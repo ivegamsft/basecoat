@@ -12,6 +12,12 @@ Purpose: convert manual test paths, charter findings, and regression checklist i
 - Decision rubric rows classified as automate-now or hybrid
 - Risk inventory with frequency, business impact, and observability notes
 
+
+## Model
+
+Recommended: claude-sonnet-4.6
+Rationale: Analyzing manual test patterns and mapping to automation candidates requires reliable multi-step analysis.
+Minimum: claude-haiku-4.5
 ## Process
 
 1. Review each manual path and rubric classification.

@@ -15,6 +15,12 @@ Purpose: build accessible, performant, and maintainable UI components and applic
 - Brand/design token definitions (if available)
 - Target browsers and device breakpoints
 
+
+## Model
+
+Recommended: gpt-5.3-codex
+Rationale: Code-optimized model produces idiomatic UI components, accurate accessibility markup, and correct CSS patterns.
+Minimum: gpt-5.4-mini
 ## Workflow
 
 1. **Review design spec** — identify all states the component must handle: loading, error, empty, and populated. Clarify any missing states before implementation.

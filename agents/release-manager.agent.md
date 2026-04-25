@@ -16,6 +16,12 @@ Purpose: automate the full release lifecycle — determine the next version from
 - Dry run flag (optional, default: `false`) — when `true`, prints what would happen without making changes
 - PR-based review flag (optional, default: `false`) — when `true`, opens a version-bump PR instead of tagging directly
 
+
+## Model
+
+Recommended: claude-sonnet-4.6
+Rationale: Release workflow requires accurate semver reasoning, CHANGELOG formatting, and safe sequential git operations.
+Minimum: claude-haiku-4.5
 ## Workflow
 
 ### Step 1 — Determine the Last Release

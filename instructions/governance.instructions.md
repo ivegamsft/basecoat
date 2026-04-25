@@ -174,7 +174,7 @@ Specifically:
 
 ## 10. Token and Model Awareness
 
-> **Token budget and cost attribution are tracked in Issue #44. Model selection guidance is now available.**
+Full model-per-role recommendations are in [`docs/MODEL_OPTIMIZATION.md`](../docs/MODEL_OPTIMIZATION.md).
 
 ### Model Selection — Match Model to Task Complexity
 
@@ -185,14 +185,25 @@ Every agent should run on the model tier that matches its cognitive demand:
 - **Code** (`gpt-5.3-codex`) — for code generation, refactoring, and implementation tasks
 - **Fast** (`claude-haiku-4.5` / `gpt-5.4-mini`) — for routine automation, scanning, and simple operations
 
-Each agent's `.agent.md` file includes a `## Model` section with the recommended model, rationale, and minimum viable model. See `docs/MODEL_OPTIMIZATION.md` for the full tier matrix, override guidance, and cost considerations.
+Every agent `.agent.md` file includes a `## Model` section with the recommended model, rationale, and minimum viable model.
+See `docs/MODEL_OPTIMIZATION.md` for the full tier matrix, override guidance, and cost considerations.
 
-### General Token Guidance
-
-Until Issue #44 is fully implemented, agents should:
+### Token Budget Awareness
 - Prefer concise, targeted prompts over large context dumps
-- Break large tasks into discrete issues and PRs rather than one massive context
-- Flag when a task feels too large for a single context window
+- Break large tasks into discrete issues and PRs rather than one massive context window
+- Flag when a task scope has grown beyond what a single session can handle — file a follow-up issue
+- When operating near context limits, summarize progress to date before continuing
+
+### Cost Attribution
+
+Tag agent-driven API calls with the agent role for cost tracking:
+
+```
+X-Agent-Role: backend-dev
+X-Sprint: S7
+```
+
+Consult your AI framework's telemetry documentation for implementation details.
 
 ---
 

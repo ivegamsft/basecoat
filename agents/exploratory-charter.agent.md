@@ -13,6 +13,12 @@ Purpose: generate one or more time-boxed exploratory testing sessions with a cle
 - Known open questions, edge cases, or environmental differences
 - Any existing charter or checklist context
 
+
+## Model
+
+Recommended: claude-sonnet-4.6
+Rationale: Charter design benefits from creative but structured session scoping and mission framing.
+Minimum: claude-haiku-4.5
 ## Process
 
 1. Define a focused mission statement for each session: what question is the session trying to answer?

@@ -74,6 +74,12 @@ git merge origin/<branch> -X theirs --no-edit
 
 > **Warning:** Never use `-X ours` or `-X theirs` on `package.json`, `*.csproj`, or source code files — these require manual merge to avoid silently dropping dependencies or logic.
 
+
+## Model
+
+Recommended: claude-sonnet-4.6
+Rationale: Merge conflict resolution and dependency-order decisions require coherent multi-step reasoning.
+Minimum: claude-haiku-4.5
 ## Workflow
 
 ### Step 1 — Fresh Clone

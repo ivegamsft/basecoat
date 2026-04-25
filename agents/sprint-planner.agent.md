@@ -20,6 +20,12 @@ acceptance criteria per issue, and a sprint board summary.
 - Constraints or dependencies from prior sprints (optional)
 - Maximum wave count or time-box preference (optional)
 
+
+## Model
+
+Recommended: claude-sonnet-4.6
+Rationale: Dependency graph construction, wave planning, and acceptance criteria writing benefit from reliable structured reasoning.
+Minimum: claude-haiku-4.5
 ## Workflow
 
 ### Step 1 — Parse the Sprint Goal

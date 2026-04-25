@@ -15,6 +15,12 @@ Purpose: design and implement integration layers, message contracts, adapters, a
 - SLA and throughput requirements
 - Current error handling and retry behavior (if any)
 
+
+## Model
+
+Recommended: gpt-5.3-codex
+Rationale: Code-optimized model generates accurate message contracts, integration patterns, and async/retry code.
+Minimum: gpt-5.4-mini
 ## Workflow
 
 1. **Map integration points** — identify every system boundary, the direction of data flow, and whether communication is synchronous (request/response) or asynchronous (event/message).

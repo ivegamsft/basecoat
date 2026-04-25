@@ -12,6 +12,12 @@ Purpose: perform a structured repository or pull request review with emphasis on
 - Relevant changed files or branch context
 - Any known risk areas from the user
 
+
+## Model
+
+Recommended: claude-sonnet-4.6
+Rationale: Nuanced review of logic, patterns, and security issues needs reliable reasoning without premium cost.
+Minimum: claude-haiku-4.5
 ## Process
 
 1. Inspect the diff or target files.

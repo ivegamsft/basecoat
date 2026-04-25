@@ -13,6 +13,12 @@ Purpose: onboard a repository or portfolio to Base Coat using safe, repeatable r
 - Approved Base Coat version or release tag
 - Any enterprise constraints such as restricted egress or internal mirrors
 
+
+## Model
+
+Recommended: claude-haiku-4.5
+Rationale: Checklist execution and file sync operations require no complex reasoning — fast and cost-effective.
+Minimum: claude-haiku-4.5
 ## Process
 
 1. Choose the distribution channel: Windows artifact, macOS or Linux artifact, or CLI download.

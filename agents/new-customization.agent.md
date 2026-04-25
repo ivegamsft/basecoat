@@ -12,6 +12,12 @@ Purpose: turn a broad customization request into the right asset with the right 
 - Scope of reuse
 - Whether the customization should always apply or be invoked on demand
 
+
+## Model
+
+Recommended: claude-haiku-4.5
+Rationale: Template-driven file creation with structured output; no complex reasoning required.
+Minimum: claude-haiku-4.5
 ## Process
 
 1. Decide whether the request should become an instruction, prompt, skill, or agent.

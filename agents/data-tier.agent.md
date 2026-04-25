@@ -15,6 +15,12 @@ Purpose: design schemas, write reversible migrations, optimize queries, and esta
 - Query patterns and access frequency estimates
 - Volume and growth projections
 
+
+## Model
+
+Recommended: gpt-5.3-codex
+Rationale: Code-optimized model generates correct schemas, reversible migrations, and parameterized queries reliably.
+Minimum: gpt-5.4-mini
 ## Workflow
 
 1. **Understand domain model** — identify entities, their attributes, cardinalities, and invariants. Clarify soft-delete requirements, audit needs, and multi-tenancy constraints before touching schema.

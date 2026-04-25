@@ -14,6 +14,12 @@ Purpose: scan a repository for committed config files, staged secrets, or missin
 - Optional: specific files or directories to focus on
 - Optional: known-safe placeholder patterns to suppress (default: `<PLACEHOLDER>`)
 
+
+## Model
+
+Recommended: claude-haiku-4.5
+Rationale: Pattern matching against known config anti-patterns is deterministic and short-context — fast tier is appropriate.
+Minimum: claude-haiku-4.5
 ## Workflow
 
 ### 1. Read `.gitignore`

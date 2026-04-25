@@ -15,6 +15,12 @@ Purpose: design and implement APIs, service layers, and data access patterns wit
 - Data model or schema context
 - Security and auth requirements
 
+
+## Model
+
+Recommended: gpt-5.3-codex
+Rationale: Code-optimized model produces more accurate API, service layer, and data access code than general-purpose models at the same cost tier.
+Minimum: gpt-5.4-mini
 ## Workflow
 
 1. **Understand requirements** — review the feature request, identify the bounded context, and clarify any ambiguous behavior before writing a line of code.

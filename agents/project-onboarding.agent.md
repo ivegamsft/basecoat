@@ -17,6 +17,12 @@ Purpose: stand up a new GitHub repository with Basecoat governance, standard sca
 - **github_org** — GitHub org or user namespace (default: current authenticated user)
 - **basecoat_version** — Basecoat release tag to pin (default: `main`)
 
+
+## Model
+
+Recommended: claude-sonnet-4.6
+Rationale: Orchestrates multiple sequential steps across repo creation, file placement, and issue filing — needs reliable multi-step reasoning.
+Minimum: claude-haiku-4.5
 ## Process
 
 ### 1. Validate Prerequisites

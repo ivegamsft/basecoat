@@ -12,6 +12,12 @@ Purpose: turn a feature description or risk inventory into a complete, actionabl
 - Known risk areas or change impact summary
 - Existing scripted coverage status (what is already automated, if anything)
 
+
+## Model
+
+Recommended: claude-sonnet-4.6
+Rationale: Test strategy requires structured risk analysis and coverage reasoning across complex features.
+Minimum: claude-haiku-4.5
 ## Process
 
 1. Inventory core behaviors and classify each as manual-only, automate-now, or hybrid using the decision rubric from `skills/manual-test-strategy/rubric-template.md`.
