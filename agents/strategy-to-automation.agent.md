@@ -88,3 +88,13 @@ Produce a summary table at the end:
 - Do not write implementation code for any specific test framework.
 - Do not assume a particular runner, language, or CI toolchain.
 - Do not defer issue filing — every candidate gets an issue before the session ends.
+
+## Governance
+
+This agent operates under the basecoat governance framework.
+
+- **Issue-first**: Do not make code changes without a logged GitHub issue.
+- **PRs only**: Never commit directly to `main`. Open a PR, self-approve if needed.
+- **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
+- **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
+- See `instructions/governance.instructions.md` for the full governance reference.

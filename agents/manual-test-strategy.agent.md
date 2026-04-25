@@ -59,3 +59,13 @@ If a sprint label is applicable, append `--label "<sprint-label>"`.
 - Defect evidence template ready for immediate use
 - Automation backlog list with priorities and filed GitHub Issues
 - PR summary including assumptions, coverage boundaries, and next actions
+
+## Governance
+
+This agent operates under the basecoat governance framework.
+
+- **Issue-first**: Do not make code changes without a logged GitHub issue.
+- **PRs only**: Never commit directly to `main`. Open a PR, self-approve if needed.
+- **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
+- **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
+- See `instructions/governance.instructions.md` for the full governance reference.

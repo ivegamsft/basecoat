@@ -11,6 +11,21 @@ It provides four customization types:
 
 The files in this repository are authored as actual customization assets, with descriptive frontmatter so teams can copy them directly into their repos and refine them instead of rewriting from scratch.
 
+## Governance
+
+Base Coat operates under a lightweight enterprise governance framework that applies to all contributions and all agent definitions in this repository.
+
+Key rules:
+
+- **Issue-first**: All changes must be backed by a logged GitHub issue.
+- **PRs only**: Never commit directly to `main`. Open a pull request; self-approval is permitted.
+- **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
+- **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
+
+Full reference: [`docs/GOVERNANCE.md`](docs/GOVERNANCE.md) · Contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md)
+
+> ℹ️ `docs/GOVERNANCE.md` and `CONTRIBUTING.md` are introduced in the companion PR `feature/43-governance-docs` and will be available once that PR merges.
+
 ## Repository Layout
 
 ```text
