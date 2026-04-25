@@ -1,1 +1,112 @@
 dist/
+
+# =============================================================================
+# Secret & credential files — NEVER commit these
+# Part of: basecoat Enterprise Governance Framework (Issue #43)
+# =============================================================================
+
+# Environment variable files
+.env
+.env.*
+.envrc
+!.env.example
+!.env.sample
+!.env.template
+
+# Private keys and certificates
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
+id_ecdsa
+id_ecdsa.*
+id_dsa
+id_dsa.*
+*.ppk
+
+# Cloud provider credential files
+credentials.json
+secrets.json
+secret.json
+service-account.json
+service_account.json
+*-service-account.json
+*_service_account.json
+gcloud-credentials.json
+application_default_credentials.json
+
+# Azure
+azureauth.json
+azurecredentials.json
+local.settings.json
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json.example
+
+# AWS
+.aws/credentials
+.aws/config
+aws-credentials.json
+
+# Terraform / OpenTofu state (may contain secrets)
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraform/
+.terraformrc
+terraform.rc
+
+# Ansible
+*.vault
+ansible-vault-password
+vault-password.txt
+
+# SSH / GPG
+.gnupg/
+*.gpg
+known_hosts
+
+# Token / secret files
+*.token
+*.secret
+*_token
+*_secret
+auth_token
+access_token
+refresh_token
+
+# Kubernetes secrets
+kubeconfig
+*.kubeconfig
+kube-config
+
+# Docker
+.docker/config.json
+docker-compose.override.yml
+
+# JetBrains IDE — may contain auth tokens
+.idea/
+
+# macOS keychain artifacts
+*.keychain
+
+# Node.js — local overrides that may contain secrets
+.npmrc
+!.npmrc.example
+.yarnrc
+!.yarnrc.example
+
+# Python
+pip-self-check.json
+
+# Gitleaks report output (contains redacted but still sensitive metadata)
+gitleaks-report.json
+gitleaks-report.sarif

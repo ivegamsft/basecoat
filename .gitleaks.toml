@@ -1,0 +1,108 @@
+# =============================================================================
+# .gitleaks.toml — Gitleaks Secret Scanning Configuration
+# Part of: basecoat Enterprise Governance Framework (Issue #43)
+#
+# USAGE:
+#   gitleaks detect --config .gitleaks.toml           # scan working tree
+#   gitleaks protect --config .gitleaks.toml          # scan staged changes (pre-commit)
+#   gitleaks detect --config .gitleaks.toml --source . --log-opts "HEAD~1..HEAD"
+#
+# CUSTOMIZATION:
+#   Teams using this template should:
+#   1. Add project-specific allowlist entries under [[rules.allowlist]] or
+#      the top-level [allowlist] block.
+#   2. Add custom rules for internal token patterns under [[rules]].
+#   3. Keep this file committed to the repo and reference it in CI.
+#
+# FALSE POSITIVES:
+#   If gitleaks flags something that is NOT a real secret, add an allowlist
+#   entry below. Use the narrowest scope possible (prefer commit or path
+#   over a broad regex).
+#
+# DOCS: https://github.com/gitleaks/gitleaks
+# =============================================================================
+
+title = "basecoat secret scanning rules"
+
+# ---------------------------------------------------------------------------
+# Gitleaks built-in rule set (extends the default ruleset shipped with the
+# binary). Remove or comment out to start from scratch.
+# ---------------------------------------------------------------------------
+[extend]
+useDefault = true
+
+# ---------------------------------------------------------------------------
+# Global allowlist — entries here are never flagged regardless of rule.
+# Add real false-positive patterns for YOUR project here.
+# ---------------------------------------------------------------------------
+[allowlist]
+description = "Global allowlist for known safe patterns and false positives"
+
+# Specific commits to ignore (e.g. test-fixture commits)
+# commits = ["abc123def456..."]
+
+# Paths that should never be scanned
+paths = [
+  # Vendored / generated lock files — large, no real secrets
+  '''(^|/)package-lock\.json$''',
+  '''(^|/)yarn\.lock$''',
+  '''(^|/)pnpm-lock\.yaml$''',
+  # Test fixtures directory — known-fake data
+  '''(^|/)test[s]?/fixtures/''',
+  '''(^|/)test[s]?/data/''',
+  # Documentation — may contain sanitised examples
+  '''(^|/)docs/''',
+  # This file itself — contains regex patterns that look like secrets
+  '''(^|/)\.gitleaks\.toml$''',
+]
+
+# Regex patterns (matched against the full secret value) that are always safe.
+# Use sparingly — prefer path or commit scoping.
+regexes = [
+  # Placeholder / example tokens used in documentation
+  '''EXAMPLE_TOKEN''',
+  '''YOUR_TOKEN_HERE''',
+  '''<your[_-].*>''',
+  # All-zero / all-F UUIDs — common in tests
+  '''00000000-0000-0000-0000-000000000000''',
+  '''[Ff]{8}-[Ff]{4}-[Ff]{4}-[Ff]{4}-[Ff]{12}''',
+  # Common test key values
+  '''(?i)test[-_]?(key|secret|token|password)''',
+  '''(?i)fake[-_]?(key|secret|token|password)''',
+  '''(?i)dummy[-_]?(key|secret|token|password)''',
+  '''(?i)placeholder[-_]?(key|secret|token|password)''',
+  # Azure SDK sample values from official Microsoft docs
+  '''(?i)accountname\.blob\.core\.windows\.net''',
+]
+
+# ---------------------------------------------------------------------------
+# Custom rules — add organisation-specific token patterns here.
+# Each rule runs IN ADDITION TO the built-in rules.
+# ---------------------------------------------------------------------------
+
+# Example: Internal API key format  (uncomment and customise)
+# [[rules]]
+# id          = "internal-api-key"
+# description = "Internal Corp API key — CORP-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+# regex       = '''CORP-[0-9a-zA-Z]{32}'''
+# tags        = ["key", "internal"]
+#
+#   [rules.allowlist]
+#   description = "Test and example values for internal API key rule"
+#   regexes     = ['''CORP-00000000000000000000000000000000''']
+
+# Example: Azure SAS token (supplement / override built-in)
+# [[rules]]
+# id          = "azure-sas-token"
+# description = "Azure Storage SAS token"
+# regex       = '''sig=[A-Za-z0-9%+/]{40,}'''
+# tags        = ["azure", "storage", "sas"]
+
+# ---------------------------------------------------------------------------
+# Entropy overrides — lower entropy thresholds for specific rule IDs if
+# you experience high false-positive rates.
+# ---------------------------------------------------------------------------
+# [[rules]]
+# id      = "generic-api-key"
+# entropy = 3.8        # default is typically 3.5 — raise to reduce FP
+
