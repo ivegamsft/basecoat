@@ -39,11 +39,15 @@ basecoat/
 - [instructions/security.instructions.md](/c:/git/basecoat/instructions/security.instructions.md): baseline secure coding and secret-handling practices
 - [instructions/reliability.instructions.md](/c:/git/basecoat/instructions/reliability.instructions.md): failure handling and operability guardrails
 - [instructions/documentation.instructions.md](/c:/git/basecoat/instructions/documentation.instructions.md): documentation and change-note expectations
+- [instructions/development.instructions.md](/c:/git/basecoat/instructions/development.instructions.md): shared development standards for all four dev core agents — code style, error handling, security, logging, testing, and agent collaboration
 - [instructions/azure.instructions.md](/c:/git/basecoat/instructions/azure.instructions.md): Azure coding, auth, and service-integration guidance
 - [instructions/terraform.instructions.md](/c:/git/basecoat/instructions/terraform.instructions.md): Terraform guidance for Azure-oriented IaC changes
 - [instructions/bicep.instructions.md](/c:/git/basecoat/instructions/bicep.instructions.md): Bicep authoring guidance and validation practices
 - [instructions/naming.instructions.md](/c:/git/basecoat/instructions/naming.instructions.md): naming conventions across repos, code, and infrastructure
 - [instructions/mcp.instructions.md](/c:/git/basecoat/instructions/mcp.instructions.md): MCP server and tool governance, safety, and enforcement guidance
+- [skills/backend-dev/SKILL.md](/c:/git/basecoat/skills/backend-dev/SKILL.md): workflow for designing APIs, scaffolding service layers, defining error catalogs, and building data access repositories
+- [skills/frontend-dev/SKILL.md](/c:/git/basecoat/skills/frontend-dev/SKILL.md): workflow for building accessible components, auditing WCAG 2.1 AA compliance, and designing state management
+- [skills/data-tier/SKILL.md](/c:/git/basecoat/skills/data-tier/SKILL.md): workflow for schema design, migration authoring, query review, and data dictionary documentation
 - [skills/manual-test-strategy/SKILL.md](/c:/git/basecoat/skills/manual-test-strategy/SKILL.md): workflow for defining manual scope, producing charters, checklists, and automation handoff artifacts
 - [skills/performance-profiling/SKILL.md](/c:/git/basecoat/skills/performance-profiling/SKILL.md): workflow for profiling slow paths
 - [skills/code-review/SKILL.md](/c:/git/basecoat/skills/code-review/SKILL.md): review-first workflow focused on risk detection
@@ -53,6 +57,10 @@ basecoat/
 - [prompts/architect.prompt.md](/c:/git/basecoat/prompts/architect.prompt.md): architecture planning starter
 - [prompts/code-review.prompt.md](/c:/git/basecoat/prompts/code-review.prompt.md): code review starter
 - [prompts/bugfix.prompt.md](/c:/git/basecoat/prompts/bugfix.prompt.md): root-cause bugfix starter
+- [agents/backend-dev.agent.md](/c:/git/basecoat/agents/backend-dev.agent.md): design and implement APIs, service layers, and data access patterns with security, observability, and auto issue filing
+- [agents/frontend-dev.agent.md](/c:/git/basecoat/agents/frontend-dev.agent.md): build accessible, performant UI components with WCAG 2.1 AA compliance, Core Web Vitals targets, and auto issue filing
+- [agents/middleware-dev.agent.md](/c:/git/basecoat/agents/middleware-dev.agent.md): design integration layers, message contracts, API gateways, and event-driven architectures with resilience patterns and auto issue filing
+- [agents/data-tier.agent.md](/c:/git/basecoat/agents/data-tier.agent.md): design schemas, write reversible migrations, optimize queries, and establish data access patterns with auto issue filing
 - [agents/manual-test-strategy.agent.md](/c:/git/basecoat/agents/manual-test-strategy.agent.md): produce a complete manual test strategy with rubric, charter, checklist, defect template, and automation backlog
 - [agents/exploratory-charter.agent.md](/c:/git/basecoat/agents/exploratory-charter.agent.md): generate time-boxed exploratory sessions with evidence capture and GitHub Issue filing
 - [agents/strategy-to-automation.agent.md](/c:/git/basecoat/agents/strategy-to-automation.agent.md): convert manual paths into tiered automation candidates with a GitHub Issue filed for every one

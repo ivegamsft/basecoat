@@ -12,6 +12,7 @@ This catalog helps teams discover what exists in Base Coat and when to use it.
 | `instructions/security.instructions.md`      | secure coding, auth boundaries, secret handling       | security, auth, secrets, validation, unsafe                        |
 | `instructions/reliability.instructions.md`   | resilience, failure modes, observability              | reliability, retry, timeout, logging, resilience                   |
 | `instructions/documentation.instructions.md` | docs updates and operational notes                    | docs, readme, changelog, migration, usage                          |
+| `instructions/development.instructions.md`   | shared standards for backend-dev, frontend-dev, middleware-dev, data-tier agents | development, code style, error handling, security, logging, testing, collaboration |
 | `instructions/azure.instructions.md`         | Azure application and service guidance                | azure, managed identity, key vault, app service                    |
 | `instructions/terraform.instructions.md`     | Terraform authoring for Azure and shared IaC          | terraform, azurerm, modules, providers, state                      |
 | `instructions/bicep.instructions.md`         | Bicep authoring, parameters, and deployment hygiene   | bicep, bicepparam, module, symbolic name                           |
@@ -22,6 +23,9 @@ This catalog helps teams discover what exists in Base Coat and when to use it.
 
 | File                                    | Use For                                                 | Keywords                                     |
 | --------------------------------------- | ------------------------------------------------------- | -------------------------------------------- |
+| `skills/backend-dev/SKILL.md`           | design and implement APIs, service layers, and data access repositories | backend, api, service, repository, error catalog                     |
+| `skills/frontend-dev/SKILL.md`          | build accessible, responsive UI components and manage client state       | frontend, ui, component, accessibility, state management             |
+| `skills/data-tier/SKILL.md`             | design schemas, write migrations, review queries, build data dictionaries | data, schema, migration, query, indexing                            |
 | `skills/manual-test-strategy/SKILL.md`  | define manual scope, produce charters, checklists, and handoff artifacts | manual testing, exploratory, charter, regression, defect, automation handoff |
 | `skills/performance-profiling/SKILL.md` | isolate and measure slow code paths                     | profiling, performance, latency, hot path    |
 | `skills/code-review/SKILL.md`           | review changes for risk, regressions, and missing tests | review, bug risk, regression, findings       |
@@ -41,6 +45,10 @@ This catalog helps teams discover what exists in Base Coat and when to use it.
 
 | File                                | Use For                                        | Keywords                                  |
 | ----------------------------------- | ---------------------------------------------- | ----------------------------------------- |
+| `agents/backend-dev.agent.md`           | design and implement APIs, service layers, and data access patterns    | agent, backend, api, service, rest, graphql, repository, error handling |
+| `agents/frontend-dev.agent.md`          | build accessible component-driven UIs with Core Web Vitals targets     | agent, frontend, ui, component, accessibility, wcag, state, performance |
+| `agents/middleware-dev.agent.md`        | design integration layers, message contracts, and resilience patterns   | agent, middleware, integration, message, event-driven, circuit breaker, retry |
+| `agents/data-tier.agent.md`             | design schemas, write migrations, optimize queries, and define data access | agent, data, schema, migration, query, indexing, repository         |
 | `agents/manual-test-strategy.agent.md`  | produce a full manual test strategy with rubric, charter, checklist, defect template, and automation backlog | agent, manual testing, strategy, exploratory, automation candidate |
 | `agents/exploratory-charter.agent.md`   | generate time-boxed exploratory sessions with scope, evidence capture, and GitHub Issue filing              | agent, exploratory, charter, session, findings |
 | `agents/strategy-to-automation.agent.md`| convert manual paths into tiered automation candidates and file GitHub Issues for every one                | agent, automation, smoke, regression, integration, candidate |

@@ -1,6 +1,6 @@
 {
     "name": "base-coat",
-    "version": "0.5.0",
+    "version": "0.6.0",
     "releaseDate": "2026-03-19",
-    "notes": "Added manual test strategy agents, skill, and templates. Updated testing instructions with Manual Test Strategy section."
+    "notes": "Sprint 1: Added backend-dev, frontend-dev, middleware-dev, and data-tier agents with matching skills and development.instructions.md."
 }

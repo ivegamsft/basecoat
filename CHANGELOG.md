@@ -2,6 +2,28 @@
 
 All notable changes to this repository should be recorded in this file.
 
+## 0.6.0 - 2026-03-19
+
+- Added `agents/backend-dev.agent.md`: designs and implements REST/GraphQL APIs, service layers, and data access patterns; files GitHub Issues with `tech-debt,backend` labels for N+1 risk, missing validation, unhandled error paths, hardcoded values, and missing auth
+- Added `agents/frontend-dev.agent.md`: builds component-driven UIs with WCAG 2.1 AA accessibility, responsive layouts, and Core Web Vitals targets; files GitHub Issues with `tech-debt,frontend,accessibility` labels for missing ARIA, hardcoded colors, non-semantic markup, missing loading states, and inline styles
+- Added `agents/middleware-dev.agent.md`: designs integration layers, message contracts, API gateways, and event-driven architectures with circuit breaker, retry, DLQ, and idempotency patterns; files GitHub Issues with `tech-debt,middleware,reliability` labels
+- Added `agents/data-tier.agent.md`: designs schemas, writes reversible migrations, optimizes queries, and establishes data access patterns; files GitHub Issues with `tech-debt,data,performance` labels for N+1 queries, missing indexes, SELECT *, missing rollbacks, and hardcoded IDs
+- Added `skills/backend-dev/SKILL.md`: skill overview, invocation guide, and template index
+- Added `skills/backend-dev/api-spec-template.md`: OpenAPI 3.x-compatible API spec skeleton with example paths, components, pagination, and error schemas
+- Added `skills/backend-dev/service-template.md`: service layer scaffold with dependency injection, structured error types, logging stubs, and testing expectations
+- Added `skills/backend-dev/error-catalog-template.md`: structured error catalog with codes, messages, HTTP status codes, and resolution hints
+- Added `skills/backend-dev/repository-pattern-template.md`: data access repository pattern boilerplate with parameterized queries, pagination, and soft delete support
+- Added `skills/frontend-dev/SKILL.md`: skill overview, invocation guide, and template index
+- Added `skills/frontend-dev/component-spec-template.md`: component specification covering props, events, slots, all UI states, accessibility requirements, and test plan
+- Added `skills/frontend-dev/accessibility-checklist.md`: WCAG 2.1 AA checklist organized by perceivable, operable, understandable, and robust principles with issue-filing guidance
+- Added `skills/frontend-dev/state-management-template.md`: state structure template covering local state, shared state, async lifecycle phases, error state, and derived state
+- Added `skills/data-tier/SKILL.md`: skill overview, invocation guide, and template index
+- Added `skills/data-tier/schema-design-template.md`: schema design document covering entities, columns, constraints, indexes, relationships, and ERD scaffold
+- Added `skills/data-tier/migration-template.md`: migration scaffold with up/down blocks, pre-migration checklist, rollback plan, and zero-downtime strategies
+- Added `skills/data-tier/query-review-checklist.md`: query review covering N+1 detection, index usage, pagination, SELECT * checks, and explain plan interpretation
+- Added `skills/data-tier/data-dictionary-template.md`: data dictionary template covering table, column, type, nullable, description, and example values
+- Added `instructions/development.instructions.md`: shared standards for all four dev core agents covering code style, error handling, security, logging, testing, issue filing, and agent collaboration handoff order
+
 ## 0.5.0 - 2026-03-19
 
 - Added `agents/manual-test-strategy.agent.md`: produces decision rubric, exploratory charter, regression checklist, defect template, and automation backlog; files GitHub Issues for all automation candidates
