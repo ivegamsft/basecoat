@@ -2,6 +2,64 @@
 
 Base Coat is a shared repository for GitHub Copilot customizations that teams can reuse across repositories.
 
+## Quick Start
+
+Run the sync script from the root of your consumer repository. This is the **only supported way** to adopt Base Coat.
+
+**Windows PowerShell:**
+
+```powershell
+$env:BASECOAT_REPO = 'https://github.com/YOUR-ORG/basecoat.git'
+irm https://raw.githubusercontent.com/YOUR-ORG/basecoat/main/sync.ps1 | iex
+```
+
+**macOS / Linux:**
+
+```bash
+export BASECOAT_REPO='https://github.com/YOUR-ORG/basecoat.git'
+curl -fsSL https://raw.githubusercontent.com/YOUR-ORG/basecoat/main/sync.sh | bash
+```
+
+**Pin to a release tag (recommended for production):**
+
+```powershell
+$env:BASECOAT_REPO = 'https://github.com/YOUR-ORG/basecoat.git'
+$env:BASECOAT_REF  = 'v0.3.0'
+irm https://raw.githubusercontent.com/YOUR-ORG/basecoat/$env:BASECOAT_REF/sync.ps1 | iex
+```
+
+The script clones Base Coat into a temp directory, copies the standard assets into your repo at `.github/base-coat/`, and cleans up. The whole process takes under a minute.
+
+### Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `BASECOAT_REPO` | `https://github.com/YOUR-ORG/basecoat.git` | Source repository URL |
+| `BASECOAT_REF` | `main` | Branch or tag to sync from |
+| `BASECOAT_TARGET_DIR` | `.github/base-coat` | Target directory inside your repo (relative to repo root) |
+
+### What Gets Synced
+
+The sync script copies these items into `BASECOAT_TARGET_DIR`:
+
+`README.md` · `CHANGELOG.md` · `INVENTORY.md` · `version.json` · `instructions/` · `skills/` · `prompts/` · `agents/`
+
+Everything else (tests, scripts, CI workflows, examples) stays in the source repo and is **not** copied into consumers.
+
+## ⚠️ Do Not Copy Files Manually
+
+Manually copying files from this repository is an **anti-pattern** that leads to:
+
+- **Stale assets** — no mechanism to pull upstream updates.
+- **Missing files** — easy to forget items or copy the wrong directory structure.
+- **Wrong target path** — consumers must place files in `.github/base-coat/`, not `.basecoat/` or another location, for Copilot to discover them.
+
+Always use `sync.ps1` (Windows) or `sync.sh` (macOS/Linux). The scripts handle cloning, copying, and cleanup in a single idempotent operation.
+
+---
+
+## Overview
+
 It provides four customization types:
 
 - Instructions for coding standards and guardrails
