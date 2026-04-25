@@ -55,6 +55,7 @@ This catalog helps teams discover what exists in Base Coat and when to use it.
 | `agents/code-review.agent.md`       | multi-step repository review process           | agent, review, repo scan, risk            |
 | `agents/new-customization.agent.md` | choose and create the right customization type | agent, customization, instruction, prompt |
 | `agents/rollout-basecoat.agent.md`  | onboard a repo to a pinned Base Coat release   | agent, rollout, bootstrap, enterprise     |
+| `agents/merge-coordinator.agent.md` | merge multiple feature branches into a target without interactive git editor hangs | agent, merge, conflict, parallel, branches, rebase, no-edit |
 
 ## Documentation Assets
 
@@ -63,6 +64,7 @@ This catalog helps teams discover what exists in Base Coat and when to use it.
 | `docs/documentation-heading-scaffolds.md` | shared heading templates for common documentation types         | docs, headings, template, scaffold       |
 | `docs/prd-and-spec-guidance.md`           | guidance and templates for PRDs and technical specs             | prd, spec, requirements, design          |
 | `docs/repo-template-standard.md`          | standard for bootstrapping and enforcing Base Coat in templates | template, governance, drift, enforcement |
+| `docs/MULTI_AGENT_WORKFLOWS.md`           | structure parallel agent sprints to minimize merge conflicts; branch naming; merge order; fresh clone principle | multi-agent, parallel, sprint, merge, conflict, branch |
 
 ## Operational Assets
 
