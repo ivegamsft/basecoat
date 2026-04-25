@@ -1,0 +1,148 @@
+name: Consumer Sync Validation
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  sync-consumer-test:
+    name: ${{ matrix.os }} - ${{ matrix.script }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            script: sync.sh
+          - os: windows-latest
+            script: sync.ps1
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare source and consumer repositories (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          SOURCE_REPO="$RUNNER_TEMP/basecoat-source"
+          CONSUMER_REPO="$RUNNER_TEMP/basecoat-consumer"
+
+          git clone --no-hardlinks "$GITHUB_WORKSPACE" "$SOURCE_REPO"
+          git -C "$SOURCE_REPO" checkout -B ci-ref "$GITHUB_SHA"
+
+          mkdir -p "$CONSUMER_REPO"
+          git -C "$CONSUMER_REPO" init
+
+          {
+            echo "SOURCE_REPO=$SOURCE_REPO"
+            echo "CONSUMER_REPO=$CONSUMER_REPO"
+            echo "TARGET_DIR=.github/base-coat"
+          } >> "$GITHUB_ENV"
+
+      - name: Prepare source and consumer repositories (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $sourceRepo = Join-Path $env:RUNNER_TEMP 'basecoat-source'
+          $consumerRepo = Join-Path $env:RUNNER_TEMP 'basecoat-consumer'
+
+          git clone --no-hardlinks $env:GITHUB_WORKSPACE $sourceRepo | Out-Null
+          git -C $sourceRepo checkout -B ci-ref $env:GITHUB_SHA | Out-Null
+
+          New-Item -Path $consumerRepo -ItemType Directory -Force | Out-Null
+          git -C $consumerRepo init | Out-Null
+
+          Add-Content -Path $env:GITHUB_ENV -Value "SOURCE_REPO=$sourceRepo"
+          Add-Content -Path $env:GITHUB_ENV -Value "CONSUMER_REPO=$consumerRepo"
+          Add-Content -Path $env:GITHUB_ENV -Value "TARGET_DIR=.github/base-coat"
+
+      - name: Run sync.sh and validate output (Linux)
+        if: matrix.script == 'sync.sh'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$CONSUMER_REPO"
+
+          output="$(BASECOAT_REPO="$SOURCE_REPO" BASECOAT_REF="ci-ref" BASECOAT_TARGET_DIR="$TARGET_DIR" bash "$GITHUB_WORKSPACE/sync.sh" 2>&1)"
+          echo "$output"
+
+          if [[ "$output" != *"Base Coat synced into $TARGET_DIR"* ]]; then
+            echo "Expected success message not found in sync.sh output" >&2
+            exit 1
+          fi
+
+      - name: Run sync.ps1 and validate output (Windows)
+        if: matrix.script == 'sync.ps1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Set-Location $env:CONSUMER_REPO
+
+          $env:BASECOAT_REPO = $env:SOURCE_REPO
+          $env:BASECOAT_REF = 'ci-ref'
+          $env:BASECOAT_TARGET_DIR = $env:TARGET_DIR
+
+          $output = & pwsh -NoProfile -File "$env:GITHUB_WORKSPACE/sync.ps1" 2>&1 | Out-String
+          Write-Host $output
+
+          if ($output -notmatch [regex]::Escape("Base Coat synced into $env:TARGET_DIR")) {
+            throw 'Expected success message not found in sync.ps1 output'
+          }
+
+      - name: Validate synced content (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          target="$CONSUMER_REPO/$TARGET_DIR"
+          test -d "$target"
+
+          expected=(README.md CHANGELOG.md INVENTORY.md version.json instructions skills prompts agents)
+          for item in "${expected[@]}"; do
+            test -e "$target/$item"
+          done
+
+          unexpected=(.git tests test fixtures sync.sh sync.ps1)
+          for item in "${unexpected[@]}"; do
+            if [[ -e "$target/$item" ]]; then
+              echo "Unexpected item found in target: $item" >&2
+              exit 1
+            fi
+          done
+
+      - name: Validate synced content (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $target = Join-Path $env:CONSUMER_REPO $env:TARGET_DIR
+          if (-not (Test-Path -Path $target -PathType Container)) {
+            throw "Target directory missing: $target"
+          }
+
+          $expected = @('README.md', 'CHANGELOG.md', 'INVENTORY.md', 'version.json', 'instructions', 'skills', 'prompts', 'agents')
+          foreach ($item in $expected) {
+            $full = Join-Path $target $item
+            if (-not (Test-Path -Path $full)) {
+              throw "Expected item missing: $item"
+            }
+          }
+
+          $unexpected = @('.git', 'tests', 'test', 'fixtures', 'sync.sh', 'sync.ps1')
+          foreach ($item in $unexpected) {
+            $full = Join-Path $target $item
+            if (Test-Path -Path $full) {
+              throw "Unexpected item found in target: $item"
+            }
+          }
