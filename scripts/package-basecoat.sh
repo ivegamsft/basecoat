@@ -29,4 +29,9 @@ tar -C "$DIST_DIR/stage" -czf "$DIST_DIR/$ARCHIVE_BASE.tar.gz" base-coat
 
 (cd "$DIST_DIR" && sha256sum "$ARCHIVE_BASE.zip" "$ARCHIVE_BASE.tar.gz" > SHA256SUMS.txt)
 
+# Clean up staging directory so dist/ only contains release-ready files.
+# Without this, `dist/*` globs (used by upload-artifact and gh release upload)
+# include the stage directory, which causes upload failures. Fixes #86.
+rm -rf "$DIST_DIR/stage"
+
 echo "Packaged artifacts into $DIST_DIR"
