@@ -144,6 +144,71 @@ All new agents, skills, and instructions require an issue before implementation.
 
 ---
 
+## Merge Policy & Build Verification
+
+**This section is mandatory for all contributors — human and AI alike.**
+
+### Branch Protection Rules
+
+The `main` branch enforces the following protections:
+
+- **No direct commits** — all changes must arrive via a pull request
+- **Required status checks must pass** before any merge is allowed
+- **Stale review dismissal** — approvals are invalidated if new commits are pushed after approval
+- **At least one approval** required before merge
+
+### Required Status Checks
+
+Every PR targeting `main` must pass **all** of the following checks before it can be merged:
+
+| Check Name | Workflow | Purpose |
+|---|---|---|
+| `Markdown lint` | `pr-validation.yml` | Lints changed `.md` files against markdownlint rules |
+| `Validate agent file structure` | `pr-validation.yml` | Verifies agents have required frontmatter and sections |
+| `Sync script dry-run` | `pr-validation.yml` | Validates sync.sh runs cleanly against a temp consumer repo |
+| `version-consistency` | `version-check.yml` | Ensures version.json and latest CHANGELOG.md entry match |
+| `prd-spec-gate` | `prd-spec-gate.yml` | Requires PRD/spec links for high-change or risky PRs |
+| `validate-commit-messages` | `validate-basecoat.yml` | Scans commit messages for secrets and PII patterns |
+| `validate-unix` | `validate-basecoat.yml` | Runs full validation suite on Ubuntu |
+| `validate-windows` | `validate-basecoat.yml` | Runs full validation suite on Windows |
+
+> **Note:** `Gitleaks` scans run as warn-only and do **not** block merge by design.
+> Findings must be reviewed and remediated, but they will not prevent a passing build
+> from being merged.
+
+### Agent Guardrail — Mandatory Build Verification Step
+
+**Any AI agent that opens or works a PR must perform this verification before declaring the work done:**
+
+```bash
+# Verify all required checks are green before closing a PR
+gh pr checks <PR-NUMBER> --repo <owner>/<repo>
+
+# Expected: every listed check shows a ✓ pass status.
+# Do NOT merge or mark work complete if any check is pending or failing.
+```
+
+Agents must:
+
+1. Open the PR
+2. Wait for the check suite to run (poll with `gh pr checks` until all are complete)
+3. Confirm every required check shows **pass** status
+4. Only then mark the PR as ready to merge / work as done
+
+**Do not declare a PR "done" because it was opened. The PR is done when checks pass and it is merged.**
+
+### No Auto-Merge
+
+Auto-merge is not enabled. Merges require:
+
+1. All required status checks green
+2. At least one approval
+3. No unresolved conversations
+
+This is intentional — catching a broken build post-merge is significantly more expensive than the few minutes it takes to confirm checks passed first.
+
+---
+
 ## Questions
 
 Open an issue with the `question` label. Do not DM maintainers for things that belong in the open.
