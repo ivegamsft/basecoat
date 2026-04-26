@@ -23,7 +23,7 @@ If you are an AI agent: **do not begin implementation without an issue number**.
 
 ## Branch Naming
 
-```
+```text
 <type>/<issue-number>-<short-description>
 ```
 
@@ -36,7 +36,8 @@ If you are an AI agent: **do not begin implementation without an issue number**.
 | `security` | Security-related changes |
 
 **Examples:**
-```
+
+```text
 feat/43-governance-docs
 fix/17-hook-glob-pattern
 docs/39-readme-overhaul
@@ -57,12 +58,14 @@ No direct commits to `main`. Ever.
 7. **Squash-merge** preferred to keep `main` history clean.
 
 **PR Title Format:**
-```
+
+```text
 <type>: <short description> (closes #<issue-number>)
 ```
 
 **Examples:**
-```
+
+```text
 feat: governance framework documentation (closes #43)
 fix: commit-msg hook glob pattern (closes #17)
 ```
@@ -71,7 +74,7 @@ fix: commit-msg hook glob pattern (closes #17)
 
 ## Commit Message Format
 
-```
+```text
 <type>(<scope>): <short summary>
 
 - Optional bullet points for detail
@@ -83,6 +86,7 @@ Co-authored-by: <name> <email>  # if applicable
 **Types:** `feat`, `fix`, `docs`, `chore`, `security`, `test`, `refactor`
 
 **Rules:**
+
 - First line ≤ 72 characters
 - Reference the issue number
 - No secrets, tokens, keys, passwords, or PII — ever
@@ -96,6 +100,7 @@ Co-authored-by: <name> <email>  # if applicable
 **Never commit secrets.** This is non-negotiable.
 
 What counts as a secret:
+
 - API keys, tokens, client secrets
 - Passwords, passphrases, PINs
 - Connection strings with credentials embedded
@@ -103,11 +108,13 @@ What counts as a secret:
 - PII (names, emails, IDs) not required for the change
 
 **If you accidentally commit a secret:**
+
 1. Rewrite history immediately (`git rebase`, `git filter-branch`, or BFG)
 2. Rotate the affected credential immediately
 3. Notify the repo owner
 
 The `.githooks/commit-msg` hook scans commit messages for secret patterns. Install it:
+
 ```bash
 bash scripts/install-git-hooks.sh
 # or on Windows:
@@ -119,11 +126,13 @@ pwsh scripts/install-git-hooks.ps1
 ## Review Expectations
 
 **For authors:**
+
 - Keep PRs focused — one issue per PR
 - Write a clear summary and validation steps in the PR description
 - Call out any deviations from standards and why
 
 **For reviewers:**
+
 - Check that the change matches the linked issue
 - Verify no secrets or PII are present
 - Confirm tests or validation steps are included where applicable
