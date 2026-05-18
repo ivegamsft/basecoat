@@ -12,7 +12,7 @@ jobs:
         run: pwsh scripts/audit-skills.ps1 -FailOnError
       - name: Upload audit results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: skill-audit-results
           path: test-results/skill-audit.txt
