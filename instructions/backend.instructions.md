@@ -1,6 +1,6 @@
 ---
 description: "Use when working on APIs, services, workers, integrations, or data access layers. Covers backend best practices for contracts, failure handling, and testability."
-applyTo: "**/*"
+applyTo: "src/**,lib/**,app/**,packages/**,api/**,server/**"
 ---
 
 # Backend Standards

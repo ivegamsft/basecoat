@@ -1,6 +1,6 @@
 ---
 description: "Config file safety instructions. Apply before creating, modifying, or staging any configuration file. Ensures secrets stay out of source control."
-applyTo: "**/*"
+applyTo: "**/*.{json,yaml,yml,toml,env,ini,conf},**/config/**,**/.env*"
 priority: 2
 ---
 
