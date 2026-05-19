@@ -117,7 +117,7 @@ module backend './modules/backend-container-app.bicep' = {
 // AcrPull role assignment for backend managed identity
 // Role definition ID for AcrPull: 7f951dda-4ed3-4680-a7ca-43fe172d538d
 resource backendAcrPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(registry.outputs.registryId, backend.outputs.principalId, '7f951dda-4ed3-4680-a7ca-43fe172d538d')
+  name: guid(resourceGroup().id, backendName, '7f951dda-4ed3-4680-a7ca-43fe172d538d')
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')
     principalId: backend.outputs.principalId
@@ -127,7 +127,7 @@ resource backendAcrPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 
 // AcrPull role assignment for frontend managed identity
 resource frontendAcrPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(registry.outputs.registryId, frontend.outputs.principalId, '7f951dda-4ed3-4680-a7ca-43fe172d538d')
+  name: guid(resourceGroup().id, frontendName, '7f951dda-4ed3-4680-a7ca-43fe172d538d')
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')
     principalId: frontend.outputs.principalId
