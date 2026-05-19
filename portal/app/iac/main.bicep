@@ -139,5 +139,3 @@ output backendUrl string = 'https://${backend.outputs.fqdn}'
 output frontendUrl string = 'https://${frontend.outputs.fqdn}'
 output databaseFqdn string = database.outputs.fqdn
 output acrLoginServer string = registry.outputs.loginServer
-output acrLoginServer string = registry.outputs.loginServer
-output acrLoginServer string = registry.outputs.loginServer
