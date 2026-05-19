@@ -37,11 +37,12 @@ Use this order to avoid mixed bootstrap/deploy failures:
 1. Run `pwsh scripts/bootstrap.ps1` in the repo.
    - This is the correct bootstrap for BaseCoat repo operations and portal deploy readiness.
    - Do not substitute `scripts/bootstrap-basecoat.ps1` (consumer-repo adoption) or `scripts/bootstrap-dashboard.ps1` (adoption dashboard setup).
-2. Set portal deploy secrets at repo scope or `staging` environment scope.
-3. Re-run `pwsh scripts/bootstrap.ps1` and verify Phase 3 passes portal secret checks.
-4. Trigger `.github/workflows/portal-deploy.yml`.
+2. Keep Azure CLI logged in and rerun `pwsh scripts/bootstrap.ps1` to auto-provision the portal OIDC app registration and repo variables when missing.
+3. Set `GHCR_PULL_TOKEN` at repo scope or `staging` environment scope.
+4. Re-run `pwsh scripts/bootstrap.ps1` and verify Phase 3 passes portal OIDC checks.
+5. Trigger `.github/workflows/portal-deploy.yml`.
 
-The deploy workflow now fails fast in the `Validate deployment secrets` step when required portal secrets are missing or malformed.
+The deploy workflow now fails fast in the `Validate deployment secrets` step when required portal variables are missing or malformed. The bootstrap script can auto-generate the Azure app registration, federated credential, and repo variables from the current Azure CLI session, but the GHCR pull token still requires a manually created PAT with `read:packages`.
 
 ---
 
@@ -118,24 +119,23 @@ does not block merges since branch protection is not enforced on `main`.
 
 ---
 
-### `PORTAL_AZURE_CREDENTIALS`
+### `AZURE_CLIENT_ID`
 
 **Used by:** `.github/workflows/portal-deploy.yml`
 
-**Purpose:** Authenticates Azure CLI actions for staging deployment.
+**Purpose:** OIDC client ID for the portal deploy app registration.
 
-**Required format:** JSON with all keys present:
+### `AZURE_TENANT_ID`
 
-```json
-{
-  "clientId": "00000000-0000-0000-0000-000000000000",
-  "clientSecret": "<secret>",
-  "tenantId": "00000000-0000-0000-0000-000000000000",
-  "subscriptionId": "00000000-0000-0000-0000-000000000000"
-}
-```
+**Used by:** `.github/workflows/portal-deploy.yml`
 
-If any key is missing, deploy fails before Azure login.
+**Purpose:** Entra tenant ID for Azure login.
+
+### `AZURE_SUBSCRIPTION_ID`
+
+**Used by:** `.github/workflows/portal-deploy.yml`
+
+**Purpose:** Target Azure subscription for portal staging deployment.
 
 ---
 

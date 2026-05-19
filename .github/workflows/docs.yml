@@ -6,11 +6,13 @@ on:
       - main
     paths:
       - 'docs/**'
+      - 'scripts/generate-token-context-inventory.py'
       - 'mkdocs.yml'
       - '.github/workflows/docs.yml'
   pull_request:
     paths:
       - 'docs/**'
+      - 'scripts/generate-token-context-inventory.py'
       - 'mkdocs.yml'
   workflow_dispatch:
 
@@ -34,6 +36,9 @@ jobs:
             mkdocs-material \
             mkdocs-awesome-pages-plugin
 
+      - name: Generate token context inventory
+        run: python scripts/generate-token-context-inventory.py
+
       - name: Validate docs (strict)
         run: python -m mkdocs build --strict
 
@@ -55,6 +60,9 @@ jobs:
           pip install \
             mkdocs-material \
             mkdocs-awesome-pages-plugin
+
+      - name: Generate token context inventory
+        run: python scripts/generate-token-context-inventory.py
 
       - name: Configure site URLs for this repository
         run: |

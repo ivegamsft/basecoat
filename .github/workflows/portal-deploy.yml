@@ -95,48 +95,33 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Validate deployment secrets
-        shell: bash
         env:
-          PORTAL_AZURE_CREDENTIALS: ${{ secrets.PORTAL_AZURE_CREDENTIALS }}
+          AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
           GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
+        shell: bash
         run: |
           set -euo pipefail
 
           missing=()
-          for secret_name in PORTAL_AZURE_CREDENTIALS GHCR_PULL_TOKEN; do
-            if [[ -z "${!secret_name:-}" ]]; then
-              missing+=("${secret_name}")
+          for var_name in AZURE_CLIENT_ID AZURE_TENANT_ID AZURE_SUBSCRIPTION_ID; do
+            if [[ -z "${!var_name:-}" ]]; then
+              missing+=("${var_name}")
             fi
           done
 
           if (( ${#missing[@]} > 0 )); then
-            echo "::error::Missing required portal deploy secrets: ${missing[*]}. Configure them at repo scope or in the staging environment."
+            echo "::error::Missing required Azure OIDC variables: ${missing[*]}. Configure them as repo variables."
             exit 1
           fi
-
-          python3 - <<'PY'
-          import json
-          import os
-          import sys
-
-          raw_creds = os.environ["PORTAL_AZURE_CREDENTIALS"]
-          try:
-              creds = json.loads(raw_creds)
-          except json.JSONDecodeError:
-              print("::error::PORTAL_AZURE_CREDENTIALS must be valid JSON for an Azure service principal.")
-              sys.exit(1)
-
-          required_keys = ("clientId", "clientSecret", "tenantId", "subscriptionId")
-          missing_keys = [key for key in required_keys if not creds.get(key)]
-          if missing_keys:
-              print(f"::error::PORTAL_AZURE_CREDENTIALS is missing required keys: {', '.join(missing_keys)}.")
-              sys.exit(1)
-          PY
 
       - name: Azure login
         uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2
         with:
-          creds: ${{ secrets.PORTAL_AZURE_CREDENTIALS }}
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
       - name: Create resource group
         shell: bash

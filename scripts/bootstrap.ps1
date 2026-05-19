@@ -116,6 +116,151 @@ function Set-GitHubSecretValue(
     return ($LASTEXITCODE -eq 0)
 }
 
+function Get-AzureAccountContext {
+    if (-not (Test-CommandExists 'az')) { return $null }
+
+    try {
+        $account = az account show 2>$null | ConvertFrom-Json -ErrorAction Stop
+        if (-not $account) { return $null }
+        return $account
+    } catch {
+        return $null
+    }
+}
+
+function Set-GitHubVariableValue(
+    [string]$repoSlug,
+    [string]$variableName,
+    [string]$variableValue
+) {
+    if ([string]::IsNullOrWhiteSpace($variableValue)) { return $false }
+
+    $variableValue | gh variable set $variableName -R $repoSlug 2>$null
+    return ($LASTEXITCODE -eq 0)
+}
+
+function Ensure-PortalOidcBootstrap(
+    [string]$repoSlug,
+    [string]$environmentName = 'staging'
+) {
+    $azureContext = Get-AzureAccountContext
+    if (-not $azureContext) {
+        Write-Fail "Azure CLI is not logged in — cannot provision portal OIDC bootstrap"
+        return $false
+    }
+
+    $tenantId = $azureContext.tenantId
+    $subscriptionId = $azureContext.id
+    $displayName = 'basecoat-portal-staging-deploy'
+    $scope = "/subscriptions/$subscriptionId"
+    $subject = "repo:IBuySpy-Shared/basecoat:environment:$environmentName"
+
+    try {
+        $appId = az ad app list --display-name $displayName --query "[0].appId" -o tsv 2>$null
+        if (-not $appId) {
+            $appId = az ad app create --display-name $displayName --query appId -o tsv 2>$null
+            if (-not $appId) {
+                Write-Fail "Failed to create Entra application for portal OIDC bootstrap"
+                return $false
+            }
+            Write-Check "Portal Entra application created" $true $displayName
+        } else {
+            Write-Check "Portal Entra application exists" $true $displayName
+        }
+
+        $spId = az ad sp list --filter "appId eq '$appId'" --query "[0].id" -o tsv 2>$null
+        if ($spId) {
+            Write-Check "Portal service principal exists" $true $appId
+        } else {
+            Write-Warn "Portal service principal not found; continuing with app registration only"
+        }
+
+        $federatedCredential = @{
+            name       = "$environmentName-github-actions"
+            issuer     = "https://token.actions.githubusercontent.com"
+            subject    = $subject
+            audiences  = @("api://AzureADTokenExchange")
+        } | ConvertTo-Json -Compress
+
+        $credentialExists = $false
+        try {
+            $existingCredentials = az ad app federated-credential list --id $appId 2>$null | ConvertFrom-Json
+            $credentialExists = @($existingCredentials | Where-Object {
+                $_.subject -eq $subject -and $_.issuer -eq 'https://token.actions.githubusercontent.com'
+            }).Count -gt 0
+        } catch {
+            $credentialExists = $false
+        }
+
+        if (-not $credentialExists) {
+            $credentialFile = Join-Path $env:TEMP "basecoat-portal-oidc-$environmentName.json"
+            $federatedCredential | Out-File -FilePath $credentialFile -Encoding utf8 -Force
+            $null = az ad app federated-credential create --id $appId --parameters $credentialFile 2>$null
+            Remove-Item -Path $credentialFile -Force -ErrorAction SilentlyContinue
+            if ($LASTEXITCODE -ne 0) {
+                Write-Fail "Failed to create federated credential for portal OIDC bootstrap"
+                return $false
+            }
+            Write-Check "Portal federated credential created" $true $environmentName
+        } else {
+            Write-Check "Portal federated credential exists" $true $environmentName
+        }
+
+        $rbacExists = az role assignment list --assignee $appId --scope $scope --query "[?roleDefinitionName=='Contributor'] | [0].id" -o tsv 2>$null
+        if (-not $rbacExists) {
+            az role assignment create --assignee $appId --role "Contributor" --scope $scope 2>$null | Out-Null
+            if ($LASTEXITCODE -ne 0) {
+                Write-Fail "Failed to assign Contributor on $scope to portal app"
+                return $false
+            }
+            Write-Check "Portal Contributor role assigned" $true $scope
+        } else {
+            Write-Check "Portal Contributor role exists" $true $scope
+        }
+
+        if (Set-GitHubVariableValue -repoSlug $repoSlug -variableName 'AZURE_CLIENT_ID' -variableValue $appId) {
+            Write-Check "AZURE_CLIENT_ID configured" $true "repo variable"
+        } else {
+            Write-Fail "Could not set AZURE_CLIENT_ID"
+            return $false
+        }
+
+        if (Set-GitHubVariableValue -repoSlug $repoSlug -variableName 'AZURE_TENANT_ID' -variableValue $tenantId) {
+            Write-Check "AZURE_TENANT_ID configured" $true "repo variable"
+        } else {
+            Write-Fail "Could not set AZURE_TENANT_ID"
+            return $false
+        }
+
+        if (Set-GitHubVariableValue -repoSlug $repoSlug -variableName 'AZURE_SUBSCRIPTION_ID' -variableValue $subscriptionId) {
+            Write-Check "AZURE_SUBSCRIPTION_ID configured" $true "repo variable"
+        } else {
+            Write-Fail "Could not set AZURE_SUBSCRIPTION_ID"
+            return $false
+        }
+
+        Write-Host "  ℹ️   Portal deploy now uses OIDC via azure/login@v2 and repo variables." -ForegroundColor DarkGray
+        return $true
+    } catch {
+        Write-Fail "Could not provision portal OIDC bootstrap: $_"
+        return $false
+    }
+}
+
+function Test-OpenIssueWithTitle {
+    param(
+        [string]$repoSlug,
+        [string]$title
+    )
+
+    try {
+        $issues = gh issue list -R $repoSlug --state open --limit 100 --json number,title 2>$null | ConvertFrom-Json
+        return [bool](@($issues | Where-Object { $_.title -eq $title } | Select-Object -First 1))
+    } catch {
+        return $false
+    }
+}
+
 function Write-AuditLog([string]$repoRoot, [hashtable]$auditData) {
     $memoryDir = Join-Path $repoRoot '.memory'
     if (-not (Test-Path $memoryDir)) {
@@ -307,95 +452,62 @@ if (Test-Path $portalDeployWorkflow) {
             throw "Unable to resolve repository slug"
         }
 
-        $requiredPortalSecrets = @(
-            'PORTAL_AZURE_CREDENTIALS',
-            'GHCR_PULL_TOKEN'
+        $requiredPortalVars = @(
+            'AZURE_CLIENT_ID',
+            'AZURE_TENANT_ID',
+            'AZURE_SUBSCRIPTION_ID'
         )
-        $repoSecretNames = @(
-            gh secret list -R $repoSlug 2>$null |
-                ForEach-Object { ($_ -split '\s+')[0] } |
+        $repoVarNames = @(
+            gh variable list -R $repoSlug --json name --jq '.[].name' 2>$null |
                 Where-Object { $_ }
         )
-        $stagingSecretNames = @(
-            gh secret list --env staging -R $repoSlug 2>$null |
-                ForEach-Object { ($_ -split '\s+')[0] } |
-                Where-Object { $_ }
-        )
-        $missingPortalSecrets = @(
-            $requiredPortalSecrets | Where-Object {
-                $repoSecretNames -notcontains $_ -and $stagingSecretNames -notcontains $_
+        $missingPortalVars = @(
+            $requiredPortalVars | Where-Object {
+                $repoVarNames -notcontains $_
             }
         )
 
-        if ($missingPortalSecrets.Count -gt 0 -and -not $Silent) {
-            Write-Warn "Missing portal deploy secrets: $($missingPortalSecrets -join ', ')"
-            if (Confirm-Step "  Configure missing portal deploy secrets now?") {
-                if ($missingPortalSecrets -contains 'PORTAL_AZURE_CREDENTIALS') {
-                    Write-Host "  Enter Azure service principal values for staging deploy:" -ForegroundColor DarkGray
-                    $clientId = (Read-Host "    clientId").Trim()
-                    $clientSecret = Read-SecretValue "    clientSecret"
-                    $tenantId = (Read-Host "    tenantId").Trim()
-                    $subscriptionId = (Read-Host "    subscriptionId").Trim()
+        if ($missingPortalVars.Count -gt 0) {
+            Write-Warn "Missing portal deploy variables: $($missingPortalVars -join ', ')"
 
-                    if ($clientId -and $clientSecret -and $tenantId -and $subscriptionId) {
-                        $azureCredsJson = @{
-                            clientId       = $clientId
-                            clientSecret   = $clientSecret
-                            tenantId       = $tenantId
-                            subscriptionId = $subscriptionId
-                        } | ConvertTo-Json -Compress
-
-                        if (Set-GitHubSecretValue -repoSlug $repoSlug -secretName 'PORTAL_AZURE_CREDENTIALS' -secretValue $azureCredsJson -environmentName 'staging') {
-                            Write-Check "PORTAL_AZURE_CREDENTIALS configured" $true "staging environment"
-                        } else {
-                            Write-Warn "Could not set PORTAL_AZURE_CREDENTIALS automatically."
-                        }
-                    } else {
-                        Write-Warn "Skipped PORTAL_AZURE_CREDENTIALS setup due to incomplete input."
-                    }
-                }
-
-                if ($missingPortalSecrets -contains 'GHCR_PULL_TOKEN') {
-                    $ghcrToken = Read-SecretValue "  GHCR pull token (read:packages)"
-                    if ($ghcrToken) {
-                        if (Set-GitHubSecretValue -repoSlug $repoSlug -secretName 'GHCR_PULL_TOKEN' -secretValue $ghcrToken -environmentName 'staging') {
-                            Write-Check "GHCR_PULL_TOKEN configured" $true "staging environment"
-                        } else {
-                            Write-Warn "Could not set GHCR_PULL_TOKEN automatically."
-                        }
-                    } else {
-                        Write-Warn "Skipped GHCR_PULL_TOKEN setup because no token was entered."
-                    }
+            if ($missingPortalVars.Count -gt 0 -and -not $Silent) {
+                $portalOidcReady = Ensure-PortalOidcBootstrap -repoSlug $repoSlug -environmentName 'staging'
+                if (-not $portalOidcReady) {
+                    Write-Fail "Portal OIDC bootstrap could not be completed"
                 }
             }
         }
 
-        $repoSecretNames = @(
-            gh secret list -R $repoSlug 2>$null |
-                ForEach-Object { ($_ -split '\s+')[0] } |
+        $repoVarNames = @(
+            gh variable list -R $repoSlug --json name --jq '.[].name' 2>$null |
                 Where-Object { $_ }
         )
-        $stagingSecretNames = @(
-            gh secret list --env staging -R $repoSlug 2>$null |
-                ForEach-Object { ($_ -split '\s+')[0] } |
+        $repoSecretNames = @(
+            gh secret list -R $repoSlug --json name --jq '.[].name' 2>$null |
                 Where-Object { $_ }
         )
 
-        foreach ($secretName in $requiredPortalSecrets) {
-            if ($repoSecretNames -contains $secretName -or $stagingSecretNames -contains $secretName) {
-                Write-Check "$secretName available for portal deploy" $true
+        foreach ($variableName in $requiredPortalVars) {
+            if ($repoVarNames -contains $variableName) {
+                Write-Check "$variableName available for portal deploy" $true
             } else {
-                Write-Fail "$secretName missing for portal deploy (set repo secret or staging environment secret)"
+                Write-Fail "$variableName missing for portal deploy (set as repo variable)"
             }
         }
 
         $script:portalDeployReady = @(
-            $requiredPortalSecrets | Where-Object {
-                $repoSecretNames -contains $_ -or $stagingSecretNames -contains $_
+            $requiredPortalVars | Where-Object {
+                $repoVarNames -contains $_
             }
-        ).Count -eq $requiredPortalSecrets.Count
+        ).Count -eq $requiredPortalVars.Count
 
-        Write-Host "  ℹ️   PORTAL_AZURE_CREDENTIALS must contain JSON keys: clientId, clientSecret, tenantId, subscriptionId" -ForegroundColor DarkGray
+        if ($repoSecretNames -contains 'GHCR_PULL_TOKEN') {
+            Write-Check "GHCR_PULL_TOKEN repo secret present" $true "required for container registry pulls"
+        } else {
+            Write-Warn "GHCR_PULL_TOKEN missing for portal deploy (set repo secret or staging environment secret)"
+        }
+
+        Write-Host "  ℹ️   Portal deploy uses azure/login@v2 with federated credentials and repo variables." -ForegroundColor DarkGray
         Write-Host "  ℹ️   PORTAL_POSTGRES_ADMIN_PASSWORD is optional (Bicep can generate the PostgreSQL admin password)" -ForegroundColor DarkGray
     } catch {
         Write-Warn "Could not verify portal deployment secrets: $_"
@@ -512,12 +624,15 @@ Write-Host ""
 Write-Host "  📋 Audit log written: $($auditFile | Resolve-Path -Relative)" -ForegroundColor DarkGray
 
 # Optionally create issues for critical errors
-if ($CreateIssues -and $script:errors.Count -gt 0 -and -not $Silent) {
+if ($CreateIssues -and -not $Silent) {
     Write-Host ""
-    Write-Host "  Creating GitHub issues for critical errors..." -ForegroundColor DarkGray
+    Write-Host "  Creating GitHub issues for bootstrap findings..." -ForegroundColor DarkGray
     
     try {
-        $errorBody = @"
+        if ($script:errors.Count -gt 0) {
+            $errorTitle = "🔴 Bootstrap validation errors"
+            if (-not (Test-OpenIssueWithTitle -repoSlug $repoSlug -title $errorTitle)) {
+                $errorBody = @"
 Bootstrap validation found critical errors:
 
 $(($script:errors | ForEach-Object { "- $_" }) -join "`n")
@@ -525,8 +640,27 @@ $(($script:errors | ForEach-Object { "- $_" }) -join "`n")
 Run \`pwsh scripts/bootstrap.ps1\` to review full details.
 Audit log: \`.memory/bootstrap-audit.json\`
 "@
-        if (Create-GitHubIssue -repoSlug $repoSlug -title "🔴 Bootstrap validation errors" -body $errorBody -labels @('bootstrap', 'critical')) {
-            Write-Host "  ✅ Issue created for critical errors" -ForegroundColor Green
+                if (Create-GitHubIssue -repoSlug $repoSlug -title $errorTitle -body $errorBody -labels @('github-actions', 'priority:high', 'maintenance')) {
+                    Write-Host "  ✅ Issue created for critical errors" -ForegroundColor Green
+                }
+            }
+        }
+
+        if ($script:warnings.Count -gt 0) {
+            $warningTitle = "🟡 Bootstrap validation warnings"
+            if (-not (Test-OpenIssueWithTitle -repoSlug $repoSlug -title $warningTitle)) {
+                $warningBody = @"
+Bootstrap validation found warnings:
+
+$(($script:warnings | ForEach-Object { "- $_" }) -join "`n")
+
+Run \`pwsh scripts/bootstrap.ps1\` to review full details.
+Audit log: \`.memory/bootstrap-audit.json\`
+"@
+                if (Create-GitHubIssue -repoSlug $repoSlug -title $warningTitle -body $warningBody -labels @('maintenance', 'documentation')) {
+                    Write-Host "  ✅ Issue created for warnings" -ForegroundColor Green
+                }
+            }
         }
     } catch {
         Write-Host "  ⚠️   Could not create issue: $_" -ForegroundColor Yellow
