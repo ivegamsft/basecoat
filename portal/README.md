@@ -78,7 +78,7 @@ Workflow links:
 Deployment notes:
 
 - The deploy workflow targets staging only.
-- It requires `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, and `AZURE_SUBSCRIPTION_ID` as repo variables, plus `GHCR_PULL_TOKEN` as a GitHub secret.
+- It requires `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, and `AZURE_SUBSCRIPTION_ID` as repo variables. GHCR image pulls use the workflow's built-in `GITHUB_TOKEN`.
 - PostgreSQL admin password can be generated directly by `portal/app/iac/main.bicep` (secret override is optional).
 - `portal/app/iac/README.md` documents the Bicep boundary and required inputs.
 
@@ -89,7 +89,7 @@ Deployment bootstrap order:
    - Do **not** use `bootstrap-basecoat.ps1` here (that script is for adopting BaseCoat into other consumer repos).
    - Do **not** use `bootstrap-dashboard.ps1` here (that script is only for adoption metrics dashboard setup).
 2. Keep Azure CLI logged in and rerun bootstrap so it can auto-generate the portal OIDC app registration and repo variables when missing.
-3. Provision `GHCR_PULL_TOKEN` at repo or `staging` environment scope.
+3. Trigger the deploy workflow — GHCR pulls use the built-in `GITHUB_TOKEN`.
 4. Re-run bootstrap and confirm Phase 3 secret checks pass.
 5. Run validation (`pwsh scripts/validate-basecoat.ps1` then `pwsh tests/run-tests.ps1`).
 6. Trigger `Portal Deploy` (push to `main` or manual dispatch).

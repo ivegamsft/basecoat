@@ -99,7 +99,6 @@ jobs:
           AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
           AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
           AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-          GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
@@ -143,7 +142,7 @@ jobs:
               backendImage="${{ needs.build-images.outputs.backend_image }}" \
               frontendImage="${{ needs.build-images.outputs.frontend_image }}" \
               containerRegistryUsername="${{ needs.build-images.outputs.registry_user }}" \
-              containerRegistryPassword="${{ secrets.GHCR_PULL_TOKEN }}" \
+              containerRegistryPassword="${{ secrets.GITHUB_TOKEN }}" \
             --name "portal-staging-whatif-${{ github.run_id }}-${{ github.run_attempt }}" \
             --no-pretty-print \
             --result-format ResourceIdOnly
@@ -160,7 +159,7 @@ jobs:
               backendImage="${{ needs.build-images.outputs.backend_image }}" \
               frontendImage="${{ needs.build-images.outputs.frontend_image }}" \
               containerRegistryUsername="${{ needs.build-images.outputs.registry_user }}" \
-              containerRegistryPassword="${{ secrets.GHCR_PULL_TOKEN }}" \
+              containerRegistryPassword="${{ secrets.GITHUB_TOKEN }}" \
             --name "portal-staging-${{ github.run_number }}" \
             --query properties.outputs \
             --output json)

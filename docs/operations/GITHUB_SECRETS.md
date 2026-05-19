@@ -38,11 +38,10 @@ Use this order to avoid mixed bootstrap/deploy failures:
    - This is the correct bootstrap for BaseCoat repo operations and portal deploy readiness.
    - Do not substitute `scripts/bootstrap-basecoat.ps1` (consumer-repo adoption) or `scripts/bootstrap-dashboard.ps1` (adoption dashboard setup).
 2. Keep Azure CLI logged in and rerun `pwsh scripts/bootstrap.ps1` to auto-provision the portal OIDC app registration and repo variables when missing.
-3. Set `GHCR_PULL_TOKEN` at repo scope or `staging` environment scope.
-4. Re-run `pwsh scripts/bootstrap.ps1` and verify Phase 3 passes portal OIDC checks.
-5. Trigger `.github/workflows/portal-deploy.yml`.
+3. Re-run `pwsh scripts/bootstrap.ps1` and verify Phase 3 passes portal OIDC checks.
+4. Trigger `.github/workflows/portal-deploy.yml`.
 
-The deploy workflow now fails fast in the `Validate deployment secrets` step when required portal variables are missing or malformed. The bootstrap script can auto-generate the Azure app registration, federated credential, and repo variables from the current Azure CLI session, but the GHCR pull token still requires a manually created PAT with `read:packages`.
+The deploy workflow now fails fast in the `Validate deployment secrets` step when required portal variables are missing or malformed. The bootstrap script can auto-generate the Azure app registration, federated credential, and repo variables from the current Azure CLI session. GHCR image pulls use the workflow's built-in `GITHUB_TOKEN` (with `packages: write` permission) — no separate PAT is needed.
 
 ---
 
@@ -149,15 +148,13 @@ If omitted, `portal/app/iac/main.bicep` generates a secure password per deployme
 
 ---
 
-### `GHCR_PULL_TOKEN`
+### `GHCR_PULL_TOKEN` *(deprecated)*
 
-**Used by:** `.github/workflows/portal-deploy.yml`
+**Status:** No longer required. The portal deploy workflow now uses the built-in
+`GITHUB_TOKEN` (with `packages: write` permission) for GHCR image pulls at
+deploy time. Azure Container Apps receives this token during Bicep deployment.
 
-**Purpose:** Allows Container Apps runtime to pull private images from GHCR.
-
-**Required scope:** `read:packages`
-
-This is deployment/runtime specific (not just build-time): `GITHUB_TOKEN` can push images during workflow execution, but Azure Container Apps needs a separate credential to pull private GHCR images after deployment.
+If this secret exists in the repo, it can be safely removed.
 
 ---
 

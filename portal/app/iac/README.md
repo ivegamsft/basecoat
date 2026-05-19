@@ -20,7 +20,7 @@ Required secrets and vars:
 - `AZURE_CLIENT_ID` (repo variable; OIDC client ID)
 - `AZURE_TENANT_ID` (repo variable; Entra tenant ID)
 - `AZURE_SUBSCRIPTION_ID` (repo variable; target Azure subscription)
-- `GHCR_PULL_TOKEN` (PAT with `read:packages` for pulling GHCR images)
+- Container registry credentials use the workflow's built-in `GITHUB_TOKEN` (no separate PAT)
 - `PORTAL_RESOURCE_GROUP` (optional, defaults to `basecoat-portal-staging-rg`)
 - `PORTAL_AZURE_LOCATION` (optional, defaults to `eastus`)
 

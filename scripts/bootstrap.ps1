@@ -501,12 +501,7 @@ if (Test-Path $portalDeployWorkflow) {
             }
         ).Count -eq $requiredPortalVars.Count
 
-        if ($repoSecretNames -contains 'GHCR_PULL_TOKEN') {
-            Write-Check "GHCR_PULL_TOKEN repo secret present" $true "required for container registry pulls"
-        } else {
-            Write-Warn "GHCR_PULL_TOKEN missing for portal deploy (set repo secret or staging environment secret)"
-        }
-
+        Write-Host "  ℹ️   Portal deploy uses GITHUB_TOKEN for GHCR pulls (no separate PAT needed)." -ForegroundColor DarkGray
         Write-Host "  ℹ️   Portal deploy uses azure/login@v2 with federated credentials and repo variables." -ForegroundColor DarkGray
         Write-Host "  ℹ️   PORTAL_POSTGRES_ADMIN_PASSWORD is optional (Bicep can generate the PostgreSQL admin password)" -ForegroundColor DarkGray
     } catch {
