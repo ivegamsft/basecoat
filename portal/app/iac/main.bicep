@@ -11,10 +11,10 @@ param environment string = 'staging'
 param acrName string = toLower('portalacr${substring(uniqueString(resourceGroup().id), 0, 6)}')
 
 @description('Backend container image tag (repo:tag, without registry prefix).')
-param backendImageTag string = ''
+param backendImageTag string
 
 @description('Frontend container image tag (repo:tag, without registry prefix).')
-param frontendImageTag string = ''
+param frontendImageTag string
 
 @description('PostgreSQL administrator login.')
 param postgresAdminLogin string = 'portaladmin'
@@ -82,17 +82,13 @@ module database './modules/postgresql-flexible-server.bicep' = {
   }
 }
 
-// Use mcr.microsoft.com hello-world placeholder if no image tag provided (ACR-only provisioning)
-var backendImage = empty(backendImageTag) ? 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest' : '${registry.outputs.loginServer}/${backendImageTag}'
-var frontendImage = empty(frontendImageTag) ? 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest' : '${registry.outputs.loginServer}/${frontendImageTag}'
-
 module frontend './modules/frontend-container-app.bicep' = {
   name: 'frontend-container-app'
   params: {
     location: location
     appName: frontendName
     environmentId: env.id
-    image: frontendImage
+    image: '${registry.outputs.loginServer}/${frontendImageTag}'
     acrLoginServer: registry.outputs.loginServer
   }
 }
@@ -103,7 +99,7 @@ module backend './modules/backend-container-app.bicep' = {
     location: location
     appName: backendName
     environmentId: env.id
-    image: backendImage
+    image: '${registry.outputs.loginServer}/${backendImageTag}'
     acrLoginServer: registry.outputs.loginServer
     dbHost: database.outputs.fqdn
     dbPort: 5432

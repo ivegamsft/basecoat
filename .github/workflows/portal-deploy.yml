@@ -27,8 +27,8 @@ env:
   AZURE_RESOURCE_GROUP: ${{ vars.PORTAL_RESOURCE_GROUP || 'basecoat-portal-staging-rg' }}
 
 jobs:
-  provision-infra:
-    name: Provision infrastructure (ACR + environment)
+  provision-acr:
+    name: Provision container registry
     runs-on: ubuntu-latest
     environment: staging
     outputs:
@@ -55,26 +55,27 @@ jobs:
             --location "${AZURE_LOCATION}" \
             --output none
 
-      - name: Deploy infrastructure (no app images)
+      - name: Provision ACR
         id: deploy
         shell: bash
         run: |
           set -euo pipefail
-          RESULT=$(az deployment group create \
+          # Only deploy ACR — lightweight, no container apps yet
+          ACR_NAME="portalacr$(echo -n $(az group show -n ${AZURE_RESOURCE_GROUP} --query id -o tsv) | sha256sum | head -c 6)"
+          az deployment group create \
             --resource-group "${AZURE_RESOURCE_GROUP}" \
-            --template-file portal/app/iac/main.bicep \
-            --name "portal-infra-${{ github.run_id }}" \
-            --query properties.outputs \
-            --output json)
-          ACR_SERVER=$(echo "${RESULT}" | python3 -c "import json,sys; print(json.load(sys.stdin)['acrLoginServer']['value'])")
-          ACR_NAME=$(echo "${ACR_SERVER}" | cut -d. -f1)
+            --template-file portal/app/iac/modules/container-registry.bicep \
+            --parameters registryName="${ACR_NAME}" \
+            --name "acr-provision-${{ github.run_id }}" \
+            --output none
+          ACR_SERVER=$(az acr show -n "${ACR_NAME}" --query loginServer -o tsv)
           echo "acr_login_server=${ACR_SERVER}" >> "$GITHUB_OUTPUT"
           echo "acr_name=${ACR_NAME}" >> "$GITHUB_OUTPUT"
 
   build-and-push:
     name: Build and push images to ACR
     runs-on: ubuntu-latest
-    needs: provision-infra
+    needs: provision-acr
     environment: staging
     outputs:
       backend_image_tag: ${{ steps.meta.outputs.backend_tag }}
@@ -93,7 +94,7 @@ jobs:
 
       - name: Log in to ACR
         shell: bash
-        run: az acr login --name "${{ needs.provision-infra.outputs.acr_name }}"
+        run: az acr login --name "${{ needs.provision-acr.outputs.acr_name }}"
 
       - name: Prepare image tags
         id: meta
@@ -113,7 +114,7 @@ jobs:
           context: portal/app/backend
           file: portal/app/backend/Dockerfile
           push: true
-          tags: ${{ needs.provision-infra.outputs.acr_login_server }}/${{ steps.meta.outputs.backend_tag }}
+          tags: ${{ needs.provision-acr.outputs.acr_login_server }}/${{ steps.meta.outputs.backend_tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -123,14 +124,14 @@ jobs:
           context: portal/app/dashboard
           file: portal/app/dashboard/Dockerfile
           push: true
-          tags: ${{ needs.provision-infra.outputs.acr_login_server }}/${{ steps.meta.outputs.frontend_tag }}
+          tags: ${{ needs.provision-acr.outputs.acr_login_server }}/${{ steps.meta.outputs.frontend_tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
   deploy-staging:
     name: Deploy staging portal app
     runs-on: ubuntu-latest
-    needs: [provision-infra, build-and-push]
+    needs: [provision-acr, build-and-push]
     environment: staging
 
     steps:
@@ -153,6 +154,7 @@ jobs:
             --resource-group "${AZURE_RESOURCE_GROUP}" \
             --template-file portal/app/iac/main.bicep \
             --parameters \
+              acrName="${{ needs.provision-acr.outputs.acr_name }}" \
               backendImageTag="${{ needs.build-and-push.outputs.backend_image_tag }}" \
               frontendImageTag="${{ needs.build-and-push.outputs.frontend_image_tag }}" \
             --name "portal-staging-${{ github.run_number }}" \
