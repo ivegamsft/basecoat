@@ -1,6 +1,6 @@
 ---
 description: "Use when building secure Electron desktop applications. Covers process architecture, inter-process communication, content security policy, code signing, auto-updates, credential storage, and ASAR integrity. Reference skill at skills/electron-apps/SKILL.md for implementation patterns."
-applyTo: "**/*"
+applyTo: "**/electron/**/*.{ts,tsx,js,jsx,cjs,mjs,json,yml,yaml},**/*electron*.{ts,tsx,js,jsx,cjs,mjs,json,yml,yaml,md}"
 ---
 
 # Electron Desktop Application Security Standards
