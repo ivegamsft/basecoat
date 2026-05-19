@@ -10,6 +10,8 @@ permissions:
 safe-outputs:
   add-comment:
     hide-older-comments: true
+  noop:
+    report-as-issue: false
 engine: copilot
 timeout-minutes: 20
 run-name: "Code Review — PR #${{ github.event.pull_request.number }}"
