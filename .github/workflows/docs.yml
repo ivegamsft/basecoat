@@ -98,6 +98,7 @@ jobs:
 
           # Restore metrics data if it existed
           if [ -s /tmp/metrics-preserve/latest.json ]; then
+            git stash --include-untracked 2>/dev/null || true
             git checkout gh-pages
             mkdir -p dashboard/metrics
             cp /tmp/metrics-preserve/latest.json dashboard/metrics/
