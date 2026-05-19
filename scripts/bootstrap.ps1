@@ -218,6 +218,19 @@ function Ensure-PortalOidcBootstrap(
             Write-Check "Portal Contributor role exists" $true $scope
         }
 
+        # User Access Administrator allows IaC to create role assignments (e.g. AcrPull for managed identity)
+        $uaaExists = az role assignment list --assignee $appId --scope $scope --query "[?roleDefinitionName=='User Access Administrator'] | [0].id" -o tsv 2>$null
+        if (-not $uaaExists) {
+            az role assignment create --assignee $appId --role "User Access Administrator" --scope $scope 2>$null | Out-Null
+            if ($LASTEXITCODE -ne 0) {
+                Write-Fail "Failed to assign User Access Administrator on $scope to portal app"
+                return $false
+            }
+            Write-Check "Portal User Access Administrator role assigned" $true $scope
+        } else {
+            Write-Check "Portal User Access Administrator role exists" $true $scope
+        }
+
         if (Set-GitHubVariableValue -repoSlug $repoSlug -variableName 'AZURE_CLIENT_ID' -variableValue $appId) {
             Write-Check "AZURE_CLIENT_ID configured" $true "repo variable"
         } else {
