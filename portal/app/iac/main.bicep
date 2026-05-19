@@ -33,6 +33,15 @@ var envName = '${prefix}-env${nameSuffix}'
 var backendName = '${prefix}-backend${nameSuffix}'
 var frontendName = '${prefix}-frontend${nameSuffix}'
 var postgresServerName = toLower('${prefix}-pg${nameSuffix}-${substring(uniqueString(resourceGroup().id), 0, 6)}')
+var acrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
+var acrPullIdentityName = '${prefix}-acr-pull${nameSuffix}'
+
+// User-assigned managed identity for ACR pull — created BEFORE container apps
+// so the AcrPull role assignment is in place when ACA pulls images.
+resource acrPullIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: acrPullIdentityName
+  location: location
+}
 
 // Azure Container Registry
 module registry './modules/container-registry.bicep' = {
@@ -40,6 +49,17 @@ module registry './modules/container-registry.bicep' = {
   params: {
     location: location
     registryName: acrName
+  }
+}
+
+// AcrPull role on the registry for the shared identity
+resource acrPullRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, acrPullIdentityName, acrPullRoleId)
+  scope: resourceGroup()
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', acrPullRoleId)
+    principalId: acrPullIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
   }
 }
 
@@ -84,50 +104,33 @@ module database './modules/postgresql-flexible-server.bicep' = {
 
 module frontend './modules/frontend-container-app.bicep' = {
   name: 'frontend-container-app'
+  dependsOn: [acrPullRole]
   params: {
     location: location
     appName: frontendName
     environmentId: env.id
     image: '${registry.outputs.loginServer}/${frontendImageTag}'
     acrLoginServer: registry.outputs.loginServer
+    acrPullIdentityId: acrPullIdentity.id
   }
 }
 
 module backend './modules/backend-container-app.bicep' = {
   name: 'backend-container-app'
+  dependsOn: [acrPullRole]
   params: {
     location: location
     appName: backendName
     environmentId: env.id
     image: '${registry.outputs.loginServer}/${backendImageTag}'
     acrLoginServer: registry.outputs.loginServer
+    acrPullIdentityId: acrPullIdentity.id
     dbHost: database.outputs.fqdn
     dbPort: 5432
     dbName: postgresDatabaseName
     dbUser: postgresAdminLogin
     dbPassword: postgresAdminPassword
     corsOrigins: 'https://${frontend.outputs.fqdn}'
-  }
-}
-
-// AcrPull role assignment for backend managed identity
-// Role definition ID for AcrPull: 7f951dda-4ed3-4680-a7ca-43fe172d538d
-resource backendAcrPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(resourceGroup().id, backendName, '7f951dda-4ed3-4680-a7ca-43fe172d538d')
-  properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')
-    principalId: backend.outputs.principalId
-    principalType: 'ServicePrincipal'
-  }
-}
-
-// AcrPull role assignment for frontend managed identity
-resource frontendAcrPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(resourceGroup().id, frontendName, '7f951dda-4ed3-4680-a7ca-43fe172d538d')
-  properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')
-    principalId: frontend.outputs.principalId
-    principalType: 'ServicePrincipal'
   }
 }
 

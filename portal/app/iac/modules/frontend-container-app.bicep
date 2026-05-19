@@ -16,6 +16,9 @@ param targetPort int = 80
 @description('ACR login server for managed identity pull.')
 param acrLoginServer string
 
+@description('User-assigned managed identity resource ID for ACR pull.')
+param acrPullIdentityId string
+
 @description('Minimum replica count.')
 param minReplicas int = 0
 
@@ -26,7 +29,10 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
   name: appName
   location: location
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${acrPullIdentityId}': {}
+    }
   }
   properties: {
     managedEnvironmentId: environmentId
@@ -40,7 +46,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
       registries: [
         {
           server: acrLoginServer
-          identity: 'system'
+          identity: acrPullIdentityId
         }
       ]
     }
@@ -74,4 +80,3 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
 }
 
 output fqdn string = app.properties.configuration.ingress.fqdn
-output principalId string = app.identity.principalId
