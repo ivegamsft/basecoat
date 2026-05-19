@@ -21,99 +21,22 @@ on:
 permissions:
   contents: read
   id-token: write
-  packages: write
 
 env:
   AZURE_LOCATION: ${{ vars.PORTAL_AZURE_LOCATION || 'eastus' }}
   AZURE_RESOURCE_GROUP: ${{ vars.PORTAL_RESOURCE_GROUP || 'basecoat-portal-staging-rg' }}
-  REGISTRY_HOST: ghcr.io
 
 jobs:
-  build-images:
-    name: Build and push app images
+  provision-infra:
+    name: Provision infrastructure (ACR + environment)
     runs-on: ubuntu-latest
     outputs:
-      image_tag: ${{ steps.meta.outputs.image_tag }}
-      backend_image: ${{ steps.meta.outputs.backend_image }}
-      frontend_image: ${{ steps.meta.outputs.frontend_image }}
-      registry_user: ${{ steps.meta.outputs.registry_user }}
+      acr_login_server: ${{ steps.deploy.outputs.acr_login_server }}
+      acr_name: ${{ steps.deploy.outputs.acr_name }}
 
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
-
-      - name: Prepare image names
-        id: meta
-        shell: bash
-        run: |
-          set -euo pipefail
-          OWNER_LC="${GITHUB_REPOSITORY_OWNER,,}"
-          IMAGE_TAG="staging-${GITHUB_SHA::7}"
-          echo "registry_user=${OWNER_LC}" >> "$GITHUB_OUTPUT"
-          echo "image_tag=${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
-          echo "backend_image=${REGISTRY_HOST}/${OWNER_LC}/basecoat-portal-backend:${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
-          echo "frontend_image=${REGISTRY_HOST}/${OWNER_LC}/basecoat-portal-dashboard:${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
-
-      - name: Log in to GHCR
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v3
-        with:
-          registry: ${{ env.REGISTRY_HOST }}
-          username: ${{ steps.meta.outputs.registry_user }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v3
-
-      - name: Build and push backend image
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
-        with:
-          context: portal/app/backend
-          file: portal/app/backend/Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.backend_image }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build and push frontend image
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
-        with:
-          context: portal/app/dashboard
-          file: portal/app/dashboard/Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.frontend_image }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  deploy-staging:
-    name: Deploy staging portal app
-    runs-on: ubuntu-latest
-    needs: build-images
-    environment: staging
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
-
-      - name: Validate deployment secrets
-        env:
-          AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
-          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
-          AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          missing=()
-          for var_name in AZURE_CLIENT_ID AZURE_TENANT_ID AZURE_SUBSCRIPTION_ID; do
-            if [[ -z "${!var_name:-}" ]]; then
-              missing+=("${var_name}")
-            fi
-          done
-
-          if (( ${#missing[@]} > 0 )); then
-            echo "::error::Missing required Azure OIDC variables: ${missing[*]}. Configure them as repo variables."
-            exit 1
-          fi
 
       - name: Azure login
         uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
@@ -131,23 +54,95 @@ jobs:
             --location "${AZURE_LOCATION}" \
             --output none
 
-      - name: Validate Bicep
+      - name: Deploy infrastructure (no app images)
+        id: deploy
         shell: bash
         run: |
           set -euo pipefail
-          az deployment group what-if \
+          RESULT=$(az deployment group create \
             --resource-group "${AZURE_RESOURCE_GROUP}" \
             --template-file portal/app/iac/main.bicep \
-            --parameters \
-              backendImage="${{ needs.build-images.outputs.backend_image }}" \
-              frontendImage="${{ needs.build-images.outputs.frontend_image }}" \
-              containerRegistryUsername="${{ needs.build-images.outputs.registry_user }}" \
-              containerRegistryPassword="${{ secrets.GITHUB_TOKEN }}" \
-            --name "portal-staging-whatif-${{ github.run_id }}-${{ github.run_attempt }}" \
-            --no-pretty-print \
-            --result-format ResourceIdOnly
+            --name "portal-infra-${{ github.run_id }}" \
+            --query properties.outputs \
+            --output json)
+          ACR_SERVER=$(echo "${RESULT}" | python3 -c "import json,sys; print(json.load(sys.stdin)['acrLoginServer']['value'])")
+          ACR_NAME=$(echo "${ACR_SERVER}" | cut -d. -f1)
+          echo "acr_login_server=${ACR_SERVER}" >> "$GITHUB_OUTPUT"
+          echo "acr_name=${ACR_NAME}" >> "$GITHUB_OUTPUT"
 
-      - name: Deploy portal stack
+  build-and-push:
+    name: Build and push images to ACR
+    runs-on: ubuntu-latest
+    needs: provision-infra
+    outputs:
+      backend_image_tag: ${{ steps.meta.outputs.backend_tag }}
+      frontend_image_tag: ${{ steps.meta.outputs.frontend_tag }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+
+      - name: Azure login
+        uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Log in to ACR
+        shell: bash
+        run: az acr login --name "${{ needs.provision-infra.outputs.acr_name }}"
+
+      - name: Prepare image tags
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+          IMAGE_TAG="staging-${GITHUB_SHA::7}"
+          echo "backend_tag=basecoat-portal-backend:${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
+          echo "frontend_tag=basecoat-portal-dashboard:${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v3
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
+        with:
+          context: portal/app/backend
+          file: portal/app/backend/Dockerfile
+          push: true
+          tags: ${{ needs.provision-infra.outputs.acr_login_server }}/${{ steps.meta.outputs.backend_tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
+        with:
+          context: portal/app/dashboard
+          file: portal/app/dashboard/Dockerfile
+          push: true
+          tags: ${{ needs.provision-infra.outputs.acr_login_server }}/${{ steps.meta.outputs.frontend_tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-staging:
+    name: Deploy staging portal app
+    runs-on: ubuntu-latest
+    needs: [provision-infra, build-and-push]
+    environment: staging
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+
+      - name: Azure login
+        uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy portal stack with app images
         id: deploy
         shell: bash
         run: |
@@ -156,10 +151,8 @@ jobs:
             --resource-group "${AZURE_RESOURCE_GROUP}" \
             --template-file portal/app/iac/main.bicep \
             --parameters \
-              backendImage="${{ needs.build-images.outputs.backend_image }}" \
-              frontendImage="${{ needs.build-images.outputs.frontend_image }}" \
-              containerRegistryUsername="${{ needs.build-images.outputs.registry_user }}" \
-              containerRegistryPassword="${{ secrets.GITHUB_TOKEN }}" \
+              backendImageTag="${{ needs.build-and-push.outputs.backend_image_tag }}" \
+              frontendImageTag="${{ needs.build-and-push.outputs.frontend_image_tag }}" \
             --name "portal-staging-${{ github.run_number }}" \
             --query properties.outputs \
             --output json)
@@ -167,6 +160,7 @@ jobs:
           echo "backend_url=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['backendUrl']['value'])")" >> "$GITHUB_OUTPUT"
           echo "frontend_url=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['frontendUrl']['value'])")" >> "$GITHUB_OUTPUT"
           echo "database_fqdn=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['databaseFqdn']['value'])")" >> "$GITHUB_OUTPUT"
+          echo "acr_server=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['acrLoginServer']['value'])")" >> "$GITHUB_OUTPUT"
 
       - name: Smoke test backend
         shell: bash
@@ -205,4 +199,5 @@ jobs:
             echo "| Backend | ${{ steps.deploy.outputs.backend_url }} |"
             echo "| Frontend | ${{ steps.deploy.outputs.frontend_url }} |"
             echo "| PostgreSQL | ${{ steps.deploy.outputs.database_fqdn }} |"
+            echo "| ACR | ${{ steps.deploy.outputs.acr_server }} |"
           } >> "$GITHUB_STEP_SUMMARY"

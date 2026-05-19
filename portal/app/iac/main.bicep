@@ -7,21 +7,14 @@ param location string = resourceGroup().location
 ])
 param environment string = 'staging'
 
-@description('Backend container image.')
-param backendImage string
+@description('Azure Container Registry name (globally unique, alphanumeric).')
+param acrName string = toLower('portalacr${substring(uniqueString(resourceGroup().id), 0, 6)}')
 
-@description('Frontend container image.')
-param frontendImage string
+@description('Backend container image tag (repo:tag, without registry prefix).')
+param backendImageTag string = ''
 
-@description('Container registry host for app images.')
-param containerRegistryServer string = 'ghcr.io'
-
-@description('Container registry username for image pulls.')
-param containerRegistryUsername string = ''
-
-@secure()
-@description('Container registry password for image pulls.')
-param containerRegistryPassword string = ''
+@description('Frontend container image tag (repo:tag, without registry prefix).')
+param frontendImageTag string = ''
 
 @description('PostgreSQL administrator login.')
 param postgresAdminLogin string = 'portaladmin'
@@ -40,6 +33,15 @@ var envName = '${prefix}-env${nameSuffix}'
 var backendName = '${prefix}-backend${nameSuffix}'
 var frontendName = '${prefix}-frontend${nameSuffix}'
 var postgresServerName = toLower('${prefix}-pg${nameSuffix}-${substring(uniqueString(resourceGroup().id), 0, 6)}')
+
+// Azure Container Registry
+module registry './modules/container-registry.bicep' = {
+  name: 'container-registry'
+  params: {
+    location: location
+    registryName: acrName
+  }
+}
 
 resource law 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   name: lawName
@@ -80,6 +82,10 @@ module database './modules/postgresql-flexible-server.bicep' = {
   }
 }
 
+// Use mcr.microsoft.com hello-world placeholder if no image tag provided (ACR-only provisioning)
+var backendImage = empty(backendImageTag) ? 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest' : '${registry.outputs.loginServer}/${backendImageTag}'
+var frontendImage = empty(frontendImageTag) ? 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest' : '${registry.outputs.loginServer}/${frontendImageTag}'
+
 module frontend './modules/frontend-container-app.bicep' = {
   name: 'frontend-container-app'
   params: {
@@ -87,9 +93,7 @@ module frontend './modules/frontend-container-app.bicep' = {
     appName: frontendName
     environmentId: env.id
     image: frontendImage
-    containerRegistryServer: containerRegistryServer
-    containerRegistryUsername: containerRegistryUsername
-    containerRegistryPassword: containerRegistryPassword
+    acrLoginServer: registry.outputs.loginServer
   }
 }
 
@@ -100,9 +104,7 @@ module backend './modules/backend-container-app.bicep' = {
     appName: backendName
     environmentId: env.id
     image: backendImage
-    containerRegistryServer: containerRegistryServer
-    containerRegistryUsername: containerRegistryUsername
-    containerRegistryPassword: containerRegistryPassword
+    acrLoginServer: registry.outputs.loginServer
     dbHost: database.outputs.fqdn
     dbPort: 5432
     dbName: postgresDatabaseName
@@ -112,6 +114,28 @@ module backend './modules/backend-container-app.bicep' = {
   }
 }
 
+// AcrPull role assignment for backend managed identity
+// Role definition ID for AcrPull: 7f951dda-4ed3-4680-a7ca-43fe172d538d
+resource backendAcrPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(registry.outputs.registryId, backend.outputs.principalId, '7f951dda-4ed3-4680-a7ca-43fe172d538d')
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')
+    principalId: backend.outputs.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// AcrPull role assignment for frontend managed identity
+resource frontendAcrPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(registry.outputs.registryId, frontend.outputs.principalId, '7f951dda-4ed3-4680-a7ca-43fe172d538d')
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')
+    principalId: frontend.outputs.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
 output backendUrl string = 'https://${backend.outputs.fqdn}'
 output frontendUrl string = 'https://${frontend.outputs.fqdn}'
 output databaseFqdn string = database.outputs.fqdn
+output acrLoginServer string = registry.outputs.loginServer

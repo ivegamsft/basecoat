@@ -13,15 +13,8 @@ param image string
 @description('Target port exposed by the container.')
 param targetPort int = 80
 
-@description('Container registry host.')
-param containerRegistryServer string = 'ghcr.io'
-
-@description('Container registry username.')
-param containerRegistryUsername string = ''
-
-@secure()
-@description('Container registry password.')
-param containerRegistryPassword string = ''
+@description('ACR login server for managed identity pull.')
+param acrLoginServer string
 
 @description('Minimum replica count.')
 param minReplicas int = 0
@@ -29,24 +22,12 @@ param minReplicas int = 0
 @description('Maximum replica count.')
 param maxReplicas int = 2
 
-var secrets = empty(containerRegistryPassword) ? [] : [
-  {
-    name: 'registry-password'
-    value: containerRegistryPassword
-  }
-]
-
-var registries = empty(containerRegistryPassword) ? [] : [
-  {
-    server: containerRegistryServer
-    username: containerRegistryUsername
-    passwordSecretRef: 'registry-password'
-  }
-]
-
 resource app 'Microsoft.App/containerApps@2024-03-01' = {
   name: appName
   location: location
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     managedEnvironmentId: environmentId
     configuration: {
@@ -56,8 +37,12 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
         transport: 'http'
         allowInsecure: false
       }
-      secrets: secrets
-      registries: registries
+      registries: [
+        {
+          server: acrLoginServer
+          identity: 'system'
+        }
+      ]
     }
     template: {
       containers: [
@@ -89,3 +74,4 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
 }
 
 output fqdn string = app.properties.configuration.ingress.fqdn
+output principalId string = app.identity.principalId
