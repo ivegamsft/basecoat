@@ -175,12 +175,32 @@ gh workflow run adoption-metrics.yml</code></pre>
         container.innerHTML = html;
     }
 
+    // Parse org/repo from various input formats (full URL, shorthand, etc.)
+    function parseRepoInput(raw) {
+        const value = raw.trim().replace(/\/+$/, '');
+        // Full GitHub URL: https://github.com/org/repo or git@github.com:org/repo
+        const urlMatch = value.match(/github\.com[/:]([^/]+)\/([^/.]+)/);
+        if (urlMatch) return `${urlMatch[1]}/${urlMatch[2]}`;
+        // Already org/repo format (exactly one slash, no protocol)
+        if (/^[^/]+\/[^/]+$/.test(value) && !value.includes(':')) return value;
+        return null;
+    }
+
     // Add repo (generates CLI command since we can't write secrets from client-side)
     function addRepo() {
         const input = document.getElementById('new-repo-input');
-        const repo = input.value.trim();
-        if (!repo || !repo.includes('/')) {
+        const repo = parseRepoInput(input.value);
+        if (!repo) {
             input.style.borderColor = '#f85149';
+            input.placeholder = 'Expected: org/repo or https://github.com/org/repo';
+            setTimeout(() => { input.placeholder = 'org/repo-name'; }, 3000);
+            return;
+        }
+        if (currentRepos.includes(repo)) {
+            input.style.borderColor = '#d29922';
+            input.value = '';
+            input.placeholder = `${repo} is already monitored`;
+            setTimeout(() => { input.placeholder = 'org/repo-name'; }, 3000);
             return;
         }
         input.style.borderColor = '#30363d';
