@@ -2,7 +2,7 @@
 
 Generated as a standalone inventory (no edits to agent/skill/instruction files).
 
-- Generated: 2026-05-19 00:52:28 -0400
+- Generated: 2026-05-19 16:38:17 -0400
 - Estimation method: `approx_tokens = round(word_count × 1.35)` (same heuristic used in `scripts/validate-basecoat.ps1`).
 - Scope: `agents/*.agent.md`, `skills/*/SKILL.md`, `instructions/*.instructions.md`.
 
@@ -10,38 +10,15 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 
 | Type | Count | Total Words | Total Approx Tokens | Avg Approx Tokens |
 |---|---:|---:|---:|---:|
-| Agent | 98 | 101941 | 137617 | 1404 |
-| Skill | 78 | 16391 | 22127 | 284 |
-| Instruction | 76 | 43209 | 58334 | 768 |
-| **All** | 252 | 161541 | 218078 | 865 |
+| Agent | 98 | 70862 | 95657 | 976 |
+| Skill | 80 | 16846 | 22741 | 284 |
+| Instruction | 79 | 44837 | 60532 | 766 |
+| **All** | 257 | 132545 | 178930 | 696 |
 
 ## Agents
 
 | Name | Location | Words | Approx Tokens |
 |---|---|---:|---:|
-| production-readiness | `agents/production-readiness.agent.md` | 2195 | 2963 |
-| resilience-reviewer | `agents/resilience-reviewer.agent.md` | 2107 | 2844 |
-| self-healing-ci | `agents/self-healing-ci.agent.md` | 1979 | 2672 |
-| release-impact-advisor | `agents/release-impact-advisor.agent.md` | 1945 | 2626 |
-| definition-of-done | `agents/definition-of-done.agent.md` | 1900 | 2565 |
-| incident-responder | `agents/incident-responder.agent.md` | 1858 | 2508 |
-| domain-designer | `agents/domain-designer.agent.md` | 1793 | 2421 |
-| e2e-test-strategy | `agents/e2e-test-strategy.agent.md` | 1776 | 2398 |
-| ha-architect | `agents/ha-architect.agent.md` | 1770 | 2390 |
-| contract-testing | `agents/contract-testing.agent.md` | 1760 | 2376 |
-| devops-engineer | `agents/devops-engineer.agent.md` | 1739 | 2348 |
-| feedback-loop | `agents/feedback-loop.agent.md` | 1696 | 2290 |
-| llmops | `agents/llmops.agent.md` | 1605 | 2167 |
-| data-pipeline | `agents/data-pipeline.agent.md` | 1600 | 2160 |
-| hardening-advisor | `agents/hardening-advisor.agent.md` | 1597 | 2156 |
-| chaos-engineer | `agents/chaos-engineer.agent.md` | 1574 | 2125 |
-| retro-facilitator | `agents/retro-facilitator.agent.md` | 1555 | 2099 |
-| merge-coordinator | `agents/merge-coordinator.agent.md` | 1553 | 2097 |
-| memory-curator | `agents/memory-curator.agent.md` | 1540 | 2079 |
-| data-integrity | `agents/data-integrity.agent.md` | 1512 | 2041 |
-| azure-landing-zone | `agents/azure-landing-zone.agent.md` | 1495 | 2018 |
-| supply-chain-security | `agents/supply-chain-security.agent.md` | 1491 | 2013 |
-| observability-engineer | `agents/observability-engineer.agent.md` | 1472 | 1987 |
 | container-security | `agents/container-security.agent.md` | 1467 | 1980 |
 | containerization-planner | `agents/containerization-planner.agent.md` | 1442 | 1947 |
 | agentops | `agents/agentops.agent.md` | 1438 | 1941 |
@@ -82,13 +59,16 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | instruction-auditor | `agents/instruction-auditor.agent.md` | 918 | 1239 |
 | security-operations | `agents/security-operations.agent.md` | 895 | 1208 |
 | issue-triage | `agents/issue-triage.agent.md` | 864 | 1166 |
+| production-readiness | `agents/production-readiness.agent.md` | 859 | 1160 |
 | guardrail | `agents/guardrail.agent.md` | 832 | 1123 |
 | infrastructure-deploy | `agents/infrastructure-deploy.agent.md` | 762 | 1029 |
 | config-auditor | `agents/config-auditor.agent.md` | 758 | 1023 |
 | product-manager | `agents/product-manager.agent.md` | 739 | 998 |
 | memory-promoter | `agents/memory-promoter.agent.md` | 734 | 991 |
+| self-healing-ci | `agents/self-healing-ci.agent.md` | 693 | 936 |
 | guidance-reviewer | `agents/guidance-reviewer.agent.md` | 685 | 925 |
 | tech-writer | `agents/tech-writer.agent.md` | 676 | 913 |
+| resilience-reviewer | `agents/resilience-reviewer.agent.md` | 667 | 900 |
 | data-architect | `agents/data-architect.agent.md` | 663 | 895 |
 | strategy-to-automation | `agents/strategy-to-automation.agent.md` | 661 | 892 |
 | dependency-update-advisor | `agents/dependency-update-advisor.agent.md` | 652 | 880 |
@@ -100,15 +80,35 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | sprint-closeout-auditor | `agents/sprint-closeout-auditor.agent.md` | 415 | 560 |
 | dotnet-modernization-advisor | `agents/dotnet-modernization-advisor.agent.md` | 390 | 526 |
 | code-review | `agents/code-review.agent.md` | 389 | 525 |
+| contract-testing | `agents/contract-testing.agent.md` | 368 | 497 |
 | station-bottleneck-analyzer | `agents/station-bottleneck-analyzer.agent.md` | 368 | 497 |
 | new-customization | `agents/new-customization.agent.md` | 367 | 495 |
+| merge-coordinator | `agents/merge-coordinator.agent.md` | 365 | 493 |
+| domain-designer | `agents/domain-designer.agent.md` | 364 | 491 |
 | rollout-basecoat | `agents/rollout-basecoat.agent.md` | 361 | 487 |
+| observability-engineer | `agents/observability-engineer.agent.md` | 360 | 486 |
+| hardening-advisor | `agents/hardening-advisor.agent.md` | 356 | 481 |
+| data-integrity | `agents/data-integrity.agent.md` | 338 | 456 |
 | rca | `agents/rca.agent.md` | 338 | 456 |
 | branch-hygiene-sweeper | `agents/branch-hygiene-sweeper.agent.md` | 330 | 446 |
+| feedback-loop | `agents/feedback-loop.agent.md` | 324 | 437 |
+| e2e-test-strategy | `agents/e2e-test-strategy.agent.md` | 323 | 436 |
+| release-impact-advisor | `agents/release-impact-advisor.agent.md` | 321 | 433 |
 | sprint-retrospective | `agents/sprint-retrospective.agent.md` | 310 | 418 |
+| retro-facilitator | `agents/retro-facilitator.agent.md` | 301 | 406 |
+| supply-chain-security | `agents/supply-chain-security.agent.md` | 294 | 397 |
+| memory-curator | `agents/memory-curator.agent.md` | 293 | 396 |
+| ha-architect | `agents/ha-architect.agent.md` | 292 | 394 |
 | orphaned-pr-cleanup | `agents/orphaned-pr-cleanup.agent.md` | 290 | 392 |
 | release-freeze-enforcer | `agents/release-freeze-enforcer.agent.md` | 287 | 387 |
 | broken-build-troubleshooter | `agents/broken-build-troubleshooter.agent.md` | 286 | 386 |
+| chaos-engineer | `agents/chaos-engineer.agent.md` | 285 | 385 |
+| devops-engineer | `agents/devops-engineer.agent.md` | 284 | 383 |
+| definition-of-done | `agents/definition-of-done.agent.md` | 275 | 371 |
+| llmops | `agents/llmops.agent.md` | 274 | 370 |
+| data-pipeline | `agents/data-pipeline.agent.md` | 270 | 364 |
+| incident-responder | `agents/incident-responder.agent.md` | 269 | 363 |
+| azure-landing-zone | `agents/azure-landing-zone.agent.md` | 258 | 348 |
 | release-readiness-chair | `agents/release-readiness-chair.agent.md` | 243 | 328 |
 | daily-standup-facilitator | `agents/daily-standup-facilitator.agent.md` | 237 | 320 |
 | takt-time-tracker | `agents/takt-time-tracker.agent.md` | 203 | 274 |
@@ -145,6 +145,8 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | database-migration | `skills/database-migration/SKILL.md` | 232 | 313 |
 | refactoring | `skills/refactoring/SKILL.md` | 232 | 313 |
 | agent-design | `skills/agent-design/SKILL.md` | 229 | 309 |
+| receiving-code-review | `skills/receiving-code-review/SKILL.md` | 229 | 309 |
+| git-worktrees | `skills/git-worktrees/SKILL.md` | 226 | 305 |
 | human-in-the-loop | `skills/human-in-the-loop/SKILL.md` | 225 | 304 |
 | domain-driven-design | `skills/domain-driven-design/SKILL.md` | 220 | 297 |
 | create-instruction | `skills/create-instruction/SKILL.md` | 219 | 296 |
@@ -206,7 +208,7 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | Name | Location | Words | Approx Tokens |
 |---|---|---:|---:|
 | entra-oidc-user-auth | `instructions/entra-oidc-user-auth.instructions.md` | 1604 | 2165 |
-| multi-repo-orchestration | `instructions/multi-repo-orchestration.instructions.md` | 1316 | 1777 |
+| multi-repo-orchestration | `instructions/multi-repo-orchestration.instructions.md` | 1324 | 1787 |
 | ruby-on-rails | `instructions/ruby-on-rails.instructions.md` | 1233 | 1665 |
 | memory-index | `instructions/memory-index.instructions.md` | 1195 | 1613 |
 | ux | `instructions/ux.instructions.md` | 1090 | 1472 |
@@ -230,6 +232,7 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | ai-verification | `instructions/ai-verification.instructions.md` | 676 | 913 |
 | rest-client-resilience | `instructions/rest-client-resilience.instructions.md` | 666 | 899 |
 | governance | `instructions/governance.instructions.md` | 653 | 882 |
+| plan-first | `instructions/plan-first.instructions.md` | 631 | 852 |
 | azure-app-configuration | `instructions/azure-app-configuration.instructions.md` | 621 | 838 |
 | tailwind-v4 | `instructions/tailwind-v4.instructions.md` | 602 | 813 |
 | tool-minimization | `instructions/tool-minimization.instructions.md` | 598 | 807 |
@@ -242,15 +245,17 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | cpp | `instructions/cpp.instructions.md` | 515 | 695 |
 | session-hygiene | `instructions/session-hygiene.instructions.md` | 507 | 684 |
 | bootstrap-structure | `instructions/bootstrap-structure.instructions.md` | 490 | 662 |
+| tdd-enforcement | `instructions/tdd-enforcement.instructions.md` | 490 | 662 |
 | config | `instructions/config.instructions.md` | 486 | 656 |
 | bootstrap-github-secrets | `instructions/bootstrap-github-secrets.instructions.md` | 479 | 647 |
+| subagent-review | `instructions/subagent-review.instructions.md` | 479 | 647 |
 | process | `instructions/process.instructions.md` | 474 | 640 |
 | ci-firewall | `instructions/ci-firewall.instructions.md` | 464 | 626 |
+| high-stakes-workflow | `instructions/high-stakes-workflow.instructions.md` | 458 | 618 |
 | observability | `instructions/observability.instructions.md` | 458 | 618 |
 | secrets-management | `instructions/secrets-management.instructions.md` | 451 | 609 |
 | quality | `instructions/quality.instructions.md` | 450 | 608 |
 | rbac-authentication | `instructions/rbac-authentication.instructions.md` | 443 | 598 |
-| plan-first | `instructions/plan-first.instructions.md` | 438 | 591 |
 | token-economics | `instructions/token-economics.instructions.md` | 419 | 566 |
 | monolith | `instructions/monolith.instructions.md` | 418 | 564 |
 | data-science | `instructions/data-science.instructions.md` | 416 | 562 |
