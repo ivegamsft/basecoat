@@ -6,12 +6,23 @@ Full-stack web application for BaseCoat governance, audit, and compliance workfl
 
 | Directory | Description |
 |---|---|
-| `frontend/` | React 18 + Vite SPA — pages, routing, auth, charts |
-| `backend/` | Express API — GitHub OAuth, JWT, PostgreSQL/Sequelize |
+| `frontend/` | **[Legacy]** React 18 + Vite SPA — pages, routing, auth, charts |
+| `backend/` | **[Legacy]** Express API — GitHub OAuth, JWT, PostgreSQL/Sequelize |
 | `ui/` | `@basecoat/portal-ui` — shared component library + Storybook |
+| `app/backend/` | **[Current]** Portal app API — TypeORM, Express, PostgreSQL |
+| `app/dashboard/` | **[Current]** Portal app UI — companion app dashboard |
 | `app/iac/` | Portal app infrastructure modules and deployment notes |
 | `app/db/` | Database migrations, seeds, and backup helpers |
 | `prompts/` | Portal-specific Copilot prompt files |
+
+## Migration from Legacy Portal
+
+The portal is being migrated from separate `frontend/` and `backend/` directories to a unified `app/` structure:
+
+- **Build/Deploy Target**: `portal/app/backend/` and `portal/app/dashboard/` are now the canonical deployment surfaces (see `.github/workflows/portal-deploy.yml`)
+- **CI Required Checks**: Tests cover both legacy (`portal/frontend/`, `portal/backend/`) for compatibility and new surfaces (`portal/app/backend/`, `portal/app/dashboard/`) for parity
+- **Sunset Plan**: Legacy surfaces will be removed once migration is complete and feature parity is confirmed
+- **Path Ownership**: Test and deploy workflows must maintain matching path triggers to prevent drift
 
 ## Local setup
 
@@ -51,13 +62,20 @@ The frontend defaults to `http://localhost:3000` for the API. Override it with `
 
 Portal PR validation currently runs:
 
-- Frontend Vitest: [`portal/frontend/package.json`](./frontend/package.json)
-- Backend Jest: [`portal/backend/package.json`](./backend/package.json)
+- **Legacy tests** (compatibility):
+  - Frontend Vitest: [`portal/frontend/package.json`](./frontend/package.json)
+  - Backend Jest: [`portal/backend/package.json`](./backend/package.json)
+- **App tests** (required, deployment target):
+  - App Backend build: [`portal/app/backend/package.json`](./app/backend/package.json)
+  - App Dashboard structure validation: [`portal/app/dashboard/`](./app/dashboard/)
+
+See `.github/workflows/portal-tests.yml` for path trigger configuration. Test and deploy workflows maintain matching path filters to ensure CI coverage matches deployment surfaces.
 
 Useful commands:
 
 - Frontend: `npm test`, `npm run build`, `npm run lint`, `npm run type-check`
 - Backend: `npm test`, `npm run test:coverage`, `npm run build`, `npm run lint`
+- App backend: `npm test`, `npm run test:coverage`, `npm run build`, `npm run lint`
 - UI library: `npm run test`, `npm run test:coverage`, `npm run validate`
 
 ## Coverage expectations

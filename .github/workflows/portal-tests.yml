@@ -6,6 +6,7 @@ on:
       - 'portal/frontend/**'
       - 'portal/backend/**'
       - 'portal/app/backend/**'
+      - 'portal/app/dashboard/**'
       - '.github/workflows/portal-tests.yml'
 
 permissions:
@@ -87,3 +88,20 @@ jobs:
 
       - name: Build TypeScript
         run: npm run build
+
+  app-dashboard-build:
+    name: Portal app dashboard build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Validate dashboard structure
+        shell: bash
+        run: |
+          if [[ ! -f "portal/app/dashboard/Dockerfile" ]]; then
+            echo "::error::portal/app/dashboard/Dockerfile not found"
+            exit 1
+          fi
+          echo "Dashboard structure validated"
