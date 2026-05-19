@@ -27,13 +27,10 @@ env:
   AZURE_RESOURCE_GROUP: ${{ vars.PORTAL_RESOURCE_GROUP || 'basecoat-portal-staging-rg' }}
 
 jobs:
-  provision-acr:
-    name: Provision container registry
+  deploy:
+    name: Build and deploy portal
     runs-on: ubuntu-latest
     environment: staging
-    outputs:
-      acr_login_server: ${{ steps.deploy.outputs.acr_login_server }}
-      acr_name: ${{ steps.deploy.outputs.acr_name }}
 
     steps:
       - name: Check out repository
@@ -56,12 +53,11 @@ jobs:
             --output none
 
       - name: Provision ACR
-        id: deploy
+        id: acr
         shell: bash
         run: |
           set -euo pipefail
-          # Only deploy ACR — lightweight, no container apps yet
-          ACR_NAME="portalacr$(echo -n $(az group show -n ${AZURE_RESOURCE_GROUP} --query id -o tsv) | sha256sum | head -c 6)"
+          # Deploy ACR via its module — idempotent
           az deployment group create \
             --resource-group "${AZURE_RESOURCE_GROUP}" \
             --template-file portal/app/iac/modules/container-registry.bicep \
@@ -69,83 +65,37 @@ jobs:
             --name "acr-provision-${{ github.run_id }}" \
             --output none
           ACR_SERVER=$(az acr show -n "${ACR_NAME}" --query loginServer -o tsv)
-          echo "acr_login_server=${ACR_SERVER}" >> "$GITHUB_OUTPUT"
-          echo "acr_name=${ACR_NAME}" >> "$GITHUB_OUTPUT"
+          echo "login_server=${ACR_SERVER}" >> "$GITHUB_OUTPUT"
+        env:
+          ACR_NAME: ${{ vars.PORTAL_ACR_NAME || 'portalacrstaging' }}
 
-  build-and-push:
-    name: Build and push images to ACR
-    runs-on: ubuntu-latest
-    needs: provision-acr
-    environment: staging
-    outputs:
-      backend_image_tag: ${{ steps.meta.outputs.backend_tag }}
-      frontend_image_tag: ${{ steps.meta.outputs.frontend_tag }}
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
-
-      - name: Azure login
-        uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
-        with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
-          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Log in to ACR
-        shell: bash
-        run: az acr login --name "${{ needs.provision-acr.outputs.acr_name }}"
-
-      - name: Prepare image tags
-        id: meta
+      - name: Build images in ACR
+        id: build
         shell: bash
         run: |
           set -euo pipefail
           IMAGE_TAG="staging-${GITHUB_SHA::7}"
-          echo "backend_tag=basecoat-portal-backend:${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
-          echo "frontend_tag=basecoat-portal-dashboard:${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
+          BACKEND_TAG="basecoat-portal-backend:${IMAGE_TAG}"
+          FRONTEND_TAG="basecoat-portal-dashboard:${IMAGE_TAG}"
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v3
+          az acr build \
+            --registry "${ACR_NAME}" \
+            --image "${BACKEND_TAG}" \
+            --file portal/app/backend/Dockerfile \
+            portal/app/backend
 
-      - name: Build and push backend image
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
-        with:
-          context: portal/app/backend
-          file: portal/app/backend/Dockerfile
-          push: true
-          tags: ${{ needs.provision-acr.outputs.acr_login_server }}/${{ steps.meta.outputs.backend_tag }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          az acr build \
+            --registry "${ACR_NAME}" \
+            --image "${FRONTEND_TAG}" \
+            --file portal/app/dashboard/Dockerfile \
+            portal/app/dashboard
 
-      - name: Build and push frontend image
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
-        with:
-          context: portal/app/dashboard
-          file: portal/app/dashboard/Dockerfile
-          push: true
-          tags: ${{ needs.provision-acr.outputs.acr_login_server }}/${{ steps.meta.outputs.frontend_tag }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          echo "backend_tag=${BACKEND_TAG}" >> "$GITHUB_OUTPUT"
+          echo "frontend_tag=${FRONTEND_TAG}" >> "$GITHUB_OUTPUT"
+        env:
+          ACR_NAME: ${{ vars.PORTAL_ACR_NAME || 'portalacrstaging' }}
 
-  deploy-staging:
-    name: Deploy staging portal app
-    runs-on: ubuntu-latest
-    needs: [provision-acr, build-and-push]
-    environment: staging
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
-
-      - name: Azure login
-        uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
-        with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
-          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Deploy portal stack with app images
+      - name: Deploy portal stack
         id: deploy
         shell: bash
         run: |
@@ -154,9 +104,9 @@ jobs:
             --resource-group "${AZURE_RESOURCE_GROUP}" \
             --template-file portal/app/iac/main.bicep \
             --parameters \
-              acrName="${{ needs.provision-acr.outputs.acr_name }}" \
-              backendImageTag="${{ needs.build-and-push.outputs.backend_image_tag }}" \
-              frontendImageTag="${{ needs.build-and-push.outputs.frontend_image_tag }}" \
+              acrName="${ACR_NAME}" \
+              backendImageTag="${{ steps.build.outputs.backend_tag }}" \
+              frontendImageTag="${{ steps.build.outputs.frontend_tag }}" \
             --name "portal-staging-${{ github.run_number }}" \
             --query properties.outputs \
             --output json)
@@ -165,6 +115,8 @@ jobs:
           echo "frontend_url=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['frontendUrl']['value'])")" >> "$GITHUB_OUTPUT"
           echo "database_fqdn=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['databaseFqdn']['value'])")" >> "$GITHUB_OUTPUT"
           echo "acr_server=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['acrLoginServer']['value'])")" >> "$GITHUB_OUTPUT"
+        env:
+          ACR_NAME: ${{ vars.PORTAL_ACR_NAME || 'portalacrstaging' }}
 
       - name: Smoke test backend
         shell: bash
