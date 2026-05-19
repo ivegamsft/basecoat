@@ -30,6 +30,7 @@ jobs:
   provision-infra:
     name: Provision infrastructure (ACR + environment)
     runs-on: ubuntu-latest
+    environment: staging
     outputs:
       acr_login_server: ${{ steps.deploy.outputs.acr_login_server }}
       acr_name: ${{ steps.deploy.outputs.acr_name }}
@@ -74,6 +75,7 @@ jobs:
     name: Build and push images to ACR
     runs-on: ubuntu-latest
     needs: provision-infra
+    environment: staging
     outputs:
       backend_image_tag: ${{ steps.meta.outputs.backend_tag }}
       frontend_image_tag: ${{ steps.meta.outputs.frontend_tag }}
