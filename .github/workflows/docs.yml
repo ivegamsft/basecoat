@@ -86,28 +86,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Deploy to GitHub Pages
-        run: |
-          # Preserve adoption metrics data across deploys
-          mkdir -p /tmp/metrics-preserve
-          if git fetch origin gh-pages 2>/dev/null; then
-            git show origin/gh-pages:dashboard/metrics/latest.json > /tmp/metrics-preserve/latest.json 2>/dev/null || true
-            git show origin/gh-pages:dashboard/metrics/history.json > /tmp/metrics-preserve/history.json 2>/dev/null || true
-          fi
-
-          mkdocs gh-deploy --force --no-history
-
-          # Restore metrics data if it existed
-          if [ -s /tmp/metrics-preserve/latest.json ]; then
-            git stash --include-untracked 2>/dev/null || true
-            git checkout gh-pages
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            mkdir -p dashboard/metrics
-            cp /tmp/metrics-preserve/latest.json dashboard/metrics/
-            cp /tmp/metrics-preserve/history.json dashboard/metrics/ 2>/dev/null || true
-            git add dashboard/metrics/
-            git diff --cached --quiet || git commit -m "chore: restore adoption metrics [skip ci]"
-            git push origin gh-pages
-          fi
+        run: mkdocs gh-deploy --force --no-history
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

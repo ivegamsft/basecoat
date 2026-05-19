@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '0 9 * * 1'  # Every Monday at 9am UTC
   workflow_dispatch: {}
+  workflow_run:
+    workflows: ["Deploy Docs"]
+    types: [completed]
 
 permissions:
   contents: write
@@ -17,6 +20,7 @@ concurrency:
 jobs:
   collect:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
