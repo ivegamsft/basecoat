@@ -53,8 +53,7 @@ jobs:
             git rm -rf . 2>/dev/null
           fi
 
-          # Restore dashboard HTML and metrics
-          git checkout main -- dashboard/index.html
+          # Deploy metrics JSON (HTML is served by MkDocs via docs/dashboard/)
           mkdir -p dashboard/metrics
           cp -r /tmp/metrics-output/. dashboard/metrics/
 
