@@ -55,7 +55,7 @@ jobs:
           echo "frontend_image=${REGISTRY_HOST}/${OWNER_LC}/basecoat-portal-dashboard:${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to GHCR
-        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v3
         with:
           registry: ${{ env.REGISTRY_HOST }}
           username: ${{ steps.meta.outputs.registry_user }}
