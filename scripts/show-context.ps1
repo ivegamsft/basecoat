@@ -171,8 +171,24 @@ function Convert-GlobToRegex {
 function Test-GlobMatch {
     param([string]$Pattern, [string]$FilePath)
 
-    # Split on commas that are NOT inside braces
+    $patterns = Split-PatternList -Pattern $Pattern
+
+    foreach ($p in $patterns) {
+        if (-not $p) { continue }
+        $regex = Convert-GlobToRegex -Glob $p
+        if ($FilePath -match $regex) {
+            return $true
+        }
+    }
+    return $false
+}
+
+function Split-PatternList {
+    param([string]$Pattern)
+
     $patterns = [System.Collections.ArrayList]::new()
+    if (-not $Pattern) { return $patterns }
+
     $depth = 0
     $current = ""
     foreach ($ch in $Pattern.ToCharArray()) {
@@ -188,13 +204,22 @@ function Test-GlobMatch {
         [void]$patterns.Add($current.Trim().Trim('"', "'"))
     }
 
+    return $patterns
+}
+
+function Test-IsMetaApplyTo {
+    param([string]$ApplyTo)
+
+    if (-not $ApplyTo) { return $false }
+
+    $patterns = Split-PatternList -Pattern $ApplyTo
     foreach ($p in $patterns) {
-        if (-not $p) { continue }
-        $regex = Convert-GlobToRegex -Glob $p
-        if ($FilePath -match $regex) {
+        $normalized = $p.Replace("\", "/").Trim().ToLowerInvariant()
+        if ($normalized -match "^(?:\./)?(?:\*\*/)?(agents|skills|instructions)/") {
             return $true
         }
     }
+
     return $false
 }
 
@@ -432,10 +457,14 @@ foreach ($item in $ContextItems) {
     $item.BudgetPct = [math]::Round(($cumulative / $ContextWindow) * 100, 1)
     if (-not $item.ContainsKey("OnDemand")) { $item.OnDemand = $false }
     if (-not $item.ContainsKey("Internal")) { $item.Internal = $false }
+    if (-not $item.ContainsKey("Meta")) {
+        $item.Meta = (($item.Type -in @("agent", "skill")) -or (Test-IsMetaApplyTo -ApplyTo $item.ApplyTo))
+    }
 }
 
 $totalTokens = $cumulative
 $totalPct = [math]::Round(($totalTokens / $ContextWindow) * 100, 1)
+$hasMetaItems = @($ContextItems | Where-Object { $_.Meta }).Count -gt 0
 
 # --- JSON output ---
 if ($Json) {
@@ -459,6 +488,7 @@ if ($Json) {
                 budgetPct  = $_.BudgetPct
                 internal   = $_.Internal
                 onDemand   = $_.OnDemand
+                meta       = $_.Meta
             }
         }
     }
@@ -501,6 +531,7 @@ if (-not $Summary) {
         # Add markers for internal/on-demand items
         if ($item.Internal) { $name = "$name [internal]" }
         if ($item.OnDemand) { $name = "$name [on-demand]" }
+        if ($item.Meta) { $name = "$name [meta]" }
         if ($name.Length -gt 28) { $name = $name.Substring(0, 25) + "..." }
 
         $tokenStr = $item.Tokens.ToString("N0")
@@ -579,6 +610,10 @@ Write-Host "  Processing hints:" -ForegroundColor DarkCyan
 Write-Host "   - Items are loaded in priority order (repo instructions first)" -ForegroundColor DarkGray
 Write-Host "   - Instructions with applyTo: '**/*' load for ALL files" -ForegroundColor DarkGray
 Write-Host "   - Scoped instructions only load when editing matching files" -ForegroundColor DarkGray
+if ($hasMetaItems) {
+    Write-Host "   - [meta] marks context scoped to agents/, skills/, or instructions/" -ForegroundColor DarkGray
+    Write-Host "   - Runtime context applies to regular project files under active work" -ForegroundColor DarkGray
+}
 if ($totalPct -gt 50) {
     Write-Host "   - WARNING: Estimated context exceeds 50% of window" -ForegroundColor Yellow
     Write-Host "     Consider narrowing .basecoat.yml allow-lists" -ForegroundColor Yellow
