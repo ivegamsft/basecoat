@@ -141,6 +141,34 @@ Four primitives. One router. Zero ambiguity about where to put things.
 
 ---
 
+## Shearing Layers: The Pace of Change
+
+Not all parts of BaseCoat change at the same speed. Borrowing from Stewart Brand's
+*How Buildings Learn*, we model the system as nested layers — each with its own pace
+of change. Fast layers sit inside slow layers, and coupling must flow inward, never
+outward.
+
+```text
+Site         ∞        Org identity, repo layout, four-primitive model
+Structure    Rare     Asset types, frontmatter schema, validation contract
+Skin         Seldom   Governance vocabulary, audit rules, guidance syntax
+Services     Periodic MCP server, Extension, CI/CD, deployment infra
+Space plan   Occasional  Instruction scoping, agent-to-skill wiring
+Stuff        Frequent Individual prompts, skill content, eval cases
+```
+
+**Design principle:** Put decisions at the fastest layer that can own them. An agent
+prompt (Stuff) should never hard-code a deployment URL (Services). A validation
+script (Structure) should never enumerate specific skill names (Stuff).
+
+**Review principle:** Changes to slower layers demand broader consensus. A tweak to
+an agent prompt is lightweight; a change to the frontmatter schema is an RFC.
+
+For the full framework and anti-patterns, see
+[`instructions/shearing-layers.instructions.md`](/instructions/shearing-layers.instructions.md).
+
+---
+
 ## Vocabulary
 
 BaseCoat's name is grounded in a straightforward idea: every workspace needs a solid
