@@ -107,29 +107,90 @@ function Parse-Frontmatter {
     return $result
 }
 
+function Convert-GlobToRegex {
+    param([string]$Glob)
+
+    $regex = ""
+    $i = 0
+    $chars = $Glob.ToCharArray()
+
+    while ($i -lt $chars.Length) {
+        $c = $chars[$i]
+
+        if ($c -eq '*') {
+            if (($i + 1) -lt $chars.Length -and $chars[$i + 1] -eq '*') {
+                # ** pattern
+                if (($i + 2) -lt $chars.Length -and $chars[$i + 2] -eq '/') {
+                    # **/ — match any number of path segments (including zero)
+                    $regex += "(.+/)?"
+                    $i += 3
+                }
+                else {
+                    # ** at end — match everything remaining
+                    $regex += ".*"
+                    $i += 2
+                }
+            }
+            else {
+                # Single * — match within one path segment
+                $regex += "[^/]*"
+                $i++
+            }
+        }
+        elseif ($c -eq '?') {
+            $regex += "[^/]"
+            $i++
+        }
+        elseif ($c -eq '{') {
+            # Brace expansion — collect until closing }
+            $braceEnd = $Glob.IndexOf('}', $i)
+            if ($braceEnd -gt $i) {
+                $inner = $Glob.Substring($i + 1, $braceEnd - $i - 1)
+                $alts = $inner -split "," | ForEach-Object { [regex]::Escape($_.Trim()) }
+                $regex += "(" + ($alts -join "|") + ")"
+                $i = $braceEnd + 1
+            }
+            else {
+                $regex += [regex]::Escape($c)
+                $i++
+            }
+        }
+        elseif ($c -eq '.') {
+            $regex += "\."
+            $i++
+        }
+        else {
+            $regex += [regex]::Escape($c)
+            $i++
+        }
+    }
+
+    return "^$regex$"
+}
+
 function Test-GlobMatch {
     param([string]$Pattern, [string]$FilePath)
 
-    # Handle comma-separated patterns
-    $patterns = $Pattern -split "," | ForEach-Object { $_.Trim().Trim('"', "'") }
+    # Split on commas that are NOT inside braces
+    $patterns = [System.Collections.ArrayList]::new()
+    $depth = 0
+    $current = ""
+    foreach ($ch in $Pattern.ToCharArray()) {
+        if ($ch -eq '{') { $depth++; $current += $ch }
+        elseif ($ch -eq '}') { $depth--; $current += $ch }
+        elseif ($ch -eq ',' -and $depth -eq 0) {
+            [void]$patterns.Add($current.Trim().Trim('"', "'"))
+            $current = ""
+        }
+        else { $current += $ch }
+    }
+    if ($current.Trim()) {
+        [void]$patterns.Add($current.Trim().Trim('"', "'"))
+    }
 
     foreach ($p in $patterns) {
-        # Convert glob to regex
-        $regex = $p.Trim()
-        $regex = $regex.Replace(".", "\.")
-        $regex = $regex.Replace("**/", "(.+/)?")
-        $regex = $regex.Replace("*", "[^/]*")
-        $regex = $regex.Replace("?", "[^/]")
-
-        # Handle brace expansion {a,b,c}
-        if ($regex -match "\{([^}]+)\}") {
-            $alternatives = $Matches[1] -split ","
-            $altRegex = "(" + ($alternatives -join "|") + ")"
-            $regex = $regex -replace "\{[^}]+\}", $altRegex
-        }
-
-        $regex = "^$regex$"
-
+        if (-not $p) { continue }
+        $regex = Convert-GlobToRegex -Glob $p
         if ($FilePath -match $regex) {
             return $true
         }
@@ -170,6 +231,7 @@ if (Test-Path $copilotInstructions) {
         Tokens   = $tokens
         Chars    = $content.Length
         FilePath = $copilotInstructions
+        Internal = $false
     })
 }
 
@@ -203,6 +265,9 @@ if (Test-Path $instructionsDir) {
         $applyTo = $parsed.Frontmatter["applyTo"]
         if (-not $applyTo) { $applyTo = "**/*" }
 
+        $distribute = $parsed.Frontmatter["distribute"]
+        $isInternal = ($distribute -eq "false")
+
         # If -File specified, filter by applyTo match
         if ($File) {
             $normalizedFile = $File.Replace("\", "/")
@@ -221,6 +286,7 @@ if (Test-Path $instructionsDir) {
             Tokens   = $tokens
             Chars    = $parsed.Content.Length
             FilePath = $instrFile.FullName
+            Internal = $isInternal
         })
     }
 }
@@ -244,20 +310,34 @@ if ($Agent) {
             Tokens   = $tokens
             Chars    = $parsed.Content.Length
             FilePath = $agentFile
+            Internal = $false
         })
 
         # --- Layer 4: Skills referenced by agent ---
-        # Look for allowed_skills or tools in frontmatter, and scan body for @skill references
+        # Parse allowed_skills from frontmatter
         $skillsDir = Join-Path $RepoRoot "skills"
         if (Test-Path $skillsDir) {
             $agentContent = $parsed.Content
-            $skillDirs = Get-ChildItem -Path $skillsDir -Directory
+            $referencedSkills = @()
 
-            foreach ($skillDir in $skillDirs) {
-                $skillName = $skillDir.Name
-                # Check if agent references this skill (in frontmatter or body)
-                if ($agentContent -match $skillName) {
-                    $skillFile = Join-Path $skillDir.FullName "SKILL.md"
+            # Extract allowed_skills list from frontmatter
+            if ($agentContent -match "(?m)^allowed_skills:\s*\[([^\]]*)\]") {
+                $skillList = $Matches[1]
+                $referencedSkills = $skillList -split "," | ForEach-Object {
+                    $_.Trim().Trim('"', "'", " ")
+                } | Where-Object { $_ }
+            }
+            elseif ($agentContent -match "(?m)^allowed-skills:\s*\[([^\]]*)\]") {
+                $skillList = $Matches[1]
+                $referencedSkills = $skillList -split "," | ForEach-Object {
+                    $_.Trim().Trim('"', "'", " ")
+                } | Where-Object { $_ }
+            }
+
+            foreach ($skillName in $referencedSkills) {
+                $skillPath = Join-Path $skillsDir $skillName
+                if (Test-Path $skillPath) {
+                    $skillFile = Join-Path $skillPath "SKILL.md"
                     if (Test-Path $skillFile) {
                         $skillContent = Get-Content -Path $skillFile -Raw
                         $skillTokens = Estimate-Tokens -Content $skillContent -Ratio $TokenRatio
@@ -270,6 +350,7 @@ if ($Agent) {
                             Tokens   = $skillTokens
                             Chars    = $skillContent.Length
                             FilePath = $skillFile
+                            Internal = $false
                         })
                     }
                 }
@@ -293,13 +374,15 @@ if (Test-Path $promptsDir) {
     if ($promptCount -gt 0) {
         [void]$ContextItems.Add(@{
             Order    = 5
-            Name     = "prompts ($promptCount files)"
+            Name     = "prompts ($promptCount available)"
             Source   = "prompts/"
             Type     = "prompt"
-            ApplyTo  = "(on invocation)"
+            ApplyTo  = "(on invocation only)"
             Tokens   = $promptTokensTotal
             Chars    = 0
             FilePath = $promptsDir
+            Internal = $false
+            OnDemand = $true
         })
     }
 }
@@ -328,6 +411,7 @@ if (Test-Path $memoryDir) {
             Tokens   = $memTokensTotal
             Chars    = $memCharsTotal
             FilePath = $memoryDir
+            Internal = $false
         })
     }
 }
@@ -337,12 +421,17 @@ if (Test-Path $memoryDir) {
 # Sort by order then name
 $ContextItems = $ContextItems | Sort-Object { $_.Order }, { $_.Name }
 
-# Calculate cumulative tokens
+# Calculate cumulative tokens (exclude on-demand items from running total)
 $cumulative = 0
 foreach ($item in $ContextItems) {
-    $cumulative += $item.Tokens
+    $isOnDemand = $item.ContainsKey("OnDemand") -and $item.OnDemand
+    if (-not $isOnDemand) {
+        $cumulative += $item.Tokens
+    }
     $item.Cumulative = $cumulative
     $item.BudgetPct = [math]::Round(($cumulative / $ContextWindow) * 100, 1)
+    if (-not $item.ContainsKey("OnDemand")) { $item.OnDemand = $false }
+    if (-not $item.ContainsKey("Internal")) { $item.Internal = $false }
 }
 
 $totalTokens = $cumulative
@@ -368,6 +457,8 @@ if ($Json) {
                 tokens     = $_.Tokens
                 cumulative = $_.Cumulative
                 budgetPct  = $_.BudgetPct
+                internal   = $_.Internal
+                onDemand   = $_.OnDemand
             }
         }
     }
@@ -407,11 +498,14 @@ if (-not $Summary) {
     foreach ($item in $ContextItems) {
         $index++
         $name = $item.Name
+        # Add markers for internal/on-demand items
+        if ($item.Internal) { $name = "$name [internal]" }
+        if ($item.OnDemand) { $name = "$name [on-demand]" }
         if ($name.Length -gt 28) { $name = $name.Substring(0, 25) + "..." }
 
         $tokenStr = $item.Tokens.ToString("N0")
-        $cumulStr = $item.Cumulative.ToString("N0")
-        $pctStr = "$($item.BudgetPct)%"
+        $cumulStr = if ($item.OnDemand) { "---" } else { $item.Cumulative.ToString("N0") }
+        $pctStr = if ($item.OnDemand) { "---" } else { "$($item.BudgetPct)%" }
 
         # Color by type
         $typeColor = switch ($item.Type) {
@@ -424,8 +518,12 @@ if (-not $Summary) {
             default             { "White" }
         }
 
+        # Dim internal items
+        if ($item.Internal) { $typeColor = "DarkGray" }
+
         # Budget color
-        $budgetColor = if ($item.BudgetPct -lt 25) { "Green" }
+        $budgetColor = if ($item.OnDemand) { "DarkGray" }
+                       elseif ($item.BudgetPct -lt 25) { "Green" }
                        elseif ($item.BudgetPct -lt 50) { "Yellow" }
                        elseif ($item.BudgetPct -lt 75) { "DarkYellow" }
                        else { "Red" }
