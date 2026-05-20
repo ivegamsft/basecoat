@@ -169,6 +169,69 @@ For the full framework and anti-patterns, see
 
 ---
 
+## Paint Layers: Depth of Protection
+
+The product name is no accident. In automotive finishing, a paint system is a stack
+of protective layers — each with a distinct purpose, each shielding the layers beneath
+it. Defects at different depths carry different severity.
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│   Defects:   Deep        Paint       Clear coat    Surface      │
+│              scratch     scratch     scratch       stain        │
+│                                                                 │
+│   ▼ ▼ ▼      ▼ ▼         ▼                                     │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │              Clear coat (protection + gloss)             │   │
+│  ├──────────────────────────────────────────────────────────┤   │
+│  │              Base coat (color + identity)                │   │
+│  ├──────────────────────────────────────────────────────────┤   │
+│  │              Primer (adhesion + corrosion guard)         │   │
+│  ├──────────────────────────────────────────────────────────┤   │
+│  │              Metal / body panel (structural)             │   │
+│  └──────────────────────────────────────────────────────────┘   │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Mapped to BaseCoat
+
+| Paint Layer | Purpose | BaseCoat Analog |
+|-------------|---------|-----------------|
+| **Metal / body panel** | Structural integrity | Repository structure, asset type schemas, validation contract |
+| **Primer** | Adhesion and corrosion resistance | Governance instructions, security rules, naming conventions |
+| **Base coat** | Color and identity | Agent personas, skill knowledge packs, prompt templates |
+| **Clear coat** | Protection, gloss, user-facing finish | Instructions that polish output (formatting, tone, style) |
+
+### Defect Severity by Depth
+
+| Depth | Defect type | Severity | Repair cost |
+|-------|-------------|----------|-------------|
+| **Surface stain** | Formatting issue, typo in output | Low | Quick fix — touch up the clear coat |
+| **Clear coat scratch** | Missing style rule, inconsistent tone | Medium | Update an instruction file |
+| **Paint scratch** | Wrong agent behavior, bad skill content | High | Rework the asset, re-evaluate |
+| **Deep scratch (to metal)** | Broken schema, invalid structure, missing primitives | Critical | Structural repair — RFC required |
+
+### Design Implications
+
+1. **Protect from the outside in.** Clear coat instructions catch surface defects
+   before they reach users. Governance (primer) prevents corrosion of standards
+   across the entire system.
+
+2. **Deeper layers are harder to change.** Repainting (swapping an agent) is
+   routine. Replacing the body panel (restructuring asset types) is a rebuild.
+
+3. **Each layer must fully cure before the next is applied.** Don't write skills
+   (base coat) before governance rules (primer) are stable. Don't add polish
+   instructions (clear coat) before the asset content (base coat) is correct.
+
+4. **Oxidation happens at boundaries.** Where layers meet — where an agent
+   references a skill, where an instruction scopes to a path — is where defects
+   accumulate. Pay extra attention to integration points.
+
+---
+
 ## Vocabulary
 
 BaseCoat's name is grounded in a straightforward idea: every workspace needs a solid
