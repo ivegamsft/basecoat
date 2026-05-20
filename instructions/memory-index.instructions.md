@@ -50,8 +50,10 @@ Max confidence boost from Pass 2: **+0.15**. For EscalationQuery contract and Gu
 | `merge-pr` | merge PR, dependabot, merge pull request | 3 | 0.85 |
 | `release` | release, version bump, tag, CHANGELOG | 4 | 0.87 |
 | `clean-branches` | clean branches, stale branches, delete merged | 2 | 0.95 |
+| `fix-remote` | fix remote, stale token, push fails, origin broken | 1 | 0.95 |
 | `portal-feature` | portal, component, hook, frontend | 5 | 0.80 |
 | `contribute-memory` | contribute memory, export memory, push to memory repo, sprint end | 2 | 0.90 |
+| `refresh-basecoat` | refresh basecoat, pull basecoat, sync basecoat, push learnings | 2 | 0.90 |
 
 Confidence is updated using Bayesian incremental learning after each outcome. Security/governance bundles marked `[pin]` are exempt from decay. See [`references/memory-index/memory-algorithms.md`](references/memory-index/memory-algorithms.md) for the update formula.
 
@@ -93,6 +95,24 @@ Confidence is updated using Bayesian incremental learning after each outcome. Se
 |---|---|---|
 | Branch cleanup | Squash merges won't show as `--merged`; use `gh pr list --state all --head <branch>` to verify | `git-hygiene` |
 | Worktrees | Sprint branches use separate worktrees; check with `git worktree list` | `git-worktree` |
+| Multi-account gh auth | `gh auth switch --user <name>` before push; verify with `gh auth status`. Stale token in remote URL blocks push even with correct gh session | `git-auth` |
+| Origin stale token | If remote URL has hardcoded `x-access-token:gho_...`, fix with `git remote set-url origin https://github.com/<owner>/<repo>.git` | `git-auth` |
+
+### Next.js / Web Apps
+
+| Trigger | Pattern | Subject |
+|---|---|---|
+| Next.js build fails | Use `npx next build --turbopack` — plain `next build` may error on monorepo setups with shared packages | `nextjs-build` |
+| Client vs server components | `export const metadata` only works in server components; split interactive state into a child client component and keep metadata in the page.tsx server wrapper | `nextjs-patterns` |
+| Shared layout components | Extract footer/nav into shared components when consistency drifts across pages; single source of truth prevents link rot | `nextjs-patterns` |
+
+### Design Skills (Impeccable)
+
+| Trigger | Pattern | Subject |
+|---|---|---|
+| Typography audit | Invoke `typeset` skill; check font-sans on body, antialiased, tabular-nums on counters, leading-relaxed on paragraphs | `design-skills` |
+| Gallery/filter pattern | Filters need client component with `useState`; wrap in server component for metadata; add `category` field to data model | `design-skills` |
+| Carousel/scroll | Use `useRef` + `scrollBy({behavior:'smooth'})` with arrow buttons; add `scrollbar-hide` CSS utility for clean horizontal scroll | `design-skills` |
 
 ### Turn Budget
 
