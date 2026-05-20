@@ -1,0 +1,491 @@
+<#
+.SYNOPSIS
+    Estimates the Copilot context budget for a basecoat-enabled repository.
+
+.DESCRIPTION
+    Scans the current repo's basecoat configuration and displays an estimated
+    context composition: which instructions, agents, skills, and memory files
+    would be loaded, their processing order, token estimates, and cumulative
+    budget against the target model's context window.
+
+    This is a SIDECAR ESTIMATOR — it cannot observe Copilot's actual runtime
+    context. It shows what SHOULD be loaded based on file-system state.
+
+.PARAMETER File
+    Target file path to filter instructions by applyTo glob match.
+    When specified, only instructions whose applyTo pattern matches this file are shown.
+
+.PARAMETER Agent
+    Agent name (without .agent.md suffix) to include in the context estimate.
+    Adds the agent definition and its referenced skills.
+
+.PARAMETER Model
+    Model name for context window budget calculation.
+    Default: claude-sonnet-4.6
+
+.PARAMETER Json
+    Output structured JSON instead of terminal-formatted table.
+
+.PARAMETER Summary
+    Show only the budget summary, not individual items.
+
+.EXAMPLE
+    pwsh scripts/show-context.ps1
+    pwsh scripts/show-context.ps1 -File src/api/auth.ts
+    pwsh scripts/show-context.ps1 -Agent solution-architect -Model claude-opus-4.7
+    pwsh scripts/show-context.ps1 -Json | ConvertFrom-Json
+
+.LINK
+    https://github.com/IBuySpy-Shared/basecoat/issues/1033
+#>
+
+[CmdletBinding()]
+param(
+    [string]$File,
+    [string]$Agent,
+    [string]$Model = "claude-sonnet-4.6",
+    [switch]$Json,
+    [switch]$Summary
+)
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+# --- Model Registry -----------------------------------------------------------
+
+$ModelRegistry = @{
+    "claude-opus-4.7"      = @{ ContextWindow = 200000; Tier = "Premium";  TokenRatio = 3.5 }
+    "claude-opus-4.6"      = @{ ContextWindow = 200000; Tier = "Premium";  TokenRatio = 3.5 }
+    "claude-sonnet-4.6"    = @{ ContextWindow = 200000; Tier = "Standard"; TokenRatio = 3.5 }
+    "claude-sonnet-4.5"    = @{ ContextWindow = 200000; Tier = "Standard"; TokenRatio = 3.5 }
+    "claude-haiku-4.5"     = @{ ContextWindow = 200000; Tier = "Fast";     TokenRatio = 3.5 }
+    "gpt-5.5"              = @{ ContextWindow = 1000000; Tier = "Premium"; TokenRatio = 4.0 }
+    "gpt-5.4"              = @{ ContextWindow = 1000000; Tier = "Standard"; TokenRatio = 4.0 }
+    "gpt-5.3-codex"        = @{ ContextWindow = 200000; Tier = "Code";    TokenRatio = 4.0 }
+    "gpt-5.2-codex"        = @{ ContextWindow = 200000; Tier = "Code";    TokenRatio = 4.0 }
+    "gpt-5.2"              = @{ ContextWindow = 200000; Tier = "Standard"; TokenRatio = 4.0 }
+    "gpt-5.4-mini"         = @{ ContextWindow = 128000; Tier = "Fast";    TokenRatio = 4.0 }
+    "gpt-5-mini"           = @{ ContextWindow = 128000; Tier = "Fast";    TokenRatio = 4.0 }
+    "gpt-4.1"              = @{ ContextWindow = 1000000; Tier = "Fast";   TokenRatio = 4.0 }
+}
+
+# --- Helpers ------------------------------------------------------------------
+
+function Get-RepoRoot {
+    $root = git rev-parse --show-toplevel 2>$null
+    if (-not $root) {
+        Write-Error "Not inside a git repository."
+        exit 1
+    }
+    return $root.Replace("/", [System.IO.Path]::DirectorySeparatorChar)
+}
+
+function Estimate-Tokens {
+    param([string]$Content, [double]$Ratio)
+    if (-not $Content) { return 0 }
+    return [math]::Ceiling($Content.Length / $Ratio)
+}
+
+function Parse-Frontmatter {
+    param([string]$FilePath)
+    $content = Get-Content -Path $FilePath -Raw -ErrorAction SilentlyContinue
+    if (-not $content) { return @{} }
+
+    $result = @{ Content = $content; Frontmatter = @{} }
+
+    if ($content -match "(?s)^---\r?\n(.+?)\r?\n---") {
+        $yamlBlock = $Matches[1]
+        foreach ($line in $yamlBlock -split "`n") {
+            $line = $line.Trim()
+            if ($line -match "^(\w[\w\-]*):\s*(.+)$") {
+                $key = $Matches[1]
+                $value = $Matches[2].Trim('"', "'", " ")
+                $result.Frontmatter[$key] = $value
+            }
+        }
+    }
+    return $result
+}
+
+function Test-GlobMatch {
+    param([string]$Pattern, [string]$FilePath)
+
+    # Handle comma-separated patterns
+    $patterns = $Pattern -split "," | ForEach-Object { $_.Trim().Trim('"', "'") }
+
+    foreach ($p in $patterns) {
+        # Convert glob to regex
+        $regex = $p.Trim()
+        $regex = $regex.Replace(".", "\.")
+        $regex = $regex.Replace("**/", "(.+/)?")
+        $regex = $regex.Replace("*", "[^/]*")
+        $regex = $regex.Replace("?", "[^/]")
+
+        # Handle brace expansion {a,b,c}
+        if ($regex -match "\{([^}]+)\}") {
+            $alternatives = $Matches[1] -split ","
+            $altRegex = "(" + ($alternatives -join "|") + ")"
+            $regex = $regex -replace "\{[^}]+\}", $altRegex
+        }
+
+        $regex = "^$regex$"
+
+        if ($FilePath -match $regex) {
+            return $true
+        }
+    }
+    return $false
+}
+
+# --- Main Logic ---------------------------------------------------------------
+
+$RepoRoot = Get-RepoRoot
+
+# Validate model
+if (-not $ModelRegistry.ContainsKey($Model)) {
+    $available = ($ModelRegistry.Keys | Sort-Object) -join ", "
+    Write-Error "Unknown model '$Model'. Available: $available"
+    exit 1
+}
+
+$ModelInfo = $ModelRegistry[$Model]
+$TokenRatio = $ModelInfo.TokenRatio
+$ContextWindow = $ModelInfo.ContextWindow
+
+# Collect context items in processing order
+$ContextItems = [System.Collections.ArrayList]::new()
+
+# --- Layer 1: .github/copilot-instructions.md ---------------------------------
+
+$copilotInstructions = Join-Path $RepoRoot ".github" "copilot-instructions.md"
+if (Test-Path $copilotInstructions) {
+    $content = Get-Content -Path $copilotInstructions -Raw
+    $tokens = Estimate-Tokens -Content $content -Ratio $TokenRatio
+    [void]$ContextItems.Add(@{
+        Order    = 1
+        Name     = "copilot-instructions"
+        Source   = ".github/"
+        Type     = "repo-instructions"
+        ApplyTo  = "**/*"
+        Tokens   = $tokens
+        Chars    = $content.Length
+        FilePath = $copilotInstructions
+    })
+}
+
+# --- Layer 2: instructions/*.instructions.md ----------------------------------
+
+$instructionsDir = Join-Path $RepoRoot "instructions"
+if (Test-Path $instructionsDir) {
+    # Check .basecoat.yml for allow-list
+    $allowList = $null
+    $basecoatYml = Join-Path $RepoRoot ".basecoat.yml"
+    if (Test-Path $basecoatYml) {
+        $ymlContent = Get-Content -Path $basecoatYml -Raw
+        if ($ymlContent -match "(?m)^instructions:\s*\r?\n((?:\s+-\s+.+\r?\n?)+)") {
+            $allowList = @()
+            foreach ($line in ($Matches[1] -split "`n")) {
+                if ($line -match "^\s+-\s+(.+)$") {
+                    $allowList += $Matches[1].Trim()
+                }
+            }
+        }
+    }
+
+    $instructionFiles = Get-ChildItem -Path $instructionsDir -Filter "*.instructions.md" | Sort-Object Name
+    foreach ($instrFile in $instructionFiles) {
+        $baseName = $instrFile.BaseName -replace "\.instructions$", ""
+
+        # Skip if allow-list exists and this file isn't in it
+        if ($allowList -and ($baseName -notin $allowList)) { continue }
+
+        $parsed = Parse-Frontmatter -FilePath $instrFile.FullName
+        $applyTo = $parsed.Frontmatter["applyTo"]
+        if (-not $applyTo) { $applyTo = "**/*" }
+
+        # If -File specified, filter by applyTo match
+        if ($File) {
+            $normalizedFile = $File.Replace("\", "/")
+            if (-not (Test-GlobMatch -Pattern $applyTo -FilePath $normalizedFile)) {
+                continue
+            }
+        }
+
+        $tokens = Estimate-Tokens -Content $parsed.Content -Ratio $TokenRatio
+        [void]$ContextItems.Add(@{
+            Order    = 2
+            Name     = $baseName
+            Source   = "instructions/"
+            Type     = "instruction"
+            ApplyTo  = $applyTo
+            Tokens   = $tokens
+            Chars    = $parsed.Content.Length
+            FilePath = $instrFile.FullName
+        })
+    }
+}
+
+# --- Layer 3: Agent definition ------------------------------------------------
+
+if ($Agent) {
+    $agentFile = Join-Path $RepoRoot "agents" "$Agent.agent.md"
+    if (-not (Test-Path $agentFile)) {
+        Write-Warning "Agent file not found: $agentFile"
+    }
+    else {
+        $parsed = Parse-Frontmatter -FilePath $agentFile
+        $tokens = Estimate-Tokens -Content $parsed.Content -Ratio $TokenRatio
+        [void]$ContextItems.Add(@{
+            Order    = 3
+            Name     = $Agent
+            Source   = "agents/"
+            Type     = "agent"
+            ApplyTo  = "(agent mode)"
+            Tokens   = $tokens
+            Chars    = $parsed.Content.Length
+            FilePath = $agentFile
+        })
+
+        # --- Layer 4: Skills referenced by agent ---
+        # Look for allowed_skills or tools in frontmatter, and scan body for @skill references
+        $skillsDir = Join-Path $RepoRoot "skills"
+        if (Test-Path $skillsDir) {
+            $agentContent = $parsed.Content
+            $skillDirs = Get-ChildItem -Path $skillsDir -Directory
+
+            foreach ($skillDir in $skillDirs) {
+                $skillName = $skillDir.Name
+                # Check if agent references this skill (in frontmatter or body)
+                if ($agentContent -match $skillName) {
+                    $skillFile = Join-Path $skillDir.FullName "SKILL.md"
+                    if (Test-Path $skillFile) {
+                        $skillContent = Get-Content -Path $skillFile -Raw
+                        $skillTokens = Estimate-Tokens -Content $skillContent -Ratio $TokenRatio
+                        [void]$ContextItems.Add(@{
+                            Order    = 4
+                            Name     = $skillName
+                            Source   = "skills/"
+                            Type     = "skill"
+                            ApplyTo  = "(via $Agent)"
+                            Tokens   = $skillTokens
+                            Chars    = $skillContent.Length
+                            FilePath = $skillFile
+                        })
+                    }
+                }
+            }
+        }
+    }
+}
+
+# --- Layer 5: Prompt templates ------------------------------------------------
+
+$promptsDir = Join-Path $RepoRoot "prompts"
+if (Test-Path $promptsDir) {
+    $promptFiles = Get-ChildItem -Path $promptsDir -Filter "*.prompt.md" -ErrorAction SilentlyContinue
+    $promptCount = 0
+    $promptTokensTotal = 0
+    foreach ($pf in $promptFiles) {
+        $content = Get-Content -Path $pf.FullName -Raw
+        $promptTokensTotal += (Estimate-Tokens -Content $content -Ratio $TokenRatio)
+        $promptCount++
+    }
+    if ($promptCount -gt 0) {
+        [void]$ContextItems.Add(@{
+            Order    = 5
+            Name     = "prompts ($promptCount files)"
+            Source   = "prompts/"
+            Type     = "prompt"
+            ApplyTo  = "(on invocation)"
+            Tokens   = $promptTokensTotal
+            Chars    = 0
+            FilePath = $promptsDir
+        })
+    }
+}
+
+# --- Layer 6: Repo memory ----------------------------------------------------
+
+$memoryDir = Join-Path $RepoRoot ".memory"
+if (Test-Path $memoryDir) {
+    $memFiles = @(Get-ChildItem -Path $memoryDir -File -Recurse | Where-Object { $_.Name -ne ".gitkeep" })
+    $memTokensTotal = 0
+    $memCharsTotal = 0
+    foreach ($mf in $memFiles) {
+        $content = Get-Content -Path $mf.FullName -Raw -ErrorAction SilentlyContinue
+        if ($content) {
+            $memTokensTotal += (Estimate-Tokens -Content $content -Ratio $TokenRatio)
+            $memCharsTotal += $content.Length
+        }
+    }
+    if ($memTokensTotal -gt 0) {
+        [void]$ContextItems.Add(@{
+            Order    = 6
+            Name     = "repo memory ($($memFiles.Count) files)"
+            Source   = ".memory/"
+            Type     = "memory"
+            ApplyTo  = "(always)"
+            Tokens   = $memTokensTotal
+            Chars    = $memCharsTotal
+            FilePath = $memoryDir
+        })
+    }
+}
+
+# --- Output -------------------------------------------------------------------
+
+# Sort by order then name
+$ContextItems = $ContextItems | Sort-Object { $_.Order }, { $_.Name }
+
+# Calculate cumulative tokens
+$cumulative = 0
+foreach ($item in $ContextItems) {
+    $cumulative += $item.Tokens
+    $item.Cumulative = $cumulative
+    $item.BudgetPct = [math]::Round(($cumulative / $ContextWindow) * 100, 1)
+}
+
+$totalTokens = $cumulative
+$totalPct = [math]::Round(($totalTokens / $ContextWindow) * 100, 1)
+
+# --- JSON output ---
+if ($Json) {
+    $output = @{
+        model          = $Model
+        tier           = $ModelInfo.Tier
+        contextWindow  = $ContextWindow
+        tokenRatio     = $TokenRatio
+        totalTokens    = $totalTokens
+        budgetPercent  = $totalPct
+        filter         = @{ file = $File; agent = $Agent }
+        items          = $ContextItems | ForEach-Object {
+            @{
+                order      = $_.Order
+                name       = $_.Name
+                source     = $_.Source
+                type       = $_.Type
+                applyTo    = $_.ApplyTo
+                tokens     = $_.Tokens
+                cumulative = $_.Cumulative
+                budgetPct  = $_.BudgetPct
+            }
+        }
+    }
+    $output | ConvertTo-Json -Depth 4
+    return
+}
+
+# --- Terminal output ---
+
+$separator = [string]::new([char]0x2500, 72)
+
+# Header
+Write-Host ""
+Write-Host " BASECOAT CONTEXT BUDGET ESTIMATOR" -ForegroundColor Cyan
+Write-Host " $separator" -ForegroundColor DarkGray
+Write-Host "  Model:    " -NoNewline -ForegroundColor Gray
+Write-Host "$Model" -NoNewline -ForegroundColor White
+Write-Host " ($($ModelInfo.Tier), $($ContextWindow.ToString('N0')) tokens)" -ForegroundColor DarkGray
+if ($File) {
+    Write-Host "  File:     " -NoNewline -ForegroundColor Gray
+    Write-Host "$File" -ForegroundColor Yellow
+}
+if ($Agent) {
+    Write-Host "  Agent:    " -NoNewline -ForegroundColor Gray
+    Write-Host "$Agent" -ForegroundColor Magenta
+}
+Write-Host " $separator" -ForegroundColor DarkGray
+Write-Host ""
+
+if (-not $Summary) {
+    # Column headers
+    $fmt = " {0,-4} {1,-30} {2,-14} {3,8} {4,8} {5,7}"
+    Write-Host ($fmt -f "#", "Name", "Source", "Tokens", "Cumul.", "Budget") -ForegroundColor DarkCyan
+    Write-Host " $separator" -ForegroundColor DarkGray
+
+    $index = 0
+    foreach ($item in $ContextItems) {
+        $index++
+        $name = $item.Name
+        if ($name.Length -gt 28) { $name = $name.Substring(0, 25) + "..." }
+
+        $tokenStr = $item.Tokens.ToString("N0")
+        $cumulStr = $item.Cumulative.ToString("N0")
+        $pctStr = "$($item.BudgetPct)%"
+
+        # Color by type
+        $typeColor = switch ($item.Type) {
+            "repo-instructions" { "Green" }
+            "instruction"       { "Green" }
+            "agent"             { "Magenta" }
+            "skill"             { "Blue" }
+            "prompt"            { "Yellow" }
+            "memory"            { "DarkYellow" }
+            default             { "White" }
+        }
+
+        # Budget color
+        $budgetColor = if ($item.BudgetPct -lt 25) { "Green" }
+                       elseif ($item.BudgetPct -lt 50) { "Yellow" }
+                       elseif ($item.BudgetPct -lt 75) { "DarkYellow" }
+                       else { "Red" }
+
+        Write-Host (" {0,-4} " -f "$index.") -NoNewline -ForegroundColor DarkGray
+        Write-Host ("{0,-28} " -f $name) -NoNewline -ForegroundColor $typeColor
+        Write-Host ("{0,-14} " -f $item.Source) -NoNewline -ForegroundColor DarkGray
+        Write-Host ("{0,7} " -f $tokenStr) -NoNewline -ForegroundColor White
+        Write-Host ("{0,8} " -f $cumulStr) -NoNewline -ForegroundColor Gray
+        Write-Host ("{0,6}" -f $pctStr) -ForegroundColor $budgetColor
+    }
+
+    Write-Host " $separator" -ForegroundColor DarkGray
+}
+
+# Budget summary bar
+$barWidth = 40
+$filledWidth = [math]::Min($barWidth, [math]::Floor(($totalPct / 100) * $barWidth))
+$emptyWidth = $barWidth - $filledWidth
+$filledChar = [char]0x2588
+$emptyChar = [char]0x2591
+
+$barColor = if ($totalPct -lt 25) { "Green" }
+            elseif ($totalPct -lt 50) { "Yellow" }
+            elseif ($totalPct -lt 75) { "DarkYellow" }
+            else { "Red" }
+
+Write-Host ""
+Write-Host "  Total: " -NoNewline -ForegroundColor Gray
+Write-Host "$($totalTokens.ToString('N0'))" -NoNewline -ForegroundColor White
+Write-Host " / $($ContextWindow.ToString('N0')) tokens " -NoNewline -ForegroundColor DarkGray
+Write-Host "($totalPct%)" -ForegroundColor $barColor
+Write-Host "  " -NoNewline
+Write-Host ([string]::new($filledChar, $filledWidth)) -NoNewline -ForegroundColor $barColor
+Write-Host ([string]::new($emptyChar, $emptyWidth)) -ForegroundColor DarkGray
+Write-Host ""
+
+# Legend
+Write-Host "  Legend: " -NoNewline -ForegroundColor DarkGray
+Write-Host "instructions" -NoNewline -ForegroundColor Green
+Write-Host " | " -NoNewline -ForegroundColor DarkGray
+Write-Host "agents" -NoNewline -ForegroundColor Magenta
+Write-Host " | " -NoNewline -ForegroundColor DarkGray
+Write-Host "skills" -NoNewline -ForegroundColor Blue
+Write-Host " | " -NoNewline -ForegroundColor DarkGray
+Write-Host "prompts" -NoNewline -ForegroundColor Yellow
+Write-Host " | " -NoNewline -ForegroundColor DarkGray
+Write-Host "memory" -ForegroundColor DarkYellow
+Write-Host ""
+
+# Processing hints
+Write-Host "  Processing hints:" -ForegroundColor DarkCyan
+Write-Host "   - Items are loaded in priority order (repo instructions first)" -ForegroundColor DarkGray
+Write-Host "   - Instructions with applyTo: '**/*' load for ALL files" -ForegroundColor DarkGray
+Write-Host "   - Scoped instructions only load when editing matching files" -ForegroundColor DarkGray
+if ($totalPct -gt 50) {
+    Write-Host "   - WARNING: Estimated context exceeds 50% of window" -ForegroundColor Yellow
+    Write-Host "     Consider narrowing .basecoat.yml allow-lists" -ForegroundColor Yellow
+}
+Write-Host ""
+Write-Host "  Note: This is an ESTIMATE. Actual context depends on Copilot's" -ForegroundColor DarkGray
+Write-Host "  runtime assembly logic, conversation history, and tool outputs." -ForegroundColor DarkGray
+Write-Host ""
