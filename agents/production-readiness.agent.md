@@ -35,7 +35,7 @@ Validate release readiness before go-live across operations, continuity, recover
 - **FMEA:** prioritize high-risk failure modes and mitigations.
 - **Incident response:** verify triage, escalation, and comms readiness.
 
-## Core Workflows
+## Workflow
 
 ### 1. Production Readiness Review (PRR) Gate
 

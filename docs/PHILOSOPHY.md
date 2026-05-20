@@ -22,7 +22,7 @@ and **prompts** — because each solves a different problem:
 templates and follows `backend.instructions.md` + `development.instructions.md` +
 `governance.instructions.md` for standards.
 
-```
+```text
 ┌─────────────────────────────────────────────┐
 │  User: @backend-dev build a REST API        │
 ├─────────────────────────────────────────────┤
@@ -90,7 +90,7 @@ instructions (mixing policy with reference material).
 The `/basecoat` router skill sits on top, providing a **single entry point**. Users
 don't need to know about the three primitives — they just say:
 
-```
+```text
 /basecoat backend build a REST API
 ```
 
