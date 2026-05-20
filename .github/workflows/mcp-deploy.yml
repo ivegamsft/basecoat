@@ -36,7 +36,6 @@ permissions:
 env:
   REGISTRY:   ghcr.io
   IMAGE_NAME: ${{ github.repository_owner }}/basecoat-metrics-mcp
-  TARGET_ENV: ${{ github.event_name == 'pull_request' && 'staging' || inputs.environment || 'prod' }}
 
 jobs:
   build-push:
@@ -44,6 +43,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork }}
+    env:
+      TARGET_ENV: ${{ github.event_name == 'pull_request' && 'staging' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'prod') }}
     outputs:
       image_tag: ${{ steps.meta.outputs.version }}
       image_ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
@@ -66,7 +67,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=sha,prefix=sha-,format=short
-            type=raw,value=${{ inputs.image_tag }},enable=${{ inputs.image_tag != '' }}
+            type=raw,value=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.image_tag || '' }},enable=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.image_tag != '' }}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
 
       - name: Set up Docker Buildx
@@ -88,7 +89,9 @@ jobs:
     timeout-minutes: 20
     needs: build-push
     if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork }}
-    environment: ${{ env.TARGET_ENV }}
+    environment: ${{ github.event_name == 'pull_request' && 'staging' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'prod') }}
+    env:
+      TARGET_ENV: ${{ github.event_name == 'pull_request' && 'staging' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'prod') }}
 
     steps:
       - name: Check out repository
