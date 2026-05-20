@@ -457,6 +457,7 @@ foreach ($item in $ContextItems) {
     $item.BudgetPct = [math]::Round(($cumulative / $ContextWindow) * 100, 1)
     if (-not $item.ContainsKey("OnDemand")) { $item.OnDemand = $false }
     if (-not $item.ContainsKey("Internal")) { $item.Internal = $false }
+    if (-not $item.ContainsKey("SourceLabel")) { $item.SourceLabel = "$($item.Type)@$($item.Source)" }
     if (-not $item.ContainsKey("Meta")) {
         $item.Meta = (($item.Type -in @("agent", "skill")) -or (Test-IsMetaApplyTo -ApplyTo $item.ApplyTo))
     }
@@ -481,6 +482,7 @@ if ($Json) {
                 order      = $_.Order
                 name       = $_.Name
                 source     = $_.Source
+                sourceLabel = $_.SourceLabel
                 type       = $_.Type
                 applyTo    = $_.ApplyTo
                 tokens     = $_.Tokens
@@ -498,7 +500,7 @@ if ($Json) {
 
 # --- Terminal output ---
 
-$separator = [string]::new([char]0x2500, 72)
+$separator = [string]::new([char]0x2500, 84)
 
 # Header
 Write-Host ""
@@ -520,8 +522,8 @@ Write-Host ""
 
 if (-not $Summary) {
     # Column headers
-    $fmt = " {0,-4} {1,-30} {2,-14} {3,8} {4,8} {5,7}"
-    Write-Host ($fmt -f "#", "Name", "Source", "Tokens", "Cumul.", "Budget") -ForegroundColor DarkCyan
+    $fmt = " {0,-4} {1,-28} {2,-24} {3,8} {4,8} {5,7}"
+    Write-Host ($fmt -f "#", "Name", "Source (type@path)", "Tokens", "Cumul.", "Budget") -ForegroundColor DarkCyan
     Write-Host " $separator" -ForegroundColor DarkGray
 
     $index = 0
@@ -533,6 +535,8 @@ if (-not $Summary) {
         if ($item.OnDemand) { $name = "$name [on-demand]" }
         if ($item.Meta) { $name = "$name [meta]" }
         if ($name.Length -gt 28) { $name = $name.Substring(0, 25) + "..." }
+        $sourceLabel = $item.SourceLabel
+        if ($sourceLabel.Length -gt 24) { $sourceLabel = $sourceLabel.Substring(0, 21) + "..." }
 
         $tokenStr = $item.Tokens.ToString("N0")
         $cumulStr = if ($item.OnDemand) { "---" } else { $item.Cumulative.ToString("N0") }
@@ -561,7 +565,7 @@ if (-not $Summary) {
 
         Write-Host (" {0,-4} " -f "$index.") -NoNewline -ForegroundColor DarkGray
         Write-Host ("{0,-28} " -f $name) -NoNewline -ForegroundColor $typeColor
-        Write-Host ("{0,-14} " -f $item.Source) -NoNewline -ForegroundColor DarkGray
+        Write-Host ("{0,-24} " -f $sourceLabel) -NoNewline -ForegroundColor DarkGray
         Write-Host ("{0,7} " -f $tokenStr) -NoNewline -ForegroundColor White
         Write-Host ("{0,8} " -f $cumulStr) -NoNewline -ForegroundColor Gray
         Write-Host ("{0,6}" -f $pctStr) -ForegroundColor $budgetColor
@@ -610,6 +614,7 @@ Write-Host "  Processing hints:" -ForegroundColor DarkCyan
 Write-Host "   - Items are loaded in priority order (repo instructions first)" -ForegroundColor DarkGray
 Write-Host "   - Instructions with applyTo: '**/*' load for ALL files" -ForegroundColor DarkGray
 Write-Host "   - Scoped instructions only load when editing matching files" -ForegroundColor DarkGray
+Write-Host "   - Name collisions across skills/instructions are expected; use Source (type@path)" -ForegroundColor DarkGray
 if ($hasMetaItems) {
     Write-Host "   - [meta] marks context scoped to agents/, skills/, or instructions/" -ForegroundColor DarkGray
     Write-Host "   - Runtime context applies to regular project files under active work" -ForegroundColor DarkGray

@@ -194,6 +194,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running show-context tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'show-context-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Show-context tests failed' -ForegroundColor Red
+    Write-FailureLog 'show-context-tests'
+    exit 1
+}
+
 Write-Host 'Running coherence check (non-blocking)...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot '..' 'scripts' 'check-coherence.ps1')
 # Non-blocking: coherence issues are warnings, not failures
