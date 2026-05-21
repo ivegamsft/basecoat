@@ -94,6 +94,10 @@ jobs:
 
           exit $status
 
+      - name: Lint — workflow policy guardrails
+        shell: pwsh
+        run: pwsh tests/workflow-guardrails-tests.ps1
+
       - name: Upload test results on failure
         if: failure()
         uses: actions/upload-artifact@v7

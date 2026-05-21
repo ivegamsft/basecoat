@@ -307,6 +307,18 @@ Auto-merge is not enabled. Merges require:
 
 This is intentional — catching a broken build post-merge is significantly more expensive than the few minutes it takes to confirm checks passed first.
 
+### Branch-Protection-Safe Automation Pattern
+
+Automation that modifies repository content must follow the same branch protection model as humans:
+
+1. Create or reset an automation branch (for example `automation/<name>`)
+2. Commit generated changes to that branch
+3. Push the automation branch
+4. Open or update a pull request targeting `main`
+5. Let required checks pass, then merge the PR
+
+Do not script `git push ... main` in routine automation workflows. If a special mirror/release workflow requires direct main updates, it must be explicitly documented, narrowly scoped, and reviewed by repo owners.
+
 ---
 
 ## Cloud Agent Workflow Auto-Approval
