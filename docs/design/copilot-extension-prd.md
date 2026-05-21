@@ -168,6 +168,7 @@ mobile — worth building only if those surfaces have meaningful adoption in you
 - No `contents:write` on main — scaffolding always goes through PRs
 - Rate-limit tool invocations per user (10 req/min default)
 - Sanitize all user inputs before passing to script execution
+- Registration and admin handoff runbook: `docs/operations/COPILOT_EXTENSION_GITHUB_APP_REGISTRATION.md`
 
 ---
 

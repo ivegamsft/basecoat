@@ -218,6 +218,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running extension intent routing eval tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'extension-intent-routing-eval-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Extension intent routing eval tests failed' -ForegroundColor Red
+    Write-FailureLog 'extension-intent-routing-eval-tests'
+    exit 1
+}
+
 Write-Host 'Running show-context tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'show-context-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
