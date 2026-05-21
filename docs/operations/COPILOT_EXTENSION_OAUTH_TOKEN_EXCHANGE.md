@@ -31,6 +31,29 @@ The placeholder:
 - ❌ **Does NOT** verify org membership
 - ❌ **Does NOT** return session cookie
 
+## Deployment Flow
+
+The extension deployment is fully automated:
+
+```
+Org-Admin: Creates & installs GitHub App (#1073)
+  ↓
+Platform Engineer: Runs bootstrap-credentials.ps1 (stores credentials in GitHub Secrets + KV)
+  ↓
+CI/CD Workflow: extension-deploy.yml
+  - Reads secrets from GitHub Secrets
+  - Builds Docker image
+  - Pushes to GHCR
+  - Deploys via Bicep IaC
+  - Performs health checks
+  ↓
+Developer: Implements token exchange (this guide)
+  ↓
+Deployment complete
+```
+
+**Note:** bootstrap-credentials.ps1 is credentials-only (chicken-egg problem). All infrastructure and environment configuration is handled by Bicep IaC and the CI/CD workflow—NOT by manual scripts.
+
 ## Implementation Path
 
 ### Phase 1: Install @octokit/app

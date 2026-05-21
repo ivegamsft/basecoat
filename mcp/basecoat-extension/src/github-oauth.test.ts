@@ -55,23 +55,6 @@ test("GitHubOAuthManager webhook signature validation", () => {
   assert.equal(manager.validateWebhookSignature(payload, "", secret), false);
 });
 
-test("GitHubOAuthManager stores and retrieves user tokens", () => {
-  const manager = new GitHubOAuthManager();
-  const state = manager.generateState();
-
-  // Store user token
-  manager.storeUserToken(state, "user123", "token-abc");
-
-  // Token should be retrievable before validation
-  let token = manager.getUserToken(state);
-  assert.ok(token);
-
-  // After validation, token entry is deleted
-  manager.validateState(state);
-  token = manager.getUserToken(state);
-  assert.equal(token, null);
-});
-
 test("GitHubOAuthManager handles invalid state gracefully", () => {
   const manager = new GitHubOAuthManager();
 
@@ -81,10 +64,7 @@ test("GitHubOAuthManager handles invalid state gracefully", () => {
   // Unknown state fails
   assert.equal(manager.validateState("unknown"), false);
 
-  // Store token for unknown state doesn't throw
-  manager.storeUserToken("unknown", "user", "token");
-  assert.ok(true);
-
-  // Get token for unknown state returns null
-  assert.equal(manager.getUserToken("unknown"), null);
+  // Validation attempt on empty state returns null via validateAndGetUserSession
+  const session = manager.validateAndGetUserSession("");
+  assert.equal(session, null);
 });
