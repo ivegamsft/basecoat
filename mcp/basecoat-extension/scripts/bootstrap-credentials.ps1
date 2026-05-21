@@ -4,35 +4,31 @@
 Bootstrap GitHub App credentials for BaseCoat Copilot Extension (minimal interaction).
 
 .DESCRIPTION
-Creates GitHub App for BaseCoat Copilot Extension and stores credentials in repository secrets + Key Vault.
+Stores GitHub App credentials in GitHub repository secrets and Azure Key Vault.
 
 This is a credentials bootstrap script—infrastructure deployment is handled by CI/CD workflows and IaC.
 
 Chicken-egg problem: The extension-deploy workflow needs GitHub App credentials before it can deploy.
-This script bridges that gap by creating the app and configuring the secrets.
+This script bridges that gap by storing the secrets securely.
 
-SMART DEFAULTS + APP CREATION: 
+SMART DEFAULTS:
 - If credentials are provided (env vars or params), stores them immediately
-- If not provided, creates GitHub App automatically using gh CLI (requires org admin token)
-- Extracts app credentials and stores in GitHub Secrets + Key Vault
-- Minimal interaction: just run the script; it handles app creation
+- If not provided, shows clear instructions for manual GitHub App creation
+- Minimal interaction: set env vars, then run script
+- Note: GitHub App creation is manual (security measure) — not automated
 
 Prerequisites:
-- GitHub CLI (gh) authenticated with org admin permissions
+- GitHub App registered in IBuySpy-Shared org (manual step via github.com/organizations/{org}/settings/apps/new)
+- GitHub CLI (gh) authenticated and authorized to configure repository secrets
 - Azure CLI (az) authenticated with Key Vault permissions (optional, for production)
-- If providing existing credentials: set env vars or pass as params
-- If auto-creating app: gh CLI must have org admin access
 
 .PARAMETER AppId
 GitHub App ID. If not provided, reads from $env:BASECOAT_EXTENSION_GITHUB_APP_ID
-If still not provided, script will create app automatically (requires org admin token).
+If not provided, script will prompt you to create app manually via GitHub UI.
 
 .PARAMETER OrgName
-GitHub organization for app creation. Default: IBuySpy-Shared (extracted from $Repo)
-Only needed if auto-creating app and providing -Repo in non-standard format.
-
-.PARAMETER CreateApp
-Force app creation even if credentials provided. Default: $false
+GitHub organization for app creation guidance. Default: IBuySpy-Shared (extracted from $Repo)
+Only used if credentials are missing (to show correct creation link).
 
 .PARAMETER ClientId
 GitHub OAuth Client ID. If not provided, reads from $env:BASECOAT_EXTENSION_GITHUB_CLIENT_ID
@@ -107,10 +103,7 @@ param(
     [string]$KeyVaultName = $env:BASECOAT_EXTENSION_KEY_VAULT_NAME ?? "",
 
     [Parameter(Mandatory = $false)]
-    [string]$OrgName = "",
-
-    [Parameter(Mandatory = $false)]
-    [switch]$CreateApp = $false
+    [string]$OrgName = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -140,63 +133,43 @@ function Write-Info {
     Write-Host "ℹ $Message" -ForegroundColor Cyan
 }
 
-function New-GitHubApp {
-    param(
-        [string]$OrgName,
-        [string]$AppName = "BaseCoat Copilot Extension"
-    )
-
-    Write-Info "Attempting to create GitHub App: $AppName in org: $OrgName"
-    Write-Info "(This requires you to have GitHub organization owner or app manager permissions)"
+function Show-AppCreationGuide {
+    param([string]$OrgName)
     
-    try {
-        # Use gh CLI to create app - this will work if user has org admin token
-        Write-Info "Creating app via GitHub API..."
-        
-        $payload = @{
-            name = $AppName
-            description = "Copilot Extension for discovering and scaffolding BaseCoat assets (agents, skills, instructions, prompts)"
-            homepage_url = "https://github.com/$OrgName/basecoat"
-            webhook_events = @("push", "pull_request", "issues", "issue_comment")
-            public = $false
-        } | ConvertTo-Json
-        
-        # Use @base64 input for gh CLI
-        $tempFile = [System.IO.Path]::GetTempFileName()
-        Set-Content -Path $tempFile -Value $payload -Encoding UTF8
-        
-        $response = & gh api "/orgs/$OrgName/apps" -X POST --input $tempFile 2>&1
-        Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
-        
-        if ($LASTEXITCODE -ne 0) {
-            Write-Error-Custom "Failed to create GitHub App. Response: $response"
-            Write-Info "Ensure you:"
-            Write-Info "  1. Have GitHub organization owner/manager permissions"
-            Write-Info "  2. Have authenticated with 'gh auth login' using org admin account"
-            Write-Info "  3. Run: gh auth status (to verify permissions)"
-            exit 1
-        }
-
-        $app = $response | ConvertFrom-Json
-        Write-Status "GitHub App created successfully!"
-        Write-Status "App ID: $($app.id)"
-        Write-Status "Client ID: $($app.client_id)"
-        
-        # Return the credentials
-        return @{
-            AppId = $app.id
-            ClientId = $app.client_id
-            ClientSecret = $app.client_secret
-            WebhookSecret = $(openssl rand -hex 20)
-        }
-    } catch {
-        Write-Error-Custom "GitHub App creation failed: $_"
-        Write-Info "You can also create the app manually:"
-        Write-Info "  1. Go to: https://github.com/organizations/$OrgName/settings/apps/new"
-        Write-Info "  2. Fill in the form with required details"
-        Write-Info "  3. Copy credentials and pass to bootstrap or set env vars"
-        exit 1
-    }
+    Write-Host ""
+    Write-Host "╔════════════════════════════════════════════════════════════════╗" -ForegroundColor Yellow
+    Write-Host "║  GitHub App Creation Required (Manual Step)                   ║" -ForegroundColor Yellow
+    Write-Host "╚════════════════════════════════════════════════════════════════╝" -ForegroundColor Yellow
+    
+    Write-Host ""
+    Write-Info "GitHub doesn't allow programmatic app creation (security measure)."
+    Write-Info "You must create the app manually via GitHub UI:"
+    
+    Write-Host ""
+    Write-Host "  1. Visit: https://github.com/organizations/$OrgName/settings/apps/new" -ForegroundColor Cyan
+    Write-Host "  2. Fill in these details:" -ForegroundColor Cyan
+    Write-Host "     - App name: BaseCoat Copilot Extension" -ForegroundColor Cyan
+    Write-Host "     - Description: Copilot Extension for managing BaseCoat assets" -ForegroundColor Cyan
+    Write-Host "     - Homepage URL: https://github.com/$OrgName/basecoat" -ForegroundColor Cyan
+    Write-Host "     - Webhook URL: https://basecoat.example.com/api/github/webhook" -ForegroundColor Cyan
+    Write-Host "     - Webhook events: issues, pull_request, push" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  3. After creation, copy these credentials:" -ForegroundColor Cyan
+    Write-Host "     - App ID" -ForegroundColor Cyan
+    Write-Host "     - Client ID" -ForegroundColor Cyan
+    Write-Host "     - Client Secret" -ForegroundColor Cyan
+    Write-Host "     - Webhook Secret" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  4. Download private key (PEM format)" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  5. Run bootstrap with credentials:" -ForegroundColor Cyan
+    Write-Host "     `$env:BASECOAT_EXTENSION_GITHUB_APP_ID = 'YOUR_APP_ID'" -ForegroundColor Green
+    Write-Host "     `$env:BASECOAT_EXTENSION_GITHUB_CLIENT_ID = 'YOUR_CLIENT_ID'" -ForegroundColor Green
+    Write-Host "     `$env:BASECOAT_EXTENSION_GITHUB_CLIENT_SECRET = 'YOUR_CLIENT_SECRET'" -ForegroundColor Green
+    Write-Host "     `$env:BASECOAT_EXTENSION_WEBHOOK_SECRET = 'YOUR_WEBHOOK_SECRET'" -ForegroundColor Green
+    Write-Host "     `$env:BASECOAT_EXTENSION_PRIVATE_KEY_PATH = './private-key.pem'" -ForegroundColor Green
+    Write-Host "     .\bootstrap-credentials.ps1" -ForegroundColor Green
+    Write-Host ""
 }
 
 Write-Info "Bootstrapping GitHub App credentials"
@@ -204,15 +177,10 @@ Write-Info "Repository: $Repo"
 
 # Auto-create app if no credentials provided and not explicitly disabled
 if (-not $AppId -and (-not $ClientId -or -not $ClientSecret -or -not $WebhookSecret)) {
-    Write-Info "No credentials provided; attempting to create GitHub App automatically..."
-    
-    $appCreds = New-GitHubApp -OrgName $OrgName
-    $AppId = $appCreds.AppId
-    $ClientId = $appCreds.ClientId
-    $ClientSecret = $appCreds.ClientSecret
-    $WebhookSecret = $appCreds.WebhookSecret
-    
-    Write-Status "GitHub App created and credentials extracted"
+    Write-Host ""
+    Write-Error-Custom "Missing GitHub App credentials"
+    Show-AppCreationGuide -OrgName $OrgName
+    exit 1
 }
 
 # Validate that credentials are provided (either via params or env vars)
