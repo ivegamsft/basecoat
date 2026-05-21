@@ -19,7 +19,7 @@ permissions:
 jobs:
   build:
     name: Build, lint, and validate MCP server
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
     timeout-minutes: 15
 
     steps:
