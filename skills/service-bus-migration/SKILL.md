@@ -9,6 +9,7 @@ compatibility:
     - github
 metadata:
   domain: infrastructure
+  category: "DevOps & Infrastructure"
   maturity: production
   audience: [backend-engineer, devops-engineer, architect]
 allowed-tools: [csharp, azure-cli, docker]

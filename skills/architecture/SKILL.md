@@ -8,7 +8,7 @@ compatibility:
   platforms:
     - github
 metadata:
-  category: "Uncategorized"
+  category: "Architecture & Design"
   tags: ["uncategorized"]
   maturity: "beta"
   audience: ["developers"]

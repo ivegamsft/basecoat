@@ -8,6 +8,7 @@ compatibility:
     - github
 metadata:
   domain: framework
+  category: "Onboarding & Deployment"
   maturity: production
   audience: [all]
 allowed-tools: [bash, curl, git]

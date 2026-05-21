@@ -9,6 +9,7 @@ compatibility:
     - github
 metadata:
   domain: identity
+  category: "Security & Compliance"
   maturity: production
   audience: [backend-engineer, devops-engineer, architect]
 allowed-tools: [bash, powershell, docker]

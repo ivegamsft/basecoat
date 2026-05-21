@@ -7,7 +7,7 @@ compatibility:
   platforms:
     - github
 metadata:
-  category: "Uncategorized"
+  category: "DevOps & Infrastructure"
   tags: ["uncategorized"]
   maturity: "beta"
   audience: ["developers"]

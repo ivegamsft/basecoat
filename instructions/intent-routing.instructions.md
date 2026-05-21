@@ -3,6 +3,10 @@ description: "Intent prefix routing — interprets user-defined prefixes to dete
 applyTo: "**/*"
 ---
 
+<!-- applyTo: "**/*" is intentional. Prefix routing must fire on every conversation so urgency
+and timing signals (hot:, async:, batch:, etc.) are never silently dropped regardless of
+which file or repo context is active. Do not narrow this scope. -->
+
 # Intent Prefix Routing
 
 The user communicates intent through structured prefixes in their messages.

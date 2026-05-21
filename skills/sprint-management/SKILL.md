@@ -8,7 +8,7 @@ compatibility:
   platforms:
     - github
 metadata:
-  category: "Uncategorized"
+  category: "Project Management & Planning"
   tags: ["uncategorized"]
   maturity: "beta"
   audience: ["developers"]

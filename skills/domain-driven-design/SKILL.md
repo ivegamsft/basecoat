@@ -9,6 +9,7 @@ compatibility:
     - github
 metadata:
   domain: architecture
+  category: "Architecture & Design"
   maturity: production
   audience: [architect, backend-engineer]
 allowed-tools: [python, javascript, java]

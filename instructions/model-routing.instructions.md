@@ -3,6 +3,10 @@ description: "Use when dispatching sub-agents or choosing models for tasks. Prov
 applyTo: "**/*"
 ---
 
+<!-- applyTo: "**/*" is intentional. Model routing must fire in every context so that model
+selection (haiku vs sonnet vs opus) is consistently applied regardless of which file is active.
+Do not narrow this scope. -->
+
 # Model Routing for Copilot CLI Fleet Mode
 
 Route tasks to the cheapest model that can handle them reliably.

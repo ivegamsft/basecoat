@@ -4,7 +4,7 @@ name: Container Security
 description: "Container and Kubernetes security — Pod Security Standards, runtime security, CSPM findings, image scanning, and supply chain security for containerized workloads. USE FOR: scan container images for CVEs, audit Pod Security Standards, assess Kubernetes runtime security. DO NOT USE FOR: writing application code, network firewall rules."
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
-  category: "Uncategorized"
+  category: "Security & Compliance"
   tags: ["uncategorized"]
   maturity: "beta"
   audience: ["developers"]

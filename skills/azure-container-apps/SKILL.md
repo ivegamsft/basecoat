@@ -9,6 +9,7 @@ compatibility:
     - github
 metadata:
   domain: infrastructure
+  category: "DevOps & Infrastructure"
   maturity: production
   audience: [devops-engineer, backend-engineer, platform-engineer]
 allowed-tools: [bash, azure-cli, docker, kubectl, terraform]

@@ -9,6 +9,7 @@ compatibility:
     - github
 metadata:
   domain: security
+  category: "Security & Compliance"
   maturity: production
   audience: [sre, security-engineer, devops-engineer]
 allowed-tools: [bash, terraform, kubectl, azure-cli, docker]

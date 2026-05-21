@@ -1,0 +1,114 @@
+name: Tech Debt Tracker
+
+on:
+  schedule:
+    - cron: '0 10 * * 5'  # Friday 10am UTC
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  track:
+    name: Count and trend tech debt markers
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Count debt markers
+        id: count
+        run: |
+          # Count TODO/FIXME/HACK/XXX/WORKAROUND across source files
+          # Exclude .git, node_modules, vendor, and binary files
+          count_marker() {
+            grep -rn --include="*.md" --include="*.ts" --include="*.js" \
+              --include="*.py" --include="*.go" --include="*.cs" \
+              --include="*.ps1" --include="*.sh" --include="*.yml" \
+              --include="*.yaml" --include="*.json" \
+              --exclude-dir=".git" --exclude-dir="node_modules" \
+              --exclude-dir="vendor" --exclude-dir="dist" \
+              -i "$1" . 2>/dev/null | wc -l || echo 0
+          }
+
+          TODO=$(count_marker "TODO")
+          FIXME=$(count_marker "FIXME")
+          HACK=$(count_marker "HACK\b")
+          XXX=$(count_marker "XXX\b")
+          WORKAROUND=$(count_marker "WORKAROUND")
+          TOTAL=$((TODO + FIXME + HACK + XXX + WORKAROUND))
+
+          echo "todo=$TODO"          >> "$GITHUB_OUTPUT"
+          echo "fixme=$FIXME"        >> "$GITHUB_OUTPUT"
+          echo "hack=$HACK"          >> "$GITHUB_OUTPUT"
+          echo "xxx=$XXX"            >> "$GITHUB_OUTPUT"
+          echo "workaround=$WORKAROUND" >> "$GITHUB_OUTPUT"
+          echo "total=$TOTAL"        >> "$GITHUB_OUTPUT"
+
+          echo "Counts — TODO:$TODO FIXME:$FIXME HACK:$HACK XXX:$XXX WORKAROUND:$WORKAROUND Total:$TOTAL"
+
+      - name: Post step summary
+        env:
+          TODO:       ${{ steps.count.outputs.todo }}
+          FIXME:      ${{ steps.count.outputs.fixme }}
+          HACK:       ${{ steps.count.outputs.hack }}
+          XXX:        ${{ steps.count.outputs.xxx }}
+          WORKAROUND: ${{ steps.count.outputs.workaround }}
+          TOTAL:      ${{ steps.count.outputs.total }}
+        run: |
+          {
+            echo "## 🔧 Tech Debt Report"
+            echo ""
+            echo "| Marker | Count |"
+            echo "|--------|-------|"
+            echo "| TODO | $TODO |"
+            echo "| FIXME | $FIXME |"
+            echo "| HACK | $HACK |"
+            echo "| XXX | $XXX |"
+            echo "| WORKAROUND | $WORKAROUND |"
+            echo "| **Total** | **$TOTAL** |"
+            echo ""
+            echo "_Run \`grep -rn 'TODO\|FIXME\|HACK' .\` locally for full details._"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Open issue if debt is growing
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        env:
+          TOTAL: ${{ steps.count.outputs.total }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const total = parseInt(process.env.TOTAL, 10);
+            const THRESHOLD = 200;  // alert if total exceeds this
+
+            if (total > THRESHOLD) {
+              const existing = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo:  context.repo.repo,
+                labels: 'tech-debt,triage',
+                state:  'open',
+              });
+
+              if (existing.data.length === 0) {
+                await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo:  context.repo.repo,
+                  title: `chore: tech debt markers exceed threshold (${total} found)`,
+                  body: [
+                    `## Tech Debt Alert`,
+                    '',
+                    `The tech debt scan found **${total} markers** (TODO/FIXME/HACK/XXX/WORKAROUND),`,
+                    `which exceeds the threshold of ${THRESHOLD}.`,
+                    '',
+                    'Run `grep -rn "TODO\\|FIXME\\|HACK" .` to list all instances.',
+                    '',
+                    '_Opened automatically by `tech-debt.yml`._',
+                  ].join('\n'),
+                  labels: ['triage'],
+                });
+                console.log(`Opened tech debt alert issue (${total} markers).`);
+              }
+            }

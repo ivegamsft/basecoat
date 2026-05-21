@@ -1,0 +1,84 @@
+name: Backlog Burndown
+
+on:
+  schedule:
+    - cron: '0 16 * * 5'  # Friday 4pm UTC
+  workflow_dispatch:
+
+permissions:
+  issues: read
+  contents: read
+
+jobs:
+  burndown:
+    name: Generate weekly burndown report
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Collect issue metrics
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const ONE_WEEK_AGO = new Date(Date.now() - 7 * 86_400_000).toISOString();
+
+            // Fetch open issues
+            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              state: 'open',
+              per_page: 100,
+            });
+
+            // Fetch issues closed in the last 7 days
+            const closedRecent = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              state: 'closed',
+              since: ONE_WEEK_AGO,
+              per_page: 100,
+            });
+
+            // Fetch issues opened in the last 7 days
+            const openedRecent = openIssues.filter(i =>
+              new Date(i.created_at) >= new Date(ONE_WEEK_AGO) && !i.pull_request
+            );
+            const closedRecentIssues = closedRecent.filter(i => !i.pull_request);
+
+            // Count open (non-PR) issues by label
+            const openNonPR = openIssues.filter(i => !i.pull_request);
+            const labelCounts = {};
+            for (const issue of openNonPR) {
+              for (const label of issue.labels) {
+                labelCounts[label.name] = (labelCounts[label.name] || 0) + 1;
+              }
+            }
+
+            const topLabels = Object.entries(labelCounts)
+              .sort((a, b) => b[1] - a[1])
+              .slice(0, 10);
+
+            const velocity = closedRecentIssues.length - openedRecent.length;
+            const trend = velocity > 0 ? '📉 Shrinking' : velocity < 0 ? '📈 Growing' : '➡️ Stable';
+
+            const labelRows = topLabels.map(([name, count]) => [name, String(count)]);
+
+            core.summary
+              .addHeading('📊 Weekly Backlog Burndown', 2)
+              .addTable([
+                [{ data: 'Metric', header: true }, { data: 'Count', header: true }],
+                ['Total open issues', String(openNonPR.length)],
+                ['Opened this week', String(openedRecent.length)],
+                ['Closed this week', String(closedRecentIssues.length)],
+                ['Net velocity', `${velocity > 0 ? '+' : ''}${velocity}`],
+                ['Backlog trend', trend],
+              ])
+              .addHeading('Open issues by label (top 10)', 3)
+              .addTable([
+                [{ data: 'Label', header: true }, { data: 'Open', header: true }],
+                ...labelRows,
+              ])
+              .write();
+
+            console.log(`Open: ${openNonPR.length} | Opened: ${openedRecent.length} | Closed: ${closedRecentIssues.length} | Trend: ${trend}`);

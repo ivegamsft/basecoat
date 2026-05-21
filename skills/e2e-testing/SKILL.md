@@ -9,6 +9,7 @@ compatibility:
     - github
 metadata:
   domain: testing
+  category: "Quality & Testing"
   maturity: production
   audience: [qa-engineer, developer, test-automation-engineer]
 allowed-tools: [bash, node, python, docker]

@@ -9,6 +9,7 @@ compatibility:
     - github
 metadata:
   domain: operations
+  category: "DevOps & Infrastructure"
   maturity: production
   audience: [release-manager, sre, architect]
 allowed-tools: [python, bash, terraform, kubernetes]

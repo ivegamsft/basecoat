@@ -1,0 +1,93 @@
+name: Orphaned PR Triage
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'  # Monday 8am UTC
+  workflow_dispatch:
+
+permissions:
+  pull-requests: write
+  issues: write
+  contents: read
+
+jobs:
+  triage:
+    name: Find and label stale PRs
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Triage stale PRs
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const STALE_DAYS   = 14;
+            const ESCALATE_DAYS = 30;
+            const now = Date.now();
+
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              state: 'open',
+              per_page: 100,
+            });
+
+            let staleCount = 0;
+            let escalatedCount = 0;
+
+            for (const pr of prs) {
+              const ageDays = (now - new Date(pr.updated_at).getTime()) / 86_400_000;
+              if (ageDays < STALE_DAYS) continue;
+
+              const labels = pr.labels.map(l => l.name);
+              staleCount++;
+
+              // Apply triage label if not already present
+              if (!labels.includes('triage')) {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo:  context.repo.repo,
+                  issue_number: pr.number,
+                  labels: ['triage'],
+                });
+              }
+
+              if (ageDays >= ESCALATE_DAYS && !labels.includes('blocked')) {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo:  context.repo.repo,
+                  issue_number: pr.number,
+                  labels: ['blocked'],
+                });
+                escalatedCount++;
+
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo:  context.repo.repo,
+                  issue_number: pr.number,
+                  body: [
+                    `⚠️ **Stale PR escalation** — this PR has had no activity for **${Math.floor(ageDays)} days**.`,
+                    '',
+                    'Please take one of the following actions:',
+                    '- Rebase and push a new commit to continue',
+                    '- Close this PR if it is no longer needed',
+                    '- Add a comment explaining the block',
+                    '',
+                    '_Automated by `orphaned-pr-triage.yml`._',
+                  ].join('\n'),
+                });
+              }
+            }
+
+            core.summary
+              .addHeading('Orphaned PR Triage Report', 2)
+              .addTable([
+                [{ data: 'Metric', header: true }, { data: 'Count', header: true }],
+                ['Open PRs scanned', String(prs.length)],
+                [`Stale (≥ ${STALE_DAYS}d)`, String(staleCount)],
+                [`Escalated (≥ ${ESCALATE_DAYS}d)`, String(escalatedCount)],
+              ])
+              .write();
+
+            console.log(`Scanned ${prs.length} PRs: ${staleCount} stale, ${escalatedCount} escalated.`);

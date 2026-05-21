@@ -18,7 +18,7 @@ allowed-tools:
   - file-editor
   - search-code
 metadata:
-  category: "Uncategorized"
+  category: "Security & Compliance"
   tags: ["uncategorized"]
   maturity: "beta"
   audience: ["developers"]

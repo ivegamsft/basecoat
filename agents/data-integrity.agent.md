@@ -6,7 +6,7 @@ description: >
   conflict resolution, ACID compliance, backup verification, and data recovery procedures.
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
-  category: "Uncategorized"
+  category: "Quality & Testing"
   tags: ["uncategorized"]
   maturity: "beta"
   audience: ["developers"]

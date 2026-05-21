@@ -9,6 +9,7 @@ compatibility:
     - github
 metadata:
   domain: infrastructure
+  category: "Architecture & Design"
   maturity: production
   audience: [architect, sre, devops-engineer]
 allowed-tools: [terraform, kubernetes, python, bash, docker]

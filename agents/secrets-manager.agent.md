@@ -4,7 +4,7 @@ name: Secrets Manager
 description: "Secrets lifecycle management — discovery, rotation, expiry scanning, emergency revocation, and Vault patterns for infrastructure and application secrets. USE FOR: plan secrets rotation schedule, scan for expiring credentials, execute emergency revocation. DO NOT USE FOR: detecting hardcoded secrets in code, general performance optimization."
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
-  category: "Uncategorized"
+  category: "Security & Compliance"
   tags: ["uncategorized"]
   maturity: "beta"
   audience: ["developers"]

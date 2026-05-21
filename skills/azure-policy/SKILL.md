@@ -7,7 +7,7 @@ compatibility:
   platforms:
     - github
 metadata:
-  category: "Uncategorized"
+  category: "Security & Compliance"
   tags: ["uncategorized"]
   maturity: "beta"
   audience: ["developers"]

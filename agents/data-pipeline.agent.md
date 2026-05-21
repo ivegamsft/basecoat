@@ -6,7 +6,7 @@ model: claude-sonnet-4.6
 tools: [read_file, write_file, list_dir, run_terminal_command, create_github_issue]
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
-  category: "Uncategorized"
+  category: "DevOps & Infrastructure"
   tags: ["uncategorized"]
   maturity: "beta"
   audience: ["developers"]

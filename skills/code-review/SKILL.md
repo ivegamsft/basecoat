@@ -8,7 +8,7 @@ compatibility:
   platforms:
     - github
 metadata:
-  category: "Uncategorized"
+  category: "Quality & Testing"
   tags: ["uncategorized"]
   maturity: "beta"
   audience: ["developers"]

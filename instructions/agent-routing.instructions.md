@@ -3,6 +3,10 @@ description: "Use when deciding which agent tier to invoke for a task. Provides 
 applyTo: "**/*"
 ---
 
+<!-- applyTo: "**/*" is intentional. Agent-tier routing must be available in every context
+so that the correct tier (cloud agent, fleet, inline) is selected regardless of which file
+is open. Do not narrow this scope. -->
+
 # Agent-Tier Routing for Copilot Workflows
 
 Route every task to the appropriate agent tier before dispatching. Tier selection affects

@@ -1,0 +1,128 @@
+name: GitHub Security Posture
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Monday 9am UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  administration: read
+
+jobs:
+  audit:
+    name: Audit repository security settings
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Run security posture checks
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo  = context.repo.repo;
+            const gaps  = [];
+
+            // ── 1. Branch protection on default branch ───────────────────────
+            try {
+              const { data: bp } = await github.rest.repos.getBranchProtection({
+                owner, repo, branch: 'main',
+              });
+              if (!bp.required_pull_request_reviews) {
+                gaps.push({ check: 'Branch protection', finding: 'PR reviews not required on main' });
+              }
+              if (!bp.required_status_checks) {
+                gaps.push({ check: 'Branch protection', finding: 'Status checks not required on main' });
+              }
+            } catch (e) {
+              gaps.push({ check: 'Branch protection', finding: 'No branch protection rule found on main' });
+            }
+
+            // ── 2. SECURITY.md ───────────────────────────────────────────────
+            try {
+              await github.rest.repos.getContent({ owner, repo, path: 'SECURITY.md' });
+            } catch {
+              try {
+                await github.rest.repos.getContent({ owner, repo, path: '.github/SECURITY.md' });
+              } catch {
+                gaps.push({ check: 'SECURITY.md', finding: 'No SECURITY.md found at root or .github/' });
+              }
+            }
+
+            // ── 3. CODEOWNERS ────────────────────────────────────────────────
+            try {
+              await github.rest.repos.getContent({ owner, repo, path: 'CODEOWNERS' });
+            } catch {
+              try {
+                await github.rest.repos.getContent({ owner, repo, path: '.github/CODEOWNERS' });
+              } catch {
+                gaps.push({ check: 'CODEOWNERS', finding: 'No CODEOWNERS file found at root or .github/' });
+              }
+            }
+
+            // ── 4. Dependabot config ─────────────────────────────────────────
+            try {
+              await github.rest.repos.getContent({ owner, repo, path: '.github/dependabot.yml' });
+            } catch {
+              gaps.push({ check: 'Dependabot', finding: '.github/dependabot.yml not found — auto-updates not configured' });
+            }
+
+            // ── 5. Vulnerability alerts enabled ─────────────────────────────
+            try {
+              await github.rest.repos.checkVulnerabilityAlerts({ owner, repo });
+            } catch {
+              gaps.push({ check: 'Vulnerability alerts', finding: 'Dependabot vulnerability alerts may not be enabled' });
+            }
+
+            // ── Summary ──────────────────────────────────────────────────────
+            if (gaps.length === 0) {
+              core.summary
+                .addHeading('✅ Security Posture — All Clear', 2)
+                .addRaw('All security posture checks passed.')
+                .write();
+              console.log('All security posture checks passed.');
+              return;
+            }
+
+            // Build step summary
+            const rows = gaps.map(g => [g.check, g.finding]);
+            core.summary
+              .addHeading(`⚠️ Security Posture — ${gaps.length} gap(s) found`, 2)
+              .addTable([
+                [{ data: 'Check', header: true }, { data: 'Finding', header: true }],
+                ...rows,
+              ])
+              .write();
+
+            // Open one consolidated issue
+            const existing = await github.rest.issues.listForRepo({
+              owner, repo, labels: 'security,triage', state: 'open',
+            });
+            const alreadyOpen = existing.data.some(i =>
+              i.title.includes('security posture')
+            );
+            if (!alreadyOpen) {
+              const body = [
+                '## Security Posture Gaps',
+                '',
+                '| Check | Finding |',
+                '|-------|---------|',
+                ...gaps.map(g => `| ${g.check} | ${g.finding} |`),
+                '',
+                '_Opened automatically by `github-security-posture.yml`._',
+              ].join('\n');
+
+              await github.rest.issues.create({
+                owner, repo,
+                title: `chore: security posture gaps detected (${gaps.length} finding(s))`,
+                body,
+                labels: ['security', 'triage'],
+              });
+              console.log(`Opened security posture issue with ${gaps.length} gap(s).`);
+            }

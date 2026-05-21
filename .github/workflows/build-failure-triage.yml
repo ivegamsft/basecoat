@@ -1,0 +1,135 @@
+name: Build Failure Triage
+
+on:
+  workflow_run:
+    workflows: ['*']
+    types: [completed]
+
+permissions:
+  actions: read
+  issues: write
+  contents: read
+
+jobs:
+  triage:
+    name: Classify failed workflow run
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event.workflow_run.conclusion == 'failure'
+
+    steps:
+      - name: Classify and report failure
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const run = context.payload.workflow_run;
+
+            // Fetch failed jobs
+            const { data: jobsData } = await github.rest.actions.listJobsForWorkflowRun({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              run_id: run.id,
+            });
+
+            const failedJobs = jobsData.jobs.filter(j => j.conclusion === 'failure');
+
+            // Classify failure by inspecting step names and conclusions
+            let category = 'Unknown';
+            let hint = '_Review the workflow logs for details._';
+
+            const stepNames = failedJobs.flatMap(j => j.steps.map(s => s.name.toLowerCase()));
+            const stepConclusions = failedJobs.flatMap(j =>
+              j.steps.filter(s => s.conclusion === 'failure').map(s => s.name.toLowerCase())
+            );
+            const combined = stepConclusions.join(' ');
+
+            if (/secret|token|credential|permission|auth|403|401/.test(combined)) {
+              category = 'Missing secret or permission';
+              hint = 'Check that required secrets are configured in repo/environment settings.';
+            } else if (/timeout|timed out|exceeded/.test(combined)) {
+              category = 'Runner timeout';
+              hint = 'The job exceeded its time limit. Consider splitting steps or increasing `timeout-minutes`.';
+            } else if (/npm install|pip install|go mod|apt-get|yarn/.test(combined)) {
+              category = 'Dependency fetch failure';
+              hint = 'A package install step failed. Check network access and package version constraints.';
+            } else if (/lint|eslint|pylint|flake8|markdownlint|shellcheck/.test(combined)) {
+              category = 'Lint error';
+              hint = 'Run the linter locally to reproduce: check the failed step for the exact command.';
+            } else if (/test|jest|pytest|rspec|vitest|mocha/.test(combined)) {
+              category = 'Test failure';
+              hint = 'Run the test suite locally to reproduce. Check for flaky tests or missing fixtures.';
+            } else if (/build|compile|tsc|webpack|vite|cargo|dotnet/.test(combined)) {
+              category = 'Build / compile error';
+              hint = 'Run the build command locally. Look for type errors, missing imports, or config issues.';
+            } else if (/docker|container|image/.test(combined)) {
+              category = 'Container build failure';
+              hint = 'Check the Dockerfile and build context. Ensure base images are accessible.';
+            }
+
+            // Check if this job has failed repeatedly (last 5 runs)
+            const { data: recentRuns } = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              workflow_id: run.workflow_id,
+              per_page: 5,
+            });
+
+            const consecutiveFailures = recentRuns.workflow_runs
+              .filter(r => r.conclusion === 'failure').length;
+
+            const runUrl = run.html_url;
+            const workflowName = run.name;
+            const branch = run.head_branch;
+
+            // Post to step summary
+            core.summary
+              .addHeading(`🔴 Build Failure Triage: ${workflowName}`, 2)
+              .addTable([
+                [{ data: 'Field', header: true }, { data: 'Value', header: true }],
+                ['Workflow', workflowName],
+                ['Branch', branch],
+                ['Run', `[#${run.run_number}](${runUrl})`],
+                ['Category', category],
+                ['Consecutive failures (last 5)', String(consecutiveFailures)],
+              ])
+              .addHeading('Remediation hint', 3)
+              .addRaw(hint)
+              .write();
+
+            // Open an issue if there are 3+ consecutive failures
+            if (consecutiveFailures >= 3) {
+              const existing = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo:  context.repo.repo,
+                labels: 'bug,triage',
+                state:  'open',
+              });
+              const alreadyOpen = existing.data.some(i =>
+                i.title.includes(workflowName) && i.title.includes('recurring')
+              );
+              if (!alreadyOpen) {
+                await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo:  context.repo.repo,
+                  title: `bug: recurring failure in "${workflowName}" (${consecutiveFailures} consecutive)`,
+                  body: [
+                    `## Recurring Build Failure`,
+                    '',
+                    `**Workflow:** ${workflowName}`,
+                    `**Branch:** ${branch}`,
+                    `**Category:** ${category}`,
+                    `**Consecutive failures:** ${consecutiveFailures}`,
+                    `**Latest run:** ${runUrl}`,
+                    '',
+                    `### Remediation hint`,
+                    '',
+                    hint,
+                    '',
+                    '_Opened automatically by `build-failure-triage.yml`._',
+                  ].join('\n'),
+                  labels: ['bug', 'triage'],
+                });
+                console.log(`Opened recurring failure issue for ${workflowName}.`);
+              }
+            }

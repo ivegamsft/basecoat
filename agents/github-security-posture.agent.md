@@ -7,7 +7,7 @@ tools: [run_terminal_command, create_github_issue]
 allowed_skills: [github-security-posture, security]
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
-  category: "Uncategorized"
+  category: "Security & Compliance"
   tags: ["uncategorized"]
   maturity: "beta"
   audience: ["developers"]
