@@ -1,7 +1,7 @@
 {
   "$schema": "basecoat-metadata-schema",
   "version": "3.26.0",
-  "generated": "2026-05-17",
+  "generated": "2026-05-21",
   "categories": {
     "AI & Development": {
       "label": "AI & Development",
@@ -1726,6 +1726,24 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/release-readiness-chair.agent.md",
+      "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "config-secrets-audit",
+      "description": "Performs a deep, cross-environment configuration and secrets audit of an entire codebase — inventorying every configuration source, classifying sensitive keys, and producing a comprehensive metadata-only findings report. USE FOR: audit config files, environment variables, CI/CD secrets, IaC parameters, Kubernetes configs, and secrets manager references across all environments; identify hardcoded credentials, unprotected env files, missing vault references, and environment coverage gaps; produce a structured report with classifications and remediation guidance. DO NOT USE FOR: live secret rotation or revocation (use secrets-manager), OWASP vulnerability scanning (use security-analyst), runtime penetration testing (use penetration-test).",
+      "category": "Quality",
+      "keywords": [
+        "config-audit",
+        "secrets",
+        "multi-environment",
+        "inventory",
+        "classification",
+        "compliance"
+      ],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/config-secrets-audit.agent.md",
       "model": "claude-sonnet-4.6",
       "argumentHint": ""
     }

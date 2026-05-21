@@ -2,7 +2,7 @@
 
 This file lists all available agents in the BaseCoat framework.
 
-> **82 agents** available
+> **83 agents** available
 
 | Agent | Description |
 |---|---|
@@ -17,6 +17,7 @@ This file lists all available agents in the BaseCoat framework.
 | [ci-failure-escalation](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/ci-failure-escalation.agent.md) | Detects N consecutive CI failures on the same workflow job, opens a blocking issue, and gates further deploys to that environment — the andon cord / halt-the-line pattern for CI/CD pipelines. USE FOR: gate deploys on ... |
 | [code-review](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/code-review.agent.md) | Use when a task needs a structured, multi-step code review workflow with findings prioritized by severity and file references. |
 | [config-auditor](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/config-auditor.agent.md) | Use when you need to scan a repository for committed or unprotected configuration files that contain secrets, credentials, or sensitive environment-specific values. Produces a findings report with remediation steps. |
+| [config-secrets-audit](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/config-secrets-audit.agent.md) | Deep, cross-environment configuration and secrets audit — inventories every configuration source (config files, env vars, CI/CD secrets, IaC parameters, Kubernetes configs, secrets manager refs), classifies sensitive keys without capturing values, and produces a metadata-only findings report with remediation guidance. USE FOR: comprehensive multi-environment secrets inventory, hardcoded credential detection, CI/CD and IaC secret hygiene audit, environment coverage gap analysis. DO NOT USE FOR: secret rotation (use secrets-manager), OWASP scanning (use security-analyst). |
 | [Container Security](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/container-security.agent.md) | Container and Kubernetes security — Pod Security Standards, runtime security, CSPM findings, image scanning, and supply chain security for containerized workloads. USE FOR: scan container images for CVEs, audit Pod Se... |
 | [containerization-planner](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/containerization-planner.agent.md) | Helps assess containerization readiness, choose deployment platforms (Docker/AKS/ACA), and generate container configurations including Dockerfiles, multi-stage builds, health probes, resource limits, and deployment ma... |
 | [contract-testing](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/contract-testing.agent.md) | Contract Testing Agent for consumer-driven contracts, E2E testing strategy, and mutation testing for distributed systems. USE FOR: write Pact consumer-driven contracts, design service integration tests, set up contrac... |
