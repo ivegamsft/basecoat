@@ -166,6 +166,7 @@ For harness troubleshooting in VS Code, use:
 
 - [VS Code Tools UI and Chat Debug View Runbook](TOOLS_UI_CHAT_DEBUG_RUNBOOK.md)
 - [Per-Model Behavior Matrix](AGENT_TESTING_HARNESS.md#per-model-behavior-matrix)
+- [VS Code Harness Context Assembly Contract](./CONTEXT_ASSEMBLY_CONTRACT.md)
 
 ## Tooling Options
 
