@@ -186,6 +186,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running harness eval gate workflow tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'harness-change-eval-gate-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Harness eval gate workflow tests failed' -ForegroundColor Red
+    Write-FailureLog 'harness-change-eval-gate-tests'
+    exit 1
+}
+
 Write-Host 'Running generate eval stubs tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'generate-eval-stubs-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
