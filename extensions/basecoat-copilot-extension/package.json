@@ -1,0 +1,14 @@
+{
+  "name": "basecoat-copilot-extension",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Sprint 32 scaffold for BaseCoat Copilot Extension",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "@github/copilot-sdk": "^0.1.0"
+  }
+}
