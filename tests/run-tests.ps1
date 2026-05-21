@@ -194,6 +194,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running orchestrator harness conformance tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'orchestrator-harness-conformance-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Orchestrator harness conformance tests failed' -ForegroundColor Red
+    Write-FailureLog 'orchestrator-harness-conformance-tests'
+    exit 1
+}
+
 Write-Host 'Running VS Code harness benchmark suite tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'vscode-harness-benchmark-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

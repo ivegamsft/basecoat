@@ -88,6 +88,17 @@ Purpose: coordinate multiple specialist agents for complex, cross-domain work by
 - Deliver partial completion when some subtasks succeed and others fail, with clear status markers for each branch.
 - Gracefully degrade by handling the work in the orchestrator or with a general-purpose agent when a specialist is unavailable.
 
+## Harness Conformance
+
+- Use the canonical sub-agent harness contract in `docs/agents/MULTI_AGENT_WORKFLOWS.md#canonical-sub-agent-harness-contract`.
+- Dispatch every subtask with a task envelope containing `task_id`, `goal`, `scope`, `acceptance_criteria`, `execution`, and `output_contract`.
+- Include optional task envelope fields when relevant: `inputs` and `retry_context`.
+- Ensure `execution` includes `allowed_files`, `allowed_tools`, `allowed_skills`, and `model`.
+- Require sub-agent response envelopes with `task_id`, `status`, `summary`, `changed_files`, `acceptance_results`, and `evidence`.
+- Require `blockers` when `status` is `blocked` or `failed`; include `follow_ups` when additional actions are recommended.
+- On retry, set `retry_context` with prior failure reasons and focused re-dispatch guidance.
+- Escalate unresolved ambiguity or repeated branch failure to a review or tie-break pass before final delivery.
+
 ## Configuration
 
 Maintain an explicit orchestration configuration that includes the agent registry, routing rules, timeout policy, and budget allocation.
