@@ -70,6 +70,7 @@ See `docs/MODEL_OPTIMIZATION.md` for the full tier matrix. See `docs/token-optim
 | Direct main push | Never — use PR |
 | Scope expanded | Stop, ask if new issue needed |
 | CI failing | Fix before merge |
+| Sprint closeout | Run verify → merge → prune → close/report |
 | Azure auth in Actions | OIDC only — no client secrets |
 | Container image tag | Must include full git SHA |
 | Azure resource naming | CAF conventions |
@@ -86,6 +87,7 @@ See `docs/MODEL_OPTIMIZATION.md` for the full tier matrix. See `docs/token-optim
 | Topic | File |
 |---|---|
 | PR workflow, branch naming, commit format, file placement, PR template | [`references/governance/workflow-rules.md`](references/governance/workflow-rules.md) |
+| Sprint close sequence and command checklist | [`references/governance/workflow-rules.md#sprint-close-workflow-verify--merge--prune--closereport`](references/governance/workflow-rules.md#sprint-close-workflow-verify--merge--prune--closereport) |
 | When to stop vs proceed, agent accountability rules | [`references/governance/agent-self-governance.md`](references/governance/agent-self-governance.md) |
 | OIDC, CAF naming, container tags, env-example, DB concurrency, deployment cancellation | [`references/governance/guardrails-reference.md`](references/governance/guardrails-reference.md) |
 | VS Code tool confirmation tiers and enforcement | [`docs/reference/guardrails/tool-confirmation-policy.md`](../docs/reference/guardrails/tool-confirmation-policy.md) |

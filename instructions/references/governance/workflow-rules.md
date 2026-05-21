@@ -16,6 +16,55 @@ Issue fields required: title, description, acceptance criteria, labels.
 
 Direct pushes to `main` are rejected by branch protection.
 
+## Sprint Close Workflow (Verify → Merge → Prune → Close/Report)
+
+Run this sequence for every sprint closeout batch:
+
+1. **Verify**
+   - Confirm each PR has linked issue(s), green CI, and required approvals.
+   - Confirm local branch is up to date with `origin/main`.
+2. **Merge**
+   - Merge only verified PRs using squash merge per repo policy.
+3. **Prune branches/worktrees**
+   - Delete merged local/remote branches and stale worktree registrations.
+4. **Close/report**
+   - Close completed issues and post a concise sprint close summary with outcomes and carry-forward items.
+
+### Sprint Close Checklist
+
+- [ ] Verified PR status, checks, approvals, and issue links
+- [ ] Merged approved PRs to `main`
+- [ ] Deleted merged branches (local + remote)
+- [ ] Pruned stale worktrees and refs
+- [ ] Closed completed issues
+- [ ] Published sprint close report (done, deferred, risks)
+
+### Command Examples
+
+```bash
+# 1) Verify
+git fetch --all --prune
+git checkout main
+git pull --ff-only origin main
+gh pr list --state open --limit 50
+gh pr checks <pr-number>
+
+# 2) Merge
+gh pr merge <pr-number> --squash --delete-branch
+
+# 3) Prune branches/worktrees
+git branch --merged main
+git branch -d <local-branch>
+git push origin --delete <remote-branch>
+git worktree list
+git worktree prune
+git fetch --prune
+
+# 4) Close/report
+gh issue close <issue-number> --comment "Completed in sprint closeout via PR #<pr-number>."
+gh issue comment <meta-issue-number> --body "Sprint close report: merged PRs ..., closed issues ..., carry-forward ..."
+```
+
 ## Branch Naming
 
 ```text
