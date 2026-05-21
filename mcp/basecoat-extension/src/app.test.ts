@@ -38,11 +38,13 @@ test("GET /health returns ok payload", async () => {
       status: string;
       service: string;
       timestamp: string;
+      rateLimit: { maxRequests: number; windowMs: number };
     };
 
     assert.equal(body.status, "ok");
     assert.equal(body.service, "basecoat-extension");
     assert.ok(Date.parse(body.timestamp));
+    assert.ok(body.rateLimit.maxRequests > 0);
   });
 });
 
@@ -199,6 +201,44 @@ test("POST /api/copilot/tools/create-pr reports external dependency blocker", as
   });
 });
 
+test("rate limiting enforces request cap for copilot routes", async () => {
+  const originalMax = process.env.RATE_LIMIT_MAX_REQUESTS;
+  const originalWindow = process.env.RATE_LIMIT_WINDOW_MS;
+  process.env.RATE_LIMIT_MAX_REQUESTS = "1";
+  process.env.RATE_LIMIT_WINDOW_MS = "60000";
+
+  try {
+    await withServer(async (baseUrl) => {
+      const firstResponse = await fetch(`${baseUrl}/api/copilot/chat`, {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-github-user-id": "test-user" },
+        body: JSON.stringify({}),
+      });
+      assert.equal(firstResponse.status, 501);
+
+      const secondResponse = await fetch(`${baseUrl}/api/copilot/chat`, {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-github-user-id": "test-user" },
+        body: JSON.stringify({}),
+      });
+      assert.equal(secondResponse.status, 429);
+    });
+  } finally {
+    if (originalMax === undefined) {
+      delete process.env.RATE_LIMIT_MAX_REQUESTS;
+    } else {
+      process.env.RATE_LIMIT_MAX_REQUESTS = originalMax;
+    }
+
+    if (originalWindow === undefined) {
+      delete process.env.RATE_LIMIT_WINDOW_MS;
+    } else {
+      process.env.RATE_LIMIT_WINDOW_MS = originalWindow;
+    }
+  }
+});
+
 after(async () => {
   await rm(testWorkRoot, { recursive: true, force: true });
 });
+

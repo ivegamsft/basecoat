@@ -1,10 +1,13 @@
 import { createApp } from "./app.js";
 import { copilotRuntime } from "./copilot-runtime.js";
+import { logger } from "./logger.js";
+import { initializeObservability } from "./observability.js";
 
 const port = Number.parseInt(process.env.PORT ?? "3000", 10);
+initializeObservability();
 const app = createApp();
 const server = app.listen(port, () => {
-  console.log(`basecoat-extension listening on port ${port}`);
+  logger.info("server_started", { port });
 });
 
 const shutdown = async () => {
