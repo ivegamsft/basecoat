@@ -30,6 +30,19 @@ handoffs:
 Use `send: false` for all Base Coat handoffs. This lets the user review the
 pre-filled context, make adjustments, and confirm intent before the next agent runs.
 
+## Handoff UI vs. Sub-Agent Harness Contract
+
+Handoffs and harness contracts solve different problems:
+
+- `handoffs` is a VS Code UI transition mechanism (button + pre-filled prompt).
+- The harness contract is the canonical machine-readable payload used by
+  orchestrators when dispatching sub-agent work and validating responses.
+
+When a handoff launches a workflow that includes sub-agent execution, use the
+canonical contract in:
+
+- `docs/agents/MULTI_AGENT_WORKFLOWS.md#canonical-sub-agent-harness-contract`
+
 ## Handoff Chains
 
 The following chains are implemented across Base Coat agents.
@@ -215,6 +228,7 @@ handoffs:
 ## References
 
 - [VS Code Custom Agents — Handoffs](https://code.visualstudio.com/docs/copilot/customization/custom-agents)
-- `docs/MULTI_AGENT_WORKFLOWS.md` — parallel branch strategies and conflict avoidance
-- `docs/token-optimization.md` — handoff template for context compression between agents
+- `docs/agents/MULTI_AGENT_WORKFLOWS.md` — parallel branch strategies and conflict avoidance
+- `docs/agents/MULTI_AGENT_WORKFLOWS.md#canonical-sub-agent-harness-contract` — canonical sub-agent harness contract
+- `docs/guides/token-optimization.md` — handoff template for context compression between agents
 - `instructions/agents.instructions.md` — agent authoring standards including handoff conventions

@@ -264,6 +264,114 @@ done
 - Sequential workflows such as build → test → deploy
 - Tasks that require shared context accumulation in one place
 
+### Canonical Sub-Agent Harness Contract
+
+Use this contract as the single source of truth when dispatching and collecting
+sub-agent work in multi-agent workflows.
+
+#### Required task envelope (orchestrator → sub-agent)
+
+| Field | Type | Required | Purpose |
+|---|---|---|---|
+| `task_id` | string | Yes | Stable identifier used for retries and traceability |
+| `goal` | string | Yes | Outcome the sub-agent must achieve |
+| `scope` | object | Yes | Bounded file paths and explicit out-of-scope constraints |
+| `acceptance_criteria` | string[] | Yes | Testable checks used in Stage 1 spec compliance |
+| `execution` | object | Yes | Allowed tools, skills, model, and operational limits |
+| `output_contract` | object | Yes | Required response shape and evidence expectations |
+| `inputs` | object | No | Optional context artifacts (issue links, prior findings, diffs) |
+| `retry_context` | object | No | Prior failure reasons and focused re-dispatch guidance |
+
+`execution` must include `allowed_files`, `allowed_tools`, `allowed_skills`, and
+`model`.
+
+#### Required response envelope (sub-agent → orchestrator)
+
+| Field | Type | Required | Purpose |
+|---|---|---|---|
+| `task_id` | string | Yes | Correlates response to dispatched task |
+| `status` | string | Yes | One of `completed`, `blocked`, `partial`, `failed` |
+| `summary` | string | Yes | Brief outcome summary |
+| `changed_files` | string[] | Yes | Files modified (empty array if none) |
+| `acceptance_results` | object[] | Yes | Per-criterion pass/fail evidence |
+| `evidence` | object | Yes | Commands, test outputs, and references supporting claims |
+| `blockers` | string[] | Conditionally | Required when `status` is `blocked` or `failed` |
+| `follow_ups` | string[] | No | Suggested next actions or tickets |
+
+#### Concrete packet example
+
+```json
+{
+  "task_envelope": {
+    "task_id": "issue-1058-doc-contract",
+    "goal": "Document canonical sub-agent harness contract in multi-agent workflows.",
+    "scope": {
+      "allowed_files": [
+        "docs/agents/MULTI_AGENT_WORKFLOWS.md",
+        "docs/agents/AGENT_RUNTIME_ENFORCEMENT.md",
+        "docs/agents/agent-handoffs.md",
+        "instructions/subagent-review.instructions.md"
+      ],
+      "out_of_scope": [
+        "agent behavior changes",
+        "workflow automation changes"
+      ]
+    },
+    "acceptance_criteria": [
+      "Canonical contract section added with task and response envelopes.",
+      "AGENT_RUNTIME_ENFORCEMENT.md links to canonical contract.",
+      "agent-handoffs.md links to canonical contract and clarifies handoff vs contract.",
+      "subagent-review.instructions.md references canonical contract."
+    ],
+    "execution": {
+      "allowed_files": [
+        "docs/agents/**",
+        "instructions/subagent-review.instructions.md"
+      ],
+      "allowed_tools": ["view", "rg", "apply_patch"],
+      "allowed_skills": [],
+      "model": "claude-sonnet-4.6"
+    },
+    "output_contract": {
+      "format": "response_envelope_v1",
+      "include_evidence": true
+    }
+  },
+  "response_envelope": {
+    "task_id": "issue-1058-doc-contract",
+    "status": "completed",
+    "summary": "Canonical contract documented and linked from required docs.",
+    "changed_files": [
+      "docs/agents/MULTI_AGENT_WORKFLOWS.md",
+      "docs/agents/AGENT_RUNTIME_ENFORCEMENT.md",
+      "docs/agents/agent-handoffs.md",
+      "instructions/subagent-review.instructions.md"
+    ],
+    "acceptance_results": [
+      {
+        "criterion": "Canonical contract section added with task and response envelopes.",
+        "result": "pass",
+        "evidence": "See section: Canonical Sub-Agent Harness Contract"
+      }
+    ],
+    "evidence": {
+      "commands": ["pwsh scripts/validate-basecoat.ps1"],
+      "artifacts": []
+    },
+    "blockers": [],
+    "follow_ups": []
+  }
+}
+```
+
+#### Handoff UI vs. harness contract
+
+- **Handoff UI (`handoffs`)** defines user-facing transitions between agents.
+- **Harness contract** defines machine-readable dispatch/response packets used by
+  orchestrators and review gates.
+- A handoff can launch a sub-agent task, but it does not replace the required task
+  and response envelopes above.
+
 ### Patterns
 
 #### Fan-Out / Fan-In

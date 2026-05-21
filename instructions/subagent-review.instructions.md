@@ -9,6 +9,10 @@ When an orchestrator dispatches work to subagents, each task output must pass
 two sequential review stages before acceptance. This prevents spec drift from
 compounding across parallel tasks.
 
+Before Stage 1 review, verify the task used the canonical packet structure in:
+
+- `docs/agents/MULTI_AGENT_WORKFLOWS.md#canonical-sub-agent-harness-contract`
+
 ## Stage 1 — Spec Compliance
 
 Does the output match what was requested?
