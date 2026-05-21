@@ -6,6 +6,7 @@ This guide describes the Phase 1 behavioral evaluation harness for BaseCoat asse
 
 - [Agent Testing Harness](./AGENT_TESTING_HARNESS.md)
 - [Per-Model Behavior Matrix](./AGENT_TESTING_HARNESS.md#per-model-behavior-matrix)
+- [VS Code Harness Benchmarks](./VS_CODE_HARNESS_BENCHMARKS.md)
 
 ## What it does
 

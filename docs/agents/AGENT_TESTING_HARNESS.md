@@ -103,6 +103,28 @@ After compaction, remaining history may be summarized, but preserved fields must
 This matrix defines expected behavior for live, tool-enabled harness runs in VS Code.
 For fixture-based scoring with no live model invocation, see [Behavioral Evaluation (Phase 1)](./BEHAVIORAL_EVAL.md).
 
+## VS Code Harness Benchmark Suite
+
+Use the benchmark suite and regression thresholds for harness-specific checks that are not covered by the Phase 1 smoke eval.
+
+- Suite definition: `tests/evals/vscode-harness-benchmark-suite.json`
+- Regression thresholds: `tests/evals/vscode-harness-regression-thresholds.json`
+- Execution guide: [VS Code Harness Benchmarks](./VS_CODE_HARNESS_BENCHMARKS.md)
+
+The suite is organized around VS Code harness behavior categories:
+
+- Multi-turn tool use
+- MCP and external tool routing
+- Terminal and browser interaction loops
+- Stop-condition and cancellation compliance
+
+It tracks harness regression signals aligned to issue #1055:
+
+- Resolution rate
+- Prompt and completion token cost
+- p95 end-to-end latency
+- Tool calls per resolved run
+
 | Model | Primary scope in harness | Practical limits | Reliability caveats | Expected tool behavior |
 |---|---|---|---|---|
 | `claude-haiku-4.5` | Fast triage, lightweight classification, low-risk routing | Higher risk of shallow reasoning on long multi-constraint prompts; keep tool payloads compact | May stop early with a plausible but incomplete answer if constraints are spread across turns | Should make targeted single-tool calls, avoid broad fan-out, and request follow-up tools only when prior results are insufficient |

@@ -194,6 +194,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running VS Code harness benchmark suite tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'vscode-harness-benchmark-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'VS Code harness benchmark suite tests failed' -ForegroundColor Red
+    Write-FailureLog 'vscode-harness-benchmark-tests'
+    exit 1
+}
+
 Write-Host 'Running generate eval stubs tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'generate-eval-stubs-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
