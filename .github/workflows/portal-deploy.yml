@@ -29,7 +29,7 @@ env:
 jobs:
   deploy:
     name: Build and deploy portal
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
     environment: staging
 
     steps:
