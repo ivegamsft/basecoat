@@ -2,6 +2,11 @@
 
 This guide describes the Phase 1 behavioral evaluation harness for BaseCoat assets.
 
+## Related harness docs
+
+- [Agent Testing Harness](./AGENT_TESTING_HARNESS.md)
+- [Per-Model Behavior Matrix](./AGENT_TESTING_HARNESS.md#per-model-behavior-matrix)
+
 ## What it does
 
 The evaluator runs smoke cases from `tests/evals/smoke.behavior.json` and scores:

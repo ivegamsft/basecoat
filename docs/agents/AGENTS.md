@@ -5,6 +5,8 @@ This file lists all available agents in the BaseCoat framework.
 ## Related harness docs
 
 - [Agent Testing Harness](./AGENT_TESTING_HARNESS.md)
+- [Per-Model Behavior Matrix](./AGENT_TESTING_HARNESS.md#per-model-behavior-matrix)
+- [Behavioral Evaluation (Phase 1)](./BEHAVIORAL_EVAL.md)
 
 > **82 agents** available
 

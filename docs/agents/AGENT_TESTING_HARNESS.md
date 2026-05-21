@@ -98,6 +98,26 @@ When compaction runs, the harness must preserve:
 
 After compaction, remaining history may be summarized, but preserved fields must remain verbatim.
 
+## Per-Model Behavior Matrix
+
+This matrix defines expected behavior for live, tool-enabled harness runs in VS Code.
+For fixture-based scoring with no live model invocation, see [Behavioral Evaluation (Phase 1)](./BEHAVIORAL_EVAL.md).
+
+| Model | Primary scope in harness | Practical limits | Reliability caveats | Expected tool behavior |
+|---|---|---|---|---|
+| `claude-haiku-4.5` | Fast triage, lightweight classification, low-risk routing | Higher risk of shallow reasoning on long multi-constraint prompts; keep tool payloads compact | May stop early with a plausible but incomplete answer if constraints are spread across turns | Should make targeted single-tool calls, avoid broad fan-out, and request follow-up tools only when prior results are insufficient |
+| `claude-sonnet-4.6` | Default balanced harness model for most multi-step tasks | Can degrade when transcripts are very long and tool schemas are large; compaction should be enabled | Occasional argument-shape drift on complex tool schemas; enforce schema validation and retries | Should choose tools when facts are required, chain tools in bounded rounds, and synthesize tool outputs before finalizing |
+| `claude-opus-4.7` | Deep reasoning, adversarial analysis, policy-heavy synthesis | Higher latency and cost per run; use when complexity justifies depth | Can over-explore and consume turn budget if prompts do not define stopping criteria | Should plan tool usage before dispatch, use fewer but higher-value tool calls, and provide explicit rationale tied to tool evidence |
+| `gpt-5-mini` | High-throughput extraction, formatting, and straightforward transformations | Less robust on ambiguous requirements with hidden constraints | Can over-index on recent messages and miss older constraints after compaction summaries | Should prefer deterministic lookup-style tools, keep arguments explicit, and avoid speculative multi-tool chains |
+| `gpt-5.4` | Strong general reasoning with moderate-to-complex tool orchestration | Sensitive to noisy tool outputs; may need stricter post-tool validation checks | May produce confident synthesis from partially relevant tool results unless guardrails enforce provenance | Should call discovery tools first, refine with focused follow-up calls, and cite which tool outputs drove the conclusion |
+| `gpt-5.3-codex` | Code-aware analysis, repo/tool workflows, and structured technical tasks | Not ideal for non-technical open-ended narrative tasks in harness evals | May optimize for code/task completion over style constraints unless explicitly scored | Should prioritize code/search/build tools, preserve argument precision, and terminate once required technical evidence is collected |
+
+### Matrix usage notes
+
+- Treat this as operational guidance, not a fixed quality ranking.
+- Validate model fit against task class, budget, and latency targets before pinning defaults.
+- When behavior differs from the matrix, capture repro prompts in eval assets and update this table with observed evidence.
+
 ## Test Types
 
 ### Unit Testing
