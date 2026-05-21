@@ -2,6 +2,10 @@
 
 This file lists all available agents in the BaseCoat framework.
 
+## Related harness docs
+
+- [Agent Testing Harness](./AGENT_TESTING_HARNESS.md)
+
 > **82 agents** available
 
 | Agent | Description |

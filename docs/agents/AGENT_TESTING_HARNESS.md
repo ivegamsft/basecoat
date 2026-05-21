@@ -13,6 +13,91 @@ Agents operate in complex environments with non-deterministic outputs, making tr
 - Quantitative evaluation metrics for accuracy, relevance, and safety
 - CI/CD integration for continuous agent quality monitoring
 
+## Operator Troubleshooting Runbook
+
+For VS Code diagnostics of harness executions, use:
+
+- [VS Code Tools UI and Chat Debug View Runbook](TOOLS_UI_CHAT_DEBUG_RUNBOOK.md)
+
+The runbook covers:
+
+- Opening Chat Debug View
+- Verifying tool exposure in the chat tool picker
+- Inspecting prompt and tool-call traces
+- Troubleshooting missing tools and malformed calls
+- An end-to-end debug walkthrough
+
+## VS Code Harness Loop Semantics
+
+This section defines the canonical execution model used by the VS Code harness.
+
+### Canonical terms
+
+- **Turn**: one model response cycle. The assistant may emit tool calls or a terminal natural-language response.
+- **Round**: one tool-execution cycle that starts when a turn emits one or more tool calls and ends when all tool results are appended.
+- **Run**: the full lifecycle from initial user input until a terminal response or a forced stop condition.
+
+### Run state machine
+
+1. Initialize run context (system prompt, user prompt, tool registry, counters).
+2. Execute a turn.
+3. If the turn emits tool calls, execute one round and continue to the next turn.
+4. If the turn emits no tool calls, treat it as terminal and end the run.
+5. End early if any stop condition is met.
+
+### Stop conditions
+
+The harness stops a run immediately when any of the following occurs:
+
+- Terminal assistant response with no tool calls.
+- Tool-call budget is exhausted.
+- Turn budget is exhausted.
+- Wall-clock timeout is reached.
+- Cancellation token is set by user or host.
+- Stop hook returns `stop=true` (for policy or guardrail violations).
+- Consecutive tool-failure threshold is reached.
+
+### Control limits
+
+Use these default limits unless an eval scenario explicitly overrides them.
+
+| Limit | Default | Purpose |
+|---|---:|---|
+| Max turns per run | 24 | Prevents unbounded recursive planning loops |
+| Max rounds per run | 24 | Keeps tool-execution loops aligned with turn cap |
+| Max tool calls per run | 48 | Caps aggregate tool fan-out and cost |
+| Max tool calls per turn | 8 | Prevents single-turn burst abuse |
+| Consecutive tool failures | 3 | Stops repeated failing retries |
+| Run timeout | 300 s | Enforces predictable test duration |
+| Cancellation poll interval | Every round + before each tool call | Guarantees bounded cancellation latency |
+
+### Cancellation and failure semantics
+
+- Cancellation checks must run before dispatching each tool call and after each round.
+- A cancellation event always wins over retries and ends the run with `status=cancelled`.
+- Tool failures are recorded per call. Retried calls increment both retry count and total call count.
+- When the consecutive failure limit is hit, end the run with `status=failed_limit`.
+
+### Context compaction and preservation guarantees
+
+Compaction is allowed only at round boundaries so the model never loses in-flight tool results.
+
+Compaction should trigger when any of the following thresholds is met:
+
+- Prompt context reaches 80% of configured token window.
+- Serialized transcript exceeds 256 KB.
+- Turn count exceeds 16 and run is still active.
+
+When compaction runs, the harness must preserve:
+
+- System and developer instructions.
+- Latest user request and explicit constraints.
+- Final assistant output from the two most recent turns.
+- Tool call and tool result records for the four most recent rounds.
+- Active budget counters (turns, rounds, tool calls, retries, elapsed time).
+
+After compaction, remaining history may be summarized, but preserved fields must remain verbatim.
+
 ## Test Types
 
 ### Unit Testing
