@@ -5,6 +5,26 @@ Schema version: **1.0.0**
 This document defines the published contract for dashboard output artifacts under
 `dashboard/metrics/` on `gh-pages`.
 
+## Canonical vocabulary and usage rules
+
+Use these terms consistently across docs, issues, and dashboard summaries:
+
+| Canonical term | Definition | Use this term instead of |
+|---|---|---|
+| **Dashboard monitored repository** | Repository explicitly listed in `DASHBOARD_REPOS` and scanned by `adoption-metrics.yml` | participant repo, enrolled repo, tracked repo |
+| **Dashboard participating repository** | Dashboard monitored repository that appears in the current `latest.json` output | active repo, included repo, onboarded repo |
+| **Telemetry artifact** | One generated output file in `dashboard/metrics/` (`latest.json`, `history.json`, `alerts.json`, `SUMMARY.md`) | metrics file, dashboard file |
+| **Snapshot** | One collection run keyed by `collected_at` | weekly dump, sample |
+| **Coverage** | Presence-based estimate of BaseCoat asset adoption from `basecoat_coverage` fields | adoption score, install score |
+| **Pass rate** | CI reliability metric from measurable run conclusions only | CI health score, success score |
+
+Usage rules:
+
+1. Use **dashboard monitored repository** when discussing configuration (`DASHBOARD_REPOS`).
+2. Use **dashboard participating repository** when discussing current output records.
+3. Use **telemetry artifact** when referencing files under `dashboard/metrics/`.
+4. Use **pass rate** with a window qualifier (`20-run` or `100-run`) when precision matters.
+
 ## Compatibility policy
 
 - Additive changes (new fields) are backward-compatible.
@@ -140,6 +160,10 @@ Limitations:
 
 ## Glossary
 
+- **Dashboard monitored repository**: Repository configured in `DASHBOARD_REPOS`
+  for weekly dashboard scanning.
+- **Dashboard participating repository**: Dashboard monitored repository present in
+  the current `latest.json` output.
 - **Artifact**: One output file produced by the weekly metrics collector.
 - **Snapshot**: A single run's metric output at `collected_at`.
 - **Measurable run**: A workflow run with conclusions included in CI denominator.

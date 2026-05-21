@@ -46,6 +46,16 @@ Weekly output also includes CI reliability signals per repository in both
 For a complete field-level contract, definitions, and interpretation guidance, see
 [Dashboard Metrics Schema and Glossary](reference/metrics-schema-glossary.md).
 
+## Canonical vocabulary
+
+Use canonical telemetry terms from
+[Dashboard Metrics Schema and Glossary](reference/metrics-schema-glossary.md#canonical-vocabulary-and-usage-rules),
+especially when writing docs, issues, and summaries for adoption telemetry:
+
+- **Dashboard monitored repository** for `DASHBOARD_REPOS` configuration
+- **Dashboard participating repository** for repos present in current outputs
+- **Telemetry artifact** for files in `dashboard/metrics/`
+
 ## Onboard a dashboard monitored repository
 
 Use this flow to opt a repository into dashboard monitoring.
