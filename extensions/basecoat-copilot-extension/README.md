@@ -31,7 +31,18 @@ Expected response:
 {"status":"ok","service":"basecoat-copilot-extension"}
 ```
 
-## Follow-on work
+## MCP proxy routes
 
-- #1129 MCP proxy routes
+Implemented for #1129:
+
+- `POST /api/extension/search` → proxies `search-skills` / `search-agents`
+- `GET /api/extension/metrics` → proxies `get-latest-metrics`, `get-history`,
+  `get-alerts`, `get-repo-metrics`
+- `POST /api/extension/details` → proxies `get-asset-details`
+
+See integration contract:
+`docs/integrations/copilot-extension-mcp-proxy.md`
+
+## Remaining follow-on work
+
 - #1130 OAuth middleware guardrails aligned to #1073 blocker
