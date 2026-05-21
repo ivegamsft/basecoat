@@ -160,6 +160,12 @@ Copilot SDK protocol. It runs in CI weekly via the `behavioral-eval.yml` workflo
 **Resolution:** When the waza project releases a version that bundles Copilot SDK v3+,
 `azd waza run` will work again. Until then, use the built-in harness for all evals.
 
+## VS Code Diagnostics Runbook
+
+For harness troubleshooting in VS Code, use:
+
+- [VS Code Tools UI and Chat Debug View Runbook](TOOLS_UI_CHAT_DEBUG_RUNBOOK.md)
+
 ## Tooling Options
 
 Several implementation approaches work well for agent evals.
