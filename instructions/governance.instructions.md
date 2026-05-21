@@ -25,6 +25,7 @@ These are not suggestions. Every AI agent operating in `ivegamsft/basecoat` must
 - **DB migrations:** Workflows running DB migrations must set `cancel-in-progress: false`. See [`docs/guardrails/db-deployment-concurrency.md`](docs/guardrails/db-deployment-concurrency.md).
 - **Deployment cancellation:** Run a pre-flight check before stopping any in-progress infrastructure deployment. See [`docs/guardrails/deployment-cancellation.md`](docs/guardrails/deployment-cancellation.md).
 - **Tool confirmation:** In VS Code agent mode, side-effecting tool calls require explicit user confirmation before execution. See [`docs/reference/guardrails/tool-confirmation-policy.md`](../docs/reference/guardrails/tool-confirmation-policy.md).
+- **Sub-agent redispatch policy:** Orchestrators must follow the canonical redispatch/retry/escalation policy and stop auto-loops at escalation threshold. See [`docs/agents/MULTI_AGENT_WORKFLOWS.md#sub-agent-redispatch-retry-and-escalation-policy`](../docs/agents/MULTI_AGENT_WORKFLOWS.md#sub-agent-redispatch-retry-and-escalation-policy).
 
 ## Batch PR Size Guideline
 
@@ -76,6 +77,7 @@ See `docs/MODEL_OPTIMIZATION.md` for the full tier matrix. See `docs/token-optim
 | DB migration workflow | `cancel-in-progress: false` |
 | Stop deployment mid-flight | Pre-flight check required |
 | VS Code side-effecting tool call | Require explicit confirmation before execution |
+| Sub-agent run fails repeatedly | Follow canonical redispatch policy; escalate at threshold |
 | Message has `bug:` / `feature:` prefix | See intent-routing instructions |
 | Bulleted `- feature:` item | Log to backlog; do not implement |
 
@@ -87,4 +89,5 @@ See `docs/MODEL_OPTIMIZATION.md` for the full tier matrix. See `docs/token-optim
 | When to stop vs proceed, agent accountability rules | [`references/governance/agent-self-governance.md`](references/governance/agent-self-governance.md) |
 | OIDC, CAF naming, container tags, env-example, DB concurrency, deployment cancellation | [`references/governance/guardrails-reference.md`](references/governance/guardrails-reference.md) |
 | VS Code tool confirmation tiers and enforcement | [`docs/reference/guardrails/tool-confirmation-policy.md`](../docs/reference/guardrails/tool-confirmation-policy.md) |
+| Sub-agent redispatch/retry/escalation policy | [`docs/agents/MULTI_AGENT_WORKFLOWS.md#sub-agent-redispatch-retry-and-escalation-policy`](../docs/agents/MULTI_AGENT_WORKFLOWS.md#sub-agent-redispatch-retry-and-escalation-policy) |
 | Intent prefix routing, timing semantics, prefix-to-agent map | [`instructions/intent-routing.instructions.md`](../instructions/intent-routing.instructions.md) |

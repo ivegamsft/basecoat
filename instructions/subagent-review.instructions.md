@@ -12,6 +12,7 @@ compounding across parallel tasks.
 Before Stage 1 review, verify the task used the canonical packet structure in:
 
 - `docs/agents/MULTI_AGENT_WORKFLOWS.md#canonical-sub-agent-harness-contract`
+- `docs/agents/MULTI_AGENT_WORKFLOWS.md#sub-agent-redispatch-retry-and-escalation-policy`
 
 ## Stage 1 — Spec Compliance
 
@@ -32,10 +33,9 @@ If Stage 1 fails:
 1. Document which acceptance criteria are unmet.
 2. Re-dispatch the task with specific feedback (not "try again").
 3. Include the failing criteria and what the output is missing.
-4. A task may be re-dispatched at most twice for Stage 1 failures.
+4. Apply the canonical redispatch policy thresholds.
 
-After two Stage 1 failures, escalate to human review or re-plan the task
-(it may be under-specified or infeasible as written).
+After two Stage 1 failures, escalate to human review or re-plan the task.
 
 ## Stage 2 — Code Quality
 
@@ -61,8 +61,8 @@ If Stage 2 fails:
 2. Re-dispatch with the quality feedback attached.
 3. A task may be re-dispatched once for Stage 2 failures.
 
-After one Stage 2 failure and re-dispatch, accept the best version and file
-a follow-up task for the remaining quality issues.
+After one Stage 2 failure and re-dispatch, accept the best version and file a
+follow-up task for the remaining quality issues.
 
 ## Integration with Orchestrator
 
@@ -73,12 +73,16 @@ When the orchestrator collects subagent results:
 3. Run Stage 2 on each Stage-1-passed result.
 4. Only integrate results that pass both stages.
 
-## Failure Escalation
+## Failure Escalation Matrix
 
-| Scenario | Action |
-|----------|--------|
-| Stage 1 fails once | Re-dispatch with feedback |
-| Stage 1 fails twice | Escalate to human or re-plan |
-| Stage 2 fails once | Re-dispatch with quality feedback |
-| Stage 2 fails after re-dispatch | Accept best version, file follow-up |
-| Multiple tasks fail Stage 1 | The plan may be under-specified — pause and re-plan |
+Use this table when deciding redispatch, retry/backoff, escalation, and terminal
+state for any sub-agent run.
+
+| Condition | Re-dispatch action | Retry/backoff | Escalation threshold | Terminal state |
+|---|---|---|---|---|
+| Stage 1 spec-compliance failure | Re-dispatch with unmet criteria and explicit expected deltas | Immediate retry for first miss; second miss after 5-minute cool-down | 2 Stage 1 misses for same task | Escalate to human or re-plan |
+| Stage 2 quality failure | Re-dispatch with line-level quality fixes only | One retry only | Stage 2 still fails after retry | Accept best version + file follow-up |
+| Transient infra/tool failure | Re-dispatch with diagnostics and same objective | Backoff at 2m, 5m, 15m (max 3 retries) | 3 transient retries exhausted | Escalate for operator intervention |
+| No-progress rerun (substantially identical output) | Re-dispatch only with materially updated feedback packet | Minimum 10-minute backoff before rerun | 2 no-progress reruns | Escalate and re-plan task/agent routing |
+| Budget/context exhaustion | Re-dispatch only after decomposing to smaller scope | One retry after decomposition | Retry still exceeds budget | Re-plan into smaller tasks |
+| Hard blocker (missing dependency/secret/policy limit) | Return blocker and required owner action | No automatic retry | Immediate | Blocked |
