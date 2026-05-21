@@ -81,7 +81,8 @@ PS> .\bootstrap-credentials.ps1 `
 .NOTES
 Author: Platform Engineer / Deployment Task
 Generated: Sprint 31
-Updated: Smart defaults for minimal interaction
+Updated: Bootstrap with auto-create GitHub App capability
+#>
 
 param(
     [Parameter(Mandatory = $false)]
@@ -159,8 +160,13 @@ function New-GitHubApp {
             webhook_events = @("push", "pull_request", "issues", "issue_comment")
             public = $false
         } | ConvertTo-Json
-
-        $response = gh api "/orgs/$OrgName/apps" -X POST --input - <<< $payload 2>&1
+        
+        # Use @base64 input for gh CLI
+        $tempFile = [System.IO.Path]::GetTempFileName()
+        Set-Content -Path $tempFile -Value $payload -Encoding UTF8
+        
+        $response = & gh api "/orgs/$OrgName/apps" -X POST --input $tempFile 2>&1
+        Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
         
         if ($LASTEXITCODE -ne 0) {
             Write-Error-Custom "Failed to create GitHub App. Response: $response"
