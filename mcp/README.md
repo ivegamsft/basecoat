@@ -44,3 +44,8 @@ docker run --rm -i basecoat-mcp
 ## Example Client Config
 
 See `examples/mcp/basecoat.mcp.json` for a sample MCP client entry.
+
+## Copilot Extension Scaffold
+
+The initial Copilot Extension runtime scaffold lives at `mcp/basecoat-extension/`.
+It uses `@github/copilot-sdk` with an Express runtime skeleton and health endpoint.
