@@ -3,19 +3,6 @@ on:
   workflow_run:
     workflows:
       - CI
-      - PR Validation
-      - Validate BaseCoat
-      - Validate Repo Template Sample
-      - Package Base Coat
-      - Deploy Docs
-      - MCP Build
-      - MCP Deploy
-      - Release
-      - Publish to Production
-      - Terraform Deploy
-      - Post-Deploy Smoke Test
-      - Version Consistency Check
-      - Consumer Sync Validation
     branches: [main]
     types: [completed]
   workflow_dispatch:
@@ -36,7 +23,7 @@ safe-outputs:
     max: 1
     close-older-issues: true
 concurrency:
-  group: "gh-aw-${{ github.workflow }}-${{ github.event.workflow_run.id || inputs.run_id || github.run_id }}"
+  group: "gh-aw-${{ github.workflow }}-${{ github.event.workflow_run.head_sha || github.event.workflow_run.id || inputs.run_id || github.run_id }}"
   cancel-in-progress: true
 engine: copilot
 timeout-minutes: 20
@@ -54,6 +41,7 @@ diagnosis and remediation guidance.
 - **Commit SHA**: `${{ github.event.workflow_run.head_sha }}`
 - **Conclusion**: `${{ github.event.workflow_run.conclusion }}`
 - **Repository**: `${{ github.repository }}`
+- **Watched workflow**: `CI` on `main` only (to avoid redundant workflow_run fan-out)
 - **Auto mode guard**: automatic `workflow_run` handling is gated by repo variable `SELF_HEALING_CI_AUTO=true` (disabled by default when unset).
 
 Fetch full workflow run details using:

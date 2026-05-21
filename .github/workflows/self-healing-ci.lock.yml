@@ -67,25 +67,12 @@ name: "Self-Healing CI — Automated Failure Diagnosis"
     - completed
     workflows:
     - CI
-    - PR Validation
-    - Validate BaseCoat
-    - Validate Repo Template Sample
-    - Package Base Coat
-    - Deploy Docs
-    - MCP Build
-    - MCP Deploy
-    - Release
-    - Publish to Production
-    - Terraform Deploy
-    - Post-Deploy Smoke Test
-    - Version Consistency Check
-    - Consumer Sync Validation
 
 permissions: {}
 
 concurrency:
   cancel-in-progress: true
-  group: gh-aw-${{ github.workflow }}-${{ github.event.workflow_run.id || inputs.run_id || github.run_id }}
+  group: gh-aw-${{ github.workflow }}-${{ github.event.workflow_run.head_sha || github.event.workflow_run.id || inputs.run_id || github.run_id }}
 
 run-name: Self-Healing CI — run ${{ github.event.workflow_run.id || inputs.run_id || github.run_id }}
 
@@ -1407,4 +1394,3 @@ jobs:
             /tmp/gh-aw/safe-output-items.jsonl
             /tmp/gh-aw/temporary-id-map.json
           if-no-files-found: ignore
-
