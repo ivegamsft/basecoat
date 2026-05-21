@@ -1,7 +1,7 @@
 #Requires -Version 7.0
 <#
 .SYNOPSIS
-Bootstrap GitHub App credentials for BaseCoat Copilot Extension.
+Bootstrap GitHub App credentials for BaseCoat Copilot Extension (minimal interaction).
 
 .DESCRIPTION
 Stores GitHub App credentials in GitHub repository secrets (for CI/CD) and Azure Key Vault (for production).
@@ -10,34 +10,50 @@ This is a credentials-only bootstrap script—infrastructure deployment is handl
 Chicken-egg problem: The extension-deploy workflow needs GitHub App credentials before it can deploy.
 This script bridges that gap by configuring the secrets.
 
+SMART DEFAULTS: All credentials can be provided via environment variables or command-line parameters.
+For minimal interaction, set environment variables and run with no parameters.
+
 Prerequisites:
 - GitHub CLI (gh) authenticated and authorized to configure repository secrets
-- Azure CLI (az) authenticated with Key Vault permissions (for production)
+- Azure CLI (az) authenticated with Key Vault permissions (optional, for production)
 - GitHub App registered in IBuySpy-Shared org (#1073)
-- GitHub App credentials from org-admin
+- GitHub App credentials from org-admin (as env vars or params)
 
 .PARAMETER AppId
-GitHub App ID
+GitHub App ID. If not provided, reads from $env:BASECOAT_EXTENSION_GITHUB_APP_ID
 
 .PARAMETER ClientId
-GitHub OAuth Client ID
+GitHub OAuth Client ID. If not provided, reads from $env:BASECOAT_EXTENSION_GITHUB_CLIENT_ID
 
 .PARAMETER ClientSecret
-GitHub OAuth Client Secret
+GitHub OAuth Client Secret. If not provided, reads from $env:BASECOAT_EXTENSION_GITHUB_CLIENT_SECRET
 
 .PARAMETER WebhookSecret
-GitHub webhook signature secret
+GitHub webhook signature secret. If not provided, reads from $env:BASECOAT_EXTENSION_WEBHOOK_SECRET
 
 .PARAMETER PrivateKeyPath
-Path to GitHub App private key PEM file
+Path to GitHub App private key PEM file. Default: ./private-key.pem
+If not provided, reads from $env:BASECOAT_EXTENSION_PRIVATE_KEY_PATH
 
 .PARAMETER Repo
 GitHub repository in format 'owner/repo'. Default: IBuySpy-Shared/basecoat
+If not provided, reads from $env:BASECOAT_EXTENSION_REPO
 
 .PARAMETER KeyVaultName
 Azure Key Vault name for production (optional). If provided, secrets are also stored in vault.
+If not provided, reads from $env:BASECOAT_EXTENSION_KEY_VAULT_NAME
 
 .EXAMPLE
+# Minimal interaction: set env vars and run
+PS> $env:BASECOAT_EXTENSION_GITHUB_APP_ID = "123456"
+PS> $env:BASECOAT_EXTENSION_GITHUB_CLIENT_ID = "Iv1.a1b2c3d4..."
+PS> $env:BASECOAT_EXTENSION_GITHUB_CLIENT_SECRET = "ghp_xxxxxxxx"
+PS> $env:BASECOAT_EXTENSION_WEBHOOK_SECRET = "whsec_xxxxxxxx"
+PS> $env:BASECOAT_EXTENSION_PRIVATE_KEY_PATH = "./private-key.pem"
+PS> .\bootstrap-credentials.ps1
+
+.EXAMPLE
+# With command-line parameters
 PS> .\bootstrap-credentials.ps1 `
   -AppId "123456" `
   -ClientId "Iv1.a1b2c3d4..." `
@@ -48,32 +64,37 @@ PS> .\bootstrap-credentials.ps1 `
 .NOTES
 Author: Platform Engineer / Deployment Task
 Generated: Sprint 31
-#>
+Updated: Smart defaults for minimal interaction
 
 param(
-    [Parameter(Mandatory = $true)]
-    [string]$AppId,
-
-    [Parameter(Mandatory = $true)]
-    [string]$ClientId,
-
-    [Parameter(Mandatory = $true)]
-    [string]$ClientSecret,
-
-    [Parameter(Mandatory = $true)]
-    [string]$WebhookSecret,
-
-    [Parameter(Mandatory = $true)]
-    [string]$PrivateKeyPath,
+    [Parameter(Mandatory = $false)]
+    [string]$AppId = $env:BASECOAT_EXTENSION_GITHUB_APP_ID,
 
     [Parameter(Mandatory = $false)]
-    [string]$Repo = "IBuySpy-Shared/basecoat",
+    [string]$ClientId = $env:BASECOAT_EXTENSION_GITHUB_CLIENT_ID,
 
     [Parameter(Mandatory = $false)]
-    [string]$KeyVaultName = ""
+    [string]$ClientSecret = $env:BASECOAT_EXTENSION_GITHUB_CLIENT_SECRET,
+
+    [Parameter(Mandatory = $false)]
+    [string]$WebhookSecret = $env:BASECOAT_EXTENSION_WEBHOOK_SECRET,
+
+    [Parameter(Mandatory = $false)]
+    [string]$PrivateKeyPath = $env:BASECOAT_EXTENSION_PRIVATE_KEY_PATH,
+
+    [Parameter(Mandatory = $false)]
+    [string]$Repo = $env:BASECOAT_EXTENSION_REPO ?? "IBuySpy-Shared/basecoat",
+
+    [Parameter(Mandatory = $false)]
+    [string]$KeyVaultName = $env:BASECOAT_EXTENSION_KEY_VAULT_NAME ?? ""
 )
 
 $ErrorActionPreference = "Stop"
+
+# Smart defaults for private key path
+if (-not $PrivateKeyPath) {
+    $PrivateKeyPath = "./private-key.pem"
+}
 
 function Write-Status {
     param([string]$Message)
@@ -92,6 +113,27 @@ function Write-Info {
 
 Write-Info "Bootstrapping GitHub App credentials"
 Write-Info "Repository: $Repo"
+
+# Validate that credentials are provided (either via params or env vars)
+$missingCredentials = @()
+if (-not $AppId) { $missingCredentials += "AppId (set env var BASECOAT_EXTENSION_GITHUB_APP_ID or pass -AppId)" }
+if (-not $ClientId) { $missingCredentials += "ClientId (set env var BASECOAT_EXTENSION_GITHUB_CLIENT_ID or pass -ClientId)" }
+if (-not $ClientSecret) { $missingCredentials += "ClientSecret (set env var BASECOAT_EXTENSION_GITHUB_CLIENT_SECRET or pass -ClientSecret)" }
+if (-not $WebhookSecret) { $missingCredentials += "WebhookSecret (set env var BASECOAT_EXTENSION_WEBHOOK_SECRET or pass -WebhookSecret)" }
+
+if ($missingCredentials.Count -gt 0) {
+    Write-Error-Custom "Missing required credentials:"
+    $missingCredentials | ForEach-Object { Write-Host "  - $_" -ForegroundColor Red }
+    Write-Host ""
+    Write-Info "To bootstrap with smart defaults, set these environment variables:"
+    Write-Host "  `$env:BASECOAT_EXTENSION_GITHUB_APP_ID = '...'"
+    Write-Host "  `$env:BASECOAT_EXTENSION_GITHUB_CLIENT_ID = '...'"
+    Write-Host "  `$env:BASECOAT_EXTENSION_GITHUB_CLIENT_SECRET = '...'"
+    Write-Host "  `$env:BASECOAT_EXTENSION_WEBHOOK_SECRET = '...'"
+    Write-Host "  `$env:BASECOAT_EXTENSION_PRIVATE_KEY_PATH = './private-key.pem' (optional; defaults to ./private-key.pem)"
+    Write-Host ""
+    exit 1
+}
 
 # Validate prerequisites
 if (-not (Test-Path $PrivateKeyPath)) {
