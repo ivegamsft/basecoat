@@ -18,6 +18,15 @@ The suite covers product-specific harness behavior that generic eval suites can 
 - MCP and external tool routing
 - Terminal and browser interaction flow handling
 - Stop conditions, budget limits, and cancellation behavior
+- Confirmation gating behavior for side-effecting tool calls
+
+Context assembly and truncation contract:
+
+- [VS Code Harness Context Assembly Contract](./CONTEXT_ASSEMBLY_CONTRACT.md)
+
+Policy reference:
+
+- [VS Code Agent Mode Tool Confirmation Policy](../reference/guardrails/tool-confirmation-policy.md)
 
 ## Metrics and thresholds
 

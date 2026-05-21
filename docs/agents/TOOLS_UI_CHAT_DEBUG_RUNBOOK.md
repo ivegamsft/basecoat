@@ -29,6 +29,11 @@ In Debug View, confirm:
 - Tool list exposed for that turn
 - Tool-call request and response events
 - Any errors returned by tool execution
+- Confirmation events for side-effecting tool calls (`approved` or `rejected`)
+
+Policy reference:
+
+- [VS Code Agent Mode Tool Confirmation Policy](../reference/guardrails/tool-confirmation-policy.md)
 
 ## Validate Tools Exposed in Tools UI
 
@@ -91,6 +96,12 @@ Actions:
 - Confirm expected fields exist and are non-empty.
 - Check whether the model ignored or misread key fields.
 - Tighten prompt instructions to reference required response fields.
+
+### Symptom: side-effecting tool ran without confirmation
+
+- Confirm the tool category in the policy tiers and expected confirmation behavior.
+- Verify the turn includes a confirmation event before tool execution.
+- If no confirmation event exists, treat as policy violation and escalate.
 
 ## End-to-End Debug Example
 

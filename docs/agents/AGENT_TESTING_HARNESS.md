@@ -18,6 +18,7 @@ Agents operate in complex environments with non-deterministic outputs, making tr
 For VS Code diagnostics of harness executions, use:
 
 - [VS Code Tools UI and Chat Debug View Runbook](TOOLS_UI_CHAT_DEBUG_RUNBOOK.md)
+- [VS Code Harness Context Assembly Contract](./CONTEXT_ASSEMBLY_CONTRACT.md)
 
 The runbook covers:
 
@@ -26,6 +27,10 @@ The runbook covers:
 - Inspecting prompt and tool-call traces
 - Troubleshooting missing tools and malformed calls
 - An end-to-end debug walkthrough
+
+Tool confirmation policy for VS Code agent mode:
+
+- [VS Code Agent Mode Tool Confirmation Policy](../reference/guardrails/tool-confirmation-policy.md)
 
 ## VS Code Harness Loop Semantics
 
@@ -82,6 +87,10 @@ Use these default limits unless an eval scenario explicitly overrides them.
 
 Compaction is allowed only at round boundaries so the model never loses in-flight tool results.
 
+Context ordering and deterministic tie-break behavior are defined in:
+
+- [VS Code Harness Context Assembly Contract](./CONTEXT_ASSEMBLY_CONTRACT.md)
+
 Compaction should trigger when any of the following thresholds is met:
 
 - Prompt context reaches 80% of configured token window.
@@ -117,6 +126,7 @@ The suite is organized around VS Code harness behavior categories:
 - MCP and external tool routing
 - Terminal and browser interaction loops
 - Stop-condition and cancellation compliance
+- Tool-confirmation gating for side-effecting actions
 
 It tracks harness regression signals aligned to issue #1055:
 

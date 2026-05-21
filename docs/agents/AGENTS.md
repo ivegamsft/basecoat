@@ -5,9 +5,11 @@ This file lists all available agents in the BaseCoat framework.
 ## Related harness docs
 
 - [Agent Testing Harness](./AGENT_TESTING_HARNESS.md)
+- [VS Code Harness Context Assembly Contract](./CONTEXT_ASSEMBLY_CONTRACT.md)
 - [Per-Model Behavior Matrix](./AGENT_TESTING_HARNESS.md#per-model-behavior-matrix)
 - [Behavioral Evaluation (Phase 1)](./BEHAVIORAL_EVAL.md)
 - [VS Code Harness Benchmarks](./VS_CODE_HARNESS_BENCHMARKS.md)
+- [VS Code Agent Mode Tool Confirmation Policy](../reference/guardrails/tool-confirmation-policy.md)
 
 > **82 agents** available
 
