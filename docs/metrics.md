@@ -43,6 +43,9 @@ Weekly output also includes CI reliability signals per repository in both
 - `pass_rate` (alias of `success_rate`)
 - `ci_pass_rate_last_20_runs` (retrospective-focused pass rate window)
 
+For a complete field-level contract, definitions, and interpretation guidance, see
+[Dashboard Metrics Schema and Glossary](reference/metrics-schema-glossary.md).
+
 ## Onboard a dashboard monitored repository
 
 Use this flow to opt a repository into dashboard monitoring.
@@ -53,13 +56,13 @@ Use this flow to opt a repository into dashboard monitoring.
 echo '["IBuySpy-Shared/basecoat","org/repo1","org/repo2"]' | gh secret set DASHBOARD_REPOS --repo IBuySpy-Shared/basecoat
 ```
 
-2. Run the workflow.
+1. Run the workflow.
 
 ```bash
 gh workflow run adoption-metrics.yml --repo IBuySpy-Shared/basecoat
 ```
 
-3. Verify dashboard outputs.
+1. Verify dashboard outputs.
 
 ```bash
 gh run list --workflow adoption-metrics.yml --repo IBuySpy-Shared/basecoat --limit 1

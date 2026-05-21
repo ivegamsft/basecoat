@@ -106,6 +106,7 @@ nav:
     - Philosophy: PHILOSOPHY.md
     - The Story: story.md
     - Metrics: metrics.md
+    - Dashboard Metrics Schema and Glossary: reference/metrics-schema-glossary.md
     - Changelog: changelog.md
 
 copyright: 'Copyright &copy; IBuySpy-Shared contributors. Licensed under MIT.'
