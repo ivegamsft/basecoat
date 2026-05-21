@@ -1,35 +1,19 @@
-import { randomBytes, createHmac } from "crypto";
+import { createHmac } from "crypto";
 import { logger } from "./logger.js";
-
-export type OAuthState = {
-  state: string;
-  expiresAt: number;
-  userId?: string;
-  token?: string;
-};
+import { SessionStore, UserSession } from "./session.js";
 
 export class GitHubOAuthManager {
-  private states: Map<string, OAuthState> = new Map();
-  private readonly stateTimeoutMs = 10 * 60 * 1000; // 10 minutes
+  private sessionStore: SessionStore;
 
-  constructor() {
-    this.startCleanupInterval();
+  constructor(sessionStore?: SessionStore) {
+    this.sessionStore = sessionStore ?? new SessionStore();
   }
 
   /**
    * Generate an OAuth state parameter for CSRF protection.
    */
   generateState(): string {
-    const state = randomBytes(32).toString("hex");
-    const expiresAt = Date.now() + this.stateTimeoutMs;
-
-    this.states.set(state, { state, expiresAt });
-    logger.info("oauth_state_generated", {
-      statePrefix: state.slice(0, 8),
-      expiresAt,
-    });
-
-    return state;
+    return this.sessionStore.generateStateParam();
   }
 
   /**
@@ -41,40 +25,53 @@ export class GitHubOAuthManager {
       return false;
     }
 
-    const entry = this.states.get(state);
-    if (!entry) {
-      logger.warn("oauth_state_invalid", { reason: "unknown_state" });
+    const session = this.sessionStore.validateState(state);
+    if (!session) {
+      logger.warn("oauth_state_invalid", { reason: "state_validation_failed" });
       return false;
     }
 
-    if (Date.now() > entry.expiresAt) {
-      logger.warn("oauth_state_invalid", { reason: "expired" });
-      this.states.delete(state);
-      return false;
-    }
-
-    this.states.delete(state);
     logger.info("oauth_state_valid", { statePrefix: state.slice(0, 8) });
     return true;
+  }
+
+  /**
+   * Validate and retrieve user session by state (consumes the state).
+   */
+  validateAndGetUserSession(state: string): UserSession | null {
+    if (!state || typeof state !== "string") {
+      logger.warn("oauth_state_invalid", { reason: "missing_or_invalid_type" });
+      return null;
+    }
+
+    const session = this.sessionStore.validateState(state);
+    if (!session) {
+      logger.warn("oauth_state_invalid", { reason: "state_validation_failed" });
+      return null;
+    }
+
+    logger.info("oauth_state_valid", { statePrefix: state.slice(0, 8) });
+    return session;
   }
 
   /**
    * Store OAuth token for user session.
    */
   storeUserToken(state: string, userId: string, token: string): void {
-    const entry = this.states.get(state);
-    if (entry) {
-      entry.userId = userId;
-      entry.token = token;
-      logger.info("oauth_token_stored", { userId });
+    const session = this.sessionStore.storeUserSession(state, userId, token);
+    if (session) {
+      logger.info("oauth_token_stored", {
+        userId,
+        sessionId: session.sessionId.slice(0, 8),
+      });
     }
   }
 
   /**
-   * Retrieve user token by state.
+   * Retrieve user session by state.
    */
-  getUserToken(state: string): { userId?: string; token?: string } | null {
-    return this.states.get(state) ?? null;
+  getUserSession(state: string): UserSession | null {
+    return this.sessionStore.getSession(state);
   }
 
   /**
@@ -105,22 +102,10 @@ export class GitHubOAuthManager {
   }
 
   /**
-   * Clean up expired state entries periodically.
+   * Stop the session cleanup interval (useful for testing).
    */
-  private startCleanupInterval(): void {
-    setInterval(() => {
-      const now = Date.now();
-      let cleaned = 0;
-      for (const [state, entry] of this.states.entries()) {
-        if (now > entry.expiresAt) {
-          this.states.delete(state);
-          cleaned++;
-        }
-      }
-      if (cleaned > 0) {
-        logger.info("oauth_state_cleanup", { cleaned });
-      }
-    }, 60000); // Run every 1 minute
+  stopCleanupInterval(): void {
+    this.sessionStore.stopCleanupInterval();
   }
 }
 

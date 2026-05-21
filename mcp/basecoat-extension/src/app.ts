@@ -176,30 +176,33 @@ export function createApp(options: AppOptions = {}) {
       return;
     }
 
-    if (!gitHubOAuthManager.validateState(state)) {
-      logger.warn("oauth_callback_rejected", {
-        reason: "invalid_state",
-        statePrefix: (state as string).slice(0, 8),
-      });
-      res.status(403).json({
-        error: "invalid_state",
-        detail: "State parameter is invalid or expired",
-      });
-      return;
-    }
+   const session = gitHubOAuthManager.validateAndGetUserSession(state);
+   if (!session) {
+     logger.warn("oauth_callback_rejected", {
+       reason: "invalid_state",
+       statePrefix: (state as string).slice(0, 8),
+     });
+     res.status(403).json({
+       error: "invalid_state",
+       detail: "State parameter is invalid or expired",
+     });
+     return;
+   }
 
-    logger.info("oauth_callback_accepted", {
-      statePrefix: (state as string).slice(0, 8),
-      code: (code as string).slice(0, 8),
-    });
+   logger.info("oauth_callback_accepted", {
+     statePrefix: (state as string).slice(0, 8),
+     code: (code as string).slice(0, 8),
+     sessionId: session.sessionId.slice(0, 8),
+   });
 
-    // Exchange code for token (actual implementation requires GitHub API call)
-    res.status(200).json({
-      status: "authorized",
-      message: "OAuth callback received. Token exchange will be performed by client.",
-      code,
-      state,
-    });
+   // Exchange code for token (actual implementation requires GitHub API call)
+   res.status(200).json({
+     status: "authorized",
+     message: "OAuth callback received. Token exchange will be performed by client.",
+     code,
+     state,
+     sessionId: session.sessionId,
+   });
   });
 
   app.post("/api/github/webhook", (req, res) => {

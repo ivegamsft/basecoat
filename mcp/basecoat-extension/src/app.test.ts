@@ -238,6 +238,381 @@ test("rate limiting enforces request cap for copilot routes", async () => {
   }
 });
 
+// GitHub OAuth tests
+test("GET /api/github/oauth/request returns authUrl and state", async () => {
+  const originalClientId = process.env.BASECOAT_EXTENSION_CLIENT_ID;
+  const originalBaseUrl = process.env.BASECOAT_EXTENSION_BASE_URL;
+
+  try {
+    process.env.BASECOAT_EXTENSION_CLIENT_ID = "test-client-id";
+    process.env.BASECOAT_EXTENSION_BASE_URL = "http://localhost:3000";
+
+    await withServer(async (baseUrl) => {
+      const response = await fetch(`${baseUrl}/api/github/oauth/request`);
+      assert.equal(response.status, 200);
+
+      const body = (await response.json()) as {
+        authUrl: string;
+        state: string;
+      };
+
+      // Basic sanity checks
+      assert.ok(body);
+      assert.ok(body.authUrl);
+      assert.ok(body.state);
+      assert.ok(typeof body.authUrl === "string");
+      assert.ok(typeof body.state === "string");
+    });
+  } finally {
+    if (originalClientId) {
+      process.env.BASECOAT_EXTENSION_CLIENT_ID = originalClientId;
+    } else {
+      delete process.env.BASECOAT_EXTENSION_CLIENT_ID;
+    }
+
+    if (originalBaseUrl) {
+      process.env.BASECOAT_EXTENSION_BASE_URL = originalBaseUrl;
+    } else {
+      delete process.env.BASECOAT_EXTENSION_BASE_URL;
+    }
+  }
+});
+
+test("GET /api/github/oauth/request returns 500 when client_id missing", async () => {
+  const originalClientId = process.env.BASECOAT_EXTENSION_CLIENT_ID;
+
+  try {
+    delete process.env.BASECOAT_EXTENSION_CLIENT_ID;
+
+    await withServer(async (baseUrl) => {
+      const response = await fetch(`${baseUrl}/api/github/oauth/request`);
+      assert.equal(response.status, 500);
+
+      const body = (await response.json()) as {
+        error: string;
+        detail: string;
+      };
+
+      assert.equal(body.error, "server_error");
+      assert.match(body.detail, /not configured/i);
+    });
+  } finally {
+    if (originalClientId) {
+      process.env.BASECOAT_EXTENSION_CLIENT_ID = originalClientId;
+    }
+  }
+});
+
+test("GET /api/github/oauth/callback with valid state returns 200", async () => {
+  const originalClientId = process.env.BASECOAT_EXTENSION_CLIENT_ID;
+
+  try {
+    process.env.BASECOAT_EXTENSION_CLIENT_ID = "test-client-id";
+
+    await withServer(async (baseUrl) => {
+      // First, generate a valid state
+      const requestResponse = await fetch(`${baseUrl}/api/github/oauth/request`);
+      const requestBody = (await requestResponse.json()) as { state: string };
+      const validState = requestBody.state;
+
+      // Then use that state in the callback
+      const response = await fetch(
+        `${baseUrl}/api/github/oauth/callback?code=test-code&state=${encodeURIComponent(validState)}`
+      );
+      assert.equal(response.status, 200);
+
+      const body = (await response.json()) as {
+        status: string;
+        message: string;
+        code: string;
+        state: string;
+      };
+
+      assert.equal(body.status, "authorized");
+      assert.ok(body.message.includes("OAuth callback received"));
+      assert.equal(body.code, "test-code");
+      assert.equal(body.state, validState);
+    });
+  } finally {
+    if (originalClientId) {
+      process.env.BASECOAT_EXTENSION_CLIENT_ID = originalClientId;
+    } else {
+      delete process.env.BASECOAT_EXTENSION_CLIENT_ID;
+    }
+  }
+});
+
+test("GET /api/github/oauth/callback with invalid state returns 403", async () => {
+  await withServer(async (baseUrl) => {
+    const response = await fetch(
+      `${baseUrl}/api/github/oauth/callback?code=test-code&state=invalid-state-that-was-never-generated`
+    );
+    assert.equal(response.status, 403);
+
+    const body = (await response.json()) as {
+      error: string;
+      detail: string;
+    };
+
+    assert.equal(body.error, "invalid_state");
+    assert.match(body.detail, /invalid or expired/i);
+  });
+});
+
+test("GET /api/github/oauth/callback validates state is consumed after use", async () => {
+  const originalClientId = process.env.BASECOAT_EXTENSION_CLIENT_ID;
+
+  try {
+    process.env.BASECOAT_EXTENSION_CLIENT_ID = "test-client-id";
+
+    await withServer(async (baseUrl) => {
+      // Generate a valid state
+      const requestResponse = await fetch(`${baseUrl}/api/github/oauth/request`);
+      const requestBody = (await requestResponse.json()) as { state: string };
+      const validState = requestBody.state;
+
+      // First callback with valid state should succeed
+      const response1 = await fetch(
+        `${baseUrl}/api/github/oauth/callback?code=test-code&state=${encodeURIComponent(validState)}`
+      );
+      assert.equal(response1.status, 200);
+
+      // Second callback with same state should fail (state already consumed)
+      const response2 = await fetch(
+        `${baseUrl}/api/github/oauth/callback?code=test-code-2&state=${encodeURIComponent(validState)}`
+      );
+      assert.equal(response2.status, 403);
+
+      const body = (await response2.json()) as {
+        error: string;
+        detail: string;
+      };
+
+      assert.equal(body.error, "invalid_state");
+    });
+  } finally {
+    if (originalClientId) {
+      process.env.BASECOAT_EXTENSION_CLIENT_ID = originalClientId;
+    } else {
+      delete process.env.BASECOAT_EXTENSION_CLIENT_ID;
+    }
+  }
+});
+
+test("GET /api/github/oauth/callback with missing params returns 400", async () => {
+  await withServer(async (baseUrl) => {
+    // Missing state
+    const response1 = await fetch(`${baseUrl}/api/github/oauth/callback?code=test-code`);
+    assert.equal(response1.status, 400);
+
+    const body1 = (await response1.json()) as {
+      error: string;
+      detail: string;
+    };
+
+    assert.equal(body1.error, "invalid_request");
+
+    // Missing code
+    const response2 = await fetch(`${baseUrl}/api/github/oauth/callback?state=test-state`);
+    assert.equal(response2.status, 400);
+
+    const body2 = (await response2.json()) as {
+      error: string;
+      detail: string;
+    };
+
+    assert.equal(body2.error, "invalid_request");
+  });
+});
+
+test("POST /api/github/webhook with valid signature returns 202", async () => {
+  const { createHmac } = await import("crypto");
+  const originalSecret = process.env.BASECOAT_EXTENSION_WEBHOOK_SECRET;
+
+  try {
+    const webhookSecret = "test-webhook-secret-key";
+    process.env.BASECOAT_EXTENSION_WEBHOOK_SECRET = webhookSecret;
+
+    await withServer(async (baseUrl) => {
+      const payload = JSON.stringify({ action: "opened", repository: { name: "test-repo" } });
+      const signature =
+        "sha256=" +
+        createHmac("sha256", webhookSecret).update(payload).digest("hex");
+
+      const response = await fetch(`${baseUrl}/api/github/webhook`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-hub-signature-256": signature,
+          "x-github-event": "pull_request",
+        },
+        body: payload,
+      });
+
+      assert.equal(response.status, 202);
+
+      const body = (await response.json()) as {
+        status: string;
+        message: string;
+      };
+
+      assert.equal(body.status, "accepted");
+      assert.ok(body.message.includes("Webhook received"));
+    });
+  } finally {
+    if (originalSecret) {
+      process.env.BASECOAT_EXTENSION_WEBHOOK_SECRET = originalSecret;
+    } else {
+      delete process.env.BASECOAT_EXTENSION_WEBHOOK_SECRET;
+    }
+  }
+});
+
+test("POST /api/github/webhook with invalid signature returns 403", async () => {
+  const originalSecret = process.env.BASECOAT_EXTENSION_WEBHOOK_SECRET;
+
+  try {
+    process.env.BASECOAT_EXTENSION_WEBHOOK_SECRET = "correct-secret";
+
+    await withServer(async (baseUrl) => {
+      const payload = JSON.stringify({ action: "opened", repository: { name: "test-repo" } });
+      const incorrectSignature = "sha256=0000000000000000000000000000000000000000000000000000000000000000";
+
+      const response = await fetch(`${baseUrl}/api/github/webhook`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-hub-signature-256": incorrectSignature,
+          "x-github-event": "pull_request",
+        },
+        body: payload,
+      });
+
+      assert.equal(response.status, 403);
+
+      const body = (await response.json()) as {
+        error: string;
+        detail: string;
+      };
+
+      assert.equal(body.error, "forbidden");
+      assert.match(body.detail, /signature validation failed/i);
+    });
+  } finally {
+    if (originalSecret) {
+      process.env.BASECOAT_EXTENSION_WEBHOOK_SECRET = originalSecret;
+    } else {
+      delete process.env.BASECOAT_EXTENSION_WEBHOOK_SECRET;
+    }
+  }
+});
+
+test("POST /api/github/webhook with missing signature returns 403", async () => {
+  const originalSecret = process.env.BASECOAT_EXTENSION_WEBHOOK_SECRET;
+
+  try {
+    process.env.BASECOAT_EXTENSION_WEBHOOK_SECRET = "test-secret";
+
+    await withServer(async (baseUrl) => {
+      const payload = JSON.stringify({ action: "opened", repository: { name: "test-repo" } });
+
+      const response = await fetch(`${baseUrl}/api/github/webhook`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-github-event": "pull_request",
+        },
+        body: payload,
+      });
+
+      assert.equal(response.status, 403);
+
+      const body = (await response.json()) as {
+        error: string;
+        detail: string;
+      };
+
+      assert.equal(body.error, "forbidden");
+    });
+  } finally {
+    if (originalSecret) {
+      process.env.BASECOAT_EXTENSION_WEBHOOK_SECRET = originalSecret;
+    } else {
+      delete process.env.BASECOAT_EXTENSION_WEBHOOK_SECRET;
+    }
+  }
+});
+
+test("POST /api/github/webhook with malformed signature returns 403", async () => {
+  const originalSecret = process.env.BASECOAT_EXTENSION_WEBHOOK_SECRET;
+
+  try {
+    process.env.BASECOAT_EXTENSION_WEBHOOK_SECRET = "test-secret";
+
+    await withServer(async (baseUrl) => {
+      const payload = JSON.stringify({ action: "opened", repository: { name: "test-repo" } });
+
+      const response = await fetch(`${baseUrl}/api/github/webhook`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-hub-signature-256": "invalid-format",
+          "x-github-event": "pull_request",
+        },
+        body: payload,
+      });
+
+      assert.equal(response.status, 403);
+
+      const body = (await response.json()) as {
+        error: string;
+        detail: string;
+      };
+
+      assert.equal(body.error, "forbidden");
+    });
+  } finally {
+    if (originalSecret) {
+      process.env.BASECOAT_EXTENSION_WEBHOOK_SECRET = originalSecret;
+    } else {
+      delete process.env.BASECOAT_EXTENSION_WEBHOOK_SECRET;
+    }
+  }
+});
+
+test("GET /api/github/setup with installation_id returns 200", async () => {
+  await withServer(async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/github/setup?installation_id=12345`);
+    assert.equal(response.status, 200);
+
+    const body = (await response.json()) as {
+      status: string;
+      message: string;
+      installationId: string;
+    };
+
+    assert.equal(body.status, "setup_received");
+    assert.ok(body.message.includes("setup initiated"));
+    assert.equal(body.installationId, "12345");
+  });
+});
+
+test("GET /api/github/setup with missing installation_id returns 200 with unknown", async () => {
+  await withServer(async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/github/setup`);
+    assert.equal(response.status, 200);
+
+    const body = (await response.json()) as {
+      status: string;
+      message: string;
+      installationId: string;
+    };
+
+    assert.equal(body.status, "setup_received");
+    assert.equal(body.installationId, "unknown");
+  });
+});
+
 after(async () => {
   await rm(testWorkRoot, { recursive: true, force: true });
 });
