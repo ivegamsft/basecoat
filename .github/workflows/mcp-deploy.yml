@@ -47,7 +47,7 @@ jobs:
       TARGET_ENV: ${{ github.event_name == 'pull_request' && 'staging' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'prod') }}
     outputs:
       image_tag: ${{ steps.meta.outputs.version }}
-      image_ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+      image_ref: ${{ env.REGISTRY }}/${{ steps.owner.outputs.lc }}/basecoat-metrics-mcp:${{ steps.meta.outputs.version }}
 
     steps:
       - name: Check out repository
@@ -60,11 +60,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Lowercase owner
+        id: owner
+        run: echo "lc=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+
       - name: Extract image metadata
         id: meta
         uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v6.0.0
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ steps.owner.outputs.lc }}/basecoat-metrics-mcp
           tags: |
             type=sha,prefix=sha-,format=short
             type=raw,value=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.image_tag || '' }},enable=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.image_tag != '' }}
