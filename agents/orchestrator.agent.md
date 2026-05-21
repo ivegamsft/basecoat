@@ -81,6 +81,19 @@ Purpose: coordinate multiple specialist agents for complex, cross-domain work by
 - If evidence is mixed, run a targeted tie-break pass with the most relevant reviewer agent.
 - If the conflict remains unresolved, surface both interpretations, identify the uncertainty, and recommend the next check.
 
+## Harness Conformance
+
+- Use the orchestrator lifecycle sequence, states, and conflict decision points in `docs/agents/MULTI_AGENT_WORKFLOWS.md#orchestrator-lifecycle-dispatch-fan-in-and-conflict-resolution`.
+- Use the canonical sub-agent harness contract in `docs/agents/MULTI_AGENT_WORKFLOWS.md#canonical-sub-agent-harness-contract`.
+- Dispatch every subtask with a task envelope containing `task_id`, `goal`, `scope`, `acceptance_criteria`, `execution`, and `output_contract`.
+- Include optional task envelope fields when relevant: `inputs` and `retry_context`.
+- Ensure `execution` includes `allowed_files`, `allowed_tools`, `allowed_skills`, and `model`.
+- Require sub-agent response envelopes with `task_id`, `status`, `summary`, `changed_files`, `acceptance_results`, and `evidence`.
+- Require `blockers` when `status` is `blocked` or `failed`; include `follow_ups` when additional actions are recommended.
+- On retry, set `retry_context` with prior failure reasons and focused re-dispatch guidance.
+- Escalate unresolved ambiguity or repeated branch failure to a review or tie-break pass before final delivery.
+- Apply policy checks from `docs/reference/guardrails/tool-confirmation-policy.md` before executing side-effecting actions.
+
 ## Failure Handling
 
 - Retry transient failures once by default and twice at most for flaky or timeout-prone subtasks.
