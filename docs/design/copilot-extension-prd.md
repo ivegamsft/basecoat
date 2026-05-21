@@ -172,6 +172,66 @@ mobile — worth building only if those surfaces have meaningful adoption in you
 
 ---
 
+## OAuth & Session Management
+
+The Extension uses GitHub OAuth 2.0 to authenticate users and authorize API access on behalf of the BaseCoat Copilot Extension GitHub App.
+
+### Key Design Decisions
+
+- **Authentication Model**: GitHub App OAuth (not Personal Access Tokens)
+- **Session Scope**: Per-user, org-scoped (members of `IBuySpy-Shared` org only)
+- **Storage**: In-memory session store with per-instance affinity (no external cache for now)
+- **CSRF Protection**: Stateful `state` tokens with 10-minute TTL; SameSite=Strict cookies
+- **Key Rotation**: Every 4 hours; old tokens are discarded (no token history)
+- **Org Membership Validation**: All sessions verify user is active member of allowed org
+
+### OAuth Flow
+
+1. User initiates auth → Extension generates random `state` token (32+ bytes)
+2. Redirect to GitHub with `client_id`, `state`, `scope`
+3. User approves scope → GitHub redirects to callback URL with `code` + `state`
+4. Backend validates `state` (must exist, not expired) → exchange `code` for `access_token`
+5. Fetch user info via GitHub API → verify org membership
+6. Create user session → store access token in memory
+7. Return session cookie (HttpOnly, Secure, SameSite=Strict) or Bearer token
+
+### Session Lifecycle
+
+| Event | TTL | Action |
+|-------|-----|--------|
+| OAuth callback → session created | 24h | Start cleanup timer |
+| Session rotation (background job) | 4h | Refresh token with GitHub, increment rotation counter |
+| Session expired or user logs out | 0 | Delete immediately, attempt token revocation at GitHub |
+| Inactivity timeout (optional) | 1h | Log and delete if configured |
+
+### Error Cases
+
+| Error | Handling |
+|-------|----------|
+| Invalid state token | 400 Bad Request; log as potential attack; do not create session |
+| Expired state token | 400 Bad Request; clean up from store; redirect to authorize |
+| GitHub API failure (code exchange) | 502 Bad Gateway; log GitHub error; no retry (user must re-authenticate) |
+| User not in allowed org | 403 Forbidden; log org mismatch; do not create session |
+| Webhook signature invalid | 401 Unauthorized; log and skip webhook processing |
+
+### Rate Limiting
+
+- `GET /api/github/oauth/authorize`: 5 req/min per IP
+- `GET /api/github/oauth/callback`: 10 req/min per IP
+- `POST /api/github/session/rotate`: 10 req/min per session
+- `POST /api/github/session/logout`: 5 req/min per session
+
+### Monitoring
+
+- Track OAuth success rate (target: >95%)
+- Alert on state validation failures (>100/hour suggests attack)
+- Monitor session rotation latency (p95 < 500ms)
+- Measure GitHub API latency (p95 < 5s)
+
+**Full specification**: `docs/operations/COPILOT_EXTENSION_OAUTH_FLOW.md`
+
+---
+
 ## Proposed Tool Inventory
 
 | Tool | Source | Description |

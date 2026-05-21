@@ -25,15 +25,117 @@ npm run test
 npm run start
 ```
 
-## Environment Variables
+## Configuration
+
+The Extension backend reads configuration from environment variables. All OAuth-related variables are required in production.
+
+### GitHub App Credentials
+
+| Variable | Required | Description |
+|---|---|---|
+| `BASECOAT_EXTENSION_GITHUB_APP_ID` | Yes | GitHub App ID (from app registration) |
+| `BASECOAT_EXTENSION_GITHUB_CLIENT_ID` | Yes | GitHub OAuth client ID |
+| `BASECOAT_EXTENSION_GITHUB_CLIENT_SECRET` | Yes | GitHub OAuth client secret (vault-managed) |
+| `BASECOAT_EXTENSION_WEBHOOK_SECRET` | Yes | Webhook signature secret (vault-managed) |
+| `BASECOAT_EXTENSION_GITHUB_PRIVATE_KEY` | Yes | GitHub App private key in PEM format (vault-managed) |
+
+### OAuth & Session Tuning
+
+| Variable | Default | Description |
+|---|---|---|
+| `BASECOAT_EXTENSION_OAUTH_STATE_TTL_MS` | `600000` | State token TTL (10 minutes) |
+| `BASECOAT_EXTENSION_SESSION_TTL_MS` | `86400000` | User session TTL (24 hours) |
+| `BASECOAT_EXTENSION_SESSION_ROTATION_INTERVAL_MS` | `14400000` | Key rotation interval (4 hours) |
+| `BASECOAT_EXTENSION_ALLOWED_ORG` | `IBuySpy-Shared` | GitHub org for membership check |
+| `BASECOAT_EXTENSION_OAUTH_CALLBACK_URL` | (auto-inferred) | Explicit callback URL (production use) |
+
+### Rate Limiting
+
+| Variable | Default | Description |
+|---|---|---|
+| `RATE_LIMIT_MAX_REQUESTS` | `10` | Max requests per user per window for `/api/copilot/*` |
+| `RATE_LIMIT_WINDOW_MS` | `60000` | Rate-limit window size in milliseconds |
+
+### Other Options
 
 | Variable | Default | Description |
 |---|---|---|
 | `PORT` | `3000` | HTTP server port |
-| `RATE_LIMIT_MAX_REQUESTS` | `10` | Max requests per user per window for `/api/copilot/*` |
-| `RATE_LIMIT_WINDOW_MS` | `60000` | Rate-limit window size in milliseconds |
-| `APPLICATIONINSIGHTS_CONNECTION_STRING` | *(unset)* | Enables Azure Monitor OpenTelemetry export when provided |
-| `BASECOAT_REPO_ROOT` | *(auto-detected)* | Explicit repository root for write-tool operations |
+| `APPLICATIONINSIGHTS_CONNECTION_STRING` | (unset) | Enables Azure Monitor OpenTelemetry export when provided |
+| `BASECOAT_REPO_ROOT` | (auto-detected) | Explicit repository root for write-tool operations |
+
+### Example `.env.local`
+
+```bash
+# Required: GitHub App credentials
+BASECOAT_EXTENSION_GITHUB_APP_ID=123456
+BASECOAT_EXTENSION_GITHUB_CLIENT_ID=Iv1.a1b2c3d4e5f6g7h8
+BASECOAT_EXTENSION_GITHUB_CLIENT_SECRET=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+BASECOAT_EXTENSION_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+BASECOAT_EXTENSION_GITHUB_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA...\n-----END RSA PRIVATE KEY-----"
+
+# Optional: OAuth & session tuning
+BASECOAT_EXTENSION_OAUTH_STATE_TTL_MS=600000
+BASECOAT_EXTENSION_SESSION_TTL_MS=86400000
+BASECOAT_EXTENSION_SESSION_ROTATION_INTERVAL_MS=14400000
+BASECOAT_EXTENSION_ALLOWED_ORG=IBuySpy-Shared
+BASECOAT_EXTENSION_OAUTH_CALLBACK_URL=https://extension.basecoat.dev/api/github/oauth/callback
+
+# Observability
+APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=...
+```
+
+## OAuth Setup
+
+The Extension uses GitHub OAuth 2.0 to authenticate users and authorize API operations. See the full OAuth flow documentation for implementation details and troubleshooting.
+
+### Prerequisites
+
+1. Register a GitHub App for the Extension (runbook: `docs/operations/COPILOT_EXTENSION_GITHUB_APP_REGISTRATION.md`)
+2. Install the app on the `IBuySpy-Shared` org
+3. Store app credentials in vault (see Configuration section above)
+
+### OAuth Flow Overview
+
+```
+User initiates auth
+    ↓
+Generate state token (CSRF protection)
+    ↓
+Redirect to GitHub authorization
+    ↓
+User approves scope
+    ↓
+GitHub redirects to callback URL with code + state
+    ↓
+Validate state token (must exist and not expired)
+    ↓
+Exchange code for access token
+    ↓
+Fetch user info and verify org membership
+    ↓
+Create user session (24h TTL)
+    ↓
+Return session cookie (HttpOnly, Secure, SameSite=Strict)
+```
+
+### Endpoints
+
+- `GET /api/github/oauth/authorize` — Initiate OAuth flow (generates state token)
+- `GET /api/github/oauth/callback` — Callback handler (validates state, exchanges code, creates session)
+- `POST /api/github/session/rotate` — Rotate session token (refresh access token with GitHub)
+- `POST /api/github/session/logout` — Logout and invalidate session
+
+### Key Features
+
+- **CSRF Protection**: Random 32+ byte state tokens with 10-minute TTL
+- **Org Scoping**: All sessions verify user is member of configured org
+- **Key Rotation**: Access tokens rotated every 4 hours (automatic background job)
+- **Rate Limiting**: OAuth routes protected at 5-10 req/min per IP/session
+- **Error Handling**: Detailed error responses for invalid state, expired sessions, API failures
+
+**Full specification**: `docs/operations/COPILOT_EXTENSION_OAUTH_FLOW.md`
+
 
 ## Endpoints
 
