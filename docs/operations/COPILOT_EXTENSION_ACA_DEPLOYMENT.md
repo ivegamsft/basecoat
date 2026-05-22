@@ -40,7 +40,7 @@ This runbook covers repository-owned deployment steps for the BaseCoat extension
 
 The following remain outside repository-only control and require org/platform admin actions:
 
-1. **GitHub App registration and installation** for the extension (`#1073`):
+1. **GitHub App registration and installation** for the extension (`#1073`, execution tracker `#1127`):
    - Create/install app in `IBuySpy-Shared` org
    - Configure extension endpoint URL to ACA FQDN
    - Configure OAuth callback and credentials

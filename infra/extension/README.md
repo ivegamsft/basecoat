@@ -32,7 +32,7 @@ az deployment group create \
 
 ## External Follow-up
 
-End-to-end extension activation still depends on GitHub App admin actions tracked by issue #1073:
+End-to-end extension activation still depends on GitHub App admin actions tracked by issue #1073 (execution checklist in #1127):
 
 1. Org admin creates/installs the extension GitHub App
 2. Platform engineer sets extension endpoint + OAuth callback to deployed FQDN

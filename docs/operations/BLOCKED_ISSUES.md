@@ -53,6 +53,8 @@ by `/orgs/{org}/copilot/metrics/reports/organization-28-day/latest`. See
 - Config scaffold: `docs/templates/copilot-extension/github-app-registration.template.json`
 - PRD references updated to the runbook for handoff completion
 
+**Follow-up Tracker:** [#1127](https://github.com/IBuySpy-Shared/basecoat/issues/1127) (owner checklist + evidence collection)
+
 **Next Action Owner:** `IBuySpy-Shared` organization admin + platform engineer for extension backend
 
 ---

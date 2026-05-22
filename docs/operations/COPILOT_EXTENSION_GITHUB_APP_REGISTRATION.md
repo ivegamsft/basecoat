@@ -1,6 +1,6 @@
 # Copilot Extension GitHub App Registration Runbook
 
-This runbook tracks issue [#1073](https://github.com/IBuySpy-Shared/basecoat/issues/1073) and captures the exact handoff needed to register the BaseCoat Copilot Extension GitHub App.
+This runbook tracks issue [#1073](https://github.com/IBuySpy-Shared/basecoat/issues/1073) and follow-up execution issue [#1127](https://github.com/IBuySpy-Shared/basecoat/issues/1127), and captures the exact handoff needed to register the BaseCoat Copilot Extension GitHub App.
 
 ## Scope
 
@@ -48,7 +48,7 @@ Use these baseline settings when creating the App:
 3. **Org Owner/Admin**: Install App on `IBuySpy-Shared` org with target repo access (`basecoat`, extension backend repo when created).
 4. **Platform Engineer**: Configure Copilot Extension registration to target `<ACA_BASE_URL>`.
 5. **QA/Platform**: Validate invocation path (`@basecoat`) and verify tool calls reach backend.
-6. **Maintainer**: Update issue #1073 with App ID, installation link, and validation evidence.
+6. **Maintainer**: Update issue #1127 with App ID, installation link, and validation evidence; then close #1127 and #1073.
 
 ## Validation Steps After Admin Work
 
@@ -56,14 +56,15 @@ Use these baseline settings when creating the App:
 2. Confirm extension endpoint responds at health route.
 3. Confirm OAuth callback succeeds for org member.
 4. Confirm `@basecoat` appears in Copilot Chat and routes a test prompt.
-5. Capture evidence in issue #1073 (screenshots/log snippets).
+5. Capture evidence in issue #1127 (screenshots/log snippets) and reference it from #1073.
 
 ## Blocking Criteria
 
-Issue #1073 remains blocked until an org admin completes App creation and org installation.
+Issue #1073 remains blocked until issue #1127 is completed with org-admin App creation and installation evidence.
 
 ## References
 
 - Design: `docs/design/copilot-extension-prd.md`
 - Blocked issues log: `docs/operations/BLOCKED_ISSUES.md`
 - Config scaffold: `docs/templates/copilot-extension/github-app-registration.template.json`
+- Follow-up tracker: `https://github.com/IBuySpy-Shared/basecoat/issues/1127`
