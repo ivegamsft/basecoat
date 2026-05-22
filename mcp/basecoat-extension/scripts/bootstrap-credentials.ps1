@@ -23,7 +23,7 @@ Prerequisites:
 - Azure CLI (az) authenticated with Key Vault permissions (optional, for production)
 
 .PARAMETER AppId
-GitHub App ID. If not provided, reads from $env:BASECOAT_EXTENSION_GITHUB_APP_ID
+GitHub App ID. If not provided, reads from $env:BASECOAT_EXTENSION_APP_ID
 If not provided, script will prompt you to create app manually via GitHub UI.
 
 .PARAMETER OrgName
@@ -31,10 +31,10 @@ GitHub organization for app creation guidance. Default: IBuySpy-Shared (extracte
 Only used if credentials are missing (to show correct creation link).
 
 .PARAMETER ClientId
-GitHub OAuth Client ID. If not provided, reads from $env:BASECOAT_EXTENSION_GITHUB_CLIENT_ID
+GitHub OAuth Client ID. If not provided, reads from $env:BASECOAT_EXTENSION_CLIENT_ID
 
 .PARAMETER ClientSecret
-GitHub OAuth Client Secret. If not provided, reads from $env:BASECOAT_EXTENSION_GITHUB_CLIENT_SECRET
+GitHub OAuth Client Secret. If not provided, reads from $env:BASECOAT_EXTENSION_CLIENT_SECRET
 
 .PARAMETER WebhookSecret
 GitHub webhook signature secret. If not provided, reads from $env:BASECOAT_EXTENSION_WEBHOOK_SECRET
@@ -58,9 +58,9 @@ PS> .\bootstrap-credentials.ps1
 
 .EXAMPLE
 # Minimal interaction: set creds, no app creation
-PS> $env:BASECOAT_EXTENSION_GITHUB_APP_ID = "123456"
-PS> $env:BASECOAT_EXTENSION_GITHUB_CLIENT_ID = "Iv1.a1b2c3d4..."
-PS> $env:BASECOAT_EXTENSION_GITHUB_CLIENT_SECRET = "ghp_xxxxxxxx"
+PS> $env:BASECOAT_EXTENSION_APP_ID = "123456"
+PS> $env:BASECOAT_EXTENSION_CLIENT_ID = "Iv1.a1b2c3d4..."
+PS> $env:BASECOAT_EXTENSION_CLIENT_SECRET = "ghp_xxxxxxxx"
 PS> $env:BASECOAT_EXTENSION_WEBHOOK_SECRET = "whsec_xxxxxxxx"
 PS> $env:BASECOAT_EXTENSION_PRIVATE_KEY_PATH = "./private-key.pem"
 PS> .\bootstrap-credentials.ps1
@@ -82,13 +82,13 @@ Updated: Bootstrap with auto-create GitHub App capability
 
 param(
     [Parameter(Mandatory = $false)]
-    [string]$AppId = $env:BASECOAT_EXTENSION_GITHUB_APP_ID,
+    [string]$AppId = $env:BASECOAT_EXTENSION_APP_ID ?? $env:BASECOAT_EXTENSION_GITHUB_APP_ID,
 
     [Parameter(Mandatory = $false)]
-    [string]$ClientId = $env:BASECOAT_EXTENSION_GITHUB_CLIENT_ID,
+    [string]$ClientId = $env:BASECOAT_EXTENSION_CLIENT_ID ?? $env:BASECOAT_EXTENSION_GITHUB_CLIENT_ID,
 
     [Parameter(Mandatory = $false)]
-    [string]$ClientSecret = $env:BASECOAT_EXTENSION_GITHUB_CLIENT_SECRET,
+    [string]$ClientSecret = $env:BASECOAT_EXTENSION_CLIENT_SECRET ?? $env:BASECOAT_EXTENSION_GITHUB_CLIENT_SECRET,
 
     [Parameter(Mandatory = $false)]
     [string]$WebhookSecret = $env:BASECOAT_EXTENSION_WEBHOOK_SECRET,
@@ -163,9 +163,9 @@ function Show-AppCreationGuide {
     Write-Host "  4. Download private key (PEM format)" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "  5. Run bootstrap with credentials:" -ForegroundColor Cyan
-    Write-Host "     `$env:BASECOAT_EXTENSION_GITHUB_APP_ID = 'YOUR_APP_ID'" -ForegroundColor Green
-    Write-Host "     `$env:BASECOAT_EXTENSION_GITHUB_CLIENT_ID = 'YOUR_CLIENT_ID'" -ForegroundColor Green
-    Write-Host "     `$env:BASECOAT_EXTENSION_GITHUB_CLIENT_SECRET = 'YOUR_CLIENT_SECRET'" -ForegroundColor Green
+    Write-Host "     `$env:BASECOAT_EXTENSION_APP_ID = 'YOUR_APP_ID'" -ForegroundColor Green
+    Write-Host "     `$env:BASECOAT_EXTENSION_CLIENT_ID = 'YOUR_CLIENT_ID'" -ForegroundColor Green
+    Write-Host "     `$env:BASECOAT_EXTENSION_CLIENT_SECRET = 'YOUR_CLIENT_SECRET'" -ForegroundColor Green
     Write-Host "     `$env:BASECOAT_EXTENSION_WEBHOOK_SECRET = 'YOUR_WEBHOOK_SECRET'" -ForegroundColor Green
     Write-Host "     `$env:BASECOAT_EXTENSION_PRIVATE_KEY_PATH = './private-key.pem'" -ForegroundColor Green
     Write-Host "     .\bootstrap-credentials.ps1" -ForegroundColor Green
@@ -185,9 +185,9 @@ if (-not $AppId -and (-not $ClientId -or -not $ClientSecret -or -not $WebhookSec
 
 # Validate that credentials are provided (either via params or env vars)
 $missingCredentials = @()
-if (-not $AppId) { $missingCredentials += "AppId (set env var BASECOAT_EXTENSION_GITHUB_APP_ID or pass -AppId)" }
-if (-not $ClientId) { $missingCredentials += "ClientId (set env var BASECOAT_EXTENSION_GITHUB_CLIENT_ID or pass -ClientId)" }
-if (-not $ClientSecret) { $missingCredentials += "ClientSecret (set env var BASECOAT_EXTENSION_GITHUB_CLIENT_SECRET or pass -ClientSecret)" }
+if (-not $AppId) { $missingCredentials += "AppId (set env var BASECOAT_EXTENSION_APP_ID or pass -AppId)" }
+if (-not $ClientId) { $missingCredentials += "ClientId (set env var BASECOAT_EXTENSION_CLIENT_ID or pass -ClientId)" }
+if (-not $ClientSecret) { $missingCredentials += "ClientSecret (set env var BASECOAT_EXTENSION_CLIENT_SECRET or pass -ClientSecret)" }
 if (-not $WebhookSecret) { $missingCredentials += "WebhookSecret (set env var BASECOAT_EXTENSION_WEBHOOK_SECRET or pass -WebhookSecret)" }
 
 if ($missingCredentials.Count -gt 0) {
@@ -195,9 +195,9 @@ if ($missingCredentials.Count -gt 0) {
     $missingCredentials | ForEach-Object { Write-Host "  - $_" -ForegroundColor Red }
     Write-Host ""
     Write-Info "To bootstrap with smart defaults, set these environment variables:"
-    Write-Host "  `$env:BASECOAT_EXTENSION_GITHUB_APP_ID = '...'"
-    Write-Host "  `$env:BASECOAT_EXTENSION_GITHUB_CLIENT_ID = '...'"
-    Write-Host "  `$env:BASECOAT_EXTENSION_GITHUB_CLIENT_SECRET = '...'"
+    Write-Host "  `$env:BASECOAT_EXTENSION_APP_ID = '...'"
+    Write-Host "  `$env:BASECOAT_EXTENSION_CLIENT_ID = '...'"
+    Write-Host "  `$env:BASECOAT_EXTENSION_CLIENT_SECRET = '...'"
     Write-Host "  `$env:BASECOAT_EXTENSION_WEBHOOK_SECRET = '...'"
     Write-Host "  `$env:BASECOAT_EXTENSION_PRIVATE_KEY_PATH = './private-key.pem' (optional; defaults to ./private-key.pem)"
     Write-Host ""
@@ -215,20 +215,20 @@ $PrivateKey = Get-Content $PrivateKeyPath -Raw
 # Store in GitHub repository secrets (for CI/CD workflow)
 Write-Info "Storing credentials in GitHub repository secrets..."
 try {
-    gh secret set BASECOAT_EXTENSION_GITHUB_APP_ID --body "$AppId" --repo "$Repo"
-    Write-Status "Secret set: BASECOAT_EXTENSION_GITHUB_APP_ID"
+    gh secret set BASECOAT_EXTENSION_APP_ID --body "$AppId" --repo "$Repo"
+    Write-Status "Secret set: BASECOAT_EXTENSION_APP_ID"
     
-    gh secret set BASECOAT_EXTENSION_GITHUB_CLIENT_ID --body "$ClientId" --repo "$Repo"
-    Write-Status "Secret set: BASECOAT_EXTENSION_GITHUB_CLIENT_ID"
+    gh secret set BASECOAT_EXTENSION_CLIENT_ID --body "$ClientId" --repo "$Repo"
+    Write-Status "Secret set: BASECOAT_EXTENSION_CLIENT_ID"
     
-    gh secret set BASECOAT_EXTENSION_GITHUB_CLIENT_SECRET --body "$ClientSecret" --repo "$Repo"
-    Write-Status "Secret set: BASECOAT_EXTENSION_GITHUB_CLIENT_SECRET"
+    gh secret set BASECOAT_EXTENSION_CLIENT_SECRET --body "$ClientSecret" --repo "$Repo"
+    Write-Status "Secret set: BASECOAT_EXTENSION_CLIENT_SECRET"
     
     gh secret set BASECOAT_EXTENSION_WEBHOOK_SECRET --body "$WebhookSecret" --repo "$Repo"
     Write-Status "Secret set: BASECOAT_EXTENSION_WEBHOOK_SECRET"
     
-    gh secret set BASECOAT_EXTENSION_GITHUB_PRIVATE_KEY --body "$PrivateKey" --repo "$Repo"
-    Write-Status "Secret set: BASECOAT_EXTENSION_GITHUB_PRIVATE_KEY"
+    gh secret set BASECOAT_EXTENSION_PRIVATE_KEY_PEM --body "$PrivateKey" --repo "$Repo"
+    Write-Status "Secret set: BASECOAT_EXTENSION_PRIVATE_KEY_PEM"
 } catch {
     Write-Error-Custom "Failed to set GitHub secrets: $_"
     exit 1

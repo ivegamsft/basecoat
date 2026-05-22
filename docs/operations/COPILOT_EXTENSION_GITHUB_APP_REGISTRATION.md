@@ -24,14 +24,13 @@ Use these baseline settings when creating the App:
 
 ### Repository Permissions
 
-- Contents: **Read-only**
-- Pull requests: **Read and write**
-- Actions: **Read and write**
-- Metadata: **Read-only** (implicit)
+Grant these permissions exactly:
 
-### Organization Permissions
+- `contents`: **read**
+- `pull_requests`: **write**
+- `actions`: **write**
 
-- Members: **Read-only** (recommended for org-scoped eligibility checks)
+`metadata:read` remains implicit and does not require a separate grant.
 
 ### Subscribe to Events
 
@@ -52,7 +51,7 @@ Use these baseline settings when creating the App:
 
 ## Validation Steps After Admin Work
 
-1. Confirm App is installed on `IBuySpy-Shared`.
+1. Confirm App is installed on `IBuySpy-Shared` and installation scope is correct.
 2. Confirm extension endpoint responds at health route.
 3. Confirm OAuth callback succeeds for org member.
 4. Confirm `@basecoat` appears in Copilot Chat and routes a test prompt.

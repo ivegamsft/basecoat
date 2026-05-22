@@ -12,9 +12,7 @@
     "actions": "write",
     "metadata": "read"
   },
-  "organizationPermissions": {
-    "members": "read"
-  },
+  "organizationPermissions": {},
   "events": [
     "pull_request",
     "pull_request_review",
@@ -29,9 +27,16 @@
     "BASECOAT_EXTENSION_WEBHOOK_SECRET",
     "BASECOAT_EXTENSION_PRIVATE_KEY_PEM"
   ],
+  "requiredMetadata": [
+    "app_id",
+    "client_id",
+    "installation_id"
+  ],
   "notes": [
     "Do not commit generated credentials.",
     "Store credentials in org/repo secrets manager.",
-    "Installation must target IBuySpy-Shared organization."
+    "requiredMetadata lists non-secret values to share in issue #1073 closure evidence.",
+    "Installation must target IBuySpy-Shared organization.",
+    "Share App ID, Client ID, and Installation ID with maintainers for issue #1073 closure."
   ]
 }

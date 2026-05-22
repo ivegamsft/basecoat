@@ -33,11 +33,11 @@ The Extension backend reads configuration from environment variables. All OAuth-
 
 | Variable | Required | Description |
 |---|---|---|
-| `BASECOAT_EXTENSION_GITHUB_APP_ID` | Yes | GitHub App ID (from app registration) |
-| `BASECOAT_EXTENSION_GITHUB_CLIENT_ID` | Yes | GitHub OAuth client ID |
-| `BASECOAT_EXTENSION_GITHUB_CLIENT_SECRET` | Yes | GitHub OAuth client secret (vault-managed) |
+| `BASECOAT_EXTENSION_APP_ID` | Yes | GitHub App ID (from app registration) |
+| `BASECOAT_EXTENSION_CLIENT_ID` | Yes | GitHub OAuth client ID |
+| `BASECOAT_EXTENSION_CLIENT_SECRET` | Yes | GitHub OAuth client secret (vault-managed) |
 | `BASECOAT_EXTENSION_WEBHOOK_SECRET` | Yes | Webhook signature secret (vault-managed) |
-| `BASECOAT_EXTENSION_GITHUB_PRIVATE_KEY` | Yes | GitHub App private key in PEM format (vault-managed) |
+| `BASECOAT_EXTENSION_PRIVATE_KEY_PEM` | Yes | GitHub App private key in PEM format (vault-managed) |
 
 ### OAuth & Session Tuning
 
@@ -69,11 +69,11 @@ The Extension backend reads configuration from environment variables. All OAuth-
 
 ```bash
 # Required: GitHub App credentials
-BASECOAT_EXTENSION_GITHUB_APP_ID=123456
-BASECOAT_EXTENSION_GITHUB_CLIENT_ID=Iv1.a1b2c3d4e5f6g7h8
-BASECOAT_EXTENSION_GITHUB_CLIENT_SECRET=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+BASECOAT_EXTENSION_APP_ID=123456
+BASECOAT_EXTENSION_CLIENT_ID=Iv1.a1b2c3d4e5f6g7h8
+BASECOAT_EXTENSION_CLIENT_SECRET=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 BASECOAT_EXTENSION_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-BASECOAT_EXTENSION_GITHUB_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA...\n-----END RSA PRIVATE KEY-----"
+BASECOAT_EXTENSION_PRIVATE_KEY_PEM="-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA...\n-----END RSA PRIVATE KEY-----"
 
 # Optional: OAuth & session tuning
 BASECOAT_EXTENSION_OAUTH_STATE_TTL_MS=600000
