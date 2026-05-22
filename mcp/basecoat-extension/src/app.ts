@@ -6,6 +6,7 @@ import { logger } from "./logger.js";
 import { extensionTracer } from "./observability.js";
 import { createRateLimiter, resolveRateLimitOptionsFromEnv } from "./rate-limit.js";
 import { gitHubOAuthManager } from "./github-oauth.js";
+import type { UserSession } from "./session.js";
 
 type AppOptions = {
   writeTools?: WriteToolService;
@@ -13,6 +14,80 @@ type AppOptions = {
     ping(): Promise<unknown>;
   };
 };
+
+type OAuthCallbackLocals = {
+  oauthCode: string;
+  oauthState: string;
+  oauthSession: UserSession;
+};
+
+const OAUTH_TOKEN_EXCHANGE_STUB_FLAG = "BASECOAT_EXTENSION_ENABLE_OAUTH_TOKEN_EXCHANGE_STUB";
+
+function requireOAuthCallbackParams(
+  req: express.Request,
+  res: express.Response<unknown, Partial<OAuthCallbackLocals>>,
+  next: express.NextFunction
+) {
+  const { code, state } = req.query;
+  if (typeof code !== "string" || typeof state !== "string") {
+    logger.warn("oauth_callback_rejected", {
+      reason: "missing_params",
+    });
+    res.status(400).json({
+      error: "invalid_request",
+      detail: "Missing code or state parameter",
+    });
+    return;
+  }
+
+  res.locals.oauthCode = code;
+  res.locals.oauthState = state;
+  next();
+}
+
+function requireOAuthTokenExchangeStubEnabled(
+  _req: express.Request,
+  res: express.Response<unknown, Partial<OAuthCallbackLocals>>,
+  next: express.NextFunction
+) {
+  if (process.env[OAUTH_TOKEN_EXCHANGE_STUB_FLAG] !== "true") {
+    logger.warn("oauth_callback_rejected", {
+      reason: "token_exchange_stub_disabled",
+      featureFlag: OAUTH_TOKEN_EXCHANGE_STUB_FLAG,
+    });
+    res.status(503).json({
+      error: "blocked_external_dependency",
+      detail:
+        "OAuth token exchange is guarded by a temporary stub. Set BASECOAT_EXTENSION_ENABLE_OAUTH_TOKEN_EXCHANGE_STUB=true to enable the stub path.",
+      blockedByIssue: "#1073",
+    });
+    return;
+  }
+
+  next();
+}
+
+function requireOAuthStateSession(
+  _req: express.Request,
+  res: express.Response<unknown, Partial<OAuthCallbackLocals>>,
+  next: express.NextFunction
+) {
+  const state = res.locals.oauthState!;
+  const session = gitHubOAuthManager.validateAndGetUserSession(state);
+  if (!session) {
+    logger.warn("oauth_callback_rejected", {
+      reason: "invalid_state",
+    });
+    res.status(403).json({
+      error: "invalid_state",
+      detail: "State parameter is invalid or expired",
+    });
+    return;
+  }
+
+  res.locals.oauthSession = session;
+  next();
+}
 
 function parseToolName(value: string): WriteToolName | null {
   if (value === "scaffold" || value === "validate" || value === "create-pr") {
@@ -162,48 +237,27 @@ export function createApp(options: AppOptions = {}) {
     res.status(200).json({ authUrl, state });
   });
 
-  app.get("/api/github/oauth/callback", (req, res) => {
-    const { code, state } = req.query;
+  app.get(
+   "/api/github/oauth/callback",
+   requireOAuthCallbackParams,
+   requireOAuthTokenExchangeStubEnabled,
+   requireOAuthStateSession,
+   (_req, res: express.Response<unknown, OAuthCallbackLocals>) => {
+     const { oauthSession: session } = res.locals;
 
-    if (!code || !state || typeof state !== "string") {
-      logger.warn("oauth_callback_rejected", {
-        reason: "missing_params",
-      });
-      res.status(400).json({
-        error: "invalid_request",
-        detail: "Missing code or state parameter",
-      });
-      return;
-    }
+     logger.info("oauth_callback_stubbed", {
+       sessionId: session.sessionId.slice(0, 8),
+       blockedByIssue: "#1073",
+     });
 
-   const session = gitHubOAuthManager.validateAndGetUserSession(state);
-   if (!session) {
-     logger.warn("oauth_callback_rejected", {
-       reason: "invalid_state",
-       statePrefix: (state as string).slice(0, 8),
+     res.status(200).json({
+       status: "token_exchange_stubbed",
+       message:
+         "OAuth callback accepted with temporary token-exchange stub. Live token exchange remains blocked by issue #1073 pending org-admin completion of issue #1127.",
+       blockedByIssue: "#1073",
      });
-     res.status(403).json({
-       error: "invalid_state",
-       detail: "State parameter is invalid or expired",
-     });
-     return;
    }
-
-   logger.info("oauth_callback_accepted", {
-     statePrefix: (state as string).slice(0, 8),
-     code: (code as string).slice(0, 8),
-     sessionId: session.sessionId.slice(0, 8),
-   });
-
-   // Exchange code for token (actual implementation requires GitHub API call)
-   res.status(200).json({
-     status: "authorized",
-     message: "OAuth callback received. Token exchange will be performed by client.",
-     code,
-     state,
-     sessionId: session.sessionId,
-   });
-  });
+  );
 
   app.post("/api/github/webhook", (req, res) => {
     const signature = req.header("x-hub-signature-256");
@@ -284,4 +338,3 @@ export function createApp(options: AppOptions = {}) {
 
   return app;
 }
-

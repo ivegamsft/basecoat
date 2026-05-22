@@ -48,6 +48,7 @@ The Extension backend reads configuration from environment variables. All OAuth-
 | `BASECOAT_EXTENSION_SESSION_ROTATION_INTERVAL_MS` | `14400000` | Key rotation interval (4 hours) |
 | `BASECOAT_EXTENSION_ALLOWED_ORG` | `IBuySpy-Shared` | GitHub org for membership check |
 | `BASECOAT_EXTENSION_OAUTH_CALLBACK_URL` | (auto-inferred) | Explicit callback URL (production use) |
+| `BASECOAT_EXTENSION_ENABLE_OAUTH_TOKEN_EXCHANGE_STUB` | (unset) | Enables temporary callback stub response only when explicitly set to `true` while live token exchange remains blocked by #1073 |
 
 ### Rate Limiting
 
@@ -110,29 +111,25 @@ GitHub redirects to callback URL with code + state
     ↓
 Validate state token (must exist and not expired)
     ↓
-Exchange code for access token
+Temporary token-exchange stub (feature-flagged)
     ↓
-Fetch user info and verify org membership
-    ↓
-Create user session (24h TTL)
-    ↓
-Return session cookie (HttpOnly, Secure, SameSite=Strict)
+Return blocked-by-#1073 callback payload for follow-up validation
 ```
 
 ### Endpoints
 
-- `GET /api/github/oauth/authorize` — Initiate OAuth flow (generates state token)
-- `GET /api/github/oauth/callback` — Callback handler (validates state, exchanges code, creates session)
-- `POST /api/github/session/rotate` — Rotate session token (refresh access token with GitHub)
-- `POST /api/github/session/logout` — Logout and invalidate session
+- `GET /api/github/oauth/request` — Initiate OAuth flow (generates state token)
+- `GET /api/github/oauth/callback` — Callback handler with middleware guardrails and temporary token-exchange stub
 
 ### Key Features
 
 - **CSRF Protection**: Random 32+ byte state tokens with 10-minute TTL
-- **Org Scoping**: All sessions verify user is member of configured org
-- **Key Rotation**: Access tokens rotated every 4 hours (automatic background job)
-- **Rate Limiting**: OAuth routes protected at 5-10 req/min per IP/session
-- **Error Handling**: Detailed error responses for invalid state, expired sessions, API failures
+- **State Guardrails**: OAuth middleware validates callback parameters and state replay/expiry
+- **Feature Flag Control**: Callback stub requires `BASECOAT_EXTENSION_ENABLE_OAUTH_TOKEN_EXCHANGE_STUB=true`
+- **Blocked Dependency Signaling**: Callback payloads explicitly identify issue #1073 as the live token-exchange blocker
+- **Error Handling**: Detailed error responses for invalid state, missing parameters, and disabled stub path
+
+Live OAuth token exchange (GitHub code→token call, org membership check, and session cookie issuance) remains blocked until org-admin registration is completed for issue #1073 (currently tracked through org-admin action in #1127).
 
 **Full specification**: `docs/operations/COPILOT_EXTENSION_OAUTH_FLOW.md`
 

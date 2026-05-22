@@ -5,6 +5,7 @@ import { mkdir, readFile, rm } from "node:fs/promises";
 import path from "node:path";
 import { createApp } from "./app.js";
 import { WriteToolService } from "./write-tools.js";
+import { gitHubOAuthManager } from "./github-oauth.js";
 
 const testWorkRoot = path.resolve(process.cwd(), ".test-work");
 
@@ -305,9 +306,11 @@ test("GET /api/github/oauth/request returns 500 when client_id missing", async (
 
 test("GET /api/github/oauth/callback with valid state returns 200", async () => {
   const originalClientId = process.env.BASECOAT_EXTENSION_CLIENT_ID;
+  const originalStubFlag = process.env.BASECOAT_EXTENSION_ENABLE_OAUTH_TOKEN_EXCHANGE_STUB;
 
   try {
     process.env.BASECOAT_EXTENSION_CLIENT_ID = "test-client-id";
+    process.env.BASECOAT_EXTENSION_ENABLE_OAUTH_TOKEN_EXCHANGE_STUB = "true";
 
     await withServer(async (baseUrl) => {
       // First, generate a valid state
@@ -324,14 +327,12 @@ test("GET /api/github/oauth/callback with valid state returns 200", async () => 
       const body = (await response.json()) as {
         status: string;
         message: string;
-        code: string;
-        state: string;
+        blockedByIssue: string;
       };
 
-      assert.equal(body.status, "authorized");
-      assert.ok(body.message.includes("OAuth callback received"));
-      assert.equal(body.code, "test-code");
-      assert.equal(body.state, validState);
+      assert.equal(body.status, "token_exchange_stubbed");
+      assert.ok(body.message.includes("temporary token-exchange stub"));
+      assert.equal(body.blockedByIssue, "#1073");
     });
   } finally {
     if (originalClientId) {
@@ -339,31 +340,49 @@ test("GET /api/github/oauth/callback with valid state returns 200", async () => 
     } else {
       delete process.env.BASECOAT_EXTENSION_CLIENT_ID;
     }
+
+    if (originalStubFlag) {
+      process.env.BASECOAT_EXTENSION_ENABLE_OAUTH_TOKEN_EXCHANGE_STUB = originalStubFlag;
+    } else {
+      delete process.env.BASECOAT_EXTENSION_ENABLE_OAUTH_TOKEN_EXCHANGE_STUB;
+    }
   }
 });
 
 test("GET /api/github/oauth/callback with invalid state returns 403", async () => {
-  await withServer(async (baseUrl) => {
-    const response = await fetch(
-      `${baseUrl}/api/github/oauth/callback?code=test-code&state=invalid-state-that-was-never-generated`
-    );
-    assert.equal(response.status, 403);
+  const originalStubFlag = process.env.BASECOAT_EXTENSION_ENABLE_OAUTH_TOKEN_EXCHANGE_STUB;
+  try {
+    process.env.BASECOAT_EXTENSION_ENABLE_OAUTH_TOKEN_EXCHANGE_STUB = "true";
+    await withServer(async (baseUrl) => {
+      const response = await fetch(
+        `${baseUrl}/api/github/oauth/callback?code=test-code&state=invalid-state-that-was-never-generated`
+      );
+      assert.equal(response.status, 403);
 
-    const body = (await response.json()) as {
-      error: string;
-      detail: string;
-    };
+      const body = (await response.json()) as {
+        error: string;
+        detail: string;
+      };
 
-    assert.equal(body.error, "invalid_state");
-    assert.match(body.detail, /invalid or expired/i);
-  });
+      assert.equal(body.error, "invalid_state");
+      assert.match(body.detail, /invalid or expired/i);
+    });
+  } finally {
+    if (originalStubFlag) {
+      process.env.BASECOAT_EXTENSION_ENABLE_OAUTH_TOKEN_EXCHANGE_STUB = originalStubFlag;
+    } else {
+      delete process.env.BASECOAT_EXTENSION_ENABLE_OAUTH_TOKEN_EXCHANGE_STUB;
+    }
+  }
 });
 
 test("GET /api/github/oauth/callback validates state is consumed after use", async () => {
   const originalClientId = process.env.BASECOAT_EXTENSION_CLIENT_ID;
+  const originalStubFlag = process.env.BASECOAT_EXTENSION_ENABLE_OAUTH_TOKEN_EXCHANGE_STUB;
 
   try {
     process.env.BASECOAT_EXTENSION_CLIENT_ID = "test-client-id";
+    process.env.BASECOAT_EXTENSION_ENABLE_OAUTH_TOKEN_EXCHANGE_STUB = "true";
 
     await withServer(async (baseUrl) => {
       // Generate a valid state
@@ -396,6 +415,12 @@ test("GET /api/github/oauth/callback validates state is consumed after use", asy
     } else {
       delete process.env.BASECOAT_EXTENSION_CLIENT_ID;
     }
+
+    if (originalStubFlag) {
+      process.env.BASECOAT_EXTENSION_ENABLE_OAUTH_TOKEN_EXCHANGE_STUB = originalStubFlag;
+    } else {
+      delete process.env.BASECOAT_EXTENSION_ENABLE_OAUTH_TOKEN_EXCHANGE_STUB;
+    }
   }
 });
 
@@ -423,6 +448,46 @@ test("GET /api/github/oauth/callback with missing params returns 400", async () 
 
     assert.equal(body2.error, "invalid_request");
   });
+});
+
+test("GET /api/github/oauth/callback returns 503 when token-exchange stub flag is disabled", async () => {
+  const originalClientId = process.env.BASECOAT_EXTENSION_CLIENT_ID;
+  const originalStubFlag = process.env.BASECOAT_EXTENSION_ENABLE_OAUTH_TOKEN_EXCHANGE_STUB;
+
+  try {
+    process.env.BASECOAT_EXTENSION_CLIENT_ID = "test-client-id";
+    delete process.env.BASECOAT_EXTENSION_ENABLE_OAUTH_TOKEN_EXCHANGE_STUB;
+
+    await withServer(async (baseUrl) => {
+      const requestResponse = await fetch(`${baseUrl}/api/github/oauth/request`);
+      const requestBody = (await requestResponse.json()) as { state: string };
+      const response = await fetch(
+        `${baseUrl}/api/github/oauth/callback?code=test-code&state=${encodeURIComponent(requestBody.state)}`
+      );
+      assert.equal(response.status, 503);
+
+      const body = (await response.json()) as {
+        error: string;
+        detail: string;
+        blockedByIssue: string;
+      };
+      assert.equal(body.error, "blocked_external_dependency");
+      assert.match(body.detail, /token exchange is guarded by a temporary stub/i);
+      assert.equal(body.blockedByIssue, "#1073");
+    });
+  } finally {
+    if (originalClientId) {
+      process.env.BASECOAT_EXTENSION_CLIENT_ID = originalClientId;
+    } else {
+      delete process.env.BASECOAT_EXTENSION_CLIENT_ID;
+    }
+
+    if (originalStubFlag) {
+      process.env.BASECOAT_EXTENSION_ENABLE_OAUTH_TOKEN_EXCHANGE_STUB = originalStubFlag;
+    } else {
+      delete process.env.BASECOAT_EXTENSION_ENABLE_OAUTH_TOKEN_EXCHANGE_STUB;
+    }
+  }
 });
 
 test("POST /api/github/webhook with valid signature returns 202", async () => {
@@ -615,5 +680,5 @@ test("GET /api/github/setup with missing installation_id returns 200 with unknow
 
 after(async () => {
   await rm(testWorkRoot, { recursive: true, force: true });
+  gitHubOAuthManager.stopCleanupInterval();
 });
-
