@@ -29,8 +29,8 @@
     "joi": "^17.11.0",
     "jsonwebtoken": "^9.0.0",
     "pg": "^8.11.2",
-    "typeorm": "^0.3.17",
-    "uuid": "^9.0.1",
+    "typeorm": "^1.0.0",
+    "uuid": "^14.0.0",
     "winston": "^3.11.0"
   },
   "devDependencies": {
