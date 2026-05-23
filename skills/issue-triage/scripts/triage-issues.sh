@@ -200,12 +200,23 @@ for i in $(seq 0 $((ISSUE_COUNT - 1))); do
   TITLE_LOWER="${TITLE,,}"
   TITLE_LEN=${#TITLE}
   BODY_LEN=${#BODY}
+  HAS_ENCODING_GIBBERISH=false
+  if printf "%s\n%s\n" "$TITLE" "$BODY" | grep -qE $'�|Ã.|Â.|â€™|â€œ|â€|ðŸ'; then
+    HAS_ENCODING_GIBBERISH=true
+  fi
   IS_BAD_TITLE=false
   for bt in "${BAD_TITLES[@]}"; do
     [[ "$TITLE_LOWER" == "$bt" ]] && IS_BAD_TITLE=true && break
   done
   [[ "$TITLE_LEN" -lt 5 ]] && IS_BAD_TITLE=true
   [[ "$BODY_LEN" -lt 20 && "$IS_OPEN" == "true" ]] && IS_BAD_TITLE=true
+
+  if [[ "$HAS_ENCODING_GIBBERISH" == "true" && "$IS_OPEN" == "true" ]]; then
+    add_label "$N" "needs-info" "Possible text encoding corruption (mojibake)"
+    add_label "$N" "needs-triage" "Needs clean UTF-8 issue text before triage"
+    post_comment "$N" "This issue appears to contain text-encoding corruption (for example: \`�\`, \`Ã\`, \`Â\`, \`â€™\`, \`â€œ\`).\n\nPlease edit/repost the title and body using UTF-8-safe text so triage can proceed accurately. This issue is being flagged, not auto-closed." "encoding-gibberish flag"
+    continue
+  fi
 
   if [[ "$IS_BAD_TITLE" == "true" && "$IS_OPEN" == "true" ]]; then
     close_issue "$N" "Invalid: title/body is gibberish or unactionable" \
@@ -251,6 +262,11 @@ for i in $(seq 0 $((ISSUE_COUNT - 1))); do
         CANONICAL=$([[ "$N" -lt "$CAND_N" ]] && echo "$N" || echo "$CAND_N")
         DUP=$([[ "$N" -gt "$CAND_N" ]] && echo "$N" || echo "$CAND_N")
         if [[ "$DUP" == "$N" ]]; then
+          for tl in "${TYPE_LABELS[@]}"; do
+            if echo "$LABELS" | grep -q "^$tl$\|,$tl$\|^$tl,\|,$tl,"; then
+              remove_label_from_issue "$N" "$tl" "duplicate/type exclusivity — duplicate is authoritative"
+            fi
+          done
           close_issue "$N" "Duplicate of #$CANONICAL (overlap $OVERLAP)" \
             "Duplicate of #$CANONICAL — closing in favor of the original tracker. All updates should go to #$CANONICAL."
           add_label "$N" "duplicate" "Token overlap $OVERLAP"
@@ -283,16 +299,34 @@ for i in $(seq 0 $((ISSUE_COUNT - 1))); do
   # -------------------------------------------------------------------------
   if [[ "$IS_OPEN" == "true" ]]; then
     HAS_TYPE=false
+    HAS_DUPLICATE=false
     HAS_PRIORITY=false
     for lbl in "${TYPE_LABELS[@]}"; do
       echo "$LABELS" | grep -q "^$lbl$\|,$lbl$\|^$lbl,\|,$lbl," && HAS_TYPE=true && break
     done
+    echo "$LABELS" | grep -q "^duplicate$\|,duplicate$\|^duplicate,\|,duplicate," && HAS_DUPLICATE=true
     for lbl in "${PRIORITY_LABELS[@]}"; do
       echo "$LABELS" | grep -q "$lbl" && HAS_PRIORITY=true && break
     done
 
+    if [[ "$HAS_DUPLICATE" == "true" && "$HAS_TYPE" == "true" ]]; then
+      if [[ "$IS_OPEN" != "true" ]] || echo "$TITLE" | grep -qiE "duplicate" || echo "$BODY" | grep -qiE "duplicate of #[0-9]+"; then
+        for tl in "${TYPE_LABELS[@]}"; do
+          if echo "$LABELS" | grep -q "^$tl$\|,$tl$\|^$tl,\|,$tl,"; then
+            remove_label_from_issue "$N" "$tl" "duplicate/type exclusivity — keeping duplicate"
+          fi
+        done
+        post_comment "$N" "Label cleanup: removed type label(s) because this issue is marked as \`duplicate\`. \`duplicate\` and type labels are mutually exclusive." "duplicate/type exclusivity"
+        HAS_TYPE=false
+      else
+        remove_label_from_issue "$N" "duplicate" "duplicate/type exclusivity — keeping type label"
+        post_comment "$N" "Label cleanup: removed \`duplicate\` because this issue has an active type label and is being treated as a normal typed issue." "duplicate/type exclusivity"
+        HAS_DUPLICATE=false
+      fi
+    fi
+
     INFERRED_TYPE=""
-    if [[ "$HAS_TYPE" == "false" ]]; then
+    if [[ "$HAS_TYPE" == "false" && "$HAS_DUPLICATE" == "false" ]]; then
       if echo "$TITLE $BODY" | grep -qiE "error|crash|fail|broken|regression|wrong|incorrect"; then
         INFERRED_TYPE="bug"
       elif echo "$TITLE" | grep -qiE "add|support|allow|feature|request|improve|enhance|new"; then
@@ -315,7 +349,7 @@ for i in $(seq 0 $((ISSUE_COUNT - 1))); do
       fi
     fi
 
-    if [[ "$HAS_PRIORITY" == "false" ]]; then
+    if [[ "$HAS_PRIORITY" == "false" && "$HAS_DUPLICATE" == "false" ]]; then
       if [[ "$INFERRED_TYPE" == "security" ]] || echo "$LABELS" | grep -q "security"; then
         add_label "$N" "priority/critical" "Security auto-escalation"
         post_comment "$N" "Priority escalated to **critical**: security issues are automatically assigned critical priority per triage policy." "auto-escalate security"

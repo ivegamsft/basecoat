@@ -28,10 +28,23 @@ git clone --depth 1 --branch "$SOURCE_REF" "$SOURCE_REPO" "$TMP_DIR/source" >/de
 
 mkdir -p "$REPO_ROOT/$TARGET_DIR"
 
-for item in README.md CHANGELOG.md version.json asset-manifest.json basecoat-metadata.json instructions skills prompts agents docs; do
+for item in README.md CHANGELOG.md version.json asset-manifest.json basecoat-metadata.json instructions skills prompts agents; do
   rm -rf "$REPO_ROOT/$TARGET_DIR/$item"
   cp -R "$TMP_DIR/source/$item" "$REPO_ROOT/$TARGET_DIR/$item"
 done
+
+# Copy only basic documentation (not full docs tree)
+rm -rf "$REPO_ROOT/$TARGET_DIR/docs"
+mkdir -p "$REPO_ROOT/$TARGET_DIR/docs"
+for doc_subdir in reference guides; do
+  if [[ -d "$TMP_DIR/source/docs/$doc_subdir" ]]; then
+    cp -R "$TMP_DIR/source/docs/$doc_subdir" "$REPO_ROOT/$TARGET_DIR/docs/$doc_subdir"
+  fi
+done
+if [[ -f "$TMP_DIR/source/docs/agents/AGENTS.md" ]]; then
+  mkdir -p "$REPO_ROOT/$TARGET_DIR/docs/agents"
+  cp "$TMP_DIR/source/docs/agents/AGENTS.md" "$REPO_ROOT/$TARGET_DIR/docs/agents/AGENTS.md"
+fi
 
 # INVENTORY.md moved to docs/reference/ in v3.11.0 — copy from new location to target root for backwards compat
 if [[ -f "$TMP_DIR/source/docs/reference/INVENTORY.md" ]]; then
@@ -66,6 +79,14 @@ if [[ -d "$REPO_ROOT/$TARGET_DIR/agents" ]]; then
   rm -rf "$REPO_ROOT/.github/agents"
   mkdir -p "$REPO_ROOT/.github/agents"
   find "$REPO_ROOT/$TARGET_DIR/agents" -maxdepth 1 -name '*.agent.md' -exec cp {} "$REPO_ROOT/.github/agents/" \;
+fi
+
+# Optional cleanup pass for stale managed files from prior versions.
+# Uses hash snapshoting to avoid deleting customized files.
+if [[ -x "$REPO_ROOT/scripts/cleanup-basecoat-upgrade.sh" ]]; then
+  "$REPO_ROOT/scripts/cleanup-basecoat-upgrade.sh" "$TARGET_DIR"
+elif [[ -f "$REPO_ROOT/scripts/cleanup-basecoat-upgrade.sh" ]]; then
+  bash "$REPO_ROOT/scripts/cleanup-basecoat-upgrade.sh" "$TARGET_DIR"
 fi
 
 echo "Base Coat synced into $TARGET_DIR"

@@ -26,6 +26,7 @@ export DRY_RUN=false   # set to true to preview only
 
 ```
 Issue exists?
+├── Contains mojibake/encoding corruption (`�`, `Ã`, `Â`, `â€™`, `â€œ`)? → Flag: needs-info + needs-triage (do not auto-close)
 ├── Is body <20 chars or purely gibberish? → Close: invalid
 ├── Is it a duplicate of a spam pattern? → Close: invalid + comment
 ├── Is it a previously closed issue with valid repro? → Reopen + remove invalid label
@@ -72,6 +73,8 @@ gh issue list --state open --search "$SEARCH_TERMS" --json number,title,state
 
 # Mark as duplicate and close
 gh issue edit $NEW --add-label "duplicate"
+# Enforce duplicate/type exclusivity
+gh issue edit $NEW --remove-label "bug" --remove-label "enhancement" --remove-label "documentation" --remove-label "chore" --remove-label "security" --remove-label "question"
 gh issue comment $NEW --body "Duplicate of #$CANONICAL — closing in favor of the original tracker.\nAll updates should go to #$CANONICAL."
 gh issue close $NEW --reason "not planned"
 

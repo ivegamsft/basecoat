@@ -139,6 +139,25 @@ function Get-TokenOverlap {
     return [math]::Round($intersection / $union, 2)
 }
 
+function Test-EncodingGibberish {
+    param([string] $Text)
+    if (-not $Text) { return $false }
+    $replacementChar = [string][char]0xFFFD
+    $patterns = @(
+        [regex]::Escape($replacementChar), # Unicode replacement character: �
+        "Ã.",
+        "Â.",
+        "â€™",
+        "â€œ",
+        "â€",
+        "ðŸ"
+    )
+    foreach ($p in $patterns) {
+        if ($Text -match $p) { return $true }
+    }
+    return $false
+}
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -201,6 +220,15 @@ foreach ($issue in $allIssues) {
     # -----------------------------------------------------------------------
     $isGibberish = ($title.Length -lt 5) -or ($badTitles -contains $title.Trim().ToLower()) -or
                    ($body.Length -lt 20 -and $isOpen)
+    $hasEncodingGibberish = Test-EncodingGibberish "$title`n$body"
+
+    if ($hasEncodingGibberish -and $isOpen) {
+        Add-Label $N "needs-info" "Possible text encoding corruption (mojibake)"
+        Add-Label $N "needs-triage" "Needs clean UTF-8 issue text before triage"
+        Post-Comment $N "This issue appears to contain text-encoding corruption (for example: `�`, `Ã`, `Â`, `â€™`, `â€œ`).`n`nPlease edit/repost the title and body using UTF-8-safe text so triage can proceed accurately. This issue is being flagged, not auto-closed." "encoding-gibberish flag"
+        continue
+    }
+
     if ($isGibberish -and $isOpen) {
         Close-Issue $N "Invalid: title/body is gibberish or unactionable" `
             "Closing as invalid: the title or body does not contain enough information to act on. Please reopen with a clear description, steps to reproduce, and expected/actual behavior."
@@ -240,6 +268,9 @@ foreach ($issue in $allIssues) {
                 $canonical = [math]::Min($N, $candidate.number)
                 $dup       = [math]::Max($N, $candidate.number)
                 if ($dup -eq $N) {
+                    foreach ($t in @($labels | Where-Object { $typeLabels -contains $_ })) {
+                        Remove-LabelFromIssue $N $t "duplicate/type exclusivity — duplicate is authoritative"
+                    }
                     Close-Issue $N "Duplicate of #$canonical (overlap $overlap)" `
                         "Duplicate of #$canonical — closing in favor of the original tracker. All updates should go to #$canonical."
                     Add-Label $N "duplicate" "Token overlap $overlap"
@@ -268,10 +299,27 @@ foreach ($issue in $allIssues) {
     # -----------------------------------------------------------------------
     # Check 4: Label and Type Enforcement
     # -----------------------------------------------------------------------
-    $hasType     = ($labels | Where-Object { $typeLabels -contains $_ }).Count -gt 0
+    $typeLabelSet = @($labels | Where-Object { $typeLabels -contains $_ })
+    $hasType     = $typeLabelSet.Count -gt 0
+    $hasDuplicate = $labels -contains "duplicate"
     $hasPriority = ($labels | Where-Object { $priorityLabels -contains $_ }).Count -gt 0
 
-    if (-not $hasType -and $isOpen) {
+    if ($hasDuplicate -and $hasType) {
+        $duplicateAuthoritative = (-not $isOpen) -or ($title -match '(?i)\bduplicate\b') -or ($body -match '(?i)duplicate of #\d+')
+        if ($duplicateAuthoritative) {
+            foreach ($t in $typeLabelSet) {
+                Remove-LabelFromIssue $N $t "duplicate/type exclusivity — keeping duplicate"
+            }
+            Post-Comment $N "Label cleanup: removed type label(s) because this issue is marked as `duplicate`. `duplicate` and type labels are mutually exclusive." "duplicate/type exclusivity"
+            $hasType = $false
+        } else {
+            Remove-LabelFromIssue $N "duplicate" "duplicate/type exclusivity — keeping type label"
+            Post-Comment $N "Label cleanup: removed `duplicate` because this issue has an active type label and is being treated as a normal typed issue." "duplicate/type exclusivity"
+            $hasDuplicate = $false
+        }
+    }
+
+    if (-not $hasType -and $isOpen -and -not $hasDuplicate) {
         $inferredType = $null
         if ($title -match '(?i)(error|crash|fail|broken|regression|wrong|incorrect|not working)' -or $body -match '(?i)(error|exception|stack trace|traceback)') {
             $inferredType = "bug"
@@ -295,7 +343,7 @@ foreach ($issue in $allIssues) {
         }
     }
 
-    if (-not $hasPriority -and $isOpen) {
+    if (-not $hasPriority -and $isOpen -and -not $hasDuplicate) {
         # Security auto-escalate
         if ($labels -contains "security" -or $inferredType -eq "security") {
             Add-Label $N "priority/critical" "Security issues are auto-escalated to critical"

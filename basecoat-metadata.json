@@ -1,7 +1,7 @@
 {
   "$schema": "basecoat-metadata-schema",
   "version": "3.26.0",
-  "generated": "2026-05-18",
+  "generated": "2026-05-23",
   "categories": {
     "AI & Development": {
       "label": "AI & Development",
@@ -1916,6 +1916,24 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/takt-time-tracker.agent.md",
+      "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "sprint-project-mapper",
+      "description": "Use when issues/PRs need clustering into meaningful sprint/project groups and rollup metrics for planning or release notes. USE FOR: grouping by sprint/wave/tags, computing issue-PR-LOC-cycle-time metrics, validating group size significance, and producing release-note-ready summaries. DO NOT USE FOR: code implementation, CI/CD deployment, or one-off issue editing.",
+      "category": "Meta",
+      "keywords": [
+        "sprint",
+        "project-mapping",
+        "wave-planning",
+        "release-notes",
+        "metrics",
+        "portfolio"
+      ],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/sprint-project-mapper.agent.md",
       "model": "claude-sonnet-4.6",
       "argumentHint": ""
     }

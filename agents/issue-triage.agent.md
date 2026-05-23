@@ -10,7 +10,7 @@ metadata:
 allowed-tools: ["bash", "git", "gh"]
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
-allowed_skills: [issue-triage, backlog-burndown, sprint-planner]
+allowed_skills: [issue-triage, backlog-burndown, sprint-management]
 visibility: public
 ---
 
@@ -38,6 +38,7 @@ Run each check for every issue. Collect all actions before executing them.
 
 #### Check 1: Validity
 - If the issue is gibberish, spam, or completely unactionable with no reproducible description: add label `invalid`, post a comment explaining the reason, and close it.
+- If the issue appears to contain **encoding corruption/mojibake** (for example `�`, `Ã`, `Â`, `â€™`, `â€œ`, or garbled path text like `�pps/`): add `needs-info` + `needs-triage`, comment with a UTF-8 re-entry request, and **do not auto-close**.
 - If a previously closed issue has `invalid` label but contains valid reproduction steps or a clear user need: reopen it, remove `invalid`, and add `needs-triage`.
 - If actionable but missing required fields (type label, description, or steps to reproduce for bugs): add `needs-info` and comment listing the specific missing fields from `skills/issue-triage/references/quality-checklist.md`.
 
@@ -54,6 +55,9 @@ Run each check for every issue. Collect all actions before executing them.
 
 #### Check 4: Label and Type Enforcement
 - Every issue must have exactly one type label: `bug`, `enhancement`, `documentation`, `chore`, `security`, or `question`.
+- `duplicate` and type labels are **mutually exclusive**:
+  - if `duplicate` is authoritative, remove all type labels
+  - if a real type label is authoritative, remove `duplicate`
 - Every issue must have at least one priority label: `priority/critical`, `priority/high`, `priority/medium`, or `priority/low`.
 - Issues missing labels: if type is clearly inferrable from title/body, apply it directly; otherwise add `needs-triage` and comment listing missing metadata using the quality checklist.
 

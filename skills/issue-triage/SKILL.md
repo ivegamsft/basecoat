@@ -16,18 +16,17 @@ allowed-tools: ["bash", "git", "gh"]
 
 # Issue Triage Skill
 
-Use this skill when you need a structured, repeatable process for auditing and improving GitHub issue quality. Works standalone or as a reference for the `issue-triage` agent.
+Use this skill to audit and improve GitHub issue quality. It can run standalone or as reference context for the `issue-triage` agent.
 
 ## Use Cases
 
-- **Backlog hygiene**: Catch gibberish, stale, and duplicate issues before sprint planning.
-- **Closed issue audit**: Verify that closed issues were actually resolved with evidence.
-- **Label enforcement**: Ensure every issue has a valid type, priority, and area label.
-- **Title quality**: Detect meaningless titles and suggest improved ones.
-- **Relationship mapping**: Link related issues, blocking issues, and parent/child hierarchies.
-- **Branch connection**: Find orphaned branches and missing PRs for in-flight issues.
-- **Proposed fixes**: Surface related code files and suggest resolution approaches for bugs.
-- **Priority calibration**: Escalate under-prioritized security issues; mark stale long-lived issues.
+- Backlog hygiene (invalid/duplicate/stale detection)
+- Closed issue verification (confirm actual resolution evidence)
+- Label and priority enforcement
+- Duplicate/type-label exclusivity enforcement
+- Title and relationship quality checks
+- Branch linkage and missing-PR detection
+- Proposed fix context for bug issues
 
 ## Reference Files
 
@@ -43,19 +42,17 @@ Use this skill when you need a structured, repeatable process for auditing and i
 | [`scripts/triage-issues.ps1`](scripts/triage-issues.ps1) | PowerShell automation for bulk triage using `gh` CLI (Windows/macOS/Linux) |
 | [`scripts/triage-issues.sh`](scripts/triage-issues.sh) | Bash equivalent for Linux/macOS consumers |
 
-## Quick Reference — Triage Checks
+## Triage Checks
 
-| Check | What it catches | Action |
-|-------|----------------|--------|
-| **Validity** | Gibberish, spam, unactionable issues | Close with `invalid`; reopen valid closed issues |
-| **Duplicate** | Title/keyword overlap >80% | Link canonical, add `duplicate`, close newer |
-| **Closed verification** | Closed without merged PR or code change | Reopen with `needs-verification` |
-| **Label/type** | Missing type, priority, or area labels | Apply or flag with `needs-triage` |
-| **Title quality** | Short, generic, or meaningless titles | Suggest improved title in comment |
-| **Proposed fixes** | No related files or resolution noted | Comment with `## Related Files` and `## Proposed Resolution` |
-| **Relationships** | Missing blocks/depends-on linkage | Add inferred relationship markers |
-| **Branch connection** | Open branch without linked PR | Comment with branch name and suggest PR |
-| **Priority review** | Security issues without critical; stale issues | Escalate or add `stale` |
+1. Validity
+2. Duplicate detection
+3. Closed-issue verification
+4. Label/type enforcement
+5. Title quality
+6. Proposed fixes + related links
+7. Relationship audit
+8. Branch connection
+9. Priority review
 
 ## Agent Pairing
 

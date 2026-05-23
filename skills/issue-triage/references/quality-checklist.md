@@ -12,12 +12,14 @@ An issue passes the minimum bar if ALL of the following are true:
 |-------|------|
 | **Title** | ≥10 chars; contains at least one meaningful word; not a stop-phrase |
 | **Body** | ≥50 chars of meaningful text (not just a URL or template headers) |
+| **Encoding integrity** | No mojibake/replacement-char corruption (e.g., `�`, `Ã`, `Â`, `â€™`, `â€œ`) |
 | **Type label** | Exactly one from the type taxonomy |
 | **Priority label** | Exactly one from the priority taxonomy |
 | **For bugs** | Must include expected vs actual behavior, or error message/stack trace |
 | **For enhancements** | Must include a problem statement or user story |
 
 Issues that fail any required field receive `needs-triage` and a comment listing what is missing.
+Encoding-integrity failures should be flagged with `needs-info` + `needs-triage` and a request to resubmit with UTF-8-safe text; they should not be auto-closed as invalid unless clearly spam.
 
 ---
 
@@ -55,6 +57,8 @@ Issues that fail any required field receive `needs-triage` and a comment listing
 | `blocked` | Cannot proceed until another issue or external action is resolved |
 | `stale` | No activity for >90 days; may be closed if not updated |
 | `wontfix` | Intentionally not resolved; out of scope or by design |
+
+**Exclusivity rule:** `duplicate` cannot coexist with any type label (`bug`, `enhancement`, `documentation`, `chore`, `security`, `question`). If both are present, triage must resolve the conflict by keeping only one side.
 
 ### Area Labels (recommended — one or more)
 
