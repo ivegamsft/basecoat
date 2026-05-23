@@ -4,6 +4,21 @@ All notable changes to this repository should be recorded in this file.
 
 ## Unreleased
 
+## 3.28.1 - 2026-05-23
+
+### Added
+
+- Added sprint/project mapper agent and skill for grouping work into meaningful sprint-wave project slices.
+- Added comprehensive issue triage agent automation with duplicate/validity/title/type/priority checks.
+
+### Changed
+
+- Updated `docs/reference/HOOKS.md` with platform-aligned event mapping, agent-scoped hook guidance, and telemetry integration recommendations.
+
+### Security
+
+- Merged dependency updates for `portal/app/backend`, `portal/backend`, `mcp`, and `mcp/basecoat-metrics`.
+
 ## 3.26.0 - 2026-05-11
 
 ### Changed

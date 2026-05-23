@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "3.26.0",
-  "releaseDate": "2026-05-11",
-  "notes": "Quality uplift sprint: raised 8 red-scored assets to green, refreshed registry metadata to 82 agents, fixed all validation warnings, added missing frontmatter fields"
+  "version": "3.28.1",
+  "releaseDate": "2026-05-23",
+  "notes": "Dogfood sprint follow-through: merged sprint mapper and issue triage automation, shipped dependency security updates, and aligned HOOKS guidance with platform events and telemetry design"
 }
