@@ -1,0 +1,3 @@
+# Keep dashboard image context minimal (static Nginx site)
+*
+!index.html

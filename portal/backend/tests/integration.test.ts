@@ -68,7 +68,7 @@ const mockRepo = {
 const mockScan = {
   id: 'scan-uuid-1',
   repositoryId: 'repo-uuid-1',
-  status: 'pending',
+  status: 'running',
   triggeredBy: null,
   startedAt: null,
   completedAt: null,
@@ -160,7 +160,7 @@ describe('POST /api/v1/repositories/:id/scans', () => {
       .set('Authorization', authHeader);
 
     expect(res.status).toBe(201);
-    expect(res.body.data.status).toBe('pending');
+    expect(res.body.data.status).toBe('running');
     expect(res.body.data.repositoryId).toBe('repo-uuid-1');
   });
 });

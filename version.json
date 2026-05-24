@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "3.27.0",
-  "releaseDate": "2026-05-17",
-  "notes": "Minor release with new agent and skill coverage, release automation, validation gates, and workflow hardening."
+  "version": "3.28.1",
+  "releaseDate": "2026-05-23",
+  "notes": "Dogfood sprint follow-through: merged sprint mapper and issue triage automation, shipped dependency security updates, and aligned HOOKS guidance with platform events and telemetry design"
 }

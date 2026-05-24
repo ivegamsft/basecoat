@@ -1,0 +1,19 @@
+name: "receiving-code-review-routing"
+description: "Routing evaluation — validates trigger activation for the receiving-code-review skill."
+skill: "skills/receiving-code-review/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "I got review feedback on my PR with 3 must-fix items. Help me address them systematically."
+    expect_activation: true
+  - id: "pos-2"
+    input: "The reviewer left comments on my pull request. How should I prioritize and respond?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "I need to re-request review after addressing all the feedback on PR #42."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Review this pull request and leave comments on code quality issues."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Create a new pull request for my feature branch and write the description."
+    expect_activation: false

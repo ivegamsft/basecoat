@@ -1,0 +1,13 @@
+[
+  { "id": "sa-01", "predicted_tool": "search-assets" },
+  { "id": "gad-01", "predicted_tool": "get-asset-details" },
+  { "id": "glm-01", "predicted_tool": "get-history" },
+  { "id": "gh-01", "predicted_tool": "get-history" },
+  { "id": "ga-01", "predicted_tool": "get-alerts" },
+  { "id": "val-01", "predicted_tool": "validate" },
+  { "id": "scf-01", "predicted_tool": "scaffold" },
+  { "id": "ag-01", "predicted_tool": "audit-governance" },
+  { "id": "cc-01", "predicted_tool": "check-coverage" },
+  { "id": "cpr-01", "predicted_tool": "create-pr" },
+  { "id": "neg-01", "predicted_tool": "none" }
+]

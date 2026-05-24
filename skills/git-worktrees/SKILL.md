@@ -1,0 +1,45 @@
+---
+
+name: git-worktrees
+description: "Use when isolating parallel tasks, experiments, or hotfixes into separate working directories. USE FOR: create isolated workspace for feature branch, run parallel tasks without stashing, set up clean environment for risky experiment, manage multiple branches simultaneously, clean up stale worktrees. DO NOT USE FOR: simple branch switching, single-task linear workflows, repos with submodule-heavy setups that complicate worktrees."
+compatibility:
+  editors:
+    - vscode
+  platforms:
+    - github
+metadata:
+  category: "Developer Workflow"
+  tags: ["git", "parallelism", "isolation", "branching"]
+  maturity: "beta"
+  audience: ["developers"]
+allowed-tools: ["bash", "git"]
+
+---
+
+# Git Worktrees — Isolated Parallel Workspaces
+
+## When to Use
+
+- Parallel tasks (orchestrator dispatching to subagents)
+- Risky experiments that should not affect the main working directory
+- Hotfixes needed while a feature branch is mid-work
+
+## When NOT to Use
+
+- Simple linear workflows — just use branches
+- Repos with complex submodule setups
+
+## Workflow
+
+1. **Create**: `git worktree add ../feature -b feat/name`
+2. **Setup**: `cd ../feature && npm install && npm test` (verify clean baseline)
+3. **Work**: Changes stay isolated; main directory untouched
+4. **Cleanup**: `git worktree remove ../feature && git worktree prune`
+
+## Safety Rules
+
+- Always verify a clean test baseline before starting work.
+- Never delete a worktree directory manually — use `git worktree remove`.
+- Run `git worktree list` before creating new ones.
+- Each worktree must be on a unique branch.
+

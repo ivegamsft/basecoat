@@ -42,6 +42,7 @@ Inspect the relevant code, constraints, and existing patterns before proposing c
 ### Phase 2 — Plan
 
 Write a short plan covering scope, approach, major risks, and verification criteria.
+Decompose the work into discrete tasks following the granularity standard below.
 
 ### Phase 3 — Implement
 
@@ -61,6 +62,41 @@ Keep the plan brief and actionable. Include:
 - **Verification criteria** — how success will be checked
 
 Do not write a novel. The plan should be short enough to guide execution and easy to update.
+
+## Task Granularity Standard
+
+Each task in the plan must be completable in one focused step. A well-formed task includes:
+
+- **Target file(s)** — exact paths that will be created or modified
+- **What changes** — the specific behavior, function, or structure being added/changed
+- **Verification** — the command or check that proves this task succeeded
+
+Guidelines for task sizing:
+
+- A single task should not touch more than ~50 lines of change.
+- If a task spans multiple unrelated files, split it.
+- Dependencies between tasks must be explicit (task B requires task A).
+- Each task should be independently verifiable before moving to the next.
+
+### Example Plan Format
+
+```
+## Tasks
+
+1. Create validation schema — `src/schemas/user.ts`
+   Change: Add Zod schema for user registration input
+   Verify: `npx vitest run src/schemas/user.test.ts`
+
+2. Add registration endpoint — `src/routes/register.ts`
+   Change: POST /register handler using schema from task 1
+   Depends: task 1
+   Verify: `curl -X POST localhost:3000/register -d '{"email":"a@b.c"}'`
+
+3. Add error handling — `src/routes/register.ts`
+   Change: Return 422 with field-level errors on validation failure
+   Depends: task 2
+   Verify: `npx vitest run src/routes/register.test.ts`
+```
 
 ## Course Correction
 

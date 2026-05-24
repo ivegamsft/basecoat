@@ -1,6 +1,6 @@
 ---
 description: "Use when implementing human user authentication via browser — Authorization Code Flow with PKCE, confidential client flows, MSAL token caching, and Entra ID app registration. Complements bac-authentication.instructions.md which covers service-to-service managed identity."
-applyTo: "**/*"
+applyTo: "**/auth/**,**/identity/**,**/*.bicep,**/iac/**,**/.github/workflows/**"
 ---
 
 # Entra ID OIDC / OAuth 2.0 — User-Facing Authentication

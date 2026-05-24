@@ -36,7 +36,23 @@ function ConvertFrom-Yaml {
 # Test 1: All workflows have timeout-minutes set
 Write-Host '  Test 1: Validate timeout-minutes in all workflows...'
 $workflowDir = '.github/workflows'
-$workflowFiles = Get-ChildItem "$workflowDir/*.yml" -File | Where-Object { $_.Name -notmatch 'README' }
+$workflowFiles = Get-ChildItem "$workflowDir/*.yml" -File | Where-Object { $_.Name -notmatch 'README|\.lock\.yml$' }
+$guardrailFailures = @()
+$directMainPushAllowList = @(
+    'publish-to-production.yml'
+)
+$nonDispatchTriggers = @(
+    'push',
+    'pull_request',
+    'pull_request_target',
+    'schedule',
+    'workflow_run',
+    'issue_comment',
+    'issues',
+    'release',
+    'repository_dispatch',
+    'merge_group'
+)
 
 $missingTimeouts = @()
 foreach ($file in $workflowFiles) {
@@ -329,6 +345,89 @@ if ($vaguJobNames.Count -eq 0) {
 }
 else {
     Write-Host "    ℹ Consider more descriptive names for: $($vaguJobNames | ForEach-Object { "$($_.file)/$($_.name)" } | Join-String -Separator ', ')"
+}
+
+# Test 11: Block unguarded github.event.inputs usage on non-dispatch triggers
+Write-Host '  Test 11: Validate github.event.inputs usage is dispatch-guarded...'
+$eventInputsGuardrailViolations = @()
+
+foreach ($file in $workflowFiles) {
+    $content = Get-Content $file.FullName -Raw
+    $lines = $content -split "`n"
+
+    $hasNonDispatchTrigger = $false
+    foreach ($trigger in $nonDispatchTriggers) {
+        if ($content -match "(?m)^\s{2}${trigger}:\s*$") {
+            $hasNonDispatchTrigger = $true
+            break
+        }
+    }
+
+    if (-not $hasNonDispatchTrigger) {
+        continue
+    }
+
+    $lineNum = 0
+    foreach ($line in $lines) {
+        $lineNum++
+        if ($line -notmatch 'github\.event\.inputs\.') {
+            continue
+        }
+
+        $isDispatchGuarded = $line -match "github\.event_name\s*==\s*['`"]workflow_dispatch['`"]"
+        $isCallGuarded = $line -match "github\.event_name\s*==\s*['`"]workflow_call['`"]"
+
+        if (-not $isDispatchGuarded -and -not $isCallGuarded) {
+            $eventInputsGuardrailViolations += @{
+                file = $file.Name
+                line = $lineNum
+                detail = $line.Trim()
+            }
+        }
+    }
+}
+
+if ($eventInputsGuardrailViolations.Count -eq 0) {
+    Write-Host '    ✓ github.event.inputs references are event-guarded where required'
+}
+else {
+    Write-Host '    ✗ Unguarded github.event.inputs references found:' -ForegroundColor Red
+    foreach ($item in $eventInputsGuardrailViolations) {
+        Write-Host "      - $($item.file):$($item.line) - $($item.detail)" -ForegroundColor Red
+    }
+    $guardrailFailures += 'event-context-misuse'
+}
+
+# Test 12: Block direct push-to-main automation patterns
+Write-Host '  Test 12: Validate no workflow pushes directly to main...'
+$directMainPushViolations = @()
+$directMainPushPattern = '(?im)git\s+push[^\r\n]*(refs/heads/main|HEAD:main|\sorigin\s+main(\s|$)|\s+main(\s|$))'
+
+foreach ($file in $workflowFiles) {
+    $content = Get-Content $file.FullName -Raw
+    if ($content -notmatch $directMainPushPattern) {
+        continue
+    }
+
+    if ($directMainPushAllowList -contains $file.Name) {
+        Write-Host "    ℹ Allowed direct-main push workflow: $($file.Name)" -ForegroundColor Yellow
+        continue
+    }
+
+    $directMainPushViolations += $file.Name
+}
+
+if ($directMainPushViolations.Count -eq 0) {
+    Write-Host '    ✓ No disallowed direct push-to-main patterns found'
+}
+else {
+    Write-Host "    ✗ Disallowed direct push-to-main patterns found in: $($directMainPushViolations -join ', ')" -ForegroundColor Red
+    $guardrailFailures += 'protected-branch-push-pattern'
+}
+
+if ($guardrailFailures.Count -gt 0) {
+    Write-Host "Workflow guardrails failed: $($guardrailFailures -join ', ')" -ForegroundColor Red
+    exit 1
 }
 
 Write-Host 'All workflow guardrails tests completed'

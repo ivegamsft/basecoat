@@ -80,6 +80,7 @@ flowchart LR
 - [operations/BLOCKED_ISSUES.md](operations/BLOCKED_ISSUES.md) — Blocked issues tracking
 - [operations/TELEMETRY_ADOPTION.md](operations/TELEMETRY_ADOPTION.md) — Adoption telemetry guide
 - [operations/GITHUB_SECRETS.md](operations/GITHUB_SECRETS.md) — Repository secrets setup and rotation guide
+- [operations/COPILOT_EXTENSION_GITHUB_APP_REGISTRATION.md](operations/COPILOT_EXTENSION_GITHUB_APP_REGISTRATION.md) — GitHub App registration runbook for BaseCoat Copilot Extension
 - [operations/security/](operations/security/) — Security policies and audit docs
 
 ## Templates (`docs/templates/`)

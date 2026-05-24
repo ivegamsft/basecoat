@@ -1,6 +1,6 @@
 ---
 description: "Use when designing or reviewing bootstrap scripts. Covers decomposition, idempotency, documentation, and cross-platform requirements."
-applyTo: "**/bootstrap*,**/scripts/*"
+applyTo: "**/bootstrap*.{ps1,sh}"
 ---
 
 # Bootstrap Script Structure

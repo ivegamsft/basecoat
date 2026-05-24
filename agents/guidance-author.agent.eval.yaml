@@ -1,0 +1,19 @@
+name: "guidance-author-routing"
+description: "Routing evaluation — validates trigger activation for the guidance-author agent."
+skill: "agents/guidance-author.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with drafting new BaseCoat guidance assets (instruction files, skill SKILL.md, agent files, prompt templates) from a description or requirement. Produces a structured draft ready for guidance-reviewer validation."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle drafting new BaseCoat guidance assets (instruction files, skill SKILL.md, agent files, prompt templates) from a description or requirement. Produces a structured draft ready for guidance-reviewer validation?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the guidance-author agent for drafting new BaseCoat guidance assets (instruction files, skill SKILL.md, agent files, prompt templates) from a description or requirement. Produces a structured draft ready for guidance-reviewer validation."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Write a haiku about programming."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Give me a recipe for chocolate chip cookies."
+    expect_activation: false

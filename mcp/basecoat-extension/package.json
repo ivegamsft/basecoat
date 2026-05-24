@@ -1,0 +1,29 @@
+{
+  "name": "basecoat-extension",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "BaseCoat Copilot Extension runtime scaffold",
+  "scripts": {
+    "dev": "tsx src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test dist/**/*.test.js",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@azure/monitor-opentelemetry": "^1.12.0",
+    "@github/copilot-sdk": "^1.0.0-beta.4",
+    "@opentelemetry/api": "^1.9.0",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^22.15.30",
+    "tsx": "^4.20.6",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

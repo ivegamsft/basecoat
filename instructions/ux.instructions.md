@@ -1,6 +1,6 @@
 ---
 description: "Use when working on user experience, interface design, accessibility, component specifications, or user journey mapping. Covers design system reference, WCAG compliance, naming conventions, handoff format, and journey standards."
-applyTo: "**/*"
+applyTo: "**/*.{tsx,jsx,html,css,scss,vue,svelte,astro},docs/ux/**,docs/design-system.md"
 ---
 
 # UX Standards

@@ -7,7 +7,7 @@ Use A/B experiments to compare two agent variants before promotion to `agents/`.
 Create experiment assets under:
 
 ```text
-experiments/<name>/
+tests/experiments/<name>/
   v1.agent.md
   v2.agent.md
   prompts.json
@@ -35,7 +35,7 @@ The report includes prompt-level winner (`v1` / `v2` / `tie`), scores, and ratio
 1. Run experiment and review report.
 2. If `v2` wins consistently, copy/promote changes into `agents/<target>.agent.md`.
 3. Open PR referencing the experiment report.
-4. Archive losing variant by keeping it under `experiments/<name>/` for traceability.
+4. Archive losing variant by keeping it under `tests/experiments/<name>/` for traceability.
 
 ## Phase 1 limits
 

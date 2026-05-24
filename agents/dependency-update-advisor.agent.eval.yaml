@@ -1,0 +1,19 @@
+name: "dependency-update-advisor-routing"
+description: "Routing evaluation — validates trigger activation for the dependency-update-advisor agent."
+skill: "agents/dependency-update-advisor.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with assess Dependabot PR risk."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle evaluate semver bump safety?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the dependency-update-advisor agent for get CVE context for dependency update."
+    expect_activation: true
+  - id: "neg-1"
+    input: "creating Dependabot config"
+    expect_activation: false
+  - id: "neg-2"
+    input: "general code review"
+    expect_activation: false

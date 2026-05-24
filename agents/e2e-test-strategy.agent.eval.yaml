@@ -1,0 +1,19 @@
+name: "e2e-test-strategy-routing"
+description: "Routing evaluation — validates trigger activation for the e2e-test-strategy agent."
+skill: "agents/e2e-test-strategy.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with design E2E suite."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle map critical user paths?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the e2e-test-strategy agent for fix flaky tests."
+    expect_activation: true
+  - id: "neg-1"
+    input: "unit testing"
+    expect_activation: false
+  - id: "neg-2"
+    input: "contract testing"
+    expect_activation: false

@@ -1,0 +1,19 @@
+name: "new-customization-routing"
+description: "Routing evaluation — validates trigger activation for the new-customization agent."
+skill: "agents/new-customization.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with creating or updating a customization asset such as an instruction, skill, prompt, or agent. Chooses the right primitive, authors the file, and validates frontmatter and placement."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle creating or updating a customization asset such as an instruction, skill, prompt, or agent. Chooses the right primitive, authors the file, and validates frontmatter and placement?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the new-customization agent for creating or updating a customization asset such as an instruction, skill, prompt, or agent. Chooses the right primitive, authors the file, and validates frontmatter and placement."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Write a haiku about programming."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Give me a recipe for chocolate chip cookies."
+    expect_activation: false

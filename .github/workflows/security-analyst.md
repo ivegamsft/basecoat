@@ -14,6 +14,8 @@ permissions:
 safe-outputs:
   add-comment:
     hide-older-comments: true
+  noop:
+    report-as-issue: false
 engine: copilot
 timeout-minutes: 20
 run-name: "Security Analysis — PR #${{ github.event.pull_request.number }}"

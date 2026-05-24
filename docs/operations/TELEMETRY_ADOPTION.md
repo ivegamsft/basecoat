@@ -5,6 +5,9 @@
 How to measure Base Coat effectiveness, usage patterns, and continuous improvement signals across consuming projects. This guide helps dogfooding teams understand where basecoat is helping, what's working, and where improvements are needed through systematic measurement and feedback loops.
 
 For the currently shippable implementation baseline, see [Telemetry Adoption — Phase 1](./TELEMETRY_ADOPTION_PHASE1.md).
+Use canonical terms from
+[Dashboard Metrics Schema and Glossary](../reference/metrics-schema-glossary.md#canonical-vocabulary-and-usage-rules)
+for adoption telemetry and dashboard participation language.
 
 ## What to Measure
 

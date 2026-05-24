@@ -25,7 +25,7 @@ Any internal repo
    - Resource owner: **IBuySpy-Shared**
    - Repository access: **Only select repositories** → `IBuySpy-Shared/basecoat-memory`
    - Permissions: **Contents** (R/W), **Pull requests** (R/W), **Metadata** (R)
-   - Set expiry to 1 year (calendar reminder to rotate)
+   - Set PAT expiry to **30 days or less** (calendar reminder to rotate)
 
 2. Store it as an **org-level secret**:
    - Go to <https://github.com/organizations/IBuySpy-Shared/settings/secrets/actions>
@@ -132,7 +132,7 @@ Open <https://github.com/IBuySpy-Shared/basecoat/issues/new/choose> and select
 
 ## Token Rotation
 
-The org-level PAT should be rotated annually.
+The org-level PAT should be rotated every 30 days.
 
 1. Create a new fine-grained PAT with the same permissions
 2. Update the org secret at:

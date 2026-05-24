@@ -1,6 +1,8 @@
 # Telemetry Adoption — Phase 1
 
 This document captures the initial, low-risk telemetry implementation path for BaseCoat.
+Canonical terminology for adoption telemetry and dashboard participation is defined
+in [Dashboard Metrics Schema and Glossary](../reference/metrics-schema-glossary.md#canonical-vocabulary-and-usage-rules).
 
 ## Scope
 

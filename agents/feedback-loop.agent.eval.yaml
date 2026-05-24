@@ -1,0 +1,19 @@
+name: "feedback-loop-routing"
+description: "Routing evaluation — validates trigger activation for the feedback-loop agent."
+skill: "agents/feedback-loop.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with track prompt effectiveness."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle run A/B test on instructions?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the feedback-loop agent for detect quality regression."
+    expect_activation: true
+  - id: "neg-1"
+    input: "writing new prompts or detailed product planning"
+    expect_activation: false
+  - id: "neg-2"
+    input: "Write a haiku about programming."
+    expect_activation: false

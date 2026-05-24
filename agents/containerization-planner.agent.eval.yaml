@@ -1,0 +1,19 @@
+name: "containerization-planner-routing"
+description: "Routing evaluation — validates trigger activation for the containerization-planner agent."
+skill: "agents/containerization-planner.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with containerize an app."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle choose AKS vs ACA?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the containerization-planner agent for generate Dockerfiles."
+    expect_activation: true
+  - id: "neg-1"
+    input: "image scanning"
+    expect_activation: false
+  - id: "neg-2"
+    input: "cluster incidents"
+    expect_activation: false

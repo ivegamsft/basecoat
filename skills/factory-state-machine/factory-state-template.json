@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ibuyspy-shared.github.io/basecoat/skills/factory-state-machine/factory-state-template.json",
+  "title": "Factory State",
+  "type": "object",
+  "required": ["version", "currentState", "states", "transitions"],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "currentState": {
+      "type": "string"
+    },
+    "states": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "transitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "mode"],
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "mode": {
+            "enum": ["auto", "manual"]
+          },
+          "condition": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": true
+}

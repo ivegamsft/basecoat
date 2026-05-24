@@ -4,12 +4,12 @@ on:
   push:
     branches: [main]
     paths:
-      - 'terraform/**'
+      - 'infra/aws/**'
       - '.github/workflows/terraform-deploy.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'terraform/**'
+      - 'infra/aws/**'
 
 env:
   AWS_REGION: us-east-1
@@ -26,19 +26,19 @@ jobs:
     strategy:
       matrix:
         working-directory:
-          - terraform
-          - terraform/modules/networking
-          - terraform/modules/database
-          - terraform/modules/compute
-          - terraform/modules/caching
-          - terraform/modules/storage
-          - terraform/modules/secrets
-          - terraform/modules/security
-          - terraform/modules/monitoring
+          - infra/aws
+          - infra/aws/modules/networking
+          - infra/aws/modules/database
+          - infra/aws/modules/compute
+          - infra/aws/modules/caching
+          - infra/aws/modules/storage
+          - infra/aws/modules/secrets
+          - infra/aws/modules/security
+          - infra/aws/modules/monitoring
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4
@@ -61,7 +61,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4
@@ -69,11 +69,11 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
 
       - name: Terraform Init
-        working-directory: terraform
+        working-directory: infra/aws
         run: terraform init -backend=false
 
       - name: Terraform Validate
-        working-directory: terraform
+        working-directory: infra/aws
         run: terraform validate
 
   plan-prod:
@@ -84,7 +84,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4
@@ -92,11 +92,11 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
 
       - name: Terraform Init
-        working-directory: terraform
+        working-directory: infra/aws
         run: terraform init -backend=false
 
       - name: Terraform Plan (Dry Run)
-        working-directory: terraform
+        working-directory: infra/aws
         run: terraform plan -var-file=environments/prod/terraform.tfvars -input=false -no-color
         env:
           TF_VAR_aws_primary_region: us-east-1

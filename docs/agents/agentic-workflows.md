@@ -22,7 +22,7 @@ the Copilot agent:
 2. Set **Resource owner** to your user account (not the org)
 3. Under **Account permissions**, set **Copilot Requests** → `Read`
 4. No repository permissions needed
-5. Set an expiration date and generate the token
+5. Set PAT expiration to **30 days or less** and generate the token
 6. Add to the repository: **Settings → Secrets and variables → Actions → New repository secret**
    - Name: `COPILOT_GITHUB_TOKEN`
    - Value: the token you generated

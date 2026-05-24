@@ -1,0 +1,19 @@
+name: "chaos-engineer-routing"
+description: "Routing evaluation — validates trigger activation for the chaos-engineer agent."
+skill: "agents/chaos-engineer.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with design fault injection experiments."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle run game day exercises?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the chaos-engineer agent for validate SLO resilience targets."
+    expect_activation: true
+  - id: "neg-1"
+    input: "debugging application bugs"
+    expect_activation: false
+  - id: "neg-2"
+    input: "writing unit tests"
+    expect_activation: false

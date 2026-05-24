@@ -1,0 +1,19 @@
+name: "release-readiness-chair-routing"
+description: "Routing evaluation — validates trigger activation for the release-readiness-chair agent."
+skill: "agents/release-readiness-chair.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with facilitating release readiness ceremonies and making explicit go/no-go decisions. USE FOR: collect release evidence across quality, operations, and rollback readiness; identify unresolved launch risks; enforce gate criteria; and publish decision records with owners and due dates. DO NOT USE FOR: implementing feature code, replacing incident response command, or product roadmap planning."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle facilitating release readiness ceremonies and making explicit go/no-go decisions. USE FOR: collect release evidence across quality, operations, and rollback readiness; identify unresolved launch risks; enforce gate criteria; and publish decision records with owners and due dates. DO NOT USE FOR: implementing feature code, replacing incident response command, or product roadmap planning?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the release-readiness-chair agent for facilitating release readiness ceremonies and making explicit go/no-go decisions. USE FOR: collect release evidence across quality, operations, and rollback readiness; identify unresolved launch risks; enforce gate criteria; and publish decision records with owners and due dates. DO NOT USE FOR: implementing feature code, replacing incident response command, or product roadmap planning."
+    expect_activation: true
+  - id: "neg-1"
+    input: "implementing feature code"
+    expect_activation: false
+  - id: "neg-2"
+    input: "replacing incident response command"
+    expect_activation: false

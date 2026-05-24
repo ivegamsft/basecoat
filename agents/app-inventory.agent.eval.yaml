@@ -1,0 +1,19 @@
+name: "app-inventory-routing"
+description: "Routing evaluation — validates trigger activation for the app-inventory agent."
+skill: "agents/app-inventory.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with scan legacy app tech stack."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle assess migration complexity?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the app-inventory agent for generate dependency inventory."
+    expect_activation: true
+  - id: "neg-1"
+    input: "writing new code"
+    expect_activation: false
+  - id: "neg-2"
+    input: "live production monitoring"
+    expect_activation: false

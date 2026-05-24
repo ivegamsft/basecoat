@@ -1,0 +1,19 @@
+name: "sprint-planner-routing"
+description: "Routing evaluation — validates trigger activation for the sprint-planner agent."
+skill: "agents/sprint-planner.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with decompose sprint goal into GitHub issues."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle build wave dependency map?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the sprint-planner agent for assign agent roles."
+    expect_activation: true
+  - id: "neg-1"
+    input: "running sprint retrospectives"
+    expect_activation: false
+  - id: "neg-2"
+    input: "story point estimation"
+    expect_activation: false

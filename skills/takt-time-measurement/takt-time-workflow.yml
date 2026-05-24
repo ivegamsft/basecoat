@@ -1,0 +1,21 @@
+name: Takt Time Measurement
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@<pinned-sha>
+      - name: Capture start time
+        run: echo "start=$(date -u +%s)" >> "$GITHUB_ENV"
+      - name: Compute takt time
+        run: echo "Replace with the workflow's actual takt calculation"
+      - name: Export metrics
+        run: echo "Write takt metrics to the step summary or telemetry sink"

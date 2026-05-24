@@ -1,0 +1,19 @@
+name: "dependency-blocker-monitor-routing"
+description: "Routing evaluation — validates trigger activation for the dependency-blocker-monitor agent."
+skill: "agents/dependency-blocker-monitor.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with monitoring workcell BOM dependencies and cell health to open or resolve blocker issues when a cell fails or recovers."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle read workcell BOM dependencies, monitor cell deployment status, create blocker issues, and resolve them on recovery?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the dependency-blocker-monitor agent for dependency maps, cell health checks, blocker issue creation, and recovery closures."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Write a dashboard component for issue tracking."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Summarize a sprint retro."
+    expect_activation: false

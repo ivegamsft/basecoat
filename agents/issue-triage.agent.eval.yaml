@@ -1,0 +1,40 @@
+name: "issue-triage-routing"
+description: "Routing evaluation — validates trigger activation for the issue-triage agent across all 9 triage check types."
+skill: "agents/issue-triage.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "Scan all open issues for duplicates and close any that are redundant."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Review recently closed issues and verify the work was actually done."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Find issues missing labels and apply the correct type and priority."
+    expect_activation: true
+  - id: "pos-4"
+    input: "Check whether closed issue #245 was actually resolved or just closed without a fix."
+    expect_activation: true
+  - id: "pos-5"
+    input: "This issue has a terrible title. Can you suggest a better one and flag it?"
+    expect_activation: true
+  - id: "pos-6"
+    input: "Look for open branches that are linked to unresolved issues and report them."
+    expect_activation: true
+  - id: "pos-7"
+    input: "Run a full triage pass on the backlog — check validity, types, priorities, and relationships."
+    expect_activation: true
+  - id: "pos-8"
+    input: "Find issues that have been open for more than 90 days with no activity and mark them stale."
+    expect_activation: true
+  - id: "pos-9"
+    input: "This bug report is gibberish — validate it and close it with an explanation if invalid."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Write unit tests for the authentication module."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Deploy the latest release to production."
+    expect_activation: false
+  - id: "neg-3"
+    input: "Summarize the sprint velocity metrics."
+    expect_activation: false

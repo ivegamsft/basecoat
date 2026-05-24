@@ -124,6 +124,7 @@ Create a fine-grained PAT with:
 - **Resource owner:** your org
 - **Repository access:** `{org}/basecoat-memory` only
 - **Permissions:** Contents (R/W), Pull requests (R/W)
+- **Expiration:** 30 days or less
 
 ```bash
 gh secret set MEMORY_REPO_TOKEN --repo IBuySpy-Shared/basecoat

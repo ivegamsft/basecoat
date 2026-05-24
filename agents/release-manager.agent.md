@@ -123,6 +123,14 @@ Generate a [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) entry groupe
 - Preserve all existing content below the new entry unchanged
 - The heading format is `## X.Y.Z - YYYY-MM-DD` (no `v` prefix, matching existing CHANGELOG.md)
 
+If no matching changelog section exists for the release tag, generate release notes from merged PRs instead. Group those PRs by category:
+
+- `Added` for `feat` / `feature` / `enhancement`
+- `Changed` for `refactor` / `perf`
+- `Fixed` for `fix` / `bug`
+- `Removed` for `remove` / `revert`
+- `Documentation`, `Testing`, `CI`, `Maintenance`, and `Other` as needed
+
 ### Step 6 — Commit the Version Bump
 
 ```bash
@@ -176,7 +184,7 @@ git push origin "v${NEXT_VERSION}"
 
 ### Step 8 — Publish GitHub Release
 
-After the tag is pushed, create the release using the CHANGELOG section as notes. The existing `release.yml` workflow handles artifact packaging automatically, but the agent can also create the release directly.
+After the tag is pushed, create the release using the CHANGELOG section as notes. If the changelog section is missing, mirror the workflow fallback by generating grouped release notes from merged PRs; only fall back to commit history if merged PR data cannot be collected. The existing `release.yml` workflow handles artifact packaging automatically, but the agent can also create the release directly.
 
 ```bash
 # Extract the changelog section for this version
@@ -200,7 +208,7 @@ gh release create "v${NEXT_VERSION}" \
 
 When `--dry-run` is set, the agent performs Steps 1–5 but does **not** commit, tag, push, or create a release. Instead, it prints:
 
-```
+```text
 DRY RUN — Release v<NEXT_VERSION>
   Bump type: <major|minor|patch>
   Current:   <CURRENT_VERSION>

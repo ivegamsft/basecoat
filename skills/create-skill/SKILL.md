@@ -26,13 +26,15 @@ Use this skill when the goal is to add a new `SKILL.md` to a shared customizatio
 3. Create a folder with a stable, discoverable name.
 4. Add frontmatter with `name` matching the folder and a description that includes trigger phrases.
 5. Write a short workflow with guardrails, expected output, and non-goals.
-6. Add templates or examples if the workflow benefits from starter assets.
-7. Validate frontmatter and update any catalog or inventory.
+6. Keep the skill concise: target roughly ≤500 tokens so validation stays advisory instead of noisy. Move long examples into templates or docs.
+7. Add templates or examples if the workflow benefits from starter assets.
+8. Validate frontmatter and update any catalog or inventory.
 
 ## Guardrails
 
 - Keep the skill scoped to one clear workflow.
 - Put discovery keywords in the description, not only in the body.
+- Keep `SKILL.md` under the token-budget target; move detail into templates or supporting docs.
 - Avoid broad descriptions that overlap heavily with existing skills.
 - Do not create a skill when a file instruction would be sufficient.
 

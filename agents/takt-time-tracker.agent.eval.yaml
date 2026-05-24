@@ -1,0 +1,19 @@
+name: "takt-time-tracker-routing"
+description: "Routing evaluation — validates trigger activation for the takt-time-tracker agent."
+skill: "agents/takt-time-tracker.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "Measure dwell time at each station and compute takt time."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Show me the median and p95 time spent in S2 and S3."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Flag any work item that exceeded the station SLA."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Fix the failing unit test."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Design a logo for the app."
+    expect_activation: false

@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param(
     [string]$RootDir = (Get-Location).Path,
-    [switch]$Strict
+    [switch]$Strict,
+    [switch]$FailOnWarning
 )
 
 Set-StrictMode -Version Latest
@@ -36,6 +37,7 @@ if (Test-Path '.agents/skills') {
 $errors = 0
 $warnings = 0
 $metadataStale = $false
+$tokenBudgetThreshold = 500
 
 function Test-AgentMetadataFreshness {
     $agentFiles = @(Get-ChildItem 'agents' -Filter '*.agent.md' -File | Sort-Object Name)
@@ -79,6 +81,7 @@ function Test-AgentMetadataFreshness {
 
 foreach ($file in $files) {
     $lines = Get-Content $file.FullName -TotalCount 50
+    $content = Get-Content $file.FullName -Raw
     if ($lines.Count -eq 0 -or $lines[0] -ne '---') {
         Write-Host "ERROR: Missing frontmatter start in $($file.FullName)" -ForegroundColor Red
         $errors++
@@ -145,6 +148,14 @@ foreach ($file in $files) {
             }
         }
 
+        # Check 1: Token budget — word count * 1.35 > 500 → warning
+        $wordCount = ($content -split '\s+' | Where-Object { $_ -ne '' }).Count
+        $approxTokens = [math]::Round($wordCount * 1.35)
+        if ($approxTokens -gt $tokenBudgetThreshold) {
+            Write-Host "WARNING: $($file.FullName) exceeds approx $tokenBudgetThreshold-token budget target (approx $approxTokens tokens)" -ForegroundColor Yellow
+            $warnings++
+        }
+
         # Validate description length
         $descLine = $lines | Select-String -Pattern '^description:\s*'
         if ($descLine) {
@@ -182,6 +193,11 @@ if ($warnings -gt 0) {
     Write-Host "Base Coat validation passed with $warnings warning(s)" -ForegroundColor Yellow
 } else {
     Write-Host 'Base Coat validation passed' -ForegroundColor Green
+}
+
+if ($FailOnWarning -and $warnings -gt 0) {
+    Write-Host "Validation failed in fail-on-warning mode: $warnings warning(s) found." -ForegroundColor Red
+    exit 1
 }
 
 if ($Strict -and $metadataStale) {

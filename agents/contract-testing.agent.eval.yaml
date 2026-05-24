@@ -1,0 +1,19 @@
+name: "contract-testing-routing"
+description: "Routing evaluation — validates trigger activation for the contract-testing agent."
+skill: "agents/contract-testing.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with write Pact consumer-driven contracts."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle design service integration tests?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the contract-testing agent for set up contract verification in CI."
+    expect_activation: true
+  - id: "neg-1"
+    input: "load testing"
+    expect_activation: false
+  - id: "neg-2"
+    input: "manual QA workflows"
+    expect_activation: false

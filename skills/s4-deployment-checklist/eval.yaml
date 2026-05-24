@@ -1,0 +1,19 @@
+name: "s4-deployment-checklist-routing"
+description: "Routing evaluation — validates trigger activation for the s4-deployment-checklist skill."
+skill: "skills/s4-deployment-checklist/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Build an S4 cutover checklist with shadow-mode validation and rollback proof."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Prepare the deployment readiness review and make monitoring and on-call review explicit."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Draft the go/no-go checklist for a production cutover."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Plan a quarterly roadmap review."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Write unit tests for a parser."
+    expect_activation: false

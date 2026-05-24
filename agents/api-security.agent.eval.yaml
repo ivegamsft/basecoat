@@ -1,0 +1,19 @@
+name: "api-security-routing"
+description: "Routing evaluation — validates trigger activation for the api-security agent."
+skill: "agents/api-security.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with run OWASP API Top 10 assessment."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle model API threats with STRIDE?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the api-security agent for audit auth flows."
+    expect_activation: true
+  - id: "neg-1"
+    input: "container image scanning"
+    expect_activation: false
+  - id: "neg-2"
+    input: "general code review"
+    expect_activation: false

@@ -6,11 +6,13 @@ on:
       - main
     paths:
       - 'docs/**'
+      - 'scripts/generate-token-context-inventory.py'
       - 'mkdocs.yml'
       - '.github/workflows/docs.yml'
   pull_request:
     paths:
       - 'docs/**'
+      - 'scripts/generate-token-context-inventory.py'
       - 'mkdocs.yml'
   workflow_dispatch:
 
@@ -22,9 +24,9 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.x'
 
@@ -33,6 +35,9 @@ jobs:
           pip install \
             mkdocs-material \
             mkdocs-awesome-pages-plugin
+
+      - name: Generate token context inventory
+        run: python scripts/generate-token-context-inventory.py
 
       - name: Validate docs (strict)
         run: python -m mkdocs build --strict
@@ -42,11 +47,11 @@ jobs:
     needs: validate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.x'
 
@@ -55,6 +60,9 @@ jobs:
           pip install \
             mkdocs-material \
             mkdocs-awesome-pages-plugin
+
+      - name: Generate token context inventory
+        run: python scripts/generate-token-context-inventory.py
 
       - name: Configure site URLs for this repository
         run: |

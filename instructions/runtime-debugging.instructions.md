@@ -1,6 +1,6 @@
 ---
 description: "Use when debugging requires runtime context such as crash dumps, logs, memory state, or production telemetry. Covers how to feed runtime data into AI-assisted debugging workflows."
-applyTo: "**/*"
+applyTo: "src/**,lib/**,app/**,packages/**,tests/**"
 ---
 
 # Runtime-Aware Debugging

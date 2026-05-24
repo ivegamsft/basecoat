@@ -19,15 +19,15 @@ coverage, version currency, and onboarding trends.
 
 ## How metrics are collected
 
-The `adoption-metrics.yml` workflow runs weekly and inspects the `gh-pages` branch
-for consumer-reported sync state. It does **not** access private repositories —
-consumers report adoption by triggering the `report-adoption-callable.yml` workflow
-in their own repos, which writes an anonymised record to BaseCoat's metrics store.
+The `adoption-metrics.yml` workflow runs weekly (and can be run manually) in the
+BaseCoat repo. It reads the monitored repository list from `DASHBOARD_REPOS`,
+collects adoption data directly through the GitHub API, and publishes outputs to
+`dashboard/metrics/` on `gh-pages`.
 
 ```mermaid
 flowchart LR
-    CR["Consumer Repo"] -->|"report-adoption-callable.yml\n(weekly)"| WF["GitHub Actions"]
-    WF -->|"Writes adoption record"| BC["BaseCoat\nadoption-metrics.yml"]
+    CFG["DASHBOARD_REPOS\n(secret in BaseCoat)"] --> BC["BaseCoat\nadoption-metrics.yml"]
+    BC -->|"Scans configured repos"| API["GitHub API"]
     BC -->|"Publishes summary"| GHP["GH Pages\ndashboard/metrics/"]
 ```
 
@@ -43,27 +43,52 @@ Weekly output also includes CI reliability signals per repository in both
 - `pass_rate` (alias of `success_rate`)
 - `ci_pass_rate_last_20_runs` (retrospective-focused pass rate window)
 
-## Enabling adoption reporting in your repo
+For a complete field-level contract, definitions, and interpretation guidance, see
+[Dashboard Metrics Schema and Glossary](reference/metrics-schema-glossary.md).
 
-Add the following workflow call to your consumer repository to participate in
-adoption metrics. This is opt-in and anonymous — no private code or data is shared.
+## Canonical vocabulary
 
-```yaml
-# .github/workflows/report-adoption.yml
-name: Report BaseCoat Adoption
-on:
-  schedule:
-    - cron: '0 6 * * 1'   # Monday 06:00 UTC
-  workflow_dispatch:
+Use canonical telemetry terms from
+[Dashboard Metrics Schema and Glossary](reference/metrics-schema-glossary.md#canonical-vocabulary-and-usage-rules),
+especially when writing docs, issues, and summaries for adoption telemetry:
 
-jobs:
-  report:
-    uses: IBuySpy-Shared/basecoat/.github/workflows/report-adoption-callable.yml@main
-    with:
-      basecoat_version: ${{ vars.BASECOAT_VERSION }}
+- **Dashboard monitored repository** for `DASHBOARD_REPOS` configuration
+- **Dashboard participating repository** for repos present in current outputs
+- **Telemetry artifact** for files in `dashboard/metrics/`
+
+## Onboard a dashboard monitored repository
+
+Use this flow to opt a repository into dashboard monitoring.
+
+1. Configure monitored repos via `DASHBOARD_REPOS` in `IBuySpy-Shared/basecoat`.
+
+```bash
+echo '["IBuySpy-Shared/basecoat","org/repo1","org/repo2"]' | gh secret set DASHBOARD_REPOS --repo IBuySpy-Shared/basecoat
 ```
 
-!!! tip "Version variable"
-    Set the `BASECOAT_VERSION` repository variable to the BaseCoat version you have
-    installed (found in `.github/base-coat/version.json`). The sync workflow updates
-    this automatically when you run `sync.ps1`.
+1. Run the workflow.
+
+```bash
+gh workflow run adoption-metrics.yml --repo IBuySpy-Shared/basecoat
+```
+
+1. Verify dashboard outputs.
+
+```bash
+gh run list --workflow adoption-metrics.yml --repo IBuySpy-Shared/basecoat --limit 1
+gh run watch --repo IBuySpy-Shared/basecoat
+```
+
+Then confirm updated files under `dashboard/metrics/` on `gh-pages`
+(`latest.json`, `history.json`, `alerts.json`, `SUMMARY.md`).
+
+!!! tip "Helper script"
+    Use `pwsh scripts/bootstrap-dashboard.ps1` to list/add/remove monitored repos
+    without manually editing secret JSON.
+
+## Enrollment decision table
+
+| Need | Use | Config location | Trigger |
+|---|---|---|---|
+| Include repositories in adoption dashboard metrics | Dashboard monitored repos | `DASHBOARD_REPOS` secret in `IBuySpy-Shared/basecoat` | `adoption-metrics.yml` (schedule or manual run) |
+| Include repositories in weekly memory candidate sweep | Memory-sweep enlistment | GitHub topic `basecoat-enabled` on each repository | `memory-sweep.yml` (Monday schedule) |

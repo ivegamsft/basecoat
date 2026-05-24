@@ -1,6 +1,6 @@
 ---
 description: "Use when making architectural decisions, designing APIs, creating system diagrams, or establishing cross-cutting patterns. Covers ADRs, diagram standards, API design, agent collaboration, and review gates."
-applyTo: "**/*"
+applyTo: "src/**,lib/**,app/**,packages/**,**/iac/**,docs/architecture/**,docs/adr/**,docs/api/**"
 ---
 
 # Architecture Standards

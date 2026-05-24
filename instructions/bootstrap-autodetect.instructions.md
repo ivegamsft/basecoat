@@ -1,6 +1,6 @@
 ---
 description: "Use when writing or reviewing bootstrap scripts. Ensures scripts auto-detect values from context and run without interactive prompts."
-applyTo: "**/bootstrap*,**/scripts/*"
+applyTo: "**/bootstrap*.{ps1,sh},scripts/bootstrap*.{ps1,sh}"
 ---
 
 # Bootstrap Auto-Detection

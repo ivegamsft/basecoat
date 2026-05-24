@@ -108,7 +108,8 @@ fine-grained PAT for the hub-to-spoke dispatch call itself.
 - Store the dispatch credential as a repository or organization secret on the
   hub: `HUB_DISPATCH_TOKEN`.
 - Never copy hub secrets into spokes -- spokes provision their own credentials.
-- Rotate PATs on a 90-day schedule; prefer GitHub Apps for zero-rotation tokens.
+- Rotate PATs every 30 days; set PAT expiration to 30 days or less.
+- Prefer GitHub Apps for zero-rotation tokens.
 - Audit token scope: the dispatch token needs only `actions:write` on spoke
   repos, not `repo` (full) scope.
 

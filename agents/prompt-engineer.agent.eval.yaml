@@ -1,0 +1,19 @@
+name: "prompt-engineer-routing"
+description: "Routing evaluation — validates trigger activation for the prompt-engineer agent."
+skill: "agents/prompt-engineer.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with designing system prompts, optimizing token usage, crafting few-shot examples, or structuring chain-of-thought instructions."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle designing system prompts, optimizing token usage, crafting few-shot examples, or structuring chain-of-thought instructions?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the prompt-engineer agent for designing system prompts, optimizing token usage, crafting few-shot examples, or structuring chain-of-thought instructions."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Write a haiku about programming."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Give me a recipe for chocolate chip cookies."
+    expect_activation: false

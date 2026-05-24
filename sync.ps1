@@ -23,13 +23,34 @@ try {
     $fullTargetDir = Join-Path $repoRoot $targetDir
     New-Item -ItemType Directory -Force -Path $fullTargetDir | Out-Null
 
-    foreach ($item in @('README.md', 'CHANGELOG.md', 'version.json', 'asset-manifest.json', 'basecoat-metadata.json', 'instructions', 'skills', 'prompts', 'agents', 'docs')) {
+    foreach ($item in @('README.md', 'CHANGELOG.md', 'version.json', 'asset-manifest.json', 'basecoat-metadata.json', 'instructions', 'skills', 'prompts', 'agents')) {
         $destination = Join-Path $fullTargetDir $item
         if (Test-Path $destination) {
             Remove-Item -Path $destination -Recurse -Force
         }
 
         Copy-Item -Path (Join-Path $sourcePath $item) -Destination $destination -Recurse -Force
+    }
+
+    # Copy only basic documentation (not full docs tree)
+    $docsDest = Join-Path $fullTargetDir 'docs'
+    if (Test-Path $docsDest) {
+        Remove-Item -Path $docsDest -Recurse -Force
+    }
+    New-Item -ItemType Directory -Force -Path $docsDest | Out-Null
+
+    foreach ($docSubdir in @('reference', 'guides')) {
+        $src = Join-Path $sourcePath "docs/$docSubdir"
+        if (Test-Path $src) {
+            Copy-Item -Path $src -Destination (Join-Path $docsDest $docSubdir) -Recurse -Force
+        }
+    }
+
+    $agentsCatalog = Join-Path $sourcePath 'docs/agents/AGENTS.md'
+    if (Test-Path $agentsCatalog) {
+        $agentsDocsDest = Join-Path $docsDest 'agents'
+        New-Item -ItemType Directory -Force -Path $agentsDocsDest | Out-Null
+        Copy-Item -Path $agentsCatalog -Destination (Join-Path $agentsDocsDest 'AGENTS.md') -Force
     }
 
     # INVENTORY.md moved to docs/reference/ in v3.11.0 — copy from new location to target root for backwards compat
@@ -84,6 +105,13 @@ try {
         Get-ChildItem -Path $agentSource -Filter '*.agent.md' | ForEach-Object {
             Copy-Item -Path $_.FullName -Destination $agentDest -Force
         }
+    }
+
+    # Optional cleanup pass for stale managed files from prior versions.
+    # Uses hash snapshoting to avoid deleting customized files.
+    $cleanupScript = Join-Path $repoRoot 'scripts/cleanup-basecoat-upgrade.ps1'
+    if (Test-Path $cleanupScript) {
+        & $cleanupScript -TargetDir $targetDir -ProtectCustomized -SetArchiveReadOnly
     }
 
     Write-Host "Base Coat synced into $targetDir"

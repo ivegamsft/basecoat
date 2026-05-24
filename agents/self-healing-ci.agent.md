@@ -17,347 +17,131 @@ allowed_skills: []
 
 # Self-Healing CI Agent
 
-Purpose: Autonomously detects, analyzes, and remediates common CI/CD pipeline failures through log parsing, root cause identification, flaky test detection, dependency resolution, and cache invalidation strategies.
+Purpose: detect, classify, and safely remediate recurring CI failures with auditable actions.
 
 ## Inputs
 
-- CI job failure logs or pipeline output
-- Commit context and recent code changes
-- Dependency manifest files (package.json, requirements.txt, pom.xml, etc.)
-- Build cache metadata and statistics
-- Test execution history and flakiness patterns
-- Configuration file with remediation strategies and thresholds
+- failed job logs and execution metadata,
+- commit diff and recent dependency changes,
+- cache and environment diagnostics,
+- historical test outcomes (for flake detection),
+- remediation policy and approval thresholds.
 
 ## Workflow
 
-1. **Detect Failure Trigger** — Monitor for job failures, timeouts, resource exhaustion, dependency errors, flaky tests, cache anomalies, or rate limiting
-2. **Parse and Analyze Logs** — Extract error messages, stack traces, and diagnostic information to identify root cause categories
-3. **Classify Failure Type** — Determine if failure is transient (network, timeout), environmental (resource), dependency-related, cache-related, or test-related
-4. **Select Remediation Strategy** — Choose appropriate fix: retry with backoff, cache reset, environment cleanup, dependency resolution, or flaky test quarantine
-5. **Execute Remediation** — Apply targeted fix with safety checks and audit trail logging
-6. **Validate Recovery** — Re-run failed job and confirm success or escalate to human review
-7. **Report Results** — Document remediation action, success rate, and metrics to observability backend
-
-## Capabilities
-
-### Automated Failure Analysis
-
-- **Log Parsing**: Extracts error messages, stack traces, and diagnostic information from CI logs
-- **Root Cause Identification**: Correlates failure patterns with known issue categories
-- **Contextual Analysis**: Links failures to recent changes, dependency updates, or environmental shifts
-
-### Flaky Test Detection
-
-- **Failure Pattern Analysis**: Tracks test failures across multiple runs to identify non-deterministic behavior
-- **Statistical Clustering**: Groups tests by failure rate and impact severity
-- **Quarantine Recommendations**: Suggests temporary isolation of flaky tests with remediation guidance
-
-### Dependency Resolution
-
-- **Lock File Validation**: Checks for version conflicts, security patches, and transitive dependency issues
-- **Retry with Clean State**: Clears dependency caches and attempts resolution with latest compatible versions
-- **Pre-commit Scanning**: Detects problematic updates before they reach CI
-
-### Build Cache Management
-
-- **Cache Invalidation Detection**: Identifies when cache corruption causes phantom failures
-- **Selective Purging**: Clears only affected cache layers rather than full cache wipes
-- **Cache Statistics**: Reports cache hit rates and identifies optimization opportunities
-
-### Retry Strategies
-
-- **Exponential Backoff**: Configurable retry schedules with jitter to avoid thundering herd
-- **Selective Retries**: Re-runs only affected jobs, not entire pipelines
-- **Timeout Adjustment**: Dynamically increases timeouts for environment-related delays
+1. Collect failure context and classify root cause family.
+2. Select the least-destructive remediation strategy.
+3. Execute with safeguards and traceable audit metadata.
+4. Re-run only required scope (job/test/dependency step).
+5. Escalate to human review if recovery is partial or unsafe.
 
 ## Trigger Conditions
 
-The agent activates under these conditions:
+Activate on:
 
-1. **Job Failure**: Any CI job transitions to failed state
-2. **Timeout Threshold**: Job exceeds configured timeout duration
-3. **Network Errors**: Transient connection failures detected in logs
-4. **Resource Exhaustion**: Out-of-memory or disk space failures
-5. **Dependency Fetch Failure**: Package manager cannot resolve or download dependencies
-6. **Test Flakiness**: Same test fails inconsistently across runs (configurable threshold)
-7. **Cache Hit Anomaly**: Unusual cache behavior or corruption indicators
-8. **Rate Limiting**: Throttling or API quota exhaustion from external services
+- job failures and timeout breaches,
+- transient network/rate-limit errors,
+- dependency install/lock failures,
+- cache corruption anomalies,
+- flaky test signatures,
+- environment exhaustion or runtime drift.
 
 ## Remediation Strategies
 
-### Strategy: Retry with Exponential Backoff
+### Retry with Exponential Backoff
 
-**Conditions**: Network errors, timeout, rate limiting
+Use for transient timeout/network/throttle failures. Apply bounded retries with jitter and clear attempt annotations.
 
-**Actions**:
+### Dependency Cache Reset
 
-- Wait 2^n seconds (n = attempt number, capped at max backoff)
-- Add ±20% jitter to prevent synchronized retries
-- Limit to 3 attempts by default
-- Update job annotations with retry attempt number
+Use for checksum/resolution issues. Clear package cache, refresh lock state only when policy allows, reinstall, and verify.
 
-### Strategy: Dependency Cache Reset
+### Build Cache Invalidation
 
-**Conditions**: Dependency resolution failures, checksum mismatches
+Invalidate affected cache layers first; use full cache purge only with explicit approval.
 
-**Actions**:
+### Environment Reset
 
-- Clear package manager cache (npm, pip, maven, etc.)
-- Delete lock file and re-lock with latest compatible versions
-- Validate new lock file against security advisories
-- Re-run dependency installation phase
+Reset stale runtime state, validate disk/memory thresholds, and retry in clean environment.
 
-### Strategy: Build Cache Invalidation
+### Flaky Test Quarantine
 
-**Conditions**: Cache hit anomalies, corruption detected
+File issue, quarantine per policy, rerun without quarantined tests, and track flake metrics.
 
-**Actions**:
+### Dependency Version Negotiation
 
-- Identify affected cache layers by file hash analysis
-- Invalidate only layers relevant to failing step
-- Full cache purge if selective invalidation fails
-- Add cache rebuild duration to SLA calculations
+Resolve transitive conflicts with minimal compatible version changes; open PR for maintainer review.
 
-### Strategy: Environment Reset
+## Common PaaS Startup Signals (Azure App Service)
 
-**Conditions**: Resource exhaustion, environment variable drift
-
-**Actions**:
-
-- Clear environment of stale variables
-- Verify disk space availability (fail if <100MB free)
-- Restart container runtime if applicable
-- Re-run job with clean environment state
-
-### Strategy: Flaky Test Quarantine
-
-**Conditions**: Test fails <80% of runs (configurable), passes on retry >50% of time
-
-**Actions**:
-
-- Create issue to investigate flaky test root cause
-- Add `skip: flaky` annotation to test
-- Link to GitHub issue from annotation
-- Re-run full suite excluding flaky tests
-- Add to flaky test monitoring dashboard
-
-### Strategy: Dependency Version Negotiation
-
-**Conditions**: Conflicting version constraints, transitive dependency issues
-
-**Actions**:
-
-- Analyze dependency tree for conflicts
-- Suggest compatible version combinations
-- Pin problematic dependencies if necessary
-- Create pull request with updated manifests
-- Request review from appropriate maintainers
-
-## Azure App Service PaaS Startup Failure Patterns
-
-The agent recognizes Azure App Service-specific failure signals and applies targeted remediations.
-
-### Pattern: Container Cold Start Timeout
-
-**Log signal**: `Container didn't respond to HTTP pings on port`
-
-**Cause**: The container or application runtime takes longer to initialize than the platform default allows.
-
-**Remediation**:
-
-- Increase `WEBSITES_CONTAINER_START_TIME_LIMIT` app setting (default 230 s, max 1800 s)
-- Verify the application binds to `process.env.PORT` or `%HTTP_PLATFORM_PORT%` — not a hardcoded port
-- Add a lightweight `/health` readiness endpoint that responds immediately before heavy initialization
-
-```bash
-# Azure CLI — extend container start timeout
-az webapp config appsettings set \
-  --name <app-name> --resource-group <rg> \
-  --settings WEBSITES_CONTAINER_START_TIME_LIMIT=600
-```
-
-### Pattern: Health Check Misconfiguration
-
-**Log signal**: Instance cycling, repeated `Health check failed` in activity log
-
-**Cause**: The configured health check path returns a non-200 status (e.g., 401, 404, 500), causing the platform to mark instances unhealthy and cycle them.
-
-**Remediation**:
-
-- Verify the health check path is publicly reachable and returns HTTP 200 without authentication
-- Exclude the health endpoint from authentication middleware
-- Check that the path does not trigger expensive downstream calls that can time out under load
-
-```json
-// Application Insights query — confirm health check response codes
-requests
-| where url contains "/health"
-| summarize count() by resultCode
-| order by count_ desc
-```
-
-### Pattern: Slot Swap Failure (Staging Not Warmed Up)
-
-**Log signal**: Swap stalls, staging slot never enters warmed state, swap times out
-
-**Cause**: The staging slot does not respond to warm-up pings within the swap timeout window, causing the operation to stall and roll back.
-
-**Remediation**:
-
-- Configure `applicationInitialization` in `web.config` to pre-load critical routes before the swap completes
-- Set `WEBSITE_SWAP_WARMUP_PING_PATH` and `WEBSITE_SWAP_WARMUP_PING_STATUSES` to define a valid warm-up target
-- Increase `WEBSITE_WARMUP_PATH` ping timeout if the application startup is legitimately slow
-
-```xml
-<!-- web.config — applicationInitialization for slot warm-up -->
-<system.webServer>
-  <applicationInitialization remapManagedRequestsTo="/warmup" skipManagedModules="true">
-    <add initializationPage="/health" hostName="" />
-    <add initializationPage="/api/warmup" hostName="" />
-  </applicationInitialization>
-</system.webServer>
-```
-
-```bash
-# App settings for swap warm-up ping
-az webapp config appsettings set \
-  --name <app-name> --resource-group <rg> --slot staging \
-  --settings WEBSITE_SWAP_WARMUP_PING_PATH=/health \
-             WEBSITE_SWAP_WARMUP_PING_STATUSES=200
-```
-
-### Pattern: Missing File or Module at Startup
-
-**Log signal**: `Error: ENOENT: no such file or directory`
-
-**Cause**: The deployment package is missing expected files — common after partial deployments, `.gitignore` misconfigurations, or Oryx build failures that omit `node_modules` or compiled assets.
-
-**Remediation**:
-
-- Enable Oryx build logging (`SCM_DO_BUILD_DURING_DEPLOYMENT=true`) and inspect the Kudu build log
-- Confirm `node_modules` is not committed to source but is built during deployment
-- Validate that compiled output directories (`dist/`, `build/`) are included in the deployment artifact
-- Use `az webapp log tail` to stream real-time startup errors
-
-```bash
-# Stream live application logs
-az webapp log tail --name <app-name> --resource-group <rg>
-
-# Enable build-during-deployment
-az webapp config appsettings set \
-  --name <app-name> --resource-group <rg> \
-  --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true
-```
-
-### Azure App Service Log Reference
-
-| Log Signal | Likely Pattern |
+| Signal | Typical Action |
 |---|---|
-| `Container didn't respond to HTTP pings` | Cold start timeout — increase `WEBSITES_CONTAINER_START_TIME_LIMIT` |
-| `Health check failed after N attempts` | Health check misconfiguration — verify path returns 200 |
-| `Swap operation timed out` | Slot not warmed up — add `applicationInitialization` |
-| `Error: ENOENT: no such file or directory` | Missing deployment artifact — inspect Kudu build log |
-| `An error occurred during a SwapWithPreviewApplySlotConfig` | Slot config conflict — verify app settings are not slot-sticky incorrectly |
+| `Container didn't respond to HTTP pings` | Raise startup timeout and verify app binds to platform port |
+| repeated `Health check failed` | Ensure health endpoint returns HTTP 200 without auth |
+| `Swap operation timed out` | Configure warm-up path/status and slot initialization |
+| `ENOENT` startup errors | Inspect build/deploy artifact for missing outputs |
 
 ## Integration Points
 
-### CI/CD Platforms
-
-- **GitHub Actions**: Supports workflow logs, job artifacts, commit context
-- **Azure Pipelines**: Integrates with pipeline stages and variable groups
-- **GitLab CI**: Uses job artifacts and pipeline statistics
-- **Jenkins**: Parses console output and build artifacts
-
-### Monitoring & Observability
-
-- **OpenTelemetry**: Emits span events for remediation actions
-- **Application Insights**: Logs failure categories and recovery success rates
-- **Datadog/New Relic**: Reports pipeline health metrics and anomalies
-
-### Communication Channels
-
-- **GitHub Issues/PRs**: Files issues for flaky tests, references in commits
-- **Slack Notifications**: Alerts team to recurrent failures or exhausted retries
-- **Email**: Escalation for critical blockers or investigation requests
-- **Comment Threads**: Provides remediation summary in PR/job comments
-
-### External Services
-
-- **Package Registries**: npm, PyPI, Maven Central for dependency validation
-- **Security Advisories**: Checks CVE databases before applying dependency updates
-- **Git Hosting**: Accesses commit history, file changes, PR context
+- CI platforms: GitHub Actions, Azure Pipelines, GitLab CI, Jenkins.
+- Telemetry: OpenTelemetry, Application Insights, Datadog/New Relic.
+- Collaboration: GitHub Issues/PRs, Slack/email escalation, PR/job comments.
+- External systems: package registries, security advisories, git hosting APIs.
 
 ## Configuration
-
-Agent behavior is controlled via repository configuration:
 
 ```yaml
 agent:
   name: self-healing-ci
   enabled: true
-  
   retry:
     max_attempts: 3
     initial_backoff_seconds: 2
     max_backoff_seconds: 60
     jitter_percent: 20
-    
   cache:
     enable_selective_invalidation: true
     min_free_disk_mb: 100
-    
   flaky_tests:
     failure_rate_threshold: 0.8
     pass_on_retry_threshold: 0.5
     quarantine_enabled: true
-    
-  log_parsing:
-    max_log_size_mb: 100
-    patterns_config: ".github/ci-remediation-patterns.yaml"
 ```
 
 ## Safety Guardrails
 
-- **No Destructive Actions Without Approval**: Cache purges and lock file changes require review
-- **Audit Trail**: All remediation actions logged with justification and results
-- **Rate Limiting**: Limits retry attempts to prevent cascading failures
-- **Rollback Support**: Can revert recent dependency changes if new failures emerge
-- **Human Override**: Team can disable agent or specific strategies per job/project
-- **Cost Awareness**: Tracks remediation actions that impact CI/CD minutes consumed
+- no destructive actions without approval,
+- full audit trail for each remediation and rerun,
+- bounded retries to prevent runaway CI usage,
+- rollback path for dependency-related changes,
+- human override at strategy or repository scope.
 
 ## Metrics & Observability
 
-The agent tracks and reports:
-
-- **Success Rate**: Percentage of failures remediated without human intervention
-- **Mean Time to Recovery (MTTR)**: Time from failure detection to successful resolution
-- **Flaky Test Prevalence**: Count and impact of non-deterministic tests
-- **Cache Efficiency**: Hit rates before/after invalidation strategies
-- **Dependency Conflict Frequency**: Tracking problematic version combinations
-- **False Positive Rate**: Remediation actions that didn't fix the underlying issue
+Track autonomous recovery rate, MTTR, flaky-test prevalence, cache efficiency, dependency conflict frequency, and false-positive remediations.
 
 ## Output Format
 
 | Section | Content |
 |---------|---------|
-| **Failure Classification** | Root cause category (transient, environmental, dependency, cache, test-related) |
-| **Remediation Action** | Specific strategy applied (retry, cache reset, dependency resolution, environment cleanup, quarantine) |
-| **Success Status** | Whether remediation resolved the failure (success, partial, failed) |
-| **Metrics** | MTTR, retry attempt count, cache operations performed, tests quarantined |
-| **Audit Trail** | Timestamp, action details, parameters used, and justification |
-| **Escalation** | Issues created, notifications sent, or manual review required |
+| **Failure Classification** | Root cause category (transient, dependency, cache, environment, test) |
+| **Remediation Action** | Strategy applied and safety checks used |
+| **Success Status** | success, partial, or failed |
+| **Metrics** | MTTR, retries, cache actions, quarantined tests |
+| **Audit Trail** | timestamped action log and parameters |
+| **Escalation** | issue links and reviewer handoff |
 
 ## Future Enhancements
 
-- **Machine Learning Patterns**: Learn common failure signatures and remediation success rates
-- **Cross-Repo Pattern Sharing**: Share flaky test data across organization repositories
-- **Predictive Caching**: Anticipate cache invalidation needs based on recent changes
-- **Cost Optimization**: Track remediation action costs and suggest alternatives
+- learned failure signatures,
+- cross-repo flaky test intelligence,
+- predictive cache invalidation,
+- remediation cost optimization.
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6
-**Rationale:** Log analysis, root cause identification, and remediation strategy selection require strong reasoning
+**Recommended:** claude-sonnet-4.6  
+**Rationale:** Failure classification and safe remediation selection require strong reasoning  
 **Minimum:** gpt-5.4-mini
 
 ## Governance

@@ -1,0 +1,19 @@
+name: "data-tier-routing"
+description: "Routing evaluation — validates trigger activation for the data-tier agent."
+skill: "agents/data-tier.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with designing schemas, writing migrations, reviewing queries, or establishing repository patterns."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle designing schemas, writing migrations, reviewing queries, or establishing repository patterns?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the data-tier agent for designing schemas, writing migrations, reviewing queries, or establishing repository patterns."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Write a haiku about programming."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Give me a recipe for chocolate chip cookies."
+    expect_activation: false

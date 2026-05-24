@@ -22,6 +22,7 @@ including agents, skills, instruction files, prompt templates, and documentation
 - Blank lines before/after code fences (MD031)
 - Files end with single newline (MD047)
 - No trailing spaces, consistent list markers
+- No emojis in any content (code, docs, UI, commit messages)
 
 ## Branch and Commit Conventions
 
@@ -33,6 +34,29 @@ including agents, skills, instruction files, prompt templates, and documentation
 
 - Structure validation: `pwsh scripts/validate-basecoat.ps1`
 - Full test suite: `pwsh tests/run-tests.ps1`
+- After any workflow or deployment change, trigger the workflow and confirm success
+  before marking work complete (e.g., `gh workflow run docs.yml` then `gh run watch`)
+
+## Authentication
+
+- Write operations (push, merge) require the `ibuyspy` account
+- Always run `gh auth switch --user ibuyspy` before push/merge operations
+- The `ivegamsft` account has read-only access and will get 403 on write attempts
+
+## PR Workflow
+
+Standard pattern for all changes:
+
+```bash
+git checkout -b <type>/<issue>-<desc>
+git add . && git commit -m "<type>(<scope>): <summary>"
+gh auth switch --user ibuyspy
+git push origin <branch>
+gh pr create --title "<title>" --body "<body>"
+gh pr merge --squash --admin
+```
+
+Use `--admin` to bypass CI wait when change is pre-validated locally.
 
 ## Triggering the Copilot Coding Agent
 
@@ -54,10 +78,11 @@ after rebasing. Common errors to fix:
 
 Deployed to GitHub Pages: <https://ibuyspy-shared.github.io/basecoat/>
 
-Workflow: `.github/workflows/adoption-metrics.yml` — runs weekly, collects metrics,
-deploys to `gh-pages` branch under `dashboard/metrics/`. The deploy step stashes
-generated files to `/tmp` before `git checkout gh-pages` to avoid untracked-file
-conflicts, then restores them to `dashboard/metrics/`.
+Architecture: MkDocs force-pushes to `gh-pages` (wiping all content). The
+`adoption-metrics.yml` workflow then auto-repopulates metrics via a `workflow_run`
+trigger that fires after every successful docs deploy. Metrics live at
+`dashboard/metrics/` on `gh-pages`. Do NOT attempt to preserve files across
+`mkdocs gh-deploy --force` — the workflow_run pattern handles recovery.
 
 ## MCP Server — Adoption Metrics
 
@@ -87,3 +112,6 @@ The `prd-spec-gate.yml` workflow blocks PRs with ≥ 500 line churn or ≥ 12 fi
 that lack PRD and spec links. PRs that only touch risky paths (skills/, agents/,
 instructions/, etc.) below the size threshold get an advisory warning only. Add
 the `skip-prd-spec-check` label to bypass.
+
+Batch PRs should stay within the contributor guideline of 15 files or fewer and
+300 changed lines or fewer unless the PR is a justified mechanical change.

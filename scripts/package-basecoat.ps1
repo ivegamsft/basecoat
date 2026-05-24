@@ -25,6 +25,34 @@ foreach ($item in @('README.md', 'CHANGELOG.md', 'INVENTORY.md', 'version.json',
     }
 }
 
+# Exclude eval metadata from packaged install payloads
+foreach ($evalRoot in @(
+    (Join-Path $stageDir 'skills'),
+    (Join-Path $stageDir 'agents')
+)) {
+    if (Test-Path $evalRoot) {
+        Get-ChildItem -Path $evalRoot -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
+            $_.Name -eq 'eval.yaml' -or $_.Name -like '*.agent.eval.yaml'
+        } | ForEach-Object {
+            Remove-Item -Path $_.FullName -Force
+        }
+    }
+}
+
+# Verify no eval metadata leaked into staged payloads
+$evalLeaks = @()
+foreach ($evalRoot in @((Join-Path $stageDir 'skills'), (Join-Path $stageDir 'agents'))) {
+    if (Test-Path $evalRoot) {
+        $evalLeaks += Get-ChildItem -Path $evalRoot -Recurse -File -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -eq 'eval.yaml' -or $_.Name -like '*.agent.eval.yaml' }
+    }
+}
+if ($evalLeaks.Count -gt 0) {
+    $evalLeaks | ForEach-Object { Write-Error "Eval metadata leaked into stage: $($_.FullName)" }
+    throw "Package validation failed: eval metadata found in staged artifacts"
+}
+Write-Host "✅ No eval metadata found in staged install artifacts"
+
 $zipPath = Join-Path $distDir "$archiveBase.zip"
 Compress-Archive -Path (Join-Path $distDir 'stage\base-coat\*') -DestinationPath $zipPath
 

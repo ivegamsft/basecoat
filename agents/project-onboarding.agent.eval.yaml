@@ -1,0 +1,19 @@
+name: "project-onboarding-routing"
+description: "Routing evaluation — validates trigger activation for the project-onboarding agent."
+skill: "agents/project-onboarding.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with set up a new repo with BaseCoat governance."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle sync instruction overlays to an existing project?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the project-onboarding agent for bootstrap sprint issue tracking."
+    expect_activation: true
+  - id: "neg-1"
+    input: "onboarding individual developers"
+    expect_activation: false
+  - id: "neg-2"
+    input: "migrating existing codebases"
+    expect_activation: false

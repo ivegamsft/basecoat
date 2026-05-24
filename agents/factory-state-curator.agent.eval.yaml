@@ -1,0 +1,19 @@
+name: "factory-state-curator-routing"
+description: "Routing evaluation — validates trigger activation for the factory-state-curator agent."
+skill: "agents/factory-state-curator.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "Merge the Workcell intake YAML and issue labels into a single S1-S5 state snapshot."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Update the shared factory state from intake, gates, and blockers."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Publish a .factory-state.json file from the current issue labels."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Write a Go HTTP handler."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Plan a marketing campaign."
+    expect_activation: false

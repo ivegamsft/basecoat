@@ -8,6 +8,11 @@
 
 This catalog helps teams discover what exists in Base Coat and when to use it.
 
+Name collisions between instructions and skills are allowed. If an instruction
+and skill share a name (for example, `architecture` or `security`), treat them
+as distinct assets and disambiguate by source path (`instructions/` vs
+`skills/`) and type.
+
 ## Instructions
 
 | File                                         | Use For                                               | Keywords                                                           |

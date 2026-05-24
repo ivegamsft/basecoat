@@ -61,9 +61,9 @@ function Get-Rationale {
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
 Set-Location $repoRoot
 
-$experimentDir = Join-Path $repoRoot "experiments/$Experiment"
+$experimentDir = Join-Path $repoRoot "tests/experiments/$Experiment"
 if (-not (Test-Path $experimentDir)) {
-    throw "Experiment directory not found: experiments/$Experiment"
+    throw "Experiment directory not found: tests/experiments/$Experiment"
 }
 
 if (-not $PromptsFile) {

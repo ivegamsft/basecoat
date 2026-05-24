@@ -1,7 +1,7 @@
 {
   "$schema": "basecoat-metadata-schema",
   "version": "3.26.0",
-  "generated": "2026-05-17",
+  "generated": "2026-05-23",
   "categories": {
     "AI & Development": {
       "label": "AI & Development",
@@ -1726,6 +1726,214 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/release-readiness-chair.agent.md",
+      "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "bom-validator",
+      "description": "Use when validating a Workcell BOM against the plant registry before S2 starts. USE FOR: schema validation, CAF naming checks, circular dependency detection, and GitHub check results. DO NOT USE FOR: runtime state merges or cutover decisions.",
+      "category": "Process",
+      "keywords": [
+        "bom",
+        "validation",
+        "caf",
+        "schema",
+        "dependencies"
+      ],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/bom-validator.agent.md",
+      "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "branch-hygiene-sweeper",
+      "description": "Use when cleaning stale branches, dangling refs, and release branch hygiene while preserving active work. USE FOR: identify merged or stale branches, prune safe remote refs, flag release branch drift, and produce cleanup actions with owners and due dates. DO NOT USE FOR: deleting branches with open PRs, changing branch protection, or resolving merge conflicts.",
+      "category": "Process",
+      "keywords": [
+        "git",
+        "branches",
+        "cleanup",
+        "hygiene",
+        "release"
+      ],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/branch-hygiene-sweeper.agent.md",
+      "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "dependency-blocker-monitor",
+      "description": "Use when monitoring workcell BOM dependencies and cell health to open or resolve blocker issues when a cell fails or recovers. USE FOR: read workcell BOM dependencies, monitor cell deployment status, create blocker issues, and resolve them on recovery. DO NOT USE FOR: general incident response, application code, or one-off issue triage.",
+      "category": "Process",
+      "keywords": [
+        "workcell",
+        "bom",
+        "dependencies",
+        "cell-health",
+        "blocker",
+        "recovery"
+      ],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/dependency-blocker-monitor.agent.md",
+      "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "escalation-router",
+      "description": "Use when high-risk decisions need a human approver and a PR-comment approval trail. USE FOR: release signoff, irreversible changes, compliance gates. DO NOT USE FOR: routine automation.",
+      "category": "Meta",
+      "keywords": [
+        "escalation",
+        "approval",
+        "human-in-the-loop",
+        "pr-comment",
+        "decision-log"
+      ],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/escalation-router.agent.md",
+      "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "factory-conductor",
+      "description": "Use when reading .factory-state.json and auto-queuing the next ready wave of factory work. USE FOR: route S2/S3/S4 work, batch dispatch by wave, and ping the right follow-up workflow. DO NOT USE FOR: state normalization, BOM validation, or product backlog prioritization.",
+      "category": "Process",
+      "keywords": [
+        "factory",
+        "orchestration",
+        "dispatch",
+        "workflow-dispatch",
+        "slack"
+      ],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/factory-conductor.agent.md",
+      "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "factory-state-curator",
+      "description": "Use when merging Workcell intake YAML, GitHub labels, and gate results into a single S1-S5 state snapshot. USE FOR: normalize station state, publish .factory-state.json, reconcile blockers, and surface stale work. DO NOT USE FOR: implementing product code or changing workflow policy.",
+      "category": "Process",
+      "keywords": [
+        "factory",
+        "state",
+        "workcell",
+        "intake",
+        "labels",
+        "sla"
+      ],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/factory-state-curator.agent.md",
+      "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "release-freeze-enforcer",
+      "description": "Use when enforcing release freeze windows, routing exception requests, and coordinating branch access during a freeze. USE FOR: evaluate freeze exceptions, block unauthorized merge attempts, and publish go/no-go decisions for frozen branches. DO NOT USE FOR: merging changes, bypassing approvals, or resolving code conflicts.",
+      "category": "Meta",
+      "keywords": [
+        "release",
+        "freeze",
+        "exceptions",
+        "governance",
+        "branches"
+      ],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/release-freeze-enforcer.agent.md",
+      "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "replanning-engine",
+      "description": "Use when S2 assessment data shows the work is far larger than estimated and a replanning decision is needed. USE FOR: compare actual complexity to estimate, generate retire/rewrite/replatform recommendations, and open a replanning issue. DO NOT USE FOR: routine triage or deployment execution.",
+      "category": "Process",
+      "keywords": [
+        "replanning",
+        "complexity",
+        "estimate",
+        "issue",
+        "tradeoffs"
+      ],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/replanning-engine.agent.md",
+      "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "s4-shadow-mode-validator",
+      "description": "Use when comparing shadow-mode and live behavior during S4 soak before cutover. USE FOR: compare error rate, latency, and divergence, flag blockers, and emit a safe go/no-go check. DO NOT USE FOR: state curation or general monitoring.",
+      "category": "DevOps",
+      "keywords": [
+        "s4",
+        "shadow-mode",
+        "validation",
+        "latency",
+        "error-rate",
+        "monitoring"
+      ],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/s4-shadow-mode-validator.agent.md",
+      "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "station-bottleneck-analyzer",
+      "description": "Use when analyzing takt-time JSON to compute queue length and throughput by station, rank bottlenecks, and file the weekly bottleneck report issue. USE FOR: station-level queue pressure, throughput trends, weekly issue filing, and follow-up actions. DO NOT USE FOR: dispatching work or changing replanning policy.",
+      "category": "Process",
+      "keywords": [
+        "takt-time",
+        "queue",
+        "throughput",
+        "bottleneck",
+        "reporting"
+      ],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/station-bottleneck-analyzer.agent.md",
+      "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "takt-time-tracker",
+      "description": "Use when measuring dwell time at each station and flagging SLA breaches. USE FOR: compute median and p95 time at S1-S5, identify bottlenecks, and export dashboard-ready JSON. DO NOT USE FOR: dispatching work or making replanning decisions.",
+      "category": "Process",
+      "keywords": [
+        "takt-time",
+        "dwell",
+        "sla",
+        "bottleneck",
+        "metrics"
+      ],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/takt-time-tracker.agent.md",
+      "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "sprint-project-mapper",
+      "description": "Use when issues/PRs need clustering into meaningful sprint/project groups and rollup metrics for planning or release notes. USE FOR: grouping by sprint/wave/tags, computing issue-PR-LOC-cycle-time metrics, validating group size significance, and producing release-note-ready summaries. DO NOT USE FOR: code implementation, CI/CD deployment, or one-off issue editing.",
+      "category": "Meta",
+      "keywords": [
+        "sprint",
+        "project-mapping",
+        "wave-planning",
+        "release-notes",
+        "metrics",
+        "portfolio"
+      ],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/sprint-project-mapper.agent.md",
       "model": "claude-sonnet-4.6",
       "argumentHint": ""
     }
