@@ -1,0 +1,16 @@
+name: "public-safe-sanitization-routing"
+description: "Routing evaluation — validates trigger activation for the public-safe-sanitization skill."
+skill: "skills/public-safe-sanitization/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Turn these internal roadmap notes into public-safe guidance for external publication."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Sanitize this issue summary so it removes repo names, customer names, and private URLs."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Create a new GitHub Actions workflow for release automation."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Review this markdown file for heading and list formatting."
+    expect_activation: false

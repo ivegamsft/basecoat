@@ -186,6 +186,30 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running harness eval gate workflow tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'harness-change-eval-gate-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Harness eval gate workflow tests failed' -ForegroundColor Red
+    Write-FailureLog 'harness-change-eval-gate-tests'
+    exit 1
+}
+
+Write-Host 'Running orchestrator harness conformance tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'orchestrator-harness-conformance-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Orchestrator harness conformance tests failed' -ForegroundColor Red
+    Write-FailureLog 'orchestrator-harness-conformance-tests'
+    exit 1
+}
+
+Write-Host 'Running VS Code harness benchmark suite tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'vscode-harness-benchmark-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'VS Code harness benchmark suite tests failed' -ForegroundColor Red
+    Write-FailureLog 'vscode-harness-benchmark-tests'
+    exit 1
+}
+
 Write-Host 'Running generate eval stubs tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'generate-eval-stubs-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
@@ -194,9 +218,29 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running extension intent routing eval tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'extension-intent-routing-eval-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Extension intent routing eval tests failed' -ForegroundColor Red
+    Write-FailureLog 'extension-intent-routing-eval-tests'
+    exit 1
+}
+
+Write-Host 'Running show-context tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'show-context-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Show-context tests failed' -ForegroundColor Red
+    Write-FailureLog 'show-context-tests'
+    exit 1
+}
+
 Write-Host 'Running coherence check (non-blocking)...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot '..' 'scripts' 'check-coherence.ps1')
 # Non-blocking: coherence issues are warnings, not failures
+
+Write-Host "`nRunning .gitignore coverage check..." -ForegroundColor Cyan
+& pwsh -File "$PSScriptRoot/../scripts/check-gitignore-coverage.ps1"
+# Advisory only — do not use -Strict here
 
 Write-Host 'All PowerShell tests passed'
 exit 0

@@ -1,0 +1,28 @@
+{
+  "suite": "vscode-harness-benchmark-v1",
+  "global_thresholds": {
+    "max_resolution_rate_drop": 0.02,
+    "max_prompt_tokens_increase_pct": 12,
+    "max_completion_tokens_increase_pct": 12,
+    "max_p95_latency_ms_increase": 1500,
+    "max_tool_calls_per_resolved_run_increase": 0.4
+  },
+  "category_thresholds": {
+    "multi_turn_tool_use": {
+      "max_resolution_rate_drop": 0.03,
+      "max_p95_latency_ms_increase": 2000
+    },
+    "mcp_external_tools": {
+      "max_resolution_rate_drop": 0.02,
+      "max_p95_latency_ms_increase": 1500
+    },
+    "terminal_browser_interactions": {
+      "max_resolution_rate_drop": 0.02,
+      "max_p95_latency_ms_increase": 1500
+    },
+    "loop_and_stop_conditions": {
+      "max_resolution_rate_drop": 0.01,
+      "max_p95_latency_ms_increase": 1000
+    }
+  }
+}

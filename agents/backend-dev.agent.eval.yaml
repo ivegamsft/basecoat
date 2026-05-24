@@ -1,0 +1,19 @@
+name: "backend-dev-routing"
+description: "Routing evaluation — validates trigger activation for the backend-dev agent."
+skill: "agents/backend-dev.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with designing or implementing REST/GraphQL APIs, service layers, and data access patterns."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle designing or implementing REST/GraphQL APIs, service layers, and data access patterns?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the backend-dev agent for designing or implementing REST/GraphQL APIs, service layers, and data access patterns."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Write a haiku about programming."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Give me a recipe for chocolate chip cookies."
+    expect_activation: false

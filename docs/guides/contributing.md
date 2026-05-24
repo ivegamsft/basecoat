@@ -20,6 +20,20 @@ Good contributions are patterns that:
 | Instruction | `instructions/<name>.instructions.md` | frontmatter + rules |
 | Memory | Via `submit-learning-callable.yml` workflow | JSON payload |
 
+## Naming collisions across asset types
+
+Skill names and instruction names can intentionally overlap. Current shared names
+include `architecture`, `documentation`, `observability`, `security`, and `ux`.
+
+This is a known pattern, not an error. Routing behavior is determined by asset
+type and source path:
+
+- `instruction@instructions/` for instructions
+- `skill@skills/` for skills
+
+When reviewing context output, use the **Source (type@path)** column to
+disambiguate similarly named assets.
+
 ## Required file structure
 
 ### Agent (`agents/<name>.agent.md`)

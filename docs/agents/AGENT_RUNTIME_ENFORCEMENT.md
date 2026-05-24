@@ -199,3 +199,4 @@ Tests include:
 - `instructions/tool-minimization.instructions.md` — tool audit checklist
 - `agents/agent-designer.agent.md` — agent design workflow and frontmatter conventions
 - `tests/agent-integration-tests.ps1` — automated validation suite
+- `docs/agents/MULTI_AGENT_WORKFLOWS.md#canonical-sub-agent-harness-contract` — canonical orchestrator↔sub-agent task and response packet contract

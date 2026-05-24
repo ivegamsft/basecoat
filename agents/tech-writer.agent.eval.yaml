@@ -1,0 +1,19 @@
+name: "tech-writer-routing"
+description: "Routing evaluation — validates trigger activation for the tech-writer agent."
+skill: "agents/tech-writer.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with creating or improving technical documentation, API docs, runbooks, tutorials, ADRs, changelogs, or implementing docs-as-code workflows."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle creating or improving technical documentation, API docs, runbooks, tutorials, ADRs, changelogs, or implementing docs-as-code workflows?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the tech-writer agent for creating or improving technical documentation, API docs, runbooks, tutorials, ADRs, changelogs, or implementing docs-as-code workflows."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Write a haiku about programming."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Give me a recipe for chocolate chip cookies."
+    expect_activation: false

@@ -25,16 +25,21 @@ A hook system should be **optional, composable, and failure-tolerant**. If a hoo
 
 ## 2. Hook Points
 
-| Hook | When It Fires | Use Cases |
-|------|---------------|-----------|
-| `SessionStart` | Agent session begins | Inject memory, load project context, set persona |
-| `SessionEnd` | Session ending or rotating | Save handoff state, persist memory, cleanup |
-| `PreToolUse` | Before any tool call | Validate permissions, inject known-fix warnings, log |
-| `PostToolUse` | After tool completes | Track errors, update knowledge base, detect loops |
-| `PreCompact` | Before context compaction | Save full state before lossy compression |
-| `PostCompact` | After compaction | Verify critical context preserved |
-| `OnError` | Tool call fails | Log to error KB, check retry policy |
-| `OnBudgetExceeded` | Token budget threshold hit | Force session rotation, trigger handoff |
+| Hook | When It Fires | Use Cases | Platform Support |
+|------|---------------|-----------|-----------------|
+| `SessionStart` | Agent session begins | Inject memory, load project context, set persona | ✅ All platforms |
+| `SessionEnd` | Session ending or rotating | Save handoff state, persist memory, cleanup | ✅ All (`Stop` in VS Code/CLI) |
+| `UserPromptSubmitted` | User submits a prompt | Audit requests, inject system context | ✅ All platforms |
+| `PreToolUse` | Before any tool call | Validate permissions, inject known-fix warnings, log | ✅ All platforms |
+| `PostToolUse` | After tool completes | Track errors, update knowledge base, detect loops | ✅ All platforms |
+| `SubagentStart` | A subagent is spawned | Track nested agent usage, init subagent resources | ✅ VS Code / CLI |
+| `SubagentStop` | A subagent completes | Aggregate results, clean up subagent resources | ✅ VS Code / CLI |
+| `PreCompact` | Before context compaction | Save full state before lossy compression | ✅ All platforms |
+| `PostCompact` | After compaction | Verify critical context preserved | ⚠️ BaseCoat extension only |
+| `OnError` | Tool call fails | Log to error KB, check retry policy | ✅ All (`errorOccurred` in VS Code/CLI) |
+| `OnBudgetExceeded` | Token budget threshold hit | Force session rotation, trigger handoff | ⚠️ BaseCoat extension only |
+
+> **Note on BaseCoat extensions:** `PostCompact` and `OnBudgetExceeded` are BaseCoat-defined concepts not natively supported by current platform runtimes. Implement them via application logic in agent guidance or MCP middleware rather than native hook config files.
 
 ### `SessionStart`
 
@@ -47,7 +52,9 @@ Typical responsibilities:
 - Inject task framing such as repo conventions, current sprint context, or persona guidance
 - Initialize telemetry correlation IDs for the session
 
-### `SessionEnd`
+### `SessionEnd` / `Stop`
+
+> **Platform note:** VS Code and Copilot CLI call this event `Stop`. Use `Stop` in `.github/hooks/*.json` config. Use `SessionEnd` in BaseCoat agent guidance prose and MCP patterns. Semantics are identical.
 
 Runs when a session is about to terminate normally or rotate into a fresh session.
 
@@ -57,6 +64,17 @@ Typical responsibilities:
 - Flush buffered telemetry and tool traces
 - Record unresolved blockers for the next session
 - Clean up temporary runtime state created by hook infrastructure
+
+### `UserPromptSubmitted`
+
+Runs immediately after the user submits a prompt, before any tools are invoked.
+
+Typical responsibilities:
+
+- Audit and log user requests for compliance analysis
+- Inject repo conventions, sprint context, or task framing before the agent begins
+- Detect prompt patterns that trigger specific workflows (e.g., "deploy" → arm watchdog)
+- Block or flag prompts that violate policy before they reach the agent
 
 ### `PreToolUse`
 
@@ -80,6 +98,26 @@ Typical responsibilities:
 - Update success and failure knowledge bases
 - Enrich future reasoning with newly learned constraints
 
+### `SubagentStart`
+
+Runs when a subagent is spawned by the parent agent.
+
+Typical responsibilities:
+
+- Track nested agent invocations for telemetry and cost attribution
+- Initialize subagent-scoped resources or context
+- Log the parent→child relationship for audit trails
+
+### `SubagentStop`
+
+Runs when a subagent completes, before returning control to the parent.
+
+Typical responsibilities:
+
+- Aggregate subagent results and pass summaries to parent context
+- Clean up subagent-scoped resources
+- Record subagent duration and output quality metrics
+
 ### `PreCompact`
 
 Runs immediately before context is compacted or summarized.
@@ -100,7 +138,9 @@ Typical responsibilities:
 - Re-inject missing anchors such as issue number, branch name, or open blockers
 - Record compaction quality metrics for later tuning
 
-### `OnError`
+### `OnError` / `errorOccurred`
+
+> **Platform note:** VS Code and Copilot CLI call this event `errorOccurred`. Use `errorOccurred` in `.github/hooks/*.json` config. Use `OnError` in BaseCoat prose and MCP patterns.
 
 Runs when a tool call or hook-managed action fails.
 
@@ -290,23 +330,64 @@ Use this when the runtime exposes extensibility through MCP servers or wrapper t
 }
 ```
 
-#### Pattern B: `hooks.json`
+#### Pattern B: `.github/hooks/*.json` (Native Platform Format)
 
-Use this when the runtime supports direct declarative hook configuration.
+Use this when targeting VS Code, Copilot CLI, or the Copilot Cloud Agent directly. Store files in `.github/hooks/` in the repository root. This is the **recommended format for BaseCoat deployments** — it works across all three surfaces without a custom runtime.
 
 ```json
 {
   "version": 1,
   "hooks": {
-    "PreToolUse": [
-      { "command": "python hooks/pre_tool.py", "priority": 20 }
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "./scripts/validate-tool.sh",
+        "powershell": "./scripts/validate-tool.ps1",
+        "cwd": ".",
+        "timeoutSec": 10
+      }
     ],
-    "OnBudgetExceeded": [
-      { "command": "python hooks/rotate_session.py", "priority": 10 }
+    "postToolUse": [
+      {
+        "type": "command",
+        "bash": "./scripts/telemetry-hook.sh",
+        "powershell": "./scripts/telemetry-hook.ps1",
+        "timeoutSec": 5
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "bash": "./scripts/session-end.sh",
+        "powershell": "./scripts/session-end.ps1",
+        "timeoutSec": 15
+      }
     ]
   }
 }
 ```
+
+> **Cloud Agent:** Only `bash` commands are honored in the ephemeral Linux sandbox. `powershell` entries are silently ignored. Use the cross-platform `command` field as a fallback.
+
+#### Agent-Scoped Hooks (VS Code Preview)
+
+Hooks can be declared directly in an `.agent.md` YAML frontmatter. They run only when that specific agent is active and supplement any workspace-level hooks.
+
+```yaml
+---
+name: guardrail
+description: "Guardrail validation agent..."
+hooks:
+  PostToolUse:
+    - type: command
+      command: "./scripts/validate-output.sh"
+  Stop:
+    - type: command
+      command: "./scripts/session-cleanup.sh"
+---
+```
+
+Enable with `chat.useCustomAgentHooks: true` in VS Code settings. This is the right pattern for agent-specific lifecycle behavior (e.g., `deploy-watchdog` arming/disarming, `memory-curator` load/persist).
 
 #### Pattern C: Code-Based Registration
 
@@ -324,32 +405,45 @@ runtime.hooks.register('SessionStart', async (event) => {
 
 ### Cross-Platform Notes
 
-| Runtime | Hook Pattern | Notes |
-|--------|--------------|-------|
-| GitHub Copilot | Via MCP tools or wrapper orchestration | Prefer hook behavior implemented as tool calls or middleware around tool dispatch |
-| Claude Code | Native hooks | Map Base Coat hook names onto the runtime's native lifecycle events where possible |
-| Codex | `hooks.json` style config | Prefer declarative registration for portability and simpler auditability |
+#### Platform Name Mapping
+
+BaseCoat uses consistent hook names in documentation and MCP patterns. When writing native hook config files, use the platform names in the table below:
+
+| BaseCoat Name | VS Code / Copilot CLI Name | Cloud Agent | Notes |
+|---|---|---|---|
+| `SessionStart` | `SessionStart` | ✅ | Identical |
+| `SessionEnd` | `Stop` | ✅ | Name differs — use `Stop` in JSON config |
+| `UserPromptSubmitted` | `UserPromptSubmit` | ✅ | Minor name variant |
+| `PreToolUse` | `preToolUse` | ✅ | camelCase in JSON config |
+| `PostToolUse` | `postToolUse` | ✅ | camelCase in JSON config |
+| `SubagentStart` | `SubagentStart` | ❌ | VS Code / CLI only |
+| `SubagentStop` | `SubagentStop` | ❌ | VS Code / CLI only |
+| `PreCompact` | `PreCompact` | ❌ | VS Code / CLI only |
+| `PostCompact` | — | — | BaseCoat extension, not in platform |
+| `OnError` | `errorOccurred` | ✅ | Name differs — use `errorOccurred` in JSON config |
+| `OnBudgetExceeded` | — | — | BaseCoat extension, implement via MCP middleware |
+
+| Runtime | Hook Pattern | Config Location | Notes |
+|--------|--------------|----------------|-------|
+| VS Code (Preview) | Native JSON + agent frontmatter | `.github/hooks/*.json` | Recommended for interactive sessions |
+| Copilot CLI | Native JSON | `.github/hooks/*.json`, `~/.copilot/hooks/` | Same format; also supports user-level hooks |
+| Copilot Cloud Agent | Native JSON (bash only) | `.github/hooks/*.json` in cloned repo | No user-level hooks; ephemeral sandbox; bash only |
+| Claude Code | Native hooks | `.claude/settings.json` | VS Code also reads this location |
+| MCP middleware | Pattern A (`mcp.json`) | Configured in MCP server | Use for non-file-based runtimes |
 
 #### GitHub Copilot
 
-Base Coat should treat GitHub Copilot hooks as an orchestration concern rather than a prompt-only concern. The cleanest integration point is usually:
+For interactive VS Code sessions: use `.github/hooks/*.json` (Pattern B). For the Copilot Cloud Agent: same format, bash only. For programmatic MCP-based integrations: use Pattern A.
 
-- wrapper logic around tool dispatch
-- MCP tools that act as hook processors
-- session middleware that injects additional context between turns
+The cleanest native integration is `.github/hooks/*.json` — no wrapper needed. For more complex logic (context injection, loop detection), wrap behavior as MCP tools and route through Pattern A.
 
 #### Claude Code
 
-Claude Code can map Base Coat hooks onto native lifecycle events. Where names differ, preserve Base Coat semantics first:
+Claude Code reads `.claude/settings.json` and `.github/hooks/*.json`. VS Code also reads the Claude Code settings files, so hooks defined there apply to both runtimes. Map BaseCoat names using the Platform Name Mapping table above.
 
-- session open maps to `SessionStart`
-- tool preflight maps to `PreToolUse`
-- tool completion maps to `PostToolUse`
-- context compression maps to `PreCompact` and `PostCompact`
+#### Codex / Other Runtimes
 
-#### Codex
-
-Codex-style runtimes fit well with a declarative `hooks.json` model. Keep handlers small, deterministic, and side-effect-aware so the config remains portable across environments.
+Use Pattern B (declarative `hooks.json`) with the `command` cross-platform field. Keep handlers small, deterministic, and side-effect-free so config remains portable.
 
 ### Error Handling in Hooks
 
@@ -475,20 +569,55 @@ Recommended sequence:
 
 ### Telemetry → All Hooks
 
-Every hook point can emit telemetry.
+Every hook point can emit telemetry. See `docs/reference/TELEMETRY.md` for the full telemetry integration guide, including Azure Application Insights configuration.
 
 Suggested measurements:
 
 | Hook | Metrics |
 |------|---------|
-| `SessionStart` | memory hits, session bootstrap latency |
-| `SessionEnd` | persisted facts, handoff size |
+| `SessionStart` | memory hits, session bootstrap latency, agent name, model |
+| `SessionEnd` / `Stop` | session duration, total tool calls, persisted facts |
+| `UserPromptSubmitted` | prompt category (no content), session phase |
 | `PreToolUse` | tool category, policy checks, warnings injected |
-| `PostToolUse` | duration, success rate, retry count, loop score |
+| `PostToolUse` | tool name, duration ms, success/fail, agent name |
+| `SubagentStart` | subagent name, parent agent, invocation depth |
+| `SubagentStop` | subagent duration, result summary |
 | `PreCompact` | pre-compaction token load, handoff size |
 | `PostCompact` | retained anchors, compression ratio |
-| `OnError` | normalized error class, recurrence count |
+| `OnError` / `errorOccurred` | normalized error class, recurrence count |
 | `OnBudgetExceeded` | trigger threshold, rotation frequency |
+
+**Privacy rule:** Never include prompt content, file contents, or user-identifying data in telemetry payloads. Log only structural metadata: agent names, tool names, timestamps, durations, and success/fail signals.
+
+#### Azure Application Insights via Hooks (opt-in)
+
+Users can route BaseCoat telemetry to their own Azure Application Insights workspace by setting `APPINSIGHTS_CONNECTION_STRING` in their environment. Hook scripts check for this variable and POST custom events to the App Insights ingestion API. If the variable is not set, the hook silently passes through.
+
+```json
+{
+  "version": 1,
+  "hooks": {
+    "postToolUse": [
+      {
+        "type": "command",
+        "bash": "./scripts/telemetry-hook.sh",
+        "powershell": "./scripts/telemetry-hook.ps1",
+        "timeoutSec": 5
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "bash": "./scripts/telemetry-hook.sh",
+        "powershell": "./scripts/telemetry-hook.ps1",
+        "timeoutSec": 5
+      }
+    ]
+  }
+}
+```
+
+See issue [#1172](https://github.com/IBuySpy-Shared/basecoat/issues/1172) for the full design and implementation plan.
 
 ---
 

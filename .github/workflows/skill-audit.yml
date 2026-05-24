@@ -3,16 +3,20 @@ on:
   schedule:
     - cron: '0 9 * * 1'  # Every Monday 9am UTC
   workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
   audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Run skill audit
         run: pwsh scripts/audit-skills.ps1 -FailOnError
       - name: Upload audit results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: skill-audit-results
           path: test-results/skill-audit.txt

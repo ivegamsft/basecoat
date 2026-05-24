@@ -1,0 +1,19 @@
+name: "ha-architect-routing"
+description: "Routing evaluation — validates trigger activation for the ha-architect agent."
+skill: "agents/ha-architect.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with design multi-region failover architecture."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle define chaos engineering experiments?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the ha-architect agent for create disaster recovery runbooks."
+    expect_activation: true
+  - id: "neg-1"
+    input: "day-to-day incident response"
+    expect_activation: false
+  - id: "neg-2"
+    input: "cost optimization analysis"
+    expect_activation: false

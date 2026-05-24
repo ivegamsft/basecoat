@@ -1,6 +1,6 @@
 ---
 description: "Use when building, extending, or consulting an error knowledge base so agents can classify failures, reuse proven fixes, and capture new patterns safely."
-applyTo: "**/*"
+applyTo: "error-kb/**/*,**/*error*.{md,json,yml,yaml,ps1,sh,py,ts,js}"
 ---
 
 # Error Knowledge Base Standards

@@ -13,6 +13,143 @@ Agents operate in complex environments with non-deterministic outputs, making tr
 - Quantitative evaluation metrics for accuracy, relevance, and safety
 - CI/CD integration for continuous agent quality monitoring
 
+## Operator Troubleshooting Runbook
+
+For VS Code diagnostics of harness executions, use:
+
+- [VS Code Tools UI and Chat Debug View Runbook](TOOLS_UI_CHAT_DEBUG_RUNBOOK.md)
+- [VS Code Harness Context Assembly Contract](./CONTEXT_ASSEMBLY_CONTRACT.md)
+
+The runbook covers:
+
+- Opening Chat Debug View
+- Verifying tool exposure in the chat tool picker
+- Inspecting prompt and tool-call traces
+- Troubleshooting missing tools and malformed calls
+- An end-to-end debug walkthrough
+
+Tool confirmation policy for VS Code agent mode:
+
+- [VS Code Agent Mode Tool Confirmation Policy](../reference/guardrails/tool-confirmation-policy.md)
+
+## VS Code Harness Loop Semantics
+
+This section defines the canonical execution model used by the VS Code harness.
+
+### Canonical terms
+
+- **Turn**: one model response cycle. The assistant may emit tool calls or a terminal natural-language response.
+- **Round**: one tool-execution cycle that starts when a turn emits one or more tool calls and ends when all tool results are appended.
+- **Run**: the full lifecycle from initial user input until a terminal response or a forced stop condition.
+
+### Run state machine
+
+1. Initialize run context (system prompt, user prompt, tool registry, counters).
+2. Execute a turn.
+3. If the turn emits tool calls, execute one round and continue to the next turn.
+4. If the turn emits no tool calls, treat it as terminal and end the run.
+5. End early if any stop condition is met.
+
+### Stop conditions
+
+The harness stops a run immediately when any of the following occurs:
+
+- Terminal assistant response with no tool calls.
+- Tool-call budget is exhausted.
+- Turn budget is exhausted.
+- Wall-clock timeout is reached.
+- Cancellation token is set by user or host.
+- Stop hook returns `stop=true` (for policy or guardrail violations).
+- Consecutive tool-failure threshold is reached.
+
+### Control limits
+
+Use these default limits unless an eval scenario explicitly overrides them.
+
+| Limit | Default | Purpose |
+|---|---:|---|
+| Max turns per run | 24 | Prevents unbounded recursive planning loops |
+| Max rounds per run | 24 | Keeps tool-execution loops aligned with turn cap |
+| Max tool calls per run | 48 | Caps aggregate tool fan-out and cost |
+| Max tool calls per turn | 8 | Prevents single-turn burst abuse |
+| Consecutive tool failures | 3 | Stops repeated failing retries |
+| Run timeout | 300 s | Enforces predictable test duration |
+| Cancellation poll interval | Every round + before each tool call | Guarantees bounded cancellation latency |
+
+### Cancellation and failure semantics
+
+- Cancellation checks must run before dispatching each tool call and after each round.
+- A cancellation event always wins over retries and ends the run with `status=cancelled`.
+- Tool failures are recorded per call. Retried calls increment both retry count and total call count.
+- When the consecutive failure limit is hit, end the run with `status=failed_limit`.
+
+### Context compaction and preservation guarantees
+
+Compaction is allowed only at round boundaries so the model never loses in-flight tool results.
+
+Context ordering and deterministic tie-break behavior are defined in:
+
+- [VS Code Harness Context Assembly Contract](./CONTEXT_ASSEMBLY_CONTRACT.md)
+
+Compaction should trigger when any of the following thresholds is met:
+
+- Prompt context reaches 80% of configured token window.
+- Serialized transcript exceeds 256 KB.
+- Turn count exceeds 16 and run is still active.
+
+When compaction runs, the harness must preserve:
+
+- System and developer instructions.
+- Latest user request and explicit constraints.
+- Final assistant output from the two most recent turns.
+- Tool call and tool result records for the four most recent rounds.
+- Active budget counters (turns, rounds, tool calls, retries, elapsed time).
+
+After compaction, remaining history may be summarized, but preserved fields must remain verbatim.
+
+## Per-Model Behavior Matrix
+
+This matrix defines expected behavior for live, tool-enabled harness runs in VS Code.
+For fixture-based scoring with no live model invocation, see [Behavioral Evaluation (Phase 1)](./BEHAVIORAL_EVAL.md).
+
+## VS Code Harness Benchmark Suite
+
+Use the benchmark suite and regression thresholds for harness-specific checks that are not covered by the Phase 1 smoke eval.
+
+- Suite definition: `tests/evals/vscode-harness-benchmark-suite.json`
+- Regression thresholds: `tests/evals/vscode-harness-regression-thresholds.json`
+- Execution guide: [VS Code Harness Benchmarks](./VS_CODE_HARNESS_BENCHMARKS.md)
+
+The suite is organized around VS Code harness behavior categories:
+
+- Multi-turn tool use
+- MCP and external tool routing
+- Terminal and browser interaction loops
+- Stop-condition and cancellation compliance
+- Tool-confirmation gating for side-effecting actions
+
+It tracks harness regression signals aligned to issue #1055:
+
+- Resolution rate
+- Prompt and completion token cost
+- p95 end-to-end latency
+- Tool calls per resolved run
+
+| Model | Primary scope in harness | Practical limits | Reliability caveats | Expected tool behavior |
+|---|---|---|---|---|
+| `claude-haiku-4.5` | Fast triage, lightweight classification, low-risk routing | Higher risk of shallow reasoning on long multi-constraint prompts; keep tool payloads compact | May stop early with a plausible but incomplete answer if constraints are spread across turns | Should make targeted single-tool calls, avoid broad fan-out, and request follow-up tools only when prior results are insufficient |
+| `claude-sonnet-4.6` | Default balanced harness model for most multi-step tasks | Can degrade when transcripts are very long and tool schemas are large; compaction should be enabled | Occasional argument-shape drift on complex tool schemas; enforce schema validation and retries | Should choose tools when facts are required, chain tools in bounded rounds, and synthesize tool outputs before finalizing |
+| `claude-opus-4.7` | Deep reasoning, adversarial analysis, policy-heavy synthesis | Higher latency and cost per run; use when complexity justifies depth | Can over-explore and consume turn budget if prompts do not define stopping criteria | Should plan tool usage before dispatch, use fewer but higher-value tool calls, and provide explicit rationale tied to tool evidence |
+| `gpt-5-mini` | High-throughput extraction, formatting, and straightforward transformations | Less robust on ambiguous requirements with hidden constraints | Can over-index on recent messages and miss older constraints after compaction summaries | Should prefer deterministic lookup-style tools, keep arguments explicit, and avoid speculative multi-tool chains |
+| `gpt-5.4` | Strong general reasoning with moderate-to-complex tool orchestration | Sensitive to noisy tool outputs; may need stricter post-tool validation checks | May produce confident synthesis from partially relevant tool results unless guardrails enforce provenance | Should call discovery tools first, refine with focused follow-up calls, and cite which tool outputs drove the conclusion |
+| `gpt-5.3-codex` | Code-aware analysis, repo/tool workflows, and structured technical tasks | Not ideal for non-technical open-ended narrative tasks in harness evals | May optimize for code/task completion over style constraints unless explicitly scored | Should prioritize code/search/build tools, preserve argument precision, and terminate once required technical evidence is collected |
+
+### Matrix usage notes
+
+- Treat this as operational guidance, not a fixed quality ranking.
+- Validate model fit against task class, budget, and latency targets before pinning defaults.
+- When behavior differs from the matrix, capture repro prompts in eval assets and update this table with observed evidence.
+
 ## Test Types
 
 ### Unit Testing

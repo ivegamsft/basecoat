@@ -7,7 +7,44 @@ Navigate to: **Settings → Secrets and variables → Actions → New repository
 
 ---
 
+## Bootstrap Audit Logging
+
+The bootstrap script generates a structured audit log at `.memory/bootstrap-audit.json` with all checks, warnings, and errors found during setup. This log includes:
+
+- **Timestamp** of bootstrap run
+- **Pass/fail counts** for all validation checks  
+- **Detailed check results** (label, status, details)
+- **Warnings and errors** lists for issue tracking
+
+### Creating GitHub issues for critical errors
+
+Run with `-CreateIssues` flag to automatically open a GitHub issue when critical validation errors are found:
+
+```powershell
+pwsh scripts/bootstrap.ps1 -CreateIssues
+```
+
+This is useful for team adoption: each bootstrap run can surface issues requiring attention without manual reporting. The `-CreateIssues` flag is disabled in `-Silent` mode (CI use) to avoid spam.
+
+---
+
 ## Required Secrets
+
+### Portal deploy bootstrap order (staging)
+
+Use this order to avoid mixed bootstrap/deploy failures:
+
+1. Run `pwsh scripts/bootstrap.ps1` in the repo.
+   - This is the correct bootstrap for BaseCoat repo operations and portal deploy readiness.
+   - Do not substitute `scripts/bootstrap-basecoat.ps1` (consumer-repo adoption) or `scripts/bootstrap-dashboard.ps1` (adoption dashboard setup).
+2. Keep Azure CLI logged in and rerun `pwsh scripts/bootstrap.ps1` to auto-provision the portal OIDC app registration and repo variables when missing.
+3. Set `GHCR_PULL_TOKEN` at repo scope or `staging` environment scope.
+4. Re-run `pwsh scripts/bootstrap.ps1` and verify Phase 3 passes portal OIDC checks.
+5. Trigger `.github/workflows/portal-deploy.yml`.
+
+The deploy workflow now fails fast in the `Validate deployment secrets` step when required portal variables are missing or malformed. The bootstrap script can auto-generate the Azure app registration, federated credential, and repo variables from the current Azure CLI session, but the GHCR pull token still requires a manually created PAT with `read:packages` and expiration set to 30 days or less.
+
+---
 
 ### `COPILOT_GITHUB_TOKEN`
 
@@ -24,7 +61,7 @@ Without this secret the agentic lock-file workflows will fail to start.
 2. Create a **fine-grained PAT**
 3. Set **Resource owner** to your user account
 4. Under **Account permissions**, set **Copilot Requests** → `Read`
-5. Set expiration to **90 days** (rotate on expiry)
+5. Set PAT expiration to **30 days or less**
 6. Generate token and copy it immediately
 7. Run bootstrap script:
 
@@ -35,7 +72,7 @@ pwsh scripts/bootstrap-copilot-github-token.ps1 -Repo IBuySpy-Shared/basecoat
 If you prefer manual UI setup, add the value as repository secret
 `COPILOT_GITHUB_TOKEN`.
 
-**Rotation schedule:** Rotate every 90 days. Set a calendar reminder.
+**Rotation schedule:** Rotate every 30 days. Set a calendar reminder.
 When rotating, generate a new token *before* the old one expires, update
 the secret, then revoke the old token.
 
@@ -51,7 +88,7 @@ isolation).
 
 **How to create:** Use a **separate token** from `COPILOT_GITHUB_TOKEN`
 (recommended). Name it `basecoat-gh-aw` and grant only the minimum
-repository read permissions required.
+repository read permissions required. Set PAT expiration to **30 days or less**.
 
 ---
 
@@ -67,6 +104,7 @@ agent to call GitHub APIs from within the agent container.
 - **Repository permissions:** Issues (read/write), Pull requests (read/write),
   Contents (read)
 - Name it `basecoat-mcp-server`
+- Set PAT expiration to **30 days or less**
 
 ---
 
@@ -79,6 +117,50 @@ agent to call GitHub APIs from within the agent container.
 **Note:** This workflow is a pre-existing non-blocking failure when the staging
 deployment is not provisioned. CI will report it as failing on every PR; this
 does not block merges since branch protection is not enforced on `main`.
+
+---
+
+### `AZURE_CLIENT_ID`
+
+**Used by:** `.github/workflows/portal-deploy.yml`
+
+**Purpose:** OIDC client ID for the portal deploy app registration.
+
+### `AZURE_TENANT_ID`
+
+**Used by:** `.github/workflows/portal-deploy.yml`
+
+**Purpose:** Entra tenant ID for Azure login.
+
+### `AZURE_SUBSCRIPTION_ID`
+
+**Used by:** `.github/workflows/portal-deploy.yml`
+
+**Purpose:** Target Azure subscription for portal staging deployment.
+
+---
+
+### `PORTAL_POSTGRES_ADMIN_PASSWORD`
+
+**Used by:** `.github/workflows/portal-deploy.yml`
+
+**Purpose:** Optional override for PostgreSQL admin password.
+
+If omitted, `portal/app/iac/main.bicep` generates a secure password per deployment.
+
+---
+
+### `GHCR_PULL_TOKEN`
+
+**Used by:** `.github/workflows/portal-deploy.yml`
+
+**Purpose:** Allows Container Apps runtime to pull private images from GHCR.
+
+**Required scope:** `read:packages`
+
+Set PAT expiration to **30 days or less** and rotate monthly.
+
+This is deployment/runtime specific (not just build-time): `GITHUB_TOKEN` can push images during workflow execution, but Azure Container Apps needs a separate credential to pull private GHCR images after deployment.
 
 ---
 

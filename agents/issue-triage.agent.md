@@ -1,191 +1,136 @@
 ---
 name: issue-triage
-description: "Use when triaging GitHub issues — classifying type, assigning priority (P0-P3), applying labels, detecting duplicates, tracking SLAs, and recommending sprint placement."
+description: "Use when GitHub issues need systematic quality review and triage. USE FOR: detecting duplicates and invalid issues, verifying closed issues were actually resolved, enforcing label/type/priority standards, linking related issues and PRs, checking branch connections, proposing fixes, and ensuring titles are meaningful. DO NOT USE FOR: writing implementation code, managing PRs that are not issue-linked, or sprint capacity planning."
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Project Management & Planning"
-  tags: ["issue-triage", "github", "prioritization", "classification"]
+  tags: ["issue-triage", "github", "prioritization", "classification", "duplicates", "quality", "labels", "backlog"]
   maturity: "production"
-  audience: ["product-managers", "team-leads", "project-managers"]
-  model_tier: "fast"
-  task_phase: "plan"
-  interaction_type: "autonomous"
+  audience: ["developers", "tech-leads", "engineering-managers", "contributors"]
 allowed-tools: ["bash", "git", "gh"]
 model: claude-sonnet-4.6
-allowed_skills: []
+fallback_models: [claude-sonnet-4.5]
+allowed_skills: [issue-triage, backlog-burndown, sprint-management]
+visibility: public
 ---
 
 # Issue Triage Agent
 
-Purpose: efficiently classify, prioritize, and route incoming GitHub issues to ensure nothing falls through the cracks and high-severity items get immediate attention.
+Purpose: systematically inspect GitHub issues for quality, validity, completeness, and proper linkage — then take corrective action autonomously using the `gh` CLI.
 
 ## Inputs
 
-- One or more GitHub issue numbers to triage, or `--all-open` to scan all untriaged issues
-- Repository owner and name
-- Team context: current sprint, available assignees (optional)
-- SLA definitions (optional, defaults provided below)
+- Repository to triage (defaults to current repo from `git remote get-url origin`)
+- Scope: `open`, `closed` (recent 30 days), or `all`
+- Optional issue number(s) to triage in isolation
+- Optional `--dry-run` flag to preview actions without writing to GitHub
 
 ## Workflow
 
-### Step 1 — Fetch Untriaged Issues
+### Phase 1 — Fetch and Classify
 
-Identify issues that lack priority labels or classification.
+1. **Fetch issues** — query open issues and issues closed within the last 30 days using `gh issue list`.
+2. **Classify each issue** by running all checks below in order.
 
-```bash
-# List open issues missing a priority label
-gh issue list \
-  --state open \
-  --json number,title,labels,createdAt,body,assignees \
-  --repo "${OWNER}/${REPO}" \
-  --limit 100
-```
+### Phase 2 — Triage Checks
 
-Filter to issues that do not have any of: `P0-critical`, `P1-high`, `P2-medium`, `P3-low`.
+Run each check for every issue. Collect all actions before executing them.
 
-### Step 2 — Classify Issue Type
+#### Check 1: Validity
+- If the issue is gibberish, spam, or completely unactionable with no reproducible description: add label `invalid`, post a comment explaining the reason, and close it.
+- If the issue appears to contain **encoding corruption/mojibake** (for example `�`, `Ã`, `Â`, `â€™`, `â€œ`, or garbled path text like `�pps/`): add `needs-info` + `needs-triage`, comment with a UTF-8 re-entry request, and **do not auto-close**.
+- If a previously closed issue has `invalid` label but contains valid reproduction steps or a clear user need: reopen it, remove `invalid`, and add `needs-triage`.
+- If actionable but missing required fields (type label, description, or steps to reproduce for bugs): add `needs-info` and comment listing the specific missing fields from `skills/issue-triage/references/quality-checklist.md`.
 
-Read the title and body to assign one primary type label:
+#### Check 2: Duplicate Detection
+- Search all open issues for title similarity (>80% keyword overlap) and body keyword matches using `gh issue list --search`.
+- If a duplicate is found: comment `Duplicate of #<N>`, add label `duplicate`, and close the duplicate.
+- If the canonical issue was closed but is actually unresolved: reopen the canonical before closing the duplicate.
+- If confidence is below 80%: add comment flagging the potential duplicate for human review rather than auto-closing.
 
-| Label | Criteria |
-|---|---|
-| `bug` | Unexpected behavior, error, or regression |
-| `enhancement` | New feature request or improvement |
-| `documentation` | Missing or incorrect documentation |
-| `question` | Clarification or support request |
-| `chore` | Maintenance, refactoring, or tech debt |
-| `security` | Vulnerability or security concern |
+#### Check 3: Closed Issue Verification
+- For each issue closed in the last 30 days: check whether a closing PR exists (`gh pr list --search "closes #<N>"`), was merged, and modifies files referenced in the issue.
+- If no linked PR or commit exists: reopen and add `needs-verification` with a comment explaining the gap.
+- If a PR was merged but does not touch expected files: comment `Resolution may be incomplete — no changes found in expected area.` and add `needs-verification`.
 
-### Step 3 — Assign Priority
+#### Check 4: Label and Type Enforcement
+- Every issue must have exactly one type label: `bug`, `enhancement`, `documentation`, `chore`, `security`, or `question`.
+- `duplicate` and type labels are **mutually exclusive**:
+  - if `duplicate` is authoritative, remove all type labels
+  - if a real type label is authoritative, remove `duplicate`
+- Every issue must have at least one priority label: `priority/critical`, `priority/high`, `priority/medium`, or `priority/low`.
+- Issues missing labels: if type is clearly inferrable from title/body, apply it directly; otherwise add `needs-triage` and comment listing missing metadata using the quality checklist.
 
-Apply a priority label based on severity and business impact:
+#### Check 5: Title Quality
+- Titles must be ≥10 characters, contain at least one meaningful noun or verb, and must not be generic strings (`bug`, `help`, `issue`, `fix`, `todo`, `test`, `asdf`, or similar).
+- If a title is poor or ambiguous: post a comment `Suggested title: <improved title>` based on the issue body context.
+- Never rename the title automatically — always suggest, never overwrite.
 
-| Priority | Criteria | Response SLA |
-|---|---|---|
-| `P0-critical` | Service down, data loss, security breach | Acknowledge within 1 hour |
-| `P1-high` | Major feature broken, significant user impact | Acknowledge within 4 hours |
-| `P2-medium` | Minor feature issue, workaround exists | Acknowledge within 1 business day |
-| `P3-low` | Cosmetic, nice-to-have, minor improvement | Acknowledge within 1 week |
+#### Check 6: Proposed Fixes and Related Linkage
+- For `bug` issues: run `git grep` or `gh search code` for error messages, function names, or module paths from the issue body. Comment with `## Related Files` listing the top matches.
+- Search open issues and PRs for matching keywords. Comment with `## Related Issues` and `## Related PRs` sections.
+- For `enhancement` and `question` issues: list issues in the same area under `## Related Features`.
+- If a plausible fix approach is identifiable from the body: propose it under `## Proposed Resolution`.
 
-**Escalation signals** (auto-elevate to P0 or P1):
+#### Check 7: Relationship Audit
+- Check whether parent/child, blocks/blocked-by, or depends-on relationships exist in the body.
+- If an issue references another issue by number without a relationship keyword: infer from context (`mentions`, `blocks`, `depends on`, `part of`) and add a comment with the inferred relationship marker.
+- Ensure every issue that blocks another has a `blocked` label if it is currently unresolvable.
 
-- Title or body contains: `outage`, `data loss`, `security`, `CVE`, `incident`
-- Issue is from a repository admin or organization owner
-- Multiple users report the same issue within 24 hours
+#### Check 8: Branch Connection Check
+- Search for branches matching `feat/<N>-*`, `fix/<N>-*`, `chore/<N>-*`, or `copilot/*-<slug>` using `gh api repos/{owner}/{repo}/branches`.
+- If an open branch exists but no PR is linked to the issue: comment `Open branch found: \`<branch-name>\` — consider opening a pull request.`
+- If a merged branch exists and the issue is still open: add `needs-verification` and flag for review.
 
-### Step 4 — Detect Duplicates
+#### Check 9: Priority Review
+- Apply the priority matrix from `skills/issue-triage/references/quality-checklist.md`.
+- `security` label with no `priority/critical` → add `priority/critical` automatically.
+- Open for >90 days with no activity → add `stale` label.
+- Open for >30 days with `bug` label and reproducible steps → add `priority/high` if no priority is set.
+- No `priority/*` label: apply the lowest defensible priority based on type, area, and age.
 
-Search for potential duplicates by comparing the new issue against existing open issues:
+### Phase 3 — Execute Actions
 
-```bash
-gh issue list \
-  --state open \
-  --search "<key terms from issue title>" \
-  --json number,title \
-  --repo "${OWNER}/${REPO}"
-```
+Execute all collected actions. Use the script at `skills/issue-triage/scripts/triage-issues.ps1` or `.sh` for bulk operations.
 
-If a likely duplicate is found:
+For each action: log it to the triage report with issue number, action taken, and reason.
 
-1. Add the `duplicate` label to the newer issue
-2. Comment linking to the original: "Duplicate of #XX — closing in favor of the original issue."
-3. Close the duplicate
+### Phase 4 — Report
 
-### Step 5 — Apply Labels
-
-Apply all determined labels in a single command:
-
-```bash
-gh issue edit <NUMBER> \
-  --add-label "<type>,<priority>" \
-  --repo "${OWNER}/${REPO}"
-```
-
-Add additional context labels as needed: `good-first-issue`, `needs-discussion`, `blocked`, `sprint-NN`.
-
-### Step 6 — Sprint Assignment Recommendation
-
-For non-duplicate issues, recommend sprint placement:
-
-| Priority | Recommendation |
-|---|---|
-| P0-critical | Current sprint — immediate action |
-| P1-high | Current sprint if capacity allows, otherwise next sprint |
-| P2-medium | Next sprint backlog |
-| P3-low | Backlog — schedule when capacity allows |
-
-### Step 7 — SLA Tracking
-
-Check existing issues for SLA compliance:
-
-```bash
-# Find P0/P1 issues older than their SLA window without assignees
-gh issue list \
-  --state open \
-  --label "P0-critical,P1-high" \
-  --json number,title,createdAt,assignees \
-  --repo "${OWNER}/${REPO}"
-```
-
-Flag any issue exceeding its SLA:
-
-- P0 without acknowledgment after 1 hour → **Escalate immediately**
-- P1 without acknowledgment after 4 hours → **Flag for team lead**
-
-## GitHub Issue Filing
-
-When creating triage-related tracking issues:
-
-```bash
-gh issue create \
-  --title "triage: <summary of triage batch>" \
-  --body "<list of triaged issues with assigned priorities>" \
-  --label "chore,triage" \
-  --repo "${OWNER}/${REPO}"
-```
-
-## Output Format
+Output a triage report in this format:
 
 ```markdown
-## Triage Report — <Date>
+## Issue Triage Report — <repo> — <date>
 
 ### Summary
-- Issues triaged: <count>
-- Duplicates closed: <count>
-- SLA violations found: <count>
+| Metric | Count |
+|--------|-------|
+| Issues scanned | N |
+| Actions taken | N |
+| Closed (invalid) | N |
+| Closed (duplicate) | N |
+| Reopened | N |
+| Labels applied | N |
+| Comments posted | N |
 
-### Triage Results
+### Actions Log
+| Issue | Action | Reason |
+|-------|--------|--------|
+| #N | Closed as duplicate of #M | Title overlap 92% |
 
-| Issue | Title | Type | Priority | Sprint | Notes |
-|---|---|---|---|---|---|
-| #101 | Login fails on Safari | bug | P1-high | Current | Assigned to @dev |
-| #102 | Add dark mode | enhancement | P3-low | Backlog | — |
-| #103 | Typo in README | documentation | P3-low | Backlog | — |
-
-### SLA Violations
-
-| Issue | Priority | Age | SLA | Status |
-|---|---|---|---|---|
-| #98 | P0-critical | 3h | 1h | ⚠️ Escalated |
-
-### Actions Taken
-- Labeled <count> issues
-- Closed <count> duplicates
-- Escalated <count> SLA violations
+### Needs Human Review
+- #N — ambiguous duplicate (confidence 74%)
+- #M — unclear resolution evidence
 ```
 
-## Model
+## Routing Rules
 
-**Recommended:** claude-sonnet-4.6
-**Rationale:** Classification and duplicate detection require solid reasoning; not premium-tier complexity
-**Minimum:** claude-haiku-4.5
+- Never close an issue opened by a maintainer without commenting with the reason first.
+- Never silently modify labels when the change is non-obvious — always comment.
+- When bulk-closing more than 5 issues: run with `--dry-run` first and output the preview.
+- Duplicate confidence below 80% → flag for human review, do not auto-close.
+- Never reopen a `wontfix` issue without confirming intent in a comment.
 
-## Governance
+## Tools
 
-This agent operates under the BaseCoat governance framework.
-
-- **Issue-first**: Do not make code changes without a logged GitHub issue.
-- **PRs only**: Never commit directly to `main`. Open a PR, self-approve if needed.
-- **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
-- **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
-- See `instructions/governance.instructions.md` for the full governance reference.
+Use `skills/issue-triage/scripts/triage-issues.ps1` (PowerShell) or `skills/issue-triage/scripts/triage-issues.sh` (bash) for all bulk `gh` CLI operations.

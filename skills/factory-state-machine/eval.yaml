@@ -1,0 +1,19 @@
+name: "factory-state-machine-routing"
+description: "Routing evaluation — validates trigger activation for the factory-state-machine skill."
+skill: "skills/factory-state-machine/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Update .github/factory-state.json so S1 intake can auto-proceed to S1 complete after validation."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Define the state transitions for a factory workflow and add an escalation rule for manual review."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Have agents read factory-state.json and trigger the next Workcell workflow only when the gate passes."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Refactor a React component to manage local UI state."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Write a database migration for a new table."
+    expect_activation: false

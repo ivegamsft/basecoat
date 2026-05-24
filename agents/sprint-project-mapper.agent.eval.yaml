@@ -1,0 +1,26 @@
+name: "sprint-project-mapper-routing"
+description: "Routing evaluation — validates trigger activation for sprint/project grouping, debate, and metric rollups."
+skill: "agents/sprint-project-mapper.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "Group similar sprint and wave issues into projects and calculate metrics."
+    expect_activation: true
+  - id: "pos-2"
+    input: "We have many labels; cluster them into meaningful release groups and generate release-note stats."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Debate whether to split or merge project groupings before computing cycle-time metrics."
+    expect_activation: true
+  - id: "pos-4"
+    input: "Map issues and PRs into projects with LOC, closure ratio, and lead time."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Implement OAuth callback middleware for the extension."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Close duplicate issues and apply labels."
+    expect_activation: false
+  - id: "neg-3"
+    input: "Deploy the app to production."
+    expect_activation: false
+

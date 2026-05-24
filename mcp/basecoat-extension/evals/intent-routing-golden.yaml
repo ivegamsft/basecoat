@@ -1,0 +1,347 @@
+version: 1
+suite: extension-intent-routing-v1
+description: Golden prompt-to-tool mappings for BaseCoat Extension routing quality checks.
+required_tools:
+  - search-assets
+  - get-asset-details
+  - get-latest-metrics
+  - get-history
+  - get-alerts
+  - validate
+  - scaffold
+  - audit-governance
+  - check-coverage
+  - create-pr
+cases:
+  - id: sa-01
+    prompt: Find skills related to API security hardening.
+    expected_tool: search-assets
+    tags: [positive, discovery]
+    suggestion_if_misrouted: Add trigger phrase "find skills related to" to search-assets.
+  - id: sa-02
+    prompt: What agents do we have for sprint planning?
+    expected_tool: search-assets
+    tags: [positive, discovery]
+    suggestion_if_misrouted: Include "what agents do we have" in search-assets description.
+  - id: sa-03
+    prompt: Search for instructions about dependency analysis.
+    expected_tool: search-assets
+    tags: [positive, discovery]
+    suggestion_if_misrouted: Add "search for instructions" synonym to search-assets.
+  - id: sa-04
+    prompt: Show prompts about release readiness.
+    expected_tool: search-assets
+    tags: [positive, discovery]
+    suggestion_if_misrouted: Include "show prompts about" examples in search-assets.
+  - id: sa-05
+    prompt: List BaseCoat assets that mention Kubernetes security.
+    expected_tool: search-assets
+    tags: [positive, discovery]
+    suggestion_if_misrouted: Add "assets that mention" pattern to search-assets.
+
+  - id: gad-01
+    prompt: Open the full content of skills/architecture/SKILL.md.
+    expected_tool: get-asset-details
+    tags: [positive, details]
+    suggestion_if_misrouted: Emphasize "open full content" for get-asset-details.
+  - id: gad-02
+    prompt: Show me the full text of the code-review agent file.
+    expected_tool: get-asset-details
+    tags: [positive, details]
+    suggestion_if_misrouted: Add "full text of agent file" wording to get-asset-details.
+  - id: gad-03
+    prompt: Retrieve full markdown for instructions/governance.instructions.md.
+    expected_tool: get-asset-details
+    tags: [positive, details]
+    suggestion_if_misrouted: Add "retrieve full markdown" trigger to get-asset-details.
+  - id: gad-04
+    prompt: Get complete details for prompts/incident-update.prompt.md.
+    expected_tool: get-asset-details
+    tags: [positive, details]
+    suggestion_if_misrouted: Include "complete details for file path" examples.
+  - id: gad-05
+    prompt: I need the entire content of the backend-dev skill.
+    expected_tool: get-asset-details
+    tags: [positive, details]
+    suggestion_if_misrouted: Add "entire content of skill" phrase to get-asset-details.
+
+  - id: glm-01
+    prompt: What are the latest BaseCoat adoption metrics?
+    expected_tool: get-latest-metrics
+    tags: [positive, metrics]
+    suggestion_if_misrouted: Include "latest adoption metrics" in get-latest-metrics.
+  - id: glm-02
+    prompt: Give me the current dashboard snapshot.
+    expected_tool: get-latest-metrics
+    tags: [positive, metrics]
+    suggestion_if_misrouted: Add "current dashboard snapshot" synonym to get-latest-metrics.
+  - id: glm-03
+    prompt: Show this week usage numbers for agents and skills.
+    expected_tool: get-latest-metrics
+    tags: [positive, metrics]
+    suggestion_if_misrouted: Mention "this week usage numbers" in get-latest-metrics.
+  - id: glm-04
+    prompt: Pull the newest metrics report.
+    expected_tool: get-latest-metrics
+    tags: [positive, metrics]
+    suggestion_if_misrouted: Add "newest metrics report" trigger to get-latest-metrics.
+  - id: glm-05
+    prompt: What's the most recent metrics state for the repo?
+    expected_tool: get-latest-metrics
+    tags: [positive, metrics]
+    suggestion_if_misrouted: Add "most recent metrics state" examples to get-latest-metrics.
+
+  - id: gh-01
+    prompt: Show adoption history for the last 8 weeks.
+    expected_tool: get-history
+    tags: [positive, history]
+    suggestion_if_misrouted: Add "adoption history" pattern to get-history.
+  - id: gh-02
+    prompt: Trend chart data for monthly usage please.
+    expected_tool: get-history
+    tags: [positive, history]
+    suggestion_if_misrouted: Include "trend chart data" in get-history description.
+  - id: gh-03
+    prompt: How has skill usage changed over time?
+    expected_tool: get-history
+    tags: [positive, history]
+    suggestion_if_misrouted: Add "changed over time" phrasing for get-history.
+  - id: gh-04
+    prompt: Return historical metrics so I can compare quarter over quarter.
+    expected_tool: get-history
+    tags: [positive, history]
+    suggestion_if_misrouted: Add "historical metrics" trigger to get-history.
+  - id: gh-05
+    prompt: Give me past alert and adoption trend points.
+    expected_tool: get-history
+    tags: [positive, history]
+    suggestion_if_misrouted: Mention "past trend points" for get-history.
+
+  - id: ga-01
+    prompt: Do we have any active adoption alerts right now?
+    expected_tool: get-alerts
+    tags: [positive, alerts]
+    suggestion_if_misrouted: Include "active alerts right now" in get-alerts.
+  - id: ga-02
+    prompt: List current degradations in the metrics pipeline.
+    expected_tool: get-alerts
+    tags: [positive, alerts]
+    suggestion_if_misrouted: Add "current degradations" wording to get-alerts.
+  - id: ga-03
+    prompt: Show warning conditions for repo health telemetry.
+    expected_tool: get-alerts
+    tags: [positive, alerts]
+    suggestion_if_misrouted: Include "warning conditions" trigger for get-alerts.
+  - id: ga-04
+    prompt: What alerts are open for adoption regressions?
+    expected_tool: get-alerts
+    tags: [positive, alerts]
+    suggestion_if_misrouted: Add "alerts are open" phrase to get-alerts.
+  - id: ga-05
+    prompt: Fetch active alert records from the dashboard feed.
+    expected_tool: get-alerts
+    tags: [positive, alerts]
+    suggestion_if_misrouted: Add "active alert records" examples for get-alerts.
+
+  - id: val-01
+    prompt: Validate the repository and run all checks.
+    expected_tool: validate
+    tags: [positive, validation]
+    suggestion_if_misrouted: Include "validate repository and run checks" in validate.
+  - id: val-02
+    prompt: Run tests and tell me if the repo is healthy.
+    expected_tool: validate
+    tags: [positive, validation]
+    suggestion_if_misrouted: Add "repo is healthy" trigger to validate.
+  - id: val-03
+    prompt: Execute BaseCoat validation scripts now.
+    expected_tool: validate
+    tags: [positive, validation]
+    suggestion_if_misrouted: Mention script execution intent in validate description.
+  - id: val-04
+    prompt: Check this branch for lint and test failures.
+    expected_tool: validate
+    tags: [positive, validation]
+    suggestion_if_misrouted: Add "lint and test failures" phrase to validate.
+  - id: val-05
+    prompt: Run validate-basecoat and run-tests for my changes.
+    expected_tool: validate
+    tags: [positive, validation]
+    suggestion_if_misrouted: Include explicit script names in validate triggers.
+
+  - id: scf-01
+    prompt: Scaffold a new skill called cloud-cost-optimizer.
+    expected_tool: scaffold
+    tags: [positive, scaffolding]
+    suggestion_if_misrouted: Emphasize "scaffold a new skill" in scaffold description.
+  - id: scf-02
+    prompt: Generate an agent template for incident commander.
+    expected_tool: scaffold
+    tags: [positive, scaffolding]
+    suggestion_if_misrouted: Add "generate an agent template" for scaffold.
+  - id: scf-03
+    prompt: Create a prompt asset skeleton for release notes.
+    expected_tool: scaffold
+    tags: [positive, scaffolding]
+    suggestion_if_misrouted: Mention "asset skeleton" synonym in scaffold.
+  - id: scf-04
+    prompt: Bootstrap a new instruction file for Java modernization.
+    expected_tool: scaffold
+    tags: [positive, scaffolding]
+    suggestion_if_misrouted: Add "bootstrap instruction file" trigger to scaffold.
+  - id: scf-05
+    prompt: Stub out a customization with proper frontmatter.
+    expected_tool: scaffold
+    tags: [positive, scaffolding]
+    suggestion_if_misrouted: Include "stub out customization" in scaffold examples.
+
+  - id: ag-01
+    prompt: Audit this skill for BaseCoat governance compliance.
+    expected_tool: audit-governance
+    tags: [positive, governance]
+    suggestion_if_misrouted: Add "governance compliance" trigger to audit-governance.
+  - id: ag-02
+    prompt: Check vocabulary and syntax policy violations in my PR.
+    expected_tool: audit-governance
+    tags: [positive, governance]
+    suggestion_if_misrouted: Mention "policy violations in PR" for audit-governance.
+  - id: ag-03
+    prompt: Run a governance audit on changed instruction files.
+    expected_tool: audit-governance
+    tags: [positive, governance]
+    suggestion_if_misrouted: Add "run governance audit" in audit-governance.
+  - id: ag-04
+    prompt: Evaluate if this asset breaks BaseCoat authoring standards.
+    expected_tool: audit-governance
+    tags: [positive, governance]
+    suggestion_if_misrouted: Include "authoring standards" phrase in audit-governance.
+  - id: ag-05
+    prompt: Validate conventions compliance for this new agent definition.
+    expected_tool: audit-governance
+    tags: [positive, governance]
+    suggestion_if_misrouted: Add "conventions compliance" examples to audit-governance.
+
+  - id: cc-01
+    prompt: Check eval coverage gaps across all skills.
+    expected_tool: check-coverage
+    tags: [positive, coverage]
+    suggestion_if_misrouted: Include "coverage gaps across skills" in check-coverage.
+  - id: cc-02
+    prompt: Which assets are missing eval companions?
+    expected_tool: check-coverage
+    tags: [positive, coverage]
+    suggestion_if_misrouted: Add "missing eval companions" trigger to check-coverage.
+  - id: cc-03
+    prompt: Find instructions with applyTo patterns that match nothing.
+    expected_tool: check-coverage
+    tags: [positive, coverage]
+    suggestion_if_misrouted: Mention applyTo mismatch checks in check-coverage.
+  - id: cc-04
+    prompt: Run the coverage report for eval and instruction completeness.
+    expected_tool: check-coverage
+    tags: [positive, coverage]
+    suggestion_if_misrouted: Include "coverage report" phrase for check-coverage.
+  - id: cc-05
+    prompt: Identify coverage blind spots in this customization set.
+    expected_tool: check-coverage
+    tags: [positive, coverage]
+    suggestion_if_misrouted: Add "coverage blind spots" examples to check-coverage.
+
+  - id: cpr-01
+    prompt: Create a PR for the scaffolded skill changes.
+    expected_tool: create-pr
+    tags: [positive, pr]
+    suggestion_if_misrouted: Include "create a PR for changes" in create-pr.
+  - id: cpr-02
+    prompt: Open a pull request from this branch with my summary.
+    expected_tool: create-pr
+    tags: [positive, pr]
+    suggestion_if_misrouted: Add "open a pull request" to create-pr triggers.
+  - id: cpr-03
+    prompt: Prepare and submit a PR for these generated assets.
+    expected_tool: create-pr
+    tags: [positive, pr]
+    suggestion_if_misrouted: Include "submit a PR" in create-pr description.
+  - id: cpr-04
+    prompt: Make a draft PR so reviewers can inspect this output.
+    expected_tool: create-pr
+    tags: [positive, pr]
+    suggestion_if_misrouted: Add "make a draft PR" phrase to create-pr.
+  - id: cpr-05
+    prompt: Publish a pull request with title and body from this work.
+    expected_tool: create-pr
+    tags: [positive, pr]
+    suggestion_if_misrouted: Include "publish pull request with title and body" trigger.
+
+  - id: neg-01
+    prompt: Explain what BaseCoat is and why we use it.
+    expected_tool: none
+    forbidden_tools: [validate, scaffold, create-pr]
+    tags: [negative, informational]
+    suggestion_if_misrouted: Clarify tool descriptions to avoid generic explanatory prompts.
+  - id: neg-02
+    prompt: Thanks, that answer helped a lot.
+    expected_tool: none
+    forbidden_tools: [search-assets, get-asset-details]
+    tags: [negative, conversational]
+    suggestion_if_misrouted: Avoid matching gratitude phrases in tool descriptions.
+  - id: neg-03
+    prompt: Write a haiku about software delivery.
+    expected_tool: none
+    forbidden_tools: [audit-governance, check-coverage]
+    tags: [negative, out-of-scope]
+    suggestion_if_misrouted: Add explicit out-of-scope exclusions for creative writing.
+  - id: neg-04
+    prompt: Translate this sentence to French: deployment completed successfully.
+    expected_tool: none
+    forbidden_tools: [get-latest-metrics, get-history]
+    tags: [negative, out-of-scope]
+    suggestion_if_misrouted: Exclude translation requests from tool triggers.
+  - id: neg-05
+    prompt: Summarize this meeting transcript in five bullets.
+    expected_tool: none
+    forbidden_tools: [search-assets, get-alerts]
+    tags: [negative, out-of-scope]
+    suggestion_if_misrouted: Keep summarization intents out of extension tool descriptions.
+  - id: neg-06
+    prompt: Should I refactor this function for readability?
+    expected_tool: none
+    forbidden_tools: [validate, audit-governance]
+    tags: [negative, ambiguous]
+    suggestion_if_misrouted: Distinguish coding advice from repository governance tools.
+  - id: neg-07
+    prompt: Tell me a joke about pull requests.
+    expected_tool: none
+    forbidden_tools: [create-pr]
+    tags: [negative, conversational]
+    suggestion_if_misrouted: Ensure create-pr requires explicit action intent.
+  - id: neg-08
+    prompt: Draft an email to stakeholders about project status.
+    expected_tool: none
+    forbidden_tools: [get-latest-metrics, get-history, get-alerts]
+    tags: [negative, out-of-scope]
+    suggestion_if_misrouted: Keep communications drafting out of telemetry tool triggers.
+  - id: neg-09
+    prompt: I need career advice for becoming a staff engineer.
+    expected_tool: none
+    forbidden_tools: [search-assets, scaffold]
+    tags: [negative, out-of-scope]
+    suggestion_if_misrouted: Add exclusion for personal coaching prompts.
+  - id: neg-10
+    prompt: Can you explain merge conflicts conceptually?
+    expected_tool: none
+    forbidden_tools: [create-pr, validate]
+    tags: [negative, informational]
+    suggestion_if_misrouted: Require repository action verbs to route to execution tools.
+  - id: neg-11
+    prompt: Should we use Scrum or Kanban for this team?
+    expected_tool: none
+    forbidden_tools: [check-coverage, audit-governance]
+    tags: [negative, out-of-scope]
+    suggestion_if_misrouted: Exclude agile coaching prompts from compliance tools.
+  - id: neg-12
+    prompt: Generate a random password with symbols.
+    expected_tool: none
+    forbidden_tools: [get-asset-details, search-assets]
+    tags: [negative, out-of-scope]
+    suggestion_if_misrouted: Add security utility exclusions to asset lookup tools.

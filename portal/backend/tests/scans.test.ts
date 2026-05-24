@@ -35,7 +35,7 @@ const mockRepo = {
 const mockScan = {
   id: 'scan-uuid-1',
   repositoryId: 'repo-uuid-1',
-  status: 'pending',
+  status: 'running',
   triggeredBy: null,
   startedAt: null,
   completedAt: null,
@@ -48,7 +48,7 @@ beforeEach(() => {
 });
 
 describe('POST /api/v1/repositories/:id/scans', () => {
-  it('creates a scan with status pending and returns 201', async () => {
+  it('creates a scan with status running and returns 201', async () => {
     (Repository.findByPk as jest.Mock).mockResolvedValue(mockRepo);
     (Scan.create as jest.Mock).mockResolvedValue(mockScan);
 
@@ -57,10 +57,10 @@ describe('POST /api/v1/repositories/:id/scans', () => {
       .set('Authorization', authHeader);
 
     expect(res.status).toBe(201);
-    expect(res.body.data.status).toBe('pending');
+    expect(res.body.data.status).toBe('running');
     expect(res.body.data.repositoryId).toBe('repo-uuid-1');
     expect(Scan.create).toHaveBeenCalledWith(
-      expect.objectContaining({ repositoryId: 'repo-uuid-1', status: 'pending' })
+      expect.objectContaining({ repositoryId: 'repo-uuid-1', status: 'running' })
     );
   });
 

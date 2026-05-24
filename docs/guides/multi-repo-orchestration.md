@@ -106,7 +106,8 @@ The hub's `HUB_DISPATCH_TOKEN` should be scoped as narrowly as possible:
 - Permissions: **Actions -> Read and write** only -- not `Contents`, `Secrets`,
   or `Administration`.
 
-Rotate PATs every 90 days. For zero-rotation credentials, use a GitHub App
+Rotate PATs every 30 days. Set PAT expiration to 30 days or less. For
+zero-rotation credentials, use a GitHub App
 with an installation token generated per run.
 
 ### Secrets Layout

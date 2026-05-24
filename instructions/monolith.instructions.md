@@ -1,6 +1,6 @@
 ---
 description: "Use when AI agents work on large monolith codebases with tightly coupled modules. Covers context scoping, dependency awareness, and safe decomposition strategies."
-applyTo: "**/*"
+applyTo: "src/**,lib/**,app/**,packages/**"
 ---
 
 # Monolith Decomposition Strategy

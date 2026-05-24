@@ -1,0 +1,20 @@
+name: "escalation-router-routing"
+description: "Routing evaluation — validates trigger activation for the escalation-router agent."
+skill: "agents/escalation-router.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "Route this high-risk decision to a human approver with structured approval data."
+    expect_activation: true
+  - id: "pos-2"
+    input: "I need a decision template and a PR-comment approval path for an irreversible release change."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Package the risk, approver, and recommendation before asking for human sign-off."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Write unit tests for the payment service."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Generate a blog post outline."
+    expect_activation: false
+

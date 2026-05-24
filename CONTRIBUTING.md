@@ -57,6 +57,14 @@ No direct commits to `main`. Ever.
 6. **At least one approval** required (human or designated AI reviewer).
 7. **Squash-merge** preferred to keep `main` history clean.
 
+### Batch PR Size Guideline
+
+- Prefer one issue per PR.
+- Batch only tightly related changes that can be reviewed together.
+- Keep batch PRs to **15 files or fewer** and **300 changed lines or fewer** (additions + deletions).
+- If you must exceed either limit, split the work or explain the mechanical reason in the PR description.
+- Large mechanical batches should include a validation summary and rollback note.
+
 **PR Title Format:**
 
 ```text
@@ -298,6 +306,18 @@ Auto-merge is not enabled. Merges require:
 3. No unresolved conversations
 
 This is intentional — catching a broken build post-merge is significantly more expensive than the few minutes it takes to confirm checks passed first.
+
+### Branch-Protection-Safe Automation Pattern
+
+Automation that modifies repository content must follow the same branch protection model as humans:
+
+1. Create or reset an automation branch (for example `automation/<name>`)
+2. Commit generated changes to that branch
+3. Push the automation branch
+4. Open or update a pull request targeting `main`
+5. Let required checks pass, then merge the PR
+
+Do not script `git push ... main` in routine automation workflows. If a special mirror/release workflow requires direct main updates, it must be explicitly documented, narrowly scoped, and reviewed by repo owners.
 
 ---
 

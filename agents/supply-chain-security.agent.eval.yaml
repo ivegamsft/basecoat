@@ -1,0 +1,19 @@
+name: "supply-chain-security-routing"
+description: "Routing evaluation — validates trigger activation for the supply-chain-security agent."
+skill: "agents/supply-chain-security.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with generate SBOM for a release build."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle sign artifacts with Sigstore and verify provenance?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the supply-chain-security agent for assess and improve SLSA compliance level."
+    expect_activation: true
+  - id: "neg-1"
+    input: "general dependency vulnerability scanning"
+    expect_activation: false
+  - id: "neg-2"
+    input: "runtime security monitoring"
+    expect_activation: false

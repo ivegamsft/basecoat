@@ -1,0 +1,19 @@
+name: "bom-validation-routing"
+description: "Routing evaluation — validates trigger activation for the bom-validation skill."
+skill: "skills/bom-validation/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Validate this Workcell BOM against the plant registry before we start S2."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Check the intake YAML for missing cells, bad CAF names, and circular dependencies."
+    expect_activation: true
+  - id: "pos-3"
+    input: "I need a BOM validation pass/fail check before the next station can begin."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Write a React component for the dashboard."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Draft a release note for the last patch."
+    expect_activation: false

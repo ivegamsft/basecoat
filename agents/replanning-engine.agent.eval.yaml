@@ -1,0 +1,19 @@
+name: "replanning-engine-routing"
+description: "Routing evaluation — validates trigger activation for the replanning-engine agent."
+skill: "agents/replanning-engine.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "The S2 assessment is 5x bigger than expected, so we need replanning."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Open a replanning issue because the complexity is far above the estimate."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Recommend retire versus rewrite versus replatform after the assessment drifted."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Create a database migration."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Update the README table of contents."
+    expect_activation: false

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       experiment:
-        description: Experiment folder name under experiments/
+        description: Experiment folder name under tests/experiments/
         required: false
         default: code-review-improvement
   schedule:
@@ -18,13 +18,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Run experiment
         shell: pwsh
         run: |
-          $experiment = "${{ github.event.inputs.experiment }}"
-          if ([string]::IsNullOrWhiteSpace($experiment)) { $experiment = "code-review-improvement" }
+          $experiment = "${{ github.event_name == 'workflow_dispatch' && inputs.experiment || 'code-review-improvement' }}"
           pwsh scripts/run-experiment.ps1 -Experiment $experiment -OutputDir test-results
 
       - name: Upload report artifacts

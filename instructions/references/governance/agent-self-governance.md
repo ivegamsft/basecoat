@@ -12,6 +12,11 @@ Stop and ask when:
 - You are about to make an irreversible change (delete files, rewrite history, bulk rename)
 - You are unsure whether a change belongs in this PR or a separate issue
 - The change affects more than one system boundary
+- A sub-agent task crosses redispatch or escalation thresholds defined in the canonical policy
+
+Canonical policy reference:
+
+- `docs/agents/MULTI_AGENT_WORKFLOWS.md#sub-agent-redispatch-retry-and-escalation-policy`
 
 **Default to asking when in doubt.**
 

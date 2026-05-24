@@ -89,6 +89,24 @@ task(agent_type: "general-purpose", model: "claude-haiku-4.5",
 Dispatch all independent agents in **one turn** to avoid paying orchestration overhead
 for each launch.
 
+### Pattern 1A: `/fleet` sprint burndown for independent issues
+
+Use `/fleet` when sprint items are independent and can be delivered in parallel.
+Keep each work item scoped to a single issue, then reconcile conflicts in the main
+conversation before opening or updating the PR.
+
+```text
+/fleet
+Goal: Burn down sprint issues #1027, #1028, #1029, #1030 in one branch.
+Agent 1: issue #1027 (/fleet usage docs)
+Agent 2: issue #1028 (/every CI polling docs)
+Agent 3: issue #1029 (/delegate mechanical PR docs)
+Agent 4: issue #1030 (@-mention + /plan docs)
+```
+
+Use this pattern only when tasks do not depend on each other and can be validated
+independently.
+
 ### Pattern 2: Phase-gated sprint
 
 ```text
@@ -104,6 +122,46 @@ Phase 3 → dispatch Cloud Agent via /approve for final PR merge
 2. Push branch
 3. Post /approve on tracking issue → Cloud Agent opens or updates PR
 ```
+
+## Prompt and Command Guidance for Fast Routing
+
+### `@`-mention files to preload context
+
+When asking for debugging or workflow help, mention the exact files up front. This
+reduces exploration turns and improves first-pass accuracy.
+
+```text
+Debug workflow failures in @.github/workflows/issue-approve.yml
+and @scripts/validate-basecoat.ps1. Focus on failed status checks only.
+```
+
+### `/plan` gate for multi-issue sprints
+
+For broad requests (for example, "burn down these 4 issues"), run `/plan` first to
+produce a scoped, approvable execution plan before dispatching agents or editing files.
+
+```text
+/plan implement issues #1027, #1028, #1029, #1030 in one docs PR
+```
+
+### `/every` polling for CI monitoring
+
+Use `/every` to automate workflow status checks instead of manual "did CI finish?"
+prompts. Keep polling intervals at 2 minutes or higher to reduce API churn.
+
+```text
+/every 2m check whether adoption-metrics workflow succeeded on this branch
+```
+
+### `/delegate` for mechanical PR creation
+
+Use `/delegate` when work is straightforward and primarily mechanical (for example,
+doc regeneration, low-risk single-file updates, or scripted updates requiring routine
+branch/commit/push/PR steps).
+
+Prefer local workflow when live debugging or iterative design decisions are required.
+Prefer `/delegate` when the value is in automation and avoiding multi-account
+auth-switching during PR creation.
 
 ## Anti-Patterns
 

@@ -1,0 +1,19 @@
+name: "daily-standup-facilitator-routing"
+description: "Routing evaluation — validates trigger activation for the daily-standup-facilitator agent."
+skill: "agents/daily-standup-facilitator.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with running daily standup ceremonies to surface blockers, dependencies, and near-term execution risk. USE FOR: extract actionable updates, identify blockers needing escalation, map dependencies across team members, and produce a day plan with owners. DO NOT USE FOR: writing feature code, replacing sprint planning, or long-term roadmap analysis."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle running daily standup ceremonies to surface blockers, dependencies, and near-term execution risk. USE FOR: extract actionable updates, identify blockers needing escalation, map dependencies across team members, and produce a day plan with owners. DO NOT USE FOR: writing feature code, replacing sprint planning, or long-term roadmap analysis?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the daily-standup-facilitator agent for running daily standup ceremonies to surface blockers, dependencies, and near-term execution risk. USE FOR: extract actionable updates, identify blockers needing escalation, map dependencies across team members, and produce a day plan with owners. DO NOT USE FOR: writing feature code, replacing sprint planning, or long-term roadmap analysis."
+    expect_activation: true
+  - id: "neg-1"
+    input: "writing feature code"
+    expect_activation: false
+  - id: "neg-2"
+    input: "replacing sprint planning"
+    expect_activation: false

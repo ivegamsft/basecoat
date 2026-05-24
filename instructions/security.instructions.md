@@ -26,6 +26,14 @@ Use this instruction for any change that touches trust boundaries, data handling
 - Only non-secret identifiers (`AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`) may be stored as GitHub Secrets.
 - See [`docs/guardrails/oidc-federation.md`](../docs/guardrails/oidc-federation.md) for the full bootstrap pattern and rationale.
 
+## VS Code Agent Mode Tool Confirmation
+
+- In VS Code agent mode, tools with side effects must require explicit user confirmation before execution.
+- Treat all mutating tool actions as confirm-required by default; allow unconfirmed execution only for strictly read-only tools.
+- Require confirmation re-prompting when action targets or arguments materially change after an initial approval.
+- Rejecting confirmation must cancel execution with no silent fallback path.
+- Follow the full policy and risk-tier definitions in [`docs/reference/guardrails/tool-confirmation-policy.md`](../docs/reference/guardrails/tool-confirmation-policy.md).
+
 ## Review Lens
 
 - What are the trust boundaries in this change?

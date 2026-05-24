@@ -7,7 +7,7 @@ contribute learnings to basecoat memory from their own organization's repos.
 
 External contributors need to:
 
-1. Create a personal access token (PAT) with write access to `basecoat-memory`
+1. Create a personal access token (PAT) with write access to `basecoat-memory` and expiration set to 30 days or less
 2. Store it as a secret in their org or repo
 3. Enlist their repo with the `basecoat-enabled` topic
 4. Choose a contribution path
@@ -28,7 +28,7 @@ External contributors need to:
    - Contents: **Read and Write**
    - Pull requests: **Read and Write**
    - Metadata: Read (implicit)
-5. Set an expiry date (recommended: 1 year) and note the renewal date
+5. Set PAT expiry to **30 days or less** and note the renewal date
 6. Click **Generate token** — copy it immediately
 
 ## Step 2 — Store the Secret
@@ -149,7 +149,7 @@ No PAT, no CLI, no secret required.
 
 | Task | When |
 |---|---|
-| Rotate PAT | Annually (or before expiry) |
+| Rotate PAT | Every 30 days (or before expiry) |
 | Update org/repo secret | After rotation |
 | Check enlistment | If sweep candidates stop appearing |
 

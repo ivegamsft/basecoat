@@ -1,0 +1,20 @@
+name: "escalation-routing"
+description: "Routing evaluation — validates trigger activation for the escalation-routing skill."
+skill: "skills/escalation-routing/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Route this high-risk decision to a human approver and capture a structured approval packet."
+    expect_activation: true
+  - id: "pos-2"
+    input: "I need a PR-comment approval path for an irreversible release decision."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Package the risk, recommendation, and approver into a decision template before merge."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Write unit tests for the payment service."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Generate a marketing slogan for the new feature."
+    expect_activation: false
+

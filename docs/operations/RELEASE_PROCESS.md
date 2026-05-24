@@ -120,6 +120,11 @@ Add a new section immediately after the preamble, above existing entries. Follow
 - Preserve all existing content below the new section unchanged
 - If a single-line-per-PR style is already in use (as in prior releases), maintain that style for consistency
 
+When a changelog section is unavailable for the target version, the release workflow
+falls back to grouped merged-PR notes. Those notes are organized by PR type/category
+(`Added`, `Changed`, `Fixed`, `Removed`, plus supporting groups like `Documentation`,
+`Testing`, `CI`, and `Maintenance`) before committing to a commit-history fallback.
+
 ### 4. Commit the Version Bump
 
 ```bash
@@ -167,9 +172,10 @@ Pushing a `v*.*.*` tag triggers the `release.yml` and `package-basecoat.yml` wor
 
 1. Build a source archive (`basecoat-vX.Y.Z.zip`)
 2. Extract release notes from `CHANGELOG.md` (prefers `## X.Y.Z`, then falls back to `## Unreleased`)
-3. Create a GitHub release with the archive and notes
+3. If no changelog section exists, generate grouped release notes from merged PRs since the last tag
+4. Create a GitHub release with the archive and notes
 
-If neither changelog section is available, the workflow auto-generates release notes from commit history as a final fallback.
+If neither changelog section nor merged PR list is available, the workflow auto-generates release notes from commit history as a final fallback.
 
 If you need to create the release manually (e.g., workflows are disabled):
 

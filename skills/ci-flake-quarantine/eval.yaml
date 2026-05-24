@@ -1,0 +1,16 @@
+name: "ci-flake-quarantine-routing"
+description: "Routing evaluation — validates trigger activation for ci-flake-quarantine."
+skill: "skills/ci-flake-quarantine/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Quarantine a flaky integration test that fails intermittently in CI."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Set an expiry policy for a test flake and track the owner."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Write the next feature for our checkout flow."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Perform a release go/no-go review for production."
+    expect_activation: false

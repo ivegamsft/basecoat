@@ -1,0 +1,19 @@
+name: "infrastructure-deploy-routing"
+description: "Routing evaluation — validates trigger activation for the infrastructure-deploy agent."
+skill: "agents/infrastructure-deploy.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with deploy Azure Bicep templates."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle manage resource group lifecycle?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the infrastructure-deploy agent for execute infrastructure rollback."
+    expect_activation: true
+  - id: "neg-1"
+    input: "application code deployments"
+    expect_activation: false
+  - id: "neg-2"
+    input: "cost analysis and optimization"
+    expect_activation: false

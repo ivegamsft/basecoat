@@ -1,0 +1,16 @@
+name: "merge-conflict-mediator-routing"
+description: "Routing evaluation — validates trigger activation for merge-conflict-mediator."
+skill: "skills/merge-conflict-mediator/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Create a deterministic merge playbook for a README and YAML conflict."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Resolve manifest conflicts without dropping dependency updates."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Implement a new auth middleware for the API."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Design a dashboard for release metrics."
+    expect_activation: false

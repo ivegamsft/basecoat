@@ -1,0 +1,194 @@
+name: Extension Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "mcp/basecoat-extension/**"
+      - "infra/extension/**"
+      - ".github/workflows/extension-deploy.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "mcp/basecoat-extension/**"
+      - "infra/extension/**"
+      - ".github/workflows/extension-deploy.yml"
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Image tag to deploy (default: git SHA)"
+        required: false
+        type: string
+      environment:
+        description: "Target environment"
+        required: false
+        default: "prod"
+        type: choice
+        options: ["prod", "staging", "dev"]
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/basecoat-extension
+
+jobs:
+  build-push:
+    name: Build and push extension image
+    runs-on: ${{ vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork }}
+    outputs:
+      image_tag: ${{ steps.meta.outputs.version }}
+      image_ref: ${{ env.REGISTRY }}/${{ steps.owner.outputs.lc }}/basecoat-extension:${{ steps.meta.outputs.version }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Lowercase owner
+        id: owner
+        run: echo "lc=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Extract image metadata
+        id: meta
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v6.0.0
+        with:
+          images: ${{ env.REGISTRY }}/${{ steps.owner.outputs.lc }}/basecoat-extension
+          tags: |
+            type=sha,prefix=sha-,format=short
+            type=raw,value=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.image_tag || '' }},enable=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.image_tag != '' }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v3
+
+      - name: Build and push
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v6
+        with:
+          context: mcp/basecoat-extension
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy extension to Azure Container Apps
+    runs-on: ${{ vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    needs: build-push
+    if: ${{ github.event_name != 'pull_request' }}
+    environment: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'prod' }}
+    env:
+      TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'prod' }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+
+      - name: Azure login
+        uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Lowercase owner
+        id: owner
+        run: echo "lc=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify GHCR image pull auth
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login "${{ env.REGISTRY }}" -u "${{ github.actor }}" --password-stdin
+          docker pull "${{ needs.build-push.outputs.image_ref }}"
+
+      - name: Staging what-if validation
+        if: ${{ env.TARGET_ENV == 'staging' }}
+        run: |
+          az deployment group what-if \
+            --resource-group "${{ secrets.EXTENSION_RESOURCE_GROUP }}" \
+            --template-file infra/extension/main.bicep \
+            --name "extension-staging-whatif-${{ github.run_id }}-${{ github.run_attempt }}" \
+            --parameters \
+              imageTag="${{ needs.build-push.outputs.image_tag }}" \
+              imageRepo="${{ steps.owner.outputs.lc }}/basecoat-extension" \
+              environment="${{ env.TARGET_ENV }}" \
+              registryUsername="${{ github.actor }}" \
+              registryPassword="${{ secrets.GITHUB_TOKEN }}" \
+            --result-format ResourceIdOnly \
+            --no-pretty-print
+
+      - name: Deploy / update Bicep infrastructure
+        uses: azure/arm-deploy@a1361c2c2cd398621955b16ca32e01c65ea340f5 # v2
+        id: infra
+        with:
+          resourceGroupName: ${{ secrets.EXTENSION_RESOURCE_GROUP }}
+          template: infra/extension/main.bicep
+          parameters: >
+            imageTag=${{ needs.build-push.outputs.image_tag }}
+            imageRepo=${{ steps.owner.outputs.lc }}/basecoat-extension
+            environment=${{ env.TARGET_ENV }}
+            registryUsername=${{ github.actor }}
+            registryPassword=${{ secrets.GITHUB_TOKEN }}
+          deploymentName: extension-${{ github.run_number }}
+
+      - name: Verify Container App readiness
+        run: |
+          if [[ "${{ env.TARGET_ENV }}" == "prod" ]]; then
+            APP_NAME="bcext-app"
+          else
+            APP_NAME="bcext-app-${{ env.TARGET_ENV }}"
+          fi
+
+          RUNNING_STATUS=$(az containerapp show \
+            --resource-group "${{ secrets.EXTENSION_RESOURCE_GROUP }}" \
+            --name "${APP_NAME}" \
+            --query "properties.runningStatus" -o tsv)
+          LATEST_READY_REVISION=$(az containerapp show \
+            --resource-group "${{ secrets.EXTENSION_RESOURCE_GROUP }}" \
+            --name "${APP_NAME}" \
+            --query "properties.latestReadyRevisionName" -o tsv)
+
+          echo "Container App: ${APP_NAME}"
+          echo "Running status: ${RUNNING_STATUS}"
+          echo "Latest ready revision: ${LATEST_READY_REVISION}"
+
+          if [[ "${RUNNING_STATUS}" != "Running" ]]; then
+            echo "::error::Container App is not running (status: ${RUNNING_STATUS})"
+            exit 1
+          fi
+
+          if [[ -z "${LATEST_READY_REVISION}" || "${LATEST_READY_REVISION}" == "null" ]]; then
+            echo "::error::No ready revision detected for ${APP_NAME}"
+            exit 1
+          fi
+
+      - name: Smoke test — health endpoint
+        run: |
+          FQDN="${{ steps.infra.outputs.fqdn }}"
+          URL="https://${FQDN}/health"
+          echo "Smoke testing: ${URL}"
+
+          for i in 1 2 3 4 5; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}" || echo "000")
+            echo "  Attempt ${i}: HTTP ${STATUS}"
+            if [[ "${STATUS}" == "200" ]]; then
+              echo "Health check passed"
+              exit 0
+            fi
+            sleep 10
+          done
+
+          echo "::error::Health check failed after 5 attempts (last status: ${STATUS})"
+          exit 1

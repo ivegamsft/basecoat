@@ -1,0 +1,71 @@
+name: Fork Issue Import
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_repo:
+        description: "Source fork repository (owner/repo)"
+        required: false
+        default: "ivegamsft/basecoat"
+        type: string
+      source_state:
+        description: "Source issue state to import"
+        required: false
+        default: "open"
+        type: choice
+        options:
+          - open
+          - closed
+          - all
+      max_items:
+        description: "Maximum source issues to scan"
+        required: false
+        default: "100"
+        type: string
+      dry_run:
+        description: "Dry run (no issue creation)"
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  import:
+    name: Import fork issues
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+
+      - name: Import issues from fork
+        id: import
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pwsh scripts/import-fork-issues.ps1 `
+            -SourceRepo "${{ inputs.source_repo }}" `
+            -SourceState "${{ inputs.source_state }}" `
+            -MaxItems "${{ inputs.max_items }}" `
+            $(if ("${{ inputs.dry_run }}" -eq "true") { "-DryRun" } else { "" })
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Fork Import Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Metric | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Scanned | ${{ steps.import.outputs.scanned }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Created | ${{ steps.import.outputs.created }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Skipped | ${{ steps.import.outputs.skipped }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Skipped (source URL match) | ${{ steps.import.outputs.skipped_source_url_match }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Skipped (normalized title match) | ${{ steps.import.outputs.skipped_title_match }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Source repo | \`${{ inputs.source_repo }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Source state | \`${{ inputs.source_state }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Dry run | \`${{ inputs.dry_run }}\` |" >> "$GITHUB_STEP_SUMMARY"

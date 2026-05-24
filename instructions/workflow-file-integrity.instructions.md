@@ -1,6 +1,6 @@
 ---
 description: Guard against silent GitHub Actions workflow file corruption and enforce checksum validation when programmatically modifying workflow YAML.
-applyTo: .github/workflows/**
+applyTo: ".github/workflows/**/*.{yml,yaml},scripts/**/*.{ps1,sh,py}"
 ---
 
 # Workflow File Integrity Rules

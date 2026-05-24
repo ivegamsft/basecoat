@@ -1,0 +1,19 @@
+name: "broken-build-troubleshooter-routing"
+description: "Routing evaluation — validates trigger activation for the broken-build-troubleshooter agent."
+skill: "agents/broken-build-troubleshooter.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with CI or local builds are failing and the team needs fast, repeatable triage to isolate root cause and restore green status. USE FOR: classify failure signatures, pinpoint failing stage/test/toolchain segment, propose minimal safe remediation, and generate a fix validation checklist. DO NOT USE FOR: feature implementation, long-form architecture documents, or security incident response ownership."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle CI or local builds are failing and the team needs fast, repeatable triage to isolate root cause and restore green status. USE FOR: classify failure signatures, pinpoint failing stage/test/toolchain segment, propose minimal safe remediation, and generate a fix validation checklist. DO NOT USE FOR: feature implementation, long-form architecture documents, or security incident response ownership?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the broken-build-troubleshooter agent for CI or local builds are failing and the team needs fast, repeatable triage to isolate root cause and restore green status. USE FOR: classify failure signatures, pinpoint failing stage/test/toolchain segment, propose minimal safe remediation, and generate a fix validation checklist. DO NOT USE FOR: feature implementation, long-form architecture documents, or security incident response ownership."
+    expect_activation: true
+  - id: "neg-1"
+    input: "feature implementation"
+    expect_activation: false
+  - id: "neg-2"
+    input: "long-form architecture documents"
+    expect_activation: false

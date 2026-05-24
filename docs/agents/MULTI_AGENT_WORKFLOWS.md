@@ -264,6 +264,185 @@ done
 - Sequential workflows such as build → test → deploy
 - Tasks that require shared context accumulation in one place
 
+### Canonical Sub-Agent Harness Contract
+
+Use this contract as the single source of truth when dispatching and collecting
+sub-agent work in multi-agent workflows.
+
+#### Required task envelope (orchestrator → sub-agent)
+
+| Field | Type | Required | Purpose |
+|---|---|---|---|
+| `task_id` | string | Yes | Stable identifier used for retries and traceability |
+| `goal` | string | Yes | Outcome the sub-agent must achieve |
+| `scope` | object | Yes | Bounded file paths and explicit out-of-scope constraints |
+| `acceptance_criteria` | string[] | Yes | Testable checks used in Stage 1 spec compliance |
+| `execution` | object | Yes | Allowed tools, skills, model, and operational limits |
+| `output_contract` | object | Yes | Required response shape and evidence expectations |
+| `inputs` | object | No | Optional context artifacts (issue links, prior findings, diffs) |
+| `retry_context` | object | No | Prior failure reasons and focused re-dispatch guidance |
+
+`execution` must include `allowed_files`, `allowed_tools`, `allowed_skills`, and
+`model`.
+
+When present, `retry_context` should include `attempt`, `failure_class`,
+`last_feedback`, and `backoff_until` so redispatch behavior is deterministic.
+
+#### Required response envelope (sub-agent → orchestrator)
+
+| Field | Type | Required | Purpose |
+|---|---|---|---|
+| `task_id` | string | Yes | Correlates response to dispatched task |
+| `status` | string | Yes | One of `completed`, `blocked`, `partial`, `failed` |
+| `summary` | string | Yes | Brief outcome summary |
+| `changed_files` | string[] | Yes | Files modified (empty array if none) |
+| `acceptance_results` | object[] | Yes | Per-criterion pass/fail evidence |
+| `evidence` | object | Yes | Commands, test outputs, and references supporting claims |
+| `blockers` | string[] | Conditionally | Required when `status` is `blocked` or `failed` |
+| `follow_ups` | string[] | No | Suggested next actions or tickets |
+
+#### Concrete packet example
+
+```json
+{
+  "task_envelope": {
+    "task_id": "issue-1058-doc-contract",
+    "goal": "Document canonical sub-agent harness contract in multi-agent workflows.",
+    "scope": {
+      "allowed_files": [
+        "docs/agents/MULTI_AGENT_WORKFLOWS.md",
+        "docs/agents/AGENT_RUNTIME_ENFORCEMENT.md",
+        "docs/agents/agent-handoffs.md",
+        "instructions/subagent-review.instructions.md"
+      ],
+      "out_of_scope": [
+        "agent behavior changes",
+        "workflow automation changes"
+      ]
+    },
+    "acceptance_criteria": [
+      "Canonical contract section added with task and response envelopes.",
+      "AGENT_RUNTIME_ENFORCEMENT.md links to canonical contract.",
+      "agent-handoffs.md links to canonical contract and clarifies handoff vs contract.",
+      "subagent-review.instructions.md references canonical contract."
+    ],
+    "execution": {
+      "allowed_files": [
+        "docs/agents/**",
+        "instructions/subagent-review.instructions.md"
+      ],
+      "allowed_tools": ["view", "rg", "apply_patch"],
+      "allowed_skills": [],
+      "model": "claude-sonnet-4.6"
+    },
+    "output_contract": {
+      "format": "response_envelope_v1",
+      "include_evidence": true
+    }
+  },
+  "response_envelope": {
+    "task_id": "issue-1058-doc-contract",
+    "status": "completed",
+    "summary": "Canonical contract documented and linked from required docs.",
+    "changed_files": [
+      "docs/agents/MULTI_AGENT_WORKFLOWS.md",
+      "docs/agents/AGENT_RUNTIME_ENFORCEMENT.md",
+      "docs/agents/agent-handoffs.md",
+      "instructions/subagent-review.instructions.md"
+    ],
+    "acceptance_results": [
+      {
+        "criterion": "Canonical contract section added with task and response envelopes.",
+        "result": "pass",
+        "evidence": "See section: Canonical Sub-Agent Harness Contract"
+      }
+    ],
+    "evidence": {
+      "commands": ["pwsh scripts/validate-basecoat.ps1"],
+      "artifacts": []
+    },
+    "blockers": [],
+    "follow_ups": []
+  }
+}
+```
+
+#### Handoff UI vs. harness contract
+
+- **Handoff UI (`handoffs`)** defines user-facing transitions between agents.
+- **Harness contract** defines machine-readable dispatch/response packets used by
+  orchestrators and review gates.
+- A handoff can launch a sub-agent task, but it does not replace the required task
+  and response envelopes above.
+
+### Sub-Agent Redispatch, Retry, and Escalation Policy
+
+Use this table as the canonical orchestration policy for sub-agent runs.
+
+| Condition | Re-dispatch action | Retry/backoff | Escalation threshold | Terminal state |
+|---|---|---|---|---|
+| Stage 1 spec-compliance failure | Re-dispatch with unmet criteria and explicit expected deltas | Immediate retry on first miss; second miss requires at least 5-minute cool-down and tightened scope | 2 Stage 1 misses for same `task_id` | `escalated` (human review or task re-plan) |
+| Stage 2 quality failure after Stage 1 pass | Re-dispatch with line-level quality fixes only | One retry only; no additional retries beyond second quality review | 1 Stage 2 retry consumed with unresolved quality gaps | `accepted_with_followup` (merge best version + file follow-up issue) |
+| Transient tool/runtime failure (timeouts, rate limits, ephemeral network faults) | Re-dispatch unchanged goal with infra diagnostics attached | Exponential backoff: 2m, 5m, 15m (max 3 retries) | 3 transient retries exhausted | `escalated` (operator intervention required) |
+| No-progress rerun (>= 80% identical output or repeated unmet criteria) | Re-dispatch only if feedback packet materially changes constraints | Minimum 10-minute backoff; require updated acceptance criteria or narrowed scope | 2 no-progress reruns | `escalated` (plan defect or wrong agent routing) |
+| Budget/context exhaustion (token, tool, or turn budget reached) | Re-dispatch with reduced scope and explicit budget limits | One retry after decomposition; split task before retrying | Retry still exceeds budget | `replanned` (decompose into smaller tasks) |
+| Hard blocker (missing dependency, required secret, policy restriction) | Do not re-dispatch blindly; return blocker with owner/action needed | No automatic retry | Immediate | `blocked` |
+
+Policy notes:
+
+- Re-dispatch feedback must never be "try again". It must include failed criteria,
+  expected artifact/file deltas, and any new constraints.
+- Every re-dispatch must increment `retry_context.attempt` and preserve failure
+  history for auditability.
+- If escalation triggers, halt auto-redispatch loops for the `task_id`.
+
+### Orchestrator Lifecycle: Dispatch, Fan-In, and Conflict Resolution
+
+Use this lifecycle when an orchestrator runs fan-out work and must converge to one
+final answer.
+
+#### Sequence
+
+1. **Plan and scope** — decompose request, define task envelopes, and set budgets.
+2. **Dispatch (fan-out)** — start all independent subtasks in parallel.
+3. **Collect branch results** — normalize each response envelope and validate
+   required fields.
+4. **Fan-in synthesis** — merge non-conflicting branches into one draft result.
+5. **Conflict resolution pass** — apply decision points below for contradictory
+   claims, file edits, or policy outcomes.
+6. **Finalize and report** — publish one coherent response with explicit branch
+   statuses and unresolved risks.
+
+#### Lifecycle states
+
+| State | Entry condition | Exit condition |
+|---|---|---|
+| `planned` | Task decomposition and envelopes are complete | At least one subtask dispatched |
+| `dispatching` | Dispatch loop is active | All runnable branches dispatched or marked blocked |
+| `running` | One or more branches are executing | All branches return terminal status |
+| `fan_in_ready` | All terminal branch results collected | Aggregation begins |
+| `aggregating` | Result merge and dedupe in progress | No conflicts remain, or conflicts identified |
+| `conflict_review` | Contradictions detected during aggregation | Tie-break decision applied or unresolved risk recorded |
+| `finalized` | Output assembled with evidence and status table | Response delivered |
+
+#### Conflict-resolution decision points
+
+| Decision point | Check | Action |
+|---|---|---|
+| `CR-1` contract validity | Missing required fields or acceptance evidence in a branch result | Mark branch `partial` or `blocked`, request targeted retry with `retry_context` |
+| `CR-2` evidence strength | Contradictory conclusions with different evidence quality | Prefer reproducible test/log/repo evidence over unsupported narrative claims |
+| `CR-3` policy gate | Any side-effecting recommendation conflicts with policy | Apply [VS Code Agent Mode Tool Confirmation Policy](../reference/guardrails/tool-confirmation-policy.md) and require confirmation path |
+| `CR-4` unresolved tie | Evidence remains mixed after one tie-break pass | Surface both interpretations, mark residual risk, and recommend next verification step |
+
+#### Related harness and policy docs
+
+- [Agent Testing Harness](./AGENT_TESTING_HARNESS.md) — run/turn/round semantics,
+  stop conditions, and cancellation behavior for dispatch loops.
+- [VS Code Agent Mode Tool Confirmation Policy](../reference/guardrails/tool-confirmation-policy.md)
+  — confirmation requirements for side-effecting operations.
+- [Agent Runtime Enforcement](./AGENT_RUNTIME_ENFORCEMENT.md) — enforcement
+  expectations that constrain orchestrator and sub-agent execution.
+
 ### Patterns
 
 #### Fan-Out / Fan-In

@@ -1,0 +1,28 @@
+{
+  "suite": "vscode-harness-benchmark-v1",
+  "metrics": {
+    "resolution_rate": 0.96,
+    "prompt_tokens_avg": 1550,
+    "completion_tokens_avg": 820,
+    "p95_latency_ms": 8200,
+    "tool_calls_per_resolved_run": 3.4
+  },
+  "categories": {
+    "multi_turn_tool_use": {
+      "resolution_rate": 0.95,
+      "p95_latency_ms": 9000
+    },
+    "mcp_external_tools": {
+      "resolution_rate": 0.97,
+      "p95_latency_ms": 7800
+    },
+    "terminal_browser_interactions": {
+      "resolution_rate": 0.96,
+      "p95_latency_ms": 8400
+    },
+    "loop_and_stop_conditions": {
+      "resolution_rate": 0.98,
+      "p95_latency_ms": 6200
+    }
+  }
+}

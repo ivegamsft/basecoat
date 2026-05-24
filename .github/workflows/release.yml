@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Build repository zip artifact
         id: package
@@ -34,7 +34,7 @@ jobs:
 
           echo "artifact_name=${artifact_name}" >> "${GITHUB_OUTPUT}"
 
-      - name: Extract changelog notes for tag version
+      - name: Extract release notes for tag version
         id: notes
         shell: bash
         run: |
@@ -43,114 +43,7 @@ jobs:
           tag="${GITHUB_REF_NAME}"
           version="${tag#v}"
           notes_file="release-notes.md"
-          section_file="release-section.md"
-
-          has_section_body() {
-            awk '
-              NR == 1 { next }
-              /^[[:space:]]*$/ { next }
-              { found = 1; exit 0 }
-              END { exit found ? 0 : 1 }
-            ' "$1"
-          }
-
-          extract_version_section() {
-            awk -v tag="${tag}" -v version="${version}" '
-              function trim(s) { sub(/^[ \t]+/, "", s); sub(/[ \t]+$/, "", s); return s }
-              BEGIN { capture = 0; found = 0 }
-              {
-                if ($0 ~ /^##[[:space:]]+/) {
-                  heading = $0
-                  normalized = heading
-                  sub(/^##[[:space:]]+/, "", normalized)
-                  gsub(/\[/, "", normalized)
-                  gsub(/\]/, "", normalized)
-                  split(normalized, parts, " - ")
-                  heading_version = trim(parts[1])
-
-                  if (capture == 1) {
-                    exit 0
-                  }
-
-                  if (heading_version == tag || heading_version == version) {
-                    capture = 1
-                    found = 1
-                    print $0
-                    next
-                  }
-                }
-
-                if (capture == 1) {
-                  print $0
-                }
-              }
-              END { if (found == 0) exit 2 }
-            ' CHANGELOG.md > "${section_file}"
-          }
-
-          extract_unreleased_section() {
-            awk '
-              BEGIN { capture = 0; found = 0 }
-              {
-                if ($0 ~ /^##[[:space:]]+/) {
-                  heading = $0
-                  sub(/^##[[:space:]]+/, "", heading)
-
-                  if (capture == 1) {
-                    exit 0
-                  }
-
-                  if (heading == "Unreleased") {
-                    capture = 1
-                    found = 1
-                    print $0
-                    next
-                  }
-                }
-
-                if (capture == 1) {
-                  print $0
-                }
-              }
-              END { if (found == 0) exit 2 }
-            ' CHANGELOG.md > "${section_file}"
-          }
-
-          write_git_history_notes() {
-            previous_tag="$(git tag --list 'v*.*.*' --sort=-v:refname | grep -Fxv "${tag}" | head -n 1 || true)"
-            range="${GITHUB_SHA}"
-            from_label="initial commit"
-
-            if [[ -n "${previous_tag}" ]]; then
-              range="${previous_tag}..${GITHUB_SHA}"
-              from_label="${previous_tag}"
-            fi
-
-            {
-              printf '## %s\n\n' "${version}"
-              printf '_Auto-generated from commit history since %s._\n\n' "${from_label}"
-              printf '### Changes\n\n'
-              git log --no-merges --pretty='- %s (%h)' "${range}" || true
-            } > "${notes_file}"
-
-            if ! grep -q '^-' "${notes_file}"; then
-              printf -- '- No commits found in selected range.\n' >> "${notes_file}"
-            fi
-          }
-
-          if [[ -f CHANGELOG.md ]] && extract_version_section && has_section_body "${section_file}"; then
-            cp "${section_file}" "${notes_file}"
-          elif [[ -f CHANGELOG.md ]] && extract_unreleased_section && has_section_body "${section_file}"; then
-            {
-              printf '## %s\n\n' "${version}"
-              printf '_Derived from `## Unreleased` in CHANGELOG.md because a `%s` section was not found._\n\n' "${version}"
-              tail -n +2 "${section_file}"
-            } > "${notes_file}"
-          else
-            write_git_history_notes
-          fi
-
-          rm -f "${section_file}"
+          scripts/generate-release-notes.sh "${tag}" "${version}" "${notes_file}"
 
           echo "notes_file=${notes_file}" >> "${GITHUB_OUTPUT}"
 

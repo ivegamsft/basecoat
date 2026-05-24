@@ -1,0 +1,19 @@
+name: "sprint-closeout-auditor-routing"
+description: "Routing evaluation — validates trigger activation for the sprint-closeout-auditor agent."
+skill: "agents/sprint-closeout-auditor.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "I need help with closing a sprint and validating completion evidence before planning the next sprint. USE FOR: verify merged PR coverage, confirm CI health, identify unresolved errors and open issues, check test evidence, and produce carry-forward actions with owners. DO NOT USE FOR: writing feature code, replacing incident postmortems, or long-term roadmap prioritization."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Can you handle closing a sprint and validating completion evidence before planning the next sprint. USE FOR: verify merged PR coverage, confirm CI health, identify unresolved errors and open issues, check test evidence, and produce carry-forward actions with owners. DO NOT USE FOR: writing feature code, replacing incident postmortems, or long-term roadmap prioritization?"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Please use the sprint-closeout-auditor agent for closing a sprint and validating completion evidence before planning the next sprint. USE FOR: verify merged PR coverage, confirm CI health, identify unresolved errors and open issues, check test evidence, and produce carry-forward actions with owners. DO NOT USE FOR: writing feature code, replacing incident postmortems, or long-term roadmap prioritization."
+    expect_activation: true
+  - id: "neg-1"
+    input: "writing feature code"
+    expect_activation: false
+  - id: "neg-2"
+    input: "replacing incident postmortems"
+    expect_activation: false

@@ -38,6 +38,27 @@ by `/orgs/{org}/copilot/metrics/reports/organization-28-day/latest`. See
 
 ---
 
+### #1073: Register GitHub App for BaseCoat Copilot Extension
+
+**Status:** BLOCKED (External org-admin prerequisite)
+
+**Description:** The GitHub App required for the BaseCoat Copilot Extension cannot be fully registered from repository-only changes.
+
+**Why It's Blocked:**
+- GitHub App creation and org installation require organization owner/admin permissions in GitHub UI
+- Extension endpoint and OAuth callback wiring depend on deployed backend URL and org secret provisioning
+
+**What Is Ready in Repo:**
+- Registration runbook: `docs/operations/COPILOT_EXTENSION_GITHUB_APP_REGISTRATION.md`
+- Config scaffold: `docs/templates/copilot-extension/github-app-registration.template.json`
+- PRD references updated to the runbook for handoff completion
+
+**Follow-up Tracker:** [#1127](https://github.com/IBuySpy-Shared/basecoat/issues/1127) (owner checklist + evidence collection)
+
+**Next Action Owner:** `IBuySpy-Shared` organization admin + platform engineer for extension backend
+
+---
+
 ## Design Limitations
 
 ### Skill Refactoring (>5KB Files) — Phase 2 #330
@@ -100,6 +121,6 @@ by `/orgs/{org}/copilot/metrics/reports/organization-28-day/latest`. See
 
 ---
 
-**Last Updated:** 2026-05-08  
+**Last Updated:** 2026-05-21  
 **Reviewed By:** Copilot  
-**Next Review:** 2026-06-08
+**Next Review:** 2026-06-21

@@ -1,6 +1,6 @@
 ---
 description: "Use when writing bootstrap scripts that provision identity or infrastructure for GitHub Actions. Ensures CI/CD secrets and variables are pushed automatically."
-applyTo: "**/bootstrap*,**/scripts/*"
+applyTo: "**/bootstrap*github*.{ps1,sh},**/bootstrap*secret*.{ps1,sh},**/bootstrap*vars*.{ps1,sh},scripts/*github*.{ps1,sh},scripts/*secret*.{ps1,sh},scripts/*vars*.{ps1,sh}"
 ---
 
 # Bootstrap GitHub Secrets Integration
