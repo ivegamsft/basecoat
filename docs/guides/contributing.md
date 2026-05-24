@@ -73,7 +73,7 @@ applyTo: path/pattern/**
 2. Add your asset following the structure above
 3. Run validation: `pwsh scripts/validate-basecoat.ps1`
 4. Run tests: `pwsh tests/run-tests.ps1`
-5. Open a PR — the Squad agent will triage it
+5. Open a PR for maintainer review
 
 ## Memory contributions
 

@@ -362,5 +362,5 @@ gitleaks detect --config .gitleaks.toml --source . --log-opts "v0.5.0..HEAD"
 
 ---
 
-> **Maintainer:** Security tooling owned by the security_analyst squad agent.
+> **Maintainer:** Security tooling owned by the security_analyst agent.
 > Issues → [#43](https://github.com/ivegamsft/basecoat/issues/43)

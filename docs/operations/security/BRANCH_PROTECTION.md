@@ -260,5 +260,5 @@ prototype repos), enable at minimum:
 
 ---
 
-> **Maintainer:** Branch protection policy owned by the security_analyst squad agent.
+> **Maintainer:** Branch protection policy owned by the security_analyst agent.
 > Issues → [#43](https://github.com/ivegamsft/basecoat/issues/43)

@@ -860,12 +860,6 @@ inside GitHub Actions. Each workflow is a `.md` source file compiled to a
 - **`docs/mcp-deployment.md`** — step-by-step deployment guide for Docker and ACA
 - **`examples/mcp/basecoat.mcp.json`** — reference MCP client configuration
 
-### Squad Workflow Automation
-
-- **`.github/agents/squad.agent.md`** — squad coordination agent for GitHub issue management
-- **4 GitHub Actions workflows**: `squad-heartbeat`, `squad-issue-assign`, `squad-triage`, `sync-squad-labels`
-- **`.copilot/mcp-config.json`** — MCP configuration for squad integration
-
 ### Consumer Smoke Tests
 
 - **`tests/run-consumer-smoke.ps1`** — Windows smoke test script for release artifact validation

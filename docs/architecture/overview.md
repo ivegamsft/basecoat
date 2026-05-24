@@ -46,7 +46,7 @@ flowchart TD
     A --> A1["Legacy Modernization"]
     A --> A2["Self-Healing CI"]
     A --> A3["Memory Promoter"]
-    A --> A4["Squad Triage"]
+    A --> A4["Issue Triage"]
     A --> A5["...75 more"]
 
     S --> S1["azure-linux-app-service"]
