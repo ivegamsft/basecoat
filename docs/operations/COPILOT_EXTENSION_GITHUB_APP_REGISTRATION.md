@@ -43,6 +43,18 @@ Grant these permissions exactly:
 ## Handoff Checklist (Owner + Outcome)
 
 1. **Org Owner/Admin**: Create GitHub App using this runbook and `docs/templates/copilot-extension/github-app-registration.template.json`.
+2. **Org Owner/Admin**: Configure callback/setup/webhook URLs to deployed extension endpoints.
+3. **Org Owner/Admin**: Install App on `IBuySpy-Shared` org and confirm installation scope.
+4. **Org Owner/Admin**: Share App metadata with maintainers: App ID, Client ID, Installation ID.
+5. **Platform Engineer**: Configure ACA secrets/env vars:
+   - `BASECOAT_EXTENSION_APP_ID`
+   - `BASECOAT_EXTENSION_CLIENT_ID`
+   - `BASECOAT_EXTENSION_CLIENT_SECRET`
+   - `BASECOAT_EXTENSION_WEBHOOK_SECRET`
+   - `BASECOAT_EXTENSION_PRIVATE_KEY_PEM`
+6. **Maintainer**: Validate `GET /api/github/oauth/request` and `GET /api/github/oauth/callback` in deployed environment.
+7. **Maintainer**: Validate webhook signature verification using a signed test payload.
+8. **Maintainer**: Capture evidence that `@basecoat` appears in Copilot Chat and link evidence to issue #1073.
 2. **Platform Engineer**: Configure ACA env vars from generated App credentials (`APP_ID`, `CLIENT_ID`, `CLIENT_SECRET`, `WEBHOOK_SECRET`, `PRIVATE_KEY`).
 3. **Org Owner/Admin**: Install App on `IBuySpy-Shared` org with target repo access (`basecoat`, extension backend repo when created).
 4. **Platform Engineer**: Configure Copilot Extension registration to target `<ACA_BASE_URL>`.
@@ -53,6 +65,11 @@ Grant these permissions exactly:
 
 1. Confirm App is installed on `IBuySpy-Shared` and installation scope is correct.
 2. Confirm extension endpoint responds at health route.
+3. Confirm `GET /api/github/oauth/request` returns an authorization URL and state.
+4. Confirm `GET /api/github/oauth/callback` succeeds for a valid state/code path.
+5. Confirm webhook signature verification succeeds with a signed test payload.
+6. Confirm `@basecoat` appears in Copilot Chat and routes a test prompt.
+7. Capture evidence in issue #1073 (screenshots/log snippets + app metadata).
 3. Confirm OAuth callback succeeds for org member.
 4. Confirm `@basecoat` appears in Copilot Chat and routes a test prompt.
 5. Capture evidence in issue #1127 (screenshots/log snippets) and reference it from #1073.
