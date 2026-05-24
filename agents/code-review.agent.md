@@ -20,28 +20,34 @@ handoffs:
 allowed_skills: []
 ---
 
+<!-- markdownlint-disable MD041 -->
+
 ## Code Review Agent
 
 Performs repository or PR review focused on correctness and regression risk.
 
-### Inputs
+## Inputs
+
 - Review scope
 - Changed files/branch context
 - Known risk areas
 
-### Process
+## Process
+
 1. Inspect diff/target files
 2. Find correctness, safety, regression risks
 3. Check test coverage for changed behavior
 4. Report findings by severity with file refs
 5. Keep summaries short
 
-### Output
+## Output
+
 - Findings
 - Open questions
 - Short summary
 
-### Review Categories
+## Review Categories
+
 | Category | Severity | Examples |
 |---|---|---|
 | Correctness | Critical | Logic errors, off-by-one, null dereference |
@@ -50,9 +56,11 @@ Performs repository or PR review focused on correctness and regression risk.
 | Performance | Medium | N+1 queries, unbounded allocations |
 | Maintainability | Low | Dead code, unclear naming |
 
-### Issue Filing
+## Issue Filing
+
 - File issues for critical findings, test gaps, or security issues
 - Use `priority:high`, `testing`, or `security` labels as appropriate
 
-### Governance
+## Governance
+
 Follows BaseCoat governance. See `instructions/governance.instructions.md`.

@@ -1,26 +1,49 @@
 #Requires -Version 7.0
 <#
 .SYNOPSIS
-Bootstrap GitHub App credentials for BaseCoat Copilot Extension (minimal interaction).
+Bootstrap credentials for BaseCoat Copilot Extension (minimal interaction, multi-auth).
 
 .DESCRIPTION
-Stores GitHub App credentials in GitHub repository secrets and Azure Key Vault.
+Stores extension credentials in GitHub repository secrets and Azure Key Vault.
+Supports three authentication modes:
+
+1. GITHUB APP (default) — User-delegated OAuth
+   - Extension makes API calls on behalf of users
+   - Each user grants consent via OAuth flow
+   - Best for user-facing applications
+   - Requires: Manual GitHub App registration
+
+2. APP TOKEN (alternative) — Service account authentication
+   - Extension uses fixed GitHub token (PAT or workflow token)
+   - Single service identity for all operations
+   - Simpler setup, no user delegation
+   - Best for service-to-service automation
+   - Requires: BASECOAT_EXTENSION_GITHUB_TOKEN env var
+
+3. OIDC (alternative) — Azure managed identity (vault-less)
+   - Extension uses Azure federated identity
+   - No secrets stored (OIDC tokens generated at runtime)
+   - Best for Azure-native deployments
+   - Requires: Azure tenant/client ID
 
 This is a credentials bootstrap script—infrastructure deployment is handled by CI/CD workflows and IaC.
 
-Chicken-egg problem: The extension-deploy workflow needs GitHub App credentials before it can deploy.
+Chicken-egg problem: The extension-deploy workflow needs credentials before it can deploy.
 This script bridges that gap by storing the secrets securely.
 
 SMART DEFAULTS:
+- Detects auth mode from environment: APP_TOKEN > OIDC > GITHUB_APP
 - If credentials are provided (env vars or params), stores them immediately
-- If not provided, shows clear instructions for manual GitHub App creation
+- If not provided, shows clear instructions for setup
 - Minimal interaction: set env vars, then run script
-- Note: GitHub App creation is manual (security measure) — not automated
 
 Prerequisites:
-- GitHub App registered in IBuySpy-Shared org (manual step via github.com/organizations/{org}/settings/apps/new)
 - GitHub CLI (gh) authenticated and authorized to configure repository secrets
 - Azure CLI (az) authenticated with Key Vault permissions (optional, for production)
+- One of:
+  * GitHub App registered in IBuySpy-Shared org (manual step via github.com/organizations/{org}/settings/apps/new)
+  * GitHub token (PAT or workflow token) for app-token mode
+  * Azure credentials (AZURE_TENANT_ID, AZURE_CLIENT_ID) for OIDC mode
 
 .PARAMETER AppId
 GitHub App ID. If not provided, reads from $env:BASECOAT_EXTENSION_APP_ID

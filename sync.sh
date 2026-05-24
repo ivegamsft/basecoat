@@ -24,7 +24,22 @@ cleanup() {
 trap cleanup EXIT
 
 echo "Cloning $SOURCE_REPO#$SOURCE_REF"
-git clone --depth 1 --branch "$SOURCE_REF" "$SOURCE_REPO" "$TMP_DIR/source" >/dev/null 2>&1
+if ! git clone --depth 1 --branch "$SOURCE_REF" "$SOURCE_REPO" "$TMP_DIR/source" >/dev/null 2>&1; then
+  # In CI for private GitHub repos, anonymous clone can fail. Retry with an auth
+  # header when either GITHUB_TOKEN or GH_TOKEN is available.
+  token="${GITHUB_TOKEN:-${GH_TOKEN:-}}"
+  if [[ "$SOURCE_REPO" =~ ^https://github\.com/ ]] && [[ -n "$token" ]]; then
+    auth_header="$(printf 'x-access-token:%s' "$token" | base64 | tr -d '\r\n')"
+    if ! git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth_header" \
+      clone --depth 1 --branch "$SOURCE_REF" "$SOURCE_REPO" "$TMP_DIR/source" >/dev/null 2>&1; then
+      echo "Failed to clone $SOURCE_REPO#$SOURCE_REF (anonymous and token-auth attempts failed)." >&2
+      exit 1
+    fi
+  else
+    echo "Failed to clone $SOURCE_REPO#$SOURCE_REF." >&2
+    exit 1
+  fi
+fi
 
 mkdir -p "$REPO_ROOT/$TARGET_DIR"
 
