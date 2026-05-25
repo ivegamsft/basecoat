@@ -3,6 +3,12 @@ name: Issue Triage Agent
 on:
   issues:
     types: [opened]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: "Issue number to triage when run manually"
+        required: true
+        type: number
 
 permissions:
   issues: write
@@ -23,7 +29,20 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
-            const issue = context.payload.issue;
+            let issue = context.payload.issue;
+            if (!issue) {
+              const issueNumber = Number(core.getInput('issue_number') || '0');
+              if (!issueNumber) {
+                core.setFailed('workflow_dispatch requires issue_number input');
+                return;
+              }
+              const issueResp = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber
+              });
+              issue = issueResp.data;
+            }
             const title = issue.title.toLowerCase();
             const body = (issue.body || '').toLowerCase();
             const labels = [];
@@ -43,12 +62,38 @@ jobs:
 
             // Priority heuristic
             if (body.includes('blocking') || body.includes('urgent')) {
-              labels.push('priority:high');
+              labels.push('priority/critical');
+              labels.push('priority:p0');
             }
 
             // Always add triage label
             if (!issue.labels || issue.labels.length === 0) {
-              labels.push('triage');
+              labels.push('needs-triage');
+            }
+
+            // Assign newest open sprint milestone when available and missing
+            if (!issue.milestone) {
+              const milestones = await github.paginate(
+                github.rest.issues.listMilestones,
+                {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  state: 'open',
+                  sort: 'due_on',
+                  direction: 'desc',
+                  per_page: 100
+                }
+              );
+              if (milestones.length > 0) {
+                const newest = milestones
+                  .sort((a, b) => (new Date(b.created_at) - new Date(a.created_at)))[0];
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  milestone: newest.number
+                });
+              }
             }
 
             if (labels.length > 0) {
@@ -66,7 +111,20 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
-            const issue = context.payload.issue;
+            let issue = context.payload.issue;
+            if (!issue) {
+              const issueNumber = Number(core.getInput('issue_number') || '0');
+              if (!issueNumber) {
+                core.setFailed('workflow_dispatch requires issue_number input');
+                return;
+              }
+              const issueResp = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber
+              });
+              issue = issueResp.data;
+            }
             const title = issue.title;
             const body = issue.body || '';
 

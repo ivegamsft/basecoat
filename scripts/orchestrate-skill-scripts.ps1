@@ -123,6 +123,7 @@ function Invoke-ScriptStep {
     )
     
     $skillRoot = (Resolve-Path -LiteralPath $SkillDir).Path
+    $skillRoot = (Resolve-Path -LiteralPath $SkillDir).Path
     $scriptPath = Join-Path $SkillDir $StepDef.entrypoint
     
     if (-not (Test-Path -LiteralPath $scriptPath)) {

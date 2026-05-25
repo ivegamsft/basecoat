@@ -4,6 +4,14 @@ All notable changes to this repository should be recorded in this file.
 
 ## Unreleased
 
+### Added
+
+- Added `.github/workflows/dependency-canary.yml` to run a dependency canary lane for Dependabot and `dependencies`-labeled pull requests.
+
+### Changed
+
+- Updated dependency guardrail guidance with retry/backoff and flaky-test containment expectations for dependency update validation.
+
 ## 3.28.1 - 2026-05-23
 
 ### Added
@@ -859,6 +867,12 @@ inside GitHub Actions. Each workflow is a `.md` source file compiled to a
 - **Docker + Azure Container Apps** deployment support with `Dockerfile` and deployment guide
 - **`docs/mcp-deployment.md`** — step-by-step deployment guide for Docker and ACA
 - **`examples/mcp/basecoat.mcp.json`** — reference MCP client configuration
+
+### Squad Workflow Automation
+
+- **`.github/agents/squad.agent.md`** — squad coordination agent for GitHub issue management
+- **4 GitHub Actions workflows**: `squad-heartbeat`, `squad-issue-assign`, `squad-triage`, `sync-squad-labels`
+- **`.copilot/mcp-config.json`** — MCP configuration for squad integration
 
 ### Consumer Smoke Tests
 

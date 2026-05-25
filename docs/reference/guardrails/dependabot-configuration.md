@@ -48,6 +48,19 @@ Auto-merge patch updates when all CI checks pass. Require human review for minor
 
 Configure auto-merge via repository rulesets or a GitHub Actions workflow that approves and merges Dependabot PRs matching `semver-patch`.
 
+## Dependency Canary Lane
+
+Run a dedicated dependency canary lane for Dependabot PRs to catch breakage before merge.
+
+- Trigger on Dependabot-authored PRs or PRs labeled `dependencies`.
+- Scope canary jobs to changed lockfiles/package manifests when possible.
+- Use install retry with exponential backoff for transient registry/network faults.
+- Run canary tests with one containment retry:
+  - First pass fails -> retry once after short wait.
+  - Pass on retry -> mark as flaky candidate and track for follow-up.
+  - Fail twice -> keep blocking; do not auto-quarantine.
+- Preserve logs as artifacts so repeated flakes can be promoted to quarantine only with evidence and expiry ownership.
+
 ## Ignore Conditions and Version Constraints
 
 Use `ignore` to suppress known-incompatible upgrades or packages pinned for compatibility:
