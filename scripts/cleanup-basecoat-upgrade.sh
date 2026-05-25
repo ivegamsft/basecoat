@@ -73,7 +73,7 @@ if [[ -f "$state_path" ]]; then
     fi
 
     if [[ "$PROTECT_CUSTOMIZED" == "true" ]]; then
-      prev_sha="$(jq -r --arg p "$old_rel" '.managedFiles[]? | select(.path==$p) | .sha256' "$state_path" | head -1)"
+      prev_sha="$(jq -r --arg p "$old_rel" '.managedFiles[]? | select(.path==$p) | (.sha256 // "")' "$state_path" | head -1)"
       curr_sha="$(sha256_file "$old_full")"
       if [[ -z "$prev_sha" || -z "$curr_sha" ]]; then
         echo "SKIP unverified stale file (missing hash): $old_rel"
