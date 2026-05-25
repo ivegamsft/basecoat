@@ -65,6 +65,7 @@ if (Test-Path $statePath) {
 
 $removed = 0
 $skippedCustomized = 0
+$skippedUnverified = 0
 
 if ($prev -and $prev.managedFiles) {
     $prevMap = @{}
@@ -80,12 +81,21 @@ if ($prev -and $prev.managedFiles) {
 
         $currentSha = Get-FileSha256 $oldFull
         $prevSha = $prevMap[$oldRel]
-        $isCustomized = $ProtectCustomized -and $prevSha -and $currentSha -and ($currentSha -ne $prevSha)
+        $hasPrevHash = -not [string]::IsNullOrWhiteSpace($prevSha)
+        $hasCurrentHash = -not [string]::IsNullOrWhiteSpace($currentSha)
 
-        if ($isCustomized) {
-            Write-Host "SKIP customized stale file: $oldRel" -ForegroundColor Yellow
-            $skippedCustomized++
-            continue
+        if ($ProtectCustomized) {
+            if (-not ($hasPrevHash -and $hasCurrentHash)) {
+                Write-Host "SKIP unverified stale file (missing hash): $oldRel" -ForegroundColor Yellow
+                $skippedUnverified++
+                continue
+            }
+
+            if ($currentSha -ne $prevSha) {
+                Write-Host "SKIP customized stale file: $oldRel" -ForegroundColor Yellow
+                $skippedCustomized++
+                continue
+            }
         }
 
         Remove-Item -LiteralPath $oldFull -Force
@@ -123,5 +133,5 @@ foreach ($rel in $currentManaged) {
 $newState.managedFiles = @($newState.managedFiles | Sort-Object path)
 $newState | ConvertTo-Json -Depth 6 | Set-Content -Path $statePath -Encoding UTF8
 
-Write-Host "Cleanup complete. Removed=$removed, SkippedCustomized=$skippedCustomized, StateFile=$statePath"
+Write-Host "Cleanup complete. Removed=$removed, SkippedCustomized=$skippedCustomized, SkippedUnverified=$skippedUnverified, StateFile=$statePath"
 

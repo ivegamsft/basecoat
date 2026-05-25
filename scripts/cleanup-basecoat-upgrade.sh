@@ -57,6 +57,7 @@ sort -u "$tmpdir/current-managed.txt" -o "$tmpdir/current-managed.txt"
 
 removed=0
 skipped_customized=0
+skipped_unverified=0
 
 if [[ -f "$state_path" ]]; then
   jq -r '.managedFiles[]?.path' "$state_path" | sort -u > "$tmpdir/prev-managed.txt"
@@ -74,7 +75,12 @@ if [[ -f "$state_path" ]]; then
     if [[ "$PROTECT_CUSTOMIZED" == "true" ]]; then
       prev_sha="$(jq -r --arg p "$old_rel" '.managedFiles[]? | select(.path==$p) | .sha256' "$state_path" | head -1)"
       curr_sha="$(sha256_file "$old_full")"
-      if [[ -n "$prev_sha" && -n "$curr_sha" && "$prev_sha" != "$curr_sha" ]]; then
+      if [[ -z "$prev_sha" || -z "$curr_sha" ]]; then
+        echo "SKIP unverified stale file (missing hash): $old_rel"
+        skipped_unverified=$((skipped_unverified + 1))
+        continue
+      fi
+      if [[ "$prev_sha" != "$curr_sha" ]]; then
         echo "SKIP customized stale file: $old_rel"
         skipped_customized=$((skipped_customized + 1))
         continue
@@ -88,7 +94,7 @@ if [[ -f "$state_path" ]]; then
 fi
 
 if [[ "$SET_ARCHIVE_READ_ONLY" == "true" && -d "$full_target_dir/docs/archive" ]]; then
-  chmod -R a-w "$full_target_dir/docs/archive" || true
+  find "$full_target_dir/docs/archive" -type f -exec chmod a-w {} + || true
   echo "Set archive files read-only under docs/archive."
 fi
 
@@ -117,5 +123,5 @@ fi
   echo "}"
 } > "$state_path"
 
-echo "Cleanup complete. Removed=$removed, SkippedCustomized=$skipped_customized, StateFile=$state_path"
+echo "Cleanup complete. Removed=$removed, SkippedCustomized=$skipped_customized, SkippedUnverified=$skipped_unverified, StateFile=$state_path"
 

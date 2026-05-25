@@ -81,6 +81,30 @@ function Invoke-SyncToConsumer {
     }
 }
 
+function Get-FileSha256 {
+    param([string]$Path)
+    return (Get-FileHash -Path $Path -Algorithm SHA256).Hash.ToLower()
+}
+
+function Invoke-CleanupToConsumer {
+    param(
+        [string]$ConsumerPath,
+        [bool]$ProtectCustomized = $true,
+        [bool]$SetArchiveReadOnly = $true
+    )
+
+    Push-Location $ConsumerPath
+    try {
+        & pwsh -NoProfile -File (Join-Path $repoRoot 'scripts/cleanup-basecoat-upgrade.ps1') `
+            -TargetDir '.github/base-coat' `
+            -ProtectCustomized:$ProtectCustomized `
+            -SetArchiveReadOnly:$SetArchiveReadOnly
+    }
+    finally {
+        Pop-Location
+    }
+}
+
 # ============================================================================
 # Test 1: Sync populates .github/ Copilot-discoverable directories
 # ============================================================================
@@ -122,6 +146,109 @@ try {
     }
 
     Write-Host "  Passed: agents($agentCount), instructions($instrCount), prompts($promptCount) synced" -ForegroundColor Green
+}
+catch {
+    $failures += $_.Exception.Message
+}
+finally {
+    if ($consumer -and (Test-Path $consumer)) {
+        Remove-Item -Path $consumer -Recurse -Force
+    }
+}
+
+# ============================================================================
+# Test 6: Cleanup removes stale unchanged files but preserves customized/unverified
+# ============================================================================
+Write-Host "`nTest 6: Cleanup removes stale unchanged files but preserves customized/unverified" -ForegroundColor Yellow
+
+$consumer = $null
+try {
+    $consumer = New-ConsumerRepo -WithGitHubDir
+    $targetDir = Join-Path $consumer '.github/base-coat'
+    $statePath = Join-Path $targetDir '.sync-state.json'
+    $manifestPath = Join-Path $targetDir 'asset-manifest.json'
+
+    New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
+    '{ "schemaVersion": "1", "assets": [] }' | Set-Content -Path $manifestPath -Encoding UTF8
+    '{}' | Set-Content -Path (Join-Path $targetDir 'basecoat-metadata.json') -Encoding UTF8
+    '{ "version": "0.0.0-test" }' | Set-Content -Path (Join-Path $targetDir 'version.json') -Encoding UTF8
+    '# test' | Set-Content -Path (Join-Path $targetDir 'README.md') -Encoding UTF8
+    '# changelog' | Set-Content -Path (Join-Path $targetDir 'CHANGELOG.md') -Encoding UTF8
+
+    $staleUnchanged = Join-Path $targetDir 'agents/stale-unchanged.agent.md'
+    $staleCustomized = Join-Path $targetDir 'agents/stale-customized.agent.md'
+    $staleUnverified = Join-Path $targetDir 'agents/stale-unverified.agent.md'
+    New-Item -ItemType Directory -Force -Path (Split-Path $staleUnchanged -Parent) | Out-Null
+
+    'unchanged' | Set-Content -Path $staleUnchanged -Encoding UTF8
+    'custom-original' | Set-Content -Path $staleCustomized -Encoding UTF8
+    'custom-unverified' | Set-Content -Path $staleUnverified -Encoding UTF8
+
+    $staleUnchangedHash = Get-FileSha256 -Path $staleUnchanged
+    $staleCustomizedHash = Get-FileSha256 -Path $staleCustomized
+    'custom-modified' | Set-Content -Path $staleCustomized -Encoding UTF8
+
+    $state = [ordered]@{
+        schemaVersion = '1'
+        generatedAt = (Get-Date).ToString('o')
+        targetDir = '.github/base-coat'
+        managedFiles = @(
+            [ordered]@{ path = 'agents/stale-unchanged.agent.md'; sha256 = $staleUnchangedHash }
+            [ordered]@{ path = 'agents/stale-customized.agent.md'; sha256 = $staleCustomizedHash }
+            [ordered]@{ path = 'agents/stale-unverified.agent.md' }
+        )
+    }
+    $state | ConvertTo-Json -Depth 6 | Set-Content -Path $statePath -Encoding UTF8
+
+    Invoke-CleanupToConsumer -ConsumerPath $consumer -ProtectCustomized $true -SetArchiveReadOnly $false
+
+    $testCount++
+    Assert-SyncPathNotExists -Path $staleUnchanged `
+        -Message 'Sync cleanup test failed: unchanged stale managed file should be removed'
+
+    $testCount++
+    Assert-SyncPathExists -Path $staleCustomized `
+        -Message 'Sync cleanup test failed: customized stale file should be preserved'
+
+    $testCount++
+    Assert-SyncPathExists -Path $staleUnverified `
+        -Message 'Sync cleanup test failed: unverified stale file should be preserved'
+
+    Write-Host '  Passed: stale cleanup is hash-safe for unchanged/customized/unverified files' -ForegroundColor Green
+}
+catch {
+    $failures += $_.Exception.Message
+}
+finally {
+    if ($consumer -and (Test-Path $consumer)) {
+        Remove-Item -Path $consumer -Recurse -Force
+    }
+}
+
+# ============================================================================
+# Test 7: Cleanup marks archive files as read-only by policy
+# ============================================================================
+Write-Host "`nTest 7: Cleanup marks archive files as read-only by policy" -ForegroundColor Yellow
+
+$consumer = $null
+try {
+    $consumer = New-ConsumerRepo -WithGitHubDir
+    $targetDir = Join-Path $consumer '.github/base-coat'
+    $manifestPath = Join-Path $targetDir 'asset-manifest.json'
+    $archiveFile = Join-Path $targetDir 'docs/archive/policy-check.md'
+
+    New-Item -ItemType Directory -Force -Path (Split-Path $archiveFile -Parent) | Out-Null
+    '{ "schemaVersion": "1", "assets": [] }' | Set-Content -Path $manifestPath -Encoding UTF8
+    'archive data' | Set-Content -Path $archiveFile -Encoding UTF8
+
+    Invoke-CleanupToConsumer -ConsumerPath $consumer -ProtectCustomized $true -SetArchiveReadOnly $true
+
+    $testCount++
+    if (-not (Get-Item -Path $archiveFile).IsReadOnly) {
+        throw 'Sync cleanup test failed: archive file should be marked read-only'
+    }
+
+    Write-Host '  Passed: archive policy marks docs/archive files as read-only' -ForegroundColor Green
 }
 catch {
     $failures += $_.Exception.Message
