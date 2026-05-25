@@ -100,6 +100,12 @@ try {
         }
     }
 
+    # Remove eval metadata from synced agents to avoid leaking internal test files.
+    $agentEvalFiles = Get-ChildItem -Path (Join-Path $fullTargetDir 'agents') -Filter '*.agent.eval.yaml' -File -ErrorAction SilentlyContinue
+    if ($agentEvalFiles) {
+        $agentEvalFiles | Remove-Item -Force
+    }
+
     # Copy Copilot-discoverable directories to their standard paths
     # Only copy flat agent/instruction/prompt/skill files — not taxonomy subdirs
     $githubDir = Join-Path $repoRoot '.github'

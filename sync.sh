@@ -101,6 +101,9 @@ for tax_dir in models orchestrator tasks types; do
   rm -rf "$REPO_ROOT/$TARGET_DIR/agents/$tax_dir"
 done
 
+# Remove eval metadata from synced agents to avoid leaking internal test files.
+find "$REPO_ROOT/$TARGET_DIR/agents" -maxdepth 1 -type f -name '*.agent.eval.yaml' -delete
+
 # Copy Copilot-discoverable directories to their standard paths
 # Only copy flat agent/instruction/prompt/skill files — not taxonomy subdirs
 mkdir -p "$REPO_ROOT/.github"

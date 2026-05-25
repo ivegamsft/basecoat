@@ -35,7 +35,12 @@ jobs:
           rm -rf dist/ghcp-stage
           mkdir -p dist/ghcp-stage
           cp -R agents skills instructions prompts dist/ghcp-stage/
-          cp basecoat-metadata.json CATALOG.md dist/ghcp-stage/
+          cp basecoat-metadata.json dist/ghcp-stage/
+          if [[ -f CATALOG.md ]]; then
+            cp CATALOG.md dist/ghcp-stage/
+          else
+            echo "::warning::CATALOG.md not found; continuing without it in GHCP ZIP"
+          fi
           find dist/ghcp-stage/skills -type f -name 'eval.yaml' -delete
           find dist/ghcp-stage/agents -type f -name '*.agent.eval.yaml' -delete
           (cd dist/ghcp-stage && zip -r ../basecoat-ghcp.zip .)
