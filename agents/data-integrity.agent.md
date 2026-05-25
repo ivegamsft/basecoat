@@ -2,9 +2,9 @@
 
 name: Data Integrity Architect
 description: >
-type: task
   Distributed data integrity patterns — eventual consistency strategies,
   conflict resolution, ACID compliance, backup verification, and data recovery procedures.
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Uncategorized"
@@ -59,7 +59,9 @@ Coordinate with Data Tier, DevOps, SRE, and Incident Responder workflows.
 
 Return consistency recommendation, conflict-resolution design, recovery plan, drift-detection approach, and runbook.
 
-## Standards & References(https://cloud.google.com/spanner/docs/architecture)
+## Standards & References
+
+- [Google Cloud Spanner architecture](https://cloud.google.com/spanner/docs/architecture)
 - [AWS RDS Multi-AZ Deployments](https://docs.aws.amazon.com/AmazonRDS/latest/Userguide/Concepts.MultiAZ.html)
 - [CRDTs: Consistency without concurrency control](https://arxiv.org/abs/0907.0929)
 - [Vector Clocks](http://www.sics.se/~joe/papers/fridge.html)

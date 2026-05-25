@@ -65,8 +65,14 @@ flowchart LR
 - [reference/COMPONENT_LIBRARY.md](reference/COMPONENT_LIBRARY.md) — Component library reference
 - [reference/PRODUCT.md](reference/PRODUCT.md) — Product vision and roadmap
 - [reference/QUICK_REFERENCE.md](reference/QUICK_REFERENCE.md) — Quick reference card
+- [reference/GUIDANCE_VOCABULARY_SYNTAX_GUIDE.md](reference/GUIDANCE_VOCABULARY_SYNTAX_GUIDE.md) — Canonical vocabulary, taxonomy, ontology, and prompt syntax
 - [reference/treatment-matrix.md](reference/treatment-matrix.md) — Issue treatment matrix
 - [reference/guardrails/](reference/guardrails/) — Guardrail configuration files
+
+## Guides (`docs/guides/`)
+
+- [guides/intent-prefixes.md](guides/intent-prefixes.md) — Intent vocabulary, routing behavior, and prompt templates
+- [agents/TAXONOMY.md](agents/TAXONOMY.md) — Agent and skill taxonomy with chain archetypes
 
 ## Operations (`docs/operations/`)
 

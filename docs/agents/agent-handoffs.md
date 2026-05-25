@@ -27,7 +27,7 @@ handoffs:
 | `prompt` | Yes | Pre-filled context sent to the target agent |
 | `send` | No | `false` (default) lets the user review/edit; `true` auto-sends immediately |
 
-Use `send: false` for all Base Coat handoffs. This lets the user review the
+Use `send: false` for all BaseCoat handoffs. This lets the user review the
 pre-filled context, make adjustments, and confirm intent before the next agent runs.
 
 ## Handoff UI vs. Sub-Agent Harness Contract
@@ -45,7 +45,7 @@ canonical contract in:
 
 ## Handoff Chains
 
-The following chains are implemented across Base Coat agents.
+The following chains are implemented across BaseCoat agents.
 
 ### Planning → Implementation
 
@@ -223,7 +223,7 @@ handoffs:
 - **Be specific.** Reference the output produced by the current agent (e.g., "the OpenAPI spec designed above", "the wave dependency map above").
 - **Set scope.** Tell the next agent what to focus on. If handing off a subset of findings, name the subset.
 - **Stay concise.** The prompt pre-fills the chat. Users can expand it; aim for 1–3 sentences.
-- **Use `send: false`** for all Base Coat handoffs so users can review before sending.
+- **Use `send: false`** for all BaseCoat handoffs so users can review before sending.
 
 ## References
 

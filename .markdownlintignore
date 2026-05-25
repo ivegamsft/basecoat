@@ -5,3 +5,9 @@
 # names (### Added, ### Changed, ### Fixed per release) and visual blank-line
 # grouping between major release blocks — exempt from MD012/MD022/MD024/MD032.
 CHANGELOG.md
+
+# Sprint closeout archives are generated snapshots preserved as historical artifacts.
+docs/archive/sprint-closeout/2025-06-03/DELIVERY-MANIFEST.md
+docs/archive/sprint-closeout/2025-06-03/README-SPRINT-CLOSEOUT.md
+docs/archive/sprint-closeout/2025-06-03/WORKFLOW-VALIDATION.md
+docs/archive/sprint-closeout/2025-06-03/sprint-metrics-summary.md

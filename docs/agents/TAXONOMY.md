@@ -30,6 +30,51 @@ Agents are classified across three dimensions:
 | **collaborative** | Human-in-the-loop, produces artifacts for review | code-review, solution-architect, tech-writer |
 | **reactive** | Triggered by events (CI failure, alert, PR) | incident-responder, self-healing-ci, guardrail |
 
+## Skill Domain Taxonomy
+
+Skills are grouped by domain so agent routing can select reusable capabilities
+before implementation starts.
+
+| Domain | Typical skills | Primary use |
+|---|---|---|
+| Architecture and planning | `architecture`, `agent-design`, `sprint-management` | design decisions, decomposition, roadmaps |
+| Development | `backend-dev`, `frontend-dev`, `api-design`, `refactoring` | implementation patterns and code structure |
+| Quality and testing | `code-review`, `manual-test-strategy`, `e2e-testing` | verification strategy and defect prevention |
+| Operations and delivery | `devops`, `observability`, `production-readiness` | release safety, telemetry, runbooks |
+| Security and governance | `security`, `api-security`, `github-security-posture` | risk assessment and policy enforcement |
+| Platform and cloud | `azure-*`, `gitops`, `environment-bootstrap` | infrastructure and cloud operating patterns |
+
+## Intent Ontology
+
+Use this ontology to map user language to chainable execution.
+
+| Intent family | Prefixes | Default phase | Typical first agent | Typical first skills |
+|---|---|---|---|---|
+| Delivery | `feature:`, `refactor:` | plan or build | `solution-architect` or `backend-dev` | `architecture`, `backend-dev`, `frontend-dev` |
+| Reliability | `bug:`, `perf:`, `outage:` | test or operate | `code-review` or `rca` | `code-review`, `performance-profiling`, `observability` |
+| Governance | `audit:`, `security:`, `chore:` | operate | `security-analyst` or `config-auditor` | `security`, `github-security-posture`, `devops` |
+| Planning | `plan:`, `spike:` | plan | `product-manager` or `sprint-planner` | `architecture`, `sprint-management`, `documentation` |
+| Quality | `test:`, `docs:`, `ux:` | test or build | `manual-test-strategy` or `tech-writer` | `manual-test-strategy`, `documentation`, `ux` |
+
+## Chain Selection
+
+Default chain archetypes for common intents:
+
+| Intent | Chain | Outcome |
+|---|---|---|
+| Feature delivery | `product-manager -> sprint-planner -> backend-dev/frontend-dev -> code-review` | sprint-scoped implementation with review |
+| Bug resolution | `code-review -> self-healing-ci -> guardrail` | defect isolation and safe patch |
+| Incident handling | `rca -> incident-responder -> sre-engineer` | triage, mitigation, and reliability follow-up |
+| Security remediation | `security-analyst -> policy-as-code-compliance -> guardrail` | vulnerability fix and policy validation |
+| Test automation uplift | `manual-test-strategy -> strategy-to-automation -> e2e-test-strategy` | measurable test coverage growth |
+
+When defining handoffs in chain prompts, include:
+
+1. Intent and target outcome.
+2. Scope boundaries and constraints.
+3. Evidence collected so far.
+4. Output contract for the next agent.
+
 ## Registry
 
 <!-- Each agent is tagged with [model, task, type] -->

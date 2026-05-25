@@ -290,7 +290,7 @@ try {
     }
 
     # 1. Reference copy: core metadata and asset directories
-    foreach ($item in @('README.md', 'CHANGELOG.md', 'version.json', 'basecoat-metadata.json',
+    foreach ($item in @('README.md', 'CHANGELOG.md', 'version.json',
                         'instructions', 'skills', 'prompts', 'agents', 'docs')) {
         Copy-OverlayItem `
             -Src   (Join-Path $sourcePath $item) `

@@ -44,10 +44,13 @@ fi
 
 mkdir -p "$REPO_ROOT/$TARGET_DIR"
 
-for item in README.md CHANGELOG.md version.json asset-manifest.json basecoat-metadata.json instructions skills prompts agents; do
+for item in README.md CHANGELOG.md version.json asset-manifest.json instructions skills prompts agents; do
   rm -rf "$REPO_ROOT/$TARGET_DIR/$item"
   cp -R "$TMP_DIR/source/$item" "$REPO_ROOT/$TARGET_DIR/$item"
 done
+
+# Legacy cleanup: basecoat-metadata.json was previously distributed.
+rm -f "$REPO_ROOT/$TARGET_DIR/basecoat-metadata.json"
 
 # Copy only basic documentation (not full docs tree)
 rm -rf "$REPO_ROOT/$TARGET_DIR/docs"

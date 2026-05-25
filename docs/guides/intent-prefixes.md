@@ -26,6 +26,21 @@ Every message prefix tells the AI three things at once: **what kind of work**,
 
 ---
 
+## Intent families
+
+Each prefix belongs to an intent family. Families are useful for routing and
+for selecting chain patterns.
+
+| Family | Prefixes | Default output type |
+|---|---|---|
+| Delivery | `feature:`, `refactor:` | implementation plan or code changes |
+| Reliability | `bug:`, `perf:`, `outage:` | fix, mitigation, or incident analysis |
+| Governance | `audit:`, `security:`, `chore:` | findings, policy action, risk controls |
+| Planning | `plan:`, `spike:` | prioritized backlog, design notes, decision doc |
+| Quality | `test:`, `docs:`, `ux:` | tests, documentation, or design artifacts |
+
+---
+
 ## Syntax matters as much as the prefix
 
 The same prefix means different things depending on how it appears in the message.
@@ -173,8 +188,8 @@ AI logs three backlog items and reports what was filed.
 - feature: add a getting-started prompt
 ```
 
-❌ Wrong response: "Here is the getting-started prompt I just created..."
-✅ Correct response: "Logged as a backlog item. Should I add it to the current sprint?"
+Wrong response: "Here is the getting-started prompt I just created..."
+Correct response: "Logged as a backlog item. Should I add it to the current sprint?"
 
 ### Combine audit and fix explicitly
 
@@ -183,3 +198,76 @@ audit: check all agent files for missing Workflow sections, log issues, fix them
 ```
 
 AI audits → logs → fixes in one pass because "fix them" was explicit.
+
+---
+
+## Prompting with proper vocabulary
+
+Use a compact, deterministic shape when writing prompts:
+
+```text
+<prefix>: <objective>
+scope: <in/out boundaries>
+constraints: <non-negotiables>
+deliverable: <artifact to return>
+evidence: <what to prove>
+next-hop: <agent name or none>
+```
+
+### Delivery example
+
+```text
+feature: add plan-first lint checks for new agent files
+scope: instructions/agents.instructions.md and tests only
+constraints: no workflow changes
+deliverable: updated instruction rule plus test case
+evidence: failing then passing test output
+next-hop: code-review
+```
+
+### Governance example
+
+```text
+audit: evaluate all skills for missing USE FOR / DO NOT USE FOR sections
+scope: skills/**/SKILL.md
+constraints: read-only; log issues but do not edit files
+deliverable: severity-ranked findings table
+evidence: file paths and missing-section counts
+next-hop: none
+```
+
+---
+
+## Chain recipes by intent
+
+Use these default chains unless there is a task-specific reason to override.
+
+| Intent | Chain | Outcome |
+|---|---|---|
+| `feature:` | `solution-architect -> backend-dev/frontend-dev -> code-review` | design to implementation with review |
+| `bug:` | `code-review -> self-healing-ci -> guardrail` | defect isolation and safe fix |
+| `outage:` | `rca -> incident-responder -> sre-engineer` | triage, containment, and reliability follow-up |
+| `security:` | `security-analyst -> policy-as-code-compliance -> guardrail` | remediation and policy validation |
+| `plan:` | `product-manager -> sprint-planner` | scoped sprint-ready backlog |
+| `test:` | `manual-test-strategy -> strategy-to-automation` | test strategy and automation candidates |
+
+When chaining, each handoff prompt should include:
+
+1. Intent statement.
+2. What is done.
+3. What remains.
+4. Constraints that must carry forward.
+5. Expected output contract.
+
+---
+
+## Design notes
+
+These conventions intentionally prefer:
+
+- **Intent-first routing** over asking users to pick an agent manually.
+- **Canonical verbs** (`triage`, `classify`, `validate`, `escalate`, `handoff`)
+  over ambiguous verbs.
+- **Standard chains** over ad hoc sequencing.
+
+This keeps prompting predictable and improves routing eval reliability.

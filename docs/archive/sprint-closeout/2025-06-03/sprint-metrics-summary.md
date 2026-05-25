@@ -1,5 +1,7 @@
 # BaseCoat Sprint Closeout Metrics — Sprint 2025-05-20 to 2025-06-03
 
+> Historical snapshot: dates and metrics in this file are intentionally preserved from the 2025 sprint closeout record.
+
 ## Executive Summary
 
 This sprint focused on governance compliance improvements, workflow standardization, and adoption tracking. We achieved significant progress on BaseCoat infrastructure and documentation standards.

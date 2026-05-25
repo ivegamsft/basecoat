@@ -19,7 +19,7 @@ and `basecoat-ghcp.zip`) include:
 - `.githooks/` — git hook scripts
 - `README.md`, `CHANGELOG.md`, `INVENTORY.md`
 - `version.json`, `asset-manifest.json`
-- `basecoat-metadata.json`, `CATALOG.md` (GHCP zip only)
+- `basecoat-metadata.json`, `CATALOG.md` (GHCP zip only; **not** distributed via `sync.ps1`/`sync.sh`)
 
 ## Excluded Files
 

@@ -1,90 +1,191 @@
 # Guidance Vocabulary and Syntax Guide
 
-This guide defines a shared language for BaseCoat assets so users can predict how agents, skills, instructions, and prompts behave before opening each file.
+This guide defines the canonical language for BaseCoat intent routing, agent and
+skill selection, chaining, and prompt construction.
 
-## Taxonomy (What each asset is for)
+## Taxonomy
 
-| Asset | Primary job | Scope |
+### Asset taxonomy
+
+| Asset | Primary role | Scope |
 |---|---|---|
-| Agent (`agents/*.agent.md`) | Multi-step execution workflow | End-to-end task orchestration |
-| Skill (`skills/*/SKILL.md`) | Reusable method or recipe | Focused capability and templates |
-| Instruction (`instructions/*.instructions.md`) | Behavioral guardrail | Cross-cutting policy and standards |
-| Prompt (`prompts/*.prompt.md`) | Fast entry point | User kickoff and intent shaping |
+| Agent (`agents/*.agent.md`) | Executor | End-to-end workflow orchestration |
+| Skill (`skills/*/SKILL.md`) | Capability | Focused reusable method |
+| Instruction (`instructions/*.instructions.md`) | Constraint | Cross-cutting behavior guardrail |
+| Prompt (`prompts/*.prompt.md`) | Entry point | Intent shaping and kickoff |
 
-## Ontology (How concepts relate)
+### Work taxonomy
 
-- **Intent**: user objective (for example, "close sprint", "triage broken build")
-- **Capability**: reusable action pattern (skill)
-- **Executor**: orchestrated operator (agent)
-- **Constraint**: non-negotiable behavior rule (instruction)
-- **Trigger phrase**: routing signal in descriptions (`USE FOR` / `DO NOT USE FOR`)
+| Layer | Meaning | Examples |
+|---|---|---|
+| Intent | What outcome is needed | fix regression, design feature, run audit |
+| Task phase | Where work sits in SDLC | plan, build, test, deploy, operate |
+| Interaction mode | How work executes | autonomous, collaborative, reactive |
+| Evidence mode | What proof is required | findings report, test output, diff summary |
 
-Relationship model:
+## Ontology
 
-1. Prompt captures intent.
-2. Agent executes intent.
-3. Agent invokes one or more skills.
-4. Instructions constrain all outputs.
+### Core entities
 
-## Vocabulary Standard
+- **Intent**: user objective.
+- **Executor**: agent selected to own the outcome.
+- **Capability**: skill used by the executor.
+- **Constraint**: instructions that bound behavior.
+- **Evidence**: validation artifacts that justify output.
+- **Handoff**: transition between executors.
+- **Chain**: ordered set of handoffs for one intent.
 
-Use consistent verbs and nouns:
+### Relationship model
 
-- **Use** "triage", "classify", "validate", "escalate", "handoff", "closeout"
-- **Avoid** ambiguous verbs like "handle", "deal with", "manage stuff"
-- Prefer one canonical term per concept:
-  - "closeout" (not mixed with "shutdown", "wrap-up", "finalization")
-  - "burndown" (not mixed with "burn down charting" unless chart-specific)
-  - "handoff" (not mixed with "transfer" for same behavior)
+1. Prompt frames intent.
+2. Intent selects executor.
+3. Executor applies one or more capabilities.
+4. Constraints govern every step.
+5. Executor emits evidence.
+6. If needed, handoff starts the next executor in a chain.
 
-## Voice and Tone
+### Cardinality model
 
-- Start descriptions with **"Use when..."**
-- Include **USE FOR** and **DO NOT USE FOR** trigger phrases in frontmatter descriptions.
-- Use direct, procedural language:
-  - "Do X, then Y"
-  - "Escalate when Z"
-- Avoid promotional language and vague claims.
+| Source | Relationship | Target |
+|---|---|---|
+| Intent | routes-to | 1 primary executor (optionally 1 fallback) |
+| Executor | invokes | 0..N capabilities |
+| Capability | governed-by | 1..N constraints |
+| Chain | contains | 1..N executors |
+| Executor | emits | 1 evidence bundle |
 
-## Syntax and Structure Rules
+## Canonical vocabulary
+
+Use canonical terms in agents, skills, instructions, and prompts.
+
+| Concept | Canonical term | Avoid |
+|---|---|---|
+| Evaluate and sort incoming work | triage | handle, look at |
+| Determine severity and owner | classify | review quickly |
+| Enforce a rule or policy | validate | check stuff |
+| Escalate to a higher responder | escalate | pass along |
+| Transfer context between agents | handoff | transfer, toss over |
+| Sprint end reporting | closeout | shutdown, wrap-up |
+| Scope reduction for safety | constrain | trim vaguely |
+| Plan without implementation | plan-only | think about, discuss only |
+
+## Intent families and execution model
+
+| Intent family | Typical prefixes | Primary outcome | Primary agent classes |
+|---|---|---|---|
+| Delivery | `feature:`, `refactor:` | Shipped change set | architect, dev, reviewer |
+| Reliability | `bug:`, `outage:`, `perf:` | Restored stability | diagnostics, responder, SRE |
+| Governance | `audit:`, `security:`, `chore:` | Risk reduction and compliance | security, policy, release |
+| Planning | `plan:`, `spike:` | Decision artifact or backlog map | planner, product, architect |
+| Quality | `test:`, `docs:` | Verification and clarity | test strategy, reviewer, writer |
+
+## Chain patterns
+
+### Standard chains
+
+| Pattern | Sequence | Use when |
+|---|---|---|
+| Design to delivery | `solution-architect -> backend-dev/frontend-dev -> code-review` | New feature implementation |
+| Incident response | `rca -> incident-responder -> sre-engineer` | Service degradation or outage |
+| Security hardening | `security-analyst -> policy-as-code-compliance -> guardrail` | Security findings require remediation |
+| Test evolution | `manual-test-strategy -> strategy-to-automation -> e2e-test-strategy` | Manual pathways need automation |
+| Sprint cycle | `product-manager -> sprint-planner -> retro-facilitator` | Sprint planning and closeout |
+
+### Chain contract
+
+Every chain step should pass:
+
+1. Intent statement.
+2. Scope and constraints.
+3. Output contract.
+4. Evidence collected so far.
+5. Explicit next-step question.
+
+## Prompting with the vocabulary
+
+### Prompt shape
+
+Use this structure for deterministic routing:
+
+```text
+<prefix>: <objective>
+scope: <in/out boundaries>
+constraints: <instructions, policy, risk limits>
+deliverable: <artifact expected>
+evidence: <what proof is required>
+next-hop: <agent or none>
+```
+
+### Examples
+
+```text
+bug: CI pipeline fails on Windows path handling
+scope: scripts/sync.ps1 and tests only
+constraints: no workflow changes, no secret handling changes
+deliverable: targeted fix plus regression test
+evidence: failing test before and passing test after
+next-hop: code-review
+```
+
+```text
+plan: next sprint for extension hardening
+scope: open issues tagged extension and security
+constraints: planning only, no implementation
+deliverable: prioritized issue list with dependency waves
+evidence: rationale per issue
+next-hop: sprint-planner
+```
+
+## Design debate and decisions
+
+### Debate 1: intent-first vs asset-first routing
+
+- **Option A (asset-first):** ask users to pick an agent first.
+- **Option B (intent-first):** infer asset from intent language.
+- **Decision:** intent-first.
+- **Reason:** reduces user cognitive load and makes routing consistent across assets.
+
+### Debate 2: broad verbs vs canonical verbs
+
+- **Option A:** allow loose synonym use.
+- **Option B:** enforce canonical vocabulary in guidance.
+- **Decision:** canonical vocabulary with synonym normalization at routing time.
+- **Reason:** consistent authoring and predictable prompt outcomes.
+
+### Debate 3: free-form chains vs standard chain archetypes
+
+- **Option A:** fully ad hoc handoffs.
+- **Option B:** defined chain archetypes with optional extension.
+- **Decision:** standard chains plus optional branch-specific steps.
+- **Reason:** better reviewability, fewer dead-end handoffs, easier eval coverage.
+
+## Authoring and syntax rules
 
 ### Agent files
 
-- Required top-level frontmatter fields:
-  - `name`, `description`, `compatibility`, `metadata`, `allowed-tools`
-- Strongly recommended:
-  - `model`, `allowed_skills`, `task_phase`, `interaction_type`, `invocation_rules`, `visibility`
-- Required body sections:
-  - `## Inputs`, `## Workflow` (or `## Process`), `## Output` (or `## Results`)
+- Required frontmatter: `name`, `description`, `compatibility`, `metadata`,
+  `allowed-tools`.
+- Strongly recommended: `model`, `allowed_skills`, `task_phase`,
+  `interaction_type`, `invocation_rules`, `visibility`, `handoffs`.
+- Required body sections: `## Inputs`, `## Workflow` or `## Process`, `## Output`
+  or `## Results`.
 
 ### Skill files
 
-- Required top-level frontmatter fields:
-  - `name`, `description`, `compatibility`, `metadata`, `allowed-tools`
-- Recommended:
-  - `invocation_rules`, `visibility`
-- Required companion file:
-  - `eval.yaml` with 3 positive + 2 negative routing scenarios
+- Required frontmatter: `name`, `description`, `compatibility`, `metadata`,
+  `allowed-tools`.
+- Recommended: `invocation_rules`, `visibility`.
+- Required companion: `eval.yaml` with positive and negative routing scenarios.
 
-### Markdown conventions
+### Description style
 
-- Use `##` headings (no bold-as-heading lines)
-- Keep tables for dense reference data
-- Keep examples concrete and copy-paste friendly
-
-### HTML companion artifact policy
-
-Use HTML only when the content is spatial or interactive and markdown materially reduces clarity.
-
-- Allowed examples: annotated diff viewers, dependency maps, sprint/release dashboards, interactive explainers.
-- Do not replace the source-of-truth markdown workflow docs with HTML-only content.
-- Every committed HTML artifact must have an adjacent text source (`.md`, `.yaml`, or `.json`) and an export path back to text.
-- Treat HTML as a companion view, not the canonical governance record.
+- Start with `Use when...`.
+- Include `USE FOR` and `DO NOT USE FOR` trigger language.
+- Use procedural phrasing and explicit escalation criteria.
 
 ## Consistency rollout plan
 
-1. Audit frontmatter semantics across agents and skills.
-2. Normalize terms and triggers in descriptions.
-3. Add missing invocation and visibility semantics.
-4. Re-run routing eval coverage and quality audits.
-5. Track drift with CI checks and periodic reports.
+1. Normalize intent vocabulary in agent and skill descriptions.
+2. Align intent prefixes, chain patterns, and handoff prompts.
+3. Add missing routing evals where ontology terms are absent.
+4. Track drift in CI with structure and eval checks.

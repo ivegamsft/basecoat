@@ -12,7 +12,7 @@ The sync script copies all distributable assets to `.github/base-coat/` in your 
 - `prompts/` — prompt templates
 - `version.json` — version metadata
 
-Files that are **not** synced: test scripts, CI workflows, internal tooling, `docs/`.
+Files that are **not** synced: `basecoat-metadata.json` (internal portal index), test scripts, CI workflows, and internal tooling. Selected documentation content is synced under `.github/base-coat/docs/`, but not the full source `docs/` tree.
 
 ## Sync commands
 

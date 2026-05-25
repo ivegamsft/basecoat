@@ -271,7 +271,7 @@ try {
 
     $targetDir = Join-Path $consumer '.github/base-coat'
 
-    foreach ($item in @('README.md', 'CHANGELOG.md', 'version.json', 'asset-manifest.json', 'basecoat-metadata.json')) {
+    foreach ($item in @('README.md', 'CHANGELOG.md', 'version.json', 'asset-manifest.json')) {
         $testCount++
         Assert-SyncPathExists -Path (Join-Path $targetDir $item) `
             -Message "Sync test failed: $item not found in target directory"
@@ -306,7 +306,7 @@ try {
 
     $targetDir = Join-Path $consumer '.github/base-coat'
 
-    foreach ($excluded in @('tests', 'scripts', 'sync.ps1', 'sync.sh', '.github', '.gitignore', '.gitleaks.toml')) {
+    foreach ($excluded in @('tests', 'scripts', 'sync.ps1', 'sync.sh', '.github', '.gitignore', '.gitleaks.toml', 'basecoat-metadata.json')) {
         $testCount++
         Assert-SyncPathNotExists -Path (Join-Path $targetDir $excluded) `
             -Message "Sync test failed: non-distributed item '$excluded' was copied to target"

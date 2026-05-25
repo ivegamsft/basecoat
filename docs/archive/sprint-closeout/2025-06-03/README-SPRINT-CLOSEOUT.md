@@ -1,5 +1,7 @@
 # BaseCoat Sprint Closeout — Complete Delivery
 
+> Historical snapshot: this document reflects the sprint window **2025-05-20 to 2025-06-03** and is preserved for audit history, not current operational status.
+
 ## 📊 Deliverables Summary
 
 This sprint closeout provides comprehensive adoption metrics, workflow validation, and dashboard-ready data for BaseCoat sprint 2025-05-20 to 2025-06-03.
