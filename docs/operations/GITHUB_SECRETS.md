@@ -179,7 +179,7 @@ Not currently wired up. Reserve the name if Slack integration is planned.
 After setting all secrets, trigger a manual workflow run to confirm:
 
 ```bash
-gh workflow run issue-triage.yml --repo IBuySpy-Shared/basecoat
+gh workflow run issue-triage.lock.yml --repo IBuySpy-Shared/basecoat
 ```
 
 Check the Actions tab for green status on the `triage` job. If it fails with

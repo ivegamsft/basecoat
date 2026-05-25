@@ -47,6 +47,6 @@ The VS Code harness test suite must include scenarios that verify:
 
 ## Related Standards
 
-- [MCP Standards](../../../instructions/mcp.instructions.md)
-- [Security Standards](../../../instructions/security.instructions.md)
-- [Governance Instructions for AI Agents](../../../instructions/governance.instructions.md)
+- [MCP Standards](/instructions/mcp.instructions.md)
+- [Security Standards](/instructions/security.instructions.md)
+- [Governance Instructions for AI Agents](/instructions/governance.instructions.md)

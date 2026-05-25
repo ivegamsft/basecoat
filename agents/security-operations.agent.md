@@ -11,9 +11,7 @@ tags:
   - secrets-management
   - audit-logging
 audience: security-engineers, soc-analysts, incident-responders
-compatibility:
-  - vscode
-  - github-copilot-chat
+compatibility: [vscode, github-copilot-chat]
 allowed-tools:
   - terminal
   - file-editor

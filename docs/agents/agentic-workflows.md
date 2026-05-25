@@ -31,7 +31,7 @@ the Copilot agent:
 
 | Workflow | Trigger | What It Does |
 |---|---|---|
-| [`issue-triage.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/.github/workflows/issue-triage.yml) | Issue opened | Classifies issue, applies priority labels, posts triage summary |
+| [`issue-triage.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/.github/workflows/issue-triage.md) | Issue opened | Classifies issue, applies priority labels, posts triage summary |
 | [`retro-facilitator.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/.github/workflows/retro-facilitator.lock.yml) | Weekly schedule | Analyzes past week's activity, creates sprint retrospective issue |
 | [`self-healing-ci.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/.github/workflows/self-healing-ci.lock.yml) | Workflow run failed | Fetches failed job logs, posts root-cause diagnosis |
 | [`release-impact-advisor.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/.github/workflows/release-impact-advisor.lock.yml) | PR opened | Assesses blast radius, rollback complexity, and risks |
@@ -41,7 +41,7 @@ the Copilot agent:
 
 Each workflow has two files that must be committed together:
 
-```
+```text
 .github/workflows/
   issue-triage.md          ← human-editable source (Markdown + YAML frontmatter)
   issue-triage.lock.yml    ← compiled GitHub Actions YAML (do not edit)
