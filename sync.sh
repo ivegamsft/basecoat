@@ -5,6 +5,7 @@ set -euo pipefail
 SOURCE_REPO="${BASECOAT_REPO:-https://github.com/YOUR-ORG/basecoat.git}"
 SOURCE_REF="${BASECOAT_REF:-main}"
 TARGET_DIR="${BASECOAT_TARGET_DIR:-.github/base-coat}"
+ALLOWED_DOCS_TOP_LEVEL=("reference" "guides" "agents")
 
 if ! command -v git >/dev/null 2>&1; then
   echo "git is required" >&2
@@ -59,6 +60,34 @@ done
 if [[ -f "$TMP_DIR/source/docs/agents/AGENTS.md" ]]; then
   mkdir -p "$REPO_ROOT/$TARGET_DIR/docs/agents"
   cp "$TMP_DIR/source/docs/agents/AGENTS.md" "$REPO_ROOT/$TARGET_DIR/docs/agents/AGENTS.md"
+fi
+
+for path in "$REPO_ROOT/$TARGET_DIR/docs"/*; do
+  [[ -e "$path" ]] || continue
+  entry="$(basename "$path")"
+  allowed=false
+  for allowed_entry in "${ALLOWED_DOCS_TOP_LEVEL[@]}"; do
+    if [[ "$entry" == "$allowed_entry" ]]; then
+      allowed=true
+      break
+    fi
+  done
+
+  if [[ "$allowed" == false ]]; then
+    echo "Docs scope validation failed: unexpected docs entry synced: $entry" >&2
+    exit 1
+  fi
+done
+
+if [[ -d "$REPO_ROOT/$TARGET_DIR/docs/agents" ]]; then
+  for path in "$REPO_ROOT/$TARGET_DIR/docs/agents"/*; do
+    [[ -e "$path" ]] || continue
+    entry="$(basename "$path")"
+    if [[ "$entry" != "AGENTS.md" ]]; then
+      echo "Docs scope validation failed: docs/agents must only contain AGENTS.md, found: $entry" >&2
+      exit 1
+    fi
+  done
 fi
 
 # INVENTORY.md moved to docs/reference/ in v3.11.0 — copy from new location to target root for backwards compat

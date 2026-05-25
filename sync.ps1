@@ -13,6 +13,36 @@ if (-not $repoRoot) {
     throw 'Run this inside a git repository'
 }
 
+$allowedDocsTopLevelEntries = @('reference', 'guides', 'agents')
+
+function Assert-MinimalDocsScope {
+    param(
+        [string]$DocsPath
+    )
+
+    if (-not (Test-Path $DocsPath)) {
+        throw "Docs scope validation failed: '$DocsPath' does not exist"
+    }
+
+    $topLevelEntries = Get-ChildItem -Path $DocsPath -Force
+    $unexpectedTopLevel = $topLevelEntries | Where-Object { $_.Name -notin $allowedDocsTopLevelEntries }
+    if ($unexpectedTopLevel.Count -gt 0) {
+        $names = ($unexpectedTopLevel | ForEach-Object { $_.Name } | Sort-Object) -join ', '
+        throw "Docs scope validation failed: unexpected docs entries synced: $names"
+    }
+
+    $agentsDocsPath = Join-Path $DocsPath 'agents'
+    if (Test-Path $agentsDocsPath) {
+        $unexpectedAgentDocs = Get-ChildItem -Path $agentsDocsPath -Force | Where-Object {
+            $_.PSIsContainer -or $_.Name -ne 'AGENTS.md'
+        }
+        if ($unexpectedAgentDocs.Count -gt 0) {
+            $names = ($unexpectedAgentDocs | ForEach-Object { $_.Name } | Sort-Object) -join ', '
+            throw "Docs scope validation failed: docs/agents must only contain AGENTS.md, found: $names"
+        }
+    }
+}
+
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString())
 $sourcePath = Join-Path $tempRoot 'source'
 
@@ -52,6 +82,8 @@ try {
         New-Item -ItemType Directory -Force -Path $agentsDocsDest | Out-Null
         Copy-Item -Path $agentsCatalog -Destination (Join-Path $agentsDocsDest 'AGENTS.md') -Force
     }
+
+    Assert-MinimalDocsScope -DocsPath $docsDest
 
     # INVENTORY.md moved to docs/reference/ in v3.11.0 — copy from new location to target root for backwards compat
     $inventorySrc = Join-Path $sourcePath 'docs/reference/INVENTORY.md'

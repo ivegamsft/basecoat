@@ -239,6 +239,65 @@ finally {
 }
 
 # ============================================================================
+# Test 5: Sync enforces minimal docs overlay scope
+# ============================================================================
+Write-Host "`nTest 5: Sync enforces minimal docs overlay scope" -ForegroundColor Yellow
+
+$consumer = $null
+try {
+    $consumer = New-ConsumerRepo -WithGitHubDir
+    Invoke-SyncToConsumer -ConsumerPath $consumer
+
+    $docsTargetDir = Join-Path $consumer '.github/base-coat/docs'
+
+    foreach ($required in @('reference', 'guides')) {
+        $testCount++
+        Assert-SyncPathExists -Path (Join-Path $docsTargetDir $required) `
+            -Message "Sync test failed: required docs subtree '$required' missing from overlay"
+    }
+
+    $testCount++
+    Assert-SyncPathExists -Path (Join-Path $docsTargetDir 'agents/AGENTS.md') `
+        -Message 'Sync test failed: docs/agents/AGENTS.md missing from overlay'
+
+    foreach ($excludedDocsSubtree in @('archive', 'architecture', 'diagrams', 'examples', 'memory', 'operations', 'research', 'templates')) {
+        $testCount++
+        Assert-SyncPathNotExists -Path (Join-Path $docsTargetDir $excludedDocsSubtree) `
+            -Message "Sync test failed: excluded docs subtree '$excludedDocsSubtree' should not be synced"
+    }
+
+    $testCount++
+    Assert-SyncPathNotExists -Path (Join-Path $docsTargetDir 'index.md') `
+        -Message 'Sync test failed: docs/index.md should not be synced'
+
+    $topLevelDocsEntries = @(Get-ChildItem -Path $docsTargetDir -Force | ForEach-Object { $_.Name })
+    $unexpectedDocsEntries = $topLevelDocsEntries | Where-Object { $_ -notin @('reference', 'guides', 'agents') }
+    $testCount++
+    if ($unexpectedDocsEntries.Count -gt 0) {
+        $unexpected = ($unexpectedDocsEntries | Sort-Object) -join ', '
+        throw "Sync test failed: unexpected docs entries found in overlay: $unexpected"
+    }
+
+    $agentDocsEntries = @(Get-ChildItem -Path (Join-Path $docsTargetDir 'agents') -Force | ForEach-Object { $_.Name })
+    $unexpectedAgentDocsEntries = $agentDocsEntries | Where-Object { $_ -ne 'AGENTS.md' }
+    $testCount++
+    if ($unexpectedAgentDocsEntries.Count -gt 0) {
+        $unexpected = ($unexpectedAgentDocsEntries | Sort-Object) -join ', '
+        throw "Sync test failed: docs/agents should only contain AGENTS.md but found: $unexpected"
+    }
+
+    Write-Host '  Passed: docs overlay constrained to minimal scope' -ForegroundColor Green
+}
+catch {
+    $failures += $_.Exception.Message
+}
+finally {
+    if ($consumer -and (Test-Path $consumer)) {
+        Remove-Item -Path $consumer -Recurse -Force
+    }
+}
+
+# ============================================================================
 # Summary
 # ============================================================================
 Write-Host "`n================================================" -ForegroundColor Cyan
