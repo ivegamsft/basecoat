@@ -67,28 +67,41 @@ function Parse-YamlFrontmatter {
         $currentScript = $null
         $inScripts = $false
         
+        $inInputs = $false
+
         $frontmatterText -split "`n" | ForEach-Object {
             $line = $_
             
             if ($line -match '^\s*scripts:\s*$') {
                 $inScripts = $true
             }
-            elseif ($inScripts -and $line -match '^\s*- name:\s*(.+)$') {
+            elseif ($inScripts -and $line -match '^\s+- name:\s*(.+)$') {
                 if ($currentScript) { $scripts += $currentScript }
-                $currentScript = @{ name = $matches[1].Trim() }
+                $currentScript = @{
+                    name = $matches[1].Trim()
+                    inputs = @()
+                }
+                $inInputs = $false
             }
             elseif ($inScripts -and $currentScript) {
-                if ($line -match '^\s*description:\s*(.+)$') {
+                if ($line -match '^\s+description:\s*(.+)$') {
                     $currentScript.description = $matches[1].Trim().Trim('"')
                 }
-                elseif ($line -match '^\s*entrypoint:\s*(.+)$') {
+                elseif ($line -match '^\s+entrypoint:\s*(.+)$') {
                     $currentScript.entrypoint = $matches[1].Trim()
                 }
-                elseif ($line -match '^\s*inputs:\s*\[\s*\]') {
+                elseif ($line -match '^\s+inputs:\s*\[\s*\]') {
                     $currentScript.inputs = @()
                 }
-                elseif ($line -match '^\s*outputs:') {
+                elseif ($line -match '^\s+inputs:\s*$') {
+                    $inInputs = $true
+                }
+                elseif ($inInputs -and $line -match '^\s+- name:\s*(.+)$') {
+                    $currentScript.inputs += @{ name = $matches[1].Trim() }
+                }
+                elseif ($line -match '^\s+outputs:') {
                     $currentScript.outputs = @()
+                    $inInputs = $false
                 }
             }
         }
@@ -109,13 +122,21 @@ function Invoke-ScriptStep {
         [hashtable]$UserArgs
     )
     
+    $skillRoot = (Resolve-Path -LiteralPath $SkillDir).Path
     $scriptPath = Join-Path $SkillDir $StepDef.entrypoint
     
-    if (-not (Test-Path $scriptPath)) {
+    if (-not (Test-Path -LiteralPath $scriptPath)) {
         throw "Script not found: $scriptPath"
     }
     
-    Write-Verbose "Executing: $scriptPath"
+    $resolvedScriptPath = (Resolve-Path -LiteralPath $scriptPath).Path
+    $skillRootWithSep = $skillRoot.TrimEnd('\', '/') + '\'
+    
+    if (-not ($resolvedScriptPath.StartsWith($skillRootWithSep, [System.StringComparison]::OrdinalIgnoreCase))) {
+        throw "Entrypoint path escapes skill directory: $($StepDef.entrypoint)"
+    }
+    
+    Write-Verbose "Executing: $resolvedScriptPath"
     
     # Build command array
     $args = @()
@@ -133,11 +154,11 @@ function Invoke-ScriptStep {
         $args += $_.Value
     }
     
-    Write-Verbose "  Command: pwsh $scriptPath $($args -join ' ')"
+    Write-Verbose "  Command: pwsh $resolvedScriptPath $($args -join ' ')"
     
     # Execute — invoke directly in this PowerShell context
     try {
-        $output = & $scriptPath @args 2>&1
+        $output = & $resolvedScriptPath @args 2>&1
         
         # Try to parse as JSON
         try {
@@ -200,11 +221,11 @@ try {
     
     # Determine which steps to run
     $stepsToRun = if ($Step) {
-        $skillDef.scripts | Where-Object { $_.name -eq $Step }
-        if (-not $stepsToRun) {
+        $filtered = $skillDef.scripts | Where-Object { $_.name -eq $Step }
+        if (-not $filtered) {
             throw "Step not found: $Step"
         }
-        @($stepsToRun)
+        @($filtered)
     }
     else {
         $skillDef.scripts

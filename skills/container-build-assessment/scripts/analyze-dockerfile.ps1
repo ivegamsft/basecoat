@@ -19,13 +19,17 @@ if (-not (Test-Path $DockerfilePath)) {
     exit 1
 }
 
-$dockerfile = Get-Content $DockerfilePath
+$dockerfileResolved = (Resolve-Path $DockerfilePath).Path
+$dockerfileDir = Split-Path $dockerfileResolved -Parent
+$dockerignorePath = Join-Path $dockerfileDir '.dockerignore'
+
+$dockerfile = Get-Content $dockerfileResolved -Raw
 $layers = @()
 $layerCount = 0
 $issues = @()
 
 # Parse Dockerfile commands
-$dockerfile | ForEach-Object {
+($dockerfile -split "`n") | ForEach-Object {
     $line = $_.Trim()
     
     if ($line -and -not $line.StartsWith('#')) {
@@ -59,20 +63,20 @@ if ($dockerfile -notmatch 'FROM.*AS') {
     $issues += "Multi-stage build not used (missed optimization opportunity)"
 }
 
-if (-not (Test-Path ((Split-Path $DockerfilePath) + '\' + '.dockerignore'))) {
+if (-not (Test-Path $dockerignorePath)) {
     $issues += ".dockerignore file missing"
 }
 
 $baseImage = if ($dockerfile -match 'FROM\s+([^\s]+)') { $matches[1] } else { 'unknown' }
 
 $result = @{
-    dockerfile_path = $DockerfilePath
+    dockerfile_path = $dockerfileResolved
     base_image = $baseImage
     total_layers = $layerCount
     layers = $layers
     issues = $issues
     has_multistage = $dockerfile -match 'FROM.*AS' ? $true : $false
-    has_dockerignore = Test-Path ((Split-Path $DockerfilePath) + '\' + '.dockerignore')
+    has_dockerignore = Test-Path $dockerignorePath
 }
 
 $result | ConvertTo-Json -Depth 5
