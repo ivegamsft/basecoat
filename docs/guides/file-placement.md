@@ -29,6 +29,7 @@ Only these file types live at the repo root:
 **Never commit to root:**
 
 - AI-generated summary or status `.txt` files (`*_COMPLETION_SUMMARY.txt`, `WAVE*_DAY*_*.txt`)
+- Agent scratch/session files (for example `base.txt`, `blocked-issues.json`, `labels.txt`, `issue-*.json`)
 - API specs (→ `docs/reference/api/`)
 - Sprint output directories (→ `docs/archive/` if worth keeping)
 - One-off tracking files (→ `docs/operations/`)
