@@ -1,6 +1,7 @@
 ---
 name: definition-of-done
 description: "Validate that a feature, PR, or release meets the Definition of Done before closing. Enforces testing evidence, config verification, response validation, and acceptance criteria. USE FOR: check PR meets DoD, validate acceptance criteria, verify release readiness. DO NOT USE FOR: writing acceptance criteria, implementing features."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Development & Review"

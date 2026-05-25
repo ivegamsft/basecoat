@@ -1,6 +1,7 @@
 ---
 name: middleware-dev
 description: "Middleware and integration layer development agent. Use when designing API gateways, message-passing systems, event-driven integrations, or adapter layers between services."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Development & Engineering"

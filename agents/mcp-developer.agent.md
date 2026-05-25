@@ -1,6 +1,7 @@
 ---
 name: mcp-developer
 description: "MCP server development agent for building Model Context Protocol servers, tools, and integrations. Use when designing, implementing, or reviewing MCP servers, tool definitions, transport configurations, and client integrations."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "AI & Machine Learning"

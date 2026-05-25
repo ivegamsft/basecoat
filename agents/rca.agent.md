@@ -1,6 +1,7 @@
 ---
 name: rca
 description: "Root Cause Analysis agent for deep-dive incident investigations, hypothesis testing, and prevention follow-up. USE FOR: run post-incident root cause analysis, trace production outage to contributing factors, generate 5-why analysis report. DO NOT USE FOR: live incident triage and containment, general performance tuning."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Operations & Support"

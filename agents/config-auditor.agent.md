@@ -1,6 +1,7 @@
 ---
 name: config-auditor
 description: "Use when you need to scan a repository for committed or unprotected configuration files that contain secrets, credentials, or sensitive environment-specific values. Produces a findings report with remediation steps."
+type: reviewer
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Security & Compliance"

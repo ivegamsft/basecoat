@@ -1,6 +1,7 @@
 ---
 name: rollout-basecoat
 description: "Use when onboarding a repository to BaseCoat in an enterprise setting. Focuses on pinned versions, safe rollout, installation method, and validation steps."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Onboarding & Deployment"

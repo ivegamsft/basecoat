@@ -1,6 +1,7 @@
 ---
 name: contract-testing
 description: "Contract Testing Agent for consumer-driven contracts, E2E testing strategy, and mutation testing for distributed systems. USE FOR: write Pact consumer-driven contracts, design service integration tests, set up contract verification in CI. DO NOT USE FOR: load testing, manual QA workflows."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Testing & Quality"

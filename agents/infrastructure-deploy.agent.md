@@ -1,6 +1,7 @@
 ---
 name: infrastructure-deploy
 description: "Orchestrates Azure infrastructure deployments using Bicep, handles resource group management, parameter validation, and rollback strategies. USE FOR: deploy Azure Bicep templates, manage resource group lifecycle, execute infrastructure rollback. DO NOT USE FOR: application code deployments, cost analysis and optimization."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Infrastructure & Operations"

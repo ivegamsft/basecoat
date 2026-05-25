@@ -1,6 +1,7 @@
 ---
 name: llmops
 description: "LLMOps agent for prompt deployment pipelines, model gateway configuration, inference monitoring, version rollback, endpoint health checks, and cost optimization. Use when operating production LLM inference systems."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "AI & Machine Learning"

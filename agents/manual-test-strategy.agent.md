@@ -1,6 +1,7 @@
 ---
 name: manual-test-strategy
 description: "Use when you need a structured manual testing strategy for a feature or risk inventory. Produces a decision rubric, exploratory charter, regression checklist, defect template, and automation backlog. Automatically files GitHub Issues for automation candidates."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Testing & Quality"

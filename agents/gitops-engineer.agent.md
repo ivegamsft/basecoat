@@ -1,6 +1,7 @@
 ---
 name: gitops-engineer
 description: "Design GitOps workflows for Infrastructure-as-Code, declarative configuration, automated deployment, and continuous reconciliation. Use when implementing Argo CD, Flux, or GitOps best practices."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Infrastructure & DevOps"

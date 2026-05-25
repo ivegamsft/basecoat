@@ -1,6 +1,7 @@
 ---
 name: daily-standup-facilitator
 description: "Use when running daily standup ceremonies to surface blockers, dependencies, and near-term execution risk. USE FOR: extract actionable updates, identify blockers needing escalation, map dependencies across team members, and produce a day plan with owners. DO NOT USE FOR: writing feature code, replacing sprint planning, or long-term roadmap analysis."
+type: facilitator
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Project Management & Planning"

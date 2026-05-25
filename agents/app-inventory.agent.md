@@ -1,6 +1,7 @@
 ---
 name: app-inventory
 description: "Scans legacy applications to discover dependencies, identify technology stacks, assess migration complexity, and generate architecture diagrams for portfolio analysis. USE FOR: scan legacy app tech stack, assess migration complexity, generate dependency inventory. DO NOT USE FOR: writing new code, live production monitoring."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Modernization & Migration"

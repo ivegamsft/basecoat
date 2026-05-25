@@ -1,6 +1,7 @@
 ---
 name: guidance-author
 description: "Use when drafting new BaseCoat guidance assets (instruction files, skill SKILL.md, agent files, prompt templates) from a description or requirement. Produces a structured draft ready for guidance-reviewer validation."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Knowledge & Learning"

@@ -1,6 +1,7 @@
 ---
 name: memory-curator
 description: "Use when extracting, deduplicating, validating, and retrieving cross-session knowledge with the SQLite memory layer, including conflict resolution, decay, and context injection."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Knowledge & Learning"

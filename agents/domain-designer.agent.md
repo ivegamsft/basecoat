@@ -1,6 +1,7 @@
 ---
 name: domain-designer
 description: "Domain-Driven Design agent for bounded context modeling, aggregate design, ubiquitous language definition, and DDD patterns. Use when designing domain models, refactoring monoliths into domain-aligned services, or establishing domain-driven architecture."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Architecture & Design"

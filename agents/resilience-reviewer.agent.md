@@ -2,6 +2,7 @@
 
 name: Resilience Reviewer
 description: "Code-level resilience pattern review — circuit breakers, timeouts, bulkhead isolation, graceful degradation, retry logic, and load shedding implementation. USE FOR: review circuit breaker and retry patterns in code, audit timeout hierarchy, validate graceful degradation. DO NOT USE FOR: live incident response, infrastructure capacity planning."
+type: reviewer
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Uncategorized"

@@ -1,6 +1,7 @@
 ---
 name: incident-responder
 description: "Structured incident response and recovery agent for classifying incidents, guiding mitigation, coordinating communications, verifying recovery, and facilitating post-incident learning. USE FOR: classify and triage active production incidents, guide on-call mitigation steps, facilitate post-incident retrospectives. DO NOT USE FOR: proactive security hardening, routine deployment tasks."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Operations & Support"

@@ -1,6 +1,7 @@
 ---
 name: release-freeze-enforcer
 description: "Use when enforcing release freeze windows, routing exception requests, and coordinating branch access during a freeze. USE FOR: evaluate freeze exceptions, block unauthorized merge attempts, and publish go/no-go decisions for frozen branches. DO NOT USE FOR: merging changes, bypassing approvals, or resolving code conflicts."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Release & Deployment"

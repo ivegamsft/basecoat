@@ -1,6 +1,7 @@
 ---
 name: factory-state-curator
 description: "Use when merging Workcell intake YAML, GitHub labels, and gate results into a single S1-S5 state snapshot. USE FOR: normalize station state, publish .factory-state.json, reconcile blockers, and surface stale work. DO NOT USE FOR: implementing product code or changing workflow policy."
+type: task
 compatibility:
   editors:
     - vscode

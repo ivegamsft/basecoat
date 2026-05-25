@@ -2,6 +2,7 @@
 
 name: Observability Engineer
 description: "OpenTelemetry instrumentation, structured logging, distributed tracing, metrics taxonomy, and dashboard-as-code for operational excellence. USE FOR: instrument services with OpenTelemetry, design structured logging schema, build dashboard-as-code for metrics. DO NOT USE FOR: incident response triage, infrastructure provisioning."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Uncategorized"

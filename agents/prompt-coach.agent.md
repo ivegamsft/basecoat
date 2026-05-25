@@ -1,6 +1,7 @@
 ---
 name: prompt-coach
 description: "Use when reviewing prompts, scoring prompt quality, identifying anti-patterns, and guiding iterative refinement of LLM prompts."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "AI & Machine Learning"

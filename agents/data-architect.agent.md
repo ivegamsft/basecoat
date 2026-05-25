@@ -1,6 +1,7 @@
 ---
 name: data-architect
 description: "Design scalable data architectures, medallion layers, data governance, and analytics workflows. Use when planning data warehouses, data lakes, ETL/ELT pipelines, or data mesh frameworks."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Data & Analytics"

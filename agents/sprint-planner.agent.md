@@ -1,6 +1,7 @@
 ---
 name: sprint-planner
 description: "Goal-to-issues decomposition and wave dependency mapping. Accepts a sprint goal, produces GitHub issues with labels, wave dependency maps, agent assignments, and acceptance criteria. USE FOR: decompose sprint goal into GitHub issues, build wave dependency map, assign agent roles. DO NOT USE FOR: running sprint retrospectives, story point estimation."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Project Management & Planning"

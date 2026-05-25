@@ -1,6 +1,7 @@
 ---
 name: feedback-loop
 description: "Continuous learning and optimization through user feedback collection, prompt effectiveness tracking, outcome measurement, A/B testing, regression detection, and instruction refinement. USE FOR: track prompt effectiveness, run A/B test on instructions, detect quality regression. DO NOT USE FOR: product feature feedback, writing new prompts."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "AI & Learning"

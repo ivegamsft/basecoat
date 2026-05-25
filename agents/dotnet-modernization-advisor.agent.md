@@ -2,6 +2,7 @@
 name: dotnet-modernization-advisor
 title: .NET Modernization Advisor
 description: "Advisor for .NET modernization assessment, upgrade planning, and execution guidance. Use when migrating legacy .NET Framework/older .NET solutions to modern .NET versions."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Modernization & Migration"

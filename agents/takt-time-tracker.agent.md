@@ -1,6 +1,7 @@
 ---
 name: takt-time-tracker
 description: "Use when measuring dwell time at each station and flagging SLA breaches. USE FOR: compute median and p95 time at S1-S5, identify bottlenecks, and export dashboard-ready JSON. DO NOT USE FOR: dispatching work or making replanning decisions."
+type: monitor
 color: cyan
 tools: [read_file, run_terminal_command]
 handoffs:

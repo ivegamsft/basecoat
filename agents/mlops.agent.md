@@ -1,6 +1,7 @@
 ---
 name: mlops
 description: "MLOps agent for model lifecycle, experiment tracking, model registry, deployment automation, drift monitoring, and reproducibility. Use when operationalizing ML systems."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "AI & Machine Learning"

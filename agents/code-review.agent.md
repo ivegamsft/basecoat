@@ -1,6 +1,7 @@
 ---
 name: code-review
 description: "Structured, multi-step code review with prioritized findings and file refs."
+type: reviewer
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Development & Review"

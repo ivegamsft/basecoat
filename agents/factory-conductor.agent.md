@@ -1,6 +1,7 @@
 ---
 name: factory-conductor
 description: "Use when reading .factory-state.json and auto-queuing the next ready wave of factory work. USE FOR: route S2/S3/S4 work, batch dispatch by wave, and ping the right follow-up workflow. DO NOT USE FOR: state normalization, BOM validation, or product backlog prioritization."
+type: task
 compatibility:
   editors:
     - vscode

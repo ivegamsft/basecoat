@@ -1,6 +1,7 @@
 ---
 name: broken-build-troubleshooter
 description: "Use when CI or local builds are failing and the team needs fast, repeatable triage to isolate root cause and restore green status. USE FOR: classify failure signatures, pinpoint failing stage/test/toolchain segment, propose minimal safe remediation, and generate a fix validation checklist. DO NOT USE FOR: feature implementation, long-form architecture documents, or security incident response ownership."
+type: task
 compatibility:
   - VS Code
   - Cursor

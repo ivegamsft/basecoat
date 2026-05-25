@@ -1,6 +1,7 @@
 ---
 name: penetration-test
 description: "Penetration Test Agent for security assessments, vulnerability discovery, and remediation workflows. Use when planning security testing engagements aligned with OWASP Testing Guide."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Security & Compliance"

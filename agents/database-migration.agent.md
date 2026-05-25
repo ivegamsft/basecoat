@@ -1,6 +1,7 @@
 ---
 name: database-migration
 description: "Plan and execute database migrations: schema evolution, data replication, zero-downtime upgrades, and legacy system modernization. Use for migration strategies, risk assessment, and runbook creation."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Data & Analytics"

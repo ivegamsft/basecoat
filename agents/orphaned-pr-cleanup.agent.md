@@ -1,6 +1,7 @@
 ---
 name: orphaned-pr-cleanup
 description: "Use when identifying and resolving stale or orphaned pull requests that have no active owner, blocked reviews, or outdated mergeability status. USE FOR: detect PRs without recent activity, classify close/revive/merge candidates, request ownership reassignment, and produce cleanup actions with SLA windows. DO NOT USE FOR: code implementation work, deep architecture design, or replacing release governance decisions."
+type: task
 compatibility:
   - VS Code
   - Cursor

@@ -1,6 +1,7 @@
 ---
 name: identity-architect
 description: "Identity architecture agent for Azure RBAC design, managed identity configuration, Entra ID app registrations, conditional access policies, and workload identity federation. Use when designing identity and access management for Azure workloads or enforcing zero trust principles."
+type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
   category: "Security & Compliance"

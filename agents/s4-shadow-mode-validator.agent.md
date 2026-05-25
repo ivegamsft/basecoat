@@ -1,6 +1,7 @@
 ---
 name: s4-shadow-mode-validator
 description: "Use when comparing shadow-mode and live behavior during S4 soak before cutover. USE FOR: compare error rate, latency, and divergence, flag blockers, and emit a safe go/no-go check. DO NOT USE FOR: state curation or general monitoring."
+type: reviewer
 compatibility:
   editors:
     - vscode
