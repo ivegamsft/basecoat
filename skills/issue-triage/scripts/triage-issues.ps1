@@ -203,7 +203,22 @@ if ($IssueNumber -gt 0) {
 Write-Host "Fetched $($allIssues.Count) issues to triage.`n"
 
 $typeLabels     = @("bug","enhancement","documentation","chore","security","question")
-$priorityLabels = @("priority/critical","priority/high","priority/medium","priority/low")
+$canonicalPriorityLabels = @{
+    critical = "P0-critical"
+    high     = "P1-high"
+    medium   = "P2-medium"
+    low      = "P3-low"
+}
+$priorityLabels = @(
+    $canonicalPriorityLabels.critical,
+    $canonicalPriorityLabels.high,
+    $canonicalPriorityLabels.medium,
+    $canonicalPriorityLabels.low,
+    "priority/critical",
+    "priority/high",
+    "priority/medium",
+    "priority/low"
+)
 $badTitles      = @("bug","fix","issue","help","todo","test","asdf","qwerty","untitled","new issue","please fix","broken","error")
 
 foreach ($issue in $allIssues) {
@@ -213,7 +228,7 @@ foreach ($issue in $allIssues) {
     $labels = @($issue.labels | ForEach-Object { $_.name })
     $isOpen = ($issue.state -eq "OPEN" -or $issue.state -eq "open")
 
-    Write-Host "--- #$N: $title ---" -ForegroundColor White
+    Write-Host "--- #${N}: $title ---" -ForegroundColor White
 
     # -----------------------------------------------------------------------
     # Check 1: Validity
@@ -346,7 +361,7 @@ foreach ($issue in $allIssues) {
     if (-not $hasPriority -and $isOpen -and -not $hasDuplicate) {
         # Security auto-escalate
         if ($labels -contains "security" -or $inferredType -eq "security") {
-            Add-Label $N "priority/critical" "Security issues are auto-escalated to critical"
+            Add-Label $N $canonicalPriorityLabels.critical "Security issues are auto-escalated to critical"
             Post-Comment $N "Priority escalated to **critical**: security issues are automatically assigned critical priority per triage policy." "auto-escalate security"
         } else {
             Add-Label $N "needs-triage" "Missing priority label"
@@ -404,23 +419,23 @@ foreach ($issue in $allIssues) {
         $agedays = ([datetime]::UtcNow - [datetime]$issue.createdAt).TotalDays
 
         if ($agedays -gt 90 -and $labels -notcontains "stale" -and
-            $labels -notcontains "priority/critical" -and $labels -notcontains "priority/high" -and
+            -not ($labels | Where-Object { $priorityLabels -contains $_ }) -and
             $labels -notcontains "blocked") {
             Add-Label $N "stale" "Open >90 days with no resolved state"
             Post-Comment $N "This issue has been open for $([math]::Round($agedays)) days with no recent activity. Adding ``stale`` label. If this is still relevant, please comment to keep it active." "stale policy"
         }
 
-        if ($labels -contains "security" -and $labels -notcontains "priority/critical") {
-            Add-Label $N "priority/critical" "Security issue without critical priority"
+        if ($labels -contains "security" -and $labels -notcontains $canonicalPriorityLabels.critical -and $labels -notcontains "priority/critical") {
+            Add-Label $N $canonicalPriorityLabels.critical "Security issue without critical priority"
         }
 
         if ($labels -contains "bug" -and $agedays -gt 30 -and
             -not ($labels | Where-Object { $priorityLabels -contains $_ })) {
-            Add-Label $N "priority/high" "Bug open >30 days without priority"
+            Add-Label $N $canonicalPriorityLabels.high "Bug open >30 days without priority"
         }
 
         if (-not ($labels | Where-Object { $priorityLabels -contains $_ }) -and $isOpen) {
-            Add-Label $N "priority/low" "No priority set; applying floor"
+            Add-Label $N $canonicalPriorityLabels.low "No priority set; applying floor"
         }
     }
 }

@@ -125,8 +125,10 @@ gh issue edit $N --add-label "needs-verification"
 | Category | Required | Valid values |
 |----------|----------|-------------|
 | Type | 1 | `bug`, `enhancement`, `documentation`, `chore`, `security`, `question` |
-| Priority | 1 | `priority/critical`, `priority/high`, `priority/medium`, `priority/low` |
+| Priority | 1 | `P0-critical`, `P1-high`, `P2-medium`, `P3-low` |
 | Area | 0–1 | `area/*` labels defined in repo |
+
+Legacy `priority/*` labels are accepted during bulk scans for backward compatibility.
 
 ### Inference Rules
 
@@ -146,11 +148,11 @@ gh issue edit $N --add-label "needs-verification"
 gh issue view $N --json labels --jq '.labels[].name'
 
 # Apply inferred labels
-gh issue edit $N --add-label "bug,priority/high"
+gh issue edit $N --add-label "bug,P1-high"
 
 # Flag for manual triage
 gh issue edit $N --add-label "needs-triage"
-gh issue comment $N --body "This issue is missing required labels:\n- [ ] Type: bug / enhancement / documentation / chore / security / question\n- [ ] Priority: priority/critical / priority/high / priority/medium / priority/low"
+gh issue comment $N --body "This issue is missing required labels:\n- [ ] Type: bug / enhancement / documentation / chore / security / question\n- [ ] Priority: P0-critical / P1-high / P2-medium / P3-low"
 ```
 
 ---
@@ -269,16 +271,16 @@ gh pr create --head fix/245-oauth-callback --base main --title "fix: OAuth callb
 
 | Condition | Action |
 |-----------|--------|
-| `security` label + no `priority/critical` | Add `priority/critical` |
+| `security` label + no `P0-critical` | Add `P0-critical` |
 | Open >90 days + no activity | Add `stale` |
-| Open >30 days + `bug` + has repro steps | Add `priority/high` if no priority set |
-| No priority label at all | Apply `priority/low` as floor |
+| Open >30 days + `bug` + has repro steps | Add `P1-high` if no priority set |
+| No priority label at all | Apply `P3-low` as floor |
 
 ### gh Commands
 
 ```bash
 # Upgrade to critical
-gh issue edit $N --add-label "priority/critical"
+gh issue edit $N --add-label "P0-critical"
 gh issue comment $N --body "Priority escalated to critical: security issues are automatically assigned critical priority per triage policy."
 
 # Mark stale

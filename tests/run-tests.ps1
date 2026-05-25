@@ -154,6 +154,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running issue triage script tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'issue-triage-script-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Issue triage script tests failed' -ForegroundColor Red
+    Write-FailureLog 'issue-triage-script-tests'
+    exit 1
+}
+
 Write-Host 'Running data workload tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'data-workload-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
