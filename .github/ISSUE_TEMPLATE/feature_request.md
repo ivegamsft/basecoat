@@ -46,6 +46,6 @@ Please ensure the following labels are applied:
 - `priority:high` if high business value
 - `priority:medium` if moderate impact
 - `priority:low` if nice-to-have
-- Sprint label if assigned: `sprint-1`, `sprint-2`, etc.
+- Sprint label: `sprint:<number>` (for example, `sprint:24`)
 
 See [`GOVERNANCE.md`](../../docs/GOVERNANCE.md#labels) for complete label taxonomy.

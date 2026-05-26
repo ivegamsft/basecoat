@@ -182,6 +182,12 @@ PRIORITY_LOW="P3-low"
 PRIORITY_LABELS=("$PRIORITY_CRITICAL" "$PRIORITY_HIGH" "$PRIORITY_MEDIUM" "$PRIORITY_LOW" "priority/critical" "priority/high" "priority/medium" "priority/low")
 BAD_TITLES=("bug" "fix" "issue" "help" "todo" "test" "asdf" "qwerty" "untitled" "new issue" "please fix" "broken" "error")
 
+has_sprint_label() {
+  local labels_csv="$1"
+  echo "$labels_csv" | grep -qiE '(^|,)sprint[:/\-]?[0-9]+($|,)' && return 0
+  return 1
+}
+
 # ---------------------------------------------------------------------------
 # Process each issue
 # ---------------------------------------------------------------------------
@@ -287,14 +293,25 @@ for i in $(seq 0 $((ISSUE_COUNT - 1))); do
   # -------------------------------------------------------------------------
   if [[ "$IS_OPEN" == "false" ]] && \
      ! echo "$LABELS" | grep -qE "wontfix|duplicate|invalid"; then
-    LINKED_PRS=$(gh pr list --repo "$REPO" --state merged \
+    CLOSING_PRS=$(gh pr list --repo "$REPO" --state merged \
       --search "closes #$N fixes #$N resolves #$N" \
       --json number 2>/dev/null || echo "[]")
-    PR_COUNT=$(echo "$LINKED_PRS" | jq 'length')
-    if [[ "$PR_COUNT" -eq 0 ]]; then
-      reopen_issue "$N" "Closed without merged PR or resolution evidence" \
-        "Reopening: no merged pull request was found that closes this issue. If resolved another way, please add a comment with the evidence."
-      add_label "$N" "needs-verification" "No linked PR found"
+    CLOSING_PR_COUNT=$(echo "$CLOSING_PRS" | jq 'length')
+
+    MENTIONED_PRS=$(gh pr list --repo "$REPO" --state merged \
+      --search "#$N" \
+      --json number 2>/dev/null || echo "[]")
+    MENTIONED_PR_COUNT=$(echo "$MENTIONED_PRS" | jq 'length')
+
+    if [[ "$CLOSING_PR_COUNT" -eq 0 ]]; then
+      if [[ "$MENTIONED_PR_COUNT" -gt 0 ]]; then
+        add_label "$N" "needs-verification" "Merged PR mentions issue but no closing keyword"
+        post_comment "$N" "A merged pull request appears to reference this issue, but no closing keyword (\`Closes #$N\`, \`Fixes #$N\`, or \`Resolves #$N\`) was found. Please backfill explicit linkage or add a comment with the delivery PR URL." "missing explicit PR closing linkage"
+      else
+        reopen_issue "$N" "Closed without merged PR or resolution evidence" \
+          "Reopening: no merged pull request was found that closes this issue. If resolved another way, please add a comment with the evidence."
+        add_label "$N" "needs-verification" "No linked PR found"
+      fi
     fi
   fi
 
@@ -359,6 +376,11 @@ for i in $(seq 0 $((ISSUE_COUNT - 1))); do
         post_comment "$N" "Priority escalated to **critical**: security issues are automatically assigned critical priority per triage policy." "auto-escalate security"
       else
         add_label "$N" "needs-triage" "Missing priority label"
+      fi
+
+      if [[ "$HAS_DUPLICATE" == "false" ]] && ! has_sprint_label "$LABELS"; then
+        add_label "$N" "needs-triage" "Missing sprint label"
+        post_comment "$N" "This issue is missing a sprint label. Please add one using the \`sprint:<number>\` format (for example, \`sprint:24\`) so it can be included in sprint mapping and release-note reporting." "missing sprint label"
       fi
     fi
   fi

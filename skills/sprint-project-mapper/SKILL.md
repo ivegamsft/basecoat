@@ -37,7 +37,7 @@ Use this skill to convert scattered issues and PRs into statistically meaningful
 
 | Script | Purpose |
 |---|---|
-| [`scripts/map-projects.ps1`](scripts/map-projects.ps1) | PowerShell mapper for Windows/macOS/Linux with `gh` CLI |
+| [`scripts/map-projects.ps1`](scripts/map-projects.ps1) | PowerShell mapper for Windows/macOS/Linux with `gh` CLI (`-NoLabelWarning` suppresses unmapped-label warning) |
 | [`scripts/map-projects.sh`](scripts/map-projects.sh) | Bash equivalent for Linux/macOS |
 
 ## Group Significance (Default)
@@ -49,10 +49,11 @@ A group is meaningful if it satisfies at least one breadth threshold and one act
 
 Groups failing thresholds are merged into nearest valid group when similarity >0.65, else reported as residual.
 
+Release-note output requires at least one linked merged PR; significant groups without linked PRs are reported under linkage-gap audit.
+
 ## Agent Pairing
 
 - `sprint-project-mapper` for project grouping and debate outcomes.
 - `backlog-burndown` for velocity and spillover analysis.
 - `issue-triage` for quality cleanup before metric baselining.
 - `sprint-planner` to convert mapped groups into next-sprint commitments.
-

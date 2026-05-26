@@ -84,6 +84,11 @@ function Has-Label {
     return (Get-LabelNames $issue) -contains $label
 }
 
+function Has-SprintLabel {
+    param([string[]] $labels)
+    return (@($labels | Where-Object { $_ -match '^sprint[:/\-]?\d+$' }).Count -gt 0)
+}
+
 function Add-Label {
     param([int] $N, [string] $label, [string] $reason)
     Write-Host "  [+label] #$N ← $label ($reason)" -ForegroundColor Yellow
@@ -301,13 +306,23 @@ foreach ($issue in $allIssues) {
     # Check 3: Closed Issue Verification
     # -----------------------------------------------------------------------
     if (-not $isOpen -and $issue.closedAt -and $labels -notcontains "wontfix" -and $labels -notcontains "duplicate" -and $labels -notcontains "invalid") {
-        $linkedPRs = gh pr list --repo $Script:Repo --state merged `
+        $closingPRs = gh pr list --repo $Script:Repo --state merged `
             --search "closes #$N OR fixes #$N OR resolves #$N" `
             --json number,title 2>$null | ConvertFrom-Json
-        if (-not $linkedPRs -or $linkedPRs.Count -eq 0) {
-            Reopen-Issue $N "Closed without merged PR or resolution evidence" `
-                "Reopening: no merged pull request was found that closes this issue. If it was resolved another way, please add a comment with the commit or evidence of resolution."
-            Add-Label $N "needs-verification" "No linked PR found"
+
+        $mentionedPRs = gh pr list --repo $Script:Repo --state merged `
+            --search "#$N" `
+            --json number,title 2>$null | ConvertFrom-Json
+
+        if (-not $closingPRs -or $closingPRs.Count -eq 0) {
+            if ($mentionedPRs -and $mentionedPRs.Count -gt 0) {
+                Add-Label $N "needs-verification" "Merged PR mentions issue but does not use closing keyword"
+                Post-Comment $N "A merged pull request appears to reference this issue, but no closing keyword was found. Please backfill explicit linkage using Closes/Fixes/Resolves for this issue number, or add a comment with the delivery PR URL." "missing explicit PR closing linkage"
+            } else {
+                Reopen-Issue $N "Closed without merged PR or resolution evidence" `
+                    "Reopening: no merged pull request was found that closes this issue. If it was resolved another way, please add a comment with the commit or evidence of resolution."
+                Add-Label $N "needs-verification" "No linked PR found"
+            }
         }
     }
 
@@ -368,6 +383,11 @@ foreach ($issue in $allIssues) {
         }
     }
 
+    if ($isOpen -and -not $hasDuplicate -and -not (Has-SprintLabel -labels $labels)) {
+        Add-Label $N "needs-triage" "Missing sprint label"
+        Post-Comment $N "This issue is missing a sprint label. Please add one using the sprint:<number> format (for example, sprint:24) so it can be included in sprint mapping and release-note reporting." "missing sprint label"
+    }
+
     # -----------------------------------------------------------------------
     # Check 5: Title Quality
     # -----------------------------------------------------------------------
@@ -391,7 +411,8 @@ foreach ($issue in $allIssues) {
         $referencedIssue = $matches[1]
         $hasRelKeyword = $body -match '(?i)(blocked by|depends on|part of|closes|fixes|resolves|duplicate of|related to)'
         if (-not $hasRelKeyword) {
-            Post-Comment $N "This issue references #$referencedIssue without a relationship keyword. Consider adding one of: ``Blocked by #$referencedIssue``, ``Depends on #$referencedIssue``, ``Part of #$referencedIssue``, or ``Related to #$referencedIssue``." "missing relationship keyword"
+            $relationshipHint = "This issue references issue $referencedIssue without a relationship keyword. Add one of: Blocked by issue $referencedIssue, Depends on issue $referencedIssue, Part of issue $referencedIssue, or Related to issue $referencedIssue."
+            Post-Comment $N $relationshipHint "missing relationship keyword"
         }
         if ($body -match '(?i)blocked by #(\d+)') {
             Add-Label $N "blocked" "Blocked by #$($matches[1])"

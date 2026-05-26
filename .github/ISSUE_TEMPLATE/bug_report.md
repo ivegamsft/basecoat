@@ -48,6 +48,6 @@ Please ensure the following labels are applied:
 - `priority:high` if blocking work
 - `priority:medium` if affects normal workflow
 - `priority:low` if cosmetic or nice-to-have
-- Sprint label if assigned: `sprint-1`, `sprint-2`, etc.
+- Sprint label: `sprint:<number>` (for example, `sprint:24`)
 
 See [`GOVERNANCE.md`](../../docs/GOVERNANCE.md#labels) for complete label taxonomy.

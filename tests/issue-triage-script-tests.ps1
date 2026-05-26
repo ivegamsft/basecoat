@@ -312,6 +312,35 @@ Assert-Equal 'EncodingGibberish: clean=F, two corrupted=T, empty=F' `
     $gibberishOutput 'False,True,True,False'
 
 # ---------------------------------------------------------------------------
+# Test 13: Sprint label policy requires sprint:<number>
+# ---------------------------------------------------------------------------
+Write-Host '  Test 13: Sprint label policy detects missing sprint labels...'
+
+$sprintScript = @'
+function Has-SprintLabel {
+    param([string[]] $labels)
+    return (@($labels | Where-Object { $_ -match '^sprint[:/\-]?\d+$' }).Count -gt 0)
+}
+$results = @(
+    (Has-SprintLabel @("bug","sprint:24")),
+    (Has-SprintLabel @("bug","sprint-24")),
+    (Has-SprintLabel @("bug","needs-triage"))
+)
+$results -join ","
+'@
+
+$sprintOutput = & pwsh -NoProfile -Command $sprintScript
+Assert-Equal 'Has-SprintLabel matches sprint label formats and rejects missing label' $sprintOutput 'True,True,False'
+
+# ---------------------------------------------------------------------------
+# Test 14: Closed-issue verification checks PR mentions fallback
+# ---------------------------------------------------------------------------
+Write-Host '  Test 14: Script source includes PR mention fallback query...'
+
+$psContent14 = Get-Content $scriptPath -Raw
+Assert-True 'Closed verification uses fallback PR mention search (#N)' ($psContent14 -match '--search "#\$N"')
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 Write-Host ""

@@ -4,12 +4,14 @@ set -euo pipefail
 REPO=""
 LIMIT=300
 MERGE_THRESHOLD=0.65
+NO_LABEL_WARNING=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --repo) REPO="$2"; shift 2 ;;
     --limit) LIMIT="$2"; shift 2 ;;
     --merge-threshold) MERGE_THRESHOLD="$2"; shift 2 ;;
+    --no-label-warning) NO_LABEL_WARNING=true; shift ;;
     *) echo "Unknown arg: $1" >&2; exit 1 ;;
   esac
 done
@@ -132,11 +134,23 @@ echo "=== Release-note-ready groups ==="
 jq -r '
   .[]
   | .significant = (((.issue_count >= 5 or .merged_pr_count >= 3) and (.loc_changed >= 200 or (.group|test("sprint:|wave:|project:")))))
-  | select(.significant == true)
+  | select(.significant == true and .merged_pr_count > 0)
   | "- **\(.group)**: \(.issue_count) issues, \(.merged_pr_count) merged PRs, \(.loc_changed) LOC changed."
 ' "$TMP/report.json"
+
+if [[ "$NO_LABEL_WARNING" != "true" ]]; then
+  TOTAL_ISSUES=$(jq 'length' "$TMP/issues.json")
+  UNMAPPED_ISSUES=$(jq '[.[] | (.labels // []) | map(.name | ascii_downcase) | map(select(test("^sprint[:/\\-]?[0-9]+$|^wave[:/\\-]?[0-9]+$|^(project|proj|epic|initiative)[:/\\-].+$"))) | length | select(. == 0)] | length' "$TMP/issues.json")
+  if [[ "$TOTAL_ISSUES" -gt 0 ]]; then
+    UNMAPPED_PCT=$(awk -v u="$UNMAPPED_ISSUES" -v t="$TOTAL_ISSUES" 'BEGIN { printf "%.1f", (u*100)/t }')
+    if awk -v pct="$UNMAPPED_PCT" 'BEGIN { exit !(pct >= 30.0) }'; then
+      echo ""
+      echo "WARNING: NO-LABEL-WARNING: ${UNMAPPED_PCT}% of scanned issues are unmapped (no sprint/wave/project labels)." >&2
+      echo "Recommendation: enforce sprint labels in issue templates and run issue-triage to flag missing sprint labels."
+    fi
+  fi
+fi
 
 echo ""
 echo "=== Debate Guidance ==="
 echo "Use references/metrics-formulas.md similarity + confidence rules to decide merge vs split for adjacent groups."
-

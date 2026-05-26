@@ -126,6 +126,7 @@ gh issue edit $N --add-label "needs-verification"
 |----------|----------|-------------|
 | Type | 1 | `bug`, `enhancement`, `documentation`, `chore`, `security`, `question` |
 | Priority | 1 | `P0-critical`, `P1-high`, `P2-medium`, `P3-low` |
+| Sprint | 1 | `sprint:<number>` |
 | Area | 0–1 | `area/*` labels defined in repo |
 
 Legacy `priority/*` labels are accepted during bulk scans for backward compatibility.
@@ -152,7 +153,7 @@ gh issue edit $N --add-label "bug,P1-high"
 
 # Flag for manual triage
 gh issue edit $N --add-label "needs-triage"
-gh issue comment $N --body "This issue is missing required labels:\n- [ ] Type: bug / enhancement / documentation / chore / security / question\n- [ ] Priority: P0-critical / P1-high / P2-medium / P3-low"
+gh issue comment $N --body "This issue is missing required labels:\n- [ ] Type: bug / enhancement / documentation / chore / security / question\n- [ ] Priority: P0-critical / P1-high / P2-medium / P3-low\n- [ ] Sprint: sprint:<number>"
 ```
 
 ---

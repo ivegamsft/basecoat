@@ -43,9 +43,10 @@ Please apply **at least one label from each category below:**
 - `priority:medium` — Important (4 hour SLA)
 - `priority:low` — Nice-to-have (1 week SLA)
 
-**Sprint** (if assigned):
+**Sprint** (required):
 
-- `sprint-1`, `sprint-2`, `sprint-3`, `sprint-4`
+- `sprint:<number>` (for example, `sprint:24`)
+- Use `needs-triage` if sprint is unknown at creation time
 
 **Technology** (optional):
 
