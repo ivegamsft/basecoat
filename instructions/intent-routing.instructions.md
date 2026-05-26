@@ -193,10 +193,10 @@ Use `@rca` for deep-dive analysis once the active incident is stabilized.
 
 | Prefix | Skills to consult |
 |---|---|
-| `bug:` | `code-review`, `error-kb` |
+| `bug:` | `code-review`, `build-failure-triage` |
 | `feature:` | `architecture`, `agent-design` (for new agents/skills) |
 | `audit:` | `security`, `code-review`, `github-security-posture` |
-| `plan:` | `architecture`, `documentation` |
+| `plan:` | `sprint-planner`, `architecture`, `documentation` |
 | `security:` | `security`, `github-security-posture` |
 | `perf:` | `performance-profiling` |
 | `docs:` | `documentation` |

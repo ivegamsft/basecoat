@@ -1676,6 +1676,14 @@
       "versionSource": "library"
     },
     {
+      "path": "skills/sprint-planner/SKILL.md",
+      "type": "skill",
+      "sha": "6051fb2fb1fdadf2c8fbc3adda862996a5b06f5a",
+      "version": null,
+      "effectiveVersion": "3.25.0",
+      "versionSource": "library"
+    },
+    {
       "path": "skills/sprint-retrospective/SKILL.md",
       "type": "skill",
       "sha": "b5ae2ff1c3cdc6199f77fe01cc2194826ca8f86d",

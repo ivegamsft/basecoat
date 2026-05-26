@@ -79,6 +79,44 @@ function Test-AgentMetadataFreshness {
     }
 }
 
+function Test-IntentRoutingSkillReferences {
+    $intentRoutingPath = Join-Path (Get-Location) 'instructions/intent-routing.instructions.md'
+    if (-not (Test-Path $intentRoutingPath)) {
+        return
+    }
+
+    $content = Get-Content $intentRoutingPath -Raw
+    $sectionMatch = [regex]::Match(
+        $content,
+        '(?ms)## Prefix-to-Skill Routing\s*\r?\n\r?\n\| Prefix \| Skills to consult \|\r?\n\|---\|---\|\r?\n(?<rows>.*?)(?:\r?\n---|\z)'
+    )
+    if (-not $sectionMatch.Success) {
+        return
+    }
+
+    $rowLines = $sectionMatch.Groups['rows'].Value -split '\r?\n'
+    foreach ($line in $rowLines) {
+        if ($line -notmatch '^\|\s*`[^`]+`\s*\|\s*(.+?)\s*\|$') {
+            continue
+        }
+
+        $skillsCell = $matches[1]
+        $skillRefs = @([regex]::Matches($skillsCell, '`([^`]+)`') | ForEach-Object { $_.Groups[1].Value.Trim() })
+
+        foreach ($skillRef in $skillRefs) {
+            if (-not $skillRef) {
+                continue
+            }
+
+            $skillPath = Join-Path (Get-Location) "skills/$skillRef/SKILL.md"
+            if (-not (Test-Path $skillPath)) {
+                Write-Host "ERROR: instructions/intent-routing.instructions.md references missing skill '$skillRef' in Prefix-to-Skill Routing" -ForegroundColor Red
+                $script:errors++
+            }
+        }
+    }
+}
+
 foreach ($file in $files) {
     $lines = Get-Content $file.FullName -TotalCount 50
     $content = Get-Content $file.FullName -Raw
@@ -184,6 +222,7 @@ catch {
 }
 
 Test-AgentMetadataFreshness
+Test-IntentRoutingSkillReferences
 
 if ($errors -gt 0) {
     throw "Validation failed with $errors error(s)"
