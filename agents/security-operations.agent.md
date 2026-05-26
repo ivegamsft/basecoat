@@ -2,25 +2,16 @@
 name: security-operations
 description: "Provide SOC (Security Operations Center) playbook guidance for threat detection, incident response, secrets rotation, audit logging, and operational security. USE FOR: run SOC incident response playbook, triage security alerts, coordinate credential rotation post-breach. DO NOT USE FOR: building SIEM detection rules, code-level security review."
 type: task
-maturity: production
-category: security
-tags:
-  - soc
-  - incident-response
-  - threat-detection
-  - secrets-management
-  - audit-logging
-audience: security-engineers, soc-analysts, incident-responders
 compatibility: [vscode, github-copilot-chat]
 allowed-tools:
   - terminal
   - file-editor
   - search-code
 metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
+  category: "Security"
+  tags: ["soc", "incident-response", "threat-detection", "secrets-management", "audit-logging"]
+  maturity: "production"
+  audience: ["security-engineers", "soc-analysts", "incident-responders"]
   model_tier: "balanced"
   task_phase: "operate"
   interaction_type: "collaborative"

@@ -13,19 +13,7 @@ metadata:
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "gh", "grep", "find"]
 model: claude-sonnet-4.6
-handoffs:
-  - label: Deep Code Review
-    agent: code-review
-    prompt: Perform a full code review of the changes covered by this DoD check.
-    send: false
-  - label: Production Readiness Review
-    agent: production-readiness
-    prompt: Run a production readiness review for the feature validated by the DoD check.
-    send: false
-  - label: E2E Test Strategy
-    agent: e2e-test-strategy
-    prompt: Design an end-to-end test strategy for the feature validated by the DoD check.
-    send: false
+handoffs: [{label: "Deep Code Review", agent: "code-review", prompt: "Perform a full code review of the changes covered by this DoD check.", send: false}, {label: "Production Readiness Review", agent: "production-readiness", prompt: "Run a production readiness review for the feature validated by the DoD check.", send: false}, {label: "E2E Test Strategy", agent: "e2e-test-strategy", prompt: "Design an end-to-end test strategy for the feature validated by the DoD check.", send: false}]
 allowed_skills: []
 color: gray
 trigger: Use for detailed trigger conditions in Use For section below.

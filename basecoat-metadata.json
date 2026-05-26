@@ -1,7 +1,7 @@
 {
   "$schema": "basecoat-metadata-schema",
   "version": "3.26.0",
-  "generated": "2026-05-23",
+  "generated": "2026-05-26",
   "categories": {
     "AI & Development": {
       "label": "AI & Development",
@@ -1934,6 +1934,74 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/sprint-project-mapper.agent.md",
+      "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "change-isolation-architect",
+      "description": "Designs layered CI/CD isolation so independent domains (for example mobile, database, portal, extension, and infra) can evolve and release separately without cross-triggered pipeline noise.",
+      "category": "Meta",
+      "keywords": [
+        "ci-cd",
+        "workflow-isolation",
+        "path-filters",
+        "release-lanes",
+        "monorepo"
+      ],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/change-isolation-architect.agent.md",
+      "model": "gpt-5.3-codex",
+      "argumentHint": ""
+    },
+    {
+      "name": "ci-audit",
+      "description": "CI/CD audit agent for GitHub organization auditing. USE FOR: auditing GitHub organization CI/CD settings, enterprise policies, runner configurations, dependencies, and installed apps. DO NOT USE FOR: writing application code, general code reviews, infrastructure-as-code development unrelated to CI/CD auditing.",
+      "category": "Meta",
+      "keywords": [
+        "ci-cd",
+        "audit",
+        "performance",
+        "cost-optimization",
+        "reliability"
+      ],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/ci-audit.agent.md",
+      "model": "claude-haiku-4.5",
+      "argumentHint": ""
+    },
+    {
+      "name": "failure-pattern-process",
+      "description": "Failure pattern process agent for evidence-first mining, raw logging, triage, and enhancement planning. USE FOR: mining failure signals across issues/PRs/CI/logs/incidents, producing append-only raw findings logs, classifying common versus repo-specific patterns with rationale, and building prioritized enhancement plans with early-detection gates. DO NOT USE FOR: implementing feature code changes, auto-remediating production incidents, or bypassing evidence and gate requirements.",
+      "category": "Meta",
+      "keywords": [
+        "failure-patterns",
+        "triage",
+        "rca",
+        "quality-gates",
+        "operations"
+      ],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/failure-pattern-process.agent.md",
+      "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "task-scope-validator",
+      "description": "Task scope validator for sub-agent dispatch. Analyzes task prompts to detect overscope, ambiguity, and risk before forwarding to explore, task, or general-purpose agents. USE FOR: validate task prompts pre-dispatch, classify tasks as automatable/gather-only/defer, identify scope refinement needs. DO NOT USE FOR: executing tasks, writing implementation code, or modifying task prompts without user feedback.",
+      "category": "Meta",
+      "keywords": [
+        "scope-validation",
+        "task-classification",
+        "agent-dispatch",
+        "guardrails",
+        "governance"
+      ],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/task-scope-validator.agent.md",
       "model": "claude-sonnet-4.6",
       "argumentHint": ""
     }

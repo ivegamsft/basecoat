@@ -1,0 +1,19 @@
+name: "task-decomposition-routing"
+description: "Routing evaluation — validates trigger activation for the task-decomposition skill."
+skill: "skills/task-decomposition/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Break this migration into parallel sub-agent tasks and define dependencies."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Validate my sub-agent prompts for context completeness before dispatch."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Classify this work into automatable, research, and deferred buckets."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Fix this one failing unit test in the parser."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Design a brand-new product roadmap for next year."
+    expect_activation: false

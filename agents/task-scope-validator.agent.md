@@ -45,10 +45,12 @@ Run each check in order. Collect all findings before determining disposition.
 #### Check 1: Single Issue / Single Outcome
 
 **Pass criteria:**
+
 - Task targets one GitHub issue, PR, feature, or technical problem.
 - Success is tied to a single, identifiable outcome (e.g., "resolve issue #42", "add authentication to the API").
 
 **Fail indicators:**
+
 - Task asks to "research 5 different topics" or "analyze all services".
 - Multiple independent outcomes required (e.g., "fix bugs AND refactor AND add tests" where each is a self-contained project).
 - Open-ended exploration without a bounding issue or acceptance criteria.
@@ -56,11 +58,13 @@ Run each check in order. Collect all findings before determining disposition.
 #### Check 2: Deterministic Path
 
 **Pass criteria:**
+
 - Steps to completion are known or strongly inferrable (e.g., "code review a specific PR", "query database for X").
 - Task can be decomposed into repeatable, predictable substeps.
 - Success does not depend on subjective judgment or opinion polling.
 
 **Fail indicators:**
+
 - Task requires discovering unknown unknowns ("explore the codebase to find problems").
 - Success hinges on human creativity or design choice (e.g., "design the best API for this").
 - Outcome is conditional on external events or user feedback loops.
@@ -68,11 +72,13 @@ Run each check in order. Collect all findings before determining disposition.
 #### Check 3: Success Measurability
 
 **Pass criteria:**
+
 - Success is objectively verifiable (e.g., "PR merged", "test passes", "file created", "output matches schema").
 - Acceptance criteria are explicit or strongly implied.
 - Failure is clear and testable.
 
 **Fail indicators:**
+
 - Success is vague ("improve the system", "make better tests").
 - Requires subjective approval ("author decides it's good enough").
 - Acceptance criteria missing or unmeasurable.
@@ -80,11 +86,13 @@ Run each check in order. Collect all findings before determining disposition.
 #### Check 4: Time-Bounded (<5 min for explore, <60 min for task)
 
 **Pass criteria:**
+
 - Estimated execution time is <5 minutes for explore agents or <60 minutes for task/general-purpose agents.
 - Task can complete without waiting for external systems or human input.
 - No indefinite loops or open-ended dependencies.
 
 **Fail indicators:**
+
 - Estimated time >5 min for explore or >60 min for task dispatch.
 - Task requires back-and-forth user confirmation.
 - Depends on long-running processes (deployments, test suites, builds).
@@ -96,6 +104,10 @@ Based on all checks, classify as one of:
 - **`automatable`** — All checks pass. Task is ready to dispatch as-is. Low risk of overscope.
 - **`gather-findings-only`** — Checks 1–3 pass, but time is borderline or task is exploration-only (no execution). Safe for explore agent but not task execution.
 - **`defer`** — One or more checks fail significantly. Task needs refinement or human decision before dispatch.
+
+## Output
+
+Return a structured JSON classification payload with check results, recommended agent, risks, and remediation guidance.
 
 ### Phase 4 — Output JSON
 
@@ -170,11 +182,13 @@ Examples:
 ## Example: Good Task Prompt
 
 **Input:**
-```
+
+```text
 scope-check: Review PR #123 and post a code review comment on the Authentication.ts file, flagging any missing error handling.
 ```
 
 **Expected output:**
+
 ```json
 {
   "task_id": "#123",
@@ -199,11 +213,13 @@ scope-check: Review PR #123 and post a code review comment on the Authentication
 ## Example: Bad Task Prompt
 
 **Input:**
-```
+
+```text
 scope-check: Analyze our entire codebase to find performance issues and suggest architectural improvements.
 ```
 
 **Expected output:**
+
 ```json
 {
   "task_id": null,
