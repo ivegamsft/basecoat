@@ -154,6 +154,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running cleanup branch automation tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'cleanup-branches-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Cleanup branch automation tests failed' -ForegroundColor Red
+    Write-FailureLog 'cleanup-branches-tests'
+    exit 1
+}
+
 Write-Host 'Running issue triage script tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'issue-triage-script-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

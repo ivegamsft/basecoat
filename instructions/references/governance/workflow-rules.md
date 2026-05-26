@@ -27,6 +27,7 @@ Run this sequence for every sprint closeout batch:
    - Merge only verified PRs using squash merge per repo policy.
 3. **Prune branches/worktrees**
    - Delete merged local/remote branches and stale worktree registrations.
+   - Run automated branch audit in dry-run first; enable deletions only after review.
 4. **Close/report**
    - Close completed issues and post a concise sprint close summary with outcomes and carry-forward items.
 
@@ -53,6 +54,10 @@ gh pr checks <pr-number>
 gh pr merge <pr-number> --squash --delete-branch
 
 # 3) Prune branches/worktrees
+gh workflow run sprint-closeout-branch-audit.yml -f stale_days=30 -f apply_changes=false
+gh run watch
+gh workflow run sprint-closeout-branch-audit.yml -f stale_days=30 -f apply_changes=true
+gh run watch
 git branch --merged main
 git branch -d <local-branch>
 git push origin --delete <remote-branch>
