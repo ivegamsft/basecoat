@@ -57,7 +57,14 @@ jobs:
           git checkout -B "${BRANCH}"
           git add docs/reference/TOKEN_CONTEXT_INVENTORY.md
           git commit -m "chore(docs): auto-update token context inventory [skip ci]"
-          git push origin "${BRANCH}" --force-with-lease
+          REMOTE_SHA="$(git ls-remote --heads origin "${BRANCH}" | awk '{print $1}')"
+          if [ -n "${REMOTE_SHA}" ]; then
+            git fetch --no-tags origin "${BRANCH}"
+            LEASE_ARG="--force-with-lease=refs/heads/${BRANCH}:${REMOTE_SHA}"
+          else
+            LEASE_ARG="--force-with-lease=refs/heads/${BRANCH}:"
+          fi
+          git push origin "HEAD:refs/heads/${BRANCH}" ${LEASE_ARG}
 
       - name: Open or update pull request
         if: steps.changes.outputs.changed == 'true'
