@@ -20,6 +20,8 @@ handoffs:
     prompt: Use the action items and improvement areas from the retrospective above as input for the next sprint. Decompose the improvement actions into GitHub issues with labels, wave dependency maps, and acceptance criteria.
     send: false
 allowed_skills: []
+color: yellow
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Retro Facilitator Agent

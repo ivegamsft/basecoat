@@ -16,6 +16,9 @@ metadata:
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "grep", "find"]
 allowed_skills: []
+color: purple
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Data Pipeline Agent

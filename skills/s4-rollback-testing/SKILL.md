@@ -1,6 +1,6 @@
 ---
 name: s4-rollback-testing
-description: "Use when designing or running S4 rollback drills, rollback verification, or recovery smoke tests. This skill makes rollback a practiced S4 habit by sequencing deploy, wait, rollback, verify, and smoke-test steps."
+description: "Designs and runs S4 rollback drills and recovery tests. USE FOR: building repeatable rollback rehearsal workflows, verifying rollback activation after soak windows, sequencing deploy/wait/rollback/verify/smoke-test steps, documenting drill outcomes for readiness checks. DO NOT USE FOR: skipping rollback verification, treating deploy success as rollback proof, implementing application features, drafting unrelated communications."
 compatibility:
   editors:
     - vscode

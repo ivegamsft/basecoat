@@ -14,6 +14,9 @@ metadata:
 allowed-tools: ["bash", "git", "terraform", "kubernetes"]
 model: gpt-5.3-codex
 allowed_skills: []
+color: gray
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Chaos Engineering Agent

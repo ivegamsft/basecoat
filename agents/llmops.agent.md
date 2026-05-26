@@ -14,6 +14,9 @@ metadata:
 allowed-tools: ["bash", "git", "terraform", "python", "azure-cli", "kubernetes"]
 model: claude-sonnet-4.6
 allowed_skills: []
+color: pink
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # LLMOps Agent

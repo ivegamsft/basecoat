@@ -2,7 +2,7 @@
 name: takt-time-tracker
 description: "Use when measuring dwell time at each station and flagging SLA breaches. USE FOR: compute median and p95 time at S1-S5, identify bottlenecks, and export dashboard-ready JSON. DO NOT USE FOR: dispatching work or making replanning decisions."
 type: monitor
-color: cyan
+color: yellow
 tools: [read_file, run_terminal_command]
 handoffs:
   - label: Analyze Bottlenecks
@@ -26,6 +26,7 @@ allowed-tools: ["bash", "git", "gh", "grep", "find"]
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
 allowed_skills: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 # Takt Time Tracker
 

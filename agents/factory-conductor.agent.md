@@ -19,6 +19,9 @@ allowed-tools: ["bash", "git", "gh", "grep", "find"]
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
 allowed_skills: []
+color: gray
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 # Factory Conductor
 

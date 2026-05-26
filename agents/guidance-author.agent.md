@@ -19,6 +19,8 @@ handoffs:
     prompt: Validate the guidance draft produced above. Check lint rules, required sections, frontmatter schema, and BaseCoat conventions. Return a pass/fail verdict with actionable fixes.
     send: false
 allowed_skills: []
+color: gray
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Guidance Author Agent

@@ -14,6 +14,9 @@ metadata:
 allowed-tools: ["bash", "git", "grep", "find", "node", "npm"]
 model: gpt-5.3-codex
 allowed_skills: []
+color: green
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Frontend Development Agent

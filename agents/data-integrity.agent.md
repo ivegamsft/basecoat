@@ -1,6 +1,6 @@
 ---
 
-name: Data Integrity Architect
+name: Data Integrity
 description: >
   Distributed data integrity patterns — eventual consistency strategies,
   conflict resolution, ACID compliance, backup verification, and data recovery procedures.
@@ -17,6 +17,9 @@ metadata:
 allowed-tools: ["bash", "git", "grep", "find"]
 model: claude-sonnet-4.6
 allowed_skills: []
+color: purple
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Data Integrity Architect Agent

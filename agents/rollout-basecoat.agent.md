@@ -14,6 +14,9 @@ metadata:
 allowed-tools: ["bash", "git", "gh"]
 model: claude-haiku-4.5
 allowed_skills: []
+color: gray
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Roll Out BaseCoat Agent

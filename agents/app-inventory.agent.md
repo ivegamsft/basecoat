@@ -25,6 +25,8 @@ handoffs:
     prompt: Use the inventory and migration complexity assessment above to begin the modernization plan. Apply the strangler fig pattern to the components identified as high-complexity migration targets.
     send: false
 allowed_skills: []
+color: gray
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # App Inventory Agent

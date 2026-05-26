@@ -11,7 +11,7 @@ This file lists all available agents in the BaseCoat framework.
 - [VS Code Harness Benchmarks](./VS_CODE_HARNESS_BENCHMARKS.md)
 - [VS Code Agent Mode Tool Confirmation Policy](../reference/guardrails/tool-confirmation-policy.md)
 
-> **82 agents** available
+> **86 agents** available
 
 | Agent | Description |
 |---|---|
@@ -95,5 +95,6 @@ This file lists all available agents in the BaseCoat framework.
 | [sre-engineer](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/sre-engineer.agent.md) | Site reliability engineering agent for SLOs, error budgets, incident response, chaos engineering, and toil reduction. Use when improving service reliability and resilience. |
 | [strategy-to-automation](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/strategy-to-automation.agent.md) | Use when converting manual test paths into automation candidates. Maps paths to smoke tests, regression tiers, or agent specs. ALWAYS files a GitHub Issue for every automation candidate identified. |
 | [supply-chain-security](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/supply-chain-security.agent.md) | Secure software supply chain with artifact signing, SBOM generation, and provenance tracking. USE FOR: generate SBOM for a release build, sign artifacts with Sigstore and verify provenance, assess and improve SLSA com... |
+| [task-scope-validator](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/task-scope-validator.agent.md) | Task scope validator for sub-agent dispatch. Analyzes task prompts to detect overscope, ambiguity, and risk before forwarding to explore, task, or general-purpose agents. USE FOR: validate task prompts pre-dispatch, classify tasks as automatable/gather-only/defer, identify scope refinement needs. |
 | [tech-writer](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/tech-writer.agent.md) | Use when creating or improving technical documentation, API docs, runbooks, tutorials, ADRs, changelogs, or implementing docs-as-code workflows. |
 | [ux-designer](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/ux-designer.agent.md) | UX design agent for user journey mapping, wireframe specs, component design, and accessibility audits. Use when designing user experiences, evaluating usability, or auditing interfaces for WCAG compliance. |

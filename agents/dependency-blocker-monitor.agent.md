@@ -15,6 +15,9 @@ allowed-tools: ["bash", "git", "gh", "azure-cli"]
 model: claude-sonnet-4.6
 fallback_models: [gpt-5.4-mini]
 allowed_skills: ["dependency-blocker-monitoring", "bom-validation", "factory-state-machine"]
+color: red
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 # Dependency Blocker Monitor
 

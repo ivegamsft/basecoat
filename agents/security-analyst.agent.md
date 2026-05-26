@@ -14,6 +14,9 @@ metadata:
 allowed-tools: ["bash", "git", "grep", "find"]
 model: gpt-5.3-codex
 allowed_skills: []
+color: red
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Security Analyst Agent

@@ -14,6 +14,9 @@ metadata:
 allowed-tools: ["bash", "sql", "terraform", "git", "azure-cli", "postgresql-cli"]
 model: claude-sonnet-4.6
 allowed_skills: []
+color: purple
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Database Migration Agent

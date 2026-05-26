@@ -13,6 +13,9 @@ model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
 allowed_skills: [issue-triage, backlog-burndown, sprint-management]
 visibility: public
+color: gray
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Issue Triage Agent

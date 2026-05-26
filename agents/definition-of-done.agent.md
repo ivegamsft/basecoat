@@ -27,6 +27,8 @@ handoffs:
     prompt: Design an end-to-end test strategy for the feature validated by the DoD check.
     send: false
 allowed_skills: []
+color: gray
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Definition of Done Agent

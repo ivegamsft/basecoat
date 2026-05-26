@@ -14,6 +14,9 @@ metadata:
 allowed-tools: ["bash", "git", "terraform", "kubernetes"]
 model: claude-sonnet-4.6
 allowed_skills: []
+color: blue
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # High-Availability & Resilience Architect Agent

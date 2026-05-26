@@ -11,6 +11,9 @@ metadata:
 allowed-tools: ["bash", "git", "grep", "glob", "powershell"]
 model: claude-sonnet-4.6
 allowed_skills: []
+color: indigo
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Instruction Auditor Agent

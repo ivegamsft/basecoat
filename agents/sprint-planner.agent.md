@@ -23,6 +23,8 @@ handoffs:
     agent: frontend-dev
     prompt: Begin implementation for the frontend issues from this sprint plan. Use the wave dependency map and acceptance criteria defined above as your guide.
     send: false
+color: yellow
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Sprint Planner Agent

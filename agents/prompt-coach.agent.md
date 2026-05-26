@@ -15,6 +15,8 @@ allowed-tools: ["bash", "git", "grep"]
 handoffs: ["agent:definition-of-done", "agent:code-reviewer"]
 model: gpt-5.3-codex
 allowed_skills: []
+color: pink
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Prompt Coach Agent

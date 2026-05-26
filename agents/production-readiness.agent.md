@@ -14,6 +14,9 @@ metadata:
 allowed-tools: ["bash", "git", "grep"]
 model: claude-sonnet-4.6
 allowed_skills: []
+color: yellow
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Production Readiness Agent

@@ -14,6 +14,9 @@ metadata:
 allowed-tools: ["bash", "git", "grep", "sql"]
 model: gpt-5.3-codex
 allowed_skills: []
+color: purple
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Data Tier Agent

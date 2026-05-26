@@ -16,6 +16,9 @@ metadata:
   task_phase: "operate"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "grep", "find"]
+color: red
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # GitHub Security Posture Agent

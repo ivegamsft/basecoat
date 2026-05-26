@@ -22,6 +22,9 @@ invocation_rules:
   - "Invoke when builds are red and the user asks for diagnosis, containment, or rapid recovery."
   - "Prefer smallest safe fix first, then follow with hardening recommendations."
 visibility: "internal"
+color: gray
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Broken Build Troubleshooter Agent

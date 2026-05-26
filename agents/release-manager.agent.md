@@ -14,6 +14,9 @@ metadata:
 allowed-tools: ["bash", "git", "gh", "grep"]
 model: claude-sonnet-4.6
 allowed_skills: []
+color: yellow
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Release Manager Agent

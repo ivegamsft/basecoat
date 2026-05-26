@@ -14,6 +14,9 @@ metadata:
 allowed-tools: ["bash", "git", "grep"]
 model: claude-haiku-4.5
 allowed_skills: []
+color: indigo
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Config Auditor Agent

@@ -19,6 +19,8 @@ handoffs:
     prompt: The guidance draft below failed reviewer validation. Address all FAIL items listed in the reviewer report, then produce a corrected draft.
     send: false
 allowed_skills: []
+color: gray
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Guidance Reviewer Agent

@@ -26,6 +26,9 @@ metadata:
   interaction_type: "collaborative"
 model: claude-sonnet-4.6
 allowed_skills: []
+color: red
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Security Operations Agent

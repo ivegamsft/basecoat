@@ -22,6 +22,8 @@ handoffs:
 invocation_rules:
   - "Invoke for release go/no-go meetings, launch gate reviews, and risk signoff ceremonies."
 visibility: "internal"
+color: yellow
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Release Readiness Chair Agent

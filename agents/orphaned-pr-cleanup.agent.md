@@ -22,6 +22,9 @@ invocation_rules:
   - "Invoke when user asks to clean stale PRs, unblock review queues, or close abandoned changes."
   - "Prefer batch triage with explicit status buckets: revive, close, escalate."
 visibility: "internal"
+color: gray
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Orphaned PR Cleanup Agent

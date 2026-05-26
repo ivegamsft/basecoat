@@ -14,6 +14,9 @@ metadata:
 allowed-tools: ["bash", "git", "azure-cli", "terraform", "powershell"]
 model: gpt-5.3-codex
 allowed_skills: []
+color: indigo
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Identity Architect Agent

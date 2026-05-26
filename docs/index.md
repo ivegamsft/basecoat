@@ -76,6 +76,7 @@ flowchart LR
 
 ## Operations (`docs/operations/`)
 
+- [operations/FLEET_DISPATCH_POLICY.md](operations/FLEET_DISPATCH_POLICY.md) — Guardrails and checklist for parallel sub-agent dispatch in fleet mode
 - [operations/RELEASE_PROCESS.md](operations/RELEASE_PROCESS.md) — How releases are cut and published
 - [operations/RELEASE_METRICS.md](operations/RELEASE_METRICS.md) — Release metrics and KPIs
 - [operations/OPERATIONAL_RUNBOOK.md](operations/OPERATIONAL_RUNBOOK.md) — Runbook for common operations

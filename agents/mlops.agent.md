@@ -14,6 +14,9 @@ metadata:
 allowed-tools: ["bash", "git", "python", "terraform", "kubernetes", "azure-cli"]
 model: gpt-5.3-codex
 allowed_skills: []
+color: pink
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # MLOps Agent

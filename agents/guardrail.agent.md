@@ -14,6 +14,9 @@ metadata:
 allowed-tools: ["bash", "git"]
 model: claude-sonnet-4.6
 allowed_skills: []
+color: gray
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Guardrail Agent

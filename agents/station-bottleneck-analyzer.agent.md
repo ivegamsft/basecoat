@@ -26,6 +26,7 @@ allowed-tools: ["bash", "git", "gh", "grep", "find"]
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
 allowed_skills: [takt-time-measurement]
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 # Station Bottleneck Analyzer
 

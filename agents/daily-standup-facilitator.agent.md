@@ -22,6 +22,8 @@ handoffs:
 invocation_rules:
   - "Invoke for daily standup facilitation, blocker extraction, or coordination handoff needs."
 visibility: "internal"
+color: yellow
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Daily Standup Facilitator Agent

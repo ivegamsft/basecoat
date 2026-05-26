@@ -14,6 +14,9 @@ metadata:
 allowed-tools: ["bash", "git", "grep", "find"]
 model: gpt-5.3-codex
 allowed_skills: []
+color: pink
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Agent Designer Agent

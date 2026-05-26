@@ -26,6 +26,8 @@ invocation_rules:
   - "Invoke when user asks to close a sprint, perform sprint burn-down closeout, or validate sprint completion readiness."
   - "Use checklist-first flow and require explicit evidence for merge, CI, errors, issues, and test status."
 visibility: "internal"
+color: indigo
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Sprint Closeout Auditor Agent

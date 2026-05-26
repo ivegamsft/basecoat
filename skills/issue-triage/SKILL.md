@@ -1,6 +1,6 @@
 ---
 name: issue-triage
-description: "Use when auditing GitHub issues for quality, validity, duplicate detection, label compliance, title integrity, relationship mapping, branch linkage, and priority enforcement. Provides structured checklists, triage workflows, and automation scripts."
+description: "Audits GitHub issues for quality, validity, duplicates, labels, and priority. USE FOR: backlog hygiene and duplicate detection, validating closed issues have resolution evidence, enforcing label/type/priority conventions, auditing titles and relationships. DO NOT USE FOR: implementing product features, writing deployment pipelines, editing application runtime code, running non-triage project planning."
 compatibility:
   editors:
     - vscode

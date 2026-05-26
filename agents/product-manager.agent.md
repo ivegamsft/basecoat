@@ -20,6 +20,8 @@ handoffs:
     prompt: Use the user stories and prioritization above as the sprint goal. Decompose them into GitHub issues with labels, wave dependency maps, agent assignments, and acceptance criteria.
     send: false
 allowed_skills: []
+color: yellow
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Product Manager Agent

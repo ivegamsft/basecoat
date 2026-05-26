@@ -14,6 +14,9 @@ metadata:
 allowed-tools: ["bash", "git", "grep", "python"]
 model: gpt-5.3-codex
 allowed_skills: []
+color: teal
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Performance Analyst Agent

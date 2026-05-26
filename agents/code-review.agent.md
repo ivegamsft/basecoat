@@ -19,6 +19,8 @@ handoffs:
     prompt: Perform a security review of the code reviewed above. Focus on critical/high findings and evaluate new endpoints/data flows for OWASP Top 10 vulnerabilities.
     send: false
 allowed_skills: []
+color: gray
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 <!-- markdownlint-disable MD041 -->

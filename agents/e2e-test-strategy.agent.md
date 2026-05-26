@@ -14,6 +14,9 @@ metadata:
 allowed-tools: ["bash", "git", "python", "docker"]
 model: claude-sonnet-4.6
 allowed_skills: []
+color: orange
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # E2E Test Strategy Agent

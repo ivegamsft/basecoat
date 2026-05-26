@@ -117,6 +117,7 @@
 | service-bus-migration | `skills/service-bus-migration/` | *(workflow only)* | — |
 | sprint-management | `skills/sprint-management/` | `sprint-planning-template.md`, `backlog-grooming-template.md`, `retrospective-template.md` | sprint-planner, retro-facilitator, product-manager, issue-triage |
 | sprint-retrospective | `skills/sprint-retrospective/` | *(workflow only)* | sprint-retrospective |
+| task-decomposition | `skills/task-decomposition/` | `complex-task-breakdown-template.md`, `automation-fitness-matrix.md`, `prompt-validation-checklist.md`, `examples/` | — |
 | ux | `skills/ux/` | `user-journey-template.md`, `wireframe-spec-template.md`, `component-spec-template.md`, `accessibility-audit-checklist.md` | ux-designer |
 | copilot-usage-analytics | `skills/copilot-usage-analytics/` | `templates/session-cost-estimate-template.md`, `templates/model-routing-recommendation-template.md`, `templates/api-landscape.md` | agentops, performance-analyst, sprint-planner |
 

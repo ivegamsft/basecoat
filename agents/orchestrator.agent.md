@@ -11,6 +11,9 @@ metadata:
 allowed-tools: ["read_file", "write_file", "list_dir", "run_terminal_command", "create_github_issue"]
 model: claude-sonnet-4.6
 allowed_skills: []
+color: gray
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Orchestrator Agent

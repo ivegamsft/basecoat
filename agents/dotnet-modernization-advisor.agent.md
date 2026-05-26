@@ -16,6 +16,9 @@ allowed-tools: ["read_file", "write_file", "list_dir", "run_terminal_command", "
 model: claude-sonnet-4.6
 allowed_skills: []
 tools: [read_file, write_file, list_dir, run_terminal_command, create_github_issue]
+color: green
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 ## .NET Modernization Advisor Agent

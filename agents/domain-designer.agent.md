@@ -23,6 +23,8 @@ handoffs:
     agent: middleware-dev
     prompt: Design the event-driven integration layer for the domain events and bounded contexts specified above. Use domain events as the primary integration mechanism and implement saga patterns for cross-context workflows.
     send: false
+color: gray
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Domain-Driven Design Agent

@@ -14,6 +14,9 @@ metadata:
 allowed-tools: ["bash", "git", "terraform", "kubernetes", "python", "azure-cli"]
 model: gpt-5.3-codex
 allowed_skills: []
+color: blue
+handoffs: []
+trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # SRE Engineer Agent

@@ -1,6 +1,6 @@
 ---
 name: public-safe-sanitization
-description: "Use when turning internal roadmap notes, issue details, or feedback into public-safe guidance; strip internal-specific content before external publication."
+description: "Converts internal material to public-safe artifacts. USE FOR: sanitizing roadmap/issue notes for sharing, redacting private URLs/customer names/IDs, producing public-safe summaries with redaction ledger, rewriting internal details into generic guidance. DO NOT USE FOR: publishing raw internal notes, preserving sensitive identifiers, generating legal/compliance determinations, creating unrelated product plans."
 compatibility:
   editors:
     - vscode
