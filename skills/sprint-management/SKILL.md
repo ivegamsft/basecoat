@@ -17,7 +17,7 @@ allowed-tools: ["bash", "git", "grep", "find"]
 
 # Sprint Management Skill
 
-Use this skill when the task involves sprint ceremony facilitation, backlog management, or sprint lifecycle activities.
+Use this skill when the task involves sprint ceremony facilitation, backlog management, branch cleanup coordination, or sprint lifecycle activities.
 
 ## When to Use
 
@@ -26,6 +26,7 @@ Use this skill when the task involves sprint ceremony facilitation, backlog mana
 - Facilitating backlog grooming / refinement sessions
 - Tracking sprint velocity and commitments
 - Preparing for sprint demos or reviews
+- Coordinating branch/worktree cleanup after sprint closeout
 
 ## How to Invoke
 
@@ -41,6 +42,14 @@ Reference this skill by attaching `skills/sprint-management/SKILL.md` to your ag
 | `retrospective-template.md` | Sprint retrospective — what went well, what to improve, action items |
 | `backlog-grooming-template.md` | Backlog refinement — story review, estimation, acceptance criteria validation |
 
+## Branch Cleanup and Worktree Hygiene
+
+- Treat branch cleanup as part of sprint closeout, not an ad hoc afterthought.
+- Use `instructions/references/governance/workflow-rules.md` for verify → merge → prune → close/report steps.
+- Use `skills/git-worktrees/SKILL.md` when the team is working in parallel worktrees.
+- Use `scripts/cleanup-branches.ps1` for audit-first stale branch and orphaned branch cleanup.
+- Prefer dry-run review before deleting branches or pruning worktrees.
+
 ## Agent Pairing
 
 This skill is designed to be used alongside the following agents:
@@ -49,5 +58,6 @@ This skill is designed to be used alongside the following agents:
 - **product-manager** — Provides prioritized stories and acceptance criteria
 - **issue-triage** — Feeds triaged and prioritized issues into the backlog
 - **retro-facilitator** — Facilitates retrospective ceremonies
+- **git-worktrees** — Handles isolated worktrees and cleanup for parallel sprint work
 
 For release-level coordination, pair with the `release-manager` agent.

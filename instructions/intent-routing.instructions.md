@@ -21,6 +21,7 @@ both the type of work and **when** to do it.
 | `plan:` | Sprint or project planning | **Now** — planning mode, no implementation | `@sprint-planner`, `@product-manager` |
 | `spike:` | Time-boxed investigation, no deliverable | **Now** — research only, produce findings | `@solution-architect` |
 | `chore:` | Maintenance, cleanup, non-functional work | **Soon** — defer if sprint is full | `@devops-engineer`, `@release-manager` |
+| `fleet:` | Close previous sprint, plan and execute the next sprint, triage oldest issues, audit PRs/builds, clean branches | **Now** — orchestrate the sprint batch | `@sprint-closeout-auditor`, `@sprint-planner`, `@issue-triage`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
 | `security:` | Security concern or vulnerability | **Now, high priority** — escalate | `@security-analyst`, `@guardrail` |
 | `perf:` | Performance degradation or concern | **Now** — measure before changing | `@performance-analyst` |
 | `outage:` | Service outage, broken or dead system, site down | **Now, high priority** — route to RCA | `@rca` |
@@ -120,6 +121,37 @@ When `audit:` fires:
 4. Wait for explicit instruction before making any changes
 
 ---
+
+## Fleet Routing
+
+`fleet:` is the shortcut intent for a sprint-execution batch that combines:
+
+1. closing the previous sprint,
+2. planning the next sprint,
+3. starting from the oldest actionable issues,
+4. including PR and broken-build context in planning,
+5. triaging new issues so they do not supersede the backlog order,
+6. cleaning up old branches and stale worktrees.
+
+Treat `fleet:` as an orchestration intent, not a single-task execution.
+
+### Normalized examples
+
+| User phrasing | Normalized intent |
+|---|---|
+| `Fleet deployed: use basecoat...` | `fleet:` |
+| `fleet: plan and execute the sprint` | `fleet:` |
+| `use basecoat for fleet mode` | `fleet:` |
+
+### Fleet chain
+
+When `fleet:` fires, prefer the following chain:
+
+- `@sprint-closeout-auditor` — verify previous sprint completion and carry-forward items
+- `@issue-triage` — rank oldest actionable issues and note superseded items
+- `@broken-build-troubleshooter` — include current PR/build failures in planning
+- `@sprint-planner` — form the next sprint plan from the oldest ready items
+- `@branch-hygiene-sweeper` — clean merged/stale branches and worktree registrations
 
 ## Feature Routing
 

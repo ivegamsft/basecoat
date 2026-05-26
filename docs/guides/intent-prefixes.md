@@ -16,6 +16,7 @@ Every message prefix tells the AI three things at once: **what kind of work**,
 | `plan:` | Sprint or project planning | **Now, no implementation** | `@sprint-planner`, `@product-manager` |
 | `spike:` | Time-boxed investigation, no deliverable | **Now, research only** | `@solution-architect` |
 | `chore:` | Maintenance, cleanup, non-functional | **Soon** | `@devops-engineer`, `@release-manager` |
+| `fleet:` | Close previous sprint, plan and execute the next sprint, triage oldest issues, audit PRs/builds, clean branches | **Now** | `@sprint-closeout-auditor`, `@sprint-planner`, `@issue-triage`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
 | `security:` | Security concern or vulnerability | **Now, high priority** | `@security-analyst`, `@guardrail` |
 | `perf:` | Performance degradation | **Now, measure first** | `@performance-analyst` |
 | `outage:` | Service outage, broken or dead system, site down | **Now, high priority** | `@rca` |
@@ -148,6 +149,28 @@ that request to `outage:` and route it to the RCA agent.
 | `nothing works` | `outage:` |
 
 Use `@rca` for the deep-dive investigation after the active incident is stable.
+
+---
+
+## Fleet routing
+
+`fleet:` is the shortcut intent for a sprint-execution batch that combines closeout, planning, oldest-first issue triage, PR/build auditing, and branch cleanup.
+
+### Normalized examples
+
+| User phrasing | Normalized intent |
+|---|---|
+| `Fleet deployed: use basecoat...` | `fleet:` |
+| `fleet: plan and execute the sprint` | `fleet:` |
+| `use basecoat for fleet mode` | `fleet:` |
+
+### Fleet chain
+
+- `@sprint-closeout-auditor`
+- `@issue-triage`
+- `@broken-build-troubleshooter`
+- `@sprint-planner`
+- `@branch-hygiene-sweeper`
 
 ---
 

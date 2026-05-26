@@ -49,3 +49,4 @@ Each answer must include:
 - `sprint-closeout-auditor`
 - `sprint-planner`
 - `retro-facilitator`
+- `git-worktrees` for cleanup of parallel worktree-based sprint branches

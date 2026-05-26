@@ -28,6 +28,7 @@ Run this sequence for every sprint closeout batch:
 3. **Prune branches/worktrees**
    - Delete merged local/remote branches and stale worktree registrations.
    - Run automated branch audit in dry-run first; enable deletions only after review.
+   - Prefer `scripts/cleanup-branches.ps1` for stale branch/orphan cleanup and `skills/git-worktrees/SKILL.md` for parallel worktree hygiene.
 4. **Close/report**
    - Close completed issues and post a concise sprint close summary with outcomes and carry-forward items.
 
