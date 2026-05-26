@@ -50,6 +50,8 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$script:DefaultGitHubOidcIssuer = 'https://token.actions.githubusercontent.com'
+$script:DefaultGitHubOidcAudience = 'api://AzureADTokenExchange'
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -139,6 +141,40 @@ function Set-GitHubVariableValue(
     return ($LASTEXITCODE -eq 0)
 }
 
+function Get-GitHubOidcIssuer([string]$repoSlug) {
+    $issuer = $env:BASECOAT_GITHUB_OIDC_ISSUER
+    if (-not [string]::IsNullOrWhiteSpace($issuer)) {
+        return $issuer.Trim()
+    }
+
+    try {
+        $issuerConfigRaw = gh api "repos/$repoSlug/actions/oidc/customization/issuer" 2>$null
+        if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($issuerConfigRaw)) {
+            $issuerConfig = $issuerConfigRaw | ConvertFrom-Json -ErrorAction Stop
+
+            if ($issuerConfig.issuer) {
+                return $issuerConfig.issuer
+            }
+
+            if ($issuerConfig.include_enterprise_slug -and $issuerConfig.enterprise_slug) {
+                return "$($script:DefaultGitHubOidcIssuer)/$($issuerConfig.enterprise_slug)"
+            }
+        }
+    } catch {
+        # Fall back to default issuer when API is unavailable.
+    }
+
+    return $script:DefaultGitHubOidcIssuer
+}
+
+function Get-GitHubOidcAudience {
+    if (-not [string]::IsNullOrWhiteSpace($env:BASECOAT_GITHUB_OIDC_AUDIENCE)) {
+        return $env:BASECOAT_GITHUB_OIDC_AUDIENCE.Trim()
+    }
+
+    return $script:DefaultGitHubOidcAudience
+}
+
 function Ensure-PortalOidcBootstrap(
     [string]$repoSlug,
     [string]$environmentName = 'staging'
@@ -153,7 +189,9 @@ function Ensure-PortalOidcBootstrap(
     $subscriptionId = $azureContext.id
     $displayName = 'basecoat-portal-staging-deploy'
     $scope = "/subscriptions/$subscriptionId"
-    $subject = "repo:IBuySpy-Shared/basecoat:environment:$environmentName"
+    $subject = "repo:$repoSlug:environment:$environmentName"
+    $issuer = Get-GitHubOidcIssuer -repoSlug $repoSlug
+    $audience = Get-GitHubOidcAudience
 
     try {
         $appId = az ad app list --display-name $displayName --query "[0].appId" -o tsv 2>$null
@@ -175,24 +213,40 @@ function Ensure-PortalOidcBootstrap(
             Write-Warn "Portal service principal not found; continuing with app registration only"
         }
 
+        $credentialName = "$environmentName-github-actions"
         $federatedCredential = @{
-            name       = "$environmentName-github-actions"
-            issuer     = "https://token.actions.githubusercontent.com"
+            name       = $credentialName
+            issuer     = $issuer
             subject    = $subject
-            audiences  = @("api://AzureADTokenExchange")
+            audiences  = @($audience)
         } | ConvertTo-Json -Compress
 
         $credentialExists = $false
+        $existingCredentialByName = $null
         try {
             $existingCredentials = az ad app federated-credential list --id $appId 2>$null | ConvertFrom-Json
+            $existingCredentialByName = @($existingCredentials | Where-Object {
+                $_.name -eq $credentialName
+            } | Select-Object -First 1)
+
             $credentialExists = @($existingCredentials | Where-Object {
-                $_.subject -eq $subject -and $_.issuer -eq 'https://token.actions.githubusercontent.com'
+                $_.subject -eq $subject -and $_.issuer -eq $issuer -and $_.audiences -contains $audience
             }).Count -gt 0
         } catch {
             $credentialExists = $false
         }
 
         if (-not $credentialExists) {
+            if ($existingCredentialByName) {
+                $existingCredentialId = if ($existingCredentialByName.id) { $existingCredentialByName.id } else { $credentialName }
+                az ad app federated-credential delete --id $appId --federated-credential-id $existingCredentialId 2>$null | Out-Null
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Fail "Failed to update federated credential '$credentialName' for portal OIDC bootstrap"
+                    return $false
+                }
+                Write-Check "Portal federated credential replaced" $true $credentialName
+            }
+
             $credentialFile = Join-Path $env:TEMP "basecoat-portal-oidc-$environmentName.json"
             $federatedCredential | Out-File -FilePath $credentialFile -Encoding utf8 -Force
             $null = az ad app federated-credential create --id $appId --parameters $credentialFile 2>$null
@@ -201,9 +255,9 @@ function Ensure-PortalOidcBootstrap(
                 Write-Fail "Failed to create federated credential for portal OIDC bootstrap"
                 return $false
             }
-            Write-Check "Portal federated credential created" $true $environmentName
+            Write-Check "Portal federated credential created" $true "$environmentName ($issuer)"
         } else {
-            Write-Check "Portal federated credential exists" $true $environmentName
+            Write-Check "Portal federated credential exists" $true "$environmentName ($issuer)"
         }
 
         $rbacExists = az role assignment list --assignee $appId --scope $scope --query "[?roleDefinitionName=='Contributor'] | [0].id" -o tsv 2>$null

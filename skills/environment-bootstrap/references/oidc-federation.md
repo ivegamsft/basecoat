@@ -32,6 +32,9 @@ az ad sp create --id $APP_ID
 TENANT_ID=$(az account show --query tenantId -o tsv)
 REPO_OWNER="IBuySpy-Shared"
 REPO_NAME="basecoat"
+GITHUB_OIDC_ISSUER="https://token.actions.githubusercontent.com"
+# If enterprise custom issuer policy is enabled, use:
+# GITHUB_OIDC_ISSUER="https://token.actions.githubusercontent.com/<enterprise-slug>"
 GITHUB_ENTITY="repo:${REPO_OWNER}/${REPO_NAME}:ref:refs/heads/main"
 
 # Create federated credential for main branch
@@ -39,7 +42,7 @@ az ad app federated-credential create \
   --id $APP_ID \
   --parameters '{
     "name": "github-main",
-    "issuer": "https://token.actions.githubusercontent.com",
+    "issuer": "'$GITHUB_OIDC_ISSUER'",
     "subject": "'$GITHUB_ENTITY'",
     "audiences": ["api://AzureADTokenExchange"]
   }'
@@ -97,7 +100,7 @@ az ad app federated-credential create \
   --id $APP_ID \
   --parameters '{
     "name": "github-staging",
-    "issuer": "https://token.actions.githubusercontent.com",
+    "issuer": "'$GITHUB_OIDC_ISSUER'",
     "subject": "'$GITHUB_ENTITY_STAGING'",
     "audiences": ["api://AzureADTokenExchange"]
   }'
@@ -109,7 +112,7 @@ az ad app federated-credential create \
   --id $APP_ID \
   --parameters '{
     "name": "github-pr",
-    "issuer": "https://token.actions.githubusercontent.com",
+    "issuer": "'$GITHUB_OIDC_ISSUER'",
     "subject": "'$GITHUB_ENTITY_PR'",
     "audiences": ["api://AzureADTokenExchange"]
   }'
@@ -124,6 +127,10 @@ az ad app federated-credential create \
 **Issue**: "JWT returned in the request is not valid"
 
 **Solution**: Ensure GitHub token expiration hasn't passed; tokens are valid for 5 minutes. Verify audience matches exactly: `api://AzureADTokenExchange`
+
+**Issue**: "AADSTS700211: No matching federated identity record found for presented assertion issuer"
+
+**Solution**: Ensure federated credential issuer exactly matches the token issuer. If enterprise custom issuer policy is enabled, use `https://token.actions.githubusercontent.com/<enterprise-slug>` instead of the default issuer.
 
 ## References
 
