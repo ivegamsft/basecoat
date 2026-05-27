@@ -86,6 +86,23 @@ function Test-IntentRoutingSkillReferences {
     }
 
     $content = Get-Content $intentRoutingPath -Raw
+
+    # Validate enforcement contract section exists with required routing rules
+    $contractMissing = @()
+    if ($content -notmatch '##\s+Enforcement Contract') {
+        $contractMissing += "'## Enforcement Contract' section"
+    }
+    if ($content -notmatch '`bug:`\s+routes') {
+        $contractMissing += "explicit 'bug:' routing rule"
+    }
+    if ($content -notmatch '`feature:`\s+routes') {
+        $contractMissing += "explicit 'feature:' routing rule"
+    }
+    if ($contractMissing.Count -gt 0) {
+        Write-Host "ERROR: instructions/intent-routing.instructions.md is missing required enforcement contract elements: $($contractMissing -join '; ')" -ForegroundColor Red
+        $script:errors++
+    }
+
     $sectionMatch = [regex]::Match(
         $content,
         '(?ms)## Prefix-to-Skill Routing\s*\r?\n\r?\n\| Prefix \| Skills to consult \|\r?\n\|---\|---\|\r?\n(?<rows>.*?)(?:\r?\n---|\z)'

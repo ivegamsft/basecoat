@@ -11,6 +11,25 @@ both the type of work and **when** to do it.
 
 ---
 
+## Enforcement Contract
+
+Prefix parsing is a hard contract, not a soft hint. When a recognized prefix
+appears at the start of a message, it must be interpreted as an authoritative
+routing signal before any plain-text interpretation occurs.
+
+Rules:
+
+1. Parse the prefix **first**. Do not attempt plain-text interpretation before
+   identifying the prefix.
+2. A recognized prefix overrides any other reading of the request.
+3. `bug:` routes immediately to the defect workflow — no further disambiguation.
+4. `feature:` routes immediately to the implementation/design workflow — no
+   further disambiguation.
+5. Any agent or pipeline that ignores a recognized prefix and treats the message
+   as plain text is in violation of this contract.
+
+---
+
 ## Prefix Vocabulary
 
 | Prefix | Intent | Default timing | Primary agents |
