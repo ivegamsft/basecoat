@@ -252,8 +252,8 @@ See the deployment RCA guardrail for retry caps and bootstrap immutability rules
 | `perf:` | `performance-profiling` |
 | `docs:` | `documentation` |
 | `test:` | `manual-test-strategy` |
-| `deploy:` | `azure-deploy`, `architecture` |
-| `rca:` | `error-kb`, `runtime-debugging` |
+| `deploy:` | `s4-deployment-checklist`, `architecture` |
+| `rca:` | `build-failure-triage`, `failure-pattern-process` |
 
 ---
 
