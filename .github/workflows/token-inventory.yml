@@ -83,11 +83,45 @@ jobs:
           EOF
           )"
 
+          # Enterprise policies can block GitHub Actions from creating or editing PRs.
+          # Keep inventory regeneration successful and provide manual next-step guidance
+          # when policy restrictions are detected, but fail normally for other errors.
+          run_pr_command() {
+            local action="$1"
+            shift
+            local output=""
+            if output="$("$@" 2>&1)"; then
+              echo "${output}"
+              return 0
+            fi
+
+            echo "${output}"
+            if echo "${output}" | grep -Eqi 'createPullRequest|not permitted|is not allowed|Resource not accessible by integration'; then
+              {
+                echo "## Token inventory PR automation blocked by policy"
+                echo
+                echo "GitHub Actions updated branch \`${BRANCH}\`, but enterprise policy blocked automated PR create/edit."
+                echo
+                echo "- Branch: \`${BRANCH}\`"
+                echo "- Attempted action: \`${action}\`"
+                echo
+                echo "Manual follow-up:"
+                echo "1. Open a PR from \`${BRANCH}\` to \`main\`."
+                echo "2. Use title: \`${PR_TITLE}\`."
+                echo "3. Use the standard token inventory PR body from this workflow."
+              } >> "$GITHUB_STEP_SUMMARY"
+              echo "WARNING: Enterprise policy blocked PR ${action}; continuing with manual PR instructions."
+              return 0
+            fi
+
+            return 1
+          }
+
           EXISTING_PR="$(gh pr list --base main --head "${BRANCH}" --state open --json number --jq '.[0].number')"
           if [ -n "${EXISTING_PR}" ]; then
             echo "Updating existing PR #${EXISTING_PR}"
-            gh pr edit "${EXISTING_PR}" --title "${PR_TITLE}" --body "${PR_BODY}"
+            run_pr_command "edit" gh pr edit "${EXISTING_PR}" --title "${PR_TITLE}" --body "${PR_BODY}"
           else
             echo "Creating a new PR from ${BRANCH} to main"
-            gh pr create --base main --head "${BRANCH}" --title "${PR_TITLE}" --body "${PR_BODY}"
+            run_pr_command "create" gh pr create --base main --head "${BRANCH}" --title "${PR_TITLE}" --body "${PR_BODY}"
           fi
