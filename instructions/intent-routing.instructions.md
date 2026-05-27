@@ -25,6 +25,8 @@ both the type of work and **when** to do it.
 | `security:` | Security concern or vulnerability | **Now, high priority** — escalate | `@security-analyst`, `@guardrail` |
 | `perf:` | Performance degradation or concern | **Now** — measure before changing | `@performance-analyst` |
 | `outage:` | Service outage, broken or dead system, site down | **Now, high priority** — route to RCA | `@rca` |
+| `rca:` | Root-cause analysis of a known failure — execution suspended | **Now, read-only** — diagnose before next attempt | `@rca`, `@config-auditor` |
+| `deploy:` | Staged infrastructure deployment — azure-prepare, azure-validate, azure-deploy in sequence | **Now** — staged sequence, do not skip validation | `@devops-engineer` |
 | `docs:` | Documentation only | **Soon** — low urgency unless broken | `@tech-writer` |
 | `test:` | Test coverage gap or test failure | **Now** — coverage gaps block releases | `@manual-test-strategy`, `@strategy-to-automation` |
 | `refactor:` | Structural improvement, no behavior change | **Later** — batch with related work | `@code-review`, `@performance-analyst` |
@@ -189,6 +191,55 @@ Use `@rca` for deep-dive analysis once the active incident is stabilized.
 
 ---
 
+## RCA Routing
+
+`rca:` suspends all execution. The session goal shifts to diagnosis only.
+
+When `rca:` fires (or any of the aliases below), route to `@rca` and `@config-auditor`
+before allowing any deployment, re-run, or remediation command.
+
+| Alias | Normalized intent |
+|---|---|
+| `stop and rca` | `rca:` |
+| `why is it failing` | `rca:` |
+| `same error` (after a prior failure) | `rca:` |
+| `still broken` (after a retry) | `rca:` |
+| same stage fails in consecutive attempts | `rca:` |
+| deployment retried 3 or more times | `rca:` (hard block on further retries) |
+
+To exit RCA mode and resume execution, the user must:
+
+1. Confirm the root cause is identified.
+2. Confirm the remediation step is distinct from prior attempts.
+3. Re-issue a `deploy:` or `outage:` intent explicitly.
+
+---
+
+## Deployment Routing
+
+`deploy:` enforces the staged deployment sequence. Skipping any stage is not permitted.
+
+**Required chain:**
+
+1. `azure-prepare` — scaffold IaC and validate configuration
+2. `azure-validate` — pre-deployment checks, no resource changes
+3. `azure-deploy` — provision and deploy
+
+If the user issues a `deploy:` without specifying the starting stage, begin at
+`azure-prepare` unless a prior stage has already been completed and confirmed in
+this session.
+
+**Enforcement:**
+
+- Do not call `azure-deploy` until `azure-validate` has completed successfully.
+- If validation fails, surface the finding and wait for explicit instruction.
+- If the same deployment step fails twice, suspend execution and enter RCA mode.
+
+See the deployment RCA guardrail for retry caps and bootstrap immutability rules:
+[`docs/reference/guardrails/deployment-rca.md`](/docs/reference/guardrails/deployment-rca.md).
+
+---
+
 ## Prefix-to-Skill Routing
 
 | Prefix | Skills to consult |
@@ -201,6 +252,8 @@ Use `@rca` for deep-dive analysis once the active incident is stabilized.
 | `perf:` | `performance-profiling` |
 | `docs:` | `documentation` |
 | `test:` | `manual-test-strategy` |
+| `deploy:` | `azure-deploy`, `architecture` |
+| `rca:` | `error-kb`, `runtime-debugging` |
 
 ---
 

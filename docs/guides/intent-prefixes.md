@@ -20,6 +20,8 @@ Every message prefix tells the AI three things at once: **what kind of work**,
 | `security:` | Security concern or vulnerability | **Now, high priority** | `@security-analyst`, `@guardrail` |
 | `perf:` | Performance degradation | **Now, measure first** | `@performance-analyst` |
 | `outage:` | Service outage, broken or dead system, site down | **Now, high priority** | `@rca` |
+| `rca:` | Root-cause analysis of a known failure — execution suspended | **Now, read-only** | `@rca`, `@config-auditor` |
+| `deploy:` | Staged infrastructure deployment — azure-prepare, azure-validate, azure-deploy in sequence | **Now, staged** | `@devops-engineer` |
 | `docs:` | Documentation only | **Soon** | `@tech-writer` |
 | `test:` | Test coverage gap or test failure | **Now** | `@manual-test-strategy` |
 | `refactor:` | Structural improvement, no behavior change | **Later, batch** | `@code-review` |
@@ -34,8 +36,8 @@ for selecting chain patterns.
 
 | Family | Prefixes | Default output type |
 |---|---|---|
-| Delivery | `feature:`, `refactor:` | implementation plan or code changes |
-| Reliability | `bug:`, `perf:`, `outage:` | fix, mitigation, or incident analysis |
+| Delivery | `feature:`, `refactor:`, `deploy:` | implementation plan, code changes, or staged deployment |
+| Reliability | `bug:`, `perf:`, `outage:`, `rca:` | fix, mitigation, incident analysis, or root-cause report |
 | Governance | `audit:`, `security:`, `chore:` | findings, policy action, risk controls |
 | Planning | `plan:`, `spike:` | prioritized backlog, design notes, decision doc |
 | Quality | `test:`, `docs:`, `ux:` | tests, documentation, or design artifacts |
@@ -149,6 +151,46 @@ that request to `outage:` and route it to the RCA agent.
 | `nothing works` | `outage:` |
 
 Use `@rca` for the deep-dive investigation after the active incident is stable.
+
+---
+
+## RCA routing
+
+`rca:` suspends all execution. Use it when you want to diagnose before retrying.
+
+| Alias | Normalized intent |
+|---|---|
+| `stop and rca` | `rca:` |
+| `why is it failing` | `rca:` |
+| `same error` (after a prior failure) | `rca:` |
+| `still broken` (after a retry) | `rca:` |
+| deployment retried 3 or more times | `rca:` (hard block) |
+
+To resume execution after RCA, re-issue a `deploy:` or `outage:` intent explicitly
+once the root cause is confirmed.
+
+---
+
+## Deployment routing
+
+`deploy:` enforces the staged deployment sequence and prevents skipping validation.
+
+**Required chain:**
+
+1. `azure-prepare` — scaffold IaC and validate configuration
+2. `azure-validate` — pre-deployment checks, no resource changes
+3. `azure-deploy` — provision and deploy
+
+If the same deployment step fails twice, the session automatically enters RCA mode.
+
+Example prompt:
+
+```text
+deploy: follow azure-prepare -> azure-validate -> azure-deploy exactly; do not deploy until validated
+```
+
+See [`docs/reference/guardrails/deployment-rca.md`](../reference/guardrails/deployment-rca.md)
+for retry caps, path lock, and bootstrap immutability rules.
 
 ---
 
@@ -270,6 +312,8 @@ Use these default chains unless there is a task-specific reason to override.
 | `feature:` | `solution-architect -> backend-dev/frontend-dev -> code-review` | design to implementation with review |
 | `bug:` | `code-review -> self-healing-ci -> guardrail` | defect isolation and safe fix |
 | `outage:` | `rca -> incident-responder -> sre-engineer` | triage, containment, and reliability follow-up |
+| `rca:` | `rca -> config-auditor` | root-cause diagnosis, execution suspended |
+| `deploy:` | `azure-prepare -> azure-validate -> azure-deploy` | staged deployment with pre-flight validation |
 | `security:` | `security-analyst -> policy-as-code-compliance -> guardrail` | remediation and policy validation |
 | `plan:` | `product-manager -> sprint-planner` | scoped sprint-ready backlog |
 | `test:` | `manual-test-strategy -> strategy-to-automation` | test strategy and automation candidates |
