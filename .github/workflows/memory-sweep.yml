@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Check out basecoat (scripts only)
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 1
           path: basecoat
@@ -72,7 +72,7 @@ jobs:
 
       - name: Check out basecoat-memory (destination)
         if: steps.check.outputs.count != '0'
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           repository: ${{ steps.params.outputs.memory_repo }}
           token: ${{ secrets.MEMORY_REPO_TOKEN }}
@@ -186,3 +186,4 @@ jobs:
         run: |
           echo "✅ Memory sweep complete — no new candidates in the last ${{ steps.params.outputs.days }} days."
           echo "   Enlisted repos: ${{ steps.check.outputs.count }}"
+

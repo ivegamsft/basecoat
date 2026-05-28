@@ -24,19 +24,45 @@ Use this skill to perform a checklist-driven sprint closeout audit before starti
 
 ## Checklist Protocol
 
-Always answer these five questions:
+Always answer these six questions:
 
 1. ✅ Did everything merge?
 2. ✅ Did CI pass?
 3. ✅ Any errors?
 4. ✅ Any issues?
 5. ✅ Did you test?
+6. ✅ Is latest-main CI green?
 
 Each answer must include:
 
 - status (`yes`, `partial`, or `no`)
 - evidence pointer (issue/PR/workflow/test reference)
 - carry-forward action when not fully green
+
+## Latest-Main CI Gate
+
+Question 6 is a hard gate. Before marking sprint closeout complete, verify:
+
+- All required workflows on the latest `main` commit are green (no failures).
+- No `action_required` approval blocks exist on latest `main` runs.
+- Evidence links point to specific workflow run URLs, not just branch summaries.
+
+If any required workflow is failing or blocked, the sprint is not closeable.
+Record the failing workflow name, run URL, and a remediation action as a
+carry-forward blocker.
+
+### CI gate commands
+
+```bash
+# List recent main branch workflow runs
+gh run list --branch main --limit 10
+
+# Check for failures on main
+gh run list --branch main --status failure --limit 5
+
+# Check for approval blocks on main
+gh run list --branch main --status action_required --limit 5
+```
 
 ## Reference Files
 

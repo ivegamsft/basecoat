@@ -38,10 +38,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v4
+        uses: hashicorp/setup-terraform@b3ec3d7a786b0175ba86becc79b127e4bc2edb5c
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
@@ -61,10 +61,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v4
+        uses: hashicorp/setup-terraform@b3ec3d7a786b0175ba86becc79b127e4bc2edb5c
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
@@ -84,10 +84,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v4
+        uses: hashicorp/setup-terraform@b3ec3d7a786b0175ba86becc79b127e4bc2edb5c
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
@@ -101,3 +101,4 @@ jobs:
         env:
           TF_VAR_aws_primary_region: us-east-1
           TF_VAR_aws_secondary_region: us-west-2
+

@@ -11,9 +11,42 @@ distribute: false
 
 These are not suggestions. Every AI agent operating in `ivegamsft/basecoat` must follow these rules without exception.
 
+## LOG-FIRST Gate
+
+Before writing any code, modifying any file, or executing any side-effecting tool
+call, the agent **must** confirm that a tracking issue exists. This is a hard block —
+do not skip it.
+
+**Gate sequence:**
+
+1. **Identify** the issue number from the current task context, user message, or
+   session state.
+2. **Verify** the issue exists: run `gh issue view <number>` and confirm it is open
+   and describes the work being started.
+3. **Pause** — do not begin implementation in the same turn as issue creation.
+4. **Only then proceed** with implementation, referencing the issue number in every
+   commit message.
+
+If no issue number is present:
+
+- Do NOT start implementation.
+- Create a tracking issue first: `gh issue create --title "<description>" --body "<context>"`.
+- Confirm the issue was created and note its number.
+- Return to the user or session with the issue link before proceeding to any code changes.
+
+This gate applies to every implementation intent: `bug:`, `feature:`, `chore:`,
+`refactor:`, `test:`, `deploy:`, and `fix`.
+
+**The most common failure mode:** creating the tracking issue and immediately
+continuing to implement in the same step without pausing to confirm the issue is
+the authoritative work record. Logging and implementing must be separate steps.
+
+---
+
 ## Hard Rules
 
-- **Issue-first:** No implementation without an issue number. No issue = hard stop. Create one first.
+- **Issue-first:** No implementation without an issue number. No issue = hard stop.
+  Satisfy the LOG-FIRST gate above before any code change.
 - **No secrets:** Never write API keys, tokens, passwords, PII, or connection strings to any file, commit, or comment. If a task requires a secret, stop and ask the operator.
 - **Internal-only GitHub writes:** Never create/update issues, PRs, or comments in non-allowlisted repositories. Use deny-by-default with an explicit internal allowlist.
 - **Workflow secrets:** GitHub Actions must use `${{ secrets.SECRET_NAME }}` — no literals. See [`docs/guardrails/secrets-in-workflows.md`](/docs/guardrails/secrets-in-workflows.md).
@@ -64,7 +97,8 @@ See `docs/MODEL_OPTIMIZATION.md` for the full tier matrix. See `docs/token-optim
 
 | Rule | Action |
 |---|---|
-| No issue | Create one, then proceed |
+| No issue | Stop — satisfy LOG-FIRST gate; create issue, pause, then proceed |
+| LOG-FIRST gate not satisfied | Hard block — do not start implementation |
 | Secret needed | Stop, ask operator |
 | GitHub write target | Validate `owner/repo` against internal allowlist before write |
 | Direct main push | Never — use PR |

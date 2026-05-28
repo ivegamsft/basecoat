@@ -154,6 +154,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running routing guardrail tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'routing-guardrail-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Routing guardrail tests failed' -ForegroundColor Red
+    Write-FailureLog 'routing-guardrail-tests'
+    exit 1
+}
+
 Write-Host 'Running cleanup branch automation tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'cleanup-branches-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

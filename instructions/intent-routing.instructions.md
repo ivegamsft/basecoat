@@ -27,6 +27,10 @@ Rules:
    further disambiguation.
 5. Any agent or pipeline that ignores a recognized prefix and treats the message
    as plain text is in violation of this contract.
+6. Before any implementation begins for a recognized implementation prefix (`bug:`,
+   `feature:`, `chore:`, `refactor:`, `test:`, `deploy:`), the LOG-FIRST gate in
+   `governance.instructions.md` must be satisfied — a tracking issue must exist and
+   be confirmed before the first code edit or file modification.
 
 ---
 
@@ -46,6 +50,9 @@ Rules:
 | `outage:` | Service outage, broken or dead system, site down | **Now, high priority** — route to RCA | `@rca` |
 | `rca:` | Root-cause analysis of a known failure — execution suspended | **Now, read-only** — diagnose before next attempt | `@rca`, `@config-auditor` |
 | `deploy:` | Staged infrastructure deployment — azure-prepare, azure-validate, azure-deploy in sequence | **Now** — staged sequence, do not skip validation | `@devops-engineer` |
+| `azure:` | Azure-scoped operation (auth, infra, SDK, provisioning) | **Now** — preflight first, then staged sequence | `@devops-engineer`, `@solution-architect` |
+| `infra:` | Infrastructure change (IaC, networking, firewall, RBAC) | **Now** — preflight first, then staged sequence | `@devops-engineer`, `@solution-architect` |
+| `architect:` | Architecture design or system-design decision | **Later** — plan before any implementation | `@solution-architect` |
 | `docs:` | Documentation only | **Soon** — low urgency unless broken | `@tech-writer` |
 | `test:` | Test coverage gap or test failure | **Now** — coverage gaps block releases | `@manual-test-strategy`, `@strategy-to-automation` |
 | `refactor:` | Structural improvement, no behavior change | **Later** — batch with related work | `@code-review`, `@performance-analyst` |
@@ -174,6 +181,48 @@ When `fleet:` fires, prefer the following chain:
 - `@sprint-planner` — form the next sprint plan from the oldest ready items
 - `@branch-hygiene-sweeper` — clean merged/stale branches and worktree registrations
 
+## Plan-First Enforcement
+
+For any implementation intent that touches multiple files or requires design
+decisions, a planning step is required before execution begins.
+
+**Affected prefixes:** `feature:`, `refactor:`, `architect:`
+
+When a standalone `feature:`, `refactor:`, or `architect:` message would produce
+multi-file changes or architectural decisions:
+
+1. Emit a plan covering scope, approach, risks, and verification criteria.
+2. Present the plan to the user.
+3. Do not begin implementing until the plan is confirmed or the user explicitly
+   waives planning (e.g., "no plan needed", "skip planning", "implement directly").
+
+Record explicit waivers in the session so subsequent agents respect them.
+
+### Sprint-Style Request Nudge
+
+When the user asks to "plan and execute the next sprint", "implement the sprint",
+or uses similar phrasing that combines planning and execution in one request:
+
+1. Route to `@sprint-planner` first.
+2. Present the sprint plan and wait for confirmation.
+3. Only then begin execution with the oldest actionable item.
+
+Do not jump directly to implementation. The `plan:` step is not optional.
+
+### Guidance-First Hints
+
+When routing a request, emit an explicit guidance hint if a relevant instruction
+file applies — before any plan or implementation output:
+
+| Scenario | Hint to emit |
+|---|---|
+| `feature:` touching a new agent or skill | "See `instructions/agents.instructions.md`" |
+| `deploy:`, `infra:`, or `azure:` | "Review `instructions/ci-firewall.instructions.md` and `instructions/rbac-authentication.instructions.md` before proceeding" |
+| `security:` | "See `instructions/security.instructions.md` and `instructions/rbac-authentication.instructions.md`" |
+| `infra:` or `azure:` provisioning RBAC-sensitive services | "See `instructions/rbac-authentication.instructions.md` for RBAC-only requirements" |
+
+---
+
 ## Feature Routing
 
 `feature:` in a bullet list means: **plan it, don't build it.**
@@ -259,6 +308,35 @@ See the deployment RCA guardrail for retry caps and bootstrap immutability rules
 
 ---
 
+## Azure Preflight Guardrail
+
+Before any Azure-scoped operation (`azure:`, `infra:`, `deploy:`), emit the
+following advisory at the start of the routing response:
+
+```text
+Azure preflight: ci-firewall and rbac-authentication checks apply.
+See instructions/ci-firewall.instructions.md and instructions/rbac-authentication.instructions.md.
+```
+
+Then verify:
+
+1. **CI Firewall** — Does the workflow access firewalled Azure resources?
+   If yes, confirm the single-job runner IP pattern from
+   `instructions/ci-firewall.instructions.md` is in place before deploying.
+2. **RBAC Authentication** — Does the change provision or configure Azure
+   resources? If yes, confirm RBAC-only auth from
+   `instructions/rbac-authentication.instructions.md` before proceeding.
+
+The advisory is non-blocking. If the preflight checks reveal a firewall or RBAC
+gap, surface the finding and wait for explicit user confirmation before continuing.
+
+Do not call `azure-deploy` until both preflight checks have been acknowledged.
+
+See [`docs/reference/guardrails/plan-first-azure-preflight.md`](/docs/reference/guardrails/plan-first-azure-preflight.md)
+for the full guardrail reference.
+
+---
+
 ## Prefix-to-Skill Routing
 
 | Prefix | Skills to consult |
@@ -272,6 +350,9 @@ See the deployment RCA guardrail for retry caps and bootstrap immutability rules
 | `docs:` | `documentation` |
 | `test:` | `manual-test-strategy` |
 | `deploy:` | `s4-deployment-checklist`, `architecture` |
+| `azure:` | `s4-deployment-checklist`, `architecture` |
+| `infra:` | `s4-deployment-checklist`, `architecture` |
+| `architect:` | `architecture`, `agent-design` |
 | `rca:` | `build-failure-triage`, `failure-pattern-process` |
 
 ---

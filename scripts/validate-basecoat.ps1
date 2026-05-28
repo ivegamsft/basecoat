@@ -79,6 +79,33 @@ function Test-AgentMetadataFreshness {
     }
 }
 
+function Test-LogFirstGate {
+    $govPath = Join-Path (Get-Location) 'instructions/governance.instructions.md'
+    if (-not (Test-Path $govPath)) {
+        Write-Host "ERROR: instructions/governance.instructions.md is missing" -ForegroundColor Red
+        $script:errors++
+        return
+    }
+
+    $content = Get-Content $govPath -Raw
+    $missing = @()
+
+    if ($content -notmatch '##\s+LOG-FIRST Gate') {
+        $missing += "'## LOG-FIRST Gate' section"
+    }
+    if ($content -notmatch 'hard block') {
+        $missing += "explicit 'hard block' language"
+    }
+    if ($content -notmatch 'tracking issue') {
+        $missing += "reference to tracking issue requirement"
+    }
+
+    if ($missing.Count -gt 0) {
+        Write-Host "ERROR: instructions/governance.instructions.md is missing required LOG-FIRST gate elements: $($missing -join '; ')" -ForegroundColor Red
+        $script:errors++
+    }
+}
+
 function Test-IntentRoutingSkillReferences {
     $intentRoutingPath = Join-Path (Get-Location) 'instructions/intent-routing.instructions.md'
     if (-not (Test-Path $intentRoutingPath)) {
@@ -240,6 +267,7 @@ catch {
 
 Test-AgentMetadataFreshness
 Test-IntentRoutingSkillReferences
+Test-LogFirstGate
 
 if ($errors -gt 0) {
     throw "Validation failed with $errors error(s)"

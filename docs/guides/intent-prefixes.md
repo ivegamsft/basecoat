@@ -22,6 +22,9 @@ Every message prefix tells the AI three things at once: **what kind of work**,
 | `outage:` | Service outage, broken or dead system, site down | **Now, high priority** | `@rca` |
 | `rca:` | Root-cause analysis of a known failure — execution suspended | **Now, read-only** | `@rca`, `@config-auditor` |
 | `deploy:` | Staged infrastructure deployment — azure-prepare, azure-validate, azure-deploy in sequence | **Now, staged** | `@devops-engineer` |
+| `azure:` | Azure-scoped operation (auth, infra, SDK, provisioning) | **Now** — preflight first, then staged sequence | `@devops-engineer`, `@solution-architect` |
+| `infra:` | Infrastructure change (IaC, networking, firewall, RBAC) | **Now** — preflight first, then staged sequence | `@devops-engineer`, `@solution-architect` |
+| `architect:` | Architecture design or system-design decision | **Later** — plan before any implementation | `@solution-architect` |
 | `docs:` | Documentation only | **Soon** | `@tech-writer` |
 | `test:` | Test coverage gap or test failure | **Now** | `@manual-test-strategy` |
 | `refactor:` | Structural improvement, no behavior change | **Later, batch** | `@code-review` |
@@ -36,11 +39,12 @@ for selecting chain patterns.
 
 | Family | Prefixes | Default output type |
 |---|---|---|
-| Delivery | `feature:`, `refactor:`, `deploy:` | implementation plan, code changes, or staged deployment |
+| Delivery | `feature:`, `refactor:`, `deploy:`, `architect:` | implementation plan, code changes, or staged deployment |
 | Reliability | `bug:`, `perf:`, `outage:`, `rca:` | fix, mitigation, incident analysis, or root-cause report |
 | Governance | `audit:`, `security:`, `chore:` | findings, policy action, risk controls |
 | Planning | `plan:`, `spike:` | prioritized backlog, design notes, decision doc |
 | Quality | `test:`, `docs:`, `ux:` | tests, documentation, or design artifacts |
+| Infrastructure | `azure:`, `infra:`, `deploy:` | preflight advisory, IaC changes, staged deployment |
 
 ---
 
@@ -98,6 +102,54 @@ These words in a message override the default timing of any prefix:
 | `no changes`, `read-only` | Analysis only, suppress all implementation |
 | `log it`, `file an issue` | Log and stop; do not implement |
 | `just document` | Documentation output only; no code changes |
+
+---
+
+## Plan-first enforcement
+
+For `feature:`, `refactor:`, and `architect:` prefixes, a planning step is
+required before implementation begins whenever the work spans multiple files
+or involves design decisions.
+
+The expected flow:
+
+1. Emit a plan (scope, approach, risks, verification criteria).
+2. Present it and wait for confirmation.
+3. Implement only after the plan is confirmed.
+
+The user can waive planning explicitly ("no plan needed", "skip planning",
+"implement directly"). Record the waiver so downstream agents respect it.
+
+### Sprint-style request nudge
+
+When the user asks to "plan and execute the next sprint" or similar:
+
+1. Route to `@sprint-planner` first.
+2. Present the sprint plan and wait for confirmation.
+3. Only then begin execution with the oldest actionable item.
+
+---
+
+## Azure preflight
+
+Before any `azure:`, `infra:`, or `deploy:` operation, emit this advisory:
+
+```text
+Azure preflight: ci-firewall and rbac-authentication checks apply.
+See instructions/ci-firewall.instructions.md and instructions/rbac-authentication.instructions.md.
+```
+
+Then verify:
+
+- **CI Firewall** — workflow accesses firewalled Azure resources? Confirm the
+  single-job runner IP pattern (`instructions/ci-firewall.instructions.md`)
+  is in place before deploying.
+- **RBAC Authentication** — change provisions or configures Azure resources?
+  Confirm RBAC-only auth (`instructions/rbac-authentication.instructions.md`)
+  before proceeding.
+
+The advisory is non-blocking unless a firewall or RBAC gap is found, in which
+case surface the finding and wait for explicit user confirmation.
 
 ---
 
@@ -309,10 +361,14 @@ Use these default chains unless there is a task-specific reason to override.
 
 | Intent | Chain | Outcome |
 |---|---|---|
-| `feature:` | `solution-architect -> backend-dev/frontend-dev -> code-review` | design to implementation with review |
+| `feature:` | `plan: -> solution-architect -> backend-dev/frontend-dev -> code-review` | plan-first, then design to implementation with review |
+| `refactor:` | `plan: -> code-review -> performance-analyst` | plan-first, then structural improvement |
+| `architect:` | `plan: -> solution-architect` | plan-first, then design decision |
 | `bug:` | `code-review -> self-healing-ci -> guardrail` | defect isolation and safe fix |
 | `outage:` | `rca -> incident-responder -> sre-engineer` | triage, containment, and reliability follow-up |
 | `rca:` | `rca -> config-auditor` | root-cause diagnosis, execution suspended |
+| `azure:` | `azure-preflight -> azure-prepare -> azure-validate -> azure-deploy` | preflight advisory, then staged deployment |
+| `infra:` | `azure-preflight -> azure-prepare -> azure-validate -> azure-deploy` | preflight advisory, then staged deployment |
 | `deploy:` | `azure-prepare -> azure-validate -> azure-deploy` | staged deployment with pre-flight validation |
 | `security:` | `security-analyst -> policy-as-code-compliance -> guardrail` | remediation and policy validation |
 | `plan:` | `product-manager -> sprint-planner` | scoped sprint-ready backlog |

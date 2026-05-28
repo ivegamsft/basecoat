@@ -32,7 +32,7 @@ jobs:
     steps:
       - name: Select canary targets
         id: select
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
             const eventName = context.eventName;
@@ -102,10 +102,10 @@ jobs:
         working-directory: ${{ matrix.path }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: ${{ matrix.node }}
           cache: npm
@@ -174,7 +174,7 @@ jobs:
 
       - name: Upload canary logs
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: dependency-canary-${{ matrix.id }}-logs
           path: |
@@ -198,3 +198,4 @@ jobs:
             echo ""
             echo "Flaky containment policy: one retry allowed; repeated failures stay blocking and should be routed to quarantine workflow only after repeat evidence."
           } >> "$GITHUB_STEP_SUMMARY"
+

@@ -24,7 +24,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Verify commenter has write access
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         id: check-access
         with:
           script: |
@@ -41,7 +41,7 @@ jobs:
 
       - name: Assign to Copilot and update labels
         if: steps.check-access.outputs.result == 'true'
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
             const issue = context.payload.issue;
@@ -109,3 +109,4 @@ jobs:
               issue_number: issue.number,
               body
             });
+

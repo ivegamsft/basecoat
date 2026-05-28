@@ -28,7 +28,14 @@
 - Evidence: <test command + result>
 - Action (if needed): <test gap remediation>
 
+6. ✅ Is latest-main CI green?
+- Status: green | failing | action_required
+- Required workflows: <list names of required workflows checked>
+- Evidence: <https://github.com/<owner>/<repo>/actions?query=branch%3Amain> and run URLs
+- Action (if needed): fix failing workflows before marking sprint closed; do not proceed while status is non-green
+
 ### Closeout decision
+- Latest-main CI gate: pass | BLOCKED
 - Ready for next sprint: yes | no
 - Blockers: <list>
 

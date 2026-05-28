@@ -45,7 +45,7 @@ jobs:
 
     steps:
       - name: Check out basecoat (scripts only)
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 1
 
@@ -83,3 +83,4 @@ jobs:
           echo "| Stale threshold | ${{ inputs.stale_after_days || '180' }} days |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Open PR | ${{ inputs.open_pr || 'false' }} |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Target | \`${{ github.repository_owner }}/basecoat-memory\` |" >> "$GITHUB_STEP_SUMMARY"
+

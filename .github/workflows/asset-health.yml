@@ -31,7 +31,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0   # needed for git log age calculation
 
@@ -68,7 +68,7 @@ jobs:
         if: |
           inputs.open_issue == true ||
           (github.event_name == 'schedule' && steps.audit.outputs.grade == 'F')
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
             const fs = require('fs');
@@ -129,3 +129,4 @@ jobs:
         run: |
           echo "::error::Asset library health is grade F (avg ${{ steps.audit.outputs.avg_score }}/10). Run 'pwsh scripts/audit-assets.ps1 -Weak' to investigate."
           exit 1
+
