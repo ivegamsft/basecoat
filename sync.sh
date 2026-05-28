@@ -10,71 +10,27 @@ ALLOWED_DOCS_TOP_LEVEL=("reference" "guides" "agents")
 sanitize_agent_for_cli() {
   local src="$1"
   local dest="$2"
-  local header
-  local has_tools=0
-  local has_allowed_tools=0
-  local map_allowed_tools=0
 
-  header="$(awk '
-    BEGIN { d = 0 }
-    /^---$/ { d++; next }
-    d == 1 { print }
-    d == 2 { exit }
-  ' "$src")"
-
-  if grep -q '^tools:' <<<"$header"; then
-    has_tools=1
-  fi
-  if grep -q '^allowed-tools:' <<<"$header"; then
-    has_allowed_tools=1
-  fi
-  if [[ "$has_tools" -eq 0 && "$has_allowed_tools" -eq 1 ]]; then
-    map_allowed_tools=1
+  # Extract frontmatter
+  local frontmatter_end
+  frontmatter_end=$(awk '/^---$/ { c++; if (c == 2) { print NR; exit } }' "$src")
+  if [[ -z "$frontmatter_end" ]]; then
+    cp "$src" "$dest"
+    return 0
   fi
 
-  awk -v map_allowed_tools="$map_allowed_tools" '
-    BEGIN {
-      in_frontmatter = 0
-      frontmatter_started = 0
-      keep = 0
-    }
+  {
+    # Keep opening marker
+    echo "---"
 
-    /^---$/ {
-      if (frontmatter_started == 0) {
-        frontmatter_started = 1
-        in_frontmatter = 1
-        print
-        next
-      }
-      if (in_frontmatter == 1) {
-        in_frontmatter = 0
-        print
-        print ""
-        next
-      }
-    }
+    # Extract and filter frontmatter (lines 2 to frontmatter_end-1)
+    sed -n '2,'$((frontmatter_end - 1))'p' "$src" | grep -E '^(name|description|tools|mcp-servers|allowed-tools):' | sed 's/^allowed-tools:/tools:/'
 
-    {
-      if (in_frontmatter == 1) {
-        if ($0 ~ /^[A-Za-z0-9_\-]+:/) {
-          key = $0
-          sub(/:.*/, "", key)
-          keep = 0
-          if (key == "name" || key == "description" || key == "tools" || key == "mcp-servers") {
-            keep = 1
-          } else if (key == "allowed-tools" && map_allowed_tools == 1) {
-            keep = 1
-            sub(/^allowed-tools:/, "tools:")
-          }
-        }
-        if (keep == 1) {
-          print
-        }
-        next
-      }
-      print
-    }
-  ' "$src" > "$dest"
+    # Keep closing marker and body
+    echo "---"
+    echo ""
+    sed -n "$((frontmatter_end + 1)),\$p" "$src"
+  } > "$dest"
 }
 
 if ! command -v git >/dev/null 2>&1; then
