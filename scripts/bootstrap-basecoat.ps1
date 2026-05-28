@@ -255,6 +255,89 @@ try {
         }
     }
 
+    $supportedAgentFrontmatterKeys = @('name', 'description', 'tools', 'mcp-servers')
+
+    function Convert-AgentToCliCompatibleContent {
+        param(
+            [string]$Content
+        )
+
+        if ($Content -notmatch '(?s)^---\s*\r?\n(.*?)\r?\n---\s*\r?\n?(.*)$') {
+            return $Content
+        }
+
+        $frontmatter = $Matches[1]
+        $body = $Matches[2]
+        $frontLines = $frontmatter -split "`r?`n"
+        $chunks = [System.Collections.Generic.List[object]]::new()
+        $currentChunk = $null
+
+        foreach ($line in $frontLines) {
+            if ($line -match '^([A-Za-z0-9_-]+):\s*(.*)$') {
+                if ($null -ne $currentChunk) {
+                    $chunks.Add($currentChunk)
+                }
+                $currentChunk = [pscustomobject]@{
+                    Key   = $Matches[1]
+                    Value = $Matches[2]
+                    Lines = [System.Collections.Generic.List[string]]::new()
+                }
+                $currentChunk.Lines.Add($line)
+            }
+            elseif ($null -ne $currentChunk) {
+                $currentChunk.Lines.Add($line)
+            }
+        }
+        if ($null -ne $currentChunk) {
+            $chunks.Add($currentChunk)
+        }
+
+        $selected = [System.Collections.Generic.List[object]]::new()
+        $toolsChunk = $null
+        $allowedToolsChunk = $null
+
+        foreach ($chunk in $chunks) {
+            if ($chunk.Key -eq 'tools') { $toolsChunk = $chunk }
+            if ($chunk.Key -eq 'allowed-tools') { $allowedToolsChunk = $chunk }
+            if ($chunk.Key -in $supportedAgentFrontmatterKeys) {
+                $selected.Add($chunk)
+            }
+        }
+
+        if (-not $toolsChunk -and $allowedToolsChunk) {
+            $remapped = [pscustomobject]@{
+                Key   = 'tools'
+                Value = $allowedToolsChunk.Value
+                Lines = [System.Collections.Generic.List[string]]::new()
+            }
+            foreach ($line in $allowedToolsChunk.Lines) {
+                if ($line -match '^allowed-tools:') {
+                    $remapped.Lines.Add(($line -replace '^allowed-tools:', 'tools:'))
+                }
+                else {
+                    $remapped.Lines.Add($line)
+                }
+            }
+            $selected.Add($remapped)
+        }
+
+        $ordered = @()
+        foreach ($key in @('name', 'description', 'tools', 'mcp-servers')) {
+            $match = $selected | Where-Object { $_.Key -eq $key } | Select-Object -First 1
+            if ($match) { $ordered += $match }
+        }
+
+        $newFrontmatterLines = [System.Collections.Generic.List[string]]::new()
+        foreach ($chunk in $ordered) {
+            foreach ($line in $chunk.Lines) {
+                $newFrontmatterLines.Add($line)
+            }
+        }
+        $newFrontmatter = ($newFrontmatterLines -join "`n").TrimEnd()
+
+        return "---`n$newFrontmatter`n---`n`n$body"
+    }
+
     # Helper: copy only *.agent.md files from a source directory
     function Copy-AgentFiles {
         param([string]$SrcDir, [string]$DestDir)
@@ -271,7 +354,9 @@ try {
                 Write-Info "[DRY RUN] Would $action agent: $($agent.Name)"
                 if ($existed) { $script:updatedCount++ } else { $script:addedCount++ }
             } else {
-                Copy-Item -Path $agent.FullName -Destination $dest -Force
+                $raw = Get-Content -Path $agent.FullName -Raw
+                $sanitized = Convert-AgentToCliCompatibleContent -Content $raw
+                Set-Content -Path $dest -Value $sanitized -Encoding UTF8
                 if ($existed) {
                     Write-Ok "Updated agent: $($agent.Name)"
                     $script:updatedCount++
