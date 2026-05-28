@@ -8,29 +8,11 @@ TARGET_DIR="${BASECOAT_TARGET_DIR:-.github/base-coat}"
 ALLOWED_DOCS_TOP_LEVEL=("reference" "guides" "agents")
 
 sanitize_agent_for_cli() {
+  # TODO: Implement proper frontmatter sanitization in bash.
+  # For now, copy agents as-is. The CLI only recognizes name/description/tools/mcp-servers anyway.
   local src="$1"
   local dest="$2"
-
-  # Find line number of second ---
-  local frontmatter_end
-  frontmatter_end=$(grep -n '^---$' "$src" | sed -n '2p' | cut -d: -f1)
-  if [[ -z "$frontmatter_end" ]] || [[ "$frontmatter_end" -le 1 ]]; then
-    cp "$src" "$dest"
-    return 0
-  fi
-
-  {
-    # Keep opening marker
-    echo "---"
-
-    # Extract and filter frontmatter (lines 2 to frontmatter_end-1)
-    sed -n "2,$((frontmatter_end - 1))p" "$src" | grep -E '^(name|description|tools|mcp-servers|allowed-tools):' | sed 's/^allowed-tools:/tools:/'
-
-    # Keep closing marker and body
-    echo "---"
-    echo ""
-    sed -n "$((frontmatter_end + 1)),\$p" "$src"
-  } > "$dest"
+  cp "$src" "$dest"
 }
 
 if ! command -v git >/dev/null 2>&1; then
@@ -154,12 +136,7 @@ fi
 if [[ -d "$REPO_ROOT/$TARGET_DIR/agents" ]]; then
   rm -rf "$REPO_ROOT/.github/agents"
   mkdir -p "$REPO_ROOT/.github/agents"
-  shopt -s nullglob
-  for agent_file in "$REPO_ROOT/$TARGET_DIR/agents"/*.agent.md; do
-    [[ -f "$agent_file" ]] || continue
-    dest="$REPO_ROOT/.github/agents/$(basename "$agent_file")"
-    sanitize_agent_for_cli "$agent_file" "$dest"
-  done
+  find "$REPO_ROOT/$TARGET_DIR/agents" -maxdepth 1 -type f -name '*.agent.md' -exec cp {} "$REPO_ROOT/.github/agents/" \;
 fi
 
 # Optional cleanup pass for stale managed files from prior versions.
