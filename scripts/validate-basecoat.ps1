@@ -41,7 +41,11 @@ $tokenBudgetThreshold = 500
 
 function Test-AgentMetadataFreshness {
     $agentFiles = @(Get-ChildItem 'agents' -Filter '*.agent.md' -File | Sort-Object Name)
-    $agentNames = @($agentFiles | ForEach-Object { $_.BaseName -replace '\.agent$', '' })
+    $agentNames = @($agentFiles | ForEach-Object { 
+        $baseName = $_.BaseName -replace '\.agent$', ''
+        # Extract short agent name from new naming convention
+        $baseName -replace '^basecoat-\d+-\w+-', ''
+    })
     $metadataPath = Join-Path (Get-Location) 'basecoat-metadata.json'
 
     if (-not (Test-Path $metadataPath)) {
