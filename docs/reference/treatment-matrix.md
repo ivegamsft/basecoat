@@ -2,7 +2,7 @@
 
 Use this matrix after running the App Inventory Agent. Match an application's complexity score
 and strategic value to the recommended treatment path. Each path maps to a set of Base Coat
-agents and skills.
+basecoat-10-core-agents and skills.
 
 ## Decision Framework
 
@@ -41,7 +41,7 @@ Stop investing in the application and plan decommission.
 4. Remove from load balancer and DNS
 5. Decommission infrastructure
 
-**Base Coat agents**: `product-manager`, `devops-engineer`
+**Base Coat agents**: `basecoat-10-core-product-manager`, `basecoat-10-core-devops-engineer`
 
 ---
 
@@ -58,12 +58,12 @@ Move the application to a new infrastructure platform with no code changes.
 **Actions**
 
 1. Containerize the application binary (no source change)
-2. Deploy to Azure Container Apps or AKS
-3. Migrate database to PaaS (Azure SQL, Cosmos DB)
+2. Deploy to basecoat-40-azure-azure Container Apps or AKS
+3. Migrate database to PaaS (basecoat-40-azure-azure SQL, Cosmos DB)
 4. Update DNS and connection strings
 5. Validate with smoke tests
 
-**Base Coat agents**: `containerization-planner`, `devops-engineer`
+**Base Coat agents**: `basecoat-30-ai-containerization-planner`, `basecoat-10-core-devops-engineer`
 **Base Coat skills**: `azure-container-apps`, `devops`
 
 ---
@@ -82,11 +82,11 @@ Make targeted platform changes while preserving application architecture.
 
 1. Replace self-managed dependencies with managed equivalents
 2. Adopt managed identity — remove hardcoded credentials
-3. Externalise config via Azure App Configuration / Key Vault
+3. Externalise basecoat-10-core-config via basecoat-40-azure-azure App Configuration / Key Vault
 4. Update framework to a supported LTS version
 5. Run existing test suite to validate parity
 
-**Base Coat agents**: `legacy-modernization`, `config-auditor`, `devops-engineer`
+**Base Coat agents**: `basecoat-10-core-legacy-modernization`, `basecoat-50-security-config-auditor`, `basecoat-10-core-devops-engineer`
 **Base Coat skills**: `identity-migration`, `environment-bootstrap`
 
 ---
@@ -99,7 +99,7 @@ Redesign the internal structure without changing external behavior.
 
 - Complexity score 41–80 AND strategic value: Medium or High
 - Application has high business value but significant technical debt
-- Target state is microservices or modular monolith
+- Target state is microservices or modular basecoat-10-core-monolith
 
 **Actions**
 
@@ -107,11 +107,11 @@ Redesign the internal structure without changing external behavior.
 2. Apply strangler fig pattern to extract high-value modules
 3. Introduce API gateway in front of legacy core
 4. Extract services incrementally per sprint wave
-5. Replace legacy service bus / messaging with Azure Service Bus
+5. Replace legacy service bus / messaging with basecoat-40-azure-azure Service Bus
 6. Migrate authentication to ASP.NET Core Identity + Entra ID
 
-**Base Coat agents**: `legacy-modernization`, `solution-architect`, `backend-dev`
-**Base Coat skills**: `service-bus-migration`, `identity-migration`, `architecture`
+**Base Coat agents**: `basecoat-10-core-legacy-modernization`, `basecoat-10-core-solution-architect`, `basecoat-10-core-backend-dev`
+**Base Coat skills**: `service-bus-migration`, `identity-migration`, `basecoat-10-core-architecture`
 
 ---
 
@@ -129,13 +129,13 @@ Rewrite the application from scratch using modern patterns, retaining business l
 
 1. Extract business rules via the App Inventory Agent
 2. Author PRD and technical spec (`docs/prd-and-spec-guidance.md`)
-3. Design new architecture (C4 model, ADRs)
+3. Design new basecoat-10-core-architecture (C4 model, ADRs)
 4. Build greenfield service with parity acceptance tests
 5. Run old and new systems in parallel with traffic mirroring
 6. Perform cutover and retire legacy system
 
-**Base Coat agents**: `solution-architect`, `backend-dev`, `frontend-dev`, `product-manager`
-**Base Coat skills**: `architecture`, `backend-dev`, `frontend-dev`
+**Base Coat agents**: `basecoat-10-core-solution-architect`, `basecoat-10-core-backend-dev`, `basecoat-10-core-frontend-dev`, `basecoat-10-core-product-manager`
+**Base Coat skills**: `basecoat-10-core-architecture`, `basecoat-10-core-backend-dev`, `basecoat-10-core-frontend-dev`
 
 ---
 
@@ -157,7 +157,7 @@ Adopt a commercial or open-source product instead of maintaining custom code.
 4. Run parallel operation period
 5. Decommission custom application
 
-**Base Coat agents**: `product-manager`, `solution-architect`
+**Base Coat agents**: `basecoat-10-core-product-manager`, `basecoat-10-core-solution-architect`
 
 ---
 
@@ -169,9 +169,9 @@ Use this worksheet alongside `skills/app-inventory/complexity-scoring-template.m
 |-------------|-----------------|-----------------|-----------|
 | (name) | (1–100) | Low / Medium / High | Retire / Rehost / Replatform / Refactor / Rebuild / Replace |
 
-## Governance
+## basecoat-20-lang-governance
 
 - Complexity score and treatment path must be recorded in the ADR log for each application.
-- Scores above 60 require solution-architect sign-off before treatment selection is finalised.
-- Treatment paths that result in Retire or Replace require product-manager approval.
+- Scores above 60 require basecoat-10-core-solution-architect sign-off before treatment selection is finalised.
+- Treatment paths that result in Retire or Replace require basecoat-10-core-product-manager approval.
 - Review the treatment matrix annually or after major portfolio changes.
