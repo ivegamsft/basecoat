@@ -91,11 +91,13 @@ $skipped = 0
 $errors  = 0
 
 foreach ($file in Get-ChildItem -Path $agentsDir -Filter "*.agent.md") {
-    $agentName = $file.BaseName -replace '\.agent$', ''
+    $baseName = $file.BaseName -replace '\.agent$', ''
+    # Extract actual agent name from new naming convention: basecoat-XX-category-agent-name -> agent-name
+    $agentName = $baseName -replace '^basecoat-\d+-\w+-', ''
     $content   = Get-Content $file.FullName -Raw
 
     if (-not $taxonomy.ContainsKey($agentName)) {
-        Write-Warning "No taxonomy entry for '$agentName' — skipping"
+        Write-Warning "No taxonomy entry for '$agentName' (file: $baseName) — skipping"
         $skipped++
         continue
     }
