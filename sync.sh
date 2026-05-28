@@ -56,7 +56,7 @@ sanitize_agent_for_cli() {
 
     {
       if (in_frontmatter == 1) {
-        if ($0 ~ /^[A-Za-z0-9_-]+:[ \t]*/) {
+        if ($0 ~ /^[A-Za-z0-9_-]+:/) {
           key = $0
           sub(/:.*/, "", key)
           keep = 0
