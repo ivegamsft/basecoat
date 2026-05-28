@@ -45,7 +45,7 @@ Please apply **at least one label from each category below:**
 
 **Sprint** (required):
 
-- `sprint:<number>` (for example, `sprint:24`)
+- `sprint-YYYY-MM` (for example, `sprint-2026-05`)
 - Use `needs-triage` if sprint is unknown at creation time
 
 **Technology** (optional):
