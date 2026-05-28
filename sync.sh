@@ -53,8 +53,10 @@ fi
 mkdir -p "$REPO_ROOT/$TARGET_DIR"
 
 for item in README.md CHANGELOG.md version.json asset-manifest.json instructions skills prompts agents; do
-  rm -rf "$REPO_ROOT/$TARGET_DIR/$item"
-  cp -R "$TMP_DIR/source/$item" "$REPO_ROOT/$TARGET_DIR/$item"
+  if [[ -e "$TMP_DIR/source/$item" ]]; then
+    rm -rf "$REPO_ROOT/$TARGET_DIR/$item"
+    cp -R "$TMP_DIR/source/$item" "$REPO_ROOT/$TARGET_DIR/$item"
+  fi
 done
 
 # Legacy cleanup: basecoat-metadata.json was previously distributed.
