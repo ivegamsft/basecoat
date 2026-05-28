@@ -177,7 +177,7 @@ Every issue should include:
 
 ### Label Taxonomy Reference
 
-Complete reference: [`docs/LABEL_TAXONOMY.md`](../docs/LABEL_TAXONOMY.md)
+Complete reference: [`docs/LABEL_taxonomy.md`](../docs/LABEL_taxonomy.md)
 
 GitHub search examples:
 
@@ -429,11 +429,11 @@ python scripts/metrics/collect-metrics.py
 
 ### 3. Tracking Inventory
 
-The `INVENTORY.md` and `CATALOG.md` files document all available assets (agents, skills, instructions, prompts) with descriptions, keywords, and use cases. Keep these updated when adding or removing assets.
+The `inventory.md` and `CATALOG.md` files document all available assets (agents, skills, instructions, prompts) with descriptions, keywords, and use cases. Keep these updated when adding or removing assets.
 
 **When to update:**
 
-- Add new agent, skill, or instruction file → add entry to `INVENTORY.md` and `CATALOG.md`
+- Add new agent, skill, or instruction file → add entry to `inventory.md` and `CATALOG.md`
 - Remove deprecated asset → remove from both files
 - Change description or functionality → update both files
 
@@ -585,3 +585,4 @@ answer is no (it references BaseCoat tooling, sprints, or internal conventions),
 ## Questions
 
 Open an issue with the `question` label. Do not DM maintainers for things that belong in the open.
+

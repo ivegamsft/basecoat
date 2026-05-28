@@ -59,7 +59,7 @@ The sync script clones BaseCoat, copies the standard assets into `.github/base-c
 
 The sync script copies these items into `BASECOAT_TARGET_DIR`:
 
-`README.md` · `CHANGELOG.md` · `INVENTORY.md` · `version.json` · `instructions/` · `skills/` · `prompts/` · `agents/`
+`README.md` · `CHANGELOG.md` · `inventory.md` · `version.json` · `instructions/` · `skills/` · `prompts/` · `agents/`
 
 Everything else (tests, scripts, CI workflows, examples) stays in the source repo and is **not** copied into consumers.
 
@@ -92,7 +92,7 @@ BaseCoat uses a consistent label taxonomy for issue triage, discovery, and sprin
 - Find high-priority bugs: `is:issue label:priority:high label:bug`
 - Find blocked issues: `is:issue label:blocked`
 
-**For complete label reference:** [`docs/reference/LABEL_TAXONOMY.md`](docs/reference/LABEL_TAXONOMY.md) · [`GOVERNANCE.md`](docs/reference/GOVERNANCE.md#labels)
+**For complete label reference:** [`docs/reference/LABEL_taxonomy.md`](docs/reference/LABEL_taxonomy.md) · [`governance.md`](docs/reference/governance.md#labels)
 
 ---
 
@@ -290,7 +290,7 @@ BaseCoat operates under a lightweight enterprise governance framework:
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
 
-Full reference: [`docs/reference/GOVERNANCE.md`](docs/reference/GOVERNANCE.md) · Contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md)
+Full reference: [`docs/reference/governance.md`](docs/reference/governance.md) · Contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md)
 
 ---
 
@@ -314,7 +314,7 @@ basecoat/
 ├── CATALOG.md           # Machine-readable asset registry
 ├── CHANGELOG.md         # Release history
 ├── CONTRIBUTING.md      # Contribution guidelines
-├── INVENTORY.md         # Asset inventory
+├── inventory.md         # Asset inventory
 └── version.json         # Current version metadata
 ```
 
@@ -401,4 +401,5 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for guidelines on adding agents, skills
 ## License
 
 This project is for internal use. Contact your organization's open-source program office for licensing terms.
+
 

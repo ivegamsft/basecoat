@@ -21,7 +21,7 @@ All notable changes to this repository should be recorded in this file.
 
 ### Changed
 
-- Updated `docs/reference/HOOKS.md` with platform-aligned event mapping, agent-scoped hook guidance, and telemetry integration recommendations.
+- Updated `docs/reference/hooks.md` with platform-aligned event mapping, agent-scoped hook guidance, and telemetry integration recommendations.
 
 ### Security
 
@@ -590,7 +590,7 @@ Complete restructuring of 155+ files into an 8-section taxonomy for navigability
 - **`docs/archive/`** — wave summaries, staging reports, sprint deliverables
 - Updated `docs/INDEX.md` with full 8-section taxonomy and diagram links
 - Updated `README.md` all broken doc links to new paths
-- Updated `sync.ps1` to find `INVENTORY.md` at new `docs/reference/` location
+- Updated `sync.ps1` to find `inventory.md` at new `docs/reference/` location
 
 #### Memory Design Documentation (`docs/memory/`)
 
@@ -851,9 +851,9 @@ inside GitHub Actions. Each workflow is a `.md` source file compiled to a
 - **`portal/prompts/`** — 5 portal-specific prompts moved out of `prompts/` sync path (#503)
 - **`docs/INDEX.md`** — New repo-wide documentation map covering all 60+ docs by topic (#502)
 - **`docs/PORTAL_INDEX.md`** — Former `docs/INDEX.md` (portal infrastructure index) preserved (#502)
-- **`scripts/generate-inventory.ps1`** — New script to validate asset counts against INVENTORY.md and README.md (#505)
+- **`scripts/generate-inventory.ps1`** — New script to validate asset counts against inventory.md and README.md (#505)
 
-### INVENTORY.md Completion
+### inventory.md Completion
 
 - Added 21 missing agent entries (73 total, up from 52)
 - Added 22 missing skill entries (55 total, up from 33)
@@ -939,7 +939,7 @@ This major release represents the completion of the full enterprise customizatio
 
 #### Documentation Updates
 - `CONTRIBUTING.md` — Updated with rate-limit discipline, GitHub Actions auto-approval, issue labeling standards
-- `docs/LABEL_TAXONOMY.md` — Formalized taxonomy (7 categories, 11.4 KB)
+- `docs/LABEL_taxonomy.md` — Formalized taxonomy (7 categories, 11.4 KB)
 - `scripts/validate-basecoat.ps1` — Enhanced validation with optional frontmatter recognition
 - `tests/run-tests.ps1` — Improved error propagation and coverage tracking
 - `docs/ENTERPRISE_*.md` — 10 comprehensive enterprise guides (networking, database, DNS, observability, DR, SLA/SLO, .NET, identity, security, Kubernetes)
@@ -1056,7 +1056,7 @@ None — v3.0.0 maintains backward compatibility with v2.x patterns.
 - Package Base Coat workflow no longer skips jobs on tag push — `validate-basecoat.yml` now accepts a `concurrency_group` input to prevent collisions with simultaneous push-to-main validate runs
 
 ### Changed
-- `docs/GOALS.md` — updated for v2.1.0 (agent counts, model frontmatter, process discipline)
+- `docs/goals.md` — updated for v2.1.0 (agent counts, model frontmatter, process discipline)
 - `docs/repo_history/2026-05-01-story-of-basecoat.md` — added Chapter 8 (Sprint 6, v2.1.0, post-release fixes)
 
 ## 2.1.0 - 2026-05-01
@@ -1064,7 +1064,7 @@ None — v3.0.0 maintains backward compatibility with v2.x patterns.
 ### Added
 - `agents/sprint-retrospective.agent.md` — new agent for generating structured sprint retrospectives with metrics, timelines, and actionable tips
 - `skills/sprint-retrospective/SKILL.md` — companion skill with document templates, metrics formulas, and tips taxonomy
-- `docs/GOALS.md` — 8 primary project goals, non-goals, and success criteria
+- `docs/goals.md` — 8 primary project goals, non-goals, and success criteria
 - `docs/repo_history/2026-05-01-story-of-basecoat.md` — 7-chapter narrative of repo evolution
 - `model` field added to all 50 agent YAML frontmatter blocks for VS Code model routing (27 claude-sonnet-4.6, 16 gpt-5.3-codex, 3 claude-haiku-4.5, 2 claude-sonnet-4-5, 1 claude-sonnet-4, 1 default)
 
@@ -1075,18 +1075,18 @@ None — v3.0.0 maintains backward compatibility with v2.x patterns.
 
 ### Changed
 - `CATALOG.md` — added 15 agents, 7 skills, 15 instructions
-- `INVENTORY.md` — complete rewrite with all 51 agents, 34 skills, 34 instructions
+- `inventory.md` — complete rewrite with all 51 agents, 34 skills, 34 instructions
 - `README.md` — updated asset counts (50→51 agents, 33→34 skills, 32→34 instructions)
-- `PRODUCT.md` — updated 6 stale count references
-- `PHILOSOPHY.md` — updated agent count
+- `product.md` — updated 6 stale count references
+- `philosophy.md` — updated agent count
 
 ## 2.0.0 - 2026-04-28
 
 ### Added
 - `/basecoat` router skill (`skills/basecoat/SKILL.md`) — single entry point with dual-mode UX: discovery (`/basecoat`) and delegation (`/basecoat [discipline] [prompt]`)
 - `basecoat-metadata.json` — machine-readable registry of all 28 agents with categories, keywords, aliases, argument hints, and paired skills
-- `PRODUCT.md` — project identity document defining audience, principles, and architecture
-- `PHILOSOPHY.md` — explains the agents + skills + instructions design and how they compose
+- `product.md` — project identity document defining audience, principles, and architecture
+- `philosophy.md` — explains the agents + skills + instructions design and how they compose
 - Categorized agent table in `CATALOG.md` with emoji groupings (🔨🏗️🔍🚀📋🧰)
 - `argumentHint` field for all 28 agents in metadata registry
 - `basecoat-ghcp.zip` release artifact for 1-step GitHub Copilot installation
@@ -1200,3 +1200,4 @@ None — v3.0.0 maintains backward compatibility with v2.x patterns.
 - Added sync scripts for PowerShell and bash consumers
 - Added starter instructions, prompts, skills, and agent files
 - Added inventory and version metadata
+

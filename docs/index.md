@@ -7,7 +7,7 @@ BaseCoat gives your organization a curated, version-controlled library of agents
 - [README.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/README.md) — Getting started, installation, and overview
 - [CHANGELOG.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/CHANGELOG.md) — Release history
 - [CONTRIBUTING.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/CONTRIBUTING.md) — Contribution guide
-- [PHILOSOPHY.md](PHILOSOPHY.md) — Design philosophy and principles
+- [philosophy.md](philosophy.md) — Design philosophy and principles
 
 ---
 
@@ -42,12 +42,12 @@ flowchart LR
 - [integrations/mcp-deployment.md](integrations/mcp-deployment.md) — Deploying the Base Coat MCP server
 - [integrations/pydantic-mcp-integration.md](integrations/pydantic-mcp-integration.md) — Pydantic + MCP integration
 - [integrations/pydantic-typescript-client-generation.md](integrations/pydantic-typescript-client-generation.md) — TypeScript client generation
-- [integrations/AZURE_AD_INTEGRATION_GUIDE.md](integrations/AZURE_AD_INTEGRATION_GUIDE.md) — Azure AD integration
-- [integrations/AZURE_SQL_MIGRATION_GUIDANCE.md](integrations/AZURE_SQL_MIGRATION_GUIDANCE.md) — Azure SQL migration
-- [integrations/ENTERPRISE_IDENTITY_ACCESS.md](integrations/ENTERPRISE_IDENTITY_ACCESS.md) — Identity & access patterns
-- [integrations/ENTERPRISE_KUBERNETES_PATTERNS.md](integrations/ENTERPRISE_KUBERNETES_PATTERNS.md) — AKS / K8s guidance
-- [integrations/APPLICATION_GATEWAY_ROUTING_GUIDANCE.md](integrations/APPLICATION_GATEWAY_ROUTING_GUIDANCE.md) — App Gateway routing
-- [integrations/RBAC_ONLY_AUTHENTICATION_PATTERNS.md](integrations/RBAC_ONLY_AUTHENTICATION_PATTERNS.md) — RBAC auth patterns
+- [integrations/azure-ad-integration-guide.md](integrations/azure-ad-integration-guide.md) — Azure AD integration
+- [integrations/azure-sql-migration-guidance.md](integrations/azure-sql-migration-guidance.md) — Azure SQL migration
+- [integrations/enterprise-identity-access.md](integrations/enterprise-identity-access.md) — Identity & access patterns
+- [integrations/enterprise-kubernetes-patterns.md](integrations/enterprise-kubernetes-patterns.md) — AKS / K8s guidance
+- [integrations/application-gateway-routing-guidance.md](integrations/application-gateway-routing-guidance.md) — App Gateway routing
+- [integrations/rbac-only-authentication-patterns.md](integrations/rbac-only-authentication-patterns.md) — RBAC auth patterns
 - [integrations/untools-integration.md](integrations/untools-integration.md) — UnTools integration guide
 
 ## Reference (`docs/reference/`)
@@ -57,37 +57,37 @@ flowchart LR
 - [reference/DISTRIBUTION.md](reference/DISTRIBUTION.md) — Sync mechanism for consumer repos
 - [reference/HOOKS.md](reference/HOOKS.md) — Git hooks and pre-commit validation
 - [reference/GOALS.md](reference/GOALS.md) — Project goals and OKRs
-- [reference/SCOPED_INSTRUCTIONS.md](reference/SCOPED_INSTRUCTIONS.md) — Scoped instruction authoring guide
-- [reference/LABEL_TAXONOMY.md](reference/LABEL_TAXONOMY.md) — GitHub label taxonomy
-- [reference/PROMPT_REGISTRY.md](reference/PROMPT_REGISTRY.md) — Prompt catalog and registry
-- [reference/ASSET_REGISTRY.md](reference/ASSET_REGISTRY.md) — Asset registry metadata
-- [reference/CLI_COMMAND_REFERENCE.md](reference/CLI_COMMAND_REFERENCE.md) — CLI command reference
-- [reference/COMPONENT_LIBRARY.md](reference/COMPONENT_LIBRARY.md) — Component library reference
-- [reference/PRODUCT.md](reference/PRODUCT.md) — Product vision and roadmap
-- [reference/QUICK_REFERENCE.md](reference/QUICK_REFERENCE.md) — Quick reference card
-- [reference/GUIDANCE_VOCABULARY_SYNTAX_GUIDE.md](reference/GUIDANCE_VOCABULARY_SYNTAX_GUIDE.md) — Canonical vocabulary, taxonomy, ontology, and prompt syntax
+- [reference/scoped-instructions.md](reference/scoped-instructions.md) — Scoped instruction authoring guide
+- [reference/label-taxonomy.md](reference/label-taxonomy.md) — GitHub label taxonomy
+- [reference/prompt-registry.md](reference/prompt-registry.md) — Prompt catalog and registry
+- [reference/asset-registry.md](reference/asset-registry.md) — Asset registry metadata
+- [reference/cli-command-reference.md](reference/cli-command-reference.md) — CLI command reference
+- [reference/component-library.md](reference/component-library.md) — Component library reference
+- [reference/product.md](reference/product.md) — Product vision and roadmap
+- [reference/quick-reference.md](reference/quick-reference.md) — Quick reference card
+- [reference/guidance-vocabulary-syntax-guide.md](reference/guidance-vocabulary-syntax-guide.md) — Canonical vocabulary, taxonomy, ontology, and prompt syntax
 - [reference/treatment-matrix.md](reference/treatment-matrix.md) — Issue treatment matrix
 - [reference/guardrails/](reference/guardrails/) — Guardrail configuration files
 
 ## Guides (`docs/guides/`)
 
 - [guides/intent-prefixes.md](guides/intent-prefixes.md) — Intent vocabulary, routing behavior, and prompt templates
-- [agents/TAXONOMY.md](agents/TAXONOMY.md) — Agent and skill taxonomy with chain archetypes
+- [agents/taxonomy.md](agents/taxonomy.md) — Agent and skill taxonomy with chain archetypes
 
 ## Operations (`docs/operations/`)
 
-- [operations/FLEET_DISPATCH_POLICY.md](operations/FLEET_DISPATCH_POLICY.md) — Guardrails and checklist for parallel sub-agent dispatch in fleet mode
-- [operations/RELEASE_PROCESS.md](operations/RELEASE_PROCESS.md) — How releases are cut and published
-- [operations/RELEASE_METRICS.md](operations/RELEASE_METRICS.md) — Release metrics and KPIs
-- [operations/OPERATIONAL_RUNBOOK.md](operations/OPERATIONAL_RUNBOOK.md) — Runbook for common operations
-- [operations/DISASTER_RECOVERY.md](operations/DISASTER_RECOVERY.md) — DR procedures
-- [operations/COST_OPTIMIZATION.md](operations/COST_OPTIMIZATION.md) — Cost analysis and optimization
-- [operations/ENTERPRISE_RUNNERS.md](operations/ENTERPRISE_RUNNERS.md) — Self-hosted runner setup
-- [operations/ENTERPRISE_SECURITY_HARDENING.md](operations/ENTERPRISE_SECURITY_HARDENING.md) — Security hardening guide
-- [operations/BLOCKED_ISSUES.md](operations/BLOCKED_ISSUES.md) — Blocked issues tracking
-- [operations/TELEMETRY_ADOPTION.md](operations/TELEMETRY_ADOPTION.md) — Adoption telemetry guide
-- [operations/GITHUB_SECRETS.md](operations/GITHUB_SECRETS.md) — Repository secrets setup and rotation guide
-- [operations/COPILOT_EXTENSION_GITHUB_APP_REGISTRATION.md](operations/COPILOT_EXTENSION_GITHUB_APP_REGISTRATION.md) — GitHub App registration runbook for BaseCoat Copilot Extension
+- [operations/fleet-dispatch-policy.md](operations/fleet-dispatch-policy.md) — Guardrails and checklist for parallel sub-agent dispatch in fleet mode
+- [operations/release-process.md](operations/release-process.md) — How releases are cut and published
+- [operations/release-metrics.md](operations/release-metrics.md) — Release metrics and KPIs
+- [operations/operational-runbook.md](operations/operational-runbook.md) — Runbook for common operations
+- [operations/disaster-recovery.md](operations/disaster-recovery.md) — DR procedures
+- [operations/cost-optimization.md](operations/cost-optimization.md) — Cost analysis and optimization
+- [operations/enterprise-runners.md](operations/enterprise-runners.md) — Self-hosted runner setup
+- [operations/enterprise-security-hardening.md](operations/enterprise-security-hardening.md) — Security hardening guide
+- [operations/blocked-issues.md](operations/blocked-issues.md) — Blocked issues tracking
+- [operations/telemetry-adoption.md](operations/telemetry-adoption.md) — Adoption telemetry guide
+- [operations/github-secrets.md](operations/github-secrets.md) — Repository secrets setup and rotation guide
+- [operations/copilot-extension-github-app-registration.md](operations/copilot-extension-github-app-registration.md) — GitHub App registration runbook for BaseCoat Copilot Extension
 - [operations/security/](operations/security/) — Security policies and audit docs
 
 ## Templates (`docs/templates/`)

@@ -127,3 +127,4 @@ See `docs/MODEL_OPTIMIZATION.md` for the full tier matrix. See `docs/token-optim
 | VS Code tool confirmation tiers and enforcement | [`docs/reference/guardrails/tool-confirmation-policy.md`](../docs/reference/guardrails/tool-confirmation-policy.md) |
 | Sub-agent redispatch/retry/escalation policy | [`docs/agents/MULTI_AGENT_WORKFLOWS.md#sub-agent-redispatch-retry-and-escalation-policy`](../docs/agents/MULTI_AGENT_WORKFLOWS.md#sub-agent-redispatch-retry-and-escalation-policy) |
 | Intent prefix routing, timing semantics, prefix-to-agent map | [`instructions/intent-routing.instructions.md`](../instructions/intent-routing.instructions.md) |
+
