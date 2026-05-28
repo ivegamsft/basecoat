@@ -7,14 +7,6 @@ SOURCE_REF="${BASECOAT_REF:-main}"
 TARGET_DIR="${BASECOAT_TARGET_DIR:-.github/base-coat}"
 ALLOWED_DOCS_TOP_LEVEL=("reference" "guides" "agents")
 
-sanitize_agent_for_cli() {
-  # TODO: Implement proper frontmatter sanitization in bash.
-  # For now, copy agents as-is. The CLI only recognizes name/description/tools/mcp-servers anyway.
-  local src="$1"
-  local dest="$2"
-  cp "$src" "$dest"
-}
-
 if ! command -v git >/dev/null 2>&1; then
   echo "git is required" >&2
   exit 1
@@ -32,7 +24,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-echo "Cloning $SOURCE_REPO#$SOURCE_REF"
+echo "Cloning $SOURCE_REPO#$SOURCE_REF" >&2
 if ! git clone --depth 1 --branch "$SOURCE_REF" "$SOURCE_REPO" "$TMP_DIR/source" >/dev/null 2>&1; then
   # In CI for private GitHub repos, anonymous clone can fail. Retry with an auth
   # header when either GITHUB_TOKEN or GH_TOKEN is available.
@@ -54,8 +46,11 @@ mkdir -p "$REPO_ROOT/$TARGET_DIR"
 
 for item in README.md CHANGELOG.md version.json asset-manifest.json instructions skills prompts agents; do
   if [[ -e "$TMP_DIR/source/$item" ]]; then
+    echo "Copying $item..." >&2
     rm -rf "$REPO_ROOT/$TARGET_DIR/$item"
     cp -R "$TMP_DIR/source/$item" "$REPO_ROOT/$TARGET_DIR/$item"
+  else
+    echo "Skipping $item (not found in source)..." >&2
   fi
 done
 
