@@ -31,6 +31,8 @@ Get-ChildItem $agentsDir -Filter "*.agent.md" | ForEach-Object {
         $frontmatter = $Matches[1]
 
         $id = $_.Name -replace "\.agent\.md$", ""
+        # Extract short agent name from new naming convention
+        $id = $id -replace '^basecoat-\d+-\w+-', ''
         $name = if ($frontmatter -match "^name:\s*(.+)$") { $Matches[1].Trim().Trim('"') } else { $id }
         $description = if ($frontmatter -match "^description:\s*(.+)$") { $Matches[1].Trim().Trim('"') } else { "No description" }
         $model = if ($frontmatter -match "^model:\s*(.+)$") { $Matches[1].Trim() } else { "claude-sonnet-4.6" }
