@@ -7,6 +7,76 @@ SOURCE_REF="${BASECOAT_REF:-main}"
 TARGET_DIR="${BASECOAT_TARGET_DIR:-.github/base-coat}"
 ALLOWED_DOCS_TOP_LEVEL=("reference" "guides" "agents")
 
+sanitize_agent_for_cli() {
+  local src="$1"
+  local dest="$2"
+  local header
+  local has_tools=0
+  local has_allowed_tools=0
+  local map_allowed_tools=0
+
+  header="$(awk '
+    BEGIN { d = 0 }
+    /^---$/ { d++; next }
+    d == 1 { print }
+    d == 2 { exit }
+  ' "$src")"
+
+  if grep -q '^tools:' <<<"$header"; then
+    has_tools=1
+  fi
+  if grep -q '^allowed-tools:' <<<"$header"; then
+    has_allowed_tools=1
+  fi
+  if [[ "$has_tools" -eq 0 && "$has_allowed_tools" -eq 1 ]]; then
+    map_allowed_tools=1
+  fi
+
+  awk -v map_allowed_tools="$map_allowed_tools" '
+    BEGIN {
+      in_frontmatter = 0
+      frontmatter_started = 0
+      keep = 0
+    }
+
+    /^---$/ {
+      if (frontmatter_started == 0) {
+        frontmatter_started = 1
+        in_frontmatter = 1
+        print
+        next
+      }
+      if (in_frontmatter == 1) {
+        in_frontmatter = 0
+        print
+        print ""
+        next
+      }
+    }
+
+    {
+      if (in_frontmatter == 1) {
+        if ($0 ~ /^[A-Za-z0-9_-]+:[[:space:]]*/) {
+          key = $0
+          sub(/:.*/, "", key)
+          keep = 0
+          if (key == "name" || key == "description" || key == "tools" || key == "mcp-servers") {
+            keep = 1
+          } else if (key == "allowed-tools" && map_allowed_tools == 1) {
+            keep = 1
+            sub(/^allowed-tools:/, "tools:")
+          }
+        }
+        if (keep == 1) {
+          print
+        }
+        next
+      }
+      print
+    }
+  ' "$src" > "$dest"
+}
+
 if ! command -v git >/dev/null 2>&1; then
   echo "git is required" >&2
   exit 1
@@ -128,7 +198,9 @@ fi
 if [[ -d "$REPO_ROOT/$TARGET_DIR/agents" ]]; then
   rm -rf "$REPO_ROOT/.github/agents"
   mkdir -p "$REPO_ROOT/.github/agents"
-  find "$REPO_ROOT/$TARGET_DIR/agents" -maxdepth 1 -name '*.agent.md' -exec cp {} "$REPO_ROOT/.github/agents/" \;
+  while IFS= read -r agent_file; do
+    sanitize_agent_for_cli "$agent_file" "$REPO_ROOT/.github/agents/$(basename "$agent_file")"
+  done < <(find "$REPO_ROOT/$TARGET_DIR/agents" -maxdepth 1 -type f -name '*.agent.md' | sort)
 fi
 
 # Optional cleanup pass for stale managed files from prior versions.
