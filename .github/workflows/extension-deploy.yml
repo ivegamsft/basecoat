@@ -36,6 +36,7 @@ permissions:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository_owner }}/basecoat-extension
+  EXTENSION_AZURE_LOCATION: ${{ vars.EXTENSION_AZURE_LOCATION || 'eastus' }}
 
 jobs:
   build-push:
@@ -112,6 +113,13 @@ jobs:
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login "${{ env.REGISTRY }}" -u "${{ github.actor }}" --password-stdin
           docker pull "${{ needs.build-push.outputs.image_ref }}"
+
+      - name: Ensure resource group exists
+        run: |
+          az group create \
+            --name "${{ secrets.EXTENSION_RESOURCE_GROUP }}" \
+            --location "${{ env.EXTENSION_AZURE_LOCATION }}" \
+            --output none
 
       - name: Staging what-if validation
         if: ${{ env.TARGET_ENV == 'staging' }}
@@ -192,4 +200,3 @@ jobs:
 
           echo "::error::Health check failed after 5 attempts (last status: ${STATUS})"
           exit 1
-
