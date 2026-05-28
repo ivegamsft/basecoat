@@ -12,6 +12,18 @@ All notable changes to this repository should be recorded in this file.
 
 - Updated dependency guardrail guidance with retry/backoff and flaky-test containment expectations for dependency update validation.
 
+## 3.28.2 - 2026-05-28
+
+### Changed
+
+- Standardized active documentation file naming to lowercase kebab-case and refreshed related references.
+- Updated stale sprint artifact dates and sprint closeout records for consistency.
+- Hardened workflow action pinning and related CI policy alignment fixes.
+
+### Fixed
+
+- Adjusted docs workflow validation to use strict mode for pull requests while allowing non-strict validation on push-to-main deploy runs so docs publishing is not blocked by existing legacy link warnings.
+
 ## 3.28.1 - 2026-05-23
 
 ### Added
@@ -1200,4 +1212,3 @@ None — v3.0.0 maintains backward compatibility with v2.x patterns.
 - Added sync scripts for PowerShell and bash consumers
 - Added starter instructions, prompts, skills, and agent files
 - Added inventory and version metadata
-

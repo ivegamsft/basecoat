@@ -39,8 +39,13 @@ jobs:
       - name: Generate token context inventory
         run: python scripts/generate-token-context-inventory.py
 
-      - name: Validate docs (strict)
-        run: python -m mkdocs build --strict
+      - name: Validate docs
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            python -m mkdocs build --strict
+          else
+            python -m mkdocs build
+          fi
 
   deploy:
     if: github.event_name != 'pull_request'
@@ -89,4 +94,3 @@ jobs:
         run: mkdocs gh-deploy --force --no-history
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-

@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "3.28.1",
-  "releaseDate": "2026-05-23",
-  "notes": "Dogfood sprint follow-through: merged sprint mapper and issue triage automation, shipped dependency security updates, and aligned HOOKS guidance with platform events and telemetry design"
+  "version": "3.28.2",
+  "releaseDate": "2026-05-28",
+  "notes": "Post-sprint stabilization release: docs naming/date consistency updates, CI action pinning hardening, and docs deploy validation alignment for reliable publishing"
 }
