@@ -11,10 +11,10 @@ sanitize_agent_for_cli() {
   local src="$1"
   local dest="$2"
 
-  # Extract frontmatter
+  # Find line number of second ---
   local frontmatter_end
-  frontmatter_end=$(awk '/^---$/ { c++; if (c == 2) { print NR; exit } }' "$src")
-  if [[ -z "$frontmatter_end" ]]; then
+  frontmatter_end=$(grep -n '^---$' "$src" | sed -n '2p' | cut -d: -f1)
+  if [[ -z "$frontmatter_end" ]] || [[ "$frontmatter_end" -le 1 ]]; then
     cp "$src" "$dest"
     return 0
   fi
@@ -24,7 +24,7 @@ sanitize_agent_for_cli() {
     echo "---"
 
     # Extract and filter frontmatter (lines 2 to frontmatter_end-1)
-    sed -n '2,'$((frontmatter_end - 1))'p' "$src" | grep -E '^(name|description|tools|mcp-servers|allowed-tools):' | sed 's/^allowed-tools:/tools:/'
+    sed -n "2,$((frontmatter_end - 1))p" "$src" | grep -E '^(name|description|tools|mcp-servers|allowed-tools):' | sed 's/^allowed-tools:/tools:/'
 
     # Keep closing marker and body
     echo "---"
