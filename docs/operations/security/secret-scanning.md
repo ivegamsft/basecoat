@@ -11,7 +11,7 @@
 3. [Installing the Pre-Commit Hook](#installing-the-pre-commit-hook)
 4. [How the CI Workflow Works](#how-the-ci-workflow-works)
 5. [Allowlisting False Positives](#allowlisting-false-positives)
-6. [I Accidentally Committed a Secret — Now What?](#i-accidentally-committed-a-secret--now-what)
+6. [I Accidentally Committed a Secret — Now What?](#i-accidentally-committed-a-secret-now-what)
 7. [Configuration Reference](#configuration-reference)
 
 ---

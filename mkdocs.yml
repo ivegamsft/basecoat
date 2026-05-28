@@ -75,10 +75,10 @@ nav:
     - Enterprise Setup: guides/enterprise-setup.md
     - Consumer Sync Guide: guides/consumer-sync.md
   - Asset Reference:
-    - Overview: reference/QUICK_REFERENCE.md
+    - Overview: reference/quick-reference.md
     - Inventory: reference/INVENTORY.md
     - Token Context Inventory: reference/TOKEN_CONTEXT_INVENTORY.md
-    - Agents: reference/ASSET_REGISTRY.md
+    - Agents: reference/asset-registry.md
     - Governance: reference/GOVERNANCE.md
   - How-To Guides:
     - Intent Prefixes: guides/intent-prefixes.md
@@ -87,7 +87,7 @@ nav:
     - Agent Examples: guides/agent-examples.md
     - Contributing: guides/contributing.md
     - Version Drift Detection: guides/version-drift.md
-    - Model Optimization: guides/MODEL_OPTIMIZATION.md
+    - Model Optimization: guides/model-optimization.md
     - Token Optimization: guides/token-optimization.md
     - BaseCoat Config (.basecoat.yml): guides/basecoat-yml.md
     - UBB Token Guidance: guides/ubb-token-guidance.md
