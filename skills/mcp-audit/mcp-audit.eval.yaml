@@ -1,0 +1,31 @@
+name: "mcp-audit-routing"
+description: "Routing evaluation — validates trigger activation for the mcp-audit skill."
+skill: "skills/mcp-audit/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Audit this MCP server implementation for code quality and compliance"
+    expect_activation: true
+  - id: "pos-2"
+    input: "Review the tool definitions and validate schema compliance"
+    expect_activation: true
+  - id: "pos-3"
+    input: "Check the MCP server for error handling and validation issues"
+    expect_activation: true
+  - id: "pos-4"
+    input: "Assess the tool documentation and schema correctness"
+    expect_activation: true
+  - id: "pos-5"
+    input: "Evaluate MCP server performance and integration compatibility"
+    expect_activation: true
+  - id: "neg-1"
+    input: "Help me implement a new MCP server"
+    expect_activation: false
+  - id: "neg-2"
+    input: "Design the tool specification for my MCP server"
+    expect_activation: false
+  - id: "neg-3"
+    input: "Write a client application for this MCP server"
+    expect_activation: false
+  - id: "neg-4"
+    input: "Review this pull request for code style"
+    expect_activation: false
