@@ -154,9 +154,12 @@ fi
 if [[ -d "$REPO_ROOT/$TARGET_DIR/agents" ]]; then
   rm -rf "$REPO_ROOT/.github/agents"
   mkdir -p "$REPO_ROOT/.github/agents"
-  while IFS= read -r agent_file; do
-    sanitize_agent_for_cli "$agent_file" "$REPO_ROOT/.github/agents/$(basename "$agent_file")"
-  done < <(find "$REPO_ROOT/$TARGET_DIR/agents" -maxdepth 1 -type f -name '*.agent.md' | sort)
+  shopt -s nullglob
+  for agent_file in "$REPO_ROOT/$TARGET_DIR/agents"/*.agent.md; do
+    [[ -f "$agent_file" ]] || continue
+    dest="$REPO_ROOT/.github/agents/$(basename "$agent_file")"
+    sanitize_agent_for_cli "$agent_file" "$dest"
+  done
 fi
 
 # Optional cleanup pass for stale managed files from prior versions.
