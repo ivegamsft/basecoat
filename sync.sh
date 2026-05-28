@@ -24,7 +24,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-echo "Cloning $SOURCE_REPO#$SOURCE_REF" >&2
+echo "Cloning $SOURCE_REPO#$SOURCE_REF"
 if ! git clone --depth 1 --branch "$SOURCE_REF" "$SOURCE_REPO" "$TMP_DIR/source" >/dev/null 2>&1; then
   # In CI for private GitHub repos, anonymous clone can fail. Retry with an auth
   # header when either GITHUB_TOKEN or GH_TOKEN is available.
@@ -45,13 +45,8 @@ fi
 mkdir -p "$REPO_ROOT/$TARGET_DIR"
 
 for item in README.md CHANGELOG.md version.json asset-manifest.json instructions skills prompts agents; do
-  if [[ -e "$TMP_DIR/source/$item" ]]; then
-    echo "Copying $item..." >&2
-    rm -rf "$REPO_ROOT/$TARGET_DIR/$item"
-    cp -R "$TMP_DIR/source/$item" "$REPO_ROOT/$TARGET_DIR/$item"
-  else
-    echo "Skipping $item (not found in source)..." >&2
-  fi
+  rm -rf "$REPO_ROOT/$TARGET_DIR/$item"
+  cp -R "$TMP_DIR/source/$item" "$REPO_ROOT/$TARGET_DIR/$item"
 done
 
 # Legacy cleanup: basecoat-metadata.json was previously distributed.
@@ -133,7 +128,7 @@ fi
 if [[ -d "$REPO_ROOT/$TARGET_DIR/agents" ]]; then
   rm -rf "$REPO_ROOT/.github/agents"
   mkdir -p "$REPO_ROOT/.github/agents"
-  find "$REPO_ROOT/$TARGET_DIR/agents" -maxdepth 1 -type f -name '*.agent.md' -exec cp {} "$REPO_ROOT/.github/agents/" \;
+  find "$REPO_ROOT/$TARGET_DIR/agents" -maxdepth 1 -name '*.agent.md' -exec cp {} "$REPO_ROOT/.github/agents/" \;
 fi
 
 # Optional cleanup pass for stale managed files from prior versions.
