@@ -1,8 +1,8 @@
 # BaseCoat
 
-**Enterprise-grade GitHub Copilot customization framework.**
+**Versioned GitHub Copilot customization library for enterprise repos.**
 
-BaseCoat gives your organization a curated, version-controlled library of agents, skills, instructions, and prompts — synced into every team repo with a single command. Instead of every team writing Copilot customizations from scratch, you get production-ready assets that enforce consistent standards across your entire GitHub Enterprise org.
+BaseCoat gives your organization one place to manage agents, skills, instructions, and prompts. Sync it into each team repo with a single command so standards stay consistent and reusable instead of being rewritten in every codebase.
 
 - [README.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/README.md) — Getting started, installation, and overview
 - [CHANGELOG.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/CHANGELOG.md) — Release history
@@ -11,7 +11,7 @@ BaseCoat gives your organization a curated, version-controlled library of agents
 
 ---
 
-## What's in the box
+## What's included
 
 | Asset type | Count | What it does |
 |---|---|---|
@@ -31,9 +31,9 @@ flowchart LR
     CP -->|guided by| DEV[Your Developers]
 ```
 
-1. **Sync** — run one script to pull the latest BaseCoat release into `.github/base-coat/`
+1. **Sync** — pull the latest BaseCoat release into `.github/base-coat/`
 2. **Use** — Copilot auto-discovers agents, instructions, and prompts from `.github/`
-3. **Contribute** — open a PR to share patterns back with every team in the org
+3. **Contribute** — open a PR to share patterns back with the org
 
 ---
 

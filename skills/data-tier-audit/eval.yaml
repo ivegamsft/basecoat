@@ -1,0 +1,19 @@
+name: "data-tier-audit-routing"
+description: "Routing evaluation — validates trigger activation for the data-tier-audit skill."
+skill: "skills/data-tier-audit/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Review this migration for rollback safety, index health, and schema drift."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Audit the query plan and data contract before we merge."
+    expect_activation: true
+  - id: "pos-3"
+    input: "I need a data-layer audit for N+1 risk and missing indexes."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Build a dashboard for sales metrics."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Write a Kubernetes deployment manifest."
+    expect_activation: false

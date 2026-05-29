@@ -1,0 +1,19 @@
+name: "azure-policy-audit-routing"
+description: "Routing evaluation — validates trigger activation for the azure-policy-audit skill."
+skill: "skills/azure-policy-audit/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Review this Azure Policy initiative for coverage gaps and exemption hygiene."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Audit the remediation tasks and compliance report for this policy set."
+    expect_activation: true
+  - id: "pos-3"
+    input: "I need an Azure policy audit for drift, exemptions, and coverage."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Set up the subnet routing rules."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Write an application feature flag service."
+    expect_activation: false
