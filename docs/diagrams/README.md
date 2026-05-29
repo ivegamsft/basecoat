@@ -6,6 +6,16 @@ All diagrams are authored in [Excalidraw](https://aka.ms/excalidraw) — an open
 whiteboarding tool. Open any `.excalidraw` file directly at
 [**aka.ms/excalidraw**](https://aka.ms/excalidraw) (drag-and-drop or use File → Open).
 
+## Start here
+
+If you only need the gist, read these three first:
+
+| Diagram | Takeaway |
+|---|---|
+| [execution-hierarchy.excalidraw](execution-hierarchy.excalidraw) | Shows the layered execution stack and where guardrails fire |
+| [intent-routing.excalidraw](intent-routing.excalidraw) | Shows when BaseCoat takes the fast path vs the full path |
+| [agentic-workflow-lifecycle.excalidraw](agentic-workflow-lifecycle.excalidraw) | Shows the trigger → filter → agent → buffer → safe output flow |
+
 ---
 
 ## Architecture
@@ -45,4 +55,3 @@ whiteboarding tool. Open any `.excalidraw` file directly at
 !!! note "Inline architecture diagrams"
     The [Architecture Overview](../architecture/overview.md) page contains live
     Mermaid diagrams that render directly in the docs site — no download required.
-

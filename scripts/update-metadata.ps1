@@ -58,7 +58,9 @@ $existingNames = $meta.agents | Select-Object -ExpandProperty name
 $newAgents = [System.Collections.Generic.List[object]]::new()
 
 Get-ChildItem $agentsDir -Filter "*.agent.md" | Sort-Object Name | ForEach-Object {
-    $agentName = $_.BaseName -replace '\.agent$', ''
+    $baseName = $_.BaseName -replace '\.agent$', ''
+    # Extract short agent name from new naming convention
+    $agentName = $baseName -replace '^basecoat-\d+-\w+-', ''
     if ($agentName -in $existingNames) { return }
 
     $content      = Get-Content $_.FullName -Raw

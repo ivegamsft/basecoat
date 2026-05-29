@@ -206,7 +206,7 @@ function Score-Agent {
     if ($frontmatter -imatch 'allowed_skills\s*:') { $score += 0.5 } else { $notes += "missing allowed_skills" }
 
     return [pscustomobject]@{
-        Name     = $File.BaseName
+        Name     = ($File.BaseName -replace '^basecoat-\d+-\w+-', '')
         Category = "agent"
         Score    = [math]::Round([math]::Min($score, 10.0), 1)
         Max      = 10.0

@@ -41,7 +41,11 @@ $tokenBudgetThreshold = 500
 
 function Test-AgentMetadataFreshness {
     $agentFiles = @(Get-ChildItem 'agents' -Filter '*.agent.md' -File | Sort-Object Name)
-    $agentNames = @($agentFiles | ForEach-Object { $_.BaseName -replace '\.agent$', '' })
+    $agentNames = @($agentFiles | ForEach-Object { 
+        $baseName = $_.BaseName -replace '\.agent$', ''
+        # Extract short agent name from new naming convention
+        $baseName -replace '^basecoat-\d+-\w+-', ''
+    })
     $metadataPath = Join-Path (Get-Location) 'basecoat-metadata.json'
 
     if (-not (Test-Path $metadataPath)) {
@@ -80,13 +84,15 @@ function Test-AgentMetadataFreshness {
 }
 
 function Test-LogFirstGate {
-    $govPath = Join-Path (Get-Location) 'instructions/governance.instructions.md'
-    if (-not (Test-Path $govPath)) {
-        Write-Host "ERROR: instructions/governance.instructions.md is missing" -ForegroundColor Red
+    # Find governance file (may have basecoat- prefix in new naming convention)
+    $govFiles = @(Get-ChildItem 'instructions' -Filter '*governance*.instructions.md' -File -ErrorAction SilentlyContinue)
+    if ($govFiles.Count -eq 0) {
+        Write-Host "ERROR: governance.instructions.md is missing from instructions/" -ForegroundColor Red
         $script:errors++
         return
     }
-
+    
+    $govPath = $govFiles[0].FullName
     $content = Get-Content $govPath -Raw
     $missing = @()
 
@@ -101,17 +107,19 @@ function Test-LogFirstGate {
     }
 
     if ($missing.Count -gt 0) {
-        Write-Host "ERROR: instructions/governance.instructions.md is missing required LOG-FIRST gate elements: $($missing -join '; ')" -ForegroundColor Red
+        Write-Host "ERROR: $([System.IO.Path]::GetFileName($govPath)) is missing required LOG-FIRST gate elements: $($missing -join '; ')" -ForegroundColor Red
         $script:errors++
     }
 }
 
 function Test-IntentRoutingSkillReferences {
-    $intentRoutingPath = Join-Path (Get-Location) 'instructions/intent-routing.instructions.md'
-    if (-not (Test-Path $intentRoutingPath)) {
+    # Find intent-routing file (may have basecoat- prefix in new naming convention)
+    $intentRoutingFiles = @(Get-ChildItem 'instructions' -Filter '*intent-routing*.instructions.md' -File -ErrorAction SilentlyContinue)
+    if ($intentRoutingFiles.Count -eq 0) {
         return
     }
-
+    
+    $intentRoutingPath = $intentRoutingFiles[0].FullName
     $content = Get-Content $intentRoutingPath -Raw
 
     # Validate enforcement contract section exists with required routing rules

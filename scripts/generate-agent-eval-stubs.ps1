@@ -139,7 +139,13 @@ if (-not (Test-Path $resolvedAgentsDir)) {
 
 $agentFiles = Get-ChildItem $resolvedAgentsDir -File -Filter *.agent.md
 if ($AgentName) {
-    $agentFiles = $agentFiles | Where-Object { ($_.BaseName -replace '\.agent$', '') -eq $AgentName }
+    # Support both old and new naming conventions
+    $agentFiles = $agentFiles | Where-Object { 
+        $baseName = $_.BaseName -replace '\.agent$', ''
+        # Extract short name from new convention or use old convention
+        $shortName = $baseName -replace '^basecoat-\d+-\w+-', ''
+        $baseName -eq $AgentName -or $shortName -eq $AgentName
+    }
     if (-not $agentFiles) {
         Write-Error "Agent '$AgentName' not found in $resolvedAgentsDir"
         exit 1
@@ -151,8 +157,10 @@ $skipped = 0
 $warned = 0
 
 foreach ($file in $agentFiles) {
-    $logicalName = $file.BaseName -replace '\.agent$', ''
-    $evalFile = Join-Path $file.DirectoryName ($file.BaseName + ".eval.yaml")
+    $baseName = $file.BaseName -replace '\.agent$', ''
+    # Extract short agent name from new naming convention
+    $logicalName = $baseName -replace '^basecoat-\d+-\w+-', ''
+    $evalFile = Join-Path $file.DirectoryName ($logicalName + ".eval.yaml")
     if ((Test-Path $evalFile) -and -not $Force) {
         $skipped++
         continue

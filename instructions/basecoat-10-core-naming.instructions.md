@@ -23,6 +23,14 @@ Use this instruction when a change introduces new files, modules, packages, clas
 - Prefer a stable pattern such as `<org>-<workload>-<env>-<region>-<suffix>` where the platform allows it
 - Keep tags aligned with naming so ownership and cost reporting stay consistent
 
+## BaseCoat Asset Naming
+
+- New agent and instruction files use a stable prefix: `basecoat-<band>-<area>-<topic>.agent.md` and `basecoat-<band>-<area>-<topic>.instructions.md`
+- `band` is a two-digit grouping prefix, `area` is the taxonomy token, and `topic` is the kebab-case slug
+- Keep the filename, catalog entry, and documentation reference aligned in the same change
+- During migration, preserve compatibility by updating aliases, references, and scripts together; do not leave mixed old/new names in active catalogs
+- For existing assets, prefer a staged rename with a compatibility note rather than a partial rename that breaks discoverability
+
 ## Review Lens
 
 - Does the new name convey purpose without local tribal knowledge?

@@ -72,6 +72,8 @@ foreach ($agentFile in $agentFiles) {
     }
 
     $fileSlug = $agentFile.BaseName -replace '\.agent$', ''
+    # Extract short agent name from new naming convention: basecoat-XX-category-agent-name -> agent-name
+    $shortFileSlug = $fileSlug -replace '^basecoat-\d+-\w+-', ''
     $nameValue = ''
     if ($frontmatter -match '(?m)^name:\s*"([^"]+)"') {
         $nameValue = $Matches[1].Trim()
@@ -88,8 +90,8 @@ foreach ($agentFile in $agentFiles) {
 
     if (-not $nameValue) {
         $errors.Add('missing field: name')
-    } elseif ($nameValue -ne $fileSlug) {
-        $warnings.Add("name '$nameValue' does not match filename slug '$fileSlug'")
+    } elseif ($nameValue -ne $shortFileSlug) {
+        $warnings.Add("name '$nameValue' does not match filename slug '$shortFileSlug'")
     }
 
     if (-not $descriptionValue) {
@@ -146,12 +148,12 @@ foreach ($agentFile in $agentFiles) {
 
     if ($errCount -gt 0) {
         $detail = ($errors | ForEach-Object { $_ }) -join '; '
-        Add-Line "[FAIL] $fileSlug — $errCount error$(if ($errCount -ne 1) {'s'}): $detail"
+        Add-Line "[FAIL] $shortFileSlug — $errCount error$(if ($errCount -ne 1) {'s'}): $detail"
     } elseif ($warnCount -gt 0) {
         $detail = ($warnings | ForEach-Object { $_ }) -join '; '
-        Add-Line "[WARN] $fileSlug — 0 errors, $warnCount warning$(if ($warnCount -ne 1) {'s'}): $detail"
+        Add-Line "[WARN] $shortFileSlug — 0 errors, $warnCount warning$(if ($warnCount -ne 1) {'s'}): $detail"
     } else {
-        Add-Line "[PASS] $fileSlug — 0 errors, 0 warnings"
+        Add-Line "[PASS] $shortFileSlug — 0 errors, 0 warnings"
     }
 }
 
