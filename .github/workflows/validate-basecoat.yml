@@ -1,4 +1,4 @@
-name: Validate BaseCoat
+name: "BaseCoat - Validate BaseCoat"
 
 on:
   workflow_call:

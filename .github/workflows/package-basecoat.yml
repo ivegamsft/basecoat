@@ -1,4 +1,4 @@
-name: Package Base Coat
+name: "BaseCoat - Package Base Coat"
 
 on:
   workflow_dispatch:

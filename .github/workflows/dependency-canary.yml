@@ -1,4 +1,4 @@
-name: Dependency Canary
+name: "BaseCoat - Dependency Canary"
 
 on:
   pull_request:

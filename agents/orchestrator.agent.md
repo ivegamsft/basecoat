@@ -36,3 +36,32 @@ references to `agents/orchestrator.agent.md`.
 Use `retry_context` when a branch fails and needs another pass. Escalate
 unresolved failures to a reviewer or parent orchestrator when retries are
 exhausted.
+
+## Inputs
+
+- `task_id`
+- `goal`
+- `scope`
+- `acceptance_criteria`
+- `inputs`
+- `allowed_files`
+- `allowed_tools`
+- `allowed_skills`
+- `model`
+
+## Workflow
+
+1. Review the task payload and identify subtask boundaries.
+2. Route work to specialist agents when a narrower skill is a better fit.
+3. Track retries with `retry_context`.
+4. Escalate unresolved failures instead of silently suppressing them.
+
+## Output
+
+- `status`
+- `summary`
+- `changed_files`
+- `acceptance_results`
+- `evidence`
+- `blockers`
+- `follow_ups`

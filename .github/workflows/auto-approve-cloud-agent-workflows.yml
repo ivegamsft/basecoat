@@ -1,4 +1,4 @@
-name: Auto-approve cloud agent workflows
+name: "BaseCoat - Auto-approve cloud agent workflows"
 
 on:
   pull_request:

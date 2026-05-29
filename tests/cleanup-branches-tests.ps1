@@ -35,7 +35,6 @@ foreach ($snippet in $requiredScriptSnippets) {
 }
 
 $requiredWorkflowSnippets = @(
-    'name: Sprint Closeout Branch Audit',
     'schedule:',
     'workflow_dispatch:',
     'apply_changes',
@@ -50,6 +49,10 @@ foreach ($snippet in $requiredWorkflowSnippets) {
     if ($workflowContent -notmatch [regex]::Escape($snippet)) {
         throw "Branch audit workflow is missing required snippet: $snippet"
     }
+}
+
+if ($workflowContent -notmatch 'name:\s*"?BaseCoat\s*-\s*Sprint Closeout Branch Audit"?' ) {
+    throw 'Branch audit workflow is missing required BaseCoat-prefixed workflow name'
 }
 
 if ($workflowContent -notmatch 'uses:\s*actions/checkout@[a-f0-9]{40}') {

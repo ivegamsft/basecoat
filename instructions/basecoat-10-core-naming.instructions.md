@@ -31,6 +31,32 @@ Use this instruction when a change introduces new files, modules, packages, clas
 - During migration, preserve compatibility by updating aliases, references, and scripts together; do not leave mixed old/new names in active catalogs
 - For existing assets, prefer a staged rename with a compatibility note rather than a partial rename that breaks discoverability
 
+## Workflow Naming Conventions
+
+- Workflow filenames remain stable in `kebab-case` with optional `.lock` suffix: `<workflow>.yml` or `<workflow>.lock.yml`
+- Workflow display names in YAML must start with `BaseCoat -` to make ownership explicit in GitHub Actions views
+- Use pattern: `name: "BaseCoat - <workflow purpose>"`
+- Apply this convention to new and existing workflows without renaming files unless a migration plan explicitly requires it
+
+## Instruction Alias Exceptions
+
+- Canonical instruction files must use `basecoat-<band>-<area>-<topic>.instructions.md`.
+- Non-prefixed instruction filenames are allowed only as legacy compatibility aliases.
+- Compatibility alias files must include:
+  - `compatibilityAlias: true`
+  - `canonicalInstruction: "<basecoat-...instructions.md>"`
+  - A description starting with `BaseCoat compatibility alias`.
+- Approved legacy alias filenames:
+  - `architecture.instructions.md`
+  - `documentation.instructions.md`
+  - `observability.instructions.md`
+  - `security.instructions.md`
+  - `ux.instructions.md`
+  - `intent-routing.instructions.md`
+  - `plan-first.instructions.md`
+  - `ci-firewall.instructions.md`
+  - `rbac-authentication.instructions.md`
+
 ## Review Lens
 
 - Does the new name convey purpose without local tribal knowledge?

@@ -1,4 +1,4 @@
-name: MCP Build
+name: "BaseCoat - MCP Build"
 
 on:
   push:

@@ -1,4 +1,4 @@
-name: Version Consistency Check
+name: "BaseCoat - Version Consistency Check"
 
 on:
   push:

@@ -1,4 +1,4 @@
-name: Memory Contribute
+name: "BaseCoat - Memory Contribute"
 
 on:
   workflow_dispatch:

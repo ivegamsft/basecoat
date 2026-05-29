@@ -1,4 +1,4 @@
-name: Publish to Production
+name: "BaseCoat - Publish to Production"
 
 # Syncs tagged releases from internal (IBuySpy-Shared/basecoat) to production (ivegamsft/basecoat)
 on:

@@ -1,4 +1,4 @@
-name: MCP Deploy
+name: "BaseCoat - MCP Deploy"
 
 on:
   push:

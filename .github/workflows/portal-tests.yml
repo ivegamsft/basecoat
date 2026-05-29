@@ -1,4 +1,4 @@
-name: Portal Tests
+name: "BaseCoat - Portal Tests"
 
 on:
   pull_request:

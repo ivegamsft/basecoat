@@ -1,4 +1,4 @@
-name: Post-Deploy Smoke Test
+name: "BaseCoat - Post-Deploy Smoke Test"
 
 on:
   workflow_dispatch:

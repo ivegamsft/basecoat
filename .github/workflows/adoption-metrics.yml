@@ -1,4 +1,4 @@
-name: Adoption Metrics
+name: "BaseCoat - Adoption Metrics"
 
 on:
   schedule:

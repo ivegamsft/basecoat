@@ -38,6 +38,18 @@ $errors = 0
 $warnings = 0
 $metadataStale = $false
 $tokenBudgetThreshold = 500
+$canonicalInstructionPattern = '^basecoat-\d{2}-[a-z0-9-]+-[a-z0-9-]+\.instructions\.md$'
+$allowedInstructionAliases = @(
+    'architecture.instructions.md',
+    'documentation.instructions.md',
+    'observability.instructions.md',
+    'security.instructions.md',
+    'ux.instructions.md',
+    'intent-routing.instructions.md',
+    'plan-first.instructions.md',
+    'ci-firewall.instructions.md',
+    'rbac-authentication.instructions.md'
+)
 
 function Test-AgentMetadataFreshness {
     $agentFiles = @(Get-ChildItem 'agents' -Filter '*.agent.md' -File | Sort-Object Name)
@@ -204,6 +216,29 @@ foreach ($file in $files) {
     if ($file.Name -like '*.instructions.md' -and -not ($lines | Select-String -Pattern '^applyTo:' -Quiet)) {
         Write-Host "ERROR: $($file.Name) missing 'applyTo' in frontmatter" -ForegroundColor Red
         $errors++
+    }
+
+    # Instructions naming convention: canonical basecoat-* names with explicit allowlisted aliases
+    if ($file.Name -like '*.instructions.md') {
+        if ($file.Name -notmatch $canonicalInstructionPattern) {
+            if ($file.Name -notin $allowedInstructionAliases) {
+                Write-Host "ERROR: $($file.Name) does not match canonical instruction naming and is not an approved legacy alias" -ForegroundColor Red
+                $errors++
+            } else {
+                if (-not ($lines | Select-String -Pattern '^compatibilityAlias:\s*true' -Quiet)) {
+                    Write-Host "ERROR: $($file.Name) is an approved legacy alias but missing 'compatibilityAlias: true'" -ForegroundColor Red
+                    $errors++
+                }
+                if (-not ($lines | Select-String -Pattern '^canonicalInstruction:\s*' -Quiet)) {
+                    Write-Host "ERROR: $($file.Name) is an approved legacy alias but missing 'canonicalInstruction:'" -ForegroundColor Red
+                    $errors++
+                }
+                if (-not ($lines | Select-String -Pattern '^description:\s*"BaseCoat compatibility alias' -Quiet)) {
+                    Write-Host "ERROR: $($file.Name) is an approved legacy alias but description does not start with 'BaseCoat compatibility alias'" -ForegroundColor Red
+                    $errors++
+                }
+            }
+        }
     }
 
     # Agent Skills spec: SKILL.md and .agent.md should have compatibility, metadata, allowed-tools

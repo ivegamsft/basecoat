@@ -1,4 +1,4 @@
-name: Auto-Enlist Repos in Basecoat
+name: "BaseCoat - Auto-Enlist Repos in Basecoat"
 
 # Admin workflow: bulk-enlist one or more org repos in the basecoat memory sweep.
 # Adds the basecoat-enabled topic and creates learning labels in each repo.

@@ -1,4 +1,4 @@
-name: PRD and Spec Gate
+name: "BaseCoat - PRD and Spec Gate"
 
 on:
   pull_request:

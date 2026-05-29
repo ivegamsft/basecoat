@@ -1,4 +1,4 @@
-name: Harness Change Eval Gate
+name: "BaseCoat - Harness Change Eval Gate"
 
 on:
   pull_request:

@@ -1,4 +1,4 @@
-name: Token Context Inventory
+name: "BaseCoat - Token Context Inventory"
 
 on:
   push:

@@ -1,4 +1,4 @@
-name: Skill Audit
+name: "BaseCoat - Skill Audit"
 on:
   schedule:
     - cron: '0 9 * * 1'  # Every Monday 9am UTC

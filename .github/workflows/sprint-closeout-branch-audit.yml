@@ -1,4 +1,4 @@
-name: Sprint Closeout Branch Audit
+name: "BaseCoat - Sprint Closeout Branch Audit"
 
 on:
   schedule:

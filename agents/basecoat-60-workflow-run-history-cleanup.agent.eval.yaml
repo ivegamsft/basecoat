@@ -1,0 +1,19 @@
+name: "run-history-cleanup-routing"
+description: "Routing evaluation — validates trigger activation for the run-history-cleanup agent."
+skill: "agents/basecoat-60-workflow-run-history-cleanup.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "Clean up old GitHub Actions workflow runs older than 30 days."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Prune stale workflow run history but keep failed runs for incident evidence."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Use run-history-cleanup to reduce old completed run noise."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Update workflow YAML files to add retention-days."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Diagnose a currently failing CI run and fix the tests."
+    expect_activation: false

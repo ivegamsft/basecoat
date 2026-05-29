@@ -1,4 +1,4 @@
-name: Consumer Sync Validation
+name: "BaseCoat - Consumer Sync Validation"
 
 on:
   push:

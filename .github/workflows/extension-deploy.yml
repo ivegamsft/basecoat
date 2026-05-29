@@ -1,4 +1,4 @@
-name: Extension Deploy
+name: "BaseCoat - Extension Deploy"
 
 on:
   push:

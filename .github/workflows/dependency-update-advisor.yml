@@ -1,4 +1,4 @@
-name: "Dependency Update Advisor"
+name: "BaseCoat - Dependency Update Advisor"
 
 on:
   pull_request:

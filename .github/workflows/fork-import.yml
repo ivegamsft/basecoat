@@ -1,4 +1,4 @@
-name: Fork Issue Import
+name: "BaseCoat - Fork Issue Import"
 
 on:
   workflow_dispatch:

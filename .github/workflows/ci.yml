@@ -1,4 +1,4 @@
-name: CI
+name: "BaseCoat - CI"
 
 on:
   workflow_call:

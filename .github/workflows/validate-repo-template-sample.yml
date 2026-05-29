@@ -1,4 +1,4 @@
-name: Validate Repo Template Sample
+name: "BaseCoat - Validate Repo Template Sample"
 
 on:
   workflow_dispatch:

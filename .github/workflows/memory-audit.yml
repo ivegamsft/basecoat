@@ -1,4 +1,4 @@
-name: Memory Audit
+name: "BaseCoat - Memory Audit"
 
 on:
   schedule:

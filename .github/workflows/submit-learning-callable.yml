@@ -1,4 +1,4 @@
-name: Submit Learning (Callable)
+name: "BaseCoat - Submit Learning (Callable)"
 
 # Reusable workflow — consumer repos call this to submit a learning without
 # running any scripts locally.

@@ -1,4 +1,4 @@
-name: Enterprise Memory Sweep
+name: "BaseCoat - Enterprise Memory Sweep"
 
 on:
   schedule:

@@ -1,4 +1,4 @@
-name: Check BaseCoat Version
+name: "BaseCoat - Check BaseCoat Version"
 
 on:
   workflow_call:

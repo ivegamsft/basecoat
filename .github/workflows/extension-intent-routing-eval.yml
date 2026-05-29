@@ -1,4 +1,4 @@
-name: Extension Intent Routing Eval
+name: "BaseCoat - Extension Intent Routing Eval"
 
 on:
   pull_request:

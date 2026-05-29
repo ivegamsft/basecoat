@@ -1,4 +1,4 @@
-name: Release
+name: "BaseCoat - Release"
 
 on:
   push:
