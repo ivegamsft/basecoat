@@ -38,26 +38,10 @@ $errors = 0
 $warnings = 0
 $metadataStale = $false
 $tokenBudgetThreshold = 500
-$canonicalInstructionPattern = '^basecoat-\d{2}-[a-z0-9-]+-[a-z0-9-]+\.instructions\.md$'
-$allowedInstructionAliases = @(
-    'architecture.instructions.md',
-    'documentation.instructions.md',
-    'observability.instructions.md',
-    'security.instructions.md',
-    'ux.instructions.md',
-    'intent-routing.instructions.md',
-    'plan-first.instructions.md',
-    'ci-firewall.instructions.md',
-    'rbac-authentication.instructions.md'
-)
 
 function Test-AgentMetadataFreshness {
     $agentFiles = @(Get-ChildItem 'agents' -Filter '*.agent.md' -File | Sort-Object Name)
-    $agentNames = @($agentFiles | ForEach-Object { 
-        $baseName = $_.BaseName -replace '\.agent$', ''
-        # Extract short agent name from new naming convention
-        $baseName -replace '^basecoat-\d+-\w+-', ''
-    })
+    $agentNames = @($agentFiles | ForEach-Object { $_.BaseName -replace '\.agent$', '' })
     $metadataPath = Join-Path (Get-Location) 'basecoat-metadata.json'
 
     if (-not (Test-Path $metadataPath)) {
@@ -96,15 +80,13 @@ function Test-AgentMetadataFreshness {
 }
 
 function Test-LogFirstGate {
-    # Find governance file (may have basecoat- prefix in new naming convention)
-    $govFiles = @(Get-ChildItem 'instructions' -Filter '*governance*.instructions.md' -File -ErrorAction SilentlyContinue)
-    if ($govFiles.Count -eq 0) {
-        Write-Host "ERROR: governance.instructions.md is missing from instructions/" -ForegroundColor Red
+    $govPath = Join-Path (Get-Location) 'instructions/governance.instructions.md'
+    if (-not (Test-Path $govPath)) {
+        Write-Host "ERROR: instructions/governance.instructions.md is missing" -ForegroundColor Red
         $script:errors++
         return
     }
-    
-    $govPath = $govFiles[0].FullName
+
     $content = Get-Content $govPath -Raw
     $missing = @()
 
@@ -119,19 +101,17 @@ function Test-LogFirstGate {
     }
 
     if ($missing.Count -gt 0) {
-        Write-Host "ERROR: $([System.IO.Path]::GetFileName($govPath)) is missing required LOG-FIRST gate elements: $($missing -join '; ')" -ForegroundColor Red
+        Write-Host "ERROR: instructions/governance.instructions.md is missing required LOG-FIRST gate elements: $($missing -join '; ')" -ForegroundColor Red
         $script:errors++
     }
 }
 
 function Test-IntentRoutingSkillReferences {
-    # Find intent-routing file (may have basecoat- prefix in new naming convention)
-    $intentRoutingFiles = @(Get-ChildItem 'instructions' -Filter '*intent-routing*.instructions.md' -File -ErrorAction SilentlyContinue)
-    if ($intentRoutingFiles.Count -eq 0) {
+    $intentRoutingPath = Join-Path (Get-Location) 'instructions/intent-routing.instructions.md'
+    if (-not (Test-Path $intentRoutingPath)) {
         return
     }
-    
-    $intentRoutingPath = $intentRoutingFiles[0].FullName
+
     $content = Get-Content $intentRoutingPath -Raw
 
     # Validate enforcement contract section exists with required routing rules
@@ -216,29 +196,6 @@ foreach ($file in $files) {
     if ($file.Name -like '*.instructions.md' -and -not ($lines | Select-String -Pattern '^applyTo:' -Quiet)) {
         Write-Host "ERROR: $($file.Name) missing 'applyTo' in frontmatter" -ForegroundColor Red
         $errors++
-    }
-
-    # Instructions naming convention: canonical basecoat-* names with explicit allowlisted aliases
-    if ($file.Name -like '*.instructions.md') {
-        if ($file.Name -notmatch $canonicalInstructionPattern) {
-            if ($file.Name -notin $allowedInstructionAliases) {
-                Write-Host "ERROR: $($file.Name) does not match canonical instruction naming and is not an approved legacy alias" -ForegroundColor Red
-                $errors++
-            } else {
-                if (-not ($lines | Select-String -Pattern '^compatibilityAlias:\s*true' -Quiet)) {
-                    Write-Host "ERROR: $($file.Name) is an approved legacy alias but missing 'compatibilityAlias: true'" -ForegroundColor Red
-                    $errors++
-                }
-                if (-not ($lines | Select-String -Pattern '^canonicalInstruction:\s*' -Quiet)) {
-                    Write-Host "ERROR: $($file.Name) is an approved legacy alias but missing 'canonicalInstruction:'" -ForegroundColor Red
-                    $errors++
-                }
-                if (-not ($lines | Select-String -Pattern '^description:\s*"BaseCoat compatibility alias' -Quiet)) {
-                    Write-Host "ERROR: $($file.Name) is an approved legacy alias but description does not start with 'BaseCoat compatibility alias'" -ForegroundColor Red
-                    $errors++
-                }
-            }
-        }
     }
 
     # Agent Skills spec: SKILL.md and .agent.md should have compatibility, metadata, allowed-tools
