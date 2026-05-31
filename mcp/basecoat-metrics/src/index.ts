@@ -100,7 +100,9 @@ server.tool(
   "Returns the most recent Base Coat adoption metrics snapshot. " +
     "Includes Copilot usage, PR cycle times, CI success rates, issue resolution times, " +
     "and Base Coat coverage percentage for all monitored repositories. " +
-    "Use repo parameter to narrow to a single repository.",
+    "Use repo parameter to narrow to a single repository. " +
+    "Use for intents like 'latest', 'current', 'now', or 'refresh snapshot'. " +
+    "Do not use for historical trends over multiple weeks or alert-only requests.",
   {
     repo: z
       .string()
@@ -148,7 +150,9 @@ server.tool(
   "get-history",
   "Returns historical adoption metrics snapshots collected weekly. " +
     "Use weeks parameter to control how many historical points to return (default 4, max 52). " +
-    "Useful for trend analysis and spotting regressions over time.",
+    "Useful for trend analysis and spotting regressions over time. " +
+    "Use for intents like 'history', 'trend', 'over time', 'week over week', or 'last N weeks'. " +
+    "Do not use for single-point current snapshot refreshes.",
   {
     weeks: z
       .number()
@@ -204,7 +208,9 @@ server.tool(
   "get-alerts",
   "Returns active degradation alerts detected in the latest metrics run. " +
     "Alerts are generated when CI success rate drops >15%, PR cycle time increases >50%, " +
-    "or Copilot acceptance rate drops >10%. An empty array means no regressions detected.",
+    "or Copilot acceptance rate drops >10%. An empty array means no regressions detected. " +
+    "Use for intents mentioning alerts, warnings, incidents, degradations, or regressions. " +
+    "Do not use for general snapshot refreshes or trend history.",
   {
     severity: z
       .enum(["warning", "info", "all"])
@@ -240,7 +246,8 @@ server.tool(
   "get-repo-metrics",
   "Returns detailed metrics for a single repository including PR velocity, " +
     "CI success rate, issue resolution time, and Base Coat asset coverage. " +
-    "Also includes trend data from the last N weeks to show direction of change.",
+    "Also includes trend data from the last N weeks to show direction of change. " +
+    "Use when the user targets one repository and wants both current metrics and trend context.",
   {
     repo: z
       .string()
@@ -386,7 +393,8 @@ server.tool(
   "search-skills",
   "Search Base Coat skills by name or description keyword. " +
     "Returns matching skills with name, description, and relative path. " +
-    "Requires the server to be started with REPO_DIR set to the repository root.",
+    "Requires the server to be started with REPO_DIR set to the repository root. " +
+    "Use when the user asks to find/list skills. Do not use to read full file content.",
   {
     query: z
       .string()
@@ -442,7 +450,8 @@ server.tool(
   "search-agents",
   "Search Base Coat agents by name or description keyword. " +
     "Returns matching agents with name, description, and relative path. " +
-    "Requires the server to be started with REPO_DIR set to the repository root.",
+    "Requires the server to be started with REPO_DIR set to the repository root. " +
+    "Use when the user asks to find/list agents. Do not use to read full file content.",
   {
     query: z
       .string()
@@ -498,7 +507,8 @@ server.tool(
   "get-asset-details",
   "Return the full content of a Base Coat skill (SKILL.md) or agent (.agent.md) file. " +
     "Use search-skills or search-agents first to discover the exact asset path. " +
-    "Requires the server to be started with REPO_DIR set to the repository root.",
+    "Requires the server to be started with REPO_DIR set to the repository root. " +
+    "Use when the user explicitly asks for complete/full file contents.",
   {
     path: z
       .string()

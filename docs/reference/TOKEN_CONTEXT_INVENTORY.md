@@ -1,0 +1,327 @@
+# Token Context Inventory
+
+Generated as a standalone inventory (no edits to agent/skill/instruction files).
+
+- Generated: 2026-05-31 16:39:30 -0400
+- Estimation method: `approx_tokens = round(word_count × 1.35)` (same heuristic used in `scripts/validate-basecoat.ps1`).
+- Scope: `agents/*.agent.md`, `skills/*/SKILL.md`, `instructions/*.instructions.md`.
+
+## Summary
+
+| Type | Count | Total Words | Total Approx Tokens | Avg Approx Tokens |
+|---|---:|---:|---:|---:|
+| Agent | 105 | 76842 | 103732 | 988 |
+| Skill | 102 | 23006 | 31059 | 304 |
+| Instruction | 89 | 47122 | 63615 | 715 |
+| **All** | 296 | 146970 | 198406 | 670 |
+
+## Agents
+
+| Name | Location | Words | Approx Tokens |
+|---|---|---:|---:|
+| basecoat-50-security-container-security | `agents/basecoat-50-security-container-security.agent.md` | 1484 | 2003 |
+| basecoat-30-ai-containerization-planner | `agents/basecoat-30-ai-containerization-planner.agent.md` | 1459 | 1970 |
+| basecoat-10-core-agentops | `agents/basecoat-10-core-agentops.agent.md` | 1455 | 1964 |
+| basecoat-60-workflow-release-manager | `agents/basecoat-60-workflow-release-manager.agent.md` | 1401 | 1891 |
+| basecoat-10-core-project-onboarding | `agents/basecoat-10-core-project-onboarding.agent.md` | 1363 | 1840 |
+| basecoat-50-security-api-security | `agents/basecoat-50-security-api-security.agent.md` | 1361 | 1837 |
+| basecoat-50-security-secrets-manager | `agents/basecoat-50-security-secrets-manager.agent.md` | 1356 | 1831 |
+| basecoat-50-security-policy-as-code-compliance | `agents/basecoat-50-security-policy-as-code-compliance.agent.md` | 1351 | 1824 |
+| basecoat-10-core-orchestrator | `agents/basecoat-10-core-orchestrator.agent.md` | 1323 | 1786 |
+| basecoat-10-core-mcp-developer | `agents/basecoat-10-core-mcp-developer.agent.md` | 1321 | 1783 |
+| basecoat-10-core-performance-analyst | `agents/basecoat-10-core-performance-analyst.agent.md` | 1320 | 1782 |
+| basecoat-10-core-sre-engineer | `agents/basecoat-10-core-sre-engineer.agent.md` | 1314 | 1774 |
+| basecoat-10-core-ux-designer | `agents/basecoat-10-core-ux-designer.agent.md` | 1300 | 1755 |
+| basecoat-90-quality-penetration-test | `agents/basecoat-90-quality-penetration-test.agent.md` | 1269 | 1713 |
+| basecoat-10-core-finops-advisor | `agents/basecoat-10-core-finops-advisor.agent.md` | 1262 | 1704 |
+| basecoat-30-ai-mlops | `agents/basecoat-30-ai-mlops.agent.md` | 1256 | 1696 |
+| basecoat-60-workflow-task-scope-validator | `agents/basecoat-60-workflow-task-scope-validator.agent.md` | 1251 | 1689 |
+| basecoat-80-data-dataops | `agents/basecoat-80-data-dataops.agent.md` | 1232 | 1663 |
+| basecoat-10-core-agent-designer | `agents/basecoat-10-core-agent-designer.agent.md` | 1213 | 1638 |
+| basecoat-10-core-prompt-coach | `agents/basecoat-10-core-prompt-coach.agent.md` | 1206 | 1628 |
+| basecoat-10-core-issue-triage | `agents/basecoat-10-core-issue-triage.agent.md` | 1205 | 1627 |
+| basecoat-10-core-api-designer | `agents/basecoat-10-core-api-designer.agent.md` | 1202 | 1623 |
+| basecoat-10-core-sprint-planner | `agents/basecoat-10-core-sprint-planner.agent.md` | 1198 | 1617 |
+| basecoat-80-data-data-tier | `agents/basecoat-80-data-data-tier.agent.md` | 1190 | 1606 |
+| basecoat-50-security-github-security-posture | `agents/basecoat-50-security-github-security-posture.agent.md` | 1172 | 1582 |
+| basecoat-50-security-security-monitor | `agents/basecoat-50-security-security-monitor.agent.md` | 1166 | 1574 |
+| basecoat-10-core-identity-architect | `agents/basecoat-10-core-identity-architect.agent.md` | 1153 | 1557 |
+| basecoat-10-core-solution-architect | `agents/basecoat-10-core-solution-architect.agent.md` | 1153 | 1557 |
+| basecoat-50-security-security-analyst | `agents/basecoat-50-security-security-analyst.agent.md` | 1151 | 1554 |
+| basecoat-10-core-legacy-modernization | `agents/basecoat-10-core-legacy-modernization.agent.md` | 1144 | 1544 |
+| basecoat-60-workflow-ci-failure-escalation | `agents/basecoat-60-workflow-ci-failure-escalation.agent.md` | 1137 | 1535 |
+| basecoat-10-core-prompt-engineer | `agents/basecoat-10-core-prompt-engineer.agent.md` | 1113 | 1503 |
+| basecoat-10-core-app-inventory | `agents/basecoat-10-core-app-inventory.agent.md` | 1037 | 1400 |
+| basecoat-10-core-middleware-dev | `agents/basecoat-10-core-middleware-dev.agent.md` | 1026 | 1385 |
+| basecoat-10-core-gitops-engineer | `agents/basecoat-10-core-gitops-engineer.agent.md` | 1014 | 1369 |
+| basecoat-80-data-database-migration | `agents/basecoat-80-data-database-migration.agent.md` | 1013 | 1368 |
+| basecoat-10-core-backend-dev | `agents/basecoat-10-core-backend-dev.agent.md` | 1001 | 1351 |
+| basecoat-10-core-dependency-lifecycle | `agents/basecoat-10-core-dependency-lifecycle.agent.md` | 1001 | 1351 |
+| basecoat-10-core-frontend-dev | `agents/basecoat-10-core-frontend-dev.agent.md` | 986 | 1331 |
+| basecoat-50-security-instruction-auditor | `agents/basecoat-50-security-instruction-auditor.agent.md` | 935 | 1262 |
+| basecoat-50-security-security-operations | `agents/basecoat-50-security-security-operations.agent.md` | 897 | 1211 |
+| basecoat-10-core-production-readiness | `agents/basecoat-10-core-production-readiness.agent.md` | 875 | 1181 |
+| basecoat-30-ai-guardrail | `agents/basecoat-30-ai-guardrail.agent.md` | 849 | 1146 |
+| basecoat-60-workflow-infrastructure-deploy | `agents/basecoat-60-workflow-infrastructure-deploy.agent.md` | 779 | 1052 |
+| basecoat-50-security-config-auditor | `agents/basecoat-50-security-config-auditor.agent.md` | 775 | 1046 |
+| basecoat-10-core-product-manager | `agents/basecoat-10-core-product-manager.agent.md` | 754 | 1018 |
+| basecoat-10-core-memory-promoter | `agents/basecoat-10-core-memory-promoter.agent.md` | 751 | 1014 |
+| basecoat-50-security-ci-audit | `agents/basecoat-50-security-ci-audit.agent.md` | 712 | 961 |
+| basecoat-60-workflow-self-healing-ci | `agents/basecoat-60-workflow-self-healing-ci.agent.md` | 710 | 959 |
+| basecoat-90-quality-guidance-reviewer | `agents/basecoat-90-quality-guidance-reviewer.agent.md` | 700 | 945 |
+| basecoat-10-core-tech-writer | `agents/basecoat-10-core-tech-writer.agent.md` | 693 | 936 |
+| basecoat-90-quality-resilience-reviewer | `agents/basecoat-90-quality-resilience-reviewer.agent.md` | 684 | 923 |
+| basecoat-80-data-data-architect | `agents/basecoat-80-data-data-architect.agent.md` | 680 | 918 |
+| basecoat-10-core-strategy-to-automation | `agents/basecoat-10-core-strategy-to-automation.agent.md` | 678 | 915 |
+| basecoat-10-core-dependency-update-advisor | `agents/basecoat-10-core-dependency-update-advisor.agent.md` | 669 | 903 |
+| basecoat-10-core-sprint-project-mapper | `agents/basecoat-10-core-sprint-project-mapper.agent.md` | 616 | 832 |
+| basecoat-10-core-exploratory-charter | `agents/basecoat-10-core-exploratory-charter.agent.md` | 597 | 806 |
+| basecoat-10-core-escalation-router | `agents/basecoat-10-core-escalation-router.agent.md` | 557 | 752 |
+| basecoat-50-security-guidance-author | `agents/basecoat-50-security-guidance-author.agent.md` | 541 | 730 |
+| basecoat-90-quality-manual-test-strategy | `agents/basecoat-90-quality-manual-test-strategy.agent.md` | 539 | 728 |
+| basecoat-10-core-dependency-blocker-monitor | `agents/basecoat-10-core-dependency-blocker-monitor.agent.md` | 515 | 695 |
+| basecoat-60-workflow-run-history-cleanup | `agents/basecoat-60-workflow-run-history-cleanup.agent.md` | 429 | 579 |
+| basecoat-50-security-sprint-closeout-auditor | `agents/basecoat-50-security-sprint-closeout-auditor.agent.md` | 421 | 568 |
+| basecoat-10-core-change-isolation-architect | `agents/basecoat-10-core-change-isolation-architect.agent.md` | 408 | 551 |
+| basecoat-20-lang-dotnet-modernization-advisor | `agents/basecoat-20-lang-dotnet-modernization-advisor.agent.md` | 407 | 549 |
+| basecoat-10-core-contract-testing | `agents/basecoat-10-core-contract-testing.agent.md` | 385 | 520 |
+| basecoat-10-core-new-customization | `agents/basecoat-10-core-new-customization.agent.md` | 384 | 518 |
+| basecoat-10-core-merge-coordinator | `agents/basecoat-10-core-merge-coordinator.agent.md` | 382 | 516 |
+| basecoat-10-core-station-bottleneck-analyzer | `agents/basecoat-10-core-station-bottleneck-analyzer.agent.md` | 381 | 514 |
+| basecoat-30-ai-domain-designer | `agents/basecoat-30-ai-domain-designer.agent.md` | 379 | 512 |
+| basecoat-60-workflow-rollout-basecoat | `agents/basecoat-60-workflow-rollout-basecoat.agent.md` | 378 | 510 |
+| basecoat-10-core-observability-engineer | `agents/basecoat-10-core-observability-engineer.agent.md` | 377 | 509 |
+| basecoat-10-core-hardening-advisor | `agents/basecoat-10-core-hardening-advisor.agent.md` | 373 | 504 |
+| basecoat-80-data-data-integrity | `agents/basecoat-80-data-data-integrity.agent.md` | 359 | 485 |
+| basecoat-10-core-rca | `agents/basecoat-10-core-rca.agent.md` | 355 | 479 |
+| basecoat-30-ai-failure-pattern-process | `agents/basecoat-30-ai-failure-pattern-process.agent.md` | 349 | 471 |
+| basecoat-10-core-branch-hygiene-sweeper | `agents/basecoat-10-core-branch-hygiene-sweeper.agent.md` | 347 | 468 |
+| basecoat-10-core-feedback-loop | `agents/basecoat-10-core-feedback-loop.agent.md` | 341 | 460 |
+| basecoat-90-quality-e2e-test-strategy | `agents/basecoat-90-quality-e2e-test-strategy.agent.md` | 340 | 459 |
+| basecoat-60-workflow-release-impact-advisor | `agents/basecoat-60-workflow-release-impact-advisor.agent.md` | 338 | 456 |
+| basecoat-10-core-sprint-retrospective | `agents/basecoat-10-core-sprint-retrospective.agent.md` | 327 | 441 |
+| basecoat-60-workflow-retro-facilitator | `agents/basecoat-60-workflow-retro-facilitator.agent.md` | 316 | 427 |
+| basecoat-50-security-supply-chain-security | `agents/basecoat-50-security-supply-chain-security.agent.md` | 311 | 420 |
+| basecoat-10-core-memory-curator | `agents/basecoat-10-core-memory-curator.agent.md` | 310 | 418 |
+| basecoat-10-core-ha-architect | `agents/basecoat-10-core-ha-architect.agent.md` | 309 | 417 |
+| basecoat-10-core-orphaned-pr-cleanup | `agents/basecoat-10-core-orphaned-pr-cleanup.agent.md` | 307 | 414 |
+| basecoat-60-workflow-release-freeze-enforcer | `agents/basecoat-60-workflow-release-freeze-enforcer.agent.md` | 304 | 410 |
+| basecoat-60-workflow-broken-build-troubleshooter | `agents/basecoat-60-workflow-broken-build-troubleshooter.agent.md` | 303 | 409 |
+| basecoat-10-core-chaos-engineer | `agents/basecoat-10-core-chaos-engineer.agent.md` | 302 | 408 |
+| basecoat-10-core-devops-engineer | `agents/basecoat-10-core-devops-engineer.agent.md` | 301 | 406 |
+| basecoat-10-core-llmops | `agents/basecoat-10-core-llmops.agent.md` | 291 | 393 |
+| basecoat-10-core-definition-of-done | `agents/basecoat-10-core-definition-of-done.agent.md` | 287 | 387 |
+| basecoat-60-workflow-data-pipeline | `agents/basecoat-60-workflow-data-pipeline.agent.md` | 287 | 387 |
+| basecoat-60-workflow-incident-responder | `agents/basecoat-60-workflow-incident-responder.agent.md` | 286 | 386 |
+| basecoat-40-azure-azure-landing-zone | `agents/basecoat-40-azure-azure-landing-zone.agent.md` | 275 | 371 |
+| basecoat-90-quality-code-review | `agents/basecoat-90-quality-code-review.agent.md` | 274 | 370 |
+| basecoat-60-workflow-release-readiness-chair | `agents/basecoat-60-workflow-release-readiness-chair.agent.md` | 258 | 348 |
+| basecoat-30-ai-daily-standup-facilitator | `agents/basecoat-30-ai-daily-standup-facilitator.agent.md` | 252 | 340 |
+| basecoat-10-core-takt-time-tracker | `agents/basecoat-10-core-takt-time-tracker.agent.md` | 216 | 292 |
+| basecoat-10-core-replanning-engine | `agents/basecoat-10-core-replanning-engine.agent.md` | 201 | 271 |
+| basecoat-10-core-factory-state-curator | `agents/basecoat-10-core-factory-state-curator.agent.md` | 192 | 259 |
+| basecoat-10-core-s4-shadow-mode-validator | `agents/basecoat-10-core-s4-shadow-mode-validator.agent.md` | 189 | 255 |
+| basecoat-10-core-factory-conductor | `agents/basecoat-10-core-factory-conductor.agent.md` | 187 | 252 |
+| orchestrator | `agents/orchestrator.agent.md` | 182 | 246 |
+| basecoat-10-core-bom-validator | `agents/basecoat-10-core-bom-validator.agent.md` | 177 | 239 |
+
+## Skills
+
+| Name | Location | Words | Approx Tokens |
+|---|---|---:|---:|
+| ci-audit | `skills/ci-audit/SKILL.md` | 368 | 497 |
+| sprint-closeout-audit | `skills/sprint-closeout-audit/SKILL.md` | 361 | 487 |
+| sprint-management | `skills/sprint-management/SKILL.md` | 359 | 485 |
+| backend-audit | `skills/backend-audit/SKILL.md` | 333 | 450 |
+| sprint-project-mapper | `skills/sprint-project-mapper/SKILL.md` | 328 | 443 |
+| agentops-audit | `skills/agentops-audit/SKILL.md` | 326 | 440 |
+| task-decomposition | `skills/task-decomposition/SKILL.md` | 323 | 436 |
+| infrastructure-audit | `skills/infrastructure-audit/SKILL.md` | 320 | 432 |
+| mcp-audit | `skills/mcp-audit/SKILL.md` | 319 | 431 |
+| api-audit | `skills/api-audit/SKILL.md` | 313 | 423 |
+| devops-audit | `skills/devops-audit/SKILL.md` | 306 | 413 |
+| failure-pattern-process | `skills/failure-pattern-process/SKILL.md` | 302 | 408 |
+| create-skill | `skills/create-skill/SKILL.md` | 295 | 398 |
+| merge-conflict-mediator | `skills/merge-conflict-mediator/SKILL.md` | 291 | 393 |
+| issue-triage | `skills/issue-triage/SKILL.md` | 290 | 392 |
+| documentation | `skills/documentation/SKILL.md` | 285 | 385 |
+| dependency-blocker-monitoring | `skills/dependency-blocker-monitoring/SKILL.md` | 283 | 382 |
+| api-security | `skills/api-security/SKILL.md` | 280 | 378 |
+| ci-flake-quarantine | `skills/ci-flake-quarantine/SKILL.md` | 272 | 367 |
+| ha-resilience | `skills/ha-resilience/SKILL.md` | 272 | 367 |
+| azure-devops-rest | `skills/azure-devops-rest/SKILL.md` | 270 | 364 |
+| twelve-factor | `skills/twelve-factor/SKILL.md` | 267 | 360 |
+| public-safe-sanitization | `skills/public-safe-sanitization/SKILL.md` | 264 | 356 |
+| contract-testing | `skills/contract-testing/SKILL.md` | 257 | 347 |
+| frontend-audit | `skills/frontend-audit/SKILL.md` | 257 | 347 |
+| service-bus-migration | `skills/service-bus-migration/SKILL.md` | 254 | 343 |
+| penetration-testing | `skills/penetration-testing/SKILL.md` | 244 | 329 |
+| e2e-testing | `skills/e2e-testing/SKILL.md` | 239 | 323 |
+| basecoat | `skills/basecoat/SKILL.md` | 237 | 320 |
+| tech-debt | `skills/tech-debt/SKILL.md` | 236 | 319 |
+| gitops | `skills/gitops/SKILL.md` | 235 | 317 |
+| azure-identity-audit | `skills/azure-identity-audit/SKILL.md` | 234 | 316 |
+| data-tier-audit | `skills/data-tier-audit/SKILL.md` | 234 | 316 |
+| electron-apps | `skills/electron-apps/SKILL.md` | 234 | 316 |
+| identity-migration | `skills/identity-migration/SKILL.md` | 234 | 316 |
+| release-audit | `skills/release-audit/SKILL.md` | 233 | 315 |
+| database-migration | `skills/database-migration/SKILL.md` | 232 | 313 |
+| landing-zone-audit | `skills/landing-zone-audit/SKILL.md` | 232 | 313 |
+| refactoring | `skills/refactoring/SKILL.md` | 232 | 313 |
+| agent-design | `skills/agent-design/SKILL.md` | 229 | 309 |
+| receiving-code-review | `skills/receiving-code-review/SKILL.md` | 229 | 309 |
+| azure-policy-audit | `skills/azure-policy-audit/SKILL.md` | 228 | 308 |
+| git-worktrees | `skills/git-worktrees/SKILL.md` | 226 | 305 |
+| human-in-the-loop | `skills/human-in-the-loop/SKILL.md` | 225 | 304 |
+| domain-driven-design | `skills/domain-driven-design/SKILL.md` | 220 | 297 |
+| create-instruction | `skills/create-instruction/SKILL.md` | 219 | 296 |
+| github-security-posture | `skills/github-security-posture/SKILL.md` | 218 | 294 |
+| azure-identity | `skills/azure-identity/SKILL.md` | 216 | 292 |
+| cqrs-event-sourcing | `skills/cqrs-event-sourcing/SKILL.md` | 215 | 290 |
+| dev-containers | `skills/dev-containers/SKILL.md` | 215 | 290 |
+| lexicon | `skills/lexicon/SKILL.md` | 214 | 289 |
+| dotnet-modernization | `skills/dotnet-modernization/SKILL.md` | 213 | 288 |
+| azure-container-apps | `skills/azure-container-apps/SKILL.md` | 211 | 285 |
+| azure-linux-app-service | `skills/azure-linux-app-service/SKILL.md` | 210 | 284 |
+| sprint-planner | `skills/sprint-planner/SKILL.md` | 210 | 284 |
+| copilot-usage-analytics | `skills/copilot-usage-analytics/SKILL.md` | 209 | 282 |
+| environment-bootstrap | `skills/environment-bootstrap/SKILL.md` | 209 | 282 |
+| cross-stack-modernization | `skills/cross-stack-modernization/SKILL.md` | 207 | 279 |
+| production-readiness | `skills/production-readiness/SKILL.md` | 207 | 279 |
+| devops | `skills/devops/SKILL.md` | 206 | 278 |
+| entity-framework-migration | `skills/entity-framework-migration/SKILL.md` | 206 | 278 |
+| sprint-closeout | `skills/sprint-closeout/SKILL.md` | 206 | 278 |
+| api-design | `skills/api-design/SKILL.md` | 205 | 277 |
+| azure-landing-zone | `skills/azure-landing-zone/SKILL.md` | 204 | 275 |
+| supply-chain-security | `skills/supply-chain-security/SKILL.md` | 204 | 275 |
+| observability | `skills/observability/SKILL.md` | 203 | 274 |
+| backlog-burndown | `skills/backlog-burndown/SKILL.md` | 202 | 273 |
+| container-migration | `skills/container-migration/SKILL.md` | 202 | 273 |
+| escalation-routing | `skills/escalation-routing/SKILL.md` | 202 | 273 |
+| code-review | `skills/code-review/SKILL.md` | 201 | 271 |
+| azure-waf-review | `skills/azure-waf-review/SKILL.md` | 199 | 269 |
+| security | `skills/security/SKILL.md` | 199 | 269 |
+| container-build-assessment | `skills/container-build-assessment/SKILL.md` | 198 | 267 |
+| azure-networking | `skills/azure-networking/SKILL.md` | 190 | 256 |
+| security-operations | `skills/security-operations/SKILL.md` | 190 | 256 |
+| change-isolation | `skills/change-isolation/SKILL.md` | 189 | 255 |
+| station-bottleneck-analyzer | `skills/station-bottleneck-analyzer/SKILL.md` | 189 | 255 |
+| ux | `skills/ux/SKILL.md` | 189 | 255 |
+| handoff | `skills/handoff/SKILL.md` | 188 | 254 |
+| performance-profiling | `skills/performance-profiling/SKILL.md` | 188 | 254 |
+| backend-dev | `skills/backend-dev/SKILL.md` | 187 | 252 |
+| data-tier | `skills/data-tier/SKILL.md` | 186 | 251 |
+| docs-site | `skills/docs-site/SKILL.md` | 186 | 251 |
+| sprint-retrospective | `skills/sprint-retrospective/SKILL.md` | 183 | 247 |
+| manual-test-strategy | `skills/manual-test-strategy/SKILL.md` | 182 | 246 |
+| architecture | `skills/architecture/SKILL.md` | 179 | 242 |
+| azure-policy | `skills/azure-policy/SKILL.md` | 178 | 240 |
+| takt-time-measurement | `skills/takt-time-measurement/SKILL.md` | 178 | 240 |
+| app-inventory | `skills/app-inventory/SKILL.md` | 172 | 232 |
+| frontend-dev | `skills/frontend-dev/SKILL.md` | 172 | 232 |
+| factory-state-machine | `skills/factory-state-machine/SKILL.md` | 170 | 230 |
+| mcp-development | `skills/mcp-development/SKILL.md` | 170 | 230 |
+| s4-deployment-checklist | `skills/s4-deployment-checklist/SKILL.md` | 169 | 228 |
+| bom-schema | `skills/bom-schema/SKILL.md` | 165 | 223 |
+| bom-validation | `skills/bom-validation/SKILL.md` | 158 | 213 |
+| s4-rollback-testing | `skills/s4-rollback-testing/SKILL.md` | 157 | 212 |
+| build-failure-triage | `skills/build-failure-triage/SKILL.md` | 156 | 211 |
+| skill-scripts | `skills/skill-scripts/SKILL.md` | 156 | 211 |
+| memory-promoter | `skills/memory-promoter/SKILL.md` | 155 | 209 |
+| orphaned-pr-triage | `skills/orphaned-pr-triage/SKILL.md` | 150 | 202 |
+| decision-log-capture | `skills/decision-log-capture/SKILL.md` | 130 | 176 |
+| standup-signal-extraction | `skills/standup-signal-extraction/SKILL.md` | 126 | 170 |
+
+## Instructions
+
+| Name | Location | Words | Approx Tokens |
+|---|---|---:|---:|
+| basecoat-50-security-entra-oidc-user-auth | `instructions/basecoat-50-security-entra-oidc-user-auth.instructions.md` | 1604 | 2165 |
+| basecoat-60-workflow-multi-repo-orchestration | `instructions/basecoat-60-workflow-multi-repo-orchestration.instructions.md` | 1324 | 1787 |
+| basecoat-20-lang-ruby-on-rails | `instructions/basecoat-20-lang-ruby-on-rails.instructions.md` | 1233 | 1665 |
+| basecoat-10-core-memory-index | `instructions/basecoat-10-core-memory-index.instructions.md` | 1195 | 1613 |
+| basecoat-10-core-agent-routing | `instructions/basecoat-10-core-agent-routing.instructions.md` | 1151 | 1554 |
+| basecoat-10-core-ux | `instructions/basecoat-10-core-ux.instructions.md` | 1090 | 1472 |
+| basecoat-20-lang-django | `instructions/basecoat-20-lang-django.instructions.md` | 1052 | 1420 |
+| basecoat-10-core-hrm-execution | `instructions/basecoat-10-core-hrm-execution.instructions.md` | 1010 | 1364 |
+| basecoat-10-core-architecture | `instructions/basecoat-10-core-architecture.instructions.md` | 1004 | 1355 |
+| basecoat-20-lang-governance | `instructions/basecoat-20-lang-governance.instructions.md` | 989 | 1335 |
+| basecoat-10-core-intent-routing | `instructions/basecoat-10-core-intent-routing.instructions.md` | 986 | 1331 |
+| basecoat-10-core-mcp | `instructions/basecoat-10-core-mcp.instructions.md` | 973 | 1314 |
+| basecoat-20-lang-java-spring-boot | `instructions/basecoat-20-lang-java-spring-boot.instructions.md` | 970 | 1310 |
+| basecoat-10-core-agents | `instructions/basecoat-10-core-agents.instructions.md` | 940 | 1269 |
+| basecoat-10-core-error-kb | `instructions/basecoat-10-core-error-kb.instructions.md` | 929 | 1254 |
+| basecoat-20-lang-python | `instructions/basecoat-20-lang-python.instructions.md` | 919 | 1241 |
+| basecoat-10-core-npm-workspaces | `instructions/basecoat-10-core-npm-workspaces.instructions.md` | 885 | 1195 |
+| basecoat-10-core-development | `instructions/basecoat-10-core-development.instructions.md` | 860 | 1161 |
+| basecoat-40-azure-azure-service-connector | `instructions/basecoat-40-azure-azure-service-connector.instructions.md` | 833 | 1125 |
+| basecoat-10-core-trm-reflexion | `instructions/basecoat-10-core-trm-reflexion.instructions.md` | 811 | 1095 |
+| basecoat-10-core-agent-behavior | `instructions/basecoat-10-core-agent-behavior.instructions.md` | 791 | 1068 |
+| basecoat-10-core-drift-monitor | `instructions/basecoat-10-core-drift-monitor.instructions.md` | 733 | 990 |
+| basecoat-10-core-j2ee-jakarta-ee | `instructions/basecoat-10-core-j2ee-jakarta-ee.instructions.md` | 708 | 956 |
+| basecoat-30-ai-ai-verification | `instructions/basecoat-30-ai-ai-verification.instructions.md` | 676 | 913 |
+| basecoat-10-core-rest-client-resilience | `instructions/basecoat-10-core-rest-client-resilience.instructions.md` | 666 | 899 |
+| basecoat-10-core-plan-first | `instructions/basecoat-10-core-plan-first.instructions.md` | 631 | 852 |
+| basecoat-10-core-subagent-review | `instructions/basecoat-10-core-subagent-review.instructions.md` | 626 | 845 |
+| basecoat-40-azure-azure-app-configuration | `instructions/basecoat-40-azure-azure-app-configuration.instructions.md` | 621 | 838 |
+| basecoat-50-security-security | `instructions/basecoat-50-security-security.instructions.md` | 609 | 822 |
+| basecoat-30-ai-tailwind-v4 | `instructions/basecoat-30-ai-tailwind-v4.instructions.md` | 602 | 813 |
+| basecoat-10-core-tool-minimization | `instructions/basecoat-10-core-tool-minimization.instructions.md` | 598 | 807 |
+| basecoat-10-core-model-routing | `instructions/basecoat-10-core-model-routing.instructions.md` | 592 | 799 |
+| basecoat-10-core-electron | `instructions/basecoat-10-core-electron.instructions.md` | 577 | 779 |
+| basecoat-10-core-testing | `instructions/basecoat-10-core-testing.instructions.md` | 577 | 779 |
+| basecoat-10-core-runtime-debugging | `instructions/basecoat-10-core-runtime-debugging.instructions.md` | 571 | 771 |
+| basecoat-10-core-fabric-notebooks | `instructions/basecoat-10-core-fabric-notebooks.instructions.md` | 550 | 742 |
+| basecoat-10-core-shearing-layers | `instructions/basecoat-10-core-shearing-layers.instructions.md` | 547 | 738 |
+| basecoat-10-core-cpp | `instructions/basecoat-10-core-cpp.instructions.md` | 515 | 695 |
+| basecoat-10-core-session-hygiene | `instructions/basecoat-10-core-session-hygiene.instructions.md` | 507 | 684 |
+| basecoat-10-core-bootstrap-structure | `instructions/basecoat-10-core-bootstrap-structure.instructions.md` | 490 | 662 |
+| basecoat-10-core-tdd-enforcement | `instructions/basecoat-10-core-tdd-enforcement.instructions.md` | 490 | 662 |
+| basecoat-10-core-config | `instructions/basecoat-10-core-config.instructions.md` | 486 | 656 |
+| basecoat-50-security-bootstrap-github-secrets | `instructions/basecoat-50-security-bootstrap-github-secrets.instructions.md` | 479 | 647 |
+| basecoat-10-core-process | `instructions/basecoat-10-core-process.instructions.md` | 474 | 640 |
+| basecoat-60-workflow-ci-firewall | `instructions/basecoat-60-workflow-ci-firewall.instructions.md` | 464 | 626 |
+| basecoat-10-core-observability | `instructions/basecoat-10-core-observability.instructions.md` | 458 | 618 |
+| basecoat-60-workflow-high-stakes-workflow | `instructions/basecoat-60-workflow-high-stakes-workflow.instructions.md` | 458 | 618 |
+| basecoat-50-security-secrets-management | `instructions/basecoat-50-security-secrets-management.instructions.md` | 451 | 609 |
+| basecoat-90-quality-quality | `instructions/basecoat-90-quality-quality.instructions.md` | 450 | 608 |
+| basecoat-50-security-rbac-authentication | `instructions/basecoat-50-security-rbac-authentication.instructions.md` | 443 | 598 |
+| basecoat-50-security-token-economics | `instructions/basecoat-50-security-token-economics.instructions.md` | 419 | 566 |
+| basecoat-10-core-monolith | `instructions/basecoat-10-core-monolith.instructions.md` | 418 | 564 |
+| basecoat-10-core-enterprise-configuration | `instructions/basecoat-10-core-enterprise-configuration.instructions.md` | 416 | 562 |
+| basecoat-80-data-data-science | `instructions/basecoat-80-data-data-science.instructions.md` | 416 | 562 |
+| basecoat-10-core-naming | `instructions/basecoat-10-core-naming.instructions.md` | 415 | 560 |
+| intent-routing | `instructions/intent-routing.instructions.md` | 414 | 559 |
+| basecoat-10-core-documentation | `instructions/basecoat-10-core-documentation.instructions.md` | 398 | 537 |
+| basecoat-10-core-bootstrap-autodetect | `instructions/basecoat-10-core-bootstrap-autodetect.instructions.md` | 392 | 529 |
+| basecoat-50-security-security-monitoring | `instructions/basecoat-50-security-security-monitoring.instructions.md` | 369 | 498 |
+| basecoat-10-core-mutation-testing | `instructions/basecoat-10-core-mutation-testing.instructions.md` | 336 | 454 |
+| basecoat-10-core-nextjs-react19 | `instructions/basecoat-10-core-nextjs-react19.instructions.md` | 306 | 413 |
+| basecoat-10-core-data-workload-testing | `instructions/basecoat-10-core-data-workload-testing.instructions.md` | 284 | 383 |
+| basecoat-10-core-frontend | `instructions/basecoat-10-core-frontend.instructions.md` | 281 | 379 |
+| basecoat-10-core-verification | `instructions/basecoat-10-core-verification.instructions.md` | 280 | 378 |
+| basecoat-10-core-reliability | `instructions/basecoat-10-core-reliability.instructions.md` | 278 | 375 |
+| basecoat-10-core-terraform-init | `instructions/basecoat-10-core-terraform-init.instructions.md` | 277 | 374 |
+| basecoat-10-core-public-guidance | `instructions/basecoat-10-core-public-guidance.instructions.md` | 275 | 371 |
+| basecoat-40-azure-azure | `instructions/basecoat-40-azure-azure.instructions.md` | 270 | 364 |
+| basecoat-60-workflow-workflow-integrity | `instructions/basecoat-60-workflow-workflow-integrity.instructions.md` | 268 | 362 |
+| basecoat-10-core-bicep | `instructions/basecoat-10-core-bicep.instructions.md` | 255 | 344 |
+| basecoat-10-core-terraform | `instructions/basecoat-10-core-terraform.instructions.md` | 255 | 344 |
+| basecoat-10-core-escalation-criteria | `instructions/basecoat-10-core-escalation-criteria.instructions.md` | 248 | 335 |
+| basecoat-20-lang-dotnet-upgrade-planning | `instructions/basecoat-20-lang-dotnet-upgrade-planning.instructions.md` | 247 | 333 |
+| basecoat-60-workflow-factory-orchestration | `instructions/basecoat-60-workflow-factory-orchestration.instructions.md` | 245 | 331 |
+| basecoat-10-core-output-style | `instructions/basecoat-10-core-output-style.instructions.md` | 243 | 328 |
+| basecoat-60-workflow-workflow-file-integrity | `instructions/basecoat-60-workflow-workflow-file-integrity.instructions.md` | 241 | 325 |
+| basecoat-20-lang-dotnet-test-strategy | `instructions/basecoat-20-lang-dotnet-test-strategy.instructions.md` | 223 | 301 |
+| basecoat-20-lang-dotnet-dependency-analysis | `instructions/basecoat-20-lang-dotnet-dependency-analysis.instructions.md` | 222 | 300 |
+| basecoat-50-security-copilot-github-token-bootstrap | `instructions/basecoat-50-security-copilot-github-token-bootstrap.instructions.md` | 214 | 289 |
+| basecoat-10-core-backend | `instructions/basecoat-10-core-backend.instructions.md` | 180 | 243 |
+| basecoat-10-core-s4-safety-gates | `instructions/basecoat-10-core-s4-safety-gates.instructions.md` | 157 | 212 |
+| security | `instructions/security.instructions.md` | 37 | 50 |
+| ux | `instructions/ux.instructions.md` | 37 | 50 |
+| ci-firewall | `instructions/ci-firewall.instructions.md` | 36 | 49 |
+| plan-first | `instructions/plan-first.instructions.md` | 35 | 47 |
+| rbac-authentication | `instructions/rbac-authentication.instructions.md` | 35 | 47 |
+| architecture | `instructions/architecture.instructions.md` | 34 | 46 |
+| documentation | `instructions/documentation.instructions.md` | 34 | 46 |
+| observability | `instructions/observability.instructions.md` | 34 | 46 |

@@ -7,10 +7,23 @@ All notable changes to this repository should be recorded in this file.
 ### Added
 
 - Added `.github/workflows/dependency-canary.yml` to run a dependency canary lane for Dependabot and `dependencies`-labeled pull requests.
+- **NEW (v3.10.0):** Distributed 9 generic GitHub Actions workflows to consumer repositories via `.github/base-coat/workflows/`:
+  - `asset-health.yml` — Automated asset quality scoring
+  - `check-version.yml` — Version consistency validation
+  - `dependency-update-advisor.yml` — Dependency security advisory
+  - `prd-spec-gate.yml` — Documentation enforcement for large changes
+  - `secret-scan.yml` — Credential/secret detection
+  - `sprint-closeout-branch-audit.yml` — Automated branch cleanup
+  - `sync-test.yml` — Sync script validation
+  - `template-validation.yml` — Template structure validation
+  - `version-check.yml` — Version alignment checks
+- Added consumer workflow documentation: `docs/guides/workflows-getting-started.md` and `docs/guides/workflows-reference.md`
+- Updated `docs/reference/DISTRIBUTION.md` with workflow distribution section
 
 ### Changed
 
 - Updated dependency guardrail guidance with retry/backoff and flaky-test containment expectations for dependency update validation.
+- Updated distribution documentation to include workflow components
 
 ## 3.28.2 - 2026-05-28
 

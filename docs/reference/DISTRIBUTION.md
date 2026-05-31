@@ -309,3 +309,74 @@ jobs:
           git push origin chore/basecoat-update
           gh pr create --title "chore: update basecoat to ${{ env.LATEST }}" --body "Automated update from ${{ env.CURRENT }} to ${{ env.LATEST }}"
 ```
+
+## Distributed Workflows (NEW - v3.10.0)
+
+### Overview
+
+Base Coat distributes proven GitHub Actions workflows to consumers, enabling standardized DevOps patterns without reinvention.
+
+### Generic Workflows (9 Total)
+
+Nine production-tested workflows with **zero BaseCoat dependencies**:
+
+| Workflow | Purpose | Setup Time |
+|----------|---------|-----------|
+| **asset-health.yml** | Asset quality scoring | 1 min |
+| **check-version.yml** | Version consistency checks | 1 min |
+| **dependency-update-advisor.yml** | Dependency security advisory | 1 min |
+| **prd-spec-gate.yml** | Documentation enforcement | 2 min |
+| **secret-scan.yml** | Credential detection | 1 min |
+| **sprint-closeout-branch-audit.yml** | Branch cleanup & hygiene | 2 min |
+| **sync-test.yml** | Sync validation | 1 min |
+| **template-validation.yml** | Template structure validation | 1 min |
+| **version-check.yml** | Version alignment | 1 min |
+
+### Installation
+
+Workflows are automatically distributed to `.github/base-coat/workflows/` via sync scripts:
+
+```powershell
+# PowerShell
+.\sync.ps1 -DestinationPath ".github/base-coat" -Version "v3.10.0"
+```
+
+```bash
+# Bash
+bash sync.sh --destination-path .github/base-coat --version v3.10.0
+```
+
+Or manually copy:
+
+```bash
+cp -r .github/base-coat/workflows/* .github/workflows/
+```
+
+### Usage
+
+Each workflow can be triggered manually or on schedule:
+
+```bash
+# Run workflow manually
+gh workflow run asset-health.yml
+
+# View results
+gh run list --workflow asset-health.yml
+```
+
+### Customization
+
+Many workflows accept inputs for customization:
+
+```bash
+# Run with custom parameters
+gh workflow run sprint-closeout-branch-audit.yml \
+  --field stale_days=14 \
+  --field apply_changes=true
+```
+
+### For More Information
+
+- **Getting Started:** See `docs/guides/workflows-getting-started.md`
+- **Detailed Reference:** See `docs/guides/workflows-reference.md`
+- **Examples:** See `docs/examples/workflow-setups/`

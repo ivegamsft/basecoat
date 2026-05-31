@@ -16,6 +16,7 @@ Every message prefix tells the AI three things at once: **what kind of work**,
 | `plan:` | Sprint or project planning | **Now, no implementation** | `@sprint-planner`, `@product-manager` |
 | `spike:` | Time-boxed investigation, no deliverable | **Now, research only** | `@solution-architect` |
 | `chore:` | Maintenance, cleanup, non-functional | **Soon** | `@devops-engineer`, `@release-manager` |
+| `pr:` | Pull request lifecycle handling: triage, merge readiness, build-gated closeout, and branch hygiene | **Now** | `@orphaned-pr-cleanup`, `@merge-coordinator`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
 | `fleet:` | Close previous sprint, plan and execute the next sprint, triage oldest issues, audit PRs/builds, clean branches | **Now** | `@sprint-closeout-auditor`, `@sprint-planner`, `@issue-triage`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
 | `security:` | Security concern or vulnerability | **Now, high priority** | `@security-analyst`, `@guardrail` |
 | `perf:` | Performance degradation | **Now, measure first** | `@performance-analyst` |
@@ -41,7 +42,7 @@ for selecting chain patterns.
 |---|---|---|
 | Delivery | `feature:`, `refactor:`, `deploy:`, `architect:` | implementation plan, code changes, or staged deployment |
 | Reliability | `bug:`, `perf:`, `outage:`, `rca:` | fix, mitigation, incident analysis, or root-cause report |
-| Governance | `audit:`, `security:`, `chore:` | findings, policy action, risk controls |
+| Governance | `audit:`, `security:`, `chore:`, `pr:` | findings, policy action, risk controls |
 | Planning | `plan:`, `spike:` | prioritized backlog, design notes, decision doc |
 | Quality | `test:`, `docs:`, `ux:` | tests, documentation, or design artifacts |
 | Infrastructure | `azure:`, `infra:`, `deploy:` | preflight advisory, IaC changes, staged deployment |
@@ -243,6 +244,26 @@ deploy: follow azure-prepare -> azure-validate -> azure-deploy exactly; do not d
 
 See [`docs/reference/guardrails/deployment-rca.md`](../reference/guardrails/deployment-rca.md)
 for retry caps, path lock, and bootstrap immutability rules.
+
+---
+
+## PR routing
+
+`pr:` is the direct intent for PR lifecycle execution.
+
+### Default sequence
+
+1. Triage stale or blocked pull requests with `@orphaned-pr-cleanup`.
+2. Validate merge readiness and ordering with `@merge-coordinator`.
+3. Verify required CI status before closure; if builds are red, route to `@broken-build-troubleshooter`.
+4. Run `@branch-hygiene-sweeper` after merge/close actions to prune only safe branches.
+
+### Guardrails
+
+- Do not close or mark complete while required builds are still pending.
+- If required builds fail, keep the PR open and attach failure evidence.
+- Only run branch cleanup for branches tied to merged/closed PRs with required builds passing.
+- Prefer serial merges for overlapping branches to reduce conflict churn.
 
 ---
 

@@ -90,6 +90,11 @@ cases:
     expected_tool: get-latest-metrics
     tags: [positive, metrics]
     suggestion_if_misrouted: Add "most recent metrics state" examples to get-latest-metrics.
+  - id: glm-06
+    prompt: Refresh the dashboard snapshot now.
+    expected_tool: get-latest-metrics
+    tags: [positive, metrics, refresh]
+    suggestion_if_misrouted: Route "refresh snapshot now/current" intents to get-latest-metrics.
 
   - id: gh-01
     prompt: Show adoption history for the last 8 weeks.
@@ -116,6 +121,11 @@ cases:
     expected_tool: get-history
     tags: [positive, history]
     suggestion_if_misrouted: Mention "past trend points" for get-history.
+  - id: gh-06
+    prompt: Refresh history for the last 12 weeks.
+    expected_tool: get-history
+    tags: [positive, history, refresh]
+    suggestion_if_misrouted: Prioritize "last N weeks/history/trend" over generic refresh wording.
 
   - id: ga-01
     prompt: Do we have any active adoption alerts right now?
@@ -142,6 +152,11 @@ cases:
     expected_tool: get-alerts
     tags: [positive, alerts]
     suggestion_if_misrouted: Add "active alert records" examples for get-alerts.
+  - id: ga-06
+    prompt: Refresh active degradation alerts for this repo.
+    expected_tool: get-alerts
+    tags: [positive, alerts, refresh]
+    suggestion_if_misrouted: Route "refresh alerts/degradations" intents to get-alerts.
 
   - id: val-01
     prompt: Validate the repository and run all checks.
@@ -248,30 +263,30 @@ cases:
     suggestion_if_misrouted: Add "coverage blind spots" examples to check-coverage.
 
   - id: cpr-01
-    prompt: Create a PR for the scaffolded skill changes.
+    prompt: pr: create a PR for the scaffolded skill changes.
     expected_tool: create-pr
-    tags: [positive, pr]
-    suggestion_if_misrouted: Include "create a PR for changes" in create-pr.
+    tags: [positive, pr, prefix, lifecycle]
+    suggestion_if_misrouted: Route "pr:" prefixed create intents to create-pr.
   - id: cpr-02
-    prompt: Open a pull request from this branch with my summary.
+    prompt: pr: open a pull request from this branch with my summary.
     expected_tool: create-pr
-    tags: [positive, pr]
-    suggestion_if_misrouted: Add "open a pull request" to create-pr triggers.
+    tags: [positive, pr, prefix, lifecycle]
+    suggestion_if_misrouted: Route "pr:" prefixed open intents to create-pr.
   - id: cpr-03
-    prompt: Prepare and submit a PR for these generated assets.
+    prompt: pr: prepare and submit a PR for these generated assets.
     expected_tool: create-pr
-    tags: [positive, pr]
-    suggestion_if_misrouted: Include "submit a PR" in create-pr description.
+    tags: [positive, pr, prefix, lifecycle]
+    suggestion_if_misrouted: Route "pr:" prefixed submit intents to create-pr.
   - id: cpr-04
-    prompt: Make a draft PR so reviewers can inspect this output.
+    prompt: pr: make a draft PR so reviewers can inspect this output.
     expected_tool: create-pr
-    tags: [positive, pr]
-    suggestion_if_misrouted: Add "make a draft PR" phrase to create-pr.
+    tags: [positive, pr, prefix, lifecycle]
+    suggestion_if_misrouted: Route "pr:" prefixed draft intents to create-pr.
   - id: cpr-05
-    prompt: Publish a pull request with title and body from this work.
+    prompt: pr: publish a pull request with title and body from this work.
     expected_tool: create-pr
-    tags: [positive, pr]
-    suggestion_if_misrouted: Include "publish pull request with title and body" trigger.
+    tags: [positive, pr, prefix, lifecycle]
+    suggestion_if_misrouted: Route "pr:" prefixed publish intents to create-pr.
 
   - id: neg-01
     prompt: Explain what BaseCoat is and why we use it.
@@ -345,3 +360,9 @@ cases:
     forbidden_tools: [get-asset-details, search-assets]
     tags: [negative, out-of-scope]
     suggestion_if_misrouted: Add security utility exclusions to asset lookup tools.
+  - id: neg-13
+    prompt: Refresh.
+    expected_tool: none
+    forbidden_tools: [get-latest-metrics, get-history, get-alerts]
+    tags: [negative, ambiguous]
+    suggestion_if_misrouted: Avoid routing one-word "refresh" prompts without a clear object.

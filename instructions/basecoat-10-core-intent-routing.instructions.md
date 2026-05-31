@@ -23,7 +23,7 @@ Rules:
 5. Any agent or pipeline that ignores a recognized prefix is in violation of
    this contract.
 6. Before any implementation begins for a recognized implementation prefix
-   (`bug:`, `feature:`, `chore:`, `refactor:`, `test:`, `deploy:`), the
+   (`bug:`, `feature:`, `chore:`, `pr:`, `refactor:`, `test:`, `deploy:`), the
    LOG-FIRST gate in `governance.instructions.md` must be satisfied.
 
 ## Prefix Vocabulary
@@ -36,7 +36,8 @@ Rules:
 | `plan:` | Sprint or project planning | Now | `@sprint-planner`, `@product-manager` |
 | `spike:` | Time-boxed investigation, no deliverable | Now | `@solution-architect` |
 | `chore:` | Maintenance, cleanup, non-functional work | Soon | `@devops-engineer`, `@release-manager` |
-| `fleet:` | Close the sprint, plan the next one, triage oldest issues, and clean branches | Now | `@sprint-closeout-auditor`, `@sprint-planner`, `@issue-triage`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
+| `pr:` | Pull request lifecycle handling: triage, merge readiness, build-gated closeout, and branch hygiene | Now | `@orphaned-pr-cleanup`, `@merge-coordinator`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
+| `fleet:` | Close previous sprint, plan and execute the next sprint, triage oldest issues, audit PRs/builds, and clean branches | Now | `@sprint-closeout-auditor`, `@sprint-planner`, `@issue-triage`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
 | `security:` | Security concern or vulnerability | Now | `@security-analyst`, `@guardrail` |
 | `perf:` | Performance degradation or concern | Now | `@performance-analyst` |
 | `outage:` | Service outage, broken or dead system, site down | Now | `@rca` |
@@ -88,8 +89,27 @@ These words override the default timing of a prefix:
 
 ## Fleet Routing
 
-`fleet:` is the shortcut intent for sprint execution, backlog triage, and
-branch cleanup.
+`fleet:` is the shortcut intent for a sprint-execution batch that combines
+closeout, planning, oldest-first issue triage, PR/build auditing, and branch
+cleanup.
+
+## PR Routing
+
+`pr:` is the direct intent for PR lifecycle execution.
+
+Default sequence:
+
+1. Triage stale or blocked pull requests with `@orphaned-pr-cleanup`.
+2. Validate merge readiness and ordering with `@merge-coordinator`.
+3. Verify CI status before closure; if builds are red, route to `@broken-build-troubleshooter`.
+4. Run `@branch-hygiene-sweeper` after merge/close actions to prune only safe branches.
+
+Guardrails:
+
+- Do not close or mark complete while required builds are still pending.
+- If required builds fail, keep the PR open and attach failure evidence.
+- Only run branch cleanup for branches tied to merged/closed PRs with required builds passing.
+- Prefer serial merges for overlapping branches to reduce conflict churn.
 
 ## Plan-First Enforcement
 

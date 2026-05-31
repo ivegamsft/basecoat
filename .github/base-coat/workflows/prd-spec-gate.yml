@@ -1,0 +1,96 @@
+name: "BaseCoat - PRD and Spec Gate"
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+      - ready_for_review
+      - labeled
+      - unlabeled
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prd-spec-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Enforce PRD and spec links for risky or large changes
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const labels = (pr.labels || []).map(l => l.name);
+
+            if (labels.includes('skip-prd-spec-check')) {
+              core.notice('Skipping PRD/spec gate due to skip-prd-spec-check label.');
+              return;
+            }
+
+            const changedFiles = pr.changed_files || 0;
+            const churn = (pr.additions || 0) + (pr.deletions || 0);
+            const highChange = changedFiles >= 12 || churn >= 500;
+
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              per_page: 100,
+            });
+
+            const riskyPathPatterns = [
+              /^instructions\//,
+              /^skills\//,
+              /^agents\//,
+              /^scripts\//,
+              /^\.github\/workflows\//,
+              /^docs\/enterprise-rollout\.md$/,
+            ];
+
+            const riskyPathTouched = files.some(file =>
+              riskyPathPatterns.some(pattern => pattern.test(file.filename))
+            );
+
+            if (!highChange && !riskyPathTouched) {
+              core.notice('PRD/spec links not required: change is below size and risk thresholds.');
+              return;
+            }
+
+            const body = (pr.body || '');
+            const markdownLinks = [...body.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)].map(m => m[1]);
+            const linkTargets = [body, ...markdownLinks].join('\n').toLowerCase();
+
+            const hasPrd = /prd/.test(linkTargets);
+            const hasSpec = /\bspec\b|technical specification/.test(linkTargets);
+
+            const hasStructuredLines =
+              /(^|\n)\s*prd\s*:\s*\S+/i.test(body) ||
+              /(^|\n)\s*spec\s*:\s*\S+/i.test(body);
+
+            if (highChange) {
+              if (!(hasPrd && hasSpec) && !hasStructuredLines) {
+                core.setFailed(
+                  'This PR is high-change and requires both PRD and spec references in the PR description. Add lines like PRD: <link> and Spec: <link>.'
+                );
+                return;
+              }
+            } else if (riskyPathTouched) {
+              // Advisory warning for risky-path-only PRs (not blocking)
+              if (!(hasPrd || hasSpec) && !hasStructuredLines) {
+                core.warning(
+                  'This PR touches risky paths. Consider adding PRD or spec references in the PR description.'
+                );
+                return;
+              }
+            }
+
+            core.notice('PRD/spec gate passed.');

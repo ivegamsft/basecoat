@@ -1,0 +1,65 @@
+name: "BaseCoat - Sprint Closeout Branch Audit"
+
+on:
+  schedule:
+    - cron: "0 2 * * 0"
+  workflow_dispatch:
+    inputs:
+      stale_days:
+        description: "Mark remote branches stale after this many days"
+        required: false
+        default: "30"
+        type: string
+      apply_changes:
+        description: "Delete safe stale remote branches and orphaned local branches"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  branch-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+
+      - name: Audit and optionally clean branches
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $staleDays = if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            [int]"${{ inputs.stale_days }}"
+          } else {
+            30
+          }
+
+          $applyChanges = if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            "${{ inputs.apply_changes }}" -eq "true"
+          } else {
+            $false
+          }
+
+          $params = @{
+            StaleDays     = $staleDays
+            DefaultBranch = 'main'
+            AssumeYes     = $true
+          }
+
+          if ($applyChanges) {
+            $params.ApplyChanges = $true
+          }
+
+          pwsh ./scripts/cleanup-branches.ps1 @params
+
