@@ -77,6 +77,15 @@ gh issue comment <meta-issue-number> --body "Sprint close report: merged PRs ...
 <type>/<issue-number>-<short-description>
 ```
 
+## Worktree Naming
+
+```text
+../<repo>-wt-<issue-or-pr>
+```
+
+Use a repo-prefixed worktree path so parallel work is easy to identify and clean up.
+Examples: `../basecoat-wt-1306`, `../basecoat-wt-pr1310`.
+
 | Type | Use For |
 |---|---|
 | `feat` | New features, content, agents, skills |
