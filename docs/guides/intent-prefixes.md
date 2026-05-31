@@ -4,6 +4,9 @@ BaseCoat sessions use a structured prefix convention to communicate intent.
 Every message prefix tells the AI three things at once: **what kind of work**,
 **how urgent**, and **which agents to involve**.
 
+Prefix prompts should use native SDLC nouns (workflow run, job, PR, issue,
+release, version drift) to reduce routing ambiguity.
+
 ---
 
 ## The prefix vocabulary
@@ -16,8 +19,13 @@ Every message prefix tells the AI three things at once: **what kind of work**,
 | `plan:` | Sprint or project planning | **Now, no implementation** | `@sprint-planner`, `@product-manager` |
 | `spike:` | Time-boxed investigation, no deliverable | **Now, research only** | `@solution-architect` |
 | `chore:` | Maintenance, cleanup, non-functional | **Soon** | `@devops-engineer`, `@release-manager` |
-| `pr:` | Pull request lifecycle handling: triage, merge readiness, build-gated closeout, and branch hygiene | **Now** | `@orphaned-pr-cleanup`, `@merge-coordinator`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
 | `fleet:` | Close previous sprint, plan and execute the next sprint, triage oldest issues, audit PRs/builds, clean branches | **Now** | `@sprint-closeout-auditor`, `@sprint-planner`, `@issue-triage`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
+| `workflow:` | GitHub Actions workflow failure triage and repair | **Now** | `@broken-build-troubleshooter`, `@self-healing-ci`, `@devops-engineer` |
+| `actions:` | GitHub Actions configuration, runs, and policy checks | **Now** | `@self-healing-ci`, `@ci-failure-escalation`, `@devops-engineer` |
+| `pr:` | Pull request triage, mergeability, or stale PR cleanup | **Now** | `@orphaned-pr-cleanup`, `@merge-coordinator`, `@code-review` |
+| `issue:` | GitHub issue triage, labeling, and backlog hygiene | **Now** | `@issue-triage`, `@sprint-planner` |
+| `release:` | Release planning, version bumping, and publication | **Now** | `@release-manager`, `@release-readiness-chair`, `@release-impact-advisor` |
+| `version:` | BaseCoat version inspection and drift check | **Now** | `@release-manager`, `@devops-engineer` |
 | `security:` | Security concern or vulnerability | **Now, high priority** | `@security-analyst`, `@guardrail` |
 | `perf:` | Performance degradation | **Now, measure first** | `@performance-analyst` |
 | `outage:` | Service outage, broken or dead system, site down | **Now, high priority** | `@rca` |
@@ -42,7 +50,8 @@ for selecting chain patterns.
 |---|---|---|
 | Delivery | `feature:`, `refactor:`, `deploy:`, `architect:` | implementation plan, code changes, or staged deployment |
 | Reliability | `bug:`, `perf:`, `outage:`, `rca:` | fix, mitigation, incident analysis, or root-cause report |
-| Governance | `audit:`, `security:`, `chore:`, `pr:` | findings, policy action, risk controls |
+| Governance | `audit:`, `security:`, `chore:` | findings, policy action, risk controls |
+| GitHub Operations | `workflow:`, `actions:`, `pr:`, `issue:`, `release:`, `version:` | run triage, repo hygiene, release/version decisions |
 | Planning | `plan:`, `spike:` | prioritized backlog, design notes, decision doc |
 | Quality | `test:`, `docs:`, `ux:` | tests, documentation, or design artifacts |
 | Infrastructure | `azure:`, `infra:`, `deploy:` | preflight advisory, IaC changes, staged deployment |
@@ -247,26 +256,6 @@ for retry caps, path lock, and bootstrap immutability rules.
 
 ---
 
-## PR routing
-
-`pr:` is the direct intent for PR lifecycle execution.
-
-### Default sequence
-
-1. Triage stale or blocked pull requests with `@orphaned-pr-cleanup`.
-2. Validate merge readiness and ordering with `@merge-coordinator`.
-3. Verify required CI status before closure; if builds are red, route to `@broken-build-troubleshooter`.
-4. Run `@branch-hygiene-sweeper` after merge/close actions to prune only safe branches.
-
-### Guardrails
-
-- Do not close or mark complete while required builds are still pending.
-- If required builds fail, keep the PR open and attach failure evidence.
-- Only run branch cleanup for branches tied to merged/closed PRs with required builds passing.
-- Prefer serial merges for overlapping branches to reduce conflict churn.
-
----
-
 ## Fleet routing
 
 `fleet:` is the shortcut intent for a sprint-execution batch that combines closeout, planning, oldest-first issue triage, PR/build auditing, and branch cleanup.
@@ -286,6 +275,24 @@ for retry caps, path lock, and bootstrap immutability rules.
 - `@broken-build-troubleshooter`
 - `@sprint-planner`
 - `@branch-hygiene-sweeper`
+
+---
+
+## GitHub-native deterministic routing
+
+`workflow:`, `actions:`, `pr:`, `issue:`, `release:`, and `version:` are
+deterministic routes. If the prefix is present, do not ask a follow-up
+disambiguation question before first evidence collection.
+
+### Contract
+
+1. `workflow:` / `actions:`: fetch failing run and job evidence first, then fix,
+   then rerun affected scope.
+2. `pr:`: inspect PR state first (mergeability, checks, review blockers), then act.
+3. `issue:`: inspect issue state first (labels, stale status, ownership), then act.
+4. `release:`: start from release/version source-of-truth, then perform release steps.
+5. `version:`: read installed downstream version first; compare to latest published
+   release only when install origin is published BaseCoat.
 
 ---
 

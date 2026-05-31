@@ -3,6 +3,9 @@
 This guide defines the canonical language for BaseCoat intent routing, agent and
 skill selection, chaining, and prompt construction.
 
+Authoring baseline: use native SDLC language (workflow run, job, PR, issue,
+release, version drift) so routing and evidence collection are deterministic.
+
 ## Taxonomy
 
 ### Asset taxonomy
@@ -68,6 +71,9 @@ Use canonical terms in agents, skills, instructions, and prompts.
 | Sprint end reporting | closeout | shutdown, wrap-up |
 | Scope reduction for safety | constrain | trim vaguely |
 | Plan without implementation | plan-only | think about, discuss only |
+| GitHub Actions execution instance | workflow run | build, pipeline run (ambiguous) |
+| Failing unit inside a run | job | step bundle, task |
+| Log-backed remediation entry point | run evidence first | guess first, classify first |
 
 ## Intent families and execution model
 
@@ -78,6 +84,17 @@ Use canonical terms in agents, skills, instructions, and prompts.
 | basecoat-20-lang-governance | `audit:`, `security:`, `chore:` | Risk reduction and compliance | security, policy, release |
 | Planning | `plan:`, `spike:` | Decision artifact or backlog map | planner, product, architect |
 | basecoat-90-quality-quality | `test:`, `docs:` | basecoat-10-core-verification and clarity | test strategy, reviewer, writer |
+| GitHub operations | `workflow:`, `actions:`, `pr:`, `issue:`, `release:`, `version:` | Run triage, repo hygiene, release/version actions | CI, release, triage, coordination |
+
+### Deterministic routing policy
+
+For GitHub operations prefixes, route directly by prefix and collect evidence
+before disambiguation.
+
+1. `workflow:` and `actions:`: fetch failing workflow run and job logs first.
+2. `pr:`: fetch PR state first.
+3. `issue:`: fetch issue state first.
+4. `release:` and `version:`: fetch release/version source-of-truth first.
 
 ## Chain patterns
 
@@ -124,6 +141,15 @@ scope: scripts/sync.ps1 and tests only
 constraints: no workflow changes, no secret handling changes
 deliverable: targeted fix plus regression test
 evidence: failing test before and passing test after
+next-hop: basecoat-90-quality-code-review
+```
+
+```text
+workflow: integration tests still failing on main
+scope: failing workflow only
+constraints: minimal patch in test/workflow path
+deliverable: fix plus rerun outcome
+evidence: failed job log line, changed diff, rerun result
 next-hop: basecoat-90-quality-code-review
 ```
 

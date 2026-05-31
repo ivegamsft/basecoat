@@ -63,7 +63,7 @@ flowchart LR
 - [reference/asset-registry.md](reference/asset-registry.md) — Asset registry metadata
 - [reference/cli-command-reference.md](reference/cli-command-reference.md) — CLI command reference
 - [reference/component-library.md](reference/component-library.md) — Component library reference
-- [reference/PRODUCT.md](reference/PRODUCT.md) — Product vision and roadmap
+- [reference/product.md](reference/product.md) — Product vision and roadmap
 - [reference/quick-reference.md](reference/quick-reference.md) — Quick reference card
 - [reference/guidance-vocabulary-syntax-guide.md](reference/guidance-vocabulary-syntax-guide.md) — Canonical vocabulary, taxonomy, ontology, and prompt syntax
 - [reference/treatment-matrix.md](reference/treatment-matrix.md) — Issue treatment matrix
@@ -72,7 +72,7 @@ flowchart LR
 ## Guides (`docs/guides/`)
 
 - [guides/intent-prefixes.md](guides/intent-prefixes.md) — Intent vocabulary, routing behavior, and prompt templates
-- [agents/TAXONOMY.md](agents/TAXONOMY.md) — Agent and skill taxonomy with chain archetypes
+- [agents/taxonomy.md](agents/taxonomy.md) — Agent and skill taxonomy with chain archetypes
 
 ## Operations (`docs/operations/`)
 

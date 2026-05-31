@@ -103,7 +103,7 @@ nav:
     - ADR-001 Naming Convention: architecture/decisions/adr-001-naming-convention.md
     - Multi-Agent Patterns: architecture/multi-agent-orchestration-patterns.md
   - About:
-    - Philosophy: philosophy.md
+    - Philosophy: PHILOSOPHY.md
     - The Story: story.md
     - Metrics: metrics.md
     - Dashboard Metrics Schema and Glossary: reference/metrics-schema-glossary.md

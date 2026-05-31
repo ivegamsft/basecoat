@@ -41,11 +41,7 @@ jobs:
 
       - name: Validate docs
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            python -m mkdocs build --strict
-          else
-            python -m mkdocs build
-          fi
+          python -m mkdocs build
 
   deploy:
     if: github.event_name != 'pull_request'

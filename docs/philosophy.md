@@ -238,6 +238,10 @@ BaseCoat's name is grounded in a straightforward idea: every workspace needs a s
 foundation before custom work is layered on top — a base coat. The product itself avoids
 paint-shop language; these are the terms we use:
 
+The operating language is native SDLC and GitHub artifacts. Prefer concrete nouns
+like workflow run, job log, PR, issue, release, and version drift over generic
+phrasing like "pipeline output" or "ticket."
+
 | Term | Meaning |
 |---|---|
 | **BaseCoat** | The product. The shared Copilot configuration distributed to consumer repos. |
@@ -248,3 +252,8 @@ paint-shop language; these are the terms we use:
 | **Consumer** | A repository that has adopted the overlay. |
 | **Contributor** | Someone who adds or improves assets in the BaseCoat source repo. |
 | **Drift** | When a consumer's installed version lags behind the current BaseCoat release. |
+| **Workflow run** | A single GitHub Actions execution instance for a workflow. |
+| **Job log** | The logs for a specific job in a workflow run; primary CI failure evidence. |
+| **PR** | A GitHub pull request; the merge unit for review and checks. |
+| **Issue** | A GitHub issue; tracked work item for planning and triage. |
+| **Release** | A GitHub release/tag publication event, separate from deployment execution. |
