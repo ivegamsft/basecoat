@@ -107,12 +107,17 @@ jobs:
           tag="${GITHUB_REF_NAME}"
           artifact="${{ steps.package.outputs.artifact_name }}"
           notes="${{ steps.notes.outputs.notes_file }}"
+          
+          # Copy sync scripts to release directory
+          mkdir -p release_assets
+          cp scripts/sync.ps1 release_assets/
+          cp scripts/sync.sh release_assets/
 
           if gh release view "${tag}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
-            gh release upload "${tag}" "${artifact}" --clobber --repo "${GITHUB_REPOSITORY}"
+            gh release upload "${tag}" "${artifact}" release_assets/* --clobber --repo "${GITHUB_REPOSITORY}"
             gh release edit "${tag}" --notes-file "${notes}" --repo "${GITHUB_REPOSITORY}"
           else
-            gh release create "${tag}" "${artifact}" \
+            gh release create "${tag}" "${artifact}" release_assets/* \
               --title "${tag}" \
               --notes-file "${notes}" \
               --repo "${GITHUB_REPOSITORY}"
