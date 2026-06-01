@@ -52,15 +52,78 @@ $categoryMap = @{
     "Finance"              = "Process"
 }
 
-$meta          = Get-Content $MetadataPath -Raw | ConvertFrom-Json
+$originalMetadataJson = Get-Content $MetadataPath -Raw
+$meta = $originalMetadataJson | ConvertFrom-Json
+
+# Migrate legacy short agent names to full file-based names to match current validation.
+$agentFiles = Get-ChildItem $agentsDir -Filter "*.agent.md" | Sort-Object Name
+$knownAgentNames = @{}
+foreach ($file in $agentFiles) {
+    $fullName = $file.BaseName -replace '\.agent$', ''
+    $knownAgentNames[$fullName] = $true
+}
+
+$legacyToFull = @{}
+foreach ($entry in @($meta.agents)) {
+    if (-not $entry.file) { continue }
+    if ($entry.name -and $knownAgentNames.ContainsKey($entry.name)) { continue }
+
+    $entryFileName = Split-Path -Leaf ([string]$entry.file)
+    $fullNameFromFile = $entryFileName -replace '\.agent\.md$', ''
+    if ($fullNameFromFile -and $knownAgentNames.ContainsKey($fullNameFromFile)) {
+        if ($entry.name -and $entry.name -ne $fullNameFromFile) {
+            $legacyToFull[[string]$entry.name] = $fullNameFromFile
+        }
+        $entry.name = $fullNameFromFile
+    }
+}
+
+foreach ($category in $meta.categories.PSObject.Properties) {
+    $agentList = @($category.Value.agents)
+    if (-not $agentList) { continue }
+    $category.Value.agents = @(
+        foreach ($name in $agentList) {
+            if ($legacyToFull.ContainsKey([string]$name)) { $legacyToFull[[string]$name] } else { $name }
+        }
+    )
+}
+
+$dedupedAgents = [System.Collections.Generic.List[object]]::new()
+$seenByFile = @{}
+foreach ($entry in @($meta.agents)) {
+    $entryFile = [string]$entry.file
+    if (-not $entryFile) {
+        $dedupedAgents.Add($entry)
+        continue
+    }
+
+    $fullNameFromFile = (Split-Path -Leaf $entryFile) -replace '\.agent\.md$', ''
+    if (-not $seenByFile.ContainsKey($entryFile)) {
+        $seenByFile[$entryFile] = $entry
+        $dedupedAgents.Add($entry)
+        continue
+    }
+
+    $current = $seenByFile[$entryFile]
+    $preferCurrent = [string]$current.name -eq $fullNameFromFile
+    $preferIncoming = [string]$entry.name -eq $fullNameFromFile
+    if ($preferIncoming -and -not $preferCurrent) {
+        $index = [Array]::IndexOf($dedupedAgents.ToArray(), $current)
+        if ($index -ge 0) {
+            $dedupedAgents[$index] = $entry
+        }
+        $seenByFile[$entryFile] = $entry
+    }
+}
+$meta.agents = $dedupedAgents.ToArray()
+
 $existingNames = $meta.agents | Select-Object -ExpandProperty name
 
 $newAgents = [System.Collections.Generic.List[object]]::new()
 
 Get-ChildItem $agentsDir -Filter "*.agent.md" | Sort-Object Name | ForEach-Object {
     $baseName = $_.BaseName -replace '\.agent$', ''
-    # Extract short agent name from new naming convention
-    $agentName = $baseName -replace '^basecoat-\d+-\w+-', ''
+    $agentName = $baseName
     if ($agentName -in $existingNames) { return }
 
     $content      = Get-Content $_.FullName -Raw
@@ -100,7 +163,14 @@ Get-ChildItem $agentsDir -Filter "*.agent.md" | Sort-Object Name | ForEach-Objec
 }
 
 if ($newAgents.Count -eq 0) {
-    Write-Host "✅  basecoat-metadata.json is up to date ($($existingNames.Count) agents)."
+    $normalizedJson = $meta | ConvertTo-Json -Depth 10
+    if ($normalizedJson -ne $originalMetadataJson) {
+        $normalizedJson | Set-Content $MetadataPath -Encoding UTF8
+        Write-Host "✅  Normalized basecoat-metadata.json ($($existingNames.Count) agents)."
+    }
+    else {
+        Write-Host "✅  basecoat-metadata.json is up to date ($($existingNames.Count) agents)."
+    }
     return
 }
 
