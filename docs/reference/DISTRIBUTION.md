@@ -67,6 +67,8 @@ For a pinned tag, use `branch = refs/tags/v1.0.0`.
 
 Base Coat provides `sync.ps1` (PowerShell) and `sync.sh` (Bash) scripts for flexible, selective synchronization without Git submodule overhead.
 
+**Important:** Always use the sync scripts to upgrade BaseCoat assets. Do not manually copy files or create PRs that add new agent files — the sync script performs a complete remove-and-replace of the `agents/`, `instructions/`, `skills/`, and `prompts/` directories, ensuring stale files from previous naming conventions are removed. Manual PRs that only add new files without removing old ones will produce a mixed state that the `check-version.yml` workflow will detect and flag.
+
 #### Using sync.ps1 (Windows/PowerShell)
 
 ```powershell

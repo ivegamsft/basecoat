@@ -88,8 +88,40 @@ jobs:
           else
             gh issue create --repo "$GITHUB_REPOSITORY" \
               --title "$TITLE" \
-              --body "## BaseCoat Upgrade Available\n\nThis repo's BaseCoat assets are out of date.\n\n| | Version |\n|---|---|\n| **Current** | v${CONSUMER} |\n| **Latest** | v${LATEST} |\n| **Versions behind** | ${{ steps.compare.outputs.drift }} |\n\n## How to upgrade\n\n\`\`\`bash\ncurl -fsSL https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/scripts/sync.sh | bash\n\`\`\`\n\nOr manually: download the [latest release](https://github.com/IBuySpy-Shared/basecoat/releases/latest) and run \`sync.ps1\` / \`sync.sh\`.\n\n---\n*Opened automatically by the BaseCoat version drift detector.*" \
+              --body "## BaseCoat Upgrade Available\n\nThis repo's BaseCoat assets are out of date.\n\n| | Version |\n|---|---|\n| **Current** | v${CONSUMER} |\n| **Latest** | v${LATEST} |\n| **Versions behind** | ${{ steps.compare.outputs.drift }} |\n\n## How to upgrade\n\nAlways use the sync script — do not manually copy or PR in agent files, as this bypasses the clean-replace step that removes stale assets.\n\n\`\`\`bash\ncurl -fsSL https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/sync.sh | bash\n\`\`\`\n\nOr on Windows: download the [latest release](https://github.com/IBuySpy-Shared/basecoat/releases/latest) and run \`sync.ps1\`.\n\n---\n*Opened automatically by the BaseCoat version drift detector.*" \
               --label "maintenance"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Detect mixed agent naming state
+        run: |
+          AGENTS_DIR="${{ inputs.stage_path }}/agents"
+          if [ ! -d "$AGENTS_DIR" ]; then
+            echo "No agents directory found at $AGENTS_DIR; skipping mixed-state check."
+            exit 0
+          fi
+
+          PREFIXED=$(find "$AGENTS_DIR" -maxdepth 1 -name 'basecoat-*.agent.md' | wc -l | tr -d ' ')
+          NON_PREFIXED=$(find "$AGENTS_DIR" -maxdepth 1 -name '*.agent.md' ! -name 'basecoat-*.agent.md' ! -name 'orchestrator.agent.md' | wc -l | tr -d ' ')
+
+          echo "Prefixed agents (basecoat-*): $PREFIXED"
+          echo "Non-prefixed agents: $NON_PREFIXED"
+
+          if [ "$PREFIXED" -gt 0 ] && [ "$NON_PREFIXED" -gt 0 ]; then
+            echo "::warning::Mixed agent naming detected: $PREFIXED basecoat-* agents and $NON_PREFIXED non-prefixed agents coexist. This indicates an incomplete manual upgrade. Run the sync script to restore a clean state."
+            TITLE="chore: BaseCoat mixed agent state detected — manual upgrade incomplete"
+            EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "$TITLE" --json number -q '.[0].number' 2>/dev/null || echo "")
+            if [ -z "$EXISTING" ]; then
+              gh issue create --repo "$GITHUB_REPOSITORY" \
+                --title "$TITLE" \
+                --body "## Mixed BaseCoat Agent State\n\nBoth old flat-name agents and new \`basecoat-\`-prefixed agents were found in \`$AGENTS_DIR\`.\n\n| | Count |\n|---|---|\n| Prefixed (\`basecoat-*\`) | $PREFIXED |\n| Non-prefixed (stale) | $NON_PREFIXED |\n\nThis typically happens when an upgrade PR manually added new agents without removing old ones. The sync script prevents this by replacing the entire agents directory.\n\n## How to fix\n\n\`\`\`bash\ncurl -fsSL https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/sync.sh | bash\n\`\`\`\n\nOr on Windows: download the [latest release](https://github.com/IBuySpy-Shared/basecoat/releases/latest) and run \`sync.ps1\`.\n\n---\n*Opened automatically by the BaseCoat version check.*" \
+                --label "maintenance"
+            else
+              echo "Mixed-state issue #$EXISTING already open."
+            fi
+          else
+            echo "Agent naming state is consistent."
           fi
         env:
           GH_TOKEN: ${{ github.token }}

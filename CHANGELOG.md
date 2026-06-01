@@ -4,9 +4,23 @@ All notable changes to this repository should be recorded in this file.
 
 ## Unreleased
 
+## 3.30.4 - 2026-06-01
+
 ### Added
 
-- Release workflow now automatically updates version.json to match release tag semver and validates version consistency.
+- Added mixed-agent-state detection step to `check-version.yml` (distributed): flags consumer repos that have both old
+  flat-name agents and new `basecoat-XX-category-*` agents coexisting, then opens a maintenance issue with remediation
+  instructions.
+
+### Fixed
+
+- Fixed `release.yml` version provenance bug: `git archive` archived the committed state, so `version.json` in every
+  release zip was one version behind the tag. The workflow now patches the zip with the updated `version.json` after
+  archiving and commits `version.json` back to `main`.
+- Regenerated `asset-manifest.json`: was frozen at v3.25.0 with 79 stale flat-name entries; now 303 assets using the
+  current `basecoat-XX-category-name` convention at v3.30.4.
+- Updated `docs/reference/DISTRIBUTION.md` with an explicit warning that manual file-level (PR-based) upgrades are not
+  supported and bypass the sync script's clean-replace safety mechanism.
 
 ## 3.30.3 - 2026-06-01
 

@@ -39,7 +39,8 @@ $workflowDir = '.github/workflows'
 $workflowFiles = Get-ChildItem "$workflowDir/*.yml" -File | Where-Object { $_.Name -notmatch 'README|\.lock\.yml$' }
 $guardrailFailures = @()
 $directMainPushAllowList = @(
-    'publish-to-production.yml'
+    'publish-to-production.yml',
+    'release.yml'
 )
 $nonDispatchTriggers = @(
     'push',

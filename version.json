@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "3.30.3",
-  "releaseDate": "2026-06-01",
-  "notes": "Release-notes enforcement with wave/sprint gates, metadata registry hotfix, sync scripts properly included in release assets"
+  "version": "3.30.4",
+  "releaseDate": "2026-06-06",
+  "notes": "Workflow distribution fix: sync scripts now distribute .github/base-coat/workflows to consumers"
 }
