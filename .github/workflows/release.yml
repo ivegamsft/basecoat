@@ -70,26 +70,6 @@ jobs:
 
           echo "artifact_name=${artifact_name}" >> "${GITHUB_OUTPUT}"
 
-      - name: Commit updated version.json back to main
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          tag="${GITHUB_REF_NAME}"
-          version="${tag#v}"
-
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          git add version.json
-          if git diff --cached --quiet; then
-            echo "version.json already matches tag; no commit needed."
-            exit 0
-          fi
-
-          git commit -m "chore(release): bump version.json to ${version} [skip ci]"
-          git push origin HEAD:main
-
       - name: Extract release notes for tag version
         id: notes
         shell: bash
