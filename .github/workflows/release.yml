@@ -107,18 +107,34 @@ jobs:
           tag="${GITHUB_REF_NAME}"
           artifact="${{ steps.package.outputs.artifact_name }}"
           notes="${{ steps.notes.outputs.notes_file }}"
-          
+           
           # Copy sync scripts to release directory
           mkdir -p release_assets
-          cp scripts/sync.ps1 release_assets/
-          cp scripts/sync.sh release_assets/
+          cp scripts/sync.ps1 release_assets/sync.ps1
+          cp scripts/sync.sh release_assets/sync.sh
+           
+          # Validate sync scripts exist
+          if [[ ! -f release_assets/sync.ps1 ]] || [[ ! -f release_assets/sync.sh ]]; then
+            echo "::error::Sync scripts missing from release_assets directory"
+            exit 1
+          fi
+           
+          echo "Uploading release assets: ${artifact} and sync scripts"
+          ls -lh release_assets/
 
           if gh release view "${tag}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
-            gh release upload "${tag}" "${artifact}" release_assets/* --clobber --repo "${GITHUB_REPOSITORY}"
+            gh release upload "${tag}" "${artifact}" "release_assets/sync.ps1" "release_assets/sync.sh" --clobber --repo "${GITHUB_REPOSITORY}"
             gh release edit "${tag}" --notes-file "${notes}" --repo "${GITHUB_REPOSITORY}"
           else
-            gh release create "${tag}" "${artifact}" release_assets/* \
+            gh release create "${tag}" "${artifact}" "release_assets/sync.ps1" "release_assets/sync.sh" \
               --title "${tag}" \
               --notes-file "${notes}" \
               --repo "${GITHUB_REPOSITORY}"
           fi
+           
+          # Verify sync scripts are in release
+          echo "Verifying release assets..."
+          gh release view "${tag}" --repo "${GITHUB_REPOSITORY}" --json assets --jq '.assets[].name' | grep -E '(sync\.ps1|sync\.sh)' || {
+            echo "::error::Sync scripts not found in release assets"
+            exit 1
+          }
