@@ -4,6 +4,18 @@ All notable changes to this repository should be recorded in this file.
 
 ## Unreleased
 
+## 3.30.5 - 2026-06-06
+
+### Fixed
+
+- Fixed version provenance in release artifact: v3.30.4 zip still contained `version.json 3.30.3` because the
+  `release.yml` fix (zip -u overlay) was merged after the v3.30.4 tag was pushed. Releasing v3.30.5 with the
+  corrected workflow produces a zip where `base-coat/version.json` matches the release tag.
+- Fixed false-positive mixed-state detection in `check-version.yml`: `orchestrator.agent.md` is an intentional
+  compat alias distributed to all consumers. Previously, its presence alongside the new `basecoat-XX-*` agents
+  triggered the mixed-state alert on every correctly-synced consumer. It is now explicitly excluded from the
+  non-prefixed agent count.
+
 ## 3.30.4 - 2026-06-01
 
 ### Added
