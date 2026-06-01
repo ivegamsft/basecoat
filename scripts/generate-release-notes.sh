@@ -13,6 +13,7 @@ notes_file="${3:-release-notes.md}"
 base_branch="${RELEASE_NOTES_BASE_BRANCH:-main}"
 gh_pr_json_file="${RELEASE_NOTES_PR_JSON_FILE:-}"
 changelog_file="${RELEASE_NOTES_CHANGELOG_FILE:-CHANGELOG.md}"
+template_file="${RELEASE_NOTES_TEMPLATE_FILE:-.github/release-notes/templates/default.md}"
 
 has_section_body() {
   awk '
@@ -252,3 +253,28 @@ else
 fi
 
 rm -f "release-section.md"
+
+if [[ -f "${template_file}" ]]; then
+  GENERATED_NOTES="$(cat "${notes_file}")" \
+  RELEASE_NOTES_TEMPLATE_FILE="${template_file}" \
+  RELEASE_NOTES_OUTPUT_FILE="${notes_file}" \
+  RELEASE_NOTES_VERSION="${version}" \
+  RELEASE_NOTES_TAG="${tag}" \
+  python - <<'PY'
+import os
+from pathlib import Path
+
+template_path = Path(os.environ["RELEASE_NOTES_TEMPLATE_FILE"])
+output_path = Path(os.environ["RELEASE_NOTES_OUTPUT_FILE"])
+generated_notes = os.environ["GENERATED_NOTES"]
+version = os.environ["RELEASE_NOTES_VERSION"]
+tag = os.environ["RELEASE_NOTES_TAG"]
+
+rendered = template_path.read_text(encoding="utf-8")
+rendered = rendered.replace("{{GENERATED_NOTES}}", generated_notes.strip())
+rendered = rendered.replace("{{VERSION}}", version)
+rendered = rendered.replace("{{TAG}}", tag)
+
+output_path.write_text(rendered.rstrip() + "\n", encoding="utf-8")
+PY
+fi

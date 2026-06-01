@@ -1,0 +1,22 @@
+name: "release-notes-routing"
+description: "Routing evaluation — validates trigger activation for the release-notes skill."
+skill: "skills/release-notes/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Draft release notes for v2.3.0 from the commits since v2.2.0."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Summarize merged PRs into customer-facing notes for this week's release."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Create upgrade notes and breaking changes for the next version."
+    expect_activation: true
+  - id: "pos-4"
+    input: "Generate release notes for wave W12 and sprint S30 from merged PR labels."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Audit whether this release candidate is safe to ship."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Deploy the release and monitor production for errors."
+    expect_activation: false

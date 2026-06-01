@@ -16,6 +16,9 @@ Prefix parsing is a hard contract, not a soft hint. When a recognized prefix
 appears at the start of a message, it must be interpreted as an authoritative
 routing signal before any plain-text interpretation occurs.
 
+1. `bug:` routes immediately to the defect workflow.
+2. `feature:` routes immediately to the implementation/design workflow.
+
 ## Prefix Vocabulary
 
 | Prefix | Intent | Default timing | Primary agents |

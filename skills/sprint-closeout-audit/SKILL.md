@@ -20,11 +20,11 @@ visibility: "internal"
 
 # Sprint Closeout Audit Skill
 
-Use this skill to perform a checklist-driven sprint closeout audit before starting the next sprint.
+Checklist-based sprint closeout audit before next sprint planning.
 
 ## Checklist Protocol
 
-Always answer these six questions:
+Always answer these seven questions:
 
 1. ✅ Did everything merge?
 2. ✅ Did CI pass?
@@ -32,12 +32,9 @@ Always answer these six questions:
 4. ✅ Any issues?
 5. ✅ Did you test?
 6. ✅ Is latest-main CI green?
+7. ✅ Are merged sprint PRs labeled for release reporting (`sprint:*` or `wave:*`)?
 
-Each answer must include:
-
-- status (`yes`, `partial`, or `no`)
-- evidence pointer (issue/PR/workflow/test reference)
-- carry-forward action when not fully green
+Each answer must include status (`yes|partial|no`), evidence link, and carry-forward action when not green.
 
 ## Latest-Main CI Gate
 
@@ -45,11 +42,14 @@ Question 6 is a hard gate. Before marking sprint closeout complete, verify:
 
 - All required workflows on the latest `main` commit are green (no failures).
 - No `action_required` approval blocks exist on latest `main` runs.
-- Evidence links point to specific workflow run URLs, not just branch summaries.
+- Evidence points to specific workflow run URLs.
 
 If any required workflow is failing or blocked, the sprint is not closeable.
-Record the failing workflow name, run URL, and a remediation action as a
-carry-forward blocker.
+Record failing workflow, run URL, and remediation as carry-forward blocker.
+
+## Label Coverage Gate
+
+Question 7 is required when sprint output feeds release notes. If merged PRs are missing both `sprint:*` and `wave:*`, mark `partial`/`no` and add carry-forward action to backfill labels.
 
 ### CI gate commands
 
@@ -64,15 +64,6 @@ gh run list --branch main --status failure --limit 5
 gh run list --branch main --status action_required --limit 5
 ```
 
-## Reference Files
+## Reference
 
-| File | Purpose |
-|---|---|
-| [`references/checklist-template.md`](references/checklist-template.md) | Output template and evidence requirements |
-
-## Agent Pairing
-
-- `sprint-closeout-auditor`
-- `sprint-planner`
-- `retro-facilitator`
-- `git-worktrees` for cleanup of parallel worktree-based sprint branches
+- [`references/checklist-template.md`](references/checklist-template.md)

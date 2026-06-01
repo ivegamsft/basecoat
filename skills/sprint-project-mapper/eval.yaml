@@ -11,10 +11,12 @@ scenarios:
   - id: "pos-3"
     input: "Calculate PR count, LOC, cycle time, and closure ratio for each project group."
     expect_activation: true
+  - id: "pos-4"
+    input: "Find merged PRs missing wave/sprint labels and block final release-note grouping until fixed."
+    expect_activation: true
   - id: "neg-1"
     input: "Write unit tests for the auth service."
     expect_activation: false
   - id: "neg-2"
     input: "Create an AKS cluster and deploy a model."
     expect_activation: false
-

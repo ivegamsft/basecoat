@@ -16,7 +16,7 @@ allowed-tools: ["bash", "git", "gh"]
 
 # Sprint/Project Mapper Skill
 
-Use this skill to convert scattered issues and PRs into statistically meaningful project groups for planning, reporting, and release notes.
+Map issues/PRs into meaningful sprint or project groups for planning, reporting, and release notes.
 
 ## Use Cases
 
@@ -24,21 +24,15 @@ Use this skill to convert scattered issues and PRs into statistically meaningful
 - Debate whether groups should be split or merged before metric reporting.
 - Compute quality metrics: issues, PRs, LOC delta, cycle time, closure ratio, blocker density.
 - Generate release-note-ready summaries only for groups that pass significance thresholds.
+- Audit and remediate missing `sprint:*` / `wave:*` labels on merged PRs before release-note cut.
 
-## Reference Files
+## References
 
-| File | Purpose |
-|---|---|
-| [`references/mapping-workflow.md`](references/mapping-workflow.md) | End-to-end grouping and debate workflow |
-| [`references/metrics-formulas.md`](references/metrics-formulas.md) | Metric definitions and significance rules |
-| [`references/release-notes-template.md`](references/release-notes-template.md) | Structured release-note output template |
-
-## Scripts
-
-| Script | Purpose |
-|---|---|
-| [`scripts/map-projects.ps1`](scripts/map-projects.ps1) | PowerShell mapper for Windows/macOS/Linux with `gh` CLI (`-NoLabelWarning` suppresses unmapped-label warning) |
-| [`scripts/map-projects.sh`](scripts/map-projects.sh) | Bash equivalent for Linux/macOS |
+- [`references/mapping-workflow.md`](references/mapping-workflow.md)
+- [`references/metrics-formulas.md`](references/metrics-formulas.md)
+- [`references/release-notes-template.md`](references/release-notes-template.md)
+- [`scripts/map-projects.ps1`](scripts/map-projects.ps1)
+- [`scripts/map-projects.sh`](scripts/map-projects.sh)
 
 ## Group Significance (Default)
 
@@ -51,9 +45,24 @@ Groups failing thresholds are merged into nearest valid group when similarity >0
 
 Release-note output requires at least one linked merged PR; significant groups without linked PRs are reported under linkage-gap audit.
 
+## Label Hygiene Protection
+
+To protect release-note consistency, run a label hygiene pass before mapping output is finalized:
+
+1. Detect merged PRs in scope missing both `sprint:*` and `wave:*`.
+2. Report the missing-label list with PR numbers and owners.
+3. Block "final" grouping output until each PR has a label or an explicit waiver note.
+
+### Label hygiene command
+
+```bash
+gh pr list --state merged --limit 200 --json number,title,author,labels \
+  | jq '[.[] | select((.labels | map(.name | test("^sprint:|^wave:")) | any) | not)]'
+```
+
 ## Agent Pairing
 
-- `sprint-project-mapper` for project grouping and debate outcomes.
-- `backlog-burndown` for velocity and spillover analysis.
-- `issue-triage` for quality cleanup before metric baselining.
-- `sprint-planner` to convert mapped groups into next-sprint commitments.
+- `sprint-project-mapper`
+- `backlog-burndown`
+- `issue-triage`
+- `sprint-planner`

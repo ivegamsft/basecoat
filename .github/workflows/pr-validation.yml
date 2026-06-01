@@ -7,12 +7,44 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  release-label-gate:
+    name: Release label gate (wave/sprint)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Validate PR has wave/sprint release label
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ ! -f "${GITHUB_EVENT_PATH}" ]]; then
+            echo "::error::Missing event payload at ${GITHUB_EVENT_PATH}."
+            exit 1
+          fi
+
+          mapfile -t labels < <(jq -r '.pull_request.labels[].name // empty' "${GITHUB_EVENT_PATH}")
+
+          if printf '%s\n' "${labels[@]}" | grep -Eq '^(wave:|sprint:)'; then
+            echo "Release label gate passed."
+            exit 0
+          fi
+
+          if printf '%s\n' "${labels[@]}" | grep -Eq '^skip-release-label-gate$'; then
+            echo "::warning::Release label gate bypassed by skip-release-label-gate."
+            exit 0
+          fi
+
+          echo "::error::PR is missing release labels. Add at least one label matching wave:* or sprint:*."
+          echo "::error::If this PR is exempt, apply label: skip-release-label-gate."
+          exit 1
+
   markdown-lint:
     name: Markdown lint
     runs-on: ubuntu-latest
@@ -204,4 +236,3 @@ jobs:
           test -d "$consumer_repo/.github/base-coat/agents"
           test -d "$consumer_repo/.github/base-coat/instructions"
           echo "sync.sh dry-run passed."
-

@@ -135,13 +135,15 @@ try {
     $fullTargetDir = Join-Path $repoRoot $targetDir
     New-Item -ItemType Directory -Force -Path $fullTargetDir | Out-Null
 
-    foreach ($item in @('README.md', 'CHANGELOG.md', 'version.json', 'asset-manifest.json', 'instructions', 'skills', 'prompts', 'agents')) {
+    foreach ($item in @('README.md', 'CHANGELOG.md', 'version.json', 'asset-manifest.json', 'instructions', 'skills', 'prompts', 'agents', 'templates')) {
         $destination = Join-Path $fullTargetDir $item
         if (Test-Path $destination) {
             Remove-Item -Path $destination -Recurse -Force
         }
-
-        Copy-Item -Path (Join-Path $sourcePath $item) -Destination $destination -Recurse -Force
+        $sourceItem = Join-Path $sourcePath $item
+        if (Test-Path $sourceItem) {
+            Copy-Item -Path $sourceItem -Destination $destination -Recurse -Force
+        }
     }
 
     # Copy only basic documentation (not full docs tree)
@@ -227,6 +229,15 @@ try {
             $sanitized = Convert-AgentToCliCompatibleContent -Content $raw
             Set-Content -Path (Join-Path $agentDest $_.Name) -Value $sanitized -Encoding UTF8
         }
+    }
+
+    # Seed release-notes template into downstream-customizable location.
+    # Never overwrite local customizations.
+    $managedReleaseTemplate = Join-Path $fullTargetDir 'templates/release-notes/default.md'
+    $customReleaseTemplate = Join-Path $repoRoot '.github/release-notes/templates/default.md'
+    if ((Test-Path $managedReleaseTemplate) -and -not (Test-Path $customReleaseTemplate)) {
+        New-Item -ItemType Directory -Force -Path (Split-Path -Parent $customReleaseTemplate) | Out-Null
+        Copy-Item -Path $managedReleaseTemplate -Destination $customReleaseTemplate -Force
     }
 
     # Optional cleanup pass for stale managed files from prior versions.

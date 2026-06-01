@@ -37,8 +37,17 @@ Review release candidates for versioning, changelog quality, tagging, and publis
 1. Confirm the version bump matches the merged work.
 2. Check changelog coverage, grouping, and link quality.
 3. Verify tags, release notes, and artifact references.
-4. Review rollback notes and publish completeness.
-5. Report any missing release prerequisites with evidence.
+4. Validate release-note source labeling: merged PRs should carry `wave:*` or `sprint:*`.
+5. Review rollback notes and publish completeness.
+6. Report any missing release prerequisites with evidence.
+
+## Wave/Sprint Label Gate
+
+When release notes are expected to be grouped by wave/sprint:
+
+- Treat missing `wave:*` and `sprint:*` labels as a release-audit finding.
+- Severity defaults to `major`; escalate to `block` if >10% of in-scope merged PRs are unlabeled.
+- Recommend remediation via `sprint-project-mapper` label hygiene pass and rerun of `release-notes`.
 
 ## Output
 

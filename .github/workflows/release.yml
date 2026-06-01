@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -47,6 +48,55 @@ jobs:
 
           echo "notes_file=${notes_file}" >> "${GITHUB_OUTPUT}"
 
+      - name: Validate wave/sprint label coverage for release PRs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tag="${GITHUB_REF_NAME}"
+          prev_tag="$(git --no-pager tag --sort=-creatordate | grep '^v' | grep -Fxv "${tag}" | head -n1 || true)"
+
+          if [[ -z "${prev_tag}" ]]; then
+            echo "::warning::No previous semver tag found; skipping wave/sprint label coverage gate."
+            exit 0
+          fi
+
+          base_date="$(git --no-pager log -1 --format=%cI "${prev_tag}")"
+          head_date="$(git --no-pager log -1 --format=%cI "${tag}")"
+          search="base:main merged:>=${base_date} merged:<=${head_date}"
+
+          pr_json="$(gh pr list --repo "${GITHUB_REPOSITORY}" --state merged --limit 500 --search "${search}" --json number,title,author,labels)"
+          total="$(jq 'length' <<<"${pr_json}")"
+          unlabeled="$(jq '[.[] | select((.labels | map(.name | test("^wave:|^sprint:")) | any) | not)]' <<<"${pr_json}")"
+          unlabeled_count="$(jq 'length' <<<"${unlabeled}")"
+
+          echo "Release label coverage window: ${prev_tag}..${tag}"
+          echo "Merged PRs in scope: ${total}"
+          echo "Merged PRs missing wave/sprint labels: ${unlabeled_count}"
+
+          if [[ "${total}" -eq 0 ]]; then
+            echo "::warning::No merged PRs found in release window."
+            exit 0
+          fi
+
+          if [[ "${unlabeled_count}" -eq 0 ]]; then
+            echo "Wave/sprint label coverage gate passed."
+            exit 0
+          fi
+
+          ratio_times_100=$(( unlabeled_count * 100 ))
+          threshold_times_100=$(( total * 10 ))
+          jq -r '.[] | "- PR #\(.number): \(.title)"' <<<"${unlabeled}" | head -n 30
+
+          if (( ratio_times_100 > threshold_times_100 )); then
+            echo "::error::Wave/sprint label coverage below threshold: ${unlabeled_count}/${total} unlabeled (>10%)."
+            exit 1
+          fi
+
+          echo "::warning::Wave/sprint label coverage is partial: ${unlabeled_count}/${total} unlabeled (<=10%)."
+
       - name: Create or update GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -67,4 +117,3 @@ jobs:
               --notes-file "${notes}" \
               --repo "${GITHUB_REPOSITORY}"
           fi
-
