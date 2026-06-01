@@ -146,6 +146,16 @@ try {
         }
     }
 
+    # Copy workflows from .github/base-coat/workflows/
+    $workflowsSource = Join-Path $sourcePath '.github' 'base-coat' 'workflows'
+    $workflowsDest = Join-Path $fullTargetDir 'workflows'
+    if (Test-Path $workflowsSource) {
+        if (Test-Path $workflowsDest) {
+            Remove-Item -Path $workflowsDest -Recurse -Force
+        }
+        Copy-Item -Path $workflowsSource -Destination $workflowsDest -Recurse -Force
+    }
+
     # Copy only basic documentation (not full docs tree)
     $docsDest = Join-Path $fullTargetDir 'docs'
     if (Test-Path $docsDest) {

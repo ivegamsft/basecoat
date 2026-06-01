@@ -51,6 +51,12 @@ for item in README.md CHANGELOG.md version.json asset-manifest.json instructions
   fi
 done
 
+# Copy workflows from .github/base-coat/workflows/ in source
+if [[ -d "$TMP_DIR/source/.github/base-coat/workflows" ]]; then
+  rm -rf "$REPO_ROOT/$TARGET_DIR/workflows"
+  cp -R "$TMP_DIR/source/.github/base-coat/workflows" "$REPO_ROOT/$TARGET_DIR/workflows"
+fi
+
 # Legacy cleanup: basecoat-metadata.json was previously distributed.
 rm -f "$REPO_ROOT/$TARGET_DIR/basecoat-metadata.json"
 
