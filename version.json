@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "3.28.2",
-  "releaseDate": "2026-05-28",
-  "notes": "Post-sprint stabilization release: docs naming/date consistency updates, CI action pinning hardening, and docs deploy validation alignment for reliable publishing"
+  "version": "3.30.3",
+  "releaseDate": "2026-06-01",
+  "notes": "Release-notes enforcement with wave/sprint gates, metadata registry hotfix, sync scripts properly included in release assets"
 }

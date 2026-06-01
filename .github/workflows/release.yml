@@ -22,6 +22,38 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
+      - name: Update version.json to match release tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          
+          tag="${GITHUB_REF_NAME}"
+          version="${tag#v}"
+          release_date="$(date -u +%Y-%m-%d)"
+          
+          jq --arg ver "$version" --arg date "$release_date" \
+            '.version = $ver | .releaseDate = $date' \
+            version.json > version.json.tmp && mv version.json.tmp version.json
+          
+          echo "Updated version.json: $version ($release_date)"
+          cat version.json
+
+      - name: Validate version.json matches tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          
+          tag="${GITHUB_REF_NAME}"
+          expected_version="${tag#v}"
+          actual_version="$(jq -r '.version' version.json)"
+          
+          if [[ "$actual_version" != "$expected_version" ]]; then
+            echo "::error::Version mismatch: tag=$tag expects version=$expected_version, but version.json has $actual_version"
+            exit 1
+          fi
+          
+          echo "✓ Version.json validated: $actual_version matches tag $tag"
+
       - name: Build repository zip artifact
         id: package
         shell: bash

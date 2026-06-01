@@ -6,6 +6,12 @@ All notable changes to this repository should be recorded in this file.
 
 ### Added
 
+- Release workflow now automatically updates version.json to match release tag semver and validates version consistency.
+
+## 3.30.3 - 2026-06-01
+
+### Added
+
 - Added `.github/workflows/dependency-canary.yml` to run a dependency canary lane for Dependabot and `dependencies`-labeled pull requests.
 - **NEW (v3.10.0):** Distributed 9 generic GitHub Actions workflows to consumer repositories via `.github/base-coat/workflows/`:
   - `asset-health.yml` — Automated asset quality scoring
@@ -24,6 +30,12 @@ All notable changes to this repository should be recorded in this file.
 
 - Updated dependency guardrail guidance with retry/backoff and flaky-test containment expectations for dependency update validation.
 - Updated distribution documentation to include workflow components
+
+### Fixed
+
+- Fixed missing sync scripts in v3.30.2 release assets (sync.ps1 and sync.sh now explicitly included and verified)
+- Corrected sync script path reference from scripts/ to repository root
+- Automated version.json updates during release to prevent version provenance mismatches downstream
 
 ## 3.28.2 - 2026-05-28
 
