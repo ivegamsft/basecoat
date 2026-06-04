@@ -4,6 +4,12 @@ All notable changes to this repository should be recorded in this file.
 
 ## Unreleased
 
+### Added
+
+- Added new consumer setup guide for downstream workflows: `docs/guides/downstream-workflows-setup.md`. This guide helps
+  consumer repositories install and use BaseCoat's `bc-` prefixed workflows, covering Phase 1 supported workflows,
+  installation examples, troubleshooting, and FAQ.
+
 ## 3.30.5 - 2026-06-06
 
 ### Fixed

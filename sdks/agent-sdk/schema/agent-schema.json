@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BaseCoat Agent Schema",
+  "description": "JSON Schema for BaseCoat agentic workflows",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Agent name in kebab-case",
+      "pattern": "^[a-z0-9-]+$",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "description": {
+      "type": "string",
+      "description": "Agent description",
+      "minLength": 10,
+      "maxLength": 500
+    },
+    "author": {
+      "type": "string",
+      "description": "Agent author",
+      "maxLength": 100
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version (e.g., 0.1.0)",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
+    },
+    "triggers": {
+      "type": "array",
+      "description": "GitHub events that trigger this agent",
+      "items": {
+        "type": "string",
+        "enum": [
+          "push",
+          "pull_request",
+          "pull_request_review",
+          "pull_request_review_comment",
+          "issues",
+          "issue_comment",
+          "schedule",
+          "workflow_dispatch",
+          "repository_dispatch"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "instructions": {
+      "type": "array",
+      "description": "BaseCoat instruction files to reference",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      }
+    },
+    "skills": {
+      "type": "array",
+      "description": "BaseCoat skills to use",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      }
+    },
+    "mcp": {
+      "type": "array",
+      "description": "MCP servers to bind",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    }
+  },
+  "required": ["name", "description"],
+  "additionalProperties": false
+}

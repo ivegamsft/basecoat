@@ -1,4 +1,5 @@
 name: "BaseCoat - Fork Issue Import"
+# [Internal-only] Memory workflow - BaseCoat operational use
 
 on:
   workflow_dispatch:

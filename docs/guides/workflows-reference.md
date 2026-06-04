@@ -1,8 +1,8 @@
 # BaseCoat Workflow Reference
 
-Complete specification of all 9 distributable workflows.
+Complete specification of 9 distributable workflow templates. Consumer installs use `scripts/configure-downstream-workflows.ps1`, which installs a safe subset by default.
 
-## Distributed Workflows (9 Total)
+## Distributed Workflow Templates (9 Total)
 
 ### 1. asset-health.yml
 
@@ -326,31 +326,32 @@ inputs:
 
 ### Automatic Distribution
 
-All 9 workflows are automatically distributed to consumer repositories via BaseCoat sync scripts.
+Install downstream-safe workflows with:
 
-Workflows appear in:
+```bash
+pwsh scripts/configure-downstream-workflows.ps1
+```
+
+Installed files:
 
 ```text
-.github/base-coat/workflows/
-├── asset-health.yml
-├── check-version.yml
-├── dependency-update-advisor.yml
-├── prd-spec-gate.yml
-├── secret-scan.yml
-├── sprint-closeout-branch-audit.yml
-├── sync-test.yml
-├── template-validation.yml
-└── version-check.yml
+.github/workflows/
+├── bc-check-health.yml
+├── bc-dependency-update-advisor.yml
+├── bc-prd-spec-gate.yml
+├── bc-secret-scan.yml
+├── bc-sprint-closeout-branch-audit.yml
+└── bc-version-check.yml
 ```
 
 ### Manual Setup
 
 ```bash
-# Copy to your repository
-cp -r .github/base-coat/workflows/* .github/workflows/
+# Preview changes
+pwsh scripts/configure-downstream-workflows.ps1 -DryRun
 
-# Or copy individual workflows
-cp .github/base-coat/workflows/asset-health.yml .github/workflows/
+# Include unsupported workflows only if your repo provides required scripts
+pwsh scripts/configure-downstream-workflows.ps1 -IncludeUnsupported
 ```
 
 ## Common Patterns
@@ -362,15 +363,15 @@ cp .github/base-coat/workflows/asset-health.yml .github/workflows/
 gh workflow list
 
 # Run workflow with defaults
-gh workflow run asset-health.yml
+gh workflow run bc-version-check.yml
 
 # Run with custom parameters
-gh workflow run sprint-closeout-branch-audit.yml \
+gh workflow run bc-sprint-closeout-branch-audit.yml \
   --field stale_days=14 \
   --field apply_changes=true
 
 # View workflow run
-gh run list --workflow asset-health.yml
+gh run list --workflow bc-version-check.yml
 ```
 
 ### Integrating with CI/CD
@@ -387,10 +388,10 @@ jobs:
 
 ```bash
 # Rename to disable
-mv .github/workflows/asset-health.yml .github/workflows/asset-health.yml.disabled
+mv .github/workflows/bc-version-check.yml .github/workflows/bc-version-check.yml.disabled
 
 # Delete to remove
-rm .github/workflows/asset-health.yml
+rm .github/workflows/bc-version-check.yml
 ```
 
 ## Release Notes

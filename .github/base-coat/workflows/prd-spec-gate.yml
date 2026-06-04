@@ -53,7 +53,6 @@ jobs:
               /^agents\//,
               /^scripts\//,
               /^\.github\/workflows\//,
-              /^docs\/enterprise-rollout\.md$/,
             ];
 
             const riskyPathTouched = files.some(file =>

@@ -1,4 +1,5 @@
 name: "BaseCoat - Enterprise Memory Sweep"
+# [Internal-only] Memory workflow - BaseCoat operational use
 
 on:
   schedule:

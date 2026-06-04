@@ -1,4 +1,5 @@
 name: "BaseCoat - Memory Contribute"
+# [Internal-only] Memory workflow - BaseCoat operational use
 
 on:
   workflow_dispatch:

@@ -1,6 +1,6 @@
 # Getting Started with BaseCoat Workflows
 
-BaseCoat distributes 9 proven, production-tested workflows that provide common DevOps patterns for consumer repositories. All workflows are zero-configuration and ready to use immediately.
+BaseCoat distributes workflow templates for consumer repositories. Use the installer script to copy and configure only downstream-safe workflows with `bc-` prefixed filenames.
 
 ## What's Included
 
@@ -22,24 +22,33 @@ Nine generic workflows with **zero BaseCoat dependencies**:
 
 ### Automatic (Recommended)
 
-If you're a BaseCoat consumer, workflows are automatically synced to your repository:
+Run the downstream workflow installer from your consumer repository:
 
 ```bash
-# Workflows appear in .github/base-coat/workflows/
-# Run by referencing from your own workflows:
-# workflow_call: .github/base-coat/workflows/check-version.yml
+pwsh scripts/configure-downstream-workflows.ps1
 ```
+
+This installs:
+
+- `bc-check-health.yml`
+- `bc-version-check.yml`
+- `bc-secret-scan.yml`
+- `bc-prd-spec-gate.yml`
+- `bc-dependency-update-advisor.yml`
+- `bc-sprint-closeout-branch-audit.yml`
+
+By default it skips/removes unsupported consumer workflows:
+
+- `bc-asset-health.yml`
+- `bc-sync-test.yml`
+- `bc-template-validation.yml`
 
 ### Manual Setup
 
-Copy workflows directly into your repository:
+Use dry-run mode to preview changes before applying:
 
 ```bash
-# Copy entire workflow directory
-cp -r .github/base-coat/workflows/* .github/workflows/
-
-# Or copy individual workflows
-cp .github/base-coat/workflows/asset-health.yml .github/workflows/
+pwsh scripts/configure-downstream-workflows.ps1 -DryRun
 ```
 
 ## Quick Start Guide
@@ -143,7 +152,7 @@ Each workflow accepts `workflow_dispatch` inputs for customization:
 
 ```bash
 # Run with custom parameters
-gh workflow run asset-health.yml \
+gh workflow run bc-check-health.yml \
   --ref main \
   --field input_param=value
 ```
@@ -154,10 +163,10 @@ To disable a workflow:
 
 ```bash
 # Option 1: Rename file (add .disabled extension)
-mv .github/workflows/sync-test.yml .github/workflows/sync-test.yml.disabled
+mv .github/workflows/bc-sprint-closeout-branch-audit.yml .github/workflows/bc-sprint-closeout-branch-audit.yml.disabled
 
 # Option 2: Remove from repository
-rm .github/workflows/asset-health.yml
+rm .github/workflows/bc-secret-scan.yml
 
 # Option 3: Set status=skipped in workflow file
 # status: skipped
@@ -179,7 +188,7 @@ rm .github/workflows/asset-health.yml
 gh workflow list --all
 
 # View workflow details
-gh workflow view asset-health.yml
+gh workflow view bc-check-health.yml
 ```
 
 ### Permission Errors

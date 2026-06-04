@@ -1,4 +1,6 @@
-# Contributing to basecoat
+<!-- markdownlint-disable MD009 MD012 MD022 MD031 MD032 MD036 MD040 MD041 -->
+
+# Contributing to BaseCoat
 
 basecoat is a GitHub Enterprise template for agentic development shops. It must follow its own advice.
 This document is the canonical reference for how changes are made — by humans and AI agents alike.
@@ -195,6 +197,20 @@ GitHub search examples:
 - **Templates** go in `docs/templates/`.
 
 All new agents, skills, and instructions require an issue before implementation.
+
+### Internal Operational Workflows
+
+These workflows are **not intended for distribution or consumer use**:
+
+- `memory-audit.yml`: Quarterly audit of memory file freshness and validity
+- `memory-contribute.yml`: Dispatch workflow for storing learned facts in memory repo
+- `adoption-metrics.yml`: Collect and publish adoption metrics dashboard
+- `fork-import.yml`: Import issues from development forks
+- `memory-sweep.yml`: Enterprise memory sweep for learning signals (Phase 2 candidate)
+
+**Rationale**: These workflows are tightly coupled to BaseCoat's internal infrastructure (basecoat-memory repository, metrics collection infrastructure, fork maintenance workflow). Consumer value is lower than agentic workflows, and dependency on BaseCoat-specific infrastructure makes them less portable.
+
+See `docs/design/memory-workflow-distribution.md` for detailed design rationale and Phase-based distribution strategy.
 
 ### Agent Frontmatter Schema
 
@@ -586,3 +602,4 @@ answer is no (it references BaseCoat tooling, sprints, or internal conventions),
 
 Open an issue with the `question` label. Do not DM maintainers for things that belong in the open.
 
+<!-- markdownlint-enable MD009 MD012 MD022 MD031 MD032 MD036 MD040 MD041 -->

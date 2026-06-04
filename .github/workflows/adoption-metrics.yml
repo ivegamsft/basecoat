@@ -1,4 +1,5 @@
 name: "BaseCoat - Adoption Metrics"
+# [Internal-only] Memory workflow - BaseCoat operational use
 
 on:
   schedule:

@@ -1,4 +1,5 @@
 name: "BaseCoat - Memory Audit"
+# [Internal-only] Memory workflow - BaseCoat operational use
 
 on:
   schedule:
