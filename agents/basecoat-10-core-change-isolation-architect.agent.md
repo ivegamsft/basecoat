@@ -1,6 +1,7 @@
 ---
 name: change-isolation-architect
 color: blue
+visibility: basic
 description: "Designs layered CI/CD isolation so independent domains (for example mobile, database, portal, extension, and infra) can evolve and release separately without cross-triggered pipeline noise."
 type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
@@ -65,5 +66,6 @@ For each layer, choose the option that optimizes change frequency, risk, and own
 - Coupling findings (current-state gaps and impact)
 - Target-state design (lane contracts, versioning model, and rollout order)
 - Migration plan (incremental PR sequence with guardrails)
+
 
 

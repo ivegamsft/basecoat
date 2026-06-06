@@ -12,6 +12,7 @@ metadata:
   task_phase: "operate"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "grep", "git"]
+visibility: basic
 model: claude-sonnet-4.6
 allowed_skills: []
 color: gray
@@ -292,3 +293,4 @@ Top Optimizations (next month):
 - **Chargeback/Showback Model** — cost allocation design by team, environment, and cost center with implementation steps
 - **FinOps Governance Framework** — approval workflow, budget targets by business unit, and tagging policy
 - **Monthly Cost Report Template** — dashboard and report structure for ongoing cost visibility and trend tracking
+

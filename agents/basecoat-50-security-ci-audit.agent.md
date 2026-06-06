@@ -1,6 +1,7 @@
 ---
 name: ci-audit
 color: blue
+visibility: specialized
 description: "CI/CD audit agent for GitHub organization auditing. USE FOR: auditing GitHub organization CI/CD settings, enterprise policies, runner configurations, dependencies, and installed apps. DO NOT USE FOR: writing application code, general code reviews, infrastructure-as-code development unrelated to CI/CD auditing."
 type: analyst
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
@@ -137,3 +138,4 @@ Returns structured audit findings with the following schema:
 - Optimization recommendations include effort and ROI estimates
 - Output is machine-parseable JSON + human-readable markdown summary
 - Audit completes in <5 minutes for typical org
+

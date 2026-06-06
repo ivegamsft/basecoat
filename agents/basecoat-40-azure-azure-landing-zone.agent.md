@@ -12,6 +12,7 @@ metadata:
   task_phase: "deploy"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "terraform", "azure-cli", "powershell"]
+visibility: basic
 model: claude-sonnet-4.6
 allowed_skills: []
 color: gray
@@ -68,3 +69,4 @@ File issues for hierarchy drift, weak policy scope, IaC failures, or platform se
 ## Output Format
 
 Return hierarchy, modules, policy assignments, vending template, ADRs, and issues.
+

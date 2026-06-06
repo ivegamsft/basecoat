@@ -9,6 +9,7 @@ metadata:
   maturity: "production"
   audience: ["developers", "architects", "tech-leads", "platform-engineers"]
 allowed-tools: ["bash", "git", "grep", "glob", "powershell"]
+visibility: specialized
 model: claude-sonnet-4.6
 allowed_skills: []
 color: indigo
@@ -179,3 +180,4 @@ This agent operates under the BaseCoat governance framework.
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
 - See `instructions/governance.instructions.md` for the full governance reference.
+

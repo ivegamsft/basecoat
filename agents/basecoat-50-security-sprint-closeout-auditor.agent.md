@@ -12,6 +12,7 @@ metadata:
   task_phase: "plan"
   interaction_type: "autonomous"
 allowed-tools: ["bash", "git", "gh", "grep"]
+visibility: specialized
 model: claude-sonnet-4.6
 allowed_skills: ["sprint-closeout-audit", "sprint-closeout", "backlog-burndown", "orphaned-pr-triage", "build-failure-triage"]
 handoffs: ["sprint-planner", "retro-facilitator"]
@@ -82,3 +83,4 @@ Use this exact checklist in output:
 1. <issue/pr/action + owner + due date>
 2. <issue/pr/action + owner + due date>
 ```
+

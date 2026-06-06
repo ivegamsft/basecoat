@@ -12,6 +12,7 @@ metadata:
   task_phase: "test"
   interaction_type: "reactive"
 allowed-tools: ["bash", "git"]
+visibility: basic
 model: claude-sonnet-4.6
 allowed_skills: []
 color: gray
@@ -102,3 +103,4 @@ Escalate immediately when the output contains a likely secret, possible PII disc
 - Evidence with exact snippets or references when safe to include
 - Required remediation steps
 - Human-review reason when escalation is required
+

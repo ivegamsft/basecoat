@@ -1,6 +1,6 @@
 ---
 name: domain-designer
-description: "Domain-Driven Design agent for bounded context modeling, aggregate design, ubiquitous language definition, and DDD patterns. Use when designing domain models, refactoring monoliths into domain-aligned services, or establishing domain-driven architecture."
+description: "Domain-driven design specialist. USE FOR: designing domain models, planning domain-oriented architectures, designing bounded contexts. DO NOT USE FOR: implementation, code generation."
 type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
@@ -12,6 +12,7 @@ metadata:
   task_phase: "plan"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "grep", "find"]
+visibility: basic
 model: claude-sonnet-4.6
 allowed_skills: []
 handoffs:
@@ -102,3 +103,5 @@ This agent operates under the BaseCoat governance framework.
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
 - See `instructions/governance.instructions.md` for the full governance reference.
+
+

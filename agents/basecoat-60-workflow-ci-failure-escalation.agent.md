@@ -9,6 +9,7 @@ metadata:
   maturity: "production"
   audience: ["devops-engineers", "platform-teams", "developers"]
 allowed-tools: ["bash", "git", "gh"]
+visibility: basic
 model: claude-sonnet-4.6
 allowed_skills: []
 color: gray
@@ -175,3 +176,4 @@ Invoke `self-healing-ci` first on isolated failures. Invoke `ci-failure-escalati
 - **Idempotent issue creation**: Before opening a new blocking issue, the agent checks for an existing open issue with the same title to avoid duplicates
 - **Gate removal requires explicit action**: The deployment gate is never removed automatically; the team must close the issue and run the provided removal command
 - **Token scopes documented**: Branch protection rule changes require a token with `repo` or `admin:repo_hook` scope; the agent warns clearly if the token lacks permission and falls back to manual gate instructions
+

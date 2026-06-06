@@ -12,6 +12,7 @@ metadata:
   task_phase: "analysis"
   interaction_type: "reactive"
 allowed-tools: ["bash"]
+visibility: basic
 model: claude-sonnet-4.6
 allowed_skills: []
 color: gray
@@ -254,3 +255,4 @@ scope-check: Analyze our entire codebase to find performance issues and suggest 
   "notes": "Requires significant refinement. Suggest: start with a smaller, bounded exploration task, then escalate findings to general-purpose agent for architecture design."
 }
 ```
+

@@ -12,8 +12,9 @@ metadata:
   task_phase: "test"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "terraform"]
+visibility: specialized
 model: claude-sonnet-4.6
-allowed_skills: [basecoat]
+allowed_skills: []
 color: red
 handoffs: []
 trigger: Use for detailed trigger conditions in Use For section below.
@@ -74,3 +75,5 @@ This agent operates under the BaseCoat governance framework.
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
 - See `instructions/governance.instructions.md` for the full governance reference.
+
+

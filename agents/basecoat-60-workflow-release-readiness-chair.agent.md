@@ -12,6 +12,7 @@ metadata:
   task_phase: "deploy"
   interaction_type: "facilitated"
 allowed-tools: ["bash", "git", "gh", "grep"]
+visibility: basic
 model: claude-sonnet-4.6
 allowed_skills:
   - build-failure-triage
@@ -57,3 +58,4 @@ Purpose: drive a repeatable release ceremony that yields a clear go/no-go decisi
 ### Required actions
 1. <owner> — <action> — due <date>
 ```
+

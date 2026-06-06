@@ -12,6 +12,7 @@ metadata:
   task_phase: "operate"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "grep", "find", "python"]
+visibility: basic
 model: claude-sonnet-4.6
 allowed_skills: []
 color: gray
@@ -74,3 +75,4 @@ Return a structured RCA report with:
 **Recommended:** claude-sonnet-4.6
 **Rationale:** Root cause analysis needs disciplined hypothesis testing, evidence synthesis, and prevention-oriented follow-up.
 **Minimum:** claude-haiku-4.5
+

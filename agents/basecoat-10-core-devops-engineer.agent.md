@@ -1,6 +1,6 @@
 ---
 name: devops-engineer
-description: "DevOps engineer agent for CI/CD pipelines, infrastructure as code, container strategy, environment promotion, rollback procedures, and observability. Use when designing or improving deployment workflows."
+description: "DevOps and infrastructure automation specialist. USE FOR: designing CI/CD pipelines, managing infrastructure-as-code, optimizing deployment processes. DO NOT USE FOR: application code, product feature development."
 type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
@@ -12,6 +12,7 @@ metadata:
   task_phase: "deploy"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "terraform", "kubernetes", "docker", "azure-cli"]
+visibility: basic
 model: gpt-5.3-codex
 allowed_skills: []
 color: blue
@@ -75,3 +76,5 @@ File issues for missing stages, secrets, rollback, observability, version pinnin
 ## Output Format
 
 Return changes, checks added, issues filed, and known gaps.
+
+

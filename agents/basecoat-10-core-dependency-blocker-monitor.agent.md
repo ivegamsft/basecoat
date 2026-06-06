@@ -12,6 +12,7 @@ metadata:
   task_phase: "operate"
   interaction_type: "autonomous"
 allowed-tools: ["bash", "git", "gh", "azure-cli"]
+visibility: basic
 model: claude-sonnet-4.6
 fallback_models: [gpt-5.4-mini]
 allowed_skills: ["dependency-blocker-monitoring", "bom-validation", "factory-state-machine"]
@@ -94,3 +95,4 @@ This agent operates under the BaseCoat governance framework.
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
 - See `instructions/governance.instructions.md` for the full governance reference.
+

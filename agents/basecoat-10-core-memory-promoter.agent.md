@@ -13,6 +13,7 @@ metadata:
   interaction_type: "autonomous"
 model: claude-haiku-4.5
 allowed-tools: ["bash", "git"]
+visibility: basic
 allowed_skills: []
 color: gray
 handoffs: []
@@ -106,3 +107,4 @@ A JSON array of memory candidates, each with the following fields:
 ```
 
 The second candidate must be excluded: it contains an ephemeral qualifier ("for now"), applies to a single session, and has frequency 1 below the minimum threshold.
+

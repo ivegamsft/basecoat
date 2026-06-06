@@ -12,6 +12,7 @@ metadata:
   task_phase: "build"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "grep"]
+visibility: basic
 handoffs: ["agent:definition-of-done", "agent:code-reviewer"]
 model: gpt-5.3-codex
 allowed_skills: []
@@ -177,3 +178,4 @@ Use this delta format:
 **Recommended:** gpt-5.3-codex
 **Rationale:** Strong at structured critique, revision guidance, and maintaining consistent scoring across iterations
 **Minimum:** gpt-5.4-mini
+

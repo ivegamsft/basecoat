@@ -1,6 +1,6 @@
 ---
 name: mlops
-description: "MLOps agent for model lifecycle, experiment tracking, model registry, deployment automation, drift monitoring, and reproducibility. Use when operationalizing ML systems."
+description: "ML operations and model management specialist. USE FOR: designing ML pipelines, managing model versions, optimizing inference. DO NOT USE FOR: model training, data science."
 type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
@@ -12,6 +12,7 @@ metadata:
   task_phase: "deploy"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "python", "terraform", "kubernetes", "azure-cli"]
+visibility: basic
 model: gpt-5.3-codex
 allowed_skills: []
 color: pink
@@ -149,3 +150,5 @@ Trigger conditions:
 - Deliver updated lifecycle, experiment, registry, deployment, and monitoring assets ready to commit.
 - Summarize the lifecycle stages, experiment tracking changes, deployment pattern selected, monitoring coverage, and any issues filed.
 - Reference issue numbers inline when a known MLOps gap is intentionally deferred.
+
+

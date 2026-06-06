@@ -12,6 +12,7 @@ metadata:
   task_phase: "plan"
   interaction_type: "autonomous"
 allowed-tools: ["bash", "git", "gh", "grep"]
+visibility: specialized
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
 allowed_skills: [orphaned-pr-triage]
@@ -70,3 +71,4 @@ with active PRs, recent commits, or freeze protection.
 - `skills/orphaned-pr-triage/SKILL.md`
 - `agents/merge-coordinator.agent.md`
 - `agents/release-freeze-enforcer.agent.md`
+

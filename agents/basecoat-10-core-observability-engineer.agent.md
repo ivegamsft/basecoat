@@ -13,6 +13,7 @@ metadata:
   task_phase: "operate"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "grep", "find"]
+visibility: basic
 model: claude-sonnet-4.6
 allowed_skills: []
 color: teal
@@ -98,3 +99,4 @@ This agent operates under the BaseCoat governance framework.
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
 - See `instructions/governance.instructions.md` for the full governance reference.
+

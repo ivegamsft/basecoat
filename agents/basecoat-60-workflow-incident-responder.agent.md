@@ -12,6 +12,7 @@ metadata:
   task_phase: "operate"
   interaction_type: "reactive"
 allowed-tools: ["bash", "git", "grep", "find", "kubernetes", "azure-cli"]
+visibility: basic
 model: claude-sonnet-4.6
 allowed_skills: []
 color: red
@@ -54,3 +55,4 @@ This agent operates under the BaseCoat governance framework.
 - **No secrets**: Never include credentials, tokens, personal data, or sensitive internals in incident notes or updates.
 - **Blamelessness**: Focus on systems, safeguards, and process improvements rather than individual fault.
 - See `instructions/governance.instructions.md` for the full governance reference.
+

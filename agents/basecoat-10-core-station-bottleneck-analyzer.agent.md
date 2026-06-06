@@ -3,6 +3,7 @@ name: station-bottleneck-analyzer
 description: "Use when analyzing takt-time JSON to compute queue length and throughput by station, rank bottlenecks, and file the weekly bottleneck report issue. USE FOR: station-level queue pressure, throughput trends, weekly issue filing, and follow-up actions. DO NOT USE FOR: dispatching work or changing replanning policy."
 type: task
 color: teal
+visibility: basic
 tools: [read_file, run_terminal_command, create_github_issue]
 handoffs:
   - label: Triage Bottleneck Report
@@ -86,3 +87,4 @@ If an issue already exists for the same reporting week, update it instead of cre
 - Bottleneck ranking by station
 - Weekly report issue draft or update
 - Follow-up actions for the slowest stations
+

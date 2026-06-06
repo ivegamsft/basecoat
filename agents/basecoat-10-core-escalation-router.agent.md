@@ -11,6 +11,7 @@ metadata:
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
 allowed-tools: ["bash", "git", "gh"]
+visibility: advanced
 allowed_skills: [human-in-the-loop, decision-log-capture, escalation-routing]
 color: gray
 handoffs: []
@@ -110,3 +111,4 @@ escalation_router_result:
     pr_comment_url: "<url | null>"
     next_action: "<what happens next>"
 ```
+

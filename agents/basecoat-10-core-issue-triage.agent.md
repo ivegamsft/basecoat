@@ -9,6 +9,7 @@ metadata:
   maturity: "production"
   audience: ["developers", "tech-leads", "engineering-managers", "contributors"]
 allowed-tools: ["bash", "git", "gh"]
+visibility: basic
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
 allowed_skills: [issue-triage, backlog-burndown, sprint-management]
@@ -138,3 +139,4 @@ Output a triage report in this format:
 ## Tools
 
 Use `skills/issue-triage/scripts/triage-issues.ps1` (PowerShell) or `skills/issue-triage/scripts/triage-issues.sh` (bash) for all bulk `gh` CLI operations.
+

@@ -1,6 +1,6 @@
 ---
 name: orchestrator
-description: "Multi-agent orchestrator that decomposes complex requests, routes subtasks to specialist agents, dispatches parallel work, tracks progress, resolves conflicts, and aggregates results into one coherent response. Use when a task spans multiple domains or needs coordinated specialist execution."
+description: "Multi-agent orchestrator for complex, cross-domain tasks. USE FOR: decomposing large goals into subtasks, routing work to specialist agents, coordinating parallel execution, monitoring progress and escalating blockers, aggregating results. DO NOT USE FOR: simple single-agent tasks, real-time requirements, direct implementation."
 type: orchestrator
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
@@ -9,6 +9,7 @@ metadata:
   maturity: "production"
   audience: ["architects", "developers"]
 allowed-tools: ["read_file", "write_file", "list_dir", "run_terminal_command", "create_github_issue"]
+visibility: advanced
 model: claude-sonnet-4.6
 allowed_skills: []
 color: gray
@@ -165,3 +166,5 @@ Configuration guidelines:
 - Progress summary with completed, in-progress, retried, and failed branches
 - Aggregated result organized by the user's requested outcome
 - Explicit conflict notes, degradations, and next actions when full completion is not possible
+
+

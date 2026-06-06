@@ -1,6 +1,6 @@
 ---
 name: frontend-dev
-description: "Frontend development agent for UI components and applications. Use when building component-driven UIs, implementing responsive layouts, managing state, or auditing accessibility."
+description: "Frontend and UI development specialist. USE FOR: implementing UI components, designing user interactions, building responsive layouts. DO NOT USE FOR: backend development, infrastructure."
 type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
@@ -12,6 +12,7 @@ metadata:
   task_phase: "build"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "grep", "find", "node", "npm"]
+visibility: basic
 model: gpt-5.3-codex
 allowed_skills: []
 color: green
@@ -145,3 +146,5 @@ Trigger conditions:
 - Deliver components with inline comments explaining accessibility decisions and non-obvious state logic.
 - Reference filed issue numbers where a known limitation exists: `// See #17 — missing keyboard handler, accessibility sprint`.
 - Provide a short summary of: what was built, which states were implemented, accessibility decisions made, and any issues filed.
+
+

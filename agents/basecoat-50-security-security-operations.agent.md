@@ -4,6 +4,7 @@ description: "Provide SOC (Security Operations Center) playbook guidance for thr
 type: task
 compatibility: [vscode, github-copilot-chat]
 allowed-tools:
+visibility: specialized
   - terminal
   - file-editor
   - search-code
@@ -214,3 +215,4 @@ This agent operates under the BaseCoat governance framework.
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
 - See `instructions/governance.instructions.md` for the full governance reference.
+

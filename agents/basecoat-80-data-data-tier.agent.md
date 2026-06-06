@@ -1,6 +1,6 @@
 ---
 name: data-tier
-description: "Data tier agent for schema design, migrations, query optimization, and data access patterns. Use when designing schemas, writing migrations, reviewing queries, or establishing repository patterns."
+description: "Data persistence and storage optimization. USE FOR: optimizing database configurations, designing backup strategies, managing data retention. DO NOT USE FOR: application development, real-time operations."
 type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
@@ -12,6 +12,7 @@ metadata:
   task_phase: "build"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "grep", "sql"]
+visibility: basic
 model: gpt-5.3-codex
 allowed_skills: []
 color: purple
@@ -161,3 +162,5 @@ Trigger conditions:
 - Include an index rationale comment on every non-obvious index.
 - Reference filed issue numbers where known gaps exist: `// See #28 — missing index on FK, deferred to perf sprint`.
 - Provide a short summary of: schema changes made, migrations written, indexes added, and issues filed.
+
+

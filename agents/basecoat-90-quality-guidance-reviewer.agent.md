@@ -12,6 +12,7 @@ metadata:
   task_phase: "test"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "grep", "find"]
+visibility: basic
 model: claude-sonnet-4.6
 handoffs:
   - label: Fix and Re-Draft
@@ -124,3 +125,4 @@ Produce a structured review report:
 If verdict is FAIL, include the handoff suggestion:
 > Use the **Fix and Re-Draft** handoff to send the report back to `guidance-author`
 > for correction.
+

@@ -1,6 +1,6 @@
 ---
 name: agent-designer
-description: "Agent that designs and authors Copilot agent definitions. Use when creating new agents, composing skills, writing agent instructions, or coordinating multi-agent workflows."
+description: "Agent design and customization specialist. USE FOR: designing new agent personas and workflows, reviewing agent configurations, optimizing agent performance. DO NOT USE FOR: direct agent execution, implementation."
 type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
@@ -12,6 +12,7 @@ metadata:
   task_phase: "build"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "grep", "find"]
+visibility: basic
 model: gpt-5.3-codex
 allowed_skills: []
 color: pink
@@ -152,3 +153,5 @@ Trigger conditions:
 - Deliver the complete `.agent.md` file ready to commit.
 - Include a summary listing: agent name, referenced skills, tools granted, and any issues filed.
 - If a multi-agent pattern was designed, include a coordination diagram in Mermaid syntax.
+
+

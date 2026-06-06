@@ -15,6 +15,7 @@ metadata:
   task_phase: "build"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "grep", "find"]
+visibility: basic
 allowed_skills: []
 color: purple
 handoffs: []
@@ -78,3 +79,4 @@ File issues for missing gates, lineage, retries, quarantine, or notebook hygiene
 ## Output Format
 
 Return layer contracts, validation rules, stages, and issues filed.
+

@@ -2,6 +2,7 @@
 name: orchestrator
 description: "Compatibility alias for the orchestrator agent. Preserves the legacy filename while the prefixed BaseCoat agent is the canonical source."
 type: orchestrator
+visibility: advanced
 ---
 
 # Orchestrator Agent

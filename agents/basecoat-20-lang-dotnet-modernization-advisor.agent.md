@@ -13,6 +13,7 @@ metadata:
   task_phase: "build"
   interaction_type: "collaborative"
 allowed-tools: ["read_file", "write_file", "list_dir", "run_terminal_command", "create_github_issue"]
+visibility: basic
 model: claude-sonnet-4.6
 allowed_skills: []
 tools: [read_file, write_file, list_dir, run_terminal_command, create_github_issue]
@@ -66,3 +67,4 @@ This agent operates under the BaseCoat governance framework.
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
 - See `instructions/governance.instructions.md` for the full governance reference.
+

@@ -1,6 +1,6 @@
 ---
 name: guidance-author
-description: "Use when drafting new BaseCoat guidance assets (instruction files, skill SKILL.md, agent files, prompt templates) from a description or requirement. Produces a structured draft ready for guidance-reviewer validation."
+description: "BaseCoat guidance documentation author. USE FOR: creating security playbooks and best practices, authoring new instruction files and agent templates, writing skill documentation, drafting guidance framework updates. DO NOT USE FOR: incident response, operational tasks, code implementation."
 type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
@@ -12,6 +12,7 @@ metadata:
   task_phase: "build"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "grep", "find"]
+visibility: specialized
 model: claude-sonnet-4.6
 handoffs:
   - label: Validate with Reviewer
@@ -86,3 +87,4 @@ Produce:
    - **Confidence**: `<n>%` — likelihood the draft passes reviewer validation without changes
    - **Assumptions made**: bullet list of choices not specified in the inputs
    - **Suggested handoff**: "Run guidance-reviewer to validate before committing"
+

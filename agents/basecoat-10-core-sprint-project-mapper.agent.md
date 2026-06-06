@@ -9,6 +9,7 @@ metadata:
   maturity: "production"
   audience: ["developers", "tech-leads", "engineering-managers", "program-managers"]
 allowed-tools: ["bash", "git", "gh"]
+visibility: basic
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
 allowed_skills: [sprint-project-mapper, backlog-burndown, sprint-management, issue-triage]
@@ -126,4 +127,5 @@ Produce:
 - Do not edit code.
 - Do not auto-close issues or rewrite sprint boards.
 - Do not fabricate links where no evidence exists in GitHub metadata.
+
 

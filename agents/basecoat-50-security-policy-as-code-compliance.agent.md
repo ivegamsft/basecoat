@@ -12,6 +12,7 @@ metadata:
   task_phase: "deploy"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "grep", "terraform"]
+visibility: specialized
 model: claude-sonnet-4.6
 allowed_skills: []
 color: red
@@ -183,3 +184,4 @@ When a policy result affects runtime behavior, produce outputs that the `guardra
 - Exception summary with approver and expiration status
 - Policy version summary, including retroactive impact notes
 - Remediation plan with owners or recommended follow-up issues
+

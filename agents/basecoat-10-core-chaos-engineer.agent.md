@@ -12,6 +12,7 @@ metadata:
   task_phase: "test"
   interaction_type: "autonomous"
 allowed-tools: ["bash", "git", "terraform", "kubernetes"]
+visibility: basic
 model: gpt-5.3-codex
 allowed_skills: []
 color: gray
@@ -76,3 +77,4 @@ File issues for poor containment, missing alerts, weak fallback, undocumented re
 ## Output Format
 
 Return experiment, safeguards, score, outcome, and next actions.
+

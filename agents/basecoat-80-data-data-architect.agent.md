@@ -1,6 +1,6 @@
 ---
 name: data-architect
-description: "Design scalable data architectures, medallion layers, data governance, and analytics workflows. Use when planning data warehouses, data lakes, ETL/ELT pipelines, or data mesh frameworks."
+description: "Data architecture design specialist. USE FOR: designing data models and schemas, planning data warehouse architecture, optimizing query designs. DO NOT USE FOR: ETL operations, data pipeline troubleshooting."
 type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
@@ -12,6 +12,7 @@ metadata:
   task_phase: "plan"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "terraform", "sql", "python", "dbt", "azure-cli"]
+visibility: basic
 model: claude-sonnet-4.6
 allowed_skills: []
 color: purple
@@ -193,3 +194,5 @@ def check_data_quality(df, table_name):
 **Recommended:** claude-sonnet-4.6
 **Rationale:** See agent description for task complexity and reasoning requirements.
 **Minimum:** gpt-5.4-mini
+
+

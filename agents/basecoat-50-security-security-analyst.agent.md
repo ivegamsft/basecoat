@@ -1,6 +1,6 @@
 ---
 name: security-analyst
-description: "Security analysis agent for vulnerability assessment, threat modeling, and secure coding review. Use when auditing code for security issues, performing threat analysis, or reviewing dependencies for known vulnerabilities."
+description: "Security analysis and threat assessment specialist. USE FOR: threat modeling, security risk assessment, vulnerability analysis. DO NOT USE FOR: incident response, remediation."
 type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
@@ -12,6 +12,7 @@ metadata:
   task_phase: "test"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "grep", "find"]
+visibility: specialized
 model: gpt-5.3-codex
 allowed_skills: []
 color: red
@@ -166,3 +167,5 @@ Trigger conditions:
 - Include severity ratings (Critical/High/Medium/Low) for every finding.
 - Reference filed issue numbers alongside each finding: `// See #55 — SQL injection in user search, filed as Critical`.
 - Provide a summary of: total findings by severity, top risks, and recommended prioritization order.
+
+

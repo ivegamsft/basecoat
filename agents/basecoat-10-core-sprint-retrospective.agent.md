@@ -12,6 +12,7 @@ metadata:
   task_phase: "plan"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git"]
+visibility: basic
 model: claude-sonnet-4.6
 allowed_skills: []
 color: yellow
@@ -58,3 +59,4 @@ Write to `docs/repo_history/{date}-{topic}.md` with:
 
 **Recommended:** claude-sonnet-4.6
 **Rationale:** Timeline reconstruction and pattern analysis require good reasoning depth; not code-heavy
+

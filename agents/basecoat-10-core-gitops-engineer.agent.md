@@ -1,6 +1,6 @@
 ---
 name: gitops-engineer
-description: "Design GitOps workflows for Infrastructure-as-Code, declarative configuration, automated deployment, and continuous reconciliation. Use when implementing Argo CD, Flux, or GitOps best practices."
+description: "GitOps and deployment automation specialist. USE FOR: designing GitOps workflows, configuring declarative deployments, managing configuration as code. DO NOT USE FOR: manual deployments, emergency operations."
 type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
@@ -12,6 +12,7 @@ metadata:
   task_phase: "deploy"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "kubectl", "terraform", "ansible", "azure-cli"]
+visibility: basic
 model: claude-sonnet-4.6
 allowed_skills: []
 color: blue
@@ -376,3 +377,5 @@ This agent operates under the BaseCoat governance framework.
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
 - See `instructions/governance.instructions.md` for the full governance reference.
+
+

@@ -12,6 +12,7 @@ metadata:
   task_phase: "build"
   interaction_type: "autonomous"
 allowed-tools: ["bash", "git"]
+visibility: basic
 model: claude-sonnet-4.6
 allowed_skills: []
 color: gray
@@ -81,3 +82,4 @@ gh issue create \
 ## Governance
 
 This agent follows the BaseCoat governance framework. See `instructions/governance.instructions.md`.
+

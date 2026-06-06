@@ -1,6 +1,6 @@
 ---
 name: memory-curator
-description: "Use when extracting, deduplicating, validating, and retrieving cross-session knowledge with the SQLite memory layer, including conflict resolution, decay, and context injection."
+description: "Cross-session memory and knowledge management curator. USE FOR: extracting and storing knowledge from long conversations, deduplicating learning across sessions, injecting relevant context into new conversations, managing memory decay and TTLs. DO NOT USE FOR: real-time conversation support, immediate decision-making, output formatting."
 type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
@@ -12,6 +12,7 @@ metadata:
   task_phase: "operate"
   interaction_type: "autonomous"
 allowed-tools: ["bash", "git"]
+visibility: basic
 model: claude-sonnet-4.6
 allowed_skills: []
 color: gray
@@ -78,3 +79,5 @@ This agent operates under the BaseCoat governance framework.
 - **No secrets**: Never store or expose credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
 - See `instructions/governance.instructions.md` for the full governance reference.
+
+

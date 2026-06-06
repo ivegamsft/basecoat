@@ -12,6 +12,7 @@ metadata:
   task_phase: "plan"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "gh"]
+visibility: basic
 model: claude-sonnet-4.6
 tools: [run_terminal_command, read_file, write_file, create_github_issue]
 handoffs:
@@ -63,3 +64,4 @@ This agent operates under the BaseCoat governance framework.
 - **No secrets**: Never include credentials, tokens, or internal hostnames in retro docs or BaseCoat issues.
 - **Generic framing**: BaseCoat issues must be project-agnostic.
 - See `instructions/governance.instructions.md` for the full governance reference.
+

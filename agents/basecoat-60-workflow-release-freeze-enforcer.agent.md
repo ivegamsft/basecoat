@@ -12,6 +12,7 @@ metadata:
   task_phase: "deploy"
   interaction_type: "facilitated"
 allowed-tools: ["bash", "git", "gh", "grep"]
+visibility: basic
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
 allowed_skills: [merge-conflict-mediator]
@@ -69,3 +70,4 @@ and which follow-up path owns the work.
 - `skills/merge-conflict-mediator/SKILL.md`
 - `agents/merge-coordinator.agent.md`
 - `agents/issue-triage.agent.md`
+

@@ -12,6 +12,7 @@ metadata:
   task_phase: "plan"
   interaction_type: "facilitated"
 allowed-tools: ["bash", "git", "gh", "grep"]
+visibility: basic
 model: claude-sonnet-4.6
 allowed_skills:
   - standup-signal-extraction
@@ -58,3 +59,4 @@ Purpose: standardize standup outcomes by converting status updates into concrete
 ### Today Plan
 1. <owner> — <action> — <expected outcome>
 ```
+

@@ -16,6 +16,7 @@ metadata:
   task_phase: "plan"
   interaction_type: "autonomous"
 allowed-tools: ["bash", "git", "gh", "grep", "find"]
+visibility: basic
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
 allowed_skills: []
@@ -45,3 +46,4 @@ Curates one coherent state file from intake, labels, and gates.
 - Updated `.factory-state.json`
 - Validation summary
 - Blocker list for downstream routing
+

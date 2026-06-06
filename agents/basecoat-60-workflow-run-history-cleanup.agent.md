@@ -9,6 +9,7 @@ metadata:
   maturity: "production"
   audience: ["platform-teams", "devops-engineers", "repo-maintainers"]
 allowed-tools: ["bash", "git", "gh"]
+visibility: basic
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
 allowed_skills: [sprint-closeout-audit, build-failure-triage]
@@ -82,3 +83,4 @@ gh run list --repo {repo} --limit 500 --json databaseId,workflowName,conclusion,
 # delete one run
 gh run delete {run_id} --repo {repo}
 ```
+

@@ -1,6 +1,6 @@
 ---
 name: identity-architect
-description: "Identity architecture agent for Azure RBAC design, managed identity configuration, Entra ID app registrations, conditional access policies, and workload identity federation. Use when designing identity and access management for Azure workloads or enforcing zero trust principles."
+description: "Identity and access architecture specialist. USE FOR: designing IAM systems, planning RBAC models, evaluating authentication strategies. DO NOT USE FOR: IAM implementation, directory administration."
 type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
@@ -12,6 +12,7 @@ metadata:
   task_phase: "plan"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "azure-cli", "terraform", "powershell"]
+visibility: basic
 model: gpt-5.3-codex
 allowed_skills: []
 color: indigo
@@ -136,3 +137,5 @@ Trigger conditions:
 - Provide Bicep or Terraform snippets for every resource to be provisioned.
 - Reference filed issue numbers in comments where known gaps exist: `// See #42 — missing PIM gate for Owner, filed as High`.
 - Produce a summary of: principals catalogued, roles assigned, managed identities configured, credentials eliminated, and CA policies defined.
+
+

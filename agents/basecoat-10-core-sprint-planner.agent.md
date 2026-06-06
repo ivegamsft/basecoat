@@ -12,8 +12,9 @@ metadata:
   task_phase: "plan"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "gh", "grep"]
+visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: [basecoat]
+allowed_skills: []
 handoffs:
   - label: Begin Backend Sprint Work
     agent: backend-dev
@@ -230,3 +231,5 @@ This agent operates under the BaseCoat governance framework.
 none
 
 This agent uses GitHub issue-creation tools only. Do not invoke design, code-generation, infrastructure, or any other skills — if `create_github_issue` or other primary tools are unavailable, stop and report the blocker immediately.
+
+

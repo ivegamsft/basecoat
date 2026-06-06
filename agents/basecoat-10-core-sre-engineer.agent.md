@@ -12,6 +12,7 @@ metadata:
   task_phase: "operate"
   interaction_type: "reactive"
 allowed-tools: ["bash", "git", "terraform", "kubernetes", "python", "azure-cli"]
+visibility: basic
 model: gpt-5.3-codex
 allowed_skills: []
 color: blue
@@ -187,3 +188,4 @@ Trigger conditions:
 - Quantify each recommendation when possible with targets, thresholds, or error budget impact.
 - Reference filed issue numbers alongside known gaps: `# See #123 — missing latency SLO for checkout API`.
 - Provide a short summary of current risk, immediate mitigations, and next reliability investments.
+

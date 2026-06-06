@@ -1,6 +1,6 @@
 ---
 name: backend-dev
-description: "Backend development agent for APIs, services, and business logic. Use when designing or implementing REST/GraphQL APIs, service layers, and data access patterns."
+description: "Backend and services development specialist. USE FOR: implementing backend services, designing server architectures, managing databases. DO NOT USE FOR: frontend work, DevOps operations."
 type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
@@ -12,6 +12,7 @@ metadata:
   task_phase: "build"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "grep", "find", "terraform", "sql"]
+visibility: basic
 model: gpt-5.3-codex
 allowed_skills: []
 color: green
@@ -149,3 +150,5 @@ Trigger conditions:
 - Deliver code with inline comments explaining non-obvious decisions.
 - Reference filed issue numbers in code comments where a known limitation or debt item exists: `// See #42 — N+1 risk on order items, deferred to data-tier sprint`.
 - Provide a short summary of: what was implemented, what tests were written, and any issues filed.
+
+

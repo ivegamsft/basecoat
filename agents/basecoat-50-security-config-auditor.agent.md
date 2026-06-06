@@ -1,6 +1,6 @@
 ---
 name: config-auditor
-description: "Use when you need to scan a repository for committed or unprotected configuration files that contain secrets, credentials, or sensitive environment-specific values. Produces a findings report with remediation steps."
+description: "Configuration auditor for detecting committed secrets and sensitive config. USE FOR: scanning repositories for hardcoded credentials, API keys, and PII; enforcing encryption standards for secrets at rest; generating compliance reports; performing pre-commit validation. DO NOT USE FOR: real-time monitoring, incident response (use Secrets Manager instead), general code reviews."
 type: reviewer
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
@@ -12,6 +12,7 @@ metadata:
   task_phase: "operate"
   interaction_type: "reactive"
 allowed-tools: ["bash", "git", "grep"]
+visibility: specialized
 model: claude-haiku-4.5
 allowed_skills: []
 color: indigo
@@ -188,3 +189,5 @@ This agent operates under the BaseCoat governance framework.
 - See `instructions/governance.instructions.md` for the full reference
 - See `docs/CONFIG_PATTERN.md` for the local config pattern this agent enforces
 - See `instructions/config.instructions.md` for agent-level config safety rules
+
+

@@ -1,6 +1,6 @@
 ---
 name: dataops
-description: "DataOps agent for data quality, lineage, governance, orchestration, data contracts, and drift detection across analytical and ML data pipelines. Use when managing pipeline reliability and data change risk."
+description: "Data operations and pipeline management. USE FOR: managing data pipelines, monitoring data quality, optimizing data flow. DO NOT USE FOR: data analysis, business intelligence."
 type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
@@ -12,6 +12,7 @@ metadata:
   task_phase: "deploy"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "grep", "python", "sql", "terraform"]
+visibility: basic
 model: gpt-5.3-codex
 allowed_skills: []
 color: purple
@@ -151,3 +152,5 @@ Trigger conditions:
 - Deliver updated pipeline, schema, contract, governance, and monitoring assets ready to commit.
 - Summarize the quality gates, lineage coverage, governance controls, orchestration decisions, and contract or drift protections added.
 - Reference issue numbers inline where a known DataOps gap is intentionally deferred.
+
+

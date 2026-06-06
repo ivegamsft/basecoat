@@ -16,6 +16,7 @@ metadata:
   task_phase: "test"
   interaction_type: "autonomous"
 allowed-tools: ["bash", "git", "gh", "grep", "find"]
+visibility: basic
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
 allowed_skills: ["s4-rollback-testing"]
@@ -45,3 +46,4 @@ Checks whether the new path can safely survive the shadow-mode soak.
 - Comparison summary
 - Threshold breaches
 - Go/no-go recommendation
+

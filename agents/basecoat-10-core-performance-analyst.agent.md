@@ -12,6 +12,7 @@ metadata:
   task_phase: "test"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "grep", "python"]
+visibility: basic
 model: gpt-5.3-codex
 allowed_skills: []
 color: teal
@@ -197,3 +198,4 @@ Trigger conditions:
 - Include measurements with baseline comparisons for every finding.
 - Reference filed issue numbers alongside each finding: `// See #72 — N+1 on order items, p95 latency regression 40%`.
 - Provide a summary of: total findings by severity, top bottlenecks, and recommended optimization order.
+

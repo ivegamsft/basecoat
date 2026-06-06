@@ -1,6 +1,6 @@
 ---
 name: penetration-test
-description: "Penetration Test Agent for security assessments, vulnerability discovery, and remediation workflows. Use when planning security testing engagements aligned with OWASP Testing Guide."
+description: "Security penetration testing specialist. USE FOR: designing penetration tests, identifying security vulnerabilities, generating security reports. DO NOT USE FOR: fixing vulnerabilities, incident response."
 type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
@@ -12,6 +12,7 @@ metadata:
   task_phase: "test"
   interaction_type: "autonomous"
 allowed-tools: ["bash", "git", "grep"]
+visibility: basic
 model: claude-sonnet-4.6
 allowed_skills: []
 color: red
@@ -271,3 +272,5 @@ This agent operates under the BaseCoat governance framework.
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
 - See `instructions/governance.instructions.md` for the full governance reference.
+
+

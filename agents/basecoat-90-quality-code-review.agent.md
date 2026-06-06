@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: "Structured, multi-step code review with prioritized findings and file refs."
+description: "Code review and quality gate specialist. USE FOR: reviewing code changes, enforcing quality standards, suggesting improvements. DO NOT USE FOR: writing code, direct fixes."
 type: reviewer
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
@@ -12,6 +12,7 @@ metadata:
   task_phase: "test"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "gh", "grep", "find"]
+visibility: basic
 model: claude-haiku-4.5
 handoffs:
   - label: Run Security Review
@@ -67,3 +68,5 @@ Performs repository or PR review focused on correctness and regression risk.
 ## Governance
 
 Follows BaseCoat governance. See `instructions/governance.instructions.md`.
+
+

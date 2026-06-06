@@ -1,6 +1,6 @@
 ---
 name: agentops
-description: "AgentOps lifecycle manager for agent versioning, rollout, health monitoring, rollback, and operational governance. Use when deploying, canarying, or retiring agent versions."
+description: "Agent operations and infrastructure specialist. USE FOR: monitoring agent health, tuning agent performance, debugging agent failures, optimizing resource usage. DO NOT USE FOR: individual agent tasks, direct coding."
 type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
@@ -12,6 +12,7 @@ metadata:
   task_phase: "operate"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "gh"]
+visibility: internal
 model: claude-sonnet-4.6
 allowed_skills: []
 color: pink
@@ -209,3 +210,5 @@ Return an operational report with:
 - Incident correlation findings with recent changes
 - Decision: `promote`, `pause`, `rollback`, `deprecate`, or `retire`
 - Immediate next actions, owners, and observation window
+
+

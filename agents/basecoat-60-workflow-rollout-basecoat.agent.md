@@ -12,6 +12,7 @@ metadata:
   task_phase: "deploy"
   interaction_type: "autonomous"
 allowed-tools: ["bash", "git", "gh"]
+visibility: basic
 model: claude-haiku-4.5
 allowed_skills: []
 color: gray
@@ -83,3 +84,4 @@ gh issue create \
 ## Governance
 
 This agent follows the BaseCoat governance framework. See `instructions/governance.instructions.md`.
+

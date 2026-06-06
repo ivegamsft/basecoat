@@ -12,6 +12,7 @@ metadata:
   task_phase: "plan"
   interaction_type: "autonomous"
 allowed-tools: ["bash", "git", "grep", "powershell"]
+visibility: basic
 model: claude-sonnet-4.6
 tools:
   - grep
@@ -316,3 +317,4 @@ This agent operates under the BaseCoat governance framework.
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
 - See `instructions/governance.instructions.md` for the full governance reference.
+

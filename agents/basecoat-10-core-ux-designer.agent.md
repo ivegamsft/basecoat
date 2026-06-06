@@ -12,6 +12,7 @@ metadata:
   task_phase: "plan"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "grep"]
+visibility: basic
 model: claude-sonnet-4-5
 allowed_skills: []
 color: gray
@@ -175,3 +176,4 @@ Trigger conditions:
 - Deliver design specs in markdown with clear section headings and tables.
 - Reference filed issue numbers in specs where a known violation or debt item exists: `<!-- See #58 — contrast violation on secondary button, tracked for remediation -->`.
 - Provide a short summary of: what was designed, what accessibility issues were found, and any issues filed.
+

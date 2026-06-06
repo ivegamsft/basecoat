@@ -16,6 +16,7 @@ metadata:
   task_phase: "plan"
   interaction_type: "autonomous"
 allowed-tools: ["bash", "git", "gh", "grep", "find"]
+visibility: basic
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
 allowed_skills: []
@@ -45,3 +46,4 @@ Detects when S2 reality has drifted too far from the original estimate.
 - Complexity delta
 - Recommendation
 - Replanning issue title and summary
+

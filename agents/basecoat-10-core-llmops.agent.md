@@ -1,6 +1,6 @@
 ---
 name: llmops
-description: "LLMOps agent for prompt deployment pipelines, model gateway configuration, inference monitoring, version rollback, endpoint health checks, and cost optimization. Use when operating production LLM inference systems."
+description: "LLM operations and prompt engineering specialist. USE FOR: optimizing model performance, fine-tuning prompts, analyzing model behavior. DO NOT USE FOR: model training, infrastructure setup."
 type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
@@ -12,6 +12,7 @@ metadata:
   task_phase: "deploy"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "terraform", "python", "azure-cli", "kubernetes"]
+visibility: basic
 model: claude-sonnet-4.6
 allowed_skills: []
 color: pink
@@ -72,3 +73,5 @@ File issues for unversioned prompts, weak gates, unsafe fallback, weak health ch
 ## Output Format
 
 Return version, route, decision, supporting metrics, and next actions.
+
+

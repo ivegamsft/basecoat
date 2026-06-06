@@ -12,6 +12,7 @@ metadata:
   task_phase: "test"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "gh", "grep", "find"]
+visibility: basic
 model: claude-sonnet-4.6
 handoffs: [{label: "Deep Code Review", agent: "code-review", prompt: "Perform a full code review of the changes covered by this DoD check.", send: false}, {label: "Production Readiness Review", agent: "production-readiness", prompt: "Run a production readiness review for the feature validated by the DoD check.", send: false}, {label: "E2E Test Strategy", agent: "e2e-test-strategy", prompt: "Design an end-to-end test strategy for the feature validated by the DoD check.", send: false}]
 allowed_skills: []
@@ -46,3 +47,4 @@ Ghost green; status-code theater; config optimism; happy-path-only tests; merge-
 ## Related Agents
 
 Use `code-review`, `production-readiness`, `e2e-test-strategy`, and `contract-testing` when deeper review is needed.
+

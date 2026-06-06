@@ -16,6 +16,7 @@ metadata:
   task_phase: "plan"
   interaction_type: "autonomous"
 allowed-tools: ["bash", "git", "gh"]
+visibility: specialized
 model: claude-sonnet-4.6
 allowed_skills: ["orphaned-pr-triage"]
 invocation_rules:
@@ -61,3 +62,4 @@ Purpose: Reduce pull request backlog drag by classifying stale PRs and driving e
 2. PR #145 — close as superseded by #180
 3. PR #166 — escalate merge conflict to component maintainer
 ```
+

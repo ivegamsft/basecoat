@@ -12,6 +12,7 @@ metadata:
   task_phase: "operate"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "grep"]
+visibility: basic
 model: gpt-5.4-mini
 allowed_skills: []
 color: gray
@@ -100,3 +101,4 @@ This agent operates under the BaseCoat governance framework.
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
 - See `instructions/governance.instructions.md` for the full governance reference.
+

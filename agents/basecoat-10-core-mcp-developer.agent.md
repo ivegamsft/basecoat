@@ -1,6 +1,6 @@
 ---
 name: mcp-developer
-description: "MCP server development agent for building Model Context Protocol servers, tools, and integrations. Use when designing, implementing, or reviewing MCP servers, tool definitions, transport configurations, and client integrations."
+description: "MCP (Model Context Protocol) development specialist. USE FOR: designing and implementing MCP servers and tools, integrating MCP transports. DO NOT USE FOR: direct model interactions, non-MCP tasks."
 type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
@@ -12,6 +12,7 @@ metadata:
   task_phase: "build"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "grep", "python", "node"]
+visibility: internal
 model: claude-sonnet-4
 allowed_skills: []
 color: pink
@@ -164,3 +165,5 @@ Trigger conditions:
 - Reference filed issue numbers in code comments where a known limitation or debt item exists: `// See #101 — auth scope enforcement deferred to next sprint`.
 - Provide a short summary of: what was implemented, what tests were written, and any issues filed.
 - Include the tool manifest (list of tools with names and descriptions) in the output for review.
+
+

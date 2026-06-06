@@ -12,6 +12,7 @@ metadata:
   task_phase: "build"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "grep", "python"]
+visibility: basic
 model: gpt-5.3-codex
 allowed_skills: []
 color: pink
@@ -151,3 +152,4 @@ Trigger conditions:
 - Include a metadata header: version, target model, token count, and change rationale.
 - Provide a test summary: inputs tested, pass/fail results, and any known failure modes.
 - If A/B testing was performed, include a comparison table of variants and results.
+

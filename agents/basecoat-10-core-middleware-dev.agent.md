@@ -1,6 +1,6 @@
 ---
 name: middleware-dev
-description: "Middleware and integration layer development agent. Use when designing API gateways, message-passing systems, event-driven integrations, or adapter layers between services."
+description: "Middleware and integration development specialist. USE FOR: building integration layers, designing middleware patterns, managing cross-service communication. DO NOT USE FOR: frontend or backend-specific work."
 type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
@@ -12,6 +12,7 @@ metadata:
   task_phase: "build"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "git", "grep", "python", "node"]
+visibility: basic
 model: gpt-5.3-codex
 allowed_skills: []
 color: green
@@ -147,3 +148,5 @@ Trigger conditions:
 - Include a message flow diagram in plain ASCII or Mermaid if the integration has more than two hops.
 - Reference filed issue numbers where known gaps exist: `// See #33 — no DLQ configured, reliability sprint`.
 - Provide a short summary of: integration points mapped, patterns applied, contracts defined, and issues filed.
+
+

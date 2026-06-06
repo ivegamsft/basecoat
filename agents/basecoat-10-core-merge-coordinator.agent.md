@@ -12,6 +12,7 @@ metadata:
   task_phase: "deploy"
   interaction_type: "autonomous"
 allowed-tools: ["bash", "git", "gh"]
+visibility: basic
 model: claude-haiku-4.5
 allowed_skills: []
 color: gray
@@ -81,3 +82,4 @@ Return branch-by-branch status, conflicts, actions taken, issues filed, skipped 
 This agent operates under the BaseCoat governance framework.
 - Issue-first, PRs only, No secrets, Branch naming conventions
 - See `instructions/governance.instructions.md` for the full reference
+

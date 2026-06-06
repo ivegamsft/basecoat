@@ -16,6 +16,7 @@ metadata:
   task_phase: "deploy"
   interaction_type: "reactive"
 allowed-tools: ["bash", "git", "gh", "grep"]
+visibility: basic
 model: claude-sonnet-4.6
 allowed_skills: ["build-failure-triage"]
 invocation_rules:
@@ -64,3 +65,4 @@ Purpose: Provide deterministic build-failure triage and guide the team to a safe
 - [ ] CI stage passes
 - [ ] No new regression failures introduced
 ```
+

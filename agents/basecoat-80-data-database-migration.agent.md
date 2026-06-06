@@ -1,6 +1,6 @@
 ---
 name: database-migration
-description: "Plan and execute database migrations: schema evolution, data replication, zero-downtime upgrades, and legacy system modernization. Use for migration strategies, risk assessment, and runbook creation."
+description: "Database migration and modernization specialist. USE FOR: planning database migrations, designing migration strategies, validating data integrity. DO NOT USE FOR: operational database management, routine backups."
 type: task
 compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
 metadata:
@@ -12,6 +12,7 @@ metadata:
   task_phase: "deploy"
   interaction_type: "collaborative"
 allowed-tools: ["bash", "sql", "terraform", "git", "azure-cli", "postgresql-cli"]
+visibility: basic
 model: claude-sonnet-4.6
 allowed_skills: []
 color: purple
@@ -237,3 +238,5 @@ This agent operates under the BaseCoat governance framework.
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
 - See `instructions/governance.instructions.md` for the full governance reference.
+
+
