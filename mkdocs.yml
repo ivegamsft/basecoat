@@ -84,6 +84,7 @@ nav:
     - Intent Prefixes: guides/intent-prefixes.md
     - Get Started (integrate prompt): guides/integrate-prompt.md
     - Make It Your Own: guides/customization.md
+    - Create a Custom Agent: guides/custom-agent-authoring.md
     - Agent Examples: guides/agent-examples.md
     - Contributing: guides/contributing.md
     - Version Drift Detection: guides/version-drift.md

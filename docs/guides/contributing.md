@@ -47,6 +47,9 @@ description: One-sentence description.
 
 Required sections: `## Inputs`, `## Workflow`, `## Output`
 
+For a consumer-oriented walkthrough, see
+[`custom-agent-authoring.md`](custom-agent-authoring.md).
+
 ### Skill (`skills/<name>/SKILL.md`)
 
 ```yaml
