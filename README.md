@@ -402,4 +402,3 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for guidelines on adding agents, skills
 ## License
 
 This project is for internal use. Contact your organization's open-source program office for licensing terms.
-

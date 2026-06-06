@@ -15,6 +15,7 @@ applyTo: "scripts/**/*,tests/**/*,.github/workflows/**/*"
 ## CI Workflows
 
 After any workflow or deployment change:
+
 1. Trigger the workflow: `gh workflow run <workflow.yml>`
 2. Monitor until green: `gh run watch`
 3. Mark work complete only after verified success

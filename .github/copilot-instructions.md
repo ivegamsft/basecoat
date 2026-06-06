@@ -34,6 +34,7 @@ For manual context:
 ## Token Impact
 
 This split reduces baseline instruction payload by **72%**:
+
 - Before: 25KB monolithic file (loaded every session)
 - After: 7KB baseline (repo-structure only) + task-specific files (1-3KB each)
 - Estimated savings: **15M tokens/month**
