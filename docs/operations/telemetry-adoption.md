@@ -4,7 +4,7 @@
 
 How to measure Base Coat effectiveness, usage patterns, and continuous improvement signals across consuming projects. This guide helps dogfooding teams understand where basecoat is helping, what's working, and where improvements are needed through systematic measurement and feedback loops.
 
-For the currently shippable implementation baseline, see [Telemetry Adoption — Phase 1](./TELEMETRY_ADOPTION_PHASE1.md).
+For the currently shippable implementation baseline, see [Telemetry Adoption — Phase 1](./telemetry-adoption-phase1.md).
 Use canonical terms from
 [Dashboard Metrics Schema and Glossary](../reference/metrics-schema-glossary.md#canonical-vocabulary-and-usage-rules)
 for adoption telemetry and dashboard participation language.
@@ -130,7 +130,7 @@ Implement lightweight feedback collection within repositories:
   - `BASECOAT_FEEDBACK_CHANNEL=#basecoat-feedback` for Slack integration
 
 - **SQLite-based local session logging:**
-  - Reference: `../memory/SQLITE_MEMORY.md` for session database schema
+  - Reference: `../memory/sqlite-memory.md` for session database schema
   - Aggregate logs weekly via GitHub Action
   - Upload to shared analysis repository
 
@@ -602,6 +602,6 @@ jobs:
 
 - [GitHub Copilot Metrics API](https://docs.github.com/en/rest/copilot/copilot-metrics)
 - [GitHub Actions Workflow Syntax](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions)
-- [SQLite Memory Implementation](../memory/SQLITE_MEMORY.md)
+- [SQLite Memory Implementation](../memory/sqlite-memory.md)
 - [BaseCoat Architecture](https://github.com/IBuySpy-Shared/basecoat/blob/main/README.md)
 - [Feedback Loop Agent Guide](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/feedback-loop.agent.md)

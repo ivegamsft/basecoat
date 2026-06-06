@@ -2,13 +2,13 @@
 
 Defines how organizations using BaseCoat can share institutional knowledge across teams through a private memory repository.
 
-> Related: `docs/SQLITE_MEMORY.md`, `instructions/memory-index.instructions.md`, `agents/memory-curator.agent.md`
+> Related: `docs/sqlite-memory.md`, `instructions/memory-index.instructions.md`, `agents/memory-curator.agent.md`
 
 ---
 
 ## The Two-Tier Memory Model
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │  Tier 1 — Personal / Team Memory  (private, local)          │
 │  • SQLite store (.db file, git-ignored)                     │
@@ -31,7 +31,7 @@ Defines how organizations using BaseCoat can share institutional knowledge acros
 │                                                             │
 │  Owned by: the organization. All teams read; PR to write.   │
 └─────────────────────────────────────────────────────────────┘
-```
+```text
 
 ---
 
@@ -41,11 +41,11 @@ Defines how organizations using BaseCoat can share institutional knowledge acros
 
 ```bash
 gh repo create {org}/basecoat-memory --private --description "Shared AI agent memory for BaseCoat"
-```
+```text
 
 ### 2. Initialize structure
 
-```
+```text
 basecoat-memory/
 ├── README.md                    # What this repo is, how to contribute
 ├── CONTRIBUTING.md              # Contribution rules and PR template
@@ -61,7 +61,7 @@ basecoat-memory/
     ├── workflows/
     │   └── validate-memory.yml  # Memory curator validation on PR
     └── PULL_REQUEST_TEMPLATE.md # Contribution PR template
-```
+```text
 
 ### 3. Configure BaseCoat to pull from it
 
@@ -70,13 +70,13 @@ Add to your fork's `.env` or repo secrets:
 ```bash
 BASECOAT_SHARED_MEMORY_REPO="{org}/basecoat-memory"
 BASECOAT_SHARED_MEMORY_TOKEN="ghp_..."  # read-only PAT scoped to the memory repo
-```
+```text
 
 Then run the sync script at session start:
 
 ```bash
 pwsh scripts/sync-shared-memory.ps1
-```
+```text
 
 ---
 
@@ -96,7 +96,7 @@ Memories: {count} entries across {N} domains
 | Trigger | Pattern | Subject | Confidence |
 |---|---|---|---|
 | ... | ... | domain:subject | 0.90 |
-```
+```text
 
 ---
 
@@ -104,7 +104,7 @@ Memories: {count} entries across {N} domains
 
 ### From personal → shared
 
-```
+```text
 1. Pattern appears in your session's store_memory 5+ times
 2. You identify it as cross-team useful (not project-specific)
 3. Export the memory:
@@ -116,7 +116,7 @@ Memories: {count} entries across {N} domains
      - Is the subject namespace correct?
      - Is it free of org/project-specific references?
 6. Approved → merged → available to all teams on next sync
-```
+```text
 
 ### PR template for memory contributions
 
@@ -140,7 +140,7 @@ Memories: {count} entries across {N} domains
 ### Source
 
 {link to session, issue, or document that originated this}
-```
+```text
 
 ---
 
@@ -167,12 +167,12 @@ Use `{domain}:{subject}` to prevent collisions across teams with different stack
 
 ## Retrieval Model at Session Start
 
-```
+```text
 1. Load team hot-index (instructions/memory-index.instructions.md)   — always, ~400 tokens
 2. Load shared hot-index (basecoat-memory/hot-index.md)              — if synced, ~400 tokens
 3. On domain match: load deep memories from memories/{domain}/        — on demand, per subject
 4. Deep memories not found locally: gh api to fetch from shared repo  — fallback
-```
+```text
 
 Total session-start cost: ~800 tokens for both hot indexes combined. Deep loads only when the task domain matches.
 

@@ -436,11 +436,11 @@ final answer.
 
 #### Related harness and policy docs
 
-- [Agent Testing Harness](./AGENT_TESTING_HARNESS.md) — run/turn/round semantics,
+- [Agent Testing Harness](./agent-testing-harness.md) — run/turn/round semantics,
   stop conditions, and cancellation behavior for dispatch loops.
 - [VS Code Agent Mode Tool Confirmation Policy](../reference/guardrails/tool-confirmation-policy.md)
   — confirmation requirements for side-effecting operations.
-- [Agent Runtime Enforcement](./AGENT_RUNTIME_ENFORCEMENT.md) — enforcement
+- [Agent Runtime Enforcement](./agent-runtime-enforcement.md) — enforcement
   expectations that constrain orchestrator and sub-agent execution.
 
 ### Patterns

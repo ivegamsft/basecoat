@@ -12,6 +12,7 @@ Baseline CLI cost (2.08B tokens/mo) reduced through five behavioral patterns:
 ### 1. Compact at phase transitions (not just time)
 
 Invoke `/compact` when switching between semantic phases:
+
 - **Triage → Implementation**: Backlog context is useless in code-change phase; drop it.
 - **Implementation → Merge-waiting**: Code diff context is useless in CI-watch phase; drop it.
 - **Merge-waiting → Next phase**: CI logs and merge status are transient; drop them.
@@ -23,12 +24,15 @@ Measured savings: reduces event count by 60–70% and tokens by 35–50% per com
 
 Measured problem: 5 separate "Plan Next Sprint for Basecoat" sessions, averaging 39.5M tokens each (ratio 293x–498x).
 
-**Solution**: Create a persistent sprint template (pinned issue or structured document) instead of re-planning from scratch each time.
-- Use `/sprint-planner` agent with a reference to the template issue (e.g., "#1400: Sprint 31 Template")
-- Agent loads backlog delta and sprints off that, not from scratch
-- Eliminates repeated setup context
+**Solution**: Use persistent sprint template (`docs/templates/sprint-structure.md`) for reusable backlog structure.
 
-Expected savings: 150M+ tokens/month (5 sessions × 39.5M tokens).
+- Load template once, reference by path in `/sprint-planner` calls
+- Provide delta (issue changes) instead of full backlog
+- Agent loads template structure and applies delta; no context reload
+
+See: `docs/templates/sprint-structure.md` for the template and usage pattern.
+
+Expected savings: 150M+ tokens/month (5 sessions × 39.5M tokens); 62% cost reduction per sprint-planning session (39.5M → ~15M tokens).
 
 ### 3. Avoid pasting instruction dumps; use file references
 
@@ -39,12 +43,14 @@ Measured problem: Recent sessions had user messages with 170k, 149k, 141k charac
 **Solution**: Use file references only. Let agents load their own docs.
 
 **Instead of:**
-```
+
+```text
 [Paste 170k character SKILL.md or instruction file into chat]
 ```
 
 **Do:**
-```
+
+```text
 See: /skills/station-bottleneck-analyzer/SKILL.md (agent will load via `view`)
 See: /.github/instructions/testing-validation.instructions.md (agent will load)
 ```
@@ -60,10 +66,12 @@ Measured problem: Long backlog runs had 70–90 report_intent calls with heavy s
 **Solution**: Batch related actions; delegate research and triage to background agents or `/delegate`.
 
 **Main session responsibilities**:
+
 - Decisions (merge? release? deploy?)
 - High-level orchestration (kick off tasks, monitor `/tasks`)
 
 **Delegated responsibilities** (to background agents):
+
 - PR triage and review (use `/delegate` or background `/code-review`)
 - File scanning and pattern matching (use background `/explore` agent)
 - Dependency audits and CI analysis (use background `/build-failure-triage`)
@@ -79,6 +87,7 @@ Measured data from last 30 days: 42.4% gpt-5.3-codex, 24% gpt-5.4-mini, 18.2% Ha
 **Real win**: Sending less context to any model. Context reduction saves 35–50% per session (compaction + delegation + template reuse).
 
 **Guidelines**:
+
 - Use cheaper models (gpt-5.4-mini, Haiku) for known-simple tasks (triage, log analysis, config audits)
 - Reserve Opus/Sonnet for architecture decisions, complex refactors, security reviews
 - But don't obsess over model choice if the session is carrying 600+ events; compact first.
@@ -100,12 +109,14 @@ Reduces per-restart overhead by ~500k tokens.
 Avoid repeating boilerplate; use compact deltas:
 
 **Before** (2KB):
-```
+
+```text
 continue until blocked, i am stepping away, merge pacing text, skip replanning...
 ```
 
 **After** (200 bytes):
-```
+
+```text
 Continue from issue #695 state; only merge PRs after required checks; skip replanning.
 ```
 
@@ -119,6 +130,7 @@ After watchdog stops being actionable, stop it: `/every stop <schedule-id>`.
 Issue #1363 is tracking implementation of real-time cost monitoring:
 
 **Planned features**:
+
 - `/token-status` command: Show tokens sent, event count, ratio, time, budget remaining
 - Auto-compact trigger: Automatic `/compact` when crossing thresholds (e.g., 400 events, 50M tokens)
 - Cost warnings: Log alerts when entering expensive zone (300x+ ratio, 594+ events)
@@ -132,6 +144,7 @@ Issue #1363 is tracking implementation of real-time cost monitoring:
 **Expensive runs (antipattern)**: 68–84M tokens, 594–684 events, 285x–434x ratio.
 
 Track in each session:
+
 - **Events per session** (target: <150 per phase; expense threshold: >400 in a single session)
 - **Compact calls** (target: ≥1 at each phase boundary; e.g., triage→impl, impl→merge)
 - **Main-session tool calls** (target: <30 per phase; expense: >70 indicates heavy orchestration)
@@ -139,6 +152,7 @@ Track in each session:
 - **Re-plan occurrences** (target: 1 per sprint; expense: >1 per sprint means template reuse failed)
 
 **Cost breakdown**:
+
 - 50% of expense from re-sending context across 594 events in a single session
 - 30% from repeated sprint re-planning (5 sessions × 39.5M each)
 - 15% from pasted instruction dumps (170k+ characters re-sent per turn)

@@ -349,5 +349,5 @@ If you cannot meet this standard, defer to interactive mode.
 ## References
 
 - [Intent Prefixes Guide](../guides/intent-prefixes.md) — Routing behavior and dispatch context
-- [OPERATIONAL_RUNBOOK.md](OPERATIONAL_RUNBOOK.md) — Operational procedures
+- [Operational Runbook](operational-runbook.md) — Operational procedures
 - [Autopilot Mode Documentation](https://github.com/IBuySpy-Shared/basecoat/blob/main/README.md) — Autopilot and fleet mode overview

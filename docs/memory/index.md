@@ -25,7 +25,7 @@ The design goal: **answer 80% of questions from L0–L2 without touching L3–L4
 L3 and L4 are powerful but expensive — reserve them for Novel tasks and
 cross-session knowledge transfer.
 
-See [Memory Design](MEMORY_DESIGN.md) for the full architectural specification.
+See [Memory Design](memory-design.md) for the full architectural specification.
 
 ---
 
@@ -122,9 +122,9 @@ review criteria, and rollback guidance.
 
 | Doc | What it covers |
 |---|---|
-| [Memory Design](MEMORY_DESIGN.md) | Five-layer architecture, schema, cache TTL |
-| [Learning Model](LEARNING_MODEL.md) | How memories flow from session to shared |
+| [Memory Design](memory-design.md) | Five-layer architecture, schema, cache TTL |
+| [Learning Model](learning-model.md) | How memories flow from session to shared |
 | [Contributing](CONTRIBUTING.md) | Five submission paths with examples |
 | [Process](PROCESS.md) | Lifecycle, review criteria, timing |
 | [Triage Guide](triage.md) | Universal vs app-specific decision guide |
-| [Shared Memory Guide](SHARED_MEMORY_GUIDE.md) | Org-level setup and management |
+| [Shared Memory Guide](shared-memory-guide.md) | Org-level setup and management |

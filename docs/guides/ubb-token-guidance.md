@@ -60,7 +60,7 @@ grow to 40K by turn 4 as output is fed back in. This is where most UBB cost come
 
 ### Model Tier
 
-Higher-tier models cost more per token. See the [Model Optimization guide](MODEL_OPTIMIZATION.md)
+Higher-tier models cost more per token. See the [Model Optimization guide](model-optimization.md)
 for the tier matrix.
 
 Rough relative cost per million tokens:
@@ -132,7 +132,7 @@ Code generation tasks       -> Code tier (Codex)
 Architecture / security     -> Premium tier (Opus) -- use sparingly
 ```
 
-See [MODEL_OPTIMIZATION.md](MODEL_OPTIMIZATION.md) for the full tier matrix and
+See [model-optimization.md](model-optimization.md) for the full tier matrix and
 override rules.
 
 ### Context Trimming
@@ -226,7 +226,7 @@ the provider's cost management console and adjust rate-limit constants in
 
 ## Related References
 
-- [Model Optimization](MODEL_OPTIMIZATION.md) -- Tier matrix, cost per model, override rules
+- [Model Optimization](model-optimization.md) -- Tier matrix, cost per model, override rules
 - [Token Optimization](token-optimization.md) -- Context window management, budget allocation, compression
 - [Rate Limit Guidance](rate-limit-guidance.md) -- Concurrency limits, retry strategy, wave patterns
 - [Agent Tier Selection](agent-tier-selection.md) -- Matching agent roles to model tiers

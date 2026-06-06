@@ -164,9 +164,9 @@ Copilot SDK protocol. It runs in CI weekly via the `behavioral-eval.yml` workflo
 
 For harness troubleshooting in VS Code, use:
 
-- [VS Code Tools UI and Chat Debug View Runbook](TOOLS_UI_CHAT_DEBUG_RUNBOOK.md)
-- [Per-Model Behavior Matrix](AGENT_TESTING_HARNESS.md#per-model-behavior-matrix)
-- [VS Code Harness Context Assembly Contract](./CONTEXT_ASSEMBLY_CONTRACT.md)
+- [VS Code Tools UI and Chat Debug View Runbook](tools-ui-chat-debug-runbook.md)
+- [Per-Model Behavior Matrix](agent-testing-harness.md#per-model-behavior-matrix)
+- [VS Code Harness Context Assembly Contract](./context-assembly-contract.md)
 
 ## Tooling Options
 

@@ -34,7 +34,7 @@ If a source appears in multiple layers, the earliest layer in this list has prio
 
 Compaction is allowed only at round boundaries.
 
-Compaction must trigger when any trigger in [Agent Testing Harness](./AGENT_TESTING_HARNESS.md#context-compaction-and-preservation-guarantees) is met.
+Compaction must trigger when any trigger in [Agent Testing Harness](./agent-testing-harness.md#context-compaction-and-preservation-guarantees) is met.
 
 When compaction runs, these items are **non-droppable** and must remain verbatim:
 
@@ -78,6 +78,6 @@ When prompt assembly logic changes, verify all of the following:
 
 ## Related harness docs
 
-- [Agent Testing Harness](./AGENT_TESTING_HARNESS.md)
-- [Behavioral Evaluation (Phase 1)](./BEHAVIORAL_EVAL.md)
-- [VS Code Harness Benchmarks](./VS_CODE_HARNESS_BENCHMARKS.md)
+- [Agent Testing Harness](./agent-testing-harness.md)
+- [Behavioral Evaluation (Phase 1)](./behavioral-eval.md)
+- [VS Code Harness Benchmarks](./vs-code-harness-benchmarks.md)

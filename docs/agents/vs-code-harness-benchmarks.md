@@ -22,7 +22,7 @@ The suite covers product-specific harness behavior that generic eval suites can 
 
 Context assembly and truncation contract:
 
-- [VS Code Harness Context Assembly Contract](./CONTEXT_ASSEMBLY_CONTRACT.md)
+- [VS Code Harness Context Assembly Contract](./context-assembly-contract.md)
 
 Policy reference:
 

@@ -1,9 +1,8 @@
-# Token Optimization & Context Handling
+﻿# Token Optimization & Context Handling
 
-Strategies for managing token budgets, compressing context, and handing off state between agents in a multi-agent system. Companion to [`MODEL_OPTIMIZATION.md`](MODEL_OPTIMIZATION.md) (model selection) and [`../architecture/multi-agent-orchestration-patterns.md`](../architecture/multi-agent-orchestration-patterns.md) (branch coordination).
+Strategies for managing token budgets, compressing context, and handing off state between agents in a multi-agent system. Companion to [`model-optimization.md`](model-optimization.md) (model selection) and [`../architecture/multi-agent-orchestration-patterns.md`](../architecture/multi-agent-orchestration-patterns.md) (branch coordination).
 
 > **Tracking:** Issue [#42](https://github.com/IBuySpy-Shared/basecoat/issues/42)
-
 > **GHCP-specific:** This guidance was developed and tested against GitHub Copilot (GHCP).
 > If you are using Azure OpenAI, Anthropic API, AWS Bedrock, or another provider,
 > model names, tier pricing, and rate limits will differ. See [Adapting for Other Providers](#adapting-for-other-providers).
@@ -40,7 +39,7 @@ Stop loading when you reach 60% of the effective limit. The remaining 40% covers
 
 ## 2. Token Budget Allocation per Agent Role
 
-Align token budgets with the model tier from [`MODEL_OPTIMIZATION.md`](MODEL_OPTIMIZATION.md):
+Align token budgets with the model tier from [`model-optimization.md`](model-optimization.md):
 
 | Agent Role | Model Tier | Recommended Input Budget | Max Output Budget | Rationale |
 |------------|-----------|--------------------------|-------------------|-----------|
@@ -75,7 +74,7 @@ When context exceeds the budget, compress — don't truncate blindly.
 
 Replace large blocks with concise summaries. Use a fast-tier model (Haiku) to generate summaries before passing them to a higher-tier model.
 
-```
+```text
 Before (2,400 tokens):
   Full git diff of 15 files with 200 changed lines
 
@@ -102,7 +101,7 @@ Only include what the agent needs for its specific task:
 
 When you must truncate, leave breadcrumbs so the agent knows context was removed:
 
-```
+```text
 [FILE: src/auth/jwt.ts — 340 lines, showing lines 1-50 and 280-340]
 [TRUNCATED: lines 51-279 contain helper functions — request full file if needed]
 ```
@@ -111,7 +110,7 @@ When you must truncate, leave breadcrumbs so the agent knows context was removed
 
 Instead of inlining large files, reference them:
 
-```
+```text
 For the full API schema, see: docs/api-schema.yaml (420 lines, ~8K tokens)
 Key endpoints relevant to this task: POST /auth/login, DELETE /auth/session
 ```
@@ -161,7 +160,7 @@ When one agent's output becomes another agent's input, transfer only what matter
 
 ### Pipeline Example
 
-```
+```text
 Architect (Opus, ~80K input)
   → produces: design doc + handoff (1.2K tokens)
 
@@ -184,7 +183,7 @@ Avoid re-reading and re-tokenizing the same content across agent invocations.
 
 Most providers cache system prompts across calls with identical prefixes. Structure prompts so the stable prefix (governance rules, role definition) stays constant:
 
-```
+```text
 [CACHED — identical across all calls for this agent role]
   System instructions (governance.instructions.md)
   Role definition (agent .md file)
@@ -204,6 +203,7 @@ When multiple agents need the same reference (e.g., a project spec), load it onc
 ### Stale Context Invalidation
 
 Cache keys should include:
+
 - File content hash (not just path — files change)
 - Branch name (context differs across branches)
 - Timestamp with TTL (default: 15 minutes for active sprint work)
@@ -226,7 +226,7 @@ Track per-agent, per-invocation:
 
 ### Cost Estimation Formula
 
-```
+```text
 Per-invocation cost =
   (input_tokens × input_price_per_1M / 1,000,000)
   + (output_tokens × output_price_per_1M / 1,000,000)
@@ -237,11 +237,12 @@ Per-invocation cost =
 
 Estimate total sprint token usage:
 
-```
+```text
 Sprint budget = Σ (agent_invocations × avg_tokens_per_invocation × cost_per_token)
 ```
 
 Example for a 10-issue sprint:
+
 - 10 planning calls (Sonnet, ~40K input, ~10K output) ≈ 500K tokens
 - 30 implementation calls (Codex, ~60K input, ~30K output) ≈ 2.7M tokens
 - 20 review calls (Sonnet, ~40K input, ~10K output) ≈ 1M tokens
@@ -251,6 +252,7 @@ Example for a 10-issue sprint:
 ### Alerts
 
 Set thresholds to catch runaway usage:
+
 - Single invocation exceeds 150K input tokens → warn
 - Agent role exceeds 2× its average daily usage → investigate
 - Sprint total exceeds budget by 20% → pause and review
@@ -280,7 +282,7 @@ Instruction files (`.instructions.md`, `.agent.md`) are loaded into every invoca
 
 ### Example A: Code Review — Well-Optimized
 
-```
+```text
 System prompt (governance + reviewer role):     1,800 tokens
 Task instructions:                                 400 tokens
 Diff (3 files, 120 lines changed):              2,200 tokens
@@ -294,7 +296,7 @@ Estimated cost:                                   ~$0.02
 
 ### Example B: Code Review — Unoptimized
 
-```
+```text
 System prompt (full governance + all instructions): 4,500 tokens
 Full conversation history (15 turns):              12,000 tokens
 All source files in the repo:                      45,000 tokens
@@ -310,7 +312,7 @@ Estimated cost:                                    ~$0.23
 
 ### Example C: Architect → Backend-Dev Handoff
 
-```
+```text
 Architect output (full):                          8,000 tokens
 Handoff document (compressed):                    1,200 tokens
 Backend-dev loads: handoff + 3 source files:      6,400 tokens
@@ -338,7 +340,7 @@ Classify each task before starting. State the class in your plan or at the top o
 
 For Novel tasks, state the estimated turn cost at task start:
 
-```
+```text
 Task: Integrate Azure Service Connector with App Configuration
 Class: Novel — no prior Service Connector instruction exists
 Estimated turns: 6 (learning cost: ~3 for discovery, ~3 for implementation + validation)
@@ -362,7 +364,7 @@ If a task has consumed more than 5 turns **and** there has been no measurable fo
 | More lines of code added without test validation | ❌ No |
 | Escalating to a higher-tier model without changing the approach | ❌ No |
 
-#### When stuck:
+#### When stuck
 
 1. **Log to memory.** Call `store_memory` with:
    - Task description (what was being attempted)
@@ -382,7 +384,7 @@ If a task has consumed more than 5 turns **and** there has been no measurable fo
 
 At 80% of your turn budget, if you have less than 50% progress toward the goal, pause and reassess. Don't wait until fully stuck.
 
-```
+```text
 Turn budget: 5
 Current turn: 4 (80%)
 Progress: 1 test passing of 4 required (25%)
@@ -394,18 +396,20 @@ Progress: 1 test passing of 4 required (25%)
 When a task completes within its turn budget **and** test validation passes, evaluate whether the solution involved a non-obvious pattern.
 
 **Reinforce when:**
+
 - The solution required a discovery that no existing instruction covers
 - The approach was non-obvious and could save future agents 2+ turns
 - A specific error was encountered and resolved in a reusable way
 
 **Skip when:**
+
 - The task followed an existing instruction exactly
 - The solution is boilerplate (adding a route, writing a standard test, etc.)
 - The memory fact would duplicate existing instruction content
 
 **What to store:**
 
-```
+```text
 Subject:    <topic area>
 Fact:       <pattern or rule, ≤200 chars>
 Citations:  <file:line or "User input: ..." or "Validated in task X">
@@ -413,7 +417,8 @@ Reason:     <why this will help future tasks; what turns it saves>
 ```
 
 **Good example:**
-```
+
+```text
 Subject:    gh-aw compilation
 Fact:       gh aw safe-outputs: add-labels and add-comment take no sub-properties.
             allowed-labels belongs under create-issue, not add-labels.
@@ -423,14 +428,15 @@ Reason:     This error burned 2 turns on Sprint 11. Any future agentic workflow
 ```
 
 **Bad example (too generic — skip):**
-```
+
+```text
 Fact: Use TypeScript for new files.
 → Already in instructions. Skip.
 ```
 
 ### 9.4 Turn Accounting Summary
 
-```
+```text
 Before task:
   Classify: Routine / Familiar / Novel
   If Novel: state estimated turn budget
@@ -525,7 +531,7 @@ audit reports as compressed input (~15K tokens total from four Haiku agents, vs.
 
 **Template for expensive research:**
 
-```
+```text
 Fast agent (Haiku): read files, grep patterns, count things, organize findings
   → output: structured report (~2K tokens)
 
@@ -554,11 +560,134 @@ limits. For UBB cost estimation and monitoring guidance, see
 
 ---
 
+## 11. Sprint Planning & Re-Planning Cost Reduction
+
+### The Problem: Planning Sessions Are Expensive
+
+Measured from BaseCoat live sessions:
+
+- **5 separate "Plan Next Sprint" sessions**: ~39.5M tokens each (ratio 293x–498x input/output)
+- **Total annual cost**: 150M+ tokens from re-planning alone
+- **Root cause**: Each session reloads full backlog context from scratch instead of reusing structure
+
+### The Solution: Persistent Sprint Template
+
+Use `docs/templates/sprint-structure.md` (or equivalent) as a reusable backlog skeleton.
+
+**Reference, don't reload:**
+
+Instead of:
+
+```text
+/sprint-planner
+I need to plan the next sprint. Here's the full backlog [170k characters of issues]...
+[Context bloat begins, history accumulates, tokens pile up]
+```
+
+Do:
+
+```text
+/sprint-planner  
+Reference: docs/templates/sprint-structure.md
+Delta from Sprint 30: [issue list changes only, ~10 lines]
+New priorities: #1234, #5678
+Moved out: #9999 (done), #8888 (defer)
+```
+
+**Measured impact**: ~39.5M → ~15M tokens per sprint-planning session (62% reduction).
+
+### Template Structure (Reusable Pattern)
+
+Every sprint uses this structure:
+
+```text
+## Sprint Metadata
+- Sprint ID
+- Duration
+- Goals
+
+## Backlog Categories
+### P1 Blockers (0–3 items)
+### P2 Medium (8–15 items)
+### P3 Low (0–5 items)
+
+## Changes from Prior Sprint
+- Moved In (new priorities)
+- Moved Out (deferred / completed)
+- Reordered (within P2/P3)
+
+## Notes for Planner
+- Bulk tasks can run in parallel
+- Resource constraints
+- Known blockers
+```
+
+When planning Sprint 31, 32, etc., reference this template and provide only the delta.
+
+### Bulk Agent Updates Pattern
+
+For mechanical agent updates (model downshift, scope docs, bulk refactoring), run in parallel via background agents instead of sequentially in the main session.
+
+**Measured from Sprint 31:**
+
+- Sequential execution: ~40 minutes + context overhead
+- Parallel execution (background agents): ~30 minutes, main session thin
+
+This pattern works for any bulk task that doesn't require cross-file orchestration.
+
+### Cost Baseline Targets for Sprints
+
+Based on measured BaseCoat sprints:
+
+| Metric | Target | Good | Expensive | Notes |
+|--------|--------|------|-----------|-------|
+| **Planning session** | 15–20M tokens | <20M | >40M | Use template; avoid re-planning |
+| **Event count (full sprint)** | 150–200 events | <200 | >400 | Compact at phase boundaries |
+| **Input/output ratio** | 207x–250x | <250x | >400x | Ratio = sum inputs / sum outputs |
+| **Pasted instruction size** | <10KB per msg | <10KB | >100KB | Reference files; no pastes |
+| **Re-plan occurrences** | 1 per sprint | 1 | >2 | Template reuse prevents re-planning |
+
+### Sprint Checklist: Before Calling `/sprint-planner`
+
+- [ ] Load template: `docs/templates/sprint-structure.md`
+- [ ] Prepare delta (not full backlog)
+- [ ] List P1 blockers (if any)
+- [ ] Note bulk tasks suitable for parallelization
+- [ ] Reference prior sprint (don't reload)
+
+---
+
+## 12. Agent Model Recommendations (Updated Sprint 31)
+
+### Routine Agents Downshifted to gpt-5.4-mini (Cost: ~$50–100/mo savings)
+
+Based on Sprint 31 empirical testing, the following agent categories are safe to downshift from `claude-sonnet-4.6` to `gpt-5.4-mini`:
+
+| Category | Agents | Rationale | Cost Impact |
+|----------|--------|-----------|-------------|
+| **Triage & Routing** | issue-triage, dependency-blocker-monitor, orphaned-pr-cleanup, escalation-router | Systematic label/pattern matching (rules-based) | ~25–30% per call |
+| **Audit & Compliance** | instruction-auditor, security-monitor, sprint-closeout-auditor | Scan for compliance, validate schema, report | ~15–20% (audit tasks are deterministic) |
+| **Cleanup & Maintenance** | branch-hygiene-sweeper, run-history-cleanup | Delete by age/status, FIFO retention | ~25–30% per call |
+| **Log Analysis** | broken-build-troubleshooter, ci-failure-escalation | Pattern-match error logs, categorize | ~20–25% per call |
+
+**Model tier equivalents:**
+
+- `claude-sonnet-4.6` → reasoning/heavy tasks
+- `gpt-5.4-mini` → routine triage, audit, cleanup, log parsing
+- `claude-haiku-4.5` → already optimal for fast I/O (keep as-is)
+
+**Exception:** Agents performing novel analysis, security decisions, or architecture work should remain on `claude-sonnet-4.6` or `claude-opus`.
+
+---
+
 ## Related References
 
-- [`MODEL_OPTIMIZATION.md`](MODEL_OPTIMIZATION.md) — Model tier matrix and cost considerations
+- [`model-optimization.md`](model-optimization.md) — Model tier matrix and cost considerations
 - [`../architecture/multi-agent-orchestration-patterns.md`](../architecture/multi-agent-orchestration-patterns.md) — Branch coordination for parallel agents
 - [`instructions/governance.instructions.md`](/instructions/governance.instructions.md) — Section 10: Token and Model Awareness
+- [`../templates/sprint-structure.md`](../templates/sprint-structure.md) — Reusable sprint planning template (reduces re-planning cost 62%)
 - Issue [#42](https://github.com/IBuySpy-Shared/basecoat/issues/42) — Tracking issue for token optimization
 - Issue [#44](https://github.com/IBuySpy-Shared/basecoat/issues/44) — Token budget and cost attribution
+- Issue [#1361](https://github.com/IBuySpy-Shared/basecoat/issues/1361) — Efficiency target: reduce backlog runs 68→35-45M tokens
+- Issue [#1362](https://github.com/IBuySpy-Shared/basecoat/issues/1362) — Sprint template to eliminate re-planning cost
 - [`ubb-token-guidance.md`](ubb-token-guidance.md) -- UBB billing model, cost estimation, monitoring

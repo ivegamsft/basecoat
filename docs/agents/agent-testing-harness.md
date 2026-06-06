@@ -17,8 +17,8 @@ Agents operate in complex environments with non-deterministic outputs, making tr
 
 For VS Code diagnostics of harness executions, use:
 
-- [VS Code Tools UI and Chat Debug View Runbook](TOOLS_UI_CHAT_DEBUG_RUNBOOK.md)
-- [VS Code Harness Context Assembly Contract](./CONTEXT_ASSEMBLY_CONTRACT.md)
+- [VS Code Tools UI and Chat Debug View Runbook](./tools-ui-chat-debug-runbook.md)
+- [VS Code Harness Context Assembly Contract](./context-assembly-contract.md)
 
 The runbook covers:
 
@@ -89,7 +89,7 @@ Compaction is allowed only at round boundaries so the model never loses in-fligh
 
 Context ordering and deterministic tie-break behavior are defined in:
 
-- [VS Code Harness Context Assembly Contract](./CONTEXT_ASSEMBLY_CONTRACT.md)
+- [VS Code Harness Context Assembly Contract](./context-assembly-contract.md)
 
 Compaction should trigger when any of the following thresholds is met:
 
@@ -110,7 +110,7 @@ After compaction, remaining history may be summarized, but preserved fields must
 ## Per-Model Behavior Matrix
 
 This matrix defines expected behavior for live, tool-enabled harness runs in VS Code.
-For fixture-based scoring with no live model invocation, see [Behavioral Evaluation (Phase 1)](./BEHAVIORAL_EVAL.md).
+For fixture-based scoring with no live model invocation, see [Behavioral Evaluation (Phase 1)](./behavioral-eval.md).
 
 ## VS Code Harness Benchmark Suite
 
@@ -118,7 +118,7 @@ Use the benchmark suite and regression thresholds for harness-specific checks th
 
 - Suite definition: `tests/evals/vscode-harness-benchmark-suite.json`
 - Regression thresholds: `tests/evals/vscode-harness-regression-thresholds.json`
-- Execution guide: [VS Code Harness Benchmarks](./VS_CODE_HARNESS_BENCHMARKS.md)
+- Execution guide: [VS Code Harness Benchmarks](./vs-code-harness-benchmarks.md)
 
 The suite is organized around VS Code harness behavior categories:
 

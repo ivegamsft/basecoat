@@ -244,7 +244,7 @@ curl -fsSL https://raw.githubusercontent.com/YOUR-ORG/basecoat/v1.1.0/sync.sh | 
 5. Create a GitHub Release with packaged artifacts using `scripts/package-basecoat.ps1` or `.sh`.
 6. Publish checksums alongside the release assets.
 
-See [`docs/RELEASE_PROCESS.md`](../operations/RELEASE_PROCESS.md) for the full release workflow.
+See [`docs/release-process.md`](../operations/release-process.md) for the full release workflow.
 
 ### Rollout Strategy
 
