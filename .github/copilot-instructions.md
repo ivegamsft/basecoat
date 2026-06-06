@@ -57,3 +57,19 @@ instruction files:
 3. **Worktree safety checks before cleanup**: verify branch-to-path mapping with
    `git worktree list` before removing any worktree, avoid path-assumptive deletes,
    and run `git worktree prune` only after mapping is confirmed.
+
+## Cost Optimization Quick Reference
+
+**Backlog/fleet sessions** are most expensive. Current baseline: expensive runs cost 68–84M tokens (594–684 events). Best measured run: 9.1M tokens (101 events, 207x ratio).
+
+**Five most impactful changes** (see `cost-optimization.instructions.md` for details):
+
+| Pattern | Savings | Action |
+|---------|---------|--------|
+| **Compact at phase boundaries** (triage→impl→merge) | 35–50% per session | Invoke `/compact` when context domain changes |
+| **Reuse sprint templates** (not 5x re-planning) | 150M+/mo (5 sessions) | Create persistent sprint issue; reference in agent calls |
+| **File references only** (no 170k char pastes) | ~300x per block | Use `view path/file.md`; let agents load docs |
+| **Delegate scan work** (not main-session orchestration) | 40–60% event reduction | Use `/delegate` or background agents for triage/research |
+| **Model choice is secondary** | ~5–10% gain | Focus on context reduction (35–50%) not model downshift |
+
+Target: Reduce expensive backlog runs from 68–84M tokens to 35–45M tokens (42–50% savings).
