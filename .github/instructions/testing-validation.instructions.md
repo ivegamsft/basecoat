@@ -1,0 +1,36 @@
+---
+description: "Repository validation, testing commands, and CI expectations"
+applyTo: "scripts/**/*,tests/**/*,.github/workflows/**/*"
+---
+
+# Testing & Validation
+
+## Local Validation
+
+- Structure validation: `pwsh scripts/validate-basecoat.ps1`
+- Full test suite: `pwsh tests/run-tests.ps1`
+- Markdown lint: `pwsh tests/run-tests.ps1` (included in full suite)
+- Docs build: `python -m mkdocs build --strict`
+
+## CI Workflows
+
+After any workflow or deployment change:
+1. Trigger the workflow: `gh workflow run <workflow.yml>`
+2. Monitor until green: `gh run watch`
+3. Mark work complete only after verified success
+
+## Common Test Failures
+
+`instructions/governance.instructions.md` frequently breaks lint after rebases because
+upstream changes introduce pre-existing violations. Always run `pwsh tests/run-tests.ps1`
+after rebasing. Common errors to fix:
+
+- **MD031/MD040**: code fences need blank lines before/after and a language specifier
+- **MD032**: lists must be surrounded by blank lines
+- **MD026**: headings must not end with a trailing colon or period
+
+## Evaluation Coverage
+
+- All agents require `<agent>.agent.eval.yaml` companion file
+- All skills require `eval.yaml` in skill directory
+- Tests fail if coverage is missing
