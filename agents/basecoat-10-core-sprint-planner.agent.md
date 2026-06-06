@@ -35,6 +35,10 @@ GitHub issues with labels, a wave dependency map showing parallel
 and sequential work, agent assignment recommendations,
 acceptance criteria per issue, and a sprint board summary.
 
+## Preflight
+
+Before creating issues or pushing changes, complete checks from `.github/agent-templates/preflight-block.md`.
+
 ## Inputs
 
 - Sprint goal statement (one sentence describing what the sprint delivers)
@@ -231,5 +235,3 @@ This agent operates under the BaseCoat governance framework.
 none
 
 This agent uses GitHub issue-creation tools only. Do not invoke design, code-generation, infrastructure, or any other skills — if `create_github_issue` or other primary tools are unavailable, stop and report the blocker immediately.
-
-
