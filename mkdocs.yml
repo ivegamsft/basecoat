@@ -76,10 +76,10 @@ nav:
     - Consumer Sync Guide: guides/consumer-sync.md
   - Asset Reference:
     - Overview: reference/quick-reference.md
-    - Inventory: reference/INVENTORY.md
-    - Token Context Inventory: reference/TOKEN_CONTEXT_INVENTORY.md
+    - Inventory: reference/inventory.md
+    - Token Context Inventory: reference/token-context-inventory.md
     - Agents: reference/asset-registry.md
-    - Governance: reference/GOVERNANCE.md
+    - Governance: reference/governance.md
   - How-To Guides:
     - Intent Prefixes: guides/intent-prefixes.md
     - Get Started (integrate prompt): guides/integrate-prompt.md
@@ -94,13 +94,13 @@ nav:
     - UBB Token Guidance: guides/ubb-token-guidance.md
   - Memory System:
     - Overview: memory/index.md
-    - Learning Model: memory/LEARNING_MODEL.md
+    - Learning Model: memory/learning-model.md
     - Triage Guide: memory/triage.md
-    - Contributing Learnings: memory/CONTRIBUTING.md
-    - Process: memory/PROCESS.md
+    - Contributing Learnings: memory/contributing.md
+    - Process: memory/process.md
   - Architecture:
     - Overview: architecture/overview.md
-    - Diagrams: diagrams/README.md
+    - Diagrams: diagrams/architecture-diagrams-index.md
     - ADR-001 Naming Convention: architecture/decisions/adr-001-naming-convention.md
     - Multi-Agent Patterns: architecture/multi-agent-orchestration-patterns.md
   - About:

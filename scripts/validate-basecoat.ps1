@@ -17,8 +17,8 @@ foreach ($item in $required) {
     }
 }
 
-# INVENTORY.md may be at root or in docs/reference/ after reorganization
-$inventoryPath = if (Test-Path 'INVENTORY.md') { 'INVENTORY.md' } elseif (Test-Path 'docs/reference/INVENTORY.md') { 'docs/reference/INVENTORY.md' } else { $null }
+# INVENTORY.md may be at root or in docs/reference/ (accepts lowercase after Phase 3+4 rename)
+$inventoryPath = if (Test-Path 'INVENTORY.md') { 'INVENTORY.md' } elseif (Test-Path 'docs/reference/INVENTORY.md') { 'docs/reference/INVENTORY.md' } elseif (Test-Path 'docs/reference/inventory.md') { 'docs/reference/inventory.md' } else { $null }
 if (-not $inventoryPath) {
     throw "Missing required path: INVENTORY.md (checked root and docs/reference/)"
 }

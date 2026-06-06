@@ -271,13 +271,13 @@ is:issue label:sprint-3 is:open
 
 ### Release Tracking
 
-Version labels (e.g., `v1.0.0`, `v2.0.0`) are used to track which version an issue targets. See [`docs/GOVERNANCE.md#versioning`](GOVERNANCE.md#versioning) for details.
+Version labels (e.g., `v1.0.0`, `v2.0.0`) are used to track which version an issue targets. See [`docs/GOVERNANCE.md#versioning`](governance.md#versioning) for details.
 
 ---
 
 ## References
 
-- **Governance Framework:** [`docs/GOVERNANCE.md`](GOVERNANCE.md)
+- **Governance Framework:** [`docs/GOVERNANCE.md`](governance.md)
 - **Contributing Guide:** [`CONTRIBUTING.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/CONTRIBUTING.md)
 - **Issue Templates:** [`.github/ISSUE_TEMPLATE/`](../.github/ISSUE_TEMPLATE/)
 - **Issue Triage Agent:** [`agents/issue-triage.agent.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/issue-triage.agent.md)

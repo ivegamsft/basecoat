@@ -31,7 +31,7 @@ Tools like Impeccable focus on one discipline (UI/design) with deep expertise. B
 
 ## Architecture
 
-```
+```text
 /basecoat (router)
 ├── agents/        50 agent definitions (.agent.md)
 ├── skills/        33 skill packages with templates

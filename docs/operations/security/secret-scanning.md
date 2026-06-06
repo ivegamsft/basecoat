@@ -11,7 +11,7 @@
 3. [Installing the Pre-Commit Hook](#installing-the-pre-commit-hook)
 4. [How the CI Workflow Works](#how-the-ci-workflow-works)
 5. [Allowlisting False Positives](#allowlisting-false-positives)
-6. [I Accidentally Committed a Secret — Now What?](#i-accidentally-committed-a-secret-now-what)
+6. [I Accidentally Committed a Secret — Now What?](#i-accidentally-committed-a-secret--now-what)
 7. [Configuration Reference](#configuration-reference)
 
 ---
@@ -278,7 +278,7 @@ already cloned the repo.
 
 ### Step 3 — Remove from git history
 
-**Option A — Only in the last commit (not yet pushed)**
+#### Option A — Only in the last commit (not yet pushed)
 
 ```bash
 git reset HEAD~1              # undo last commit, keep changes staged
@@ -287,7 +287,7 @@ git add <file>
 git commit -m "fix: remove secret [#43]"
 ```
 
-**Option B — In recent commits (already pushed, no public forks)**
+#### Option B — In recent commits (already pushed, no public forks)
 
 ```bash
 # Use git-filter-repo (recommended over BFG for modern repos)
@@ -304,9 +304,10 @@ git push origin --force --all
 git push origin --force --tags
 ```
 
-**Option C — Secret deep in history or in public forks**
+#### Option C — Secret deep in history or in public forks
 
 Contact your security team. Options include:
+
 - GitHub repository security advisory
 - GitHub Support for cache purge (public repos)
 - BFG Repo Cleaner: `java -jar bfg.jar --replace-text <patterns-file>`
@@ -341,8 +342,8 @@ to prevent the same class of secret from being committed again.
 | `.gitleaks.toml` | Gitleaks config: custom rules, allowlists, entropy tuning |
 | `.github/workflows/secret-scan.yml` | CI workflow — warn-only scanning |
 | `scripts/install-hooks.sh` | Local pre-commit hook installer |
-| `docs/security/SECRET_SCANNING.md` | This file |
-| `docs/security/BRANCH_PROTECTION.md` | Branch protection recommendations |
+| `docs/security/secret-scanning.md` | This file |
+| `docs/security/branch-protection.md` | Branch protection recommendations |
 
 ### Updating gitleaks version
 

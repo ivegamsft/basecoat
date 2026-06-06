@@ -176,7 +176,7 @@ get a submission declined.
 
 ## References
 
-- [Contributing Learnings](CONTRIBUTING.md) — the five submission paths
-- [Memory Process](PROCESS.md) — end-to-end lifecycle
+- [Contributing Learnings](contributing.md) — the five submission paths
+- [Memory Process](process.md) — end-to-end lifecycle
 - [Memory Design](memory-design.md) — the five-layer hierarchy
 - [Shared Memory Guide](shared-memory-guide.md) — org-level setup

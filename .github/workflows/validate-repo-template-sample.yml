@@ -29,8 +29,10 @@ jobs:
           from pathlib import Path
 
           root = Path('docs/examples/repo-template')
+          # Accept README.md or the renamed sample-repo-template.md (Phase 4)
+          readme_path = root / 'sample-repo-template.md' if (root / 'sample-repo-template.md').exists() else root / 'README.md'
           required_paths = [
-              root / 'README.md',
+              readme_path,
               root / '.github/base-coat.lock.json',
               root / '.github/workflows/bootstrap-basecoat-template.yml',
               root / '.github/workflows/enforce-basecoat-template.yml',

@@ -151,7 +151,7 @@ gh workflow run auto-enlist.yml \
 
 ## See Also
 
-- `docs/memory/SETUP-EXTERNAL.md` — guide for teams outside IBuySpy-Shared
-- `docs/memory/CONTRIBUTING.md` — all five contribution paths explained
+- `docs/memory/setup-external.md` — guide for teams outside IBuySpy-Shared
+- `docs/memory/contributing.md` — all five contribution paths explained
 - `scripts/onboard-basecoat.sh` — enlistment script
 - `.github/workflows/auto-enlist.yml` — bulk enlistment for admins

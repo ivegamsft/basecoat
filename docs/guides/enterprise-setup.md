@@ -83,10 +83,10 @@ Apply these settings to your Base Coat fork:
    - Require pull request reviews (1+ approvals)
    - Require status checks to pass (CI validation)
    - Restrict who can push to `main`
-   - See [`docs/../operations/security/BRANCH_PROTECTION.md`](../operations/security/BRANCH_PROTECTION.md)
+   - See [`docs/../operations/security/BRANCH_PROTECTION.md`](../operations/security/branch-protection.md)
 
 2. **Secret scanning**: Enable GitHub secret scanning and push protection.
-   See [`docs/../operations/security/SECRET_SCANNING.md`](../operations/security/SECRET_SCANNING.md)
+   See [`docs/../operations/security/SECRET_SCANNING.md`](../operations/security/secret-scanning.md)
 
 3. **Copilot policy**: Enable Copilot for the organization and allow custom instructions from repositories.
 
@@ -169,7 +169,7 @@ All customizations follow the same governance model:
 - **Naming conventions**: Follow the patterns in [`instructions/naming.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/naming.instructions.md).
 - **Quality gates**: CI validates structure and naming on every PR.
 
-See [`docs/GOVERNANCE.md`](../reference/GOVERNANCE.md) and [`CONTRIBUTING.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/CONTRIBUTING.md) for full details.
+See [`docs/GOVERNANCE.md`](../reference/governance.md) and [`CONTRIBUTING.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/CONTRIBUTING.md) for full details.
 
 ---
 

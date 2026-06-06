@@ -52,11 +52,11 @@ flowchart LR
 
 ## Reference (`docs/reference/`)
 
-- [reference/INVENTORY.md](reference/INVENTORY.md) — Full asset listing (agents, skills, instructions, prompts)
-- [reference/GOVERNANCE.md](reference/GOVERNANCE.md) — Contribution policies and review standards
-- [reference/DISTRIBUTION.md](reference/DISTRIBUTION.md) — Sync mechanism for consumer repos
-- [reference/HOOKS.md](reference/HOOKS.md) — Git hooks and pre-commit validation
-- [reference/GOALS.md](reference/GOALS.md) — Project goals and OKRs
+- [reference/inventory.md](reference/inventory.md) — Full asset listing (agents, skills, instructions, prompts)
+- [reference/governance.md](reference/governance.md) — Contribution policies and review standards
+- [reference/distribution.md](reference/distribution.md) — Sync mechanism for consumer repos
+- [reference/hooks.md](reference/hooks.md) — Git hooks and pre-commit validation
+- [reference/goals.md](reference/goals.md) — Project goals and OKRs
 - [reference/scoped-instructions.md](reference/scoped-instructions.md) — Scoped instruction authoring guide
 - [reference/label-taxonomy.md](reference/label-taxonomy.md) — GitHub label taxonomy
 - [reference/prompt-registry.md](reference/prompt-registry.md) — Prompt catalog and registry

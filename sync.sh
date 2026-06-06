@@ -102,8 +102,11 @@ if [[ -d "$REPO_ROOT/$TARGET_DIR/docs/agents" ]]; then
 fi
 
 # INVENTORY.md moved to docs/reference/ in v3.11.0 — copy from new location to target root for backwards compat
+# Accepts both INVENTORY.md and inventory.md (Phase 3+4 rename to lowercase)
 if [[ -f "$TMP_DIR/source/docs/reference/INVENTORY.md" ]]; then
   cp "$TMP_DIR/source/docs/reference/INVENTORY.md" "$REPO_ROOT/$TARGET_DIR/INVENTORY.md"
+elif [[ -f "$TMP_DIR/source/docs/reference/inventory.md" ]]; then
+  cp "$TMP_DIR/source/docs/reference/inventory.md" "$REPO_ROOT/$TARGET_DIR/INVENTORY.md"
 fi
 
 # Remove agent taxonomy subdirs from staging — they contain only index

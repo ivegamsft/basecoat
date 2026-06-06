@@ -88,11 +88,12 @@ These are the checks defined in basecoat workflows:
 
 > **Important:** Do **not** add the `gitleaks` / `Secret Scanning (warn only)`
 > check as a required status check. It is intentionally warn-only and must
-> never block merges. See [Secret Scanning design rationale](./SECRET_SCANNING.md#overview).
+> never block merges. See [Secret Scanning design rationale](./secret-scanning.md#overview).
 
 ### `release/*` branches
 
 Same as `main` with these differences:
+
 - Required approvals: **2**
 - Restrict who can push: CI release automation + release manager role only
 

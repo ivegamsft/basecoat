@@ -5,10 +5,10 @@ learnings back for the steward team to review and promote into shared memory.
 
 ## First-Time Setup
 
-> **IBuySpy-Shared org members (internal):** See `docs/memory/SETUP-INTERNAL.md`.
+> **IBuySpy-Shared org members (internal):** See `docs/memory/setup-internal.md`.
 > After a one-time admin secret, onboarding a repo takes a single command.
 >
-> **External orgs:** See `docs/memory/SETUP-EXTERNAL.md`.
+> **External orgs:** See `docs/memory/setup-external.md`.
 > You need a fine-grained PAT stored as a secret, then one onboarding command.
 
 Once set up, the paths below all work with zero additional configuration
@@ -216,4 +216,4 @@ directly from other teams' learnings.
 - `.github/workflows/submit-learning-callable.yml` — reusable/callable workflow
 - `.github/ISSUE_TEMPLATE/memory-contribution.yml` — zero-setup issue form
 - `.basecoat.yml.example` — sweep configuration template
-- `docs/memory/PROCESS.md` — full memory lifecycle overview
+- `docs/memory/process.md` — full memory lifecycle overview

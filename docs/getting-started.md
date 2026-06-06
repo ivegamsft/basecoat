@@ -69,5 +69,5 @@ jobs:
 ## Next steps
 
 - [Enterprise setup](guides/enterprise-setup.md) — reduced-friction setup for IBuySpy-Shared org members
-- [Asset reference](reference/QUICK_REFERENCE.md) — browse all available agents, skills, and instructions
+- [Asset reference](reference/quick-reference.md) — browse all available agents, skills, and instructions
 - [Contributing](guides/contributing.md) — add your own patterns back to BaseCoat

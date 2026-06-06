@@ -55,7 +55,7 @@ Five paths are available — choose based on your setup and urgency:
 | Run `submit-learning.ps1` | Org secret or PAT | Windows/PowerShell |
 | Run `submit-learning.sh` | Org secret or PAT | Linux/macOS/WSL |
 
-See [Contributing Learnings](CONTRIBUTING.md) for the full guide with examples
+See [Contributing Learnings](contributing.md) for the full guide with examples
 for each path.
 
 ---
@@ -103,16 +103,16 @@ memories/{domain}/{subject}.md      ← promoted to shared memory
 Weekly sync → hot-index.md          ← distributed to all consumers
 ```
 
-See [Memory Process](PROCESS.md) for the end-to-end lifecycle with timing,
+See [Memory Process](process.md) for the end-to-end lifecycle with timing,
 review criteria, and rollback guidance.
 
 ---
 
 ## Setting Up Memory in Your Repo
 
-- **IBuySpy-Shared org members:** See [Internal Setup](SETUP-INTERNAL.md) —
+- **IBuySpy-Shared org members:** See [Internal Setup](setup-internal.md) —
   one admin secret, then a single onboarding command per repo.
-- **External orgs:** See [External Setup](SETUP-EXTERNAL.md) —
+- **External orgs:** See [External Setup](setup-external.md) —
   fine-grained PAT, then one onboarding command.
 - **Enlisting a repo for passive sweep:** See [Enlistment](enlistment.md).
 
@@ -124,7 +124,7 @@ review criteria, and rollback guidance.
 |---|---|
 | [Memory Design](memory-design.md) | Five-layer architecture, schema, cache TTL |
 | [Learning Model](learning-model.md) | How memories flow from session to shared |
-| [Contributing](CONTRIBUTING.md) | Five submission paths with examples |
-| [Process](PROCESS.md) | Lifecycle, review criteria, timing |
+| [Contributing](contributing.md) | Five submission paths with examples |
+| [Process](process.md) | Lifecycle, review criteria, timing |
 | [Triage Guide](triage.md) | Universal vs app-specific decision guide |
 | [Shared Memory Guide](shared-memory-guide.md) | Org-level setup and management |

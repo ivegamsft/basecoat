@@ -17,8 +17,8 @@ for item in "${required[@]}"; do
   fi
 done
 
-# INVENTORY.md moved to docs/reference/ in v3.11.0 — accept either location
-if [[ ! -e "INVENTORY.md" && ! -e "docs/reference/INVENTORY.md" ]]; then
+# INVENTORY.md moved to docs/reference/ in v3.11.0 — accept either location (lowercase after Phase 3+4)
+if [[ ! -e "INVENTORY.md" && ! -e "docs/reference/INVENTORY.md" && ! -e "docs/reference/inventory.md" ]]; then
   echo "Missing required path: INVENTORY.md" >&2
   exit 1
 fi

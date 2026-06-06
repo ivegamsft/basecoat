@@ -244,7 +244,7 @@ Don't. Increment the patch version instead. Semver versions are immutable.
 Check the Actions tab. The `release.yml` workflow uses `gh release create` on first publish and `gh release upload` + `gh release edit` if the release already exists. You can re-run the workflow or create the release manually.
 
 **Q: Who can cut a release?**
-Per `docs/GOVERNANCE.md`, CI/CD changes (including releases) are decided by the repo owner. In practice, anyone with push access to `main` and tag permissions can follow this process.
+Per `docs/governance.md`, CI/CD changes (including releases) are decided by the repo owner. In practice, anyone with push access to `main` and tag permissions can follow this process.
 
 ---
 
@@ -252,7 +252,7 @@ Per `docs/GOVERNANCE.md`, CI/CD changes (including releases) are decided by the 
 
 | Document | Purpose |
 |---|---|
-| `docs/GOVERNANCE.md` | Versioning policy, sprint process, decision-making |
+| `docs/governance.md` | Versioning policy, sprint process, decision-making |
 | `CONTRIBUTING.md` | Branch naming, commit format, PR process |
 | `version.json` | Machine-readable current version |
 | `CHANGELOG.md` | Human-readable release history |

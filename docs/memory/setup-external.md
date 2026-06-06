@@ -176,6 +176,6 @@ To rotate:
 
 ## See Also
 
-- `docs/memory/SETUP-INTERNAL.md` — guide for IBuySpy-Shared org members
-- `docs/memory/CONTRIBUTING.md` — all five contribution paths explained
+- `docs/memory/setup-internal.md` — guide for IBuySpy-Shared org members
+- `docs/memory/contributing.md` — all five contribution paths explained
 - `scripts/onboard-basecoat.sh` — enlistment script

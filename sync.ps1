@@ -180,8 +180,13 @@ try {
     Assert-MinimalDocsScope -DocsPath $docsDest
 
     # INVENTORY.md moved to docs/reference/ in v3.11.0 — copy from new location to target root for backwards compat
-    $inventorySrc = Join-Path $sourcePath 'docs/reference/INVENTORY.md'
-    if (Test-Path $inventorySrc) {
+    # Accepts both INVENTORY.md and inventory.md (Phase 3+4 rename to lowercase)
+    $inventorySrc = if (Test-Path (Join-Path $sourcePath 'docs/reference/INVENTORY.md')) {
+        Join-Path $sourcePath 'docs/reference/INVENTORY.md'
+    } elseif (Test-Path (Join-Path $sourcePath 'docs/reference/inventory.md')) {
+        Join-Path $sourcePath 'docs/reference/inventory.md'
+    } else { $null }
+    if ($inventorySrc) {
         Copy-Item -Path $inventorySrc -Destination (Join-Path $fullTargetDir 'INVENTORY.md') -Force
     }
 

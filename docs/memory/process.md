@@ -88,7 +88,7 @@ pwsh scripts/submit-learning.ps1 `
 The script validates scope, writes a structured candidate to
 `basecoat-memory/sweep-candidates/`, and optionally opens a review PR.
 
-See `docs/memory/CONTRIBUTING.md` for the full consumer guide.
+See `docs/memory/contributing.md` for the full consumer guide.
 
 ## Memory File Format
 
