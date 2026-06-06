@@ -19,7 +19,6 @@ all active files for your workflow.
 | `testing-validation.instructions.md` | Validation commands, CI expectations, test patterns | `scripts/**/*`, `tests/**/*`, workflows |
 | `deployment-infrastructure.instructions.md` | Workflows, PRD gates, MCP servers, authentication | `.github/workflows/**/*`, IaC |
 | `cost-optimization.instructions.md` | Session hygiene, fleet patterns, token budgeting | All workflows (performance guidance) |
-| `msx-auth-dataverse.instructions.md` | MSX authentication, Dataverse patterns, quota tracking | Agents/skills using MSX integration |
 
 ## How to Use
 
