@@ -10,7 +10,7 @@ metadata:
   audience: ["developers", "architects", "tech-leads", "platform-engineers"]
 allowed-tools: ["bash", "git", "grep", "glob", "powershell"]
 visibility: specialized
-model: claude-sonnet-4.6
+model: gpt-5.4-mini
 allowed_skills: []
 color: indigo
 handoffs: []

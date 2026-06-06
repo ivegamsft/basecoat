@@ -10,7 +10,7 @@ metadata:
   audience: ["developers", "tech-leads", "engineering-managers", "contributors"]
 allowed-tools: ["bash", "git", "gh"]
 visibility: basic
-model: claude-sonnet-4.6
+model: gpt-5.4-mini
 fallback_models: [claude-sonnet-4.5]
 allowed_skills: [issue-triage, backlog-burndown, sprint-management]
 visibility: public

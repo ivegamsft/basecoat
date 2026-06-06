@@ -8,7 +8,7 @@ metadata:
   tags: ["escalation", "approval", "human-in-the-loop", "pr-comment", "decision-log"]
   maturity: "production"
   audience: ["developers", "tech-leads", "reviewers", "release-managers"]
-model: claude-sonnet-4.6
+model: gpt-5.4-mini
 fallback_models: [claude-sonnet-4.5]
 allowed-tools: ["bash", "git", "gh"]
 visibility: advanced

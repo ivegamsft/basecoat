@@ -14,7 +14,7 @@ metadata:
   interaction_type: "reactive"
 allowed-tools: ["bash", "git", "grep", "find"]
 visibility: specialized
-model: claude-sonnet-4.6
+model: gpt-5.4-mini
 allowed_skills: []
 color: red
 handoffs: []

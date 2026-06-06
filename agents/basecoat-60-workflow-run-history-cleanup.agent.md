@@ -10,7 +10,7 @@ metadata:
   audience: ["platform-teams", "devops-engineers", "repo-maintainers"]
 allowed-tools: ["bash", "git", "gh"]
 visibility: basic
-model: claude-sonnet-4.6
+model: gpt-5.4-mini
 fallback_models: [claude-sonnet-4.5]
 allowed_skills: [sprint-closeout-audit, build-failure-triage]
 color: gray

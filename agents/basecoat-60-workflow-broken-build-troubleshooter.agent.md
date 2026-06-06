@@ -17,7 +17,7 @@ metadata:
   interaction_type: "reactive"
 allowed-tools: ["bash", "git", "gh", "grep"]
 visibility: basic
-model: claude-sonnet-4.6
+model: gpt-5.4-mini
 allowed_skills: ["build-failure-triage"]
 invocation_rules:
   - "Invoke when builds are red and the user asks for diagnosis, containment, or rapid recovery."

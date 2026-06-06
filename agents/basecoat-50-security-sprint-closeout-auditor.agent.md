@@ -13,7 +13,7 @@ metadata:
   interaction_type: "autonomous"
 allowed-tools: ["bash", "git", "gh", "grep"]
 visibility: specialized
-model: claude-sonnet-4.6
+model: gpt-5.4-mini
 allowed_skills: ["sprint-closeout-audit", "sprint-closeout", "backlog-burndown", "orphaned-pr-triage", "build-failure-triage"]
 handoffs: ["sprint-planner", "retro-facilitator"]
 invocation_rules: ["Invoke when user asks to close a sprint, perform sprint burn-down closeout, or validate sprint completion readiness.", "Use checklist-first flow and require explicit evidence for merge, CI, errors, issues, and test status."]

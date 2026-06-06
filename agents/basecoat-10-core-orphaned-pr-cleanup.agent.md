@@ -17,7 +17,7 @@ metadata:
   interaction_type: "autonomous"
 allowed-tools: ["bash", "git", "gh"]
 visibility: specialized
-model: claude-sonnet-4.6
+model: gpt-5.4-mini
 allowed_skills: ["orphaned-pr-triage"]
 invocation_rules:
   - "Invoke when user asks to clean stale PRs, unblock review queues, or close abandoned changes."

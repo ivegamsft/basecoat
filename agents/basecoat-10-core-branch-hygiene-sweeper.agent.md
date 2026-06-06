@@ -13,7 +13,7 @@ metadata:
   interaction_type: "autonomous"
 allowed-tools: ["bash", "git", "gh", "grep"]
 visibility: specialized
-model: claude-sonnet-4.6
+model: gpt-5.4-mini
 fallback_models: [claude-sonnet-4.5]
 allowed_skills: [orphaned-pr-triage]
 color: gray

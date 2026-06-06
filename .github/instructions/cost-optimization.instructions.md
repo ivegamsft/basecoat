@@ -114,6 +114,17 @@ Continue from issue #695 state; only merge PRs after required checks; skip repla
 Scheduled prompts (`/every`) that run >100 times/month cost ~150M tokens/mo.
 After watchdog stops being actionable, stop it: `/every stop <schedule-id>`.
 
+## Cost Observability & Auto-Compaction (In Development)
+
+Issue #1363 is tracking implementation of real-time cost monitoring:
+
+**Planned features**:
+- `/token-status` command: Show tokens sent, event count, ratio, time, budget remaining
+- Auto-compact trigger: Automatic `/compact` when crossing thresholds (e.g., 400 events, 50M tokens)
+- Cost warnings: Log alerts when entering expensive zone (300x+ ratio, 594+ events)
+
+**Expected impact**: Agents can self-correct mid-session without waiting for post-hoc feedback, shaving 10–15% from expensive sessions.
+
 ## Token Budget Monitoring
 
 **Backlog session baseline**: 9.1M tokens, 101 events, 207x ratio (the target for efficiency).
