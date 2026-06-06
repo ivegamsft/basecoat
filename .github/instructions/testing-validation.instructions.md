@@ -19,6 +19,19 @@ After any workflow or deployment change:
 2. Monitor until green: `gh run watch`
 3. Mark work complete only after verified success
 
+## E2E Verification Gate
+
+If a change affects runtime behavior, UX flows, auth, or integration boundaries,
+do not claim success without targeted E2E validation (for example, Playwright in
+consumer repos).
+
+Required preconditions before running E2E:
+
+1. Lint, build, and typecheck complete successfully.
+2. Auth-mode prerequisites are set (for example, `E2E_AUTH_BYPASS` when used).
+3. The application base URL is reachable and backing dependencies are running
+   (for example, Docker or local DB services).
+
 ## Common Test Failures
 
 `instructions/governance.instructions.md` frequently breaks lint after rebases because

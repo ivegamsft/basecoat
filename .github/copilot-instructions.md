@@ -40,3 +40,19 @@ This split reduces baseline instruction payload by **72%**:
 
 See `.github/instructions/cost-optimization.instructions.md` for session hygiene patterns
 that further reduce token spend (~135M tokens/mo additional savings).
+
+## Execution Guardrails (Fleet, E2E, Worktrees)
+
+These repo-level rules are mandatory and apply even when working from specialized
+instruction files:
+
+1. **Serialized merges in fleet runs**: open multiple PRs if needed, but merge only
+   one at a time. Wait for checks + merge completion before merging the next PR.
+   Clean up local/remote branch state after each merge.
+2. **E2E verification before claiming success**: do not declare completion until
+   lint/build/typecheck and targeted E2E coverage for changed flows are complete.
+   Validate E2E preconditions explicitly (auth-bypass mode, reachable base URL,
+   required local services such as Docker/DB).
+3. **Worktree safety checks before cleanup**: verify branch-to-path mapping with
+   `git worktree list` before removing any worktree, avoid path-assumptive deletes,
+   and run `git worktree prune` only after mapping is confirmed.

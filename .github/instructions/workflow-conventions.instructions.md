@@ -35,6 +35,15 @@ gh pr merge --squash --admin
 
 Use `--admin` to bypass CI wait when change is pre-validated locally.
 
+## Fleet Merge Pacing
+
+During fleet or burndown sessions, enforce serialized merge pacing:
+
+1. Queue work in parallel if needed, but merge one PR at a time.
+2. Before each merge, confirm required checks are green and mergeability is clean.
+3. Wait for merge completion before starting the next merge.
+4. After each merge, clean up local and remote branch state before continuing.
+
 ## Triggering the Copilot Coding Agent
 
 Post `/approve` as an issue comment to trigger the Copilot coding agent workflow
@@ -44,3 +53,9 @@ the issue to Copilot. The `@copilot` mention does **not** trigger the agent.
 ## Worktrees
 
 When creating worktrees, use naming pattern: `../<repo>-wt-<issue-or-pr>` (e.g., `../basecoat-wt-1334`).
+
+Worktree cleanup safety playbook:
+
+1. Verify branch-to-path mapping with `git worktree list` before removal.
+2. Never delete worktrees by assumed paths.
+3. Use `git worktree prune` only after mapping is confirmed and stale entries are identified.

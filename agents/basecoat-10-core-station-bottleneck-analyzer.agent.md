@@ -27,7 +27,6 @@ allowed-tools: ["bash", "git", "gh", "grep", "find"]
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
 allowed_skills: [takt-time-measurement]
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 # Station Bottleneck Analyzer
 
@@ -87,4 +86,3 @@ If an issue already exists for the same reporting week, update it instead of cre
 - Bottleneck ranking by station
 - Weekly report issue draft or update
 - Follow-up actions for the slowest stations
-

@@ -216,6 +216,7 @@ BaseCoat is built on four GitHub Copilot customization primitives:
 | [mcp-development](skills/mcp-development/) | mcp-server-template, tool-definition-template, transport-config-template | mcp-developer |
 | [performance-profiling](skills/performance-profiling/) | SKILL.md workflow | performance-analyst |
 | [refactoring](skills/refactoring/) | SKILL.md workflow | — |
+| [rollout-basecoat](skills/rollout-basecoat/) | SKILL.md workflow | rollout-basecoat |
 | [security](skills/security/) | owasp-checklist, stride-threat-model-template, vulnerability-report-template, dependency-audit-template | security-analyst |
 | [github-security-posture](skills/github-security-posture/) | posture-report-template | github-security-posture |
 | [service-bus-migration](skills/service-bus-migration/) | SKILL.md workflow | middleware-dev |
@@ -401,5 +402,4 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for guidelines on adding agents, skills
 ## License
 
 This project is for internal use. Contact your organization's open-source program office for licensing terms.
-
 

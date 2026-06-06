@@ -49,6 +49,29 @@ Files that are **not** synced: `basecoat-metadata.json` (internal portal index),
     BASECOAT_TARGET_DIR=.github/my-basecoat ./sync.sh
     ```
 
+## Quick refresh shortcut
+
+In Copilot-enabled environments, use the phrase `refresh basecoat` to trigger
+the rollout workflow.
+
+If your environment reports `Skill not found: rollout-basecoat`, run sync
+directly from the consumer repo root:
+
+=== "PowerShell fallback"
+
+    ```powershell
+    $env:BASECOAT_REPO = 'https://github.com/IBuySpy-Shared/basecoat.git'
+    $env:BASECOAT_REF  = 'main'  # or vX.Y.Z
+    .\sync.ps1
+    ```
+
+=== "Shell fallback"
+
+    ```bash
+    BASECOAT_REPO=https://github.com/IBuySpy-Shared/basecoat.git \
+    BASECOAT_REF=main ./sync.sh
+    ```
+
 ## Checking your version
 
 ```bash
