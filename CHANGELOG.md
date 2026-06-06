@@ -4,11 +4,20 @@ All notable changes to this repository should be recorded in this file.
 
 ## Unreleased
 
+- No unreleased changes.
+
+## 3.30.6 - 2026-06-06
+
 ### Added
 
 - Added new consumer setup guide for downstream workflows: `docs/guides/downstream-workflows-setup.md`. This guide helps
   consumer repositories install and use BaseCoat's `bc-` prefixed workflows, covering Phase 1 supported workflows,
   installation examples, troubleshooting, and FAQ.
+
+### Fixed
+
+- Removed leaked local-context instruction file `.github/instructions/msx-auth-dataverse.instructions.md` and routing
+  reference from `.github/copilot-instructions.md`.
 
 ## 3.30.5 - 2026-06-06
 
