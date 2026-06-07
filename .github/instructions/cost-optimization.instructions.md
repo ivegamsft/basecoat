@@ -96,7 +96,7 @@ Measured data from last 30 days: 42.4% gpt-5.3-codex, 24% gpt-5.4-mini, 18.2% Ha
 
 ### Direct Skill Targeting (Skip the Router)
 
-Call specialized skills directly; skip `/basecoat` router overhead (~500k tokens/call).
+Call specialized skills directly; skip router overhead (~500k tokens/call).
 
 See `.github/instructions/routing-decision-tree.md` for the full intent → skill mapping (40+ entries).
 
@@ -112,9 +112,9 @@ Expected savings: 46M tokens/mo (~500k per direct call × 96 router calls/mo).
 
 ### Single Kickoff + /tasks Monitoring
 
-Instead of repeated `/basecoat` calls (96/mo), use:
+Instead of repeated router calls (96/mo), use:
 
-1. Start once: `/basecoat [initial directive]`
+1. Start once with the target agent or orchestrator
 2. Monitor progress: `/tasks`
 3. Steer with deltas: `Continue from issue #695; merge PRs after checks`
 

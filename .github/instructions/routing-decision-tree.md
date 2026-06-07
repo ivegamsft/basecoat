@@ -1,12 +1,12 @@
 ---
-description: "Routing decision tree: map user intent directly to an agent/skill instead of going through the /basecoat router"
+description: "Routing decision tree: map user intent directly to an agent or skill without routing through the legacy router"
 applyTo: "**/*"
 ---
 
 # Routing Decision Tree
 
-Direct routing — call the right skill or agent the first time instead of routing through
-`/basecoat`. Each router call costs ~500k tokens; direct calls skip that overhead.
+Direct routing — call the right skill or agent the first time. Each router call costs
+~500k tokens; direct calls skip that overhead.
 
 ## How to Use
 
@@ -103,8 +103,8 @@ Find your intent below and call the listed skill or agent directly.
 
 ## Routing Anti-Patterns
 
-Do NOT use `/basecoat` when a direct call exists. Use it only when no specific skill or
-agent maps to your intent and you need the router to identify the right path.
+Prefer direct skill or agent calls. Use the orchestrator only when no specific skill or
+agent maps to your intent and you need routing to identify the right path.
 
 See also: `.github/instructions/cost-optimization.instructions.md` for session hygiene
 patterns that further reduce token spend.
