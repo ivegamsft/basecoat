@@ -111,7 +111,7 @@ When spawning agents programmatically, pass the model as a parameter:
 // Use the recommended model from the agent's ## Model section
 const result = await spawnAgent({
   role: 'backend-dev',
-  model: 'gpt-5.3-codex',   // from agents/backend-dev.agent.md
+  model: 'gpt-5.3-codex',   // from agents/basecoat-10-core-backend-dev.agent.md
   prompt: taskDescription
 });
 ```
@@ -201,6 +201,7 @@ task. If your agent does both in one pass, split it.
 produced the same result. The sprint had to be restarted with a manual wave pattern.
 
 **What we learned:**
+
 - Enterprise Copilot API limits concurrent sessions, not just requests-per-minute
 - 3 concurrent agents = safe ceiling
 - 4 = risky depending on org activity at the time
@@ -254,8 +255,8 @@ For UBB billing and monitoring guidance, see [ubb-token-guidance.md](ubb-token-g
 
 ## Related References
 
-- `instructions/governance.instructions.md` — Section 10 covers model awareness policy
-- `instructions/token-economics.instructions.md` — Turn budget classification and fast-path routing
+- `instructions/basecoat-20-lang-governance.instructions.md` — Section 10 covers model awareness policy
+- `instructions/basecoat-50-security-token-economics.instructions.md` — Turn budget classification and fast-path routing
 - Individual agent files in `agents/` — each contains a `## Model` section
 - [`token-optimization.md`](token-optimization.md) — Context window management and budget allocation
 - [`ubb-token-guidance.md`](ubb-token-guidance.md) -- UBB billing model, cost estimation, alert thresholds

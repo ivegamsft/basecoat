@@ -193,6 +193,6 @@ az deployment group operation list \
 - [Azure ARM deployment cancellation](https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/deploy-cli#cancel-a-running-deployment)
 - [Terraform: Handling interrupts](https://developer.hashicorp.com/terraform/cli/commands/apply#interrupts)
 - [Azure Developer CLI (`azd`) environment management](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/manage-environment-variables)
-- Governance: [`instructions/governance.instructions.md`](/instructions/governance.instructions.md)
+- Governance: [`instructions/basecoat-20-lang-governance.instructions.md`](/instructions/basecoat-20-lang-governance.instructions.md)
 - Related guardrail: [`docs/guardrails/db-deployment-concurrency.md`](db-deployment-concurrency.md)
 - Related guardrail: [`docs/guardrails/ci-concurrency.md`](ci-concurrency.md)

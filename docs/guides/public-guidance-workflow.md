@@ -34,5 +34,5 @@ sanitized guidance draft.
 ## Related Assets
 
 - `skills/public-safe-sanitization/SKILL.md` for the interactive sanitization workflow
-- `instructions/public-guidance.instructions.md` for the publication transformation checklist
-- `agents/guardrail.agent.md` for validation before release
+- `instructions/basecoat-10-core-public-guidance.instructions.md` for the publication transformation checklist
+- `agents/basecoat-30-ai-guardrail.agent.md` for validation before release

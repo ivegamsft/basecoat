@@ -37,12 +37,14 @@ These are snapshot files from past releases and should be archived:
 | `RELEASE_NOTES_v3.0.0.md` | 7.3 KB | v3.0.0 release | Move to `docs/archived/RELEASE_NOTES_v3.0.0.md` |
 
 **Rationale**:
+
 - These are historical snapshots from specific releases
 - CHANGELOG.md is the single source of truth for release history
 - Keeping versioned copies clutters root and creates maintenance burden
 - Create `docs/archived/` to preserve historical context if needed
 
 **Git Commands**:
+
 ```powershell
 mkdir docs/archived -Force
 git mv AUDIT_REPORT_v2.3.0.md docs/archived/
@@ -50,7 +52,7 @@ git mv FINAL_RELEASE_NOTES.md docs/archived/
 git mv COMPREHENSIVE_RELEASE_REPORT_v3.0.0.md docs/archived/
 git mv RELEASE_NOTES_v3.0.0.md docs/archived/
 git commit -m "docs: archive versioned release reports to docs/archived/" -m "- Move AUDIT_REPORT_v2.3.0.md, FINAL_RELEASE_NOTES.md, COMPREHENSIVE_RELEASE_REPORT_v3.0.0.md, RELEASE_NOTES_v3.0.0.md to docs/archived/. Reduces root clutter and preserves historical records in dedicated archive directory."
-```
+```text
 
 ---
 
@@ -63,11 +65,13 @@ git commit -m "docs: archive versioned release reports to docs/archived/" -m "- 
 | `plan-sharedStandardsRepo.prompt.md` | 3.8 KB | Working file | Move to `docs/working/plan-sharedStandardsRepo.prompt.md` |
 
 **Rationale**:
+
 - These are design/planning documents that should live in `/docs` per repository conventions
 - Design briefs establish architectural direction but are not referenced from root
 - Working prompt files accumulate over time and should be isolated
 
 **Action Plan**:
+
 ```powershell
 mkdir docs/design-briefs -Force
 mkdir docs/working -Force
@@ -77,7 +81,7 @@ git mv plan-sharedStandardsRepo.prompt.md docs/working/
 git commit -m "docs: reorganize design and working documents into docs/ subdirectories" -m "- Move PLUGIN_DESIGN_BRIEF.md and PORTAL_DESIGN_BRIEF.md to docs/design-briefs/
 - Move plan-sharedStandardsRepo.prompt.md to docs/working/
 - Follows repository convention: design and working docs belong in docs/ hierarchy"
-```
+```text
 
 ---
 
@@ -95,18 +99,21 @@ git commit -m "docs: reorganize design and working documents into docs/ subdirec
 **Recommendation**: Single source of truth
 
 **Conflict Analysis**:
+
 - **AGENTS.md**: Lists 52 agents, descriptive format, referenced in README.md
 - **INVENTORY.md**: Lists instructions, skills, prompts with keywords; more comprehensive
 - **CATALOG.md (root)**: Formatted with paired skills and model recommendations (more detailed)
 - **docs/CATALOG.md**: Different schema, appears to be outdated version
 
 **Decision**:
+
 1. Keep `AGENTS.md` at root (referenced in README.md, stable API)
 2. Keep `INVENTORY.md` at root (keyword-searchable, rich metadata)
 3. Move `CATALOG.md` (root) → `docs/ASSET_REGISTRY.md` (renamed, detailed reference)
 4. Delete `docs/CATALOG.md` (redundant)
 
 **Git Commands**:
+
 ```powershell
 # Rename root CATALOG.md to emphasize it's a detailed registry
 git mv CATALOG.md docs/ASSET_REGISTRY.md
@@ -122,7 +129,7 @@ git commit -m "docs: consolidate asset catalogs and eliminate duplication" -m "-
 - Keep AGENTS.md as quick reference (in root, referenced by README.md)
 - Keep INVENTORY.md as searchable instruction/skill index
 - Reduces catalog fragmentation and maintenance burden"
-```
+```text
 
 **Note**: Update README.md links if needed.
 
@@ -141,11 +148,12 @@ git commit -m "docs: consolidate asset catalogs and eliminate duplication" -m "-
 **Actions**:
 
 1. **Update Agent Count**:
+
    ```powershell
    cd F:\Git\basecoat
    (Get-ChildItem agents/*.agent.md).Count  # Should show actual count
    # Edit README.md line 7 and AGENTS.md line 5 with correct count
-   ```
+   ```text
 
 2. **Add navigation guidance** to both AGENTS.md and INVENTORY.md headers:
    - AGENTS.md: "Quick agent reference—use this to find agents by name"
@@ -164,6 +172,7 @@ git commit -m "docs: consolidate asset catalogs and eliminate duplication" -m "-
 These are design/research branches created by the copilot-swe-agent. All are **≥2 weeks old** (created May 3, 2026):
 
 **Sample stale branches** (all unmerged):
+
 - `origin/copilot/add-agents-skills-path` (May 3)
 - `origin/copilot/add-dotnet-modernization-advisor-agent` (May 3)
 - `origin/copilot/add-penetration-test-agent` (May 3)
@@ -181,7 +190,7 @@ git branch -r --merged origin/main | grep 'origin/copilot/' > merged_branches.tx
 gh api repos/IBuySpy-Shared/basecoat/git/refs/heads | jq -r '.[] | select(.ref | startswith("refs/heads/copilot/")) | .ref' | while read ref; do
   git push origin --delete ${ref#refs/heads/}
 done
-```
+```text
 
 **Impact**: Reduces branch list from 41 to ~8, improves navigation.
 
@@ -195,6 +204,7 @@ done
 | `origin/fix/skill-name-validation` | May 3 | Unclear | Check if merged |
 
 **Cleanup Commands**:
+
 ```powershell
 # Check merge status
 git branch -r --merged origin/main | grep 'origin/feat\|origin/fix'
@@ -204,24 +214,26 @@ git push origin --delete feat/383-github-actions-auto-approval
 git push origin --delete fix/403-hardened-test-failure-propagation
 
 # Verify status of others before deleting
-```
+```text
 
 ---
 
 ### B. Orphaned Worktrees (4 detected)
 
 **Detected worktrees**:
-```
+
+```text
 F:\Git\basecoat          (active, main worktree)
 F:\Git\basecoat-sprint-2 (git worktree) — ORPHANED
 F:\Git\basecoat-sprint-3 (git worktree) — ORPHANED
 F:\Git\basecoat-worktrees (directory) — ORPHANED
 F:\Git\basecoat-wt (directory) — ORPHANED
-```
+```text
 
 **Issue**: Worktrees created for sprint work but not cleaned up after branch deletion.
 
 **Cleanup**:
+
 ```powershell
 # From main worktree
 cd F:\Git\basecoat
@@ -236,7 +248,7 @@ git worktree remove --force F:\Git\basecoat-sprint-3  # if it shows in git workt
 # Manually clean up orphaned directories (if not registered)
 Remove-Item -Recurse -Force F:\Git\basecoat-worktrees -ErrorAction SilentlyContinue
 Remove-Item -Recurse -Force F:\Git\basecoat-wt -ErrorAction SilentlyContinue
-```
+```text
 
 ---
 
@@ -245,14 +257,15 @@ Remove-Item -Recurse -Force F:\Git\basecoat-wt -ErrorAction SilentlyContinue
 ### Search Results for TODO/FIXME
 
 **Files with TODO/FIXME markers** (1 found):
-- `agents/tech-writer.agent.md` — Contains TODO (check for incomplete content)
+
+- `agents/basecoat-10-core-tech-writer.agent.md` — Contains TODO (check for incomplete content)
 
 **Action**: Review tech-writer agent for unfinished sections.
 
 ```powershell
 cd F:\Git\basecoat
 grep -rn "TODO\|FIXME" agents/ instructions/ skills/ docs/ | Select-Object
-```
+```text
 
 ---
 
@@ -273,7 +286,7 @@ $skillRefs | ForEach-Object {
   $skillPath = "skills/$_/SKILL.md"
   if (!(Test-Path $skillPath)) { Write-Output "MISSING: $skillPath" }
 }
-```
+```text
 
 ---
 
@@ -282,7 +295,8 @@ $skillRefs | ForEach-Object {
 ### Recommended Directory Organization
 
 **Current state** (files in root that should be in docs/):
-```
+
+```text
 basecoat/
 ├── AGENTS.md                                  ✅ Keep (referenced by README, API stable)
 ├── INVENTORY.md                               ✅ Keep (keyword index, stable)
@@ -304,9 +318,10 @@ basecoat/
 │   ├── archived/                              ✨ Create for release snapshots
 │   ├── design-briefs/                         ✨ Create for design docs
 │   └── working/                               ✨ Create for work-in-progress
-```
+```text
 
 **Cleanup Summary**:
+
 - ✅ Keep at root: 7 files (README, CHANGELOG, CONTRIBUTING, PHILOSOPHY, PRODUCT, AGENTS, INVENTORY)
 - ❌ Move to docs/: 8 files
 - ✨ Create: 3 directories (archived/, design-briefs/, working/)
@@ -320,6 +335,7 @@ basecoat/
 
 **Closed PRs**: 69 total  
 **Sample closed PRs** (last 10):
+
 - PR #475: "feat: configure GitHub Actions auto-approval..." (merged)
 - PR #474: "fix(#383): add blank lines around list items..." (merged)
 - Many older PRs from 2025-2026
@@ -331,6 +347,7 @@ basecoat/
 **Open vs Closed Issues**: [Requires further investigation via GitHub API]
 
 **Potential cleanup candidates**:
+
 - Issues marked as `blocked` without recent activity (>30 days)
 - Issues without labels or clear priority
 - Duplicate issues
@@ -373,15 +390,16 @@ git mv CATALOG.md docs/ASSET_REGISTRY.md
 git rm docs/CATALOG.md
 
 git commit -m "docs: consolidate catalogs to eliminate duplication" -m "Move root CATALOG.md to docs/ASSET_REGISTRY.md. Delete redundant docs/CATALOG.md. Keeps AGENTS.md and INVENTORY.md as stable APIs." --author "Cleanup Audit <cleanup@basecoat.local>"
-```
+```text
 
 ### Phase 2: Update Documentation (15-20 minutes)
 
 **1. Update README.md** to fix agent count and catalog references:
+
 ```markdown
 - Line 7: Update agent count if needed
 - Link to docs/ASSET_REGISTRY.md instead of CATALOG.md
-```
+```text
 
 **2. Add navigation guidance** to AGENTS.md and INVENTORY.md headers
 
@@ -390,18 +408,20 @@ git commit -m "docs: consolidate catalogs to eliminate duplication" -m "Move roo
 ### Phase 3: Branch Cleanup (10-15 minutes)
 
 **1. Delete merged copilot/* branches**:
+
 ```powershell
 gh api repos/IBuySpy-Shared/basecoat/git/refs/heads `
   | jq -r '.[] | select(.ref | test("refs/heads/copilot/")) | .ref' `
   | ForEach-Object { git push origin --delete $_.Replace('refs/heads/', '') }
-```
+```text
 
 **2. Delete merged feat/fix/* branches**:
+
 ```powershell
 git push origin --delete feat/383-github-actions-auto-approval
 git push origin --delete fix/403-hardened-test-failure-propagation
 # (verify others before deleting)
-```
+```text
 
 ### Phase 4: Worktree Cleanup (5 minutes)
 
@@ -413,7 +433,7 @@ git worktree remove --force F:\Git\basecoat-sprint-3 2>&1
 # Clean up orphaned directories
 Remove-Item -Recurse -Force F:\Git\basecoat-worktrees -ErrorAction SilentlyContinue
 Remove-Item -Recurse -Force F:\Git\basecoat-wt -ErrorAction SilentlyContinue
-```
+```text
 
 ---
 
@@ -475,16 +495,19 @@ Remove-Item -Recurse -Force F:\Git\basecoat-wt -ErrorAction SilentlyContinue
 ## 11. FOLLOW-UP ACTIONS
 
 ### Short-term (1-2 weeks)
+
 1. ✅ Execute cleanup plan (this task)
 2. Monitor for broken external links
 3. Update any documentation that references moved files
 
 ### Medium-term (1-2 months)
+
 1. Implement automated checks in CI to prevent root-level files from accumulating
-2. Create `.gitignore` rule for working files (*.draft.md, *.wip.md)
+2. Create `.gitignore` rule for working files (*.draft.md,*.wip.md)
 3. Set up branch deletion automation for merged branches
 
 ### Long-term (3-6 months)
+
 1. Review and consolidate remaining docs/ files (40+ files)
 2. Establish documentation governance for design briefs and working docs
 3. Implement documentation versioning strategy
@@ -495,7 +518,7 @@ Remove-Item -Recurse -Force F:\Git\basecoat-wt -ErrorAction SilentlyContinue
 
 ### Root-Level Markdown Files (15 total, 191 KB)
 
-```
+```text
 191 KB total in root-level .md files
 
 After cleanup (7 files, 89 KB):
@@ -512,7 +535,7 @@ Moved to docs/ (8 files, 102 KB):
 - docs/design-briefs/ (9 KB)
 - docs/working/ (4 KB)
 - docs/ASSET_REGISTRY.md (19 KB)
-```
+```text
 
 ---
 
@@ -527,4 +550,3 @@ Moved to docs/ (8 files, 102 KB):
 **Report Status**: ✅ Ready for execution
 
 **Next Step**: Execute Phase 1-4 cleanup plan above, then validate with checklist.
-

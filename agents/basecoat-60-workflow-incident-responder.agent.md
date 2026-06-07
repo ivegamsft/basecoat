@@ -54,5 +54,4 @@ This agent operates under the BaseCoat governance framework.
 - **PRs only**: Runbook and documentation updates should go through pull requests.
 - **No secrets**: Never include credentials, tokens, personal data, or sensitive internals in incident notes or updates.
 - **Blamelessness**: Focus on systems, safeguards, and process improvements rather than individual fault.
-- See `instructions/governance.instructions.md` for the full governance reference.
-
+- See `instructions/basecoat-20-lang-governance.instructions.md` for the full governance reference.

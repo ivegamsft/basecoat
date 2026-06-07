@@ -2,7 +2,7 @@
 
 Defines how organizations using BaseCoat can share institutional knowledge across teams through a private memory repository.
 
-> Related: `docs/sqlite-memory.md`, `instructions/memory-index.instructions.md`, `agents/memory-curator.agent.md`
+> Related: `docs/sqlite-memory.md`, `instructions/basecoat-10-core-memory-index.instructions.md`, `agents/basecoat-10-core-memory-curator.agent.md`
 
 ---
 
@@ -82,7 +82,7 @@ pwsh scripts/sync-shared-memory.ps1
 
 ## The `hot-index.md` File
 
-The shared hot index mirrors the structure of `instructions/memory-index.instructions.md` but contains only org-wide patterns. It is injected at session start (≤500 tokens). Deep memories are loaded on demand by subject.
+The shared hot index mirrors the structure of `instructions/basecoat-10-core-memory-index.instructions.md` but contains only org-wide patterns. It is injected at session start (≤500 tokens). Deep memories are loaded on demand by subject.
 
 ```markdown
 # Shared Memory Hot Index
@@ -168,7 +168,7 @@ Use `{domain}:{subject}` to prevent collisions across teams with different stack
 ## Retrieval Model at Session Start
 
 ```text
-1. Load team hot-index (instructions/memory-index.instructions.md)   — always, ~400 tokens
+1. Load team hot-index (instructions/basecoat-10-core-memory-index.instructions.md)   — always, ~400 tokens
 2. Load shared hot-index (basecoat-memory/hot-index.md)              — if synced, ~400 tokens
 3. On domain match: load deep memories from memories/{domain}/        — on demand, per subject
 4. Deep memories not found locally: gh api to fetch from shared repo  — fallback

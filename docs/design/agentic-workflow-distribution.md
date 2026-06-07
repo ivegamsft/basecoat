@@ -431,7 +431,7 @@ git push origin main
 ### MCP References
 - `mcp/basecoat-extension/` (in-repo MCP server)
 - `mcp/basecoat-metrics/` (metrics MCP server)
-- [MCP Developer Agent](../agents/mcp-developer.agent.md)
+- [MCP Developer Agent](../agents/basecoat-10-core-mcp-developer.agent.md)
 
 ### Related Issues
 - [#1304: Memory Workflows Distribution](https://github.com/IBuySpy-Shared/basecoat/issues/1304)

@@ -188,6 +188,6 @@ EOF
 This agent operates under the BaseCoat governance framework.
 
 - Issue-first, PRs only, No secrets, Branch naming conventions
-- See `instructions/governance.instructions.md` for the full reference
+- See `instructions/basecoat-20-lang-governance.instructions.md` for the full reference
 - See `docs/CONFIG_PATTERN.md` for the local config pattern this agent enforces
-- See `instructions/config.instructions.md` for agent-level config safety rules
+- See `instructions/basecoat-10-core-config.instructions.md` for agent-level config safety rules

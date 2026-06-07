@@ -36,7 +36,7 @@ The following categories of values must **never** appear in a committed file:
 
 ## Onboarding Pattern
 
-```
+```text
 # 1. Copy the template to your local config
 cp config/settings.template.json config/settings.json
 
@@ -45,9 +45,10 @@ cp config/settings.template.json config/settings.json
 
 # 3. Optionally create a local override
 cp config/settings.json config/settings.local.json
-```
+```text
 
 Your application should load in priority order:
+
 1. `config/settings.local.json` (if present)
 2. `config/settings.json`
 3. Environment variables (`.env.local` → `.env`)
@@ -83,7 +84,7 @@ Every config file with real values must have a committed `.template` sibling. Th
     "smtpHost": "<SMTP_HOST>"
   }
 }
-```
+```text
 
 Non-secret defaults (numbers, booleans, feature flags with safe defaults) **may** have real values in the template.
 
@@ -92,21 +93,24 @@ Non-secret defaults (numbers, booleans, feature flags with safe defaults) **may*
 ## Framework-Agnostic Usage
 
 ### PowerShell
+
 ```powershell
 $settings = Get-Content config/settings.json | ConvertFrom-Json
 $tenantId = $settings.azure.tenantId
-```
+```text
 
 ### Node.js
+
 ```javascript
 import { readFileSync } from 'fs';
 const settings = JSON.parse(readFileSync('config/settings.json', 'utf-8'));
 // Or use dotenv for .env files:
 import 'dotenv/config';
 const tenantId = process.env.AZURE_TENANT_ID;
-```
+```text
 
 ### Python
+
 ```python
 import json, os
 from dotenv import load_dotenv
@@ -118,7 +122,7 @@ with open('config/settings.json') as f:
     settings = json.load(f)
 
 tenant_id = os.getenv('AZURE_TENANT_ID', settings['azure']['tenantId'])
-```
+```text
 
 ---
 
@@ -133,14 +137,14 @@ In pipelines, inject secrets via environment variables from a secrets store (e.g
     AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
     AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
     AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-```
+```text
 
 ---
 
 ## Enforcement
 
 - `.gitignore` must cover `config/settings.json`, `config/settings.local.json`, `.env`, `.env.local`, and `*.local.json`.
-- The `config-auditor` agent (`agents/config-auditor.agent.md`) can scan a repo for violations.
+- The `config-auditor` agent (`agents/basecoat-50-security-config-auditor.agent.md`) can scan a repo for violations.
 - The pre-commit hook (`scripts/install-git-hooks.sh`) blocks common secret patterns.
 - See `docs/templates/GITIGNORE_TEMPLATE.md` for the standard gitignore entries.
 
@@ -148,7 +152,7 @@ In pipelines, inject secrets via environment variables from a secrets store (e.g
 
 ## Related
 
-- `instructions/config.instructions.md` — agent instructions for config file handling
-- `agents/config-auditor.agent.md` — automated config secret scanner
+- `instructions/basecoat-10-core-config.instructions.md` — agent instructions for config file handling
+- `agents/basecoat-50-security-config-auditor.agent.md` — automated config secret scanner
 - `docs/templates/GITIGNORE_TEMPLATE.md` — standard gitignore entries
-- `instructions/security.instructions.md` — broader security standards
+- `instructions/basecoat-50-security-security.instructions.md` — broader security standards

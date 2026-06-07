@@ -34,8 +34,8 @@ cross-stack Entra ID OIDC.
 - Externalize sessions to Redis.
 - Move databases to Azure Database for PostgreSQL Flexible Server.
 - Use `omniauth-azure-activedirectory-v2` for Entra ID sign-in.
-- See `instructions/ruby-on-rails.instructions.md` and
-  `instructions/entra-oidc-user-auth.instructions.md`.
+- See `instructions/basecoat-20-lang-ruby-on-rails.instructions.md` and
+  `instructions/basecoat-50-security-entra-oidc-user-auth.instructions.md`.
 
 ### Django
 
@@ -43,8 +43,8 @@ cross-stack Entra ID OIDC.
 - Use PostgreSQL Flexible Server instead of SQLite in production.
 - Externalize sessions with `django-redis`.
 - Use `social-auth-app-django` or `django-allauth` for Entra ID sign-in.
-- See `instructions/django.instructions.md` and
-  `instructions/entra-oidc-user-auth.instructions.md`.
+- See `instructions/basecoat-20-lang-django.instructions.md` and
+  `instructions/basecoat-50-security-entra-oidc-user-auth.instructions.md`.
 
 ### Node.js and Express
 
@@ -53,7 +53,7 @@ cross-stack Entra ID OIDC.
 - Use `@azure/msal-node` for user sign-in and `passport-azure-ad` for API
   protection.
 - Externalize sessions with `express-session` plus Redis.
-- See `instructions/entra-oidc-user-auth.instructions.md`.
+- See `instructions/basecoat-50-security-entra-oidc-user-auth.instructions.md`.
 
 ### SharePoint 2013
 

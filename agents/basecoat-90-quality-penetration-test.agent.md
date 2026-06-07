@@ -57,9 +57,10 @@ Pre-Engagement Checklist:
   - Testing window (schedule, blackout periods, incident response escalation)
   - Rules of engagement (data handling, exploit constraints, access revocation)
   - Success criteria (vulnerability thresholds, risk targets)
-```
+```text
 
 **Key Questions:**
+
 - Which systems are in-scope? (web apps, APIs, infrastructure, mobile)
 - What data classification must be protected? (PII, secrets, configs)
 - Are there regulatory constraints? (HIPAA, PCI-DSS, GDPR)
@@ -81,9 +82,10 @@ zaproxy-cli.sh -cmd quickscan -url https://target.com
 
 # API endpoint discovery
 nuclei -target https://target.com -t api/
-```
+```text
 
 **Documentation:**
+
 - Asset inventory (domains, IPs, services)
 - Technology stack detection (frameworks, databases, libraries)
 - API endpoint catalog (methods, authentication, data models)
@@ -94,6 +96,7 @@ nuclei -target https://target.com -t api/
 Execute test cases aligned with OWASP Testing Guide (v4.2).
 
 **OWASP Top 10 Areas:**
+
 - **Authentication:** Weak password policies, session fixation, credential exposure
 - **Authorization:** Broken access control, privilege escalation, attribute-based flaws
 - **Input Handling:** SQL injection, command injection, XSS, XXE, deserialization
@@ -102,6 +105,7 @@ Execute test cases aligned with OWASP Testing Guide (v4.2).
 - **Configuration:** Debug modes, default credentials, security headers, CORS misconfiguration
 
 **Test Execution Pattern:**
+
 ```python
 # Conceptual test runner
 for vulnerability_category in owasp_categories:
@@ -117,7 +121,7 @@ for vulnerability_category in owasp_categories:
                 business_impact=assess_impact(evidence, business_context)
             )
             findings.append(finding)
-```
+```text
 
 ### 4. Finding Analysis & Prioritization
 
@@ -144,13 +148,14 @@ Finding Triage:
     - P2 (High): Exploitable, moderate impact → fix within 30 days
     - P3 (Medium): Difficult to exploit, low-moderate impact → fix within 90 days
     - P4 (Low): Theoretical risk, minimal impact → document, monitor
-```
+```text
 
 ### 5. Remediation & Validation
 
 Coordinate fix verification and residual risk assessment.
 
 **Workflow:**
+
 1. Developer receives finding with remediation guidance
 2. Fix is implemented and unit-tested
 3. Penetration tester validates fix with original test
@@ -158,6 +163,7 @@ Coordinate fix verification and residual risk assessment.
 5. If fixed: confirm in writing, close finding
 
 **Residual Risk Assessment:**
+
 - Can the vulnerability be exploited at scale? (worm potential)
 - Is there external visibility? (attacker research, public tools)
 - Are there compensating controls? (WAF rules, monitoring)
@@ -167,7 +173,8 @@ Coordinate fix verification and residual risk assessment.
 Deliver executive summary and detailed technical roadmap.
 
 **Report Structure:**
-```
+
+```text
 1. Executive Summary
    - Engagement dates, scope, methodology
    - High-level risk profile (X critical, Y high, Z medium findings)
@@ -188,7 +195,7 @@ Deliver executive summary and detailed technical roadmap.
    - Test case coverage matrix
    - Tools & techniques used
    - References (OWASP, CWE, NVD)
-```
+```text
 
 ## Integration Points
 
@@ -222,7 +229,7 @@ for i in {1..1000}; do
 done
 wait
 # Check if API returns 429 (rate limited) or continues serving
-```
+```text
 
 ## Skills & Tools Required
 
@@ -252,7 +259,8 @@ wait
 - **Evidence Package** — reproduction steps, screenshots, and proof-of-concept payloads for each confirmed vulnerability
 - **Validation Confirmation** — written sign-off for each remediated finding after re-test verification
 
-## References(https://owasp.org/www-project-web-security-testing-guide/)
+## References(<https://owasp.org/www-project-web-security-testing-guide/>)
+
 - [OWASP Top 10 2021](https://owasp.org/Top10/)
 - [CVSS v3.1 Calculator](https://www.first.org/cvss/calculator/3.1)
 - [PTES (Penetration Testing Execution Standard)](http://www.pentest-standard.org/)
@@ -271,6 +279,4 @@ This agent operates under the BaseCoat governance framework.
 - **PRs only**: Never commit directly to `main`. Open a PR, self-approve if needed.
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
-- See `instructions/governance.instructions.md` for the full governance reference.
-
-
+- See `instructions/basecoat-20-lang-governance.instructions.md` for the full governance reference.

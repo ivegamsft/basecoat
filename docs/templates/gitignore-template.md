@@ -126,7 +126,7 @@ git check-ignore -v <path/to/file>
 
 ## Enforcement
 
-- The `config-auditor` agent (`agents/config-auditor.agent.md`) checks gitignore coverage as part of its scan.
+- The `config-auditor` agent (`agents/basecoat-50-security-config-auditor.agent.md`) checks gitignore coverage as part of its scan.
 - The `config.instructions.md` agent instructions require verifying gitignore coverage before staging.
 - CI (`validate-basecoat.yml`) may validate that the minimum entries are present.
 
@@ -135,5 +135,5 @@ git check-ignore -v <path/to/file>
 ## Related
 
 - `docs/CONFIG_PATTERN.md` — full local config pattern
-- `agents/config-auditor.agent.md` — automated secret scanner
-- `instructions/config.instructions.md` — agent config safety instructions
+- `agents/basecoat-50-security-config-auditor.agent.md` — automated secret scanner
+- `instructions/basecoat-10-core-config.instructions.md` — agent config safety instructions

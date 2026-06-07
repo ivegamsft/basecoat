@@ -10,8 +10,8 @@
 > The generated output in `basecoat-metadata.json` is the canonical source used by the
 > router skill. Browse `agents/*.agent.md` directly for the current full list.
 
-> Machine-readable registry of all agents, skills, and instruction files.
-> Generated from the `main` branch. Keep this file in sync when adding or removing assets.
+Machine-readable registry of all agents, skills, and instruction files.
+Generated from the `main` branch. Keep this file in sync when adding or removing assets.
 
 ---
 
@@ -20,64 +20,64 @@
 | Name | File | Description | Paired Skills | Model Recommendation |
 |---|---|---|---|---|
 | | **🔨 Development** | | | |
-| basecoat-10-core-backend-dev | `agents/backend-dev.agent.md` | APIs, service layers, business logic, and data access | basecoat-10-core-backend-dev | GPT-4o / Claude Sonnet |
-| basecoat-10-core-frontend-dev | `agents/frontend-dev.agent.md` | UI components, responsive layouts, state, accessibility | basecoat-10-core-frontend-dev | GPT-4o / Claude Sonnet |
-| basecoat-10-core-middleware-dev | `agents/middleware-dev.agent.md` | API gateways, integration layers, event-driven architectures | — | GPT-4o / Claude Sonnet |
-| basecoat-80-data-data-tier | `agents/data-tier.agent.md` | Schema design, migrations, query optimization, data access | basecoat-80-data-data-tier | GPT-4o / Claude Sonnet |
+| basecoat-10-core-backend-dev | `agents/basecoat-10-core-backend-dev.agent.md` | APIs, service layers, business logic, and data access | basecoat-10-core-backend-dev | GPT-4o / Claude Sonnet |
+| basecoat-10-core-frontend-dev | `agents/basecoat-10-core-frontend-dev.agent.md` | UI components, responsive layouts, state, accessibility | basecoat-10-core-frontend-dev | GPT-4o / Claude Sonnet |
+| basecoat-10-core-middleware-dev | `agents/basecoat-10-core-middleware-dev.agent.md` | API gateways, integration layers, event-driven architectures | — | GPT-4o / Claude Sonnet |
+| basecoat-80-data-data-tier | `agents/basecoat-80-data-data-tier.agent.md` | Schema design, migrations, query optimization, data access | basecoat-80-data-data-tier | GPT-4o / Claude Sonnet |
 | | **🏗️ Architecture** | | | |
-| basecoat-10-core-solution-architect | `agents/solution-architect.agent.md` | System design, C4 diagrams, ADRs, and technology selection | basecoat-10-core-architecture | GPT-4o / Claude Sonnet |
-| basecoat-10-core-api-designer | `agents/api-designer.agent.md` | API design for OpenAPI, REST, GraphQL, and basecoat-20-lang-governance | api-design | GPT-4o / Claude Sonnet |
-| basecoat-10-core-ux-designer | `agents/ux-designer.agent.md` | Journey mapping, wireframes, and accessibility audits | basecoat-10-core-ux | GPT-4o / Claude Sonnet |
-| basecoat-10-core-app-inventory | `agents/app-inventory.agent.md` | Scan legacy apps for project files, NuGet/npm dependencies, connection strings, framework versions, and migration complexity scores | basecoat-10-core-app-inventory | GPT-4o / Claude Sonnet |
-| basecoat-10-core-legacy-modernization | `agents/legacy-modernization.agent.md` | Guides Web Forms → Razor Pages migration using the strangler fig pattern | — | GPT-4o / Claude Sonnet |
-| basecoat-40-azure-azure-landing-zone | `agents/azure-landing-zone.agent.md` | Enterprise-scale landing zone scaffolding following CAF/ESLZ: management groups, hub networking, policy baselines, and landing zone vending | basecoat-40-azure-azure-landing-zone | Claude Sonnet |
+| basecoat-10-core-solution-architect | `agents/basecoat-10-core-solution-architect.agent.md` | System design, C4 diagrams, ADRs, and technology selection | basecoat-10-core-architecture | GPT-4o / Claude Sonnet |
+| basecoat-10-core-api-designer | `agents/basecoat-10-core-api-designer.agent.md` | API design for OpenAPI, REST, GraphQL, and basecoat-20-lang-governance | api-design | GPT-4o / Claude Sonnet |
+| basecoat-10-core-ux-designer | `agents/basecoat-10-core-ux-designer.agent.md` | Journey mapping, wireframes, and accessibility audits | basecoat-10-core-ux | GPT-4o / Claude Sonnet |
+| basecoat-10-core-app-inventory | `agents/basecoat-10-core-app-inventory.agent.md` | Scan legacy apps for project files, NuGet/npm dependencies, connection strings, framework versions, and migration complexity scores | basecoat-10-core-app-inventory | GPT-4o / Claude Sonnet |
+| basecoat-10-core-legacy-modernization | `agents/basecoat-10-core-legacy-modernization.agent.md` | Guides Web Forms → Razor Pages migration using the strangler fig pattern | — | GPT-4o / Claude Sonnet |
+| basecoat-40-azure-azure-landing-zone | `agents/basecoat-40-azure-azure-landing-zone.agent.md` | Enterprise-scale landing zone scaffolding following CAF/ESLZ: management groups, hub networking, policy baselines, and landing zone vending | basecoat-40-azure-azure-landing-zone | Claude Sonnet |
 | | **🔍 Quality** | | | |
-| basecoat-10-core-chaos-engineer | `agents/chaos-engineer.agent.md` | Chaos engineering for fault injection, game days, resilience scoring, and recovery validation | — | GPT-4o / Claude Sonnet |
-| basecoat-90-quality-code-review | `agents/code-review.agent.md` | Structured multi-step code review workflow | basecoat-90-quality-code-review | GPT-4o / Claude Sonnet |
-| basecoat-50-security-config-auditor | `agents/config-auditor.agent.md` | Scans for committed or unprotected basecoat-10-core-config secrets | basecoat-50-security-security | GPT-4o / Claude Sonnet |
-| basecoat-50-security-github-security-posture | `agents/github-security-posture.agent.md` | Audits GitHub org and repo basecoat-50-security-security settings: code basecoat-50-security-security configs, rulesets, secret scanning, Dependabot, and branch protection | basecoat-50-security-github-security-posture | Claude Sonnet |
-| basecoat-10-core-exploratory-charter | `agents/exploratory-charter.agent.md` | Time-boxed exploratory basecoat-10-core-testing charters with evidence capture | basecoat-90-quality-manual-test-strategy | GPT-4o / Claude Sonnet |
-| basecoat-30-ai-guardrail | `agents/guardrail.agent.md` | Post-processing validation for safety, quality, compliance, and formatting | — | Claude Sonnet |
-| basecoat-10-core-identity-architect | `agents/identity-architect.agent.md` | basecoat-40-azure-azure RBAC, managed identities, Entra ID app registrations, conditional access, and workload identity federation | azure-identity | GPT-4o / Claude Sonnet |
-| basecoat-90-quality-manual-test-strategy | `agents/manual-test-strategy.agent.md` | Manual basecoat-10-core-testing strategy with rubric, charter, checklist, and automation backlog | basecoat-90-quality-manual-test-strategy | GPT-4o / Claude Sonnet |
-| basecoat-10-core-performance-analyst | `agents/performance-analyst.agent.md` | Profiling, load testing, and performance optimization | performance-profiling | GPT-4o / Claude Sonnet |
-| basecoat-50-security-policy-as-code-compliance | `agents/policy-as-code-compliance.agent.md` | Policy-as-code compliance for validating code and basecoat-10-core-config against organizational rules and producing audit-ready reports | azure-policy | GPT-4o / Claude Sonnet |
-| basecoat-50-security-security-analyst | `agents/security-analyst.agent.md` | Vulnerability assessment, threat modeling, secure code review | basecoat-50-security-security | GPT-4o / Claude Sonnet |
-| basecoat-10-core-strategy-to-automation | `agents/strategy-to-automation.agent.md` | Converts manual test paths into tiered automation candidates | basecoat-90-quality-manual-test-strategy | GPT-4o / Claude Sonnet |
+| basecoat-10-core-chaos-engineer | `agents/basecoat-10-core-chaos-engineer.agent.md` | Chaos engineering for fault injection, game days, resilience scoring, and recovery validation | — | GPT-4o / Claude Sonnet |
+| basecoat-90-quality-code-review | `agents/basecoat-90-quality-code-review.agent.md` | Structured multi-step code review workflow | basecoat-90-quality-code-review | GPT-4o / Claude Sonnet |
+| basecoat-50-security-config-auditor | `agents/basecoat-50-security-config-auditor.agent.md` | Scans for committed or unprotected basecoat-10-core-config secrets | basecoat-50-security-security | GPT-4o / Claude Sonnet |
+| basecoat-50-security-github-security-posture | `agents/basecoat-50-security-github-security-posture.agent.md` | Audits GitHub org and repo basecoat-50-security-security settings: code basecoat-50-security-security configs, rulesets, secret scanning, Dependabot, and branch protection | basecoat-50-security-github-security-posture | Claude Sonnet |
+| basecoat-10-core-exploratory-charter | `agents/basecoat-10-core-exploratory-charter.agent.md` | Time-boxed exploratory basecoat-10-core-testing charters with evidence capture | basecoat-90-quality-manual-test-strategy | GPT-4o / Claude Sonnet |
+| basecoat-30-ai-guardrail | `agents/basecoat-30-ai-guardrail.agent.md` | Post-processing validation for safety, quality, compliance, and formatting | — | Claude Sonnet |
+| basecoat-10-core-identity-architect | `agents/basecoat-10-core-identity-architect.agent.md` | basecoat-40-azure-azure RBAC, managed identities, Entra ID app registrations, conditional access, and workload identity federation | azure-identity | GPT-4o / Claude Sonnet |
+| basecoat-90-quality-manual-test-strategy | `agents/basecoat-90-quality-manual-test-strategy.agent.md` | Manual basecoat-10-core-testing strategy with rubric, charter, checklist, and automation backlog | basecoat-90-quality-manual-test-strategy | GPT-4o / Claude Sonnet |
+| basecoat-10-core-performance-analyst | `agents/basecoat-10-core-performance-analyst.agent.md` | Profiling, load testing, and performance optimization | performance-profiling | GPT-4o / Claude Sonnet |
+| basecoat-50-security-policy-as-code-compliance | `agents/basecoat-50-security-policy-as-code-compliance.agent.md` | Policy-as-code compliance for validating code and basecoat-10-core-config against organizational rules and producing audit-ready reports | azure-policy | GPT-4o / Claude Sonnet |
+| basecoat-50-security-security-analyst | `agents/basecoat-50-security-security-analyst.agent.md` | Vulnerability assessment, threat modeling, secure code review | basecoat-50-security-security | GPT-4o / Claude Sonnet |
+| basecoat-10-core-strategy-to-automation | `agents/basecoat-10-core-strategy-to-automation.agent.md` | Converts manual test paths into tiered automation candidates | basecoat-90-quality-manual-test-strategy | GPT-4o / Claude Sonnet |
 | | **🚀 DevOps** | | | |
-| basecoat-10-core-agentops | `agents/agentops.agent.md` | Agent lifecycle, versioning, rollout health, rollback, and retirement | — | GPT-4o / Claude Sonnet |
-| basecoat-30-ai-containerization-planner | `agents/containerization-planner.agent.md` | Containerization readiness assessment, platform selection, Dockerfiles, multi-stage builds, and deployment manifests | — | GPT-4o / Claude Sonnet |
-| basecoat-10-core-devops-engineer | `agents/devops-engineer.agent.md` | CI/CD, IaC, deployment, rollback, and basecoat-10-core-observability | devops | GPT-4o / Claude Sonnet |
-| basecoat-60-workflow-incident-responder | `agents/incident-responder.agent.md` | Structured incident response and recovery for classifying, mitigating, coordinating, and post-incident learning | — | GPT-4o / Claude Sonnet |
-| basecoat-60-workflow-infrastructure-deploy | `agents/infrastructure-deploy.agent.md` | Orchestrates basecoat-40-azure-azure infrastructure deployments using basecoat-10-core-bicep with parameter validation and rollback strategies | — | GPT-4o / Claude Sonnet |
-| basecoat-60-workflow-release-impact-advisor | `agents/release-impact-advisor.agent.md` | Release readiness assessment, blast radius analysis, rollback planning, and safe deployment strategies | — | GPT-4o / Claude Sonnet |
-| basecoat-60-workflow-release-manager | `agents/release-manager.agent.md` | Versioned release workflow, changelog, tagging, and publishing | — | GPT-4o-mini / Claude Haiku |
-| basecoat-60-workflow-rollout-basecoat | `agents/rollout-basecoat.agent.md` | Enterprise Base Coat onboarding and rollout | — | GPT-4o-mini / Claude Haiku |
-| basecoat-60-workflow-self-healing-ci | `agents/self-healing-ci.agent.md` | Automated CI failure analysis, log parsing, flaky test detection, and pipeline remediation | — | GPT-4o / Claude Sonnet |
-| basecoat-10-core-sre-engineer | `agents/sre-engineer.agent.md` | Site basecoat-10-core-reliability engineering for SLOs, error budgets, incident response, chaos engineering, and toil reduction | — | GPT-4o / Claude Sonnet |
+| basecoat-10-core-agentops | `agents/basecoat-10-core-agentops.agent.md` | Agent lifecycle, versioning, rollout health, rollback, and retirement | — | GPT-4o / Claude Sonnet |
+| basecoat-30-ai-containerization-planner | `agents/basecoat-30-ai-containerization-planner.agent.md` | Containerization readiness assessment, platform selection, Dockerfiles, multi-stage builds, and deployment manifests | — | GPT-4o / Claude Sonnet |
+| basecoat-10-core-devops-engineer | `agents/basecoat-10-core-devops-engineer.agent.md` | CI/CD, IaC, deployment, rollback, and basecoat-10-core-observability | devops | GPT-4o / Claude Sonnet |
+| basecoat-60-workflow-incident-responder | `agents/basecoat-60-workflow-incident-responder.agent.md` | Structured incident response and recovery for classifying, mitigating, coordinating, and post-incident learning | — | GPT-4o / Claude Sonnet |
+| basecoat-60-workflow-infrastructure-deploy | `agents/basecoat-60-workflow-infrastructure-deploy.agent.md` | Orchestrates basecoat-40-azure-azure infrastructure deployments using basecoat-10-core-bicep with parameter validation and rollback strategies | — | GPT-4o / Claude Sonnet |
+| basecoat-60-workflow-release-impact-advisor | `agents/basecoat-60-workflow-release-impact-advisor.agent.md` | Release readiness assessment, blast radius analysis, rollback planning, and safe deployment strategies | — | GPT-4o / Claude Sonnet |
+| basecoat-60-workflow-release-manager | `agents/basecoat-60-workflow-release-manager.agent.md` | Versioned release workflow, changelog, tagging, and publishing | — | GPT-4o-mini / Claude Haiku |
+| basecoat-60-workflow-rollout-basecoat | `agents/basecoat-60-workflow-rollout-basecoat.agent.md` | Enterprise Base Coat onboarding and rollout | — | GPT-4o-mini / Claude Haiku |
+| basecoat-60-workflow-self-healing-ci | `agents/basecoat-60-workflow-self-healing-ci.agent.md` | Automated CI failure analysis, log parsing, flaky test detection, and pipeline remediation | — | GPT-4o / Claude Sonnet |
+| basecoat-10-core-sre-engineer | `agents/basecoat-10-core-sre-engineer.agent.md` | Site basecoat-10-core-reliability engineering for SLOs, error budgets, incident response, chaos engineering, and toil reduction | — | GPT-4o / Claude Sonnet |
 | | **📋 Process** | | | |
-| basecoat-10-core-issue-triage | `agents/issue-triage.agent.md` | Triage, classify, label, and prioritize GitHub issues | sprint-management | GPT-4o-mini / Claude Haiku |
-| basecoat-10-core-product-manager | `agents/product-manager.agent.md` | Requirements, user stories, acceptance criteria, roadmaps | sprint-management | GPT-4o / Claude Sonnet |
-| basecoat-10-core-project-onboarding | `agents/project-onboarding.agent.md` | Base Coat repository onboarding and setup | — | GPT-4o-mini / Claude Haiku |
-| basecoat-60-workflow-retro-facilitator | `agents/retro-facilitator.agent.md` | Sprint retrospective summary and improvement issue creation | sprint-management | GPT-4o / Claude Sonnet |
-| basecoat-10-core-sprint-planner | `agents/sprint-planner.agent.md` | Sprint goal-to-issues breakdown and wave planning | sprint-management | GPT-4o / Claude Sonnet |
-| basecoat-10-core-sprint-retrospective | `agents/sprint-retrospective.agent.md` | Reconstructs repository history for sprint retrospectives with metrics and actionable tips | basecoat-10-core-sprint-retrospective | GPT-4o / Claude Sonnet |
+| basecoat-10-core-issue-triage | `agents/basecoat-10-core-issue-triage.agent.md` | Triage, classify, label, and prioritize GitHub issues | sprint-management | GPT-4o-mini / Claude Haiku |
+| basecoat-10-core-product-manager | `agents/basecoat-10-core-product-manager.agent.md` | Requirements, user stories, acceptance criteria, roadmaps | sprint-management | GPT-4o / Claude Sonnet |
+| basecoat-10-core-project-onboarding | `agents/basecoat-10-core-project-onboarding.agent.md` | Base Coat repository onboarding and setup | — | GPT-4o-mini / Claude Haiku |
+| basecoat-60-workflow-retro-facilitator | `agents/basecoat-60-workflow-retro-facilitator.agent.md` | Sprint retrospective summary and improvement issue creation | sprint-management | GPT-4o / Claude Sonnet |
+| basecoat-10-core-sprint-planner | `agents/basecoat-10-core-sprint-planner.agent.md` | Sprint goal-to-issues breakdown and wave planning | sprint-management | GPT-4o / Claude Sonnet |
+| basecoat-10-core-sprint-retrospective | `agents/basecoat-10-core-sprint-retrospective.agent.md` | Reconstructs repository history for sprint retrospectives with metrics and actionable tips | basecoat-10-core-sprint-retrospective | GPT-4o / Claude Sonnet |
 | | **🧰 Meta** | | | |
-| basecoat-10-core-agent-designer | `agents/agent-designer.agent.md` | Designs and authors Copilot agent definitions | agent-design | GPT-4o / Claude Sonnet |
-| basecoat-10-core-dependency-lifecycle | `agents/dependency-lifecycle.agent.md` | Dependency updates, breaking change tracking, upgrade paths, and migration guides | — | GPT-4o / Claude Sonnet |
-| basecoat-10-core-feedback-loop | `agents/feedback-loop.agent.md` | Continuous learning through feedback collection, prompt effectiveness tracking, and instruction refinement | — | GPT-4o / Claude Sonnet |
-| basecoat-10-core-mcp-developer | `agents/mcp-developer.agent.md` | basecoat-10-core-mcp servers, tools, and integrations | mcp-basecoat-10-core-development | GPT-4o / Claude Sonnet |
-| basecoat-10-core-memory-curator | `agents/memory-curator.agent.md` | Cross-session knowledge extraction, deduplication, validation, and context injection via SQLite memory layer | — | GPT-4o / Claude Sonnet |
-| basecoat-10-core-merge-coordinator | `agents/merge-coordinator.agent.md` | Parallel branch merge coordination | — | GPT-4o-mini / Claude Haiku |
-| basecoat-10-core-new-customization | `agents/new-customization.agent.md` | Creates or updates Base Coat customization assets | create-skill, create-instruction | GPT-4o / Claude Sonnet |
-| basecoat-10-core-prompt-coach | `agents/prompt-coach.agent.md` | Interactive prompt review, scoring, and refinement coaching | — | GPT-4o / Claude Sonnet |
-| basecoat-10-core-prompt-engineer | `agents/prompt-engineer.agent.md` | Prompt and system-prompt optimization | — | GPT-4o / Claude Sonnet |
-| basecoat-10-core-tech-writer | `agents/tech-writer.agent.md` | Technical docs, runbooks, tutorials, and changelogs | basecoat-10-core-documentation | GPT-4o / Claude Sonnet |
+| basecoat-10-core-agent-designer | `agents/basecoat-10-core-agent-designer.agent.md` | Designs and authors Copilot agent definitions | agent-design | GPT-4o / Claude Sonnet |
+| basecoat-10-core-dependency-lifecycle | `agents/basecoat-10-core-dependency-lifecycle.agent.md` | Dependency updates, breaking change tracking, upgrade paths, and migration guides | — | GPT-4o / Claude Sonnet |
+| basecoat-10-core-feedback-loop | `agents/basecoat-10-core-feedback-loop.agent.md` | Continuous learning through feedback collection, prompt effectiveness tracking, and instruction refinement | — | GPT-4o / Claude Sonnet |
+| basecoat-10-core-mcp-developer | `agents/basecoat-10-core-mcp-developer.agent.md` | basecoat-10-core-mcp servers, tools, and integrations | mcp-basecoat-10-core-development | GPT-4o / Claude Sonnet |
+| basecoat-10-core-memory-curator | `agents/basecoat-10-core-memory-curator.agent.md` | Cross-session knowledge extraction, deduplication, validation, and context injection via SQLite memory layer | — | GPT-4o / Claude Sonnet |
+| basecoat-10-core-merge-coordinator | `agents/basecoat-10-core-merge-coordinator.agent.md` | Parallel branch merge coordination | — | GPT-4o-mini / Claude Haiku |
+| basecoat-10-core-new-customization | `agents/basecoat-10-core-new-customization.agent.md` | Creates or updates Base Coat customization assets | create-skill, create-instruction | GPT-4o / Claude Sonnet |
+| basecoat-10-core-prompt-coach | `agents/basecoat-10-core-prompt-coach.agent.md` | Interactive prompt review, scoring, and refinement coaching | — | GPT-4o / Claude Sonnet |
+| basecoat-10-core-prompt-engineer | `agents/basecoat-10-core-prompt-engineer.agent.md` | Prompt and system-prompt optimization | — | GPT-4o / Claude Sonnet |
+| basecoat-10-core-tech-writer | `agents/basecoat-10-core-tech-writer.agent.md` | Technical docs, runbooks, tutorials, and changelogs | basecoat-10-core-documentation | GPT-4o / Claude Sonnet |
 | | **⚙️ Ops** | | | |
-| basecoat-60-workflow-data-pipeline | `agents/data-pipeline.agent.md` | Medallion lakehouse pipelines (bronze/silver/gold), data quality, feature store integration, and ML pipeline orchestration | — | Claude Sonnet |
-| basecoat-80-data-dataops | `agents/dataops.agent.md` | basecoat-80-data-dataops for data quality, lineage, governance, orchestration, and drift detection across pipelines | — | GPT-4o / Claude Sonnet |
-| basecoat-10-core-llmops | `agents/llmops.agent.md` | basecoat-10-core-llmops for prompt deployment pipelines, model gateway configuration, inference monitoring, and cost optimization | — | GPT-4o / Claude Sonnet |
-| basecoat-30-ai-mlops | `agents/mlops.agent.md` | basecoat-30-ai-mlops for model lifecycle, experiment tracking, model registry, deployment automation, and drift monitoring | — | GPT-4o / Claude Sonnet |
+| basecoat-60-workflow-data-pipeline | `agents/basecoat-60-workflow-data-pipeline.agent.md` | Medallion lakehouse pipelines (bronze/silver/gold), data quality, feature store integration, and ML pipeline orchestration | — | Claude Sonnet |
+| basecoat-80-data-dataops | `agents/basecoat-80-data-dataops.agent.md` | basecoat-80-data-dataops for data quality, lineage, governance, orchestration, and drift detection across pipelines | — | GPT-4o / Claude Sonnet |
+| basecoat-10-core-llmops | `agents/basecoat-10-core-llmops.agent.md` | basecoat-10-core-llmops for prompt deployment pipelines, model gateway configuration, inference monitoring, and cost optimization | — | GPT-4o / Claude Sonnet |
+| basecoat-30-ai-mlops | `agents/basecoat-30-ai-mlops.agent.md` | basecoat-30-ai-mlops for model lifecycle, experiment tracking, model registry, deployment automation, and drift monitoring | — | GPT-4o / Claude Sonnet |
 
 ---
 
@@ -127,39 +127,39 @@
 
 | Name | File | Scope |
 |---|---|---|
-| basecoat-10-core-agent-behavior | `instructions/agent-behavior.instructions.md` | Retry loop prevention, edit thrashing, and escalation decisions |
-| basecoat-10-core-agents | `instructions/agents.instructions.md` | Agent authoring standards |
-| basecoat-10-core-architecture | `instructions/architecture.instructions.md` | Architecture, API, and design-diagram guidance |
-| basecoat-40-azure-azure | `instructions/azure.instructions.md` | basecoat-40-azure-azure service, SDK, and deployment guidance |
-| basecoat-10-core-backend | `instructions/backend.instructions.md` | basecoat-10-core-backend APIs, services, workers, and data access |
-| basecoat-10-core-bicep | `instructions/bicep.instructions.md` | basecoat-40-azure-azure basecoat-10-core-bicep authoring and validation |
-| basecoat-10-core-config | `instructions/config.instructions.md` | basecoat-10-core-config file safety and secrets prevention |
-| basecoat-80-data-data-science | `instructions/data-science.instructions.md` | Data science, ML, notebook, and medallion lakehouse patterns |
-| basecoat-10-core-development | `instructions/development.instructions.md` | Shared dev standards for all dev-core basecoat-10-core-agents |
-| basecoat-10-core-documentation | `instructions/documentation.instructions.md` | basecoat-10-core-documentation and change-note expectations |
-| basecoat-10-core-drift-monitor | `instructions/drift-monitor.instructions.md` | Infrastructure-as-Code drift detection and remediation strategies |
-| basecoat-10-core-error-kb | `instructions/error-kb.instructions.md` | Building and consulting error knowledge bases for failure classification and proven fixes |
-| basecoat-10-core-frontend | `instructions/frontend.instructions.md` | Frontend, UI, state management, and accessibility |
-| basecoat-20-lang-governance | `instructions/governance.instructions.md` | Repository-wide AI basecoat-20-lang-governance rules |
-| basecoat-10-core-mcp | `instructions/mcp.instructions.md` | basecoat-10-core-mcp server, tooling, and trust-boundary guidance |
-| basecoat-10-core-model-routing | `instructions/model-routing.instructions.md` | Cost-aware model routing to avoid over-spending on premium models |
-| basecoat-10-core-naming | `instructions/naming.instructions.md` | basecoat-10-core-naming conventions across repos, code, and infrastructure |
-| basecoat-10-core-nextjs-react19 | `instructions/nextjs-react19.instructions.md` | Next.js and React 19 Server Components, App Router, and modern patterns |
-| basecoat-10-core-npm-workspaces | `instructions/npm-workspaces.instructions.md` | npm workspaces and monorepo management best practices |
-| basecoat-10-core-output-style | `instructions/output-style.instructions.md` | Concise agent responses while preserving clarity and full-fidelity code |
-| basecoat-10-core-plan-first | `instructions/plan-first.instructions.md` | Explore-plan-implement-verify workflow for multi-step tasks |
-| basecoat-10-core-process | `instructions/process.instructions.md` | Delivery lifecycle, sprint, triage, and release basecoat-10-core-process |
-| basecoat-90-quality-quality | `instructions/quality.instructions.md` | PR review, security, performance, and coverage gates |
-| basecoat-10-core-reliability | `instructions/reliability.instructions.md` | Retries, uptime, background work, and dependency failure |
-| basecoat-50-security-security | `instructions/security.instructions.md` | Secure coding, auth, authz, secrets, and input handling |
-| basecoat-10-core-session-hygiene | `instructions/session-hygiene.instructions.md` | Context hygiene, session rotation, and clean-state working practices |
-| basecoat-30-ai-tailwind-v4 | `instructions/tailwind-v4.instructions.md` | Tailwind CSS v4 patterns, CSS-first configuration, and migration guidance |
-| basecoat-10-core-terraform | `instructions/terraform.instructions.md` | basecoat-10-core-terraform guidance for Azure-oriented IaC |
-| basecoat-10-core-testing | `instructions/testing.instructions.md` | basecoat-10-core-testing best practices and validation expectations |
-| basecoat-50-security-token-economics | `instructions/token-economics.instructions.md` | Cost-aware model routing and token budget discipline |
-| basecoat-10-core-tool-minimization | `instructions/tool-minimization.instructions.md` | Selective tool enablement and disciplined basecoat-10-core-mcp server usage |
-| basecoat-10-core-ux | `instructions/ux.instructions.md` | UX, accessibility, and design-system guidance |
-| basecoat-10-core-verification | `instructions/verification.instructions.md` | Explicit success criteria before coding and basecoat-10-core-verification with evidence before completion |
+| basecoat-10-core-agent-behavior | `instructions/basecoat-10-core-agent-behavior.instructions.md` | Retry loop prevention, edit thrashing, and escalation decisions |
+| basecoat-10-core-agents | `instructions/basecoat-10-core-agents.instructions.md` | Agent authoring standards |
+| basecoat-10-core-architecture | `instructions/basecoat-10-core-architecture.instructions.md` | Architecture, API, and design-diagram guidance |
+| basecoat-40-azure-azure | `instructions/basecoat-40-azure-azure.instructions.md` | basecoat-40-azure-azure service, SDK, and deployment guidance |
+| basecoat-10-core-backend | `instructions/basecoat-10-core-backend.instructions.md` | basecoat-10-core-backend APIs, services, workers, and data access |
+| basecoat-10-core-bicep | `instructions/basecoat-10-core-bicep.instructions.md` | basecoat-40-azure-azure basecoat-10-core-bicep authoring and validation |
+| basecoat-10-core-config | `instructions/basecoat-10-core-config.instructions.md` | basecoat-10-core-config file safety and secrets prevention |
+| basecoat-80-data-data-science | `instructions/basecoat-80-data-data-science.instructions.md` | Data science, ML, notebook, and medallion lakehouse patterns |
+| basecoat-10-core-development | `instructions/basecoat-10-core-development.instructions.md` | Shared dev standards for all dev-core basecoat-10-core-agents |
+| basecoat-10-core-documentation | `instructions/basecoat-10-core-documentation.instructions.md` | basecoat-10-core-documentation and change-note expectations |
+| basecoat-10-core-drift-monitor | `instructions/basecoat-10-core-drift-monitor.instructions.md` | Infrastructure-as-Code drift detection and remediation strategies |
+| basecoat-10-core-error-kb | `instructions/basecoat-10-core-error-kb.instructions.md` | Building and consulting error knowledge bases for failure classification and proven fixes |
+| basecoat-10-core-frontend | `instructions/basecoat-10-core-frontend.instructions.md` | Frontend, UI, state management, and accessibility |
+| basecoat-20-lang-governance | `instructions/basecoat-20-lang-governance.instructions.md` | Repository-wide AI basecoat-20-lang-governance rules |
+| basecoat-10-core-mcp | `instructions/basecoat-10-core-mcp.instructions.md` | basecoat-10-core-mcp server, tooling, and trust-boundary guidance |
+| basecoat-10-core-model-routing | `instructions/basecoat-10-core-model-routing.instructions.md` | Cost-aware model routing to avoid over-spending on premium models |
+| basecoat-10-core-naming | `instructions/basecoat-10-core-naming.instructions.md` | basecoat-10-core-naming conventions across repos, code, and infrastructure |
+| basecoat-10-core-nextjs-react19 | `instructions/basecoat-10-core-nextjs-react19.instructions.md` | Next.js and React 19 Server Components, App Router, and modern patterns |
+| basecoat-10-core-npm-workspaces | `instructions/basecoat-10-core-npm-workspaces.instructions.md` | npm workspaces and monorepo management best practices |
+| basecoat-10-core-output-style | `instructions/basecoat-10-core-output-style.instructions.md` | Concise agent responses while preserving clarity and full-fidelity code |
+| basecoat-10-core-plan-first | `instructions/basecoat-10-core-plan-first.instructions.md` | Explore-plan-implement-verify workflow for multi-step tasks |
+| basecoat-10-core-process | `instructions/basecoat-10-core-process.instructions.md` | Delivery lifecycle, sprint, triage, and release basecoat-10-core-process |
+| basecoat-90-quality-quality | `instructions/basecoat-90-quality-quality.instructions.md` | PR review, security, performance, and coverage gates |
+| basecoat-10-core-reliability | `instructions/basecoat-10-core-reliability.instructions.md` | Retries, uptime, background work, and dependency failure |
+| basecoat-50-security-security | `instructions/basecoat-50-security-security.instructions.md` | Secure coding, auth, authz, secrets, and input handling |
+| basecoat-10-core-session-hygiene | `instructions/basecoat-10-core-session-hygiene.instructions.md` | Context hygiene, session rotation, and clean-state working practices |
+| basecoat-30-ai-tailwind-v4 | `instructions/basecoat-30-ai-tailwind-v4.instructions.md` | Tailwind CSS v4 patterns, CSS-first configuration, and migration guidance |
+| basecoat-10-core-terraform | `instructions/basecoat-10-core-terraform.instructions.md` | basecoat-10-core-terraform guidance for Azure-oriented IaC |
+| basecoat-10-core-testing | `instructions/basecoat-10-core-testing.instructions.md` | basecoat-10-core-testing best practices and validation expectations |
+| basecoat-50-security-token-economics | `instructions/basecoat-50-security-token-economics.instructions.md` | Cost-aware model routing and token budget discipline |
+| basecoat-10-core-tool-minimization | `instructions/basecoat-10-core-tool-minimization.instructions.md` | Selective tool enablement and disciplined basecoat-10-core-mcp server usage |
+| basecoat-10-core-ux | `instructions/basecoat-10-core-ux.instructions.md` | UX, accessibility, and design-system guidance |
+| basecoat-10-core-verification | `instructions/basecoat-10-core-verification.instructions.md` | Explicit success criteria before coding and basecoat-10-core-verification with evidence before completion |
 
 ---
 

@@ -51,9 +51,9 @@ Use the manual test strategy agents and skill when a change or feature needs exp
 
 ### Agents
 
-- **`agents/manual-test-strategy.agent.md`**: produces the full strategy — decision rubric, exploratory charter, regression checklist, defect template, and automation backlog with GitHub Issues filed for every candidate.
-- **`agents/exploratory-charter.agent.md`**: generates one or more time-boxed exploratory sessions with mission, scope, evidence format, and triage routing. Files GitHub Issues for automation-worthy findings.
-- **`agents/strategy-to-automation.agent.md`**: converts manual paths and rubric rows into tiered automation candidates (smoke, regression, integration, or agent spec) and files a GitHub Issue for every candidate without exception.
+- **`agents/basecoat-90-quality-manual-test-strategy.agent.md`**: produces the full strategy — decision rubric, exploratory charter, regression checklist, defect template, and automation backlog with GitHub Issues filed for every candidate.
+- **`agents/basecoat-10-core-exploratory-charter.agent.md`**: generates one or more time-boxed exploratory sessions with mission, scope, evidence format, and triage routing. Files GitHub Issues for automation-worthy findings.
+- **`agents/basecoat-10-core-strategy-to-automation.agent.md`**: converts manual paths and rubric rows into tiered automation candidates (smoke, regression, integration, or agent spec) and files a GitHub Issue for every candidate without exception.
 
 ### Skill
 

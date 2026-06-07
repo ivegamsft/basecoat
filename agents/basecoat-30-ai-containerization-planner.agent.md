@@ -488,5 +488,4 @@ This agent operates under the BaseCoat governance framework.
 - **PRs only**: Never commit directly to `main`. Open a PR, self-approve if needed.
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
-- See `instructions/governance.instructions.md` for the full governance reference.
-
+- See `instructions/basecoat-20-lang-governance.instructions.md` for the full governance reference.

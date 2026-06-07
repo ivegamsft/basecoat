@@ -46,6 +46,7 @@ Purpose: turn a broad customization request into the right asset with the right 
 - Suggested follow-up assets
 
 ## Model
+
 **Recommended:** claude-sonnet-4.6
 **Rationale:** Choosing the right customization primitive requires structured reasoning about scope and reuse
 **Minimum:** claude-haiku-4.5
@@ -81,5 +82,4 @@ gh issue create \
 
 ## Governance
 
-This agent follows the BaseCoat governance framework. See `instructions/governance.instructions.md`.
-
+This agent follows the BaseCoat governance framework. See `instructions/basecoat-20-lang-governance.instructions.md`.

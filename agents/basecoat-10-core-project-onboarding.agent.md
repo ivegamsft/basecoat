@@ -42,7 +42,7 @@ Confirm `gh` and `git` CLI tools are available and authenticated.
 ```bash
 gh auth status
 git --version
-```
+```text
 
 If either is missing or unauthenticated, stop and report the error.
 
@@ -59,13 +59,13 @@ gh repo create "$github_org/$repo_name" \
   --description "$repo_description" \
   --"$visibility" \
   --clone
-```
+```text
 
 If the repo already exists, clone it instead:
 
 ```bash
 gh repo clone "$github_org/$repo_name"
-```
+```text
 
 ### 3. Scaffold Root Files
 
@@ -79,7 +79,7 @@ $basecoatRef = "$basecoat_version"   # e.g. "v0.6.0" or "main"
 Invoke-WebRequest `
   -Uri "https://raw.githubusercontent.com/ivegamsft/basecoat/$basecoatRef/sync.ps1" `
   -OutFile "sync.ps1"
-```
+```text
 
 **`sync.sh`** — same approach:
 
@@ -88,7 +88,7 @@ curl -fsSL \
   "https://raw.githubusercontent.com/ivegamsft/basecoat/$basecoat_version/sync.sh" \
   -o sync.sh
 chmod +x sync.sh
-```
+```text
 
 **`setup.ps1`** — bootstrap script that runs the BaseCoat sync and any first-time setup:
 
@@ -109,7 +109,7 @@ if (Test-Path $hooksDir) {
 }
 
 Write-Host 'Setup complete.'
-```
+```text
 
 **`.gitignore`** — standard ignore list with secrets protection:
 
@@ -149,7 +149,7 @@ __pycache__/
 *.tmp
 *.bak
 *.log
-```
+```text
 
 **`README.md`** — project readme with Getting Started section:
 
@@ -173,19 +173,19 @@ $repo_description
    ```bash
    gh repo clone $github_org/$repo_name
    cd $repo_name
-   ```
+   ```text
 
 2. Run the setup script to sync BaseCoat governance and configure hooks:
 
    **PowerShell:**
    ```powershell
    .\setup.ps1
-   ```
+   ```text
 
    **Bash:**
    ```bash
    ./sync.sh
-   ```
+   ```text
 
 3. Start working — all governance instructions, agents, and skills are now available under `.github/base-coat/`.
 
@@ -195,18 +195,18 @@ Re-run the sync script at any time to pull the latest BaseCoat version:
 
 ```powershell
 .\sync.ps1
-```
+```text
 
 Or pin to a specific release tag:
 
 ```powershell
 $env:BASECOAT_REF = "v0.6.0"
 .\sync.ps1
-```
+```text
 
 ## Contributing
 
-See `.github/base-coat/instructions/governance.instructions.md` for the full governance framework.
+See `.github/base-coat/instructions/basecoat-20-lang-governance.instructions.md` for the full governance framework.
 
 ## License
 
@@ -221,11 +221,11 @@ Use `sync.ps1` to pull the governance framework at the pinned version. This is t
 $env:BASECOAT_REPO = 'https://github.com/ivegamsft/basecoat.git'
 $env:BASECOAT_REF  = "$basecoat_version"
 .\sync.ps1
-```
+```text
 
 Verify the sync produced the expected structure:
 
-```
+```text
 .github/base-coat/
 ├── README.md
 ├── CHANGELOG.md
@@ -235,7 +235,7 @@ Verify the sync produced the expected structure:
 ├── skills/
 ├── prompts/
 └── agents/
-```
+```text
 
 ### 5. Configure Issue Templates
 
@@ -262,7 +262,7 @@ body:
       description: How will we know this is done?
     validations:
       required: true
-```
+```text
 
 **`.github/ISSUE_TEMPLATE/bug.yml`**:
 
@@ -289,7 +289,7 @@ body:
       label: Steps to reproduce
     validations:
       required: true
-```
+```text
 
 ### 6. Log the First Sprint Issue
 
@@ -314,7 +314,7 @@ $sprint_1_goal
 ## Context
 
 Created by the project-onboarding agent during initial repo setup."
-```
+```text
 
 ### 7. Commit and Push
 
@@ -333,7 +333,7 @@ git commit -m "feat: initial project scaffolding with BaseCoat integration
 Ref #<sprint-1-issue-number>"
 
 git push origin main
-```
+```text
 
 > **Note:** This initial scaffolding commit is the one exception where a direct push to `main` is acceptable — the repo has no branch protection yet and no prior history. All subsequent changes must follow the PR workflow per `governance.instructions.md`.
 
@@ -355,7 +355,7 @@ After completion, report the following:
 
 ### Files Created
 
-```
+```text
 $repo_name/
 ├── .github/
 │   ├── ISSUE_TEMPLATE/
@@ -375,7 +375,7 @@ $repo_name/
 ├── setup.ps1
 ├── sync.ps1
 └── sync.sh
-```
+```text
 
 ### Next Steps
 
@@ -395,6 +395,7 @@ This agent is safe to re-run on an existing repository:
 - **Sprint-1 issue** — a new issue is created each run. Check for duplicates before re-running if this is undesirable.
 
 ## Model
+
 **Recommended:** claude-sonnet-4.6
 **Rationale:** Repo scaffolding decisions and sprint goal decomposition need good reasoning depth
 **Minimum:** claude-haiku-4.5
@@ -407,5 +408,4 @@ This agent operates under the BaseCoat governance framework.
 - **PRs only**: Never commit directly to `main`. Open a PR, self-approve if needed.
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
-- See `instructions/governance.instructions.md` for the full governance reference.
-
+- See `instructions/basecoat-20-lang-governance.instructions.md` for the full governance reference.

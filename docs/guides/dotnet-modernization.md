@@ -30,11 +30,11 @@ This document defines the Base Coat approach for modernizing .NET workloads.
 
 ## Base Coat assets
 
-- Agent: `agents/dotnet-modernization-advisor.agent.md`
+- Agent: `agents/basecoat-20-lang-dotnet-modernization-advisor.agent.md`
 - Skills:
   - `skills/dotnet-modernization/SKILL.md`
   - `skills/entity-framework-migration/SKILL.md`
 - Instructions:
-  - `instructions/dotnet-upgrade-planning.instructions.md`
-  - `instructions/dotnet-dependency-analysis.instructions.md`
-  - `instructions/dotnet-test-strategy.instructions.md`
+  - `instructions/basecoat-20-lang-dotnet-upgrade-planning.instructions.md`
+  - `instructions/basecoat-20-lang-dotnet-dependency-analysis.instructions.md`
+  - `instructions/basecoat-20-lang-dotnet-test-strategy.instructions.md`

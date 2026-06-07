@@ -259,7 +259,7 @@ When proposing a new label:
 
 ### GitHub Copilot Issue Triage Agent
 
-The `issue-triage` agent uses these labels to classify and prioritize issues automatically. See [`agents/issue-triage.agent.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/issue-triage.agent.md) for details.
+The `issue-triage` agent uses these labels to classify and prioritize issues automatically. See [`agents/basecoat-10-core-issue-triage.agent.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-issue-triage.agent.md) for details.
 
 ### Sprint Planning
 
@@ -280,4 +280,4 @@ Version labels (e.g., `v1.0.0`, `v2.0.0`) are used to track which version an iss
 - **Governance Framework:** [`docs/GOVERNANCE.md`](governance.md)
 - **Contributing Guide:** [`CONTRIBUTING.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/CONTRIBUTING.md)
 - **Issue Templates:** [`.github/ISSUE_TEMPLATE/`](../.github/ISSUE_TEMPLATE/)
-- **Issue Triage Agent:** [`agents/issue-triage.agent.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/issue-triage.agent.md)
+- **Issue Triage Agent:** [`agents/basecoat-10-core-issue-triage.agent.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-issue-triage.agent.md)

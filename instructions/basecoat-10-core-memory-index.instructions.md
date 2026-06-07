@@ -131,7 +131,7 @@ For sharing across sessions/users: see `docs/memory/PROCESS.md` — contribute t
 | Topic | File |
 |---|---|
 | Promotion ladder formula, TRM confidence math, EscalationQuery contract, confidence update formula | [`references/memory-index/memory-algorithms.md`](references/memory-index/memory-algorithms.md) |
-| Full HRM layer definitions, GuidanceSignal types | `instructions/hrm-execution.instructions.md` |
-| Reflexion failure signal format, two-pass classification | `instructions/trm-reflexion.instructions.md` |
+| Full HRM layer definitions, GuidanceSignal types | `instructions/basecoat-10-core-hrm-execution.instructions.md` |
+| Reflexion failure signal format, two-pass classification | `instructions/basecoat-10-core-trm-reflexion.instructions.md` |
 | TRM estimator rationale and threshold calibration | `docs/research/TRM-HRM-investigation.md` |
 | End-to-end memory contribution pipeline, scope policy, steward guide | [`docs/memory/PROCESS.md`](../docs/memory/PROCESS.md) |

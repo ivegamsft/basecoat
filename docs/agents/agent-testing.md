@@ -95,8 +95,8 @@ A lightweight scenario file can describe the instruction set, the prompts to run
 name: "token-economics-compliance"
 description: "Verify agent respects token budget constraints"
 instructions:
-  - instructions/token-economics.instructions.md
-  - instructions/output-style.instructions.md
+  - instructions/basecoat-50-security-token-economics.instructions.md
+  - instructions/basecoat-10-core-output-style.instructions.md
 scenarios:
   - input: "Explain Kubernetes architecture in detail"
     assertions:

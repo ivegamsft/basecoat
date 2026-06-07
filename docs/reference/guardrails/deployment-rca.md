@@ -112,7 +112,7 @@ the incident.
 - Commenting out firewall rule steps to test without network restrictions.
 - Leaving runner IPs in place after a deployment completes.
 
-See [`instructions/ci-firewall.instructions.md`](/instructions/ci-firewall.instructions.md)
+See [`instructions/basecoat-60-workflow-ci-firewall.instructions.md`](/instructions/basecoat-60-workflow-ci-firewall.instructions.md)
 for the full pattern, YAML template, and anti-patterns.
 
 ---
@@ -134,7 +134,7 @@ before allowing any execution path:
 ## References
 
 - Deployment cancellation pre-flight: [`deployment-cancellation.md`](deployment-cancellation.md)
-- Firewall pattern: [`instructions/ci-firewall.instructions.md`](/instructions/ci-firewall.instructions.md)
-- Intent routing: [`instructions/intent-routing.instructions.md`](/instructions/intent-routing.instructions.md)
-- Bootstrap structure: [`instructions/bootstrap-structure.instructions.md`](/instructions/bootstrap-structure.instructions.md)
+- Firewall pattern: [`instructions/basecoat-60-workflow-ci-firewall.instructions.md`](/instructions/basecoat-60-workflow-ci-firewall.instructions.md)
+- Intent routing: [`instructions/basecoat-10-core-intent-routing.instructions.md`](/instructions/basecoat-10-core-intent-routing.instructions.md)
+- Bootstrap structure: [`instructions/basecoat-10-core-bootstrap-structure.instructions.md`](/instructions/basecoat-10-core-bootstrap-structure.instructions.md)
 - CI concurrency: [`ci-concurrency.md`](ci-concurrency.md)

@@ -24,7 +24,7 @@ MAJOR.MINOR.PATCH
 | Increment | When | Examples |
 |---|---|---|
 | **MAJOR** | Breaking change to consuming repo contract — file moves, schema changes, removed required files | Renaming `instructions/` to `standards/`, changing `version.json` schema |
-| **MINOR** | New agents, skills, instructions, templates, or non-breaking additions | Adding `agents/release-manager.agent.md`, new skill folder |
+| **MINOR** | New agents, skills, instructions, templates, or non-breaking additions | Adding `agents/basecoat-60-workflow-release-manager.agent.md`, new skill folder |
 | **PATCH** | Bug fixes, typos, CI tweaks, documentation corrections | Fixing a broken link, correcting a regex in a workflow |
 
 When in doubt, prefer the lower bump. A `feat` that adds content without changing contracts is `minor`, not `major`.
@@ -200,7 +200,7 @@ After the release is published:
 
 ## Using the Release Manager Agent
 
-The `release-manager` agent (`agents/release-manager.agent.md`) automates Steps 1–6 above. Invoke it with:
+The `release-manager` agent (`agents/basecoat-60-workflow-release-manager.agent.md`) automates Steps 1–6 above. Invoke it with:
 
 - **Default (direct tag):** The agent identifies merged PRs, bumps the version, writes the changelog, commits, tags, and publishes.
 - **With PR review:** Pass the PR-based review flag to have the agent open a release PR instead of tagging directly.
@@ -259,4 +259,4 @@ Per `docs/governance.md`, CI/CD changes (including releases) are decided by the 
 | `.github/workflows/release.yml` | Tag-triggered release automation |
 | `.github/workflows/package-basecoat.yml` | Tag-triggered packaging and artifact upload |
 | `.github/workflows/version-check.yml` | CI check for version/CHANGELOG consistency |
-| `agents/release-manager.agent.md` | Agent that automates this process |
+| `agents/basecoat-60-workflow-release-manager.agent.md` | Agent that automates this process |

@@ -38,6 +38,7 @@ The Secrets Manager agent operationalizes **secrets lifecycle management** acros
 ## Use Cases
 
 **Primary:**
+
 - Planning and implementing secrets rotation schedules
 - Scanning for expiring certificates and credentials
 - Emergency secret revocation workflows (compromised API keys, leaked credentials)
@@ -45,6 +46,7 @@ The Secrets Manager agent operationalizes **secrets lifecycle management** acros
 - Establishing least-privilege credential patterns (short-lived tokens, workload identities)
 
 **Secondary:**
+
 - Secrets discovery across infrastructure (SSH keys, API tokens, database passwords)
 - Regulatory compliance mapping (SOC2 CC6.1, HIPAA Security Rule §164.308(a)(3)(ii)(B))
 - Supply chain secret management (dependency credentials, artifact repository tokens)
@@ -169,6 +171,7 @@ vault kv list secret/
 ### 2. Vault Migration Plan
 
 For each discovered secret:
+
 - Determine rotation frequency
 - Assign owner/team
 - Plan zero-downtime migration
@@ -264,7 +267,8 @@ Incident Response:
 - **Expiry Scan Report** — list of certificates and credentials expiring within 30/60/90 days with remediation priority
 - **Emergency Revocation Playbook** — break-glass procedure for compromised credentials with audit trail requirements
 
-## Standards & References— Recommendation for Key Management](https://doi.org/10.6028/NIST.SP.800-57pt1r5)
+## Standards & References— Recommendation for Key Management](<https://doi.org/10.6028/NIST.SP.800-57pt1r5>)
+
 - [NIST SP 800-152 — Guidelines for Testing Cryptographic Modules](https://doi.org/10.6028/NIST.SP.800-152)
 - [SOC2 CC6.1 — Logical and Physical Access Controls](https://us.aicpa.org/interestareas/informationmanagement/sodp/content-landing)
 - [HIPAA Security Rule §164.308(a)(3)(ii)(B) — Encryption/Decryption](https://www.hhs.gov/hipaa/for-professionals/security/index.html)
@@ -286,5 +290,4 @@ This agent operates under the BaseCoat governance framework.
 - **PRs only**: Never commit directly to `main`. Open a PR, self-approve if needed.
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
-- See `instructions/governance.instructions.md` for the full governance reference.
-
+- See `instructions/basecoat-20-lang-governance.instructions.md` for the full governance reference.

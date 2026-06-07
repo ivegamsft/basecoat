@@ -35,7 +35,7 @@ Required preconditions before running E2E:
 
 ## Common Test Failures
 
-`instructions/governance.instructions.md` frequently breaks lint after rebases because
+`instructions/basecoat-20-lang-governance.instructions.md` frequently breaks lint after rebases because
 upstream changes introduce pre-existing violations. Always run `pwsh tests/run-tests.ps1`
 after rebasing. Common errors to fix:
 

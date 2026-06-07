@@ -93,7 +93,7 @@ A Copilot Extension surfaces all of this conversationally in any GitHub-integrat
    | (repos,    | | Repo       | | (GH Pages) |
    |  PRs)      | | (clone)    | |            |
    +------------+ +------------+ +------------+
-```
+```text
 
 ### Option B: Expand Existing MCP Server
 
@@ -121,7 +121,7 @@ New write tools (scaffold, validate, create-pr) live in the Extension layer.
 | **Deployment complexity** | New service + GH App registration | Already deployed | Two services |
 | **Latency** | Direct (one hop) | Local (fastest) | Extra hop |
 
-**Recommendation: Option C (Hybrid)**
+### Recommendation: Option C (Hybrid)
 
 Rationale:
 
@@ -271,6 +271,7 @@ The Extension uses GitHub OAuth 2.0 to authenticate users and authorize API acce
 ### Debugging Misroutes
 
 When intents don't map correctly:
+
 1. Log the raw user prompt + the tool the SDK selected (or "none")
 2. Compare against tool descriptions — refine wording
 3. Track in a `misroutes.jsonl` file or table for weekly review
@@ -288,12 +289,12 @@ The Extension reads this manifest at startup — no filesystem scan needed at ru
 
 ```json
 {
-  "agents": [{ "name": "api-designer", "description": "...", "path": "agents/api-designer.agent.md" }],
+  "agents": [{ "name": "api-designer", "description": "...", "path": "agents/basecoat-10-core-api-designer.agent.md" }],
   "skills": [{ "name": "azure-container-apps", "description": "...", "path": "skills/azure-container-apps/SKILL.md" }],
   "instructions": [...],
   "prompts": [...]
 }
-```
+```text
 
 ### User-Facing Tools
 
@@ -339,7 +340,7 @@ Critical for this project. Test that natural language prompts route to the corre
 
 - prompt: "Run validation on the repo"
   expected_tool: validate
-```
+```text
 
 ### End-to-End Tests
 
@@ -379,7 +380,7 @@ Write tool descriptions as if they're the **user's voice**, not the developer's:
 // GOOD — user-intent-centric
 "Search for BaseCoat agents, skills, instructions, or prompts by keyword.
 Use when asking 'what do we have for X?' or 'find skills related to Y'."
-```
+```text
 
 #### 2. Include Trigger Phrases
 
@@ -389,7 +390,7 @@ Add example phrasings directly in the description:
 description: `Run the BaseCoat validation suite (validate-basecoat.ps1 and run-tests.ps1).
 Triggers: "validate the repo", "run tests", "check if my changes pass",
 "is the repo healthy?", "lint basecoat"`
-```
+```text
 
 #### 3. Use Synonyms and Alternate Terms
 
@@ -397,14 +398,14 @@ Triggers: "validate the repo", "run tests", "check if my changes pass",
 description: `Create a new BaseCoat asset (agent, skill, instruction, or prompt)
 with correct frontmatter, directory structure, and eval companion.
 Also known as: scaffold, generate, bootstrap, initialize, stub out, add new.`
-```
+```text
 
 #### 4. Negative Routing (Exclude Mismatches)
 
 ```typescript
 description: `...
 Do NOT use for: modifying existing assets, running audits, or viewing metrics.`
-```
+```text
 
 #### 5. Parameter Descriptions as Routing Hints
 
@@ -417,7 +418,7 @@ parameters: {
     description: "Keyword to search for (e.g., 'security', 'API', 'azure', 'testing')"
   }
 }
-```
+```text
 
 #### 6. Skill/Agent Activation Shortcuts
 
@@ -429,13 +430,13 @@ For BaseCoat's own skills/agents that should be directly invocable:
 
 #### 7. Continuous Improvement Loop
 
-```
+```text
 User prompt → Tool selected → User feedback (thumbs up/down)
                                       ↓
                               Log to misroutes table
                                       ↓
                           Weekly review → refine descriptions
-```
+```text
 
 ### Description Template for Every Tool
 
@@ -451,7 +452,7 @@ server.tool(
   { /* params */ },
   handler
 );
-```
+```text
 
 ---
 

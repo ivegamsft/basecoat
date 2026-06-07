@@ -4,11 +4,11 @@ applyTo: "**/*"
 distribute: false
 ---
 
-## HRM Execution — Formal Layer Contracts
+# HRM Execution — Formal Layer Contracts
 
 > This file defines the Hierarchical Reasoning Model (HRM) execution contract for BaseCoat.
 > It implements the HRM Phase 2 adoption path from `docs/research/TRM-HRM-investigation.md`.
-> TRM intent classification details are in `instructions/trm-reflexion.instructions.md`.
+> TRM intent classification details are in `instructions/basecoat-10-core-trm-reflexion.instructions.md`.
 
 ---
 
@@ -135,7 +135,7 @@ emit `TURN_BUDGET_AT_RISK` before proceeding and confirm scope with the user.
 
 ## See Also
 
-- `instructions/trm-reflexion.instructions.md` — TRM Pass 1/Pass 2, Reflexion signal, k=3 cap
-- `instructions/memory-index.instructions.md` — L0–L4 index structure, EscalationQuery contract
-- `instructions/token-economics.instructions.md` — Turn budget taxonomy, 2D routing matrix reference
+- `instructions/basecoat-10-core-trm-reflexion.instructions.md` — TRM Pass 1/Pass 2, Reflexion signal, k=3 cap
+- `instructions/basecoat-10-core-memory-index.instructions.md` — L0–L4 index structure, EscalationQuery contract
+- `instructions/basecoat-50-security-token-economics.instructions.md` — Turn budget taxonomy, 2D routing matrix reference
 - `docs/research/TRM-HRM-investigation.md` — Full TRM+HRM investigation and threshold calibration

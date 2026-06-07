@@ -533,13 +533,13 @@ data before being treated as authoritative.
 
 ### TRM Failure Modes
 
-**Infinite recursion / runaway loops**
+### Infinite recursion / runaway loops
 
 - Risk: TRM loop does not converge and keeps requesting additional passes
 - Mitigation: Hard cap at max_passes=2. No exceptions. Any unresolved classification
   after Pass 2 routes to full path — it does not trigger Pass 3.
 
-**Oscillation**
+### Oscillation
 
 - Risk: Pass 1 classifies as intent A (confidence 0.72), Pass 2 reclassifies as intent B
   (confidence 0.73), a hypothetical Pass 3 would return to A
@@ -547,7 +547,7 @@ data before being treated as authoritative.
   but apply a 0.10 confidence penalty (the disagreement is a signal of genuine ambiguity).
   If penalized confidence drops below 0.50, route to full path.
 
-**Confirmation bias**
+### Confirmation bias
 
 - Risk: TRM's Pass 2 retrieves L3 context that confirms Pass 1's tentative classification,
   even when that classification is wrong. The agent loads supporting evidence for the
@@ -556,7 +556,7 @@ data before being treated as authoritative.
   constrained to a targeted L3 query (not a broad session scan). If the agent cannot
   construct a targeted query, skip Pass 2 and route to full path.
 
-**Budget exhaustion in TRM loop**
+### Budget exhaustion in TRM loop
 
 - Risk: TRM's overhead consumes budget that was allocated to the actual task
 - Mitigation: TRM token cost is deducted from the session budget before the task begins.
@@ -565,7 +565,7 @@ data before being treated as authoritative.
 
 ### HRM Failure Modes
 
-**Scope creep across layers**
+### Scope creep across layers
 
 - Risk: A layer attempts to resolve out-of-scope concerns (e.g., L2 routing layer tries
   to fetch L4 semantic facts before escalating)
@@ -573,7 +573,7 @@ data before being treated as authoritative.
   tooling. Until tooling enforces this, add an explicit scope check to each layer's
   system prompt: "If the answer requires [next layer's data], emit EscalationSignal."
 
-**Cascade escalation (all layers escalate, no resolution)**
+### Cascade escalation (all layers escalate, no resolution)
 
 - Risk: No layer resolves the request; the full HRM stack traverses all layers and returns
   nothing
@@ -581,7 +581,7 @@ data before being treated as authoritative.
   ("no coverage — generate and store"). The generation step creates a provisional L4 fact
   that is stored for future use.
 
-**Stale cross-layer dependency**
+### Stale cross-layer dependency
 
 - Risk: An L2 routing rule depends on an L4 fact that has been updated; the L2 rule now
   routes incorrectly
@@ -589,7 +589,7 @@ data before being treated as authoritative.
   tooling is available, quarterly memory audits should check L2 entries against their
   cited L4 sources.
 
-**Layer bypass**
+### Layer bypass
 
 - Risk: An agent skips layers (e.g., queries L4 directly without checking L2/L3), missing
   hot-cache hits and inflating token cost
@@ -613,22 +613,22 @@ data before being treated as authoritative.
 
 ### Near-term (next 1–2 sprints)
 
-4. **Implement TRM intent classifier (Pass 2)** — when L2 classification falls in the
+1. **Implement TRM intent classifier (Pass 2)** — when L2 classification falls in the
    0.30–0.79 band, automatically retrieve a targeted L3 snippet and reclassify before
    routing. Cap at max_passes=2 and confidence boost at +0.15.
-5. **Add heat scoring to memory promotion** — replace raw access counts with exponential
+2. **Add heat scoring to memory promotion** — replace raw access counts with exponential
    moving average heat scores (α=0.85) computed from session event streams.
-6. **Introduce `EscalationQuery` type** — structured query passed from L2 to L3/L4 with
+3. **Introduce `EscalationQuery` type** — structured query passed from L2 to L3/L4 with
    intent, keywords, confidence, and context_budget_remaining fields.
 
 ### Medium-term (future sprints)
 
-7. **Formalize HRM scope constraints** — add scope-check prompts to each decomposition
+1. **Formalize HRM scope constraints** — add scope-check prompts to each decomposition
    level in the agent workflow agents (sprint-planner, issue-triage, task agents).
-8. **Instrument TRM+HRM signals** — log guidance signals (TURN_BUDGET_AT_RISK,
+2. **Instrument TRM+HRM signals** — log guidance signals (TURN_BUDGET_AT_RISK,
    ELEVATE_TO_L3, etc.) to `session_store_sql` for retrospective analysis and threshold
    recalibration.
-9. **Calibrate thresholds from real data** — after 30 days of signal instrumentation,
+3. **Calibrate thresholds from real data** — after 30 days of signal instrumentation,
    review heat scores, confidence drift, and escalation rates to validate or adjust
    the recommended threshold values in this document.
 
@@ -661,5 +661,5 @@ data before being treated as authoritative.
    Expressivity.* Proceedings of AAAI-94, 1123–1128.
 7. Base Coat. *Memory Design.* `docs/memory/MEMORY_DESIGN.md`.
 8. Base Coat. *Learning Model.* `docs/memory/LEARNING_MODEL.md`.
-9. Base Coat. *Token Economics.* `instructions/token-economics.instructions.md`.
-10. Base Coat. *Memory Index.* `instructions/memory-index.instructions.md`.
+9. Base Coat. *Token Economics.* `instructions/basecoat-50-security-token-economics.instructions.md`.
+10. Base Coat. *Memory Index.* `instructions/basecoat-10-core-memory-index.instructions.md`.

@@ -19,7 +19,7 @@ Choose the appropriate base image for your workload:
 
 Select compute based on workload profile:
 
-```
+```text
 General Purpose (Dsv3, Esv3):
 - Web servers, small databases, development/test
 - 1-4 vCPUs, 4-16 GB RAM
@@ -34,7 +34,7 @@ Compute Optimized (Fsv2):
 - Batch processing, scientific simulations
 - High CPU-to-memory ratio
 - Sustained compute workloads
-```
+```text
 
 ## Desired State Configuration (DSC) Provisioning
 
@@ -72,7 +72,7 @@ Configuration WebServerConfig {
 
 # Compile configuration to MOF file
 WebServerConfig -OutputPath C:\DSC
-```
+```text
 
 ### DSC Extension in Azure
 
@@ -101,7 +101,7 @@ Set-AzVMDscExtension `
   -ConfigurationName 'WebServerConfig' `
   -Version '2.9' `
   -AutoUpdate $true
-```
+```text
 
 ### DSC Patterns for Enterprise
 
@@ -141,7 +141,7 @@ $configData = @{
         }
     )
 }
-```
+```text
 
 #### Parity with On-Premises
 
@@ -160,7 +160,7 @@ Configuration CurrentState {
         # Mirror every installed role, feature, and setting
     }
 }
-```
+```text
 
 ## Image Provisioning Workflow
 
@@ -201,7 +201,7 @@ New-AzImage `
   -Image $image `
   -ImageName $imageName `
   -ResourceGroupName $resourceGroupName
-```
+```text
 
 ### Scaling from Image
 
@@ -220,7 +220,7 @@ for ($i = 1; $i -le 3; $i++) {
       -VirtualNetworkName 'prod-vnet' `
       -SubnetName 'web-subnet'
 }
-```
+```text
 
 ## Migration Strategies
 
@@ -245,7 +245,7 @@ Use Azure Site Recovery for minimal downtime:
 Enable-AzRecoveryServicesAsrReplication `
   -VirtualMachine $vm `
   -ReplicationPolicy $replicationPolicy
-```
+```text
 
 ## Network Configuration
 
@@ -294,7 +294,7 @@ foreach ($rule in $nsgRules) {
     Add-AzNetworkSecurityRuleConfig @rule `
       -NetworkSecurityGroup $nsg
 }
-```
+```text
 
 ### Bastion Host for Secure Access
 
@@ -318,7 +318,7 @@ $bastion = New-AzBastion `
   -Name 'prod-bastion' `
   -PublicIpAddressId $publicIp.Id `
   -VirtualNetworkId $vnet.Id
-```
+```text
 
 ## Monitoring and Compliance
 
@@ -335,7 +335,7 @@ Set-AzVMExtension `
   -Publisher 'Microsoft.Azure.Monitor' `
   -ExtensionType 'AzureMonitorWindowsAgent' `
   -TypeHandlerVersion '1.0'
-```
+```text
 
 ### Compliance: Windows Hardening
 
@@ -366,11 +366,11 @@ Configuration SecurityBaseline {
         }
     }
 }
-```
+```text
 
 ## Base Coat Assets
 
-- Agent: `agents/containerization-planner.agent.md`
+- Agent: `agents/basecoat-30-ai-containerization-planner.agent.md`
 - Skill: `skills/azure-compute/`
 - Instruction: `instructions/dsc-provisioning.instructions.md`
 

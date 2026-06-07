@@ -63,5 +63,4 @@ This agent operates under the BaseCoat governance framework.
 - **PRs only**: Retro doc changes go through a PR — no direct `main` commits.
 - **No secrets**: Never include credentials, tokens, or internal hostnames in retro docs or BaseCoat issues.
 - **Generic framing**: BaseCoat issues must be project-agnostic.
-- See `instructions/governance.instructions.md` for the full governance reference.
-
+- See `instructions/basecoat-20-lang-governance.instructions.md` for the full governance reference.

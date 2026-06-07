@@ -147,16 +147,16 @@ Before any `azure:`, `infra:`, or `deploy:` operation, emit this advisory:
 
 ```text
 Azure preflight: ci-firewall and rbac-authentication checks apply.
-See instructions/ci-firewall.instructions.md and instructions/rbac-authentication.instructions.md.
+See instructions/basecoat-60-workflow-ci-firewall.instructions.md and instructions/basecoat-50-security-rbac-authentication.instructions.md.
 ```
 
 Then verify:
 
 - **CI Firewall** — workflow accesses firewalled Azure resources? Confirm the
-  single-job runner IP pattern (`instructions/ci-firewall.instructions.md`)
+  single-job runner IP pattern (`instructions/basecoat-60-workflow-ci-firewall.instructions.md`)
   is in place before deploying.
 - **RBAC Authentication** — change provisions or configures Azure resources?
-  Confirm RBAC-only auth (`instructions/rbac-authentication.instructions.md`)
+  Confirm RBAC-only auth (`instructions/basecoat-50-security-rbac-authentication.instructions.md`)
   before proceeding.
 
 The advisory is non-blocking unless a firewall or RBAC gap is found, in which
@@ -320,7 +320,7 @@ disambiguation question before first evidence collection.
 ## The instruction file
 
 This convention is codified in
-[`instructions/intent-routing.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/intent-routing.instructions.md).
+[`instructions/basecoat-10-core-intent-routing.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/basecoat-10-core-intent-routing.instructions.md).
 
 When BaseCoat is synced to your repo, this instruction is loaded by Copilot
 automatically and applies to all conversations. You can adopt this prefix
@@ -384,7 +384,7 @@ next-hop: <agent name or none>
 
 ```text
 feature: add plan-first lint checks for new agent files
-scope: instructions/agents.instructions.md and tests only
+scope: instructions/basecoat-10-core-agents.instructions.md and tests only
 constraints: no workflow changes
 deliverable: updated instruction rule plus test case
 evidence: failing then passing test output

@@ -126,5 +126,4 @@ See `docs/MODEL_OPTIMIZATION.md` for the full tier matrix. See `docs/token-optim
 | OIDC, CAF naming, container tags, env-example, DB concurrency, deployment cancellation | [`references/governance/guardrails-reference.md`](references/governance/guardrails-reference.md) |
 | VS Code tool confirmation tiers and enforcement | [`docs/reference/guardrails/tool-confirmation-policy.md`](../docs/reference/guardrails/tool-confirmation-policy.md) |
 | Sub-agent redispatch/retry/escalation policy | [`docs/agents/MULTI_AGENT_WORKFLOWS.md#sub-agent-redispatch-retry-and-escalation-policy`](../docs/agents/MULTI_AGENT_WORKFLOWS.md#sub-agent-redispatch-retry-and-escalation-policy) |
-| Intent prefix routing, timing semantics, prefix-to-agent map | [`instructions/intent-routing.instructions.md`](../instructions/intent-routing.instructions.md) |
-
+| Intent prefix routing, timing semantics, prefix-to-agent map | [`instructions/basecoat-10-core-intent-routing.instructions.md`](../instructions/basecoat-10-core-intent-routing.instructions.md) |

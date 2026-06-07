@@ -72,4 +72,4 @@ Purpose: demonstrate the required structure.
 *(none)*
 ```
 
-Refer to `agents/backend-dev.agent.md` and `agents/security-analyst.agent.md` for fully fleshed-out examples.
+Refer to `agents/basecoat-10-core-backend-dev.agent.md` and `agents/basecoat-50-security-security-analyst.agent.md` for fully fleshed-out examples.

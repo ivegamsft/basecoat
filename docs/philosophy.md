@@ -165,7 +165,7 @@ script (Structure) should never enumerate specific skill names (Stuff).
 an agent prompt is lightweight; a change to the frontmatter schema is an RFC.
 
 For the full framework and anti-patterns, see
-[`instructions/shearing-layers.instructions.md`](/instructions/shearing-layers.instructions.md).
+[`instructions/basecoat-10-core-shearing-layers.instructions.md`](/instructions/basecoat-10-core-shearing-layers.instructions.md).
 
 ---
 

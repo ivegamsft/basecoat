@@ -34,4 +34,4 @@ Reusable templates and workflows for inventorying legacy application portfolios 
 
 ## Paired Agent
 
-`agents/app-inventory.agent.md` — see `docs/treatment-matrix.md` for app disposition decisions.
+`agents/basecoat-10-core-app-inventory.agent.md` — see `docs/treatment-matrix.md` for app disposition decisions.

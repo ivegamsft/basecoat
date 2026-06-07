@@ -166,7 +166,7 @@ All customizations follow the same governance model:
 
 - **Issue-first**: Log a GitHub issue before creating or modifying any asset.
 - **PR review**: All changes go through pull requests. Self-approval is permitted for low-risk changes.
-- **Naming conventions**: Follow the patterns in [`instructions/naming.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/naming.instructions.md).
+- **Naming conventions**: Follow the patterns in [`instructions/basecoat-10-core-naming.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/basecoat-10-core-naming.instructions.md).
 - **Quality gates**: CI validates structure and naming on every PR.
 
 See [`docs/GOVERNANCE.md`](../reference/governance.md) and [`CONTRIBUTING.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/CONTRIBUTING.md) for full details.
@@ -191,7 +191,7 @@ See [`docs/GOVERNANCE.md`](../reference/governance.md) and [`CONTRIBUTING.md`](h
 ### Agent Trust Boundaries
 
 - Agents and skills execute in the context of the developer's Copilot session. They do not have independent access to systems.
-- MCP integrations must follow the trust-boundary rules in [`instructions/mcp.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/mcp.instructions.md).
+- MCP integrations must follow the trust-boundary rules in [`instructions/basecoat-10-core-mcp.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/basecoat-10-core-mcp.instructions.md).
 - Review [`docs/../reference/guardrails/oidc-federation.md`](../reference/guardrails/oidc-federation.md) before configuring any GitHub Actions to Azure authentication.
 
 ### Supply Chain Security

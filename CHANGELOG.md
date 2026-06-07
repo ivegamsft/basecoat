@@ -143,18 +143,18 @@ All notable changes to this repository should be recorded in this file.
 - `docs/architecture/decisions/adr-001-naming-convention.md` — ADR clarifying `basecoat` vs `base-coat` naming split (#638)
 - `.github/workflows/check-basecoat-version-callable.yml` — callable version drift detection workflow for consumer repos (#648)
 - `.github/workflow-templates/check-basecoat-version.yml` — starter template for consumer repos
-- `instructions/workflow-integrity.instructions.md` — GitHub Actions security guardrails: injection, credentials, pinned actions (#642)
-- `instructions/workflow-file-integrity.instructions.md` — workflow YAML corruption prevention (#643)
+- `instructions/basecoat-60-workflow-workflow-integrity.instructions.md` — GitHub Actions security guardrails: injection, credentials, pinned actions (#642)
+- `instructions/basecoat-60-workflow-workflow-file-integrity.instructions.md` — workflow YAML corruption prevention (#643)
 - `skills/azure-linux-app-service/SKILL.md` — Python/Ruby/Node.js PaaS on App Service Linux (#644)
 - `skills/cross-stack-modernization/SKILL.md` — language-agnostic modernization patterns: strangler fig, ACL, risk scoring (#645)
-- `agents/memory-promoter.agent.md` — promotes session patterns to memory contribution payloads (#627)
+- `agents/basecoat-10-core-memory-promoter.agent.md` — promotes session patterns to memory contribution payloads (#627)
 - `scripts/detect-repeat-fixes.ps1` — checks session-state against a hardcoded list of known recurring fix patterns and flags those that exceed the frequency threshold (#630)
 
 ### Changed
 
 - `skills/database-migration/SKILL.md` — extended with Entra-only SQL auth: SID-based CREATE USER, managed identity (#647)
-- `agents/legacy-modernization.agent.md` — added Python, Ruby, Java, Node.js migration patterns (#639)
-- `agents/self-healing-ci.agent.md` — added Azure App Service PaaS startup failure patterns (#640)
+- `agents/basecoat-10-core-legacy-modernization.agent.md` — added Python, Ruby, Java, Node.js migration patterns (#639)
+- `agents/basecoat-60-workflow-self-healing-ci.agent.md` — added Azure App Service PaaS startup failure patterns (#640)
 - `.github/workflows/submit-learning-callable.yml` — added batch `memories` JSON array input (#631)
 
 ## 3.24.0 - 2026-05-09
@@ -190,13 +190,13 @@ Business Model Canvas for the BaseCoat multi-agent system. Covers value
 propositions, customer segments, channels, revenue streams (measured in
 adoption and knowledge quality), key activities, and cost structure.
 
-#### agents/guidance-author.agent.md
+#### agents/basecoat-50-security-guidance-author.agent.md
 
 Creator agent that drafts new BaseCoat guidance assets (instructions, skills,
 agents, prompts) from a plain-language description. Handoffs to
 guidance-reviewer for validation.
 
-#### agents/guidance-reviewer.agent.md
+#### agents/basecoat-90-quality-guidance-reviewer.agent.md
 
 Verifier agent that validates guidance drafts against lint rules, frontmatter
 schema, required sections, and BaseCoat conventions. Returns structured
@@ -532,7 +532,7 @@ in `CONTRIBUTING.md` under "Asset Distribution". Closes #578.
 
 ### HRM Formalization + Skill Batch 2 + Memory Intelligence
 
-#### HRM Phase 2 Formal Layer Contracts (`instructions/hrm-execution.instructions.md`)
+#### HRM Phase 2 Formal Layer Contracts (`instructions/basecoat-10-core-hrm-execution.instructions.md`)
 
 New instruction file formalizing the Human-Routing-Model Phase 2 adoption path from the TRM/HRM research doc:
 
@@ -542,9 +542,9 @@ New instruction file formalizing the Human-Routing-Model Phase 2 adoption path f
 - **Guidance signal catalogue** — 7 signals: `STAY_FAST_PATH`, `EXPAND_CONTEXT`, `ELEVATE_TO_L3`, `ELEVATE_TO_L4`, `TURN_BUDGET_AT_RISK`, `ESCALATE_SCOPE`, `CONFIDENCE_DRIFT`
 - **Agent decomposition scope table** — Sprint → Wave → Issue → Task → Sub-task with "can resolve" and "must escalate" columns
 - **Cross-layer dependency notation** — `[depends: subject@fact]` comment convention
-- Updated `instructions/memory-index.instructions.md` and `instructions/token-economics.instructions.md` with 2D routing matrix references and cross-links
+- Updated `instructions/basecoat-10-core-memory-index.instructions.md` and `instructions/basecoat-50-security-token-economics.instructions.md` with 2D routing matrix references and cross-links
 
-#### TRM Memory Intelligence (`instructions/memory-index.instructions.md`)
+#### TRM Memory Intelligence (`instructions/basecoat-10-core-memory-index.instructions.md`)
 
 - **Pattern bundle Bayesian confidence updates** — `confidence(t) = confidence(t-1) + 0.05 × (outcome(t) - confidence(t-1))`, bounded [0.50, 0.99]; quarterly drift review for bundles drifting > 0.15 from authored value
 - **Memory promotion heat scoring** — `heat(t) = 0.85 × heat(t-1) + 0.15 × relevance(t)` where relevance ∈ {1.0 applied, 0.5 loaded, 0.0 not loaded}; `[heat-score: <value>]` inline comment convention for L2 index entries; raw access-count thresholds replaced with heat thresholds
@@ -573,7 +573,7 @@ Each `SKILL.md` is now a ≤5 KB overview + nav table; detailed content lives in
 
 ### TRM Intelligence + Skill Modularization + MCP Expansion
 
-#### TRM Reflexion Instruction (`instructions/trm-reflexion.instructions.md`)
+#### TRM Reflexion Instruction (`instructions/basecoat-10-core-trm-reflexion.instructions.md`)
 
 New instruction file implementing the TRM Phase 1 adoption path from the research doc:
 
@@ -582,7 +582,7 @@ New instruction file implementing the TRM Phase 1 adoption path from the researc
 - **Self-consistency cap** — k=3 maximum passes; Pass 3 uses majority vote across all three passes
 - **Progress estimator** — exponential moving average `estimate(t) = estimate(t-1)×0.7 + observation(t)×0.3`; fires checkpoint when progress/turns_remaining < 0.6
 - **HRM tier integration** — TRM confidence score surfaces alongside fast/full routing decision
-- Updated `instructions/token-economics.instructions.md` and `instructions/memory-index.instructions.md` with cross-references to `trm-reflexion.instructions.md`
+- Updated `instructions/basecoat-50-security-token-economics.instructions.md` and `instructions/basecoat-10-core-memory-index.instructions.md` with cross-references to `trm-reflexion.instructions.md`
 
 #### Large Skill Modularization (`skills/`)
 
@@ -612,7 +612,7 @@ Three new tools added to the `basecoat-metrics` MCP server:
 
 New agentic workflow for automated Dependabot PR triage:
 
-- **`agents/dependency-update-advisor.agent.md`** — defines the full workflow: semver bump detection, breaking change lookup, impact surface analysis, CVE context, structured comment posting
+- **`agents/basecoat-10-core-dependency-update-advisor.agent.md`** — defines the full workflow: semver bump detection, breaking change lookup, impact surface analysis, CVE context, structured comment posting
 - **`.github/workflows/dependency-update-advisor.yml`** — GitHub Actions workflow triggered on `pull_request: opened` for Dependabot PRs; posts a `🔍 Dependency Update Risk Assessment` comment with risk level (LOW/MEDIUM/HIGH), breaking change detection from release notes, test focus suggestions, and CVE context
 
 ## 3.12.0 - 2026-05-08
@@ -723,8 +723,8 @@ New `security-analyst.md` + compiled `security-analyst.lock.yml`:
 
 #### Azure Instructions
 
-- **`instructions/azure-service-connector.instructions.md`**: managed identity authentication (system/user-assigned), Key Vault references for secrets, Bicep `Microsoft.ServiceLinker/linkers` patterns, standard environment variable names, connection validation
-- **`instructions/azure-app-configuration.instructions.md`**: key naming hierarchy (`{service}/{component}/{key}` + labels), feature flags with safe defaults, dynamic refresh with sentinel key, `disableLocalAuth`, purge protection, private endpoints, SDK usage pattern (.NET example)
+- **`instructions/basecoat-40-azure-azure-service-connector.instructions.md`**: managed identity authentication (system/user-assigned), Key Vault references for secrets, Bicep `Microsoft.ServiceLinker/linkers` patterns, standard environment variable names, connection validation
+- **`instructions/basecoat-40-azure-azure-app-configuration.instructions.md`**: key naming hierarchy (`{service}/{component}/{key}` + labels), feature flags with safe defaults, dynamic refresh with sentinel key, `disableLocalAuth`, purge protection, private endpoints, SDK usage pattern (.NET example)
 
 #### Shared Org Memory Repo
 
@@ -749,7 +749,7 @@ New reference document defining the 5-layer execution stack for all BaseCoat age
 
 Pattern bundle catalog: 9 known BaseCoat patterns with turn budgets and confidence lifecycle (degrades on overruns, retires below 0.50).
 
-#### Memory Lookup Hierarchy (`instructions/memory-index.instructions.md`)
+#### Memory Lookup Hierarchy (`instructions/basecoat-10-core-memory-index.instructions.md`)
 
 New L2 hot-cache instruction file — loads at session start to prime fast recall:
 
@@ -759,7 +759,7 @@ New L2 hot-cache instruction file — loads at session start to prime fast recal
 - Trigger map organized by domain (CI, testing, portal, git, assets, turn budget)
 - Episodic retrieval SQL shortcuts for L3 queries
 
-#### Turn Budget and Learning Cost (`instructions/token-economics.instructions.md`)
+#### Turn Budget and Learning Cost (`instructions/basecoat-50-security-token-economics.instructions.md`)
 
 - Classify tasks as **Routine** (≤3 turns), **Familiar** (≤5 turns), or **Novel** (estimate N) before starting
 - **Failure protocol**: after 5 turns with no measurable forward progress → `store_memory` failure pattern, change approach before escalating model tier
@@ -773,14 +773,14 @@ New L2 hot-cache instruction file — loads at session start to prime fast recal
 - Heat thresholds: cold (0–2 accesses), warm (3–9), hot (10+)
 - Pinned flag exempts memories from decay and demotion
 
-#### Memory Curator Agent (`agents/memory-curator.agent.md`)
+#### Memory Curator Agent (`agents/basecoat-10-core-memory-curator.agent.md`)
 
 - L0–L4 lookup hierarchy with retrieval cost per tier
 - Promotion protocol (myelination): access frequency drives tier promotion
 - Heat-based proactive injection: hot memories injected at session start when domain matches
 - Resolution order for SessionStart and PostToolUse failure paths
 
-#### Plan-First Workflow (`instructions/plan-first.instructions.md`)
+#### Plan-First Workflow (`instructions/basecoat-10-core-plan-first.instructions.md`)
 
 - Phase 0 (Intent Classification) added before Explore phase
 - Fast-path tasks skip directly to Plan using bundle context
@@ -1064,15 +1064,15 @@ None — v3.0.0 maintains backward compatibility with v2.x patterns.
 
 ### Added
 - `skills/electron-apps/SKILL.md` — Electron app development patterns: IPC, CSP, state management, testing, packaging, auto-updates (#346)
-- `instructions/fabric-notebooks.instructions.md` — Medallion architecture for Fabric notebooks, lakehouse integration, CI/CD automation, governance (#377)
-- `agents/security-operations.agent.md` — SOC playbook, threat detection, incident response, secrets rotation, audit logging (#360)
-- `agents/penetration-test.agent.md` — Penetration testing workflows, OWASP Testing Guide alignment, finding templates (#364)
-- `agents/production-readiness.agent.md` — PRR gates, business continuity planning, disaster recovery, FMEA analysis (#363)
-- `agents/ha-architect.agent.md` — High availability patterns, resilience review, SRE/chaos engineering (#362)
-- `agents/contract-testing.agent.md` — Consumer-driven contracts, Pact, mutation testing, integration test orchestration (#361)
-- `agents/data-architect.agent.md` — Medallion architecture, data governance, ETL/ELT patterns, performance optimization (#365)
-- `agents/database-migration.agent.md` — Zero-downtime migrations, schema evolution, dual-write strategies (#365)
-- `agents/gitops-engineer.agent.md` — Argo CD, Flux v2, drift detection, disaster recovery patterns (#365)
+- `instructions/basecoat-10-core-fabric-notebooks.instructions.md` — Medallion architecture for Fabric notebooks, lakehouse integration, CI/CD automation, governance (#377)
+- `agents/basecoat-50-security-security-operations.agent.md` — SOC playbook, threat detection, incident response, secrets rotation, audit logging (#360)
+- `agents/basecoat-90-quality-penetration-test.agent.md` — Penetration testing workflows, OWASP Testing Guide alignment, finding templates (#364)
+- `agents/basecoat-10-core-production-readiness.agent.md` — PRR gates, business continuity planning, disaster recovery, FMEA analysis (#363)
+- `agents/basecoat-10-core-ha-architect.agent.md` — High availability patterns, resilience review, SRE/chaos engineering (#362)
+- `agents/basecoat-10-core-contract-testing.agent.md` — Consumer-driven contracts, Pact, mutation testing, integration test orchestration (#361)
+- `agents/basecoat-80-data-data-architect.agent.md` — Medallion architecture, data governance, ETL/ELT patterns, performance optimization (#365)
+- `agents/basecoat-80-data-database-migration.agent.md` — Zero-downtime migrations, schema evolution, dual-write strategies (#365)
+- `agents/basecoat-10-core-gitops-engineer.agent.md` — Argo CD, Flux v2, drift detection, disaster recovery patterns (#365)
 - All supporting skills for Tier 1B security, operations, and data agents
 - Agent Skills spec validator integration (Phase 2 #327)
 - Cross-client interop sync paths for `.agents/skills/` (Phase 2 #329)
@@ -1083,8 +1083,8 @@ None — v3.0.0 maintains backward compatibility with v2.x patterns.
 
 
 ### Added
-- `agents/data-pipeline.agent.md` — orchestrates data ingestion, transformation, quality validation workflows (#379)
-- `agents/github-security-posture.agent.md` — analyzes org/repo security settings, permissions, branch protections, secret scanning (#381)
+- `agents/basecoat-60-workflow-data-pipeline.agent.md` — orchestrates data ingestion, transformation, quality validation workflows (#379)
+- `agents/basecoat-50-security-github-security-posture.agent.md` — analyzes org/repo security settings, permissions, branch protections, secret scanning (#381)
 - `agents/vs-code-handoff.agent.md` — seamless skill/agent handoff workflows between VS Code Copilot and other tools (#382)
 - Cloud agent coordination workflows with auto-approval and self-merge for continuous delivery (#379-382)
 
@@ -1094,18 +1094,18 @@ None — v3.0.0 maintains backward compatibility with v2.x patterns.
 - `model` and `tools` frontmatter fields to all 3 prompt files for VS Code routing (#321)
 - Browser storage threat model section in `security.instructions.md` (#344)
 - Security headers section in `nextjs-react19.instructions.md` with CSP baseline (#344)
-- `instructions/rest-client-resilience.instructions.md` — timeouts, retries, 429 handling, semaphores, structured failure logging (#347)
+- `instructions/basecoat-10-core-rest-client-resilience.instructions.md` — timeouts, retries, 429 handling, semaphores, structured failure logging (#347)
 - `skills/azure-devops-rest/SKILL.md` — auth, PAT scopes, pagination, throttling, endpoint taxonomy (#345)
 
 ## 2.3.0 - 2026-05-01
 
 ### Added
-- `instructions/terraform-init.instructions.md` — always use `-reconfigure` in bootstrap and CI/CD (#353)
-- `instructions/bootstrap-autodetect.instructions.md` — auto-detect values via param → env → CLI cascade, no prompts (#348)
-- `instructions/bootstrap-github-secrets.instructions.md` — auto-push secrets/variables via `gh` CLI (#350)
-- `instructions/ci-firewall.instructions.md` — single-job runner IP firewall pattern with guaranteed cleanup (#351)
-- `instructions/bootstrap-structure.instructions.md` — decomposed, idempotent, documented bootstrap scripts (#349)
-- `instructions/rbac-authentication.instructions.md` — RBAC-only Azure auth, disable shared keys/SAS/access policies (#352)
+- `instructions/basecoat-10-core-terraform-init.instructions.md` — always use `-reconfigure` in bootstrap and CI/CD (#353)
+- `instructions/basecoat-10-core-bootstrap-autodetect.instructions.md` — auto-detect values via param → env → CLI cascade, no prompts (#348)
+- `instructions/basecoat-50-security-bootstrap-github-secrets.instructions.md` — auto-push secrets/variables via `gh` CLI (#350)
+- `instructions/basecoat-60-workflow-ci-firewall.instructions.md` — single-job runner IP firewall pattern with guaranteed cleanup (#351)
+- `instructions/basecoat-10-core-bootstrap-structure.instructions.md` — decomposed, idempotent, documented bootstrap scripts (#349)
+- `instructions/basecoat-50-security-rbac-authentication.instructions.md` — RBAC-only Azure auth, disable shared keys/SAS/access policies (#352)
 
 ## 2.2.0 - 2026-05-01
 
@@ -1140,7 +1140,7 @@ None — v3.0.0 maintains backward compatibility with v2.x patterns.
 ## 2.1.0 - 2026-05-01
 
 ### Added
-- `agents/sprint-retrospective.agent.md` — new agent for generating structured sprint retrospectives with metrics, timelines, and actionable tips
+- `agents/basecoat-10-core-sprint-retrospective.agent.md` — new agent for generating structured sprint retrospectives with metrics, timelines, and actionable tips
 - `skills/sprint-retrospective/SKILL.md` — companion skill with document templates, metrics formulas, and tips taxonomy
 - `docs/goals.md` — 8 primary project goals, non-goals, and success criteria
 - `docs/repo_history/2026-05-01-story-of-basecoat.md` — 7-chapter narrative of repo evolution
@@ -1194,22 +1194,22 @@ None — v3.0.0 maintains backward compatibility with v2.x patterns.
 
 ## 0.7.0 - 2026-04-26
 
-- Added `agents/sprint-planner.agent.md`: goal-to-issues decomposition with wave dependency mapping, agent assignment recommendations, acceptance criteria generation, and sprint board output
-- Added `agents/project-onboarding.agent.md`: single-invocation new repo setup — creates repo, syncs Basecoat at pinned version, places sync scripts, configures .gitignore and issue templates, logs Sprint 1 issue, and scaffolds README
-- Added `agents/release-manager.agent.md`: automated versioned release workflow — reads merged PRs, bumps version.json (semver), writes CHANGELOG entry, creates git tag, and publishes GitHub release; supports dry-run and PR-or-direct mode
-- Added `agents/retro-facilitator.agent.md`: end-of-sprint retrospective — collects sprint artifacts, computes metrics, identifies patterns (Went Well / Improve / Action Items), files generic Basecoat improvement issues, and persists retro doc via PR
+- Added `agents/basecoat-10-core-sprint-planner.agent.md`: goal-to-issues decomposition with wave dependency mapping, agent assignment recommendations, acceptance criteria generation, and sprint board output
+- Added `agents/basecoat-10-core-project-onboarding.agent.md`: single-invocation new repo setup — creates repo, syncs Basecoat at pinned version, places sync scripts, configures .gitignore and issue templates, logs Sprint 1 issue, and scaffolds README
+- Added `agents/basecoat-60-workflow-release-manager.agent.md`: automated versioned release workflow — reads merged PRs, bumps version.json (semver), writes CHANGELOG entry, creates git tag, and publishes GitHub release; supports dry-run and PR-or-direct mode
+- Added `agents/basecoat-60-workflow-retro-facilitator.agent.md`: end-of-sprint retrospective — collects sprint artifacts, computes metrics, identifies patterns (Went Well / Improve / Action Items), files generic Basecoat improvement issues, and persists retro doc via PR
 - Added `docs/MODEL_OPTIMIZATION.md`: model-per-role recommendations with tier matrix (Premium / Reasoning / Code / Fast), when-to-override guidance, cost considerations, and consumer configuration patterns
 - Added `docs/RELEASE_PROCESS.md`: step-by-step release guide covering version artifact sync, semver rules, manual and agent-driven release processes, tag immutability policy, rollback procedure, and CI integration table
 - Updated all 15 `agents/*.agent.md` files: added `## Model` section to every agent with recommended model, rationale, and minimum viable model
-- Updated `instructions/governance.instructions.md`: Section 10 implemented — model selection guidance, token budget awareness rules, and cost attribution pattern (replaces stub)
+- Updated `instructions/basecoat-20-lang-governance.instructions.md`: Section 10 implemented — model selection guidance, token budget awareness rules, and cost attribution pattern (replaces stub)
 - Fixed `README.md`: sync consumption pattern moved to top with Quick Start section, anti-pattern callout, and environment variables table
 
 ## 0.6.0 - 2026-03-19
 
-- Added `agents/backend-dev.agent.md`: designs and implements REST/GraphQL APIs, service layers, and data access patterns; files GitHub Issues with `tech-debt,backend` labels for N+1 risk, missing validation, unhandled error paths, hardcoded values, and missing auth
-- Added `agents/frontend-dev.agent.md`: builds component-driven UIs with WCAG 2.1 AA accessibility, responsive layouts, and Core Web Vitals targets; files GitHub Issues with `tech-debt,frontend,accessibility` labels for missing ARIA, hardcoded colors, non-semantic markup, missing loading states, and inline styles
-- Added `agents/middleware-dev.agent.md`: designs integration layers, message contracts, API gateways, and event-driven architectures with circuit breaker, retry, DLQ, and idempotency patterns; files GitHub Issues with `tech-debt,middleware,reliability` labels
-- Added `agents/data-tier.agent.md`: designs schemas, writes reversible migrations, optimizes queries, and establishes data access patterns; files GitHub Issues with `tech-debt,data,performance` labels for N+1 queries, missing indexes, SELECT *, missing rollbacks, and hardcoded IDs
+- Added `agents/basecoat-10-core-backend-dev.agent.md`: designs and implements REST/GraphQL APIs, service layers, and data access patterns; files GitHub Issues with `tech-debt,backend` labels for N+1 risk, missing validation, unhandled error paths, hardcoded values, and missing auth
+- Added `agents/basecoat-10-core-frontend-dev.agent.md`: builds component-driven UIs with WCAG 2.1 AA accessibility, responsive layouts, and Core Web Vitals targets; files GitHub Issues with `tech-debt,frontend,accessibility` labels for missing ARIA, hardcoded colors, non-semantic markup, missing loading states, and inline styles
+- Added `agents/basecoat-10-core-middleware-dev.agent.md`: designs integration layers, message contracts, API gateways, and event-driven architectures with circuit breaker, retry, DLQ, and idempotency patterns; files GitHub Issues with `tech-debt,middleware,reliability` labels
+- Added `agents/basecoat-80-data-data-tier.agent.md`: designs schemas, writes reversible migrations, optimizes queries, and establishes data access patterns; files GitHub Issues with `tech-debt,data,performance` labels for N+1 queries, missing indexes, SELECT *, missing rollbacks, and hardcoded IDs
 - Added `skills/backend-dev/SKILL.md`: skill overview, invocation guide, and template index
 - Added `skills/backend-dev/api-spec-template.md`: OpenAPI 3.x-compatible API spec skeleton with example paths, components, pagination, and error schemas
 - Added `skills/backend-dev/service-template.md`: service layer scaffold with dependency injection, structured error types, logging stubs, and testing expectations
@@ -1224,19 +1224,19 @@ None — v3.0.0 maintains backward compatibility with v2.x patterns.
 - Added `skills/data-tier/migration-template.md`: migration scaffold with up/down blocks, pre-migration checklist, rollback plan, and zero-downtime strategies
 - Added `skills/data-tier/query-review-checklist.md`: query review covering N+1 detection, index usage, pagination, SELECT * checks, and explain plan interpretation
 - Added `skills/data-tier/data-dictionary-template.md`: data dictionary template covering table, column, type, nullable, description, and example values
-- Added `instructions/development.instructions.md`: shared standards for all four dev core agents covering code style, error handling, security, logging, testing, issue filing, and agent collaboration handoff order
+- Added `instructions/basecoat-10-core-development.instructions.md`: shared standards for all four dev core agents covering code style, error handling, security, logging, testing, issue filing, and agent collaboration handoff order
 
 ## 0.5.0 - 2026-03-19
 
-- Added `agents/manual-test-strategy.agent.md`: produces decision rubric, exploratory charter, regression checklist, defect template, and automation backlog; files GitHub Issues for all automation candidates
-- Added `agents/exploratory-charter.agent.md`: generates time-boxed exploratory sessions with mission, scope, evidence capture, and triage routing; files GitHub Issues for automation-worthy findings
-- Added `agents/strategy-to-automation.agent.md`: converts manual paths into tiered automation candidates (smoke, regression, integration, agent spec); files a GitHub Issue for every candidate without exception
+- Added `agents/basecoat-90-quality-manual-test-strategy.agent.md`: produces decision rubric, exploratory charter, regression checklist, defect template, and automation backlog; files GitHub Issues for all automation candidates
+- Added `agents/basecoat-10-core-exploratory-charter.agent.md`: generates time-boxed exploratory sessions with mission, scope, evidence capture, and triage routing; files GitHub Issues for automation-worthy findings
+- Added `agents/basecoat-10-core-strategy-to-automation.agent.md`: converts manual paths into tiered automation candidates (smoke, regression, integration, agent spec); files a GitHub Issue for every candidate without exception
 - Added `skills/manual-test-strategy/SKILL.md`: skill description, when to use, and agent invocation guide
 - Added `skills/manual-test-strategy/rubric-template.md`: decision rubric template for manual-only, automate-now, and hybrid classification with risk scoring matrix
 - Added `skills/manual-test-strategy/charter-template.md`: exploratory charter template with mission, time box, scope, evidence log, and triage routing
 - Added `skills/manual-test-strategy/checklist-template.md`: regression checklist template with automation candidate flagging
 - Added `skills/manual-test-strategy/defect-template.md`: defect evidence template with reproduction steps, impact, diagnostic context, and automation handoff section
-- Updated `instructions/testing.instructions.md`: added Manual Test Strategy section referencing all three agents, the skill, the decision rubric, and automation handoff expectations
+- Updated `instructions/basecoat-10-core-testing.instructions.md`: added Manual Test Strategy section referencing all three agents, the skill, the decision rubric, and automation handoff expectations
 
 ## 0.4.2 - 2026-03-19
 

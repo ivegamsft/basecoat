@@ -6,7 +6,7 @@ This document provides best practices for using Azure Application Gateway to rou
 
 ### Core Components
 
-```
+```text
 Clients
   |
   v
@@ -18,7 +18,7 @@ Clients
   +-- Backend Pools
   +-- HTTP Settings
   +-- Probes
-```
+```text
 
 Key components:
 
@@ -80,7 +80,7 @@ $rule2 = New-AzApplicationGatewayRequestRoutingRule `
   -HttpListener $listener2 `
   -BackendAddressPool $pool2 `
   -HttpSettings $httpSettings
-```
+```text
 
 ### Pattern 2: Path-Based Routing
 
@@ -117,7 +117,7 @@ $rule = New-AzApplicationGatewayRequestRoutingRule `
   -RuleType 'PathBasedRouting' `
   -HttpListener $listener `
   -UrlPathMap $urlPathMap
-```
+```text
 
 ### Pattern 3: Multi-Site Host-Based with HTTPS
 
@@ -164,7 +164,7 @@ $rule = New-AzApplicationGatewayRequestRoutingRule `
     -TargetListener $listener1 `
     -IncludePath $true `
     -IncludeQueryString $true)
-```
+```text
 
 ## Advanced Routing Configurations
 
@@ -197,7 +197,7 @@ $httpSettings = New-AzApplicationGatewayBackendHttpSettings `
 Get-AzApplicationGatewayBackendHealth `
   -ResourceGroupName 'prod-rg' `
   -ApplicationGatewayName 'app-gateway'
-```
+```text
 
 ### Session Affinity (Sticky Sessions)
 
@@ -212,7 +212,7 @@ $httpSettings = New-AzApplicationGatewayBackendHttpSettings `
   -CookieBasedAffinity 'Enabled' `
   -CookieName 'APPGWROUTE' `
   -RequestTimeout 30
-```
+```text
 
 ### Request Rewriting
 
@@ -239,7 +239,7 @@ $pathRewriteRule = New-AzApplicationGatewayRewriteRule `
     -Pattern '^/old-path/(.*)$') `
   -ActionSet (New-AzApplicationGatewayRewriteRuleActionSet `
     -UrlConfiguration @{ModifiedPath = '/new-path/$1'})
-```
+```text
 
 ## High Availability Configuration
 
@@ -265,7 +265,7 @@ Add-AzTrafficManagerEndpointConfig `
   -TrafficManagerProfile $profile
 
 # Geographic routing ensures users connect to nearest region
-```
+```text
 
 ### Auto-Scaling Configuration
 
@@ -279,7 +279,7 @@ $autoScaleConfig = New-AzApplicationGatewayAutoscaleConfiguration `
 Get-AzApplicationGatewayAutoscaleConfiguration `
   -ApplicationGateway $appGw | 
   Select-Object MinCapacity, MaxCapacity
-```
+```text
 
 ## Security: Web Application Firewall (WAF)
 
@@ -303,7 +303,7 @@ $wafPolicy = New-AzWebApplicationFirewallPolicy `
 $appGw = Update-AzApplicationGateway `
   -ApplicationGateway $appGw `
   -WebApplicationFirewallPolicyId $wafPolicy.Id
-```
+```text
 
 ## Monitoring and Diagnostics
 
@@ -337,7 +337,7 @@ public class ApiController : ControllerBase
         return Ok(new { message = "Success" });
     }
 }
-```
+```text
 
 ### Metrics and Alerts
 
@@ -359,11 +359,11 @@ New-AzMetricAlertRuleV2 `
   -ActionGroup $actionGroup.Id `
   -Frequency 00:05:00 `
   -WindowSize 00:10:00
-```
+```text
 
 ## Base Coat Assets
 
-- Agent: `agents/middleware-dev.agent.md`
+- Agent: `agents/basecoat-10-core-middleware-dev.agent.md`
 - Skill: `skills/azure-compute/`
 - Instruction: `instructions/routing-patterns.instructions.md`
 

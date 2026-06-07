@@ -37,22 +37,24 @@ Apply these instructions whenever you are about to create, edit, or stage a conf
 
 ## When Staging Files
 
-4. **Run a pre-stage secret check.** Before `git add`, scan for the following patterns in files you are about to stage:
+1. **Run a pre-stage secret check.** Before `git add`, scan for the following patterns in files you are about to stage:
    - UUIDs/GUIDs matching the pattern `[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}` in config values
    - Keys named: `tenantId`, `clientId`, `clientSecret`, `apiKey`, `password`, `token`, `connectionString`, `secret`, `subscriptionId`
    - Values that are not `<PLACEHOLDER>` tokens next to those keys
    - `aliases` arrays containing `@`-email addresses or short strings that look like UPNs
 
-5. **STOP and alert on secret-looking values.**
+2. **STOP and alert on secret-looking values.**
    If any staged file contains a value that looks like a secret (non-placeholder beside a secret-keyed field):
    - **DO NOT proceed with the commit.**
    - Alert the user immediately:
-     ```
+
+     ```text
      ⛔ SECRET DETECTED — Staging halted.
      File: <path/to/file>
      Field: <field name>
      Action required: Remove the secret value, add the file to .gitignore, and create a .template companion.
-     ```
+     ```text
+
    - Recommend: unstage the file (`git restore --staged <file>`), add to `.gitignore`, and create the template.
 
 ## Template File Rules
@@ -72,10 +74,10 @@ config/settings.local.json
 .env
 .env.local
 *.local.json
-```
+```text
 
 ## Reference
 
 - `docs/CONFIG_PATTERN.md` — full local config pattern documentation
-- `agents/config-auditor.agent.md` — scan a repo for secret violations
+- `agents/basecoat-50-security-config-auditor.agent.md` — scan a repo for secret violations
 - `docs/templates/GITIGNORE_TEMPLATE.md` — standard gitignore entries

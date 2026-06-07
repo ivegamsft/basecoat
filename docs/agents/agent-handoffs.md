@@ -231,4 +231,4 @@ handoffs:
 - `docs/agents/MULTI_AGENT_WORKFLOWS.md` — parallel branch strategies and conflict avoidance
 - `docs/agents/MULTI_AGENT_WORKFLOWS.md#canonical-sub-agent-harness-contract` — canonical sub-agent harness contract
 - `docs/guides/token-optimization.md` — handoff template for context compression between agents
-- `instructions/agents.instructions.md` — agent authoring standards including handoff conventions
+- `instructions/basecoat-10-core-agents.instructions.md` — agent authoring standards including handoff conventions

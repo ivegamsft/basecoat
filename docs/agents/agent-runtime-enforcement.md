@@ -39,7 +39,7 @@ tools: [read_file, write_file, run_terminal_command, create_github_issue]
 
 - Follow the principle of least privilege. Include only tools the agent's workflow actually calls.
 - Do not add tools "just in case" — every extra tool adds prompt overhead and expands the attack surface.
-- See `instructions/tool-minimization.instructions.md` for detailed guidance on tool auditing.
+- See `instructions/basecoat-10-core-tool-minimization.instructions.md` for detailed guidance on tool auditing.
 
 ---
 
@@ -106,7 +106,7 @@ The `## Model` section in an agent file is **binding**, not advisory.
 
 - Always provide both `**Recommended:**` and `**Minimum:**` with exact model identifiers.
 - Provide a one-line `**Rationale:**` to document why the model was chosen.
-- See the Model Selection Guide in `instructions/agents.instructions.md` for per-role recommendations.
+- See the Model Selection Guide in `instructions/basecoat-10-core-agents.instructions.md` for per-role recommendations.
 
 ---
 
@@ -195,8 +195,8 @@ Tests include:
 
 ## References
 
-- `instructions/agents.instructions.md` — authoritative agent authoring standards
-- `instructions/tool-minimization.instructions.md` — tool audit checklist
-- `agents/agent-designer.agent.md` — agent design workflow and frontmatter conventions
+- `instructions/basecoat-10-core-agents.instructions.md` — authoritative agent authoring standards
+- `instructions/basecoat-10-core-tool-minimization.instructions.md` — tool audit checklist
+- `agents/basecoat-10-core-agent-designer.agent.md` — agent design workflow and frontmatter conventions
 - `tests/agent-integration-tests.ps1` — automated validation suite
 - `docs/agents/MULTI_AGENT_WORKFLOWS.md#canonical-sub-agent-harness-contract` — canonical orchestrator↔sub-agent task and response packet contract

@@ -604,4 +604,4 @@ jobs:
 - [GitHub Actions Workflow Syntax](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions)
 - [SQLite Memory Implementation](../memory/sqlite-memory.md)
 - [BaseCoat Architecture](https://github.com/IBuySpy-Shared/basecoat/blob/main/README.md)
-- [Feedback Loop Agent Guide](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/feedback-loop.agent.md)
+- [Feedback Loop Agent Guide](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-feedback-loop.agent.md)

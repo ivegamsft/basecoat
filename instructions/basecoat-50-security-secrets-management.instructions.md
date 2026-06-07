@@ -2,7 +2,7 @@
 description: >
   Secrets management standards — never commit secrets to version control,
   use centralized Vault solutions, implement rotation, and audit all access.
-applyTo: agents/secrets-manager.agent.md, agents/devops-engineer.agent.md, agents/infrastructure-deploy.agent.md
+applyTo: agents/basecoat-50-security-secrets-manager.agent.md, agents/basecoat-10-core-devops-engineer.agent.md, agents/basecoat-60-workflow-infrastructure-deploy.agent.md
 ---
 
 # Secrets Management Standards

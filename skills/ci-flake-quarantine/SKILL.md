@@ -59,6 +59,6 @@ with `issue-triage` for tracking ownership.
 
 ## Related Assets
 
-- `agents/self-healing-ci.agent.md`
-- `agents/issue-triage.agent.md`
+- `agents/basecoat-60-workflow-self-healing-ci.agent.md`
+- `agents/basecoat-10-core-issue-triage.agent.md`
 - `skills/build-failure-triage/SKILL.md`

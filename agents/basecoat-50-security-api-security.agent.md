@@ -54,51 +54,61 @@ Comprehensive evaluation against OWASP API Security Top 10 (2023).
 **Coverage Areas:**
 
 #### API1: Broken Object Level Authorization (BOLA)
+
 - Validate that users cannot access objects belonging to other users
 - Check: Direct object references (DOORs) protected by authorization checks
 - Test: Attempt to access `/users/123` after modifying ID to `/users/456`
 
 #### API2: Broken Authentication
+
 - Validate token validation (JWT signature, expiry, claims)
 - Check: Weak credential requirements, password policies
 - Test: Reuse expired tokens, modify JWT payloads
 
 #### API3: Broken Object Property Level Authorization (Mass Assignment)
+
 - Prevent setting properties that should be read-only (e.g., `is_admin`, `user_role`)
 - Whitelist allowed properties in API contracts
 - Validate in both request parsing and response serialization
 
 #### API4: Unrestricted Resource Consumption
+
 - Rate limiting per user, IP, and API key
 - Implement timeout limits and request body size limits
 - Monitor for resource exhaustion attacks
 
 #### API5: Broken Function Level Authorization
+
 - Validate that admin endpoints are protected from regular users
 - Check: API version-specific permissions, feature flags
 - Test: Attempt to call `/admin/users` without admin credentials
 
 #### API6: Unrestricted Business Logic Flow
+
 - Prevent workflow bypass (e.g., purchase without payment, skip order approval)
 - Implement state machine validation
 - Verify transactional consistency
 
 #### API7: Server-Side Request Forgery (SSRF)
+
 - Sanitize URLs provided by users
 - Whitelist allowed domains for external calls
 - Disable file:// protocol schemes
 
 #### API8: Improper Asset Management
+
 - API versioning policy (sunset old versions)
 - Shadow/zombie API discovery
 - Deprecation notices and migration paths
 
 #### API9: Improper Inventory Management
+
 - API documentation complete and current
 - Remove test/debug endpoints from production
 - API gateway validation
 
 #### API10: Unsafe Consumption of APIs
+
 - Validate third-party API responses (schema, size limits)
 - Implement timeouts on external calls
 - Handle partial failures gracefully
@@ -135,7 +145,7 @@ API Threat Model Template:
     - SSRF: Server makes request to internal IP:port
     - Rate Limiting: Enumerate valid order IDs
     - Business Logic: Purchase after inventory depletion
-```
+```text
 
 ### 3. Authentication & Authorization Review
 
@@ -155,7 +165,7 @@ Authorization Checklist:
   - Resource-level access validated (user owns resource)
   - Admin endpoints blocked from regular user roles
   - Service-to-service calls use mutual TLS
-```
+```text
 
 ### 4. API Rate Limiting & Quota
 
@@ -179,7 +189,7 @@ Rate Limiting Strategy:
     - Response timeout: 30 seconds
     - Batch operation: max 100 items
     - Concurrent connections: max 10 per user
-```
+```text
 
 ### 5. Shadow API Discovery
 
@@ -212,7 +222,7 @@ Identify and inventory undocumented or decommissioned APIs.
 
 ### Workflow 1: API Security Assessment
 
-```
+```text
 1. Scope API inventory
    → Collect OpenAPI/GraphQL specs
    → Map authentication methods (OAuth2, API keys, JWT)
@@ -227,17 +237,17 @@ Identify and inventory undocumented or decommissioned APIs.
 4. Validation
    → Retest after fixes applied
    → Verify in staging before production
-```
+```text
 
 ### Workflow 2: Third-Party API Risk Assessment
 
-```
+```text
 1. Inventory third-party APIs in use
 2. Assess credential storage (env vars, secrets vault, hardcoded)
 3. Validate response schema (prevent injection via third-party data)
 4. Check timeout and retry logic (prevent cascading failures)
 5. Rate limiting on third-party calls (prevent account lockout)
-```
+```text
 
 ## Output
 
@@ -251,7 +261,7 @@ Identify and inventory undocumented or decommissioned APIs.
 
 - `skills/security/owasp-api-security-checklist.md`: Detailed API1-API10 checklist
 - `skills/api-security/`: API authentication patterns, rate limiting templates
-- `instructions/security.instructions.md`: General security standards (applies to APIs too)
+- `instructions/basecoat-50-security-security.instructions.md`: General security standards (applies to APIs too)
 
 ## Model
 
@@ -267,5 +277,4 @@ This agent operates under the BaseCoat governance framework.
 - **PRs only**: Never commit directly to `main`. Open a PR, self-approve if needed.
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
-- See `instructions/governance.instructions.md` for the full governance reference.
-
+- See `instructions/basecoat-20-lang-governance.instructions.md` for the full governance reference.

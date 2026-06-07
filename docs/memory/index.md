@@ -34,7 +34,7 @@ See [Memory Design](memory-design.md) for the full architectural specification.
 | Memory type | Layer | Example |
 |---|---|---|
 | Role definition, agent purpose | L0 — agent frontmatter | "You are a security reviewer. Always run SAST first." |
-| Universal coding rules | L1 — instructions | `instructions/governance.instructions.md` |
+| Universal coding rules | L1 — instructions | `instructions/basecoat-20-lang-governance.instructions.md` |
 | Hot facts for this repo | L2 — hot-index | "This repo uses OIDC for Azure auth, not client secrets" |
 | Sprint history, session patterns | L3 — DuckDB | Prior session summaries, turn history |
 | Reusable patterns across sessions | L4 — store_memory | "check-coherence.ps1 exits 0 unless -Strict is passed" |

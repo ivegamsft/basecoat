@@ -140,7 +140,7 @@ produce multi-file changes or architectural decisions:
 2. Present the plan to the user.
 3. Do not begin implementing until the plan is confirmed or explicitly waived.
 
-See `instructions/plan-first.instructions.md` for the compatibility alias used
+See `instructions/basecoat-10-core-plan-first.instructions.md` for the compatibility alias used
 during the rollout.
 
 ## Sprint-Style Request Nudge
@@ -157,15 +157,15 @@ sprint-planning language:
 For `azure:` and `infra:` work, review these compatibility aliases before
 proceeding:
 
-- `instructions/ci-firewall.instructions.md`
-- `instructions/rbac-authentication.instructions.md`
+- `instructions/basecoat-60-workflow-ci-firewall.instructions.md`
+- `instructions/basecoat-50-security-rbac-authentication.instructions.md`
 
 These files preserve the legacy names while the prefixed BaseCoat instruction
 files remain the canonical source.
 
 ## Routing Notes
 
-- Use `instructions/plan-first.instructions.md` when a request asks to plan
+- Use `instructions/basecoat-10-core-plan-first.instructions.md` when a request asks to plan
   before execution.
 - Use the Azure preflight aliases before any Azure provisioning or RBAC-sensitive
   changes.

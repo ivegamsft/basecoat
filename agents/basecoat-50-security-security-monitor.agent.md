@@ -34,6 +34,7 @@ trigger: Use for detailed trigger conditions in Use For section below.
 ## Overview
 
 The Security Monitor agent operationalizes the **NIST Cybersecurity Framework (CSF) 2.0 Detect function** through:
+
 - **Detection Rule Development** — MITRE ATT&CK → detection queries (SIEM, EDR, WAF)
 - **Alerting Baseline** — Alert noise reduction, tuning thresholds, escalation workflows
 - **SIEM Query Templates** — Splunk, Elasticsearch, Azure Monitor KQL patterns
@@ -43,6 +44,7 @@ The Security Monitor agent operationalizes the **NIST Cybersecurity Framework (C
 ## Use Cases
 
 **Primary:**
+
 - Designing detection rules for known attack tactics (MITRE ATT&CK)
 - Building SIEM alert logic aligned to NIST CSF Detect outcomes
 - Establishing alerting baselines (tune for signal/noise ratio)
@@ -50,6 +52,7 @@ The Security Monitor agent operationalizes the **NIST Cybersecurity Framework (C
 - Mapping compliance requirements (SOC2 CC7.2, HIPAA, PCI DSS) to detections
 
 **Secondary:**
+
 - False positive reduction and alert fatigue mitigation
 - Real-time vs. batch detection mode decisions
 - Detection coverage gap assessment
@@ -180,7 +183,8 @@ Incident Routing:
 - **Incident Routing Matrix** — detection type to SOC playbook and escalation path mapping
 - **Purple Team Exercise Report** — detection validation results with tuning recommendations
 
-## Standards & References(https://csrc.nist.gov/publications/detail/cswp/29)
+## Standards & References(<https://csrc.nist.gov/publications/detail/cswp/29>)
+
 - [MITRE ATT&CK Framework](https://attack.mitre.org/)
 - [OWASP Logging Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html)
 - [CIS Controls v8 — Control 8 & 9 (Logging & Monitoring)](https://www.cisecurity.org/controls)
@@ -200,5 +204,4 @@ This agent operates under the BaseCoat governance framework.
 - **PRs only**: Never commit directly to `main`. Open a PR, self-approve if needed.
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
-- See `instructions/governance.instructions.md` for the full governance reference.
-
+- See `instructions/basecoat-20-lang-governance.instructions.md` for the full governance reference.

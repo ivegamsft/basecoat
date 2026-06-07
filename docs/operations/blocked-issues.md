@@ -61,7 +61,7 @@ description: Tracking for known limitations and prerequisites for certain featur
 
 **Note:** The old `GET /orgs/{org}/copilot/metrics` endpoint was sunset 2026-04-02 and replaced
 by `/orgs/{org}/copilot/metrics/reports/organization-28-day/latest`. See
-`instructions/enterprise-configuration.instructions.md` for updated API reference.
+`instructions/basecoat-10-core-enterprise-configuration.instructions.md` for updated API reference.
 
 ---
 

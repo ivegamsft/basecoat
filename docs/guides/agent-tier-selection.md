@@ -150,7 +150,7 @@ defaults. The schema has three sections:
 
 ## Related Guidance
 
-- [Agent Routing Instructions](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/agent-routing.instructions.md) — machine-readable routing rules for Copilot
-- [Model Routing](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/model-routing.instructions.md) — which LLM tier (Opus / Sonnet / Haiku) within a tier
+- [Agent Routing Instructions](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/basecoat-10-core-agent-routing.instructions.md) — machine-readable routing rules for Copilot
+- [Model Routing](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/basecoat-10-core-model-routing.instructions.md) — which LLM tier (Opus / Sonnet / Haiku) within a tier
 - [Runner Routing](../reference/guardrails/runner-routing.md) — which CI runner for GitHub Actions jobs
 - [Context Routing](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/references/token-economics/context-routing.md) — which context tiers to load

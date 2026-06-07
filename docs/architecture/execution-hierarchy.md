@@ -2,15 +2,15 @@
 
 Defines the layered execution stack for all BaseCoat agents. Every task traverses this stack in order — layers cannot be skipped, only the context load depth varies based on intent classification.
 
-> Related: `instructions/token-economics.instructions.md`, `instructions/memory-index.instructions.md`, `instructions/governance.instructions.md`
-
+> Related: `instructions/basecoat-50-security-token-economics.instructions.md`, `instructions/basecoat-10-core-memory-index.instructions.md`, `instructions/basecoat-20-lang-governance.instructions.md`
+>
 > **For forks:** The Pattern Bundle Catalog (Layer 3a) ships with BaseCoat's own patterns as a reference. Replace or extend it with your team's patterns. The stack architecture and confidence lifecycle are framework guidance — keep those. Pattern confidence scores reflect BaseCoat's own history; reset them to `0.80` (provisional) when adopting.
 
 ---
 
 ## The Stack
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────┐
 │  Layer 0 — System Instructions                                  │
 │  Set by the host/IDE. Defines model role and capabilities.      │
@@ -54,7 +54,7 @@ Defines the layered execution stack for all BaseCoat agents. Every task traverse
 │    store_memory failure → demote bundle confidence ↓            │
 │  • Bundle confidence < 0.5 after 3 overruns: retire fast path   │
 └─────────────────────────────────────────────────────────────────┘
-```
+```text
 
 ---
 
@@ -81,7 +81,7 @@ Intent classification uses only what is already in context — the user message 
 
 ### Classification Algorithm
 
-```
+```text
 1. Extract intent keywords from the user message
 2. Scan the L2 trigger map (memory-index.instructions.md) for matches
 3. If match found:
@@ -90,7 +90,7 @@ Intent classification uses only what is already in context — the user message 
      if confidence 0.50–0.79 → assign pattern tentatively, FULL PATH with bundle pre-loaded
      if confidence < 0.50 → FULL PATH, no bundle
 4. If no match: Novel task → FULL PATH, estimate turn budget
-```
+```text
 
 ### Confidence Score Inputs
 
@@ -125,14 +125,14 @@ A pattern bundle is a pre-scoped execution package for a known intent. It contai
 
 ### Confidence Lifecycle
 
-```
+```text
 New bundle: confidence = 0.80 (provisional)
 Each on-budget success:  confidence += 0.05 (max 1.0)
 Each overrun (>budget):  confidence -= 0.15
 Each failure (>5 turns, no progress): confidence -= 0.25
 confidence < 0.50: demote to tentative (0.50–0.79 zone — triggers full path)
 confidence < 0.30: retire bundle, remove from fast-path catalog
-```
+```text
 
 ### BaseCoat Pattern Bundle Catalog
 
@@ -158,7 +158,7 @@ Intent keywords: <2-5 trigger phrases>
 Context set: <list of files/docs needed>
 Turn budget: <actual turns taken>
 Confidence: 0.80 (provisional — elevates with reuse)
-```
+```text
 
 ---
 
@@ -168,14 +168,15 @@ Used when intent is Novel, confidence is below threshold, or the fast path bundl
 
 Load in this order, stopping when context is sufficient:
 
-```
+```text
 1. L2 trigger map (already loaded) → identify relevant subjects
 2. L3 episodic: session_store_sql → prior sessions on this subject
 3. L4 semantic: targeted docs sections (not full files)
 4. Broad exploration only as last resort
-```
+```text
 
 Set an estimated turn budget at start:
+
 - No prior sessions found: estimate 6–8 turns (full learning cost)
 - Prior sessions found but failed: estimate 4–6 turns (partial learning)
 - Prior sessions found and succeeded: reclassify as Familiar, estimate 4–5 turns

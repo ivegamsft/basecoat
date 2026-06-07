@@ -63,5 +63,5 @@ confirmation before execution.
 For `azure:` and `infra:` work, review these compatibility aliases before
 proceeding:
 
-- `instructions/ci-firewall.instructions.md`
-- `instructions/rbac-authentication.instructions.md`
+- `instructions/basecoat-60-workflow-ci-firewall.instructions.md`
+- `instructions/basecoat-50-security-rbac-authentication.instructions.md`

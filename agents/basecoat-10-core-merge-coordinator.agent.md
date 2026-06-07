@@ -73,6 +73,7 @@ File issues for human-review conflicts, stale branches, broken post-merge tests,
 Return branch-by-branch status, conflicts, actions taken, issues filed, skipped branches, and final target state.
 
 ## Model
+
 **Recommended:** claude-haiku-4.5
 **Rationale:** Routine branch operations with well-defined steps — speed and cost matter most
 **Minimum:** gpt-5.4-mini
@@ -80,6 +81,6 @@ Return branch-by-branch status, conflicts, actions taken, issues filed, skipped 
 ## Governance
 
 This agent operates under the BaseCoat governance framework.
-- Issue-first, PRs only, No secrets, Branch naming conventions
-- See `instructions/governance.instructions.md` for the full reference
 
+- Issue-first, PRs only, No secrets, Branch naming conventions
+- See `instructions/basecoat-20-lang-governance.instructions.md` for the full reference

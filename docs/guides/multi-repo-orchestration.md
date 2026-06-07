@@ -5,7 +5,7 @@ across multiple GitHub repositories using `workflow_dispatch`. It covers
 authentication, output sharing, throttling, and failure handling.
 
 The companion Copilot instruction file is
-[`instructions/multi-repo-orchestration.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/multi-repo-orchestration.instructions.md).
+[`instructions/basecoat-60-workflow-multi-repo-orchestration.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/basecoat-60-workflow-multi-repo-orchestration.instructions.md).
 
 ## When to Use This Pattern
 
@@ -262,5 +262,5 @@ steps:
 - [GitHub Actions: Reusable workflows vs. dispatch](https://docs.github.com/en/actions/using-workflows/reusing-workflows)
 - [Fine-grained personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token)
 - [GitHub Apps for cross-repo auth](https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps/about-github-apps)
-- Related instruction: [`instructions/ci-firewall.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/ci-firewall.instructions.md)
-- Related instruction: [`instructions/secrets-management.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/secrets-management.instructions.md)
+- Related instruction: [`instructions/basecoat-60-workflow-ci-firewall.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/basecoat-60-workflow-ci-firewall.instructions.md)
+- Related instruction: [`instructions/basecoat-50-security-secrets-management.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/basecoat-50-security-secrets-management.instructions.md)

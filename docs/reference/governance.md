@@ -206,7 +206,7 @@ If in doubt, open an issue. It takes 30 seconds and creates a paper trail.
 |---|---|
 | `CONTRIBUTING.md` | How to contribute — branch naming, commits, PRs, secrets |
 | `docs/GOVERNANCE.md` | This file — decisions, sprints, versioning, agent standards |
-| `instructions/governance.instructions.md` | AI agent instruction set — authoritative rules for agents |
+| `instructions/basecoat-20-lang-governance.instructions.md` | AI agent instruction set — authoritative rules for agents |
 | `docs/templates/PRD_TEMPLATE.md` | Product requirements doc template |
 | `docs/templates/ISSUE_TEMPLATE.md` | Issue template for bugs and features |
 

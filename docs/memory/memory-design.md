@@ -10,7 +10,7 @@ context out of the token budget.
 |-------|------|-------------|-------------|
 | L0 | Agent frontmatter | `agents/*.agent.md` | Always — compiled into agent definition |
 | L1 | Scoped instructions | `instructions/*.instructions.md` | Per `applyTo` glob match at session start |
-| L2 | Hot cache index | `instructions/memory-index.instructions.md` | Every session start (L1 rule) |
+| L2 | Hot cache index | `instructions/basecoat-10-core-memory-index.instructions.md` | Every session start (L1 rule) |
 | L3 | Session store | `session_store_sql` (DuckDB) | On demand — cross-session queries |
 | L4 | Long-term memory | `store_memory` tool + `docs/` | On demand — persistent facts |
 
@@ -59,7 +59,7 @@ description: "TypeScript coding conventions"
 
 ### L2 — Hot Cache Index
 
-`instructions/memory-index.instructions.md` — loaded at every session start
+`instructions/basecoat-10-core-memory-index.instructions.md` — loaded at every session start
 via a broad `applyTo: "**/*"` rule. Contains:
 
 - Execution path routing decisions (fast-path vs. deep-reasoning)

@@ -68,6 +68,5 @@ and which follow-up path owns the work.
 ## Related Assets
 
 - `skills/merge-conflict-mediator/SKILL.md`
-- `agents/merge-coordinator.agent.md`
-- `agents/issue-triage.agent.md`
-
+- `agents/basecoat-10-core-merge-coordinator.agent.md`
+- `agents/basecoat-10-core-issue-triage.agent.md`

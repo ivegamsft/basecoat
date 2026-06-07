@@ -21,10 +21,10 @@ Eliminate hardcoded credentials, connection strings, and API keys:
 
 **Authorization**: "What can you do?" (enforced via RBAC)
 
-```
+```text
 Request -> Entra ID Authentication -> RBAC Authorization -> Access Granted/Denied
            (Verify identity)            (Check permissions)
-```
+```text
 
 ## Azure Managed Identity
 
@@ -45,7 +45,7 @@ $identity = Get-AzAppService -ResourceGroupName 'prod-rg' -Name 'my-app' |
   Select-Object -ExpandProperty Identity
 
 Write-Host "Object ID: $($identity.PrincipalId)"
-```
+```text
 
 ### User-Assigned Managed Identity
 
@@ -71,7 +71,7 @@ New-AzAppService `
   -AppServicePlanName 'my-plan' `
   -IdentityType 'UserAssigned' `
   -IdentityId $identity.Id
-```
+```text
 
 ## RBAC Role Assignments
 
@@ -93,7 +93,7 @@ New-AzRoleAssignment `
 Get-AzRoleAssignment `
   -ObjectId $appIdentity.PrincipalId `
   -Scope $scope
-```
+```text
 
 ### Common Role Patterns
 
@@ -124,7 +124,7 @@ New-AzRoleAssignment `
   -ObjectId $appIdentity.PrincipalId `
   -RoleDefinitionId $role.Id `
   -Scope $scope
-```
+```text
 
 ## Code Patterns: No Secrets
 
@@ -178,7 +178,7 @@ public class OrderRepository
         return null;
     }
 }
-```
+```text
 
 ### Pattern 2: App Service → Azure Storage
 
@@ -216,7 +216,7 @@ public class DocumentService
         await blobClient.UploadAsync(content, overwrite: true);
     }
 }
-```
+```text
 
 ### Pattern 3: App Service → Key Vault
 
@@ -250,7 +250,7 @@ public class ConfigurationService
         return secret.Value;
     }
 }
-```
+```text
 
 ### Pattern 4: Azure Function → Event Hub
 
@@ -309,7 +309,7 @@ public static class EventProcessorFunction
         }
     }
 }
-```
+```text
 
 ### Pattern 5: Container → CosmosDB
 
@@ -341,7 +341,7 @@ public class OrderDataAccess
         return response.Resource;
     }
 }
-```
+```text
 
 ## Dependency Injection Setup
 
@@ -370,7 +370,7 @@ builder.Services.AddSingleton(x =>
 
 var app = builder.Build();
 // ... rest of configuration
-```
+```text
 
 ## Service-to-Service Authentication
 
@@ -406,7 +406,7 @@ New-AzRoleAssignment `
   -ObjectId $sp.Id `
   -RoleDefinitionName 'Contributor' `
   -Scope "/subscriptions/.../resourceGroups/prod-rg"
-```
+```text
 
 ## Monitoring and Auditing
 
@@ -421,7 +421,7 @@ Get-AzLog -ResourceGroup 'prod-rg' `
   -StartTime (Get-Date).AddDays(-7) `
   -Caller $appIdentity.PrincipalId |
   Select-Object -Property EventTimestamp, OperationName, Status
-```
+```text
 
 ### Azure Policy Enforcement
 
@@ -448,11 +448,11 @@ Enforce managed identity usage:
     }
   }
 }
-```
+```text
 
 ## Base Coat Assets
 
-- Agent: `agents/identity-architect.agent.md`
+- Agent: `agents/basecoat-10-core-identity-architect.agent.md`
 - Instruction: `instructions/zero-trust-identity.instructions.md`
 - Skill: `skills/azure-rbac/`
 

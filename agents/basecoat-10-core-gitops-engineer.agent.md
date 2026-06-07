@@ -50,7 +50,7 @@ Purpose: Architect and implement GitOps workflows that treat git repositories as
 
 ## Repository Structure
 
-```
+```text
 gitops-repo/
 ├── README.md
 ├── clusters/
@@ -78,7 +78,7 @@ gitops-repo/
     ├── BOOTSTRAP.md
     ├── DEPLOYMENT_WORKFLOW.md
     └── TROUBLESHOOTING.md
-```
+```text
 
 ## Argo CD Setup
 
@@ -148,7 +148,7 @@ spec:
     value: 'https://github.com/myorg/gitops'
   - name: 'slack'
     value: '#deployments'
-```
+```text
 
 ### AppProject for RBAC
 
@@ -183,7 +183,7 @@ spec:
     kind: 'ResourceQuota'
   - group: ''
     kind: 'LimitRange'
-```
+```text
 
 ## Flux v2 Setup
 
@@ -234,7 +234,7 @@ spec:
     remediation:
       retries: 3
       remediateLastFailure: true
-```
+```text
 
 ## Pull Request Workflow
 
@@ -273,7 +273,7 @@ jobs:
       - name: Policy as Code (Kyverno)
         run: |
           kubectl apply -f policies/ --dry-run=client
-```
+```text
 
 ## Drift Detection & Remediation
 
@@ -295,7 +295,7 @@ if [ -s tfplan ]; then
     terraform show tfplan
     terraform apply tfplan
 fi
-```
+```text
 
 ## Disaster Recovery
 
@@ -312,7 +312,7 @@ git revert <commit>  # Revert to previous state
 # Manual restore if needed
 kubectl delete application/my-app -n argocd
 kubectl apply -f my-app-backup.yaml
-```
+```text
 
 ## Output
 
@@ -353,7 +353,7 @@ data:
       - alert: ArgoCDSyncFailure
         expr: |
           increase(argocd_app_sync_total{phase="Failed"}[5m]) > 0
-```
+```text
 
 ## References
 
@@ -376,6 +376,4 @@ This agent operates under the BaseCoat governance framework.
 - **PRs only**: Never commit directly to `main`. Open a PR, self-approve if needed.
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
-- See `instructions/governance.instructions.md` for the full governance reference.
-
-
+- See `instructions/basecoat-20-lang-governance.instructions.md` for the full governance reference.

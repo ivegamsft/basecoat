@@ -67,6 +67,4 @@ Performs repository or PR review focused on correctness and regression risk.
 
 ## Governance
 
-Follows BaseCoat governance. See `instructions/governance.instructions.md`.
-
-
+Follows BaseCoat governance. See `instructions/basecoat-20-lang-governance.instructions.md`.

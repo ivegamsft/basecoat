@@ -241,8 +241,8 @@ done
 
 ## References
 
-- `agents/merge-coordinator.agent.md` — the automated merge agent
-- `instructions/governance.instructions.md` — governance rules (priority:1)
+- `agents/basecoat-10-core-merge-coordinator.agent.md` — the automated merge agent
+- `instructions/basecoat-20-lang-governance.instructions.md` — governance rules (priority:1)
 - `docs/CONFIG_PATTERN.md` — local config pattern to avoid committing secrets
 - Issue #51 — merge-coordinator origin story (parallel 5-agent sprint, rebase hang)
 
@@ -313,7 +313,7 @@ When present, `retry_context` should include `attempt`, `failure_class`,
         "docs/agents/MULTI_AGENT_WORKFLOWS.md",
         "docs/agents/AGENT_RUNTIME_ENFORCEMENT.md",
         "docs/agents/agent-handoffs.md",
-        "instructions/subagent-review.instructions.md"
+        "instructions/basecoat-10-core-subagent-review.instructions.md"
       ],
       "out_of_scope": [
         "agent behavior changes",
@@ -329,7 +329,7 @@ When present, `retry_context` should include `attempt`, `failure_class`,
     "execution": {
       "allowed_files": [
         "docs/agents/**",
-        "instructions/subagent-review.instructions.md"
+        "instructions/basecoat-10-core-subagent-review.instructions.md"
       ],
       "allowed_tools": ["view", "rg", "apply_patch"],
       "allowed_skills": [],
@@ -348,7 +348,7 @@ When present, `retry_context` should include `attempt`, `failure_class`,
       "docs/agents/MULTI_AGENT_WORKFLOWS.md",
       "docs/agents/AGENT_RUNTIME_ENFORCEMENT.md",
       "docs/agents/agent-handoffs.md",
-      "instructions/subagent-review.instructions.md"
+      "instructions/basecoat-10-core-subagent-review.instructions.md"
     ],
     "acceptance_results": [
       {

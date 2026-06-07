@@ -47,6 +47,7 @@ Purpose: onboard a repository or portfolio to BaseCoat using safe, repeatable re
 - Upgrade guidance
 
 ## Model
+
 **Recommended:** claude-haiku-4.5
 **Rationale:** Repeatable rollout steps with well-defined validation — speed and cost matter most
 **Minimum:** gpt-5.4-mini
@@ -83,5 +84,4 @@ gh issue create \
 
 ## Governance
 
-This agent follows the BaseCoat governance framework. See `instructions/governance.instructions.md`.
-
+This agent follows the BaseCoat governance framework. See `instructions/basecoat-20-lang-governance.instructions.md`.

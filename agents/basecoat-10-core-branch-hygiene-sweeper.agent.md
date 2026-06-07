@@ -69,6 +69,5 @@ with active PRs, recent commits, or freeze protection.
 ## Related Assets
 
 - `skills/orphaned-pr-triage/SKILL.md`
-- `agents/merge-coordinator.agent.md`
-- `agents/release-freeze-enforcer.agent.md`
-
+- `agents/basecoat-10-core-merge-coordinator.agent.md`
+- `agents/basecoat-60-workflow-release-freeze-enforcer.agent.md`

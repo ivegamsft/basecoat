@@ -52,7 +52,8 @@ No critical single points of failure; tested recovery; clear SLO policy.
 
 Return HA topology, resilience checklist, SLO guidance, and DR plan.
 
-## References(https://www.cisecurity.org/benchmark/kubernetes)
+## References(<https://www.cisecurity.org/benchmark/kubernetes>)
+
 - [CIS AWS Foundations Benchmark](https://www.cisecurity.org/benchmark/amazon-web-services)
 - [Google SRE Book: Monitoring Distributed Systems](https://sre.google/sre-book/monitoring-distributed-systems/)
 - [Chaos Engineering Principles](https://principlesofchaos.org/)
@@ -71,5 +72,4 @@ This agent operates under the BaseCoat governance framework.
 - **PRs only**: Never commit directly to `main`. Open a PR, self-approve if needed.
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
-- See `instructions/governance.instructions.md` for the full governance reference.
-
+- See `instructions/basecoat-20-lang-governance.instructions.md` for the full governance reference.

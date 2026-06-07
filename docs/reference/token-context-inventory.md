@@ -122,7 +122,7 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | basecoat-10-core-factory-state-curator | `agents/basecoat-10-core-factory-state-curator.agent.md` | 192 | 259 |
 | basecoat-10-core-s4-shadow-mode-validator | `agents/basecoat-10-core-s4-shadow-mode-validator.agent.md` | 189 | 255 |
 | basecoat-10-core-factory-conductor | `agents/basecoat-10-core-factory-conductor.agent.md` | 187 | 252 |
-| orchestrator | `agents/orchestrator.agent.md` | 182 | 246 |
+| orchestrator | `agents/basecoat-10-core-orchestrator.agent.md` | 182 | 246 |
 | basecoat-10-core-bom-validator | `agents/basecoat-10-core-bom-validator.agent.md` | 177 | 239 |
 
 ## Skills
@@ -291,7 +291,7 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | basecoat-10-core-enterprise-configuration | `instructions/basecoat-10-core-enterprise-configuration.instructions.md` | 416 | 562 |
 | basecoat-80-data-data-science | `instructions/basecoat-80-data-data-science.instructions.md` | 416 | 562 |
 | basecoat-10-core-naming | `instructions/basecoat-10-core-naming.instructions.md` | 415 | 560 |
-| intent-routing | `instructions/intent-routing.instructions.md` | 414 | 559 |
+| intent-routing | `instructions/basecoat-10-core-intent-routing.instructions.md` | 414 | 559 |
 | basecoat-10-core-documentation | `instructions/basecoat-10-core-documentation.instructions.md` | 398 | 537 |
 | basecoat-10-core-bootstrap-autodetect | `instructions/basecoat-10-core-bootstrap-autodetect.instructions.md` | 392 | 529 |
 | basecoat-50-security-security-monitoring | `instructions/basecoat-50-security-security-monitoring.instructions.md` | 369 | 498 |
@@ -317,11 +317,11 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | basecoat-50-security-copilot-github-token-bootstrap | `instructions/basecoat-50-security-copilot-github-token-bootstrap.instructions.md` | 214 | 289 |
 | basecoat-10-core-backend | `instructions/basecoat-10-core-backend.instructions.md` | 180 | 243 |
 | basecoat-10-core-s4-safety-gates | `instructions/basecoat-10-core-s4-safety-gates.instructions.md` | 157 | 212 |
-| security | `instructions/security.instructions.md` | 37 | 50 |
-| ux | `instructions/ux.instructions.md` | 37 | 50 |
-| ci-firewall | `instructions/ci-firewall.instructions.md` | 36 | 49 |
-| plan-first | `instructions/plan-first.instructions.md` | 35 | 47 |
-| rbac-authentication | `instructions/rbac-authentication.instructions.md` | 35 | 47 |
-| architecture | `instructions/architecture.instructions.md` | 34 | 46 |
-| documentation | `instructions/documentation.instructions.md` | 34 | 46 |
-| observability | `instructions/observability.instructions.md` | 34 | 46 |
+| security | `instructions/basecoat-50-security-security.instructions.md` | 37 | 50 |
+| ux | `instructions/basecoat-10-core-ux.instructions.md` | 37 | 50 |
+| ci-firewall | `instructions/basecoat-60-workflow-ci-firewall.instructions.md` | 36 | 49 |
+| plan-first | `instructions/basecoat-10-core-plan-first.instructions.md` | 35 | 47 |
+| rbac-authentication | `instructions/basecoat-50-security-rbac-authentication.instructions.md` | 35 | 47 |
+| architecture | `instructions/basecoat-10-core-architecture.instructions.md` | 34 | 46 |
+| documentation | `instructions/basecoat-10-core-documentation.instructions.md` | 34 | 46 |
+| observability | `instructions/basecoat-10-core-observability.instructions.md` | 34 | 46 |

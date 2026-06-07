@@ -54,6 +54,7 @@ Purpose: Plan, execute, and validate database migrations with minimal downtime, 
 ### Schema-Only Migrations
 
 **Backward-Compatible Changes** (Safe)
+
 ```sql
 -- Add column with default
 ALTER TABLE users ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
@@ -67,6 +68,7 @@ ALTER TABLE orders ADD COLUMN order_date TIMESTAMP;
 ```
 
 **Breaking Changes** (Require Coordination)
+
 ```sql
 -- Remove column (ensure no code references it)
 ALTER TABLE users DROP COLUMN deprecated_field;
@@ -82,6 +84,7 @@ ALTER TABLE products
 ### Data Migration Strategies
 
 **Full Table Copy** (Small tables)
+
 ```sql
 -- Simple copy with validation
 CREATE TABLE target_db.new_table AS 
@@ -93,6 +96,7 @@ SELECT COUNT(*) FROM target_db.new_table;  -- 1,234,567
 ```
 
 **Incremental Replication** (Large tables)
+
 ```sql
 -- Initial snapshot
 INSERT INTO target.users
@@ -113,6 +117,7 @@ WHEN NOT MATCHED THEN INSERT ...;
 ```
 
 **Dual-Write Pattern** (Zero-Downtime)
+
 1. Deploy dual-write logic (write to both old and new)
 2. Replicate historical data
 3. Validate data consistency
@@ -122,7 +127,8 @@ WHEN NOT MATCHED THEN INSERT ...;
 
 ### Zero-Downtime Migrations
 
-**Using Feature Flags**
+### Using Feature Flags
+
 ```python
 # Application layer
 if feature_flag_enabled('use_new_database'):
@@ -237,6 +243,4 @@ This agent operates under the BaseCoat governance framework.
 - **PRs only**: Never commit directly to `main`. Open a PR, self-approve if needed.
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
-- See `instructions/governance.instructions.md` for the full governance reference.
-
-
+- See `instructions/basecoat-20-lang-governance.instructions.md` for the full governance reference.

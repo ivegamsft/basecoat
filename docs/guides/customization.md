@@ -8,7 +8,7 @@ to a fully maintained private fork — and when each makes sense.
 
 ## The customization spectrum
 
-```
+```json
 [Sync & go] ──────── [Configure] ──────── [Fork & extend] ──────── [Full fork]
      │                     │                      │                      │
   5 minutes             30 minutes             1–2 hours             Ongoing
@@ -17,7 +17,7 @@ to a fully maintained private fork — and when each makes sense.
   Trying it out        Teams with             Enterprises with       Platform teams
                        preferences            proprietary patterns   maintaining
                                                                      a shared fork
-```
+```text
 
 ---
 
@@ -30,13 +30,13 @@ No configuration file required.
 # macOS / Linux
 export BASECOAT_REPO='https://github.com/IBuySpy-Shared/basecoat.git'
 curl -fsSL https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/sync.sh | bash
-```
+```text
 
 ```powershell
 # Windows PowerShell
 $env:BASECOAT_REPO = 'https://github.com/IBuySpy-Shared/basecoat.git'
 irm https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/sync.ps1 | iex
-```
+```text
 
 What you get: all agents, skills, instructions, and prompts overlaid into `.github/`.
 
@@ -74,7 +74,7 @@ instructions:
 sync:
   exclude:
     - archive/   # skip archived assets
-```
+```text
 
 ### What configuration lets you do
 
@@ -97,7 +97,7 @@ co-exist with synced BaseCoat assets without any conflict.
 
 Place private assets **outside** the sync target paths:
 
-```
+```text
 your-repo/
 ├── .github/
 │   ├── agents/               ← synced from BaseCoat (do not edit)
@@ -108,7 +108,7 @@ your-repo/
 │   │   └── deploy-to-prod.agent.md
 │   └── skills/
 │       └── our-stack/SKILL.md
-```
+```text
 
 Or, add your private agents as **custom instructions** that extend the synced globals:
 
@@ -117,7 +117,7 @@ Or, add your private agents as **custom instructions** that extend the synced gl
 applyTo: "src/**/*.py"
 ---
 Always use our internal `app.logger` module, not the stdlib `logging` module.
-```
+```text
 
 **Best for:** teams with proprietary domain knowledge or internal tooling that
 shouldn't be contributed upstream.
@@ -142,14 +142,14 @@ cd basecoat
 git remote rename origin upstream
 git remote add origin https://github.com/YOUR-ORG/basecoat.git
 git push -u origin main
-```
+```text
 
 ### Point your consumers at the fork
 
 ```yaml
 # .basecoat.yml in each consumer repo
 source: https://github.com/YOUR-ORG/basecoat.git
-```
+```text
 
 ### Stay in sync with upstream
 
@@ -177,7 +177,7 @@ jobs:
         run: gh pr create --fill --base main || true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-```
+```text
 
 **Best for:** enterprises managing multiple teams, platform teams, and orgs
 that need to add proprietary agents centrally.
@@ -190,13 +190,13 @@ When you add a file with the same name as a BaseCoat asset in your fork,
 your version takes precedence after the next sync. Downstream consumers get
 your version, not the upstream original.
 
-```
+```text
 IBuySpy-Shared/basecoat
-  └── agents/code-review.agent.md   ← upstream original
+  └── agents/basecoat-90-quality-code-review.agent.md   ← upstream original
 
 YOUR-ORG/basecoat (fork)
-  └── agents/code-review.agent.md   ← your override wins
-```
+  └── agents/basecoat-90-quality-code-review.agent.md   ← your override wins
+```text
 
 Use this to:
 
@@ -229,6 +229,6 @@ pwsh scripts/validate-basecoat.ps1
 
 # Verify instruction coverage
 pwsh scripts/check-coherence.ps1 -Strict
-```
+```text
 
 If tests pass, Copilot can see all your agents, skills, and instructions.

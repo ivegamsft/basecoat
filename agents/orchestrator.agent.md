@@ -10,7 +10,7 @@ visibility: advanced
 ## Harness Conformance
 
 This file satisfies the canonical-sub-agent-harness-contract for legacy
-references to `agents/orchestrator.agent.md`.
+references to `agents/basecoat-10-core-orchestrator.agent.md`.
 
 - `task_id`
 - `goal`

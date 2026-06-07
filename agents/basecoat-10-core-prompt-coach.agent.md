@@ -161,7 +161,7 @@ Use this delta format:
 ## Repository Integrations
 
 - Review agent, instruction, prompt, or skill files in this repository for prompt quality issues.
-- Pair with `instructions/token-economics.instructions.md` when token budget awareness matters.
+- Pair with `instructions/basecoat-50-security-token-economics.instructions.md` when token budget awareness matters.
 - When a prompt registry workflow exists, hand off optimized prompts for versioning and comparison across revisions.
 
 ## Output Format
@@ -178,4 +178,3 @@ Use this delta format:
 **Recommended:** gpt-5.3-codex
 **Rationale:** Strong at structured critique, revision guidance, and maintaining consistent scoring across iterations
 **Minimum:** gpt-5.4-mini
-

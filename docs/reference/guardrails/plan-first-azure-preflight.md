@@ -62,7 +62,7 @@ instruction files before any deployment step runs.
 
 ```text
 Azure preflight: ci-firewall and rbac-authentication checks apply.
-See instructions/ci-firewall.instructions.md and instructions/rbac-authentication.instructions.md.
+See instructions/basecoat-60-workflow-ci-firewall.instructions.md and instructions/basecoat-50-security-rbac-authentication.instructions.md.
 ```
 
 **Preflight checks:**
@@ -70,13 +70,13 @@ See instructions/ci-firewall.instructions.md and instructions/rbac-authenticatio
 1. **CI Firewall** — Does the workflow access Azure resources behind a network
    firewall (Storage, Key Vault, SQL, Cosmos)?
    - If yes: confirm the single-job runner IP pattern is in place.
-   - Reference: `instructions/ci-firewall.instructions.md`
+   - Reference: `instructions/basecoat-60-workflow-ci-firewall.instructions.md`
 
 2. **RBAC Authentication** — Does the change provision or configure Azure
    resources?
    - If yes: confirm RBAC-only auth is enforced (no shared keys, SAS tokens,
      or connection string auth).
-   - Reference: `instructions/rbac-authentication.instructions.md`
+   - Reference: `instructions/basecoat-50-security-rbac-authentication.instructions.md`
 
 **Blocking condition:** If a preflight check reveals a firewall or RBAC gap,
 surface the finding and wait for explicit user confirmation before continuing.
@@ -110,8 +110,8 @@ Order of precedence:
 
 ## References
 
-- Plan-first workflow: [`instructions/plan-first.instructions.md`](/instructions/plan-first.instructions.md)
-- CI firewall pattern: [`instructions/ci-firewall.instructions.md`](/instructions/ci-firewall.instructions.md)
-- RBAC authentication: [`instructions/rbac-authentication.instructions.md`](/instructions/rbac-authentication.instructions.md)
+- Plan-first workflow: [`instructions/basecoat-10-core-plan-first.instructions.md`](/instructions/basecoat-10-core-plan-first.instructions.md)
+- CI firewall pattern: [`instructions/basecoat-60-workflow-ci-firewall.instructions.md`](/instructions/basecoat-60-workflow-ci-firewall.instructions.md)
+- RBAC authentication: [`instructions/basecoat-50-security-rbac-authentication.instructions.md`](/instructions/basecoat-50-security-rbac-authentication.instructions.md)
 - Deployment RCA: [`deployment-rca.md`](deployment-rca.md)
-- Intent routing: [`instructions/intent-routing.instructions.md`](/instructions/intent-routing.instructions.md)
+- Intent routing: [`instructions/basecoat-10-core-intent-routing.instructions.md`](/instructions/basecoat-10-core-intent-routing.instructions.md)

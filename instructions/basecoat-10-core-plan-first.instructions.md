@@ -28,7 +28,7 @@ Skip the formal plan for small, obvious work such as:
 
 Before loading any context, classify the task:
 
-1. Match the user message against the L2 trigger map in `instructions/memory-index.instructions.md`
+1. Match the user message against the L2 trigger map in `instructions/basecoat-10-core-memory-index.instructions.md`
 2. If a pattern bundle matches with confidence ≥ 0.80 → **Fast Path**: load the bundle's pre-scoped context, apply its turn budget, skip broad exploration
 3. If confidence 0.50–0.79 → load the bundle as a starting point but continue with full Explore phase
 4. If confidence < 0.50 or no match → **Full Path**: proceed through all phases below
@@ -80,7 +80,7 @@ Guidelines for task sizing:
 
 ### Example Plan Format
 
-```
+```text
 ## Tasks
 
 1. Create validation schema — `src/schemas/user.ts`
@@ -96,7 +96,7 @@ Guidelines for task sizing:
    Change: Return 422 with field-level errors on validation failure
    Depends: task 2
    Verify: `npx vitest run src/routes/register.test.ts`
-```
+```text
 
 ## Course Correction
 

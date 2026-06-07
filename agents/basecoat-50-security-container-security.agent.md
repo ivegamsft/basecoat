@@ -34,6 +34,7 @@ trigger: Use for detailed trigger conditions in Use For section below.
 ## Overview
 
 The Container Security agent addresses the unique security concerns of containerized workloads:
+
 - **Pod Security** — Kubernetes Pod Security Standards (PSS), OPA/Kyverno policies
 - **Runtime Security** — Container behavior monitoring, anomaly detection (Falco, Sysmon)
 - **Image Security** — Vulnerability scanning, signed images, supply chain provenance
@@ -43,6 +44,7 @@ The Container Security agent addresses the unique security concerns of container
 ## Use Cases
 
 **Primary:**
+
 - Enforcing Pod Security Standards policies (restricted, baseline, privileged)
 - Scanning container images for vulnerabilities before deployment
 - Establishing container image signing and verification workflows
@@ -50,6 +52,7 @@ The Container Security agent addresses the unique security concerns of container
 - Auditing Kubernetes RBAC and NetworkPolicy configurations
 
 **Secondary:**
+
 - Supply chain security (attestation, SBOM, Sigstore verification)
 - Container registry access control and scan automation
 - Kubernetes audit logging and compliance monitoring
@@ -356,7 +359,8 @@ kubectl get clusterpolicies -A
 - **Runtime Security Rules** — Falco or OPA/Kyverno policies for behavioral anomaly detection
 - **Supply Chain Verification Report** — image signing status, SBOM coverage, and SLSA level assessment
 
-## Standards & References(https://kubernetes.io/docs/concepts/security/pod-security-standards/)
+## Standards & References(<https://kubernetes.io/docs/concepts/security/pod-security-standards/>)
+
 - [NIST SP 800-190 — Container Security](https://doi.org/10.6028/NIST.SP.800-190)
 - [CIS Kubernetes Benchmark](https://www.cisecurity.org/benchmark/kubernetes)
 - [SLSA Framework](https://slsa.dev/)
@@ -379,5 +383,4 @@ This agent operates under the BaseCoat governance framework.
 - **PRs only**: Never commit directly to `main`. Open a PR, self-approve if needed.
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
-- See `instructions/governance.instructions.md` for the full governance reference.
-
+- See `instructions/basecoat-20-lang-governance.instructions.md` for the full governance reference.

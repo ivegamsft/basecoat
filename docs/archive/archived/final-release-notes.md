@@ -1,6 +1,6 @@
 # BaseCoat v2.3.0 - FINAL RELEASE
 
-**Status: ✅ COMPLETE - All Issues Resolved - Production Ready**
+## Status: Complete - All Issues Resolved - Production Ready
 
 ## Release Summary
 
@@ -15,7 +15,9 @@ BaseCoat v2.3.0 represents the **final, complete release** of the BaseCoat frame
 ## Sprint Delivery Summary
 
 ### Sprint 5 (v2.1.0) - Operations & Quality
-**21 Issues Resolved**
+
+### 21 Issues Resolved
+
 - Markdown validation and linting improvements
 - Documentation standards and governance
 - Agent and skill lifecycle management
@@ -23,7 +25,9 @@ BaseCoat v2.3.0 represents the **final, complete release** of the BaseCoat frame
 - ~7,000+ lines added
 
 ### Sprint 6 (v2.2.0) - Infrastructure & Tracking
-**9 Issues Resolved**
+
+### 9 Issues Resolved
+
 - Enterprise infrastructure guidance
 - Azure landing zone patterns
 - Data science and medallion architecture
@@ -31,7 +35,9 @@ BaseCoat v2.3.0 represents the **final, complete release** of the BaseCoat frame
 - ~3,000+ lines added
 
 ### Sprint 7 (v2.3.0) - Cloud Agent Auto-Approval
-**1 Issue Resolved**
+
+### 1 Issue Resolved
+
 - GitHub Actions auto-approval workflow for cloud agent (#383)
 - Seamless cloud agent CI/CD integration
 - Self-merge capability for continuous delivery
@@ -51,6 +57,7 @@ BaseCoat v2.3.0 represents the **final, complete release** of the BaseCoat frame
 ## Release Contents
 
 ### Assets Delivered
+
 - ✅ 52 production-ready agents
 - ✅ 73 skill definitions and implementations
 - ✅ 52 instruction files with governance
@@ -60,6 +67,7 @@ BaseCoat v2.3.0 represents the **final, complete release** of the BaseCoat frame
 - ✅ Automated CI/CD workflows with auto-approval
 
 ### Key Features in v2.3.0
+
 1. **Cloud Agent Auto-Approval** - GitHub Actions workflow for seamless cloud agent deployment (#383)
 2. **Complete Agent Ecosystem** - 52 agents covering all enterprise scenarios
 3. **Comprehensive Skills Library** - 73 modular skills for agent composition
@@ -67,27 +75,32 @@ BaseCoat v2.3.0 represents the **final, complete release** of the BaseCoat frame
 5. **Production CI/CD** - Automated testing, validation, and deployment
 
 ## Breaking Changes
+
 **None** - This release is fully backward compatible with v2.2.0
 
 ## Deprecations
+
 **None** - All existing APIs and patterns remain supported
 
 ## Security
+
 - ✅ No security vulnerabilities detected
 - ✅ Dependencies up-to-date
 - ✅ Secret scanning enabled and passing
 - ✅ All workflows signed and verified
 
 ## Documentation
+
 - [Agents Reference](./AGENTS.md) — Complete agent catalog (52 agents)
 - [Skills Documentation](./docs/) — Skill definitions and patterns
-- [Governance](./instructions/governance.instructions.md) — Enterprise standards
+- [Governance](./instructions/basecoat-20-lang-governance.instructions.md) — Enterprise standards
 - [Contributing Guide](./CONTRIBUTING.md) — Development workflow
 - [Release Notes Archive](./CHANGELOG.md) — Complete version history
 
 ## Installation & Upgrade
 
 ### Fresh Install
+
 ```bash
 gh repo clone IBuySpy-Shared/basecoat
 cd basecoat
@@ -96,6 +109,7 @@ pwsh scripts/sync-basecoat.ps1
 ```
 
 ### Upgrade from v2.2.0
+
 ```bash
 git fetch origin
 git checkout v2.3.0
@@ -111,6 +125,7 @@ pwsh scripts/validate-basecoat.ps1
 ## Acknowledgments
 
 This release represents the culmination of three focused sprints delivering:
+
 - Operational excellence through automation
 - Enterprise-grade governance and guardrails
 - Cloud-native agent orchestration

@@ -1,6 +1,6 @@
 ---
 description: "Enterprise-level GitHub Copilot policy configuration, including usage metrics enablement, seat management, and security policies."
-applyTo: "references/enterprise-configuration/**/*.md,instructions/enterprise-configuration.instructions.md,.github/workflows/*.{yml,yaml}"
+applyTo: "references/enterprise-configuration/**/*.md,instructions/basecoat-10-core-enterprise-configuration.instructions.md,.github/workflows/*.{yml,yaml}"
 distribute: false
 ---
 
@@ -80,6 +80,6 @@ See [`references/enterprise-configuration/security-and-checklist.md`](references
 
 ## See Also
 
-- `instructions/security-monitoring.instructions.md` — Monitoring security posture
-- `instructions/governance.instructions.md` — BaseCoat governance policies
-- `instructions/observability.instructions.md` — Observability and metrics
+- `instructions/basecoat-50-security-security-monitoring.instructions.md` — Monitoring security posture
+- `instructions/basecoat-20-lang-governance.instructions.md` — BaseCoat governance policies
+- `instructions/basecoat-10-core-observability.instructions.md` — Observability and metrics

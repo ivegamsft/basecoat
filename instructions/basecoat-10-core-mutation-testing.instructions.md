@@ -2,7 +2,7 @@
 description: >
   Mutation testing standards — use when verifying test quality. Mutation testing checks whether
   existing tests actually catch bugs. Covers score thresholds, tool selection, and fix strategies.
-applyTo: "agents/contract-testing.agent.md, agents/e2e-test-strategy.agent.md, instructions/testing.instructions.md"
+applyTo: "agents/basecoat-10-core-contract-testing.agent.md, agents/basecoat-90-quality-e2e-test-strategy.agent.md, instructions/basecoat-10-core-testing.instructions.md"
 ---
 
 # Mutation Testing Standards

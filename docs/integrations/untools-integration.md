@@ -37,14 +37,14 @@ The following table evaluates the top 5 Untools frameworks for integration into 
 
 **Integration Points:**
 
-- **File:** `agents/prompt-engineer.agent.md` — enhance workflow steps 1-2
+- **File:** `agents/basecoat-10-core-prompt-engineer.agent.md` — enhance workflow steps 1-2
 - **New Asset:** Create `instructions/prompt-design.instructions.md` with explicit first-principles template
 - **Trigger:** When a prompt requires revision or is handling edge cases
 
 **Touch Points in Repository:**
 
 ```text
-agents/prompt-engineer.agent.md
+agents/basecoat-10-core-prompt-engineer.agent.md
   └─ Workflow step 1 (Understand intent)
      └─ Add: "Apply First Principles: break the desired behavior into atomic components"
 
@@ -75,22 +75,22 @@ Before authoring a prompt, apply this 5-step decomposition:
 
 **Integration Points:**
 
-- **File:** `agents/agent-designer.agent.md` — enhance workflow steps 1 and 4
-- **File:** `agents/guardrail.agent.md` — add assumption validation to guardrail checks
+- **File:** `agents/basecoat-10-core-agent-designer.agent.md` — enhance workflow steps 1 and 4
+- **File:** `agents/basecoat-30-ai-guardrail.agent.md` — add assumption validation to guardrail checks
 - **New Asset:** Create `instructions/assumption-validation.instructions.md`
 - **Trigger:** When designing a new agent or validating guardrail logic
 
 **Touch Points in Repository:**
 
 ```text
-agents/agent-designer.agent.md
+agents/basecoat-10-core-agent-designer.agent.md
   └─ Workflow step 1 (Clarify scope)
      └─ Add: "Ladder of Inference check: What observable behaviors define success? 
               What assumptions are we making about user intent?"
   └─ Workflow step 4 (Write instruction body)
      └─ Add: "Test reasoning chains: Can we trace from observable input → assumption → conclusion?"
 
-agents/guardrail.agent.md
+agents/basecoat-30-ai-guardrail.agent.md
   └─ Validation rules
      └─ Add: "Assumption check: Are guardrail rules based on observable data or inference?"
 
@@ -123,20 +123,20 @@ When reviewing agent design or guardrail rules, climb the Ladder for each key de
 
 **Integration Points:**
 
-- **File:** `agents/solution-architect.agent.md` — enhance design review workflow
-- **File:** `agents/release-impact-advisor.agent.md` — add perspective-based risk assessment
+- **File:** `agents/basecoat-10-core-solution-architect.agent.md` — enhance design review workflow
+- **File:** `agents/basecoat-60-workflow-release-impact-advisor.agent.md` — add perspective-based risk assessment
 - **New Asset:** Create `instructions/multi-perspective-design.instructions.md`
 - **Trigger:** When reviewing architectural tradeoffs or release readiness
 
 **Touch Points in Repository:**
 
 ```text
-agents/solution-architect.agent.md
+agents/basecoat-10-core-solution-architect.agent.md
   └─ Workflow (add design review step)
      └─ "Apply Six Thinking Hats: systematically review from facts, risks, benefits, 
         creativity, and process perspectives"
 
-agents/release-impact-advisor.agent.md
+agents/basecoat-60-workflow-release-impact-advisor.agent.md
   └─ Impact assessment workflow
      └─ Embed hat-based perspective check: facts about the release, risks (black), 
         opportunities (yellow), creative mitigations (green)
@@ -168,22 +168,22 @@ When evaluating an architectural decision, structure review using 6 Hats:
 
 **Integration Points:**
 
-- **File:** `agents/sprint-planner.agent.md` — enhance goal decomposition workflow
-- **File:** `agents/solution-architect.agent.md` — add problem decomposition for architecture work
+- **File:** `agents/basecoat-10-core-sprint-planner.agent.md` — enhance goal decomposition workflow
+- **File:** `agents/basecoat-10-core-solution-architect.agent.md` — add problem decomposition for architecture work
 - **New Asset:** Create `instructions/problem-decomposition.instructions.md`
 - **Trigger:** When planning a sprint goal or defining a complex project scope
 
 **Touch Points in Repository:**
 
 ```text
-agents/sprint-planner.agent.md
+agents/basecoat-10-core-sprint-planner.agent.md
   └─ Workflow step 1 (Accept sprint goal)
      └─ Add: "Decompose using Issue Tree: break goal into primary branches (major components), 
         then secondary branches (actionable tasks)"
   └─ Output
      └─ Include: Issue tree visualization (text-based) showing decomposition hierarchy
 
-agents/solution-architect.agent.md
+agents/basecoat-10-core-solution-architect.agent.md
   └─ System design workflow
      └─ Add: "Map architecture to issue tree; each tree branch aligns with an architecture domain"
 
@@ -227,22 +227,22 @@ Sprint Goal: "Improve agent observability"
 
 **Integration Points:**
 
-- **File:** `agents/release-impact-advisor.agent.md` — enhance consequence analysis
-- **File:** `agents/solution-architect.agent.md` — add long-term consequence consideration to design reviews
+- **File:** `agents/basecoat-60-workflow-release-impact-advisor.agent.md` — enhance consequence analysis
+- **File:** `agents/basecoat-10-core-solution-architect.agent.md` — add long-term consequence consideration to design reviews
 - **New Asset:** Create `instructions/consequence-mapping.instructions.md`
 - **Trigger:** When assessing release impact or designing long-lived systems
 
 **Touch Points in Repository:**
 
 ```text
-agents/release-impact-advisor.agent.md
+agents/basecoat-60-workflow-release-impact-advisor.agent.md
   └─ Workflow (Impact Assessment)
      └─ Add step: "Second-Order Consequences: For each first-order effect, ask: 'And then what? 
         What second and third-order consequences could emerge?'"
   └─ Risk Assessment output
      └─ Include: Consequence chain for each identified risk
 
-agents/solution-architect.agent.md
+agents/basecoat-10-core-solution-architect.agent.md
   └─ Design review checklist
      └─ Add: "Long-term consequence check: How does this design evolve over 1, 3, 5 years?"
 
@@ -278,12 +278,12 @@ When evaluating a release or design decision, apply consequence mapping:
 
 | File | Integration | Reason |
 |---|---|---|
-| `agents/prompt-engineer.agent.md` | First Principles Thinking | Enhance step 1 & 2 of workflow |
-| `agents/agent-designer.agent.md` | Ladder of Inference | Enhance step 1 & 4; improve assumption clarity |
-| `agents/solution-architect.agent.md` | Six Thinking Hats + Second-Order Thinking + Issue Trees | Multi-framework support for architecture work |
-| `agents/sprint-planner.agent.md` | Issue Trees | Enhance goal decomposition |
-| `agents/release-impact-advisor.agent.md` | Six Thinking Hats + Second-Order Thinking | Improve impact assessment rigor |
-| `agents/guardrail.agent.md` | Ladder of Inference | Add assumption validation to guardrail checks |
+| `agents/basecoat-10-core-prompt-engineer.agent.md` | First Principles Thinking | Enhance step 1 & 2 of workflow |
+| `agents/basecoat-10-core-agent-designer.agent.md` | Ladder of Inference | Enhance step 1 & 4; improve assumption clarity |
+| `agents/basecoat-10-core-solution-architect.agent.md` | Six Thinking Hats + Second-Order Thinking + Issue Trees | Multi-framework support for architecture work |
+| `agents/basecoat-10-core-sprint-planner.agent.md` | Issue Trees | Enhance goal decomposition |
+| `agents/basecoat-60-workflow-release-impact-advisor.agent.md` | Six Thinking Hats + Second-Order Thinking | Improve impact assessment rigor |
+| `agents/basecoat-30-ai-guardrail.agent.md` | Ladder of Inference | Add assumption validation to guardrail checks |
 
 ---
 

@@ -1,4 +1,4 @@
-﻿# Token Optimization & Context Handling
+# Token Optimization & Context Handling
 
 Strategies for managing token budgets, compressing context, and handing off state between agents in a multi-agent system. Companion to [`model-optimization.md`](model-optimization.md) (model selection) and [`../architecture/multi-agent-orchestration-patterns.md`](../architecture/multi-agent-orchestration-patterns.md) (branch coordination).
 
@@ -502,7 +502,7 @@ wrong. More turns with the same approach do not fix this.
 ### Instruction Sizing: When Instructions Become Context Debt
 
 **Observation across Sprint 23–24:** The governance instruction file
-(`instructions/governance.instructions.md`) grew to 8KB+ (estimated ~2,500 tokens).
+(`instructions/basecoat-20-lang-governance.instructions.md`) grew to 8KB+ (estimated ~2,500 tokens).
 Because it has `applyTo: "**/*"`, it loads on every agent invocation. Across a
 30-invocation sprint, the governance instruction alone accounts for ~75K tokens.
 
@@ -684,7 +684,7 @@ Based on Sprint 31 empirical testing, the following agent categories are safe to
 
 - [`model-optimization.md`](model-optimization.md) — Model tier matrix and cost considerations
 - [`../architecture/multi-agent-orchestration-patterns.md`](../architecture/multi-agent-orchestration-patterns.md) — Branch coordination for parallel agents
-- [`instructions/governance.instructions.md`](/instructions/governance.instructions.md) — Section 10: Token and Model Awareness
+- [`instructions/basecoat-20-lang-governance.instructions.md`](/instructions/basecoat-20-lang-governance.instructions.md) — Section 10: Token and Model Awareness
 - [`../templates/sprint-structure.md`](../templates/sprint-structure.md) — Reusable sprint planning template (reduces re-planning cost 62%)
 - Issue [#42](https://github.com/IBuySpy-Shared/basecoat/issues/42) — Tracking issue for token optimization
 - Issue [#44](https://github.com/IBuySpy-Shared/basecoat/issues/44) — Token budget and cost attribution

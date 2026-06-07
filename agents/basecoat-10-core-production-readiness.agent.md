@@ -155,18 +155,22 @@ Incident Response Workflow:
 ## Success Criteria
 
 ✅ **Production Readiness:**
+
 - PRR decisions are evidence-backed and auditable.
 - Critical blockers are resolved before broad rollout.
 
 ✅ **Business Continuity:**
+
 - RTO/RPO targets exist for critical systems.
 - Continuity exercises run on a recurring cadence.
 
 ✅ **Disaster Recovery:**
+
 - Restore drills validate recovery procedures.
 - Tiered runbooks are current and owner-assigned.
 
 ✅ **Incident Response:**
+
 - On-call escalation and comms paths are verified.
 - Post-incident actions are tracked to closure.
 
@@ -200,5 +204,4 @@ This agent operates under the BaseCoat governance framework.
 - **PRs only**: Never commit directly to `main`. Open a PR, self-approve if needed.
 - **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
 - **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
-- See `instructions/governance.instructions.md` for the full governance reference.
-
+- See `instructions/basecoat-20-lang-governance.instructions.md` for the full governance reference.
