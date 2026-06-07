@@ -19,6 +19,7 @@ on:
 permissions:
   contents: write
   pages: write
+  id-token: write
 
 jobs:
   validate:
@@ -47,6 +48,9 @@ jobs:
     if: github.event_name != 'pull_request'
     needs: validate
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
@@ -76,34 +80,21 @@ jobs:
           sed -i "s|https://github.com/IBuySpy-Shared/basecoat|${REPO_URL}|gI" mkdocs.yml
           sed -i "s|IBuySpy-Shared/basecoat|${{ github.repository }}|g" mkdocs.yml
 
-      - name: Enable GitHub Pages (first run)
+      - name: Build docs
+        run: mkdocs build
+
+      - name: Update repository homepage URL
         run: |
-          # Create Pages if it doesn't exist yet (POST)
-          gh api --method POST "repos/${{ github.repository }}/pages" \
-            --field 'source[branch]=gh-pages' \
-            --field 'source[path]=/' 2>/dev/null || true
-
-          # Ensure Pages source points to gh-pages branch regardless of prior state (PUT).
-          # Handles the case where Pages was already enabled with a different source branch.
-          PAGES_BRANCH=$(gh api "repos/${{ github.repository }}/pages" \
-            --jq '.source.branch' 2>/dev/null || echo "unknown")
-          if [ "$PAGES_BRANCH" != "gh-pages" ]; then
-            echo "Pages source is '$PAGES_BRANCH', updating to 'gh-pages'..."
-            gh api --method PUT "repos/${{ github.repository }}/pages" \
-              --field 'source[branch]=gh-pages' \
-              --field 'source[path]=/' 2>/dev/null \
-              && echo "Pages source updated" \
-              || echo "Warning: could not update Pages source (may need manual update in repo settings)"
-          else
-            echo "Pages source already set to gh-pages"
-          fi
-
           gh api --method PATCH "repos/${{ github.repository }}" \
             --field "homepage=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" 2>/dev/null || true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@98ef48e41587a300b82de4cf298aa98b57b2faae
+        with:
+          path: site/
+
       - name: Deploy to GitHub Pages
-        run: mkdocs gh-deploy --force --no-history
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128
