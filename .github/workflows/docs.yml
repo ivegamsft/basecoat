@@ -78,9 +78,26 @@ jobs:
 
       - name: Enable GitHub Pages (first run)
         run: |
+          # Create Pages if it doesn't exist yet (POST)
           gh api --method POST "repos/${{ github.repository }}/pages" \
             --field 'source[branch]=gh-pages' \
             --field 'source[path]=/' 2>/dev/null || true
+
+          # Ensure Pages source points to gh-pages branch regardless of prior state (PUT).
+          # Handles the case where Pages was already enabled with a different source branch.
+          PAGES_BRANCH=$(gh api "repos/${{ github.repository }}/pages" \
+            --jq '.source.branch' 2>/dev/null || echo "unknown")
+          if [ "$PAGES_BRANCH" != "gh-pages" ]; then
+            echo "Pages source is '$PAGES_BRANCH', updating to 'gh-pages'..."
+            gh api --method PUT "repos/${{ github.repository }}/pages" \
+              --field 'source[branch]=gh-pages' \
+              --field 'source[path]=/' 2>/dev/null \
+              && echo "Pages source updated" \
+              || echo "Warning: could not update Pages source (may need manual update in repo settings)"
+          else
+            echo "Pages source already set to gh-pages"
+          fi
+
           gh api --method PATCH "repos/${{ github.repository }}" \
             --field "homepage=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" 2>/dev/null || true
         env:
