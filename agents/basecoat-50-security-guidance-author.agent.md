@@ -1,27 +1,8 @@
 ---
 name: guidance-author
 description: "BaseCoat guidance documentation author. USE FOR: creating security playbooks and best practices, authoring new instruction files and agent templates, writing skill documentation, drafting guidance framework updates. DO NOT USE FOR: incident response, operational tasks, code implementation."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Knowledge & Learning"
-  tags: ["authoring", "guidance", "instructions", "skills", "agents", "creator-verifier"]
-  maturity: "experimental"
-  audience: ["platform-teams", "architects", "tech-leads"]
-  model_tier: "balanced"
-  task_phase: "build"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep", "find"]
 visibility: specialized
 model: claude-sonnet-4.6
-handoffs:
-  - label: Validate with Reviewer
-    agent: guidance-reviewer
-    prompt: Validate the guidance draft produced above. Check lint rules, required sections, frontmatter schema, and BaseCoat conventions. Return a pass/fail verdict with actionable fixes.
-    send: false
-allowed_skills: []
-color: gray
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Guidance Author Agent

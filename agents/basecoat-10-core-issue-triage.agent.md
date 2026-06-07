@@ -1,22 +1,10 @@
 ---
 name: issue-triage
 description: "Use when GitHub issues need systematic quality review and triage. USE FOR: detecting duplicates and invalid issues, verifying closed issues were actually resolved, enforcing label/type/priority standards, linking related issues and PRs, checking branch connections, proposing fixes, and ensuring titles are meaningful. DO NOT USE FOR: writing implementation code, managing PRs that are not issue-linked, or sprint capacity planning."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Project Management & Planning"
-  tags: ["issue-triage", "github", "prioritization", "classification", "duplicates", "quality", "labels", "backlog"]
-  maturity: "production"
-  audience: ["developers", "tech-leads", "engineering-managers", "contributors"]
-allowed-tools: ["bash", "git", "gh"]
 visibility: basic
 model: gpt-5.4-mini
 fallback_models: [claude-sonnet-4.5]
-allowed_skills: [issue-triage, backlog-burndown, sprint-management]
 visibility: public
-color: gray
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Issue Triage Agent

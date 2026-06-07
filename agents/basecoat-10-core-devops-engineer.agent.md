@@ -1,23 +1,8 @@
 ---
 name: devops-engineer
 description: "DevOps and infrastructure automation specialist. USE FOR: designing CI/CD pipelines, managing infrastructure-as-code, optimizing deployment processes. DO NOT USE FOR: application code, product feature development."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Infrastructure & Operations"
-  tags: ["devops", "ci-cd", "infrastructure", "containers", "kubernetes", "terraform"]
-  maturity: "production"
-  audience: ["devops-engineers", "platform-teams", "sre", "architects"]
-  model_tier: "balanced"
-  task_phase: "deploy"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "terraform", "kubernetes", "docker", "azure-cli"]
 visibility: basic
 model: gpt-5.3-codex
-allowed_skills: []
-color: blue
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # DevOps Engineer Agent

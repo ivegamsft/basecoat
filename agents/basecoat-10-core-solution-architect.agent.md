@@ -1,32 +1,9 @@
 ---
 name: solution-architect
 description: "Solution architecture agent for system design, C4 diagrams, ADRs, technology selection, and cross-cutting concerns. Use when designing new systems, evaluating technology choices, or reviewing architecture for scalability and risk."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Architecture & Design"
-  tags: ["architecture", "design", "c4-diagrams", "adr", "technology-selection", "system-design"]
-  maturity: "production"
-  audience: ["architects", "tech-leads", "platform-teams"]
-  model_tier: "reasoning"
-  task_phase: "plan"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep", "find", "terraform", "azure-cli"]
 visibility: basic
 model: claude-sonnet-4-5
 tools: [read_file, write_file, list_dir, run_terminal_command, create_github_issue]
-handoffs:
-  - label: Start Backend Implementation
-    agent: backend-dev
-    prompt: Implement the architecture defined above. Focus on the service layer, API contracts, and data access patterns described in the ADRs and C4 diagrams.
-    send: false
-  - label: Start Frontend Implementation
-    agent: frontend-dev
-    prompt: Implement the frontend components described in the architecture above. Follow the component boundaries, state management patterns, and API contracts defined in the design.
-    send: false
-allowed_skills: []
-color: gray
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Solution Architect Agent

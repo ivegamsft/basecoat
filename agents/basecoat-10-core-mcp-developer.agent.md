@@ -1,23 +1,8 @@
 ---
 name: mcp-developer
 description: "MCP (Model Context Protocol) development specialist. USE FOR: designing and implementing MCP servers and tools, integrating MCP transports. DO NOT USE FOR: direct model interactions, non-MCP tasks."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "AI & Machine Learning"
-  tags: ["mcp", "model-context-protocol", "tools", "integration", "ai-systems"]
-  maturity: "production"
-  audience: ["ai-engineers", "developers", "platform-teams"]
-  model_tier: "balanced"
-  task_phase: "build"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep", "python", "node"]
 visibility: internal
 model: claude-sonnet-4
-allowed_skills: []
-color: pink
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # MCP Developer Agent

@@ -1,28 +1,9 @@
 ---
 name: factory-conductor
 description: "Use when reading .factory-state.json and auto-queuing the next ready wave of factory work. USE FOR: route S2/S3/S4 work, batch dispatch by wave, and ping the right follow-up workflow. DO NOT USE FOR: state normalization, BOM validation, or product backlog prioritization."
-type: task
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Process"
-  tags: ["factory", "orchestration", "dispatch", "workflow-dispatch", "slack"]
-  maturity: "beta"
-  audience: ["developers", "project-managers", "tech-leads"]
-  model_tier: "balanced"
-  task_phase: "plan"
-  interaction_type: "autonomous"
-allowed-tools: ["bash", "git", "gh", "grep", "find"]
 visibility: basic
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
-allowed_skills: []
-color: gray
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 # Factory Conductor
 

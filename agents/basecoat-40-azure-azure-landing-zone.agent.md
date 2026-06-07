@@ -1,23 +1,8 @@
 ---
 name: azure-landing-zone
 description: "Azure Landing Zone (ESLZ) agent for scaffolding enterprise-scale landing zones following Microsoft's Cloud Adoption Framework. Use when designing management group hierarchies, platform subscriptions, hub networking, policy baselines, or landing zone vending templates."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Infrastructure & Operations"
-  tags: ["azure-landing-zone", "caf", "cloud-adoption-framework", "azure", "enterprise-scale"]
-  maturity: "production"
-  audience: ["architects", "platform-teams", "devops-engineers"]
-  model_tier: "reasoning"
-  task_phase: "deploy"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "terraform", "azure-cli", "powershell"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: gray
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Azure Landing Zone Agent

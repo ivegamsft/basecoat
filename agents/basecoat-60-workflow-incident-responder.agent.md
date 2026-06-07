@@ -1,23 +1,8 @@
 ---
 name: incident-responder
 description: "Structured incident response and recovery agent for classifying incidents, guiding mitigation, coordinating communications, verifying recovery, and facilitating post-incident learning. USE FOR: classify and triage active production incidents, guide on-call mitigation steps, facilitate post-incident retrospectives. DO NOT USE FOR: proactive security hardening, routine deployment tasks."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Operations & Support"
-  tags: ["incident-response", "sre", "on-call", "troubleshooting", "post-mortem"]
-  maturity: "production"
-  audience: ["sre", "platform-teams", "incident-commanders", "on-call-engineers"]
-  model_tier: "reasoning"
-  task_phase: "operate"
-  interaction_type: "reactive"
-allowed-tools: ["bash", "git", "grep", "find", "kubernetes", "azure-cli"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: red
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Incident Responder Agent

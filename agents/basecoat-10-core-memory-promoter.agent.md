@@ -1,23 +1,8 @@
 ---
 name: memory-promoter
 description: "Analyzes session transcripts and sprint summaries to identify high-value patterns for promotion to long-term BaseCoat memory contributions. USE FOR: extract reusable patterns from session transcripts, identify conventions worth promoting to BaseCoat memory, review sprint summaries for learnings. DO NOT USE FOR: writing code or instructions directly, real-time session assistance."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Knowledge & Learning"
-  tags: ["memory", "pattern-detection", "learning", "contributions"]
-  maturity: "production"
-  audience: ["developers", "architects", "platform-teams"]
-  model_tier: "fast"
-  task_phase: "operate"
-  interaction_type: "autonomous"
 model: claude-haiku-4.5
-allowed-tools: ["bash", "git"]
 visibility: basic
-allowed_skills: []
-color: gray
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Memory Promoter Agent

@@ -1,28 +1,9 @@
 ---
 name: product-manager
 description: "Use when gathering requirements, writing user stories, defining acceptance criteria, planning roadmaps, or prioritizing features using frameworks like RICE or MoSCoW."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Product & Strategy"
-  tags: ["product-management", "requirements", "roadmap", "user-stories", "prioritization"]
-  maturity: "production"
-  audience: ["product-managers", "product-owners", "team-leads"]
-  model_tier: "reasoning"
-  task_phase: "plan"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep"]
 visibility: basic
 model: claude-sonnet-4.6
 tools: [run_terminal_command, read_file, write_file, list_dir]
-handoffs:
-  - label: Plan Sprint
-    agent: sprint-planner
-    prompt: Use the user stories and prioritization above as the sprint goal. Decompose them into GitHub issues with labels, wave dependency maps, agent assignments, and acceptance criteria.
-    send: false
-allowed_skills: []
-color: yellow
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Product Manager Agent

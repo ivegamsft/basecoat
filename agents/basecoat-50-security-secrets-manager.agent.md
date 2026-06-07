@@ -1,24 +1,8 @@
 ---
-
 name: Secrets Manager
 description: "Secrets lifecycle management — discovery, rotation, expiry scanning, emergency revocation, and Vault patterns for infrastructure and application secrets. USE FOR: plan secrets rotation schedule, scan for expiring credentials, execute emergency revocation. DO NOT USE FOR: detecting hardcoded secrets in code, general performance optimization."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-  model_tier: "balanced"
-  task_phase: "operate"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep", "find"]
 visibility: specialized
 model: claude-sonnet-4.6
-allowed_skills: []
-color: red
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Secrets Manager Agent

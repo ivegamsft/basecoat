@@ -1,23 +1,8 @@
 ---
 name: new-customization
 description: "Use when creating or updating a customization asset such as an instruction, skill, prompt, or agent. Chooses the right primitive, authors the file, and validates frontmatter and placement."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "AI & Development"
-  tags: ["customization", "basecoat", "agent-authoring", "skill-creation"]
-  maturity: "production"
-  audience: ["developers", "agents", "architects"]
-  model_tier: "fast"
-  task_phase: "build"
-  interaction_type: "autonomous"
-allowed-tools: ["bash", "git"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: gray
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # New Customization Agent

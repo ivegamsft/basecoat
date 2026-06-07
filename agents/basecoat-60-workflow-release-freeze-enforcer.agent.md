@@ -1,24 +1,9 @@
 ---
 name: release-freeze-enforcer
 description: "Use when enforcing release freeze windows, routing exception requests, and coordinating branch access during a freeze. USE FOR: evaluate freeze exceptions, block unauthorized merge attempts, and publish go/no-go decisions for frozen branches. DO NOT USE FOR: merging changes, bypassing approvals, or resolving code conflicts."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Release & Deployment"
-  tags: ["release", "freeze", "exceptions", "governance", "branches"]
-  maturity: "beta"
-  audience: ["release-managers", "devops-engineers", "engineering-managers"]
-  model_tier: "balanced"
-  task_phase: "deploy"
-  interaction_type: "facilitated"
-allowed-tools: ["bash", "git", "gh", "grep"]
 visibility: basic
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
-allowed_skills: [merge-conflict-mediator]
-color: yellow
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 # Release Freeze Enforcer
 

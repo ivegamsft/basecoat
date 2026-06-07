@@ -1,24 +1,9 @@
 ---
 name: dependency-blocker-monitor
 description: "Use when monitoring workcell BOM dependencies and cell health to open or resolve blocker issues when a cell fails or recovers. USE FOR: read workcell BOM dependencies, monitor cell deployment status, create blocker issues, and resolve them on recovery. DO NOT USE FOR: general incident response, application code, or one-off issue triage."
-type: monitor
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Process"
-  tags: ["workcell", "bom", "dependencies", "cell-health", "blocker", "recovery"]
-  maturity: "beta"
-  audience: ["developers", "project-managers", "tech-leads"]
-  model_tier: "balanced"
-  task_phase: "operate"
-  interaction_type: "autonomous"
-allowed-tools: ["bash", "git", "gh", "azure-cli"]
 visibility: basic
 model: gpt-5.4-mini
 fallback_models: [gpt-5.4-mini]
-allowed_skills: ["dependency-blocker-monitoring", "bom-validation", "factory-state-machine"]
-color: red
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 # Dependency Blocker Monitor
 

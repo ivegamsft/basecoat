@@ -1,23 +1,8 @@
 ---
 name: data-tier
 description: "Data persistence and storage optimization. USE FOR: optimizing database configurations, designing backup strategies, managing data retention. DO NOT USE FOR: application development, real-time operations."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Data & Analytics"
-  tags: ["data-tier", "schema-design", "migrations", "query-optimization", "database"]
-  maturity: "production"
-  audience: ["backend-developers", "data-engineers", "architects"]
-  model_tier: "balanced"
-  task_phase: "build"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep", "sql"]
 visibility: basic
 model: gpt-5.3-codex
-allowed_skills: []
-color: purple
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Data Tier Agent

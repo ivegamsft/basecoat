@@ -1,31 +1,8 @@
 ---
 name: domain-designer
 description: "Domain-driven design specialist. USE FOR: designing domain models, planning domain-oriented architectures, designing bounded contexts. DO NOT USE FOR: implementation, code generation."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Architecture & Design"
-  tags: ["domain-driven-design", "bounded-contexts", "aggregates", "ubiquitous-language", "microservices", "domain-events"]
-  maturity: "production"
-  audience: ["architects", "domain-experts", "backend-developers", "platform-teams"]
-  model_tier: "reasoning"
-  task_phase: "plan"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep", "find"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-handoffs:
-  - label: Implement Aggregate
-    agent: backend-dev
-    prompt: Implement the aggregate design specified above, including value objects, domain events, and invariant enforcement. Follow the domain language definitions and ensure command handlers respect aggregate boundaries.
-    send: false
-  - label: Design Integration
-    agent: middleware-dev
-    prompt: Design the event-driven integration layer for the domain events and bounded contexts specified above. Use domain events as the primary integration mechanism and implement saga patterns for cross-context workflows.
-    send: false
-color: gray
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Domain-Driven Design Agent

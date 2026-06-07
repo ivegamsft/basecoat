@@ -1,24 +1,8 @@
 ---
-
 name: Resilience Reviewer
 description: "Code-level resilience pattern review — circuit breakers, timeouts, bulkhead isolation, graceful degradation, retry logic, and load shedding implementation. USE FOR: review circuit breaker and retry patterns in code, audit timeout hierarchy, validate graceful degradation. DO NOT USE FOR: live incident response, infrastructure capacity planning."
-type: reviewer
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-  model_tier: "balanced"
-  task_phase: "test"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep", "find"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: gray
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Resilience Reviewer Agent

@@ -1,23 +1,8 @@
 ---
 name: dependency-update-advisor
 description: "Reviews Dependabot pull requests and posts a structured risk assessment comment: semver bump type, breaking change likelihood, suggested test focus areas, and known CVE context. USE FOR: assess Dependabot PR risk, evaluate semver bump safety, get CVE context for dependency update. DO NOT USE FOR: creating Dependabot config, general code review."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Developer Experience"
-  tags: ["dependabot", "dependency-updates", "security", "risk-assessment"]
-  maturity: "production"
-  audience: ["developers", "maintainers", "platform-teams"]
-  model_tier: "balanced"
-  task_phase: "operate"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep"]
 visibility: basic
 model: gpt-5.4-mini
-allowed_skills: []
-color: gray
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Dependency Update Advisor Agent

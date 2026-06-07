@@ -1,23 +1,8 @@
 ---
 name: agentops
 description: "Agent operations and infrastructure specialist. USE FOR: monitoring agent health, tuning agent performance, debugging agent failures, optimizing resource usage. DO NOT USE FOR: individual agent tasks, direct coding."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "AI & Operations"
-  tags: ["agentops", "lifecycle-management", "deployment", "monitoring"]
-  maturity: "production"
-  audience: ["platform-teams", "devops-engineers", "ai-engineers"]
-  model_tier: "balanced"
-  task_phase: "operate"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "gh"]
 visibility: internal
 model: claude-sonnet-4.6
-allowed_skills: []
-color: pink
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # AgentOps Agent

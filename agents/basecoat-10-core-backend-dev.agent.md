@@ -1,23 +1,8 @@
 ---
 name: backend-dev
 description: "Backend and services development specialist. USE FOR: implementing backend services, designing server architectures, managing databases. DO NOT USE FOR: frontend work, DevOps operations."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Development & Engineering"
-  tags: ["backend", "api", "services", "database", "performance", "security"]
-  maturity: "production"
-  audience: ["backend-developers", "platform-teams", "architects"]
-  model_tier: "balanced"
-  task_phase: "build"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep", "find", "terraform", "sql"]
 visibility: basic
 model: gpt-5.3-codex
-allowed_skills: []
-color: green
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Backend Development Agent

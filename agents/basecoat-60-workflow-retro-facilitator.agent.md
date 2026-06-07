@@ -1,28 +1,9 @@
 ---
 name: retro-facilitator
 description: "End-of-sprint retrospective agent. Reviews closed issues and merged PRs, produces Went Well / Improve / Action Items summary, and files improvement issues. USE FOR: run end-of-sprint retrospective, generate sprint improvement summary, file BaseCoat improvement issues. DO NOT USE FOR: planning next sprint, velocity estimation."
-type: facilitator
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Project Management & Planning"
-  tags: ["retrospective", "sprint-review", "agile", "continuous-improvement"]
-  maturity: "production"
-  audience: ["scrum-masters", "team-leads", "agile-coaches"]
-  model_tier: "balanced"
-  task_phase: "plan"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "gh"]
 visibility: basic
 model: claude-sonnet-4.6
 tools: [run_terminal_command, read_file, write_file, create_github_issue]
-handoffs:
-  - label: Plan Next Sprint
-    agent: sprint-planner
-    prompt: Use the action items and improvement areas from the retrospective above as input for the next sprint. Decompose the improvement actions into GitHub issues with labels, wave dependency maps, and acceptance criteria.
-    send: false
-allowed_skills: []
-color: yellow
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Retro Facilitator Agent

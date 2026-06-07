@@ -1,23 +1,8 @@
 ---
 name: rca
 description: "Root Cause Analysis agent for deep-dive incident investigations, hypothesis testing, and prevention follow-up. USE FOR: run post-incident root cause analysis, trace production outage to contributing factors, generate 5-why analysis report. DO NOT USE FOR: live incident triage and containment, general performance tuning."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Operations & Support"
-  tags: ["incident-response", "rca", "root-cause-analysis", "postmortem", "troubleshooting"]
-  maturity: "production"
-  audience: ["sre", "platform-teams", "incident-commanders", "on-call-engineers"]
-  model_tier: "reasoning"
-  task_phase: "operate"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep", "find", "python"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: gray
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # RCA Agent

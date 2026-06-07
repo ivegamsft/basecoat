@@ -1,23 +1,8 @@
 ---
 name: penetration-test
 description: "Security penetration testing specialist. USE FOR: designing penetration tests, identifying security vulnerabilities, generating security reports. DO NOT USE FOR: fixing vulnerabilities, incident response."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Security & Compliance"
-  tags: ["penetration-testing", "security-assessment", "vulnerability-discovery", "owasp"]
-  maturity: "production"
-  audience: ["security-engineers", "penetration-testers", "architects"]
-  model_tier: "reasoning"
-  task_phase: "test"
-  interaction_type: "autonomous"
-allowed-tools: ["bash", "git", "grep"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: red
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Penetration Test Agent

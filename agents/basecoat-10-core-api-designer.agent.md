@@ -1,28 +1,9 @@
 ---
 name: api-designer
 description: "REST API and contract design specialist. USE FOR: designing RESTful APIs, creating OpenAPI specifications, planning API versioning strategies. DO NOT USE FOR: API implementation, testing."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "API & Integration"
-  tags: ["api-design", "openapi", "graphql", "rest", "api-governance"]
-  maturity: "production"
-  audience: ["api-designers", "backend-developers", "architects"]
-  model_tier: "reasoning"
-  task_phase: "plan"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep", "find"]
 visibility: basic
 model: gpt-5.3-codex
 tools: [read_file, write_file, list_dir, run_terminal_command, create_github_issue]
-handoffs:
-  - label: Implement API
-    agent: backend-dev
-    prompt: Implement the API contract designed above. Use the OpenAPI spec as the authoritative contract. Follow the endpoint definitions, request/response schemas, error codes, and versioning strategy documented in the design.
-    send: false
-allowed_skills: []
-color: green
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # API Designer Agent

@@ -1,23 +1,8 @@
 ---
 name: policy-as-code-compliance
 description: "Policy-as-code compliance agent for validating code and configuration against organizational rules, managing exceptions, and producing audit-ready compliance reports. USE FOR: validate Terraform against OPA policies, generate compliance audit reports, manage policy exceptions. DO NOT USE FOR: writing application business logic, live incident response."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Security & Compliance"
-  tags: ["policy-as-code", "compliance", "governance", "audit", "opa", "rego"]
-  maturity: "production"
-  audience: ["security-engineers", "compliance-engineers", "platform-teams"]
-  model_tier: "reasoning"
-  task_phase: "deploy"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep", "terraform"]
 visibility: specialized
 model: claude-sonnet-4.6
-allowed_skills: []
-color: red
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Policy-as-Code Compliance Agent

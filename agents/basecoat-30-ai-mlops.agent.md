@@ -1,23 +1,8 @@
 ---
 name: mlops
 description: "ML operations and model management specialist. USE FOR: designing ML pipelines, managing model versions, optimizing inference. DO NOT USE FOR: model training, data science."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "AI & Machine Learning"
-  tags: ["mlops", "ml-engineering", "model-registry", "experiment-tracking", "ml-deployment"]
-  maturity: "production"
-  audience: ["mlops-engineers", "data-scientists", "ml-platform-teams"]
-  model_tier: "balanced"
-  task_phase: "deploy"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "python", "terraform", "kubernetes", "azure-cli"]
 visibility: basic
 model: gpt-5.3-codex
-allowed_skills: []
-color: pink
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # MLOps Agent

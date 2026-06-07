@@ -1,23 +1,8 @@
 ---
 name: release-impact-advisor
 description: "Assesses release readiness, change impacts, blast radius, rollback planning, and safe deployment strategies with canary deployments, feature flags, and changelog generation. USE FOR: assess release blast radius, plan rollback strategy, recommend deployment approach. DO NOT USE FOR: executing deployments, live incident response."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Release & Deployment"
-  tags: ["release-management", "impact-analysis", "deployment-strategy", "rollback", "canary"]
-  maturity: "production"
-  audience: ["release-managers", "devops-engineers", "platform-teams"]
-  model_tier: "balanced"
-  task_phase: "deploy"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep", "powershell"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: yellow
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Release Impact Advisor Agent

@@ -1,23 +1,8 @@
 ---
 name: release-manager
 description: "Automated versioned release workflow. Reads merged PRs since the last release, bumps version.json, writes CHANGELOG entry, creates git tag, and publishes GitHub release. USE FOR: bump semver and publish GitHub release, generate changelog from merged PRs, create git release tag. DO NOT USE FOR: sprint planning, deployment risk assessment."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Release & Deployment"
-  tags: ["release-management", "versioning", "changelog", "semver", "git-tagging"]
-  maturity: "production"
-  audience: ["devops-engineers", "release-managers", "platform-teams"]
-  model_tier: "balanced"
-  task_phase: "deploy"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "gh", "grep"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: yellow
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Release Manager Agent

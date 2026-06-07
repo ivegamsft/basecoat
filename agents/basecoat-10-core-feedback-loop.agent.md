@@ -1,23 +1,8 @@
 ---
 name: feedback-loop
 description: "Continuous learning and optimization through user feedback collection, prompt effectiveness tracking, outcome measurement, A/B testing, regression detection, and instruction refinement. USE FOR: track prompt effectiveness, run A/B test on instructions, detect quality regression. DO NOT USE FOR: product feature feedback, writing new prompts."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "AI & Learning"
-  tags: ["feedback", "optimization", "learning", "a-b-testing", "metrics"]
-  maturity: "production"
-  audience: ["ai-engineers", "platform-teams", "agents"]
-  model_tier: "fast"
-  task_phase: "operate"
-  interaction_type: "reactive"
-allowed-tools: ["bash", "git", "gh"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: gray
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Feedback Loop Agent

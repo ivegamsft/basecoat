@@ -1,23 +1,8 @@
 ---
 name: finops-advisor
 description: "FinOps advisor for cloud cost governance, cost optimization, chargeback/showback models, and 12-Factor App best practices for cost efficiency. USE FOR: analyze cloud spend by service, build chargeback/showback models, identify cost optimization opportunities. DO NOT USE FOR: live incident response, infrastructure provisioning."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Cost & FinOps"
-  tags: ["finops", "cost-optimization", "cloud-cost", "governance", "chargeback", "showback"]
-  maturity: "production"
-  audience: ["platform-teams", "architects", "finance", "engineering-managers"]
-  model_tier: "balanced"
-  task_phase: "operate"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "grep", "git"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: gray
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # FinOps Advisor

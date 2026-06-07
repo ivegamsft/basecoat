@@ -1,31 +1,8 @@
 ---
 name: sprint-planner
 description: "Goal-to-issues decomposition and wave dependency mapping. Accepts a sprint goal, produces GitHub issues with labels, wave dependency maps, agent assignments, and acceptance criteria. USE FOR: decompose sprint goal into GitHub issues, build wave dependency map, assign agent roles. DO NOT USE FOR: running sprint retrospectives, story point estimation."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Project Management & Planning"
-  tags: ["sprint-planning", "agile", "issue-decomposition", "dependency-mapping", "roadmapping"]
-  maturity: "production"
-  audience: ["scrum-masters", "product-managers", "team-leads"]
-  model_tier: "balanced"
-  task_phase: "plan"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "gh", "grep"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-handoffs:
-  - label: Begin Backend Sprint Work
-    agent: backend-dev
-    prompt: Begin implementation for the backend issues from this sprint plan. Use the wave dependency map and acceptance criteria defined above as your guide.
-    send: false
-  - label: Begin Frontend Sprint Work
-    agent: frontend-dev
-    prompt: Begin implementation for the frontend issues from this sprint plan. Use the wave dependency map and acceptance criteria defined above as your guide.
-    send: false
-color: yellow
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Sprint Planner Agent

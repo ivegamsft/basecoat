@@ -1,23 +1,8 @@
 ---
 name: ux-designer
 description: "UX design agent for user journey mapping, wireframe specs, component design, and accessibility audits. Use when designing user experiences, evaluating usability, or auditing interfaces for WCAG compliance."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Design & UX"
-  tags: ["ux-design", "user-experience", "accessibility", "wireframes", "ui-design"]
-  maturity: "production"
-  audience: ["ux-designers", "ui-designers", "product-teams"]
-  model_tier: "balanced"
-  task_phase: "plan"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep"]
 visibility: basic
 model: claude-sonnet-4-5
-allowed_skills: []
-color: gray
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # UX Designer Agent

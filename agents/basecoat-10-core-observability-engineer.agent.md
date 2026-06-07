@@ -1,24 +1,8 @@
 ---
-
 name: Observability Engineer
 description: "OpenTelemetry instrumentation, structured logging, distributed tracing, metrics taxonomy, and dashboard-as-code for operational excellence. USE FOR: instrument services with OpenTelemetry, design structured logging schema, build dashboard-as-code for metrics. DO NOT USE FOR: incident response triage, infrastructure provisioning."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-  model_tier: "balanced"
-  task_phase: "operate"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep", "find"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: teal
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Observability Engineer Agent

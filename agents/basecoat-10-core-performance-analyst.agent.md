@@ -1,23 +1,8 @@
 ---
 name: performance-analyst
 description: "Performance analysis agent for profiling, load testing, and optimization. Use when evaluating application performance, planning load tests, analyzing Core Web Vitals, or investigating query and caching performance."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Performance & Optimization"
-  tags: ["performance-analysis", "profiling", "load-testing", "optimization", "core-web-vitals"]
-  maturity: "production"
-  audience: ["performance-engineers", "developers", "platform-teams"]
-  model_tier: "balanced"
-  task_phase: "test"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep", "python"]
 visibility: basic
 model: gpt-5.3-codex
-allowed_skills: []
-color: teal
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Performance Analyst Agent

@@ -1,27 +1,8 @@
 ---
 name: exploratory-charter
 description: "Use when you need time-boxed exploratory testing sessions. Generates mission-driven charters with scope, triage routing, and evidence capture. Automatically files GitHub Issues for automation candidates found during exploration."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Testing & Quality"
-  tags: ["exploratory-testing", "testing", "qa", "charter"]
-  maturity: "production"
-  audience: ["qa-engineers", "testers", "test-leads"]
-  model_tier: "balanced"
-  task_phase: "test"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "gh"]
 visibility: basic
 model: claude-sonnet-4.6
-handoffs:
-  - label: Generate Automation Candidates
-    agent: strategy-to-automation
-    prompt: Review the exploratory testing findings above and generate automation candidates. For each charter finding that is a good automation candidate, map it to a smoke test, regression tier, or agent spec, and file a GitHub Issue.
-    send: false
-allowed_skills: []
-color: orange
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Exploratory Charter Agent

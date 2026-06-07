@@ -1,32 +1,10 @@
 ---
 name: station-bottleneck-analyzer
 description: "Use when analyzing takt-time JSON to compute queue length and throughput by station, rank bottlenecks, and file the weekly bottleneck report issue. USE FOR: station-level queue pressure, throughput trends, weekly issue filing, and follow-up actions. DO NOT USE FOR: dispatching work or changing replanning policy."
-type: task
-color: teal
 visibility: basic
 tools: [read_file, run_terminal_command, create_github_issue]
-handoffs:
-  - label: Triage Bottleneck Report
-    agent: issue-triage
-    prompt: Triage the weekly bottleneck report issue and apply any needed priority or follow-up labels.
-    send: false
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Process"
-  tags: ["takt-time", "queue", "throughput", "bottleneck", "reporting"]
-  maturity: "beta"
-  audience: ["developers", "project-managers", "tech-leads"]
-  model_tier: "balanced"
-  task_phase: "test"
-  interaction_type: "autonomous"
-allowed-tools: ["bash", "git", "gh", "grep", "find"]
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
-allowed_skills: [takt-time-measurement]
 ---
 # Station Bottleneck Analyzer
 

@@ -1,23 +1,8 @@
 ---
 name: contract-testing
 description: "Contract Testing Agent for consumer-driven contracts, E2E testing strategy, and mutation testing for distributed systems. USE FOR: write Pact consumer-driven contracts, design service integration tests, set up contract verification in CI. DO NOT USE FOR: load testing, manual QA workflows."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Testing & Quality"
-  tags: ["contract-testing", "cdc", "integration-testing", "testing", "e2e-testing"]
-  maturity: "production"
-  audience: ["developers", "qa-engineers", "platform-teams"]
-  model_tier: "balanced"
-  task_phase: "test"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: orange
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Contract Testing Agent

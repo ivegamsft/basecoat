@@ -1,23 +1,8 @@
 ---
 name: config-auditor
 description: "Configuration auditor for detecting committed secrets and sensitive config. USE FOR: scanning repositories for hardcoded credentials, API keys, and PII; enforcing encryption standards for secrets at rest; generating compliance reports; performing pre-commit validation. DO NOT USE FOR: real-time monitoring, incident response (use Secrets Manager instead), general code reviews."
-type: reviewer
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Security & Compliance"
-  tags: ["config-audit", "secrets-scanning", "security", "compliance"]
-  maturity: "production"
-  audience: ["security-engineers", "devops-engineers", "platform-teams"]
-  model_tier: "fast"
-  task_phase: "operate"
-  interaction_type: "reactive"
-allowed-tools: ["bash", "git", "grep"]
 visibility: specialized
 model: gpt-5.4-mini
-allowed_skills: []
-color: indigo
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Config Auditor Agent

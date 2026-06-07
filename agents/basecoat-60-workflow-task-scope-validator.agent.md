@@ -1,23 +1,8 @@
 ---
 name: task-scope-validator
 description: "Task scope validator for sub-agent dispatch. Analyzes task prompts to detect overscope, ambiguity, and risk before forwarding to explore, task, or general-purpose agents. USE FOR: validate task prompts pre-dispatch, classify tasks as automatable/gather-only/defer, identify scope refinement needs. DO NOT USE FOR: executing tasks, writing implementation code, or modifying task prompts without user feedback."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Agent Operations & Governance"
-  tags: ["scope-validation", "task-classification", "agent-dispatch", "guardrails", "governance"]
-  maturity: "production"
-  audience: ["platform-teams", "agents", "engineering-managers"]
-  model_tier: "fast"
-  task_phase: "analysis"
-  interaction_type: "reactive"
-allowed-tools: ["bash"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: gray
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Task Scope Validator Agent

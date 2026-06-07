@@ -1,23 +1,8 @@
 ---
 name: frontend-dev
 description: "Frontend and UI development specialist. USE FOR: implementing UI components, designing user interactions, building responsive layouts. DO NOT USE FOR: backend development, infrastructure."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Development & Engineering"
-  tags: ["frontend", "ui", "react", "vue", "accessibility", "performance"]
-  maturity: "production"
-  audience: ["frontend-developers", "ux-engineers", "ui-architects"]
-  model_tier: "balanced"
-  task_phase: "build"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep", "find", "node", "npm"]
 visibility: basic
 model: gpt-5.3-codex
-allowed_skills: []
-color: green
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Frontend Development Agent

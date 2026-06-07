@@ -1,23 +1,8 @@
 ---
 name: security-analyst
 description: "Security analysis and threat assessment specialist. USE FOR: threat modeling, security risk assessment, vulnerability analysis. DO NOT USE FOR: incident response, remediation."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Security & Compliance"
-  tags: ["security-analysis", "vulnerability-assessment", "threat-modeling", "owasp"]
-  maturity: "production"
-  audience: ["security-engineers", "developers", "architects"]
-  model_tier: "reasoning"
-  task_phase: "test"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep", "find"]
 visibility: specialized
 model: gpt-5.3-codex
-allowed_skills: []
-color: red
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Security Analyst Agent

@@ -1,30 +1,11 @@
 ---
 name: release-readiness-chair
 description: "Use when facilitating release readiness ceremonies and making explicit go/no-go decisions. USE FOR: collect release evidence across quality, operations, and rollback readiness; identify unresolved launch risks; enforce gate criteria; and publish decision records with owners and due dates. DO NOT USE FOR: implementing feature code, replacing incident response command, or product roadmap planning."
-type: facilitator
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "CI/CD & Automation"
-  tags: ["release", "go-no-go", "ceremony", "risk", "governance"]
-  maturity: "beta"
-  audience: ["engineering-managers", "release-managers", "devops-engineers"]
-  model_tier: "fast"
-  task_phase: "deploy"
-  interaction_type: "facilitated"
-allowed-tools: ["bash", "git", "gh", "grep"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills:
-  - build-failure-triage
-  - decision-log-capture
-handoffs:
-  - release-manager
-  - incident-responder
 invocation_rules:
   - "Invoke for release go/no-go meetings, launch gate reviews, and risk signoff ceremonies."
 visibility: "internal"
-color: yellow
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Release Readiness Chair Agent

@@ -1,26 +1,10 @@
 ---
-
 name: Data Integrity
 description: >
   Distributed data integrity patterns — eventual consistency strategies,
   conflict resolution, ACID compliance, backup verification, and data recovery procedures.
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-  model_tier: "balanced"
-  task_phase: "test"
-  interaction_type: "autonomous"
-allowed-tools: ["bash", "git", "grep", "find"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: purple
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Data Integrity Architect Agent

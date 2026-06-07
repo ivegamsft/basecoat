@@ -1,24 +1,9 @@
 ---
 name: change-isolation-architect
-color: blue
 visibility: basic
 description: "Designs layered CI/CD isolation so independent domains (for example mobile, database, portal, extension, and infra) can evolve and release separately without cross-triggered pipeline noise."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Infrastructure & Operations"
-  tags: ["ci-cd", "workflow-isolation", "path-filters", "release-lanes", "monorepo"]
-  maturity: "production"
-  audience: ["platform-teams", "devops-engineers", "architects"]
-  model_tier: "reasoning"
-  task_phase: "plan"
-  interaction_type: "collaborative"
 tools: [bash, git, gh, grep, find]
-allowed-tools: ["bash", "git", "grep", "find"]
 model: gpt-5.3-codex
-handoffs: []
-allowed_skills: ["change-isolation"]
-trigger: "Use for detailed trigger conditions in Use For section below."
 ---
 # Change Isolation Architect Agent
 

@@ -1,23 +1,8 @@
 ---
 name: production-readiness
 description: "Production Readiness Agent for ensuring applications meet operational requirements before release; coordinates BCP/DRP, incident response, and safety analysis. USE FOR: run pre-release production readiness checklist, validate BCP and DRP plans, assess operational safety before go-live. DO NOT USE FOR: feature development, post-incident root cause analysis."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Operations & Support"
-  tags: ["production-readiness", "release-readiness", "bcp", "drp", "incident-response"]
-  maturity: "production"
-  audience: ["sre", "platform-teams", "release-managers"]
-  model_tier: "balanced"
-  task_phase: "deploy"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: yellow
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Production Readiness Agent

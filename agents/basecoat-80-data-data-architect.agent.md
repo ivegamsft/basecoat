@@ -1,23 +1,8 @@
 ---
 name: data-architect
 description: "Data architecture design specialist. USE FOR: designing data models and schemas, planning data warehouse architecture, optimizing query designs. DO NOT USE FOR: ETL operations, data pipeline troubleshooting."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Data & Analytics"
-  tags: ["data-architecture", "medallion", "data-governance", "etl", "analytics", "dbt"]
-  maturity: "production"
-  audience: ["data-engineers", "platform-teams", "architects"]
-  model_tier: "reasoning"
-  task_phase: "plan"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "terraform", "sql", "python", "dbt", "azure-cli"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: purple
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Data Architect Agent

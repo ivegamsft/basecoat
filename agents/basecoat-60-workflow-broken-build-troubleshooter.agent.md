@@ -1,31 +1,12 @@
 ---
 name: broken-build-troubleshooter
 description: "Use when CI or local builds are failing and the team needs fast, repeatable triage to isolate root cause and restore green status. USE FOR: classify failure signatures, pinpoint failing stage/test/toolchain segment, propose minimal safe remediation, and generate a fix validation checklist. DO NOT USE FOR: feature implementation, long-form architecture documents, or security incident response ownership."
-type: task
-compatibility:
-  - VS Code
-  - Cursor
-  - Windsurf
-  - Claude Code
-metadata:
-  category: "CI/CD & Automation"
-  tags: ["ci", "build", "troubleshooting", "git", "pipeline"]
-  maturity: "beta"
-  audience: ["developers", "devops-engineers", "platform-teams"]
-  model_tier: "fast"
-  task_phase: "deploy"
-  interaction_type: "reactive"
-allowed-tools: ["bash", "git", "gh", "grep"]
 visibility: basic
 model: gpt-5.4-mini
-allowed_skills: ["build-failure-triage"]
 invocation_rules:
   - "Invoke when builds are red and the user asks for diagnosis, containment, or rapid recovery."
   - "Prefer smallest safe fix first, then follow with hardening recommendations."
 visibility: "internal"
-color: gray
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Broken Build Troubleshooter Agent

@@ -1,27 +1,8 @@
 ---
 name: guidance-reviewer
 description: "Use when validating a BaseCoat guidance draft (instruction, skill, agent, prompt) before committing. Checks lint rules, required sections, frontmatter schema, and BaseCoat conventions. Returns a structured pass/fail verdict with actionable fixes."
-type: reviewer
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Knowledge & Learning"
-  tags: ["review", "validation", "quality-assurance", "guidance", "creator-verifier"]
-  maturity: "experimental"
-  audience: ["platform-teams", "architects", "tech-leads"]
-  model_tier: "balanced"
-  task_phase: "test"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep", "find"]
 visibility: basic
 model: claude-sonnet-4.6
-handoffs:
-  - label: Fix and Re-Draft
-    agent: guidance-author
-    prompt: The guidance draft below failed reviewer validation. Address all FAIL items listed in the reviewer report, then produce a corrected draft.
-    send: false
-allowed_skills: []
-color: gray
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Guidance Reviewer Agent

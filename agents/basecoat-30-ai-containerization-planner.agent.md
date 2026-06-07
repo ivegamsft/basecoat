@@ -1,23 +1,8 @@
 ---
 name: containerization-planner
 description: "Helps assess containerization readiness, choose deployment platforms (Docker/AKS/ACA), and generate container configurations including Dockerfiles, multi-stage builds, health probes, resource limits, and deployment manifests. USE FOR: containerize an app, choose AKS vs ACA, generate Dockerfiles. DO NOT USE FOR: image scanning, cluster incidents."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Infrastructure & Operations"
-  tags: ["containerization", "docker", "kubernetes", "container-apps", "deployment"]
-  maturity: "production"
-  audience: ["devops-engineers", "platform-teams", "architects"]
-  model_tier: "reasoning"
-  task_phase: "plan"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "terraform", "kubernetes", "docker", "azure-cli"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: gray
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Containerization Planner Agent

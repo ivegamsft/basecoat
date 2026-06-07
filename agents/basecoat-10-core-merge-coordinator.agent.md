@@ -1,23 +1,8 @@
 ---
 name: merge-coordinator
 description: "Parallel branch merge coordinator. Use when multiple feature branches need to be merged into a target branch without interactive git editors hanging automated pipelines. Handles conflict detection, safe resolution, and ordered PR merging."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "CI/CD & Automation"
-  tags: ["git", "merge", "ci-cd", "automation", "conflict-resolution"]
-  maturity: "production"
-  audience: ["devops-engineers", "platform-teams", "developers"]
-  model_tier: "fast"
-  task_phase: "deploy"
-  interaction_type: "autonomous"
-allowed-tools: ["bash", "git", "gh"]
 visibility: basic
 model: claude-haiku-4.5
-allowed_skills: []
-color: gray
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Merge Coordinator Agent

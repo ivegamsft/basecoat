@@ -1,23 +1,8 @@
 ---
 name: identity-architect
 description: "Identity and access architecture specialist. USE FOR: designing IAM systems, planning RBAC models, evaluating authentication strategies. DO NOT USE FOR: IAM implementation, directory administration."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Security & Compliance"
-  tags: ["identity", "iam", "azure-rbac", "entra-id", "zero-trust", "conditional-access"]
-  maturity: "production"
-  audience: ["identity-architects", "security-engineers", "platform-teams"]
-  model_tier: "reasoning"
-  task_phase: "plan"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "azure-cli", "terraform", "powershell"]
 visibility: basic
 model: gpt-5.3-codex
-allowed_skills: []
-color: indigo
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Identity Architect Agent

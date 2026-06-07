@@ -1,28 +1,9 @@
 ---
 name: factory-state-curator
 description: "Use when merging Workcell intake YAML, GitHub labels, and gate results into a single S1-S5 state snapshot. USE FOR: normalize station state, publish .factory-state.json, reconcile blockers, and surface stale work. DO NOT USE FOR: implementing product code or changing workflow policy."
-type: task
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Process"
-  tags: ["factory", "state", "workcell", "intake", "labels", "sla"]
-  maturity: "beta"
-  audience: ["developers", "project-managers", "tech-leads"]
-  model_tier: "balanced"
-  task_phase: "plan"
-  interaction_type: "autonomous"
-allowed-tools: ["bash", "git", "gh", "grep", "find"]
 visibility: basic
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
-allowed_skills: []
-color: gray
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 # Factory State Curator
 

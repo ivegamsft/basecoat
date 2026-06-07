@@ -1,24 +1,9 @@
 ---
 name: failure-pattern-process
-color: blue
 visibility: basic
 description: "Failure pattern process agent for evidence-first mining, raw logging, triage, and enhancement planning. USE FOR: mining failure signals across issues/PRs/CI/logs/incidents, producing append-only raw findings logs, classifying common versus repo-specific patterns with rationale, and building prioritized enhancement plans with early-detection gates. DO NOT USE FOR: implementing feature code changes, auto-remediating production incidents, or bypassing evidence and gate requirements."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Operations & Support"
-  tags: ["failure-patterns", "triage", "rca", "quality-gates", "operations"]
-  maturity: "beta"
-  audience: ["sre", "platform-teams", "repo-maintainers", "engineering-managers"]
-  model_tier: "reasoning"
-  task_phase: "operate"
-  interaction_type: "collaborative"
 tools: [bash, git, gh, grep, find]
-allowed-tools: ["bash", "git", "gh", "grep", "find"]
 model: claude-sonnet-4.6
-handoffs: []
-allowed_skills: [failure-pattern-process]
-trigger: "Use for detailed trigger conditions in Use For section below."
 ---
 # Failure Pattern Process Agent
 

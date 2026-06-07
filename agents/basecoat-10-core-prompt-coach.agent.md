@@ -1,23 +1,8 @@
 ---
 name: prompt-coach
 description: "Use when reviewing prompts, scoring prompt quality, identifying anti-patterns, and guiding iterative refinement of LLM prompts."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "AI & Machine Learning"
-  tags: ["prompt-coaching", "prompt-optimization", "llm", "ai-development"]
-  maturity: "production"
-  audience: ["prompt-engineers", "ai-engineers", "developers"]
-  model_tier: "balanced"
-  task_phase: "build"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep"]
 visibility: basic
-handoffs: ["agent:definition-of-done", "agent:code-reviewer"]
 model: gpt-5.3-codex
-allowed_skills: []
-color: pink
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Prompt Coach Agent

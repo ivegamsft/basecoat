@@ -1,23 +1,8 @@
 ---
 name: prompt-engineer
 description: "Prompt optimization and system prompt engineering agent. Use when designing system prompts, optimizing token usage, crafting few-shot examples, or structuring chain-of-thought instructions."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "AI & Machine Learning"
-  tags: ["prompt-engineering", "llm", "system-prompts", "optimization", "token-efficiency"]
-  maturity: "production"
-  audience: ["ai-engineers", "prompt-engineers", "llm-practitioners"]
-  model_tier: "balanced"
-  task_phase: "build"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep", "python"]
 visibility: basic
 model: gpt-5.3-codex
-allowed_skills: []
-color: pink
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Prompt Engineer Agent

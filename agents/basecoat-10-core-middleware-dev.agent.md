@@ -1,23 +1,8 @@
 ---
 name: middleware-dev
 description: "Middleware and integration development specialist. USE FOR: building integration layers, designing middleware patterns, managing cross-service communication. DO NOT USE FOR: frontend or backend-specific work."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Development & Engineering"
-  tags: ["middleware", "integration", "api-gateway", "event-driven", "messaging"]
-  maturity: "production"
-  audience: ["backend-developers", "architects", "platform-teams"]
-  model_tier: "balanced"
-  task_phase: "build"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep", "python", "node"]
 visibility: basic
 model: gpt-5.3-codex
-allowed_skills: []
-color: green
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Middleware Development Agent

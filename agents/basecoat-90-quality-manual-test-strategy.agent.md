@@ -1,27 +1,8 @@
 ---
 name: manual-test-strategy
 description: "Use when you need a structured manual testing strategy for a feature or risk inventory. Produces a decision rubric, exploratory charter, regression checklist, defect template, and automation backlog. Automatically files GitHub Issues for automation candidates."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Testing & Quality"
-  tags: ["test-strategy", "manual-testing", "qa", "testing"]
-  maturity: "production"
-  audience: ["qa-engineers", "testers", "test-leads"]
-  model_tier: "balanced"
-  task_phase: "test"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "gh"]
 visibility: basic
 model: claude-sonnet-4.6
-handoffs:
-  - label: Convert to Automation
-    agent: strategy-to-automation
-    prompt: Convert the manual test strategy above into automation candidates. Map the test paths to smoke tests, regression tiers, or agent specs as appropriate, and file GitHub Issues for each automation candidate.
-    send: false
-allowed_skills: []
-color: orange
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Manual Test Strategy Agent

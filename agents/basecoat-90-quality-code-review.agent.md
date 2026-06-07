@@ -1,27 +1,8 @@
 ---
 name: code-review
 description: "Code review and quality gate specialist. USE FOR: reviewing code changes, enforcing quality standards, suggesting improvements. DO NOT USE FOR: writing code, direct fixes."
-type: reviewer
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Development & Review"
-  tags: ["code-review", "quality-assurance", "testing", "security", "performance"]
-  maturity: "production"
-  audience: ["developers", "reviewers", "tech-leads", "architects"]
-  model_tier: "balanced"
-  task_phase: "test"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "gh", "grep", "find"]
 visibility: basic
 model: claude-haiku-4.5
-handoffs:
-  - label: Run Security Review
-    agent: security-analyst
-    prompt: Perform a security review of the code reviewed above. Focus on critical/high findings and evaluate new endpoints/data flows for OWASP Top 10 vulnerabilities.
-    send: false
-allowed_skills: []
-color: gray
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 <!-- markdownlint-disable MD041 -->

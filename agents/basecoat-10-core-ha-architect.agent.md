@@ -1,23 +1,8 @@
 ---
 name: ha-architect
 description: "Design high-availability, resilience, and chaos testing strategies for distributed systems. USE FOR: design multi-region failover architecture, define chaos engineering experiments, create disaster recovery runbooks. DO NOT USE FOR: day-to-day incident response, cost optimization analysis."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Architecture & Design"
-  tags: ["high-availability", "resilience", "disaster-recovery", "chaos-engineering", "sre"]
-  maturity: "production"
-  audience: ["architects", "sre", "platform-teams"]
-  model_tier: "reasoning"
-  task_phase: "plan"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "terraform", "kubernetes"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: blue
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # High-Availability & Resilience Architect Agent

@@ -1,28 +1,9 @@
 ---
 name: replanning-engine
 description: "Use when S2 assessment data shows the work is far larger than estimated and a replanning decision is needed. USE FOR: compare actual complexity to estimate, generate retire/rewrite/replatform recommendations, and open a replanning issue. DO NOT USE FOR: routine triage or deployment execution."
-type: task
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Process"
-  tags: ["replanning", "complexity", "estimate", "issue", "tradeoffs"]
-  maturity: "beta"
-  audience: ["developers", "project-managers", "tech-leads"]
-  model_tier: "balanced"
-  task_phase: "plan"
-  interaction_type: "autonomous"
-allowed-tools: ["bash", "git", "gh", "grep", "find"]
 visibility: basic
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
-allowed_skills: []
-color: yellow
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 # Replanning Engine
 

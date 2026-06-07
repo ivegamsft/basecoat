@@ -1,23 +1,8 @@
 ---
 name: supply-chain-security
 description: "Secure software supply chain with artifact signing, SBOM generation, and provenance tracking. USE FOR: generate SBOM for a release build, sign artifacts with Sigstore and verify provenance, assess and improve SLSA compliance level. DO NOT USE FOR: general dependency vulnerability scanning, runtime security monitoring."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Security & Compliance"
-  tags: ["supply-chain", "sbom", "slsa", "signing", "provenance"]
-  maturity: "production"
-  audience: ["security-engineers", "devops-engineers", "platform-teams"]
-  model_tier: "reasoning"
-  task_phase: "test"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "terraform"]
 visibility: specialized
 model: claude-sonnet-4.6
-allowed_skills: []
-color: red
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Supply Chain Security Agent

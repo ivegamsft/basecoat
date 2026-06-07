@@ -1,23 +1,8 @@
 ---
 name: agent-designer
 description: "Agent design and customization specialist. USE FOR: designing new agent personas and workflows, reviewing agent configurations, optimizing agent performance. DO NOT USE FOR: direct agent execution, implementation."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "AI & Development"
-  tags: ["agent-design", "copilot", "agent-authoring", "skill-composition"]
-  maturity: "production"
-  audience: ["ai-engineers", "developers", "architects"]
-  model_tier: "balanced"
-  task_phase: "build"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "grep", "find"]
 visibility: basic
 model: gpt-5.3-codex
-allowed_skills: []
-color: pink
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Agent Designer Agent

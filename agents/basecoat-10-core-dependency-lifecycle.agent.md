@@ -1,23 +1,8 @@
 ---
 name: dependency-lifecycle
 description: "Agent for managing dependency updates, tracking breaking changes, planning upgrade paths, monitoring vulnerabilities, analyzing semantic versioning, and generating migration guides. USE FOR: plan upgrade paths, generate migration guides, audit dependency CVEs. DO NOT USE FOR: writing new features, infrastructure provisioning."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Development & Engineering"
-  tags: ["dependency-management", "version-upgrades", "vulnerability-tracking", "breaking-changes"]
-  maturity: "production"
-  audience: ["developers", "platform-teams", "tech-leads"]
-  model_tier: "fast"
-  task_phase: "operate"
-  interaction_type: "autonomous"
-allowed-tools: ["bash", "git", "grep"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: gray
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Dependency Lifecycle Agent

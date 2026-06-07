@@ -1,23 +1,8 @@
 ---
 name: strategy-to-automation
 description: "Use when converting manual test paths into automation candidates. Maps paths to smoke tests, regression tiers, or agent specs. ALWAYS files a GitHub Issue for every automation candidate identified."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Testing & Quality"
-  tags: ["test-automation", "testing-strategy", "qa", "regression-testing"]
-  maturity: "production"
-  audience: ["qa-engineers", "testers", "automation-engineers"]
-  model_tier: "reasoning"
-  task_phase: "plan"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "gh"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: gray
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Strategy to Automation Agent

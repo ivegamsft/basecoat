@@ -1,23 +1,8 @@
 ---
 name: llmops
 description: "LLM operations and prompt engineering specialist. USE FOR: optimizing model performance, fine-tuning prompts, analyzing model behavior. DO NOT USE FOR: model training, infrastructure setup."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "AI & Machine Learning"
-  tags: ["llmops", "mlops", "prompts", "inference", "model-serving", "observability"]
-  maturity: "production"
-  audience: ["mlops-engineers", "llm-platform-teams", "data-scientists", "architects"]
-  model_tier: "balanced"
-  task_phase: "deploy"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "terraform", "python", "azure-cli", "kubernetes"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: pink
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # LLMOps Agent

@@ -1,20 +1,8 @@
 ---
 name: instruction-auditor
 description: "Detects missing instruction coverage for a repo — identifies tech stacks and workflow patterns present in the codebase that have no corresponding BaseCoat instruction file in the overlay. USE FOR: find uncovered tech stacks in a repo overlay, audit BaseCoat instruction file gaps, identify missing workflow pattern coverage. DO NOT USE FOR: writing new instruction files, general code review."
-type: reviewer
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Governance & Compliance"
-  tags: ["instructions", "coverage", "audit", "tech-stack", "overlay"]
-  maturity: "production"
-  audience: ["developers", "architects", "tech-leads", "platform-engineers"]
-allowed-tools: ["bash", "git", "grep", "glob", "powershell"]
 visibility: specialized
 model: gpt-5.4-mini
-allowed_skills: []
-color: indigo
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Instruction Auditor Agent

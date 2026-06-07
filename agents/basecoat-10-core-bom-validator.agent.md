@@ -1,28 +1,9 @@
 ---
 name: bom-validator
 description: "Use when validating a Workcell BOM against the plant registry before S2 starts. USE FOR: schema validation, CAF naming checks, circular dependency detection, and GitHub check results. DO NOT USE FOR: runtime state merges or cutover decisions."
-type: reviewer
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Process"
-  tags: ["bom", "validation", "caf", "schema", "dependencies"]
-  maturity: "beta"
-  audience: ["developers", "project-managers", "tech-leads"]
-  model_tier: "balanced"
-  task_phase: "plan"
-  interaction_type: "autonomous"
-allowed-tools: ["bash", "git", "gh", "grep", "find"]
 visibility: basic
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
-allowed_skills: ["bom-validation"]
-color: gray
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 # BOM Validator
 

@@ -1,22 +1,10 @@
 ---
 name: sprint-project-mapper
 description: "Use when issues/PRs need clustering into meaningful sprint/project groups and rollup metrics for planning or release notes. USE FOR: grouping by sprint/wave/tags, computing issue-PR-LOC-cycle-time metrics, validating group size significance, and producing release-note-ready summaries. DO NOT USE FOR: code implementation, CI/CD deployment, or one-off issue editing."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Project Management & Planning"
-  tags: ["sprint", "project-mapping", "wave-planning", "release-notes", "metrics", "portfolio"]
-  maturity: "production"
-  audience: ["developers", "tech-leads", "engineering-managers", "program-managers"]
-allowed-tools: ["bash", "git", "gh"]
 visibility: basic
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
-allowed_skills: [sprint-project-mapper, backlog-burndown, sprint-management, issue-triage]
 visibility: public
-color: yellow
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Sprint/Project Mapper Agent

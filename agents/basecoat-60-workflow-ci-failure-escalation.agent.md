@@ -1,20 +1,8 @@
 ---
 name: ci-failure-escalation
 description: "Detects N consecutive CI failures on the same workflow job, opens a blocking issue, and gates further deploys to that environment — the andon cord / halt-the-line pattern for CI/CD pipelines. USE FOR: gate deploys on CI failures, open blocking issues, enforce halt-line policy. DO NOT USE FOR: fixing failing tests, writing CI config."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "CI/CD & Automation"
-  tags: ["ci-cd", "automation", "pipeline", "escalation", "deployment-gate"]
-  maturity: "production"
-  audience: ["devops-engineers", "platform-teams", "developers"]
-allowed-tools: ["bash", "git", "gh"]
 visibility: basic
 model: gpt-5.4-mini
-allowed_skills: []
-color: gray
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # CI Failure Escalation Agent

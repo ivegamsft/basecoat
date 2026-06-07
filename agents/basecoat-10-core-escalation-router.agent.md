@@ -1,21 +1,9 @@
 ---
 name: escalation-router
 description: "Use when high-risk decisions need a human approver and a PR-comment approval trail. USE FOR: release signoff, irreversible changes, compliance gates. DO NOT USE FOR: routine automation."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Governance"
-  tags: ["escalation", "approval", "human-in-the-loop", "pr-comment", "decision-log"]
-  maturity: "production"
-  audience: ["developers", "tech-leads", "reviewers", "release-managers"]
 model: gpt-5.4-mini
 fallback_models: [claude-sonnet-4.5]
-allowed-tools: ["bash", "git", "gh"]
 visibility: advanced
-allowed_skills: [human-in-the-loop, decision-log-capture, escalation-routing]
-color: gray
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 # Escalation Router Agent
 

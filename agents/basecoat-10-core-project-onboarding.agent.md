@@ -1,23 +1,8 @@
 ---
 name: project-onboarding
 description: "Single-invocation new repo setup with BaseCoat integration. Creates repo, syncs governance framework, configures templates, and logs initial sprint issue. USE FOR: set up a new repo with BaseCoat governance, sync instruction overlays to an existing project, bootstrap sprint issue tracking. DO NOT USE FOR: onboarding individual developers, migrating existing codebases."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Onboarding & Deployment"
-  tags: ["project-setup", "onboarding", "basecoat", "governance"]
-  maturity: "production"
-  audience: ["platform-teams", "devops-engineers", "team-leads"]
-  model_tier: "balanced"
-  task_phase: "plan"
-  interaction_type: "autonomous"
-allowed-tools: ["bash", "git", "gh"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: yellow
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Project Onboarding Agent

@@ -2,24 +2,9 @@
 name: dotnet-modernization-advisor
 title: .NET Modernization Advisor
 description: "Advisor for .NET modernization assessment, upgrade planning, and execution guidance. Use when migrating legacy .NET Framework/older .NET solutions to modern .NET versions."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Modernization & Migration"
-  tags: ["dotnet", "modernization", "migration", "upgrade", "legacy"]
-  maturity: "production"
-  audience: ["platform-engineering", "backend-developers", "architects"]
-  model_tier: "reasoning"
-  task_phase: "build"
-  interaction_type: "collaborative"
-allowed-tools: ["read_file", "write_file", "list_dir", "run_terminal_command", "create_github_issue"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
 tools: [read_file, write_file, list_dir, run_terminal_command, create_github_issue]
-color: green
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 ## .NET Modernization Advisor Agent

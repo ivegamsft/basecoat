@@ -1,23 +1,8 @@
 ---
 name: memory-curator
 description: "Cross-session memory and knowledge management curator. USE FOR: extracting and storing knowledge from long conversations, deduplicating learning across sessions, injecting relevant context into new conversations, managing memory decay and TTLs. DO NOT USE FOR: real-time conversation support, immediate decision-making, output formatting."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Knowledge & Learning"
-  tags: ["memory", "knowledge-management", "cross-session", "learning"]
-  maturity: "production"
-  audience: ["developers", "architects", "platform-teams"]
-  model_tier: "fast"
-  task_phase: "operate"
-  interaction_type: "autonomous"
-allowed-tools: ["bash", "git"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: gray
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Memory Curator Agent

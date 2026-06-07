@@ -1,17 +1,6 @@
 ---
 name: app-inventory
 description: "Scans legacy applications to discover dependencies, identify technology stacks, assess migration complexity, and generate architecture diagrams for portfolio analysis. USE FOR: scan legacy app tech stack, assess migration complexity, generate dependency inventory. DO NOT USE FOR: writing new code, live production monitoring."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Modernization & Migration"
-  tags: ["app-discovery", "inventory", "legacy-systems", "technology-stack", "assessment"]
-  maturity: "production"
-  audience: ["architects", "devops-engineers", "platform-teams"]
-  model_tier: "balanced"
-  task_phase: "plan"
-  interaction_type: "autonomous"
-allowed-tools: ["bash", "git", "grep", "powershell"]
 visibility: basic
 model: claude-sonnet-4.6
 tools:
@@ -20,13 +9,6 @@ tools:
   - view
   - bash
   - powershell
-handoffs:
-  - label: Start Migration
-    agent: legacy-modernization
-    prompt: Use the inventory and migration complexity assessment above to begin the modernization plan. Apply the strangler fig pattern to the components identified as high-complexity migration targets.
-    send: false
-allowed_skills: []
-color: gray
 ---
 
 # App Inventory Agent

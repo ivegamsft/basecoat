@@ -1,23 +1,8 @@
 ---
 name: gitops-engineer
 description: "GitOps and deployment automation specialist. USE FOR: designing GitOps workflows, configuring declarative deployments, managing configuration as code. DO NOT USE FOR: manual deployments, emergency operations."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Infrastructure & DevOps"
-  tags: ["gitops", "argo-cd", "flux", "infrastructure-as-code", "kubernetes", "ci-cd"]
-  maturity: "production"
-  audience: ["platform-engineers", "devops", "sre"]
-  model_tier: "balanced"
-  task_phase: "deploy"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "kubectl", "terraform", "ansible", "azure-cli"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: blue
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # GitOps Engineer Agent

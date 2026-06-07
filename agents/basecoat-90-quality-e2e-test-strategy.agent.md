@@ -1,23 +1,8 @@
 ---
 name: e2e-test-strategy
 description: "E2E Test Strategy Agent for end-to-end testing orchestration, critical path identification, flakiness prevention, and cross-browser coverage. Covers Playwright, Cypress, Selenium patterns and integration with CI/CD pipelines. USE FOR: design E2E suite, map critical user paths, fix flaky tests. DO NOT USE FOR: unit testing, contract testing."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Testing & Quality"
-  tags: ["e2e-testing", "playwright", "cypress", "test-automation", "qa"]
-  maturity: "production"
-  audience: ["qa-engineers", "developers", "test-automation-engineers"]
-  model_tier: "balanced"
-  task_phase: "test"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git", "python", "docker"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: orange
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # E2E Test Strategy Agent

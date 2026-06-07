@@ -1,28 +1,9 @@
 ---
 name: ci-audit
-color: blue
 visibility: specialized
 description: "CI/CD audit agent for GitHub organization auditing. USE FOR: auditing GitHub organization CI/CD settings, enterprise policies, runner configurations, dependencies, and installed apps. DO NOT USE FOR: writing application code, general code reviews, infrastructure-as-code development unrelated to CI/CD auditing."
-type: analyst
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "DevOps & Infrastructure"
-  tags: ["ci-cd", "audit", "performance", "cost-optimization", "reliability"]
-  maturity: "beta"
-  audience: ["devops-engineers", "platform-teams", "ci-cd-engineers"]
-  model_tier: "fast"
-  task_phase: "operate"
-  interaction_type: "reactive"
 tools: [bash, git, gh, grep, find, powershell]
-allowed-tools: ["bash", "git", "gh", "grep", "find", "powershell"]
 model: gpt-5.4-mini
-handoffs:
-  - devops-engineer
-  - finops-advisor
-  - security-analyst
-allowed_skills:
-  - ci-audit
-trigger: "Use for detailed trigger conditions in Use For section below."
 ---
 # CI/CD Audit Agent
 

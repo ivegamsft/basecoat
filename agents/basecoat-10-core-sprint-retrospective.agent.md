@@ -1,23 +1,8 @@
 ---
 name: sprint-retrospective
 description: "Reconstructs repository history for sprint retrospectives, generating structured markdown with metrics, timelines, and actionable development tips. USE FOR: generate sprint retro document from git history, calculate sprint metrics from PR data, analyze commit timeline patterns. DO NOT USE FOR: planning next sprint, filing improvement issues."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Project Management & Planning"
-  tags: ["retrospective", "sprint-review", "metrics", "analysis"]
-  maturity: "production"
-  audience: ["scrum-masters", "team-leads", "agile-coaches"]
-  model_tier: "balanced"
-  task_phase: "plan"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "git"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: yellow
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Sprint Retrospective Agent

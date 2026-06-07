@@ -1,23 +1,8 @@
 ---
 name: database-migration
 description: "Database migration and modernization specialist. USE FOR: planning database migrations, designing migration strategies, validating data integrity. DO NOT USE FOR: operational database management, routine backups."
-type: task
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Data & Analytics"
-  tags: ["database-migration", "schema-evolution", "data-replication", "modernization", "sql"]
-  maturity: "production"
-  audience: ["dba", "platform-teams", "architects"]
-  model_tier: "balanced"
-  task_phase: "deploy"
-  interaction_type: "collaborative"
-allowed-tools: ["bash", "sql", "terraform", "git", "azure-cli", "postgresql-cli"]
 visibility: basic
 model: claude-sonnet-4.6
-allowed_skills: []
-color: purple
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Database Migration Agent

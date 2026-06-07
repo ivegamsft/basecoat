@@ -1,25 +1,10 @@
 ---
 name: sprint-closeout-auditor
 description: "Use when closing a sprint and validating completion evidence before planning the next sprint. USE FOR: verify merged PR coverage, confirm CI health, identify unresolved errors and open issues, check test evidence, and produce carry-forward actions with owners. DO NOT USE FOR: writing feature code, replacing incident postmortems, or long-term roadmap prioritization."
-type: reviewer
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Project Management & Planning"
-  tags: ["sprint", "closeout", "agile", "governance", "checklist"]
-  maturity: "beta"
-  audience: ["engineering-managers", "tech-leads", "developers"]
-  model_tier: "fast"
-  task_phase: "plan"
-  interaction_type: "autonomous"
-allowed-tools: ["bash", "git", "gh", "grep"]
 visibility: specialized
 model: gpt-5.4-mini
-allowed_skills: ["sprint-closeout-audit", "sprint-closeout", "backlog-burndown", "orphaned-pr-triage", "build-failure-triage"]
-handoffs: ["sprint-planner", "retro-facilitator"]
 invocation_rules: ["Invoke when user asks to close a sprint, perform sprint burn-down closeout, or validate sprint completion readiness.", "Use checklist-first flow and require explicit evidence for merge, CI, errors, issues, and test status."]
 visibility: "internal"
-color: indigo
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Sprint Closeout Auditor Agent

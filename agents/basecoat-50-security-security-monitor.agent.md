@@ -1,24 +1,8 @@
 ---
-
 name: Security Monitor
 description: "Detection engineering and SIEM configuration — maps MITRE ATT&CK tactics to detection rules, builds alerting baselines, and operationalizes NIST CSF Detect. USE FOR: build ATT&CK-mapped detection rules, calibrate SIEM alert thresholds, map compliance to detection coverage. DO NOT USE FOR: live incident response, secrets rotation."
-type: monitor
-compatibility: ["VS Code", "Cursor", "Windsurf", "Claude Code"]
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-  model_tier: "balanced"
-  task_phase: "operate"
-  interaction_type: "reactive"
-allowed-tools: ["bash", "git", "grep", "find"]
 visibility: specialized
 model: gpt-5.4-mini
-allowed_skills: []
-color: red
-handoffs: []
-trigger: Use for detailed trigger conditions in Use For section below.
 ---
 
 # Security Monitor Agent
