@@ -15,7 +15,7 @@ metadata:
   interaction_type: "reactive"
 tools: [bash, git, gh, grep, find, powershell]
 allowed-tools: ["bash", "git", "gh", "grep", "find", "powershell"]
-model: claude-haiku-4.5
+model: gpt-5.4-mini
 handoffs:
   - devops-engineer
   - finops-advisor
@@ -138,4 +138,3 @@ Returns structured audit findings with the following schema:
 - Optimization recommendations include effort and ROI estimates
 - Output is machine-parseable JSON + human-readable markdown summary
 - Audit completes in <5 minutes for typical org
-

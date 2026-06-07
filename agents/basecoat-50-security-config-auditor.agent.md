@@ -13,7 +13,7 @@ metadata:
   interaction_type: "reactive"
 allowed-tools: ["bash", "git", "grep"]
 visibility: specialized
-model: claude-haiku-4.5
+model: gpt-5.4-mini
 allowed_skills: []
 color: indigo
 handoffs: []
@@ -36,7 +36,7 @@ Purpose: scan a repository for committed config files, staged secrets, or missin
 
 Parse `.gitignore` (and `.gitignore` files in subdirectories) and check that the minimum required entries are present:
 
-```
+```text
 config/settings.json
 config/settings.local.json
 .env
@@ -96,7 +96,7 @@ Report any commits that added sensitive-named files to history.
 
 ## Findings Report Format
 
-```
+```markdown
 ## Config Audit Report
 **Date:** <ISO 8601>
 **Repo:** <path or remote URL>
@@ -178,16 +178,16 @@ EOF
 ```
 
 ## Model
-**Recommended:** claude-haiku-4.5
+
+**Recommended:** gpt-5.4-mini
 **Rationale:** Routine scanning with well-defined patterns — speed and cost matter most
 **Minimum:** gpt-5.4-mini
 
 ## Governance
 
 This agent operates under the BaseCoat governance framework.
+
 - Issue-first, PRs only, No secrets, Branch naming conventions
 - See `instructions/governance.instructions.md` for the full reference
 - See `docs/CONFIG_PATTERN.md` for the local config pattern this agent enforces
 - See `instructions/config.instructions.md` for agent-level config safety rules
-
-
