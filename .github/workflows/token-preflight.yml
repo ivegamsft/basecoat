@@ -4,7 +4,7 @@ name: "BaseCoat - Production Token Preflight"
 # Run on demand via workflow_dispatch to confirm the token is safe before tagging.
 # Called via workflow_call by publish-to-production.yml as a blocking preflight gate.
 on:
-  workflow_dispatch:
+  workflow_dispatch: {}
   workflow_call:
     secrets:
       PRODUCTION_REPO_TOKEN:
@@ -89,13 +89,14 @@ jobs:
           esac
 
           PUSH_ACCESS=$(python3 - <<'PYEOF'
-import json, sys
-with open("repo.json") as f:
-    d = json.load(f)
-perms = d.get("permissions", {})
-print("true" if (perms.get("push") or perms.get("admin")) else "false")
-PYEOF
-) || PUSH_ACCESS="false"
+          import json
+
+          with open("repo.json", encoding="utf-8") as f:
+              d = json.load(f)
+          perms = d.get("permissions", {})
+          print("true" if (perms.get("push") or perms.get("admin")) else "false")
+          PYEOF
+          ) || PUSH_ACCESS="false"
 
           if [[ "${PUSH_ACCESS}" != "true" ]]; then
             PUSH_VAL=$(python3 -c "import json; d=json.load(open('repo.json')); print(d.get('permissions',{}).get('push','false'))" 2>/dev/null || echo "false")
