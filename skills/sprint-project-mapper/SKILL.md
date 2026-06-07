@@ -1,17 +1,6 @@
 ---
 name: sprint-project-mapper
 description: "Use when mapping issue/PR items into meaningful sprint or project groups. USE FOR: clustering by sprint/wave/project tags, split-vs-merge debate, and release-note metric rollups. DO NOT USE FOR: code implementation, issue-by-issue triage cleanup, or deployment execution."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Project Management & Planning"
-  tags: ["sprint", "wave", "project", "clustering", "release-notes", "metrics", "portfolio"]
-  maturity: "production"
-  audience: ["developers", "tech-leads", "engineering-managers", "program-managers"]
-allowed-tools: ["bash", "git", "gh"]
 ---
 
 # Sprint/Project Mapper Skill

@@ -1,18 +1,6 @@
 ---
 name: agentops-audit
 description: "Audits agent definitions, routing configurations, and tool bindings. USE FOR: reviewing agent definitions for correctness, assessing tool routing logic, validating tool bindings, evaluating prompt quality, analyzing agent behavior consistency. DO NOT USE FOR: writing agents from scratch, designing agent architectures, implementing tools, general code review."
-compatibility:
-  editors:
-    - vscode
-    - cursor
-  platforms:
-    - github
-metadata:
-  category: "AI & Agents"
-  tags: ["agents", "audit", "routing", "tools", "ai-ops"]
-  maturity: "beta"
-  audience: ["ai-engineers", "agent-developers", "platform-teams"]
-allowed-tools: ["bash", "git", "grep", "find", "powershell"]
 ---
 
 # Agent Operations Audit Skill

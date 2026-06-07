@@ -1,17 +1,6 @@
 ---
 name: frontend-audit
 description: "Use when reviewing frontend implementations, component output, responsive behavior, accessibility states, or UI consistency. USE FOR: audit generated UI, review a PR for WCAG or responsive issues, verify interaction states and copy consistency, check performance-sensitive patterns. DO NOT USE FOR: building UI features from scratch, backend API design, database schema modeling."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
 ---
 
 # Frontend Audit Skill

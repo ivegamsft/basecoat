@@ -1,17 +1,6 @@
 ---
 name: failure-pattern-process
 description: "Use when running the failure-pattern consumer process from mining through enhancement planning. USE FOR: evidence mining, append-only raw finding capture, common-versus-local triage with rationale, and prioritized enhancement planning with early-detection gates. DO NOT USE FOR: implementing repository feature changes, incident hotfix execution, or unsupported analysis without evidence links."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Operations & Support"
-  tags: ["failure-patterns", "triage", "evidence", "quality-gates", "operations"]
-  maturity: "beta"
-  audience: ["sre", "platform-teams", "repo-maintainers", "engineering-managers"]
-allowed-tools: ["bash", "git", "gh", "grep", "find"]
 invocation_rules:
   - "Use when the task requires mining failure evidence and producing the full A1-D2 artifact chain."
 visibility: "internal"

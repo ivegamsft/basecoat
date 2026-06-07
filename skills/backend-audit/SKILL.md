@@ -1,18 +1,6 @@
 ---
 name: backend-audit
 description: "Audits generated or implemented backend code output. Evaluates code quality, testing coverage, performance, security, and maintainability. USE FOR: reviewing backend implementations, analyzing code quality, assessing test coverage, identifying performance bottlenecks, security vulnerabilities, structural debt. DO NOT USE FOR: writing backend code from scratch, database schema design, API contract design, frontend code review, infrastructure provisioning."
-compatibility:
-  editors:
-    - vscode
-    - cursor
-  platforms:
-    - github
-metadata:
-  category: "Code Quality & Auditing"
-  tags: ["backend", "audit", "code-quality", "testing", "security"]
-  maturity: "beta"
-  audience: ["backend-engineers", "platform-teams", "tech-leads"]
-allowed-tools: ["bash", "git", "grep", "find", "powershell"]
 ---
 
 # Backend Audit Skill

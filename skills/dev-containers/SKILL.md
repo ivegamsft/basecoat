@@ -1,17 +1,6 @@
 ---
 name: dev-containers
 description: "VS Code Dev Containers and GitHub Codespaces guidance for reproducible development environments and team onboarding. USE FOR: create devcontainer.json for this repo, set up Codespaces for contributors, containerize local dev toolchain, add VS Code extensions inside container, make development setup reproducible across machines. DO NOT USE FOR: production container deployment, Kubernetes runtime troubleshooting, packaging a desktop application."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Development & Operations"
-  tags: ["dev-containers", "docker", "codespaces", "devcontainer", "reproducible-environments"]
-  maturity: "production"
-  audience: ["developers", "devops-engineers", "team-leads"]
-allowed-tools: ["docker", "bash", "json", "yaml"]
 ---
 
 # VS Code Dev Containers

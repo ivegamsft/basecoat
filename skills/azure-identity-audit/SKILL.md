@@ -1,17 +1,6 @@
 ---
 name: azure-identity-audit
 description: "Use when reviewing Azure identity and access designs across RBAC, managed identities, Entra ID, and federation. USE FOR: audit RBAC assignments, managed identity scope, app registration permissions, OIDC federation, least privilege. DO NOT USE FOR: network topology design, app feature code, non-Azure IAM platforms."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
 ---
 
 # Azure Identity Audit Skill

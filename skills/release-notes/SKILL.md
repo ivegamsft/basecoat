@@ -1,17 +1,6 @@
 ---
 name: release-notes
 description: "Use when drafting or updating release notes from commits, pull requests, tags, waves, or sprints. USE FOR: create release notes for a version, summarize changes since a tag, generate notes by wave/sprint labels, produce internal or customer-facing changelog drafts, and structure upgrade notes with traceability. DO NOT USE FOR: release readiness audits, deployment execution, rollback operations, or post-release production incident troubleshooting."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Project Management & Planning"
-  tags: ["release", "release-notes", "changelog", "semver", "communication"]
-  maturity: "beta"
-  audience: ["developers", "tech-leads", "engineering-managers", "program-managers"]
-allowed-tools: ["bash", "git", "gh"]
 ---
 
 # Release Notes Skill

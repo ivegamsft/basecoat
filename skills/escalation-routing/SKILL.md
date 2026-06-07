@@ -1,17 +1,6 @@
 ---
 name: escalation-routing
 description: "Use when routing high-risk decisions to the right human approver with a PR-comment approval trail. USE FOR: release signoff, irreversible changes, compliance gates. DO NOT USE FOR: routine automation."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Governance"
-  tags: ["escalation", "approval", "human-in-the-loop", "pr-comment"]
-  maturity: "beta"
-  audience: ["developers", "tech-leads", "reviewers"]
-allowed-tools: ["bash", "git", "gh"]
 visibility: "internal"
 ---
 # Escalation Routing Skill

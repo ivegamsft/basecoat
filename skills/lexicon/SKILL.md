@@ -1,17 +1,6 @@
 ---
 name: lexicon
 description: "Use when defining or auditing a project's vocabulary, taxonomy, ontology, and brand voice so docs, agents, and prompts use consistent canonical terms. USE FOR: create project lexicon file, audit docs for terminology drift, define naming taxonomy for assets, detect off-brand tone or vibe mismatches, standardize canonical product terms. DO NOT USE FOR: copyediting grammar only, generating logos or visuals, source code refactoring unrelated to language."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Design & Governance"
-  tags: ["taxonomy", "vocabulary", "ontology", "brand-voice", "audit", "naming", "consistency"]
-  maturity: "production"
-  audience: ["tech-writers", "architects", "platform-teams", "developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
 ---
 
 # Lexicon Skill

@@ -1,17 +1,6 @@
 ---
 name: station-bottleneck-analyzer
 description: "Use when analyzing takt-time JSON to calculate queue length and throughput by station, rank bottlenecks, and draft the weekly bottleneck report issue. USE FOR: station-level queue pressure, throughput trends, bottleneck ranking, and weekly issue filing. DO NOT USE FOR: dispatching work or changing routing policy."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Process"
-  tags: ["takt-time", "queue", "throughput", "bottleneck", "issue-reporting"]
-  maturity: "beta"
-  audience: ["developers", "project-managers", "tech-leads"]
-allowed-tools: ["bash", "git", "gh", "grep", "find"]
 visibility: "internal"
 ---
 # Station Bottleneck Analyzer Skill

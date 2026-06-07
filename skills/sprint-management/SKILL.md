@@ -1,18 +1,6 @@
 ---
-
 name: sprint-management
 description: "Use when planning or running sprint ceremonies, backlog refinement, and commitment tracking. USE FOR: plan sprint capacity and goals, run backlog grooming session, prepare sprint review agenda, track velocity against commitments, facilitate sprint ceremony workflow. DO NOT USE FOR: writing implementation code, annual roadmap strategy only."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
 ---
 
 # Sprint Management Skill

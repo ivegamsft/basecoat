@@ -1,18 +1,6 @@
 ---
 name: devops-audit
 description: "Audits CI/CD pipelines, deployment configurations, and environment management. USE FOR: reviewing GitHub Actions workflows, analyzing deployment processes, validating environment configurations, assessing automation completeness, identifying workflow bottlenecks. DO NOT USE FOR: implementing CI/CD workflows from scratch, infrastructure provisioning, application code development, database administration."
-compatibility:
-  editors:
-    - vscode
-    - cursor
-  platforms:
-    - github
-metadata:
-  category: "DevOps & Infrastructure"
-  tags: ["devops", "audit", "ci-cd", "deployment", "automation"]
-  maturity: "beta"
-  audience: ["devops-engineers", "platform-teams", "ci-cd-engineers"]
-allowed-tools: ["bash", "git", "gh", "grep", "find", "powershell"]
 ---
 
 # DevOps Audit Skill

@@ -1,18 +1,6 @@
 ---
-
 name: create-skill
 description: "Use when creating a new reusable skill with clear triggers, workflow steps, and starter assets in a customization repository. USE FOR: add a new SKILL.md file, design skill trigger phrases, decide if work belongs in a skill, scaffold skill folder with templates, write discovery-focused skill frontmatter. DO NOT USE FOR: creating a file instruction only, writing application business logic, generating a one-off prompt response."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
 ---
 
 # Create A Skill

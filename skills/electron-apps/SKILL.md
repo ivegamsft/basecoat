@@ -2,17 +2,6 @@
 name: electron-apps
 description: "Use when building secure, production-ready Electron desktop apps with guidance for IPC, preload APIs, packaging, updates, and renderer isolation. USE FOR: secure Electron IPC design, preload script API patterns, package and sign desktop app, implement auto-update flow, review BrowserWindow security settings. DO NOT USE FOR: generic web SPA architecture, mobile app development, browser extension work."
 applyTo: agent-electron-developer, agent-desktop-engineer
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
 ---
 
 # Electron Application Development

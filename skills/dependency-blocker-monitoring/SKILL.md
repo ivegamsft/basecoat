@@ -1,17 +1,6 @@
 ---
 name: dependency-blocker-monitoring
 description: "Use when monitoring workcell BOM dependencies and cell health so blocker issues are opened when a cell fails and resolved when it recovers. USE FOR: dependency maps, cell health checks, blocker issue creation, and recovery closures. DO NOT USE FOR: general project tracking or unrelated CI triage."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Process"
-  tags: ["workcell", "bom", "dependencies", "cell-health", "blocker", "recovery"]
-  maturity: "beta"
-  audience: ["developers", "project-managers", "tech-leads"]
-allowed-tools: ["bash", "git", "gh", "azure-cli"]
 visibility: "internal"
 ---
 # Dependency Blocker Monitoring Skill

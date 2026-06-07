@@ -1,17 +1,6 @@
 ---
 name: backlog-burndown
 description: "Use when managing backlog burn-down and flow health across a sprint window or milestone. USE FOR: build burn-down tables from issue state changes, detect spillover risk from velocity and remaining scope, prioritize blockers to protect sprint goals, and produce daily backlog status updates with explicit actions. DO NOT USE FOR: writing implementation code, replacing sprint retrospective analysis, or setting annual portfolio strategy."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Project Management"
-  tags: ["agile", "sprint", "backlog", "burndown", "delivery"]
-  maturity: "beta"
-  audience: ["developers", "tech-leads", "engineering-managers"]
-allowed-tools: ["bash", "git", "grep", "find"]
 ---
 
 # Backlog Burndown Skill

@@ -1,17 +1,6 @@
 ---
 name: sprint-planner
 description: "Compatibility routing skill for sprint planning requests that resolve to skill(sprint-planner). USE FOR: sprint goal decomposition, wave/dependency planning, issue breakdown planning, and next-sprint commitment shaping. DO NOT USE FOR: implementing product code changes, CI/build remediation, or production incident response."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Project Management & Planning"
-  tags: ["sprint", "planning", "dependencies", "issue-breakdown", "routing-compatibility"]
-  maturity: "production"
-  audience: ["developers", "tech-leads", "engineering-managers"]
-allowed-tools: ["bash", "git", "gh"]
 ---
 
 # Sprint Planner Skill

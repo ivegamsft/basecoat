@@ -1,18 +1,6 @@
 ---
-
 name: azure-landing-zone
 description: "Use when designing Azure enterprise-scale landing zones aligned to the Cloud Adoption Framework. USE FOR: design an Azure landing zone, scaffold a management group hierarchy, create a hub networking platform subscription, assign a regulatory policy initiative, vend a new application landing zone. DO NOT USE FOR: single-resource app deployment, AWS organization design, application code generation."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
 ---
 
 # Azure Landing Zone Skill

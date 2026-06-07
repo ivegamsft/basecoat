@@ -1,17 +1,6 @@
 ---
 name: cross-stack-modernization
 description: "Language-agnostic modernization guidance for incrementally replacing legacy applications using strangler fig, ACLs, and risk scoring. USE FOR: plan legacy app modernization strategy, choose rewrite versus refactor versus replace, design strangler fig migration, sequence service extraction by dependency risk, decide database-first or UI-first migration. DO NOT USE FOR: greenfield system design, minor bug fixes in one service, container-only deployment setup."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: modernization
-  keywords: "modernization, strangler-fig, anti-corruption-layer, refactor, rewrite, migration, legacy"
-  maturity: production
-  audience: [solution-architect, backend-engineer, platform-engineer]
-allowed-tools: [bash, git, grep, find]
 ---
 
 # Cross-Stack Modernization

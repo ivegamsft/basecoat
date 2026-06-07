@@ -1,18 +1,6 @@
 ---
 name: ci-audit
 description: "Audits GitHub organization CI/CD settings and runner configurations. USE FOR: auditing CI/CD settings, analyzing runners, scanning dependencies, generating optimization recommendations, creating audit findings. DO NOT USE FOR: writing application code, code reviews, database schema design, creating GitHub Actions workflows, infrastructure-as-code development unrelated to CI/CD auditing."
-compatibility:
-  editors:
-    - vscode
-    - cursor
-  platforms:
-    - github
-metadata:
-  category: "DevOps & Infrastructure"
-  tags: ["ci-cd", "audit", "performance", "cost-optimization", "devops"]
-  maturity: "beta"
-  audience: ["devops-engineers", "platform-teams", "ci-cd-engineers"]
-allowed-tools: ["bash", "git", "gh", "grep", "find", "powershell"]
 ---
 
 # CI/CD Audit Skill

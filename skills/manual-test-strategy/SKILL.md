@@ -1,18 +1,6 @@
 ---
-
 name: manual-test-strategy
 description: "Use when deciding what should stay manual, what should become automated, and how exploratory testing, checklists, and defect evidence are captured. USE FOR: classify manual versus automated coverage, create exploratory test charter, build repeatable manual regression checklist, capture defect evidence for triage, identify automation candidates from manual testing. DO NOT USE FOR: writing automated test code, performance benchmarking, production incident response."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
 ---
 
 # Manual Test Strategy

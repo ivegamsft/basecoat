@@ -1,18 +1,6 @@
 ---
-
 name: documentation
 description: "Use when writing or improving technical documentation such as READMEs, ADRs, runbooks, and reference guides. USE FOR: write a project README, record an architecture decision, create an operational runbook, review docs for accuracy and gaps, establish docs-as-code standards. DO NOT USE FOR: implementing application features, generating code-only refactors, designing infrastructure topology diagrams from scratch."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
 ---
 
 # Documentation Skill

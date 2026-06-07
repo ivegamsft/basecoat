@@ -1,17 +1,6 @@
 ---
 name: data-tier-audit
 description: "Use when reviewing schemas, migrations, indexes, query plans, or data contract safety. USE FOR: audit schema drift, migration rollback safety, index health, query risk, repository patterns. DO NOT USE FOR: UI copywriting, infrastructure-only tasks, generic code review."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
 ---
 
 # Data Tier Audit Skill

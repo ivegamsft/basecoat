@@ -1,17 +1,6 @@
 ---
 name: ci-flake-quarantine
 description: "Use when isolating flaky CI tests with evidence-based quarantine windows and expiry policy. USE FOR: confirm flakiness, quarantine only after repeat evidence, and produce owner/expiry tracking. DO NOT USE FOR: hiding failures, permanently disabling tests, or replacing root-cause remediation."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "CI/CD & Automation"
-  tags: ["ci", "flaky", "quarantine", "tests", "expiry"]
-  maturity: "beta"
-  audience: ["developers", "devops-engineers", "platform-teams"]
-allowed-tools: ["bash", "git", "gh", "grep"]
 visibility: "internal"
 ---
 # CI Flake Quarantine Skill

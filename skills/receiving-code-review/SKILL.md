@@ -1,19 +1,6 @@
 ---
-
 name: receiving-code-review
 description: "Use when responding to pull request review feedback. Covers acknowledging comments, categorizing severity, addressing changes, and re-requesting review. USE FOR: address PR review comments, respond to code review feedback, categorize review items, re-request review after changes, resolve review threads. DO NOT USE FOR: performing initial code review, writing review comments on others' PRs, general PR creation."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Developer Workflow"
-  tags: ["code-review", "pull-requests", "collaboration"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "gh"]
-
 ---
 
 # Receiving Code Review — Response Protocol

@@ -1,18 +1,6 @@
 ---
 name: api-audit
 description: "Audits API endpoint designs, contracts, versioning strategies, and error handling. USE FOR: reviewing API endpoint definitions, validating request/response contracts, assessing error handling patterns, evaluating versioning strategies, analyzing documentation completeness. DO NOT USE FOR: implementing API endpoints, writing backend code, database design, frontend development, infrastructure setup."
-compatibility:
-  editors:
-    - vscode
-    - cursor
-  platforms:
-    - github
-metadata:
-  category: "API & Integration"
-  tags: ["api", "audit", "contracts", "design", "integration"]
-  maturity: "beta"
-  audience: ["api-designers", "backend-engineers", "integration-engineers"]
-allowed-tools: ["bash", "git", "grep", "find", "powershell"]
 ---
 
 # API Audit Skill

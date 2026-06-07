@@ -1,16 +1,6 @@
 ---
 name: skill-scripts
 description: "Use when a skill needs executable multi-step workflows where each script produces structured JSON that is passed to the next step, enabling composable assessment, planning, validation, and execution with clear contracts."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  domain: framework
-  maturity: beta
-  audience: [all]
-allowed-tools: [bash, powershell, git]
 ---
 
 # Skill Scripts

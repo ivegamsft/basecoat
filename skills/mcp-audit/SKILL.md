@@ -1,18 +1,6 @@
 ---
 name: mcp-audit
 description: "Audits MCP server implementations, tool definitions, and schema compliance. USE FOR: reviewing MCP server code quality, validating tool definitions, assessing schema compliance, identifying integration issues, evaluating error handling. DO NOT USE FOR: implementing MCP servers from scratch, designing tool specifications, writing client applications, general code review."
-compatibility:
-  editors:
-    - vscode
-    - cursor
-  platforms:
-    - github
-metadata:
-  category: "AI & Integration"
-  tags: ["mcp", "audit", "tools", "integration", "schema"]
-  maturity: "beta"
-  audience: ["mcp-developers", "integration-engineers", "platform-teams"]
-allowed-tools: ["bash", "git", "grep", "find", "powershell"]
 ---
 
 # MCP Audit Skill

@@ -1,18 +1,6 @@
 ---
-
 name: change-isolation
 description: "Use when designing or reviewing monorepo workflow isolation so independent layers (mobile, database, portal, extension, infra) can build, test, and release separately. USE FOR: define path-based lane boundaries, isolate deploy workflows by layer, design independent versioning lanes, audit cross-trigger coupling in GitHub Actions, create release lane contracts. DO NOT USE FOR: implementing application feature logic, writing database queries unrelated to CI/CD boundaries, or generic project planning without workflow scope."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
 ---
 
 # Change Isolation Skill

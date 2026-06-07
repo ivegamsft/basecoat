@@ -1,17 +1,6 @@
 ---
 name: tech-debt
 description: "Use when inventorying, scoring, budgeting, or reducing technical debt across a repo or team. USE FOR: build technical debt register, rank cleanup work with RICE, reserve sprint capacity for remediation, compare debt items by impact and effort, track debt amortization over time. DO NOT USE FOR: implementing feature work directly, emergency production incident response."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Engineering"
-  tags: ["technical-debt", "prioritization", "rice", "budgeting", "tracking", "amortization"]
-  maturity: "beta"
-  audience: ["developers", "engineering-leads"]
-allowed-tools: ["search/codebase"]
 ---
 
 # Technical Debt Management

@@ -1,18 +1,6 @@
 ---
-
 name: handoff
 description: "Use when ending a session or transferring work so another agent or future session can resume with preserved reasoning, exact files, commands, and blockers. USE FOR: create end-of-session handoff, transfer task between agents, summarize unfinished work with next steps, capture commands and validations run, package follow-up deployment context. DO NOT USE FOR: solving the task itself, long-term project planning, writing user-facing release notes."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
 ---
 
 # Handoff Skill

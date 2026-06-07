@@ -1,18 +1,6 @@
 ---
 name: infrastructure-audit
 description: "Audits Infrastructure-as-Code (Bicep/Terraform), resource configurations, and networking. USE FOR: reviewing IaC code quality, validating resource configurations, assessing networking architecture, identifying security misconfigurations, analyzing cost optimization opportunities. DO NOT USE FOR: writing IaC from scratch, provisioning infrastructure, network architecture design, application development, DevOps workflow creation."
-compatibility:
-  editors:
-    - vscode
-    - cursor
-  platforms:
-    - github
-metadata:
-  category: "DevOps & Infrastructure"
-  tags: ["infrastructure", "audit", "iac", "terraform", "bicep"]
-  maturity: "beta"
-  audience: ["infrastructure-engineers", "platform-teams", "cloud-architects"]
-allowed-tools: ["bash", "git", "grep", "find", "powershell"]
 ---
 
 # Infrastructure Audit Skill

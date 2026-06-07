@@ -2,16 +2,6 @@
 name: penetration-testing
 title: Penetration Testing & Vulnerability Discovery Patterns
 description: "Use when executing authorized penetration tests, validating OWASP risks, or producing exploit-backed findings. USE FOR: test for SQL injection or SSRF, run OWASP Top 10 web assessment, validate broken access control, reproduce API auth bypass, write penetration test findings report. DO NOT USE FOR: testing without authorization, destructive load testing in production."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  domain: security
-  maturity: production
-  audience: [security-engineer, red-team, bug-bounty]
-allowed-tools: [bash, curl, python, docker, git]
 ---
 
 # Penetration Testing Skill

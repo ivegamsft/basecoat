@@ -1,17 +1,6 @@
 ---
 name: bom-validation
 description: "Validates Workcell BOMs against plant registry and CAF naming rules. USE FOR: validating BOM completeness before S2, detecting circular dependencies, enforcing CAF naming compliance, checking registry references before handoff. DO NOT USE FOR: approving incomplete BOMs, inferring missing resources, writing application code, running release/deployment tasks."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Process"
-  tags: ["bom", "validation", "caf", "schema", "dependencies"]
-  maturity: "beta"
-  audience: ["developers", "project-managers", "tech-leads"]
-allowed-tools: ["bash", "git", "grep", "find"]
 visibility: "internal"
 ---
 # BOM Validation Skill

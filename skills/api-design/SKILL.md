@@ -1,18 +1,6 @@
 ---
-
 name: api-design
 description: "Use when designing or reviewing API contracts, versioning decisions, and governance standards. USE FOR: design a REST API contract, review an OpenAPI diff for breaking changes, choose an API versioning strategy, draft GraphQL schema changes, create a deprecation or sunset plan. DO NOT USE FOR: implementing request handlers, tuning database indexes, penetration testing an API."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
 ---
 
 # API Design Skill

@@ -1,17 +1,6 @@
 ---
 name: azure-policy-audit
 description: "Use when reviewing Azure Policy definitions, initiatives, exemptions, remediation tasks, or compliance reporting. USE FOR: audit policy coverage, remediation completeness, exemption hygiene, policy drift, compliance reporting. DO NOT USE FOR: app business logic, RBAC-only questions, generic troubleshooting."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
 ---
 
 # Azure Policy Audit Skill

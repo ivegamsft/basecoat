@@ -1,18 +1,6 @@
 ---
-
 name: human-in-the-loop
 description: "Use when agent workflows need explicit human judgment for destructive, ambiguous, high-stakes, or low-confidence actions, with approval gates and escalation patterns. USE FOR: add approval step before production deploy, define escalation triggers for risky automation, design asynchronous human review workflow, defer destructive action pending approval, document graceful degradation when reviewers are unavailable. DO NOT USE FOR: fully autonomous low-risk tasks, replacing security policy, general chatbot conversation design."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
 ---
 
 # Human-in-the-Loop

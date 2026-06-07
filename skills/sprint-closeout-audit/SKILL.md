@@ -1,17 +1,6 @@
 ---
 name: sprint-closeout-audit
 description: "Use when auditing sprint closure readiness with explicit pass/fail evidence for merge state, CI health, unresolved errors, open issues, and test execution. USE FOR: run end-of-sprint completion checklist, validate carry-forward decisions, produce closeout report for leadership, and gate next-sprint planning until closure criteria are explicit. DO NOT USE FOR: feature implementation, architecture design, or standalone incident response."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Project Management"
-  tags: ["sprint", "closeout", "audit", "agile", "checklist"]
-  maturity: "beta"
-  audience: ["engineering-managers", "tech-leads", "developers"]
-allowed-tools: ["bash", "git", "gh", "grep"]
 invocation_rules:
   - "Use when closing a sprint and validating objective completion evidence."
   - "Require all five checklist questions with evidence links in output."

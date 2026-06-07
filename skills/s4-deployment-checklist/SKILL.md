@@ -1,17 +1,6 @@
 ---
 name: s4-deployment-checklist
 description: "Use when preparing an S4 cutover, shadow-mode soak, rollback validation, or deployment readiness review. USE FOR: checklist-driven release gating, rollback testing, monitoring readiness, and team briefing. DO NOT USE FOR: generic release notes or unrelated sprint planning."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
 visibility: "internal"
 ---
 # S4 Deployment Checklist Skill

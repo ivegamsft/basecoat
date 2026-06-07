@@ -1,17 +1,6 @@
 ---
 name: bom-schema
 description: "Use when defining or validating BOM schemas, resource ID formats, required cells, or naming conventions. USE FOR: JSON schema for BOM validation, required-field checks, and template creation. DO NOT USE FOR: unrelated app schemas or general data-model design."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
 visibility: "internal"
 ---
 # BOM Schema Skill

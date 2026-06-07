@@ -1,17 +1,6 @@
 ---
 name: release-audit
 description: "Use when reviewing release readiness, changelog quality, version bumps, tags, or publish completeness. USE FOR: audit a release candidate, verify semver and changelog entries, check tag and release note completeness, review rollback readiness. DO NOT USE FOR: cutting the release, planning sprint work, debugging product bugs, deployment troubleshooting."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
 ---
 
 # Release Audit Skill
