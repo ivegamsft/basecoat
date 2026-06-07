@@ -17,7 +17,7 @@ Jump to: [Audit](#audit) · [Build & Integrate](#build--integrate) ·
 
 **Agent:** `@config-auditor`
 
-```
+```text
 @config-auditor Scan this repository for committed credentials, exposed API keys,
 and missing .gitignore coverage. Report findings by severity with remediation steps.
 ```
@@ -31,7 +31,7 @@ and missing .gitignore coverage. Report findings by severity with remediation st
 
 **Typical follow-up:** The agent flags a hardcoded connection string. You ask:
 
-```
+```text
 @config-auditor The postgres connection string in src/config/db.ts is flagged.
 Generate a remediation PR description and the corrected code using an environment variable.
 ```
@@ -42,7 +42,7 @@ Generate a remediation PR description and the corrected code using an environmen
 
 **Agent:** `@github-security-posture`
 
-```
+```text
 @github-security-posture Audit this repository's GitHub security settings.
 Check branch protection, secret scanning, Dependabot, CODEOWNERS, and workflow permissions.
 ```
@@ -59,7 +59,7 @@ Check branch protection, secret scanning, Dependabot, CODEOWNERS, and workflow p
 
 **Agent:** `@code-review`
 
-```
+```text
 @code-review Review the diff between main and release/v2.1 for correctness,
 regression risk, and missing test coverage. Focus on the auth and payment modules.
 ```
@@ -105,7 +105,7 @@ pwsh tests/quality-gate-tests.ps1
 
 **Step 1 — Architecture:**
 
-```
+```text
 @solution-architect Design the data model, API contracts, and component boundaries
 for a multi-tenant audit log feature. We store events in Postgres, expose them via
 REST, and need 90-day retention with GDPR deletion support.
@@ -117,7 +117,7 @@ handoff button.
 
 **Step 2 — Implementation (via handoff or directly):**
 
-```
+```text
 @backend-dev Implement the audit log API from the architecture above.
 Create the Postgres migration, the repository layer, the service, and the REST routes.
 ```
@@ -127,7 +127,7 @@ registration, and unit test scaffolding.
 
 **Step 3 — Review:**
 
-```
+```text
 @code-review Review the audit log implementation above. Focus on the delete path
 for GDPR compliance and the Postgres index strategy for the tenant_id + created_at query.
 ```
@@ -138,7 +138,7 @@ for GDPR compliance and the Postgres index strategy for the tenant_id + created_
 
 **Agent:** `@agent-designer`
 
-```
+```text
 @agent-designer Create a new agent for dependency lifecycle management.
 It should scan package.json and requirements.txt files, identify outdated dependencies,
 assess breaking change risk, and produce an upgrade plan.
@@ -163,7 +163,7 @@ pwsh scripts/validate-basecoat.ps1
 
 **Agent:** `@api-designer` then `@backend-dev`
 
-```
+```text
 @api-designer Design the integration contract between our order service and
 the new fulfillment API. We need: webhook registration, retry with exponential
 backoff, idempotency keys, and a dead-letter queue for failed events.
@@ -181,7 +181,7 @@ context for `@backend-dev` to implement.
 
 **Agent:** `@sprint-planner`
 
-```
+```text
 @sprint-planner Sprint goal: Ship the memory triage feature — consumers can
 self-screen learnings before submitting, and the steward team has a structured
 review checklist. Sprint 25, repository: IBuySpy-Shared/basecoat, team size: 3.
@@ -209,7 +209,7 @@ gh issue list --label sprint-25 --json number,title | ConvertFrom-Json |
 
 **Agent:** `@sprint-retrospective`
 
-```
+```text
 @sprint-retrospective Sprint 24 retrospective. Velocity: 31/34 points.
 Three items carried over: consumer-sync.md doc fix, generate-registry CI wiring,
 performance-baseline-pr-check.yml cleanup. Main blocker: rate limit hits when
@@ -231,7 +231,7 @@ dispatching 5 concurrent agents. Team size: 2. Duration: 2 weeks.
 
 **Agent:** `@security-analyst`
 
-```
+```text
 @security-analyst Perform a security review of the new audit log feature.
 Focus on: tenant isolation (can user A query user B's logs?), SQL injection risk
 in the filter parameters, GDPR deletion completeness, and the webhook endpoint
@@ -251,7 +251,7 @@ authentication.
 
 **Agent:** `@guidance-reviewer`
 
-```
+```text
 @guidance-reviewer Review the governance.instructions.md file for internal
 consistency and alignment with what CI actually enforces. Flag any rules that
 are stated as hard requirements but have no enforcement mechanism.
@@ -269,7 +269,7 @@ are stated as hard requirements but have no enforcement mechanism.
 
 **Agent:** `@production-readiness`
 
-```
+```text
 @production-readiness Run a production readiness review for the audit log feature.
 Check: error handling coverage, observability (structured logs, metrics, traces),
 graceful degradation, health endpoint, runbook exists, rollback plan documented.
@@ -289,7 +289,7 @@ graceful degradation, health endpoint, runbook exists, rollback plan documented.
 
 **Agent:** `@rollout-basecoat`
 
-```
+```text
 @rollout-basecoat Onboard the repo myorg/payments-service to BaseCoat v3.25.0.
 Enterprise constraints: no direct internet access — must pull from our internal
 mirror at artifacts.myorg.internal/basecoat.
@@ -316,7 +316,7 @@ pwsh scripts/bootstrap-basecoat.ps1 `
 
 **Agent:** `@dependency-update-advisor`
 
-```
+```text
 @dependency-update-advisor Scan package.json and requirements.txt for dependencies
 that are more than one major version behind. Assess breaking change risk for each,
 and produce an upgrade sequence that minimizes CI failures.
@@ -335,7 +335,7 @@ and produce an upgrade sequence that minimizes CI failures.
 
 **Agent:** `@release-manager`
 
-```
+```text
 @release-manager Prepare the v3.25.0 release. Changes since v3.24.0:
 memory triage guide added, 11 audit issues logged, enterprise-setup nav
 fixed, agent examples page added. Validate tests pass, bump version.json,
@@ -357,7 +357,7 @@ draft the CHANGELOG entry, and generate the release notes.
 
 **Agent:** `@memory-promoter`
 
-```
+```text
 @memory-promoter Analyze the Sprint 24 session history for recurring fix patterns
 and non-obvious discoveries. Session state folder: ~/.copilot/session-state/.
 Minimum frequency: 2 occurrences. Filter out anything repo-specific.
@@ -388,7 +388,7 @@ pwsh scripts/submit-learning.ps1 `
 
 **Agent:** `@feedback-loop`
 
-```
+```text
 @feedback-loop Analyze the last 30 days of session data for the code-review agent.
 Identify patterns where users immediately re-asked after the first response,
 edited the agent output heavily, or flagged the finding as wrong. Suggest
@@ -409,7 +409,7 @@ instruction refinements.
 
 **Agent:** `@observability-engineer`
 
-```
+```text
 @observability-engineer Add structured logging, metrics, and traces to the
 audit log service. Stack: Node.js + Express + Postgres. Target: Azure Monitor
 with Application Insights. We need request tracing across the webhook and
@@ -429,7 +429,7 @@ REST API paths.
 
 **Agent:** `@incident-responder`
 
-```
+```text
 @incident-responder P1 incident: audit log writes are failing in the EU region.
 Symptoms: 503s from POST /audit/events since 14:32 UTC. DB connection pool
 exhausted. US region healthy. On-call: @alice. Incident channel: #inc-2024-0521.
@@ -449,7 +449,7 @@ exhausted. US region healthy. On-call: @alice. Incident channel: #inc-2024-0521.
 
 ### Full feature pipeline
 
-```
+```text
 sprint-planner     → decomposes goal into issues
   └─ solution-architect  → designs the system
        └─ backend-dev    → implements it
@@ -460,7 +460,7 @@ sprint-planner     → decomposes goal into issues
 
 ### Sprint close pipeline
 
-```
+```text
 sprint-retrospective    → what happened, what to carry
   └─ memory-promoter    → surface candidates from session history
        └─ submit-learning.ps1   → publish approved candidates
@@ -469,7 +469,7 @@ sprint-retrospective    → what happened, what to carry
 
 ### Security hardening pipeline
 
-```
+```text
 config-auditor          → finds exposed secrets / config gaps
 github-security-posture → GitHub settings audit
   └─ security-analyst   → threat model + remediation
@@ -481,16 +481,22 @@ github-security-posture → GitHub settings audit
 
 ## Tips
 
-**Start with `/basecoat`** to browse all 77 agents by category and find the
-right one for your job:
+**Call agents directly by name.** Use `@agent-name` for any task you already
+know — no router needed. The [routing decision tree](.github/instructions/routing-decision-tree.md)
+maps 40+ intents to direct agent or skill calls:
 
+```text
+@issue-triage Triage all open bugs in the backlog
+@sprint-planner Plan sprint 34 from open GitHub issues
+@code-review Review PR #142, focus on auth middleware
 ```
-/basecoat
-```
+
+For initial exploration, invoke the `basecoat` discovery skill in Copilot Chat
+to browse the full agent catalog by category.
 
 **Delegate, don't just ask.** Agents work best when given a concrete deliverable:
 
-```
+```text
 # Too vague:
 @code-review Look at the PR
 

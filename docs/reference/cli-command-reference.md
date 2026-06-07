@@ -26,7 +26,7 @@ Unknown command: /basecoat
 
 ### Related Issue
 
-≡ƒôï **Issue #476**: "Feature: Add /basecoat CLI shorthand command"
+**Issue #476**: "Feature: Add /basecoat CLI shorthand command"
 
 - Status: Enhancement request
 - Labels: `enhancement`, `feature`, `enterprise`
@@ -36,7 +36,7 @@ Unknown command: /basecoat
 
 ## Recommended Workarounds
 
-### Γ£à Option 1: Agent Name Reference (Recommended)
+### Option 1: Agent Name Reference (Recommended)
 
 Use the agent name directly with `@` mention syntax:
 
