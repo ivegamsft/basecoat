@@ -20,7 +20,14 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  preflight-token-check:
+    name: Preflight — PRODUCTION_REPO_TOKEN readiness
+    uses: ./.github/workflows/token-preflight.yml
+    secrets:
+      PRODUCTION_REPO_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
+
   publish:
+    needs: preflight-token-check
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -38,35 +45,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [[ -z "${PRODUCTION_TOKEN:-}" ]]; then
-            echo "::error::PRODUCTION_REPO_TOKEN secret not configured."
-            echo "::error::Fix: create a fine-grained PAT signed in as ivegamsft with resource owner=ivegamsft, repo=ivegamsft/basecoat."
-            echo "::error::Required permissions: Contents R/W + Administration R/W + Workflows R/W"
-            echo "::error::See issue #575 for step-by-step instructions."
-            exit 1
-          fi
-
-          # Verify the token can push to the production repo before attempting
-          REPO_JSON=$(curl -s \
-            -H "Authorization: token ${PRODUCTION_TOKEN}" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/ivegamsft/basecoat")
-
-          HTTP_STATUS=$(echo "${REPO_JSON}" | python3 -c "import sys,json; d=json.load(sys.stdin); print('ok' if d.get('permissions',{}).get('push') else 'nopush')" 2>/dev/null || echo "error")
-
-          if [[ "${HTTP_STATUS}" != "ok" ]]; then
-            PUSH_VAL=$(echo "${REPO_JSON}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('permissions',{}).get('push','?'))" 2>/dev/null || echo "?")
-            echo "::error::PRODUCTION_REPO_TOKEN cannot push to ivegamsft/basecoat (permissions.push=${PUSH_VAL})."
-            echo "::error::The PAT must be created by the ivegamsft account owner (not IBuySpy-Shared org)."
-            echo "::error::Steps: sign in as ivegamsft → Settings → Fine-grained tokens → resource owner=ivegamsft, repo=ivegamsft/basecoat"
-            echo "::error::Permissions needed: Contents R/W + Administration R/W + Workflows R/W"
-            echo "::error::Then: gh secret set PRODUCTION_REPO_TOKEN --repo IBuySpy-Shared/basecoat"
-            echo "::error::See issue #575 for details."
-            exit 1
-          fi
-
           PRODUCTION_REMOTE="https://x-access-token:${PRODUCTION_TOKEN}@github.com/ivegamsft/basecoat.git"
-          # TAG is set from GitHub expression in env: inputs.tag on dispatch, github.ref_name on tag push
 
           # Temporarily disable branch protection to allow push
           echo "Disabling branch protection..."
@@ -92,5 +71,5 @@ jobs:
             "https://api.github.com/repos/ivegamsft/basecoat/branches/main/protection" \
             -d '{"required_status_checks":null,"enforce_admins":false,"required_pull_request_reviews":{"required_approving_review_count":1},"restrictions":null}'
 
-          echo "✅ Pushed ${TAG} to ivegamsft/basecoat"
+          echo "Pushed ${TAG} to ivegamsft/basecoat"
 

@@ -11,9 +11,30 @@ applyTo: ".github/workflows/**/*,iac/**/*"
 - Always run `gh auth switch --user ibuyspy` before push/merge operations
 - The `ivegamsft` account has read-only access and will get 403 on write attempts
 
+## Pre-Release Token Preflight
+
+Before pushing a release tag, validate `PRODUCTION_REPO_TOKEN` readiness to prevent
+partial-release state (internal release created, production mirror stale).
+
+Run the preflight check:
+
+```bash
+gh workflow run token-preflight.yml --repo IBuySpy-Shared/basecoat
+gh run watch
+```
+
+A green run confirms the token is configured, can read `ivegamsft/basecoat`, and has
+push permissions. Only proceed with tagging after a passing run.
+
+If the preflight fails, follow the remediation steps in the error output to rotate the
+token before tagging. The `publish-to-production.yml` workflow enforces this gate
+automatically at runtime via a `preflight-token-check` job that must pass before
+the `publish` job runs. See issue #575 for PAT rotation steps.
+
 ## PRD / Spec Gate
 
 The `prd-spec-gate.yml` workflow blocks PRs with:
+
 - ≥ 500 line churn **OR** ≥ 12 files that lack PRD and spec links
 - PRs touching risky paths (skills/, agents/, instructions/) get advisory warning below threshold
 - Add the `skip-prd-spec-check` label to bypass
