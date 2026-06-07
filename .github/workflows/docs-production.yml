@@ -41,6 +41,39 @@ jobs:
           fi
           echo "Token present, proceeding"
 
+      - name: Ensure Pages source is gh-pages branch
+        run: |
+          # docs.yml uses mkdocs gh-deploy which pushes to the gh-pages branch.
+          # GitHub Pages must be configured to serve from that branch, not main.
+          PAGES_BRANCH=$(curl -s \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.PRODUCTION_REPO_TOKEN }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/ivegamsft/basecoat/pages" \
+            | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('source',{}).get('branch','unknown'))" 2>/dev/null || echo "unknown")
+
+          echo "Current Pages source branch: $PAGES_BRANCH"
+
+          if [ "$PAGES_BRANCH" != "gh-pages" ]; then
+            echo "Pages source is '$PAGES_BRANCH', updating to 'gh-pages'..."
+            HTTP_STATUS=$(curl -s -o /tmp/pages_response.json -w "%{http_code}" \
+              -X PUT \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${{ secrets.PRODUCTION_REPO_TOKEN }}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/ivegamsft/basecoat/pages" \
+              -d '{"source":{"branch":"gh-pages","path":"/"}}')
+            echo "Pages update HTTP status: $HTTP_STATUS"
+            cat /tmp/pages_response.json || true
+            if [ "$HTTP_STATUS" = "204" ]; then
+              echo "::notice::Pages source updated to gh-pages branch"
+            else
+              echo "::warning::Could not update Pages source (status $HTTP_STATUS) — site may serve from wrong branch"
+            fi
+          else
+            echo "Pages source already set to gh-pages — no change needed"
+          fi
+
       - name: Dispatch docs.yml on production repo
         id: dispatch
         run: |
