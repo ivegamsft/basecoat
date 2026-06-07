@@ -509,6 +509,33 @@ try {
     Write-Warn "Could not check repo secrets (needs repo admin access)"
 }
 
+# PRODUCTION_REPO_TOKEN (if publish-to-production workflow is present)
+$publishWorkflow = Join-Path $repoRoot '.github\workflows\publish-to-production.yml'
+if (Test-Path $publishWorkflow) {
+    try {
+        $prodRepoSlug = if (-not [string]::IsNullOrWhiteSpace($repoSlug)) {
+            $repoSlug
+        } else {
+            (gh repo view --json nameWithOwner --jq '.nameWithOwner' 2>$null).Trim()
+        }
+        $prodSecretList = gh secret list -R $prodRepoSlug 2>$null | Out-String
+        if ($prodSecretList -match 'PRODUCTION_REPO_TOKEN') {
+            Write-Check "PRODUCTION_REPO_TOKEN repo secret present" $true "required for publish-to-production"
+        } else {
+            Write-Warn "PRODUCTION_REPO_TOKEN not set — publish-to-production workflow will fail on release"
+            Write-Host "  -> Required: a fine-grained PAT created by the ivegamsft account owner" -ForegroundColor DarkGray
+            Write-Host "     1. Sign in to https://github.com as ivegamsft" -ForegroundColor DarkGray
+            Write-Host "     2. Settings -> Developer settings -> Fine-grained tokens -> Generate new token" -ForegroundColor DarkGray
+            Write-Host "     3. Resource owner: ivegamsft  |  Repository: ivegamsft/basecoat" -ForegroundColor DarkGray
+            Write-Host "     4. Permissions: Contents (R/W), Administration (R/W), Workflows (R/W)" -ForegroundColor DarkGray
+            Write-Host "     5. After generating: gh secret set PRODUCTION_REPO_TOKEN --repo $prodRepoSlug" -ForegroundColor DarkGray
+            Write-Host "  -> See docs/operations/github-secrets.md for full steps." -ForegroundColor DarkGray
+        }
+    } catch {
+        Write-Warn "Could not check PRODUCTION_REPO_TOKEN (needs repo admin access)"
+    }
+}
+
 # Portal deployment secrets (if portal deploy workflow is present)
 $portalDeployWorkflow = Join-Path $repoRoot '.github\workflows\portal-deploy.yml'
 $script:portalDeployReady = $false
