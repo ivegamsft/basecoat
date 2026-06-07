@@ -72,7 +72,7 @@ flowchart LR
 ## Guides (`docs/guides/`)
 
 - [guides/intent-prefixes.md](guides/intent-prefixes.md) — Intent vocabulary, routing behavior, and prompt templates
-- [agents/taxonomy.md](agents/taxonomy.md) — Agent and skill taxonomy with chain archetypes
+- [reference/guidance-vocabulary-syntax-guide.md](reference/guidance-vocabulary-syntax-guide.md) — Agent and skill taxonomy with chain archetypes
 
 ## Operations (`docs/operations/`)
 
@@ -92,7 +92,7 @@ flowchart LR
 
 ## Templates (`docs/templates/`)
 
-- [templates/](templates/) — Reusable file and directory templates (shared memory, repo scaffold, etc.)
+- [templates/README.md](templates/README.md) — Reusable file and directory templates (shared memory, repo scaffold, etc.)
 
 ## Archive
 

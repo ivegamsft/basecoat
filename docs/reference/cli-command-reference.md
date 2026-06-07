@@ -147,7 +147,7 @@ for event sourcing with CQRS pattern
 
 ### Other
 
-- See [agents.md](../agents/agents.md) for complete list of 73 basecoat-10-core-agents
+- See [AGENTS.md](../agents/AGENTS.md) for complete list of 73 basecoat-10-core-agents
 
 ---
 
@@ -252,7 +252,7 @@ task = "design the factory basecoat-10-core-architecture and document"
 
 If you encounter issues with basecoat-10-core-agents or workarounds:
 
-1. **Check** [agents.md](../agents/agents.md) for agent availability
+1. **Check** [AGENTS.md](../agents/AGENTS.md) for agent availability
 2. **Try** different agent names (exact match required)
 3. **Report** via GitHub Issues with:
    - Command attempted

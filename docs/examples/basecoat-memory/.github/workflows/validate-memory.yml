@@ -3,8 +3,8 @@ name: Validate Memory Contribution
 on:
   pull_request:
     paths:
-      - 'memories/**'
-      - 'hot-index.md'
+      - 'docs/examples/basecoat-memory/memories/**'
+      - 'docs/examples/basecoat-memory/hot-index.md'
 
 jobs:
   validate:
@@ -20,33 +20,22 @@ jobs:
         shell: bash
         run: |
           errors=()
-
-          for f in $(git diff --name-only origin/main...HEAD -- 'memories/**/*.md'); do
+          for f in $(git diff --name-only origin/main...HEAD -- 'docs/examples/basecoat-memory/memories/**/*.md'); do
             echo "Checking: $f"
-
-            # Must have frontmatter
             if ! grep -q '^---' "$f"; then
               errors+=("$f: missing YAML frontmatter")
             fi
-
-            # Must have subject in domain:subject format
             subject=$(grep '^subject:' "$f" | sed 's/subject: *"//' | sed 's/".*//')
             if [[ ! "$subject" =~ ^[a-z-]+:[a-z-]+ ]]; then
               errors+=("$f: subject must be namespaced (domain:subject), got: '$subject'")
             fi
-
-            # Must have confidence
             confidence=$(grep '^confidence:' "$f" | awk '{print $2}')
-            if (( $(echo "$confidence < 0.75" | bc -l) )); then
+            if [[ -n "$confidence" ]] && (( $(echo "$confidence < 0.75" | bc -l) )); then
               errors+=("$f: confidence $confidence is below minimum 0.75")
             fi
-
-            # Must not contain org-specific patterns
             if grep -qiE '(github\.com/[a-z-]+/[a-z-]+|#[0-9]{3,}|internal\.|corp\.)' "$f"; then
               errors+=("$f: contains org-specific references (repo URLs, issue numbers, internal domains)")
             fi
-
-            # Content must be under 200 chars (Pattern section)
             pattern=$(awk '/^## Pattern/{found=1; next} found && /^##/{exit} found{print}' "$f" | tr -d '\n')
             if [[ ${#pattern} -gt 200 ]]; then
               errors+=("$f: Pattern section exceeds 200 chars (${#pattern})")
@@ -54,11 +43,11 @@ jobs:
           done
 
           if [[ ${#errors[@]} -gt 0 ]]; then
-            echo "VALIDATION_FAILED=true" >> $GITHUB_OUTPUT
+            echo "VALIDATION_FAILED=true" >> "$GITHUB_OUTPUT"
             printf '%s\n' "${errors[@]}" > /tmp/validation-errors.txt
             cat /tmp/validation-errors.txt
           else
-            echo "VALIDATION_FAILED=false" >> $GITHUB_OUTPUT
+            echo "VALIDATION_FAILED=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Comment validation result
@@ -74,14 +63,14 @@ jobs:
               const errors = fs.existsSync('/tmp/validation-errors.txt')
                 ? fs.readFileSync('/tmp/validation-errors.txt', 'utf8')
                 : 'Unknown validation errors';
-              body = `## ❌ Memory Validation Failed\n\n\`\`\`\n${errors}\n\`\`\`\n\nSee [CONTRIBUTING.md](CONTRIBUTING.md) for requirements.`;
+              body = `## ❌ Memory Validation Failed\n\n\`\`\`\n${errors}\n\`\`\`\n\nSee [CONTRIBUTING.md](../../CONTRIBUTING.md) for requirements.`;
             } else {
-              body = `## ✅ Memory Validation Passed\n\nAll memory files meet the contribution requirements.\n\nA memory steward will review the content before merging.`;
+              body = '## ✅ Memory Validation Passed\n\nShared memory contribution rules satisfied.';
             }
 
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
+            await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
+              issue_number: context.issue.number,
               body
             });

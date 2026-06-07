@@ -482,7 +482,7 @@ github-security-posture → GitHub settings audit
 ## Tips
 
 **Call agents directly by name.** Use `@agent-name` for any task you already
-know — no router needed. The [routing decision tree](.github/instructions/routing-decision-tree.md)
+know — no router needed. The [routing decision tree](https://github.com/IBuySpy-Shared/basecoat/blob/main/.github/instructions/routing-decision-tree.md)
 maps 40+ intents to direct agent or skill calls:
 
 ```text

@@ -408,7 +408,7 @@ File issues in the [BaseCoat repository](https://github.com/IBuySpy-Shared/basec
 
 - [BaseCoat Workflows Reference](./workflows-reference.md) — Complete spec for all 9 workflows
 - [BaseCoat Distribution Guide](../reference/distribution.md) — How BaseCoat assets are synced
-- [Contributing to BaseCoat](../CONTRIBUTING.md) — Submit improvements or new workflows
+- [Contributing to BaseCoat](https://github.com/IBuySpy-Shared/basecoat/blob/main/CONTRIBUTING.md) — Submit improvements or new workflows
 
 ---
 

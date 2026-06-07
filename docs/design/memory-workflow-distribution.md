@@ -379,7 +379,7 @@ distribution:
 
 - **#1305**: Agentic Workflow Distribution & Consumer Agent SDK Strategy
 - **#1303**: CI/CD Workflow Templatization (independent)
-- **#1302**: Workflow Assessment (all-workflows-assessment.md)
+- **#1302**: Workflow Assessment (planned)
 
 ### Related Files
 
@@ -393,9 +393,9 @@ distribution:
 
 ### Reference Docs
 
-- [BaseCoat Memory Architecture](../memory/README.md)
-- [Memory Sweep Design](../memory/sweep-design.md) (if exists)
-- [Workflow Assessment](all-workflows-assessment.md)
+- [BaseCoat Memory Architecture](../memory/index.md)
+- Memory Sweep Design (if exists)
+- Workflow Assessment (planned)
 
 ---
 
