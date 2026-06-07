@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "3.30.6",
-  "releaseDate": "2026-06-06",
-  "notes": "Release: downstream workflow setup guide; remove leaked local-context MSX instruction file"
+  "version": "3.30.11",
+  "releaseDate": "2026-06-07",
+  "notes": "Release: sprint 32 docs cleanup and production docs path fixes"
 }
