@@ -1,0 +1,21 @@
+name: Validate Base Coat Consumer
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Verify Base Coat exists
+        run: |
+          test -f .github/base-coat/version.json
+          test -d .github/base-coat/instructions
+          test -d .github/base-coat/skills
+
+      - name: Show installed version
+        run: cat .github/base-coat/version.json

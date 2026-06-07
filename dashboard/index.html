@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BaseCoat — Adoption Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #e6edf3; padding: 2rem; }
+        h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .subtitle { color: #8b949e; margin-bottom: 2rem; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1.5rem; }
+        .card h2 { font-size: 1rem; color: #8b949e; margin-bottom: 0.5rem; }
+        .card .value { font-size: 2.5rem; font-weight: bold; color: #58a6ff; }
+        .card .delta { font-size: 0.85rem; margin-top: 0.25rem; }
+        .delta.positive { color: #3fb950; }
+        .delta.negative { color: #f85149; }
+        .chart-container { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .chart-container h2 { margin-bottom: 1rem; font-size: 1.1rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #30363d; }
+        th { color: #8b949e; font-weight: 500; }
+        .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; }
+        .badge-green { background: #1b4332; color: #3fb950; }
+        .badge-yellow { background: #3d2e00; color: #d29922; }
+        .badge-red { background: #3d1418; color: #f85149; }
+        .loading { text-align: center; padding: 4rem; color: #8b949e; }
+        .error { color: #f85149; padding: 2rem; text-align: center; }
+        footer { margin-top: 2rem; color: #484f58; font-size: 0.8rem; text-align: center; }
+        .onboard-section { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .onboard-section h2 { margin-bottom: 1rem; font-size: 1.1rem; }
+        .repo-list { list-style: none; margin: 0.5rem 0; }
+        .repo-list li { padding: 0.5rem 0.75rem; border-bottom: 1px solid #21262d; display: flex; justify-content: space-between; align-items: center; }
+        .repo-list li:last-child { border-bottom: none; }
+        .repo-list .repo-name { font-family: monospace; color: #58a6ff; }
+        .repo-list .repo-status { font-size: 0.8rem; color: #3fb950; }
+        .onboard-form { display: flex; gap: 0.5rem; margin-top: 1rem; }
+        .onboard-form input { flex: 1; padding: 0.5rem 0.75rem; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #e6edf3; font-family: monospace; }
+        .onboard-form input::placeholder { color: #484f58; }
+        .btn { padding: 0.5rem 1rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 500; }
+        .btn-primary { background: #238636; color: #fff; }
+        .btn-primary:hover { background: #2ea043; }
+        .btn-danger { background: #3d1418; color: #f85149; font-size: 0.75rem; padding: 0.3rem 0.6rem; }
+        .btn-danger:hover { background: #5a1d23; }
+        .btn-copy { background: #21262d; color: #8b949e; }
+        .btn-copy:hover { background: #30363d; }
+        pre { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: 0.85rem; margin: 0.5rem 0; }
+        code { font-family: 'SF Mono', 'Fira Code', monospace; }
+        .tab-bar { display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 1px solid #30363d; }
+        .tab { padding: 0.75rem 1.25rem; cursor: pointer; color: #8b949e; border-bottom: 2px solid transparent; }
+        .tab:hover { color: #e6edf3; }
+        .tab.active { color: #e6edf3; border-bottom-color: #58a6ff; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body>
+    <h1>BaseCoat — Adoption Dashboard</h1>
+    <p class="subtitle">Measuring Copilot customization effectiveness across dogfooding projects</p>
+
+    <div class="tab-bar">
+        <div class="tab active" data-tab="metrics">Metrics</div>
+        <div class="tab" data-tab="repos">Monitored Repos</div>
+    </div>
+
+    <div id="tab-metrics" class="tab-content active">
+        <div id="app">
+            <div class="loading">Loading metrics...</div>
+        </div>
+    </div>
+
+    <div id="tab-repos" class="tab-content">
+        <div class="onboard-section">
+            <h2>Monitored Repositories</h2>
+            <p class="subtitle" style="margin-bottom: 1rem;">These repos are scanned weekly for adoption metrics. Manage via CLI or update the DASHBOARD_REPOS secret.</p>
+
+            <div id="repo-list-container">
+                <div class="loading">Loading repo list...</div>
+            </div>
+
+            <div class="onboard-form">
+                <input type="text" id="new-repo-input" placeholder="org/repo-name" />
+                <button class="btn btn-primary" onclick="addRepo()">Add Repo</button>
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+                <h3 style="font-size: 0.95rem; color: #8b949e; margin-bottom: 0.5rem;">CLI Commands</h3>
+                <pre><code># List monitored repos
+pwsh scripts/bootstrap-dashboard.ps1 -List
+
+# Add repos interactively
+pwsh scripts/bootstrap-dashboard.ps1 -Add
+
+# Remove repos
+pwsh scripts/bootstrap-dashboard.ps1 -Remove
+
+# Or set directly via secret (JSON array)
+echo '["org/repo1","org/repo2"]' | gh secret set DASHBOARD_REPOS</code></pre>
+            </div>
+
+            <div id="onboard-output" style="margin-top: 1rem; display: none;">
+                <h3 style="font-size: 0.95rem; color: #8b949e; margin-bottom: 0.5rem;">Generated Command</h3>
+                <pre><code id="onboard-command"></code></pre>
+                <button class="btn btn-copy" onclick="copyCommand()">Copy to clipboard</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        Data collected weekly by GitHub Actions. No secrets stored client-side.<br>
+        Bootstrap setup: <code>pwsh scripts/bootstrap-dashboard.ps1</code>
+    </footer>
+
+    <script>
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+        });
+    });
+
+    // State
+    let currentRepos = [];
+
+    // Load metrics
+    async function loadMetrics() {
+        const app = document.getElementById('app');
+        try {
+            const [latest, history] = await Promise.all([
+                fetch('metrics/latest.json').then(r => r.ok ? r.json() : null),
+                fetch('metrics/history.json').then(r => r.ok ? r.json() : null)
+            ]);
+
+            if (!latest) {
+                app.innerHTML = `
+                    <div class="error">
+                        <h2>No metrics data yet</h2>
+                        <p>Run the bootstrap script and trigger the workflow:</p>
+                        <pre><code>pwsh scripts/bootstrap-dashboard.ps1
+gh workflow run adoption-metrics.yml</code></pre>
+                    </div>`;
+                return;
+            }
+
+            // Extract repo list from metrics
+            currentRepos = Object.keys(latest.repos);
+            renderRepoList();
+            renderDashboard(latest, history || []);
+        } catch (e) {
+            app.innerHTML = `<div class="error">Failed to load metrics: ${e.message}</div>`;
+        }
+    }
+
+    // Render repo management list
+    function renderRepoList() {
+        const container = document.getElementById('repo-list-container');
+        if (currentRepos.length === 0) {
+            container.innerHTML = '<p style="color: #8b949e;">No repos configured yet. Add one below or run the bootstrap script.</p>';
+            return;
+        }
+        let html = '<ul class="repo-list">';
+        for (const repo of currentRepos) {
+            html += `
+                <li>
+                    <span class="repo-name">${repo}</span>
+                    <span class="repo-status">monitored</span>
+                </li>`;
+        }
+        html += '</ul>';
+        container.innerHTML = html;
+    }
+
+    // Parse org/repo from various input formats (full URL, shorthand, etc.)
+    function parseRepoInput(raw) {
+        const value = raw.trim().replace(/\/+$/, '');
+        // Full GitHub URL: https://github.com/org/repo or git@github.com:org/repo
+        const urlMatch = value.match(/github\.com[/:]([^/]+)\/([^/.]+)/);
+        if (urlMatch) return `${urlMatch[1]}/${urlMatch[2]}`;
+        // Already org/repo format (exactly one slash, no protocol)
+        if (/^[^/]+\/[^/]+$/.test(value) && !value.includes(':')) return value;
+        return null;
+    }
+
+    // Add repo (generates CLI command since we can't write secrets from client-side)
+    function addRepo() {
+        const input = document.getElementById('new-repo-input');
+        const repo = parseRepoInput(input.value);
+        if (!repo) {
+            input.style.borderColor = '#f85149';
+            input.placeholder = 'Expected: org/repo or https://github.com/org/repo';
+            setTimeout(() => { input.placeholder = 'org/repo-name'; }, 3000);
+            return;
+        }
+        if (currentRepos.includes(repo)) {
+            input.style.borderColor = '#d29922';
+            input.value = '';
+            input.placeholder = `${repo} is already monitored`;
+            setTimeout(() => { input.placeholder = 'org/repo-name'; }, 3000);
+            return;
+        }
+        input.style.borderColor = '#30363d';
+
+        const allRepos = [...currentRepos, repo];
+        const json = JSON.stringify(allRepos);
+        const command = `echo '${json}' | gh secret set DASHBOARD_REPOS --repo IBuySpy-Shared/basecoat\ngh workflow run adoption-metrics.yml`;
+
+        document.getElementById('onboard-command').textContent = command;
+        document.getElementById('onboard-output').style.display = 'block';
+        input.value = '';
+    }
+
+    function copyCommand() {
+        const text = document.getElementById('onboard-command').textContent;
+        navigator.clipboard.writeText(text);
+    }
+
+    function renderDashboard(latest, history) {
+        const app = document.getElementById('app');
+        const repos = Object.entries(latest.repos);
+        const copilot = latest.copilot;
+
+        const totalPRs = repos.reduce((s, [, d]) => s + d.pull_requests.prs_merged_28d, 0);
+        const avgCI = repos.length > 0
+            ? (repos.reduce((s, [, d]) => s + d.ci.success_rate, 0) / repos.length).toFixed(1)
+            : 0;
+        const avgCoverage = repos.length > 0
+            ? (repos.reduce((s, [, d]) => s + d.basecoat_coverage.percentage, 0) / repos.length).toFixed(1)
+            : 0;
+
+        let html = `
+        <div class="grid">
+            <div class="card">
+                <h2>Copilot Active Users</h2>
+                <div class="value">${copilot.available ? (copilot.total_active_users || '—') : '—'}</div>
+                <div class="delta">${copilot.available ? 'org-wide' : 'API not configured'}</div>
+            </div>
+            <div class="card">
+                <h2>PRs Merged (28d)</h2>
+                <div class="value">${totalPRs}</div>
+                <div class="delta">across ${repos.length} repos</div>
+            </div>
+            <div class="card">
+                <h2>CI Success Rate</h2>
+                <div class="value">${avgCI}%</div>
+                <div class="delta ${avgCI >= 90 ? 'positive' : avgCI >= 75 ? '' : 'negative'}">average</div>
+            </div>
+            <div class="card">
+                <h2>BaseCoat Coverage</h2>
+                <div class="value">${avgCoverage}%</div>
+                <div class="delta">assets synced</div>
+            </div>
+        </div>`;
+
+        // Repo table
+        html += `
+        <div class="chart-container">
+            <h2>Repository Breakdown</h2>
+            <table>
+                <thead>
+                    <tr><th>Repository</th><th>PRs</th><th>Cycle Time</th><th>CI</th><th>Issues Closed</th><th>Coverage</th></tr>
+                </thead>
+                <tbody>`;
+
+        for (const [repo, data] of repos) {
+            const short = repo.split('/').pop();
+            const ci = data.ci.success_rate;
+            const ciBadge = ci >= 90 ? 'badge-green' : ci >= 75 ? 'badge-yellow' : 'badge-red';
+            html += `
+                <tr>
+                    <td><strong>${short}</strong></td>
+                    <td>${data.pull_requests.prs_merged_28d}</td>
+                    <td>${data.pull_requests.cycle_time_median_hours}h</td>
+                    <td><span class="badge ${ciBadge}">${ci}%</span></td>
+                    <td>${data.issues.issues_closed_28d}</td>
+                    <td>${data.basecoat_coverage.percentage}%</td>
+                </tr>`;
+        }
+
+        html += `</tbody></table></div>`;
+
+        // Trend chart
+        if (history.length > 1) {
+            html += `
+            <div class="chart-container">
+                <h2>Trends (Weekly)</h2>
+                <canvas id="trendChart" height="100"></canvas>
+            </div>`;
+        }
+
+        app.innerHTML = html;
+
+        if (history.length > 1) {
+            const labels = history.map(h => h.collected_at.slice(0, 10));
+            const ciData = history.map(h => {
+                const r = Object.values(h.repos);
+                return r.length > 0 ? (r.reduce((s, d) => s + d.ci.success_rate, 0) / r.length).toFixed(1) : 0;
+            });
+            const prData = history.map(h => {
+                return Object.values(h.repos).reduce((s, d) => s + d.pull_requests.prs_merged_28d, 0);
+            });
+
+            new Chart(document.getElementById('trendChart'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        { label: 'CI Success %', data: ciData, borderColor: '#3fb950', tension: 0.3, yAxisID: 'y' },
+                        { label: 'PRs Merged', data: prData, borderColor: '#58a6ff', tension: 0.3, yAxisID: 'y1' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { labels: { color: '#8b949e' } } },
+                    scales: {
+                        x: { ticks: { color: '#484f58' }, grid: { color: '#21262d' } },
+                        y: { position: 'left', ticks: { color: '#3fb950' }, grid: { color: '#21262d' }, min: 0, max: 100 },
+                        y1: { position: 'right', ticks: { color: '#58a6ff' }, grid: { display: false }, min: 0 }
+                    }
+                }
+            });
+        }
+    }
+
+    loadMetrics();
+    </script>
+</body>
+</html>

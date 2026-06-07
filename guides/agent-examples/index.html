@@ -1,0 +1,3095 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Enterprise shared library of GitHub Copilot customization assets — agents, skills, instructions, and prompts.">
+      
+      
+      
+        <link rel="canonical" href="https://ivegamsft.github.io/basecoat/guides/agent-examples/">
+      
+      
+        <link rel="prev" href="../custom-agent-authoring/">
+      
+      
+        <link rel="next" href="../contributing/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Agent Examples - BaseCoat</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#agent-examples" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="BaseCoat" class="md-header__button md-logo" aria-label="BaseCoat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12 16 7.36-5.73L21 9l-9-7-9 7 1.63 1.27M12 18.54l-7.38-5.73L3 14.07l9 7 9-7-1.63-1.27z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BaseCoat
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Agent Examples
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ivegamsft/basecoat" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ivegamsft/basecoat
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/quick-reference/" class="md-tabs__link">
+          
+  
+  
+  Asset Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../intent-prefixes/" class="md-tabs__link">
+          
+  
+  
+  How-To Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../memory/" class="md-tabs__link">
+          
+  
+  
+  Memory System
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../architecture/overview/" class="md-tabs__link">
+          
+  
+  
+  Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../PHILOSOPHY.md" class="md-tabs__link">
+          
+  
+  
+  About
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="BaseCoat" class="md-nav__button md-logo" aria-label="BaseCoat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12 16 7.36-5.73L21 9l-9-7-9 7 1.63 1.27M12 18.54l-7.38-5.73L3 14.07l9 7 9-7-1.63-1.27z"/></svg>
+
+    </a>
+    BaseCoat
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ivegamsft/basecoat" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ivegamsft/basecoat
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../enterprise-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Enterprise Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../consumer-sync/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Consumer Sync Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Asset Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Asset Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/quick-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/token-context-inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Token Context Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/asset-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/governance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Governance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-To Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How-To Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intent-prefixes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Intent Prefixes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integrate-prompt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Started (integrate prompt)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../customization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Make It Your Own
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom-agent-authoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create a Custom Agent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Examples
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#audit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audit
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Audit">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scan-a-repo-for-exposed-secrets-and-config-gaps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scan a repo for exposed secrets and config gaps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#audit-your-github-security-posture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audit your GitHub security posture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-quality-audit-before-a-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code quality audit before a release
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#audit-basecoat-assets-for-quality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audit BaseCoat assets for quality
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#build-integrate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build &amp; Integrate
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Build &amp; Integrate">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#design-a-new-feature-end-to-end" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design a new feature end-to-end
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-a-new-agent-to-basecoat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add a new agent to BaseCoat
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integrate-a-new-service-into-an-existing-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integrate a new service into an existing system
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plan-a-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plan a Sprint
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Plan a Sprint">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#decompose-a-sprint-goal-into-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decompose a sprint goal into issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-a-retrospective" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run a retrospective
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#review-harden" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Review &amp; Harden
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Review &amp; Harden">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#security-review-of-a-new-feature" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security review of a new feature
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check-ci-and-governance-alignment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Check CI and governance alignment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#production-readiness-check-before-launch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Production readiness check before launch
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#update-upgrade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update &amp; Upgrade
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Update &amp; Upgrade">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#roll-basecoat-out-to-a-new-repo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Roll BaseCoat out to a new repo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-outdated-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update outdated dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#coordinate-a-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coordinate a release
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#publish-learnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Publish Learnings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Publish Learnings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#surface-memory-candidates-from-a-completed-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Surface memory candidates from a completed sprint
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#collect-and-act-on-feedback-about-agent-quality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Collect and act on feedback about agent quality
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitor-respond" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Monitor &amp; Respond
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitor &amp; Respond">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#set-up-observability-for-a-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Set up observability for a service
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#respond-to-a-production-incident" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Respond to a production incident
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chaining-agents-common-pipelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chaining Agents: Common Pipelines
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Chaining Agents: Common Pipelines">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#full-feature-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full feature pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sprint-close-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sprint close pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-hardening-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security hardening pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tips
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../version-drift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Drift Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../model-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../token-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Token Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../basecoat-yml/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BaseCoat Config (.basecoat.yml)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ubb-token-guidance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UBB Token Guidance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory System
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Memory System
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/learning-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learning Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/triage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Triage Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing Learnings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/process/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Process
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../diagrams/architecture-diagrams-index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagrams
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/decisions/adr-001-naming-convention/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-001 Naming Convention
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/multi-agent-orchestration-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Agent Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    About
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    About
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../PHILOSOPHY.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Philosophy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../story/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Story
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/metrics-schema-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dashboard Metrics Schema and Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#audit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audit
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Audit">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scan-a-repo-for-exposed-secrets-and-config-gaps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scan a repo for exposed secrets and config gaps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#audit-your-github-security-posture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audit your GitHub security posture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-quality-audit-before-a-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code quality audit before a release
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#audit-basecoat-assets-for-quality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audit BaseCoat assets for quality
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#build-integrate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build &amp; Integrate
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Build &amp; Integrate">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#design-a-new-feature-end-to-end" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design a new feature end-to-end
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-a-new-agent-to-basecoat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add a new agent to BaseCoat
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integrate-a-new-service-into-an-existing-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integrate a new service into an existing system
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plan-a-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plan a Sprint
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Plan a Sprint">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#decompose-a-sprint-goal-into-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decompose a sprint goal into issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-a-retrospective" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run a retrospective
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#review-harden" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Review &amp; Harden
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Review &amp; Harden">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#security-review-of-a-new-feature" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security review of a new feature
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check-ci-and-governance-alignment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Check CI and governance alignment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#production-readiness-check-before-launch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Production readiness check before launch
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#update-upgrade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update &amp; Upgrade
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Update &amp; Upgrade">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#roll-basecoat-out-to-a-new-repo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Roll BaseCoat out to a new repo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-outdated-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Update outdated dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#coordinate-a-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coordinate a release
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#publish-learnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Publish Learnings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Publish Learnings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#surface-memory-candidates-from-a-completed-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Surface memory candidates from a completed sprint
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#collect-and-act-on-feedback-about-agent-quality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Collect and act on feedback about agent quality
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitor-respond" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Monitor &amp; Respond
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitor &amp; Respond">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#set-up-observability-for-a-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Set up observability for a service
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#respond-to-a-production-incident" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Respond to a production incident
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chaining-agents-common-pipelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chaining Agents: Common Pipelines
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Chaining Agents: Common Pipelines">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#full-feature-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full feature pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sprint-close-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sprint close pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-hardening-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security hardening pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tips
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../intent-prefixes/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    How-To Guides
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="agent-examples">Agent Examples<a class="headerlink" href="#agent-examples" title="Permanent link">&para;</a></h1>
+<p>Practical examples for the most common jobs you'll use BaseCoat agents for.
+Each example shows what to say, what comes back, and how to chain agents when one
+job naturally leads into the next.</p>
+<p>Jump to: <a href="#audit">Audit</a> · <a href="#build--integrate">Build &amp; Integrate</a> ·
+<a href="#plan-a-sprint">Plan a Sprint</a> · <a href="#review--harden">Review &amp; Harden</a> ·
+<a href="#update--upgrade">Update &amp; Upgrade</a> · <a href="#publish-learnings">Publish Learnings</a> ·
+<a href="#monitor--respond">Monitor &amp; Respond</a></p>
+<hr />
+<h2 id="audit">Audit<a class="headerlink" href="#audit" title="Permanent link">&para;</a></h2>
+<h3 id="scan-a-repo-for-exposed-secrets-and-config-gaps">Scan a repo for exposed secrets and config gaps<a class="headerlink" href="#scan-a-repo-for-exposed-secrets-and-config-gaps" title="Permanent link">&para;</a></h3>
+<p><strong>Agent:</strong> <code>@config-auditor</code></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>@config-auditor Scan this repository for committed credentials, exposed API keys,
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>and missing .gitignore coverage. Report findings by severity with remediation steps.
+</code></pre></div>
+<p><strong>What comes back:</strong></p>
+<ul>
+<li>A findings report grouped by severity (Critical / High / Medium / Low)</li>
+<li>Each finding includes the file, line, and a specific remediation step</li>
+<li>A <code>.gitignore</code> coverage gap list if required entries are missing</li>
+<li>A summary count: <code>3 Critical, 7 High, 2 Medium</code></li>
+</ul>
+<p><strong>Typical follow-up:</strong> The agent flags a hardcoded connection string. You ask:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>@config-auditor The postgres connection string in src/config/db.ts is flagged.
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Generate a remediation PR description and the corrected code using an environment variable.
+</code></pre></div>
+<hr />
+<h3 id="audit-your-github-security-posture">Audit your GitHub security posture<a class="headerlink" href="#audit-your-github-security-posture" title="Permanent link">&para;</a></h3>
+<p><strong>Agent:</strong> <code>@github-security-posture</code></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>@github-security-posture Audit this repository&#39;s GitHub security settings.
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>Check branch protection, secret scanning, Dependabot, CODEOWNERS, and workflow permissions.
+</code></pre></div>
+<p><strong>What comes back:</strong></p>
+<ul>
+<li>Per-setting pass/fail with the current state and the recommended state</li>
+<li>Prioritized fix list ordered by risk</li>
+<li>Ready-to-run <code>gh</code> CLI commands to apply each fix</li>
+</ul>
+<hr />
+<h3 id="code-quality-audit-before-a-release">Code quality audit before a release<a class="headerlink" href="#code-quality-audit-before-a-release" title="Permanent link">&para;</a></h3>
+<p><strong>Agent:</strong> <code>@code-review</code></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>@code-review Review the diff between main and release/v2.1 for correctness,
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>regression risk, and missing test coverage. Focus on the auth and payment modules.
+</code></pre></div>
+<p><strong>What comes back:</strong></p>
+<ul>
+<li>Findings by severity (Critical / High / Medium / Low / Info)</li>
+<li>Each finding: file reference, description, suggested fix</li>
+<li>Test coverage gaps: which changed paths have no associated test changes</li>
+<li>A handoff option: <strong>Run Security Review</strong> → routes the critical findings
+  directly to <code>@security-analyst</code></li>
+</ul>
+<hr />
+<h3 id="audit-basecoat-assets-for-quality">Audit BaseCoat assets for quality<a class="headerlink" href="#audit-basecoat-assets-for-quality" title="Permanent link">&para;</a></h3>
+<p><strong>Agent:</strong> Run the built-in quality gate directly (no agent needed):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">pwsh</span> <span class="n">scripts</span><span class="p">/</span><span class="n">audit-assets</span><span class="p">.</span><span class="n">ps1</span> <span class="n">-Report</span>
+</code></pre></div>
+<p>Or from CI:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">pwsh</span> <span class="n">tests</span><span class="p">/</span><span class="n">quality-gate-tests</span><span class="p">.</span><span class="n">ps1</span>
+</code></pre></div>
+<p><strong>What comes back:</strong></p>
+<ul>
+<li>Per-asset scores (0–10) across five dimensions: description quality,
+  workflow completeness, input/output clarity, compatibility, governance</li>
+<li>Aggregate score with pass/fail against the 5.0/10 threshold</li>
+<li>Red assets (score ≤ 0.5) listed explicitly — these block CI</li>
+</ul>
+<hr />
+<h2 id="build-integrate">Build &amp; Integrate<a class="headerlink" href="#build-integrate" title="Permanent link">&para;</a></h2>
+<h3 id="design-a-new-feature-end-to-end">Design a new feature end-to-end<a class="headerlink" href="#design-a-new-feature-end-to-end" title="Permanent link">&para;</a></h3>
+<p><strong>Chain:</strong> <code>@solution-architect</code> → <code>@backend-dev</code> → <code>@code-review</code></p>
+<p><strong>Step 1 — Architecture:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>@solution-architect Design the data model, API contracts, and component boundaries
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>for a multi-tenant audit log feature. We store events in Postgres, expose them via
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>REST, and need 90-day retention with GDPR deletion support.
+</code></pre></div>
+<p><strong>What comes back:</strong> C4 component diagram (Mermaid), ADR for storage choice,
+API contract (OpenAPI snippet), risk table. Includes a <strong>Start Backend Implementation</strong>
+handoff button.</p>
+<p><strong>Step 2 — Implementation (via handoff or directly):</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>@backend-dev Implement the audit log API from the architecture above.
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>Create the Postgres migration, the repository layer, the service, and the REST routes.
+</code></pre></div>
+<p><strong>What comes back:</strong> Migration file, TypeORM entity, service, controller, route
+registration, and unit test scaffolding.</p>
+<p><strong>Step 3 — Review:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>@code-review Review the audit log implementation above. Focus on the delete path
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>for GDPR compliance and the Postgres index strategy for the tenant_id + created_at query.
+</code></pre></div>
+<hr />
+<h3 id="add-a-new-agent-to-basecoat">Add a new agent to BaseCoat<a class="headerlink" href="#add-a-new-agent-to-basecoat" title="Permanent link">&para;</a></h3>
+<p><strong>Agent:</strong> <code>@agent-designer</code></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>@agent-designer Create a new agent for dependency lifecycle management.
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>It should scan package.json and requirements.txt files, identify outdated dependencies,
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>assess breaking change risk, and produce an upgrade plan.
+</code></pre></div>
+<p><strong>What comes back:</strong></p>
+<ul>
+<li>A complete <code>.agent.md</code> file with correct frontmatter (name, description,
+  compatibility, model, allowed_skills)</li>
+<li>Inputs, Workflow, and Expected Output sections filled in</li>
+<li>Suggested handoffs to <code>@code-review</code> and <code>@release-manager</code></li>
+</ul>
+<p>Then validate it:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">pwsh</span> <span class="n">scripts</span><span class="p">/</span><span class="n">validate-basecoat</span><span class="p">.</span><span class="n">ps1</span>
+</code></pre></div>
+<hr />
+<h3 id="integrate-a-new-service-into-an-existing-system">Integrate a new service into an existing system<a class="headerlink" href="#integrate-a-new-service-into-an-existing-system" title="Permanent link">&para;</a></h3>
+<p><strong>Agent:</strong> <code>@api-designer</code> then <code>@backend-dev</code></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>@api-designer Design the integration contract between our order service and
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>the new fulfillment API. We need: webhook registration, retry with exponential
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>backoff, idempotency keys, and a dead-letter queue for failed events.
+</code></pre></div>
+<p><strong>What comes back:</strong> OpenAPI spec for the integration surface, idempotency
+key strategy, retry configuration table, and DLQ design. Use the result as
+context for <code>@backend-dev</code> to implement.</p>
+<hr />
+<h2 id="plan-a-sprint">Plan a Sprint<a class="headerlink" href="#plan-a-sprint" title="Permanent link">&para;</a></h2>
+<h3 id="decompose-a-sprint-goal-into-issues">Decompose a sprint goal into issues<a class="headerlink" href="#decompose-a-sprint-goal-into-issues" title="Permanent link">&para;</a></h3>
+<p><strong>Agent:</strong> <code>@sprint-planner</code></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>@sprint-planner Sprint goal: Ship the memory triage feature — consumers can
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>self-screen learnings before submitting, and the steward team has a structured
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>review checklist. Sprint 25, repository: IBuySpy-Shared/basecoat, team size: 3.
+</code></pre></div>
+<p><strong>What comes back:</strong></p>
+<ul>
+<li>GitHub issues with labels, acceptance criteria, and story points</li>
+<li>A wave dependency map (what can run in parallel, what must sequence)</li>
+<li>Agent assignments per issue (e.g., <code>@tech-writer</code> for docs, <code>@backend-dev</code> for scripts)</li>
+<li>A <strong>Begin Backend Sprint Work</strong> handoff to <code>@backend-dev</code></li>
+<li>A <strong>Begin Frontend Sprint Work</strong> handoff to <code>@frontend-dev</code></li>
+</ul>
+<p><strong>After planning:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c"># Open all issues from the sprint plan at once</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="n">gh</span> <span class="n">issue</span> <span class="n">list</span> <span class="p">-</span><span class="n">-label</span> <span class="n">sprint</span><span class="p">-</span><span class="n">25</span> <span class="p">-</span><span class="n">-json</span> <span class="n">number</span><span class="p">,</span><span class="n">title</span> <span class="p">|</span> <span class="nb">ConvertFrom-Json</span> <span class="p">|</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>  <span class="k">ForEach</span><span class="n">-Object</span> <span class="p">{</span> <span class="n">gh</span> <span class="n">issue</span> <span class="n">view</span> <span class="nv">$_</span><span class="p">.</span><span class="n">number</span> <span class="p">-</span><span class="n">-web</span> <span class="p">}</span>
+</code></pre></div>
+<hr />
+<h3 id="run-a-retrospective">Run a retrospective<a class="headerlink" href="#run-a-retrospective" title="Permanent link">&para;</a></h3>
+<p><strong>Agent:</strong> <code>@sprint-retrospective</code></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>@sprint-retrospective Sprint 24 retrospective. Velocity: 31/34 points.
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>Three items carried over: consumer-sync.md doc fix, generate-registry CI wiring,
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>performance-baseline-pr-check.yml cleanup. Main blocker: rate limit hits when
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>dispatching 5 concurrent agents. Team size: 2. Duration: 2 weeks.
+</code></pre></div>
+<p><strong>What comes back:</strong></p>
+<ul>
+<li>What went well / what didn't / what to try next</li>
+<li>Action items with owners and priority</li>
+<li>Patterns to consider submitting to memory (e.g., the rate limit discovery)</li>
+<li>Carry-over analysis: why items slipped and whether the root cause is addressed</li>
+</ul>
+<hr />
+<h2 id="review-harden">Review &amp; Harden<a class="headerlink" href="#review-harden" title="Permanent link">&para;</a></h2>
+<h3 id="security-review-of-a-new-feature">Security review of a new feature<a class="headerlink" href="#security-review-of-a-new-feature" title="Permanent link">&para;</a></h3>
+<p><strong>Agent:</strong> <code>@security-analyst</code></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>@security-analyst Perform a security review of the new audit log feature.
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>Focus on: tenant isolation (can user A query user B&#39;s logs?), SQL injection risk
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>in the filter parameters, GDPR deletion completeness, and the webhook endpoint
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>authentication.
+</code></pre></div>
+<p><strong>What comes back:</strong></p>
+<ul>
+<li>Threat model (what an attacker could do, likelihood, impact)</li>
+<li>OWASP Top 10 mapping for each finding</li>
+<li>Specific code references with remediation steps</li>
+<li>Test cases to validate each remediation</li>
+</ul>
+<hr />
+<h3 id="check-ci-and-governance-alignment">Check CI and governance alignment<a class="headerlink" href="#check-ci-and-governance-alignment" title="Permanent link">&para;</a></h3>
+<p><strong>Agent:</strong> <code>@guidance-reviewer</code></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>@guidance-reviewer Review the governance.instructions.md file for internal
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>consistency and alignment with what CI actually enforces. Flag any rules that
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>are stated as hard requirements but have no enforcement mechanism.
+</code></pre></div>
+<p><strong>What comes back:</strong></p>
+<ul>
+<li>Rule-by-rule table: stated requirement vs. enforcement state (Enforced / Warn-only / None)</li>
+<li>Recommendations: which gaps to close in CI vs. which to downgrade to advisory</li>
+<li>Ready-to-commit instruction file edits where wording overstates enforcement</li>
+</ul>
+<hr />
+<h3 id="production-readiness-check-before-launch">Production readiness check before launch<a class="headerlink" href="#production-readiness-check-before-launch" title="Permanent link">&para;</a></h3>
+<p><strong>Agent:</strong> <code>@production-readiness</code></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>@production-readiness Run a production readiness review for the audit log feature.
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>Check: error handling coverage, observability (structured logs, metrics, traces),
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>graceful degradation, health endpoint, runbook exists, rollback plan documented.
+</code></pre></div>
+<p><strong>What comes back:</strong></p>
+<ul>
+<li>Checklist with pass/fail per criterion</li>
+<li>Gaps with severity and suggested remediation</li>
+<li>A readiness score (e.g., 8/11 criteria met — not ready)</li>
+</ul>
+<hr />
+<h2 id="update-upgrade">Update &amp; Upgrade<a class="headerlink" href="#update-upgrade" title="Permanent link">&para;</a></h2>
+<h3 id="roll-basecoat-out-to-a-new-repo">Roll BaseCoat out to a new repo<a class="headerlink" href="#roll-basecoat-out-to-a-new-repo" title="Permanent link">&para;</a></h3>
+<p><strong>Agent:</strong> <code>@rollout-basecoat</code></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>@rollout-basecoat Onboard the repo myorg/payments-service to BaseCoat v3.25.0.
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>Enterprise constraints: no direct internet access — must pull from our internal
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>mirror at artifacts.myorg.internal/basecoat.
+</code></pre></div>
+<p><strong>What comes back:</strong></p>
+<ul>
+<li>Step-by-step rollout plan with the correct internal mirror configuration</li>
+<li>Validation checklist: which files should exist after sync</li>
+<li>Version pinning instructions</li>
+<li>Upgrade path for future releases</li>
+</ul>
+<p>Or run the bootstrap script directly:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="n">pwsh</span> <span class="n">scripts</span><span class="p">/</span><span class="n">bootstrap-basecoat</span><span class="p">.</span><span class="n">ps1</span> <span class="p">`</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>  <span class="n">-BasecoatRepo</span> <span class="n">https</span><span class="p">://</span><span class="n">artifacts</span><span class="p">.</span><span class="n">myorg</span><span class="p">.</span><span class="n">internal</span><span class="p">/</span><span class="n">basecoat</span><span class="p">.</span><span class="n">git</span> <span class="p">`</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>  <span class="n">-Ref</span> <span class="n">v3</span><span class="p">.</span><span class="n">25</span><span class="p">.</span><span class="n">0</span>
+</code></pre></div>
+<hr />
+<h3 id="update-outdated-dependencies">Update outdated dependencies<a class="headerlink" href="#update-outdated-dependencies" title="Permanent link">&para;</a></h3>
+<p><strong>Agent:</strong> <code>@dependency-update-advisor</code></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>@dependency-update-advisor Scan package.json and requirements.txt for dependencies
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>that are more than one major version behind. Assess breaking change risk for each,
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>and produce an upgrade sequence that minimizes CI failures.
+</code></pre></div>
+<p><strong>What comes back:</strong></p>
+<ul>
+<li>Per-dependency table: current version, latest, breaking change risk (High/Med/Low)</li>
+<li>Recommended upgrade sequence (safest first)</li>
+<li>Changelog highlights for High-risk upgrades</li>
+<li>Test strategy: which test suites to run after each upgrade batch</li>
+</ul>
+<hr />
+<h3 id="coordinate-a-release">Coordinate a release<a class="headerlink" href="#coordinate-a-release" title="Permanent link">&para;</a></h3>
+<p><strong>Agent:</strong> <code>@release-manager</code></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>@release-manager Prepare the v3.25.0 release. Changes since v3.24.0:
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>memory triage guide added, 11 audit issues logged, enterprise-setup nav
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>fixed, agent examples page added. Validate tests pass, bump version.json,
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>draft the CHANGELOG entry, and generate the release notes.
+</code></pre></div>
+<p><strong>What comes back:</strong></p>
+<ul>
+<li>CHANGELOG entry in the correct format</li>
+<li><code>version.json</code> update</li>
+<li>GitHub release draft with structured notes (New, Fixed, Internal)</li>
+<li>Tag command ready to copy-paste</li>
+</ul>
+<hr />
+<h2 id="publish-learnings">Publish Learnings<a class="headerlink" href="#publish-learnings" title="Permanent link">&para;</a></h2>
+<h3 id="surface-memory-candidates-from-a-completed-sprint">Surface memory candidates from a completed sprint<a class="headerlink" href="#surface-memory-candidates-from-a-completed-sprint" title="Permanent link">&para;</a></h3>
+<p><strong>Agent:</strong> <code>@memory-promoter</code></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>@memory-promoter Analyze the Sprint 24 session history for recurring fix patterns
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>and non-obvious discoveries. Session state folder: ~/.copilot/session-state/.
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>Minimum frequency: 2 occurrences. Filter out anything repo-specific.
+</code></pre></div>
+<p><strong>What comes back:</strong></p>
+<ul>
+<li>Ranked list of memory candidates with frequency, impact score, and suggested fact text</li>
+<li>Each candidate includes: subject, fact (≤200 chars), citations, reason for storing</li>
+<li>Candidates are ready to pipe into <code>submit-learning.ps1</code></li>
+</ul>
+<p><strong>Submit the top candidates:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c"># Submit a single learning</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="n">pwsh</span> <span class="n">scripts</span><span class="p">/</span><span class="nb">submit-learning</span><span class="p">.</span><span class="n">ps1</span> <span class="p">`</span>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>  <span class="n">-Subject</span> <span class="s2">&quot;ci:check-coherence-default-exit&quot;</span> <span class="p">`</span>
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>  <span class="n">-Fact</span> <span class="s2">&quot;check-coherence.ps1 exits 0 unless -Strict is passed. CI is non-blocking without it.&quot;</span> <span class="p">`</span>
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>  <span class="n">-Evidence</span> <span class="s2">&quot;https://github.com/IBuySpy-Shared/basecoat/issues/709&quot;</span> <span class="p">`</span>
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>  <span class="n">-Domain</span> <span class="s2">&quot;ci&quot;</span> <span class="p">`</span>
+<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a>  <span class="n">-Source</span> <span class="s2">&quot;IBuySpy-Shared/basecoat&quot;</span> <span class="p">`</span>
+<a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a>  <span class="n">-OpenPR</span>
+</code></pre></div>
+<hr />
+<h3 id="collect-and-act-on-feedback-about-agent-quality">Collect and act on feedback about agent quality<a class="headerlink" href="#collect-and-act-on-feedback-about-agent-quality" title="Permanent link">&para;</a></h3>
+<p><strong>Agent:</strong> <code>@feedback-loop</code></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>@feedback-loop Analyze the last 30 days of session data for the code-review agent.
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>Identify patterns where users immediately re-asked after the first response,
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>edited the agent output heavily, or flagged the finding as wrong. Suggest
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>instruction refinements.
+</code></pre></div>
+<p><strong>What comes back:</strong></p>
+<ul>
+<li>Failure pattern summary (what categories of output were reworked most)</li>
+<li>Specific instruction changes with before/after diffs</li>
+<li>A/B test design if the change is high-risk (two variants, sample size, measurement criteria)</li>
+</ul>
+<hr />
+<h2 id="monitor-respond">Monitor &amp; Respond<a class="headerlink" href="#monitor-respond" title="Permanent link">&para;</a></h2>
+<h3 id="set-up-observability-for-a-service">Set up observability for a service<a class="headerlink" href="#set-up-observability-for-a-service" title="Permanent link">&para;</a></h3>
+<p><strong>Agent:</strong> <code>@observability-engineer</code></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>@observability-engineer Add structured logging, metrics, and traces to the
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>audit log service. Stack: Node.js + Express + Postgres. Target: Azure Monitor
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>with Application Insights. We need request tracing across the webhook and
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>REST API paths.
+</code></pre></div>
+<p><strong>What comes back:</strong></p>
+<ul>
+<li>Middleware additions for structured logging (JSON, with request-id propagation)</li>
+<li>Metrics: which counters, histograms, and gauges to add and where</li>
+<li>Trace instrumentation with span boundaries</li>
+<li>Azure Monitor workspace config and dashboard template</li>
+</ul>
+<hr />
+<h3 id="respond-to-a-production-incident">Respond to a production incident<a class="headerlink" href="#respond-to-a-production-incident" title="Permanent link">&para;</a></h3>
+<p><strong>Agent:</strong> <code>@incident-responder</code></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>@incident-responder P1 incident: audit log writes are failing in the EU region.
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>Symptoms: 503s from POST /audit/events since 14:32 UTC. DB connection pool
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>exhausted. US region healthy. On-call: @alice. Incident channel: #inc-2024-0521.
+</code></pre></div>
+<p><strong>What comes back:</strong></p>
+<ul>
+<li>Immediate mitigation steps (ordered, copy-paste ready)</li>
+<li>Root cause hypotheses ranked by likelihood</li>
+<li>Data to collect (specific log queries, metrics to pull)</li>
+<li>Stakeholder communication draft</li>
+<li>Post-incident review checklist</li>
+</ul>
+<hr />
+<h2 id="chaining-agents-common-pipelines">Chaining Agents: Common Pipelines<a class="headerlink" href="#chaining-agents-common-pipelines" title="Permanent link">&para;</a></h2>
+<h3 id="full-feature-pipeline">Full feature pipeline<a class="headerlink" href="#full-feature-pipeline" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>sprint-planner     → decomposes goal into issues
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>  └─ solution-architect  → designs the system
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>       └─ backend-dev    → implements it
+<a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a>            └─ code-review       → reviews the implementation
+<a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a>                 └─ security-analyst    → security pass
+<a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a>                      └─ production-readiness  → launch gate
+</code></pre></div>
+<h3 id="sprint-close-pipeline">Sprint close pipeline<a class="headerlink" href="#sprint-close-pipeline" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>sprint-retrospective    → what happened, what to carry
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>  └─ memory-promoter    → surface candidates from session history
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>       └─ submit-learning.ps1   → publish approved candidates
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a>            └─ release-manager  → tag and publish the release
+</code></pre></div>
+<h3 id="security-hardening-pipeline">Security hardening pipeline<a class="headerlink" href="#security-hardening-pipeline" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>config-auditor          → finds exposed secrets / config gaps
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>github-security-posture → GitHub settings audit
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a>  └─ security-analyst   → threat model + remediation
+<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a>       └─ hardening-advisor     → infrastructure hardening
+<a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a>            └─ production-readiness    → readiness gate
+</code></pre></div>
+<hr />
+<h2 id="tips">Tips<a class="headerlink" href="#tips" title="Permanent link">&para;</a></h2>
+<p><strong>Call agents directly by name.</strong> Use <code>@agent-name</code> for any task you already
+know — no router needed. The <a href=".github/instructions/routing-decision-tree.md">routing decision tree</a>
+maps 40+ intents to direct agent or skill calls:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>@issue-triage Triage all open bugs in the backlog
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>@sprint-planner Plan sprint 34 from open GitHub issues
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>@code-review Review PR #142, focus on auth middleware
+</code></pre></div>
+<p>For initial exploration, invoke the <code>basecoat</code> discovery skill in Copilot Chat
+to browse the full agent catalog by category.</p>
+<p><strong>Delegate, don't just ask.</strong> Agents work best when given a concrete deliverable:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a># Too vague:
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>@code-review Look at the PR
+<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a>
+<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a># Concrete:
+<a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a>@code-review Review PR #142. Focus on the auth middleware refactor and
+<a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a>whether the JWT expiry check is preserved across all code paths.
+</code></pre></div>
+<p><strong>Use handoffs for natural transitions.</strong> When an agent finishes and shows a
+handoff button (e.g., <strong>Run Security Review</strong>), clicking it pre-loads the
+context from the current session — you don't have to re-explain.</p>
+<p><strong>Check the <code>## Model</code> section</strong> of each agent file if cost matters. Fast-tier
+agents (Haiku) handle scanning and automation. Reasoning-tier (Sonnet) handles
+analysis. Premium (Opus) handles architecture and security reviews.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; IBuySpy-Shared contributors. Licensed under MIT.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/ivegamsft/basecoat" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "search.highlight", "search.suggest", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

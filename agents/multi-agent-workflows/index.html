@@ -1,0 +1,3066 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Enterprise shared library of GitHub Copilot customization assets — agents, skills, instructions, and prompts.">
+      
+      
+      
+        <link rel="canonical" href="https://ivegamsft.github.io/basecoat/agents/multi-agent-workflows/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Multi-Agent Workflow Guide - BaseCoat</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#multi-agent-workflow-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="BaseCoat" class="md-header__button md-logo" aria-label="BaseCoat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12 16 7.36-5.73L21 9l-9-7-9 7 1.63 1.27M12 18.54l-7.38-5.73L3 14.07l9 7 9-7-1.63-1.27z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BaseCoat
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Multi-Agent Workflow Guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ivegamsft/basecoat" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ivegamsft/basecoat
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/quick-reference/" class="md-tabs__link">
+          
+  
+  
+  Asset Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/intent-prefixes/" class="md-tabs__link">
+          
+  
+  
+  How-To Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../memory/" class="md-tabs__link">
+          
+  
+  
+  Memory System
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../architecture/overview/" class="md-tabs__link">
+          
+  
+  
+  Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../PHILOSOPHY.md" class="md-tabs__link">
+          
+  
+  
+  About
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="BaseCoat" class="md-nav__button md-logo" aria-label="BaseCoat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12 16 7.36-5.73L21 9l-9-7-9 7 1.63 1.27M12 18.54l-7.38-5.73L3 14.07l9 7 9-7-1.63-1.27z"/></svg>
+
+    </a>
+    BaseCoat
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ivegamsft/basecoat" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ivegamsft/basecoat
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/enterprise-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Enterprise Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/consumer-sync/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Consumer Sync Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Asset Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Asset Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/quick-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/token-context-inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Token Context Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/asset-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/governance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Governance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-To Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How-To Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/intent-prefixes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Intent Prefixes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/integrate-prompt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Started (integrate prompt)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/customization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Make It Your Own
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/custom-agent-authoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create a Custom Agent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/agent-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/version-drift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Drift Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/model-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/token-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Token Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/basecoat-yml/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BaseCoat Config (.basecoat.yml)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/ubb-token-guidance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UBB Token Guidance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory System
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Memory System
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/learning-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learning Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/triage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Triage Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing Learnings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/process/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Process
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../diagrams/architecture-diagrams-index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagrams
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/decisions/adr-001-naming-convention/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-001 Naming Convention
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/multi-agent-orchestration-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Agent Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    About
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    About
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../PHILOSOPHY.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Philosophy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../story/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Story
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/metrics-schema-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dashboard Metrics Schema and Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-fresh-clone-principle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Fresh Clone Principle
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#branch-naming-conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Branch Naming Conventions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Branch Naming Conventions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parallel-sprint-branches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parallel sprint branches
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hotfix-branches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hotfix branches
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agent-specific-branches-non-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent-specific branches (non-sprint)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#minimizing-conflicts-by-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Minimizing Conflicts by Design
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Minimizing Conflicts by Design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-assign-file-ownership-to-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Assign file ownership to agents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-avoid-shared-infrastructure-files-in-every-branch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Avoid shared infrastructure files in every branch
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-use-feature-flags-instead-of-shared-config-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Use feature flags instead of shared config changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#merge-order-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Merge Order Strategies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Merge Order Strategies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#strategy-1-dependency-graph-preferred" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Strategy 1: Dependency graph (preferred)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#strategy-2-conflict-surface-area-fallback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Strategy 2: Conflict surface area (fallback)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#strategy-3-chronological-simplest-lowest-safety" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Strategy 3: Chronological (simplest, lowest safety)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-use-merge-coordinator-vs-manual-merge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to Use merge-coordinator vs. Manual Merge
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#safe-git-commands-for-automated-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Safe Git Commands for Automated Agents
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Safe Git Commands for Automated Agents">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#always-use-these" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Always use these
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#never-use-these-in-automated-contexts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ❌ Never use these in automated contexts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables-that-prevent-hangs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment variables that prevent hangs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parallel-sprint-playbook-step-by-step" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parallel Sprint Playbook (Step-by-Step)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parallel Sprint Playbook (Step-by-Step)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#before-the-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Before the sprint
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#during-the-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        During the sprint
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#after-the-sprint-merge-phase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        After the sprint (merge phase)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#checklist-is-a-branch-ready-to-merge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checklist: Is a Branch Ready to Merge?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parallel-agent-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parallel Agent Execution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parallel Agent Execution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#when-to-parallelize" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to Parallelize
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-not-to-parallelize" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When NOT to Parallelize
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#canonical-sub-agent-harness-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Canonical Sub-Agent Harness Contract
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Canonical Sub-Agent Harness Contract">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#required-task-envelope-orchestrator-sub-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Required task envelope (orchestrator → sub-agent)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#required-response-envelope-sub-agent-orchestrator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Required response envelope (sub-agent → orchestrator)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#concrete-packet-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concrete packet example
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handoff-ui-vs-harness-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Handoff UI vs. harness contract
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sub-agent-redispatch-retry-and-escalation-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sub-Agent Redispatch, Retry, and Escalation Policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orchestrator-lifecycle-dispatch-fan-in-and-conflict-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Orchestrator Lifecycle: Dispatch, Fan-In, and Conflict Resolution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Orchestrator Lifecycle: Dispatch, Fan-In, and Conflict Resolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sequence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lifecycle-states" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lifecycle states
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#conflict-resolution-decision-points" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conflict-resolution decision points
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#related-harness-and-policy-docs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related harness and policy docs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Patterns
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fan-out-fan-in" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fan-Out / Fan-In
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#subagent-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Subagent Isolation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parallel-implementation-with-conflict-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parallel Implementation with Conflict Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#result-aggregation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Result Aggregation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#anti-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Anti-Patterns
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="multi-agent-workflow-guide">Multi-Agent Workflow Guide<a class="headerlink" href="#multi-agent-workflow-guide" title="Permanent link">&para;</a></h1>
+<p>How to structure parallel agent work so branches stay mergeable, conflicts stay minimal, and the merge step does not hang.</p>
+<h2 id="the-problem">The Problem<a class="headerlink" href="#the-problem" title="Permanent link">&para;</a></h2>
+<p>When multiple agents work in parallel on separate branches, every agent touches overlapping files: <code>README.md</code>, <code>INVENTORY.md</code>, <code>CHANGELOG.md</code>, shared config, shared test fixtures. Without structure, the merge step becomes a manual conflict-resolution marathon — or worse, it silently hangs waiting for an interactive git editor that never gets input.</p>
+<p>This guide captures the patterns that work.</p>
+<hr />
+<h2 id="the-fresh-clone-principle">The Fresh Clone Principle<a class="headerlink" href="#the-fresh-clone-principle" title="Permanent link">&para;</a></h2>
+<blockquote>
+<p><strong>Always clone fresh. Never reuse a dirty working directory.</strong></p>
+</blockquote>
+<p>A working directory from a previous agent run may carry:</p>
+<ul>
+<li>Unresolved conflict markers (<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</code>)</li>
+<li>A detached HEAD state from an aborted rebase</li>
+<li>Uncommitted changes that corrupt subsequent merges</li>
+<li>Stale remote-tracking refs that hide new commits</li>
+</ul>
+<p>The fix is trivial and non-negotiable:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nv">WORKDIR</span><span class="o">=</span><span class="s2">&quot;/tmp/agent-</span><span class="k">$(</span>date<span class="w"> </span>+%s<span class="k">)</span><span class="s2">&quot;</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>git<span class="w"> </span>clone<span class="w"> </span>&lt;repo-url&gt;<span class="w"> </span><span class="nv">$WORKDIR</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nb">cd</span><span class="w"> </span><span class="nv">$WORKDIR</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>git<span class="w"> </span>fetch<span class="w"> </span>--all
+</code></pre></div>
+<p>Clean up after each run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">cd</span><span class="w"> </span>/tmp<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span><span class="nv">$WORKDIR</span>
+</code></pre></div>
+<hr />
+<h2 id="branch-naming-conventions">Branch Naming Conventions<a class="headerlink" href="#branch-naming-conventions" title="Permanent link">&para;</a></h2>
+<p>Consistent names let tooling (and humans) understand scope and order at a glance.</p>
+<h3 id="parallel-sprint-branches">Parallel sprint branches<a class="headerlink" href="#parallel-sprint-branches" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>feature/sprint-{N}-{app-or-area}
+</code></pre></div>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>feature/sprint-3-api
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>feature/sprint-3-ui
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>feature/sprint-3-data
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>feature/sprint-3-tests
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>feature/sprint-3-docs
+</code></pre></div>
+<ul>
+<li><code>N</code> is the sprint number — makes ordering unambiguous</li>
+<li><code>app-or-area</code> is the bounded context the agent owns for this sprint</li>
+<li>Never reuse a branch name across sprints (creates confusing history)</li>
+</ul>
+<h3 id="hotfix-branches">Hotfix branches<a class="headerlink" href="#hotfix-branches" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>hotfix/{issue-number}-{short-description}
+</code></pre></div>
+<h3 id="agent-specific-branches-non-sprint">Agent-specific branches (non-sprint)<a class="headerlink" href="#agent-specific-branches-non-sprint" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>feature/{issue-number}-{short-description}
+</code></pre></div>
+<p>This is the single-issue pattern used when an agent is working a specific GitHub Issue, not part of a coordinated sprint.</p>
+<hr />
+<h2 id="minimizing-conflicts-by-design">Minimizing Conflicts by Design<a class="headerlink" href="#minimizing-conflicts-by-design" title="Permanent link">&para;</a></h2>
+<h3 id="1-assign-file-ownership-to-agents">1. Assign file ownership to agents<a class="headerlink" href="#1-assign-file-ownership-to-agents" title="Permanent link">&para;</a></h3>
+<p>Before the sprint starts, decide which agent owns which files. An agent that does not need a file should not touch it.</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Owner</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>README.md</code></td>
+<td>docs agent only</td>
+</tr>
+<tr>
+<td><code>INVENTORY.md</code></td>
+<td>docs agent only</td>
+</tr>
+<tr>
+<td><code>CHANGELOG.md</code></td>
+<td>release agent only</td>
+</tr>
+<tr>
+<td><code>package.json</code> / <code>*.csproj</code></td>
+<td>one agent per manifest</td>
+</tr>
+<tr>
+<td><code>src/api/**</code></td>
+<td>backend-dev agent</td>
+</tr>
+<tr>
+<td><code>src/ui/**</code></td>
+<td>frontend-dev agent</td>
+</tr>
+<tr>
+<td><code>tests/**</code></td>
+<td>qa agent</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-avoid-shared-infrastructure-files-in-every-branch">2. Avoid shared infrastructure files in every branch<a class="headerlink" href="#2-avoid-shared-infrastructure-files-in-every-branch" title="Permanent link">&para;</a></h3>
+<p>If every branch touches <code>.gitignore</code>, <code>README.md</code>, and <code>INVENTORY.md</code>, every merge has conflicts. Instead:</p>
+<ul>
+<li>Route all shared-file updates to a single designated branch</li>
+<li>Other agents skip those files and file issues requesting the update</li>
+<li>The docs/infra branch merges last</li>
+</ul>
+<h3 id="3-use-feature-flags-instead-of-shared-config-changes">3. Use feature flags instead of shared config changes<a class="headerlink" href="#3-use-feature-flags-instead-of-shared-config-changes" title="Permanent link">&para;</a></h3>
+<p>If two agents need to change the same config file, use a feature-flag pattern: each agent adds its own key under a namespaced section. They never edit the same line.</p>
+<hr />
+<h2 id="merge-order-strategies">Merge Order Strategies<a class="headerlink" href="#merge-order-strategies" title="Permanent link">&para;</a></h2>
+<h3 id="strategy-1-dependency-graph-preferred">Strategy 1: Dependency graph (preferred)<a class="headerlink" href="#strategy-1-dependency-graph-preferred" title="Permanent link">&para;</a></h3>
+<p>Build a directed acyclic graph (DAG) of which branches depend on each other. Merge leaves first, roots last.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>feature/sprint-3-schema
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    └──► feature/sprint-3-api
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>              └──► feature/sprint-3-ui
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>              └──► feature/sprint-3-tests
+</code></pre></div>
+<p>Merge order: <code>schema → api → ui → tests</code></p>
+<p>To detect dependencies programmatically:</p>
+<ol>
+<li>For each branch, list changed files</li>
+<li>Check if any other branch imports/requires those files</li>
+<li>If branch B imports something introduced in branch A → A must merge before B</li>
+</ol>
+<h3 id="strategy-2-conflict-surface-area-fallback">Strategy 2: Conflict surface area (fallback)<a class="headerlink" href="#strategy-2-conflict-surface-area-fallback" title="Permanent link">&para;</a></h3>
+<p>When no explicit dependencies exist, merge in ascending order of conflict surface area:</p>
+<ol>
+<li>Branches that touch zero shared files — merge first (clean, no risk)</li>
+<li>Branches that touch low-conflict shared files (<code>.gitignore</code>, new docs) — merge second</li>
+<li>Branches that touch high-conflict files (shared config, shared lib) — merge last with extra validation</li>
+</ol>
+<h3 id="strategy-3-chronological-simplest-lowest-safety">Strategy 3: Chronological (simplest, lowest safety)<a class="headerlink" href="#strategy-3-chronological-simplest-lowest-safety" title="Permanent link">&para;</a></h3>
+<p>Merge in the order branches were created (oldest first). This works when agents were given non-overlapping scopes, but it provides no protection against scope drift.</p>
+<hr />
+<h2 id="when-to-use-merge-coordinator-vs-manual-merge">When to Use merge-coordinator vs. Manual Merge<a class="headerlink" href="#when-to-use-merge-coordinator-vs-manual-merge" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>≥ 2 branches with no source code conflicts</td>
+<td><code>merge-coordinator</code> agent</td>
+</tr>
+<tr>
+<td>Known dependency order, documentation/config conflicts only</td>
+<td><code>merge-coordinator</code> agent</td>
+</tr>
+<tr>
+<td>Single branch, clean diff</td>
+<td>Manual merge (<code>git merge --no-edit</code>)</td>
+</tr>
+<tr>
+<td>Source code (<code>.ts</code>, <code>.cs</code>, <code>.py</code>) conflict in any branch</td>
+<td>Manual merge — human required</td>
+</tr>
+<tr>
+<td>Branches &gt; 200 commits behind target</td>
+<td>Manual merge — stale branch cleanup first</td>
+</tr>
+<tr>
+<td>Merge of a breaking-change branch</td>
+<td>Manual merge — review required before push</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="safe-git-commands-for-automated-agents">Safe Git Commands for Automated Agents<a class="headerlink" href="#safe-git-commands-for-automated-agents" title="Permanent link">&para;</a></h2>
+<h3 id="always-use-these">✅ Always use these<a class="headerlink" href="#always-use-these" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>git<span class="w"> </span>merge<span class="w"> </span>origin/&lt;branch&gt;<span class="w"> </span>--no-commit<span class="w"> </span>--no-ff<span class="w">    </span><span class="c1"># attempt merge, inspect first</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>git<span class="w"> </span>merge<span class="w"> </span>origin/&lt;branch&gt;<span class="w"> </span>--no-edit<span class="w">              </span><span class="c1"># merge and auto-accept message</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>git<span class="w"> </span>commit<span class="w"> </span>--no-edit<span class="w">                             </span><span class="c1"># commit with auto message</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;explicit message&quot;</span><span class="w">                 </span><span class="c1"># commit with explicit message</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>git<span class="w"> </span>cherry-pick<span class="w"> </span>&lt;hash&gt;<span class="w"> </span>--no-commit<span class="w">               </span><span class="c1"># apply commit without committing</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>git<span class="w"> </span>merge<span class="w"> </span>origin/&lt;branch&gt;<span class="w"> </span>-X<span class="w"> </span>ours<span class="w"> </span>--no-edit<span class="w">      </span><span class="c1"># take ours on conflict (docs only)</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>git<span class="w"> </span>merge<span class="w"> </span>origin/&lt;branch&gt;<span class="w"> </span>-X<span class="w"> </span>theirs<span class="w"> </span>--no-edit<span class="w">    </span><span class="c1"># take theirs on conflict (docs only)</span>
+</code></pre></div>
+<h3 id="never-use-these-in-automated-contexts">❌ Never use these in automated contexts<a class="headerlink" href="#never-use-these-in-automated-contexts" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>git<span class="w"> </span>rebase<span class="w"> </span>origin/main<span class="w">          </span><span class="c1"># HANGS — opens editor on conflicts</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>git<span class="w"> </span>rebase<span class="w"> </span>--continue<span class="w">           </span><span class="c1"># HANGS — opens editor for commit message</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>git<span class="w"> </span>commit<span class="w">                      </span><span class="c1"># HANGS — opens editor for message</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>git<span class="w"> </span>merge<span class="w"> </span>--continue<span class="w">            </span><span class="c1"># HANGS — opens editor for message</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>git<span class="w"> </span>rebase<span class="w"> </span>-i<span class="w"> </span>HEAD~N<span class="w">            </span><span class="c1"># HANGS — interactive rebase, always requires editor</span>
+</code></pre></div>
+<h3 id="environment-variables-that-prevent-hangs">Environment variables that prevent hangs<a class="headerlink" href="#environment-variables-that-prevent-hangs" title="Permanent link">&para;</a></h3>
+<p>Set these at the start of any automated agent session:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">GIT_TERMINAL_PROMPT</span><span class="o">=</span><span class="m">0</span><span class="w">     </span><span class="c1"># never prompt for credentials</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">GIT_EDITOR</span><span class="o">=</span><span class="nb">true</span><span class="w">           </span><span class="c1"># no-op editor</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">GIT_MERGE_AUTOEDIT</span><span class="o">=</span>no<span class="w">     </span><span class="c1"># suppress merge message editor</span>
+</code></pre></div>
+<hr />
+<h2 id="parallel-sprint-playbook-step-by-step">Parallel Sprint Playbook (Step-by-Step)<a class="headerlink" href="#parallel-sprint-playbook-step-by-step" title="Permanent link">&para;</a></h2>
+<h3 id="before-the-sprint">Before the sprint<a class="headerlink" href="#before-the-sprint" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Identify the sprint number and scope</li>
+<li>Assign file ownership — document which agent owns which files</li>
+<li>Create all branches from the same <code>main</code> commit (same base, minimal drift)</li>
+<li>Share the branch list and dependency order with merge-coordinator</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nv">BASE</span><span class="o">=</span><span class="k">$(</span>git<span class="w"> </span>rev-parse<span class="w"> </span>main<span class="k">)</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="k">for</span><span class="w"> </span>area<span class="w"> </span><span class="k">in</span><span class="w"> </span>api<span class="w"> </span>ui<span class="w"> </span>data<span class="w"> </span>tests<span class="w"> </span>docs<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">  </span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>feature/sprint-3-<span class="nv">$area</span><span class="w"> </span><span class="nv">$BASE</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">  </span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>feature/sprint-3-<span class="nv">$area</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="k">done</span>
+</code></pre></div>
+<h3 id="during-the-sprint">During the sprint<a class="headerlink" href="#during-the-sprint" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Agents work in parallel on their branches</li>
+<li>Each agent runs in a fresh clone</li>
+<li>Agents do NOT merge or rebase against each other's branches mid-sprint</li>
+<li>If an agent discovers it needs something from another branch, it files an issue — it does not cherry-pick</li>
+</ul>
+<h3 id="after-the-sprint-merge-phase">After the sprint (merge phase)<a class="headerlink" href="#after-the-sprint-merge-phase" title="Permanent link">&para;</a></h3>
+<ol>
+<li>All agents push their final commits</li>
+<li>Open PRs for all branches (target: <code>main</code>)</li>
+<li>Run <code>merge-coordinator</code> agent with the branch list and dependency order</li>
+<li>Review the merge report</li>
+<li>Approve and merge PRs that were flagged clean or auto-resolved</li>
+<li>Manually resolve any PRs flagged for human review</li>
+</ol>
+<hr />
+<h2 id="checklist-is-a-branch-ready-to-merge">Checklist: Is a Branch Ready to Merge?<a class="headerlink" href="#checklist-is-a-branch-ready-to-merge" title="Permanent link">&para;</a></h2>
+<ul>
+<li>[ ] Branch is up to date with target (or merge-coordinator will handle it)</li>
+<li>[ ] All CI checks pass on the branch</li>
+<li>[ ] No secrets committed (gitleaks passes)</li>
+<li>[ ] PR description references the issue number (<code>Closes #NN</code>)</li>
+<li>[ ] Changed files are within the agent's assigned ownership scope</li>
+<li>[ ] No conflict markers (<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, <code>=======</code>, <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>) left in files</li>
+<li>[ ] No debug files or local config files staged</li>
+</ul>
+<hr />
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>agents/merge-coordinator.agent.md</code> — the automated merge agent</li>
+<li><code>instructions/governance.instructions.md</code> — governance rules (priority:1)</li>
+<li><code>docs/CONFIG_PATTERN.md</code> — local config pattern to avoid committing secrets</li>
+<li>Issue #51 — merge-coordinator origin story (parallel 5-agent sprint, rebase hang)</li>
+</ul>
+<hr />
+<h2 id="parallel-agent-execution">Parallel Agent Execution<a class="headerlink" href="#parallel-agent-execution" title="Permanent link">&para;</a></h2>
+<h3 id="when-to-parallelize">When to Parallelize<a class="headerlink" href="#when-to-parallelize" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Independent research threads, such as exploring multiple modules simultaneously</li>
+<li>Non-overlapping file modifications across different services or components</li>
+<li>Multiple test suites or validation passes that can run independently</li>
+<li>Fan-out investigation before fan-in synthesis</li>
+</ul>
+<h3 id="when-not-to-parallelize">When NOT to Parallelize<a class="headerlink" href="#when-not-to-parallelize" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Tasks with data dependencies where the output of one step feeds another</li>
+<li>Overlapping file modifications where merge conflicts are guaranteed</li>
+<li>Sequential workflows such as build → test → deploy</li>
+<li>Tasks that require shared context accumulation in one place</li>
+</ul>
+<h3 id="canonical-sub-agent-harness-contract">Canonical Sub-Agent Harness Contract<a class="headerlink" href="#canonical-sub-agent-harness-contract" title="Permanent link">&para;</a></h3>
+<p>Use this contract as the single source of truth when dispatching and collecting
+sub-agent work in multi-agent workflows.</p>
+<h4 id="required-task-envelope-orchestrator-sub-agent">Required task envelope (orchestrator → sub-agent)<a class="headerlink" href="#required-task-envelope-orchestrator-sub-agent" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>task_id</code></td>
+<td>string</td>
+<td>Yes</td>
+<td>Stable identifier used for retries and traceability</td>
+</tr>
+<tr>
+<td><code>goal</code></td>
+<td>string</td>
+<td>Yes</td>
+<td>Outcome the sub-agent must achieve</td>
+</tr>
+<tr>
+<td><code>scope</code></td>
+<td>object</td>
+<td>Yes</td>
+<td>Bounded file paths and explicit out-of-scope constraints</td>
+</tr>
+<tr>
+<td><code>acceptance_criteria</code></td>
+<td>string[]</td>
+<td>Yes</td>
+<td>Testable checks used in Stage 1 spec compliance</td>
+</tr>
+<tr>
+<td><code>execution</code></td>
+<td>object</td>
+<td>Yes</td>
+<td>Allowed tools, skills, model, and operational limits</td>
+</tr>
+<tr>
+<td><code>output_contract</code></td>
+<td>object</td>
+<td>Yes</td>
+<td>Required response shape and evidence expectations</td>
+</tr>
+<tr>
+<td><code>inputs</code></td>
+<td>object</td>
+<td>No</td>
+<td>Optional context artifacts (issue links, prior findings, diffs)</td>
+</tr>
+<tr>
+<td><code>retry_context</code></td>
+<td>object</td>
+<td>No</td>
+<td>Prior failure reasons and focused re-dispatch guidance</td>
+</tr>
+</tbody>
+</table>
+<p><code>execution</code> must include <code>allowed_files</code>, <code>allowed_tools</code>, <code>allowed_skills</code>, and
+<code>model</code>.</p>
+<p>When present, <code>retry_context</code> should include <code>attempt</code>, <code>failure_class</code>,
+<code>last_feedback</code>, and <code>backoff_until</code> so redispatch behavior is deterministic.</p>
+<h4 id="required-response-envelope-sub-agent-orchestrator">Required response envelope (sub-agent → orchestrator)<a class="headerlink" href="#required-response-envelope-sub-agent-orchestrator" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>task_id</code></td>
+<td>string</td>
+<td>Yes</td>
+<td>Correlates response to dispatched task</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>string</td>
+<td>Yes</td>
+<td>One of <code>completed</code>, <code>blocked</code>, <code>partial</code>, <code>failed</code></td>
+</tr>
+<tr>
+<td><code>summary</code></td>
+<td>string</td>
+<td>Yes</td>
+<td>Brief outcome summary</td>
+</tr>
+<tr>
+<td><code>changed_files</code></td>
+<td>string[]</td>
+<td>Yes</td>
+<td>Files modified (empty array if none)</td>
+</tr>
+<tr>
+<td><code>acceptance_results</code></td>
+<td>object[]</td>
+<td>Yes</td>
+<td>Per-criterion pass/fail evidence</td>
+</tr>
+<tr>
+<td><code>evidence</code></td>
+<td>object</td>
+<td>Yes</td>
+<td>Commands, test outputs, and references supporting claims</td>
+</tr>
+<tr>
+<td><code>blockers</code></td>
+<td>string[]</td>
+<td>Conditionally</td>
+<td>Required when <code>status</code> is <code>blocked</code> or <code>failed</code></td>
+</tr>
+<tr>
+<td><code>follow_ups</code></td>
+<td>string[]</td>
+<td>No</td>
+<td>Suggested next actions or tickets</td>
+</tr>
+</tbody>
+</table>
+<h4 id="concrete-packet-example">Concrete packet example<a class="headerlink" href="#concrete-packet-example" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="p">{</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="nt">&quot;task_envelope&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span><span class="nt">&quot;task_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;issue-1058-doc-contract&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">    </span><span class="nt">&quot;goal&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Document canonical sub-agent harness contract in multi-agent workflows.&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">    </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">      </span><span class="nt">&quot;allowed_files&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">        </span><span class="s2">&quot;docs/agents/MULTI_AGENT_WORKFLOWS.md&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">        </span><span class="s2">&quot;docs/agents/AGENT_RUNTIME_ENFORCEMENT.md&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="w">        </span><span class="s2">&quot;docs/agents/agent-handoffs.md&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="w">        </span><span class="s2">&quot;instructions/subagent-review.instructions.md&quot;</span>
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="w">      </span><span class="p">],</span>
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="w">      </span><span class="nt">&quot;out_of_scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="w">        </span><span class="s2">&quot;agent behavior changes&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="w">        </span><span class="s2">&quot;workflow automation changes&quot;</span>
+<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a><span class="w">      </span><span class="p">]</span>
+<a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a><span class="w">    </span><span class="nt">&quot;acceptance_criteria&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a><span class="w">      </span><span class="s2">&quot;Canonical contract section added with task and response envelopes.&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a><span class="w">      </span><span class="s2">&quot;AGENT_RUNTIME_ENFORCEMENT.md links to canonical contract.&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a><span class="w">      </span><span class="s2">&quot;agent-handoffs.md links to canonical contract and clarifies handoff vs contract.&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a><span class="w">      </span><span class="s2">&quot;subagent-review.instructions.md references canonical contract.&quot;</span>
+<a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a><span class="w">    </span><span class="p">],</span>
+<a id="__codelineno-11-23" name="__codelineno-11-23" href="#__codelineno-11-23"></a><span class="w">    </span><span class="nt">&quot;execution&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-24" name="__codelineno-11-24" href="#__codelineno-11-24"></a><span class="w">      </span><span class="nt">&quot;allowed_files&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-11-25" name="__codelineno-11-25" href="#__codelineno-11-25"></a><span class="w">        </span><span class="s2">&quot;docs/agents/**&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-26" name="__codelineno-11-26" href="#__codelineno-11-26"></a><span class="w">        </span><span class="s2">&quot;instructions/subagent-review.instructions.md&quot;</span>
+<a id="__codelineno-11-27" name="__codelineno-11-27" href="#__codelineno-11-27"></a><span class="w">      </span><span class="p">],</span>
+<a id="__codelineno-11-28" name="__codelineno-11-28" href="#__codelineno-11-28"></a><span class="w">      </span><span class="nt">&quot;allowed_tools&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;view&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;rg&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;apply_patch&quot;</span><span class="p">],</span>
+<a id="__codelineno-11-29" name="__codelineno-11-29" href="#__codelineno-11-29"></a><span class="w">      </span><span class="nt">&quot;allowed_skills&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<a id="__codelineno-11-30" name="__codelineno-11-30" href="#__codelineno-11-30"></a><span class="w">      </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;claude-sonnet-4.6&quot;</span>
+<a id="__codelineno-11-31" name="__codelineno-11-31" href="#__codelineno-11-31"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-11-32" name="__codelineno-11-32" href="#__codelineno-11-32"></a><span class="w">    </span><span class="nt">&quot;output_contract&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-33" name="__codelineno-11-33" href="#__codelineno-11-33"></a><span class="w">      </span><span class="nt">&quot;format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;response_envelope_v1&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-34" name="__codelineno-11-34" href="#__codelineno-11-34"></a><span class="w">      </span><span class="nt">&quot;include_evidence&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-11-35" name="__codelineno-11-35" href="#__codelineno-11-35"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-11-36" name="__codelineno-11-36" href="#__codelineno-11-36"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-11-37" name="__codelineno-11-37" href="#__codelineno-11-37"></a><span class="w">  </span><span class="nt">&quot;response_envelope&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-38" name="__codelineno-11-38" href="#__codelineno-11-38"></a><span class="w">    </span><span class="nt">&quot;task_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;issue-1058-doc-contract&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-39" name="__codelineno-11-39" href="#__codelineno-11-39"></a><span class="w">    </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;completed&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-40" name="__codelineno-11-40" href="#__codelineno-11-40"></a><span class="w">    </span><span class="nt">&quot;summary&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Canonical contract documented and linked from required docs.&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-41" name="__codelineno-11-41" href="#__codelineno-11-41"></a><span class="w">    </span><span class="nt">&quot;changed_files&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-11-42" name="__codelineno-11-42" href="#__codelineno-11-42"></a><span class="w">      </span><span class="s2">&quot;docs/agents/MULTI_AGENT_WORKFLOWS.md&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-43" name="__codelineno-11-43" href="#__codelineno-11-43"></a><span class="w">      </span><span class="s2">&quot;docs/agents/AGENT_RUNTIME_ENFORCEMENT.md&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-44" name="__codelineno-11-44" href="#__codelineno-11-44"></a><span class="w">      </span><span class="s2">&quot;docs/agents/agent-handoffs.md&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-45" name="__codelineno-11-45" href="#__codelineno-11-45"></a><span class="w">      </span><span class="s2">&quot;instructions/subagent-review.instructions.md&quot;</span>
+<a id="__codelineno-11-46" name="__codelineno-11-46" href="#__codelineno-11-46"></a><span class="w">    </span><span class="p">],</span>
+<a id="__codelineno-11-47" name="__codelineno-11-47" href="#__codelineno-11-47"></a><span class="w">    </span><span class="nt">&quot;acceptance_results&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-11-48" name="__codelineno-11-48" href="#__codelineno-11-48"></a><span class="w">      </span><span class="p">{</span>
+<a id="__codelineno-11-49" name="__codelineno-11-49" href="#__codelineno-11-49"></a><span class="w">        </span><span class="nt">&quot;criterion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Canonical contract section added with task and response envelopes.&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-50" name="__codelineno-11-50" href="#__codelineno-11-50"></a><span class="w">        </span><span class="nt">&quot;result&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pass&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-51" name="__codelineno-11-51" href="#__codelineno-11-51"></a><span class="w">        </span><span class="nt">&quot;evidence&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;See section: Canonical Sub-Agent Harness Contract&quot;</span>
+<a id="__codelineno-11-52" name="__codelineno-11-52" href="#__codelineno-11-52"></a><span class="w">      </span><span class="p">}</span>
+<a id="__codelineno-11-53" name="__codelineno-11-53" href="#__codelineno-11-53"></a><span class="w">    </span><span class="p">],</span>
+<a id="__codelineno-11-54" name="__codelineno-11-54" href="#__codelineno-11-54"></a><span class="w">    </span><span class="nt">&quot;evidence&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-55" name="__codelineno-11-55" href="#__codelineno-11-55"></a><span class="w">      </span><span class="nt">&quot;commands&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;pwsh scripts/validate-basecoat.ps1&quot;</span><span class="p">],</span>
+<a id="__codelineno-11-56" name="__codelineno-11-56" href="#__codelineno-11-56"></a><span class="w">      </span><span class="nt">&quot;artifacts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<a id="__codelineno-11-57" name="__codelineno-11-57" href="#__codelineno-11-57"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-11-58" name="__codelineno-11-58" href="#__codelineno-11-58"></a><span class="w">    </span><span class="nt">&quot;blockers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<a id="__codelineno-11-59" name="__codelineno-11-59" href="#__codelineno-11-59"></a><span class="w">    </span><span class="nt">&quot;follow_ups&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<a id="__codelineno-11-60" name="__codelineno-11-60" href="#__codelineno-11-60"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-11-61" name="__codelineno-11-61" href="#__codelineno-11-61"></a><span class="p">}</span>
+</code></pre></div>
+<h4 id="handoff-ui-vs-harness-contract">Handoff UI vs. harness contract<a class="headerlink" href="#handoff-ui-vs-harness-contract" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Handoff UI (<code>handoffs</code>)</strong> defines user-facing transitions between agents.</li>
+<li><strong>Harness contract</strong> defines machine-readable dispatch/response packets used by
+  orchestrators and review gates.</li>
+<li>A handoff can launch a sub-agent task, but it does not replace the required task
+  and response envelopes above.</li>
+</ul>
+<h3 id="sub-agent-redispatch-retry-and-escalation-policy">Sub-Agent Redispatch, Retry, and Escalation Policy<a class="headerlink" href="#sub-agent-redispatch-retry-and-escalation-policy" title="Permanent link">&para;</a></h3>
+<p>Use this table as the canonical orchestration policy for sub-agent runs.</p>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>Re-dispatch action</th>
+<th>Retry/backoff</th>
+<th>Escalation threshold</th>
+<th>Terminal state</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stage 1 spec-compliance failure</td>
+<td>Re-dispatch with unmet criteria and explicit expected deltas</td>
+<td>Immediate retry on first miss; second miss requires at least 5-minute cool-down and tightened scope</td>
+<td>2 Stage 1 misses for same <code>task_id</code></td>
+<td><code>escalated</code> (human review or task re-plan)</td>
+</tr>
+<tr>
+<td>Stage 2 quality failure after Stage 1 pass</td>
+<td>Re-dispatch with line-level quality fixes only</td>
+<td>One retry only; no additional retries beyond second quality review</td>
+<td>1 Stage 2 retry consumed with unresolved quality gaps</td>
+<td><code>accepted_with_followup</code> (merge best version + file follow-up issue)</td>
+</tr>
+<tr>
+<td>Transient tool/runtime failure (timeouts, rate limits, ephemeral network faults)</td>
+<td>Re-dispatch unchanged goal with infra diagnostics attached</td>
+<td>Exponential backoff: 2m, 5m, 15m (max 3 retries)</td>
+<td>3 transient retries exhausted</td>
+<td><code>escalated</code> (operator intervention required)</td>
+</tr>
+<tr>
+<td>No-progress rerun (&gt;= 80% identical output or repeated unmet criteria)</td>
+<td>Re-dispatch only if feedback packet materially changes constraints</td>
+<td>Minimum 10-minute backoff; require updated acceptance criteria or narrowed scope</td>
+<td>2 no-progress reruns</td>
+<td><code>escalated</code> (plan defect or wrong agent routing)</td>
+</tr>
+<tr>
+<td>Budget/context exhaustion (token, tool, or turn budget reached)</td>
+<td>Re-dispatch with reduced scope and explicit budget limits</td>
+<td>One retry after decomposition; split task before retrying</td>
+<td>Retry still exceeds budget</td>
+<td><code>replanned</code> (decompose into smaller tasks)</td>
+</tr>
+<tr>
+<td>Hard blocker (missing dependency, required secret, policy restriction)</td>
+<td>Do not re-dispatch blindly; return blocker with owner/action needed</td>
+<td>No automatic retry</td>
+<td>Immediate</td>
+<td><code>blocked</code></td>
+</tr>
+</tbody>
+</table>
+<p>Policy notes:</p>
+<ul>
+<li>Re-dispatch feedback must never be "try again". It must include failed criteria,
+  expected artifact/file deltas, and any new constraints.</li>
+<li>Every re-dispatch must increment <code>retry_context.attempt</code> and preserve failure
+  history for auditability.</li>
+<li>If escalation triggers, halt auto-redispatch loops for the <code>task_id</code>.</li>
+</ul>
+<h3 id="orchestrator-lifecycle-dispatch-fan-in-and-conflict-resolution">Orchestrator Lifecycle: Dispatch, Fan-In, and Conflict Resolution<a class="headerlink" href="#orchestrator-lifecycle-dispatch-fan-in-and-conflict-resolution" title="Permanent link">&para;</a></h3>
+<p>Use this lifecycle when an orchestrator runs fan-out work and must converge to one
+final answer.</p>
+<h4 id="sequence">Sequence<a class="headerlink" href="#sequence" title="Permanent link">&para;</a></h4>
+<ol>
+<li><strong>Plan and scope</strong> — decompose request, define task envelopes, and set budgets.</li>
+<li><strong>Dispatch (fan-out)</strong> — start all independent subtasks in parallel.</li>
+<li><strong>Collect branch results</strong> — normalize each response envelope and validate
+   required fields.</li>
+<li><strong>Fan-in synthesis</strong> — merge non-conflicting branches into one draft result.</li>
+<li><strong>Conflict resolution pass</strong> — apply decision points below for contradictory
+   claims, file edits, or policy outcomes.</li>
+<li><strong>Finalize and report</strong> — publish one coherent response with explicit branch
+   statuses and unresolved risks.</li>
+</ol>
+<h4 id="lifecycle-states">Lifecycle states<a class="headerlink" href="#lifecycle-states" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>Entry condition</th>
+<th>Exit condition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>planned</code></td>
+<td>Task decomposition and envelopes are complete</td>
+<td>At least one subtask dispatched</td>
+</tr>
+<tr>
+<td><code>dispatching</code></td>
+<td>Dispatch loop is active</td>
+<td>All runnable branches dispatched or marked blocked</td>
+</tr>
+<tr>
+<td><code>running</code></td>
+<td>One or more branches are executing</td>
+<td>All branches return terminal status</td>
+</tr>
+<tr>
+<td><code>fan_in_ready</code></td>
+<td>All terminal branch results collected</td>
+<td>Aggregation begins</td>
+</tr>
+<tr>
+<td><code>aggregating</code></td>
+<td>Result merge and dedupe in progress</td>
+<td>No conflicts remain, or conflicts identified</td>
+</tr>
+<tr>
+<td><code>conflict_review</code></td>
+<td>Contradictions detected during aggregation</td>
+<td>Tie-break decision applied or unresolved risk recorded</td>
+</tr>
+<tr>
+<td><code>finalized</code></td>
+<td>Output assembled with evidence and status table</td>
+<td>Response delivered</td>
+</tr>
+</tbody>
+</table>
+<h4 id="conflict-resolution-decision-points">Conflict-resolution decision points<a class="headerlink" href="#conflict-resolution-decision-points" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Decision point</th>
+<th>Check</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CR-1</code> contract validity</td>
+<td>Missing required fields or acceptance evidence in a branch result</td>
+<td>Mark branch <code>partial</code> or <code>blocked</code>, request targeted retry with <code>retry_context</code></td>
+</tr>
+<tr>
+<td><code>CR-2</code> evidence strength</td>
+<td>Contradictory conclusions with different evidence quality</td>
+<td>Prefer reproducible test/log/repo evidence over unsupported narrative claims</td>
+</tr>
+<tr>
+<td><code>CR-3</code> policy gate</td>
+<td>Any side-effecting recommendation conflicts with policy</td>
+<td>Apply <a href="../../reference/guardrails/tool-confirmation-policy/">VS Code Agent Mode Tool Confirmation Policy</a> and require confirmation path</td>
+</tr>
+<tr>
+<td><code>CR-4</code> unresolved tie</td>
+<td>Evidence remains mixed after one tie-break pass</td>
+<td>Surface both interpretations, mark residual risk, and recommend next verification step</td>
+</tr>
+</tbody>
+</table>
+<h4 id="related-harness-and-policy-docs">Related harness and policy docs<a class="headerlink" href="#related-harness-and-policy-docs" title="Permanent link">&para;</a></h4>
+<ul>
+<li><a href="../agent-testing-harness/">Agent Testing Harness</a> — run/turn/round semantics,
+  stop conditions, and cancellation behavior for dispatch loops.</li>
+<li><a href="../../reference/guardrails/tool-confirmation-policy/">VS Code Agent Mode Tool Confirmation Policy</a>
+  — confirmation requirements for side-effecting operations.</li>
+<li><a href="../agent-runtime-enforcement/">Agent Runtime Enforcement</a> — enforcement
+  expectations that constrain orchestrator and sub-agent execution.</li>
+</ul>
+<h3 id="patterns">Patterns<a class="headerlink" href="#patterns" title="Permanent link">&para;</a></h3>
+<h4 id="fan-out-fan-in">Fan-Out / Fan-In<a class="headerlink" href="#fan-out-fan-in" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Decompose a task into <code>N</code> independent subtasks</li>
+<li>Dispatch <code>N</code> agents simultaneously</li>
+<li>Collect results, resolve conflicts, and synthesize the final output</li>
+<li>Use for: code exploration, multi-file implementation, parallel testing</li>
+</ul>
+<h4 id="subagent-isolation">Subagent Isolation<a class="headerlink" href="#subagent-isolation" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Launch subagents for research or investigation</li>
+<li>Keep the main context clean by summarizing subagent findings back into the parent workflow</li>
+<li>Use for: understanding unfamiliar code, exploring alternatives, impact analysis</li>
+</ul>
+<h4 id="parallel-implementation-with-conflict-detection">Parallel Implementation with Conflict Detection<a class="headerlink" href="#parallel-implementation-with-conflict-detection" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Assign non-overlapping file sets to each agent</li>
+<li>Use separate git branches, one per agent</li>
+<li>Merge sequentially with conflict detection between each merge</li>
+<li>If conflicts appear, resolve them manually or assign them to a merge-coordinator agent</li>
+</ul>
+<h4 id="result-aggregation">Result Aggregation<a class="headerlink" href="#result-aggregation" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Define the expected output format before dispatching agents</li>
+<li>Collect all results into a single synthesis</li>
+<li>Handle partial failures: if 1 of <code>N</code> agents fails, continue with the remaining <code>N-1</code> results where possible</li>
+<li>Report which agents succeeded, which failed, and why</li>
+</ul>
+<h3 id="anti-patterns">Anti-Patterns<a class="headerlink" href="#anti-patterns" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Do not parallelize and then duplicate work by re-investigating what subagents already found</li>
+<li>Do not launch speculative agents "just in case" — they waste resources</li>
+<li>Do not fan out without a clear fan-in strategy</li>
+<li>Do not parallelize tasks that share mutable state</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; IBuySpy-Shared contributors. Licensed under MIT.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/ivegamsft/basecoat" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "search.highlight", "search.suggest", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

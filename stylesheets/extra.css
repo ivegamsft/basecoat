@@ -1,0 +1,63 @@
+/* ── Mermaid diagram sizing ───────────────────────────────────────────────── */
+
+/* Center diagrams and allow them to use the full content column width */
+.mermaid {
+  display: flex;
+  justify-content: center;
+  margin: 1.5rem 0;
+  overflow-x: auto;
+}
+
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+  min-width: min(640px, 100%);
+}
+
+/* ── Figures / embedded images ────────────────────────────────────────────── */
+
+/* Ensure any <figure> images scale to full content width */
+figure img,
+article img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* ── Excalidraw diagram link cards ───────────────────────────────────────── */
+
+.diagram-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.diagram-card {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  text-decoration: none;
+  color: var(--md-default-fg-color);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.diagram-card:hover {
+  border-color: var(--md-accent-fg-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.diagram-card strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--md-primary-fg-color);
+}
+
+/* ── Admonition tweaks ────────────────────────────────────────────────────── */
+
+/* Give note/tip admonitions more breathing room */
+.admonition {
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+}

@@ -1,0 +1,4169 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Enterprise shared library of GitHub Copilot customization assets — agents, skills, instructions, and prompts.">
+      
+      
+      
+        <link rel="canonical" href="https://ivegamsft.github.io/basecoat/guides/token-optimization/">
+      
+      
+        <link rel="prev" href="../model-optimization/">
+      
+      
+        <link rel="next" href="../basecoat-yml/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Token Optimization - BaseCoat</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#token-optimization-context-handling" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="BaseCoat" class="md-header__button md-logo" aria-label="BaseCoat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12 16 7.36-5.73L21 9l-9-7-9 7 1.63 1.27M12 18.54l-7.38-5.73L3 14.07l9 7 9-7-1.63-1.27z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BaseCoat
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Token Optimization
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ivegamsft/basecoat" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ivegamsft/basecoat
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/quick-reference/" class="md-tabs__link">
+          
+  
+  
+  Asset Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../intent-prefixes/" class="md-tabs__link">
+          
+  
+  
+  How-To Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../memory/" class="md-tabs__link">
+          
+  
+  
+  Memory System
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../architecture/overview/" class="md-tabs__link">
+          
+  
+  
+  Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../PHILOSOPHY.md" class="md-tabs__link">
+          
+  
+  
+  About
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="BaseCoat" class="md-nav__button md-logo" aria-label="BaseCoat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12 16 7.36-5.73L21 9l-9-7-9 7 1.63 1.27M12 18.54l-7.38-5.73L3 14.07l9 7 9-7-1.63-1.27z"/></svg>
+
+    </a>
+    BaseCoat
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ivegamsft/basecoat" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ivegamsft/basecoat
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../enterprise-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Enterprise Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../consumer-sync/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Consumer Sync Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Asset Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Asset Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/quick-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/token-context-inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Token Context Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/asset-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/governance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Governance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-To Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How-To Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intent-prefixes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Intent Prefixes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integrate-prompt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Started (integrate prompt)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../customization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Make It Your Own
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom-agent-authoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create a Custom Agent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agent-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../version-drift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Drift Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../model-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Token Optimization
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Token Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-context-window-management-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Context Window Management Strategies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Context Window Management Strategies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#know-your-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Know Your Limits
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layered-context-loading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layered Context Loading
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-token-budget-allocation-per-agent-role" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Token Budget Allocation per Agent Role
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Token Budget Allocation per Agent Role">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#budget-enforcement-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Budget Enforcement Pattern
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-prompt-compression-techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Prompt Compression Techniques
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Prompt Compression Techniques">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-summarization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Summarization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-selective-inclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Selective Inclusion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-truncation-with-markers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Truncation with Markers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-reference-by-pointer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Reference by Pointer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-context-handoff-between-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Context Handoff Between Agents
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Context Handoff Between Agents">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-to-pass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What to Pass
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handoff-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Handoff Template
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipeline-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pipeline Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-caching-strategies-for-repeated-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Caching Strategies for Repeated Context
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Caching Strategies for Repeated Context">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-prompt-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Prompt Caching
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cross-agent-shared-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-Agent Shared Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stale-context-invalidation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stale Context Invalidation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-measurement-and-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Measurement and Monitoring
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Measurement and Monitoring">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#token-usage-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Token Usage Tracking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cost-estimation-formula" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cost Estimation Formula
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sprint-level-budget" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sprint-Level Budget
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alerts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alerts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-instruction-file-sizing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Instruction File Sizing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Instruction File Sizing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sizing-guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sizing Guidelines
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-practical-examples-with-token-counts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Practical Examples with Token Counts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Practical Examples with Token Counts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-a-code-review-well-optimized" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example A: Code Review — Well-Optimized
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-b-code-review-unoptimized" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example B: Code Review — Unoptimized
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-c-architect-backend-dev-handoff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example C: Architect → Backend-Dev Handoff
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-task-complexity-turn-budgets-and-adaptive-learning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Task Complexity, Turn Budgets, and Adaptive Learning
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Task Complexity, Turn Budgets, and Adaptive Learning">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-complexity-classification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Complexity Classification
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-failure-protocol-stuck-after-5-turns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Failure Protocol — Stuck After 5 Turns
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9.2 Failure Protocol — Stuck After 5 Turns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-counts-as-forward-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What counts as forward progress?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-stuck" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When stuck
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#early-warning-the-8050-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Early warning: the 80/50 rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-success-protocol-learning-reinforcement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 Success Protocol — Learning Reinforcement
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#94-turn-accounting-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.4 Turn Accounting Summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-from-the-field-basecoat-sprint-experience" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. From the Field: BaseCoat Sprint Experience
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. From the Field: BaseCoat Sprint Experience">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context-loading-the-cost-of-speculative-reads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context Loading: The Cost of Speculative Reads
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#turn-budget-the-5-turn-recovery-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Turn Budget: The 5-Turn Recovery Pattern
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instruction-sizing-when-instructions-become-context-debt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instruction Sizing: When Instructions Become Context Debt
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compression-haiku-for-summarization-sonnet-for-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compression: Haiku for Summarization, Sonnet for Analysis
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adapting-for-other-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adapting for Other Providers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-sprint-planning-re-planning-cost-reduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Sprint Planning &amp; Re-Planning Cost Reduction
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Sprint Planning &amp; Re-Planning Cost Reduction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-problem-planning-sessions-are-expensive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Problem: Planning Sessions Are Expensive
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-solution-persistent-sprint-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Solution: Persistent Sprint Template
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#template-structure-reusable-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Template Structure (Reusable Pattern)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bulk-agent-updates-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bulk Agent Updates Pattern
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cost-baseline-targets-for-sprints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cost Baseline Targets for Sprints
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sprint-checklist-before-calling-sprint-planner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sprint Checklist: Before Calling /sprint-planner
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-agent-model-recommendations-updated-sprint-31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Agent Model Recommendations (Updated Sprint 31)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Agent Model Recommendations (Updated Sprint 31)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#routine-agents-downshifted-to-gpt-54-mini-cost-50100mo-savings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Routine Agents Downshifted to gpt-5.4-mini (Cost: ~$50–100/mo savings)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../basecoat-yml/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BaseCoat Config (.basecoat.yml)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ubb-token-guidance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UBB Token Guidance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory System
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Memory System
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/learning-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learning Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/triage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Triage Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing Learnings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/process/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Process
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../diagrams/architecture-diagrams-index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagrams
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/decisions/adr-001-naming-convention/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-001 Naming Convention
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/multi-agent-orchestration-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Agent Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    About
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    About
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../PHILOSOPHY.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Philosophy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../story/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Story
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/metrics-schema-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dashboard Metrics Schema and Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-context-window-management-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Context Window Management Strategies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Context Window Management Strategies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#know-your-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Know Your Limits
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layered-context-loading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layered Context Loading
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-token-budget-allocation-per-agent-role" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Token Budget Allocation per Agent Role
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Token Budget Allocation per Agent Role">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#budget-enforcement-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Budget Enforcement Pattern
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-prompt-compression-techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Prompt Compression Techniques
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Prompt Compression Techniques">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-summarization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Summarization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-selective-inclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Selective Inclusion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-truncation-with-markers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Truncation with Markers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-reference-by-pointer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Reference by Pointer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-context-handoff-between-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Context Handoff Between Agents
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Context Handoff Between Agents">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-to-pass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What to Pass
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handoff-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Handoff Template
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipeline-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pipeline Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-caching-strategies-for-repeated-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Caching Strategies for Repeated Context
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Caching Strategies for Repeated Context">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-prompt-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Prompt Caching
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cross-agent-shared-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-Agent Shared Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stale-context-invalidation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stale Context Invalidation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-measurement-and-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Measurement and Monitoring
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Measurement and Monitoring">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#token-usage-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Token Usage Tracking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cost-estimation-formula" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cost Estimation Formula
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sprint-level-budget" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sprint-Level Budget
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alerts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alerts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-instruction-file-sizing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Instruction File Sizing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Instruction File Sizing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sizing-guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sizing Guidelines
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-practical-examples-with-token-counts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Practical Examples with Token Counts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Practical Examples with Token Counts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-a-code-review-well-optimized" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example A: Code Review — Well-Optimized
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-b-code-review-unoptimized" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example B: Code Review — Unoptimized
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-c-architect-backend-dev-handoff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example C: Architect → Backend-Dev Handoff
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-task-complexity-turn-budgets-and-adaptive-learning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Task Complexity, Turn Budgets, and Adaptive Learning
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Task Complexity, Turn Budgets, and Adaptive Learning">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-complexity-classification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Complexity Classification
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-failure-protocol-stuck-after-5-turns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Failure Protocol — Stuck After 5 Turns
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9.2 Failure Protocol — Stuck After 5 Turns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-counts-as-forward-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What counts as forward progress?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-stuck" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When stuck
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#early-warning-the-8050-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Early warning: the 80/50 rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-success-protocol-learning-reinforcement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 Success Protocol — Learning Reinforcement
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#94-turn-accounting-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.4 Turn Accounting Summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-from-the-field-basecoat-sprint-experience" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. From the Field: BaseCoat Sprint Experience
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. From the Field: BaseCoat Sprint Experience">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context-loading-the-cost-of-speculative-reads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context Loading: The Cost of Speculative Reads
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#turn-budget-the-5-turn-recovery-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Turn Budget: The 5-Turn Recovery Pattern
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instruction-sizing-when-instructions-become-context-debt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instruction Sizing: When Instructions Become Context Debt
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compression-haiku-for-summarization-sonnet-for-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compression: Haiku for Summarization, Sonnet for Analysis
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adapting-for-other-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adapting for Other Providers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-sprint-planning-re-planning-cost-reduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Sprint Planning &amp; Re-Planning Cost Reduction
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Sprint Planning &amp; Re-Planning Cost Reduction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-problem-planning-sessions-are-expensive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Problem: Planning Sessions Are Expensive
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-solution-persistent-sprint-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Solution: Persistent Sprint Template
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#template-structure-reusable-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Template Structure (Reusable Pattern)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bulk-agent-updates-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bulk Agent Updates Pattern
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cost-baseline-targets-for-sprints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cost Baseline Targets for Sprints
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sprint-checklist-before-calling-sprint-planner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sprint Checklist: Before Calling /sprint-planner
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-agent-model-recommendations-updated-sprint-31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Agent Model Recommendations (Updated Sprint 31)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Agent Model Recommendations (Updated Sprint 31)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#routine-agents-downshifted-to-gpt-54-mini-cost-50100mo-savings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Routine Agents Downshifted to gpt-5.4-mini (Cost: ~$50–100/mo savings)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../intent-prefixes/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    How-To Guides
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="token-optimization-context-handling">Token Optimization &amp; Context Handling<a class="headerlink" href="#token-optimization-context-handling" title="Permanent link">&para;</a></h1>
+<p>Strategies for managing token budgets, compressing context, and handing off state between agents in a multi-agent system. Companion to <a href="../model-optimization/"><code>model-optimization.md</code></a> (model selection) and <a href="../../architecture/multi-agent-orchestration-patterns/"><code>../architecture/multi-agent-orchestration-patterns.md</code></a> (branch coordination).</p>
+<blockquote>
+<p><strong>Tracking:</strong> Issue <a href="https://github.com/IBuySpy-Shared/basecoat/issues/42">#42</a>
+<strong>GHCP-specific:</strong> This guidance was developed and tested against GitHub Copilot (GHCP).
+If you are using Azure OpenAI, Anthropic API, AWS Bedrock, or another provider,
+model names, tier pricing, and rate limits will differ. See <a href="#adapting-for-other-providers">Adapting for Other Providers</a>.</p>
+</blockquote>
+<hr />
+<h2 id="1-context-window-management-strategies">1. Context Window Management Strategies<a class="headerlink" href="#1-context-window-management-strategies" title="Permanent link">&para;</a></h2>
+<p>Every model has a finite context window. Treating it as unlimited leads to degraded output quality, truncated responses, and wasted spend.</p>
+<h3 id="know-your-limits">Know Your Limits<a class="headerlink" href="#know-your-limits" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Context Window</th>
+<th>Effective Limit</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>claude-opus-4.6</td>
+<td>200K tokens</td>
+<td>~160K usable</td>
+<td>Reserve 20% for output generation</td>
+</tr>
+<tr>
+<td>claude-sonnet-4.6</td>
+<td>200K tokens</td>
+<td>~160K usable</td>
+<td>Same reservation applies</td>
+</tr>
+<tr>
+<td>gpt-5.3-codex</td>
+<td>200K tokens</td>
+<td>~160K usable</td>
+<td>Code-optimized; large inputs degrade non-code reasoning</td>
+</tr>
+<tr>
+<td>claude-haiku-4.5</td>
+<td>200K tokens</td>
+<td>~160K usable</td>
+<td>Fast but quality drops sharply past ~80K input</td>
+</tr>
+<tr>
+<td>gpt-5.4-mini</td>
+<td>128K tokens</td>
+<td>~100K usable</td>
+<td>Budget model; keep inputs under 60K for reliable output</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rule of thumb:</strong> Reserve 20% of the context window for output. If you need 40K tokens of output, you have 160K minus 40K = 120K for input.</p>
+<h3 id="layered-context-loading">Layered Context Loading<a class="headerlink" href="#layered-context-loading" title="Permanent link">&para;</a></h3>
+<p>Load context in priority order rather than dumping everything at once:</p>
+<ol>
+<li><strong>System instructions</strong> — governance rules, role definition (~1–2K tokens)</li>
+<li><strong>Task-specific instructions</strong> — the immediate objective (~0.5–1K tokens)</li>
+<li><strong>Critical reference files</strong> — only files the agent must read to complete the task</li>
+<li><strong>Supporting context</strong> — examples, history, related docs (load only if budget remains)</li>
+</ol>
+<p>Stop loading when you reach 60% of the effective limit. The remaining 40% covers agent reasoning and output.</p>
+<hr />
+<h2 id="2-token-budget-allocation-per-agent-role">2. Token Budget Allocation per Agent Role<a class="headerlink" href="#2-token-budget-allocation-per-agent-role" title="Permanent link">&para;</a></h2>
+<p>Align token budgets with the model tier from <a href="../model-optimization/"><code>model-optimization.md</code></a>:</p>
+<table>
+<thead>
+<tr>
+<th>Agent Role</th>
+<th>Model Tier</th>
+<th>Recommended Input Budget</th>
+<th>Max Output Budget</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>architect</td>
+<td>Premium</td>
+<td>80K</td>
+<td>40K</td>
+<td>Deep reasoning needs room for chain-of-thought</td>
+</tr>
+<tr>
+<td>security_analyst</td>
+<td>Premium</td>
+<td>80K</td>
+<td>40K</td>
+<td>Must analyze full code paths without truncation</td>
+</tr>
+<tr>
+<td>reviewer / code-review</td>
+<td>Reasoning</td>
+<td>60K</td>
+<td>20K</td>
+<td>Diffs + context; output is structured comments</td>
+</tr>
+<tr>
+<td>researcher</td>
+<td>Reasoning</td>
+<td>80K</td>
+<td>30K</td>
+<td>May ingest large docs; output is synthesis</td>
+</tr>
+<tr>
+<td>backend-dev / frontend-dev</td>
+<td>Code</td>
+<td>60K</td>
+<td>40K</td>
+<td>Code generation needs generous output budget</td>
+</tr>
+<tr>
+<td>sprint-planner</td>
+<td>Reasoning</td>
+<td>40K</td>
+<td>20K</td>
+<td>Structured decomposition, not large inputs</td>
+</tr>
+<tr>
+<td>merge-coordinator</td>
+<td>Fast</td>
+<td>20K</td>
+<td>10K</td>
+<td>Small diffs, merge commands, status checks</td>
+</tr>
+<tr>
+<td>config-auditor / watchdog</td>
+<td>Fast</td>
+<td>30K</td>
+<td>5K</td>
+<td>Scan-and-report; output is a short checklist</td>
+</tr>
+</tbody>
+</table>
+<h3 id="budget-enforcement-pattern">Budget Enforcement Pattern<a class="headerlink" href="#budget-enforcement-pattern" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">function</span><span class="w"> </span><span class="nx">enforceTokenBudget</span><span class="p">(</span><span class="nx">prompt</span><span class="p">,</span><span class="w"> </span><span class="nx">maxInputTokens</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">estimated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">estimateTokens</span><span class="p">(</span><span class="nx">prompt</span><span class="p">);</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">estimated</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nx">maxInputTokens</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">compressContext</span><span class="p">(</span><span class="nx">prompt</span><span class="p">,</span><span class="w"> </span><span class="nx">maxInputTokens</span><span class="p">);</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">prompt</span><span class="p">;</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">}</span>
+</code></pre></div>
+<hr />
+<h2 id="3-prompt-compression-techniques">3. Prompt Compression Techniques<a class="headerlink" href="#3-prompt-compression-techniques" title="Permanent link">&para;</a></h2>
+<p>When context exceeds the budget, compress — don't truncate blindly.</p>
+<h3 id="31-summarization">3.1 Summarization<a class="headerlink" href="#31-summarization" title="Permanent link">&para;</a></h3>
+<p>Replace large blocks with concise summaries. Use a fast-tier model (Haiku) to generate summaries before passing them to a higher-tier model.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Before (2,400 tokens):
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  Full git diff of 15 files with 200 changed lines
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>After (400 tokens):
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  &quot;Summary: 15 files changed across src/auth/ and src/api/.
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>   Key changes: JWT validation refactored, rate-limit middleware added,
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>   3 new API routes (/users, /sessions, /tokens). No deletions.&quot;
+</code></pre></div>
+<p><strong>Cost:</strong> One Haiku summarization call (~0.02¢) can save 2,000 tokens on a Sonnet call (~0.6¢).</p>
+<h3 id="32-selective-inclusion">3.2 Selective Inclusion<a class="headerlink" href="#32-selective-inclusion" title="Permanent link">&para;</a></h3>
+<p>Only include what the agent needs for its specific task:</p>
+<table>
+<thead>
+<tr>
+<th>Agent Task</th>
+<th>Include</th>
+<th>Exclude</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Code review</td>
+<td>Changed files, diff hunks, test results</td>
+<td>Unrelated source files, full history</td>
+</tr>
+<tr>
+<td>Architecture</td>
+<td>Interface definitions, dependency graph</td>
+<td>Implementation bodies, test fixtures</td>
+</tr>
+<tr>
+<td>Security scan</td>
+<td>Auth code, input handling, config</td>
+<td>UI components, styling, docs</td>
+</tr>
+<tr>
+<td>Sprint planning</td>
+<td>Issue list, velocity data, blockers</td>
+<td>Source code, CI logs</td>
+</tr>
+</tbody>
+</table>
+<h3 id="33-truncation-with-markers">3.3 Truncation with Markers<a class="headerlink" href="#33-truncation-with-markers" title="Permanent link">&para;</a></h3>
+<p>When you must truncate, leave breadcrumbs so the agent knows context was removed:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>[FILE: src/auth/jwt.ts — 340 lines, showing lines 1-50 and 280-340]
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>[TRUNCATED: lines 51-279 contain helper functions — request full file if needed]
+</code></pre></div>
+<h3 id="34-reference-by-pointer">3.4 Reference by Pointer<a class="headerlink" href="#34-reference-by-pointer" title="Permanent link">&para;</a></h3>
+<p>Instead of inlining large files, reference them:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>For the full API schema, see: docs/api-schema.yaml (420 lines, ~8K tokens)
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>Key endpoints relevant to this task: POST /auth/login, DELETE /auth/session
+</code></pre></div>
+<hr />
+<h2 id="4-context-handoff-between-agents">4. Context Handoff Between Agents<a class="headerlink" href="#4-context-handoff-between-agents" title="Permanent link">&para;</a></h2>
+<p>When one agent's output becomes another agent's input, transfer only what matters.</p>
+<h3 id="what-to-pass">What to Pass<a class="headerlink" href="#what-to-pass" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Data</th>
+<th>Pass?</th>
+<th>Format</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Task result / deliverable</td>
+<td>✅ Always</td>
+<td>Full output</td>
+</tr>
+<tr>
+<td>Decision rationale</td>
+<td>✅ Always</td>
+<td>2–3 sentence summary</td>
+</tr>
+<tr>
+<td>Files created or modified</td>
+<td>✅ Always</td>
+<td>File paths + brief description</td>
+</tr>
+<tr>
+<td>Unresolved issues or blockers</td>
+<td>✅ Always</td>
+<td>Structured list</td>
+</tr>
+<tr>
+<td>Error messages encountered</td>
+<td>✅ If relevant</td>
+<td>Exact error text</td>
+</tr>
+<tr>
+<td>Full conversation history</td>
+<td>❌ Never</td>
+<td>Summarize instead</td>
+</tr>
+<tr>
+<td>Intermediate reasoning steps</td>
+<td>❌ Never</td>
+<td>Only pass conclusions</td>
+</tr>
+<tr>
+<td>Unchanged reference files</td>
+<td>❌ Never</td>
+<td>Agent can load its own</td>
+</tr>
+</tbody>
+</table>
+<h3 id="handoff-template">Handoff Template<a class="headerlink" href="#handoff-template" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="gu">## Agent Handoff: {source-role} → {target-role}</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="gu">### Completed</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="k">-</span><span class="w"> </span>{what was done, 1-2 lines each}
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="gu">### Artifacts</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="k">-</span><span class="w"> </span><span class="sb">`path/to/file.ts`</span> — {what it contains}
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="k">-</span><span class="w"> </span><span class="sb">`path/to/test.ts`</span> — {test coverage summary}
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="gu">### Decisions Made</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="k">-</span><span class="w"> </span>{decision}: {rationale in one line}
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="gu">### Open Items</span>
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="k">-</span><span class="w"> </span>{anything the next agent must address}
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="gu">### Context Files Needed</span>
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="k">-</span><span class="w"> </span>{only files the next agent should load}
+</code></pre></div>
+<p><strong>Target size:</strong> Handoff documents should be 500–1,500 tokens. If yours exceeds 2K tokens, compress further.</p>
+<h3 id="pipeline-example">Pipeline Example<a class="headerlink" href="#pipeline-example" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Architect (Opus, ~80K input)
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  → produces: design doc + handoff (1.2K tokens)
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>Backend-Dev (Codex, ~60K input)
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>  → receives: handoff + design doc + relevant source files
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>  → produces: implementation + handoff (800 tokens)
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>Reviewer (Sonnet, ~60K input)
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>  → receives: handoff + diff + test results
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>  → produces: review comments + approval/rejection
+</code></pre></div>
+<hr />
+<h2 id="5-caching-strategies-for-repeated-context">5. Caching Strategies for Repeated Context<a class="headerlink" href="#5-caching-strategies-for-repeated-context" title="Permanent link">&para;</a></h2>
+<p>Avoid re-reading and re-tokenizing the same content across agent invocations.</p>
+<h3 id="system-prompt-caching">System Prompt Caching<a class="headerlink" href="#system-prompt-caching" title="Permanent link">&para;</a></h3>
+<p>Most providers cache system prompts across calls with identical prefixes. Structure prompts so the stable prefix (governance rules, role definition) stays constant:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>[CACHED — identical across all calls for this agent role]
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  System instructions (governance.instructions.md)
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  Role definition (agent .md file)
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>[VARIABLE — changes per invocation]
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>  Task-specific context
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>  File contents
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>  Conversation history
+</code></pre></div>
+<p><strong>Savings:</strong> Anthropic's prompt caching charges ~10% of normal input cost for cached tokens. A 3K-token system prompt called 50 times saves ~135K billable tokens.</p>
+<h3 id="cross-agent-shared-context">Cross-Agent Shared Context<a class="headerlink" href="#cross-agent-shared-context" title="Permanent link">&para;</a></h3>
+<p>When multiple agents need the same reference (e.g., a project spec), load it once and pass a summary to subsequent agents rather than having each agent re-read the full document.</p>
+<h3 id="stale-context-invalidation">Stale Context Invalidation<a class="headerlink" href="#stale-context-invalidation" title="Permanent link">&para;</a></h3>
+<p>Cache keys should include:</p>
+<ul>
+<li>File content hash (not just path — files change)</li>
+<li>Branch name (context differs across branches)</li>
+<li>Timestamp with TTL (default: 15 minutes for active sprint work)</li>
+</ul>
+<hr />
+<h2 id="6-measurement-and-monitoring">6. Measurement and Monitoring<a class="headerlink" href="#6-measurement-and-monitoring" title="Permanent link">&para;</a></h2>
+<h3 id="token-usage-tracking">Token Usage Tracking<a class="headerlink" href="#token-usage-tracking" title="Permanent link">&para;</a></h3>
+<p>Track per-agent, per-invocation:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>How to Capture</th>
+<th>Why It Matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Input tokens</td>
+<td>Provider API response</td>
+<td>Cost attribution</td>
+</tr>
+<tr>
+<td>Output tokens</td>
+<td>Provider API response</td>
+<td>Cost attribution + quality signal</td>
+</tr>
+<tr>
+<td>Cache hit tokens</td>
+<td>Provider API response (if available)</td>
+<td>Caching effectiveness</td>
+</tr>
+<tr>
+<td>Context utilization</td>
+<td>Input tokens ÷ effective window</td>
+<td>Over 80% = risk of quality degradation</td>
+</tr>
+<tr>
+<td>Compression ratio</td>
+<td>Original tokens ÷ compressed tokens</td>
+<td>Compression effectiveness</td>
+</tr>
+</tbody>
+</table>
+<h3 id="cost-estimation-formula">Cost Estimation Formula<a class="headerlink" href="#cost-estimation-formula" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Per-invocation cost =
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  (input_tokens × input_price_per_1M / 1,000,000)
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>  + (output_tokens × output_price_per_1M / 1,000,000)
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>  - (cached_tokens × cache_discount_per_1M / 1,000,000)
+</code></pre></div>
+<h3 id="sprint-level-budget">Sprint-Level Budget<a class="headerlink" href="#sprint-level-budget" title="Permanent link">&para;</a></h3>
+<p>Estimate total sprint token usage:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>Sprint budget = Σ (agent_invocations × avg_tokens_per_invocation × cost_per_token)
+</code></pre></div>
+<p>Example for a 10-issue sprint:</p>
+<ul>
+<li>10 planning calls (Sonnet, ~40K input, ~10K output) ≈ 500K tokens</li>
+<li>30 implementation calls (Codex, ~60K input, ~30K output) ≈ 2.7M tokens</li>
+<li>20 review calls (Sonnet, ~40K input, ~10K output) ≈ 1M tokens</li>
+<li>40 automation calls (Haiku, ~20K input, ~5K output) ≈ 1M tokens</li>
+<li><strong>Total: ~5.2M tokens per sprint</strong></li>
+</ul>
+<h3 id="alerts">Alerts<a class="headerlink" href="#alerts" title="Permanent link">&para;</a></h3>
+<p>Set thresholds to catch runaway usage:</p>
+<ul>
+<li>Single invocation exceeds 150K input tokens → warn</li>
+<li>Agent role exceeds 2× its average daily usage → investigate</li>
+<li>Sprint total exceeds budget by 20% → pause and review</li>
+</ul>
+<hr />
+<h2 id="7-instruction-file-sizing">7. Instruction File Sizing<a class="headerlink" href="#7-instruction-file-sizing" title="Permanent link">&para;</a></h2>
+<p>Instruction files (<code>.instructions.md</code>, <code>.agent.md</code>) are loaded into every invocation. Oversized instructions waste budget on every call.</p>
+<table>
+<thead>
+<tr>
+<th>File Type</th>
+<th>Target Size</th>
+<th>Max Size</th>
+<th>Tokens (est.)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.instructions.md</code></td>
+<td>1–3 KB</td>
+<td>5 KB</td>
+<td>~500–1,500</td>
+</tr>
+<tr>
+<td><code>.agent.md</code></td>
+<td>2–4 KB</td>
+<td>6 KB</td>
+<td>~800–2,000</td>
+</tr>
+<tr>
+<td>Governance instructions</td>
+<td>3–5 KB</td>
+<td>8 KB</td>
+<td>~1,200–2,500</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sizing-guidelines">Sizing Guidelines<a class="headerlink" href="#sizing-guidelines" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>One concern per file.</strong> Split multi-topic instructions into separate files.</li>
+<li><strong>Link, don't inline.</strong> Reference detailed docs by path instead of copying content.</li>
+<li><strong>Prune examples.</strong> One good example beats three redundant ones.</li>
+<li><strong>Audit quarterly.</strong> Remove outdated rules that no longer apply.</li>
+</ul>
+<hr />
+<h2 id="8-practical-examples-with-token-counts">8. Practical Examples with Token Counts<a class="headerlink" href="#8-practical-examples-with-token-counts" title="Permanent link">&para;</a></h2>
+<h3 id="example-a-code-review-well-optimized">Example A: Code Review — Well-Optimized<a class="headerlink" href="#example-a-code-review-well-optimized" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>System prompt (governance + reviewer role):     1,800 tokens
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>Task instructions:                                 400 tokens
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>Diff (3 files, 120 lines changed):              2,200 tokens
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>Test results summary:                              300 tokens
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>───────────────────────────────────────────────
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>Total input:                                     4,700 tokens
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>Output (review comments):                        1,200 tokens
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>Model: claude-sonnet-4.6
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>Estimated cost:                                   ~$0.02
+</code></pre></div>
+<h3 id="example-b-code-review-unoptimized">Example B: Code Review — Unoptimized<a class="headerlink" href="#example-b-code-review-unoptimized" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>System prompt (full governance + all instructions): 4,500 tokens
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>Full conversation history (15 turns):              12,000 tokens
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>All source files in the repo:                      45,000 tokens
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>Full CI log output:                                 8,000 tokens
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>───────────────────────────────────────────────
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>Total input:                                      69,500 tokens
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>Output (same review comments):                     1,200 tokens
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>Model: claude-sonnet-4.6
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>Estimated cost:                                    ~$0.23
+</code></pre></div>
+<p><strong>Savings: 91% cost reduction</strong> by loading only what the agent needs.</p>
+<h3 id="example-c-architect-backend-dev-handoff">Example C: Architect → Backend-Dev Handoff<a class="headerlink" href="#example-c-architect-backend-dev-handoff" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>Architect output (full):                          8,000 tokens
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>Handoff document (compressed):                    1,200 tokens
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>Backend-dev loads: handoff + 3 source files:      6,400 tokens
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>───────────────────────────────────────────────
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>Backend-dev total input:                          7,600 tokens
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>Without handoff (re-reads everything):           35,000 tokens
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>Savings:                                            78%
+</code></pre></div>
+<hr />
+<h2 id="9-task-complexity-turn-budgets-and-adaptive-learning">9. Task Complexity, Turn Budgets, and Adaptive Learning<a class="headerlink" href="#9-task-complexity-turn-budgets-and-adaptive-learning" title="Permanent link">&para;</a></h2>
+<p>Agent work has a cost that goes beyond tokens — it also consumes turns. Turns compound: each one adds history to the context window, narrows decision space, and raises the cost of a wrong approach. This section defines how to classify tasks, budget turns, and convert experience into reusable memory.</p>
+<h3 id="91-complexity-classification">9.1 Complexity Classification<a class="headerlink" href="#91-complexity-classification" title="Permanent link">&para;</a></h3>
+<p>Classify each task before starting. State the class in your plan or at the top of your first response.</p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Definition</th>
+<th>Typical indicators</th>
+<th>Soft turn budget</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Routine</strong></td>
+<td>Pattern fully covered by existing instructions or memory</td>
+<td>"We have an instruction for this", existing template matches</td>
+<td>≤ 3 turns</td>
+</tr>
+<tr>
+<td><strong>Familiar</strong></td>
+<td>Similar to prior work but with new variables or constraints</td>
+<td>"We've done something like this", partial memory match</td>
+<td>≤ 5 turns</td>
+</tr>
+<tr>
+<td><strong>Novel</strong></td>
+<td>No prior coverage; encountering this pattern for the first time</td>
+<td>No matching instruction, no memory hit, new tool/API/pattern</td>
+<td>Estimate N turns upfront</td>
+</tr>
+</tbody>
+</table>
+<p>For Novel tasks, state the estimated turn cost at task start:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>Task: Integrate Azure Service Connector with App Configuration
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>Class: Novel — no prior Service Connector instruction exists
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>Estimated turns: 6 (learning cost: ~3 for discovery, ~3 for implementation + validation)
+</code></pre></div>
+<p><strong>Learning cost amortization:</strong> A Novel task that succeeds becomes Familiar the next time. Familiar tasks that are done repeatedly become Routine. Memory is the mechanism — see §9.3.</p>
+<h3 id="92-failure-protocol-stuck-after-5-turns">9.2 Failure Protocol — Stuck After 5 Turns<a class="headerlink" href="#92-failure-protocol-stuck-after-5-turns" title="Permanent link">&para;</a></h3>
+<p>If a task has consumed more than 5 turns <strong>and</strong> there has been no measurable forward progress, stop. Do not continue with more of the same approach.</p>
+<h4 id="what-counts-as-forward-progress">What counts as forward progress?<a class="headerlink" href="#what-counts-as-forward-progress" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Counts?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A new test passes that did not pass before</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>A new error class is resolved (not just a different message for the same root cause)</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>A file reaches its intended target state</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>A blocker is identified and removed</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>The same error appears with different output</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td>More lines of code added without test validation</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td>Escalating to a higher-tier model without changing the approach</td>
+<td>❌ No</td>
+</tr>
+</tbody>
+</table>
+<h4 id="when-stuck">When stuck<a class="headerlink" href="#when-stuck" title="Permanent link">&para;</a></h4>
+<ol>
+<li><strong>Log to memory.</strong> Call <code>store_memory</code> with:</li>
+<li>Task description (what was being attempted)</li>
+<li>Approach tried (summarize the strategy, not the code)</li>
+<li>Failure mode (exact error, logical dead-end, or missing capability)</li>
+<li>
+<p>Blocking signal (what specifically is preventing progress)</p>
+</li>
+<li>
+<p><strong>Reassess, don't escalate.</strong> Change the approach before changing the model tier. Common pivots:</p>
+</li>
+<li>Break the task into smaller independently-verifiable units</li>
+<li>Load docs or examples that were previously skipped to save tokens</li>
+<li>Invert the approach (bottom-up instead of top-down, or vice versa)</li>
+<li>
+<p>Consult memory for similar prior failures</p>
+</li>
+<li>
+<p><strong>Escalate model tier only as a last resort</strong>, and only when the problem genuinely requires deeper reasoning — not just more attempts.</p>
+</li>
+</ol>
+<h4 id="early-warning-the-8050-rule">Early warning: the 80/50 rule<a class="headerlink" href="#early-warning-the-8050-rule" title="Permanent link">&para;</a></h4>
+<p>At 80% of your turn budget, if you have less than 50% progress toward the goal, pause and reassess. Don't wait until fully stuck.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>Turn budget: 5
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>Current turn: 4 (80%)
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>Progress: 1 test passing of 4 required (25%)
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>→ Pause. Reassess before turn 5.
+</code></pre></div>
+<h3 id="93-success-protocol-learning-reinforcement">9.3 Success Protocol — Learning Reinforcement<a class="headerlink" href="#93-success-protocol-learning-reinforcement" title="Permanent link">&para;</a></h3>
+<p>When a task completes within its turn budget <strong>and</strong> test validation passes, evaluate whether the solution involved a non-obvious pattern.</p>
+<p><strong>Reinforce when:</strong></p>
+<ul>
+<li>The solution required a discovery that no existing instruction covers</li>
+<li>The approach was non-obvious and could save future agents 2+ turns</li>
+<li>A specific error was encountered and resolved in a reusable way</li>
+</ul>
+<p><strong>Skip when:</strong></p>
+<ul>
+<li>The task followed an existing instruction exactly</li>
+<li>The solution is boilerplate (adding a route, writing a standard test, etc.)</li>
+<li>The memory fact would duplicate existing instruction content</li>
+</ul>
+<p><strong>What to store:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>Subject:    &lt;topic area&gt;
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>Fact:       &lt;pattern or rule, ≤200 chars&gt;
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>Citations:  &lt;file:line or &quot;User input: ...&quot; or &quot;Validated in task X&quot;&gt;
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>Reason:     &lt;why this will help future tasks; what turns it saves&gt;
+</code></pre></div>
+<p><strong>Good example:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>Subject:    gh-aw compilation
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>Fact:       gh aw safe-outputs: add-labels and add-comment take no sub-properties.
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>            allowed-labels belongs under create-issue, not add-labels.
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>Citations:  .github/workflows/issue-triage.md — Sprint 11 compile iteration
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>Reason:     This error burned 2 turns on Sprint 11. Any future agentic workflow
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>            author will hit it immediately without this memory.
+</code></pre></div>
+<p><strong>Bad example (too generic — skip):</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>Fact: Use TypeScript for new files.
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>→ Already in instructions. Skip.
+</code></pre></div>
+<h3 id="94-turn-accounting-summary">9.4 Turn Accounting Summary<a class="headerlink" href="#94-turn-accounting-summary" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>Before task:
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>  Classify: Routine / Familiar / Novel
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>  If Novel: state estimated turn budget
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>During task:
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>  Track actual turns vs. budget
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>  At 80% budget / &lt;50% progress: reassess
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>On failure (&gt;5 turns, no progress):
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>  store_memory(failure pattern)
+<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a>  change approach or escalate
+<a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a>
+<a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a>On success (within budget + tests pass):
+<a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a>  if novel pattern: store_memory(solution pattern)
+<a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a>  classification → drops one level (Novel→Familiar, Familiar→Routine)
+</code></pre></div>
+<hr />
+<h2 id="10-from-the-field-basecoat-sprint-experience">10. From the Field: BaseCoat Sprint Experience<a class="headerlink" href="#10-from-the-field-basecoat-sprint-experience" title="Permanent link">&para;</a></h2>
+<p>These examples come from BaseCoat's own development sprints. They illustrate how
+the strategies in §1–9 play out in practice.</p>
+<h3 id="context-loading-the-cost-of-speculative-reads">Context Loading: The Cost of Speculative Reads<a class="headerlink" href="#context-loading-the-cost-of-speculative-reads" title="Permanent link">&para;</a></h3>
+<p><strong>What happened:</strong> In early sprints, the explore skill pattern was: read the entire
+<code>agents/</code> directory to understand the repo state. At 77 agents (~400 tokens each),
+this consumed ~30K tokens before any task work started.</p>
+<p><strong>What changed:</strong> The hot-index pattern. The L2 memory index (<code>memory-index.instructions.md</code>)
+loads a curated summary (~1,500 tokens) of all key facts about the repo. This
+replaces the full directory scan for 80% of tasks. The other 20% (Novel tasks
+that need specific agent details) load only the targeted agent files.</p>
+<p><strong>Measured impact:</strong> Task startup dropped from ~30K tokens (full scan) to
+~3K tokens (hot index + targeted load). On a sprint with 30 agent invocations,
+this saves ~810K tokens.</p>
+<hr />
+<h3 id="turn-budget-the-5-turn-recovery-pattern">Turn Budget: The 5-Turn Recovery Pattern<a class="headerlink" href="#turn-budget-the-5-turn-recovery-pattern" title="Permanent link">&para;</a></h3>
+<p><strong>What happened:</strong> During Sprint 19, an agent was tasked with wiring
+<code>check-coherence.ps1</code> into CI. It consumed 7 turns and produced no working
+configuration. The agent kept modifying the workflow YAML — changing indentation,
+restructuring steps — but the root problem was that the script exits 0 by default
+and CI never knew it had run with violations.</p>
+<p><strong>The 80/50 signal was ignored:</strong> At turn 4 (80% of a ≤5 budget), the agent had
+1 of 3 required checks passing (33% progress). The correct move was to pause
+and reassess.</p>
+<p><strong>Resolution in turn 8:</strong> Changed approach — instead of fixing the workflow, added
+<code>-Strict</code> to the script call in <code>run-tests.ps1</code>. The same tests that had been
+passing now surfaced the violations. Three lines of change instead of 50.</p>
+<p><strong>Pattern confirmed:</strong> At 80% of turn budget with &lt;50% progress, the approach is
+wrong. More turns with the same approach do not fix this.</p>
+<hr />
+<h3 id="instruction-sizing-when-instructions-become-context-debt">Instruction Sizing: When Instructions Become Context Debt<a class="headerlink" href="#instruction-sizing-when-instructions-become-context-debt" title="Permanent link">&para;</a></h3>
+<p><strong>Observation across Sprint 23–24:</strong> The governance instruction file
+(<code>instructions/governance.instructions.md</code>) grew to 8KB+ (estimated ~2,500 tokens).
+Because it has <code>applyTo: "**/*"</code>, it loads on every agent invocation. Across a
+30-invocation sprint, the governance instruction alone accounts for ~75K tokens.</p>
+<p><strong>What this means:</strong> Every 1KB added to a global instruction file costs ~750K
+tokens per year at BaseCoat's sprint velocity (~300 invocations/month).
+Global instruction files have a much higher amortized cost than targeted ones.</p>
+<p><strong>Rule reinforced:</strong> Global instructions (<code>applyTo: "**/*"</code>) should contain only
+invariant rules. Domain-specific guidance belongs in scoped instruction files
+(<code>applyTo: "agents/**"</code>, <code>applyTo: "*.yml"</code>).</p>
+<hr />
+<h3 id="compression-haiku-for-summarization-sonnet-for-analysis">Compression: Haiku for Summarization, Sonnet for Analysis<a class="headerlink" href="#compression-haiku-for-summarization-sonnet-for-analysis" title="Permanent link">&para;</a></h3>
+<p><strong>Pattern from audit sprint:</strong> Four audit background agents each read 50–80 files
+and returned structured reports (150–200s wall time). All four used the Haiku-class
+explore model. All four produced accurate results. Total token cost: approximately
+the same as one Sonnet invocation with the same context.</p>
+<p><strong>The lesson:</strong> "Reading and organizing" is a Fast-tier task even when the output
+matters. "Analyzing and deciding based on what you read" is a Reasoning-tier task.
+The audit agents did the former; the session's main agent did the latter using the
+audit reports as compressed input (~15K tokens total from four Haiku agents, vs.
+~80K tokens if the Sonnet session had read all the files directly).</p>
+<p><strong>Template for expensive research:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>Fast agent (Haiku): read files, grep patterns, count things, organize findings
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>  → output: structured report (~2K tokens)
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>Reasoning agent (Sonnet): receive structured reports, analyze, decide, act
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>  → input: N × 2K tokens from fast agents
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>  → avoids: N × 30K tokens of direct file reading
+</code></pre></div>
+<hr />
+<h2 id="adapting-for-other-providers">Adapting for Other Providers<a class="headerlink" href="#adapting-for-other-providers" title="Permanent link">&para;</a></h2>
+<p>This guide focuses on GitHub Copilot (GHCP). If your team routes agents to a
+different provider, model names, tier pricing, and rate limits will differ:</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Model tier equivalent</th>
+<th>Rate limit difference</th>
+<th>Billing unit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Azure OpenAI</td>
+<td>GPT-4o ~= Standard, GPT-4o-mini ~= Fast</td>
+<td>TPM/RPM per deployment</td>
+<td>Per token</td>
+</tr>
+<tr>
+<td>Anthropic API</td>
+<td>Opus ~= Premium, Sonnet ~= Standard, Haiku ~= Fast</td>
+<td>Per-minute limits</td>
+<td>Per token</td>
+</tr>
+<tr>
+<td>AWS Bedrock</td>
+<td>On-demand vs. provisioned</td>
+<td>Regional quotas</td>
+<td>Per token</td>
+</tr>
+<tr>
+<td>OpenAI API</td>
+<td>GPT-4o ~= Standard, GPT-4o-mini ~= Fast</td>
+<td>Tier-based RPM/TPM</td>
+<td>Per token</td>
+</tr>
+</tbody>
+</table>
+<p>Adjust rate-limit constants and budget thresholds to match the provider's documented
+limits. For UBB cost estimation and monitoring guidance, see
+<a href="../ubb-token-guidance/">ubb-token-guidance.md</a>.</p>
+<hr />
+<h2 id="11-sprint-planning-re-planning-cost-reduction">11. Sprint Planning &amp; Re-Planning Cost Reduction<a class="headerlink" href="#11-sprint-planning-re-planning-cost-reduction" title="Permanent link">&para;</a></h2>
+<h3 id="the-problem-planning-sessions-are-expensive">The Problem: Planning Sessions Are Expensive<a class="headerlink" href="#the-problem-planning-sessions-are-expensive" title="Permanent link">&para;</a></h3>
+<p>Measured from BaseCoat live sessions:</p>
+<ul>
+<li><strong>5 separate "Plan Next Sprint" sessions</strong>: ~39.5M tokens each (ratio 293x–498x input/output)</li>
+<li><strong>Total annual cost</strong>: 150M+ tokens from re-planning alone</li>
+<li><strong>Root cause</strong>: Each session reloads full backlog context from scratch instead of reusing structure</li>
+</ul>
+<h3 id="the-solution-persistent-sprint-template">The Solution: Persistent Sprint Template<a class="headerlink" href="#the-solution-persistent-sprint-template" title="Permanent link">&para;</a></h3>
+<p>Use <code>docs/templates/sprint-structure.md</code> (or equivalent) as a reusable backlog skeleton.</p>
+<p><strong>Reference, don't reload:</strong></p>
+<p>Instead of:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>/sprint-planner
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>I need to plan the next sprint. Here&#39;s the full backlog [170k characters of issues]...
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>[Context bloat begins, history accumulates, tokens pile up]
+</code></pre></div>
+<p>Do:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>/sprint-planner  
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>Reference: docs/templates/sprint-structure.md
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>Delta from Sprint 30: [issue list changes only, ~10 lines]
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>New priorities: #1234, #5678
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>Moved out: #9999 (done), #8888 (defer)
+</code></pre></div>
+<p><strong>Measured impact</strong>: ~39.5M → ~15M tokens per sprint-planning session (62% reduction).</p>
+<h3 id="template-structure-reusable-pattern">Template Structure (Reusable Pattern)<a class="headerlink" href="#template-structure-reusable-pattern" title="Permanent link">&para;</a></h3>
+<p>Every sprint uses this structure:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>## Sprint Metadata
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>- Sprint ID
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>- Duration
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>- Goals
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>## Backlog Categories
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>### P1 Blockers (0–3 items)
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>### P2 Medium (8–15 items)
+<a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a>### P3 Low (0–5 items)
+<a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a>
+<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a>## Changes from Prior Sprint
+<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a>- Moved In (new priorities)
+<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a>- Moved Out (deferred / completed)
+<a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a>- Reordered (within P2/P3)
+<a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a>
+<a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a>## Notes for Planner
+<a id="__codelineno-21-17" name="__codelineno-21-17" href="#__codelineno-21-17"></a>- Bulk tasks can run in parallel
+<a id="__codelineno-21-18" name="__codelineno-21-18" href="#__codelineno-21-18"></a>- Resource constraints
+<a id="__codelineno-21-19" name="__codelineno-21-19" href="#__codelineno-21-19"></a>- Known blockers
+</code></pre></div>
+<p>When planning Sprint 31, 32, etc., reference this template and provide only the delta.</p>
+<h3 id="bulk-agent-updates-pattern">Bulk Agent Updates Pattern<a class="headerlink" href="#bulk-agent-updates-pattern" title="Permanent link">&para;</a></h3>
+<p>For mechanical agent updates (model downshift, scope docs, bulk refactoring), run in parallel via background agents instead of sequentially in the main session.</p>
+<p><strong>Measured from Sprint 31:</strong></p>
+<ul>
+<li>Sequential execution: ~40 minutes + context overhead</li>
+<li>Parallel execution (background agents): ~30 minutes, main session thin</li>
+</ul>
+<p>This pattern works for any bulk task that doesn't require cross-file orchestration.</p>
+<h3 id="cost-baseline-targets-for-sprints">Cost Baseline Targets for Sprints<a class="headerlink" href="#cost-baseline-targets-for-sprints" title="Permanent link">&para;</a></h3>
+<p>Based on measured BaseCoat sprints:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Target</th>
+<th>Good</th>
+<th>Expensive</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Planning session</strong></td>
+<td>15–20M tokens</td>
+<td>&lt;20M</td>
+<td>&gt;40M</td>
+<td>Use template; avoid re-planning</td>
+</tr>
+<tr>
+<td><strong>Event count (full sprint)</strong></td>
+<td>150–200 events</td>
+<td>&lt;200</td>
+<td>&gt;400</td>
+<td>Compact at phase boundaries</td>
+</tr>
+<tr>
+<td><strong>Input/output ratio</strong></td>
+<td>207x–250x</td>
+<td>&lt;250x</td>
+<td>&gt;400x</td>
+<td>Ratio = sum inputs / sum outputs</td>
+</tr>
+<tr>
+<td><strong>Pasted instruction size</strong></td>
+<td>&lt;10KB per msg</td>
+<td>&lt;10KB</td>
+<td>&gt;100KB</td>
+<td>Reference files; no pastes</td>
+</tr>
+<tr>
+<td><strong>Re-plan occurrences</strong></td>
+<td>1 per sprint</td>
+<td>1</td>
+<td>&gt;2</td>
+<td>Template reuse prevents re-planning</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sprint-checklist-before-calling-sprint-planner">Sprint Checklist: Before Calling <code>/sprint-planner</code><a class="headerlink" href="#sprint-checklist-before-calling-sprint-planner" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[ ] Load template: <code>docs/templates/sprint-structure.md</code></li>
+<li>[ ] Prepare delta (not full backlog)</li>
+<li>[ ] List P1 blockers (if any)</li>
+<li>[ ] Note bulk tasks suitable for parallelization</li>
+<li>[ ] Reference prior sprint (don't reload)</li>
+</ul>
+<hr />
+<h2 id="12-agent-model-recommendations-updated-sprint-31">12. Agent Model Recommendations (Updated Sprint 31)<a class="headerlink" href="#12-agent-model-recommendations-updated-sprint-31" title="Permanent link">&para;</a></h2>
+<h3 id="routine-agents-downshifted-to-gpt-54-mini-cost-50100mo-savings">Routine Agents Downshifted to gpt-5.4-mini (Cost: ~$50–100/mo savings)<a class="headerlink" href="#routine-agents-downshifted-to-gpt-54-mini-cost-50100mo-savings" title="Permanent link">&para;</a></h3>
+<p>Based on Sprint 31 empirical testing, the following agent categories are safe to downshift from <code>claude-sonnet-4.6</code> to <code>gpt-5.4-mini</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Agents</th>
+<th>Rationale</th>
+<th>Cost Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Triage &amp; Routing</strong></td>
+<td>issue-triage, dependency-blocker-monitor, orphaned-pr-cleanup, escalation-router</td>
+<td>Systematic label/pattern matching (rules-based)</td>
+<td>~25–30% per call</td>
+</tr>
+<tr>
+<td><strong>Audit &amp; Compliance</strong></td>
+<td>instruction-auditor, security-monitor, sprint-closeout-auditor</td>
+<td>Scan for compliance, validate schema, report</td>
+<td>~15–20% (audit tasks are deterministic)</td>
+</tr>
+<tr>
+<td><strong>Cleanup &amp; Maintenance</strong></td>
+<td>branch-hygiene-sweeper, run-history-cleanup</td>
+<td>Delete by age/status, FIFO retention</td>
+<td>~25–30% per call</td>
+</tr>
+<tr>
+<td><strong>Log Analysis</strong></td>
+<td>broken-build-troubleshooter, ci-failure-escalation</td>
+<td>Pattern-match error logs, categorize</td>
+<td>~20–25% per call</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Model tier equivalents:</strong></p>
+<ul>
+<li><code>claude-sonnet-4.6</code> → reasoning/heavy tasks</li>
+<li><code>gpt-5.4-mini</code> → routine triage, audit, cleanup, log parsing</li>
+<li><code>claude-haiku-4.5</code> → already optimal for fast I/O (keep as-is)</li>
+</ul>
+<p><strong>Exception:</strong> Agents performing novel analysis, security decisions, or architecture work should remain on <code>claude-sonnet-4.6</code> or <code>claude-opus</code>.</p>
+<hr />
+<h2 id="related-references">Related References<a class="headerlink" href="#related-references" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../model-optimization/"><code>model-optimization.md</code></a> — Model tier matrix and cost considerations</li>
+<li><a href="../../architecture/multi-agent-orchestration-patterns/"><code>../architecture/multi-agent-orchestration-patterns.md</code></a> — Branch coordination for parallel agents</li>
+<li><a href="/instructions/governance.instructions.md"><code>instructions/governance.instructions.md</code></a> — Section 10: Token and Model Awareness</li>
+<li><a href="../../templates/sprint-structure/"><code>../templates/sprint-structure.md</code></a> — Reusable sprint planning template (reduces re-planning cost 62%)</li>
+<li>Issue <a href="https://github.com/IBuySpy-Shared/basecoat/issues/42">#42</a> — Tracking issue for token optimization</li>
+<li>Issue <a href="https://github.com/IBuySpy-Shared/basecoat/issues/44">#44</a> — Token budget and cost attribution</li>
+<li>Issue <a href="https://github.com/IBuySpy-Shared/basecoat/issues/1361">#1361</a> — Efficiency target: reduce backlog runs 68→35-45M tokens</li>
+<li>Issue <a href="https://github.com/IBuySpy-Shared/basecoat/issues/1362">#1362</a> — Sprint template to eliminate re-planning cost</li>
+<li><a href="../ubb-token-guidance/"><code>ubb-token-guidance.md</code></a> -- UBB billing model, cost estimation, monitoring</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; IBuySpy-Shared contributors. Licensed under MIT.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/ivegamsft/basecoat" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "search.highlight", "search.suggest", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

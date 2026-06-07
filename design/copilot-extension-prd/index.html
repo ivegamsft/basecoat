@@ -1,0 +1,3153 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Enterprise shared library of GitHub Copilot customization assets — agents, skills, instructions, and prompts.">
+      
+      
+      
+        <link rel="canonical" href="https://ivegamsft.github.io/basecoat/design/copilot-extension-prd/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Copilot Extension for BaseCoat — PRD & Architecture - BaseCoat</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#copilot-extension-for-basecoat-prd-architecture" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="BaseCoat" class="md-header__button md-logo" aria-label="BaseCoat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12 16 7.36-5.73L21 9l-9-7-9 7 1.63 1.27M12 18.54l-7.38-5.73L3 14.07l9 7 9-7-1.63-1.27z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BaseCoat
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Copilot Extension for BaseCoat — PRD &amp; Architecture
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ivegamsft/basecoat" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ivegamsft/basecoat
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/quick-reference/" class="md-tabs__link">
+          
+  
+  
+  Asset Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/intent-prefixes/" class="md-tabs__link">
+          
+  
+  
+  How-To Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../memory/" class="md-tabs__link">
+          
+  
+  
+  Memory System
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../architecture/overview/" class="md-tabs__link">
+          
+  
+  
+  Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../PHILOSOPHY.md" class="md-tabs__link">
+          
+  
+  
+  About
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="BaseCoat" class="md-nav__button md-logo" aria-label="BaseCoat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12 16 7.36-5.73L21 9l-9-7-9 7 1.63 1.27M12 18.54l-7.38-5.73L3 14.07l9 7 9-7-1.63-1.27z"/></svg>
+
+    </a>
+    BaseCoat
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ivegamsft/basecoat" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ivegamsft/basecoat
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/enterprise-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Enterprise Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/consumer-sync/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Consumer Sync Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Asset Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Asset Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/quick-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/token-context-inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Token Context Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/asset-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/governance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Governance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-To Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How-To Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/intent-prefixes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Intent Prefixes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/integrate-prompt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Started (integrate prompt)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/customization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Make It Your Own
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/custom-agent-authoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create a Custom Agent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/agent-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/version-drift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Drift Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/model-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/token-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Token Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/basecoat-yml/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BaseCoat Config (.basecoat.yml)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/ubb-token-guidance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UBB Token Guidance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory System
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Memory System
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/learning-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learning Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/triage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Triage Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing Learnings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/process/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Process
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../diagrams/architecture-diagrams-index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagrams
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/decisions/adr-001-naming-convention/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-001 Naming Convention
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/multi-agent-orchestration-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Agent Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    About
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    About
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../PHILOSOPHY.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Philosophy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../story/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Story
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/metrics-schema-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dashboard Metrics Schema and Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prd-basecoat-manager-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PRD: BaseCoat Manager Extension
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PRD: BaseCoat Manager Extension">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#problem-statement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem Statement
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#target-users" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Target Users
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functional-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Functional Requirements
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Functional Requirements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#p0-must-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P0 — Must Have
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p1-should-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P1 — Should Have
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p2-nice-to-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P2 — Nice to Have
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#non-functional-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-Functional Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Design
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Architecture Design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-a-copilot-sdk-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option A: Copilot SDK Agent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-b-expand-existing-mcp-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option B: Expand Existing MCP Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-c-hybrid-mcp-server-thin-extension-proxy-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option C: Hybrid — MCP Server + Thin Extension Proxy (Recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#design-debate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design Debate
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Design Debate">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#extension-a-vs-mcp-only-b-vs-hybrid-c" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extension (A) vs. MCP-only (B) vs. Hybrid (C)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#repo-clone-vs-github-api-for-asset-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Repo Clone vs. GitHub API for Asset Access
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scaffolding-server-side-vs-client-side" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scaffolding: Server-side vs. Client-side
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#counter-argument-is-the-extension-layer-worth-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Counter-argument: Is the Extension Layer Worth It?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Considerations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#oauth-session-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OAuth &amp; Session Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OAuth &amp; Session Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-design-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Design Decisions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#oauth-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OAuth Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#session-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Session Lifecycle
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error Cases
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rate Limiting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Monitoring
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#proposed-tool-inventory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proposed Tool Inventory
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#observability-whats-working-and-whats-not" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Observability: What's Working and What's Not
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Observability: What&#39;s Working and What&#39;s Not">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#telemetry-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Telemetry Stack
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-metrics-to-track" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Metrics to Track
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debugging-misroutes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Debugging Misroutes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#asset-discovery-exposing-tools-skills-and-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Asset Discovery: Exposing Tools, Skills, and Agents
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Asset Discovery: Exposing Tools, Skills, and Agents">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#manifest-driven-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manifest-Driven Discovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user-facing-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User-Facing Tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing Strategy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing Strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unit-tests-tool-logic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unit Tests (Tool Logic)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integration-tests-sdk-wiring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integration Tests (SDK Wiring)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#eval-tests-intent-matching-quality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Eval Tests (Intent Matching Quality)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#end-to-end-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        End-to-End Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regression-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regression Testing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#intent-routing-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intent Routing Optimization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Intent Routing Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-intent-matching-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Intent Matching Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optimization-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optimization Strategies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Optimization Strategies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-description-engineering-most-important" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Description Engineering (Most Important)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-include-trigger-phrases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Include Trigger Phrases
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-use-synonyms-and-alternate-terms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Use Synonyms and Alternate Terms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-negative-routing-exclude-mismatches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Negative Routing (Exclude Mismatches)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-parameter-descriptions-as-routing-hints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Parameter Descriptions as Routing Hints
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-skillagent-activation-shortcuts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Skill/Agent Activation Shortcuts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-continuous-improvement-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Continuous Improvement Loop
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#description-template-for-every-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Description Template for Every Tool
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="copilot-extension-for-basecoat-prd-architecture">Copilot Extension for BaseCoat — PRD &amp; Architecture<a class="headerlink" href="#copilot-extension-for-basecoat-prd-architecture" title="Permanent link">&para;</a></h1>
+<h2 id="prd-basecoat-manager-extension">PRD: BaseCoat Manager Extension<a class="headerlink" href="#prd-basecoat-manager-extension" title="Permanent link">&para;</a></h2>
+<h3 id="problem-statement">Problem Statement<a class="headerlink" href="#problem-statement" title="Permanent link">&para;</a></h3>
+<p>BaseCoat has grown to 98 agents, 80 skills, 79 instructions, and 5 prompts.
+Contributors struggle to:</p>
+<ol>
+<li><strong>Discover</strong> what already exists before creating duplicates</li>
+<li><strong>Author</strong> new assets with correct frontmatter, eval companions, and naming conventions</li>
+<li><strong>Validate</strong> changes without memorizing which scripts to run</li>
+<li><strong>Govern</strong> quality — vocabulary compliance, coverage gaps, stale assets</li>
+<li><strong>Monitor</strong> adoption — metrics, alerts, trend regressions</li>
+</ol>
+<p>Today these tasks require CLI access, repo familiarity, and reading scattered docs.
+A Copilot Extension surfaces all of this conversationally in any GitHub-integrated surface.</p>
+<h3 id="target-users">Target Users<a class="headerlink" href="#target-users" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Persona</th>
+<th>Need</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>New contributor</strong></td>
+<td>Discover existing assets, scaffold correctly on first try</td>
+</tr>
+<tr>
+<td><strong>Experienced author</strong></td>
+<td>Run validation, check coverage, get audit feedback</td>
+</tr>
+<tr>
+<td><strong>Platform lead</strong></td>
+<td>Monitor adoption metrics, spot regressions, enforce governance</td>
+</tr>
+<tr>
+<td><strong>Reviewer</strong></td>
+<td>Assess PR quality against BaseCoat conventions</td>
+</tr>
+</tbody>
+</table>
+<h3 id="functional-requirements">Functional Requirements<a class="headerlink" href="#functional-requirements" title="Permanent link">&para;</a></h3>
+<h4 id="p0-must-have">P0 — Must Have<a class="headerlink" href="#p0-must-have" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Capability</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F1</td>
+<td>Asset discovery</td>
+<td>Search agents/skills/instructions/prompts by keyword, type, or tag</td>
+</tr>
+<tr>
+<td>F2</td>
+<td>Asset details</td>
+<td>Retrieve full content, frontmatter, and eval status for any asset</td>
+</tr>
+<tr>
+<td>F3</td>
+<td>Validation</td>
+<td>Run <code>validate-basecoat.ps1</code> and <code>run-tests.ps1</code> and return results</td>
+</tr>
+<tr>
+<td>F4</td>
+<td>Metrics snapshot</td>
+<td>Expose <code>get-latest-metrics</code>, <code>get-history</code>, <code>get-alerts</code> (existing MCP tools)</td>
+</tr>
+<tr>
+<td>F5</td>
+<td>Scaffolding</td>
+<td>Generate new agent/skill/instruction/prompt with correct structure</td>
+</tr>
+</tbody>
+</table>
+<h4 id="p1-should-have">P1 — Should Have<a class="headerlink" href="#p1-should-have" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Capability</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F6</td>
+<td>Governance audit</td>
+<td>Run vocabulary/syntax audits, report violations</td>
+</tr>
+<tr>
+<td>F7</td>
+<td>Dependency graph</td>
+<td>Show which agents reference which skills</td>
+</tr>
+<tr>
+<td>F8</td>
+<td>Coverage report</td>
+<td>Identify assets missing evals, instructions with no applyTo match</td>
+</tr>
+<tr>
+<td>F9</td>
+<td>PR review assist</td>
+<td>Check a PR diff against BaseCoat conventions</td>
+</tr>
+</tbody>
+</table>
+<h4 id="p2-nice-to-have">P2 — Nice to Have<a class="headerlink" href="#p2-nice-to-have" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Capability</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F10</td>
+<td>Auto-fix suggestions</td>
+<td>Propose frontmatter fixes, missing blank lines, etc.</td>
+</tr>
+<tr>
+<td>F11</td>
+<td>Onboarding flow</td>
+<td>Guided walkthrough for first-time contributors</td>
+</tr>
+<tr>
+<td>F12</td>
+<td>Changelog generation</td>
+<td>Summarize recent asset changes for release notes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="non-functional-requirements">Non-Functional Requirements<a class="headerlink" href="#non-functional-requirements" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Latency</strong>: Tool responses &lt; 5s for read operations, &lt; 30s for validation runs</li>
+<li><strong>Availability</strong>: 99.5% uptime (stateless, scale-to-zero acceptable for cost)</li>
+<li><strong>Security</strong>: GitHub App auth; only org members can invoke; no secrets in responses</li>
+<li><strong>Observability</strong>: Structured logging, request tracing, error rate alerting</li>
+</ul>
+<hr />
+<h2 id="architecture-design">Architecture Design<a class="headerlink" href="#architecture-design" title="Permanent link">&para;</a></h2>
+<h3 id="option-a-copilot-sdk-agent">Option A: Copilot SDK Agent<a class="headerlink" href="#option-a-copilot-sdk-agent" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>+-----------------------------------------------------+
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>|  GitHub Copilot Chat (IDE / github.com / CLI)        |
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>+------------------------+----------------------------+
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>                         | Copilot Extension Protocol
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                         v
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>+-----------------------------------------------------+
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>|  BaseCoat Extension Agent (Node.js / @github/copilot-sdk)  |
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>|                                                     |
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>|  +-----------+  +-----------+  +-----------+        |
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>|  | Tool:     |  | Tool:     |  | Tool:     |        |
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>|  | search    |  | validate  |  | scaffold  |        |
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>|  +-----------+  +-----------+  +-----------+        |
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>|  +-----------+  +-----------+  +-----------+        |
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>|  | Tool:     |  | Tool:     |  | Tool:     |        |
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>|  | metrics   |  | audit     |  | details   |        |
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>|  +-----------+  +-----------+  +-----------+        |
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>+------------------------+----------------------------+
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>                         |
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>          +--------------+--------------+
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>          v              v              v
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>   +------------+ +------------+ +------------+
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>   | GitHub API | | BaseCoat   | | Metrics    |
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>   | (repos,    | | Repo       | | (GH Pages) |
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>   |  PRs)      | | (clone)    | |            |
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>   +------------+ +------------+ +------------+
+</code></pre></div>
+<h3 id="option-b-expand-existing-mcp-server">Option B: Expand Existing MCP Server<a class="headerlink" href="#option-b-expand-existing-mcp-server" title="Permanent link">&para;</a></h3>
+<p>Extend <code>mcp/basecoat-metrics/</code> with all new tools. Continue using it as an MCP
+server consumed by VS Code / CLI. No Copilot Extension registration needed.</p>
+<h3 id="option-c-hybrid-mcp-server-thin-extension-proxy-recommended">Option C: Hybrid — MCP Server + Thin Extension Proxy (Recommended)<a class="headerlink" href="#option-c-hybrid-mcp-server-thin-extension-proxy-recommended" title="Permanent link">&para;</a></h3>
+<p>Register a Copilot Extension whose agent backend proxies to the existing MCP
+server for read operations, adding only the Copilot SDK session management layer.
+New write tools (scaffold, validate, create-pr) live in the Extension layer.</p>
+<hr />
+<h2 id="design-debate">Design Debate<a class="headerlink" href="#design-debate" title="Permanent link">&para;</a></h2>
+<h3 id="extension-a-vs-mcp-only-b-vs-hybrid-c">Extension (A) vs. MCP-only (B) vs. Hybrid (C)<a class="headerlink" href="#extension-a-vs-mcp-only-b-vs-hybrid-c" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Criterion</th>
+<th>A: Full Extension</th>
+<th>B: MCP-only</th>
+<th>C: Hybrid</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Reach</strong></td>
+<td>Any Copilot surface (IDE, web, mobile, CLI)</td>
+<td>VS Code + CLI only</td>
+<td>Same as A</td>
+</tr>
+<tr>
+<td><strong>Auth model</strong></td>
+<td>GitHub App OAuth — org-scoped</td>
+<td>Local machine token</td>
+<td>GitHub App delegates to MCP</td>
+</tr>
+<tr>
+<td><strong>Multi-user</strong></td>
+<td>Yes, stateless per-request</td>
+<td>Single-user local</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Existing code reuse</strong></td>
+<td>Must rewrite tools in SDK format</td>
+<td>100% reuse</td>
+<td>High reuse</td>
+</tr>
+<tr>
+<td><strong>Deployment complexity</strong></td>
+<td>New service + GH App registration</td>
+<td>Already deployed</td>
+<td>Two services</td>
+</tr>
+<tr>
+<td><strong>Latency</strong></td>
+<td>Direct (one hop)</td>
+<td>Local (fastest)</td>
+<td>Extra hop</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Recommendation: Option C (Hybrid)</strong></p>
+<p>Rationale:</p>
+<ul>
+<li>The MCP server already has 7 tools (metrics + asset search). Rewriting is waste.</li>
+<li>A thin Extension proxy adds Copilot surface reach without duplicating logic.</li>
+<li>New write-oriented tools (scaffold, validate) live in the Extension layer since
+  they need GitHub API access for PR creation.</li>
+<li>If the SDK matures to support MCP backends natively, the proxy collapses to config.</li>
+</ul>
+<h3 id="repo-clone-vs-github-api-for-asset-access">Repo Clone vs. GitHub API for Asset Access<a class="headerlink" href="#repo-clone-vs-github-api-for-asset-access" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Pros</th>
+<th>Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Shallow clone at startup</td>
+<td>Fast local reads, run scripts natively</td>
+<td>Stale data, disk, cold start</td>
+</tr>
+<tr>
+<td>GitHub Contents API</td>
+<td>Always fresh, no disk</td>
+<td>Rate limits, no script execution</td>
+</tr>
+<tr>
+<td>Hybrid (API for reads, Actions for scripts)</td>
+<td>Best of both</td>
+<td>More moving parts</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Recommendation: GitHub Contents API for reads + dispatch GitHub Actions for validation.</strong></p>
+<p>This keeps the Extension stateless (no clone needed) and leverages existing CI for
+heavy validation, returning results via check-run or workflow artifact.</p>
+<h3 id="scaffolding-server-side-vs-client-side">Scaffolding: Server-side vs. Client-side<a class="headerlink" href="#scaffolding-server-side-vs-client-side" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Server-side</strong>: Extension generates files, creates a PR via GitHub API. User reviews.</li>
+<li><strong>Client-side</strong>: Extension returns file templates; user applies locally.</li>
+</ul>
+<p><strong>Recommendation: Server-side (PR creation)</strong> for the Extension surface (github.com chat).
+For IDE, return workspace edits. Support both via a <code>mode</code> parameter on the scaffold tool.</p>
+<h3 id="counter-argument-is-the-extension-layer-worth-it">Counter-argument: Is the Extension Layer Worth It?<a class="headerlink" href="#counter-argument-is-the-extension-layer-worth-it" title="Permanent link">&para;</a></h3>
+<p>The Copilot SDK is pre-1.0 and the Extension ecosystem is still maturing. If the
+primary users are developers already in VS Code, the MCP server alone covers 90%
+of use cases without the overhead of GitHub App registration, OAuth flows, and a
+proxy layer. The Extension adds value mainly for the github.com chat surface and
+mobile — worth building only if those surfaces have meaningful adoption in your org.</p>
+<hr />
+<h2 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Extension GitHub App needs <code>contents:read</code>, <code>pull_requests:write</code>, <code>actions:write</code></li>
+<li>No <code>contents:write</code> on main — scaffolding always goes through PRs</li>
+<li>Rate-limit tool invocations per user (10 req/min default)</li>
+<li>Sanitize all user inputs before passing to script execution</li>
+<li>Registration and admin handoff runbook: <code>docs/operations/COPILOT_EXTENSION_GITHUB_APP_REGISTRATION.md</code></li>
+</ul>
+<hr />
+<h2 id="oauth-session-management">OAuth &amp; Session Management<a class="headerlink" href="#oauth-session-management" title="Permanent link">&para;</a></h2>
+<p>The Extension uses GitHub OAuth 2.0 to authenticate users and authorize API access on behalf of the BaseCoat Copilot Extension GitHub App.</p>
+<h3 id="key-design-decisions">Key Design Decisions<a class="headerlink" href="#key-design-decisions" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Authentication Model</strong>: GitHub App OAuth (not Personal Access Tokens)</li>
+<li><strong>Session Scope</strong>: Per-user, org-scoped (members of <code>IBuySpy-Shared</code> org only)</li>
+<li><strong>Storage</strong>: In-memory session store with per-instance affinity (no external cache for now)</li>
+<li><strong>CSRF Protection</strong>: Stateful <code>state</code> tokens with 10-minute TTL; SameSite=Strict cookies</li>
+<li><strong>Key Rotation</strong>: Every 4 hours; old tokens are discarded (no token history)</li>
+<li><strong>Org Membership Validation</strong>: All sessions verify user is active member of allowed org</li>
+</ul>
+<h3 id="oauth-flow">OAuth Flow<a class="headerlink" href="#oauth-flow" title="Permanent link">&para;</a></h3>
+<ol>
+<li>User initiates auth → Extension generates random <code>state</code> token (32+ bytes)</li>
+<li>Redirect to GitHub with <code>client_id</code>, <code>state</code>, <code>scope</code></li>
+<li>User approves scope → GitHub redirects to callback URL with <code>code</code> + <code>state</code></li>
+<li>Backend validates <code>state</code> (must exist, not expired) → exchange <code>code</code> for <code>access_token</code></li>
+<li>Fetch user info via GitHub API → verify org membership</li>
+<li>Create user session → store access token in memory</li>
+<li>Return session cookie (HttpOnly, Secure, SameSite=Strict) or Bearer token</li>
+</ol>
+<h3 id="session-lifecycle">Session Lifecycle<a class="headerlink" href="#session-lifecycle" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>TTL</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OAuth callback → session created</td>
+<td>24h</td>
+<td>Start cleanup timer</td>
+</tr>
+<tr>
+<td>Session rotation (background job)</td>
+<td>4h</td>
+<td>Refresh token with GitHub, increment rotation counter</td>
+</tr>
+<tr>
+<td>Session expired or user logs out</td>
+<td>0</td>
+<td>Delete immediately, attempt token revocation at GitHub</td>
+</tr>
+<tr>
+<td>Inactivity timeout (optional)</td>
+<td>1h</td>
+<td>Log and delete if configured</td>
+</tr>
+</tbody>
+</table>
+<h3 id="error-cases">Error Cases<a class="headerlink" href="#error-cases" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Error</th>
+<th>Handling</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Invalid state token</td>
+<td>400 Bad Request; log as potential attack; do not create session</td>
+</tr>
+<tr>
+<td>Expired state token</td>
+<td>400 Bad Request; clean up from store; redirect to authorize</td>
+</tr>
+<tr>
+<td>GitHub API failure (code exchange)</td>
+<td>502 Bad Gateway; log GitHub error; no retry (user must re-authenticate)</td>
+</tr>
+<tr>
+<td>User not in allowed org</td>
+<td>403 Forbidden; log org mismatch; do not create session</td>
+</tr>
+<tr>
+<td>Webhook signature invalid</td>
+<td>401 Unauthorized; log and skip webhook processing</td>
+</tr>
+</tbody>
+</table>
+<h3 id="rate-limiting">Rate Limiting<a class="headerlink" href="#rate-limiting" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>GET /api/github/oauth/authorize</code>: 5 req/min per IP</li>
+<li><code>GET /api/github/oauth/callback</code>: 10 req/min per IP</li>
+<li><code>POST /api/github/session/rotate</code>: 10 req/min per session</li>
+<li><code>POST /api/github/session/logout</code>: 5 req/min per session</li>
+</ul>
+<h3 id="monitoring">Monitoring<a class="headerlink" href="#monitoring" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Track OAuth success rate (target: &gt;95%)</li>
+<li>Alert on state validation failures (&gt;100/hour suggests attack)</li>
+<li>Monitor session rotation latency (p95 &lt; 500ms)</li>
+<li>Measure GitHub API latency (p95 &lt; 5s)</li>
+</ul>
+<p><strong>Full specification</strong>: <code>docs/operations/COPILOT_EXTENSION_OAUTH_FLOW.md</code></p>
+<hr />
+<h2 id="proposed-tool-inventory">Proposed Tool Inventory<a class="headerlink" href="#proposed-tool-inventory" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Source</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>search-assets</code></td>
+<td>MCP (exists)</td>
+<td>Keyword search across all asset types</td>
+</tr>
+<tr>
+<td><code>get-asset-details</code></td>
+<td>MCP (exists)</td>
+<td>Full content of any asset file</td>
+</tr>
+<tr>
+<td><code>get-latest-metrics</code></td>
+<td>MCP (exists)</td>
+<td>Current adoption snapshot</td>
+</tr>
+<tr>
+<td><code>get-history</code></td>
+<td>MCP (exists)</td>
+<td>Historical trend data</td>
+</tr>
+<tr>
+<td><code>get-alerts</code></td>
+<td>MCP (exists)</td>
+<td>Active degradation alerts</td>
+</tr>
+<tr>
+<td><code>validate</code></td>
+<td>Extension (new)</td>
+<td>Dispatch validation workflow, return results</td>
+</tr>
+<tr>
+<td><code>scaffold</code></td>
+<td>Extension (new)</td>
+<td>Generate new asset with correct structure</td>
+</tr>
+<tr>
+<td><code>audit-governance</code></td>
+<td>Extension (new)</td>
+<td>Run vocabulary/syntax audit on an asset</td>
+</tr>
+<tr>
+<td><code>check-coverage</code></td>
+<td>Extension (new)</td>
+<td>Report eval/instruction coverage gaps</td>
+</tr>
+<tr>
+<td><code>create-pr</code></td>
+<td>Extension (new)</td>
+<td>Create PR from scaffolded assets</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="observability-whats-working-and-whats-not">Observability: What's Working and What's Not<a class="headerlink" href="#observability-whats-working-and-whats-not" title="Permanent link">&para;</a></h2>
+<h3 id="telemetry-stack">Telemetry Stack<a class="headerlink" href="#telemetry-stack" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>What it tells you</th>
+<th>How</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SDK built-in</strong></td>
+<td>Session traces, tool invocations, latency, errors</td>
+<td>OpenTelemetry hooks in <code>@github/copilot-sdk</code> — export to Azure Monitor / App Insights</td>
+</tr>
+<tr>
+<td><strong>GitHub Copilot usage API</strong></td>
+<td>Acceptance rates, active users, seat utilization</td>
+<td><code>GET /orgs/{org}/copilot/usage</code> — weekly snapshots</td>
+</tr>
+<tr>
+<td><strong>Extension-level logging</strong></td>
+<td>Which tools fired, input/output, error rates</td>
+<td>Structured JSON logs in Container Apps → Log Analytics</td>
+</tr>
+<tr>
+<td><strong>Intent match failures</strong></td>
+<td>When the Extension is invoked but no tool matches</td>
+<td>Log unmatched prompts; review weekly for description gaps</td>
+</tr>
+</tbody>
+</table>
+<h3 id="key-metrics-to-track">Key Metrics to Track<a class="headerlink" href="#key-metrics-to-track" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Tool invocation rate</strong> — which tools are actually used vs. registered</li>
+<li><strong>Intent-to-tool match rate</strong> — % of user prompts that correctly route to a tool</li>
+<li><strong>Error rate per tool</strong> — surface broken tools quickly</li>
+<li><strong>Latency p50/p95</strong> — especially for validation dispatches</li>
+<li><strong>Fallback rate</strong> — how often the agent gives a generic response instead of using a tool</li>
+</ul>
+<h3 id="debugging-misroutes">Debugging Misroutes<a class="headerlink" href="#debugging-misroutes" title="Permanent link">&para;</a></h3>
+<p>When intents don't map correctly:
+1. Log the raw user prompt + the tool the SDK selected (or "none")
+2. Compare against tool descriptions — refine wording
+3. Track in a <code>misroutes.jsonl</code> file or table for weekly review</p>
+<hr />
+<h2 id="asset-discovery-exposing-tools-skills-and-agents">Asset Discovery: Exposing Tools, Skills, and Agents<a class="headerlink" href="#asset-discovery-exposing-tools-skills-and-agents" title="Permanent link">&para;</a></h2>
+<p>The Extension must make the full BaseCoat inventory queryable:</p>
+<h3 id="manifest-driven-discovery">Manifest-Driven Discovery<a class="headerlink" href="#manifest-driven-discovery" title="Permanent link">&para;</a></h3>
+<p>Generate <code>asset-manifest.json</code> (already exists at repo root) on every commit via CI.
+The Extension reads this manifest at startup — no filesystem scan needed at runtime.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;agents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;api-designer&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;agents/api-designer.agent.md&quot;</span><span class="w"> </span><span class="p">}],</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">&quot;skills&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;azure-container-apps&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;skills/azure-container-apps/SKILL.md&quot;</span><span class="w"> </span><span class="p">}],</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="nt">&quot;instructions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">...</span><span class="p">],</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="nt">&quot;prompts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">...</span><span class="p">]</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="user-facing-tools">User-Facing Tools<a class="headerlink" href="#user-facing-tools" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>search-assets</code></td>
+<td>Full-text keyword search across names + descriptions</td>
+</tr>
+<tr>
+<td><code>list-assets</code></td>
+<td>Filter by type, tag, or visibility</td>
+</tr>
+<tr>
+<td><code>get-asset-details</code></td>
+<td>Return full markdown content of any asset</td>
+</tr>
+<tr>
+<td><code>get-dependencies</code></td>
+<td>Which agents reference which skills (graph query)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="testing-strategy">Testing Strategy<a class="headerlink" href="#testing-strategy" title="Permanent link">&para;</a></h2>
+<h3 id="unit-tests-tool-logic">Unit Tests (Tool Logic)<a class="headerlink" href="#unit-tests-tool-logic" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Mock GitHub API responses and MCP server calls</li>
+<li>Assert each tool returns expected schema for given inputs</li>
+<li>Framework: Jest or Vitest (matches existing MCP server setup)</li>
+</ul>
+<h3 id="integration-tests-sdk-wiring">Integration Tests (SDK Wiring)<a class="headerlink" href="#integration-tests-sdk-wiring" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Use SDK session replay: record a conversation, replay tool invocations</li>
+<li>Verify tool registration, parameter validation, error handling</li>
+<li>Run against a local instance of the Extension</li>
+</ul>
+<h3 id="eval-tests-intent-matching-quality">Eval Tests (Intent Matching Quality)<a class="headerlink" href="#eval-tests-intent-matching-quality" title="Permanent link">&para;</a></h3>
+<p>Critical for this project. Test that natural language prompts route to the correct tool:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># evals/search-assets.eval.yaml</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">prompt</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;What</span><span class="nv"> </span><span class="s">agents</span><span class="nv"> </span><span class="s">do</span><span class="nv"> </span><span class="s">we</span><span class="nv"> </span><span class="s">have</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">API</span><span class="nv"> </span><span class="s">design?&quot;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">expected_tool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">search-assets</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">expected_params</span><span class="p">:</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="nt">query</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;API</span><span class="nv"> </span><span class="s">design&quot;</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;agent&quot;</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">prompt</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Show</span><span class="nv"> </span><span class="s">me</span><span class="nv"> </span><span class="s">the</span><span class="nv"> </span><span class="s">full</span><span class="nv"> </span><span class="s">content</span><span class="nv"> </span><span class="s">of</span><span class="nv"> </span><span class="s">the</span><span class="nv"> </span><span class="s">architecture</span><span class="nv"> </span><span class="s">skill&quot;</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span><span class="nt">expected_tool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">get-asset-details</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">  </span><span class="nt">expected_params</span><span class="p">:</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;skills/architecture/SKILL.md&quot;</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">prompt</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Run</span><span class="nv"> </span><span class="s">validation</span><span class="nv"> </span><span class="s">on</span><span class="nv"> </span><span class="s">the</span><span class="nv"> </span><span class="s">repo&quot;</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">  </span><span class="nt">expected_tool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">validate</span>
+</code></pre></div>
+<h3 id="end-to-end-tests">End-to-End Tests<a class="headerlink" href="#end-to-end-tests" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Spin up Extension locally, send prompts via SDK test client</li>
+<li>Assert full response flow (tool selected → invoked → response rendered)</li>
+<li>Run in CI on every PR to the Extension code</li>
+</ul>
+<h3 id="regression-testing">Regression Testing<a class="headerlink" href="#regression-testing" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Maintain a golden set of 50+ prompt→tool mappings</li>
+<li>CI fails if any mapping regresses (tool description change broke routing)</li>
+</ul>
+<hr />
+<h2 id="intent-routing-optimization">Intent Routing Optimization<a class="headerlink" href="#intent-routing-optimization" title="Permanent link">&para;</a></h2>
+<p>This is the highest-leverage design area. If descriptions are poor, the Extension
+becomes a dumb passthrough that never activates the right tool.</p>
+<h3 id="how-intent-matching-works">How Intent Matching Works<a class="headerlink" href="#how-intent-matching-works" title="Permanent link">&para;</a></h3>
+<ol>
+<li>User prompt enters the Copilot agent runtime</li>
+<li>The SDK matches the prompt against registered tool <strong>descriptions</strong></li>
+<li>Best-matching tool is invoked with extracted parameters</li>
+<li>If no tool scores above threshold → generic LLM response (bad)</li>
+</ol>
+<h3 id="optimization-strategies">Optimization Strategies<a class="headerlink" href="#optimization-strategies" title="Permanent link">&para;</a></h3>
+<h4 id="1-description-engineering-most-important">1. Description Engineering (Most Important)<a class="headerlink" href="#1-description-engineering-most-important" title="Permanent link">&para;</a></h4>
+<p>Write tool descriptions as if they're the <strong>user's voice</strong>, not the developer's:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1">// BAD — developer-centric</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="s2">&quot;Queries the asset manifest for matching entries&quot;</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1">// GOOD — user-intent-centric</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="s2">&quot;Search for BaseCoat agents, skills, instructions, or prompts by keyword.</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="s2">Use when asking &#39;what do we have for X?&#39; or &#39;find skills related to Y&#39;.&quot;</span>
+</code></pre></div>
+<h4 id="2-include-trigger-phrases">2. Include Trigger Phrases<a class="headerlink" href="#2-include-trigger-phrases" title="Permanent link">&para;</a></h4>
+<p>Add example phrasings directly in the description:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nx">description</span><span class="o">:</span><span class="w"> </span><span class="sb">`Run the BaseCoat validation suite (validate-basecoat.ps1 and run-tests.ps1).</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="sb">Triggers: &quot;validate the repo&quot;, &quot;run tests&quot;, &quot;check if my changes pass&quot;,</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="sb">&quot;is the repo healthy?&quot;, &quot;lint basecoat&quot;`</span>
+</code></pre></div>
+<h4 id="3-use-synonyms-and-alternate-terms">3. Use Synonyms and Alternate Terms<a class="headerlink" href="#3-use-synonyms-and-alternate-terms" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nx">description</span><span class="o">:</span><span class="w"> </span><span class="sb">`Create a new BaseCoat asset (agent, skill, instruction, or prompt)</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="sb">with correct frontmatter, directory structure, and eval companion.</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="sb">Also known as: scaffold, generate, bootstrap, initialize, stub out, add new.`</span>
+</code></pre></div>
+<h4 id="4-negative-routing-exclude-mismatches">4. Negative Routing (Exclude Mismatches)<a class="headerlink" href="#4-negative-routing-exclude-mismatches" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nx">description</span><span class="o">:</span><span class="w"> </span><span class="sb">`...</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="sb">Do NOT use for: modifying existing assets, running audits, or viewing metrics.`</span>
+</code></pre></div>
+<h4 id="5-parameter-descriptions-as-routing-hints">5. Parameter Descriptions as Routing Hints<a class="headerlink" href="#5-parameter-descriptions-as-routing-hints" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nx">parameters</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span><span class="nx">description</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Asset type: &#39;agent&#39;, &#39;skill&#39;, &#39;instruction&#39;, or &#39;prompt&#39;&quot;</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span><span class="nx">query</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="nx">description</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Keyword to search for (e.g., &#39;security&#39;, &#39;API&#39;, &#39;azure&#39;, &#39;testing&#39;)&quot;</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="p">}</span>
+</code></pre></div>
+<h4 id="6-skillagent-activation-shortcuts">6. Skill/Agent Activation Shortcuts<a class="headerlink" href="#6-skillagent-activation-shortcuts" title="Permanent link">&para;</a></h4>
+<p>For BaseCoat's own skills/agents that should be directly invocable:</p>
+<ul>
+<li>Register them as <strong>aliases</strong> in the Extension manifest</li>
+<li>Map known skill names to direct invocation (e.g., "use the api-designer agent" → fetch and display that agent's content)</li>
+<li>Maintain a <code>shortcuts.json</code> mapping common phrases to tools</li>
+</ul>
+<h4 id="7-continuous-improvement-loop">7. Continuous Improvement Loop<a class="headerlink" href="#7-continuous-improvement-loop" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>User prompt → Tool selected → User feedback (thumbs up/down)
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>                                      ↓
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>                              Log to misroutes table
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>                                      ↓
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>                          Weekly review → refine descriptions
+</code></pre></div>
+<h3 id="description-template-for-every-tool">Description Template for Every Tool<a class="headerlink" href="#description-template-for-every-tool" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nx">server</span><span class="p">.</span><span class="nx">tool</span><span class="p">(</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="s2">&quot;tool-name&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="p">[</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span><span class="s2">&quot;One-sentence summary of what this does.&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">    </span><span class="s2">&quot;Use when: &lt;2-3 example user intents&gt;.&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">    </span><span class="s2">&quot;Also known as: &lt;synonyms&gt;.&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">    </span><span class="s2">&quot;Do NOT use for: &lt;common mismatches&gt;.&quot;</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">  </span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">),</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="cm">/* params */</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">  </span><span class="nx">handler</span>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="p">);</span>
+</code></pre></div>
+<hr />
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Register GitHub App for the Extension</li>
+<li>Scaffold Extension project using <code>@github/copilot-sdk</code></li>
+<li>Implement thin proxy to existing MCP server for read tools</li>
+<li>Add new write tools (scaffold, validate-dispatch, create-pr)</li>
+<li>Write eval suite (50+ prompt→tool golden mappings) before launch</li>
+<li>Instrument OpenTelemetry for invocation tracking</li>
+<li>Deploy to Azure Container Apps alongside existing MCP server</li>
+<li>Run 2-week pilot with 5 contributors, collect misroute data</li>
+<li>Refine tool descriptions based on pilot telemetry</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; IBuySpy-Shared contributors. Licensed under MIT.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/ivegamsft/basecoat" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "search.highlight", "search.suggest", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

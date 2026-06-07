@@ -1,0 +1,1188 @@
+openapi: 3.0.0
+info:
+  title: Basecoat Portal API
+  description: |
+    Comprehensive governance, security audit, and compliance tracking API for the Basecoat Portal.
+    Supports 1000+ concurrent requests with JWT authentication, role-based access control, and 
+    comprehensive audit logging.
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: api-support@basecoat.dev
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.basecoat.dev/v1
+    description: Production
+  - url: https://staging-api.basecoat.dev/v1
+    description: Staging
+
+tags:
+  - name: Authentication
+    description: User authentication and session management
+  - name: Teams
+    description: Team management and membership
+  - name: Repositories
+    description: Repository governance and configuration
+  - name: Audit & Scans
+    description: Security audits and vulnerability scans
+  - name: Compliance
+    description: Compliance tracking and policy management
+  - name: Simulations
+    description: Security simulation and incident response exercises
+  - name: Reports & Analytics
+    description: Reporting, dashboards, and analytics
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT token issued after successful authentication.
+        Include in Authorization header: Bearer <token>
+    oauth2:
+      type: oauth2
+      description: GitHub OAuth 2.0 integration for repository access
+      flows:
+        authorizationCode:
+          authorizationUrl: https://github.com/login/oauth/authorize
+          tokenUrl: https://github.com/login/oauth/access_token
+          refreshUrl: https://api.basecoat.dev/v1/auth/refresh
+          scopes:
+            repo: Full control of repositories
+            user: Read user profile
+            admin:repo_hook: Full control of repository hooks
+
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - message
+        - timestamp
+      properties:
+        code:
+          type: string
+          description: Machine-readable error code (e.g., AUTH_UNAUTHORIZED, VALIDATION_ERROR)
+        message:
+          type: string
+          description: Human-readable error description
+        details:
+          type: object
+          description: Additional context-specific error details
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp of error occurrence
+        requestId:
+          type: string
+          description: Unique request identifier for debugging
+        retryAfter:
+          type: integer
+          description: Seconds to wait before retry (for 429 Too Many Requests)
+
+    PaginatedResponse:
+      type: object
+      required:
+        - items
+        - pagination
+      properties:
+        items:
+          type: array
+          description: Array of resource items
+        pagination:
+          type: object
+          required:
+            - total
+            - limit
+            - offset
+            - hasMore
+          properties:
+            total:
+              type: integer
+              description: Total count of items
+            limit:
+              type: integer
+              description: Items per page
+            offset:
+              type: integer
+              description: Number of items skipped
+            hasMore:
+              type: boolean
+              description: Whether more items exist
+
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - name
+        - role
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique user identifier
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        role:
+          type: string
+          enum: [admin, auditor, developer, viewer]
+          description: User role within organization
+        avatarUrl:
+          type: string
+          format: uri
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        lastLoginAt:
+          type: string
+          format: date-time
+
+    Team:
+      type: object
+      required:
+        - id
+        - name
+        - members
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 1000
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamMember'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    TeamMember:
+      type: object
+      required:
+        - userId
+        - role
+      properties:
+        userId:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [owner, maintainer, member]
+        joinedAt:
+          type: string
+          format: date-time
+
+    Repository:
+      type: object
+      required:
+        - id
+        - name
+        - url
+        - team
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        url:
+          type: string
+          format: uri
+        team:
+          type: string
+          format: uuid
+        isPrivate:
+          type: boolean
+        language:
+          type: string
+        complianceLevel:
+          type: string
+          enum: [level1, level2, level3, level4]
+        lastAuditAt:
+          type: string
+          format: date-time
+
+    Audit:
+      type: object
+      required:
+        - id
+        - repositoryId
+        - type
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+        repositoryId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [security, compliance, code-quality, dependency]
+        status:
+          type: string
+          enum: [pending, in_progress, completed, failed]
+        findings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Finding'
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+
+    Finding:
+      type: object
+      required:
+        - id
+        - severity
+        - category
+        - description
+      properties:
+        id:
+          type: string
+          format: uuid
+        severity:
+          type: string
+          enum: [critical, high, medium, low, info]
+        category:
+          type: string
+        description:
+          type: string
+        remediation:
+          type: string
+        status:
+          type: string
+          enum: [open, acknowledged, resolved, false_positive]
+
+    CompliancePolicy:
+      type: object
+      required:
+        - id
+        - name
+        - rules
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        framework:
+          type: string
+          enum: [SOC2, ISO27001, HIPAA, GDPR, PCI-DSS, NIST]
+        rules:
+          type: array
+          items:
+            type: object
+        enforcedAt:
+          type: string
+          format: date-time
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login with email and password
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - token
+                  - user
+                  - expiresIn
+                properties:
+                  token:
+                    type: string
+                    description: JWT bearer token
+                  user:
+                    $ref: '#/components/schemas/User'
+                  expiresIn:
+                    type: integer
+                    description: Token expiration in seconds
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Too many login attempts
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh JWT token
+      operationId: refreshToken
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  expiresIn:
+                    type: integer
+        '401':
+          description: Token invalid or expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout current user
+      operationId: logoutUser
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Logout successful
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/oauth/github:
+    get:
+      tags:
+        - Authentication
+      summary: Initiate GitHub OAuth flow
+      operationId: githubOAuth
+      parameters:
+        - name: redirectUri
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uri
+      responses:
+        '302':
+          description: Redirect to GitHub authorization endpoint
+
+  /teams:
+    get:
+      tags:
+        - Teams
+      summary: List all teams
+      operationId: listTeams
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: Teams retrieved successfully
+          headers:
+            X-Rate-Limit-Remaining:
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Team'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - Teams
+      summary: Create new team
+      operationId: createTeam
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 255
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Team created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /teams/{teamId}:
+    get:
+      tags:
+        - Teams
+      summary: Get team details
+      operationId: getTeam
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Team details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+        '404':
+          description: Team not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    patch:
+      tags:
+        - Teams
+      summary: Update team
+      operationId: updateTeam
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '200':
+          description: Team updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Teams
+      summary: Delete team
+      operationId: deleteTeam
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Team deleted
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /teams/{teamId}/members:
+    get:
+      tags:
+        - Teams
+      summary: List team members
+      operationId: listTeamMembers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Team members retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  members:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TeamMember'
+
+    post:
+      tags:
+        - Teams
+      summary: Add member to team
+      operationId: addTeamMember
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - role
+              properties:
+                userId:
+                  type: string
+                  format: uuid
+                role:
+                  type: string
+                  enum: [owner, maintainer, member]
+      responses:
+        '201':
+          description: Member added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamMember'
+        '409':
+          description: Member already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /repositories:
+    get:
+      tags:
+        - Repositories
+      summary: List repositories
+      operationId: listRepositories
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: team
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Repositories retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Repository'
+
+    post:
+      tags:
+        - Repositories
+      summary: Register repository
+      operationId: createRepository
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - url
+                - teamId
+              properties:
+                name:
+                  type: string
+                url:
+                  type: string
+                  format: uri
+                teamId:
+                  type: string
+                  format: uuid
+                complianceLevel:
+                  type: string
+                  enum: [level1, level2, level3, level4]
+      responses:
+        '201':
+          description: Repository registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Repository'
+
+  /repositories/{repositoryId}:
+    get:
+      tags:
+        - Repositories
+      summary: Get repository details
+      operationId: getRepository
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: repositoryId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Repository details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Repository'
+
+    patch:
+      tags:
+        - Repositories
+      summary: Update repository configuration
+      operationId: updateRepository
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: repositoryId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                complianceLevel:
+                  type: string
+      responses:
+        '200':
+          description: Repository updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Repository'
+
+    delete:
+      tags:
+        - Repositories
+      summary: Remove repository
+      operationId: deleteRepository
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: repositoryId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Repository removed
+
+  /audits:
+    get:
+      tags:
+        - Audit & Scans
+      summary: List audits
+      operationId: listAudits
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: repositoryId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, in_progress, completed, failed]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Audits retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Audit'
+
+    post:
+      tags:
+        - Audit & Scans
+      summary: Create audit
+      operationId: createAudit
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - repositoryId
+                - type
+              properties:
+                repositoryId:
+                  type: string
+                  format: uuid
+                type:
+                  type: string
+                  enum: [security, compliance, code-quality, dependency]
+      responses:
+        '201':
+          description: Audit created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Audit'
+
+  /audits/{auditId}:
+    get:
+      tags:
+        - Audit & Scans
+      summary: Get audit details
+      operationId: getAudit
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: auditId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Audit details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Audit'
+
+  /audits/batch:
+    post:
+      tags:
+        - Audit & Scans
+      summary: Create multiple audits
+      operationId: createAuditBatch
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - audits
+              properties:
+                audits:
+                  type: array
+                  minItems: 1
+                  maxItems: 100
+                  items:
+                    type: object
+                    required:
+                      - repositoryId
+                      - type
+                    properties:
+                      repositoryId:
+                        type: string
+                        format: uuid
+                      type:
+                        type: string
+      responses:
+        '201':
+          description: Batch audits created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  created:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Audit'
+                  failed:
+                    type: array
+                    items:
+                      type: object
+
+  /compliance/policies:
+    get:
+      tags:
+        - Compliance
+      summary: List compliance policies
+      operationId: listPolicies
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: framework
+          in: query
+          schema:
+            type: string
+            enum: [SOC2, ISO27001, HIPAA, GDPR, PCI-DSS, NIST]
+      responses:
+        '200':
+          description: Policies retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  policies:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CompliancePolicy'
+
+    post:
+      tags:
+        - Compliance
+      summary: Create compliance policy
+      operationId: createPolicy
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - framework
+              properties:
+                name:
+                  type: string
+                framework:
+                  type: string
+                rules:
+                  type: array
+      responses:
+        '201':
+          description: Policy created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompliancePolicy'
+
+  /compliance/status:
+    get:
+      tags:
+        - Compliance
+      summary: Get compliance status
+      operationId: getComplianceStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: repositoryId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Compliance status retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  repositoryId:
+                    type: string
+                  policies:
+                    type: array
+                  complianceScore:
+                    type: number
+                    minimum: 0
+                    maximum: 100
+
+  /simulations:
+    get:
+      tags:
+        - Simulations
+      summary: List security simulations
+      operationId: listSimulations
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Simulations retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  simulations:
+                    type: array
+                    items:
+                      type: object
+
+    post:
+      tags:
+        - Simulations
+      summary: Create security simulation
+      operationId: createSimulation
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - type
+              properties:
+                name:
+                  type: string
+                type:
+                  type: string
+      responses:
+        '201':
+          description: Simulation created
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /reports:
+    get:
+      tags:
+        - Reports & Analytics
+      summary: List reports
+      operationId: listReports
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Reports retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reports:
+                    type: array
+
+    post:
+      tags:
+        - Reports & Analytics
+      summary: Generate report
+      operationId: generateReport
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - type
+              properties:
+                name:
+                  type: string
+                type:
+                  type: string
+      responses:
+        '201':
+          description: Report generated
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /analytics/dashboard:
+    get:
+      tags:
+        - Reports & Analytics
+      summary: Get analytics dashboard
+      operationId: getDashboard
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard data retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  metrics:
+                    type: object
+                  trends:
+                    type: array
+
+security:
+  - bearerAuth: []

@@ -1,0 +1,2661 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Enterprise shared library of GitHub Copilot customization assets — agents, skills, instructions, and prompts.">
+      
+      
+      
+        <link rel="canonical" href="https://ivegamsft.github.io/basecoat/integrations/untools-integration/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Untools Integration for BaseCoat - BaseCoat</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#untools-integration-for-basecoat" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="BaseCoat" class="md-header__button md-logo" aria-label="BaseCoat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12 16 7.36-5.73L21 9l-9-7-9 7 1.63 1.27M12 18.54l-7.38-5.73L3 14.07l9 7 9-7-1.63-1.27z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BaseCoat
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Untools Integration for BaseCoat
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ivegamsft/basecoat" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ivegamsft/basecoat
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/quick-reference/" class="md-tabs__link">
+          
+  
+  
+  Asset Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/intent-prefixes/" class="md-tabs__link">
+          
+  
+  
+  How-To Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../memory/" class="md-tabs__link">
+          
+  
+  
+  Memory System
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../architecture/overview/" class="md-tabs__link">
+          
+  
+  
+  Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../PHILOSOPHY.md" class="md-tabs__link">
+          
+  
+  
+  About
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="BaseCoat" class="md-nav__button md-logo" aria-label="BaseCoat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12 16 7.36-5.73L21 9l-9-7-9 7 1.63 1.27M12 18.54l-7.38-5.73L3 14.07l9 7 9-7-1.63-1.27z"/></svg>
+
+    </a>
+    BaseCoat
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ivegamsft/basecoat" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ivegamsft/basecoat
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/enterprise-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Enterprise Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/consumer-sync/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Consumer Sync Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Asset Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Asset Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/quick-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/token-context-inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Token Context Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/asset-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/governance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Governance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-To Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How-To Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/intent-prefixes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Intent Prefixes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/integrate-prompt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Started (integrate prompt)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/customization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Make It Your Own
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/custom-agent-authoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create a Custom Agent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/agent-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/version-drift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Drift Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/model-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/token-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Token Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/basecoat-yml/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BaseCoat Config (.basecoat.yml)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/ubb-token-guidance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UBB Token Guidance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory System
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Memory System
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/learning-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learning Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/triage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Triage Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing Learnings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/process/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Process
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../diagrams/architecture-diagrams-index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagrams
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/decisions/adr-001-naming-convention/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-001 Naming Convention
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/multi-agent-orchestration-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Agent Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    About
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    About
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../PHILOSOPHY.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Philosophy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../story/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Story
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/metrics-schema-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dashboard Metrics Schema and Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-untools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Untools?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommendation-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommendation Matrix
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integration Design
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Integration Design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-first-principles-thinking-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. First Principles Thinking Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-ladder-of-inference-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Ladder of Inference Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-six-thinking-hats-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Six Thinking Hats Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-issue-trees-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Issue Trees Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-second-order-thinking-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Second-Order Thinking Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#repository-touch-points-concrete-file-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Repository Touch Points (Concrete File Changes)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Repository Touch Points (Concrete File Changes)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#new-files-to-create" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Files to Create
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#existing-files-to-reference-no-edits-yet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Existing Files to Reference (No edits yet)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation-approach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation Approach
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Validation Approach">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quality-improvements-to-measure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quality Improvements to Measure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation-activities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation Activities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation-and-example-assets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation and Example Assets
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration-roadmap-proposed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integration Roadmap (Proposed)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Integration Roadmap (Proposed)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-0-design-review-current" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 0: Design &amp; Review (Current)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-lightweight-integration-proposed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: Lightweight Integration (Proposed)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-pilot-adoption-future" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: Pilot Adoption (Future)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-full-adoption-future" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3: Full Adoption (Future)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dependencies-learning-curve" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dependencies &amp; Learning Curve
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="untools-integration-for-basecoat">Untools Integration for BaseCoat<a class="headerlink" href="#untools-integration-for-basecoat" title="Permanent link">&para;</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>This document proposes integrating <strong>Untools</strong> (<a href="https://untools.co/">https://untools.co/</a>) decision frameworks into BaseCoat's prompt engineering and agent authoring workflows. Untools provides curated, practical thinking tools and decision-making frameworks that can improve the quality, clarity, and rigor of BaseCoat agent design and prompt optimization.</p>
+<h3 id="why-untools">Why Untools?<a class="headerlink" href="#why-untools" title="Permanent link">&para;</a></h3>
+<p>BaseCoat agents and prompts are designed to help operators think through complex problems. By embedding Untools frameworks into the agent instruction sets and decision workflows, we can:</p>
+<ul>
+<li><strong>Increase prompt clarity</strong> — systematically eliminate ambiguity through first-principles thinking</li>
+<li><strong>Reduce bias</strong> — surface hidden assumptions using the Ladder of Inference</li>
+<li><strong>Improve design quality</strong> — apply structured thinking patterns to agent workflows</li>
+<li><strong>Enable better decision-making</strong> — provide operators with proven mental models for reasoning about complex systems</li>
+</ul>
+<hr />
+<h2 id="recommendation-matrix">Recommendation Matrix<a class="headerlink" href="#recommendation-matrix" title="Permanent link">&para;</a></h2>
+<p>The following table evaluates the top 5 Untools frameworks for integration into BaseCoat workflows:</p>
+<table>
+<thead>
+<tr>
+<th>Framework</th>
+<th>Where to Apply</th>
+<th>Primary Benefit</th>
+<th>Secondary Benefit</th>
+<th>Tradeoff</th>
+<th>Integration Path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>First Principles Thinking</strong></td>
+<td><code>prompt-engineer.agent.md</code>, new instruction <code>prompt-design.instructions.md</code></td>
+<td>Systematically break down prompt requirements to core components; eliminate inherited assumptions</td>
+<td>Reduces cognitive load on prompt engineers by providing a structured decomposition method</td>
+<td>Requires initial discipline; can feel slow for simple prompts</td>
+<td>Add workflow step to prompt-engineer agent</td>
+</tr>
+<tr>
+<td><strong>Ladder of Inference</strong></td>
+<td><code>agent-designer.agent.md</code>, <code>guardrail.agent.md</code>, new instruction <code>assumption-validation.instructions.md</code></td>
+<td>Surface hidden assumptions in agent design; validate reasoning chains in guardrails</td>
+<td>Improves clarity of agent decision logic; easier to debug and maintain agent behavior</td>
+<td>Adds explicit validation step; requires clarity on observable data vs. interpretation</td>
+<td>Extend agent workflow with assumption-surfacing checklist</td>
+</tr>
+<tr>
+<td><strong>Six Thinking Hats</strong></td>
+<td><code>solution-architect.agent.md</code>, new instruction <code>multi-perspective-design.instructions.md</code></td>
+<td>Structure multi-perspective design reviews (facts, risks, benefits, creativity, process)</td>
+<td>Enables balanced evaluation of architectural tradeoffs; reduces groupthink in design decisions</td>
+<td>Introduces formality that may feel heavyweight for simple decisions</td>
+<td>Create structured review template; reference in agent</td>
+</tr>
+<tr>
+<td><strong>Issue Trees</strong></td>
+<td><code>sprint-planner.agent.md</code>, <code>solution-architect.agent.md</code>, new instruction <code>problem-decomposition.instructions.md</code></td>
+<td>Systematically decompose complex problems into actionable sub-problems; aligns with sprint goal-to-issues workflow</td>
+<td>Improves sprint planning clarity; helps detect missing acceptance criteria</td>
+<td>Overhead for well-scoped problems; can become overly granular</td>
+<td>Extend sprint-planner workflow; link to existing agent output</td>
+</tr>
+<tr>
+<td><strong>Second-Order Thinking</strong></td>
+<td><code>release-impact-advisor.agent.md</code>, <code>solution-architect.agent.md</code>, new instruction <code>consequence-mapping.instructions.md</code></td>
+<td>Anticipate long-term consequences of design and deployment decisions; improve risk assessment</td>
+<td>Strengthens release readiness evaluation; reduces post-deployment surprises</td>
+<td>Can cause analysis paralysis; requires discipline to act after analysis</td>
+<td>Add checklist to release-impact-advisor workflow</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="integration-design">Integration Design<a class="headerlink" href="#integration-design" title="Permanent link">&para;</a></h2>
+<h3 id="1-first-principles-thinking-integration">1. First Principles Thinking Integration<a class="headerlink" href="#1-first-principles-thinking-integration" title="Permanent link">&para;</a></h3>
+<p><strong>Purpose:</strong> Break down complex prompt requirements to fundamental truths, reducing inherited assumptions and improving clarity.</p>
+<p><strong>Integration Points:</strong></p>
+<ul>
+<li><strong>File:</strong> <code>agents/prompt-engineer.agent.md</code> — enhance workflow steps 1-2</li>
+<li><strong>New Asset:</strong> Create <code>instructions/prompt-design.instructions.md</code> with explicit first-principles template</li>
+<li><strong>Trigger:</strong> When a prompt requires revision or is handling edge cases</li>
+</ul>
+<p><strong>Touch Points in Repository:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>agents/prompt-engineer.agent.md
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  └─ Workflow step 1 (Understand intent)
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>     └─ Add: &quot;Apply First Principles: break the desired behavior into atomic components&quot;
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>instructions/prompt-design.instructions.md (NEW)
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  └─ Section: &quot;First Principles Prompt Decomposition&quot;
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>     └─ Template: &quot;What is the core objective? What minimal knowledge does the model need? 
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>                   What are the observable inputs and required outputs?&quot;
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>prompts/ (reference examples, e.g., prompt-registry entries)
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>  └─ Link to first-principles checklist
+</code></pre></div>
+<p><strong>Usage Pattern (Optional):</strong></p>
+<p>Before authoring a prompt, apply this 5-step decomposition:</p>
+<ol>
+<li><strong>State the problem without jargon</strong> — avoid technical terms; describe in plain language</li>
+<li><strong>List all assumptions</strong> — what are you assuming about the model's knowledge, context, or constraints?</li>
+<li><strong>Challenge each assumption</strong> — which are necessary? Which can be removed?</li>
+<li><strong>Identify minimal requirements</strong> — what information must the prompt contain to achieve the objective?</li>
+<li><strong>Reconstruct the prompt</strong> — write a focused, minimal prompt that embeds only the essential elements</li>
+</ol>
+<hr />
+<h3 id="2-ladder-of-inference-integration">2. Ladder of Inference Integration<a class="headerlink" href="#2-ladder-of-inference-integration" title="Permanent link">&para;</a></h3>
+<p><strong>Purpose:</strong> Surface hidden assumptions in agent design and guard against biased reasoning chains.</p>
+<p><strong>Integration Points:</strong></p>
+<ul>
+<li><strong>File:</strong> <code>agents/agent-designer.agent.md</code> — enhance workflow steps 1 and 4</li>
+<li><strong>File:</strong> <code>agents/guardrail.agent.md</code> — add assumption validation to guardrail checks</li>
+<li><strong>New Asset:</strong> Create <code>instructions/assumption-validation.instructions.md</code></li>
+<li><strong>Trigger:</strong> When designing a new agent or validating guardrail logic</li>
+</ul>
+<p><strong>Touch Points in Repository:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>agents/agent-designer.agent.md
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  └─ Workflow step 1 (Clarify scope)
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>     └─ Add: &quot;Ladder of Inference check: What observable behaviors define success? 
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>              What assumptions are we making about user intent?&quot;
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  └─ Workflow step 4 (Write instruction body)
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>     └─ Add: &quot;Test reasoning chains: Can we trace from observable input → assumption → conclusion?&quot;
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>agents/guardrail.agent.md
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>  └─ Validation rules
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>     └─ Add: &quot;Assumption check: Are guardrail rules based on observable data or inference?&quot;
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>instructions/assumption-validation.instructions.md (NEW)
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>  └─ 7-rung Ladder template: Observable data → Selection → Meaning → Assumptions → 
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>                             Conclusions → Beliefs → Actions
+</code></pre></div>
+<p><strong>Usage Pattern (Optional):</strong></p>
+<p>When reviewing agent design or guardrail rules, climb the Ladder for each key decision:</p>
+<table>
+<thead>
+<tr>
+<th>Rung</th>
+<th>Question</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Observable data</td>
+<td>What did we observe?</td>
+<td>"Agent output was less than 100 tokens"</td>
+</tr>
+<tr>
+<td>2. Select data</td>
+<td>What details did we focus on?</td>
+<td>"Focused on token count; ignored semantic coherence"</td>
+</tr>
+<tr>
+<td>3. Add meaning</td>
+<td>What meaning did we assign?</td>
+<td>"Assumes brevity indicates poor quality"</td>
+</tr>
+<tr>
+<td>4. Make assumptions</td>
+<td>What must be true?</td>
+<td>"Assumes all users prefer verbose outputs"</td>
+</tr>
+<tr>
+<td>5. Draw conclusions</td>
+<td>What do we conclude?</td>
+<td>"This prompt design fails for concise tasks"</td>
+</tr>
+<tr>
+<td>6. Adopt beliefs</td>
+<td>What do we now believe?</td>
+<td>"This agent cannot handle constraint-driven tasks"</td>
+</tr>
+<tr>
+<td>7. Take action</td>
+<td>What action results?</td>
+<td>"Reject this agent design; redesign the prompt"</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Challenge each rung:</strong> Is the step justified? What evidence supports it? Can we reframe it?</p>
+<hr />
+<h3 id="3-six-thinking-hats-integration">3. Six Thinking Hats Integration<a class="headerlink" href="#3-six-thinking-hats-integration" title="Permanent link">&para;</a></h3>
+<p><strong>Purpose:</strong> Structure multi-perspective design reviews to improve architectural decision quality.</p>
+<p><strong>Integration Points:</strong></p>
+<ul>
+<li><strong>File:</strong> <code>agents/solution-architect.agent.md</code> — enhance design review workflow</li>
+<li><strong>File:</strong> <code>agents/release-impact-advisor.agent.md</code> — add perspective-based risk assessment</li>
+<li><strong>New Asset:</strong> Create <code>instructions/multi-perspective-design.instructions.md</code></li>
+<li><strong>Trigger:</strong> When reviewing architectural tradeoffs or release readiness</li>
+</ul>
+<p><strong>Touch Points in Repository:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>agents/solution-architect.agent.md
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  └─ Workflow (add design review step)
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>     └─ &quot;Apply Six Thinking Hats: systematically review from facts, risks, benefits, 
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>        creativity, and process perspectives&quot;
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>agents/release-impact-advisor.agent.md
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>  └─ Impact assessment workflow
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>     └─ Embed hat-based perspective check: facts about the release, risks (black), 
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>        opportunities (yellow), creative mitigations (green)
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>instructions/multi-perspective-design.instructions.md (NEW)
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>  └─ 6 Hats template with guided questions for each color
+</code></pre></div>
+<p><strong>Usage Pattern (Optional):</strong></p>
+<p>When evaluating an architectural decision, structure review using 6 Hats:</p>
+<table>
+<thead>
+<tr>
+<th>Hat</th>
+<th>Focus</th>
+<th>Key Questions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>White Hat</strong> (Facts)</td>
+<td>Data, information</td>
+<td>What do we know? What data do we have? What's missing?</td>
+</tr>
+<tr>
+<td><strong>Red Hat</strong> (Feelings)</td>
+<td>Intuition, emotions</td>
+<td>How do stakeholders feel? What's the gut reaction?</td>
+</tr>
+<tr>
+<td><strong>Black Hat</strong> (Risks)</td>
+<td>Critical thinking</td>
+<td>What could go wrong? What are the pitfalls? Costs?</td>
+</tr>
+<tr>
+<td><strong>Yellow Hat</strong> (Benefits)</td>
+<td>Optimism, value</td>
+<td>What are the advantages? How does this create value?</td>
+</tr>
+<tr>
+<td><strong>Green Hat</strong> (Creativity)</td>
+<td>New ideas</td>
+<td>What alternatives exist? How can we overcome obstacles?</td>
+</tr>
+<tr>
+<td><strong>Blue Hat</strong> (Process)</td>
+<td>Control, planning</td>
+<td>What is the decision process? What's the next step?</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Process:</strong> Define the decision, then have reviewers "wear" each hat sequentially. Document findings from each perspective. Synthesize for final recommendation.</p>
+<hr />
+<h3 id="4-issue-trees-integration">4. Issue Trees Integration<a class="headerlink" href="#4-issue-trees-integration" title="Permanent link">&para;</a></h3>
+<p><strong>Purpose:</strong> Decompose complex problems into actionable sub-problems; strengthen sprint planning.</p>
+<p><strong>Integration Points:</strong></p>
+<ul>
+<li><strong>File:</strong> <code>agents/sprint-planner.agent.md</code> — enhance goal decomposition workflow</li>
+<li><strong>File:</strong> <code>agents/solution-architect.agent.md</code> — add problem decomposition for architecture work</li>
+<li><strong>New Asset:</strong> Create <code>instructions/problem-decomposition.instructions.md</code></li>
+<li><strong>Trigger:</strong> When planning a sprint goal or defining a complex project scope</li>
+</ul>
+<p><strong>Touch Points in Repository:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>agents/sprint-planner.agent.md
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  └─ Workflow step 1 (Accept sprint goal)
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>     └─ Add: &quot;Decompose using Issue Tree: break goal into primary branches (major components), 
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>        then secondary branches (actionable tasks)&quot;
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>  └─ Output
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>     └─ Include: Issue tree visualization (text-based) showing decomposition hierarchy
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>agents/solution-architect.agent.md
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>  └─ System design workflow
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>     └─ Add: &quot;Map architecture to issue tree; each tree branch aligns with an architecture domain&quot;
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>instructions/problem-decomposition.instructions.md (NEW)
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>  └─ Issue Tree template: root problem → primary branches → secondary branches → actionable leaves
+</code></pre></div>
+<p><strong>Usage Pattern (Optional):</strong></p>
+<p>To decompose a sprint goal using Issue Trees:</p>
+<ol>
+<li><strong>Start with the root</strong> — write the main problem or goal at the top</li>
+<li><strong>Identify primary branches</strong> — what are the major dimensions or sub-problems? (e.g., "Why is product not selling?" → Marketing, Product, Market)</li>
+<li><strong>Secondary decomposition</strong> — for each branch, what are the next-level causes or components?</li>
+<li><strong>Actionable leaves</strong> — continue subdividing until each leaf represents a task that can be assigned and estimated</li>
+<li><strong>Map to issues</strong> — create GitHub issues for each leaf; group leaves into epic/parent issues for branches</li>
+</ol>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Sprint Goal: &quot;Improve agent observability&quot;
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>├─ Logging
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>│  ├─ Add structured logging to agent runtime
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>│  ├─ Emit logs to central telemetry system
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>│  └─ Create log dashboard
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>├─ Metrics
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>│  ├─ Instrument agent decision points
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>│  ├─ Track response latency and tokens
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>│  └─ Set up metric alerts
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>└─ Tracing
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>   ├─ Add distributed tracing headers
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>   ├─ Export traces to observability backend
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>   └─ Create trace visualization UI
+</code></pre></div>
+<hr />
+<h3 id="5-second-order-thinking-integration">5. Second-Order Thinking Integration<a class="headerlink" href="#5-second-order-thinking-integration" title="Permanent link">&para;</a></h3>
+<p><strong>Purpose:</strong> Anticipate long-term consequences of design and deployment decisions; improve risk assessment and release readiness.</p>
+<p><strong>Integration Points:</strong></p>
+<ul>
+<li><strong>File:</strong> <code>agents/release-impact-advisor.agent.md</code> — enhance consequence analysis</li>
+<li><strong>File:</strong> <code>agents/solution-architect.agent.md</code> — add long-term consequence consideration to design reviews</li>
+<li><strong>New Asset:</strong> Create <code>instructions/consequence-mapping.instructions.md</code></li>
+<li><strong>Trigger:</strong> When assessing release impact or designing long-lived systems</li>
+</ul>
+<p><strong>Touch Points in Repository:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>agents/release-impact-advisor.agent.md
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  └─ Workflow (Impact Assessment)
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>     └─ Add step: &quot;Second-Order Consequences: For each first-order effect, ask: &#39;And then what? 
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>        What second and third-order consequences could emerge?&#39;&quot;
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>  └─ Risk Assessment output
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>     └─ Include: Consequence chain for each identified risk
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>agents/solution-architect.agent.md
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>  └─ Design review checklist
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>     └─ Add: &quot;Long-term consequence check: How does this design evolve over 1, 3, 5 years?&quot;
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>instructions/consequence-mapping.instructions.md (NEW)
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>  └─ Consequence chain template: First-order → Second-order → Third-order effects
+</code></pre></div>
+<p><strong>Usage Pattern (Optional):</strong></p>
+<p>When evaluating a release or design decision, apply consequence mapping:</p>
+<ol>
+<li><strong>Identify the immediate action</strong> — e.g., "Deploy new prompt engineering workflow"</li>
+<li><strong>First-order effects</strong> — what happens immediately? (e.g., "Prompts become clearer, users report higher satisfaction")</li>
+<li><strong>Second-order effects</strong> — what ripples from the first-order effects? (e.g., "Prompt engineers spend more time on edge cases; sprint velocity decreases temporarily")</li>
+<li><strong>Third-order effects</strong> — what emerges from the second-order effects? (e.g., "Edge case coverage improves; fewer bugs in production over time; technical debt decreases")</li>
+<li><strong>Assess net benefit</strong> — do second and third-order effects strengthen or undermine the first-order goal?</li>
+</ol>
+<hr />
+<h2 id="repository-touch-points-concrete-file-changes">Repository Touch Points (Concrete File Changes)<a class="headerlink" href="#repository-touch-points-concrete-file-changes" title="Permanent link">&para;</a></h2>
+<h3 id="new-files-to-create">New Files to Create<a class="headerlink" href="#new-files-to-create" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>instructions/prompt-design.instructions.md</code></td>
+<td>First Principles for prompt engineering</td>
+<td>Design phase</td>
+</tr>
+<tr>
+<td><code>instructions/assumption-validation.instructions.md</code></td>
+<td>Ladder of Inference guide</td>
+<td>Design phase</td>
+</tr>
+<tr>
+<td><code>instructions/multi-perspective-design.instructions.md</code></td>
+<td>Six Thinking Hats template</td>
+<td>Design phase</td>
+</tr>
+<tr>
+<td><code>instructions/problem-decomposition.instructions.md</code></td>
+<td>Issue Trees decomposition guide</td>
+<td>Design phase</td>
+</tr>
+<tr>
+<td><code>instructions/consequence-mapping.instructions.md</code></td>
+<td>Second-Order Thinking checklist</td>
+<td>Design phase</td>
+</tr>
+</tbody>
+</table>
+<h3 id="existing-files-to-reference-no-edits-yet">Existing Files to Reference (No edits yet)<a class="headerlink" href="#existing-files-to-reference-no-edits-yet" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Integration</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>agents/prompt-engineer.agent.md</code></td>
+<td>First Principles Thinking</td>
+<td>Enhance step 1 &amp; 2 of workflow</td>
+</tr>
+<tr>
+<td><code>agents/agent-designer.agent.md</code></td>
+<td>Ladder of Inference</td>
+<td>Enhance step 1 &amp; 4; improve assumption clarity</td>
+</tr>
+<tr>
+<td><code>agents/solution-architect.agent.md</code></td>
+<td>Six Thinking Hats + Second-Order Thinking + Issue Trees</td>
+<td>Multi-framework support for architecture work</td>
+</tr>
+<tr>
+<td><code>agents/sprint-planner.agent.md</code></td>
+<td>Issue Trees</td>
+<td>Enhance goal decomposition</td>
+</tr>
+<tr>
+<td><code>agents/release-impact-advisor.agent.md</code></td>
+<td>Six Thinking Hats + Second-Order Thinking</td>
+<td>Improve impact assessment rigor</td>
+</tr>
+<tr>
+<td><code>agents/guardrail.agent.md</code></td>
+<td>Ladder of Inference</td>
+<td>Add assumption validation to guardrail checks</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="validation-approach">Validation Approach<a class="headerlink" href="#validation-approach" title="Permanent link">&para;</a></h2>
+<h3 id="quality-improvements-to-measure">Quality Improvements to Measure<a class="headerlink" href="#quality-improvements-to-measure" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Prompt Clarity</strong></li>
+<li>Metric: Reduce "ambiguous prompt" issues filed against agents by &gt;20%</li>
+<li>
+<p>Method: Track issues with "prompt unclear", "conflicting instructions", "edge case not covered"</p>
+</li>
+<li>
+<p><strong>Assumption Clarity</strong></p>
+</li>
+<li>Metric: Increase documentation of explicit assumptions in agent design by &gt;50%</li>
+<li>
+<p>Method: Audit agent files for "Assumptions" sections; compare before/after</p>
+</li>
+<li>
+<p><strong>Decision Quality</strong></p>
+</li>
+<li>Metric: Decrease post-release incidents caused by unforeseen consequences by &gt;30%</li>
+<li>
+<p>Method: Track incident RCAs that cite "unintended side effect" or "second-order impact"</p>
+</li>
+<li>
+<p><strong>Design Speed</strong></p>
+</li>
+<li>Metric: Maintain or improve time-to-first-iteration for new agents (no regression)</li>
+<li>Method: Measure from issue-open to agent-authored-and-tested</li>
+</ol>
+<h3 id="validation-activities">Validation Activities<a class="headerlink" href="#validation-activities" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Phase 1 (Pilot):</strong> Apply frameworks to 2 new agent designs (e.g., <code>solution-architect</code>, <code>release-impact-advisor</code>); collect feedback</li>
+<li><strong>Phase 2 (Adoption):</strong> Embed frameworks in instruction files; reference in agent workflows</li>
+<li><strong>Phase 3 (Measure):</strong> Track quality metrics; adjust guidance based on adoption feedback</li>
+<li><strong>Phase 4 (Refine):</strong> Update instruction files with patterns that worked; deprecate frameworks that added overhead</li>
+</ul>
+<h3 id="documentation-and-example-assets">Documentation and Example Assets<a class="headerlink" href="#documentation-and-example-assets" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Create example prompts/agents annotated with framework application</li>
+<li>Add "Before/After" examples showing how each framework improved clarity</li>
+<li>Build a "Untools decision tree" showing which framework to use for which problem</li>
+<li>Maintain a decision log in agent files showing which frameworks were applied and why</li>
+</ul>
+<hr />
+<h2 id="integration-roadmap-proposed">Integration Roadmap (Proposed)<a class="headerlink" href="#integration-roadmap-proposed" title="Permanent link">&para;</a></h2>
+<h3 id="phase-0-design-review-current">Phase 0: Design &amp; Review (Current)<a class="headerlink" href="#phase-0-design-review-current" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[x] Evaluate 3-5 Untools frameworks for fit</li>
+<li>[x] Create this recommendation matrix and integration design</li>
+<li>[x] Identify concrete repository touch points</li>
+<li>[ ] Get stakeholder feedback on framework selections</li>
+</ul>
+<h3 id="phase-1-lightweight-integration-proposed">Phase 1: Lightweight Integration (Proposed)<a class="headerlink" href="#phase-1-lightweight-integration-proposed" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Create 5 instruction files (prompt-design, assumption-validation, multi-perspective-design, problem-decomposition, consequence-mapping)</li>
+<li>Add 1-2 sentences per framework to relevant agent files (references, not detailed instructions)</li>
+<li>Run markdown linting and tests</li>
+<li>Merge to main</li>
+</ul>
+<h3 id="phase-2-pilot-adoption-future">Phase 2: Pilot Adoption (Future)<a class="headerlink" href="#phase-2-pilot-adoption-future" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Apply frameworks to 2-3 new agent designs</li>
+<li>Collect adoption feedback; refine instruction clarity</li>
+<li>Track early metrics (time-to-design, assumption clarity)</li>
+</ul>
+<h3 id="phase-3-full-adoption-future">Phase 3: Full Adoption (Future)<a class="headerlink" href="#phase-3-full-adoption-future" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Embed frameworks into agent workflow steps (e.g., prompt-engineer workflow now explicitly mentions First Principles)</li>
+<li>Create training materials and examples</li>
+<li>Monitor quality metrics; iterate on framework effectiveness</li>
+</ul>
+<hr />
+<h2 id="dependencies-learning-curve">Dependencies &amp; Learning Curve<a class="headerlink" href="#dependencies-learning-curve" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Untools.co access:</strong> Frameworks are free; detailed templates available on Untools (optional reference)</li>
+<li><strong>Learning curve:</strong> Minimal for operators familiar with decision-making frameworks; ~1–2 hours per framework for deep understanding</li>
+<li><strong>Adoption overhead:</strong> Low; frameworks are optional guidance, not mandatory. Operators can apply selectively.</li>
+</ul>
+<hr />
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Share this document</strong> with BaseCoat stakeholders for feedback</li>
+<li><strong>Select a pilot agent</strong> for first-phase integration (recommend <code>solution-architect.agent.md</code> or <code>prompt-engineer.agent.md</code>)</li>
+<li><strong>Create instruction files</strong> per Phase 1 roadmap</li>
+<li><strong>Update agent workflow steps</strong> to reference frameworks (non-breaking changes)</li>
+<li><strong>Pilot adoption</strong> with a team and collect feedback</li>
+<li><strong>Measure quality improvements</strong> over next sprint cycle</li>
+<li><strong>Iterate</strong> based on adoption feedback</li>
+</ol>
+<hr />
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Untools:</strong> <a href="https://untools.co/">https://untools.co/</a></li>
+<li><strong>First Principles Thinking:</strong> Fundamental decomposition for problem-solving</li>
+<li><strong>Ladder of Inference:</strong> Surface hidden assumptions and biases</li>
+<li><strong>Six Thinking Hats:</strong> Multi-perspective decision-making framework</li>
+<li><strong>Issue Trees:</strong> Hierarchical problem decomposition</li>
+<li><strong>Second-Order Thinking:</strong> Long-term consequence analysis</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; IBuySpy-Shared contributors. Licensed under MIT.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/ivegamsft/basecoat" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "search.highlight", "search.suggest", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

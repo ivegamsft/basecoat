@@ -1,0 +1,23 @@
+name: Bootstrap Base Coat
+
+on:
+  workflow_dispatch:
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Download approved Base Coat release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download v0.3.0 --repo YOUR-ORG/basecoat --pattern 'base-coat-*.tar.gz' --dir .basecoat-download
+          archive=$(find .basecoat-download -name 'base-coat-*.tar.gz' | head -n 1)
+          mkdir -p .github
+          tar -xzf "$archive" -C .github
+
+      - name: Show imported version
+        run: cat .github/base-coat/version.json

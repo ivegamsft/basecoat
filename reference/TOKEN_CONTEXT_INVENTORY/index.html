@@ -1,0 +1,3787 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Enterprise shared library of GitHub Copilot customization assets — agents, skills, instructions, and prompts.">
+      
+      
+      
+        <link rel="canonical" href="https://ivegamsft.github.io/basecoat/reference/TOKEN_CONTEXT_INVENTORY/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Token Context Inventory - BaseCoat</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#token-context-inventory" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="BaseCoat" class="md-header__button md-logo" aria-label="BaseCoat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12 16 7.36-5.73L21 9l-9-7-9 7 1.63 1.27M12 18.54l-7.38-5.73L3 14.07l9 7 9-7-1.63-1.27z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BaseCoat
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Token Context Inventory
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ivegamsft/basecoat" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ivegamsft/basecoat
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../quick-reference/" class="md-tabs__link">
+          
+  
+  
+  Asset Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/intent-prefixes/" class="md-tabs__link">
+          
+  
+  
+  How-To Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../memory/" class="md-tabs__link">
+          
+  
+  
+  Memory System
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../architecture/overview/" class="md-tabs__link">
+          
+  
+  
+  Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../PHILOSOPHY.md" class="md-tabs__link">
+          
+  
+  
+  About
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="BaseCoat" class="md-nav__button md-logo" aria-label="BaseCoat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12 16 7.36-5.73L21 9l-9-7-9 7 1.63 1.27M12 18.54l-7.38-5.73L3 14.07l9 7 9-7-1.63-1.27z"/></svg>
+
+    </a>
+    BaseCoat
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ivegamsft/basecoat" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ivegamsft/basecoat
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/enterprise-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Enterprise Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/consumer-sync/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Consumer Sync Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Asset Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Asset Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quick-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../token-context-inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Token Context Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../asset-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../governance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Governance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-To Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How-To Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/intent-prefixes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Intent Prefixes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/integrate-prompt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Started (integrate prompt)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/customization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Make It Your Own
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/custom-agent-authoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create a Custom Agent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/agent-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/version-drift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Drift Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/model-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/token-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Token Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/basecoat-yml/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BaseCoat Config (.basecoat.yml)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/ubb-token-guidance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UBB Token Guidance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory System
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Memory System
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/learning-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learning Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/triage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Triage Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing Learnings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/process/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Process
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../diagrams/architecture-diagrams-index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagrams
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/decisions/adr-001-naming-convention/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-001 Naming Convention
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/multi-agent-orchestration-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Agent Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    About
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    About
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../PHILOSOPHY.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Philosophy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../story/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Story
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../metrics-schema-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dashboard Metrics Schema and Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skills" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skills
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instructions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instructions
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="token-context-inventory">Token Context Inventory<a class="headerlink" href="#token-context-inventory" title="Permanent link">&para;</a></h1>
+<p>Generated as a standalone inventory (no edits to agent/skill/instruction files).</p>
+<ul>
+<li>Generated: 2026-06-07 16:41:14 +0000</li>
+<li>Estimation method: <code>approx_tokens = round(word_count × 1.35)</code> (same heuristic used in <code>scripts/validate-basecoat.ps1</code>).</li>
+<li>Scope: <code>agents/*.agent.md</code>, <code>skills/*/SKILL.md</code>, <code>instructions/*.instructions.md</code>.</li>
+</ul>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th style="text-align: right;">Count</th>
+<th style="text-align: right;">Total Words</th>
+<th style="text-align: right;">Total Approx Tokens</th>
+<th style="text-align: right;">Avg Approx Tokens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agent</td>
+<td style="text-align: right;">105</td>
+<td style="text-align: right;">77049</td>
+<td style="text-align: right;">104018</td>
+<td style="text-align: right;">991</td>
+</tr>
+<tr>
+<td>Skill</td>
+<td style="text-align: right;">104</td>
+<td style="text-align: right;">23707</td>
+<td style="text-align: right;">32004</td>
+<td style="text-align: right;">308</td>
+</tr>
+<tr>
+<td>Instruction</td>
+<td style="text-align: right;">90</td>
+<td style="text-align: right;">47298</td>
+<td style="text-align: right;">63852</td>
+<td style="text-align: right;">709</td>
+</tr>
+<tr>
+<td><strong>All</strong></td>
+<td style="text-align: right;">299</td>
+<td style="text-align: right;">148054</td>
+<td style="text-align: right;">199874</td>
+<td style="text-align: right;">668</td>
+</tr>
+</tbody>
+</table>
+<h2 id="agents">Agents<a class="headerlink" href="#agents" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Location</th>
+<th style="text-align: right;">Words</th>
+<th style="text-align: right;">Approx Tokens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>basecoat-50-security-container-security</td>
+<td><code>agents/basecoat-50-security-container-security.agent.md</code></td>
+<td style="text-align: right;">1486</td>
+<td style="text-align: right;">2006</td>
+</tr>
+<tr>
+<td>basecoat-10-core-agentops</td>
+<td><code>agents/basecoat-10-core-agentops.agent.md</code></td>
+<td style="text-align: right;">1464</td>
+<td style="text-align: right;">1976</td>
+</tr>
+<tr>
+<td>basecoat-30-ai-containerization-planner</td>
+<td><code>agents/basecoat-30-ai-containerization-planner.agent.md</code></td>
+<td style="text-align: right;">1461</td>
+<td style="text-align: right;">1972</td>
+</tr>
+<tr>
+<td>basecoat-60-workflow-release-manager</td>
+<td><code>agents/basecoat-60-workflow-release-manager.agent.md</code></td>
+<td style="text-align: right;">1403</td>
+<td style="text-align: right;">1894</td>
+</tr>
+<tr>
+<td>basecoat-10-core-project-onboarding</td>
+<td><code>agents/basecoat-10-core-project-onboarding.agent.md</code></td>
+<td style="text-align: right;">1365</td>
+<td style="text-align: right;">1843</td>
+</tr>
+<tr>
+<td>basecoat-50-security-api-security</td>
+<td><code>agents/basecoat-50-security-api-security.agent.md</code></td>
+<td style="text-align: right;">1363</td>
+<td style="text-align: right;">1840</td>
+</tr>
+<tr>
+<td>basecoat-50-security-secrets-manager</td>
+<td><code>agents/basecoat-50-security-secrets-manager.agent.md</code></td>
+<td style="text-align: right;">1358</td>
+<td style="text-align: right;">1833</td>
+</tr>
+<tr>
+<td>basecoat-50-security-policy-as-code-compliance</td>
+<td><code>agents/basecoat-50-security-policy-as-code-compliance.agent.md</code></td>
+<td style="text-align: right;">1353</td>
+<td style="text-align: right;">1827</td>
+</tr>
+<tr>
+<td>basecoat-10-core-mcp-developer</td>
+<td><code>agents/basecoat-10-core-mcp-developer.agent.md</code></td>
+<td style="text-align: right;">1322</td>
+<td style="text-align: right;">1785</td>
+</tr>
+<tr>
+<td>basecoat-10-core-performance-analyst</td>
+<td><code>agents/basecoat-10-core-performance-analyst.agent.md</code></td>
+<td style="text-align: right;">1322</td>
+<td style="text-align: right;">1785</td>
+</tr>
+<tr>
+<td>basecoat-10-core-sre-engineer</td>
+<td><code>agents/basecoat-10-core-sre-engineer.agent.md</code></td>
+<td style="text-align: right;">1316</td>
+<td style="text-align: right;">1777</td>
+</tr>
+<tr>
+<td>basecoat-10-core-ux-designer</td>
+<td><code>agents/basecoat-10-core-ux-designer.agent.md</code></td>
+<td style="text-align: right;">1302</td>
+<td style="text-align: right;">1758</td>
+</tr>
+<tr>
+<td>basecoat-90-quality-penetration-test</td>
+<td><code>agents/basecoat-90-quality-penetration-test.agent.md</code></td>
+<td style="text-align: right;">1272</td>
+<td style="text-align: right;">1717</td>
+</tr>
+<tr>
+<td>basecoat-10-core-finops-advisor</td>
+<td><code>agents/basecoat-10-core-finops-advisor.agent.md</code></td>
+<td style="text-align: right;">1264</td>
+<td style="text-align: right;">1706</td>
+</tr>
+<tr>
+<td>basecoat-30-ai-mlops</td>
+<td><code>agents/basecoat-30-ai-mlops.agent.md</code></td>
+<td style="text-align: right;">1262</td>
+<td style="text-align: right;">1704</td>
+</tr>
+<tr>
+<td>basecoat-60-workflow-task-scope-validator</td>
+<td><code>agents/basecoat-60-workflow-task-scope-validator.agent.md</code></td>
+<td style="text-align: right;">1253</td>
+<td style="text-align: right;">1692</td>
+</tr>
+<tr>
+<td>basecoat-10-core-orchestrator</td>
+<td><code>agents/basecoat-10-core-orchestrator.agent.md</code></td>
+<td style="text-align: right;">1233</td>
+<td style="text-align: right;">1665</td>
+</tr>
+<tr>
+<td>basecoat-80-data-dataops</td>
+<td><code>agents/basecoat-80-data-dataops.agent.md</code></td>
+<td style="text-align: right;">1230</td>
+<td style="text-align: right;">1660</td>
+</tr>
+<tr>
+<td>basecoat-10-core-agent-designer</td>
+<td><code>agents/basecoat-10-core-agent-designer.agent.md</code></td>
+<td style="text-align: right;">1220</td>
+<td style="text-align: right;">1647</td>
+</tr>
+<tr>
+<td>basecoat-10-core-issue-triage</td>
+<td><code>agents/basecoat-10-core-issue-triage.agent.md</code></td>
+<td style="text-align: right;">1217</td>
+<td style="text-align: right;">1643</td>
+</tr>
+<tr>
+<td>basecoat-10-core-sprint-planner</td>
+<td><code>agents/basecoat-10-core-sprint-planner.agent.md</code></td>
+<td style="text-align: right;">1212</td>
+<td style="text-align: right;">1636</td>
+</tr>
+<tr>
+<td>basecoat-10-core-prompt-coach</td>
+<td><code>agents/basecoat-10-core-prompt-coach.agent.md</code></td>
+<td style="text-align: right;">1208</td>
+<td style="text-align: right;">1631</td>
+</tr>
+<tr>
+<td>basecoat-10-core-api-designer</td>
+<td><code>agents/basecoat-10-core-api-designer.agent.md</code></td>
+<td style="text-align: right;">1203</td>
+<td style="text-align: right;">1624</td>
+</tr>
+<tr>
+<td>basecoat-50-security-github-security-posture</td>
+<td><code>agents/basecoat-50-security-github-security-posture.agent.md</code></td>
+<td style="text-align: right;">1195</td>
+<td style="text-align: right;">1613</td>
+</tr>
+<tr>
+<td>basecoat-80-data-data-tier</td>
+<td><code>agents/basecoat-80-data-data-tier.agent.md</code></td>
+<td style="text-align: right;">1191</td>
+<td style="text-align: right;">1608</td>
+</tr>
+<tr>
+<td>basecoat-50-security-security-monitor</td>
+<td><code>agents/basecoat-50-security-security-monitor.agent.md</code></td>
+<td style="text-align: right;">1168</td>
+<td style="text-align: right;">1577</td>
+</tr>
+<tr>
+<td>basecoat-10-core-solution-architect</td>
+<td><code>agents/basecoat-10-core-solution-architect.agent.md</code></td>
+<td style="text-align: right;">1155</td>
+<td style="text-align: right;">1559</td>
+</tr>
+<tr>
+<td>basecoat-50-security-security-analyst</td>
+<td><code>agents/basecoat-50-security-security-analyst.agent.md</code></td>
+<td style="text-align: right;">1147</td>
+<td style="text-align: right;">1548</td>
+</tr>
+<tr>
+<td>basecoat-10-core-legacy-modernization</td>
+<td><code>agents/basecoat-10-core-legacy-modernization.agent.md</code></td>
+<td style="text-align: right;">1146</td>
+<td style="text-align: right;">1547</td>
+</tr>
+<tr>
+<td>basecoat-10-core-identity-architect</td>
+<td><code>agents/basecoat-10-core-identity-architect.agent.md</code></td>
+<td style="text-align: right;">1143</td>
+<td style="text-align: right;">1543</td>
+</tr>
+<tr>
+<td>basecoat-60-workflow-ci-failure-escalation</td>
+<td><code>agents/basecoat-60-workflow-ci-failure-escalation.agent.md</code></td>
+<td style="text-align: right;">1139</td>
+<td style="text-align: right;">1538</td>
+</tr>
+<tr>
+<td>basecoat-10-core-prompt-engineer</td>
+<td><code>agents/basecoat-10-core-prompt-engineer.agent.md</code></td>
+<td style="text-align: right;">1115</td>
+<td style="text-align: right;">1505</td>
+</tr>
+<tr>
+<td>basecoat-10-core-middleware-dev</td>
+<td><code>agents/basecoat-10-core-middleware-dev.agent.md</code></td>
+<td style="text-align: right;">1032</td>
+<td style="text-align: right;">1393</td>
+</tr>
+<tr>
+<td>basecoat-10-core-app-inventory</td>
+<td><code>agents/basecoat-10-core-app-inventory.agent.md</code></td>
+<td style="text-align: right;">1028</td>
+<td style="text-align: right;">1388</td>
+</tr>
+<tr>
+<td>basecoat-10-core-gitops-engineer</td>
+<td><code>agents/basecoat-10-core-gitops-engineer.agent.md</code></td>
+<td style="text-align: right;">1019</td>
+<td style="text-align: right;">1376</td>
+</tr>
+<tr>
+<td>basecoat-80-data-database-migration</td>
+<td><code>agents/basecoat-80-data-database-migration.agent.md</code></td>
+<td style="text-align: right;">1016</td>
+<td style="text-align: right;">1372</td>
+</tr>
+<tr>
+<td>basecoat-10-core-backend-dev</td>
+<td><code>agents/basecoat-10-core-backend-dev.agent.md</code></td>
+<td style="text-align: right;">1004</td>
+<td style="text-align: right;">1355</td>
+</tr>
+<tr>
+<td>basecoat-10-core-dependency-lifecycle</td>
+<td><code>agents/basecoat-10-core-dependency-lifecycle.agent.md</code></td>
+<td style="text-align: right;">1003</td>
+<td style="text-align: right;">1354</td>
+</tr>
+<tr>
+<td>basecoat-10-core-frontend-dev</td>
+<td><code>agents/basecoat-10-core-frontend-dev.agent.md</code></td>
+<td style="text-align: right;">990</td>
+<td style="text-align: right;">1336</td>
+</tr>
+<tr>
+<td>basecoat-50-security-instruction-auditor</td>
+<td><code>agents/basecoat-50-security-instruction-auditor.agent.md</code></td>
+<td style="text-align: right;">937</td>
+<td style="text-align: right;">1265</td>
+</tr>
+<tr>
+<td>basecoat-50-security-security-operations</td>
+<td><code>agents/basecoat-50-security-security-operations.agent.md</code></td>
+<td style="text-align: right;">899</td>
+<td style="text-align: right;">1214</td>
+</tr>
+<tr>
+<td>basecoat-10-core-production-readiness</td>
+<td><code>agents/basecoat-10-core-production-readiness.agent.md</code></td>
+<td style="text-align: right;">877</td>
+<td style="text-align: right;">1184</td>
+</tr>
+<tr>
+<td>basecoat-30-ai-guardrail</td>
+<td><code>agents/basecoat-30-ai-guardrail.agent.md</code></td>
+<td style="text-align: right;">851</td>
+<td style="text-align: right;">1149</td>
+</tr>
+<tr>
+<td>basecoat-50-security-config-auditor</td>
+<td><code>agents/basecoat-50-security-config-auditor.agent.md</code></td>
+<td style="text-align: right;">796</td>
+<td style="text-align: right;">1075</td>
+</tr>
+<tr>
+<td>basecoat-60-workflow-infrastructure-deploy</td>
+<td><code>agents/basecoat-60-workflow-infrastructure-deploy.agent.md</code></td>
+<td style="text-align: right;">781</td>
+<td style="text-align: right;">1054</td>
+</tr>
+<tr>
+<td>basecoat-10-core-product-manager</td>
+<td><code>agents/basecoat-10-core-product-manager.agent.md</code></td>
+<td style="text-align: right;">756</td>
+<td style="text-align: right;">1021</td>
+</tr>
+<tr>
+<td>basecoat-10-core-memory-promoter</td>
+<td><code>agents/basecoat-10-core-memory-promoter.agent.md</code></td>
+<td style="text-align: right;">753</td>
+<td style="text-align: right;">1017</td>
+</tr>
+<tr>
+<td>basecoat-50-security-ci-audit</td>
+<td><code>agents/basecoat-50-security-ci-audit.agent.md</code></td>
+<td style="text-align: right;">714</td>
+<td style="text-align: right;">964</td>
+</tr>
+<tr>
+<td>basecoat-60-workflow-self-healing-ci</td>
+<td><code>agents/basecoat-60-workflow-self-healing-ci.agent.md</code></td>
+<td style="text-align: right;">712</td>
+<td style="text-align: right;">961</td>
+</tr>
+<tr>
+<td>basecoat-90-quality-guidance-reviewer</td>
+<td><code>agents/basecoat-90-quality-guidance-reviewer.agent.md</code></td>
+<td style="text-align: right;">702</td>
+<td style="text-align: right;">948</td>
+</tr>
+<tr>
+<td>basecoat-10-core-tech-writer</td>
+<td><code>agents/basecoat-10-core-tech-writer.agent.md</code></td>
+<td style="text-align: right;">695</td>
+<td style="text-align: right;">938</td>
+</tr>
+<tr>
+<td>basecoat-90-quality-resilience-reviewer</td>
+<td><code>agents/basecoat-90-quality-resilience-reviewer.agent.md</code></td>
+<td style="text-align: right;">686</td>
+<td style="text-align: right;">926</td>
+</tr>
+<tr>
+<td>basecoat-80-data-data-architect</td>
+<td><code>agents/basecoat-80-data-data-architect.agent.md</code></td>
+<td style="text-align: right;">685</td>
+<td style="text-align: right;">925</td>
+</tr>
+<tr>
+<td>basecoat-10-core-strategy-to-automation</td>
+<td><code>agents/basecoat-10-core-strategy-to-automation.agent.md</code></td>
+<td style="text-align: right;">680</td>
+<td style="text-align: right;">918</td>
+</tr>
+<tr>
+<td>basecoat-10-core-dependency-update-advisor</td>
+<td><code>agents/basecoat-10-core-dependency-update-advisor.agent.md</code></td>
+<td style="text-align: right;">671</td>
+<td style="text-align: right;">906</td>
+</tr>
+<tr>
+<td>basecoat-10-core-sprint-project-mapper</td>
+<td><code>agents/basecoat-10-core-sprint-project-mapper.agent.md</code></td>
+<td style="text-align: right;">618</td>
+<td style="text-align: right;">834</td>
+</tr>
+<tr>
+<td>basecoat-10-core-exploratory-charter</td>
+<td><code>agents/basecoat-10-core-exploratory-charter.agent.md</code></td>
+<td style="text-align: right;">599</td>
+<td style="text-align: right;">809</td>
+</tr>
+<tr>
+<td>basecoat-10-core-escalation-router</td>
+<td><code>agents/basecoat-10-core-escalation-router.agent.md</code></td>
+<td style="text-align: right;">559</td>
+<td style="text-align: right;">755</td>
+</tr>
+<tr>
+<td>basecoat-50-security-guidance-author</td>
+<td><code>agents/basecoat-50-security-guidance-author.agent.md</code></td>
+<td style="text-align: right;">551</td>
+<td style="text-align: right;">744</td>
+</tr>
+<tr>
+<td>basecoat-90-quality-manual-test-strategy</td>
+<td><code>agents/basecoat-90-quality-manual-test-strategy.agent.md</code></td>
+<td style="text-align: right;">541</td>
+<td style="text-align: right;">730</td>
+</tr>
+<tr>
+<td>basecoat-10-core-dependency-blocker-monitor</td>
+<td><code>agents/basecoat-10-core-dependency-blocker-monitor.agent.md</code></td>
+<td style="text-align: right;">517</td>
+<td style="text-align: right;">698</td>
+</tr>
+<tr>
+<td>basecoat-60-workflow-run-history-cleanup</td>
+<td><code>agents/basecoat-60-workflow-run-history-cleanup.agent.md</code></td>
+<td style="text-align: right;">431</td>
+<td style="text-align: right;">582</td>
+</tr>
+<tr>
+<td>basecoat-50-security-sprint-closeout-auditor</td>
+<td><code>agents/basecoat-50-security-sprint-closeout-auditor.agent.md</code></td>
+<td style="text-align: right;">423</td>
+<td style="text-align: right;">571</td>
+</tr>
+<tr>
+<td>basecoat-10-core-change-isolation-architect</td>
+<td><code>agents/basecoat-10-core-change-isolation-architect.agent.md</code></td>
+<td style="text-align: right;">410</td>
+<td style="text-align: right;">554</td>
+</tr>
+<tr>
+<td>basecoat-20-lang-dotnet-modernization-advisor</td>
+<td><code>agents/basecoat-20-lang-dotnet-modernization-advisor.agent.md</code></td>
+<td style="text-align: right;">409</td>
+<td style="text-align: right;">552</td>
+</tr>
+<tr>
+<td>basecoat-10-core-contract-testing</td>
+<td><code>agents/basecoat-10-core-contract-testing.agent.md</code></td>
+<td style="text-align: right;">387</td>
+<td style="text-align: right;">522</td>
+</tr>
+<tr>
+<td>basecoat-10-core-new-customization</td>
+<td><code>agents/basecoat-10-core-new-customization.agent.md</code></td>
+<td style="text-align: right;">386</td>
+<td style="text-align: right;">521</td>
+</tr>
+<tr>
+<td>basecoat-10-core-merge-coordinator</td>
+<td><code>agents/basecoat-10-core-merge-coordinator.agent.md</code></td>
+<td style="text-align: right;">384</td>
+<td style="text-align: right;">518</td>
+</tr>
+<tr>
+<td>basecoat-60-workflow-rollout-basecoat</td>
+<td><code>agents/basecoat-60-workflow-rollout-basecoat.agent.md</code></td>
+<td style="text-align: right;">380</td>
+<td style="text-align: right;">513</td>
+</tr>
+<tr>
+<td>basecoat-10-core-observability-engineer</td>
+<td><code>agents/basecoat-10-core-observability-engineer.agent.md</code></td>
+<td style="text-align: right;">379</td>
+<td style="text-align: right;">512</td>
+</tr>
+<tr>
+<td>basecoat-10-core-hardening-advisor</td>
+<td><code>agents/basecoat-10-core-hardening-advisor.agent.md</code></td>
+<td style="text-align: right;">375</td>
+<td style="text-align: right;">506</td>
+</tr>
+<tr>
+<td>basecoat-30-ai-domain-designer</td>
+<td><code>agents/basecoat-30-ai-domain-designer.agent.md</code></td>
+<td style="text-align: right;">373</td>
+<td style="text-align: right;">504</td>
+</tr>
+<tr>
+<td>basecoat-10-core-station-bottleneck-analyzer</td>
+<td><code>agents/basecoat-10-core-station-bottleneck-analyzer.agent.md</code></td>
+<td style="text-align: right;">372</td>
+<td style="text-align: right;">502</td>
+</tr>
+<tr>
+<td>basecoat-80-data-data-integrity</td>
+<td><code>agents/basecoat-80-data-data-integrity.agent.md</code></td>
+<td style="text-align: right;">361</td>
+<td style="text-align: right;">487</td>
+</tr>
+<tr>
+<td>basecoat-10-core-rca</td>
+<td><code>agents/basecoat-10-core-rca.agent.md</code></td>
+<td style="text-align: right;">357</td>
+<td style="text-align: right;">482</td>
+</tr>
+<tr>
+<td>basecoat-30-ai-failure-pattern-process</td>
+<td><code>agents/basecoat-30-ai-failure-pattern-process.agent.md</code></td>
+<td style="text-align: right;">351</td>
+<td style="text-align: right;">474</td>
+</tr>
+<tr>
+<td>basecoat-10-core-branch-hygiene-sweeper</td>
+<td><code>agents/basecoat-10-core-branch-hygiene-sweeper.agent.md</code></td>
+<td style="text-align: right;">349</td>
+<td style="text-align: right;">471</td>
+</tr>
+<tr>
+<td>basecoat-10-core-feedback-loop</td>
+<td><code>agents/basecoat-10-core-feedback-loop.agent.md</code></td>
+<td style="text-align: right;">343</td>
+<td style="text-align: right;">463</td>
+</tr>
+<tr>
+<td>basecoat-90-quality-e2e-test-strategy</td>
+<td><code>agents/basecoat-90-quality-e2e-test-strategy.agent.md</code></td>
+<td style="text-align: right;">342</td>
+<td style="text-align: right;">462</td>
+</tr>
+<tr>
+<td>basecoat-60-workflow-release-impact-advisor</td>
+<td><code>agents/basecoat-60-workflow-release-impact-advisor.agent.md</code></td>
+<td style="text-align: right;">340</td>
+<td style="text-align: right;">459</td>
+</tr>
+<tr>
+<td>basecoat-10-core-memory-curator</td>
+<td><code>agents/basecoat-10-core-memory-curator.agent.md</code></td>
+<td style="text-align: right;">332</td>
+<td style="text-align: right;">448</td>
+</tr>
+<tr>
+<td>basecoat-10-core-sprint-retrospective</td>
+<td><code>agents/basecoat-10-core-sprint-retrospective.agent.md</code></td>
+<td style="text-align: right;">329</td>
+<td style="text-align: right;">444</td>
+</tr>
+<tr>
+<td>basecoat-60-workflow-retro-facilitator</td>
+<td><code>agents/basecoat-60-workflow-retro-facilitator.agent.md</code></td>
+<td style="text-align: right;">318</td>
+<td style="text-align: right;">429</td>
+</tr>
+<tr>
+<td>basecoat-50-security-supply-chain-security</td>
+<td><code>agents/basecoat-50-security-supply-chain-security.agent.md</code></td>
+<td style="text-align: right;">313</td>
+<td style="text-align: right;">423</td>
+</tr>
+<tr>
+<td>basecoat-10-core-ha-architect</td>
+<td><code>agents/basecoat-10-core-ha-architect.agent.md</code></td>
+<td style="text-align: right;">311</td>
+<td style="text-align: right;">420</td>
+</tr>
+<tr>
+<td>basecoat-10-core-orphaned-pr-cleanup</td>
+<td><code>agents/basecoat-10-core-orphaned-pr-cleanup.agent.md</code></td>
+<td style="text-align: right;">309</td>
+<td style="text-align: right;">417</td>
+</tr>
+<tr>
+<td>basecoat-60-workflow-release-freeze-enforcer</td>
+<td><code>agents/basecoat-60-workflow-release-freeze-enforcer.agent.md</code></td>
+<td style="text-align: right;">306</td>
+<td style="text-align: right;">413</td>
+</tr>
+<tr>
+<td>basecoat-60-workflow-broken-build-troubleshooter</td>
+<td><code>agents/basecoat-60-workflow-broken-build-troubleshooter.agent.md</code></td>
+<td style="text-align: right;">305</td>
+<td style="text-align: right;">412</td>
+</tr>
+<tr>
+<td>basecoat-10-core-chaos-engineer</td>
+<td><code>agents/basecoat-10-core-chaos-engineer.agent.md</code></td>
+<td style="text-align: right;">304</td>
+<td style="text-align: right;">410</td>
+</tr>
+<tr>
+<td>basecoat-10-core-devops-engineer</td>
+<td><code>agents/basecoat-10-core-devops-engineer.agent.md</code></td>
+<td style="text-align: right;">303</td>
+<td style="text-align: right;">409</td>
+</tr>
+<tr>
+<td>basecoat-10-core-llmops</td>
+<td><code>agents/basecoat-10-core-llmops.agent.md</code></td>
+<td style="text-align: right;">291</td>
+<td style="text-align: right;">393</td>
+</tr>
+<tr>
+<td>basecoat-90-quality-code-review</td>
+<td><code>agents/basecoat-90-quality-code-review.agent.md</code></td>
+<td style="text-align: right;">290</td>
+<td style="text-align: right;">392</td>
+</tr>
+<tr>
+<td>basecoat-10-core-definition-of-done</td>
+<td><code>agents/basecoat-10-core-definition-of-done.agent.md</code></td>
+<td style="text-align: right;">289</td>
+<td style="text-align: right;">390</td>
+</tr>
+<tr>
+<td>basecoat-60-workflow-data-pipeline</td>
+<td><code>agents/basecoat-60-workflow-data-pipeline.agent.md</code></td>
+<td style="text-align: right;">289</td>
+<td style="text-align: right;">390</td>
+</tr>
+<tr>
+<td>basecoat-60-workflow-incident-responder</td>
+<td><code>agents/basecoat-60-workflow-incident-responder.agent.md</code></td>
+<td style="text-align: right;">288</td>
+<td style="text-align: right;">389</td>
+</tr>
+<tr>
+<td>basecoat-40-azure-azure-landing-zone</td>
+<td><code>agents/basecoat-40-azure-azure-landing-zone.agent.md</code></td>
+<td style="text-align: right;">277</td>
+<td style="text-align: right;">374</td>
+</tr>
+<tr>
+<td>basecoat-60-workflow-release-readiness-chair</td>
+<td><code>agents/basecoat-60-workflow-release-readiness-chair.agent.md</code></td>
+<td style="text-align: right;">260</td>
+<td style="text-align: right;">351</td>
+</tr>
+<tr>
+<td>basecoat-30-ai-daily-standup-facilitator</td>
+<td><code>agents/basecoat-30-ai-daily-standup-facilitator.agent.md</code></td>
+<td style="text-align: right;">254</td>
+<td style="text-align: right;">343</td>
+</tr>
+<tr>
+<td>basecoat-10-core-takt-time-tracker</td>
+<td><code>agents/basecoat-10-core-takt-time-tracker.agent.md</code></td>
+<td style="text-align: right;">207</td>
+<td style="text-align: right;">279</td>
+</tr>
+<tr>
+<td>orchestrator</td>
+<td><code>agents/orchestrator.agent.md</code></td>
+<td style="text-align: right;">206</td>
+<td style="text-align: right;">278</td>
+</tr>
+<tr>
+<td>basecoat-10-core-replanning-engine</td>
+<td><code>agents/basecoat-10-core-replanning-engine.agent.md</code></td>
+<td style="text-align: right;">203</td>
+<td style="text-align: right;">274</td>
+</tr>
+<tr>
+<td>basecoat-10-core-factory-state-curator</td>
+<td><code>agents/basecoat-10-core-factory-state-curator.agent.md</code></td>
+<td style="text-align: right;">194</td>
+<td style="text-align: right;">262</td>
+</tr>
+<tr>
+<td>basecoat-10-core-s4-shadow-mode-validator</td>
+<td><code>agents/basecoat-10-core-s4-shadow-mode-validator.agent.md</code></td>
+<td style="text-align: right;">191</td>
+<td style="text-align: right;">258</td>
+</tr>
+<tr>
+<td>basecoat-10-core-factory-conductor</td>
+<td><code>agents/basecoat-10-core-factory-conductor.agent.md</code></td>
+<td style="text-align: right;">189</td>
+<td style="text-align: right;">255</td>
+</tr>
+<tr>
+<td>basecoat-10-core-bom-validator</td>
+<td><code>agents/basecoat-10-core-bom-validator.agent.md</code></td>
+<td style="text-align: right;">179</td>
+<td style="text-align: right;">242</td>
+</tr>
+</tbody>
+</table>
+<h2 id="skills">Skills<a class="headerlink" href="#skills" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Location</th>
+<th style="text-align: right;">Words</th>
+<th style="text-align: right;">Approx Tokens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ci-audit</td>
+<td><code>skills/ci-audit/SKILL.md</code></td>
+<td style="text-align: right;">368</td>
+<td style="text-align: right;">497</td>
+</tr>
+<tr>
+<td>release-notes</td>
+<td><code>skills/release-notes/SKILL.md</code></td>
+<td style="text-align: right;">364</td>
+<td style="text-align: right;">491</td>
+</tr>
+<tr>
+<td>sprint-management</td>
+<td><code>skills/sprint-management/SKILL.md</code></td>
+<td style="text-align: right;">359</td>
+<td style="text-align: right;">485</td>
+</tr>
+<tr>
+<td>sprint-closeout-audit</td>
+<td><code>skills/sprint-closeout-audit/SKILL.md</code></td>
+<td style="text-align: right;">349</td>
+<td style="text-align: right;">471</td>
+</tr>
+<tr>
+<td>sprint-project-mapper</td>
+<td><code>skills/sprint-project-mapper/SKILL.md</code></td>
+<td style="text-align: right;">343</td>
+<td style="text-align: right;">463</td>
+</tr>
+<tr>
+<td>backend-audit</td>
+<td><code>skills/backend-audit/SKILL.md</code></td>
+<td style="text-align: right;">333</td>
+<td style="text-align: right;">450</td>
+</tr>
+<tr>
+<td>agentops-audit</td>
+<td><code>skills/agentops-audit/SKILL.md</code></td>
+<td style="text-align: right;">326</td>
+<td style="text-align: right;">440</td>
+</tr>
+<tr>
+<td>task-decomposition</td>
+<td><code>skills/task-decomposition/SKILL.md</code></td>
+<td style="text-align: right;">323</td>
+<td style="text-align: right;">436</td>
+</tr>
+<tr>
+<td>infrastructure-audit</td>
+<td><code>skills/infrastructure-audit/SKILL.md</code></td>
+<td style="text-align: right;">320</td>
+<td style="text-align: right;">432</td>
+</tr>
+<tr>
+<td>mcp-audit</td>
+<td><code>skills/mcp-audit/SKILL.md</code></td>
+<td style="text-align: right;">319</td>
+<td style="text-align: right;">431</td>
+</tr>
+<tr>
+<td>api-audit</td>
+<td><code>skills/api-audit/SKILL.md</code></td>
+<td style="text-align: right;">313</td>
+<td style="text-align: right;">423</td>
+</tr>
+<tr>
+<td>devops-audit</td>
+<td><code>skills/devops-audit/SKILL.md</code></td>
+<td style="text-align: right;">306</td>
+<td style="text-align: right;">413</td>
+</tr>
+<tr>
+<td>failure-pattern-process</td>
+<td><code>skills/failure-pattern-process/SKILL.md</code></td>
+<td style="text-align: right;">302</td>
+<td style="text-align: right;">408</td>
+</tr>
+<tr>
+<td>release-audit</td>
+<td><code>skills/release-audit/SKILL.md</code></td>
+<td style="text-align: right;">298</td>
+<td style="text-align: right;">402</td>
+</tr>
+<tr>
+<td>create-skill</td>
+<td><code>skills/create-skill/SKILL.md</code></td>
+<td style="text-align: right;">295</td>
+<td style="text-align: right;">398</td>
+</tr>
+<tr>
+<td>merge-conflict-mediator</td>
+<td><code>skills/merge-conflict-mediator/SKILL.md</code></td>
+<td style="text-align: right;">291</td>
+<td style="text-align: right;">393</td>
+</tr>
+<tr>
+<td>issue-triage</td>
+<td><code>skills/issue-triage/SKILL.md</code></td>
+<td style="text-align: right;">290</td>
+<td style="text-align: right;">392</td>
+</tr>
+<tr>
+<td>documentation</td>
+<td><code>skills/documentation/SKILL.md</code></td>
+<td style="text-align: right;">285</td>
+<td style="text-align: right;">385</td>
+</tr>
+<tr>
+<td>dependency-blocker-monitoring</td>
+<td><code>skills/dependency-blocker-monitoring/SKILL.md</code></td>
+<td style="text-align: right;">283</td>
+<td style="text-align: right;">382</td>
+</tr>
+<tr>
+<td>api-security</td>
+<td><code>skills/api-security/SKILL.md</code></td>
+<td style="text-align: right;">280</td>
+<td style="text-align: right;">378</td>
+</tr>
+<tr>
+<td>ci-flake-quarantine</td>
+<td><code>skills/ci-flake-quarantine/SKILL.md</code></td>
+<td style="text-align: right;">272</td>
+<td style="text-align: right;">367</td>
+</tr>
+<tr>
+<td>ha-resilience</td>
+<td><code>skills/ha-resilience/SKILL.md</code></td>
+<td style="text-align: right;">272</td>
+<td style="text-align: right;">367</td>
+</tr>
+<tr>
+<td>azure-devops-rest</td>
+<td><code>skills/azure-devops-rest/SKILL.md</code></td>
+<td style="text-align: right;">270</td>
+<td style="text-align: right;">364</td>
+</tr>
+<tr>
+<td>twelve-factor</td>
+<td><code>skills/twelve-factor/SKILL.md</code></td>
+<td style="text-align: right;">267</td>
+<td style="text-align: right;">360</td>
+</tr>
+<tr>
+<td>public-safe-sanitization</td>
+<td><code>skills/public-safe-sanitization/SKILL.md</code></td>
+<td style="text-align: right;">264</td>
+<td style="text-align: right;">356</td>
+</tr>
+<tr>
+<td>contract-testing</td>
+<td><code>skills/contract-testing/SKILL.md</code></td>
+<td style="text-align: right;">257</td>
+<td style="text-align: right;">347</td>
+</tr>
+<tr>
+<td>frontend-audit</td>
+<td><code>skills/frontend-audit/SKILL.md</code></td>
+<td style="text-align: right;">257</td>
+<td style="text-align: right;">347</td>
+</tr>
+<tr>
+<td>service-bus-migration</td>
+<td><code>skills/service-bus-migration/SKILL.md</code></td>
+<td style="text-align: right;">254</td>
+<td style="text-align: right;">343</td>
+</tr>
+<tr>
+<td>rollout-basecoat</td>
+<td><code>skills/rollout-basecoat/SKILL.md</code></td>
+<td style="text-align: right;">252</td>
+<td style="text-align: right;">340</td>
+</tr>
+<tr>
+<td>penetration-testing</td>
+<td><code>skills/penetration-testing/SKILL.md</code></td>
+<td style="text-align: right;">244</td>
+<td style="text-align: right;">329</td>
+</tr>
+<tr>
+<td>git-worktrees</td>
+<td><code>skills/git-worktrees/SKILL.md</code></td>
+<td style="text-align: right;">243</td>
+<td style="text-align: right;">328</td>
+</tr>
+<tr>
+<td>e2e-testing</td>
+<td><code>skills/e2e-testing/SKILL.md</code></td>
+<td style="text-align: right;">239</td>
+<td style="text-align: right;">323</td>
+</tr>
+<tr>
+<td>basecoat</td>
+<td><code>skills/basecoat/SKILL.md</code></td>
+<td style="text-align: right;">237</td>
+<td style="text-align: right;">320</td>
+</tr>
+<tr>
+<td>tech-debt</td>
+<td><code>skills/tech-debt/SKILL.md</code></td>
+<td style="text-align: right;">236</td>
+<td style="text-align: right;">319</td>
+</tr>
+<tr>
+<td>gitops</td>
+<td><code>skills/gitops/SKILL.md</code></td>
+<td style="text-align: right;">235</td>
+<td style="text-align: right;">317</td>
+</tr>
+<tr>
+<td>azure-identity-audit</td>
+<td><code>skills/azure-identity-audit/SKILL.md</code></td>
+<td style="text-align: right;">234</td>
+<td style="text-align: right;">316</td>
+</tr>
+<tr>
+<td>data-tier-audit</td>
+<td><code>skills/data-tier-audit/SKILL.md</code></td>
+<td style="text-align: right;">234</td>
+<td style="text-align: right;">316</td>
+</tr>
+<tr>
+<td>electron-apps</td>
+<td><code>skills/electron-apps/SKILL.md</code></td>
+<td style="text-align: right;">234</td>
+<td style="text-align: right;">316</td>
+</tr>
+<tr>
+<td>identity-migration</td>
+<td><code>skills/identity-migration/SKILL.md</code></td>
+<td style="text-align: right;">234</td>
+<td style="text-align: right;">316</td>
+</tr>
+<tr>
+<td>database-migration</td>
+<td><code>skills/database-migration/SKILL.md</code></td>
+<td style="text-align: right;">232</td>
+<td style="text-align: right;">313</td>
+</tr>
+<tr>
+<td>landing-zone-audit</td>
+<td><code>skills/landing-zone-audit/SKILL.md</code></td>
+<td style="text-align: right;">232</td>
+<td style="text-align: right;">313</td>
+</tr>
+<tr>
+<td>refactoring</td>
+<td><code>skills/refactoring/SKILL.md</code></td>
+<td style="text-align: right;">232</td>
+<td style="text-align: right;">313</td>
+</tr>
+<tr>
+<td>agent-design</td>
+<td><code>skills/agent-design/SKILL.md</code></td>
+<td style="text-align: right;">229</td>
+<td style="text-align: right;">309</td>
+</tr>
+<tr>
+<td>receiving-code-review</td>
+<td><code>skills/receiving-code-review/SKILL.md</code></td>
+<td style="text-align: right;">229</td>
+<td style="text-align: right;">309</td>
+</tr>
+<tr>
+<td>azure-policy-audit</td>
+<td><code>skills/azure-policy-audit/SKILL.md</code></td>
+<td style="text-align: right;">228</td>
+<td style="text-align: right;">308</td>
+</tr>
+<tr>
+<td>human-in-the-loop</td>
+<td><code>skills/human-in-the-loop/SKILL.md</code></td>
+<td style="text-align: right;">225</td>
+<td style="text-align: right;">304</td>
+</tr>
+<tr>
+<td>domain-driven-design</td>
+<td><code>skills/domain-driven-design/SKILL.md</code></td>
+<td style="text-align: right;">220</td>
+<td style="text-align: right;">297</td>
+</tr>
+<tr>
+<td>create-instruction</td>
+<td><code>skills/create-instruction/SKILL.md</code></td>
+<td style="text-align: right;">219</td>
+<td style="text-align: right;">296</td>
+</tr>
+<tr>
+<td>github-security-posture</td>
+<td><code>skills/github-security-posture/SKILL.md</code></td>
+<td style="text-align: right;">218</td>
+<td style="text-align: right;">294</td>
+</tr>
+<tr>
+<td>azure-identity</td>
+<td><code>skills/azure-identity/SKILL.md</code></td>
+<td style="text-align: right;">216</td>
+<td style="text-align: right;">292</td>
+</tr>
+<tr>
+<td>cqrs-event-sourcing</td>
+<td><code>skills/cqrs-event-sourcing/SKILL.md</code></td>
+<td style="text-align: right;">215</td>
+<td style="text-align: right;">290</td>
+</tr>
+<tr>
+<td>dev-containers</td>
+<td><code>skills/dev-containers/SKILL.md</code></td>
+<td style="text-align: right;">215</td>
+<td style="text-align: right;">290</td>
+</tr>
+<tr>
+<td>lexicon</td>
+<td><code>skills/lexicon/SKILL.md</code></td>
+<td style="text-align: right;">214</td>
+<td style="text-align: right;">289</td>
+</tr>
+<tr>
+<td>dotnet-modernization</td>
+<td><code>skills/dotnet-modernization/SKILL.md</code></td>
+<td style="text-align: right;">213</td>
+<td style="text-align: right;">288</td>
+</tr>
+<tr>
+<td>azure-container-apps</td>
+<td><code>skills/azure-container-apps/SKILL.md</code></td>
+<td style="text-align: right;">211</td>
+<td style="text-align: right;">285</td>
+</tr>
+<tr>
+<td>azure-linux-app-service</td>
+<td><code>skills/azure-linux-app-service/SKILL.md</code></td>
+<td style="text-align: right;">210</td>
+<td style="text-align: right;">284</td>
+</tr>
+<tr>
+<td>sprint-planner</td>
+<td><code>skills/sprint-planner/SKILL.md</code></td>
+<td style="text-align: right;">210</td>
+<td style="text-align: right;">284</td>
+</tr>
+<tr>
+<td>copilot-usage-analytics</td>
+<td><code>skills/copilot-usage-analytics/SKILL.md</code></td>
+<td style="text-align: right;">209</td>
+<td style="text-align: right;">282</td>
+</tr>
+<tr>
+<td>environment-bootstrap</td>
+<td><code>skills/environment-bootstrap/SKILL.md</code></td>
+<td style="text-align: right;">209</td>
+<td style="text-align: right;">282</td>
+</tr>
+<tr>
+<td>cross-stack-modernization</td>
+<td><code>skills/cross-stack-modernization/SKILL.md</code></td>
+<td style="text-align: right;">207</td>
+<td style="text-align: right;">279</td>
+</tr>
+<tr>
+<td>production-readiness</td>
+<td><code>skills/production-readiness/SKILL.md</code></td>
+<td style="text-align: right;">207</td>
+<td style="text-align: right;">279</td>
+</tr>
+<tr>
+<td>devops</td>
+<td><code>skills/devops/SKILL.md</code></td>
+<td style="text-align: right;">206</td>
+<td style="text-align: right;">278</td>
+</tr>
+<tr>
+<td>entity-framework-migration</td>
+<td><code>skills/entity-framework-migration/SKILL.md</code></td>
+<td style="text-align: right;">206</td>
+<td style="text-align: right;">278</td>
+</tr>
+<tr>
+<td>sprint-closeout</td>
+<td><code>skills/sprint-closeout/SKILL.md</code></td>
+<td style="text-align: right;">206</td>
+<td style="text-align: right;">278</td>
+</tr>
+<tr>
+<td>api-design</td>
+<td><code>skills/api-design/SKILL.md</code></td>
+<td style="text-align: right;">205</td>
+<td style="text-align: right;">277</td>
+</tr>
+<tr>
+<td>azure-landing-zone</td>
+<td><code>skills/azure-landing-zone/SKILL.md</code></td>
+<td style="text-align: right;">204</td>
+<td style="text-align: right;">275</td>
+</tr>
+<tr>
+<td>supply-chain-security</td>
+<td><code>skills/supply-chain-security/SKILL.md</code></td>
+<td style="text-align: right;">204</td>
+<td style="text-align: right;">275</td>
+</tr>
+<tr>
+<td>observability</td>
+<td><code>skills/observability/SKILL.md</code></td>
+<td style="text-align: right;">203</td>
+<td style="text-align: right;">274</td>
+</tr>
+<tr>
+<td>backlog-burndown</td>
+<td><code>skills/backlog-burndown/SKILL.md</code></td>
+<td style="text-align: right;">202</td>
+<td style="text-align: right;">273</td>
+</tr>
+<tr>
+<td>container-migration</td>
+<td><code>skills/container-migration/SKILL.md</code></td>
+<td style="text-align: right;">202</td>
+<td style="text-align: right;">273</td>
+</tr>
+<tr>
+<td>escalation-routing</td>
+<td><code>skills/escalation-routing/SKILL.md</code></td>
+<td style="text-align: right;">202</td>
+<td style="text-align: right;">273</td>
+</tr>
+<tr>
+<td>code-review</td>
+<td><code>skills/code-review/SKILL.md</code></td>
+<td style="text-align: right;">201</td>
+<td style="text-align: right;">271</td>
+</tr>
+<tr>
+<td>azure-waf-review</td>
+<td><code>skills/azure-waf-review/SKILL.md</code></td>
+<td style="text-align: right;">199</td>
+<td style="text-align: right;">269</td>
+</tr>
+<tr>
+<td>security</td>
+<td><code>skills/security/SKILL.md</code></td>
+<td style="text-align: right;">199</td>
+<td style="text-align: right;">269</td>
+</tr>
+<tr>
+<td>container-build-assessment</td>
+<td><code>skills/container-build-assessment/SKILL.md</code></td>
+<td style="text-align: right;">198</td>
+<td style="text-align: right;">267</td>
+</tr>
+<tr>
+<td>azure-networking</td>
+<td><code>skills/azure-networking/SKILL.md</code></td>
+<td style="text-align: right;">190</td>
+<td style="text-align: right;">256</td>
+</tr>
+<tr>
+<td>security-operations</td>
+<td><code>skills/security-operations/SKILL.md</code></td>
+<td style="text-align: right;">190</td>
+<td style="text-align: right;">256</td>
+</tr>
+<tr>
+<td>change-isolation</td>
+<td><code>skills/change-isolation/SKILL.md</code></td>
+<td style="text-align: right;">189</td>
+<td style="text-align: right;">255</td>
+</tr>
+<tr>
+<td>station-bottleneck-analyzer</td>
+<td><code>skills/station-bottleneck-analyzer/SKILL.md</code></td>
+<td style="text-align: right;">189</td>
+<td style="text-align: right;">255</td>
+</tr>
+<tr>
+<td>ux</td>
+<td><code>skills/ux/SKILL.md</code></td>
+<td style="text-align: right;">189</td>
+<td style="text-align: right;">255</td>
+</tr>
+<tr>
+<td>handoff</td>
+<td><code>skills/handoff/SKILL.md</code></td>
+<td style="text-align: right;">188</td>
+<td style="text-align: right;">254</td>
+</tr>
+<tr>
+<td>performance-profiling</td>
+<td><code>skills/performance-profiling/SKILL.md</code></td>
+<td style="text-align: right;">188</td>
+<td style="text-align: right;">254</td>
+</tr>
+<tr>
+<td>backend-dev</td>
+<td><code>skills/backend-dev/SKILL.md</code></td>
+<td style="text-align: right;">187</td>
+<td style="text-align: right;">252</td>
+</tr>
+<tr>
+<td>data-tier</td>
+<td><code>skills/data-tier/SKILL.md</code></td>
+<td style="text-align: right;">186</td>
+<td style="text-align: right;">251</td>
+</tr>
+<tr>
+<td>docs-site</td>
+<td><code>skills/docs-site/SKILL.md</code></td>
+<td style="text-align: right;">186</td>
+<td style="text-align: right;">251</td>
+</tr>
+<tr>
+<td>sprint-retrospective</td>
+<td><code>skills/sprint-retrospective/SKILL.md</code></td>
+<td style="text-align: right;">183</td>
+<td style="text-align: right;">247</td>
+</tr>
+<tr>
+<td>manual-test-strategy</td>
+<td><code>skills/manual-test-strategy/SKILL.md</code></td>
+<td style="text-align: right;">182</td>
+<td style="text-align: right;">246</td>
+</tr>
+<tr>
+<td>architecture</td>
+<td><code>skills/architecture/SKILL.md</code></td>
+<td style="text-align: right;">179</td>
+<td style="text-align: right;">242</td>
+</tr>
+<tr>
+<td>azure-policy</td>
+<td><code>skills/azure-policy/SKILL.md</code></td>
+<td style="text-align: right;">178</td>
+<td style="text-align: right;">240</td>
+</tr>
+<tr>
+<td>takt-time-measurement</td>
+<td><code>skills/takt-time-measurement/SKILL.md</code></td>
+<td style="text-align: right;">178</td>
+<td style="text-align: right;">240</td>
+</tr>
+<tr>
+<td>app-inventory</td>
+<td><code>skills/app-inventory/SKILL.md</code></td>
+<td style="text-align: right;">172</td>
+<td style="text-align: right;">232</td>
+</tr>
+<tr>
+<td>frontend-dev</td>
+<td><code>skills/frontend-dev/SKILL.md</code></td>
+<td style="text-align: right;">172</td>
+<td style="text-align: right;">232</td>
+</tr>
+<tr>
+<td>factory-state-machine</td>
+<td><code>skills/factory-state-machine/SKILL.md</code></td>
+<td style="text-align: right;">170</td>
+<td style="text-align: right;">230</td>
+</tr>
+<tr>
+<td>mcp-development</td>
+<td><code>skills/mcp-development/SKILL.md</code></td>
+<td style="text-align: right;">170</td>
+<td style="text-align: right;">230</td>
+</tr>
+<tr>
+<td>s4-deployment-checklist</td>
+<td><code>skills/s4-deployment-checklist/SKILL.md</code></td>
+<td style="text-align: right;">169</td>
+<td style="text-align: right;">228</td>
+</tr>
+<tr>
+<td>bom-schema</td>
+<td><code>skills/bom-schema/SKILL.md</code></td>
+<td style="text-align: right;">165</td>
+<td style="text-align: right;">223</td>
+</tr>
+<tr>
+<td>bom-validation</td>
+<td><code>skills/bom-validation/SKILL.md</code></td>
+<td style="text-align: right;">158</td>
+<td style="text-align: right;">213</td>
+</tr>
+<tr>
+<td>s4-rollback-testing</td>
+<td><code>skills/s4-rollback-testing/SKILL.md</code></td>
+<td style="text-align: right;">157</td>
+<td style="text-align: right;">212</td>
+</tr>
+<tr>
+<td>build-failure-triage</td>
+<td><code>skills/build-failure-triage/SKILL.md</code></td>
+<td style="text-align: right;">156</td>
+<td style="text-align: right;">211</td>
+</tr>
+<tr>
+<td>skill-scripts</td>
+<td><code>skills/skill-scripts/SKILL.md</code></td>
+<td style="text-align: right;">156</td>
+<td style="text-align: right;">211</td>
+</tr>
+<tr>
+<td>memory-promoter</td>
+<td><code>skills/memory-promoter/SKILL.md</code></td>
+<td style="text-align: right;">155</td>
+<td style="text-align: right;">209</td>
+</tr>
+<tr>
+<td>orphaned-pr-triage</td>
+<td><code>skills/orphaned-pr-triage/SKILL.md</code></td>
+<td style="text-align: right;">150</td>
+<td style="text-align: right;">202</td>
+</tr>
+<tr>
+<td>decision-log-capture</td>
+<td><code>skills/decision-log-capture/SKILL.md</code></td>
+<td style="text-align: right;">130</td>
+<td style="text-align: right;">176</td>
+</tr>
+<tr>
+<td>standup-signal-extraction</td>
+<td><code>skills/standup-signal-extraction/SKILL.md</code></td>
+<td style="text-align: right;">126</td>
+<td style="text-align: right;">170</td>
+</tr>
+</tbody>
+</table>
+<h2 id="instructions">Instructions<a class="headerlink" href="#instructions" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Location</th>
+<th style="text-align: right;">Words</th>
+<th style="text-align: right;">Approx Tokens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>basecoat-50-security-entra-oidc-user-auth</td>
+<td><code>instructions/basecoat-50-security-entra-oidc-user-auth.instructions.md</code></td>
+<td style="text-align: right;">1604</td>
+<td style="text-align: right;">2165</td>
+</tr>
+<tr>
+<td>basecoat-60-workflow-multi-repo-orchestration</td>
+<td><code>instructions/basecoat-60-workflow-multi-repo-orchestration.instructions.md</code></td>
+<td style="text-align: right;">1324</td>
+<td style="text-align: right;">1787</td>
+</tr>
+<tr>
+<td>basecoat-20-lang-ruby-on-rails</td>
+<td><code>instructions/basecoat-20-lang-ruby-on-rails.instructions.md</code></td>
+<td style="text-align: right;">1233</td>
+<td style="text-align: right;">1665</td>
+</tr>
+<tr>
+<td>basecoat-10-core-memory-index</td>
+<td><code>instructions/basecoat-10-core-memory-index.instructions.md</code></td>
+<td style="text-align: right;">1195</td>
+<td style="text-align: right;">1613</td>
+</tr>
+<tr>
+<td>basecoat-10-core-agent-routing</td>
+<td><code>instructions/basecoat-10-core-agent-routing.instructions.md</code></td>
+<td style="text-align: right;">1151</td>
+<td style="text-align: right;">1554</td>
+</tr>
+<tr>
+<td>basecoat-10-core-intent-routing</td>
+<td><code>instructions/basecoat-10-core-intent-routing.instructions.md</code></td>
+<td style="text-align: right;">1110</td>
+<td style="text-align: right;">1498</td>
+</tr>
+<tr>
+<td>basecoat-10-core-ux</td>
+<td><code>instructions/basecoat-10-core-ux.instructions.md</code></td>
+<td style="text-align: right;">1090</td>
+<td style="text-align: right;">1472</td>
+</tr>
+<tr>
+<td>basecoat-20-lang-django</td>
+<td><code>instructions/basecoat-20-lang-django.instructions.md</code></td>
+<td style="text-align: right;">1052</td>
+<td style="text-align: right;">1420</td>
+</tr>
+<tr>
+<td>basecoat-10-core-hrm-execution</td>
+<td><code>instructions/basecoat-10-core-hrm-execution.instructions.md</code></td>
+<td style="text-align: right;">1010</td>
+<td style="text-align: right;">1364</td>
+</tr>
+<tr>
+<td>basecoat-10-core-architecture</td>
+<td><code>instructions/basecoat-10-core-architecture.instructions.md</code></td>
+<td style="text-align: right;">1004</td>
+<td style="text-align: right;">1355</td>
+</tr>
+<tr>
+<td>basecoat-20-lang-governance</td>
+<td><code>instructions/basecoat-20-lang-governance.instructions.md</code></td>
+<td style="text-align: right;">989</td>
+<td style="text-align: right;">1335</td>
+</tr>
+<tr>
+<td>basecoat-10-core-mcp</td>
+<td><code>instructions/basecoat-10-core-mcp.instructions.md</code></td>
+<td style="text-align: right;">973</td>
+<td style="text-align: right;">1314</td>
+</tr>
+<tr>
+<td>basecoat-20-lang-java-spring-boot</td>
+<td><code>instructions/basecoat-20-lang-java-spring-boot.instructions.md</code></td>
+<td style="text-align: right;">970</td>
+<td style="text-align: right;">1310</td>
+</tr>
+<tr>
+<td>basecoat-10-core-agents</td>
+<td><code>instructions/basecoat-10-core-agents.instructions.md</code></td>
+<td style="text-align: right;">940</td>
+<td style="text-align: right;">1269</td>
+</tr>
+<tr>
+<td>basecoat-10-core-error-kb</td>
+<td><code>instructions/basecoat-10-core-error-kb.instructions.md</code></td>
+<td style="text-align: right;">929</td>
+<td style="text-align: right;">1254</td>
+</tr>
+<tr>
+<td>basecoat-20-lang-python</td>
+<td><code>instructions/basecoat-20-lang-python.instructions.md</code></td>
+<td style="text-align: right;">919</td>
+<td style="text-align: right;">1241</td>
+</tr>
+<tr>
+<td>basecoat-10-core-npm-workspaces</td>
+<td><code>instructions/basecoat-10-core-npm-workspaces.instructions.md</code></td>
+<td style="text-align: right;">885</td>
+<td style="text-align: right;">1195</td>
+</tr>
+<tr>
+<td>basecoat-10-core-development</td>
+<td><code>instructions/basecoat-10-core-development.instructions.md</code></td>
+<td style="text-align: right;">860</td>
+<td style="text-align: right;">1161</td>
+</tr>
+<tr>
+<td>basecoat-40-azure-azure-service-connector</td>
+<td><code>instructions/basecoat-40-azure-azure-service-connector.instructions.md</code></td>
+<td style="text-align: right;">833</td>
+<td style="text-align: right;">1125</td>
+</tr>
+<tr>
+<td>basecoat-10-core-trm-reflexion</td>
+<td><code>instructions/basecoat-10-core-trm-reflexion.instructions.md</code></td>
+<td style="text-align: right;">811</td>
+<td style="text-align: right;">1095</td>
+</tr>
+<tr>
+<td>basecoat-10-core-agent-behavior</td>
+<td><code>instructions/basecoat-10-core-agent-behavior.instructions.md</code></td>
+<td style="text-align: right;">791</td>
+<td style="text-align: right;">1068</td>
+</tr>
+<tr>
+<td>basecoat-10-core-drift-monitor</td>
+<td><code>instructions/basecoat-10-core-drift-monitor.instructions.md</code></td>
+<td style="text-align: right;">733</td>
+<td style="text-align: right;">990</td>
+</tr>
+<tr>
+<td>basecoat-10-core-j2ee-jakarta-ee</td>
+<td><code>instructions/basecoat-10-core-j2ee-jakarta-ee.instructions.md</code></td>
+<td style="text-align: right;">708</td>
+<td style="text-align: right;">956</td>
+</tr>
+<tr>
+<td>basecoat-30-ai-ai-verification</td>
+<td><code>instructions/basecoat-30-ai-ai-verification.instructions.md</code></td>
+<td style="text-align: right;">676</td>
+<td style="text-align: right;">913</td>
+</tr>
+<tr>
+<td>basecoat-10-core-rest-client-resilience</td>
+<td><code>instructions/basecoat-10-core-rest-client-resilience.instructions.md</code></td>
+<td style="text-align: right;">666</td>
+<td style="text-align: right;">899</td>
+</tr>
+<tr>
+<td>basecoat-10-core-plan-first</td>
+<td><code>instructions/basecoat-10-core-plan-first.instructions.md</code></td>
+<td style="text-align: right;">631</td>
+<td style="text-align: right;">852</td>
+</tr>
+<tr>
+<td>basecoat-10-core-subagent-review</td>
+<td><code>instructions/basecoat-10-core-subagent-review.instructions.md</code></td>
+<td style="text-align: right;">626</td>
+<td style="text-align: right;">845</td>
+</tr>
+<tr>
+<td>basecoat-40-azure-azure-app-configuration</td>
+<td><code>instructions/basecoat-40-azure-azure-app-configuration.instructions.md</code></td>
+<td style="text-align: right;">621</td>
+<td style="text-align: right;">838</td>
+</tr>
+<tr>
+<td>basecoat-50-security-security</td>
+<td><code>instructions/basecoat-50-security-security.instructions.md</code></td>
+<td style="text-align: right;">609</td>
+<td style="text-align: right;">822</td>
+</tr>
+<tr>
+<td>basecoat-30-ai-tailwind-v4</td>
+<td><code>instructions/basecoat-30-ai-tailwind-v4.instructions.md</code></td>
+<td style="text-align: right;">602</td>
+<td style="text-align: right;">813</td>
+</tr>
+<tr>
+<td>basecoat-10-core-tool-minimization</td>
+<td><code>instructions/basecoat-10-core-tool-minimization.instructions.md</code></td>
+<td style="text-align: right;">598</td>
+<td style="text-align: right;">807</td>
+</tr>
+<tr>
+<td>basecoat-10-core-model-routing</td>
+<td><code>instructions/basecoat-10-core-model-routing.instructions.md</code></td>
+<td style="text-align: right;">592</td>
+<td style="text-align: right;">799</td>
+</tr>
+<tr>
+<td>basecoat-10-core-electron</td>
+<td><code>instructions/basecoat-10-core-electron.instructions.md</code></td>
+<td style="text-align: right;">577</td>
+<td style="text-align: right;">779</td>
+</tr>
+<tr>
+<td>basecoat-10-core-testing</td>
+<td><code>instructions/basecoat-10-core-testing.instructions.md</code></td>
+<td style="text-align: right;">577</td>
+<td style="text-align: right;">779</td>
+</tr>
+<tr>
+<td>basecoat-10-core-runtime-debugging</td>
+<td><code>instructions/basecoat-10-core-runtime-debugging.instructions.md</code></td>
+<td style="text-align: right;">571</td>
+<td style="text-align: right;">771</td>
+</tr>
+<tr>
+<td>basecoat-10-core-fabric-notebooks</td>
+<td><code>instructions/basecoat-10-core-fabric-notebooks.instructions.md</code></td>
+<td style="text-align: right;">550</td>
+<td style="text-align: right;">742</td>
+</tr>
+<tr>
+<td>basecoat-10-core-shearing-layers</td>
+<td><code>instructions/basecoat-10-core-shearing-layers.instructions.md</code></td>
+<td style="text-align: right;">547</td>
+<td style="text-align: right;">738</td>
+</tr>
+<tr>
+<td>basecoat-10-core-cpp</td>
+<td><code>instructions/basecoat-10-core-cpp.instructions.md</code></td>
+<td style="text-align: right;">515</td>
+<td style="text-align: right;">695</td>
+</tr>
+<tr>
+<td>basecoat-10-core-session-hygiene</td>
+<td><code>instructions/basecoat-10-core-session-hygiene.instructions.md</code></td>
+<td style="text-align: right;">507</td>
+<td style="text-align: right;">684</td>
+</tr>
+<tr>
+<td>basecoat-10-core-bootstrap-structure</td>
+<td><code>instructions/basecoat-10-core-bootstrap-structure.instructions.md</code></td>
+<td style="text-align: right;">490</td>
+<td style="text-align: right;">662</td>
+</tr>
+<tr>
+<td>basecoat-10-core-tdd-enforcement</td>
+<td><code>instructions/basecoat-10-core-tdd-enforcement.instructions.md</code></td>
+<td style="text-align: right;">490</td>
+<td style="text-align: right;">662</td>
+</tr>
+<tr>
+<td>basecoat-10-core-config</td>
+<td><code>instructions/basecoat-10-core-config.instructions.md</code></td>
+<td style="text-align: right;">486</td>
+<td style="text-align: right;">656</td>
+</tr>
+<tr>
+<td>basecoat-50-security-bootstrap-github-secrets</td>
+<td><code>instructions/basecoat-50-security-bootstrap-github-secrets.instructions.md</code></td>
+<td style="text-align: right;">479</td>
+<td style="text-align: right;">647</td>
+</tr>
+<tr>
+<td>basecoat-10-core-process</td>
+<td><code>instructions/basecoat-10-core-process.instructions.md</code></td>
+<td style="text-align: right;">474</td>
+<td style="text-align: right;">640</td>
+</tr>
+<tr>
+<td>basecoat-60-workflow-ci-firewall</td>
+<td><code>instructions/basecoat-60-workflow-ci-firewall.instructions.md</code></td>
+<td style="text-align: right;">464</td>
+<td style="text-align: right;">626</td>
+</tr>
+<tr>
+<td>basecoat-10-core-observability</td>
+<td><code>instructions/basecoat-10-core-observability.instructions.md</code></td>
+<td style="text-align: right;">458</td>
+<td style="text-align: right;">618</td>
+</tr>
+<tr>
+<td>basecoat-60-workflow-high-stakes-workflow</td>
+<td><code>instructions/basecoat-60-workflow-high-stakes-workflow.instructions.md</code></td>
+<td style="text-align: right;">458</td>
+<td style="text-align: right;">618</td>
+</tr>
+<tr>
+<td>basecoat-50-security-secrets-management</td>
+<td><code>instructions/basecoat-50-security-secrets-management.instructions.md</code></td>
+<td style="text-align: right;">451</td>
+<td style="text-align: right;">609</td>
+</tr>
+<tr>
+<td>basecoat-90-quality-quality</td>
+<td><code>instructions/basecoat-90-quality-quality.instructions.md</code></td>
+<td style="text-align: right;">450</td>
+<td style="text-align: right;">608</td>
+</tr>
+<tr>
+<td>basecoat-50-security-rbac-authentication</td>
+<td><code>instructions/basecoat-50-security-rbac-authentication.instructions.md</code></td>
+<td style="text-align: right;">443</td>
+<td style="text-align: right;">598</td>
+</tr>
+<tr>
+<td>basecoat-50-security-token-economics</td>
+<td><code>instructions/basecoat-50-security-token-economics.instructions.md</code></td>
+<td style="text-align: right;">419</td>
+<td style="text-align: right;">566</td>
+</tr>
+<tr>
+<td>basecoat-10-core-monolith</td>
+<td><code>instructions/basecoat-10-core-monolith.instructions.md</code></td>
+<td style="text-align: right;">418</td>
+<td style="text-align: right;">564</td>
+</tr>
+<tr>
+<td>basecoat-10-core-enterprise-configuration</td>
+<td><code>instructions/basecoat-10-core-enterprise-configuration.instructions.md</code></td>
+<td style="text-align: right;">416</td>
+<td style="text-align: right;">562</td>
+</tr>
+<tr>
+<td>basecoat-80-data-data-science</td>
+<td><code>instructions/basecoat-80-data-data-science.instructions.md</code></td>
+<td style="text-align: right;">416</td>
+<td style="text-align: right;">562</td>
+</tr>
+<tr>
+<td>basecoat-10-core-naming</td>
+<td><code>instructions/basecoat-10-core-naming.instructions.md</code></td>
+<td style="text-align: right;">415</td>
+<td style="text-align: right;">560</td>
+</tr>
+<tr>
+<td>basecoat-10-core-documentation</td>
+<td><code>instructions/basecoat-10-core-documentation.instructions.md</code></td>
+<td style="text-align: right;">398</td>
+<td style="text-align: right;">537</td>
+</tr>
+<tr>
+<td>intent-routing</td>
+<td><code>instructions/intent-routing.instructions.md</code></td>
+<td style="text-align: right;">397</td>
+<td style="text-align: right;">536</td>
+</tr>
+<tr>
+<td>basecoat-10-core-bootstrap-autodetect</td>
+<td><code>instructions/basecoat-10-core-bootstrap-autodetect.instructions.md</code></td>
+<td style="text-align: right;">392</td>
+<td style="text-align: right;">529</td>
+</tr>
+<tr>
+<td>basecoat-50-security-security-monitoring</td>
+<td><code>instructions/basecoat-50-security-security-monitoring.instructions.md</code></td>
+<td style="text-align: right;">369</td>
+<td style="text-align: right;">498</td>
+</tr>
+<tr>
+<td>basecoat-10-core-mutation-testing</td>
+<td><code>instructions/basecoat-10-core-mutation-testing.instructions.md</code></td>
+<td style="text-align: right;">336</td>
+<td style="text-align: right;">454</td>
+</tr>
+<tr>
+<td>basecoat-10-core-nextjs-react19</td>
+<td><code>instructions/basecoat-10-core-nextjs-react19.instructions.md</code></td>
+<td style="text-align: right;">306</td>
+<td style="text-align: right;">413</td>
+</tr>
+<tr>
+<td>basecoat-10-core-data-workload-testing</td>
+<td><code>instructions/basecoat-10-core-data-workload-testing.instructions.md</code></td>
+<td style="text-align: right;">284</td>
+<td style="text-align: right;">383</td>
+</tr>
+<tr>
+<td>basecoat-10-core-frontend</td>
+<td><code>instructions/basecoat-10-core-frontend.instructions.md</code></td>
+<td style="text-align: right;">281</td>
+<td style="text-align: right;">379</td>
+</tr>
+<tr>
+<td>basecoat-10-core-verification</td>
+<td><code>instructions/basecoat-10-core-verification.instructions.md</code></td>
+<td style="text-align: right;">280</td>
+<td style="text-align: right;">378</td>
+</tr>
+<tr>
+<td>basecoat-10-core-reliability</td>
+<td><code>instructions/basecoat-10-core-reliability.instructions.md</code></td>
+<td style="text-align: right;">278</td>
+<td style="text-align: right;">375</td>
+</tr>
+<tr>
+<td>basecoat-10-core-terraform-init</td>
+<td><code>instructions/basecoat-10-core-terraform-init.instructions.md</code></td>
+<td style="text-align: right;">277</td>
+<td style="text-align: right;">374</td>
+</tr>
+<tr>
+<td>basecoat-10-core-public-guidance</td>
+<td><code>instructions/basecoat-10-core-public-guidance.instructions.md</code></td>
+<td style="text-align: right;">275</td>
+<td style="text-align: right;">371</td>
+</tr>
+<tr>
+<td>basecoat-40-azure-azure</td>
+<td><code>instructions/basecoat-40-azure-azure.instructions.md</code></td>
+<td style="text-align: right;">270</td>
+<td style="text-align: right;">364</td>
+</tr>
+<tr>
+<td>basecoat-60-workflow-workflow-integrity</td>
+<td><code>instructions/basecoat-60-workflow-workflow-integrity.instructions.md</code></td>
+<td style="text-align: right;">268</td>
+<td style="text-align: right;">362</td>
+</tr>
+<tr>
+<td>basecoat-10-core-bicep</td>
+<td><code>instructions/basecoat-10-core-bicep.instructions.md</code></td>
+<td style="text-align: right;">255</td>
+<td style="text-align: right;">344</td>
+</tr>
+<tr>
+<td>basecoat-10-core-terraform</td>
+<td><code>instructions/basecoat-10-core-terraform.instructions.md</code></td>
+<td style="text-align: right;">255</td>
+<td style="text-align: right;">344</td>
+</tr>
+<tr>
+<td>basecoat-10-core-escalation-criteria</td>
+<td><code>instructions/basecoat-10-core-escalation-criteria.instructions.md</code></td>
+<td style="text-align: right;">248</td>
+<td style="text-align: right;">335</td>
+</tr>
+<tr>
+<td>basecoat-20-lang-dotnet-upgrade-planning</td>
+<td><code>instructions/basecoat-20-lang-dotnet-upgrade-planning.instructions.md</code></td>
+<td style="text-align: right;">247</td>
+<td style="text-align: right;">333</td>
+</tr>
+<tr>
+<td>basecoat-60-workflow-factory-orchestration</td>
+<td><code>instructions/basecoat-60-workflow-factory-orchestration.instructions.md</code></td>
+<td style="text-align: right;">245</td>
+<td style="text-align: right;">331</td>
+</tr>
+<tr>
+<td>basecoat-10-core-output-style</td>
+<td><code>instructions/basecoat-10-core-output-style.instructions.md</code></td>
+<td style="text-align: right;">243</td>
+<td style="text-align: right;">328</td>
+</tr>
+<tr>
+<td>basecoat-60-workflow-workflow-file-integrity</td>
+<td><code>instructions/basecoat-60-workflow-workflow-file-integrity.instructions.md</code></td>
+<td style="text-align: right;">241</td>
+<td style="text-align: right;">325</td>
+</tr>
+<tr>
+<td>basecoat-20-lang-dotnet-test-strategy</td>
+<td><code>instructions/basecoat-20-lang-dotnet-test-strategy.instructions.md</code></td>
+<td style="text-align: right;">223</td>
+<td style="text-align: right;">301</td>
+</tr>
+<tr>
+<td>basecoat-20-lang-dotnet-dependency-analysis</td>
+<td><code>instructions/basecoat-20-lang-dotnet-dependency-analysis.instructions.md</code></td>
+<td style="text-align: right;">222</td>
+<td style="text-align: right;">300</td>
+</tr>
+<tr>
+<td>basecoat-50-security-copilot-github-token-bootstrap</td>
+<td><code>instructions/basecoat-50-security-copilot-github-token-bootstrap.instructions.md</code></td>
+<td style="text-align: right;">214</td>
+<td style="text-align: right;">289</td>
+</tr>
+<tr>
+<td>basecoat-10-core-backend</td>
+<td><code>instructions/basecoat-10-core-backend.instructions.md</code></td>
+<td style="text-align: right;">180</td>
+<td style="text-align: right;">243</td>
+</tr>
+<tr>
+<td>basecoat-10-core-s4-safety-gates</td>
+<td><code>instructions/basecoat-10-core-s4-safety-gates.instructions.md</code></td>
+<td style="text-align: right;">157</td>
+<td style="text-align: right;">212</td>
+</tr>
+<tr>
+<td>governance</td>
+<td><code>instructions/governance.instructions.md</code></td>
+<td style="text-align: right;">69</td>
+<td style="text-align: right;">93</td>
+</tr>
+<tr>
+<td>security</td>
+<td><code>instructions/security.instructions.md</code></td>
+<td style="text-align: right;">37</td>
+<td style="text-align: right;">50</td>
+</tr>
+<tr>
+<td>ux</td>
+<td><code>instructions/ux.instructions.md</code></td>
+<td style="text-align: right;">37</td>
+<td style="text-align: right;">50</td>
+</tr>
+<tr>
+<td>ci-firewall</td>
+<td><code>instructions/ci-firewall.instructions.md</code></td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;">49</td>
+</tr>
+<tr>
+<td>plan-first</td>
+<td><code>instructions/plan-first.instructions.md</code></td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">47</td>
+</tr>
+<tr>
+<td>rbac-authentication</td>
+<td><code>instructions/rbac-authentication.instructions.md</code></td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">47</td>
+</tr>
+<tr>
+<td>architecture</td>
+<td><code>instructions/architecture.instructions.md</code></td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">46</td>
+</tr>
+<tr>
+<td>documentation</td>
+<td><code>instructions/documentation.instructions.md</code></td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">46</td>
+</tr>
+<tr>
+<td>observability</td>
+<td><code>instructions/observability.instructions.md</code></td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">46</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; IBuySpy-Shared contributors. Licensed under MIT.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/ivegamsft/basecoat" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "search.highlight", "search.suggest", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

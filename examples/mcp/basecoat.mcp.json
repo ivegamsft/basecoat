@@ -1,0 +1,12 @@
+{
+    "servers": {
+        "basecoat": {
+            "type": "stdio",
+            "command": "node",
+            "args": [
+                "./mcp/index.js"
+            ],
+            "cwd": ".github/base-coat"
+        }
+    }
+}

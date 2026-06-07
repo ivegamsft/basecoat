@@ -1,0 +1,3330 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Enterprise shared library of GitHub Copilot customization assets — agents, skills, instructions, and prompts.">
+      
+      
+      
+        <link rel="canonical" href="https://ivegamsft.github.io/basecoat/reference/asset-catalog/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Asset Catalog - BaseCoat</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#asset-catalog" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="BaseCoat" class="md-header__button md-logo" aria-label="BaseCoat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12 16 7.36-5.73L21 9l-9-7-9 7 1.63 1.27M12 18.54l-7.38-5.73L3 14.07l9 7 9-7-1.63-1.27z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BaseCoat
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Asset Catalog
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ivegamsft/basecoat" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ivegamsft/basecoat
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../quick-reference/" class="md-tabs__link">
+          
+  
+  
+  Asset Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/intent-prefixes/" class="md-tabs__link">
+          
+  
+  
+  How-To Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../memory/" class="md-tabs__link">
+          
+  
+  
+  Memory System
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../architecture/overview/" class="md-tabs__link">
+          
+  
+  
+  Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../PHILOSOPHY.md" class="md-tabs__link">
+          
+  
+  
+  About
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="BaseCoat" class="md-nav__button md-logo" aria-label="BaseCoat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12 16 7.36-5.73L21 9l-9-7-9 7 1.63 1.27M12 18.54l-7.38-5.73L3 14.07l9 7 9-7-1.63-1.27z"/></svg>
+
+    </a>
+    BaseCoat
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ivegamsft/basecoat" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ivegamsft/basecoat
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/enterprise-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Enterprise Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/consumer-sync/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Consumer Sync Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Asset Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Asset Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quick-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../token-context-inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Token Context Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../asset-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../governance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Governance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-To Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How-To Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/intent-prefixes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Intent Prefixes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/integrate-prompt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Started (integrate prompt)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/customization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Make It Your Own
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/custom-agent-authoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create a Custom Agent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/agent-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/version-drift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Drift Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/model-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/token-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Token Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/basecoat-yml/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BaseCoat Config (.basecoat.yml)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/ubb-token-guidance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UBB Token Guidance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory System
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Memory System
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/learning-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learning Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/triage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Triage Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing Learnings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/process/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Process
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../diagrams/architecture-diagrams-index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagrams
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/decisions/adr-001-naming-convention/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-001 Naming Convention
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/multi-agent-orchestration-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Agent Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    About
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    About
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../PHILOSOPHY.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Philosophy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../story/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Story
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../metrics-schema-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dashboard Metrics Schema and Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#basecoat-10-core-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        basecoat-10-core-agents
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="basecoat-10-core-agents">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basecoat-10-core-architecture-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        basecoat-10-core-architecture &amp; Design
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modernization-migration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modernization &amp; Migration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basecoat-40-azure-azure-cloud" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        basecoat-40-azure-azure &amp; Cloud
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basecoat-50-security-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        basecoat-50-security-security
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basecoat-10-core-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        basecoat-10-core-development
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basecoat-10-core-testing-basecoat-90-quality-quality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        basecoat-10-core-testing &amp; basecoat-90-quality-quality
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cicd-devops" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CI/CD &amp; DevOps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-knowledge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory &amp; Knowledge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delivery-planning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Delivery &amp; Planning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basecoat-authoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BaseCoat Authoring
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-ml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data &amp; ML
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skills" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skills
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Skills">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basecoat-40-azure-azure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        basecoat-40-azure-azure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modernization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modernization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basecoat-10-core-development-domains" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        basecoat-10-core-development Domains
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#devops-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DevOps &amp; Operations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basecoat-50-security-security_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        basecoat-50-security-security
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-intelligence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory &amp; Intelligence
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instructions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instructions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Instructions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basecoat-20-lang-governance-safety" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        basecoat-20-lang-governance &amp; Safety
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agent-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent Behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basecoat-10-core-architecture-design_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        basecoat-10-core-architecture &amp; Design
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basecoat-10-core-development_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        basecoat-10-core-development
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basecoat-40-azure-azure-cloud_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        basecoat-40-azure-azure &amp; Cloud
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basecoat-50-security-security_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        basecoat-50-security-security
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basecoat-10-core-testing-basecoat-90-quality-quality_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        basecoat-10-core-testing &amp; basecoat-90-quality-quality
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-ml_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data &amp; ML
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basecoat-10-core-reliability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        basecoat-10-core-reliability
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-knowledge_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory &amp; Knowledge
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prompts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prompts
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="asset-catalog">Asset Catalog<a class="headerlink" href="#asset-catalog" title="Permanent link">&para;</a></h1>
+<p>Complete reference of all BaseCoat assets grouped by category. Counts reflect the current
+repository state (79 basecoat-10-core-agents · 57 skills · 64 instructions · 3 prompts).</p>
+<h2 id="basecoat-10-core-agents">basecoat-10-core-agents<a class="headerlink" href="#basecoat-10-core-agents" title="Permanent link">&para;</a></h2>
+<p>basecoat-10-core-agents are end-to-end task executors stored as <code>agents/&lt;name&gt;.agent.md</code>.</p>
+<h3 id="basecoat-10-core-architecture-design">basecoat-10-core-architecture &amp; Design<a class="headerlink" href="#basecoat-10-core-architecture-design" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-10-core-agent-designer</code></td>
+<td>Designs and authors Copilot agent definitions; covers skill composition and multi-agent coordination</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-api-designer</code></td>
+<td>OpenAPI spec authoring, REST and GraphQL design, versioning strategy, breaking-change analysis</td>
+</tr>
+<tr>
+<td><code>basecoat-80-data-data-architect</code></td>
+<td>Scalable data architectures, medallion layers, data governance, and analytics workflows</td>
+</tr>
+<tr>
+<td><code>basecoat-30-ai-domain-designer</code></td>
+<td>Domain-Driven Design agent for bounded context modeling, aggregate design, ubiquitous language</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-ha-architect</code></td>
+<td>High-availability, resilience, and chaos basecoat-10-core-testing strategies for distributed systems</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-identity-architect</code></td>
+<td>basecoat-40-azure-azure RBAC design, managed identity configuration, Entra ID app registrations</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-solution-architect</code></td>
+<td>System design, C4 diagrams, ADRs, technology selection, and cross-cutting concerns</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-ux-designer</code></td>
+<td>User journey mapping, wireframe specs, component design, and accessibility audits</td>
+</tr>
+</tbody>
+</table>
+<h3 id="modernization-migration">Modernization &amp; Migration<a class="headerlink" href="#modernization-migration" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-10-core-app-inventory</code></td>
+<td>Scans legacy applications to discover dependencies, identify technology stacks, assess migration readiness</td>
+</tr>
+<tr>
+<td><code>basecoat-30-ai-containerization-planner</code></td>
+<td>Assesses containerization readiness, chooses deployment platforms (Docker/AKS/ACA)</td>
+</tr>
+<tr>
+<td><code>basecoat-80-data-database-migration</code></td>
+<td>Plans and executes database migrations: schema evolution, replication, zero-downtime upgrades</td>
+</tr>
+<tr>
+<td><code>basecoat-20-lang-dotnet-modernization-advisor</code></td>
+<td>.NET modernization assessment, upgrade planning, and execution guidance</td>
+</tr>
+<tr>
+<td><code>entity-framework-migration</code></td>
+<td>Entity Framework Core migration planning and execution</td>
+</tr>
+<tr>
+<td><code>identity-migration</code></td>
+<td>Identity provider migration strategy and execution</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-legacy-modernization</code></td>
+<td>Web Forms to Razor Pages migration using the strangler fig pattern</td>
+</tr>
+</tbody>
+</table>
+<h3 id="basecoat-40-azure-azure-cloud">basecoat-40-azure-azure &amp; Cloud<a class="headerlink" href="#basecoat-40-azure-azure-cloud" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-40-azure-azure-landing-zone</code></td>
+<td>Scaffolds enterprise-scale landing zones following Microsoft ESLZ guidance</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-finops-advisor</code></td>
+<td>Cloud cost governance, cost optimization, chargeback/showback models, and 12-Factor FinOps</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-gitops-engineer</code></td>
+<td>GitOps workflows for Infrastructure-as-Code, declarative configuration, automated deployment</td>
+</tr>
+<tr>
+<td><code>basecoat-60-workflow-infrastructure-deploy</code></td>
+<td>Orchestrates basecoat-40-azure-azure infrastructure deployments using basecoat-10-core-bicep with parallel resource management</td>
+</tr>
+</tbody>
+</table>
+<h3 id="basecoat-50-security-security">basecoat-50-security-security<a class="headerlink" href="#basecoat-50-security-security" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-50-security-api-basecoat-50-security-security</code></td>
+<td>API threat modeling, OWASP API basecoat-50-security-security Top 10 assessment, and remediation</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-chaos-engineer</code></td>
+<td>Fault injection, game days, resilience scoring, and recovery validation</td>
+</tr>
+<tr>
+<td><code>basecoat-50-security-config-auditor</code></td>
+<td>Scans repositories for committed or unprotected configuration files containing secrets</td>
+</tr>
+<tr>
+<td><code>basecoat-50-security-container-basecoat-50-security-security</code></td>
+<td>Container image and runtime basecoat-50-security-security hardening</td>
+</tr>
+<tr>
+<td><code>basecoat-50-security-github-security-posture</code></td>
+<td>GitHub org and repository policy auditor</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-hardening-advisor</code></td>
+<td>basecoat-50-security-security hardening guidance for applications and infrastructure</td>
+</tr>
+<tr>
+<td><code>basecoat-90-quality-penetration-test</code></td>
+<td>basecoat-50-security-security assessments, vulnerability discovery, and remediation workflows</td>
+</tr>
+<tr>
+<td><code>basecoat-50-security-policy-as-code-compliance</code></td>
+<td>Validates code and configuration against organizational rules and compliance frameworks</td>
+</tr>
+<tr>
+<td><code>basecoat-50-security-secrets-manager</code></td>
+<td>Secrets lifecycle management and rotation</td>
+</tr>
+<tr>
+<td><code>basecoat-50-security-security-analyst</code></td>
+<td>Vulnerability assessment, threat modeling, and secure coding review</td>
+</tr>
+<tr>
+<td><code>basecoat-50-security-security-monitor</code></td>
+<td>basecoat-50-security-security monitoring and alerting strategy</td>
+</tr>
+<tr>
+<td><code>basecoat-50-security-security-operations</code></td>
+<td>SOC playbook guidance for threat detection, incident response, and basecoat-50-security-security operations</td>
+</tr>
+<tr>
+<td><code>basecoat-50-security-supply-chain-basecoat-50-security-security</code></td>
+<td>Artifact signing, SBOM generation, and provenance tracking</td>
+</tr>
+</tbody>
+</table>
+<h3 id="basecoat-10-core-development">basecoat-10-core-development<a class="headerlink" href="#basecoat-10-core-development" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-10-core-backend-dev</code></td>
+<td>APIs, services, and business logic; basecoat-10-core-architecture patterns and data access</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-frontend-dev</code></td>
+<td>UI components and applications; component-driven basecoat-10-core-development and state management</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-middleware-dev</code></td>
+<td>API gateways, message-passing, and integration layer design</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-mcp-developer</code></td>
+<td>basecoat-10-core-mcp server basecoat-10-core-development for building Model Context Protocol servers and tools</td>
+</tr>
+<tr>
+<td><code>basecoat-80-data-data-tier</code></td>
+<td>Schema design, migrations, query optimization, and data access patterns</td>
+</tr>
+</tbody>
+</table>
+<h3 id="basecoat-10-core-testing-basecoat-90-quality-quality">basecoat-10-core-testing &amp; basecoat-90-quality-quality<a class="headerlink" href="#basecoat-10-core-testing-basecoat-90-quality-quality" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-90-quality-code-review</code></td>
+<td>Structured multi-step code review with findings prioritized by severity</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-contract-basecoat-10-core-testing</code></td>
+<td>Consumer-driven contracts, E2E basecoat-10-core-testing strategy, and mutation basecoat-10-core-testing</td>
+</tr>
+<tr>
+<td><code>basecoat-90-quality-e2e-test-strategy</code></td>
+<td>End-to-end basecoat-10-core-testing orchestration, critical path identification, flakiness reduction</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-exploratory-charter</code></td>
+<td>Time-boxed exploratory basecoat-10-core-testing sessions with mission-driven charters</td>
+</tr>
+<tr>
+<td><code>basecoat-30-ai-guardrail</code></td>
+<td>Validates outputs against safety, quality, compliance, and formatting constraints</td>
+</tr>
+<tr>
+<td><code>basecoat-90-quality-manual-test-strategy</code></td>
+<td>Structured manual basecoat-10-core-testing strategy for a feature or risk inventory</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-performance-analyst</code></td>
+<td>Profiling, load testing, and optimization; evaluating application performance</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-strategy-to-automation</code></td>
+<td>Converts manual test paths into automation candidates</td>
+</tr>
+</tbody>
+</table>
+<h3 id="cicd-devops">CI/CD &amp; DevOps<a class="headerlink" href="#cicd-devops" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-10-core-agentops</code></td>
+<td>Agent versioning, rollout, health monitoring, rollback, and operational basecoat-20-lang-governance</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-dependency-lifecycle</code></td>
+<td>Manages dependency updates, tracks breaking changes, plans upgrade paths</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-dependency-update-advisor</code></td>
+<td>Reviews Dependabot PRs with structured risk assessment comments</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-devops-engineer</code></td>
+<td>CI/CD pipelines, infrastructure as code, container strategy, environment management</td>
+</tr>
+<tr>
+<td><code>basecoat-60-workflow-release-impact-advisor</code></td>
+<td>Release readiness assessment, change impact analysis, blast radius estimation</td>
+</tr>
+<tr>
+<td><code>basecoat-60-workflow-release-manager</code></td>
+<td>Automated versioned release workflow from merged PRs to GitHub releases</td>
+</tr>
+<tr>
+<td><code>basecoat-60-workflow-self-healing-ci</code></td>
+<td>CI failure analysis, log parsing, pipeline remediation, and retry strategies</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-sre-engineer</code></td>
+<td>SLOs, error budgets, incident response, chaos engineering for site basecoat-10-core-reliability</td>
+</tr>
+</tbody>
+</table>
+<h3 id="memory-knowledge">Memory &amp; Knowledge<a class="headerlink" href="#memory-knowledge" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-10-core-feedback-loop</code></td>
+<td>Continuous learning through user feedback collection and prompt effectiveness tracking</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-memory-curator</code></td>
+<td>Extracts, deduplicates, validates, and retrieves cross-session knowledge</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-memory-promoter</code></td>
+<td>Analyzes session transcripts to identify high-value patterns for promotion to BaseCoat memory</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-prompt-coach</code></td>
+<td>Interactive prompt optimization coach; reviews and scores prompt basecoat-90-quality-quality</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-prompt-engineer</code></td>
+<td>System prompt engineering; designing prompts, optimizing few-shot examples</td>
+</tr>
+</tbody>
+</table>
+<h3 id="delivery-planning">Delivery &amp; Planning<a class="headerlink" href="#delivery-planning" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-60-workflow-incident-responder</code></td>
+<td>Structured incident response: classification, mitigation coordination, post-mortem</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-issue-triage</code></td>
+<td>GitHub issue classification, priority assignment (P0-P3), label management</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-merge-coordinator</code></td>
+<td>Parallel branch merge coordination into a target branch</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-product-manager</code></td>
+<td>Requirements gathering, user stories, acceptance criteria, roadmap planning</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-production-readiness</code></td>
+<td>Ensures applications meet operational requirements before release</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-project-onboarding</code></td>
+<td>Single-invocation new repo setup with BaseCoat integration</td>
+</tr>
+<tr>
+<td><code>basecoat-60-workflow-retro-facilitator</code></td>
+<td>End-of-sprint retrospective from closed issues and merged PRs</td>
+</tr>
+<tr>
+<td><code>basecoat-60-workflow-rollout-basecoat</code></td>
+<td>Onboards a repository to BaseCoat in an enterprise setting with pinned versioning</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-sprint-planner</code></td>
+<td>Goal-to-issues decomposition and wave dependency mapping</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-sprint-retrospective</code></td>
+<td>Reconstructs repository history for sprint retrospectives</td>
+</tr>
+</tbody>
+</table>
+<h3 id="basecoat-authoring">BaseCoat Authoring<a class="headerlink" href="#basecoat-authoring" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-50-security-guidance-author</code></td>
+<td>Drafts new BaseCoat guidance assets (instructions, skills, agents, prompts)</td>
+</tr>
+<tr>
+<td><code>basecoat-90-quality-guidance-reviewer</code></td>
+<td>Validates a BaseCoat guidance draft before committing</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-new-customization</code></td>
+<td>Creates or updates customization assets such as instructions, skills, prompts, or basecoat-10-core-agents</td>
+</tr>
+</tbody>
+</table>
+<h3 id="data-ml">Data &amp; ML<a class="headerlink" href="#data-ml" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-10-core-chaos-engineer</code></td>
+<td>Fault injection and resilience validation for distributed systems</td>
+</tr>
+<tr>
+<td><code>basecoat-80-data-data-integrity</code></td>
+<td>Data integrity validation and constraint enforcement</td>
+</tr>
+<tr>
+<td><code>basecoat-60-workflow-data-pipeline</code></td>
+<td>Medallion lakehouse architecture, data quality, ML pipeline orchestration</td>
+</tr>
+<tr>
+<td><code>basecoat-80-data-dataops</code></td>
+<td>Data quality, lineage, governance, orchestration, and data contracts</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-llmops</code></td>
+<td>Prompt deployment pipelines, model gateway configuration, inference monitoring</td>
+</tr>
+<tr>
+<td><code>basecoat-30-ai-mlops</code></td>
+<td>Model lifecycle, experiment tracking, model registry, deployment automation, drift detection</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-observability-engineer</code></td>
+<td>basecoat-10-core-observability strategy including metrics, traces, logs, and alerting</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="skills">Skills<a class="headerlink" href="#skills" title="Permanent link">&para;</a></h2>
+<p>Skills are reusable domain capabilities stored as <code>skills/&lt;name&gt;/SKILL.md</code>.</p>
+<h3 id="basecoat-40-azure-azure">basecoat-40-azure-azure<a class="headerlink" href="#basecoat-40-azure-azure" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Skill</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>azure-container-apps</code></td>
+<td>basecoat-40-azure-azure Container Apps deployment patterns</td>
+</tr>
+<tr>
+<td><code>azure-devops-rest</code></td>
+<td>basecoat-40-azure-azure DevOps REST API integration</td>
+</tr>
+<tr>
+<td><code>azure-identity</code></td>
+<td>basecoat-40-azure-azure managed identity and Entra ID configuration</td>
+</tr>
+<tr>
+<td><code>basecoat-40-azure-azure-landing-zone</code></td>
+<td>Enterprise-scale landing zone scaffolding</td>
+</tr>
+<tr>
+<td><code>azure-linux-app-service</code></td>
+<td>basecoat-40-azure-azure App Service for Linbasecoat-10-core-ux deployment and configuration</td>
+</tr>
+<tr>
+<td><code>azure-networking</code></td>
+<td>basecoat-40-azure-azure virtual networks, NSGs, private endpoints</td>
+</tr>
+<tr>
+<td><code>azure-policy</code></td>
+<td>basecoat-40-azure-azure Policy definition and assignment</td>
+</tr>
+<tr>
+<td><code>azure-waf-review</code></td>
+<td>basecoat-40-azure-azure Well-Architected Framework review automation</td>
+</tr>
+</tbody>
+</table>
+<h3 id="modernization">Modernization<a class="headerlink" href="#modernization" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Skill</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-10-core-app-inventory</code></td>
+<td>Application inventory and dependency discovery</td>
+</tr>
+<tr>
+<td><code>cross-stack-modernization</code></td>
+<td>Cross-technology stack modernization patterns</td>
+</tr>
+<tr>
+<td><code>dotnet-modernization</code></td>
+<td>.NET upgrade and modernization execution</td>
+</tr>
+<tr>
+<td><code>entity-framework-migration</code></td>
+<td>EF Core migration generation and validation</td>
+</tr>
+<tr>
+<td><code>identity-migration</code></td>
+<td>Identity provider migration execution</td>
+</tr>
+</tbody>
+</table>
+<h3 id="basecoat-10-core-development-domains">basecoat-10-core-development Domains<a class="headerlink" href="#basecoat-10-core-development-domains" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Skill</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>agent-design</code></td>
+<td>Copilot agent definition authoring</td>
+</tr>
+<tr>
+<td><code>api-design</code></td>
+<td>OpenAPI/REST/GraphQL API specification authoring</td>
+</tr>
+<tr>
+<td><code>basecoat-50-security-api-basecoat-50-security-security</code></td>
+<td>API basecoat-50-security-security assessment and hardening</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-backend-dev</code></td>
+<td>basecoat-10-core-backend service and API basecoat-10-core-development patterns</td>
+</tr>
+<tr>
+<td><code>basecoat-90-quality-code-review</code></td>
+<td>Structured code review workflow</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-contract-basecoat-10-core-testing</code></td>
+<td>Consumer-driven contract test generation</td>
+</tr>
+<tr>
+<td><code>cqrs-event-sourcing</code></td>
+<td>CQRS and event sourcing implementation patterns</td>
+</tr>
+<tr>
+<td><code>basecoat-80-data-data-tier</code></td>
+<td>Data schema design and access patterns</td>
+</tr>
+<tr>
+<td><code>basecoat-80-data-database-migration</code></td>
+<td>Database migration planning and execution</td>
+</tr>
+<tr>
+<td><code>domain-driven-design</code></td>
+<td>Bounded context and aggregate modeling</td>
+</tr>
+<tr>
+<td><code>e2e-basecoat-10-core-testing</code></td>
+<td>End-to-end test strategy and implementation</td>
+</tr>
+<tr>
+<td><code>electron-apps</code></td>
+<td>basecoat-10-core-electron desktop application basecoat-50-security-security patterns</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-frontend-dev</code></td>
+<td>basecoat-10-core-frontend component and state management patterns</td>
+</tr>
+<tr>
+<td><code>basecoat-90-quality-manual-test-strategy</code></td>
+<td>Manual test plan and exploratory charter creation</td>
+</tr>
+<tr>
+<td><code>mcp-basecoat-10-core-development</code></td>
+<td>Model Context Protocol server basecoat-10-core-development</td>
+</tr>
+<tr>
+<td><code>performance-profiling</code></td>
+<td>Application profiling and load basecoat-10-core-testing</td>
+</tr>
+<tr>
+<td><code>refactoring</code></td>
+<td>Safe refactoring techniques and patterns</td>
+</tr>
+</tbody>
+</table>
+<h3 id="devops-operations">DevOps &amp; Operations<a class="headerlink" href="#devops-operations" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Skill</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat</code></td>
+<td>BaseCoat sync, version management, and asset authoring</td>
+</tr>
+<tr>
+<td><code>create-instruction</code></td>
+<td>Creates new instruction files following BaseCoat conventions</td>
+</tr>
+<tr>
+<td><code>create-skill</code></td>
+<td>Creates new skill directories following BaseCoat conventions</td>
+</tr>
+<tr>
+<td><code>dev-containers</code></td>
+<td>Dev container configuration and optimization</td>
+</tr>
+<tr>
+<td><code>devops</code></td>
+<td>CI/CD pipeline design and implementation</td>
+</tr>
+<tr>
+<td><code>environment-bootstrap</code></td>
+<td>Environment provisioning and bootstrap automation</td>
+</tr>
+<tr>
+<td><code>gitops</code></td>
+<td>GitOps workflow implementation with declarative configuration</td>
+</tr>
+<tr>
+<td><code>ha-resilience</code></td>
+<td>High-availability and resilience pattern implementation</td>
+</tr>
+<tr>
+<td><code>handoff</code></td>
+<td>Session and task handoff basecoat-10-core-documentation</td>
+</tr>
+<tr>
+<td><code>human-in-the-loop</code></td>
+<td>Human review checkpoints and escalation workflows</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-observability</code></td>
+<td>Metrics, tracing, logging, and alerting setup</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-production-readiness</code></td>
+<td>Pre-release operational readiness validation</td>
+</tr>
+<tr>
+<td><code>sprint-management</code></td>
+<td>Sprint planning, issue decomposition, and wave mapping</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-sprint-retrospective</code></td>
+<td>Sprint retrospective generation from repository history</td>
+</tr>
+<tr>
+<td><code>basecoat-50-security-supply-chain-basecoat-50-security-security</code></td>
+<td>SBOM, artifact signing, and provenance</td>
+</tr>
+<tr>
+<td><code>tech-debt</code></td>
+<td>Technical debt identification and remediation planning</td>
+</tr>
+<tr>
+<td><code>twelve-factor</code></td>
+<td>Twelve-factor app compliance review</td>
+</tr>
+</tbody>
+</table>
+<h3 id="basecoat-50-security-security_1">basecoat-50-security-security<a class="headerlink" href="#basecoat-50-security-security_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Skill</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-50-security-github-security-posture</code></td>
+<td>GitHub organization and repository basecoat-50-security-security posture audit</td>
+</tr>
+<tr>
+<td><code>penetration-basecoat-10-core-testing</code></td>
+<td>basecoat-50-security-security assessment and penetration basecoat-10-core-testing execution</td>
+</tr>
+<tr>
+<td><code>basecoat-50-security-security</code></td>
+<td>General basecoat-50-security-security review and hardening</td>
+</tr>
+<tr>
+<td><code>basecoat-50-security-security-operations</code></td>
+<td>SOC playbook and threat response guidance</td>
+</tr>
+</tbody>
+</table>
+<h3 id="memory-intelligence">Memory &amp; Intelligence<a class="headerlink" href="#memory-intelligence" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Skill</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-10-core-architecture</code></td>
+<td>Architectural decision recording and system design</td>
+</tr>
+<tr>
+<td><code>copilot-usage-analytics</code></td>
+<td>GitHub Copilot usage metrics and adoption reporting</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-documentation</code></td>
+<td>Technical basecoat-10-core-documentation authoring and review</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-ux</code></td>
+<td>User experience design and accessibility patterns</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="instructions">Instructions<a class="headerlink" href="#instructions" title="Permanent link">&para;</a></h2>
+<p>Instructions are Copilot behavior rules stored as <code>instructions/&lt;name&gt;.instructions.md</code>,
+applied automatically based on <code>applyTo</code> glob patterns.</p>
+<h3 id="basecoat-20-lang-governance-safety">basecoat-20-lang-governance &amp; Safety<a class="headerlink" href="#basecoat-20-lang-governance-safety" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Instruction</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-20-lang-governance</code></td>
+<td><strong>Read first.</strong> basecoat-20-lang-governance rules for all AI basecoat-10-core-agents in this repository</td>
+</tr>
+<tr>
+<td><code>basecoat-30-ai-ai-basecoat-10-core-verification</code></td>
+<td>Risk-tiered basecoat-10-core-verification protocol for reviewing or accepting AI-generated code</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-config</code></td>
+<td>Safety rules for creating, modifying, or staging configuration files</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-output-style</code></td>
+<td>Keeps agent responses concise while preserving clarity and full-fidelity detail</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-plan-first</code></td>
+<td>Enforces planning before execution for multi-step or cross-file tasks</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-tool-minimization</code></td>
+<td>Selective tool enablement to reduce surface area during agent execution</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-verification</code></td>
+<td>Requires explicit success criteria before planning, implementing, or reviewing</td>
+</tr>
+</tbody>
+</table>
+<h3 id="agent-behavior">Agent Behavior<a class="headerlink" href="#agent-behavior" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Instruction</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-10-core-agent-behavior</code></td>
+<td>Prevents infinite retry loops, edit thrashing, and repeated failed actions</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-agents</code></td>
+<td>Naming, structure, required sections, skill pairing, and multi-agent coordination</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-model-routing</code></td>
+<td>Cost-aware model routing for sub-agent dispatch and model selection</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-session-hygiene</code></td>
+<td>Long-running session management, task switching, and handoff coordination</td>
+</tr>
+<tr>
+<td><code>basecoat-50-security-token-economics</code></td>
+<td>Cost-aware context loading; model escalation cost control</td>
+</tr>
+</tbody>
+</table>
+<h3 id="basecoat-10-core-architecture-design_1">basecoat-10-core-architecture &amp; Design<a class="headerlink" href="#basecoat-10-core-architecture-design_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Instruction</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-10-core-architecture</code></td>
+<td>Architectural decisions, API design, system diagrams, and cross-cutting standards</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-naming</code></td>
+<td>Repository, file, type, variable, test, infrastructure, and basecoat-40-azure-azure resource basecoat-10-core-naming</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-hrm-execution</code></td>
+<td>Formal layer contracts, two-dimensional routing matrix, and guidance signals</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-trm-reflexion</code></td>
+<td>TRM Reflexion loop for intent classification and turn budget estimation</td>
+</tr>
+</tbody>
+</table>
+<h3 id="basecoat-10-core-development_1">basecoat-10-core-development<a class="headerlink" href="#basecoat-10-core-development_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Instruction</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-10-core-backend</code></td>
+<td>APIs, services, workers, integrations, and data access layer best practices</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-development</code></td>
+<td>Shared conventions when using backend-dev, frontend-dev, basecoat-10-core-middleware-dev basecoat-10-core-agents</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-frontend</code></td>
+<td>UI, client-side state, styling, forms, and interaction best practices</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-nextjs-react19</code></td>
+<td>Next.js and React 19: Server Components, App Router, streaming, forms</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-npm-workspaces</code></td>
+<td>npm workspaces and monorepo management setup and best practices</td>
+</tr>
+<tr>
+<td><code>basecoat-20-lang-python</code></td>
+<td>basecoat-20-lang-python conventions for data science and ML pipelines</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-cpp</code></td>
+<td>Memory safety, concurrency, and undefined behavior for C++ and native code</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-electron</code></td>
+<td>Secure basecoat-10-core-electron desktop application patterns</td>
+</tr>
+<tr>
+<td><code>basecoat-30-ai-tailwind-v4</code></td>
+<td>Tailwind CSS v4 patterns and CSS-first configuration</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-monolith</code></td>
+<td>Context management for large basecoat-10-core-monolith codebases with tightly coupled modules</td>
+</tr>
+</tbody>
+</table>
+<h3 id="basecoat-40-azure-azure-cloud_1">basecoat-40-azure-azure &amp; Cloud<a class="headerlink" href="#basecoat-40-azure-azure-cloud_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Instruction</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-40-azure-azure</code></td>
+<td>basecoat-40-azure-azure services, basecoat-40-azure-azure SDK integrations, and deployment configuration</td>
+</tr>
+<tr>
+<td><code>basecoat-40-azure-azure-app-configuration</code></td>
+<td>basecoat-40-azure-azure App Configuration for feature flags and centralized settings</td>
+</tr>
+<tr>
+<td><code>basecoat-40-azure-azure-service-connector</code></td>
+<td>basecoat-40-azure-azure Service Connector for App Service, Container Apps, AKS</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-bicep</code></td>
+<td>basecoat-10-core-bicep file authoring: symbolic names, parameters, and module patterns</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-bootstrap-autodetect</code></td>
+<td>Bootstrap scripts that auto-detect values from existing infrastructure</td>
+</tr>
+<tr>
+<td><code>basecoat-50-security-bootstrap-github-secrets</code></td>
+<td>Bootstrap scripts provisioning identity or infrastructure for GitHub Actions</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-bootstrap-structure</code></td>
+<td>Bootstrap script decomposition, idempotency, and basecoat-10-core-documentation</td>
+</tr>
+<tr>
+<td><code>basecoat-60-workflow-ci-firewall</code></td>
+<td>GitHub Actions workflows accessing firewalled basecoat-40-azure-azure resources</td>
+</tr>
+<tr>
+<td><code>basecoat-50-security-rbac-authentication</code></td>
+<td>RBAC-only authentication enforcement — no shared keys or connection strings</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-terraform</code></td>
+<td>basecoat-10-core-terraform for Azure: provider pinning and shared infrastructure patterns</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-terraform-init</code></td>
+<td>Running <code>basecoat-10-core-terraform init</code> in bootstrap scripts and CI/CD pipelines</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-drift-monitor</code></td>
+<td>Infrastructure-as-Code drift detection and remediation strategies</td>
+</tr>
+</tbody>
+</table>
+<h3 id="basecoat-50-security-security_2">basecoat-50-security-security<a class="headerlink" href="#basecoat-50-security-security_2" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Instruction</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-50-security-security</code></td>
+<td>Authentication, authorization, secrets, input handling, and security-sensitive changes</td>
+</tr>
+<tr>
+<td><code>basecoat-50-security-secrets-management</code></td>
+<td>Secrets lifecycle, rotation, and storage basecoat-20-lang-governance</td>
+</tr>
+<tr>
+<td><code>basecoat-50-security-security-monitoring</code></td>
+<td>basecoat-50-security-security monitoring, alerting, and incident detection</td>
+</tr>
+<tr>
+<td><code>basecoat-60-workflow-workflow-integrity</code></td>
+<td>GitHub Actions security: script injection, credential exposure prevention</td>
+</tr>
+<tr>
+<td><code>basecoat-60-workflow-workflow-file-integrity</code></td>
+<td>Silent GitHub Actions workflow file corruption prevention and checksum validation</td>
+</tr>
+</tbody>
+</table>
+<h3 id="basecoat-10-core-testing-basecoat-90-quality-quality_1">basecoat-10-core-testing &amp; basecoat-90-quality-quality<a class="headerlink" href="#basecoat-10-core-testing-basecoat-90-quality-quality_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Instruction</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-10-core-testing</code></td>
+<td>Common basecoat-10-core-testing best practices for regression, unit, integration tests</td>
+</tr>
+<tr>
+<td><code>basecoat-90-quality-quality</code></td>
+<td>PR review, basecoat-50-security-security posture, performance measurement, and coverage enforcement</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-data-workload-basecoat-10-core-testing</code></td>
+<td>Medallion data patterns, data basecoat-90-quality-quality validation, and contract basecoat-10-core-testing</td>
+</tr>
+<tr>
+<td><code>basecoat-20-lang-dotnet-dependency-analysis</code></td>
+<td>.NET dependency compatibility and remediation analysis</td>
+</tr>
+<tr>
+<td><code>basecoat-20-lang-dotnet-test-strategy</code></td>
+<td>.NET modernization test strategy and regression-gate guidance</td>
+</tr>
+<tr>
+<td><code>basecoat-20-lang-dotnet-upgrade-planning</code></td>
+<td>.NET upgrade planning checklist and phased execution</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-mutation-basecoat-10-core-testing</code></td>
+<td>Mutation basecoat-10-core-testing strategy and tooling integration</td>
+</tr>
+</tbody>
+</table>
+<h3 id="data-ml_1">Data &amp; ML<a class="headerlink" href="#data-ml_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Instruction</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-80-data-data-science</code></td>
+<td>Data science and ML conventions: Jupyter, pandas, scikit-learn</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-fabric-notebooks</code></td>
+<td>Microsoft Fabric notebooks with CI/CD, lakehouse integration, and basecoat-20-lang-governance</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-observability</code></td>
+<td>Metrics, traces, logs, and alerting configuration guidance</td>
+</tr>
+</tbody>
+</table>
+<h3 id="basecoat-10-core-reliability">basecoat-10-core-reliability<a class="headerlink" href="#basecoat-10-core-reliability" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Instruction</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-10-core-reliability</code></td>
+<td>Uptime, retries, background work, and dependency failure handling</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-rest-client-resilience</code></td>
+<td>HTTP client resilience: timeouts, retries, circuit breakers</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-runtime-debugging</code></td>
+<td>Debugging with crash dumps, logs, memory state, and production diagnostics</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-error-kb</code></td>
+<td>Building and consulting an error knowledge base for agent failure classification</td>
+</tr>
+</tbody>
+</table>
+<h3 id="memory-knowledge_1">Memory &amp; Knowledge<a class="headerlink" href="#memory-knowledge_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Instruction</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basecoat-10-core-memory-index</code></td>
+<td>L2 memory index loaded at session start to prime fast pattern recall</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-enterprise-configuration</code></td>
+<td>GitHub Copilot policy configuration, usage metrics, and seat management</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-documentation</code></td>
+<td>basecoat-10-core-documentation standards for setup, workflows, public contracts, and runbooks</td>
+</tr>
+<tr>
+<td><code>basecoat-10-core-process</code></td>
+<td>Sprint planning, issue triage, PR management, and release evaluation</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="prompts">Prompts<a class="headerlink" href="#prompts" title="Permanent link">&para;</a></h2>
+<p>Prompts are structured templates stored as <code>prompts/&lt;name&gt;.prompt.md</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Prompt</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>architect</code></td>
+<td>Break down a feature or system change into options, tradeoffs, and execution steps before editing code</td>
+</tr>
+<tr>
+<td><code>bugfix</code></td>
+<td>Root-cause analysis, minimal safe fix, and validation for a bug, regression, or production failure</td>
+</tr>
+<tr>
+<td><code>basecoat-90-quality-code-review</code></td>
+<td>Risk-focused code review of a diff, branch, or set of files; returns findings, open questions, summary</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; IBuySpy-Shared contributors. Licensed under MIT.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/ivegamsft/basecoat" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "search.highlight", "search.suggest", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

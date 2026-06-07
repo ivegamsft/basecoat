@@ -1,0 +1,3448 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Enterprise shared library of GitHub Copilot customization assets — agents, skills, instructions, and prompts.">
+      
+      
+      
+        <link rel="canonical" href="https://ivegamsft.github.io/basecoat/guides/intent-prefixes/">
+      
+      
+        <link rel="prev" href="../../reference/governance/">
+      
+      
+        <link rel="next" href="../integrate-prompt/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Intent Prefixes - BaseCoat</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#intent-prefixes" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="BaseCoat" class="md-header__button md-logo" aria-label="BaseCoat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12 16 7.36-5.73L21 9l-9-7-9 7 1.63 1.27M12 18.54l-7.38-5.73L3 14.07l9 7 9-7-1.63-1.27z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BaseCoat
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Intent Prefixes
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ivegamsft/basecoat" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ivegamsft/basecoat
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/quick-reference/" class="md-tabs__link">
+          
+  
+  
+  Asset Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  How-To Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../memory/" class="md-tabs__link">
+          
+  
+  
+  Memory System
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../architecture/overview/" class="md-tabs__link">
+          
+  
+  
+  Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../PHILOSOPHY.md" class="md-tabs__link">
+          
+  
+  
+  About
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="BaseCoat" class="md-nav__button md-logo" aria-label="BaseCoat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12 16 7.36-5.73L21 9l-9-7-9 7 1.63 1.27M12 18.54l-7.38-5.73L3 14.07l9 7 9-7-1.63-1.27z"/></svg>
+
+    </a>
+    BaseCoat
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ivegamsft/basecoat" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ivegamsft/basecoat
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../enterprise-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Enterprise Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../consumer-sync/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Consumer Sync Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Asset Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Asset Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/quick-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/token-context-inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Token Context Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/asset-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/governance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Governance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-To Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How-To Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Intent Prefixes
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Intent Prefixes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-prefix-vocabulary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The prefix vocabulary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#intent-families" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intent families
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#syntax-matters-as-much-as-the-prefix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Syntax matters as much as the prefix
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Syntax matters as much as the prefix">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#standalone-act-now" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Standalone → act now
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bulleted-list-triage-and-log-not-implement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bulleted list → triage and log, not implement
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mixed-message-preamble-is-immediate-list-is-triage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mixed message → preamble is immediate, list is triage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#timing-modifiers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Timing modifiers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plan-first-enforcement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plan-first enforcement
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Plan-first enforcement">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sprint-style-request-nudge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sprint-style request nudge
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#azure-preflight" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Azure preflight
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#audit-mode-is-always-read-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audit mode is always read-only
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-this-convention-exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why this convention exists
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outage-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Outage routing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rca-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RCA routing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deployment routing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pr-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PR routing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PR routing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#default-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Default sequence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#guardrails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Guardrails
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fleet-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fleet routing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Fleet routing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#normalized-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Normalized examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fleet-chain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fleet chain
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#github-native-deterministic-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitHub-native deterministic routing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GitHub-native deterministic routing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Contract
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-instruction-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The instruction file
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#good-bug-in-a-standalone-message" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Good: bug in a standalone message
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#good-features-in-a-bulleted-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Good: features in a bulleted list
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-mistake-bulleted-feature-treated-as-immediate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common mistake: bulleted feature treated as immediate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#combine-audit-and-fix-explicitly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Combine audit and fix explicitly
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prompting-with-proper-vocabulary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prompting with proper vocabulary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Prompting with proper vocabulary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#delivery-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Delivery example
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#governance-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Governance example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chain-recipes-by-intent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chain recipes by intent
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#design-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integrate-prompt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Started (integrate prompt)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../customization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Make It Your Own
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom-agent-authoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create a Custom Agent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agent-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../version-drift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Drift Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../model-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../token-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Token Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../basecoat-yml/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BaseCoat Config (.basecoat.yml)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ubb-token-guidance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UBB Token Guidance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory System
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Memory System
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/learning-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learning Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/triage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Triage Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing Learnings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/process/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Process
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../diagrams/architecture-diagrams-index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagrams
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/decisions/adr-001-naming-convention/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-001 Naming Convention
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/multi-agent-orchestration-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Agent Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    About
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    About
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../PHILOSOPHY.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Philosophy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../story/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Story
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/metrics-schema-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dashboard Metrics Schema and Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-prefix-vocabulary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The prefix vocabulary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#intent-families" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intent families
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#syntax-matters-as-much-as-the-prefix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Syntax matters as much as the prefix
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Syntax matters as much as the prefix">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#standalone-act-now" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Standalone → act now
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bulleted-list-triage-and-log-not-implement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bulleted list → triage and log, not implement
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mixed-message-preamble-is-immediate-list-is-triage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mixed message → preamble is immediate, list is triage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#timing-modifiers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Timing modifiers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plan-first-enforcement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plan-first enforcement
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Plan-first enforcement">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sprint-style-request-nudge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sprint-style request nudge
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#azure-preflight" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Azure preflight
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#audit-mode-is-always-read-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audit mode is always read-only
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-this-convention-exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why this convention exists
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outage-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Outage routing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rca-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RCA routing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deployment routing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pr-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PR routing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PR routing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#default-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Default sequence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#guardrails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Guardrails
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fleet-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fleet routing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Fleet routing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#normalized-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Normalized examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fleet-chain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fleet chain
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#github-native-deterministic-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitHub-native deterministic routing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GitHub-native deterministic routing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Contract
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-instruction-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The instruction file
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#good-bug-in-a-standalone-message" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Good: bug in a standalone message
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#good-features-in-a-bulleted-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Good: features in a bulleted list
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-mistake-bulleted-feature-treated-as-immediate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common mistake: bulleted feature treated as immediate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#combine-audit-and-fix-explicitly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Combine audit and fix explicitly
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prompting-with-proper-vocabulary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prompting with proper vocabulary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Prompting with proper vocabulary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#delivery-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Delivery example
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#governance-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Governance example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chain-recipes-by-intent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chain recipes by intent
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#design-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="./" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    How-To Guides
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="intent-prefixes">Intent Prefixes<a class="headerlink" href="#intent-prefixes" title="Permanent link">&para;</a></h1>
+<p>BaseCoat sessions use a structured prefix convention to communicate intent.
+Every message prefix tells the AI three things at once: <strong>what kind of work</strong>,
+<strong>how urgent</strong>, and <strong>which agents to involve</strong>.</p>
+<p>Prefix prompts should use native SDLC nouns (workflow run, job, PR, issue,
+release, version drift) to reduce routing ambiguity.</p>
+<hr />
+<h2 id="the-prefix-vocabulary">The prefix vocabulary<a class="headerlink" href="#the-prefix-vocabulary" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Prefix</th>
+<th>Means</th>
+<th>Timing</th>
+<th>Routes to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bug:</code></td>
+<td>Defect, regression, broken behavior</td>
+<td><strong>Now</strong></td>
+<td><code>@code-review</code>, <code>@self-healing-ci</code></td>
+</tr>
+<tr>
+<td><code>feature:</code></td>
+<td>New capability or enhancement</td>
+<td><strong>Backlog</strong></td>
+<td><code>@sprint-planner</code>, <code>@solution-architect</code></td>
+</tr>
+<tr>
+<td><code>audit:</code></td>
+<td>Review, assess, validate — no changes</td>
+<td><strong>Now, read-only</strong></td>
+<td><code>@security-analyst</code>, <code>@config-auditor</code></td>
+</tr>
+<tr>
+<td><code>plan:</code></td>
+<td>Sprint or project planning</td>
+<td><strong>Now, no implementation</strong></td>
+<td><code>@sprint-planner</code>, <code>@product-manager</code></td>
+</tr>
+<tr>
+<td><code>spike:</code></td>
+<td>Time-boxed investigation, no deliverable</td>
+<td><strong>Now, research only</strong></td>
+<td><code>@solution-architect</code></td>
+</tr>
+<tr>
+<td><code>chore:</code></td>
+<td>Maintenance, cleanup, non-functional</td>
+<td><strong>Soon</strong></td>
+<td><code>@devops-engineer</code>, <code>@release-manager</code></td>
+</tr>
+<tr>
+<td><code>pr:</code></td>
+<td>Pull request lifecycle handling: triage, merge readiness, build-gated closeout, and branch hygiene</td>
+<td><strong>Now</strong></td>
+<td><code>@orphaned-pr-cleanup</code>, <code>@merge-coordinator</code>, <code>@broken-build-troubleshooter</code>, <code>@branch-hygiene-sweeper</code></td>
+</tr>
+<tr>
+<td><code>fleet:</code></td>
+<td>Close previous sprint, plan and execute the next sprint, triage oldest issues, audit PRs/builds, clean branches</td>
+<td><strong>Now</strong></td>
+<td><code>@sprint-closeout-auditor</code>, <code>@sprint-planner</code>, <code>@issue-triage</code>, <code>@broken-build-troubleshooter</code>, <code>@branch-hygiene-sweeper</code></td>
+</tr>
+<tr>
+<td><code>workflow:</code></td>
+<td>GitHub Actions workflow failure triage and repair</td>
+<td><strong>Now</strong></td>
+<td><code>@broken-build-troubleshooter</code>, <code>@self-healing-ci</code>, <code>@devops-engineer</code></td>
+</tr>
+<tr>
+<td><code>actions:</code></td>
+<td>GitHub Actions configuration, runs, and policy checks</td>
+<td><strong>Now</strong></td>
+<td><code>@self-healing-ci</code>, <code>@ci-failure-escalation</code>, <code>@devops-engineer</code></td>
+</tr>
+<tr>
+<td><code>pr:</code></td>
+<td>Pull request triage, mergeability, or stale PR cleanup</td>
+<td><strong>Now</strong></td>
+<td><code>@orphaned-pr-cleanup</code>, <code>@merge-coordinator</code>, <code>@code-review</code></td>
+</tr>
+<tr>
+<td><code>issue:</code></td>
+<td>GitHub issue triage, labeling, and backlog hygiene</td>
+<td><strong>Now</strong></td>
+<td><code>@issue-triage</code>, <code>@sprint-planner</code></td>
+</tr>
+<tr>
+<td><code>release:</code></td>
+<td>Release planning, version bumping, and publication</td>
+<td><strong>Now</strong></td>
+<td><code>@release-manager</code>, <code>@release-readiness-chair</code>, <code>@release-impact-advisor</code></td>
+</tr>
+<tr>
+<td><code>version:</code></td>
+<td>BaseCoat version inspection and drift check</td>
+<td><strong>Now</strong></td>
+<td><code>@release-manager</code>, <code>@devops-engineer</code></td>
+</tr>
+<tr>
+<td><code>security:</code></td>
+<td>Security concern or vulnerability</td>
+<td><strong>Now, high priority</strong></td>
+<td><code>@security-analyst</code>, <code>@guardrail</code></td>
+</tr>
+<tr>
+<td><code>perf:</code></td>
+<td>Performance degradation</td>
+<td><strong>Now, measure first</strong></td>
+<td><code>@performance-analyst</code></td>
+</tr>
+<tr>
+<td><code>outage:</code></td>
+<td>Service outage, broken or dead system, site down</td>
+<td><strong>Now, high priority</strong></td>
+<td><code>@rca</code></td>
+</tr>
+<tr>
+<td><code>rca:</code></td>
+<td>Root-cause analysis of a known failure — execution suspended</td>
+<td><strong>Now, read-only</strong></td>
+<td><code>@rca</code>, <code>@config-auditor</code></td>
+</tr>
+<tr>
+<td><code>deploy:</code></td>
+<td>Staged infrastructure deployment — azure-prepare, azure-validate, azure-deploy in sequence</td>
+<td><strong>Now, staged</strong></td>
+<td><code>@devops-engineer</code></td>
+</tr>
+<tr>
+<td><code>azure:</code></td>
+<td>Azure-scoped operation (auth, infra, SDK, provisioning)</td>
+<td><strong>Now</strong> — preflight first, then staged sequence</td>
+<td><code>@devops-engineer</code>, <code>@solution-architect</code></td>
+</tr>
+<tr>
+<td><code>infra:</code></td>
+<td>Infrastructure change (IaC, networking, firewall, RBAC)</td>
+<td><strong>Now</strong> — preflight first, then staged sequence</td>
+<td><code>@devops-engineer</code>, <code>@solution-architect</code></td>
+</tr>
+<tr>
+<td><code>architect:</code></td>
+<td>Architecture design or system-design decision</td>
+<td><strong>Later</strong> — plan before any implementation</td>
+<td><code>@solution-architect</code></td>
+</tr>
+<tr>
+<td><code>docs:</code></td>
+<td>Documentation only</td>
+<td><strong>Soon</strong></td>
+<td><code>@tech-writer</code></td>
+</tr>
+<tr>
+<td><code>test:</code></td>
+<td>Test coverage gap or test failure</td>
+<td><strong>Now</strong></td>
+<td><code>@manual-test-strategy</code></td>
+</tr>
+<tr>
+<td><code>refactor:</code></td>
+<td>Structural improvement, no behavior change</td>
+<td><strong>Later, batch</strong></td>
+<td><code>@code-review</code></td>
+</tr>
+<tr>
+<td><code>ux:</code></td>
+<td>User experience or design</td>
+<td><strong>Soon</strong></td>
+<td><code>@ux-designer</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="intent-families">Intent families<a class="headerlink" href="#intent-families" title="Permanent link">&para;</a></h2>
+<p>Each prefix belongs to an intent family. Families are useful for routing and
+for selecting chain patterns.</p>
+<table>
+<thead>
+<tr>
+<th>Family</th>
+<th>Prefixes</th>
+<th>Default output type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Delivery</td>
+<td><code>feature:</code>, <code>refactor:</code>, <code>deploy:</code>, <code>architect:</code></td>
+<td>implementation plan, code changes, or staged deployment</td>
+</tr>
+<tr>
+<td>Reliability</td>
+<td><code>bug:</code>, <code>perf:</code>, <code>outage:</code>, <code>rca:</code></td>
+<td>fix, mitigation, incident analysis, or root-cause report</td>
+</tr>
+<tr>
+<td>Governance</td>
+<td><code>audit:</code>, <code>security:</code>, <code>chore:</code></td>
+<td>findings, policy action, risk controls</td>
+</tr>
+<tr>
+<td>GitHub Operations</td>
+<td><code>workflow:</code>, <code>actions:</code>, <code>pr:</code>, <code>issue:</code>, <code>release:</code>, <code>version:</code></td>
+<td>run triage, repo hygiene, release/version decisions</td>
+</tr>
+<tr>
+<td>Planning</td>
+<td><code>plan:</code>, <code>spike:</code></td>
+<td>prioritized backlog, design notes, decision doc</td>
+</tr>
+<tr>
+<td>Quality</td>
+<td><code>test:</code>, <code>docs:</code>, <code>ux:</code></td>
+<td>tests, documentation, or design artifacts</td>
+</tr>
+<tr>
+<td>Infrastructure</td>
+<td><code>azure:</code>, <code>infra:</code>, <code>deploy:</code></td>
+<td>preflight advisory, IaC changes, staged deployment</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="syntax-matters-as-much-as-the-prefix">Syntax matters as much as the prefix<a class="headerlink" href="#syntax-matters-as-much-as-the-prefix" title="Permanent link">&para;</a></h2>
+<p>The same prefix means different things depending on how it appears in the message.</p>
+<h3 id="standalone-act-now">Standalone → act now<a class="headerlink" href="#standalone-act-now" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>bug: the sync script exits with code 1 on Windows when BASECOAT_REPO is unset
+</code></pre></div>
+<p>A prefix at the start of a standalone message is an immediate work order.
+The AI investigates and fixes it in this session.</p>
+<h3 id="bulleted-list-triage-and-log-not-implement">Bulleted list → triage and log, not implement<a class="headerlink" href="#bulleted-list-triage-and-log-not-implement" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>- bug: metrics dashboard is broken on mobile
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>- feature: add a getting-started prompt
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>- chore: clean up stale branches
+</code></pre></div>
+<p>Prefixes inside a bulleted list are <strong>triage items</strong>. The AI logs them
+(as GitHub issues, plan notes, or backlog entries) and confirms receipt.
+It does <strong>not</strong> start implementing.</p>
+<blockquote>
+<p>This is the most important distinction. A bulleted <code>feature:</code> means
+<em>"add this to the backlog."</em> It does not mean <em>"build this now."</em></p>
+</blockquote>
+<h3 id="mixed-message-preamble-is-immediate-list-is-triage">Mixed message → preamble is immediate, list is triage<a class="headerlink" href="#mixed-message-preamble-is-immediate-list-is-triage" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>run an audit against the CI workflows and log issues
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>- feature: add retry logic to sync.sh
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>- bug: secret-scan.yml always exits 0
+</code></pre></div>
+<p>The preamble instruction ("run an audit") executes now.
+The bulleted items are logged. The AI returns audit findings plus a summary
+of what was filed. It waits for direction before starting any of the list items.</p>
+<hr />
+<h2 id="timing-modifiers">Timing modifiers<a class="headerlink" href="#timing-modifiers" title="Permanent link">&para;</a></h2>
+<p>These words in a message override the default timing of any prefix:</p>
+<table>
+<thead>
+<tr>
+<th>Word</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>now</code>, <code>immediately</code>, <code>urgent</code></td>
+<td>Promote to immediate, even <code>feature:</code></td>
+</tr>
+<tr>
+<td><code>later</code>, <code>backlog</code>, <code>next sprint</code></td>
+<td>Defer, even <code>bug:</code></td>
+</tr>
+<tr>
+<td><code>no changes</code>, <code>read-only</code></td>
+<td>Analysis only, suppress all implementation</td>
+</tr>
+<tr>
+<td><code>log it</code>, <code>file an issue</code></td>
+<td>Log and stop; do not implement</td>
+</tr>
+<tr>
+<td><code>just document</code></td>
+<td>Documentation output only; no code changes</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="plan-first-enforcement">Plan-first enforcement<a class="headerlink" href="#plan-first-enforcement" title="Permanent link">&para;</a></h2>
+<p>For <code>feature:</code>, <code>refactor:</code>, and <code>architect:</code> prefixes, a planning step is
+required before implementation begins whenever the work spans multiple files
+or involves design decisions.</p>
+<p>The expected flow:</p>
+<ol>
+<li>Emit a plan (scope, approach, risks, verification criteria).</li>
+<li>Present it and wait for confirmation.</li>
+<li>Implement only after the plan is confirmed.</li>
+</ol>
+<p>The user can waive planning explicitly ("no plan needed", "skip planning",
+"implement directly"). Record the waiver so downstream agents respect it.</p>
+<h3 id="sprint-style-request-nudge">Sprint-style request nudge<a class="headerlink" href="#sprint-style-request-nudge" title="Permanent link">&para;</a></h3>
+<p>When the user asks to "plan and execute the next sprint" or similar:</p>
+<ol>
+<li>Route to <code>@sprint-planner</code> first.</li>
+<li>Present the sprint plan and wait for confirmation.</li>
+<li>Only then begin execution with the oldest actionable item.</li>
+</ol>
+<hr />
+<h2 id="azure-preflight">Azure preflight<a class="headerlink" href="#azure-preflight" title="Permanent link">&para;</a></h2>
+<p>Before any <code>azure:</code>, <code>infra:</code>, or <code>deploy:</code> operation, emit this advisory:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Azure preflight: ci-firewall and rbac-authentication checks apply.
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>See instructions/ci-firewall.instructions.md and instructions/rbac-authentication.instructions.md.
+</code></pre></div>
+<p>Then verify:</p>
+<ul>
+<li><strong>CI Firewall</strong> — workflow accesses firewalled Azure resources? Confirm the
+  single-job runner IP pattern (<code>instructions/ci-firewall.instructions.md</code>)
+  is in place before deploying.</li>
+<li><strong>RBAC Authentication</strong> — change provisions or configures Azure resources?
+  Confirm RBAC-only auth (<code>instructions/rbac-authentication.instructions.md</code>)
+  before proceeding.</li>
+</ul>
+<p>The advisory is non-blocking unless a firewall or RBAC gap is found, in which
+case surface the finding and wait for explicit user confirmation.</p>
+<hr />
+<h2 id="audit-mode-is-always-read-only">Audit mode is always read-only<a class="headerlink" href="#audit-mode-is-always-read-only" title="Permanent link">&para;</a></h2>
+<p><code>audit:</code> never makes changes unless the user adds "and fix" or "resolve."</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>audit: run a say-vs-do check on the CI workflows
+</code></pre></div>
+<p>→ Returns findings. Logs issues if asked. Waits.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>audit: run impeccable against GH Pages, log issues, and resolve
+</code></pre></div>
+<p>→ Runs audit, logs issues, then implements fixes.</p>
+<hr />
+<h2 id="why-this-convention-exists">Why this convention exists<a class="headerlink" href="#why-this-convention-exists" title="Permanent link">&para;</a></h2>
+<p>Working in a long session with many items in flight, prefixes let you:</p>
+<ul>
+<li><strong>Drop items into the backlog mid-conversation</strong> without losing flow</li>
+<li><strong>Signal urgency without context-switching</strong> — the AI knows <code>security:</code> means
+  stop and address it, <code>chore:</code> means batch it</li>
+<li><strong>Audit without side effects</strong> — <code>audit:</code> is a safe way to ask "what's wrong
+  here?" without triggering changes</li>
+<li><strong>Control sprint scope</strong> — a bulleted list of <code>feature:</code> items at the end of
+  a message becomes the next sprint's backlog, not this session's work</li>
+</ul>
+<hr />
+<h2 id="outage-routing">Outage routing<a class="headerlink" href="#outage-routing" title="Permanent link">&para;</a></h2>
+<p>When a user says a service is broken, dead, down, or not responding, normalize
+that request to <code>outage:</code> and route it to the RCA agent.</p>
+<table>
+<thead>
+<tr>
+<th>Alias</th>
+<th>Normalized intent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>broken</code></td>
+<td><code>outage:</code></td>
+</tr>
+<tr>
+<td><code>broke</code></td>
+<td><code>outage:</code></td>
+</tr>
+<tr>
+<td><code>dead</code></td>
+<td><code>outage:</code></td>
+</tr>
+<tr>
+<td><code>site down</code></td>
+<td><code>outage:</code></td>
+</tr>
+<tr>
+<td><code>down</code></td>
+<td><code>outage:</code></td>
+</tr>
+<tr>
+<td><code>not responding</code></td>
+<td><code>outage:</code></td>
+</tr>
+<tr>
+<td><code>incident</code></td>
+<td><code>outage:</code></td>
+</tr>
+<tr>
+<td><code>it's broken</code></td>
+<td><code>outage:</code></td>
+</tr>
+<tr>
+<td><code>nothing works</code></td>
+<td><code>outage:</code></td>
+</tr>
+</tbody>
+</table>
+<p>Use <code>@rca</code> for the deep-dive investigation after the active incident is stable.</p>
+<hr />
+<h2 id="rca-routing">RCA routing<a class="headerlink" href="#rca-routing" title="Permanent link">&para;</a></h2>
+<p><code>rca:</code> suspends all execution. Use it when you want to diagnose before retrying.</p>
+<table>
+<thead>
+<tr>
+<th>Alias</th>
+<th>Normalized intent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stop and rca</code></td>
+<td><code>rca:</code></td>
+</tr>
+<tr>
+<td><code>why is it failing</code></td>
+<td><code>rca:</code></td>
+</tr>
+<tr>
+<td><code>same error</code> (after a prior failure)</td>
+<td><code>rca:</code></td>
+</tr>
+<tr>
+<td><code>still broken</code> (after a retry)</td>
+<td><code>rca:</code></td>
+</tr>
+<tr>
+<td>deployment retried 3 or more times</td>
+<td><code>rca:</code> (hard block)</td>
+</tr>
+</tbody>
+</table>
+<p>To resume execution after RCA, re-issue a <code>deploy:</code> or <code>outage:</code> intent explicitly
+once the root cause is confirmed.</p>
+<hr />
+<h2 id="deployment-routing">Deployment routing<a class="headerlink" href="#deployment-routing" title="Permanent link">&para;</a></h2>
+<p><code>deploy:</code> enforces the staged deployment sequence and prevents skipping validation.</p>
+<p><strong>Required chain:</strong></p>
+<ol>
+<li><code>azure-prepare</code> — scaffold IaC and validate configuration</li>
+<li><code>azure-validate</code> — pre-deployment checks, no resource changes</li>
+<li><code>azure-deploy</code> — provision and deploy</li>
+</ol>
+<p>If the same deployment step fails twice, the session automatically enters RCA mode.</p>
+<p>Example prompt:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>deploy: follow azure-prepare -&gt; azure-validate -&gt; azure-deploy exactly; do not deploy until validated
+</code></pre></div>
+<p>See <a href="../../reference/guardrails/deployment-rca/"><code>docs/reference/guardrails/deployment-rca.md</code></a>
+for retry caps, path lock, and bootstrap immutability rules.</p>
+<hr />
+<h2 id="pr-routing">PR routing<a class="headerlink" href="#pr-routing" title="Permanent link">&para;</a></h2>
+<p><code>pr:</code> is the direct intent for PR lifecycle execution.</p>
+<h3 id="default-sequence">Default sequence<a class="headerlink" href="#default-sequence" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Triage stale or blocked pull requests with <code>@orphaned-pr-cleanup</code>.</li>
+<li>Validate merge readiness and ordering with <code>@merge-coordinator</code>.</li>
+<li>Verify required CI status before closure; if builds are red, route to <code>@broken-build-troubleshooter</code>.</li>
+<li>Run <code>@branch-hygiene-sweeper</code> after merge/close actions to prune only safe branches.</li>
+</ol>
+<h3 id="guardrails">Guardrails<a class="headerlink" href="#guardrails" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Do not close or mark complete while required builds are still pending.</li>
+<li>If required builds fail, keep the PR open and attach failure evidence.</li>
+<li>Only run branch cleanup for branches tied to merged/closed PRs with required builds passing.</li>
+<li>Prefer serial merges for overlapping branches to reduce conflict churn.</li>
+</ul>
+<hr />
+<h2 id="fleet-routing">Fleet routing<a class="headerlink" href="#fleet-routing" title="Permanent link">&para;</a></h2>
+<p><code>fleet:</code> is the shortcut intent for a sprint-execution batch that combines closeout, planning, oldest-first issue triage, PR/build auditing, and branch cleanup.</p>
+<h3 id="normalized-examples">Normalized examples<a class="headerlink" href="#normalized-examples" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>User phrasing</th>
+<th>Normalized intent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Fleet deployed: use basecoat...</code></td>
+<td><code>fleet:</code></td>
+</tr>
+<tr>
+<td><code>fleet: plan and execute the sprint</code></td>
+<td><code>fleet:</code></td>
+</tr>
+<tr>
+<td><code>use basecoat for fleet mode</code></td>
+<td><code>fleet:</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="fleet-chain">Fleet chain<a class="headerlink" href="#fleet-chain" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>@sprint-closeout-auditor</code></li>
+<li><code>@issue-triage</code></li>
+<li><code>@broken-build-troubleshooter</code></li>
+<li><code>@sprint-planner</code></li>
+<li><code>@branch-hygiene-sweeper</code></li>
+</ul>
+<hr />
+<h2 id="github-native-deterministic-routing">GitHub-native deterministic routing<a class="headerlink" href="#github-native-deterministic-routing" title="Permanent link">&para;</a></h2>
+<p><code>workflow:</code>, <code>actions:</code>, <code>pr:</code>, <code>issue:</code>, <code>release:</code>, and <code>version:</code> are
+deterministic routes. If the prefix is present, do not ask a follow-up
+disambiguation question before first evidence collection.</p>
+<h3 id="contract">Contract<a class="headerlink" href="#contract" title="Permanent link">&para;</a></h3>
+<ol>
+<li><code>workflow:</code> / <code>actions:</code>: fetch failing run and job evidence first, then fix,
+   then rerun affected scope.</li>
+<li><code>pr:</code>: inspect PR state first (mergeability, checks, review blockers), then act.</li>
+<li><code>issue:</code>: inspect issue state first (labels, stale status, ownership), then act.</li>
+<li><code>release:</code>: start from release/version source-of-truth, then perform release steps.</li>
+<li><code>version:</code>: read installed downstream version first; compare to latest published
+   release only when install origin is published BaseCoat.</li>
+</ol>
+<hr />
+<h2 id="the-instruction-file">The instruction file<a class="headerlink" href="#the-instruction-file" title="Permanent link">&para;</a></h2>
+<p>This convention is codified in
+<a href="https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/intent-routing.instructions.md"><code>instructions/intent-routing.instructions.md</code></a>.</p>
+<p>When BaseCoat is synced to your repo, this instruction is loaded by Copilot
+automatically and applies to all conversations. You can adopt this prefix
+convention in your own team immediately — no configuration required.</p>
+<hr />
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
+<h3 id="good-bug-in-a-standalone-message">Good: bug in a standalone message<a class="headerlink" href="#good-bug-in-a-standalone-message" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>bug: the lint workflow silently passes on instructions with trailing spaces
+</code></pre></div>
+<p>AI fixes it now.</p>
+<h3 id="good-features-in-a-bulleted-list">Good: features in a bulleted list<a class="headerlink" href="#good-features-in-a-bulleted-list" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>- feature: add retry logic to sync.sh
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>- feature: add a prompt for onboarding new repos
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>- feature: support BASECOAT_EXCLUDE env var
+</code></pre></div>
+<p>AI logs three backlog items and reports what was filed.</p>
+<h3 id="common-mistake-bulleted-feature-treated-as-immediate">Common mistake: bulleted feature treated as immediate<a class="headerlink" href="#common-mistake-bulleted-feature-treated-as-immediate" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>- feature: add a getting-started prompt
+</code></pre></div>
+<p>Wrong response: "Here is the getting-started prompt I just created..."
+Correct response: "Logged as a backlog item. Should I add it to the current sprint?"</p>
+<h3 id="combine-audit-and-fix-explicitly">Combine audit and fix explicitly<a class="headerlink" href="#combine-audit-and-fix-explicitly" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>audit: check all agent files for missing Workflow sections, log issues, fix them
+</code></pre></div>
+<p>AI audits → logs → fixes in one pass because "fix them" was explicit.</p>
+<hr />
+<h2 id="prompting-with-proper-vocabulary">Prompting with proper vocabulary<a class="headerlink" href="#prompting-with-proper-vocabulary" title="Permanent link">&para;</a></h2>
+<p>Use a compact, deterministic shape when writing prompts:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>&lt;prefix&gt;: &lt;objective&gt;
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>scope: &lt;in/out boundaries&gt;
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>constraints: &lt;non-negotiables&gt;
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>deliverable: &lt;artifact to return&gt;
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>evidence: &lt;what to prove&gt;
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>next-hop: &lt;agent name or none&gt;
+</code></pre></div>
+<h3 id="delivery-example">Delivery example<a class="headerlink" href="#delivery-example" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>feature: add plan-first lint checks for new agent files
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>scope: instructions/agents.instructions.md and tests only
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>constraints: no workflow changes
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>deliverable: updated instruction rule plus test case
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>evidence: failing then passing test output
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>next-hop: code-review
+</code></pre></div>
+<h3 id="governance-example">Governance example<a class="headerlink" href="#governance-example" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>audit: evaluate all skills for missing USE FOR / DO NOT USE FOR sections
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>scope: skills/**/SKILL.md
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>constraints: read-only; log issues but do not edit files
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>deliverable: severity-ranked findings table
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>evidence: file paths and missing-section counts
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>next-hop: none
+</code></pre></div>
+<hr />
+<h2 id="chain-recipes-by-intent">Chain recipes by intent<a class="headerlink" href="#chain-recipes-by-intent" title="Permanent link">&para;</a></h2>
+<p>Use these default chains unless there is a task-specific reason to override.</p>
+<table>
+<thead>
+<tr>
+<th>Intent</th>
+<th>Chain</th>
+<th>Outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>feature:</code></td>
+<td><code>plan: -&gt; solution-architect -&gt; backend-dev/frontend-dev -&gt; code-review</code></td>
+<td>plan-first, then design to implementation with review</td>
+</tr>
+<tr>
+<td><code>refactor:</code></td>
+<td><code>plan: -&gt; code-review -&gt; performance-analyst</code></td>
+<td>plan-first, then structural improvement</td>
+</tr>
+<tr>
+<td><code>architect:</code></td>
+<td><code>plan: -&gt; solution-architect</code></td>
+<td>plan-first, then design decision</td>
+</tr>
+<tr>
+<td><code>bug:</code></td>
+<td><code>code-review -&gt; self-healing-ci -&gt; guardrail</code></td>
+<td>defect isolation and safe fix</td>
+</tr>
+<tr>
+<td><code>outage:</code></td>
+<td><code>rca -&gt; incident-responder -&gt; sre-engineer</code></td>
+<td>triage, containment, and reliability follow-up</td>
+</tr>
+<tr>
+<td><code>rca:</code></td>
+<td><code>rca -&gt; config-auditor</code></td>
+<td>root-cause diagnosis, execution suspended</td>
+</tr>
+<tr>
+<td><code>azure:</code></td>
+<td><code>azure-preflight -&gt; azure-prepare -&gt; azure-validate -&gt; azure-deploy</code></td>
+<td>preflight advisory, then staged deployment</td>
+</tr>
+<tr>
+<td><code>infra:</code></td>
+<td><code>azure-preflight -&gt; azure-prepare -&gt; azure-validate -&gt; azure-deploy</code></td>
+<td>preflight advisory, then staged deployment</td>
+</tr>
+<tr>
+<td><code>deploy:</code></td>
+<td><code>azure-prepare -&gt; azure-validate -&gt; azure-deploy</code></td>
+<td>staged deployment with pre-flight validation</td>
+</tr>
+<tr>
+<td><code>security:</code></td>
+<td><code>security-analyst -&gt; policy-as-code-compliance -&gt; guardrail</code></td>
+<td>remediation and policy validation</td>
+</tr>
+<tr>
+<td><code>plan:</code></td>
+<td><code>product-manager -&gt; sprint-planner</code></td>
+<td>scoped sprint-ready backlog</td>
+</tr>
+<tr>
+<td><code>test:</code></td>
+<td><code>manual-test-strategy -&gt; strategy-to-automation</code></td>
+<td>test strategy and automation candidates</td>
+</tr>
+</tbody>
+</table>
+<p>When chaining, each handoff prompt should include:</p>
+<ol>
+<li>Intent statement.</li>
+<li>What is done.</li>
+<li>What remains.</li>
+<li>Constraints that must carry forward.</li>
+<li>Expected output contract.</li>
+</ol>
+<hr />
+<h2 id="design-notes">Design notes<a class="headerlink" href="#design-notes" title="Permanent link">&para;</a></h2>
+<p>These conventions intentionally prefer:</p>
+<ul>
+<li><strong>Intent-first routing</strong> over asking users to pick an agent manually.</li>
+<li><strong>Canonical verbs</strong> (<code>triage</code>, <code>classify</code>, <code>validate</code>, <code>escalate</code>, <code>handoff</code>)
+  over ambiguous verbs.</li>
+<li><strong>Standard chains</strong> over ad hoc sequencing.</li>
+</ul>
+<p>This keeps prompting predictable and improves routing eval reliability.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; IBuySpy-Shared contributors. Licensed under MIT.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/ivegamsft/basecoat" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "search.highlight", "search.suggest", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

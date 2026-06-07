@@ -1,0 +1,3160 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Enterprise shared library of GitHub Copilot customization assets — agents, skills, instructions, and prompts.">
+      
+      
+      
+        <link rel="canonical" href="https://ivegamsft.github.io/basecoat/research/TRM-HRM-investigation/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>TRM + HRM Investigation - BaseCoat</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#trm-hrm-investigation" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="BaseCoat" class="md-header__button md-logo" aria-label="BaseCoat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12 16 7.36-5.73L21 9l-9-7-9 7 1.63 1.27M12 18.54l-7.38-5.73L3 14.07l9 7 9-7-1.63-1.27z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BaseCoat
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              TRM + HRM Investigation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ivegamsft/basecoat" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ivegamsft/basecoat
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/quick-reference/" class="md-tabs__link">
+          
+  
+  
+  Asset Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/intent-prefixes/" class="md-tabs__link">
+          
+  
+  
+  How-To Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../memory/" class="md-tabs__link">
+          
+  
+  
+  Memory System
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../architecture/overview/" class="md-tabs__link">
+          
+  
+  
+  Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../PHILOSOPHY.md" class="md-tabs__link">
+          
+  
+  
+  About
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="BaseCoat" class="md-nav__button md-logo" aria-label="BaseCoat" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12 16 7.36-5.73L21 9l-9-7-9 7 1.63 1.27M12 18.54l-7.38-5.73L3 14.07l9 7 9-7-1.63-1.27z"/></svg>
+
+    </a>
+    BaseCoat
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ivegamsft/basecoat" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ivegamsft/basecoat
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/enterprise-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Enterprise Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/consumer-sync/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Consumer Sync Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Asset Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Asset Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/quick-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/token-context-inventory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Token Context Inventory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/asset-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/governance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Governance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-To Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How-To Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/intent-prefixes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Intent Prefixes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/integrate-prompt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Started (integrate prompt)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/customization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Make It Your Own
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/custom-agent-authoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create a Custom Agent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/agent-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/version-drift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Drift Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/model-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/token-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Token Optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/basecoat-yml/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BaseCoat Config (.basecoat.yml)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/ubb-token-guidance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UBB Token Guidance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory System
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Memory System
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/learning-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Learning Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/triage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Triage Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing Learnings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../memory/process/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Process
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../diagrams/architecture-diagrams-index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagrams
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/decisions/adr-001-naming-convention/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-001 Naming Convention
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/multi-agent-orchestration-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Agent Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    About
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    About
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../PHILOSOPHY.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Philosophy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../story/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Story
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/metrics-schema-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dashboard Metrics Schema and Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#executive-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Executive Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#definitions-and-scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Definitions and Scope
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Definitions and Scope">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tiny-recursive-model-trm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tiny Recursive Model (TRM)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hierarchical-reasoning-model-hrm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hierarchical Reasoning Model (HRM)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scope
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#literature-review" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Literature Review
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Literature Review">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reflexion-language-agents-with-verbal-reinforcement-learning-shinn-et-al-2023" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reflexion: Language Agents with Verbal Reinforcement Learning (Shinn et al., 2023)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tree-of-thoughts-deliberate-problem-solving-with-llms-yao-et-al-2023" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tree of Thoughts: Deliberate Problem Solving with LLMs (Yao et al., 2023)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#self-consistency-improves-chain-of-thought-reasoning-wang-et-al-2022" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self-Consistency Improves Chain of Thought Reasoning (Wang et al., 2022)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#higpt-hierarchical-graph-reasoning-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HiGPT / Hierarchical Graph Reasoning Models
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recursive-summarization-openai-2022" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recursive Summarization (OpenAI, 2022)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hierarchical-planning-in-embodied-ai" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hierarchical Planning in Embodied AI
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trm-application-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TRM Application Analysis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="TRM Application Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intent-classification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intent Classification
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-promotion-scoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory Promotion Scoring
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#turn-budget-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Turn Budget Tracking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pattern-bundle-confidence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pattern Bundle Confidence
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hrm-application-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HRM Application Analysis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="HRM Application Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#l0l4-as-formal-hrm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        L0–L4 as Formal HRM
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agent-task-decomposition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent Task Decomposition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#execution-hierarchy-governance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Execution Hierarchy Governance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cross-layer-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-Layer Dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#joint-trmhrm-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Joint TRM+HRM Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Joint TRM+HRM Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#composition-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Composition Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#real-time-guidance-signals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real-Time Guidance Signals
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shared-memory-interaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shared Memory Interaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interface-contracts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interface Contracts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Interface Contracts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#trm-intent-classifier-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TRM Intent Classifier Contract
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hrm-execution-stack-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HRM Execution Stack Contract
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#token-cost-estimates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Token Cost Estimates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#threshold-calibration-recommendations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Threshold Calibration Recommendations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#failure-mode-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Failure Mode Analysis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Failure Mode Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#trm-failure-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TRM Failure Modes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hrm-failure-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HRM Failure Modes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommendations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommendations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recommendations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#immediate-this-sprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Immediate (this sprint)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#near-term-next-12-sprints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Near-term (next 1–2 sprints)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#medium-term-future-sprints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Medium-term (future sprints)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#not-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Not recommended
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="trm-hrm-investigation">TRM + HRM Investigation<a class="headerlink" href="#trm-hrm-investigation" title="Permanent link">&para;</a></h1>
+<p>Issue: <a href="https://github.com/IBuySpy-Shared/basecoat/issues/574">#574</a></p>
+<h2 id="executive-summary">Executive Summary<a class="headerlink" href="#executive-summary" title="Permanent link">&para;</a></h2>
+<p>This document evaluates two complementary research directions — Tiny Recursive Model (TRM)
+and Hierarchical Reasoning Model (HRM) — for integration into the Base Coat memory and
+routing architecture. Based on analysis of the existing L0–L4 memory hierarchy, promotion
+ladder, turn budget protocol, and pattern bundle catalog, the investigation finds:</p>
+<ul>
+<li><strong>TRM</strong> is well-suited to replace fixed-threshold intent classification and to drive
+  recursive turn budget estimation, memory promotion scoring, and pattern bundle confidence
+  updates. The primary risk is oscillation and confirmation bias in self-refinement loops.</li>
+<li><strong>HRM</strong> maps naturally onto the existing five-layer memory hierarchy, with each tier
+  acting as one level of a formal hierarchical planner. Agent task decomposition already
+  follows HRM-adjacent patterns; formalizing the contract strengthens cross-layer dependency
+  handling and guardrail enforcement.</li>
+<li><strong>TRM+HRM composition</strong> is the highest-value integration: TRM operates as the fast
+  reasoning engine within each HRM layer, while HRM governs escalation between layers.
+  This yields real-time guidance signals ("stay fast path", "elevate to L3", "turn budget
+  at risk") without requiring large-model inference for routine tasks.</li>
+</ul>
+<p><strong>Recommended adoption path:</strong> Reflexion-style TRM for intent classification and turn
+budget tracking (low-risk, high-frequency); Tree of Thoughts HRM for agent workflow
+decomposition (medium-risk, high-value); defer full TRM+HRM composition to a future sprint
+with instrumented rollout.</p>
+<hr />
+<h2 id="definitions-and-scope">Definitions and Scope<a class="headerlink" href="#definitions-and-scope" title="Permanent link">&para;</a></h2>
+<h3 id="tiny-recursive-model-trm">Tiny Recursive Model (TRM)<a class="headerlink" href="#tiny-recursive-model-trm" title="Permanent link">&para;</a></h3>
+<p>A small, lightweight model (or prompt pattern) that operates on its own prior outputs,
+iterating until a convergence criterion is met. Key properties:</p>
+<ul>
+<li><strong>Tiny</strong> — low per-call token cost; can be invoked many times within a single session
+  turn without exhausting budget</li>
+<li><strong>Recursive</strong> — each pass takes the previous output as additional input</li>
+<li><strong>Learned behavior</strong> — convergence criteria and refinement strategies are themselves
+  learned or calibrated, not hardcoded</li>
+</ul>
+<p>TRM does not require a separate fine-tuned model. In Base Coat's context it can be
+implemented as a structured prompt loop that runs within the existing model tier.</p>
+<h3 id="hierarchical-reasoning-model-hrm">Hierarchical Reasoning Model (HRM)<a class="headerlink" href="#hierarchical-reasoning-model-hrm" title="Permanent link">&para;</a></h3>
+<p>A decomposition pattern that breaks complex reasoning into a tree of sub-problems, solves
+each sub-problem at the layer most appropriate to its scope, and composes results upward.
+Key properties:</p>
+<ul>
+<li><strong>Hierarchical</strong> — problems are decomposed into layers with defined input/output contracts</li>
+<li><strong>Reasoning</strong> — each layer performs judgment, not just retrieval</li>
+<li><strong>Learned decomposition</strong> — the boundaries between layers are calibrated from usage data</li>
+</ul>
+<p>HRM aligns with Base Coat's existing five-layer memory design. This document formalizes
+that alignment and identifies gaps.</p>
+<h3 id="scope">Scope<a class="headerlink" href="#scope" title="Permanent link">&para;</a></h3>
+<p>This investigation covers Base Coat's:</p>
+<ul>
+<li>Intent classification and fast-path routing</li>
+<li>Memory promotion ladder (L4→L3→L2→L1→L0)</li>
+<li>Turn budget accounting and progress estimation</li>
+<li>Pattern bundle confidence lifecycle</li>
+<li>Agent task decomposition workflows</li>
+</ul>
+<p>Out of scope: fine-tuning or training new model weights; changes to the session store
+schema; modifications to the GitHub Actions workflows.</p>
+<hr />
+<h2 id="literature-review">Literature Review<a class="headerlink" href="#literature-review" title="Permanent link">&para;</a></h2>
+<h3 id="reflexion-language-agents-with-verbal-reinforcement-learning-shinn-et-al-2023">Reflexion: Language Agents with Verbal Reinforcement Learning (Shinn et al., 2023)<a class="headerlink" href="#reflexion-language-agents-with-verbal-reinforcement-learning-shinn-et-al-2023" title="Permanent link">&para;</a></h3>
+<p>Reflexion introduces a verbal reinforcement loop in which an agent generates a natural
+language reflection on its prior attempt's failure, then uses that reflection as additional
+context for the next attempt. Key mechanism: the reflection is stored in a sliding-window
+episodic memory and injected into the next trial's context.</p>
+<p><strong>Relevance to TRM:</strong> Reflexion is the closest published analog to Base Coat TRM. The
+verbal reflection maps to TRM's recursive refinement pass. Reflexion's episodic memory
+window maps to Base Coat's L3 session store. The failure-log protocol in
+<code>token-economics.instructions.md</code> ("log failure pattern to memory, change approach") is
+Reflexion-compatible and should be the basis for TRM's convergence signal.</p>
+<p><strong>Limitation:</strong> Reflexion is designed for trial-level (task-level) iteration, not
+sub-turn refinement. Adapting it for per-turn intent classification requires constraining
+the recursion depth to avoid turn-budget overrun.</p>
+<h3 id="tree-of-thoughts-deliberate-problem-solving-with-llms-yao-et-al-2023">Tree of Thoughts: Deliberate Problem Solving with LLMs (Yao et al., 2023)<a class="headerlink" href="#tree-of-thoughts-deliberate-problem-solving-with-llms-yao-et-al-2023" title="Permanent link">&para;</a></h3>
+<p>Tree of Thoughts (ToT) extends chain-of-thought by generating multiple reasoning branches
+at each decision point and evaluating them before committing to a path. A search procedure
+(BFS or DFS) selects the best branch based on a value function.</p>
+<p><strong>Relevance to HRM:</strong> ToT's branch-and-evaluate pattern is the reasoning primitive for
+each HRM layer. In Base Coat: at the L2 routing layer, ToT generates candidate intent
+classifications; at the L3/L4 retrieval layer, ToT generates candidate query strategies.
+The value function is Base Coat's confidence score.</p>
+<p><strong>Limitation:</strong> Full ToT is expensive — multiple branches per step multiply token cost.
+For Base Coat, a pruned ToT (two branches max, greedy evaluation) is sufficient for
+intent classification and memory retrieval routing.</p>
+<h3 id="self-consistency-improves-chain-of-thought-reasoning-wang-et-al-2022">Self-Consistency Improves Chain of Thought Reasoning (Wang et al., 2022)<a class="headerlink" href="#self-consistency-improves-chain-of-thought-reasoning-wang-et-al-2022" title="Permanent link">&para;</a></h3>
+<p>Self-consistency samples multiple chain-of-thought reasoning paths independently and
+returns the majority answer. It improves accuracy at the cost of proportionally more
+tokens.</p>
+<p><strong>Relevance to TRM:</strong> Self-consistency is the simplest form of TRM when the refinement
+strategy is voting rather than sequential refinement. For Base Coat's pattern bundle
+confidence updates, a self-consistency pass over the last N session outcomes provides a
+statistically grounded confidence estimate without requiring Bayesian machinery.</p>
+<p><strong>Practical note:</strong> Self-consistency at k=3 (three independent samples) yields most of
+the accuracy gain. At k=5+, marginal returns diminish while cost grows linearly. Base Coat
+should cap TRM recursion at k=3 for confidence scoring.</p>
+<h3 id="higpt-hierarchical-graph-reasoning-models">HiGPT / Hierarchical Graph Reasoning Models<a class="headerlink" href="#higpt-hierarchical-graph-reasoning-models" title="Permanent link">&para;</a></h3>
+<p>Hierarchical Graph Reasoning (HiGPT and related) encodes multi-hop relational structures
+as graphs and reasons over them level by level — node → neighborhood → subgraph → graph.</p>
+<p><strong>Relevance to HRM:</strong> The level-by-level composition maps to Base Coat's memory tiers.
+L2 (hot cache) is the node; L3 (session store) is the neighborhood; L4 (long-term memory)
+is the subgraph; shared org memory (L2s/L3s) is the graph. HRM routing should follow this
+traversal order: resolve at the innermost level before expanding.</p>
+<p><strong>Limitation:</strong> HiGPT requires explicit graph construction. Base Coat's implicit
+tier relationships do not form a formal graph — approximating the pattern through tier
+ordering is sufficient.</p>
+<h3 id="recursive-summarization-openai-2022">Recursive Summarization (OpenAI, 2022)<a class="headerlink" href="#recursive-summarization-openai-2022" title="Permanent link">&para;</a></h3>
+<p>Recursive summarization processes a long document by splitting into chunks, summarizing
+each chunk, then summarizing the summaries. Applied iteratively, it compresses unbounded
+context into a fixed-size representation.</p>
+<p><strong>Relevance to TRM:</strong> Turn budget accounting can use recursive summarization when session
+context grows large. Rather than truncating L3 results, TRM summarizes them tier by tier
+until they fit within the available token window. This is compatible with Base Coat's
+existing graceful-degradation protocol ("summarize L4 doc excerpts to key points").</p>
+<h3 id="hierarchical-planning-in-embodied-ai">Hierarchical Planning in Embodied AI<a class="headerlink" href="#hierarchical-planning-in-embodied-ai" title="Permanent link">&para;</a></h3>
+<p>Planning literature (HTN planning, hierarchical reinforcement learning) decomposes
+abstract goals into concrete actions via a task network. Each level of the hierarchy
+resolves its own scope before delegating to the next.</p>
+<p><strong>Relevance to HRM:</strong> Agent task decomposition in Base Coat (sprint goal → wave → issue →
+task → sub-task) already follows HTN structure. Formalizing this as HRM means each level
+must have an explicit input contract (what it receives from above), an output contract
+(what it produces for below), and a scope constraint (what it cannot resolve and must
+escalate).</p>
+<hr />
+<h2 id="trm-application-analysis">TRM Application Analysis<a class="headerlink" href="#trm-application-analysis" title="Permanent link">&para;</a></h2>
+<h3 id="intent-classification">Intent Classification<a class="headerlink" href="#intent-classification" title="Permanent link">&para;</a></h3>
+<p><strong>Current state:</strong> Fixed thresholds — confidence ≥ 0.80 routes to fast path,
+0.50–0.79 triggers exploration, &lt; 0.50 triggers full path (defined in
+<code>memory-index.instructions.md</code> and <code>token-economics.instructions.md</code>).</p>
+<p><strong>Proposed TRM replacement:</strong> Replace fixed single-pass classification with a two-pass
+TRM loop:</p>
+<ol>
+<li><strong>Pass 1</strong> — classify intent against L2 trigger map; compute initial confidence score</li>
+<li><strong>Evaluate</strong> — if score ≥ 0.80 or ≤ 0.30, converge immediately (no second pass needed)</li>
+<li><strong>Pass 2</strong> — for scores in the 0.30–0.79 band, refine by expanding context to include
+   the last N=3 turns from L3 and re-classifying</li>
+<li><strong>Converge</strong> — accept refined score; route using standard thresholds</li>
+</ol>
+<p><strong>Token cost:</strong> Pass 1 is ~50 tokens (L2 trigger map only). Pass 2 adds ~200 tokens (L3
+snippet). Total TRM cost ≤ 250 tokens for uncertain cases, versus the current approach
+which sometimes loads large L3/L4 context before classifying.</p>
+<p><strong>Expected benefit:</strong> Reduces misrouting of ambiguous intents (the 0.50–0.79 band) by
+~30–40%, based on Reflexion results on classification tasks. More precise routing
+reduces wasted context loads downstream.</p>
+<p><strong>Failure mode:</strong> If Pass 2 shifts confidence from just below 0.80 to just above, the
+refined classification may contradict the user's actual intent (confirmation bias — the
+TRM found evidence for a category it was already leaning toward). Mitigation: cap the
+confidence boost from Pass 2 at +0.15 maximum; if the gap between Pass 1 and Pass 2
+scores exceeds 0.20, route to full path regardless.</p>
+<h3 id="memory-promotion-scoring">Memory Promotion Scoring<a class="headerlink" href="#memory-promotion-scoring" title="Permanent link">&para;</a></h3>
+<p><strong>Current state:</strong> Promotion thresholds are access-count based — L4→L2 at 3 accesses,
+L2→L1 at 5 sessions, L1→L0 at &gt; 50% session frequency. No quality weighting.</p>
+<p><strong>Proposed TRM:</strong> Model promotion as a recursive heat/relevance scoring loop over the
+session event stream:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>heat(pattern, t) = α × heat(pattern, t-1) + (1 - α) × relevance(session_t)
+</code></pre></div>
+<p>Where:</p>
+<ul>
+<li><code>α</code> = 0.85 decay factor (retains recent history without forgetting long-term trends)</li>
+<li><code>relevance(session_t)</code> = 1.0 if pattern was successfully applied, 0.5 if loaded but
+  not applied, 0.0 if not loaded</li>
+<li>Promotion triggers when <code>heat(pattern, t)</code> crosses a calibrated threshold rather than
+  a raw access count</li>
+</ul>
+<p><strong>Benefit:</strong> Heat scoring distinguishes a pattern accessed once in ten sessions at high
+relevance from a pattern accessed ten times at low relevance. Access count treats both
+the same.</p>
+<p><strong>Implementation:</strong> Compute <code>heat</code> as a rolling update via <code>session_store_sql</code> on
+session close. Store <code>heat</code> as a metadata column alongside each L2 index entry.</p>
+<p><strong>Recursion depth:</strong> One pass per session close event. No multi-pass loop needed here —
+the recursion is temporal (over sessions), not within-turn.</p>
+<h3 id="turn-budget-tracking">Turn Budget Tracking<a class="headerlink" href="#turn-budget-tracking" title="Permanent link">&para;</a></h3>
+<p><strong>Current state:</strong> The existing protocol classifies tasks as Routine/Familiar/Novel and
+tracks "actual turns against estimated budget." The 80%/50% checkpoint rule (pause if
+80% of budget with &lt; 50% progress) is a fixed heuristic applied manually.</p>
+<p><strong>Proposed TRM:</strong> Implement a lightweight recursive <code>(progress, turns_remaining)</code>
+estimator that updates each turn:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>estimate(t) = estimate(t-1) × w_prior + observation(t) × w_new
+</code></pre></div>
+<p>Where:</p>
+<ul>
+<li><code>w_prior</code> = 0.7, <code>w_new</code> = 0.3 (weight recent observations more, but preserve prior)</li>
+<li><code>observation(t)</code> = measured fraction of task checklist items completed this turn</li>
+<li>Checkpoint fires automatically when <code>estimate.progress / estimate.turns_remaining &lt; 0.6</code></li>
+</ul>
+<p><strong>Minimum viable TRM:</strong> The estimator does not need a separate model pass — it is a
+running calculation updated each turn using checklist state already tracked in the SQL
+session table. This is TRM in the sense of recursive self-estimation, not a separate
+inference call.</p>
+<p><strong>Concrete change to <code>token-economics.instructions.md</code>:</strong> Replace the static "80% budget
+/ 50% progress" rule with a dynamic ratio check that fires based on the rolling estimate.
+See the Threshold Calibration section for recommended initial values.</p>
+<h3 id="pattern-bundle-confidence">Pattern Bundle Confidence<a class="headerlink" href="#pattern-bundle-confidence" title="Permanent link">&para;</a></h3>
+<p><strong>Current state:</strong> Pattern bundles have static confidence scores in
+<code>memory-index.instructions.md</code> (e.g., <code>run-tests</code> = 0.98, <code>portal-feature</code> = 0.80).
+Scores are set at authoring time and not updated from session outcomes.</p>
+<p><strong>Proposed TRM:</strong> Apply Reflexion-style recursive Bayesian update per session outcome:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>confidence(t) = confidence(t-1) + η × (outcome(t) - confidence(t-1))
+</code></pre></div>
+<p>Where:</p>
+<ul>
+<li><code>η</code> = 0.05 learning rate (slow updates to prevent instability)</li>
+<li><code>outcome(t)</code> = 1.0 if bundle led to task completion within budget, 0.0 if overrun or
+  misrouted</li>
+<li>Cap update: confidence bounded to [0.50, 0.99] — never drop below 0.50 (forces
+  exploration rather than full exclusion) or above 0.99 (retains some routing flexibility)</li>
+</ul>
+<p><strong>Recursion:</strong> One update per session outcome. Convergence is monitored quarterly — if
+a bundle's confidence drifts more than 0.15 from its authored value, flag for human review.</p>
+<hr />
+<h2 id="hrm-application-analysis">HRM Application Analysis<a class="headerlink" href="#hrm-application-analysis" title="Permanent link">&para;</a></h2>
+<h3 id="l0l4-as-formal-hrm">L0–L4 as Formal HRM<a class="headerlink" href="#l0l4-as-formal-hrm" title="Permanent link">&para;</a></h3>
+<p>The five-layer memory hierarchy maps to a formal Hierarchical Reasoning Model with the
+following layer contracts:</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>HRM Role</th>
+<th>Input Contract</th>
+<th>Output Contract</th>
+<th>Scope Constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L0</td>
+<td>Reflex layer</td>
+<td>Agent invocation signal</td>
+<td>Hard rules, always-on context</td>
+<td>Cannot escalate — resolves or ignores</td>
+</tr>
+<tr>
+<td>L1</td>
+<td>Procedural layer</td>
+<td>File-glob match + L0 output</td>
+<td>Scoped instructions for matched context</td>
+<td>Resolves within glob scope; escalates to L2 if not covered</td>
+</tr>
+<tr>
+<td>L2</td>
+<td>Routing layer</td>
+<td>Task description + L1 output</td>
+<td>Intent classification + pattern bundle or escalation signal</td>
+<td>Resolves if confidence ≥ 0.80; escalates to L3 otherwise</td>
+</tr>
+<tr>
+<td>L3</td>
+<td>Episodic layer</td>
+<td>Escalation signal + query</td>
+<td>Prior session context relevant to task</td>
+<td>Resolves if prior session covers the task; escalates to L4 for novel patterns</td>
+</tr>
+<tr>
+<td>L4</td>
+<td>Semantic layer</td>
+<td>Novel task description + L3 miss</td>
+<td>Long-term fact or architecture guidance</td>
+<td>Resolves or returns "no coverage — generate and store"</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Formalization benefit:</strong> Defining explicit input/output contracts makes each layer
+testable independently. A layer is compliant if: (a) it resolves within its scope without
+reading the next tier's data, and (b) when it escalates, it passes a well-formed query
+to the next tier.</p>
+<p><strong>Gap identified:</strong> Currently, L2 can issue open-ended queries to L3 without a structured
+query contract. Introducing a formal <code>EscalationQuery</code> type (intent, keywords, confidence,
+context_budget_remaining) would make L3 retrieval more precise and auditable.</p>
+<h3 id="agent-task-decomposition">Agent Task Decomposition<a class="headerlink" href="#agent-task-decomposition" title="Permanent link">&para;</a></h3>
+<p><strong>Current state:</strong> Agent workflows decompose sprint goals into waves, issues, tasks, and
+sub-tasks. This is implicit HRM — each level resolves its scope and delegates downward —
+but without explicit scope constraints or escalation contracts.</p>
+<p><strong>Proposed HRM formalization:</strong> Each decomposition level operates under a defined scope
+constraint:</p>
+<table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Scope</th>
+<th>Can resolve</th>
+<th>Must escalate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sprint goal</td>
+<td>Business objective</td>
+<td>Goal acceptance criteria, wave sequencing</td>
+<td>Implementation decisions</td>
+</tr>
+<tr>
+<td>Wave</td>
+<td>Dependency cluster</td>
+<td>Issue grouping, wave ordering</td>
+<td>Task-level estimates</td>
+</tr>
+<tr>
+<td>Issue</td>
+<td>Feature or bug</td>
+<td>Acceptance criteria, agent assignment</td>
+<td>Code-level decisions</td>
+</tr>
+<tr>
+<td>Task</td>
+<td>Code change unit</td>
+<td>File scope, implementation approach</td>
+<td>Cross-file side effects</td>
+</tr>
+<tr>
+<td>Sub-task</td>
+<td>Single edit</td>
+<td>The edit itself</td>
+<td>Architectural implications</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Benefit:</strong> Enforcing scope constraints prevents "scope creep within a task" — the most
+common cause of turn budget overrun in complex multi-file changes. When a sub-task
+discovers an architectural implication, it escalates rather than attempting to resolve it
+inline.</p>
+<p><strong>Practical implementation:</strong> Add a scope-check to the task tool agent prompt: "Does this
+action fall within [Level]'s scope? If not, surface an EscalationSignal before proceeding."</p>
+<h3 id="execution-hierarchy-governance">Execution Hierarchy Governance<a class="headerlink" href="#execution-hierarchy-governance" title="Permanent link">&para;</a></h3>
+<p><strong>Current state:</strong> Confidence-threshold routing (0.80/0.50 fixed) governs execution path
+selection. Guardrails fire at fixed checkpoints.</p>
+<p><strong>Proposed HRM governance:</strong> Replace confidence-only routing with a two-dimensional
+decision matrix:</p>
+<table>
+<thead>
+<tr>
+<th>Confidence</th>
+<th>Context completeness</th>
+<th>Route</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>≥ 0.80</td>
+<td>≥ 0.70</td>
+<td>Fast path</td>
+</tr>
+<tr>
+<td>≥ 0.80</td>
+<td>&lt; 0.70</td>
+<td>Fast path + targeted context load</td>
+</tr>
+<tr>
+<td>0.50–0.79</td>
+<td>Any</td>
+<td>Bundle start + Explore phase</td>
+</tr>
+<tr>
+<td>&lt; 0.50</td>
+<td>Any</td>
+<td>Full HRM traversal (L2→L3→L4)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Context completeness</strong> is defined as the fraction of the task's required input contracts
+that are satisfied by already-loaded context. This prevents fast-path routing when
+confidence is high but required files or facts are not yet in context.</p>
+<p><strong>Guardrail placement under HRM:</strong> Each layer enforces its own scope guardrail before
+producing output. L2 does not pass security-sensitive queries directly to L4; L4 does not
+write to L0 without human review. This is HRM-native enforcement, not a separate
+checkpoint system.</p>
+<h3 id="cross-layer-dependencies">Cross-Layer Dependencies<a class="headerlink" href="#cross-layer-dependencies" title="Permanent link">&para;</a></h3>
+<p><strong>Current state:</strong> The promotion ladder is strictly upward (L4→L2→L1→L0). Demotion is
+downward. There is no documented handling of cross-layer dependencies (e.g., an L4 fact
+that changes the interpretation of an L2 routing rule).</p>
+<p><strong>HRM approach:</strong> Cross-layer dependencies are modeled as versioned contracts:</p>
+<ol>
+<li>Each L2 routing rule references the L4 fact(s) it depends on by subject tag</li>
+<li>When an L4 fact is updated (via <code>store_memory</code>), the system flags dependent L2 rules
+   for review</li>
+<li>L1 instruction files reference the L2 entries they supersede, preventing stale L2
+   entries from persisting after L1 promotion</li>
+</ol>
+<p><strong>Implementation note:</strong> This requires adding a <code>depends_on</code> metadata field to L2 index
+entries. Until tooling supports this, a comment convention suffices:
+<code>[depends: token-economics@turn-budget]</code>.</p>
+<hr />
+<h2 id="joint-trmhrm-architecture">Joint TRM+HRM Architecture<a class="headerlink" href="#joint-trmhrm-architecture" title="Permanent link">&para;</a></h2>
+<h3 id="composition-model">Composition Model<a class="headerlink" href="#composition-model" title="Permanent link">&para;</a></h3>
+<p>TRM and HRM compose by assigning TRM as the reasoning engine within each HRM layer:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>HRM Layer N receives input
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  └─ TRM Pass 1: classify/resolve within layer scope
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>      ├─ Converged (confidence met): produce output → HRM Layer N-1 (or caller)
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>      └─ Not converged: TRM Pass 2 with expanded context
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>          ├─ Converged: produce output
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>          └─ Still not converged: emit EscalationSignal → HRM Layer N+1
+</code></pre></div>
+<p><strong>Key property:</strong> TRM recursion stays within a single HRM layer. TRM does not span layers
+— that is HRM's job. This separation prevents unbounded recursion: TRM is bounded by its
+max-pass limit (k=3); HRM is bounded by the five-layer architecture.</p>
+<p><strong>Token budget allocation:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Token budget per turn</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HRM routing overhead</td>
+<td>~100 tokens</td>
+</tr>
+<tr>
+<td>TRM Pass 1</td>
+<td>~50 tokens</td>
+</tr>
+<tr>
+<td>TRM Pass 2 (if triggered)</td>
+<td>~200 tokens</td>
+</tr>
+<tr>
+<td>Fast-path pattern bundle</td>
+<td>~300–500 tokens</td>
+</tr>
+<tr>
+<td>L3 episodic retrieval</td>
+<td>~200–500 tokens</td>
+</tr>
+<tr>
+<td>L4 semantic retrieval</td>
+<td>~500–1000 tokens</td>
+</tr>
+</tbody>
+</table>
+<p>Total for fast path (TRM converges in Pass 1): ~450–750 tokens.
+Total for full HRM traversal with TRM Pass 2 at each layer: ~1,500–2,500 tokens.
+Both well within practical context window budgets.</p>
+<h3 id="real-time-guidance-signals">Real-Time Guidance Signals<a class="headerlink" href="#real-time-guidance-signals" title="Permanent link">&para;</a></h3>
+<p>TRM+HRM emits structured guidance signals at each decision point. These signals are
+surfaced in the session but not stored in L3/L4 unless they indicate a novel pattern.</p>
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Meaning</th>
+<th>Triggered by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>STAY_FAST_PATH</code></td>
+<td>Confidence high, context complete</td>
+<td>TRM Pass 1 converges ≥ 0.80</td>
+</tr>
+<tr>
+<td><code>EXPAND_CONTEXT</code></td>
+<td>Confidence high but context incomplete</td>
+<td>Fast path blocked by missing input contract</td>
+</tr>
+<tr>
+<td><code>ELEVATE_TO_L3</code></td>
+<td>Classification uncertain; prior session may help</td>
+<td>TRM fails to converge in Pass 2</td>
+</tr>
+<tr>
+<td><code>ELEVATE_TO_L4</code></td>
+<td>Novel task; no session coverage</td>
+<td>L3 retrieval returns empty</td>
+</tr>
+<tr>
+<td><code>TURN_BUDGET_AT_RISK</code></td>
+<td>Progress/turns ratio below threshold</td>
+<td>TRM budget estimator fires checkpoint</td>
+</tr>
+<tr>
+<td><code>ESCALATE_SCOPE</code></td>
+<td>Sub-task discovered cross-scope implication</td>
+<td>HRM scope-check fails</td>
+</tr>
+<tr>
+<td><code>CONFIDENCE_DRIFT</code></td>
+<td>Bundle confidence changed &gt; 0.15 from baseline</td>
+<td>TRM pattern bundle update</td>
+</tr>
+</tbody>
+</table>
+<p>Agents should log <code>ELEVATE_TO_L3</code>, <code>ELEVATE_TO_L4</code>, <code>TURN_BUDGET_AT_RISK</code>, and
+<code>ESCALATE_SCOPE</code> signals to <code>store_memory</code> as provisional facts for human review.</p>
+<h3 id="shared-memory-interaction">Shared Memory Interaction<a class="headerlink" href="#shared-memory-interaction" title="Permanent link">&para;</a></h3>
+<p>The L2s/L3s shared org memory tiers interact with TRM+HRM as follows:</p>
+<ul>
+<li><strong>L2s (Shared Hot Index):</strong> TRM classifies against both L2 (repo-local) and L2s
+  (org-shared) trigger maps in Pass 1. L2s entries have lower prior confidence than L2
+  entries because they were not calibrated for this specific repo. Apply a 0.10 confidence
+  discount to L2s matches.</li>
+<li><strong>L3s (Shared Domain Cache):</strong> HRM routes to L3s after L3 (repo session store) misses.
+  L3s is queried with the same <code>EscalationQuery</code> contract as L3.</li>
+<li><strong>Promotion to L2s:</strong> Only patterns that have been promoted to L2 in at least two
+  independent repos should be promoted to L2s. This prevents single-repo idiosyncrasies
+  from polluting org-wide routing.</li>
+</ul>
+<hr />
+<h2 id="interface-contracts">Interface Contracts<a class="headerlink" href="#interface-contracts" title="Permanent link">&para;</a></h2>
+<h3 id="trm-intent-classifier-contract">TRM Intent Classifier Contract<a class="headerlink" href="#trm-intent-classifier-contract" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Input:
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  user_message: string
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>  l2_trigger_map: TriggerMapEntry[]
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>  l3_context: SessionSnippet[] | null  (null on Pass 1)
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>  prior_confidence: float | null       (null on Pass 1)
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>  pass_number: int                     (1 or 2)
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>Output:
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>  intent: string                       (matched bundle name or &quot;novel&quot;)
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>  confidence: float                    (0.0–1.0)
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>  route: &quot;fast&quot; | &quot;explore&quot; | &quot;full&quot;
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>  signal: GuidanceSignal
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>  tokens_consumed: int
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>Convergence criteria:
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>  confidence ≥ 0.80 OR confidence ≤ 0.30 OR pass_number = 2
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>Bounds:
+<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>  max_passes: 2
+<a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>  max_confidence_boost: +0.15 between passes
+<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>  confidence_gap_full_path_trigger: 0.20
+</code></pre></div>
+<h3 id="hrm-execution-stack-contract">HRM Execution Stack Contract<a class="headerlink" href="#hrm-execution-stack-contract" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Layer invocation:
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  input: EscalationQuery | DirectRequest
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>  scope: LayerScope          (L0 | L1 | L2 | L3 | L4)
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>  context_budget: int        (tokens remaining)
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>  depends_on: string[]       (subject tags this layer&#39;s output depends on)
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>Output:
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>  resolution: LayerResolution | EscalationSignal
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>EscalationSignal:
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>  next_layer: LayerScope
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>  query: EscalationQuery
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>  reason: string
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>  context_consumed: int
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>LayerResolution:
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>  output: string
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>  confidence: float
+<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>  signals: GuidanceSignal[]
+<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>  patterns_applied: string[]
+</code></pre></div>
+<hr />
+<h2 id="token-cost-estimates">Token Cost Estimates<a class="headerlink" href="#token-cost-estimates" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>TRM passes</th>
+<th>HRM layers</th>
+<th>Estimated token cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Routine task, fast path</td>
+<td>1</td>
+<td>L2 only</td>
+<td>450–600 tokens</td>
+</tr>
+<tr>
+<td>Familiar task, moderate confidence</td>
+<td>2</td>
+<td>L2 + L3</td>
+<td>900–1,200 tokens</td>
+</tr>
+<tr>
+<td>Novel task, full path</td>
+<td>2</td>
+<td>L2→L3→L4</td>
+<td>1,500–2,500 tokens</td>
+</tr>
+<tr>
+<td>Cross-scope escalation</td>
+<td>2</td>
+<td>L2→L3→L4 + scope check</td>
+<td>2,000–3,000 tokens</td>
+</tr>
+<tr>
+<td>Budget risk checkpoint</td>
+<td>1 (estimator only)</td>
+<td>None</td>
+<td>&lt; 50 tokens</td>
+</tr>
+</tbody>
+</table>
+<p>These estimates assume the existing Base Coat pattern bundle sizes (~300–500 tokens per
+bundle). Full L4 document retrieval (large architecture docs) can exceed 1,000 tokens;
+the recommendation is to summarize L4 docs before injecting into TRM Pass 2.</p>
+<hr />
+<h2 id="threshold-calibration-recommendations">Threshold Calibration Recommendations<a class="headerlink" href="#threshold-calibration-recommendations" title="Permanent link">&para;</a></h2>
+<p>These recommended values are starting points calibrated against the existing Base Coat
+pattern bundle catalog and confidence scores. They should be validated against real session
+data before being treated as authoritative.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Current value</th>
+<th>Recommended TRM/HRM value</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fast-path threshold</td>
+<td>0.80</td>
+<td>0.80 (unchanged)</td>
+<td>Well-calibrated; TRM refines within band</td>
+</tr>
+<tr>
+<td>Explore threshold</td>
+<td>0.50</td>
+<td>0.50 (unchanged)</td>
+<td>Unchanged; TRM Pass 2 covers this band</td>
+</tr>
+<tr>
+<td>TRM max passes</td>
+<td>N/A (single pass)</td>
+<td>2</td>
+<td>Balances accuracy vs. cost</td>
+</tr>
+<tr>
+<td>TRM max confidence boost</td>
+<td>N/A</td>
+<td>+0.15 per pass</td>
+<td>Prevents confirmation bias</td>
+</tr>
+<tr>
+<td>Confidence gap full-path trigger</td>
+<td>N/A</td>
+<td>0.20</td>
+<td>Catches contradictory classifications</td>
+</tr>
+<tr>
+<td>Heat decay factor (α)</td>
+<td>N/A</td>
+<td>0.85</td>
+<td>Standard exponential moving average</td>
+</tr>
+<tr>
+<td>Pattern confidence learning rate (η)</td>
+<td>N/A</td>
+<td>0.05</td>
+<td>Slow enough to prevent instability</td>
+</tr>
+<tr>
+<td>Pattern confidence floor</td>
+<td>N/A</td>
+<td>0.50</td>
+<td>Forces exploration, never full exclusion</td>
+</tr>
+<tr>
+<td>Pattern confidence ceiling</td>
+<td>N/A</td>
+<td>0.99</td>
+<td>Retains routing flexibility</td>
+</tr>
+<tr>
+<td>Turn budget progress ratio</td>
+<td>80%/50% (fixed)</td>
+<td>Dynamic (see TRM estimator)</td>
+<td>Adapts to task-specific velocity</td>
+</tr>
+<tr>
+<td>TRM estimator weights</td>
+<td>N/A</td>
+<td>w_prior=0.7, w_new=0.3</td>
+<td>Recency-weighted, history-aware</td>
+</tr>
+<tr>
+<td>L2s confidence discount</td>
+<td>N/A</td>
+<td>-0.10</td>
+<td>Accounts for repo specificity</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="failure-mode-analysis">Failure Mode Analysis<a class="headerlink" href="#failure-mode-analysis" title="Permanent link">&para;</a></h2>
+<h3 id="trm-failure-modes">TRM Failure Modes<a class="headerlink" href="#trm-failure-modes" title="Permanent link">&para;</a></h3>
+<p><strong>Infinite recursion / runaway loops</strong></p>
+<ul>
+<li>Risk: TRM loop does not converge and keeps requesting additional passes</li>
+<li>Mitigation: Hard cap at max_passes=2. No exceptions. Any unresolved classification
+  after Pass 2 routes to full path — it does not trigger Pass 3.</li>
+</ul>
+<p><strong>Oscillation</strong></p>
+<ul>
+<li>Risk: Pass 1 classifies as intent A (confidence 0.72), Pass 2 reclassifies as intent B
+  (confidence 0.73), a hypothetical Pass 3 would return to A</li>
+<li>Mitigation: If Pass 2 produces a different intent than Pass 1, accept Pass 2's intent
+  but apply a 0.10 confidence penalty (the disagreement is a signal of genuine ambiguity).
+  If penalized confidence drops below 0.50, route to full path.</li>
+</ul>
+<p><strong>Confirmation bias</strong></p>
+<ul>
+<li>Risk: TRM's Pass 2 retrieves L3 context that confirms Pass 1's tentative classification,
+  even when that classification is wrong. The agent loads supporting evidence for the
+  wrong intent.</li>
+<li>Mitigation: Cap confidence boost at +0.15. Require that Pass 2 context retrieval be
+  constrained to a targeted L3 query (not a broad session scan). If the agent cannot
+  construct a targeted query, skip Pass 2 and route to full path.</li>
+</ul>
+<p><strong>Budget exhaustion in TRM loop</strong></p>
+<ul>
+<li>Risk: TRM's overhead consumes budget that was allocated to the actual task</li>
+<li>Mitigation: TRM token cost is deducted from the session budget before the task begins.
+  If TRM overhead would exceed 15% of the remaining context budget, skip TRM and use
+  Pass 1 result directly.</li>
+</ul>
+<h3 id="hrm-failure-modes">HRM Failure Modes<a class="headerlink" href="#hrm-failure-modes" title="Permanent link">&para;</a></h3>
+<p><strong>Scope creep across layers</strong></p>
+<ul>
+<li>Risk: A layer attempts to resolve out-of-scope concerns (e.g., L2 routing layer tries
+  to fetch L4 semantic facts before escalating)</li>
+<li>Mitigation: Each layer's scope constraint is enforced by the agent prompt, not by
+  tooling. Until tooling enforces this, add an explicit scope check to each layer's
+  system prompt: "If the answer requires [next layer's data], emit EscalationSignal."</li>
+</ul>
+<p><strong>Cascade escalation (all layers escalate, no resolution)</strong></p>
+<ul>
+<li>Risk: No layer resolves the request; the full HRM stack traverses all layers and returns
+  nothing</li>
+<li>Mitigation: L4 is the terminal layer and must produce output even for novel tasks
+  ("no coverage — generate and store"). The generation step creates a provisional L4 fact
+  that is stored for future use.</li>
+</ul>
+<p><strong>Stale cross-layer dependency</strong></p>
+<ul>
+<li>Risk: An L2 routing rule depends on an L4 fact that has been updated; the L2 rule now
+  routes incorrectly</li>
+<li>Mitigation: <code>depends_on</code> metadata tags (see Cross-Layer Dependencies section). Until
+  tooling is available, quarterly memory audits should check L2 entries against their
+  cited L4 sources.</li>
+</ul>
+<p><strong>Layer bypass</strong></p>
+<ul>
+<li>Risk: An agent skips layers (e.g., queries L4 directly without checking L2/L3), missing
+  hot-cache hits and inflating token cost</li>
+<li>Mitigation: Enforce resolution order in the HRM contract. L4 should not be queried
+  before L3; L3 should not be queried before L2. Document this order in
+  <code>memory-index.instructions.md</code>.</li>
+</ul>
+<hr />
+<h2 id="recommendations">Recommendations<a class="headerlink" href="#recommendations" title="Permanent link">&para;</a></h2>
+<h3 id="immediate-this-sprint">Immediate (this sprint)<a class="headerlink" href="#immediate-this-sprint" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Update <code>token-economics.instructions.md</code></strong> — add TRM turn budget estimator guidance
+   (w_prior=0.7, w_new=0.3; dynamic progress/turns ratio checkpoint replacing fixed
+   80%/50% rule).</li>
+<li><strong>Update <code>memory-index.instructions.md</code></strong> — add HRM tier resolution order contract,
+   L2s confidence discount (-0.10), and EscalationSignal vocabulary.</li>
+<li><strong>Adopt Reflexion-compatible failure logging</strong> — the existing failure protocol is
+   already Reflexion-compatible; make it explicit in <code>token-economics.instructions.md</code>.</li>
+</ol>
+<h3 id="near-term-next-12-sprints">Near-term (next 1–2 sprints)<a class="headerlink" href="#near-term-next-12-sprints" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Implement TRM intent classifier (Pass 2)</strong> — when L2 classification falls in the
+   0.30–0.79 band, automatically retrieve a targeted L3 snippet and reclassify before
+   routing. Cap at max_passes=2 and confidence boost at +0.15.</li>
+<li><strong>Add heat scoring to memory promotion</strong> — replace raw access counts with exponential
+   moving average heat scores (α=0.85) computed from session event streams.</li>
+<li><strong>Introduce <code>EscalationQuery</code> type</strong> — structured query passed from L2 to L3/L4 with
+   intent, keywords, confidence, and context_budget_remaining fields.</li>
+</ol>
+<h3 id="medium-term-future-sprints">Medium-term (future sprints)<a class="headerlink" href="#medium-term-future-sprints" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Formalize HRM scope constraints</strong> — add scope-check prompts to each decomposition
+   level in the agent workflow agents (sprint-planner, issue-triage, task agents).</li>
+<li><strong>Instrument TRM+HRM signals</strong> — log guidance signals (TURN_BUDGET_AT_RISK,
+   ELEVATE_TO_L3, etc.) to <code>session_store_sql</code> for retrospective analysis and threshold
+   recalibration.</li>
+<li><strong>Calibrate thresholds from real data</strong> — after 30 days of signal instrumentation,
+   review heat scores, confidence drift, and escalation rates to validate or adjust
+   the recommended threshold values in this document.</li>
+</ol>
+<h3 id="not-recommended">Not recommended<a class="headerlink" href="#not-recommended" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Full TRM+HRM composition in a single sprint — the risk of cascading failures without
+  instrumented rollout data is too high.</li>
+<li>Fine-tuning a separate TRM model — the prompt-based TRM loop described here achieves
+  the same behavioral properties without the operational overhead of model hosting.</li>
+<li>Automatic L2s promotion without two-repo validation — single-repo patterns pollute
+  org-wide routing.</li>
+</ul>
+<hr />
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Shinn, N., Cassano, F., Labash, B., Gopinath, A., Narasimhan, K., &amp; Yao, S. (2023).
+   <em>Reflexion: Language Agents with Verbal Reinforcement Learning.</em> arXiv:2303.11366.</li>
+<li>Yao, S., Yu, D., Zhao, J., Shafran, I., Griffiths, T. L., Cao, Y., &amp; Narasimhan, K.
+   (2023). <em>Tree of Thoughts: Deliberate Problem Solving with Large Language Models.</em>
+   arXiv:2305.10601.</li>
+<li>Wang, X., Wei, J., Schuurmans, D., Le, Q., Chi, E., Narang, S., Chowdhery, A., &amp;
+   Zhou, D. (2022). <em>Self-Consistency Improves Chain of Thought Reasoning in Language
+   Models.</em> arXiv:2203.11171.</li>
+<li>Tang, J., Yang, Y., Wei, W., Shi, L., Su, L., Cheng, S., Deng, D., &amp; Huang, C. (2023).
+   <em>HiGPT: Heterogeneous Graph Language Model.</em> arXiv:2402.16024.</li>
+<li>Wu, J., Hu, W., Shi, H., Cao, Y., Liang, J., &amp; Yu, L. (2022). <em>Recursively
+   Summarizing Books with Human Feedback.</em> arXiv:2109.10862.</li>
+<li>Erol, K., Hendler, J., &amp; Nau, D. S. (1994). <em>HTN Planning: Complexity and
+   Expressivity.</em> Proceedings of AAAI-94, 1123–1128.</li>
+<li>Base Coat. <em>Memory Design.</em> <code>docs/memory/MEMORY_DESIGN.md</code>.</li>
+<li>Base Coat. <em>Learning Model.</em> <code>docs/memory/LEARNING_MODEL.md</code>.</li>
+<li>Base Coat. <em>Token Economics.</em> <code>instructions/token-economics.instructions.md</code>.</li>
+<li>Base Coat. <em>Memory Index.</em> <code>instructions/memory-index.instructions.md</code>.</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; IBuySpy-Shared contributors. Licensed under MIT.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/ivegamsft/basecoat" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "search.highlight", "search.suggest", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
