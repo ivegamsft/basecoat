@@ -1,0 +1,36 @@
+{
+  "collected_at": "2026-06-08T12:56:08.784427+00:00",
+  "organization": "ivegamsft",
+  "copilot": {
+    "available": false
+  },
+  "repos": {
+    "ivegamsft/basecoat": {
+      "pull_requests": {
+        "prs_merged_28d": 24,
+        "cycle_time_median_hours": 0.1,
+        "cycle_time_p95_hours": 74.8
+      },
+      "ci": {
+        "success_rate": 70.3,
+        "pass_rate": 70.3,
+        "ci_pass_rate_last_20_runs": 75.0,
+        "ci_pass_rate_last_100_runs": 70.3,
+        "total_runs_sampled": 91,
+        "runs_sampled_last_20": 20,
+        "successful_runs_last_20": 15
+      },
+      "issues": {
+        "issues_closed_28d": 50,
+        "resolution_time_median_hours": 392.1
+      },
+      "basecoat_coverage": {
+        "agents": 0,
+        "instructions": 7,
+        "skills": 0,
+        "prompts": 0,
+        "percentage": 7.4
+      }
+    }
+  }
+}
