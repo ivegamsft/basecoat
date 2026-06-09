@@ -7,6 +7,7 @@ scripts:
     entrypoint: scripts/analyze-dockerfile.ps1
     inputs:
       - name: DockerfilePath
+compatibility: GHCP
 ---
 
 # Container Build Assessment

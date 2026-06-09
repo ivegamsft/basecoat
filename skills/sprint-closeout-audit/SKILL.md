@@ -5,6 +5,7 @@ invocation_rules:
   - "Use when closing a sprint and validating objective completion evidence."
   - "Require all five checklist questions with evidence links in output."
 visibility: "internal"
+compatibility: GHCP
 ---
 
 # Sprint Closeout Audit Skill

@@ -1,6 +1,7 @@
 ---
 name: documentation
 description: "Use when writing or improving technical documentation such as READMEs, ADRs, runbooks, and reference guides. USE FOR: write a project README, record an architecture decision, create an operational runbook, review docs for accuracy and gaps, establish docs-as-code standards. DO NOT USE FOR: implementing application features, generating code-only refactors, designing infrastructure topology diagrams from scratch."
+compatibility: GHCP
 ---
 
 # Documentation Skill

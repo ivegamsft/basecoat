@@ -2,6 +2,7 @@
 name: azure-devops-rest
 description: "Use when building automations that call Azure DevOps REST APIs for work items, pipelines, repos, and artifacts. USE FOR: query Azure DevOps work items via REST, trigger a pipeline run from a script, paginate Azure DevOps API results, authenticate with PAT or System.AccessToken, update a work item with JSON Patch. DO NOT USE FOR: GitHub REST automation, Azure resource deployment, browser UI test scripting."
 context: fork
+compatibility: GHCP
 ---
 
 # Azure DevOps REST API Skill

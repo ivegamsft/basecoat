@@ -49,6 +49,7 @@ Message hygiene:
 - Do not paste large instruction blocks into chat; reference files by path.
 - Batch related operations in one turn.
 - Keep the main thread focused on decisions and outcomes; use delegation for broad scan/research work.
+- Prefer Ask mode for small, direct queries and edits; switch to Agent mode for multi-file execution, long-running workflows, or broad investigations.
 
 ## Fleet Merge Pacing
 
@@ -58,6 +59,14 @@ During fleet or burndown sessions, enforce serialized merge pacing:
 2. Before each merge, confirm required checks are green and mergeability is clean.
 3. Wait for merge completion before starting the next merge.
 4. After each merge, clean up local and remote branch state before continuing.
+
+## Token-Efficient Operating Defaults
+
+Use these defaults unless task complexity requires escalation:
+
+1. Keep responses concise by default and expand only when risk, ambiguity, or investigation depth requires it.
+2. Start in Auto/default model routing for routine work; upshift only for architecture/security reasoning or complex cross-system debugging.
+3. Audit each tool call for overhead: prefer direct file tools for local repo work and reserve remote/MCP calls for data not available in-repo.
 
 ## Triggering the Copilot Coding Agent
 

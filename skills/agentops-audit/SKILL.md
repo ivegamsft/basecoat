@@ -1,6 +1,7 @@
 ---
 name: agentops-audit
 description: "Audits agent definitions, routing configurations, and tool bindings. USE FOR: reviewing agent definitions for correctness, assessing tool routing logic, validating tool bindings, evaluating prompt quality, analyzing agent behavior consistency. DO NOT USE FOR: writing agents from scratch, designing agent architectures, implementing tools, general code review."
+compatibility: GHCP
 ---
 
 # Agent Operations Audit Skill

@@ -1,6 +1,7 @@
 ---
 name: devops
 description: "Use when designing CI/CD pipelines, infrastructure as code, deployment workflows, rollback plans, or observability setup. USE FOR: create GitHub Actions pipeline, review Bicep or Terraform deployment templates, define release promotion gates, write rollback runbook for a service, add monitoring and health checks for deployment. DO NOT USE FOR: writing application feature code, database schema modeling, drafting product marketing copy."
+compatibility: GHCP
 ---
 
 # DevOps Skill
