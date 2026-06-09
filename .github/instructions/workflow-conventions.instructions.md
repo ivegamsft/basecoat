@@ -35,6 +35,21 @@ gh pr merge --squash --admin
 
 Use `--admin` to bypass CI wait when change is pre-validated locally.
 
+## CLI session transition policy
+
+For long runs, enforce context transitions explicitly:
+
+1. **Triage -> implementation**: run `/compact`.
+2. **Implementation -> merge waiting**: run `/compact`.
+3. **Domain pivot** (for example sprint planning -> release triage): run `/new`.
+   Reload only the required references.
+
+Message hygiene:
+
+- Do not paste large instruction blocks into chat; reference files by path.
+- Batch related operations in one turn.
+- Keep the main thread focused on decisions and outcomes; use delegation for broad scan/research work.
+
 ## Fleet Merge Pacing
 
 During fleet or burndown sessions, enforce serialized merge pacing:

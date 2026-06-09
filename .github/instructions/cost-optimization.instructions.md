@@ -9,6 +9,26 @@ applyTo: "**/*"
 
 Baseline CLI cost (2.08B tokens/mo) reduced through five behavioral patterns:
 
+### Sprint 35 execution plan (issues #1420-#1424)
+
+Execute these in order to reduce input-token bloat first, then optimize routing:
+
+| Order | Issue | Focus | Output |
+|---|---|---|---|
+| 1 | #1420 | Phase-boundary compaction policy | Updated workflow/instruction guidance with explicit compact gates |
+| 2 | #1421 | Large-payload carry-over elimination | File-reference-only policy plus `/new` or `/compact` pivot rules |
+| 3 | #1422 | Main-thread orchestration reduction | Batching/delegation defaults with decision-only main-thread pattern |
+| 4 | #1423 | Model-routing policy | Routine-loop model defaults with temporary upshift guidance |
+| 5 | #1424 | Attachment context compression | Canonical summary artifact workflow/template |
+
+### Operator checklist for every long CLI run
+
+1. Start with short context and file references only.
+2. At each phase switch (triage -> implementation -> merge waiting), run `/compact`.
+3. If switching to a new domain (for example: sprint planning -> release operations), run `/new` and reload only relevant references.
+4. Keep main-thread messages decision-focused; delegate scan/research work.
+5. For attachment-heavy tasks, create one canonical summary artifact and reference it by path/link.
+
 ### 1. Compact at phase transitions (not just time)
 
 Invoke `/compact` when switching between semantic phases:
@@ -57,6 +77,12 @@ See: /.github/instructions/testing-validation.instructions.md (agent will load)
 
 Expected savings: ~300x tokens per pasted block (170k chars × context reuse cost over 50+ turns = prevented 8.5M tokens).
 
+#### `/compact` vs `/new` pivot rule
+
+- Use `/compact` when staying in the same objective but changing phase.
+- Use `/new` when objective/domain changes and prior context is mostly irrelevant.
+- Before either command, persist the current canonical references (issue link, template path, or summary artifact path) so restart cost stays low.
+
 ### 4. Delegate scan/research work; keep main session decision-only
 
 Measured problem: Long backlog runs had 70–90 report_intent calls with heavy shell/tool back-and-forth in main session.
@@ -91,6 +117,14 @@ Measured data from last 30 days: 42.4% gpt-5.3-codex, 24% gpt-5.4-mini, 18.2% Ha
 - Use cheaper models (gpt-5.4-mini, Haiku) for known-simple tasks (triage, log analysis, config audits)
 - Reserve Opus/Sonnet for architecture decisions, complex refactors, security reviews
 - But don't obsess over model choice if the session is carrying 600+ events; compact first.
+
+#### Model-routing matrix for routine loops
+
+| Work type | Default model | Upshift trigger |
+|---|---|---|
+| Status checks, run monitoring, branch/PR hygiene | gpt-5.4-mini or Haiku | Complex multi-system failure correlation |
+| File scans, pattern lookups, lightweight triage | gpt-5.4-mini or Haiku | Ambiguous architecture/security tradeoffs |
+| Deep refactor, architecture change, security reasoning | gpt-5.3-codex or stronger | N/A |
 
 ## Fleet Patterns
 

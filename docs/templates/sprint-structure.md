@@ -56,6 +56,32 @@ Instead of re-listing 50+ issues, track **delta from prior sprint**:
 
 This delta approach saves **~20M tokens** vs re-listing the entire backlog.
 
+## Execution Board Pattern
+
+Use this block to execute, not only plan:
+
+```text
+## Sprint Execution Board
+
+### Wave 1 (policy/guardrails)
+- [ ] #NNNN compact policy update
+- [ ] #NNNN context payload reduction
+- [ ] #NNNN delegation and batching defaults
+
+### Wave 2 (runtime optimization)
+- [ ] #NNNN model routing matrix
+- [ ] #NNNN attachment canonical summary workflow
+
+### Dependencies
+- #NNNN depends on #NNNN
+- #NNNN depends on #NNNN
+
+### Definition of done
+- [ ] PR merged for each wave
+- [ ] Instructions updated
+- [ ] Follow-up tracking issues closed or moved
+```
+
 ## Sample Sprint (Reference)
 
 **Sprint 31: Cost Optimization Focus**
