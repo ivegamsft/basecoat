@@ -36,14 +36,26 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-      - name: Azure login
-        if: ${{ secrets.AZURE_CREDENTIALS != '' }}
+      - name: Select Azure auth mode
+        id: azure-auth
+        shell: bash
+        run: |
+          if [[ -n "${AZURE_CREDENTIALS}" ]]; then
+            echo "mode=creds" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=oidc" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Azure login (credentials)
+        if: ${{ steps.azure-auth.outputs.mode == 'creds' }}
         uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Azure login (OIDC)
-        if: ${{ secrets.AZURE_CREDENTIALS == '' }}
+        if: ${{ steps.azure-auth.outputs.mode == 'oidc' }}
         uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
