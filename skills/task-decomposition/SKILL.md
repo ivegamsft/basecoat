@@ -11,6 +11,7 @@ Guide for breaking complex tasks into automation-friendly chunks and validating 
 ## When to Use
 
 Apply this skill when:
+
 - You have a large, multi-faceted request that would benefit from parallel async execution
 - You need to decide which sub-agents can handle which pieces autonomously
 - You're writing prompts for sub-agents and want to ensure clarity and context completeness

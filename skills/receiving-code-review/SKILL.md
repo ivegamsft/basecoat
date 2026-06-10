@@ -34,4 +34,3 @@ Only when: all must-fix addressed, questions answered, CI green, PR description 
 ## Anti-Patterns
 
 - Silent force-push, ignoring nits, partial must-fix resolution, re-requesting before CI passes, mega-commits addressing many comments at once.
-
