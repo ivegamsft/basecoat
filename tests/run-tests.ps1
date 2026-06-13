@@ -1,3 +1,7 @@
+param(
+    [bool]$GuidanceAuditFailOnError = $true
+)
+
 $ErrorActionPreference = 'Stop'
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
@@ -62,7 +66,15 @@ if ($missingEval.Count -gt 0) {
 Write-Host "  eval.yaml CI gate passed: all $((Get-ChildItem $skillsDir -Directory).Count) skills have eval.yaml" -ForegroundColor Green
 
 Write-Host 'Running organized guidance audits...'
-& pwsh -NoProfile -File (Join-Path $repoRoot 'scripts' 'run-guidance-audits.ps1') -FailOnError
+$guidanceAuditArgs = @(
+    '-NoProfile',
+    '-File',
+    (Join-Path $repoRoot 'scripts' 'run-guidance-audits.ps1')
+)
+if ($GuidanceAuditFailOnError) {
+    $guidanceAuditArgs += '-FailOnError'
+}
+& pwsh @guidanceAuditArgs
 if ($LASTEXITCODE -ne 0) {
     Write-Host 'Guidance audit run failed' -ForegroundColor Red
     Write-FailureLog 'run-guidance-audits'

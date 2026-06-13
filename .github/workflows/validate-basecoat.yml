@@ -8,6 +8,11 @@ on:
         required: false
         type: string
         default: ''
+      fail_on_guidance_audit_errors:
+        description: 'When false, guidance audit findings are advisory and do not fail the PowerShell test suite.'
+        required: false
+        type: boolean
+        default: true
   workflow_dispatch:
   push:
     branches:
@@ -71,7 +76,7 @@ jobs:
 
       - name: Run PowerShell test suite
         shell: pwsh
-        run: ./tests/run-tests.ps1
+        run: ./tests/run-tests.ps1 -GuidanceAuditFailOnError:${{ github.event_name != 'workflow_call' || inputs.fail_on_guidance_audit_errors }}
 
       - name: Registry metadata freshness check (blocking)
         shell: pwsh
@@ -80,4 +85,3 @@ jobs:
       - name: Coherence check (blocking)
         shell: pwsh
         run: ./scripts/check-coherence.ps1 -Strict -Category conflicts
-
