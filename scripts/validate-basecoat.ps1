@@ -106,6 +106,45 @@ function Test-LogFirstGate {
     }
 }
 
+function Test-DocsHomepageAssetCounts {
+    $docsIndexPath = Join-Path (Get-Location) 'docs/index.md'
+    if (-not (Test-Path $docsIndexPath)) {
+        Write-Host "ERROR: docs/index.md is missing" -ForegroundColor Red
+        $script:errors++
+        return
+    }
+
+    $content = Get-Content $docsIndexPath -Raw
+    $patterns = @{
+        Agents       = '\|\s+\*\*Agents\*\*\s+\|\s+(\d+)\s+\|'
+        Skills       = '\|\s+\*\*Skills\*\*\s+\|\s+(\d+)\s+\|'
+        Instructions = '\|\s+\*\*Instructions\*\*\s+\|\s+(\d+)\s+\|'
+        Prompts      = '\|\s+\*\*Prompts\*\*\s+\|\s+(\d+)\s+\|'
+    }
+
+    $expected = @{
+        Agents       = @(Get-ChildItem 'agents' -Filter '*.agent.md' -File).Count
+        Skills       = @(Get-ChildItem 'skills' -Recurse -Filter 'SKILL.md' -File).Count
+        Instructions = @(Get-ChildItem 'instructions' -Filter '*.instructions.md' -File).Count
+        Prompts      = @(Get-ChildItem 'prompts' -Filter '*.prompt.md' -File).Count
+    }
+
+    foreach ($key in $patterns.Keys) {
+        $match = [regex]::Match($content, $patterns[$key])
+        if (-not $match.Success) {
+            Write-Host "ERROR: docs/index.md is missing table row for $key count" -ForegroundColor Red
+            $script:errors++
+            continue
+        }
+
+        $actual = [int]$match.Groups[1].Value
+        if ($actual -ne $expected[$key]) {
+            Write-Host "ERROR: docs/index.md $key count is stale (found $actual, expected $($expected[$key])). Update docs/index.md." -ForegroundColor Red
+            $script:errors++
+        }
+    }
+}
+
 function Test-IntentRoutingSkillReferences {
     $intentRoutingPath = Join-Path (Get-Location) 'instructions/intent-routing.instructions.md'
     if (-not (Test-Path $intentRoutingPath)) {
@@ -268,6 +307,7 @@ catch {
 Test-AgentMetadataFreshness
 Test-IntentRoutingSkillReferences
 Test-LogFirstGate
+Test-DocsHomepageAssetCounts
 
 if ($errors -gt 0) {
     throw "Validation failed with $errors error(s)"
