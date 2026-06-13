@@ -21,5 +21,5 @@ After a significant development session:
 
 1. Create `docs/repo_history/YYYY-MM-DD-<short-name>.md`
 2. Include: timeline, metrics, what went well, what could improve
-3. Update this README table
+3. Update this index table
 4. Consider whether tips should be added to `development-tips.md`
