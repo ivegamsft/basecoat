@@ -90,6 +90,7 @@ flowchart LR
 - [operations/telemetry-adoption.md](operations/telemetry-adoption.md) — Adoption telemetry guide
 - [operations/github-secrets.md](operations/github-secrets.md) — Repository secrets setup and rotation guide
 - [operations/copilot-extension-github-app-registration.md](operations/copilot-extension-github-app-registration.md) — GitHub App registration runbook for BaseCoat Copilot Extension
+- [operations/build-master-control-plane.md](operations/build-master-control-plane.md) — Build master architecture, policy matrix, and runbook for lane-aware continuous merge with cloud break-fix
 - [operations/security/](operations/security/) — Security policies and audit docs
 
 ## Templates (`docs/templates/`)
