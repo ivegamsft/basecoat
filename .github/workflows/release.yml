@@ -54,6 +54,41 @@ jobs:
           
           echo "✓ Version.json validated: $actual_version matches tag $tag"
 
+      - name: Preflight production mirror token
+        env:
+          PRODUCTION_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${PRODUCTION_TOKEN:-}" ]]; then
+            echo "::error title=Missing PRODUCTION_REPO_TOKEN::Release stopped to avoid an internal-only release when production publish cannot run."
+            echo "::error::Set PRODUCTION_REPO_TOKEN with a PAT owned by ivegamsft for ivegamsft/basecoat."
+            echo "::error::Run token-preflight.yml after updating the secret, then re-run this release."
+            exit 1
+          fi
+
+          http_code="$(curl -sS -o repo.json -w "%{http_code}" \
+            -H "Authorization: token ${PRODUCTION_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/ivegamsft/basecoat")"
+
+          if [[ "${http_code}" != "200" ]]; then
+            echo "::error title=Production repo access check failed::PRODUCTION_REPO_TOKEN probe returned HTTP ${http_code}."
+            echo "::error::Fix the secret with an ivegamsft-owned PAT and run token-preflight.yml before tagging."
+            exit 1
+          fi
+
+          push_access="$(python3 -c "import json; d=json.load(open('repo.json', encoding='utf-8')); p=d.get('permissions',{}); print('true' if (p.get('push') or p.get('admin')) else 'false')")"
+          if [[ "${push_access}" != "true" ]]; then
+            echo "::error title=Token lacks push access::Release stopped to prevent a partial release state."
+            echo "::error::PRODUCTION_REPO_TOKEN must have push/admin access to ivegamsft/basecoat."
+            echo "::error::Regenerate the PAT as ivegamsft, update the secret, run token-preflight.yml, then retry."
+            exit 1
+          fi
+
+          echo "Production mirror preflight passed."
+
       - name: Build repository zip artifact
         id: package
         shell: bash

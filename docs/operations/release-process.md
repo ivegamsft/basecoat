@@ -40,6 +40,7 @@ Before starting a release, verify:
 - [ ] No secrets, tokens, or PII in any merged content
 - [ ] `gh` CLI is installed and authenticated (`gh auth status`)
 - [ ] Working tree is clean (`git status` shows no changes)
+- [ ] `PRODUCTION_REPO_TOKEN` preflight is green (`gh workflow run token-preflight.yml --repo IBuySpy-Shared/basecoat` then `gh run watch`)
 
 ---
 
