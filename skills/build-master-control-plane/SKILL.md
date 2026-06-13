@@ -13,7 +13,7 @@ paired cloud break-fix worker.
 ## Reference Files
 
 | File | Purpose |
-|---|---|
+| --- | --- |
 | [`references/state-machine.md`](references/state-machine.md) | Lane/global state definitions and transitions |
 | [`references/policy-matrix.md`](references/policy-matrix.md) | Break-fix eligibility, retry budgets, and escalation thresholds |
 

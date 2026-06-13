@@ -99,4 +99,3 @@ This pattern is intentionally aligned with existing repository guidance:
 
 It does not replace `merge-coordinator` or `ci-failure-escalation`; it composes
 with them as a higher-level control plane.
-
