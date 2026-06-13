@@ -43,9 +43,10 @@ Please ensure the following labels are applied:
 
 **Recommended:**
 
+- `priority:critical` if this is a launch blocker
 - `priority:high` if high business value
 - `priority:medium` if moderate impact
 - `priority:low` if nice-to-have
 - Sprint label: `sprint-YYYY-MM` (for example, `sprint-2026-05`)
 
-See [`GOVERNANCE.md`](../../docs/GOVERNANCE.md#labels) for complete label taxonomy.
+See [`governance-contract.md`](../../docs/reference/governance-contract.md#labels) for complete label taxonomy.

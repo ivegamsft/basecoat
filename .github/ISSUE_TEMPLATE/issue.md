@@ -39,9 +39,10 @@ Please apply **at least one label from each category below:**
 
 **Priority** (recommended):
 
-- `priority:high` — Urgent (1 hour SLA)
-- `priority:medium` — Important (4 hour SLA)
-- `priority:low` — Nice-to-have (1 week SLA)
+- `priority:critical` — Service down, data loss, active security breach, CVE
+- `priority:high` — Blocking work or major user impact
+- `priority:medium` — Moderate user impact
+- `priority:low` — Nice-to-have or cosmetic
 
 **Sprint** (required):
 
@@ -52,4 +53,4 @@ Please apply **at least one label from each category below:**
 
 - `azure`, `dotnet`, `kubernetes`, `python`, `terraform`, etc.
 
-See [`GOVERNANCE.md`](../../docs/GOVERNANCE.md#labels) for complete label taxonomy.
+See [`governance-contract.md`](../../docs/reference/governance-contract.md#labels) for complete label taxonomy.

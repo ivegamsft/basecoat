@@ -90,9 +90,12 @@ These labels classify the nature of the issue:
 
 | Label | SLA | Criteria |
 |---|---|---|
-| `priority:high` | 1 hour | Blocking work, data loss risk, security breach |
-| `priority:medium` | 4 hours | Major feature impact, significant user frustration |
+| `priority:critical` | 1 hour | Service down, data loss, active security breach, CVE |
+| `priority:high` | 4 hours | Major feature broken, significant user impact, no workaround |
+| `priority:medium` | 1 business day | Minor feature issue, workaround exists, moderate user impact |
 | `priority:low` | 1 week | Cosmetic, nice-to-have, or minor improvement |
+
+Use the canonical priority labels for new work. Legacy labels (`P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/high`) are migration-only.
 
 #### Approval Status Labels
 
@@ -205,7 +208,8 @@ If in doubt, open an issue. It takes 30 seconds and creates a paper trail.
 | File | Purpose |
 |---|---|
 | `CONTRIBUTING.md` | How to contribute — branch naming, commits, PRs, secrets |
-| `docs/GOVERNANCE.md` | This file — decisions, sprints, versioning, agent standards |
+| `docs/reference/governance-contract.md` | Canonical common-vs-specific governance guide |
+| `docs/operations/label-cleanup-plan.md` | Safe label normalization runbook for shared and repo-specific labels |
 | `instructions/basecoat-20-lang-governance.instructions.md` | AI agent instruction set — authoritative rules for agents |
 | `docs/templates/PRD_TEMPLATE.md` | Product requirements doc template |
 | `docs/templates/ISSUE_TEMPLATE.md` | Issue template for bugs and features |

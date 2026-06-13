@@ -52,6 +52,7 @@ flowchart LR
 
 ## Reference (`docs/reference/`)
 
+- [reference/governance-contract.md](reference/governance-contract.md) — Canonical common-vs-specific governance guide
 - [reference/inventory.md](reference/inventory.md) — Full asset listing (agents, skills, instructions, prompts)
 - [reference/governance.md](reference/governance.md) — Contribution policies and review standards
 - [reference/distribution.md](reference/distribution.md) — Sync mechanism for consumer repos
@@ -77,6 +78,7 @@ flowchart LR
 ## Operations (`docs/operations/`)
 
 - [operations/fleet-dispatch-policy.md](operations/fleet-dispatch-policy.md) — Guardrails and checklist for parallel sub-agent dispatch in fleet mode
+- [operations/label-cleanup-plan.md](operations/label-cleanup-plan.md) — Safe label normalization plan that preserves repo-specific labels
 - [operations/release-process.md](operations/release-process.md) — How releases are cut and published
 - [operations/release-metrics.md](operations/release-metrics.md) — Release metrics and KPIs
 - [operations/operational-runbook.md](operations/operational-runbook.md) — Runbook for common operations

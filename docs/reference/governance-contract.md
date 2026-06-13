@@ -1,0 +1,108 @@
+# Governance Guide
+
+This guide defines the shared governance layer for BaseCoat and how to separate
+common rules from repo-specific rules.
+
+## What belongs where
+
+| Layer | Use for | Examples |
+|---|---|---|
+| Common | Rules that should apply across repos | label taxonomy, PRD/spec gates, issue template structure, agent/skill authoring rules |
+| Specific | Rules that depend on this repo's structure or release flow | sprint labels, area labels, workflow names, repo-only exceptions |
+
+## Label namespaces
+
+| Namespace | Ownership | Cleanup rule |
+|---|---|---|
+| Governance | Shared BaseCoat contract labels | Safe to normalize across repos |
+| Delivery | Repo-specific labels such as sprint, area, wave, or feature tracking | Preserve unless the repo owner explicitly approves a rename or removal |
+| Migration | Legacy aliases kept for backward compatibility | Accept only during migration and bulk cleanup; do not add to new work |
+
+Only governance labels should be auto-normalized by shared tooling. Delivery labels belong to the target repo and must be treated as preserved state.
+
+## Labels
+
+### Issue types
+
+- `bug`
+- `enhancement`
+- `documentation`
+- `chore`
+- `security`
+- `question`
+
+### Priorities
+
+- `priority:critical`
+- `priority:high`
+- `priority:medium`
+- `priority:low`
+
+### State and routing labels
+
+- `needs-triage`
+- `needs-info`
+- `needs-verification`
+- `duplicate`
+- `blocked`
+- `approved`
+- `copilot-agent`
+
+### Asset labels
+
+- `agent`
+- `skill`
+- `instruction`
+- `prompt`
+
+## Versioning
+
+Version labels are repo-specific and should follow the repo's release policy.
+Use this section to document any version or sprint label conventions that are
+specific to this repository rather than the shared BaseCoat contract.
+
+## Legacy label migration
+
+| Legacy label | Canonical label |
+|---|---|
+| `P0-critical` | `priority:critical` |
+| `P1-high` | `priority:high` |
+| `P2-medium` | `priority:medium` |
+| `P3-low` | `priority:low` |
+| `priority/high` | `priority:high` |
+
+Legacy labels may still exist on older issues, but new triage, templates, and
+workflows should use the canonical labels above.
+
+## Cleanup safety
+
+1. Snapshot labels before making changes.
+2. Normalize governance labels first.
+3. Preserve delivery labels unless the target repo declares them obsolete.
+4. Treat unknown labels as repo-specific until the owner confirms otherwise.
+5. Comment and file an issue before deleting any label that is not in the governance namespace.
+
+## Authoring rules
+
+1. Keep shared policy in one place.
+2. Put repo-specific exceptions in the repo-specific section, not in the common contract.
+3. Link issues and PRs back to this guide when they touch labels, templates, or workflows.
+4. File a GitHub issue for every gap you find in docs, labels, workflows, or assets.
+
+## Gap categories
+
+| Category | Example |
+|---|---|
+| Documentation gap | Missing or outdated guidance doc |
+| Label gap | Canonical label missing or legacy label still treated as primary |
+| Workflow gap | Audit or enforcement check missing |
+| Asset gap | Missing agent or skill for a recurring governance task |
+
+## Related references
+
+- `docs/reference/governance.md`
+- `docs/reference/label-taxonomy.md`
+- `docs/operations/label-cleanup-plan.md`
+- `docs/reference/treatment-matrix.md`
+- `.github/ISSUE_TEMPLATE/issue.md`
+- `.github/PULL_REQUEST_TEMPLATE.md`

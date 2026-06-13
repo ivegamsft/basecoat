@@ -120,7 +120,7 @@ gh issue create \
 
 - One issue per user story (not per epic)
 - Link related issues with "Related to #XX" in the body
-- Add priority label: `P0-critical`, `P1-high`, `P2-medium`, or `P3-low`
+- Add priority label: `priority:critical`, `priority:high`, `priority:medium`, or `priority:low`
 
 ## Output Format
 

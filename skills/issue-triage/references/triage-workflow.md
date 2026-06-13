@@ -24,7 +24,7 @@ export DRY_RUN=false   # set to true to preview only
 
 ### Decision Tree
 
-```
+```text
 Issue exists?
 ├── Contains mojibake/encoding corruption (`�`, `Ã`, `Â`, `â€™`, `â€œ`)? → Flag: needs-info + needs-triage (do not auto-close)
 ├── Is body <20 chars or purely gibberish? → Close: invalid
@@ -125,11 +125,12 @@ gh issue edit $N --add-label "needs-verification"
 | Category | Required | Valid values |
 |----------|----------|-------------|
 | Type | 1 | `bug`, `enhancement`, `documentation`, `chore`, `security`, `question` |
-| Priority | 1 | `P0-critical`, `P1-high`, `P2-medium`, `P3-low` |
-| Sprint | 1 | `sprint:<number>` |
+| Priority | 1 | `priority:critical`, `priority:high`, `priority:medium`, `priority:low` |
+| Sprint | 1 | `sprint-<number>` |
 | Area | 0–1 | `area/*` labels defined in repo |
 
-Legacy `priority/*` labels are accepted during bulk scans for backward compatibility.
+Legacy labels (`P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/high`) are accepted during bulk scans for backward compatibility.
+Repo-specific delivery labels such as `area/*` and `sprint-*` must be preserved during cleanup; only governance labels should be normalized automatically.
 
 ### Inference Rules
 
@@ -149,11 +150,11 @@ Legacy `priority/*` labels are accepted during bulk scans for backward compatibi
 gh issue view $N --json labels --jq '.labels[].name'
 
 # Apply inferred labels
-gh issue edit $N --add-label "bug,P1-high"
+gh issue edit $N --add-label "bug,priority:high"
 
 # Flag for manual triage
 gh issue edit $N --add-label "needs-triage"
-gh issue comment $N --body "This issue is missing required labels:\n- [ ] Type: bug / enhancement / documentation / chore / security / question\n- [ ] Priority: P0-critical / P1-high / P2-medium / P3-low\n- [ ] Sprint: sprint:<number>"
+gh issue comment $N --body "This issue is missing required labels:\n- [ ] Type: bug / enhancement / documentation / chore / security / question\n- [ ] Priority: priority:critical / priority:high / priority:medium / priority:low\n- [ ] Sprint: sprint-<number>"
 ```
 
 ---
@@ -251,16 +252,16 @@ gh pr list --head "$BRANCH_NAME" --json number,state
 
 ### Comment Template
 
-```markdown
+````markdown
 **Open branch found**
 
 Branch `fix/245-oauth-callback` exists but no pull request is linked to this issue.
 
 If work is in progress, consider opening a PR to track it:
-```
+```bash
 gh pr create --head fix/245-oauth-callback --base main --title "fix: OAuth callback error" --body "Closes #245"
 ```
-```
+````
 
 ---
 
@@ -272,16 +273,16 @@ gh pr create --head fix/245-oauth-callback --base main --title "fix: OAuth callb
 
 | Condition | Action |
 |-----------|--------|
-| `security` label + no `P0-critical` | Add `P0-critical` |
+| `security` label + no `priority:critical` | Add `priority:critical` |
 | Open >90 days + no activity | Add `stale` |
-| Open >30 days + `bug` + has repro steps | Add `P1-high` if no priority set |
-| No priority label at all | Apply `P3-low` as floor |
+| Open >30 days + `bug` + has repro steps | Add `priority:high` if no priority set |
+| No priority label at all | Apply `priority:low` as floor |
 
 ### gh Commands
 
 ```bash
 # Upgrade to critical
-gh issue edit $N --add-label "P0-critical"
+gh issue edit $N --add-label "priority:critical"
 gh issue comment $N --body "Priority escalated to critical: security issues are automatically assigned critical priority per triage policy."
 
 # Mark stale

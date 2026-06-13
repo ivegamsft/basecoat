@@ -4,6 +4,20 @@ This document defines all labels used in the BaseCoat repository for issue manag
 
 ---
 
+## Namespace Policy
+
+BaseCoat uses a dual taxonomy:
+
+| Namespace | Examples | Cleanup rule |
+|---|---|---|
+| Governance/shared | `bug`, `enhancement`, `security`, `priority:critical`, `needs-triage`, `agent`, `skill` | May be normalized across repos |
+| Delivery/repo-specific | `sprint-1`, `sprint-2`, `backlog`, `area/*`, repo-local tracking labels | Preserve unless the repo owner approves removal or rename |
+| Migration-only | `P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/high` | Accept during migration and bulk scans only |
+
+Shared tooling should never remove a delivery label just because another repo does not use it.
+
+---
+
 ## Label Categories
 
 ### 1. Asset Type Labels (Custom)
@@ -54,9 +68,12 @@ These labels indicate urgency and define service level agreements (SLAs) for res
 
 | Label | SLA | Criteria | Example |
 |---|---|---|---|
-| `priority:high` | 1 hour | Service down, data loss risk, security breach, blocking multiple users | Production outage, critical vulnerability |
-| `priority:medium` | 4 hours | Major feature broken, significant user impact, workaround not available | Important agent broken, significant UX issue |
+| `priority:critical` | 1 hour | Service down, data loss, active security breach, CVE | Production outage, active exploit |
+| `priority:high` | 4 hours | Major feature broken, significant user impact, no workaround | Important agent broken, significant UX issue |
+| `priority:medium` | 1 business day | Minor feature issue, workaround exists, moderate user impact | Non-critical agent issue with workaround |
 | `priority:low` | 1 week | Cosmetic issue, nice-to-have enhancement, minor improvement | Typo in documentation, minor UI improvement |
+
+Canonical priorities should be used for new triage. Legacy labels (`P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/high`) are accepted only for migration and bulk scanning.
 
 **Escalation signals** (auto-elevate to `priority:high` or `priority:medium`):
 
@@ -91,6 +108,7 @@ These labels indicate which sprint (if any) an issue is assigned to.
 - During sprint planning, move to appropriate sprint label: `sprint-1`, `sprint-2`, etc.
 - Remove `backlog` when assigning to a sprint
 - If moved between sprints, update the label accordingly
+- Cleanup automation must preserve sprint labels unless the repo owner explicitly declares them obsolete.
 
 ---
 
@@ -166,7 +184,7 @@ Combine labels for compound queries:
 
 ```bash
 is:issue label:sprint-3 label:agent           # Sprint 3 agent work
-is:issue label:bug label:priority:high        # High-priority bugs
+is:issue label:bug label:priority:critical    # Critical bugs
 is:issue label:blocked is:open                # Open blocked issues
 is:issue label:security label:priority:high   # High-priority security issues
 ```
@@ -196,7 +214,7 @@ When creating an issue:
 
 1. **Choose asset type** (if applicable): `agent`, `skill`, `instruction`, or `prompt`
 2. **Choose issue type**: `bug`, `enhancement`, `documentation`, `question`, `chore`, or `security`
-3. **Estimate priority** (optional, will be set during triage): `priority:high`, `priority:medium`, `priority:low`
+3. **Estimate priority** (optional, will be set during triage): `priority:critical`, `priority:high`, `priority:medium`, `priority:low`
 4. **Add technology labels** (optional): `azure`, `dotnet`, `kubernetes`, etc.
 
 Example: Creating an issue about a bug in a skill → labels: `skill`, `bug`
@@ -271,13 +289,13 @@ is:issue label:sprint-3 is:open
 
 ### Release Tracking
 
-Version labels (e.g., `v1.0.0`, `v2.0.0`) are used to track which version an issue targets. See [`docs/GOVERNANCE.md#versioning`](governance.md#versioning) for details.
+Version labels (e.g., `v1.0.0`, `v2.0.0`) are used to track which version an issue targets. See [`docs/reference/governance-contract.md#versioning`](governance-contract.md#versioning) for details.
 
 ---
 
 ## References
 
-- **Governance Framework:** [`docs/GOVERNANCE.md`](governance.md)
+- **Governance Framework:** [`docs/reference/governance-contract.md`](governance-contract.md)
 - **Contributing Guide:** [`CONTRIBUTING.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/CONTRIBUTING.md)
 - **Issue Templates:** [`.github/ISSUE_TEMPLATE/`](../.github/ISSUE_TEMPLATE/)
 - **Issue Triage Agent:** [`agents/basecoat-10-core-issue-triage.agent.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-issue-triage.agent.md)

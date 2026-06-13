@@ -165,3 +165,12 @@ For non-sensitive security improvements (e.g., adding a scan, tightening a rule)
 - [ ] No secrets, tokens, credentials, or PII included
 - [ ] Linked to related issues where applicable
 - [ ] Applied the correct labels
+
+### Canonical priority labels
+
+- `priority:critical`
+- `priority:high`
+- `priority:medium`
+- `priority:low`
+
+Legacy `P0-critical` / `P1-high` / `P2-medium` / `P3-low` labels are migration-only.

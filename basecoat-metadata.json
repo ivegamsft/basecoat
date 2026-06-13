@@ -1,7 +1,7 @@
 {
   "$schema": "basecoat-metadata-schema",
   "version": "3.26.0",
-  "generated": "2026-05-31",
+  "generated": "2026-06-13",
   "categories": {
     "AI & Development": {
       "label": "AI & Development",
@@ -2038,6 +2038,28 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/orchestrator.agent.md",
+      "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "governance-auditor",
+      "description": "Use when auditing issue and PR metadata, label drift, template gaps, and workflow enforcement coverage. USE FOR: label audits, template consistency checks, workflow drift reviews, gap identification, and issue-ready findings. DO NOT USE FOR: writing application code, implementing product features, or changing labels without evidence.",
+      "category": "Meta",
+      "keywords": [],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/governance-auditor.agent.md",
+      "model": "gpt-5.4-mini",
+      "argumentHint": ""
+    },
+    {
+      "name": "governance-author",
+      "description": "Use when writing or revising common-vs-specific governance guidance, canonical label contracts, and migration notes. USE FOR: drafting docs/reference/governance-contract.md, separating shared rules from repo-specific rules, mapping legacy labels to canonical labels, and planning governance issue backlogs. DO NOT USE FOR: implementation code, release management, or ad hoc issue cleanup.",
+      "category": "Meta",
+      "keywords": [],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/governance-author.agent.md",
       "model": "claude-sonnet-4.6",
       "argumentHint": ""
     }

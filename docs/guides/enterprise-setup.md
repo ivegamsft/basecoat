@@ -169,7 +169,7 @@ All customizations follow the same governance model:
 - **Naming conventions**: Follow the patterns in [`instructions/basecoat-10-core-naming.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/basecoat-10-core-naming.instructions.md).
 - **Quality gates**: CI validates structure and naming on every PR.
 
-See [`docs/GOVERNANCE.md`](../reference/governance.md) and [`CONTRIBUTING.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/CONTRIBUTING.md) for full details.
+See [`docs/reference/governance-contract.md`](../reference/governance-contract.md) and [`CONTRIBUTING.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/CONTRIBUTING.md) for full details.
 
 ---
 

@@ -45,9 +45,10 @@ Please ensure the following labels are applied:
 
 **Recommended:**
 
+- `priority:critical` if service is down or data loss is possible
 - `priority:high` if blocking work
 - `priority:medium` if affects normal workflow
 - `priority:low` if cosmetic or nice-to-have
 - Sprint label: `sprint-YYYY-MM` (for example, `sprint-2026-05`)
 
-See [`GOVERNANCE.md`](../../docs/GOVERNANCE.md#labels) for complete label taxonomy.
+See [`governance-contract.md`](../../docs/reference/governance-contract.md#labels) for complete label taxonomy.

@@ -40,12 +40,12 @@ Encoding-integrity failures should be flagged with `needs-info` + `needs-triage`
 
 | Label | Criteria | Response SLA |
 |-------|----------|-------------|
-| `P0-critical` | Service down, data loss, active security breach, CVE | Acknowledge within 1 hour |
-| `P1-high` | Major feature broken, significant user impact, no workaround | Acknowledge within 4 hours |
-| `P2-medium` | Minor feature issue, workaround exists, moderate user impact | Acknowledge within 1 business day |
-| `P3-low` | Cosmetic, nice-to-have, documentation gaps, low user impact | Acknowledge within 1 week |
+| `priority:critical` | Service down, data loss, active security breach, CVE | Acknowledge within 1 hour |
+| `priority:high` | Major feature broken, significant user impact, no workaround | Acknowledge within 4 hours |
+| `priority:medium` | Minor feature issue, workaround exists, moderate user impact | Acknowledge within 1 business day |
+| `priority:low` | Cosmetic, nice-to-have, documentation gaps, low user impact | Acknowledge within 1 week |
 
-Legacy `priority/*` labels are still recognized by bulk triage scripts for backward compatibility.
+Legacy labels (`P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/high`) are recognized only for migration and bulk scans.
 
 ### State Labels (applied by triage)
 
@@ -76,6 +76,9 @@ Repos should define area labels matching their project structure. Common example
 | `area/auth` | Authentication and authorization |
 | `area/api` | Public or internal API surface |
 
+Area and sprint labels are repo-specific delivery labels. Preserve them during any
+governance cleanup unless the repo owner has approved a rename or removal.
+
 ---
 
 ## Priority Matrix
@@ -84,14 +87,14 @@ Use this matrix to assign priority when it is not immediately obvious:
 
 |   | High Impact | Low Impact |
 |---|-------------|------------|
-| **High Urgency** | `P0-critical` | `P1-high` |
-| **Low Urgency** | `P2-medium` | `P3-low` |
+| **High Urgency** | `priority:critical` | `priority:high` |
+| **Low Urgency** | `priority:medium` | `priority:low` |
 
 **Escalation signals** (auto-upgrade):
 
-- Title or body contains: `outage`, `data loss`, `security`, `CVE`, `incident`, `breach` → `P0-critical`
-- Bug with no workaround and affecting primary user flow → `P1-high`
-- Open >30 days with reproducible bug + no priority → `P1-high`
+- Title or body contains: `outage`, `data loss`, `security`, `CVE`, `incident`, `breach` → `priority:critical`
+- Bug with no workaround and affecting primary user flow → `priority:high`
+- Open >30 days with reproducible bug + no priority → `priority:high`
 - Open >90 days with no activity → add `stale` regardless of priority
 
 ---
@@ -168,5 +171,5 @@ When adding relationship comments, use these standard phrases:
 |-----|--------|--------|
 | >90 days, no comments | Stale | Add `stale` label; comment asking for status |
 | >120 days, no response to stale comment | Inactive | Close with `wontfix`; comment inviting reopen |
-| Exception: `P0-critical` or `P1-high` | Active regardless of age | Do not mark stale |
+| Exception: `priority:critical` or `priority:high` | Active regardless of age | Do not mark stale |
 | Exception: `blocked` | Waiting state | Do not mark stale unless blocker is resolved |

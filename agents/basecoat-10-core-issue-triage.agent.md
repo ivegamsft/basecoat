@@ -59,7 +59,7 @@ Run each check for every issue. Collect all actions before executing them.
 - `duplicate` and type labels are **mutually exclusive**:
   - if `duplicate` is authoritative, remove all type labels
   - if a real type label is authoritative, remove `duplicate`
-- Every issue must have at least one priority label: `priority/critical`, `priority/high`, `priority/medium`, or `priority/low`.
+- Every issue must have at least one priority label: `priority:critical`, `priority:high`, `priority:medium`, or `priority:low`.
 - Issues missing labels: if type is clearly inferrable from title/body, apply it directly; otherwise add `needs-triage` and comment listing missing metadata using the quality checklist.
 
 #### Check 5: Title Quality
@@ -90,10 +90,10 @@ Run each check for every issue. Collect all actions before executing them.
 #### Check 9: Priority Review
 
 - Apply the priority matrix from `skills/issue-triage/references/quality-checklist.md`.
-- `security` label with no `priority/critical` → add `priority/critical` automatically.
+- `security` label with no `priority:critical` → add `priority:critical` automatically.
 - Open for >90 days with no activity → add `stale` label.
-- Open for >30 days with `bug` label and reproducible steps → add `priority/high` if no priority is set.
-- No `priority/*` label: apply the lowest defensible priority based on type, area, and age.
+- Open for >30 days with `bug` label and reproducible steps → add `priority:high` if no priority is set.
+- No canonical priority label: apply the lowest defensible priority based on type, area, and age.
 
 ### Phase 3 — Execute Actions
 

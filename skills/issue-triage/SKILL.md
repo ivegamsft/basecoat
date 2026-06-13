@@ -44,6 +44,8 @@ Use this skill to audit and improve GitHub issue quality. It can run standalone 
 8. Branch connection
 9. Priority review
 
+Canonical priorities are `priority:critical`, `priority:high`, `priority:medium`, and `priority:low`.
+
 ## Agent Pairing
 
 - `issue-triage` agent for fully automated triage runs.

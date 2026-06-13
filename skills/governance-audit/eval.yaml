@@ -1,0 +1,20 @@
+name: "governance-audit-skill-routing"
+description: "Routing evaluation — validates trigger activation for the governance-audit skill."
+skill: "skills/governance-audit/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Audit issue labels, PR templates, and workflows for governance drift."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Find missing governance docs and stale metadata references."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Prepare follow-up issues for label and workflow gaps."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Implement a new API endpoint."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Fix a broken CSS layout."
+    expect_activation: false
+
