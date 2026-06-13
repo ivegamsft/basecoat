@@ -88,6 +88,7 @@ Find your intent below and call the listed skill or agent directly.
 
 | Intent | Direct Call |
 |---|---|
+| Get in-session cost status with compaction signal | `/token-status` |
 | Check session token usage | `/usage` |
 | Compact session history mid-run | `/compact` |
 | Analyze token spend across sessions | `workiq-ask_work_iq` via Copilot |

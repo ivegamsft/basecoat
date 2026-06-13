@@ -175,17 +175,49 @@ Continue from issue #695 state; only merge PRs after required checks; skip repla
 Scheduled prompts (`/every`) that run >100 times/month cost ~150M tokens/mo.
 After watchdog stops being actionable, stop it: `/every stop <schedule-id>`.
 
-## Cost Observability & Auto-Compaction (In Development)
+## Cost Observability & Auto-Compaction
 
-Issue #1363 is tracking implementation of real-time cost monitoring:
+Issue #1363 introduces an in-repo observability command and threshold checks:
 
-**Planned features**:
+### `/token-status` command
 
-- `/token-status` command: Show tokens sent, event count, ratio, time, budget remaining
-- Auto-compact trigger: Automatic `/compact` when crossing thresholds (e.g., 400 events, 50M tokens)
-- Cost warnings: Log alerts when entering expensive zone (300x+ ratio, 594+ events)
+Run the command directly:
 
-**Expected impact**: Agents can self-correct mid-session without waiting for post-hoc feedback, shaving 10–15% from expensive sessions.
+```bash
+pwsh scripts/token-status.ps1 -InputTokens <n> -OutputTokens <n> -Events <n> -ElapsedMinutes <n>
+```
+
+JSON mode for automation:
+
+```bash
+pwsh scripts/token-status.ps1 -InputFile session-metrics.json -Json
+```
+
+The command reports:
+
+- tokens sent so far (`inputTokens`)
+- event count (`eventCount`)
+- input/output ratio (`inputOutputRatio`)
+- elapsed time (`elapsedMinutes`)
+- estimated remaining budget (`estimatedRemainingBudget`)
+
+### Auto-compact trigger thresholds
+
+`autoCompactTriggered=true` when either threshold is crossed:
+
+- event count `>= 400`
+- input tokens `>= 50,000,000`
+
+### Cost warning markers
+
+`markers[]` emits `[COST-WARN] ...` entries when thresholds are crossed:
+
+- ratio `>= 300x`
+- events `>= 500`
+- input tokens `>= 50,000,000`
+
+These markers are designed for chat log visibility so agents can compact earlier and
+delegate low-signal scans before sessions enter expensive ranges.
 
 ## Token Budget Monitoring
 

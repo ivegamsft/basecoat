@@ -258,6 +258,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running token-status tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'token-status-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Token-status tests failed' -ForegroundColor Red
+    Write-FailureLog 'token-status-tests'
+    exit 1
+}
+
 Write-Host 'Running coherence check (non-blocking)...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot '..' 'scripts' 'check-coherence.ps1')
 # Non-blocking: coherence issues are warnings, not failures
