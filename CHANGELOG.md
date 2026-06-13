@@ -4,7 +4,21 @@ All notable changes to this repository should be recorded in this file.
 
 ## Unreleased
 
-- No unreleased changes.
+### Added
+
+- Added consolidated workflow enhancements for issue #1389:
+  - `.github/workflows/dependency-audit.yml` (#181)
+  - `.github/workflows/stale-management.yml` (#182)
+  - `.github/workflows/release-changelog-generation.yml` (#183)
+  - `.github/workflows/cross-repo-sync-validation.yml` (#184)
+  - `.github/workflows/docs-link-checker.yml` (#185)
+  - `.github/workflows/skill-coverage-report.yml` (#186)
+  - `.github/workflows/repo-health-check.yml` (#187)
+  - `.github/workflows/pr-size-labeler.yml` (#188)
+  - `.github/workflows/dependency-graph-pages.yml` (#189)
+  - `.github/workflows/reviewer-autoassign.yml` (#190)
+- Added workflow contract coverage test: `tests/workflow-enhancements-1389-tests.ps1`
+  and wired it into `tests/run-tests.ps1`.
 
 ## 3.30.6 - 2026-06-06
 
