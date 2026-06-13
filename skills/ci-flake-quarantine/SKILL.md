@@ -2,6 +2,7 @@
 name: ci-flake-quarantine
 description: "Use when isolating flaky CI tests with evidence-based quarantine windows and expiry policy. USE FOR: confirm flakiness, quarantine only after repeat evidence, and produce owner/expiry tracking. DO NOT USE FOR: hiding failures, permanently disabling tests, or replacing root-cause remediation."
 visibility: "internal"
+compatibility: GHCP
 ---
 # CI Flake Quarantine Skill
 

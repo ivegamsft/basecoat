@@ -366,6 +366,25 @@ if ($Agent) {
                 } | Where-Object { $_ }
             }
 
+            # Fallback for current agent format: parse markdown "## Allowed Skills" bullet list
+            if ($referencedSkills.Count -eq 0) {
+                $allowedSkillsMatch = [regex]::Match(
+                    $agentContent,
+                    "(?ms)^##\s+Allowed Skills\s*$\s*(.+?)(?=^##\s+|\z)"
+                )
+                if ($allowedSkillsMatch.Success) {
+                    $referencedSkills = @(
+                        $allowedSkillsMatch.Groups[1].Value -split "`n" | ForEach-Object {
+                            if ($_ -match "^\s*-\s+([A-Za-z0-9._-]+)\b.*$") {
+                                $Matches[1]
+                            }
+                        } | Where-Object { $_ }
+                    )
+                }
+            }
+
+            $referencedSkills = @($referencedSkills | Select-Object -Unique)
+
             foreach ($skillName in $referencedSkills) {
                 $skillPath = Join-Path $skillsDir $skillName
                 if (Test-Path $skillPath) {

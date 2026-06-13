@@ -4,6 +4,7 @@ description: "Use when diagnosing failed builds to quickly isolate fault class a
 invocation_rules:
   - "Use when a pipeline or local build is red and root-cause triage is required."
 visibility: "internal"
+compatibility: GHCP
 ---
 
 # Build Failure Triage Skill

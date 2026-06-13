@@ -28,6 +28,8 @@ Execute these in order to reduce input-token bloat first, then optimize routing:
 3. If switching to a new domain (for example: sprint planning -> release operations), run `/new` and reload only relevant references.
 4. Keep main-thread messages decision-focused; delegate scan/research work.
 5. For attachment-heavy tasks, create one canonical summary artifact and reference it by path/link.
+6. Choose Ask mode by default for focused answers; use Agent mode when execution spans multiple files, long-running commands, or broad research.
+7. Keep output tokens lean by default: concise responses, small diffs, and escalation to deeper explanations only when needed.
 
 ### 1. Compact at phase transitions (not just time)
 
@@ -125,6 +127,29 @@ Measured data from last 30 days: 42.4% gpt-5.3-codex, 24% gpt-5.4-mini, 18.2% Ha
 | Status checks, run monitoring, branch/PR hygiene | gpt-5.4-mini or Haiku | Complex multi-system failure correlation |
 | File scans, pattern lookups, lightweight triage | gpt-5.4-mini or Haiku | Ambiguous architecture/security tradeoffs |
 | Deep refactor, architecture change, security reasoning | gpt-5.3-codex or stronger | N/A |
+
+#### Auto/default model baseline and explicit upshift triggers
+
+Start in Auto/default routing for routine workflows. Upshift model strength only when one or more of these triggers is present:
+
+1. Cross-repository or cross-system reasoning with ambiguous root cause.
+2. Security-sensitive review where subtle exploit paths must be analyzed.
+3. Large refactors requiring strict behavior preservation across many touchpoints.
+4. Architectural tradeoff decisions with long-lived platform impact.
+
+Downshift again once the high-complexity segment is complete.
+
+### MCP server overhead audit checklist
+
+Before adding or using MCP-heavy flows in routine loops, verify:
+
+1. The required data is not already available from local files or direct CLI commands.
+2. Calls are batched to minimize round trips and repeated context transmission.
+3. Returned payloads are scoped to only needed fields and row limits.
+4. The workflow includes a fallback path if MCP is unavailable or slow.
+5. The operation frequency is justified (avoid high-cadence polling without actionability).
+
+Prefer direct repository tools (`view`, `glob`, `rg`) for local context and reserve MCP usage for external or system-of-record data.
 
 ## Fleet Patterns
 

@@ -1,6 +1,7 @@
 ---
 name: observability
 description: "Use when adding logs, metrics, traces, or alertable telemetry to apps, services, and distributed systems. USE FOR: instrument service with OpenTelemetry, add structured logging and trace IDs, define SLI or latency metrics, trace requests across queues and APIs, improve incident debugging telemetry. DO NOT USE FOR: pure UI redesign, business analytics reporting."
+compatibility: GHCP
 ---
 
 # Observability Skill

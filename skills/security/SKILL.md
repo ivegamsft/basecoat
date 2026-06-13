@@ -1,6 +1,7 @@
 ---
 name: security
 description: "Use when auditing code, modeling threats, or reviewing dependencies for exploitable weaknesses. USE FOR: run OWASP security review, create STRIDE threat model, scan for hardcoded secrets, audit dependencies for CVEs, write structured vulnerability report. DO NOT USE FOR: live incident response handling, general performance tuning."
+compatibility: GHCP
 ---
 
 # Security Skill
