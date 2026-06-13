@@ -6,6 +6,16 @@ All notable changes to this repository should be recorded in this file.
 
 - No unreleased changes.
 
+## 3.31.0 - 2026-06-13
+
+### Added
+
+- Executed Sprint 35 cost-optimization playbook with updated operational guidance and session hygiene improvements. (#1425)
+
+### Fixed
+
+- Unblocked portal deployment and issue triage workflow runs. (#1419)
+
 ## 3.30.6 - 2026-06-06
 
 ### Added
