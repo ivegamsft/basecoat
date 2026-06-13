@@ -177,13 +177,15 @@ Pushing a `v*.*.*` tag triggers the `release.yml` and `package-basecoat.yml` wor
 
 If neither changelog section nor merged PR list is available, the workflow auto-generates release notes from commit history as a final fallback.
 
-If you need to create the release manually (e.g., workflows are disabled):
+If you need to create the release manually (e.g., workflows are disabled), create
+it in the canonical source repository (`IBuySpy-Shared/basecoat`). Production
+release metadata is synchronized by the publish workflow.
 
 ```bash
 gh release create vX.Y.Z \
   --title "vX.Y.Z" \
   --notes-file release-notes.md \
-  --repo ivegamsft/basecoat
+  --repo IBuySpy-Shared/basecoat
 ```
 
 ### 7. Post-Release Verification
