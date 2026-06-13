@@ -170,10 +170,31 @@ git push origin vX.Y.Z
 
 Pushing a `v*.*.*` tag triggers the `release.yml` and `package-basecoat.yml` workflows automatically. These workflows:
 
-1. Build a source archive (`basecoat-vX.Y.Z.zip`)
-2. Extract release notes from `CHANGELOG.md` (prefers `## X.Y.Z`, then falls back to `## Unreleased`)
-3. If no changelog section exists, generate grouped release notes from merged PRs since the last tag
-4. Create a GitHub release with the archive and notes
+1. Build a source archive (`basecoat-vX.Y.Z.zip`) from the tagged commit
+2. Overlay `version.json` in the archive so payload metadata matches the release tag
+3. Attach `sync.ps1` and `sync.sh` to the GitHub release for consumer upgrades
+4. Extract release notes from `CHANGELOG.md` (prefers `## X.Y.Z`, then falls back to `## Unreleased`)
+5. If no changelog section exists, generate grouped release notes from merged PRs since the last tag
+6. Create or update the GitHub release with the archive, sync scripts, and notes
+
+#### Release artifact and version alignment contract
+
+Each release should keep these three values aligned:
+
+- Git tag: `vX.Y.Z`
+- Root metadata: `version.json` -> `"version": "X.Y.Z"`
+- Distributed payload metadata: `version.json` inside `basecoat-vX.Y.Z.zip`
+
+Use this verification command after release publish:
+
+```bash
+unzip -p basecoat-vX.Y.Z.zip version.json | jq -r '.version'
+```
+
+Expected output: `X.Y.Z` (same as the tag without the `v` prefix).
+
+Release notes should explicitly call out any consumer-impacting sync changes and
+whether a full or scoped sync is recommended.
 
 If neither changelog section nor merged PR list is available, the workflow auto-generates release notes from commit history as a final fallback.
 
@@ -195,6 +216,7 @@ After the release is published:
 - [ ] `release.yml` workflow completed successfully
 - [ ] Tag `vX.Y.Z` appears in the repository's tag list
 - [ ] `version.json` on `main` reflects the released version
+- [ ] `version.json` inside `basecoat-vX.Y.Z.zip` matches `X.Y.Z`
 
 ---
 
