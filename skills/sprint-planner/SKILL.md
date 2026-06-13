@@ -11,7 +11,8 @@ Use this skill as the compatibility surface for runtimes that invoke `skill(spri
 
 - Ensure `sprint-planner` is discoverable as a skill entrypoint.
 - Route sprint planning tasks to the `@sprint-planner` agent workflow.
-- Keep sprint decomposition behavior aligned with the existing planner agent.
+- Keep sprint decomposition behavior aligned with the existing planner agent,
+  including milestone and GitHub Project tracking setup.
 
 ## Invocation
 
@@ -27,6 +28,7 @@ Use this skill when requests include sprint planning goals such as:
 2. Delegate decomposition to `@sprint-planner`.
 3. Produce:
    - issue list with labels and owners,
+   - sprint milestone and project board association for every issue,
    - dependency/wave map,
    - acceptance criteria per item,
    - carry-forward notes for blocked work.
