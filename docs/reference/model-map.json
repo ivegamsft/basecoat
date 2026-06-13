@@ -1,0 +1,49 @@
+{
+  "generated": "2026-06-13T18:44:19Z",
+  "source": "agents/*.agent.md",
+  "models": [
+    {
+      "canonical": "claude-haiku-4.5",
+      "count": 4,
+      "aliases": [
+        "claude-haiku-4.5"
+      ]
+    },
+    {
+      "canonical": "claude-sonnet-4",
+      "count": 1,
+      "aliases": [
+        "claude-sonnet-4"
+      ]
+    },
+    {
+      "canonical": "claude-sonnet-4.5",
+      "count": 3,
+      "aliases": [
+        "claude-sonnet-4-5",
+        "claude-sonnet-4.5"
+      ]
+    },
+    {
+      "canonical": "claude-sonnet-4.6",
+      "count": 66,
+      "aliases": [
+        "claude-sonnet-4.6"
+      ]
+    },
+    {
+      "canonical": "gpt-5.3-codex",
+      "count": 17,
+      "aliases": [
+        "gpt-5.3-codex"
+      ]
+    },
+    {
+      "canonical": "gpt-5.4-mini",
+      "count": 14,
+      "aliases": [
+        "gpt-5.4-mini"
+      ]
+    }
+  ]
+}
