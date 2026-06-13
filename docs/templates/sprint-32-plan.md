@@ -25,7 +25,7 @@ Must complete in sequence (Phase 1):
 
 - **#1368**: Fix 13 broken cross-references (BEFORE deleting redirects)
   - Owner: @ibuyspy
-  - Files: docs/agents/AGENTS.md, behavioral-eval.md, agent-testing-harness.md (5 agents), docs/memory/index.md, shared-memory.md, triage.md, CONTRIBUTING.md, docs/operations/telemetry-adoption.md
+  - Files: docs/agents/agents.md, behavioral-eval.md, agent-testing-harness.md (5 agents), docs/memory/index.md, shared-memory.md, triage.md, CONTRIBUTING.md, docs/operations/telemetry-adoption.md
   - Refs: Update UPPERCASE filename refs to lowercase
   - Est. effort: 30 min (find/replace + verification)
   - Verification: `python -m mkdocs build --strict` must pass
