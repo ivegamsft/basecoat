@@ -1,6 +1,7 @@
 ---
 name: config-secrets-audit
 description: "Config and secret exposure audit skill for repository and IaC config files. USE FOR: scanning Azure Key Vault references, hardcoded connection strings, GitHub Actions env secrets, .env/YAML/Bicep/Terraform parameter secrets, severity scoring, and SARIF output generation. DO NOT USE FOR: runtime penetration testing, live incident response, or deploying remediation changes."
+compatibility: GHCP
 ---
 
 # Config Secrets Audit Skill
@@ -49,4 +50,3 @@ pwsh skills/config-secrets-audit/scripts/audit-config-secrets.ps1 -RootPath . -C
 
 - For Azure policy and compliance rollups, forward SARIF + summary output into your policy reporting pipeline.
 - Use with `github-security-posture`, `security-analyst`, or `devops-audit` for remediation planning.
-
