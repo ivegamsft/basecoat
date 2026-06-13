@@ -375,7 +375,7 @@ if ($Agent) {
                 if ($allowedSkillsMatch.Success) {
                     $referencedSkills = @(
                         $allowedSkillsMatch.Groups[1].Value -split "`n" | ForEach-Object {
-                            if ($_ -match "^\s*-\s+([A-Za-z0-9._-]+)\s*$") {
+                            if ($_ -match "^\s*-\s+([A-Za-z0-9._-]+)\b.*$") {
                                 $Matches[1]
                             }
                         } | Where-Object { $_ }
