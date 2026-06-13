@@ -8,9 +8,8 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag to publish (e.g. v3.10.0)"
+        description: "Tag to publish (e.g. v3.31.0)"
         required: true
-        default: "v3.10.0"
 
 permissions:
   contents: read
@@ -150,4 +149,3 @@ jobs:
             }' \
             && echo "Production repo metadata updated" \
             || echo "Warning: could not update repo metadata (non-fatal)"
-
