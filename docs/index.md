@@ -92,7 +92,15 @@ flowchart LR
 
 ## Templates (`docs/templates/`)
 
-- [templates/](templates/) — Reusable file and directory templates (shared memory, repo scaffold, etc.)
+- [templates/README.md](templates/README.md) — File templates and scaffold taxonomy guidance
+- [templates/sprint-structure.md](templates/sprint-structure.md) — Reusable sprint-planning structure
+- [templates/basecoat-memory/basecoat-shared-memory-setup.md](templates/basecoat-memory/basecoat-shared-memory-setup.md) — Shared memory scaffold
+
+## Examples (`docs/examples/`)
+
+- [examples/README.md](examples/README.md) — Read-only examples and starter references
+- [examples/repo-template/sample-repo-template.md](examples/repo-template/sample-repo-template.md) — Repository template sample
+- [examples/iac/azure-iac-examples.md](examples/iac/azure-iac-examples.md) — Azure IaC examples
 
 ## Archive
 

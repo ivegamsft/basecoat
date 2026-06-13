@@ -1,4 +1,4 @@
-# Base Coat Repository History
+# Base Coat Repository History Index
 
 This folder documents the evolution of the Base Coat repository through sprint stories, development learnings, and agentic workflow retrospectives.
 

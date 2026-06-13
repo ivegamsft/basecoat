@@ -1,4 +1,4 @@
-# {org} BaseCoat Shared Memory
+# {org} BaseCoat Shared Memory Setup
 
 Private repository for shared AI agent knowledge across all teams using BaseCoat.
 

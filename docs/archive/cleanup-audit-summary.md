@@ -78,7 +78,7 @@ plan-sharedStandardsRepo.prompt.md → docs/working/
 
 **Phase 3: Consolidate Catalogs** (2 files, 15 min)
 ```
-CATALOG.md (root) → docs/ASSET_REGISTRY.md
+CATALOG.md (root) → docs/reference/asset-catalog.md
 docs/CATALOG.md → DELETE (redundant)
 ```
 **Why**: Single source of truth for asset registry, eliminates confusion
@@ -140,12 +140,14 @@ basecoat/
 ├── PHILOSOPHY.md
 ├── PRODUCT.md
 └── docs/
-    ├── ASSET_REGISTRY.md               ← Moved from root (detailed registry)
+    ├── reference/
+    │   ├── asset-catalog.md            ← Current detailed registry
+    │   └── inventory.md                ← Current searchable index
     ├── archived/                       ← NEW
     │   ├── AUDIT_REPORT_v2.3.0.md
     │   ├── FINAL_RELEASE_NOTES.md
     │   ├── COMPREHENSIVE_RELEASE_REPORT_v3.0.0.md
-    │   └── RELEASE_NOTES_v3.0.0.0.md
+    │   └── RELEASE_NOTES_v3.0.0.md
     ├── design-briefs/                  ← NEW
     │   ├── PLUGIN_DESIGN_BRIEF.md
     │   └── PORTAL_DESIGN_BRIEF.md
@@ -162,7 +164,7 @@ basecoat/
 
 | Issue | Details | Resolution |
 |-------|---------|-----------|
-| **4 agent catalogs** | AGENTS.md vs INVENTORY.md vs CATALOG.md vs docs/CATALOG.md | Keep AGENTS + INVENTORY at root; move detailed registry to docs/ |
+| **4 agent catalogs** | AGENTS.md vs INVENTORY.md vs CATALOG.md vs docs/CATALOG.md | Keep AGENTS + INVENTORY as the stable references; use docs/reference/asset-catalog.md for the detailed registry |
 | **Agent count mismatch** | README says 52 agents; actual is 73 | Update count after verifying |
 | **Design briefs not discoverable** | PLUGIN_DESIGN_BRIEF.md and PORTAL_DESIGN_BRIEF.md in root, not linked | Move to docs/design-briefs/ + add navigation |
 | **Versioned reports in root** | AUDIT_REPORT_v2.3.0.md clogs root | Archive to docs/archived/ |
@@ -193,7 +195,7 @@ basecoat/
 - [ ] On `main` branch
 - [ ] `git fetch origin` completed
 - [ ] Tests pass: `pwsh tests/run-tests.ps1`
-- [ ] Read full CLEANUP_REPORT.md
+- [ ] Read full cleanup-report.md
 
 ### Post-Cleanup
 - [ ] 4 commits created (one per phase)
@@ -235,7 +237,7 @@ git mv plan-sharedStandardsRepo.prompt.md docs/working/
 git commit -m "docs: move design and working docs to docs/"
 
 # Consolidate catalogs (Phase 3)
-git mv CATALOG.md docs/ASSET_REGISTRY.md
+git mv CATALOG.md docs/reference/asset-catalog.md
 git rm docs/CATALOG.md
 git commit -m "docs: consolidate catalogs and eliminate duplication"
 
@@ -262,7 +264,7 @@ Get-ChildItem -Filter "*.md" | Measure-Object  # Should be ≤7 files
 
 ## 🚀 Next Steps
 
-1. **Review Full Report**: Read `CLEANUP_REPORT.md` (11 sections)
+1. **Review Full Report**: Read `cleanup-report.md` (11 sections)
 2. **Execute Cleanup**: Follow Phase 1-5 plan above
 3. **Validate**: Use post-cleanup checklist
 4. **Monitor**: Watch for broken external links over next week
@@ -273,11 +275,11 @@ Get-ChildItem -Filter "*.md" | Measure-Object  # Should be ≤7 files
 ## 📞 Questions?
 
 Refer to full report sections:
-- **Detailed rationale**: See CLEANUP_REPORT.md § 1-4
-- **Git commands**: See CLEANUP_REPORT.md § 7 (Execution Plan)
-- **Branch analysis**: See CLEANUP_REPORT.md § 3.A
-- **Worktree cleanup**: See CLEANUP_REPORT.md § 3.B
-- **Validation**: See CLEANUP_REPORT.md § 8
+- **Detailed rationale**: See cleanup-report.md § 1-4
+- **Git commands**: See cleanup-report.md § 7 (Execution Plan)
+- **Branch analysis**: See cleanup-report.md § 3.A
+- **Worktree cleanup**: See cleanup-report.md § 3.B
+- **Validation**: See cleanup-report.md § 8
 
 ---
 

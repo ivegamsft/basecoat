@@ -181,7 +181,7 @@ BaseCoat is built on four GitHub Copilot customization primitives:
 | [tech-writer](agents/basecoat-10-core-tech-writer.agent.md) | Technical docs, runbooks, tutorials, and changelogs |
 | [ux-designer](agents/basecoat-10-core-ux-designer.agent.md) | Journey mapping, wireframes, and accessibility audits |
 
-> Full machine-readable catalog with skill pairings and model recommendations: [`CATALOG.md`](CATALOG.md)
+> Full machine-readable catalog with skill pairings and model recommendations: [`docs/reference/asset-catalog.md`](docs/reference/asset-catalog.md)
 
 ---
 
@@ -312,7 +312,7 @@ basecoat/
 ├── .github/workflows/   # CI/CD pipelines
 ├── sync.ps1             # Windows sync script
 ├── sync.sh              # macOS/Linux sync script
-├── CATALOG.md           # Machine-readable asset registry
+├── docs/reference/asset-catalog.md  # Machine-readable asset registry
 ├── CHANGELOG.md         # Release history
 ├── CONTRIBUTING.md      # Contribution guidelines
 ├── inventory.md         # Asset inventory

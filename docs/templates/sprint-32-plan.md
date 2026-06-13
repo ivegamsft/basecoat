@@ -63,13 +63,12 @@ Unblock after Phase 1:
 
 After Phase 2:
 
-- **#1371**: Rename 4 generic README.md files to be descriptive
+- **#1371**: Rename remaining generic README.md files to be descriptive
   - Owner: @ibuyspy
   - Files:
-    - docs/templates/basecoat-memory/README.md → basecoat-shared-memory-setup.md
-    - docs/examples/repo-template/README.md → repo-template-quick-start.md
-    - docs/examples/iac/README.md → iac-examples-index.md
-    - docs/diagrams/README.md → architecture-diagrams-index.md
+    - docs/templates/basecoat-memory/basecoat-shared-memory-setup.md
+    - docs/archive/repo_history/repo-history-index.md
+    - docs/archive/wave3/wave3-database-validation-readme.md
   - Est. effort: 15 min (rename + update any internal links)
 
 ---
