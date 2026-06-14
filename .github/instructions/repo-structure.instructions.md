@@ -1,6 +1,6 @@
 ---
 description: "BaseCoat repository structure, file organization, and naming conventions"
-applyTo: "**/*"
+applyTo: "agents/**/*,skills/**/*,instructions/**/*,prompts/**/*,docs/**/*"
 ---
 
 # BaseCoat Repository Structure

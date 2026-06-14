@@ -1,6 +1,6 @@
 ---
 description: "Session hygiene, fleet management, and token cost optimization patterns"
-applyTo: "**/*"
+applyTo: "agents/**/*,skills/**/*"
 ---
 
 # Cost Optimization & Session Management
