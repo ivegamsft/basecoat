@@ -1,0 +1,19 @@
+name: "program-bootstrap-routing"
+description: "Routing evaluation for program-bootstrap covering happy path and failure/retry prompts."
+skill: "agents/program-bootstrap.agent.md"
+scenarios:
+  - id: "happy-path"
+    input: "Bootstrap a new program end-to-end: onboard repo, seed issues, generate docs/specs, and produce architecture and workflow packs."
+    expect_activation: true
+  - id: "dry-run"
+    input: "Run program bootstrap in dry-run mode with no side effects and show the startup pack preview."
+    expect_activation: true
+  - id: "resume-retry"
+    input: "Resume program bootstrap from the architecture checkpoint after backlog stage succeeded and retry only failed stages."
+    expect_activation: true
+  - id: "neg-specialist-only"
+    input: "Just create one sprint issue from a single user story."
+    expect_activation: false
+  - id: "neg-taxonomy-overwrite"
+    input: "Delete existing delivery labels and replace them with one global taxonomy."
+    expect_activation: false
