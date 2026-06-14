@@ -3,19 +3,19 @@ description: "Routing evaluation — validates trigger activation for the agento
 skill: "skills/agentops-audit/SKILL.md"
 scenarios:
   - id: "pos-1"
-    input: "Audit the agent definitions for correctness and completeness"
+    input: "Audit this agent spec and provide a 0-5 scorecard with concrete fixes."
     expect_activation: true
   - id: "pos-2"
-    input: "Review the tool routing logic and identify potential issues"
+    input: "Review tool correctness, ambiguity handling, and cost-latency fit for this skill definition."
     expect_activation: true
   - id: "pos-3"
-    input: "Assess tool bindings and parameter mapping in the agents"
+    input: "Generate a revised spec and include routing profile with recommended class."
     expect_activation: true
   - id: "pos-4"
-    input: "Evaluate prompt quality and instruction clarity"
+    input: "Evaluate eval-readiness and safety-compliance risks in this agent config."
     expect_activation: true
   - id: "pos-5"
-    input: "Check agent behavior consistency and error handling"
+    input: "Produce audit_report artifacts with risks and measurable success criteria."
     expect_activation: true
   - id: "neg-1"
     input: "Help me write a new agent"
