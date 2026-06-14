@@ -216,6 +216,29 @@ Not currently wired up. Reserve the name if Slack integration is planned.
 
 ---
 
+## Optional Repository Variables (Agentic Workflow Model Overrides)
+
+Set these under **Settings → Secrets and variables → Actions → Variables** when
+you need to override default gh-aw model selection:
+
+### `GH_AW_MODEL_AGENT_COPILOT`
+
+**Used by:** Agent phase in `issue-triage.lock.yml` (and other gh-aw lock files
+that reference the same variable)
+
+**Default when unset (issue triage):** `gpt-5-mini`
+
+### `GH_AW_MODEL_DETECTION_COPILOT`
+
+**Used by:** Threat-detection phase in `issue-triage.lock.yml`
+
+**Default when unset (issue triage):** `gpt-5-mini`
+
+Use only values supported by your Copilot subscription tier. If unsupported, the
+workflow fails with `400 The requested model is not supported`.
+
+---
+
 ## Validating Secrets
 
 After setting all secrets, trigger a manual workflow run to confirm:

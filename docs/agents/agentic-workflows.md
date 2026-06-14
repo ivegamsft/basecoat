@@ -85,6 +85,26 @@ Agentic workflows use a defense-in-depth model:
 Never add write permissions directly in the `permissions:` block. All writes
 must go through `safe-outputs:`.
 
+## Model Compatibility Guardrails
+
+Issue triage failures can present as:
+
+```text
+400 The requested model is not supported.
+```
+
+To reduce this risk in BaseCoat, the compiled issue-triage workflow defaults both
+agent and detection phases to `gpt-5-mini` when no repository variable override
+is set.
+
+If you need an override, use repository variables (not prompt text):
+
+- `GH_AW_MODEL_AGENT_COPILOT`
+- `GH_AW_MODEL_DETECTION_COPILOT`
+
+Set each variable to a model confirmed as supported by your Copilot plan/tier.
+Unsupported values fail fast during `Execute GitHub Copilot CLI`.
+
 ## Allowed Expressions
 
 The `gh aw` compiler enforces a strict allowlist of `${{ }}` expressions for
