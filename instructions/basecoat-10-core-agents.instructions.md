@@ -22,6 +22,7 @@ Every agent file must start with a YAML frontmatter block containing these field
 ---
 name: kebab-case-agent-name
 description: "One-sentence description of the agent's purpose. Start with the role noun and state when to invoke it."
+visibility: internal
 tools: [read_file, write_file, list_dir, run_terminal_command, create_github_issue]
 allowed_skills: [skill-name-a, skill-name-b]
 capabilities:

@@ -24,7 +24,7 @@ capabilities: (recommended for new/updated assets)
 model_policy: (recommended when model behavior matters)
   fallback: true
   preferred_families: [family-a, family-b]
-  excluded_tiers: [tier-a] (optional)
+  excluded_tiers: [tier-a] # optional
 pinned_model: string (optional; only for justified pinning)
 pin_reason: string (required when pinned_model is set)
 model: string (legacy compatibility; allowed during migration)

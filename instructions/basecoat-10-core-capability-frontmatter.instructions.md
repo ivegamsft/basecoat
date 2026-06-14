@@ -58,6 +58,7 @@ capabilities:
 model_policy:
   fallback: true
   preferred_families: [claude-sonnet, gpt-5]
+---
 ```
 
 ## Canonical Example (Pinned With Justification)
@@ -78,4 +79,5 @@ model_policy:
   excluded_tiers: [low]
 pinned_model: claude-sonnet-4.6
 pin_reason: "Regulated audit baselines require reproducible output against approved evaluation fixtures."
+---
 ```
