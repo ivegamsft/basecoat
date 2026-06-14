@@ -53,4 +53,4 @@ Please apply **at least one label from each category below:**
 
 - `azure`, `dotnet`, `kubernetes`, `python`, `terraform`, etc.
 
-See [`governance-contract.md`](../../docs/reference/governance-contract.md#labels) for complete label taxonomy.
+See [`docs/GOVERNANCE.md`](../../docs/GOVERNANCE.md#canonical-label-set-for-new-work) for canonical labels and migration guidance.
