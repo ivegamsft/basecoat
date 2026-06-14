@@ -246,6 +246,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running program bootstrap contract tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'program-bootstrap-contract-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Program bootstrap contract tests failed' -ForegroundColor Red
+    Write-FailureLog 'program-bootstrap-contract-tests'
+    exit 1
+}
+
 Write-Host 'Running VS Code harness benchmark suite tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'vscode-harness-benchmark-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
