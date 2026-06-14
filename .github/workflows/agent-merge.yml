@@ -55,7 +55,7 @@ jobs:
                   failures.append(f"{path}: missing name in frontmatter")
                   continue
               name = name_match.group(1).strip().strip('"').strip("'")
-              tools_match = re.search(r"^allowed-tools:\n((?:^[ \t]+-.*\n)+)", frontmatter, flags=re.M)
+              tools_match = re.search(r"^allowed-tools:\n((?:^[ \t]+-.*(?:\n|$))+)", frontmatter, flags=re.M)
               tools_block = tools_match.group(1) if tools_match else ""
               tools = tuple(sorted(set(re.findall(r"^\s*-\s*([A-Za-z0-9_.:-]+)\s*$", tools_block, flags=re.M))))
               by_name.setdefault(name, []).append((str(path), tools))
@@ -146,7 +146,7 @@ jobs:
           ROLLBACK_REF: ${{ github.event.inputs.rollback_ref }}
         run: |
           git revert --no-commit "${ROLLBACK_REF}"
-          git diff > agent-merge-rollback.patch
+          git diff --cached > agent-merge-rollback.patch
           git reset --hard
 
       - name: Upload rollback patch artifact
