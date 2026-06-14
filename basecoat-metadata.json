@@ -2034,7 +2034,13 @@
       "name": "orchestrator",
       "description": "Compatibility alias for the orchestrator agent. Preserves the legacy filename while the prefixed BaseCoat agent is the canonical source.",
       "category": "Meta",
-      "keywords": [],
+      "keywords": [
+        "sdlc",
+        "autonomy",
+        "risk-classification",
+        "merge-queue",
+        "governance"
+      ],
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/orchestrator.agent.md",
@@ -2095,7 +2101,16 @@
       "name": "flow-admission-controller",
       "description": "Use when designing or tuning intake controls for PR volume, merge-queue admission, and reviewer/runner capacity limits. USE FOR: WIP limit policies, queue admission rules, stale PR handling, and safe load-shedding design. DO NOT USE FOR: overriding branch protections manually, skipping approvals, or implementing unrelated product features.",
       "category": "Meta",
-      "keywords": ["flow", "admission", "wip-limit", "queue", "capacity", "intake", "stale-pr", "load-shedding"],
+      "keywords": [
+        "flow",
+        "admission",
+        "wip-limit",
+        "queue",
+        "capacity",
+        "intake",
+        "stale-pr",
+        "load-shedding"
+      ],
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/flow-admission-controller.agent.md",
@@ -2106,7 +2121,15 @@
       "name": "flow-auditor",
       "description": "Use when auditing PR intake, merge queue health, CI tier efficiency, and stale-branch pressure across repositories. USE FOR: queue bottleneck audits, CI waste analysis, PR aging reviews, merge-path risk scoring, and evidence-backed findings. DO NOT USE FOR: writing feature code, merging PRs without approval, or changing branch protections directly.",
       "category": "Meta",
-      "keywords": ["flow", "audit", "merge-queue", "bottleneck", "ci-waste", "pr-aging", "risk-scoring"],
+      "keywords": [
+        "flow",
+        "audit",
+        "merge-queue",
+        "bottleneck",
+        "ci-waste",
+        "pr-aging",
+        "risk-scoring"
+      ],
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/flow-auditor.agent.md",
@@ -2117,7 +2140,14 @@
       "name": "flow-optimizer",
       "description": "Use when building an optimization program that combines audit evidence with prioritized fixes and execution sequencing. USE FOR: phased flow optimization plans, merge-queue and CI policy tuning, target KPI definition, and rollout risk reduction. DO NOT USE FOR: one-off bugfix coding, ad hoc release approvals, or force-merging around failed checks.",
       "category": "Meta",
-      "keywords": ["flow", "optimization", "merge-queue", "ci-policy", "kpi", "phased-plan"],
+      "keywords": [
+        "flow",
+        "optimization",
+        "merge-queue",
+        "ci-policy",
+        "kpi",
+        "phased-plan"
+      ],
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/flow-optimizer.agent.md",
@@ -2128,7 +2158,14 @@
       "name": "flow-suggester",
       "description": "Use when converting audit findings into prioritized, issue-ready fixes with acceptance criteria and owners. USE FOR: translating audit evidence into GitHub issues, prioritizing queue and CI fixes, sequencing remediation work, and defining measurable outcomes. DO NOT USE FOR: running uncontrolled migrations, bypassing governance gates, or shipping code changes directly.",
       "category": "Meta",
-      "keywords": ["flow", "suggest", "audit", "remediation", "github-issues", "prioritize"],
+      "keywords": [
+        "flow",
+        "suggest",
+        "audit",
+        "remediation",
+        "github-issues",
+        "prioritize"
+      ],
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/flow-suggester.agent.md",
@@ -2139,11 +2176,48 @@
       "name": "flow-tracker",
       "description": "Use when tracking repository flow metrics over time and recommending corrective actions when trends degrade. USE FOR: weekly flow scorecards, trend analysis, regression alerts, and metric-backed improvement suggestions. DO NOT USE FOR: speculative architecture redesign, editing production code, or replacing incident response workflows.",
       "category": "Meta",
-      "keywords": ["flow", "tracking", "metrics", "scorecard", "trend", "regression"],
+      "keywords": [
+        "flow",
+        "tracking",
+        "metrics",
+        "scorecard",
+        "trend",
+        "regression"
+      ],
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/flow-tracker.agent.md",
       "model": "gpt-5.4-mini",
+      "argumentHint": ""
+    },
+    {
+      "name": "agentic-sdlc-autonomy",
+      "description": "Audit, measure, implement, and operate rules-based human-in-the-loop autonomy for agent-operated repositories. Use when evaluating or improving agentic SDLC governance: PR risk classification (A0-A5 levels), auto-merge policy, merge queue gates, deployment lane policy, DB migration controls, IaC safety rules, runner isolation, production approval flows, and policy-versus-settings drift.",
+      "category": "Meta",
+      "keywords": [
+        "flow",
+        "governance",
+        "orchestration",
+        "gap-analysis",
+        "skill-reuse",
+        "issues",
+        "prs"
+      ],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/agentic-sdlc-autonomy.agent.md",
+      "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "flow-governance-conductor",
+      "description": "Use when coordinating flow-governance analysis across code, PRs, issues, skills, and scripts. USE FOR: reusing existing flow/CI/governance skills first, mapping findings to current agents and scripts, identifying missing skill/script coverage, and producing issue-ready gap backlogs. DO NOT USE FOR: writing product features, bypassing branch or environment protections, or force-merging pull requests.",
+      "category": "Meta",
+      "keywords": [],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/flow-governance-conductor.agent.md",
+      "model": "gpt-5.3-codex",
       "argumentHint": ""
     }
   ]

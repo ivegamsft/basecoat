@@ -1,0 +1,14 @@
+# Baseline ownership for governance and review routing.
+# Last matching rule wins.
+
+* @ibuyspy
+
+# Repository governance and automation
+.github/ @ibuyspy @ivegamsft
+instructions/ @ibuyspy
+
+# Customization assets
+agents/ @ibuyspy
+skills/ @ibuyspy
+prompts/ @ibuyspy
+docs/ @ibuyspy
