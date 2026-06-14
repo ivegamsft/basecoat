@@ -175,11 +175,15 @@ echo "Fetched $ISSUE_COUNT issues to triage."
 echo ""
 
 TYPE_LABELS=("bug" "enhancement" "documentation" "chore" "security" "question")
-PRIORITY_CRITICAL="P0-critical"
-PRIORITY_HIGH="P1-high"
-PRIORITY_MEDIUM="P2-medium"
-PRIORITY_LOW="P3-low"
-PRIORITY_LABELS=("$PRIORITY_CRITICAL" "$PRIORITY_HIGH" "$PRIORITY_MEDIUM" "$PRIORITY_LOW" "priority/critical" "priority/high" "priority/medium" "priority/low")
+PRIORITY_CRITICAL="priority:critical"
+PRIORITY_HIGH="priority:high"
+PRIORITY_MEDIUM="priority:medium"
+PRIORITY_LOW="priority:low"
+PRIORITY_LABELS=(
+  "$PRIORITY_CRITICAL" "$PRIORITY_HIGH" "$PRIORITY_MEDIUM" "$PRIORITY_LOW"
+  "P0-critical" "P1-high" "P2-medium" "P3-low"
+  "priority/critical" "priority/high" "priority/medium" "priority/low"
+)
 BAD_TITLES=("bug" "fix" "issue" "help" "todo" "test" "asdf" "qwerty" "untitled" "new issue" "please fix" "broken" "error")
 
 has_sprint_label() {
@@ -441,13 +445,13 @@ for i in $(seq 0 $((ISSUE_COUNT - 1))); do
       echo "$LABELS" | grep -q "$lbl" && HAS_PRIORITY_ANY=true && break
     done
 
-    if [[ "$AGE_DAYS" -gt 90 ]] && \
-       ! echo "$LABELS" | grep -qE "stale|P0-critical|P1-high|priority/critical|priority/high|blocked"; then
+    if [[ "$AGE_DAYS" -gt 90 ]] && [[ "$HAS_PRIORITY_ANY" == "false" ]] && \
+       ! echo "$LABELS" | grep -qE '(^|,)stale(,|$)|(^|,)blocked(,|$)'; then
       add_label "$N" "stale" "Open >90 days"
       post_comment "$N" "This issue has been open for $AGE_DAYS days with no recent activity. Adding \`stale\` label. Comment to keep it active." "stale policy"
     fi
 
-    if echo "$LABELS" | grep -q "security" && ! echo "$LABELS" | grep -qE "P0-critical|priority/critical"; then
+    if echo "$LABELS" | grep -qE '(^|,)security(,|$)' && ! echo "$LABELS" | grep -qE '(^|,)priority:critical(,|$)|(^|,)P0-critical(,|$)|(^|,)priority/critical(,|$)'; then
       add_label "$N" "$PRIORITY_CRITICAL" "Security without critical priority"
     fi
 
