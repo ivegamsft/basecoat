@@ -119,6 +119,8 @@ These labels indicate blocking conditions or special handling requirements.
 | Label | Meaning | Action |
 |---|---|---|
 | `blocked` | Issue is blocked by another issue or external dependency | Add a comment explaining what's blocking; update when unblocked |
+| `needs-info` | Additional details are required before triage or implementation | Request missing details and keep open until clarified |
+| `needs-verification` | A fix is proposed and needs confirmation from reporter/reviewer | Validate behavior in repro path before closing |
 | `spec-required` | Issue needs a PRD, spec, or design doc before implementation can start | Do not start work until spec is linked and reviewed |
 | `governance` | Issue relates to repository governance, standards, or process | Follows governance change approval process |
 | `approved` | Issue has been approved for implementation by appropriate stakeholder | OK to start work |

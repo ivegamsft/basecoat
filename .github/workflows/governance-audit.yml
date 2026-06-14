@@ -1,4 +1,4 @@
-name: BaseCoat - Governance Audit
+name: BaseCoat - Governance Metadata Drift Audit
 
 on:
   workflow_dispatch:
@@ -20,35 +20,16 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-      - name: Audit governance surfaces
-        shell: bash
+      - name: Audit governance metadata drift
+        shell: pwsh
         run: |
-          set -euo pipefail
+          ./scripts/governance-metadata-drift.ps1 -Mode audit -SummaryPath governance-metadata-drift-report.md
 
-          missing=()
-
-          for file in \
-            docs/reference/governance-contract.md \
-            docs/reference/label-taxonomy.md \
-            docs/reference/governance.md \
-            docs/operations/label-cleanup-plan.md \
-            .github/ISSUE_TEMPLATE/issue.md \
-            .github/PULL_REQUEST_TEMPLATE.md
-          do
-            [[ -f "$file" ]] || missing+=("$file")
-          done
-
-          if [[ ${#missing[@]} -gt 0 ]]; then
-            printf 'Missing governance files:\n%s\n' "${missing[@]}" >&2
-            exit 1
-          fi
-
-          grep -q 'priority:critical' docs/reference/governance-contract.md
-          grep -q '^## Labels$' docs/reference/governance-contract.md
-          grep -q '^## Versioning$' docs/reference/governance-contract.md
-          grep -q 'priority:critical' docs/reference/label-taxonomy.md
-          grep -qi 'preserve delivery labels' docs/operations/label-cleanup-plan.md
-          grep -q 'docs/reference/governance-contract.md' .github/ISSUE_TEMPLATE/issue.md
-          grep -q 'docs/reference/governance-contract.md' .github/PULL_REQUEST_TEMPLATE.md
-
-          echo "Governance audit passed."
+      - name: Upload governance drift report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: governance-metadata-drift-report
+          path: governance-metadata-drift-report.md
+          if-no-files-found: error
+          retention-days: 14
