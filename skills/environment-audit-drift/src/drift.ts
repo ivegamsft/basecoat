@@ -144,15 +144,16 @@ export class EnvironmentAuditDrifter {
     // Mock GitHub branch protection checks
     for (const pattern of config.allowed_branch_patterns || []) {
       const protection = await this.mockCheckBranchProtection(pattern);
+      const expectedApprovals = this.getMinimumApprovalsForAutonomy(config.autonomy_level);
 
-      if (config.autonomy_level === 'A2' && protection.required_approvals < 1) {
+      if (protection.required_approvals < expectedApprovals) {
         this.addFinding({
           id: `security-approval-mismatch-${env}-${pattern}`,
           environment: env,
-          severity: 'high',
+          severity: config.autonomy_level === 'A1' ? 'critical' : 'high',
           category: 'security_drift',
-          finding: `Branch '${pattern}' configured as A2 (approval-gated) but has ${protection.required_approvals} required approvals`,
-          expected: '1+ required approval',
+          finding: `Branch '${pattern}' configured as ${config.autonomy_level} requires ${expectedApprovals}+ approvals but has ${protection.required_approvals}`,
+          expected: `${expectedApprovals}+ required approvals`,
           actual: String(protection.required_approvals),
           remediation: 'Update GitHub branch protection rules to require approvals',
           resource: pattern,
@@ -163,7 +164,6 @@ export class EnvironmentAuditDrifter {
   }
 
   private async auditDeploymentDrift(): Promise<void> {
-    // Mock release manifest check
     if (!fs.existsSync(this.input.release_manifest_path!)) {
       this.addFinding({
         id: 'deployment-manifest-missing',
@@ -180,20 +180,74 @@ export class EnvironmentAuditDrifter {
     }
 
     try {
-      const manifest = JSON.parse(fs.readFileSync(this.input.release_manifest_path!, 'utf-8'));
+      const parsed = JSON.parse(fs.readFileSync(this.input.release_manifest_path!, 'utf-8'));
+      const manifest = this.parseReleaseManifest(parsed);
       const manifestAge = this.calculateManifestAge(manifest.timestamp);
 
       if (manifestAge > 168) {
         // older than 1 week
         this.addFinding({
           id: 'deployment-manifest-stale',
-          environment: manifest.environment,
+          environment: 'all',
           severity: 'medium',
           category: 'deployment_drift',
           finding: `Release manifest is ${manifestAge} hours old`,
           expected: '< 168 hours (1 week)',
           actual: `${manifestAge} hours`,
           remediation: 'Verify release promotion workflow is running correctly',
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      let comparedEnvironments = 0;
+      for (const env of Object.keys(this.environmentMap.environments || {})) {
+        const expectedVersion = manifest.expectedByEnvironment[env];
+        const actualVersion = manifest.actualByEnvironment[env];
+        if (expectedVersion && actualVersion) {
+          comparedEnvironments += 1;
+          if (expectedVersion !== actualVersion) {
+            this.addFinding({
+              id: `deployment-version-mismatch-${env}`,
+              environment: env,
+              severity: 'high',
+              category: 'deployment_drift',
+              finding: `Release manifest version '${expectedVersion}' does not match deployed Container Apps revision '${actualVersion}'`,
+              expected: expectedVersion,
+              actual: actualVersion,
+              remediation: 'Run promotion/deployment workflow to align deployed revision with release manifest',
+              resource: env,
+              timestamp: new Date().toISOString(),
+            });
+          }
+          continue;
+        }
+
+        if (expectedVersion && !actualVersion) {
+          this.addFinding({
+            id: `deployment-actual-missing-${env}`,
+            environment: env,
+            severity: 'medium',
+            category: 'deployment_drift',
+            finding: `Expected version '${expectedVersion}' found in manifest but deployed revision is missing`,
+            expected: expectedVersion,
+            actual: 'missing',
+            remediation: 'Populate deployed Container Apps revision in the release manifest',
+            resource: env,
+            timestamp: new Date().toISOString(),
+          });
+        }
+      }
+
+      if (comparedEnvironments === 0) {
+        this.addFinding({
+          id: 'deployment-version-comparison-unavailable',
+          environment: 'all',
+          severity: 'medium',
+          category: 'deployment_drift',
+          finding: 'Release manifest does not include comparable expected and deployed versions for configured environments',
+          expected: 'expected_version and deployed_revision data',
+          actual: 'insufficient',
+          remediation: 'Store per-environment expected_version and deployed_revision values in the release manifest',
           timestamp: new Date().toISOString(),
         });
       }
@@ -214,7 +268,7 @@ export class EnvironmentAuditDrifter {
 
   private async auditTagDrift(): Promise<void> {
     // Mock Azure tag checks
-    const requiredTags = ['Environment', 'App', 'ManagedBy'];
+    const requiredTags = ['Environment', 'App', 'ManagedBy', 'ReleaseId'];
 
     for (const [env, config] of Object.entries(this.environmentMap.environments || {})) {
       for (const tag of requiredTags) {
@@ -272,6 +326,69 @@ export class EnvironmentAuditDrifter {
     const manifestTime = new Date(timestamp).getTime();
     const nowTime = Date.now();
     return Math.floor((nowTime - manifestTime) / (1000 * 60 * 60));
+  }
+
+  private getMinimumApprovalsForAutonomy(level: EnvironmentConfig['autonomy_level']): number {
+    switch (level) {
+      case 'A1':
+        return 2;
+      case 'A2':
+        return 1;
+      case 'A3':
+        return 1;
+      case 'A4':
+      default:
+        return 0;
+    }
+  }
+
+  private parseReleaseManifest(parsed: unknown): {
+    timestamp?: string;
+    expectedByEnvironment: Record<string, string>;
+    actualByEnvironment: Record<string, string>;
+  } {
+    const manifestObject =
+      parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+        ? (parsed as Record<string, unknown>)
+        : {};
+
+    const expectedByEnvironment: Record<string, string> = {};
+    const actualByEnvironment: Record<string, string> = {};
+    const globalVersion = this.readString(manifestObject['version']);
+    const environmentBlock = this.asRecord(manifestObject['environments']);
+
+    for (const env of Object.keys(this.environmentMap.environments || {})) {
+      const envRecord = this.asRecord(environmentBlock[env]);
+      expectedByEnvironment[env] =
+        this.readString(envRecord['expected_version']) ||
+        this.readString(envRecord['release_version']) ||
+        globalVersion ||
+        '';
+      actualByEnvironment[env] =
+        this.readString(envRecord['deployed_revision']) ||
+        this.readString(envRecord['deployed_version']) ||
+        this.readString(envRecord['container_app_revision']) ||
+        this.readString(this.asRecord(manifestObject['deployed_revisions'])[env]) ||
+        this.readString(this.asRecord(manifestObject['actual_versions'])[env]) ||
+        '';
+    }
+
+    return {
+      timestamp: this.readString(manifestObject['timestamp']),
+      expectedByEnvironment,
+      actualByEnvironment,
+    };
+  }
+
+  private asRecord(value: unknown): Record<string, unknown> {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      return value as Record<string, unknown>;
+    }
+    return {};
+  }
+
+  private readString(value: unknown): string {
+    return typeof value === 'string' ? value : '';
   }
 
   // Mock helpers (would be replaced with real Azure/GitHub API calls)

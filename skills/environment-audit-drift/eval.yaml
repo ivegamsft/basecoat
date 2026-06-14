@@ -11,6 +11,9 @@ scenarios:
   - id: "pos-3"
     input: "Generate a drift report with severity and remediation for staging and prod."
     expect_activation: true
+  - id: "pos-4"
+    input: "Compare release manifest versions to deployed Container Apps revisions and flag ReleaseId tag drift."
+    expect_activation: true
   - id: "neg-1"
     input: "Implement a new React component with responsive layout."
     expect_activation: false
