@@ -20,6 +20,20 @@ Good scoping keeps guidance precise and context-appropriate without adding noise
 - Narrow instructions are useful for language, framework, directory, or workflow-specific expectations.
 - A good scope reduces false activations and helps the right guidance appear at the right time.
 
+## Token-Efficient Scoping Pattern
+
+Scope design is a token-cost control, not just an organization preference:
+
+1. Keep universal (`**/*`) files to invariant rules only.
+2. Move workflow-specific guidance into bounded patterns (for example: `agents/**`, `skills/**`, `tests/**`).
+3. Link to canonical docs instead of duplicating long guidance blocks across multiple instruction files.
+
+Recommended companion references:
+
+- `.github/instructions/workflow-conventions.instructions.md`
+- `.github/instructions/cost-optimization.instructions.md`
+- `docs/guides/token-optimization.md`
+
 ---
 
 ## `applyTo` Pattern Reference

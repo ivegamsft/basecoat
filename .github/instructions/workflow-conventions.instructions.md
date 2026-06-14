@@ -47,9 +47,11 @@ For long runs, enforce context transitions explicitly:
 Message hygiene:
 
 - Do not paste large instruction blocks into chat; reference files by path.
+- Normalize rich-file inputs (PPTX, PDF, DOCX, XLSX) into one markdown summary artifact before passing context between turns or agents.
 - Batch related operations in one turn.
 - Keep the main thread focused on decisions and outcomes; use delegation for broad scan/research work.
 - Prefer Ask mode for small, direct queries and edits; switch to Agent mode for multi-file execution, long-running workflows, or broad investigations.
+- For full token-optimization defaults and MCP overhead checks, follow `.github/instructions/cost-optimization.instructions.md` and `docs/reference/scoped-instructions.md`.
 
 ## Fleet Merge Pacing
 

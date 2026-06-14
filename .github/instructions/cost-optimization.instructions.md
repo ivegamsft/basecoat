@@ -30,6 +30,13 @@ Execute these in order to reduce input-token bloat first, then optimize routing:
 5. For attachment-heavy tasks, create one canonical summary artifact and reference it by path/link.
 6. Choose Ask mode by default for focused answers; use Agent mode when execution spans multiple files, long-running commands, or broad research.
 7. Keep output tokens lean by default: concise responses, small diffs, and escalation to deeper explanations only when needed.
+8. Normalize rich files (PPTX, PDF, DOCX, XLSX) into one markdown summary artifact before reuse across turns.
+
+Cross-reference surfaces:
+
+- `docs/guides/token-optimization.md` (operator quick-start + normalization workflow)
+- `.github/instructions/workflow-conventions.instructions.md` (session transition and mode defaults)
+- `docs/reference/scoped-instructions.md` (scope design that prevents token-heavy universal activation)
 
 ### 1. Compact at phase transitions (not just time)
 

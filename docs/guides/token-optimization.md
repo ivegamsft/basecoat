@@ -8,6 +8,25 @@ Strategies for managing token budgets, compressing context, and handing off stat
 > model names, tier pricing, and rate limits will differ. See [Adapting for Other Providers](#adapting-for-other-providers).
 ---
 
+## Operator Quick-Start Checklist (Issue #1436)
+
+Use this checklist as the default operating path for token-efficient runs:
+
+1. Start with file references only and compact at phase boundaries (`/compact`, `/new`) instead of carrying full pasted context.
+2. Keep output tokens lean by default: short responses, small diffs, and depth only when risk or ambiguity requires it.
+3. Choose Ask mode for direct, scoped work and Agent mode for multi-file execution, long-running commands, or broad research.
+4. Start in Auto/default model routing, then upshift only when explicit complexity triggers are present.
+5. Run an MCP overhead sanity pass before MCP-heavy loops (batch calls, limit fields, prefer local repo tools when possible).
+6. Normalize rich files (slides, PDFs, spreadsheets, docs) into one markdown summary artifact before prompting downstream agents.
+
+See also:
+
+- [`.github/instructions/cost-optimization.instructions.md`](/.github/instructions/cost-optimization.instructions.md)
+- [`.github/instructions/workflow-conventions.instructions.md`](/.github/instructions/workflow-conventions.instructions.md)
+- [`../reference/scoped-instructions.md`](../reference/scoped-instructions.md)
+
+---
+
 ## 1. Context Window Management Strategies
 
 Every model has a finite context window. Treating it as unlimited leads to degraded output quality, truncated responses, and wasted spend.
@@ -114,6 +133,34 @@ Instead of inlining large files, reference them:
 For the full API schema, see: docs/api-schema.yaml (420 lines, ~8K tokens)
 Key endpoints relevant to this task: POST /auth/login, DELETE /auth/session
 ```
+
+### 3.5 Rich-file to Markdown Normalization
+
+When inputs start as rich artifacts (PPTX, PDF, DOCX, XLSX), convert them to one markdown summary before using them as model context.
+
+1. Extract only decision-relevant content (objectives, constraints, numbers, open risks).
+2. Collapse repetitive material into one canonical summary file.
+3. Link to the source artifact path or URL instead of pasting full extracted text.
+4. Reuse that same markdown summary across turns and agents.
+
+Suggested summary shape:
+
+```markdown
+## Source
+- File: /path/to/source.ext
+- Date: 2026-06-14
+
+## Key Facts
+- ...
+
+## Decisions and Constraints
+- ...
+
+## Open Questions
+- ...
+```
+
+This keeps attachment-heavy workflows token-stable and avoids duplicated extraction in downstream prompts.
 
 ---
 
@@ -685,6 +732,9 @@ Based on Sprint 31 empirical testing, the following agent categories are safe to
 - [`model-optimization.md`](model-optimization.md) — Model tier matrix and cost considerations
 - [`../architecture/multi-agent-orchestration-patterns.md`](../architecture/multi-agent-orchestration-patterns.md) — Branch coordination for parallel agents
 - [`instructions/basecoat-20-lang-governance.instructions.md`](/instructions/basecoat-20-lang-governance.instructions.md) — Section 10: Token and Model Awareness
+- [`.github/instructions/cost-optimization.instructions.md`](/.github/instructions/cost-optimization.instructions.md) — Operator defaults, model upshift triggers, and MCP overhead checklist
+- [`.github/instructions/workflow-conventions.instructions.md`](/.github/instructions/workflow-conventions.instructions.md) — Ask vs Agent mode policy and transition hygiene
+- [`../reference/scoped-instructions.md`](../reference/scoped-instructions.md) — Scope patterns that prevent universal instruction bloat
 - [`../templates/sprint-structure.md`](../templates/sprint-structure.md) — Reusable sprint planning template (reduces re-planning cost 62%)
 - Issue [#42](https://github.com/IBuySpy-Shared/basecoat/issues/42) — Tracking issue for token optimization
 - Issue [#44](https://github.com/IBuySpy-Shared/basecoat/issues/44) — Token budget and cost attribution

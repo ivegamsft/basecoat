@@ -15,9 +15,9 @@ BaseCoat gives your organization one place to manage agents, skills, instruction
 
 | Asset type | Count | What it does |
 |---|---|---|
-| **Agents** | 105 | End-to-end task executors — sprint planners, code reviewers, security analysts, and more |
-| **Skills** | 104 | Reusable domain capabilities invoked by agents |
-| **Instructions** | 90 | Copilot behavior rules scoped by file path pattern |
+| **Agents** | 116 | End-to-end task executors — sprint planners, code reviewers, security analysts, and more |
+| **Skills** | 116 | Reusable domain capabilities invoked by agents |
+| **Instructions** | 91 | Copilot behavior rules scoped by file path pattern |
 | **Prompts** | 5 | Structured templates for repeatable tasks |
 
 ---
@@ -73,6 +73,7 @@ flowchart LR
 ## Guides (`docs/guides/`)
 
 - [guides/intent-prefixes.md](guides/intent-prefixes.md) — Intent vocabulary, routing behavior, and prompt templates
+- [guides/token-optimization.md](guides/token-optimization.md) — Operator token-efficiency checklist, model/mode defaults, and context normalization patterns
 - [agents/taxonomy.md](agents/taxonomy.md) — Agent and skill taxonomy with chain archetypes
 
 ## Operations (`docs/operations/`)
