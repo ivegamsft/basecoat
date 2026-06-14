@@ -8,6 +8,7 @@ compatibility:
   - skill:flow-admission-control
   - skill:human-in-the-loop
 metadata:
+  category: sdlc-governance
   domain: sdlc-governance
   maturity: beta
   audience:

@@ -102,7 +102,17 @@ foreach ($skillDir in $skillDirs) {
             }
         }
 
-        # Check 5: USE FOR / DO NOT USE FOR triggers
+        # Check 5: metadata.category presence
+        $metadataBlock = ''
+        $hasMetadataBlock = $frontmatter -match '(?ms)^metadata\s*:\s*\r?\n((?:[ \t]{2,}.*(?:\r?\n|$))*)'
+        if ($hasMetadataBlock) {
+            $metadataBlock = $Matches[1]
+        }
+        if ($hasMetadataBlock -and $metadataBlock -notmatch '(?m)^[ \t]{2,}category\s*:') {
+            $warnings.Add("missing metadata.category")
+        }
+
+        # Check 6: USE FOR / DO NOT USE FOR triggers
         if ($descriptionValue -notmatch 'USE FOR' -or $descriptionValue -notmatch 'DO NOT USE FOR') {
             $warnings.Add("missing USE FOR or DO NOT USE FOR triggers")
         }

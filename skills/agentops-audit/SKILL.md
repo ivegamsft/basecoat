@@ -4,6 +4,7 @@ description: "Audits and improves agent/skill specs with a scored rubric and rou
 compatibility:
   - agent:agent-designer
 metadata:
+  category: agent-development
   domain: agent-development
   maturity: production
   audience:

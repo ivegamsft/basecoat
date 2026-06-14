@@ -5,6 +5,7 @@ compatibility:
   - agent:governance-auditor
   - agent:governance-author
 metadata:
+  category: governance
   domain: governance
   maturity: production
   audience:

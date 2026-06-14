@@ -6,6 +6,8 @@ compatibility: []
 author: IBuySpy-Shared
 version: 1.0.0
 category: modernization
+metadata:
+  category: modernization
 tags: [dotnet, modernization, migration, upgrade]
 compatibility: GHCP
 ---

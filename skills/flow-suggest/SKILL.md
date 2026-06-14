@@ -5,6 +5,7 @@ compatibility:
   - agent:flow-suggester
   - agent:flow-optimizer
 metadata:
+  category: flow-governance
   domain: flow-governance
   maturity: production
   audience:

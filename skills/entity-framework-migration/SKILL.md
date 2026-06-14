@@ -6,6 +6,8 @@ compatibility: []
 author: IBuySpy-Shared
 version: 1.0.0
 category: data
+metadata:
+  category: data
 tags: [dotnet, entity-framework, ef-core, migration]
 compatibility: GHCP
 ---
