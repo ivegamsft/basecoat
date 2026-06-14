@@ -55,19 +55,19 @@ jobs:
                   failures.append(f"{path}: missing name in frontmatter")
                   continue
               name = name_match.group(1).strip().strip('"').strip("'")
-              tools_match = re.search(r"^tools:\n((?:^[ \t]+-.*(?:\n|$))+)", frontmatter, flags=re.M)
-              tools_block = tools_match.group(1) if tools_match else ""
-              tools = tuple(sorted(set(re.findall(r"^\s*-\s*([A-Za-z0-9_.:-]+)\s*$", tools_block, flags=re.M))))
-              by_name.setdefault(name, []).append((str(path), tools))
+              skills_match = re.search(r"^allowed_skills:\n((?:^[ \t]+-.*(?:\n|$))+)", frontmatter, flags=re.M)
+              skills_block = skills_match.group(1) if skills_match else ""
+              skills = tuple(sorted(set(re.findall(r"^\s*-\s*([A-Za-z0-9_.:-]+)\s*$", skills_block, flags=re.M))))
+              by_name.setdefault(name, []).append((str(path), skills))
 
           for name, entries in by_name.items():
               if len(entries) <= 1:
                   continue
-              tool_sets = {tools for _, tools in entries}
+              skill_sets = {skills for _, skills in entries}
               paths = ", ".join(path for path, _ in entries)
               failures.append(f"duplicate agent name '{name}' in: {paths}")
-              if len(tool_sets) > 1:
-                  failures.append(f"conflicting allowed-tools for duplicated agent '{name}'")
+              if len(skill_sets) > 1:
+                  failures.append(f"conflicting allowed_skills for duplicated agent '{name}'")
 
           if failures:
               print("Agent merge guardrail failures:")
@@ -75,7 +75,7 @@ jobs:
                   print(f"- {failure}")
               sys.exit(1)
 
-          print("Agent guardrails passed: no duplicates or conflicting allowed-tools detected.")
+          print("Agent guardrails passed: no duplicates or conflicting allowed_skills detected.")
           PY
 
       - name: Validate eval companions
@@ -122,7 +122,7 @@ jobs:
             echo "## Frontmatter changes"
             echo
             git diff --unified=0 "${RANGE}" -- agents skills \
-              | awk '/^diff --git / || /^@@/ || /^[+-](name|description|visibility|model|metadata|tools|allowed_skills|compatibility):/'
+              | awk '/^diff --git / || /^@@/ || /^[+-](name|description|visibility|model|metadata|allowed_skills):/'
           } > agent-merge-changelog.md
 
       - name: Upload changelog artifact
