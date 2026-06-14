@@ -198,6 +198,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running code review agent workflow contract tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'workflow-code-review-agent-contract.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Code review agent workflow contract tests failed' -ForegroundColor Red
+    Write-FailureLog 'workflow-code-review-agent-contract'
+    exit 1
+}
+
 Write-Host 'Running data workload tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'data-workload-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
