@@ -3,16 +3,16 @@ description: "Routing evaluation — validates trigger activation for the ci-aud
 skill: "agents/basecoat-50-security-ci-audit.agent.md"
 scenarios:
   - id: "pos-1"
-    input: "Audit our GitHub organization CI/CD settings"
+    input: "Audit this repository and export branch protection and required status checks."
     expect_activation: true
   - id: "pos-2"
-    input: "I need a comprehensive audit of runners and dependencies"
+    input: "Produce a governance evidence pack: merge queue state, environment protections, production reviewers, and workflow-dispatch actors."
     expect_activation: true
   - id: "pos-3"
-    input: "Can you review installed GitHub Apps and SDKs?"
+    input: "Export runner groups, runner labels, required security scanning gates, and whether CODEOWNERS is enforced."
     expect_activation: true
   - id: "pos-4"
-    input: "Please audit enterprise settings and generate recommendations"
+    input: "Compare repository policy files to live GitHub settings and report gaps in markdown."
     expect_activation: true
   - id: "neg-1"
     input: "help me write a new workflow"

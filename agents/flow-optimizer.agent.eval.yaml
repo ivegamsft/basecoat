@@ -1,0 +1,20 @@
+name: "flow-optimizer-routing"
+description: "Routing evaluation — validates trigger activation for the flow-optimizer agent."
+skill: "agents/flow-optimizer.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "Use our audit and suggested fixes to build a phased flow optimization plan."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Optimize merge throughput by tuning queue policy and CI execution tiers."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Create a roadmap to reduce approval-to-merge time using current bottleneck data."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Refactor the frontend auth state management."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Open an on-call incident bridge."
+    expect_activation: false
+

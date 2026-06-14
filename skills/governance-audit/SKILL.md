@@ -34,14 +34,27 @@ Use this skill to audit the repo against the canonical governance contract.
 1. Compare the live repo state to the canonical governance guide.
 2. Identify missing docs, stale labels, and template drift.
 3. Separate true gaps from repo-specific exceptions.
-4. Summarize findings with severity and evidence.
-5. File or propose GitHub issues for the unresolved gaps.
+4. Export governance-control state for branch, checks, environments, queue, runners, and production dispatch permissions.
+5. Summarize findings with severity and evidence.
+6. File or propose GitHub issues for the unresolved gaps.
+
+## Mandatory exports
+
+Every governance audit must include exported evidence for:
+
+- Branch protection configuration
+- Required status checks
+- Environment protection rules
+- Merge queue configuration
+- Runner group permissions
+- Who can dispatch production workflows
 
 ## Output
 
 - Findings table
 - Gap list
 - Recommended follow-up issues
+- Control export package for audit traceability
 
 ## Related Assets
 

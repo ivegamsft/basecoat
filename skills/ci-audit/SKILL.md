@@ -1,31 +1,32 @@
 ---
 name: ci-audit
-description: "Audits GitHub organization CI/CD settings and runner configurations. USE FOR: auditing CI/CD settings, analyzing runners, scanning dependencies, generating optimization recommendations, creating audit findings. DO NOT USE FOR: writing application code, code reviews, database schema design, creating GitHub Actions workflows, infrastructure-as-code development unrelated to CI/CD auditing."
+description: "Audits live GitHub repository governance controls and produces a markdown evidence pack. USE FOR: exporting branch protection and required checks, verifying merge queue and environment protections, auditing runners and security gates, and reporting policy-vs-live gaps. DO NOT USE FOR: writing application code, creating workflows, infrastructure implementation, or making repo-setting changes."
 compatibility: GHCP
 ---
 
 # CI/CD Audit Skill
 
-Comprehensive auditing of GitHub organization CI/CD settings, runner configurations, and dependency health.
+Repository governance auditing for CI/CD controls using GitHub API/CLI evidence.
 
 ## USE FOR
 
-- Auditing GitHub org CI/CD settings (runner allocation, concurrency, secret management)
-- Analyzing enterprise settings (SSO, audit logs, IP allowlist, app policies)
-- Scanning dependency health and identifying outdated packages
-- Reviewing self-hosted runner profiles (sizing, capacity, labels)
-- Assessing installed GitHub Apps and SDKs against project needs
-- Generating optimization recommendations for cost and performance
-- Creating structured audit findings and action plans
+- Exporting branch protection for `main`/`master`
+- Exporting required status checks
+- Reporting merge queue enabled/disabled state
+- Exporting GitHub Environment protection rules and production reviewers
+- Exporting allowed workflow-dispatch actors
+- Exporting runner groups and runner labels
+- Verifying required security scanning gates
+- Determining whether `CODEOWNERS` enforcement is active
+- Producing policy-vs-live gap analysis with remediation priorities
 
 ## DO NOT USE FOR
 
 - Writing application code or feature implementations
-- General code reviews of feature branches
-- Database schema design or migration planning
-- Creating GitHub Actions workflows from scratch (use `devops` skill instead)
-- Infrastructure-as-code development unrelated to CI/CD auditing
-- Personal developer environment configuration
+- Creating GitHub Actions workflows from scratch
+- Infrastructure-as-code implementation tasks
+- Changing repository settings or files during audit
+- General code review tasks unrelated to governance evidence
 
 ## Templates in This Skill
 
@@ -44,19 +45,12 @@ Comprehensive auditing of GitHub organization CI/CD settings, runner configurati
 
 Use with `ci-audit` agent for end-to-end auditing workflows. Route remediation to `devops-engineer` agent for implementation guidance.
 
-## Audit Script
+## Output contract
 
-The `scripts/ci-audit.ps1` script provides automation for common audit operations:
+Produce markdown only:
 
-- Query GitHub org settings via `gh` API
-- Parse `.github/workflows/` for runner usage patterns
-- Analyze `package.json`, lock files, and `requirements.txt` for dependencies
-- Generate structured audit JSON with findings and recommendations
-
-Example usage:
-
-```powershell
-./scripts/ci-audit.ps1 -OrgName my-org -OutputFormat json -OutputPath ./audit-report.json
-```
-
-Output format is fully compatible with the audit templates.
+1. Scope and timestamp
+2. Evidence table for the 10 required governance sections
+3. Gap matrix: policy expectation vs live setting
+4. Prioritized remediation recommendations
+5. Appendix with commands/endpoints used

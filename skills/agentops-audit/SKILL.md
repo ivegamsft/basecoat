@@ -1,49 +1,76 @@
 ---
 name: agentops-audit
-description: "Audits agent definitions, routing configurations, and tool bindings. USE FOR: reviewing agent definitions for correctness, assessing tool routing logic, validating tool bindings, evaluating prompt quality, analyzing agent behavior consistency. DO NOT USE FOR: writing agents from scratch, designing agent architectures, implementing tools, general code review."
-compatibility: GHCP
+description: "Audits and improves agent/skill specs with a scored rubric and routing rationale. USE FOR: scoring spec quality, identifying concrete fixes, producing revised specs, validating cost/latency fit, generating routing profiles. DO NOT USE FOR: implementing product features, unrelated code review, infrastructure deployment."
+compatibility:
+  - agent:agent-designer
+metadata:
+  domain: agent-development
+  maturity: production
+  audience:
+    - maintainer
+    - prompt-engineer
+allowed-tools:
+  - bash
+  - git
+  - gh
+visibility: public
 ---
 
 # Agent Operations Audit Skill
 
-Comprehensive auditing of agent definitions, tool routing configurations, prompt quality, and agent behavior consistency.
+Audit agent or skill specifications and produce an actionable scorecard, risk list, and revised spec.
 
 ## USE FOR
 
-- Reviewing agent definition files for correctness and completeness
-- Assessing tool routing logic and fallback strategies
-- Validating tool bindings and parameter mapping
-- Evaluating prompt quality, clarity, and instruction effectiveness
-- Analyzing agent behavior consistency and expected outcomes
-- Identifying missing tool bindings or incorrect routing
-- Reviewing agent error handling and edge cases
-- Assessing agent scope and tool permission boundaries
-- Evaluating multi-agent coordination and handoff logic
-- Creating structured audit findings with recommendations
+- Scoring existing specs using a 0-5 rubric
+- Finding ambiguity, safety gaps, and tool-policy issues
+- Recommending concrete, prioritized fixes
+- Producing a revised spec with measurable success criteria
+- Generating routing rationale and estimated turn profile
+- Supporting `audit` and `create_and_audit` flows in `agent-designer`
 
 ## DO NOT USE FOR
 
-- Writing agents from scratch (use agent development skills)
-- Designing agent architectures
-- Implementing tools (use tool development skills)
-- General code review (use `code-review` skill)
-- Backend development unrelated to agents
+- Writing product application code
+- Infrastructure deployment and operations
+- General-purpose code review outside agent/skill definitions
 
-## Audit Checklist
+## Required Scoring Dimensions (0-5)
 
-- **Agent Definition**: Completeness, naming, documentation
-- **Routing Logic**: Tool selection criteria, fallback handling, edge cases
-- **Tool Bindings**: Correct mapping, parameter passing, error scenarios
-- **Prompts**: Clarity, instructions, examples, consistency
-- **Behavior**: Expected outcomes, edge cases, failure modes
-- **Scope**: Tool permissions, boundary definitions, constraints
-- **Error Handling**: Invalid inputs, tool failures, graceful degradation
-- **Performance**: Response time, resource usage, efficiency
-- **Documentation**: Agent purpose, tool descriptions, examples
-- **Testing**: Routing scenarios, integration tests, edge cases
+- `clarity`
+- `safety_compliance`
+- `tool_correctness`
+- `ambiguity_handling`
+- `cost_latency_fit`
+- `eval_readiness`
+
+## Audit Deliverables
+
+- `scorecard`
+- `risks`
+- `concrete_fixes`
+- `revised_spec`
+
+## Output Contract
+
+Always include:
+
+1. **Task-shaping classification** (`execution_mode`, `estimated_turns`, `tool_profile`, `uncertainty`)
+2. **Routing profile**:
+   - `recommended_class`: `Fast | Balanced | Deep | Tool-Strict`
+   - `rationale`
+   - `estimated_turns`: `1 | 2-3 | 4+`
+   - `risk_mitigations`
+3. **Artifacts**:
+   - `audit_report`
+   - `agent_spec` when a revised or regenerated spec is produced
+
+## Guardrails
+
+- Do not assume model family names are portable across providers.
+- Prefer measurable success criteria over subjective language.
+- Escalate when constraints conflict (for example: fast + deep reasoning + lowest cost).
 
 ## Related Skills
 
-- `agent-design` — Agent design and architecture
-- `backend-audit` — Backend code quality assessment
-- `api-audit` — API contract and tool interface audit
+- `agent-design` — authoring and scaffolding agent/skill assets
