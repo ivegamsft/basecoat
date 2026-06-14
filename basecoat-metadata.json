@@ -1,7 +1,7 @@
 {
   "$schema": "basecoat-metadata-schema",
   "version": "3.26.0",
-  "generated": "2026-06-13",
+  "generated": "2026-06-14",
   "categories": {
     "AI & Development": {
       "label": "AI & Development",
@@ -2089,6 +2089,61 @@
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-build-master.agent.md",
       "model": "claude-sonnet-4.5",
+      "argumentHint": ""
+    },
+    {
+      "name": "flow-admission-controller",
+      "description": "Use when designing or tuning intake controls for PR volume, merge-queue admission, and reviewer/runner capacity limits. USE FOR: WIP limit policies, queue admission rules, stale PR handling, and safe load-shedding design. DO NOT USE FOR: overriding branch protections manually, skipping approvals, or implementing unrelated product features.",
+      "category": "Meta",
+      "keywords": [],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/flow-admission-controller.agent.md",
+      "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "flow-auditor",
+      "description": "Use when auditing PR intake, merge queue health, CI tier efficiency, and stale-branch pressure across repositories. USE FOR: queue bottleneck audits, CI waste analysis, PR aging reviews, merge-path risk scoring, and evidence-backed findings. DO NOT USE FOR: writing feature code, merging PRs without approval, or changing branch protections directly.",
+      "category": "Meta",
+      "keywords": [],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/flow-auditor.agent.md",
+      "model": "gpt-5.4-mini",
+      "argumentHint": ""
+    },
+    {
+      "name": "flow-optimizer",
+      "description": "Use when building an optimization program that combines audit evidence with prioritized fixes and execution sequencing. USE FOR: phased flow optimization plans, merge-queue and CI policy tuning, target KPI definition, and rollout risk reduction. DO NOT USE FOR: one-off bugfix coding, ad hoc release approvals, or force-merging around failed checks.",
+      "category": "Meta",
+      "keywords": [],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/flow-optimizer.agent.md",
+      "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "flow-suggester",
+      "description": "Use when converting audit findings into prioritized, issue-ready fixes with acceptance criteria and owners. USE FOR: translating audit evidence into GitHub issues, prioritizing queue and CI fixes, sequencing remediation work, and defining measurable outcomes. DO NOT USE FOR: running uncontrolled migrations, bypassing governance gates, or shipping code changes directly.",
+      "category": "Meta",
+      "keywords": [],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/flow-suggester.agent.md",
+      "model": "gpt-5.4-mini",
+      "argumentHint": ""
+    },
+    {
+      "name": "flow-tracker",
+      "description": "Use when tracking repository flow metrics over time and recommending corrective actions when trends degrade. USE FOR: weekly flow scorecards, trend analysis, regression alerts, and metric-backed improvement suggestions. DO NOT USE FOR: speculative architecture redesign, editing production code, or replacing incident response workflows.",
+      "category": "Meta",
+      "keywords": [],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/flow-tracker.agent.md",
+      "model": "gpt-5.4-mini",
       "argumentHint": ""
     }
   ]

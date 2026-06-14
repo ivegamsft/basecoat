@@ -3,16 +3,16 @@ description: "Routing evaluation — validates trigger activation for the ci-aud
 skill: "skills/ci-audit/SKILL.md"
 scenarios:
   - id: "pos-1"
-    input: "Audit our GitHub organization CI/CD settings for optimization opportunities"
+    input: "Create a markdown governance evidence pack for this repo with branch protection and required checks."
     expect_activation: true
   - id: "pos-2"
-    input: "Analyze runner configurations and dependency health across the org"
+    input: "Audit merge queue state, environment protection rules, production reviewers, and workflow-dispatch permissions."
     expect_activation: true
   - id: "pos-3"
-    input: "Review installed GitHub Apps and generate recommendations"
+    input: "Export runner groups/labels, required security scanning gates, and CODEOWNERS enforcement."
     expect_activation: true
   - id: "pos-4"
-    input: "Generate a CI/CD audit report with findings and ROI estimates"
+    input: "Report policy-vs-live governance gaps as markdown only."
     expect_activation: true
   - id: "neg-1"
     input: "help me set up a GitHub Actions workflow"

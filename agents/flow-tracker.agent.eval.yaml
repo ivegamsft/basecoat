@@ -1,0 +1,20 @@
+name: "flow-tracker-routing"
+description: "Routing evaluation — validates trigger activation for the flow-tracker agent."
+skill: "agents/flow-tracker.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "Track our PR and merge queue metrics weekly and flag regressions."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Build a flow scorecard and suggest actions when throughput declines."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Analyze trends in stale PRs, queue depth, and CI cancellation waste."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Migrate this app from React to Vue."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Generate a privacy policy document."
+    expect_activation: false
+

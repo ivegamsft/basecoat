@@ -1,0 +1,19 @@
+name: "flow-auditor-routing"
+description: "Routing evaluation — validates trigger activation for the flow-auditor agent."
+skill: "agents/flow-auditor.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "Audit our PR queue, merge delays, and CI waste across repositories."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Find where our merge path is bottlenecked and rank the biggest flow risks."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Review stale PR pressure and canceled-run waste to identify bottlenecks, and export branch protection, required checks, environment protection, merge queue config, runner permissions, and production workflow dispatch access."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Implement a new payment endpoint in the API."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Design a new logo for the docs site."
+    expect_activation: false
