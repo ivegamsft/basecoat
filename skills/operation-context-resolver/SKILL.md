@@ -1,130 +1,52 @@
 ---
 name: operation-context-resolver
-description: "Deterministic environment routing for troubleshooting and deployment workflows that map user intent, labels, and branch context to safe environment actions. USE FOR: resolving target environment before running diagnostics, gating deployments by allowed/blocked actions, enforcing production approval requirements, and standardizing incident-readonly behavior across repositories. DO NOT USE FOR: replacing platform policy enforcement systems, making direct infrastructure mutations without approval controls, or bypassing environment configuration validation."
+description: "Resolve deterministic environment context for branch, label, and incident driven workflows using environment-map.yml, returning target environment, operation mode, and action permissions. USE FOR: resolving preview/dev/staging/prod target before troubleshooting or deployment, enforcing allowed and blocked action checks, applying incident-readonly routing, validating human approval requirements for risky actions. DO NOT USE FOR: direct infrastructure mutation without policy checks, replacing platform branch protection controls, or bypassing environment-map validation."
 compatibility: GHCP
-requires:
-  - GitHub Environments configured
-  - ".github/environment-map.yml in repo"
-  - "Optional: Azure subscription context"
-provides:
-  - "operation-context.json (JSON output)"
-  - "ResolverInput/OperationContext TypeScript types"
-  - "GitHub Actions workflow template"
-examples:
-  - "Resolve environment for branch troubleshooting"
-  - "Determine permissions for prod incident response"
-  - "Route deployment to correct environment"
-eval_coverage:
-  - Resolver outputs correct environment for each branch pattern
-  - Incident keywords override branch context
-  - Mutations are blocked when context forbids them
-  - Human approval is required for prod operations
-tags:
-  - environment
-  - routing
-  - troubleshooting
-  - deployment
-  - incident-response
 ---
 
 # Operation Context Resolver
 
-Resolves operational context (target environment, permissions, allowed/blocked actions) for GitHub Actions workflows and agentic tasks.
-
-## Quick Start
-
-### 1. Provide environment map
-
-Create `.github/environment-map.yml` in your repo (template provided in `templates/`).
-
-### 2. Import resolver in your agent
-
-```typescript
-import { resolveOperationContext } from 'skills/operation-context-resolver';
-
-const context = await resolveOperationContext({
-  github_event_payload: process.env.GITHUB_EVENT,
-  github_ref: process.env.GITHUB_REF,
-  user_intent: 'troubleshoot login timeout'
-});
-
-// Now context has:
-// - target_environment
-// - allowed_actions
-// - blocked_actions
-// - human_approval_required
-// etc.
-```
-
-### 3. Check permissions before action
-
-```typescript
-const isActionAllowed = (ctx: OperationContext, action: string): boolean =>
-  ctx.allowed_actions.includes(action) && !ctx.blocked_actions.includes(action);
-
-if (!isActionAllowed(context, 'read_logs')) {
-  throw new Error(`Action blocked: read_logs not in allowed_actions`);
-}
-
-if (context.human_approval_required && context.target_environment === 'prod') {
-  console.log('Production operation requires human approval.');
-}
-```
-
-## Key Features
-
-- **Deterministic routing**: Branch name, PR labels, incident keywords to environment
-- **Explicit permissions**: Define allowed/blocked actions per environment and mode
-- **Human gates**: Production operations require approval by default
-- **Incident override**: Keywords like "site is down in prod" override branch context
-- **Audit trail**: Operation context is immutable JSON; can be logged and reviewed
-- **Extensible**: Add custom modes, rules, and fields without breaking changes
+Routes a request to the correct environment and mode, then returns allowed and blocked actions.
 
 ## Inputs
 
-| Input | Type | Example | Purpose |
-|-------|------|---------|---------|
-| `github_event_payload` | JSON | `github.event` | Extract branch, SHA, PR labels |
-| `github_ref` | string | `refs/heads/main` | Determine branch/tag |
-| `user_intent` | string | "site is down in prod" | Keyword matching for incident |
-| `pr_labels` | string[] | `["env:prod"]` | Explicit environment signal |
-| `workflow_dispatch_input` | object | `{ environment: "staging" }` | Human override |
+- `github_ref`, `github_event_payload`, `pr_labels`
+- `user_intent` for incident keyword routing
+- `workflow_dispatch_input.environment` for explicit override
 
 ## Output
 
-```json
-{
-  "request": "user request or trigger",
-  "operation_id": "UUID for audit",
-  "target_environment": "preview|dev|staging|prod",
-  "github_environment": "preview|dev|staging|production",
-  "azure_subscription": "...",
-  "resource_group": "...",
-  "production": false,
-  "risk_level": "low|medium|high|critical",
-  "mode": "read_only|branch_deploy|incident_readonly",
-  "allowed_actions": ["read_logs", "read_deployments"],
-  "blocked_actions": ["prod_deploy", "migrate_db"],
-  "human_approval_required": false,
-  "incident_mode": false,
-  "resolved_at": "ISO8601 timestamp",
-  "resolver_version": "1.0.0"
-}
+`OperationContext` includes:
+
+- `target_environment`, `mode`, `risk_level`
+- `allowed_actions`, `blocked_actions`
+- `human_approval_required`, `incident_mode`
+
+## Behavior order
+
+1. Explicit workflow override
+2. Incident keyword override
+3. Environment labels
+4. YAML rules from `environment-map.yml`
+5. Branch pattern matching
+6. Safe default (`dev`, `read_only`)
+
+## Usage
+
+```typescript
+const context = await resolveOperationContext({
+  github_ref: process.env.GITHUB_REF,
+  user_intent: "troubleshoot login timeout",
+  pr_labels: ["env:staging"],
+});
+
+const isActionAllowed =
+  context.allowed_actions.includes("read_logs") &&
+  !context.blocked_actions.includes("read_logs");
 ```
 
-## Decision Logic
+## Artifacts
 
-Resolver uses this priority:
-
-1. Human-provided override (workflow_dispatch input)
-2. Incident keywords ("site is down", "customers cannot access")
-3. PR labels (`env:prod`, `env:staging`)
-4. GitHub deployment records for commit SHA
-5. Branch patterns (matched against environment-map.yml)
-6. Default to safe mode (read-only, non-prod)
-
-## See Also
-
-- [Integration Guide](./README.md)
-- [Environment Map Template](./templates/environment-map.yml)
-- [TypeScript Types](./src/types.ts)
+- Template: `templates/environment-map.yml`
+- Guide: `README.md`
+- Types: `src/types.ts`
