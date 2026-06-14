@@ -103,30 +103,109 @@ jobs:
           set -euo pipefail
 
           PRODUCTION_REMOTE="https://x-access-token:${PRODUCTION_TOKEN}@github.com/ivegamsft/basecoat.git"
+          PROTECTION_API="https://api.github.com/repos/ivegamsft/basecoat/branches/main/protection"
+          PROTECTION_BACKUP_FILE=".production-main-protection.json"
+          PROTECTION_VERIFY_FILE=".production-main-protection-post.json"
+          HAD_PROTECTION=0
+          PROTECTION_RESTORED=0
 
-          # Temporarily disable branch protection to allow push
-          echo "Disabling branch protection..."
-          curl -sf -X DELETE \
+          restore_branch_protection() {
+            if [ "$PROTECTION_RESTORED" -eq 1 ]; then
+              return
+            fi
+
+            if [ "$HAD_PROTECTION" -eq 1 ]; then
+              echo "Restoring original branch protection..."
+              curl -sf -X PUT \
+                -H "Authorization: token ${PRODUCTION_TOKEN}" \
+                -H "Accept: application/vnd.github+json" \
+                "$PROTECTION_API" \
+                --data-binary "@${PROTECTION_BACKUP_FILE}" >/dev/null
+            else
+              echo "Branch had no protection before publish; ensuring unprotected state is preserved..."
+              curl -sf -X DELETE \
+                -H "Authorization: token ${PRODUCTION_TOKEN}" \
+                -H "Accept: application/vnd.github+json" \
+                "$PROTECTION_API" >/dev/null || true
+            fi
+
+            PROTECTION_RESTORED=1
+          }
+
+          trap 'restore_branch_protection' EXIT
+
+          echo "Capturing existing branch protection..."
+          protection_status=$(curl -sS -o "$PROTECTION_BACKUP_FILE" -w "%{http_code}" \
             -H "Authorization: token ${PRODUCTION_TOKEN}" \
             -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/ivegamsft/basecoat/branches/main/protection" || true
+            "$PROTECTION_API")
+
+          if [ "$protection_status" = "200" ]; then
+            HAD_PROTECTION=1
+            echo "Existing branch protection captured."
+          elif [ "$protection_status" = "404" ]; then
+            echo "Branch protection is currently disabled."
+            echo '{}' > "$PROTECTION_BACKUP_FILE"
+          else
+            echo "Failed to capture branch protection (HTTP ${protection_status})."
+            exit 1
+          fi
+
+          if [ "$HAD_PROTECTION" -eq 1 ]; then
+            echo "Temporarily disabling branch protection to allow force-push..."
+            curl -sf -X DELETE \
+              -H "Authorization: token ${PRODUCTION_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              "$PROTECTION_API" >/dev/null
+          fi
 
           # Clear any persisted Actions bot credentials so PAT is used for push
           git config --local --unset-all http.https://github.com/.extraheader || true
 
-          # Push the main branch
+          # Push the main branch (force is required to mirror rewritten release content)
           git push "${PRODUCTION_REMOTE}" HEAD:refs/heads/main --force
 
           # Push the tag
           git push "${PRODUCTION_REMOTE}" "refs/tags/${TAG}"
 
-          # Re-enable branch protection
-          echo "Re-enabling branch protection..."
-          curl -sf -X PUT \
-            -H "Authorization: token ${PRODUCTION_TOKEN}" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/ivegamsft/basecoat/branches/main/protection" \
-            -d '{"required_status_checks":null,"enforce_admins":false,"required_pull_request_reviews":{"required_approving_review_count":1},"restrictions":null}'
+          restore_branch_protection
+
+          echo "Verifying branch protection round-trip..."
+          if [ "$HAD_PROTECTION" -eq 1 ]; then
+            verify_status=$(curl -sS -o "$PROTECTION_VERIFY_FILE" -w "%{http_code}" \
+              -H "Authorization: token ${PRODUCTION_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              "$PROTECTION_API")
+            if [ "$verify_status" != "200" ]; then
+              echo "Branch protection verification failed (HTTP ${verify_status})."
+              exit 1
+            fi
+
+            python - "$PROTECTION_BACKUP_FILE" "$PROTECTION_VERIFY_FILE" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as before_file:
+    before = json.load(before_file)
+with open(sys.argv[2], encoding="utf-8") as after_file:
+    after = json.load(after_file)
+
+if before != after:
+    print("Branch protection restore mismatch.", file=sys.stderr)
+    sys.exit(1)
+PY
+          else
+            verify_status=$(curl -sS -o /dev/null -w "%{http_code}" \
+              -H "Authorization: token ${PRODUCTION_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              "$PROTECTION_API")
+            if [ "$verify_status" != "404" ]; then
+              echo "Expected unprotected branch after restore, got HTTP ${verify_status}."
+              exit 1
+            fi
+          fi
+
+          rm -f "$PROTECTION_BACKUP_FILE" "$PROTECTION_VERIFY_FILE"
 
           echo "Pushed ${TAG} to ivegamsft/basecoat"
 
@@ -150,4 +229,3 @@ jobs:
             }' \
             && echo "Production repo metadata updated" \
             || echo "Warning: could not update repo metadata (non-fatal)"
-
