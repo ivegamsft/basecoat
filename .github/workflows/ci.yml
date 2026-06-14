@@ -98,6 +98,10 @@ jobs:
         shell: pwsh
         run: pwsh tests/workflow-guardrails-tests.ps1
 
+      - name: Validate — token status observability thresholds
+        shell: pwsh
+        run: pwsh tests/token-status-tests.ps1
+
       - name: Upload test results on failure
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -126,4 +130,3 @@ jobs:
           path: test-results/
           retention-days: 7
           if-no-files-found: ignore
-
