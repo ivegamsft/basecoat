@@ -95,9 +95,17 @@ function toMarkdown(report: DriftReport): string {
 }
 
 function toJunit(report: DriftReport): string {
+  const escapeXml = (value: string): string =>
+    value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+
   const testCases = report.findings.map(
     finding =>
-      `    <testcase classname="${finding.category}" name="${finding.id}"><failure message="${finding.finding.replace(/"/g, '&quot;')}">${finding.remediation.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</failure></testcase>`
+      `    <testcase classname="${escapeXml(finding.category)}" name="${escapeXml(finding.id)}"><failure message="${escapeXml(finding.finding)}">${escapeXml(finding.remediation)}</failure></testcase>`
   );
 
   return [

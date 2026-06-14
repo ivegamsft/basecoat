@@ -74,16 +74,12 @@ if (driftIsCritical(report)) {
 }
 ```
 
-### Consume drift status in resolver
-
-The `operation-context-resolver` skill automatically checks drift status and includes it in the output:
+### Consume drift status in your workflow
 
 ```typescript
-const context = await resolveOperationContext({ ... });
-
-// Returns: 'clean' | 'warning' | 'critical'
-if (context.metadata.drift_status === 'critical') {
-  throw new Error('Cannot proceed: environment-map.yml has critical drift');
+const report = await auditEnvironmentDrift({ ... });
+if (driftIsCritical(report)) {
+  throw new Error('Cannot proceed: critical environment drift detected');
 }
 ```
 

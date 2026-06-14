@@ -46,6 +46,7 @@ Routes a request to the correct environment and mode, then returns allowed and b
 
 ```typescript
 import fs from 'fs';
+import { resolveOperationContext } from '@basecoat/operation-context-resolver';
 
 const githubEventPayload = process.env.GITHUB_EVENT_PATH
   ? fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf-8')

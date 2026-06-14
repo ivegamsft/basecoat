@@ -1,6 +1,6 @@
 // Type definitions for operation context resolver
 
-export type Environment = 'preview' | 'dev' | 'staging' | 'prod';
+export type Environment = string;
 export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
 export type OperationMode = 
   | 'read_only'
@@ -82,7 +82,7 @@ export interface ResolverRule {
     | {
         user_intent_contains?: string[];
         pr_labels?: string[];
-        event_name?: string;
+        event_name?: string | string[];
         source_branch?: string | string[];
       };
   context: {

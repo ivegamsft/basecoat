@@ -80,11 +80,12 @@ const logs = await readLogsFromEnvironment(context.target_environment);
 ### Check before deployment
 
 ```typescript
-if (context.blocked_actions.includes('deploy_app')) {
-  console.log('Deployment blocked in this mode.');
-  if (context.human_approval_required) {
-    throw new Error('Human approval required before proceeding.');
-  }
+const canDeploy =
+  context.allowed_actions.includes('deploy_app') &&
+  !context.blocked_actions.includes('deploy_app');
+
+if (!canDeploy) {
+  throw new Error(`Deployment not allowed in ${context.mode} for ${context.target_environment}`);
 }
 
 // Safe to deploy
@@ -188,7 +189,7 @@ const context = await resolveOperationContext({
 ### Validate environment-map.yml in your repo
 
 ```bash
-npm run validate -- \
+npx @basecoat/operation-context-resolver validate \
   --repo-root .
 ```
 
@@ -206,7 +207,7 @@ Output:
 
 ```yaml
 - name: Validate environment map
-  run: npm run validate -- --repo-root .
+  run: npx @basecoat/operation-context-resolver validate --repo-root .
 ```
 
 ## Customization

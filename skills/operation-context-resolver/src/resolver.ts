@@ -87,6 +87,14 @@ export class OperationContextResolver {
         );
       }
 
+      // Step 4b: Deployment-scoped operations prefer read-only context in the branch environment.
+      if (input.deployment_record_sha) {
+        const deploymentEnv = this.resolveEnvironmentFromBranch(branch);
+        if (deploymentEnv) {
+          return this.buildContext(deploymentEnv, 'read_only', operationId, now, input);
+        }
+      }
+
       // Step 5: Check branch pattern
       const envFromBranch = this.resolveEnvironmentFromBranch(branch);
       if (envFromBranch) {
@@ -279,11 +287,11 @@ export class OperationContextResolver {
       throw new Error(`Environment '${env}' not found in environment-map.yml`);
     }
 
-    const allowedActions = envConfig.allowed_actions[mode] || [];
-    const blockedActions = envConfig.blocked_actions[mode] || [];
+    const allowedActions = envConfig.allowed_actions?.[mode] || [];
+    const blockedActions = envConfig.blocked_actions?.[mode] || [];
     const humanApprovalRequired = overrides?.human_approval_required !== undefined
       ? overrides.human_approval_required
-      : envConfig.approval_required[mode] || false;
+      : envConfig.approval_required?.[mode] || false;
 
     const context: OperationContext = {
       request: input.user_intent || 'unspecified',

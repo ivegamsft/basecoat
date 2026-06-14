@@ -37,10 +37,12 @@ export class EnvironmentAuditDrifter {
         await this.auditDeploymentDrift();
       }
 
-      // Optional: audit tags
       if (this.input.app_config_key_check) {
-        await this.auditTagDrift();
+        await this.auditAppConfigKeyDrift();
       }
+
+      // Always audit tags
+      await this.auditTagDrift();
     } catch (error) {
       this.addFinding({
         id: 'audit-error',
@@ -91,7 +93,7 @@ export class EnvironmentAuditDrifter {
 
       if (!exists) {
         this.addFinding({
-          id: `config-resource-missing-${resource.type}`,
+          id: `config-resource-missing-${env}-${resource.type}`,
           environment: env,
           severity: resource.critical ? 'critical' : 'high',
           category: 'config_drift',
@@ -108,7 +110,7 @@ export class EnvironmentAuditDrifter {
     // Check GitHub environment
     if (!config.github_environment) {
       this.addFinding({
-        id: 'config-github-environment-missing-value',
+        id: `config-github-environment-missing-value-${env}`,
         environment: env,
         severity: 'high',
         category: 'config_drift',
@@ -123,7 +125,7 @@ export class EnvironmentAuditDrifter {
     const githubEnvExists = await this.mockCheckGitHubEnvironment(config.github_environment);
     if (!githubEnvExists) {
       this.addFinding({
-        id: 'config-github-environment-missing',
+        id: `config-github-environment-missing-${env}`,
         environment: env,
         severity: 'high',
         category: 'config_drift',
@@ -143,7 +145,7 @@ export class EnvironmentAuditDrifter {
 
       if (config.autonomy_level === 'A2' && protection.required_approvals < 1) {
         this.addFinding({
-          id: `security-approval-mismatch-${pattern}`,
+          id: `security-approval-mismatch-${env}-${pattern}`,
           environment: env,
           severity: 'high',
           category: 'security_drift',
@@ -228,6 +230,24 @@ export class EnvironmentAuditDrifter {
             timestamp: new Date().toISOString(),
           });
         }
+      }
+    }
+  }
+
+  private async auditAppConfigKeyDrift(): Promise<void> {
+    for (const [env, config] of Object.entries(this.environmentMap.environments || {})) {
+      if (!config.app_config) {
+        this.addFinding({
+          id: `app-config-key-check-missing-store-${env}`,
+          environment: env,
+          severity: 'medium',
+          category: 'config_drift',
+          finding: 'App Configuration key check requested, but app_config is not set for this environment',
+          expected: 'app_config value',
+          actual: 'missing',
+          remediation: 'Set app_config for the environment or disable app_config_key_check',
+          timestamp: new Date().toISOString(),
+        });
       }
     }
   }
