@@ -2055,7 +2055,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/governance-auditor.agent.md",
-      "model": "claude-sonnet-4.5",
+      "model": "gpt-5.4-mini",
       "argumentHint": ""
     },
     {
@@ -2072,7 +2072,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/governance-author.agent.md",
-      "model": "claude-sonnet-4.5",
+      "model": "claude-sonnet-4.6",
       "argumentHint": ""
     },
     {
