@@ -29,11 +29,13 @@ with high signal-to-noise ratio. Do not comment on style or formatting.
 - **PR title**: `${{ github.event.pull_request.title }}`
 - **Repository**: `${{ github.repository }}`
 
-Fetch the PR diff and file list:
-```bash
-gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }}
-gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json files,additions,deletions,changedFiles,baseRefName
-```
+Fetch the PR diff and file list using GitHub MCP tools. The repository
+`${{ github.repository }}` is in `owner/repo` format — split on `/` to get
+owner and repo name:
+
+- Call `get_pull_request` with `pullNumber: ${{ github.event.pull_request.number }}` to get PR metadata (additions, deletions, changedFiles, baseRefName)
+- Call `get_pull_request_files` to get the list of changed files
+- Call `get_pull_request_diff` to get the full diff
 
 ## What to Do
 
