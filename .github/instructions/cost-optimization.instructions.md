@@ -31,6 +31,20 @@ Execute these in order to reduce input-token bloat first, then optimize routing:
 6. Choose Ask mode by default for focused answers; use Agent mode when execution spans multiple files, long-running commands, or broad research.
 7. Keep output tokens lean by default: concise responses, small diffs, and escalation to deeper explanations only when needed.
 
+### Ask mode vs Agent mode decision table
+
+Use this table before starting work so mode selection is explicit, not implied.
+
+| Situation | Preferred mode | Why | BaseCoat example |
+|---|---|---|---|
+| Single question, quick lookup, or one-file clarification | **Ask mode** | Avoids agent startup and orchestration overhead | "What does `.github/instructions/testing-validation.instructions.md` require for local validation?" |
+| Small edit in one file with low ambiguity | **Ask mode** | Lower turn count and less context carry-over | Update one markdown section in `docs/guides/workflows-getting-started.md` |
+| Multi-file change with generated artifacts or cross-reference updates | **Agent mode** | Better for coordinated edits and consistency checks | Refresh inventory docs plus `asset-manifest.json` and metadata artifacts |
+| Command-heavy workflow with verification loops | **Agent mode** | Handles tool execution and iteration without main-thread churn | Run full validation/test scripts and fix breakages before PR |
+| Broad triage/research across many modules or issues | **Agent mode** | Delegation and batching reduce repeated reads in the main thread | Backlog burndown scan across multiple issues/PRs |
+
+If uncertain, start in **Ask mode** and switch to **Agent mode** when scope expands beyond a focused answer or single-step edit.
+
 ### 1. Compact at phase transitions (not just time)
 
 Invoke `/compact` when switching between semantic phases:
