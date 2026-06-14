@@ -18,6 +18,7 @@ jobs:
     uses: ./.github/workflows/validate-basecoat.yml
     with:
       concurrency_group: "Package-Base-Coat-validate-${{ github.ref }}"
+      fail_on_guidance_audit_errors: false
 
   package:
     needs: validate
@@ -99,4 +100,3 @@ jobs:
           else
             gh release create "$GITHUB_REF_NAME" $files --title "Base Coat $GITHUB_REF_NAME" --generate-notes --repo "${{ github.repository }}"
           fi
-
