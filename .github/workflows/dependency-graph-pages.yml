@@ -1,0 +1,91 @@
+name: "BaseCoat - Dependency Graph to Pages"
+
+on:
+  schedule:
+    - cron: "0 8 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  graph:
+    name: Generate dependency graph and publish via docs PR
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      branch_name: ${{ steps.prepare.outputs.branch_name }}
+      should_open_pr: ${{ steps.prepare.outputs.should_open_pr }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+
+      - name: Generate dependency graph report
+        id: prepare
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          New-Item -ItemType Directory -Force -Path docs/reports | Out-Null
+          $graph = pwsh scripts/graph-dependencies.ps1 -ShowOrphans
+          $timestamp = Get-Date -AsUTC -Format 'yyyy-MM-ddTHH:mm:ssZ'
+          $content = @(
+            '# Dependency Graph',
+            '',
+            "- Generated: $timestamp",
+            "- Source workflow: `.github/workflows/dependency-graph-pages.yml`",
+            '',
+            $graph
+          ) -join "`n"
+          Set-Content -Path docs/reports/dependency-graph.md -Value $content -Encoding UTF8
+
+          if (-not (git diff --quiet -- docs/reports/dependency-graph.md)) {
+            $branch = "automation/dependency-graph-$env:GITHUB_RUN_ID"
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git checkout -b $branch
+            git add docs/reports/dependency-graph.md
+            git commit -m 'docs(graph): refresh dependency graph report'
+            git push origin $branch
+            Add-Content -Path $env:GITHUB_OUTPUT -Value "should_open_pr=true"
+            Add-Content -Path $env:GITHUB_OUTPUT -Value "branch_name=$branch"
+          } else {
+            Add-Content -Path $env:GITHUB_OUTPUT -Value "should_open_pr=false"
+            Add-Content -Path $env:GITHUB_OUTPUT -Value "branch_name="
+          }
+
+          Get-Content docs/reports/dependency-graph.md | Add-Content -Path $env:GITHUB_STEP_SUMMARY
+
+      - name: Upload dependency graph artifact
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: dependency-graph-report
+          path: docs/reports/dependency-graph.md
+          retention-days: 14
+
+      - name: Open pull request for docs publication
+        if: steps.prepare.outputs.should_open_pr == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch="${{ steps.prepare.outputs.branch_name }}"
+          title="docs(graph): refresh dependency graph report"
+          body="Automated refresh of \`docs/reports/dependency-graph.md\`.\n\nThis report is published to Pages via the docs deployment workflow after merge.\n\nCloses #189."
+
+          existing="$(gh pr list --state open --head "$branch" --json number --jq '.[0].number' || true)"
+          if [[ -n "$existing" ]]; then
+            echo "PR #$existing already exists for branch $branch"
+            exit 0
+          fi
+
+          gh pr create --base main --head "$branch" --title "$title" --body "$body"

@@ -166,6 +166,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running workflow enhancements (#1389) tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'workflow-enhancements-1389-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Workflow enhancements (#1389) tests failed' -ForegroundColor Red
+    Write-FailureLog 'workflow-enhancements-1389-tests'
+    exit 1
+}
+
 Write-Host 'Running routing guardrail tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'routing-guardrail-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

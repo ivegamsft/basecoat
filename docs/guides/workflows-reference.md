@@ -2,6 +2,25 @@
 
 Reference for upstream workflow templates in BaseCoat. Consumer installs use `scripts/configure-downstream-workflows.ps1`, which currently installs only the supported subset (`reusable` by default, with supported `templates` via opt-in) from `.github/base-coat/workflows`.
 
+## Consolidated Workflow Enhancements (#1389)
+
+The following workflows implement the consolidated production enhancement set for
+issues #181 through #190. Each workflow includes `workflow_dispatch` for manual
+testing and uses pinned action SHAs.
+
+| Issue | Workflow | Purpose |
+|---|---|---|
+| #181 | `.github/workflows/dependency-audit.yml` | Weekly dependency audit across lockfiles with issue tracking output |
+| #182 | `.github/workflows/stale-management.yml` | Auto-mark and auto-close stale issues/PRs with configurable thresholds |
+| #183 | `.github/workflows/release-changelog-generation.yml` | Generate changelog content from release events and open update PRs |
+| #184 | `.github/workflows/cross-repo-sync-validation.yml` | Validate consumer repos are within a configurable version drift window |
+| #185 | `.github/workflows/docs-link-checker.yml` | Nightly external docs link checks with report artifacts and issue updates |
+| #186 | `.github/workflows/skill-coverage-report.yml` | Scheduled report of skills missing `eval.yaml` coverage |
+| #187 | `.github/workflows/repo-health-check.yml` | Scheduled lint/validate/test health run with badge-ready status |
+| #188 | `.github/workflows/pr-size-labeler.yml` | Automatic PR size labels (`size:XS`..`size:XL`) from diff size |
+| #189 | `.github/workflows/dependency-graph-pages.yml` | Generate dependency graph report and publish via docs PR flow |
+| #190 | `.github/workflows/reviewer-autoassign.yml` | Auto-request reviewers using changed-path commit history |
+
 ## Distributed Workflow Templates (9 Total)
 
 ### 1. asset-health.yml

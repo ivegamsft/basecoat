@@ -1,0 +1,131 @@
+name: "BaseCoat - Release Changelog Generation"
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to generate changelog for (e.g., v3.30.7)"
+        type: string
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    name: Generate changelog section from release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      branch_name: ${{ steps.prepare.outputs.branch_name }}
+      should_open_pr: ${{ steps.prepare.outputs.should_open_pr }}
+      version: ${{ steps.prepare.outputs.version }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: "3.x"
+
+      - name: Generate changelog entry
+        id: prepare
+        shell: bash
+        env:
+          TAG_INPUT: ${{ inputs.tag || '' }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || '' }}
+        run: |
+          set -euo pipefail
+          mkdir -p reports
+
+          tag="${RELEASE_TAG:-$TAG_INPUT}"
+          if [[ -z "$tag" ]]; then
+            echo "::error::No release tag provided."
+            exit 1
+          fi
+
+          version="${tag#v}"
+          date_utc="$(date -u +%Y-%m-%d)"
+          notes_file="reports/release-${version}.md"
+          scripts/generate-release-notes.sh "$tag" "$version" "$notes_file"
+
+          if grep -Eq "^## v?${version}\b" CHANGELOG.md; then
+            echo "Changelog already contains ${version}; skipping PR creation."
+            echo "should_open_pr=false" >> "$GITHUB_OUTPUT"
+            echo "branch_name=" >> "$GITHUB_OUTPUT"
+            echo "version=$version" >> "$GITHUB_OUTPUT"
+            cat "$notes_file" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          NOTES_FILE="$notes_file" VERSION="$version" DATE_UTC="$date_utc" python - <<'PY'
+          from pathlib import Path
+          import os
+
+          changelog = Path("CHANGELOG.md")
+          notes = Path(os.environ["NOTES_FILE"]).read_text(encoding="utf-8").strip()
+          version = os.environ["VERSION"]
+          date_utc = os.environ["DATE_UTC"]
+
+          section = f"\n## {version} - {date_utc}\n\n{notes}\n"
+          content = changelog.read_text(encoding="utf-8")
+          marker = "## Unreleased"
+          if marker in content:
+            head, tail = content.split(marker, 1)
+            updated = f"{head}{marker}\n\n- No unreleased changes.\n{section}{tail.lstrip()}"
+          else:
+            updated = f"{content.rstrip()}\n{section}"
+          changelog.write_text(updated, encoding="utf-8")
+          PY
+
+          branch_name="automation/changelog-${version}-${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch_name"
+          git add CHANGELOG.md
+          git commit -m "docs(changelog): add release notes for ${version}"
+          git push origin "$branch_name"
+
+          echo "should_open_pr=true" >> "$GITHUB_OUTPUT"
+          echo "branch_name=$branch_name" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          cat "$notes_file" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload generated release notes
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: release-changelog-notes
+          path: reports/release-*.md
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Open changelog pull request
+        if: steps.prepare.outputs.should_open_pr == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch="${{ steps.prepare.outputs.branch_name }}"
+          version="${{ steps.prepare.outputs.version }}"
+          title="docs(changelog): add release notes for ${version}"
+          body="Automated changelog generation for release \`${version}\`.\n\n- Source tag: \`${version}\`\n- Workflow: \`.github/workflows/release-changelog-generation.yml\`\n\nCloses #183."
+
+          existing="$(gh pr list --state open --head "$branch" --json number --jq '.[0].number' || true)"
+          if [[ -n "$existing" ]]; then
+            echo "PR #$existing already exists for branch $branch"
+            exit 0
+          fi
+
+          gh pr create --base main --head "$branch" --title "$title" --body "$body"

@@ -1,0 +1,91 @@
+name: "BaseCoat - PR Size Labeler"
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "Pull request number to label"
+        type: number
+        required: true
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  label:
+    name: Apply deterministic PR size label
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Calculate and apply size label
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        env:
+          PR_NUMBER_INPUT: ${{ inputs.pr_number || '' }}
+        with:
+          script: |
+            const prNumber = context.payload.pull_request?.number || Number(process.env.PR_NUMBER_INPUT || '0');
+            if (!prNumber) {
+              core.setFailed('Unable to resolve pull request number.');
+              return;
+            }
+
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+
+            const totalChanges = (pr.data.additions || 0) + (pr.data.deletions || 0);
+            const thresholds = [
+              { label: 'size:XS', max: 20, color: '0e8a16', description: 'Small PR (<=20 changed lines)' },
+              { label: 'size:S', max: 100, color: '1d76db', description: 'Small-medium PR (<=100 changed lines)' },
+              { label: 'size:M', max: 300, color: 'fbca04', description: 'Medium PR (<=300 changed lines)' },
+              { label: 'size:L', max: 800, color: 'd93f0b', description: 'Large PR (<=800 changed lines)' },
+              { label: 'size:XL', max: Number.MAX_SAFE_INTEGER, color: 'b60205', description: 'Extra large PR (>800 changed lines)' }
+            ];
+
+            const selected = thresholds.find(item => totalChanges <= item.max) || thresholds[thresholds.length - 1];
+            const allLabels = thresholds.map(item => item.label);
+
+            const existingLabels = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber
+            });
+            const current = existingLabels.data.map(label => label.name);
+            const toRemove = current.filter(name => allLabels.includes(name) && name !== selected.label);
+
+            for (const name of toRemove) {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                name
+              });
+            }
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              labels: [selected.label]
+            });
+
+            core.summary
+              .addHeading('PR size labeling result')
+              .addTable([
+                [{ data: 'PR', header: true }, `#${prNumber}`],
+                [{ data: 'Additions', header: true }, String(pr.data.additions || 0)],
+                [{ data: 'Deletions', header: true }, String(pr.data.deletions || 0)],
+                [{ data: 'Total changes', header: true }, String(totalChanges)],
+                [{ data: 'Applied label', header: true }, selected.label]
+              ])
+              .write();
