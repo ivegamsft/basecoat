@@ -66,7 +66,7 @@ After Phase 2:
 - **#1371**: Rename remaining generic README.md files to be descriptive
   - Owner: @ibuyspy
   - Files:
-    - docs/templates/basecoat-memory/basecoat-shared-memory-setup.md
+    - .github/template-repos/basecoat-memory/basecoat-shared-memory-setup.md
     - docs/archive/repo_history/repo-history-index.md
     - docs/archive/wave3/wave3-database-validation-readme.md
   - Est. effort: 15 min (rename + update any internal links)
