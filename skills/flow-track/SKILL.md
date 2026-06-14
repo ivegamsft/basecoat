@@ -1,4 +1,4 @@
----
+﻿---
 name: flow-track
 description: "Use when tracking PR/merge/CI flow metrics over time and generating metric-backed corrective suggestions. USE FOR: trend scorecards, regression alerts, threshold monitoring, and action recommendations tied to metrics. DO NOT USE FOR: one-off static audits without history, ad hoc coding work, or replacing SRE incident procedures."
 compatibility:
@@ -48,4 +48,3 @@ guidance when metrics trend in the wrong direction.
 - `agents/flow-tracker.agent.md`
 - `skills/flow-audit/SKILL.md`
 - `skills/flow-suggest/SKILL.md`
-

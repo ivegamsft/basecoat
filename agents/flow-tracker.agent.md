@@ -1,4 +1,4 @@
----
+﻿---
 name: flow-tracker
 description: "Use when tracking repository flow metrics over time and recommending corrective actions when trends degrade. USE FOR: weekly flow scorecards, trend analysis, regression alerts, and metric-backed improvement suggestions. DO NOT USE FOR: speculative architecture redesign, editing production code, or replacing incident response workflows."
 compatibility:
@@ -51,4 +51,3 @@ action-oriented guidance grounded in trend data.
 - Weekly or sprint flow scorecard
 - Regression and threshold alert summary
 - Recommended next actions with expected KPI impact
-
