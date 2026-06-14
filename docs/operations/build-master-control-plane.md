@@ -26,8 +26,6 @@ delegating eligible build repairs to cloud agents through PR-only workflows.
 Selected approach is Option C because it aligns with existing Basecoat guidance:
 serialized merge pacing, PR-only changes, and policy-gated autonomy.
 
-## Design
-
 ## Components
 
 1. **Build Master agent** (`build-master`)

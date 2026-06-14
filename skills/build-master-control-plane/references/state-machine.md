@@ -6,7 +6,7 @@
 | --- | --- | --- | --- |
 | `healthy` | Lane is merging normally | initialization or successful recovery | confirmed post-merge failure |
 | `degraded` | Lane has active incident but may continue with limits | first confirmed failure | threshold breach (`paused`) or successful fix (`healthy`) |
-| `paused` | Lane is blocked for safety | policy threshold reached or high-risk signal | fix PR verified and policy checks pass |
+| `paused` | Lane is blocked for safety | policy threshold reached or high-risk signal | fix PR verified and merged; recovery begins (`recovering`) |
 | `recovering` | Lane is in verification after fix | fix PR merged and checks running | all required checks green (`healthy`) or regression (`paused`) |
 
 ## Global states
