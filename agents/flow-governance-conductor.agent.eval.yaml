@@ -1,0 +1,19 @@
+name: "flow-governance-conductor-routing"
+description: "Routing evaluation — validates trigger activation for the flow-governance-conductor agent."
+skill: "agents/flow-governance-conductor.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "Use our existing flow skills and scripts to audit current PRs/issues/code, then tell me what governance gaps still need new skills."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Map flow bottlenecks to current agents first, suggest missing automation only where no skill or script already exists."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Review open PRs and issue backlog, reuse current governance skills, and produce issue-ready gap recommendations."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Implement the new checkout API endpoint and add integration tests."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Design a hero banner and typography system for the docs site."
+    expect_activation: false
