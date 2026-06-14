@@ -4,6 +4,11 @@ description: "Contract Testing Agent for consumer-driven contracts, E2E testing 
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Contract Testing Agent

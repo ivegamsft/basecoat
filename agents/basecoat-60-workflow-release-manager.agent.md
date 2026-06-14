@@ -4,6 +4,11 @@ description: "Automated versioned release workflow. Reads merged PRs since the l
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: workflow
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Release Manager Agent

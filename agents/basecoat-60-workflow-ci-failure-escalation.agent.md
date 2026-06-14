@@ -4,6 +4,11 @@ description: "Detects N consecutive CI failures on the same workflow job, opens 
 visibility: basic
 model: gpt-5.4-mini
 compatibility: []
+metadata:
+  category: workflow
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # CI Failure Escalation Agent

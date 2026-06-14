@@ -4,6 +4,11 @@ description: "Agent for managing dependency updates, tracking breaking changes, 
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Dependency Lifecycle Agent

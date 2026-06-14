@@ -7,6 +7,11 @@ invocation_rules:
   - "Invoke for release go/no-go meetings, launch gate reviews, and risk signoff ceremonies."
 visibility: "internal"
 compatibility: []
+metadata:
+  category: workflow
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Release Readiness Chair Agent

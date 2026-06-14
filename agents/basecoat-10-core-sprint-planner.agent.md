@@ -4,6 +4,11 @@ description: "Goal-to-issues decomposition and wave dependency mapping. Accepts 
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Sprint Planner Agent

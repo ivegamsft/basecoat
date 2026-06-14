@@ -4,6 +4,11 @@ description: "Use when creating or updating a customization asset such as an ins
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # New Customization Agent

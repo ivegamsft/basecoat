@@ -5,6 +5,11 @@ model: claude-sonnet-4.6
 tools: [read_file, write_file, list_dir, run_terminal_command, create_github_issue]
 visibility: basic
 compatibility: []
+metadata:
+  category: workflow
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Data Pipeline Agent

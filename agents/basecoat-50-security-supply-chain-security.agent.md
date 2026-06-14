@@ -4,6 +4,11 @@ description: "Secure software supply chain with artifact signing, SBOM generatio
 visibility: specialized
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: security
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Supply Chain Security Agent

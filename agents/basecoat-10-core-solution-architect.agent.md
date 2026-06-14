@@ -5,6 +5,11 @@ visibility: basic
 model: claude-sonnet-4-5
 tools: [read_file, write_file, list_dir, run_terminal_command, create_github_issue]
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Solution Architect Agent

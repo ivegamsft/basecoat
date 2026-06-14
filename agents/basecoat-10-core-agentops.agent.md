@@ -4,6 +4,11 @@ description: "Agent operations and infrastructure specialist. USE FOR: monitorin
 visibility: internal
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # AgentOps Agent

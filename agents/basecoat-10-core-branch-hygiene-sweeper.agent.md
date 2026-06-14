@@ -5,6 +5,11 @@ visibility: specialized
 model: gpt-5.4-mini
 fallback_models: [claude-sonnet-4.5]
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 # Branch Hygiene Sweeper
 

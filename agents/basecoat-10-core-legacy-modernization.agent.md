@@ -4,6 +4,11 @@ description: "Guides teams through Web Forms to Razor Pages migration using the 
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Legacy Modernization Agent

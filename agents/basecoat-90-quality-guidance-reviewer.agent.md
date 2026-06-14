@@ -4,6 +4,11 @@ description: "Use when validating a BaseCoat guidance draft (instruction, skill,
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: quality
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Guidance Reviewer Agent

@@ -4,6 +4,11 @@ description: "Reviews Dependabot pull requests and posts a structured risk asses
 visibility: basic
 model: gpt-5.4-mini
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Dependency Update Advisor Agent

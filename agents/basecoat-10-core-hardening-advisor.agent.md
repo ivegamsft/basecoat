@@ -4,6 +4,11 @@ description: "CIS Benchmarks and STIG hardening advisor for Dockerfiles, Kuberne
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Hardening Advisor Agent

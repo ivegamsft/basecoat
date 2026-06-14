@@ -4,6 +4,11 @@ description: "Parallel branch merge coordinator. Use when multiple feature branc
 visibility: basic
 model: claude-haiku-4.5
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Merge Coordinator Agent

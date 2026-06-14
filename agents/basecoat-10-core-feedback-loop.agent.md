@@ -4,6 +4,11 @@ description: "Continuous learning and optimization through user feedback collect
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Feedback Loop Agent

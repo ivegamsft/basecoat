@@ -4,6 +4,11 @@ description: "Security penetration testing specialist. USE FOR: designing penetr
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: quality
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Penetration Test Agent

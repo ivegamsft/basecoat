@@ -4,6 +4,11 @@ description: "Identity and access architecture specialist. USE FOR: designing IA
 visibility: basic
 model: gpt-5.3-codex
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Identity Architect Agent

@@ -4,6 +4,11 @@ description: "BaseCoat guidance documentation author. USE FOR: creating security
 visibility: specialized
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: security
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Guidance Author Agent

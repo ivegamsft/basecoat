@@ -4,6 +4,11 @@ description: "Azure Landing Zone (ESLZ) agent for scaffolding enterprise-scale l
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: cloud
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Azure Landing Zone Agent

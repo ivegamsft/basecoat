@@ -4,6 +4,11 @@ description: "Helps assess containerization readiness, choose deployment platfor
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: ai
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Containerization Planner Agent

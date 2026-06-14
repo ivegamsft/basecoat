@@ -5,6 +5,11 @@ visibility: basic
 model: claude-sonnet-4.6
 tools: [run_terminal_command, read_file, write_file, create_github_issue]
 compatibility: []
+metadata:
+  category: workflow
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Retro Facilitator Agent

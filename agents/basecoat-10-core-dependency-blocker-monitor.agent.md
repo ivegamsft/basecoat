@@ -5,6 +5,11 @@ visibility: basic
 model: gpt-5.4-mini
 fallback_models: [gpt-5.4-mini]
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 # Dependency Blocker Monitor
 

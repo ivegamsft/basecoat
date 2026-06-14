@@ -6,6 +6,11 @@ model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
 visibility: public
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Sprint/Project Mapper Agent

@@ -4,6 +4,11 @@ description: "Production Readiness Agent for ensuring applications meet operatio
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Production Readiness Agent

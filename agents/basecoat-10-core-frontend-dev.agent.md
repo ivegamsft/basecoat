@@ -4,6 +4,11 @@ description: "Frontend and UI development specialist. USE FOR: implementing UI c
 visibility: basic
 model: gpt-5.3-codex
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Frontend Development Agent

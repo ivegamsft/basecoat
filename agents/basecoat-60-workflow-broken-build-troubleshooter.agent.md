@@ -8,6 +8,11 @@ invocation_rules:
   - "Prefer smallest safe fix first, then follow with hardening recommendations."
 visibility: "internal"
 compatibility: []
+metadata:
+  category: workflow
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Broken Build Troubleshooter Agent

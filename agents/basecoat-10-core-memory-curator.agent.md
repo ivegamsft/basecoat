@@ -4,6 +4,11 @@ description: "Cross-session memory and knowledge management curator. USE FOR: ex
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Memory Curator Agent

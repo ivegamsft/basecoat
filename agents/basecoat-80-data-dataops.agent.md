@@ -4,6 +4,11 @@ description: "Data operations and pipeline management. USE FOR: managing data pi
 visibility: basic
 model: gpt-5.3-codex
 compatibility: []
+metadata:
+  category: data
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # DataOps Agent

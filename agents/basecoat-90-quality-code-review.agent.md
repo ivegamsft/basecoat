@@ -4,6 +4,11 @@ description: "Code review and quality gate specialist. USE FOR: reviewing code c
 visibility: basic
 model: claude-haiku-4.5
 compatibility: []
+metadata:
+  category: quality
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 <!-- markdownlint-disable MD041 -->

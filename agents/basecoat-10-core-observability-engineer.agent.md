@@ -4,6 +4,11 @@ description: "OpenTelemetry instrumentation, structured logging, distributed tra
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Observability Engineer Agent

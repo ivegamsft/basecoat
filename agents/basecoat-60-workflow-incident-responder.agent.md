@@ -4,6 +4,11 @@ description: "Structured incident response and recovery agent for classifying in
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: workflow
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Incident Responder Agent

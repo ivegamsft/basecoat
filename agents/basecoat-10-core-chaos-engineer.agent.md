@@ -4,6 +4,11 @@ description: "Chaos engineering agent for fault injection, game days, resilience
 visibility: basic
 model: gpt-5.3-codex
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Chaos Engineering Agent

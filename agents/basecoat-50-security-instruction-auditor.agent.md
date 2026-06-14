@@ -4,6 +4,11 @@ description: "Detects missing instruction coverage for a repo — identifies tec
 visibility: specialized
 model: gpt-5.4-mini
 compatibility: []
+metadata:
+  category: security
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Instruction Auditor Agent

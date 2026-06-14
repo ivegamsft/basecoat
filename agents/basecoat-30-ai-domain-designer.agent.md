@@ -4,6 +4,11 @@ description: "Domain-driven design specialist. USE FOR: designing domain models,
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: ai
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Domain-Driven Design Agent

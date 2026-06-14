@@ -4,6 +4,11 @@ description: "Use when reviewing prompts, scoring prompt quality, identifying an
 visibility: basic
 model: gpt-5.3-codex
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Prompt Coach Agent

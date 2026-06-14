@@ -4,6 +4,11 @@ description: "Orchestrates Azure infrastructure deployments using Bicep, handles
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: workflow
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Infrastructure Deploy Agent

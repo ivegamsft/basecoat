@@ -4,6 +4,11 @@ description: "API Security Agent for comprehensive API threat modeling, OWASP AP
 visibility: specialized
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: security
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # API Security Agent

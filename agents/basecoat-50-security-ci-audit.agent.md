@@ -5,6 +5,11 @@ description: "Use when asked to audit repository governance posture or produce a
 tools: [bash, git, gh, grep, find, powershell]
 model: gpt-5.4-mini
 compatibility: []
+metadata:
+  category: security
+  maturity: alpha
+  audience:
+    - developer
 ---
 # CI/CD Audit Agent
 

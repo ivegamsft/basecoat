@@ -4,6 +4,11 @@ description: "FinOps advisor for cloud cost governance, cost optimization, charg
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # FinOps Advisor

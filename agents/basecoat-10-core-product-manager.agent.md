@@ -5,6 +5,11 @@ visibility: basic
 model: claude-sonnet-4.6
 tools: [run_terminal_command, read_file, write_file, list_dir]
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Product Manager Agent

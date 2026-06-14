@@ -6,6 +6,11 @@ description: >
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: data
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Data Integrity Architect Agent

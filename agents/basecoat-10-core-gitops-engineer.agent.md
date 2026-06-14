@@ -4,6 +4,11 @@ description: "GitOps and deployment automation specialist. USE FOR: designing Gi
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # GitOps Engineer Agent

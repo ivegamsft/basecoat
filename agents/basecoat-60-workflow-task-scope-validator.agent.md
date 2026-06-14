@@ -4,6 +4,11 @@ description: "Task scope validator for sub-agent dispatch. Analyzes task prompts
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: workflow
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Task Scope Validator Agent

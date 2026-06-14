@@ -5,6 +5,11 @@ model: gpt-5.4-mini
 fallback_models: [claude-sonnet-4.5]
 visibility: advanced
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 # Escalation Router Agent
 

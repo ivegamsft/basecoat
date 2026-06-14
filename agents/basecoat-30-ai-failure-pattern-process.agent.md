@@ -5,6 +5,11 @@ description: "Failure pattern process agent for evidence-first mining, raw loggi
 tools: [bash, git, gh, grep, find]
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: ai
+  maturity: alpha
+  audience:
+    - developer
 ---
 # Failure Pattern Process Agent
 
