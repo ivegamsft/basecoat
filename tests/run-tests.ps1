@@ -65,6 +65,14 @@ if ($missingEval.Count -gt 0) {
 }
 Write-Host "  eval.yaml CI gate passed: all $((Get-ChildItem $skillsDir -Directory).Count) skills have eval.yaml" -ForegroundColor Green
 
+Write-Host 'Running skill compatibility frontmatter tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'skill-compatibility-frontmatter-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Skill compatibility frontmatter tests failed' -ForegroundColor Red
+    Write-FailureLog 'skill-compatibility-frontmatter-tests'
+    exit 1
+}
+
 Write-Host 'Running organized guidance audits...'
 $guidanceAuditArgs = @(
     '-NoProfile',
