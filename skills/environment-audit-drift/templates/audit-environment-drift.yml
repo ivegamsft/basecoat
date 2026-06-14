@@ -125,7 +125,7 @@ jobs:
        needs.audit.outputs.drift_status == 'high')
     steps:
       - name: Post Slack notification
-        if: vars.SLACK_WEBHOOK_URL != ''
+        if: secrets.SLACK_WEBHOOK_URL != ''
         uses: slackapi/slack-github-action@v1
         with:
           webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}

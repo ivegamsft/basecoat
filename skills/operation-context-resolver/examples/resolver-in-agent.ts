@@ -8,13 +8,17 @@
 
 import { resolveOperationContext } from '../src/resolver';
 import { OperationContext } from '../src/types';
+import fs from 'fs';
 
 async function troubleshootAgent(userRequest: string): Promise<void> {
   console.log(`User request: "${userRequest}"`);
 
   // Resolve operation context
   const context = await resolveOperationContext({
-    github_event_payload: process.env.GITHUB_EVENT,
+    github_event_payload: process.env.GITHUB_EVENT_PATH
+      ? fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf-8')
+      : process.env.GITHUB_EVENT,
+    github_event_name: process.env.GITHUB_EVENT_NAME,
     github_ref: process.env.GITHUB_REF,
     user_intent: userRequest,
     pr_labels: process.env.PR_LABELS ? JSON.parse(process.env.PR_LABELS) : [],
@@ -140,6 +144,7 @@ async function mockExecuteAction(action: string, env: string): Promise<void> {
     // Example 1: Feature branch troubleshooting
     console.log('=== EXAMPLE 1: Feature branch troubleshooting ===\n');
     process.env.GITHUB_REF = 'refs/heads/feature/login-timeout';
+    process.env.GITHUB_EVENT_PATH = '';
     process.env.GITHUB_EVENT = JSON.stringify({
       pull_request: { head: { ref: 'feature/login-timeout' } },
     });

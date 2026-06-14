@@ -175,7 +175,6 @@ rules:
       source_branch: hotfix/*
     context:
       target_environment: staging
-      fallback_environment: prod
       mode: read_only
       human_approval_required: true
 

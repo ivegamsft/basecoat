@@ -9,7 +9,11 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "validate": "ts-node src/validator.ts",
-    "lint": "eslint src --ext .ts"
+    "lint": "eslint src --ext .ts",
+    "cli": "ts-node src/cli.ts"
+  },
+  "bin": {
+    "operation-context-resolver": "dist/cli.js"
   },
   "keywords": [
     "environment",

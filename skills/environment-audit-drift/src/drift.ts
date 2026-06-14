@@ -83,6 +83,9 @@ export class EnvironmentAuditDrifter {
     ];
 
     for (const resource of resources) {
+      if (typeof resource.name !== 'string' || resource.name.length === 0) {
+        continue;
+      }
       // In real implementation, query Azure here
       const exists = await this.mockCheckAzureResource(resource.name);
 
@@ -103,6 +106,20 @@ export class EnvironmentAuditDrifter {
     }
 
     // Check GitHub environment
+    if (!config.github_environment) {
+      this.addFinding({
+        id: 'config-github-environment-missing-value',
+        environment: env,
+        severity: 'high',
+        category: 'config_drift',
+        finding: 'github_environment is missing from environment config',
+        expected: 'non-empty github_environment value',
+        actual: 'missing',
+        remediation: 'Set github_environment for this environment in environment-map.yml',
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
     const githubEnvExists = await this.mockCheckGitHubEnvironment(config.github_environment);
     if (!githubEnvExists) {
       this.addFinding({
@@ -238,11 +255,17 @@ export class EnvironmentAuditDrifter {
   // Mock helpers (would be replaced with real Azure/GitHub API calls)
   private async mockCheckAzureResource(name: string): Promise<boolean> {
     // In real implementation: query Azure for resource
+    if (!name) {
+      return false;
+    }
     return !name.includes('missing');
   }
 
   private async mockCheckGitHubEnvironment(name: string): Promise<boolean> {
     // In real implementation: query GitHub API
+    if (!name) {
+      return false;
+    }
     return !name.includes('missing');
   }
 

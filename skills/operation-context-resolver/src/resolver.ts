@@ -46,7 +46,13 @@ export class OperationContextResolver {
 
       // Step 1: Check explicit override
       if (input.workflow_dispatch_input?.environment) {
-        const env = input.workflow_dispatch_input.environment as Environment;
+        const envInput = input.workflow_dispatch_input.environment;
+        if (typeof envInput !== 'string' || !this.isKnownEnvironment(envInput)) {
+          throw new Error(
+            `Invalid workflow_dispatch_input.environment '${String(envInput)}'. Expected one of: ${Object.keys(this.environmentMap.environments).join(', ')}`
+          );
+        }
+        const env = envInput as Environment;
         return this.buildContext(env, 'branch_deploy', operationId, now, input);
       }
 
@@ -175,7 +181,7 @@ export class OperationContextResolver {
 
   private resolveEnvironmentFromBranch(branch: string): Environment | null {
     for (const [env, config] of Object.entries(this.environmentMap.environments)) {
-      for (const pattern of config.allowed_branch_patterns) {
+      for (const pattern of config.allowed_branch_patterns || []) {
         if (this.matchPattern(branch, pattern)) {
           return env as Environment;
         }
@@ -222,6 +228,14 @@ export class OperationContextResolver {
         }
       }
 
+      if (match.event_name) {
+        const expected = Array.isArray(match.event_name) ? match.event_name : [match.event_name];
+        const currentEventName = input.github_event_name || '';
+        if (expected.includes(currentEventName)) {
+          return rule.context;
+        }
+      }
+
       if (match.source_branch) {
         const patterns = Array.isArray(match.source_branch) ? match.source_branch : [match.source_branch];
         const found = patterns.some(pattern => this.matchPattern(branch, pattern));
@@ -241,7 +255,10 @@ export class OperationContextResolver {
 
     // Support simple wildcards: feature/* matches feature/foo
     if (pattern.includes('*')) {
-      const regex = new RegExp(`^${pattern.replace(/\*/g, '.*')}$`);
+      const escaped = pattern
+        .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
+        .replace(/\*/g, '.*');
+      const regex = new RegExp(`^${escaped}$`);
       return regex.test(branch);
     }
 
@@ -294,6 +311,10 @@ export class OperationContextResolver {
     };
 
     return context;
+  }
+
+  private isKnownEnvironment(value: string): value is Environment {
+    return Object.prototype.hasOwnProperty.call(this.environmentMap.environments, value);
   }
 
   isActionAllowed(context: OperationContext, action: string): boolean {

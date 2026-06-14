@@ -74,9 +74,9 @@ describe('EnvironmentAuditDrifter', () => {
     const auditor = new EnvironmentAuditDrifter(input, mockEnvironmentMap);
     const report = await auditor.audit();
 
-    expect(report.findings).toEqual(expect.arrayContaining(
-      report.findings.filter(f => ['critical', 'high', 'medium', 'low'].includes(f.severity))
-    ));
+    for (const finding of report.findings) {
+      expect(['critical', 'high', 'medium', 'low']).toContain(finding.severity);
+    }
   });
 
   it('should include audit metadata with UUID and timestamp', async () => {
@@ -111,11 +111,9 @@ describe('EnvironmentAuditDrifter', () => {
     const report = await auditor.audit();
 
     const securityDrifts = report.findings.filter(f => f.category === 'security_drift');
-    expect(securityDrifts).toEqual(
-      expect.arrayContaining(
-        securityDrifts.filter(f => f.severity === 'high' || f.severity === 'medium')
-      )
-    );
+    for (const finding of securityDrifts) {
+      expect(['high', 'medium']).toContain(finding.severity);
+    }
   });
 
   it('should mark as actionable when no critical drifts', async () => {

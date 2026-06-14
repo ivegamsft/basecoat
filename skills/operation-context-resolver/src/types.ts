@@ -13,6 +13,7 @@ export type OperationMode =
 
 export interface ResolverInput {
   github_event_payload?: string | object;
+  github_event_name?: string;
   github_ref?: string;
   user_intent?: string;
   pr_labels?: string[];
@@ -35,7 +36,7 @@ export interface EnvironmentConfig {
   key_vault: string;
   front_door_profile: string | null;
   tags: Record<string, string>;
-  allowed_branch_patterns: string[];
+  allowed_branch_patterns?: string[];
   allowed_workflows: string[];
   approval_required: Partial<Record<OperationMode, boolean>>;
   allowed_actions: Partial<Record<OperationMode, string[]>>;
@@ -86,7 +87,6 @@ export interface ResolverRule {
       };
   context: {
     target_environment: Environment;
-    fallback_environment?: Environment;
     mode: OperationMode;
     risk_level?: RiskLevel;
     human_approval_required?: boolean;

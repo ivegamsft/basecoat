@@ -42,11 +42,17 @@ import { resolveOperationContext } from '@basecoat/operation-context-resolver';
 
 ```typescript
 import { resolveOperationContext } from '@basecoat/operation-context-resolver';
+import fs from 'fs';
+
+const githubEventPayload = process.env.GITHUB_EVENT_PATH
+  ? fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf-8')
+  : undefined;
 
 // In your agent or workflow
 const context = await resolveOperationContext({
-  github_event_payload: process.env.GITHUB_EVENT,
+  github_event_payload: githubEventPayload,
   github_ref: process.env.GITHUB_REF,
+  github_event_name: process.env.GITHUB_EVENT_NAME,
   user_intent: 'troubleshoot login timeout',
   pr_labels: JSON.parse(process.env.PR_LABELS || '[]'),
 });
@@ -74,7 +80,7 @@ const logs = await readLogsFromEnvironment(context.target_environment);
 ### Check before deployment
 
 ```typescript
-if (context.blocked_actions.includes('deploy')) {
+if (context.blocked_actions.includes('deploy_app')) {
   console.log('Deployment blocked in this mode.');
   if (context.human_approval_required) {
     throw new Error('Human approval required before proceeding.');

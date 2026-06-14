@@ -34,8 +34,16 @@ Routes a request to the correct environment and mode, then returns allowed and b
 ## Usage
 
 ```typescript
+import fs from 'fs';
+
+const githubEventPayload = process.env.GITHUB_EVENT_PATH
+  ? fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf-8')
+  : undefined;
+
 const context = await resolveOperationContext({
   github_ref: process.env.GITHUB_REF,
+  github_event_name: process.env.GITHUB_EVENT_NAME,
+  github_event_payload: githubEventPayload,
   user_intent: "troubleshoot login timeout",
   pr_labels: ["env:staging"],
 });

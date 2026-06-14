@@ -23,7 +23,17 @@ export async function validateEnvironmentMap(repoRoot: string): Promise<Validati
 
   try {
     const content = fs.readFileSync(mapPath, 'utf-8');
-    map = yaml.load(content) as EnvironmentMap;
+    const parsed = yaml.load(content);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return {
+        valid: false,
+        errors: ['Root of environment-map.yml must be a YAML object'],
+        warnings: [],
+        environments_found: [],
+        rules_count: 0,
+      };
+    }
+    map = parsed as EnvironmentMap;
   } catch (error) {
     return {
       valid: false,
