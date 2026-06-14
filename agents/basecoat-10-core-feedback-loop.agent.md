@@ -3,6 +3,7 @@ name: feedback-loop
 description: "Continuous learning and optimization through user feedback collection, prompt effectiveness tracking, outcome measurement, A/B testing, regression detection, and instruction refinement. USE FOR: track prompt effectiveness, run A/B test on instructions, detect quality regression. DO NOT USE FOR: product feature feedback, writing new prompts."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Feedback Loop Agent

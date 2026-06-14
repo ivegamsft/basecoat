@@ -1,6 +1,6 @@
 name: "gitops-engineer-routing"
 description: "Routing evaluation — validates trigger activation for the gitops-engineer agent."
-skill: "agents/gitops-engineer.agent.md"
+skill: "agents/basecoat-10-core-gitops-engineer.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with implementing Argo CD, Flux, or GitOps best practices."

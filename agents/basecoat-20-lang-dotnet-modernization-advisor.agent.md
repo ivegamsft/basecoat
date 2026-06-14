@@ -5,6 +5,7 @@ description: "Advisor for .NET modernization assessment, upgrade planning, and e
 visibility: basic
 model: claude-sonnet-4.6
 tools: [read_file, write_file, list_dir, run_terminal_command, create_github_issue]
+compatibility: []
 ---
 
 ## .NET Modernization Advisor Agent

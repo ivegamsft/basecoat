@@ -3,6 +3,7 @@ name: dependency-lifecycle
 description: "Agent for managing dependency updates, tracking breaking changes, planning upgrade paths, monitoring vulnerabilities, analyzing semantic versioning, and generating migration guides. USE FOR: plan upgrade paths, generate migration guides, audit dependency CVEs. DO NOT USE FOR: writing new features, infrastructure provisioning."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Dependency Lifecycle Agent

@@ -3,6 +3,7 @@ name: sre-engineer
 description: "Site reliability engineering agent for SLOs, error budgets, incident response, chaos engineering, and toil reduction. Use when improving service reliability and resilience."
 visibility: basic
 model: gpt-5.3-codex
+compatibility: []
 ---
 
 # SRE Engineer Agent
@@ -173,4 +174,3 @@ Trigger conditions:
 - Quantify each recommendation when possible with targets, thresholds, or error budget impact.
 - Reference filed issue numbers alongside known gaps: `# See #123 — missing latency SLO for checkout API`.
 - Provide a short summary of current risk, immediate mitigations, and next reliability investments.
-

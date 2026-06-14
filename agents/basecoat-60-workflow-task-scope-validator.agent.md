@@ -3,6 +3,7 @@ name: task-scope-validator
 description: "Task scope validator for sub-agent dispatch. Analyzes task prompts to detect overscope, ambiguity, and risk before forwarding to explore, task, or general-purpose agents. USE FOR: validate task prompts pre-dispatch, classify tasks as automatable/gather-only/defer, identify scope refinement needs. DO NOT USE FOR: executing tasks, writing implementation code, or modifying task prompts without user feedback."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Task Scope Validator Agent
@@ -240,4 +241,3 @@ scope-check: Analyze our entire codebase to find performance issues and suggest 
   "notes": "Requires significant refinement. Suggest: start with a smaller, bounded exploration task, then escalate findings to general-purpose agent for architecture design."
 }
 ```
-

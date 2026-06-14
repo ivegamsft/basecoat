@@ -3,6 +3,7 @@ name: guidance-reviewer
 description: "Use when validating a BaseCoat guidance draft (instruction, skill, agent, prompt) before committing. Checks lint rules, required sections, frontmatter schema, and BaseCoat conventions. Returns a structured pass/fail verdict with actionable fixes."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Guidance Reviewer Agent
@@ -106,4 +107,3 @@ Produce a structured review report:
 If verdict is FAIL, include the handoff suggestion:
 > Use the **Fix and Re-Draft** handoff to send the report back to `guidance-author`
 > for correction.
-

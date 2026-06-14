@@ -4,6 +4,7 @@ visibility: basic
 description: "Designs layered CI/CD isolation so independent domains (for example mobile, database, portal, extension, and infra) can evolve and release separately without cross-triggered pipeline noise."
 tools: [bash, git, gh, grep, find]
 model: gpt-5.3-codex
+compatibility: []
 ---
 # Change Isolation Architect Agent
 
@@ -51,6 +52,3 @@ For each layer, choose the option that optimizes change frequency, risk, and own
 - Coupling findings (current-state gaps and impact)
 - Target-state design (lane contracts, versioning model, and rollout order)
 - Migration plan (incremental PR sequence with guardrails)
-
-
-

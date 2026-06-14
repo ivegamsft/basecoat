@@ -6,6 +6,7 @@ model: claude-sonnet-4.6
 invocation_rules:
   - "Invoke for daily standup facilitation, blocker extraction, or coordination handoff needs."
 visibility: "internal"
+compatibility: []
 ---
 
 # Daily Standup Facilitator Agent
@@ -40,4 +41,3 @@ Purpose: standardize standup outcomes by converting status updates into concrete
 ### Today Plan
 1. <owner> — <action> — <expected outcome>
 ```
-

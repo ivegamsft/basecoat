@@ -3,6 +3,7 @@ name: security-analyst
 description: "Security analysis and threat assessment specialist. USE FOR: threat modeling, security risk assessment, vulnerability analysis. DO NOT USE FOR: incident response, remediation."
 visibility: specialized
 model: gpt-5.3-codex
+compatibility: []
 ---
 
 # Security Analyst Agent
@@ -152,5 +153,3 @@ Trigger conditions:
 - Include severity ratings (Critical/High/Medium/Low) for every finding.
 - Reference filed issue numbers alongside each finding: `// See #55 — SQL injection in user search, filed as Critical`.
 - Provide a summary of: total findings by severity, top risks, and recommended prioritization order.
-
-

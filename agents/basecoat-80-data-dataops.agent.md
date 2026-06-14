@@ -3,6 +3,7 @@ name: dataops
 description: "Data operations and pipeline management. USE FOR: managing data pipelines, monitoring data quality, optimizing data flow. DO NOT USE FOR: data analysis, business intelligence."
 visibility: basic
 model: gpt-5.3-codex
+compatibility: []
 ---
 
 # DataOps Agent
@@ -137,5 +138,3 @@ Trigger conditions:
 - Deliver updated pipeline, schema, contract, governance, and monitoring assets ready to commit.
 - Summarize the quality gates, lineage coverage, governance controls, orchestration decisions, and contract or drift protections added.
 - Reference issue numbers inline where a known DataOps gap is intentionally deferred.
-
-

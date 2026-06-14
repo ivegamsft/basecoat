@@ -1,6 +1,6 @@
 name: "supply-chain-security-routing"
 description: "Routing evaluation — validates trigger activation for the supply-chain-security agent."
-skill: "agents/supply-chain-security.agent.md"
+skill: "agents/basecoat-50-security-supply-chain-security.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with generate SBOM for a release build."

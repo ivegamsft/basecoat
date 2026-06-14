@@ -5,6 +5,7 @@ visibility: specialized
 model: gpt-5.4-mini
 invocation_rules: ["Invoke when user asks to close a sprint, perform sprint burn-down closeout, or validate sprint completion readiness.", "Use checklist-first flow and require explicit evidence for merge, CI, errors, issues, and test status."]
 visibility: "internal"
+compatibility: []
 ---
 
 # Sprint Closeout Auditor Agent
@@ -68,4 +69,3 @@ Use this exact checklist in output:
 1. <issue/pr/action + owner + due date>
 2. <issue/pr/action + owner + due date>
 ```
-

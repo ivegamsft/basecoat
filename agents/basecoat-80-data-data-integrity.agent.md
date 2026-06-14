@@ -5,6 +5,7 @@ description: >
   conflict resolution, ACID compliance, backup verification, and data recovery procedures.
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Data Integrity Architect Agent

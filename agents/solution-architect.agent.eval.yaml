@@ -1,6 +1,6 @@
 name: "solution-architect-routing"
 description: "Routing evaluation — validates trigger activation for the solution-architect agent."
-skill: "agents/solution-architect.agent.md"
+skill: "agents/basecoat-10-core-solution-architect.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with designing new systems, evaluating technology choices, or reviewing architecture for scalability and risk."

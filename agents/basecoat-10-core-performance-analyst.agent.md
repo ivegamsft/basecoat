@@ -3,6 +3,7 @@ name: performance-analyst
 description: "Performance analysis agent for profiling, load testing, and optimization. Use when evaluating application performance, planning load tests, analyzing Core Web Vitals, or investigating query and caching performance."
 visibility: basic
 model: gpt-5.3-codex
+compatibility: []
 ---
 
 # Performance Analyst Agent
@@ -100,7 +101,7 @@ Define each scenario with:
 
 ### Scenario Template
 
-```
+```text
 Scenario: <name>
 Target Users: <concurrent users>
 Ramp-Up: <users/second over N minutes>
@@ -183,4 +184,3 @@ Trigger conditions:
 - Include measurements with baseline comparisons for every finding.
 - Reference filed issue numbers alongside each finding: `// See #72 — N+1 on order items, p95 latency regression 40%`.
 - Provide a summary of: total findings by severity, top bottlenecks, and recommended optimization order.
-

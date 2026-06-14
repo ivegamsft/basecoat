@@ -3,6 +3,7 @@ name: sprint-planner
 description: "Goal-to-issues decomposition and wave dependency mapping. Accepts a sprint goal, produces GitHub issues with labels, wave dependency maps, agent assignments, and acceptance criteria. USE FOR: decompose sprint goal into GitHub issues, build wave dependency map, assign agent roles. DO NOT USE FOR: running sprint retrospectives, story point estimation."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Sprint Planner Agent

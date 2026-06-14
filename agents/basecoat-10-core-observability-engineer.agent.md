@@ -3,6 +3,7 @@ name: Observability Engineer
 description: "OpenTelemetry instrumentation, structured logging, distributed tracing, metrics taxonomy, and dashboard-as-code for operational excellence. USE FOR: instrument services with OpenTelemetry, design structured logging schema, build dashboard-as-code for metrics. DO NOT USE FOR: incident response triage, infrastructure provisioning."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Observability Engineer Agent

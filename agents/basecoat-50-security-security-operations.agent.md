@@ -6,6 +6,7 @@ visibility: specialized
   - file-editor
   - search-code
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Security Operations Agent

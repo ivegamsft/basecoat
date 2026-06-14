@@ -4,6 +4,7 @@ visibility: specialized
 description: "CI/CD audit agent for GitHub organization auditing. USE FOR: auditing GitHub organization CI/CD settings, enterprise policies, runner configurations, dependencies, and installed apps. DO NOT USE FOR: writing application code, general code reviews, infrastructure-as-code development unrelated to CI/CD auditing."
 tools: [bash, git, gh, grep, find, powershell]
 model: gpt-5.4-mini
+compatibility: []
 ---
 # CI/CD Audit Agent
 

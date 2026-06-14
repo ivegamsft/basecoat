@@ -1,6 +1,6 @@
 name: "factory-conductor-routing"
 description: "Routing evaluation — validates trigger activation for the factory-conductor agent."
-skill: "agents/factory-conductor.agent.md"
+skill: "agents/basecoat-10-core-factory-conductor.agent.md"
 scenarios:
   - id: "pos-1"
     input: "Read .factory-state.json and queue the next ready wave."

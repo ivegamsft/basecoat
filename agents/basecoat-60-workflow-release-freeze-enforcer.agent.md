@@ -4,6 +4,7 @@ description: "Use when enforcing release freeze windows, routing exception reque
 visibility: basic
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
+compatibility: []
 ---
 # Release Freeze Enforcer
 

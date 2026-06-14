@@ -2,6 +2,7 @@
 name: orchestrator
 description: "Compatibility alias for the orchestrator agent. Preserves the legacy filename while the prefixed BaseCoat agent is the canonical source. USE FOR: routing multi-step workflows, coordinating parallel agents, tracking execution state. DO NOT USE FOR: single-step tasks, user-facing triage, direct tool calls."
 visibility: advanced
+compatibility: []
 ---
 
 # Orchestrator Agent

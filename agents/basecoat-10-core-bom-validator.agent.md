@@ -4,6 +4,7 @@ description: "Use when validating a Workcell BOM against the plant registry befo
 visibility: basic
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
+compatibility: []
 ---
 # BOM Validator
 
@@ -27,4 +28,3 @@ Validates the workcell BOM before the next station can begin.
 - Validation result
 - Blocking reasons
 - Check summary for the workcell PR
-

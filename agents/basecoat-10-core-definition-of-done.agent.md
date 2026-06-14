@@ -3,6 +3,7 @@ name: definition-of-done
 description: "Validate that a feature, PR, or release meets the Definition of Done before closing. Enforces testing evidence, config verification, response validation, and acceptance criteria. USE FOR: check PR meets DoD, validate acceptance criteria, verify release readiness. DO NOT USE FOR: writing acceptance criteria, implementing features."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Definition of Done Agent
@@ -32,4 +33,3 @@ Ghost green; status-code theater; config optimism; happy-path-only tests; merge-
 ## Related Agents
 
 Use `code-review`, `production-readiness`, `e2e-test-strategy`, and `contract-testing` when deeper review is needed.
-

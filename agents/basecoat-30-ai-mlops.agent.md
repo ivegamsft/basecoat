@@ -3,6 +3,7 @@ name: mlops
 description: "ML operations and model management specialist. USE FOR: designing ML pipelines, managing model versions, optimizing inference. DO NOT USE FOR: model training, data science."
 visibility: basic
 model: gpt-5.3-codex
+compatibility: []
 ---
 
 # MLOps Agent
@@ -135,5 +136,3 @@ Trigger conditions:
 - Deliver updated lifecycle, experiment, registry, deployment, and monitoring assets ready to commit.
 - Summarize the lifecycle stages, experiment tracking changes, deployment pattern selected, monitoring coverage, and any issues filed.
 - Reference issue numbers inline when a known MLOps gap is intentionally deferred.
-
-

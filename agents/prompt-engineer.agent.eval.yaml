@@ -1,6 +1,6 @@
 name: "prompt-engineer-routing"
 description: "Routing evaluation — validates trigger activation for the prompt-engineer agent."
-skill: "agents/prompt-engineer.agent.md"
+skill: "agents/basecoat-10-core-prompt-engineer.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with designing system prompts, optimizing token usage, crafting few-shot examples, or structuring chain-of-thought instructions."

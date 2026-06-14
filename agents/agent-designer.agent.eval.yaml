@@ -1,6 +1,6 @@
 name: "agent-designer-routing"
 description: "Routing evaluation — validates trigger activation for the agent-designer agent."
-skill: "agents/agent-designer.agent.md"
+skill: "agents/basecoat-10-core-agent-designer.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with creating new agents, composing skills, writing agent instructions, or coordinating multi-agent workflows."

@@ -1,6 +1,6 @@
 name: "exploratory-charter-routing"
 description: "Routing evaluation — validates trigger activation for the exploratory-charter agent."
-skill: "agents/exploratory-charter.agent.md"
+skill: "agents/basecoat-10-core-exploratory-charter.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with time-boxed exploratory testing sessions. Generates mission-driven charters with scope, triage routing, and evidence capture. Automatically files GitHub Issues for automation candidates found during exploration."

@@ -1,6 +1,6 @@
 # BaseCoat Workflow Reference
 
-Complete specification of 9 distributable workflow templates. Consumer installs use `scripts/configure-downstream-workflows.ps1`, which installs a safe subset by default.
+Reference for upstream workflow templates in BaseCoat. Consumer installs use `scripts/configure-downstream-workflows.ps1`, which currently installs only the supported subset (`reusable` by default, with supported `templates` via opt-in) from `.github/base-coat/workflows`.
 
 ## Distributed Workflow Templates (9 Total)
 
@@ -336,12 +336,9 @@ Installed files:
 
 ```text
 .github/workflows/
-├── bc-check-health.yml
-├── bc-dependency-update-advisor.yml
-├── bc-prd-spec-gate.yml
-├── bc-secret-scan.yml
-├── bc-sprint-closeout-branch-audit.yml
-└── bc-version-check.yml
+├── basecoat-upstream-version-drift.yml
+├── basecoat-version-check.yml
+└── basecoat-secret-scan.yml
 ```
 
 ### Manual Setup
@@ -351,7 +348,7 @@ Installed files:
 pwsh scripts/configure-downstream-workflows.ps1 -DryRun
 
 # Include unsupported workflows only if your repo provides required scripts
-pwsh scripts/configure-downstream-workflows.ps1 -IncludeUnsupported
+pwsh scripts/configure-downstream-workflows.ps1 -IncludeTemplates -IncludeUnsupported
 ```
 
 ## Common Patterns
@@ -363,15 +360,16 @@ pwsh scripts/configure-downstream-workflows.ps1 -IncludeUnsupported
 gh workflow list
 
 # Run workflow with defaults
-gh workflow run bc-version-check.yml
+gh workflow run basecoat-version-check.yml
 
 # Run with custom parameters
-gh workflow run bc-sprint-closeout-branch-audit.yml \
+# (requires template workflows to be installed with -IncludeTemplates)
+gh workflow run basecoat-sprint-closeout-branch-audit.yml \
   --field stale_days=14 \
   --field apply_changes=true
 
 # View workflow run
-gh run list --workflow bc-version-check.yml
+gh run list --workflow basecoat-version-check.yml
 ```
 
 ### Integrating with CI/CD
@@ -388,10 +386,10 @@ jobs:
 
 ```bash
 # Rename to disable
-mv .github/workflows/bc-version-check.yml .github/workflows/bc-version-check.yml.disabled
+mv .github/workflows/basecoat-version-check.yml .github/workflows/basecoat-version-check.yml.disabled
 
 # Delete to remove
-rm .github/workflows/bc-version-check.yml
+rm .github/workflows/basecoat-version-check.yml
 ```
 
 ## Release Notes

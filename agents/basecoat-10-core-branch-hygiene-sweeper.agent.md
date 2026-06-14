@@ -4,6 +4,7 @@ description: "Use when cleaning stale branches, dangling refs, and release branc
 visibility: specialized
 model: gpt-5.4-mini
 fallback_models: [claude-sonnet-4.5]
+compatibility: []
 ---
 # Branch Hygiene Sweeper
 

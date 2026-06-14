@@ -1,6 +1,6 @@
 name: "instruction-auditor-routing"
 description: "Routing evaluation — validates trigger activation for the instruction-auditor agent."
-skill: "agents/instruction-auditor.agent.md"
+skill: "agents/basecoat-50-security-instruction-auditor.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with find uncovered tech stacks in a repo overlay."

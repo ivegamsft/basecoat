@@ -3,6 +3,7 @@ name: database-migration
 description: "Database migration and modernization specialist. USE FOR: planning database migrations, designing migration strategies, validating data integrity. DO NOT USE FOR: operational database management, routine backups."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Database Migration Agent

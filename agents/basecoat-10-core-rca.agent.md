@@ -3,6 +3,7 @@ name: rca
 description: "Root Cause Analysis agent for deep-dive incident investigations, hypothesis testing, and prevention follow-up. USE FOR: run post-incident root cause analysis, trace production outage to contributing factors, generate 5-why analysis report. DO NOT USE FOR: live incident triage and containment, general performance tuning."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # RCA Agent
@@ -60,4 +61,3 @@ Return a structured RCA report with:
 **Recommended:** claude-sonnet-4.6
 **Rationale:** Root cause analysis needs disciplined hypothesis testing, evidence synthesis, and prevention-oriented follow-up.
 **Minimum:** claude-haiku-4.5
-

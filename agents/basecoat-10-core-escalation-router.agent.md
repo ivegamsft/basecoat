@@ -4,6 +4,7 @@ description: "Use when high-risk decisions need a human approver and a PR-commen
 model: gpt-5.4-mini
 fallback_models: [claude-sonnet-4.5]
 visibility: advanced
+compatibility: []
 ---
 # Escalation Router Agent
 
@@ -99,4 +100,3 @@ escalation_router_result:
     pr_comment_url: "<url | null>"
     next_action: "<what happens next>"
 ```
-

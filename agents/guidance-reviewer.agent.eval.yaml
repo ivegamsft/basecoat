@@ -1,6 +1,6 @@
 name: "guidance-reviewer-routing"
 description: "Routing evaluation — validates trigger activation for the guidance-reviewer agent."
-skill: "agents/guidance-reviewer.agent.md"
+skill: "agents/basecoat-90-quality-guidance-reviewer.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with validating a BaseCoat guidance draft (instruction, skill, agent, prompt) before committing. Checks lint rules, required sections, frontmatter schema, and BaseCoat conventions. Returns a structured pass/fail verdict with actionable fixes."

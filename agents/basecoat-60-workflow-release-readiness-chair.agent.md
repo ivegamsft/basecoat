@@ -6,6 +6,7 @@ model: claude-sonnet-4.6
 invocation_rules:
   - "Invoke for release go/no-go meetings, launch gate reviews, and risk signoff ceremonies."
 visibility: "internal"
+compatibility: []
 ---
 
 # Release Readiness Chair Agent
@@ -39,4 +40,3 @@ Purpose: drive a repeatable release ceremony that yields a clear go/no-go decisi
 ### Required actions
 1. <owner> — <action> — due <date>
 ```
-

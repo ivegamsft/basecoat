@@ -1,6 +1,6 @@
 name: "merge-coordinator-routing"
 description: "Routing evaluation — validates trigger activation for the merge-coordinator agent."
-skill: "agents/merge-coordinator.agent.md"
+skill: "agents/basecoat-10-core-merge-coordinator.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with multiple feature branches need to be merged into a target branch without interactive git editors hanging automated pipelines. Handles conflict detection, safe resolution, and ordered PR merging."

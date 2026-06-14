@@ -3,6 +3,7 @@ name: ci-failure-escalation
 description: "Detects N consecutive CI failures on the same workflow job, opens a blocking issue, and gates further deploys to that environment — the andon cord / halt-the-line pattern for CI/CD pipelines. USE FOR: gate deploys on CI failures, open blocking issues, enforce halt-line policy. DO NOT USE FOR: fixing failing tests, writing CI config."
 visibility: basic
 model: gpt-5.4-mini
+compatibility: []
 ---
 
 # CI Failure Escalation Agent
@@ -164,4 +165,3 @@ Invoke `self-healing-ci` first on isolated failures. Invoke `ci-failure-escalati
 - **Idempotent issue creation**: Before opening a new blocking issue, the agent checks for an existing open issue with the same title to avoid duplicates
 - **Gate removal requires explicit action**: The deployment gate is never removed automatically; the team must close the issue and run the provided removal command
 - **Token scopes documented**: Branch protection rule changes require a token with `repo` or `admin:repo_hook` scope; the agent warns clearly if the token lacks permission and falls back to manual gate instructions
-

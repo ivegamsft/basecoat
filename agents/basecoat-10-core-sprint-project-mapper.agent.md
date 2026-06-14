@@ -5,6 +5,7 @@ visibility: basic
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
 visibility: public
+compatibility: []
 ---
 
 # Sprint/Project Mapper Agent
@@ -115,5 +116,3 @@ Produce:
 - Do not edit code.
 - Do not auto-close issues or rewrite sprint boards.
 - Do not fabricate links where no evidence exists in GitHub metadata.
-
-

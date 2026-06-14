@@ -4,6 +4,7 @@ description: "REST API and contract design specialist. USE FOR: designing RESTfu
 visibility: basic
 model: gpt-5.3-codex
 tools: [read_file, write_file, list_dir, run_terminal_command, create_github_issue]
+compatibility: []
 ---
 
 # API Designer Agent
@@ -146,5 +147,3 @@ Trigger conditions:
 - Deliver OpenAPI 3.x YAML or GraphQL SDL with inline descriptions on every field.
 - Reference filed issue numbers in spec comments where a known violation or debt item exists: `# See #57 — pagination missing on /v1/reports, deferred to next sprint`.
 - Provide a short summary of: what was designed, what changed from the previous version, any breaking changes detected, and any issues filed.
-
-

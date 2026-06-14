@@ -1,6 +1,6 @@
 name: "containerization-planner-routing"
 description: "Routing evaluation — validates trigger activation for the containerization-planner agent."
-skill: "agents/containerization-planner.agent.md"
+skill: "agents/basecoat-30-ai-containerization-planner.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with containerize an app."

@@ -3,6 +3,7 @@ name: domain-designer
 description: "Domain-driven design specialist. USE FOR: designing domain models, planning domain-oriented architectures, designing bounded contexts. DO NOT USE FOR: implementation, code generation."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Domain-Driven Design Agent

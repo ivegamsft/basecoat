@@ -4,6 +4,7 @@ visibility: basic
 description: "Failure pattern process agent for evidence-first mining, raw logging, triage, and enhancement planning. USE FOR: mining failure signals across issues/PRs/CI/logs/incidents, producing append-only raw findings logs, classifying common versus repo-specific patterns with rationale, and building prioritized enhancement plans with early-detection gates. DO NOT USE FOR: implementing feature code changes, auto-remediating production incidents, or bypassing evidence and gate requirements."
 tools: [bash, git, gh, grep, find]
 model: claude-sonnet-4.6
+compatibility: []
 ---
 # Failure Pattern Process Agent
 
@@ -55,6 +56,3 @@ Return:
 
 - `docs/operations/FAILURE_PATTERN_CONSUMER_PROCESS.md`
 - `docs/operations/FAILURE_PATTERN_RUN_CONTRACT.md`
-
-
-

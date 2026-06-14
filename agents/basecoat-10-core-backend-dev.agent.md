@@ -3,6 +3,7 @@ name: backend-dev
 description: "Backend and services development specialist. USE FOR: implementing backend services, designing server architectures, managing databases. DO NOT USE FOR: frontend work, DevOps operations."
 visibility: basic
 model: gpt-5.3-codex
+compatibility: []
 ---
 
 # Backend Development Agent
@@ -126,6 +127,7 @@ Trigger conditions:
 | Endpoint missing authentication or authorization check | `tech-debt,backend,security` |
 
 ## Model
+
 **Recommended:** gpt-5.3-codex
 **Rationale:** Code-optimized model tuned for API implementation, service layers, and data access patterns
 **Minimum:** gpt-5.4-mini
@@ -135,5 +137,3 @@ Trigger conditions:
 - Deliver code with inline comments explaining non-obvious decisions.
 - Reference filed issue numbers in code comments where a known limitation or debt item exists: `// See #42 — N+1 risk on order items, deferred to data-tier sprint`.
 - Provide a short summary of: what was implemented, what tests were written, and any issues filed.
-
-

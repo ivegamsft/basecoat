@@ -3,6 +3,7 @@ name: prompt-engineer
 description: "Prompt optimization and system prompt engineering agent. Use when designing system prompts, optimizing token usage, crafting few-shot examples, or structuring chain-of-thought instructions."
 visibility: basic
 model: gpt-5.3-codex
+compatibility: []
 ---
 
 # Prompt Engineer Agent
@@ -137,4 +138,3 @@ Trigger conditions:
 - Include a metadata header: version, target model, token count, and change rationale.
 - Provide a test summary: inputs tested, pass/fail results, and any known failure modes.
 - If A/B testing was performed, include a comparison table of variants and results.
-

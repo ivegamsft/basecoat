@@ -3,6 +3,7 @@ name: data-tier
 description: "Data persistence and storage optimization. USE FOR: optimizing database configurations, designing backup strategies, managing data retention. DO NOT USE FOR: application development, real-time operations."
 visibility: basic
 model: gpt-5.3-codex
+compatibility: []
 ---
 
 # Data Tier Agent
@@ -27,25 +28,29 @@ Purpose: design schemas, write reversible migrations, optimize queries, and esta
 
 ## Schema Design
 
-**Naming conventions**
+### Naming conventions
+
 - Table names: plural snake_case (`orders`, `order_items`, `user_accounts`).
 - Column names: singular snake_case (`created_at`, `user_id`, `is_active`).
 - Primary keys: `id` (surrogate, auto-increment or UUID). Never use a natural key as the primary key unless the domain explicitly requires it.
 - Foreign keys: `<referenced_table_singular>_id` (e.g., `order_id`, `user_id`).
 - Timestamps: include `created_at` and `updated_at` on every table. Use UTC.
 
-**Data types**
+### Data types
+
 - Use the most restrictive type that fits the data. Do not use `TEXT` for a status enum with five known values.
 - Store monetary values as `DECIMAL(19,4)` or integer cents — never `FLOAT`.
 - Store timestamps as UTC with timezone awareness.
 - Use `BOOLEAN` for binary flags, not `TINYINT(1)` or string `'Y'/'N'`.
 
-**Normalization and denormalization**
+### Normalization and denormalization
+
 - Default to 3NF for write-heavy transactional data.
 - Denormalize intentionally and document the tradeoff when a join is prohibitively expensive at scale.
 - Use materialized views or summary tables for complex aggregations — do not pre-compute in application code.
 
-**Constraints**
+### Constraints
+
 - Enforce referential integrity with foreign key constraints unless the database or scale genuinely prevents it (document why when skipping).
 - Use `NOT NULL` constraints wherever a null value has no semantic meaning.
 - Use `CHECK` constraints for domain-level invariants (e.g., `amount > 0`, `status IN ('pending', 'active', 'closed')`).
@@ -63,16 +68,19 @@ Purpose: design schemas, write reversible migrations, optimize queries, and esta
 
 ## Query Patterns
 
-**N+1 detection**
+### N+1 detection
+
 - Never query inside a loop. Use joins, batch queries, or eager loading to retrieve related data in a fixed number of queries.
 - If an ORM is used, review generated SQL for unexpected per-row queries.
 
-**Pagination**
+### Pagination
+
 - All collection queries must be paginated. Default page size must be defined and enforced server-side.
 - Use cursor-based pagination for large or frequently changing datasets. Offset pagination is acceptable for small, stable datasets.
 - Never allow unbounded `SELECT * FROM table` in production paths.
 
-**Bulk operations**
+### Bulk operations
+
 - Use batch inserts, updates, and deletes when operating on multiple rows.
 - Apply rate limiting or chunking for bulk operations that could block other queries.
 
@@ -137,6 +145,7 @@ Trigger conditions:
 | Hardcoded ID or environment-specific value in a query or migration | `tech-debt,data` |
 
 ## Model
+
 **Recommended:** gpt-5.3-codex
 **Rationale:** Code-optimized model tuned for schema design, migrations, and query optimization
 **Minimum:** gpt-5.4-mini
@@ -147,5 +156,3 @@ Trigger conditions:
 - Include an index rationale comment on every non-obvious index.
 - Reference filed issue numbers where known gaps exist: `// See #28 — missing index on FK, deferred to perf sprint`.
 - Provide a short summary of: schema changes made, migrations written, indexes added, and issues filed.
-
-

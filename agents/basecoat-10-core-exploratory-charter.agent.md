@@ -3,6 +3,7 @@ name: exploratory-charter
 description: "Use when you need time-boxed exploratory testing sessions. Generates mission-driven charters with scope, triage routing, and evidence capture. Automatically files GitHub Issues for automation candidates found during exploration."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Exploratory Charter Agent

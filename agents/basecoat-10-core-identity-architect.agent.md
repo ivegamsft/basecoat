@@ -3,6 +3,7 @@ name: identity-architect
 description: "Identity and access architecture specialist. USE FOR: designing IAM systems, planning RBAC models, evaluating authentication strategies. DO NOT USE FOR: IAM implementation, directory administration."
 visibility: basic
 model: gpt-5.3-codex
+compatibility: []
 ---
 
 # Identity Architect Agent
@@ -122,5 +123,3 @@ Trigger conditions:
 - Provide Bicep or Terraform snippets for every resource to be provisioned.
 - Reference filed issue numbers in comments where known gaps exist: `// See #42 — missing PIM gate for Owner, filed as High`.
 - Produce a summary of: principals catalogued, roles assigned, managed identities configured, credentials eliminated, and CA policies defined.
-
-

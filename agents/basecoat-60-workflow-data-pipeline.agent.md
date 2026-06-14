@@ -4,6 +4,7 @@ description: "Data pipeline agent for medallion lakehouse architecture, data qua
 model: claude-sonnet-4.6
 tools: [read_file, write_file, list_dir, run_terminal_command, create_github_issue]
 visibility: basic
+compatibility: []
 ---
 
 # Data Pipeline Agent
@@ -63,4 +64,3 @@ File issues for missing gates, lineage, retries, quarantine, or notebook hygiene
 ## Output Format
 
 Return layer contracts, validation rules, stages, and issues filed.
-

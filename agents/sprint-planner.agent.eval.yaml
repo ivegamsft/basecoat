@@ -1,6 +1,6 @@
 name: "sprint-planner-routing"
 description: "Routing evaluation — validates trigger activation for the sprint-planner agent."
-skill: "agents/sprint-planner.agent.md"
+skill: "agents/basecoat-10-core-sprint-planner.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with decompose sprint goal into GitHub issues."

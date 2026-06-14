@@ -1,6 +1,6 @@
 name: "rollout-basecoat-routing"
 description: "Routing evaluation — validates trigger activation for the rollout-basecoat agent."
-skill: "agents/rollout-basecoat.agent.md"
+skill: "agents/basecoat-60-workflow-rollout-basecoat.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with onboarding a repository to BaseCoat in an enterprise setting. Focuses on pinned versions, safe rollout, installation method, and validation steps."

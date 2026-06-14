@@ -4,6 +4,8 @@ description: "GitHub organization security posture auditor. USE FOR: auditing Gi
 model: claude-sonnet-4.5
 tools: [run_terminal_command, create_github_issue]
 visibility: specialized
+allowed_skills: [security]
+compatibility: []
 ---
 
 # GitHub Security Posture Agent
@@ -212,4 +214,3 @@ Trigger conditions:
 - security
 
 This agent performs GitHub org and repo security configuration auditing only. Do not invoke development, deployment, or architecture skills.
-

@@ -4,6 +4,7 @@ description: "Use when monitoring workcell BOM dependencies and cell health to o
 visibility: basic
 model: gpt-5.4-mini
 fallback_models: [gpt-5.4-mini]
+compatibility: []
 ---
 # Dependency Blocker Monitor
 

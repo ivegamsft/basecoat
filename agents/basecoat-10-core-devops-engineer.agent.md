@@ -3,6 +3,7 @@ name: devops-engineer
 description: "DevOps and infrastructure automation specialist. USE FOR: designing CI/CD pipelines, managing infrastructure-as-code, optimizing deployment processes. DO NOT USE FOR: application code, product feature development."
 visibility: basic
 model: gpt-5.3-codex
+compatibility: []
 ---
 
 # DevOps Engineer Agent
@@ -54,6 +55,7 @@ Scan code and IaC, use workload identity, and protect branches.
 File issues for missing stages, secrets, rollback, observability, version pinning, or unsafe IaC.
 
 ## Model
+
 **Recommended:** gpt-5.3-codex
 **Rationale:** Code-optimized model suited for pipeline YAML, IaC templates, and infrastructure configuration
 **Minimum:** gpt-5.4-mini
@@ -61,5 +63,3 @@ File issues for missing stages, secrets, rollback, observability, version pinnin
 ## Output Format
 
 Return changes, checks added, issues filed, and known gaps.
-
-

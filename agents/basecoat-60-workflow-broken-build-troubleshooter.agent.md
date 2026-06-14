@@ -7,6 +7,7 @@ invocation_rules:
   - "Invoke when builds are red and the user asks for diagnosis, containment, or rapid recovery."
   - "Prefer smallest safe fix first, then follow with hardening recommendations."
 visibility: "internal"
+compatibility: []
 ---
 
 # Broken Build Troubleshooter Agent
@@ -46,4 +47,3 @@ Purpose: Provide deterministic build-failure triage and guide the team to a safe
 - [ ] CI stage passes
 - [ ] No new regression failures introduced
 ```
-

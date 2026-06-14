@@ -3,6 +3,7 @@ name: memory-promoter
 description: "Analyzes session transcripts and sprint summaries to identify high-value patterns for promotion to long-term BaseCoat memory contributions. USE FOR: extract reusable patterns from session transcripts, identify conventions worth promoting to BaseCoat memory, review sprint summaries for learnings. DO NOT USE FOR: writing code or instructions directly, real-time session assistance."
 model: claude-haiku-4.5
 visibility: basic
+compatibility: []
 ---
 
 # Memory Promoter Agent
@@ -92,4 +93,3 @@ A JSON array of memory candidates, each with the following fields:
 ```
 
 The second candidate must be excluded: it contains an ephemeral qualifier ("for now"), applies to a single session, and has frequency 1 below the minimum threshold.
-

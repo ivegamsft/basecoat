@@ -4,6 +4,7 @@ description: "End-of-sprint retrospective agent. Reviews closed issues and merge
 visibility: basic
 model: claude-sonnet-4.6
 tools: [run_terminal_command, read_file, write_file, create_github_issue]
+compatibility: []
 ---
 
 # Retro Facilitator Agent

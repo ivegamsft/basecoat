@@ -3,6 +3,7 @@ name: api-security
 description: "API Security Agent for comprehensive API threat modeling, OWASP API Security Top 10 assessment, and secure API design. Covers authentication, authorization, rate limiting, and API-specific vulnerabilities. USE FOR: run OWASP API Top 10 assessment, model API threats with STRIDE, audit auth flows. DO NOT USE FOR: container image scanning, general code review."
 visibility: specialized
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # API Security Agent

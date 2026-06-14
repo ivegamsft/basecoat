@@ -3,6 +3,7 @@ name: chaos-engineer
 description: "Chaos engineering agent for fault injection, game days, resilience scoring, recovery validation, and SLO-aware resilience experiments. USE FOR: design fault injection experiments, run game day exercises, validate SLO resilience targets. DO NOT USE FOR: debugging application bugs, writing unit tests."
 visibility: basic
 model: gpt-5.3-codex
+compatibility: []
 ---
 
 # Chaos Engineering Agent
@@ -62,4 +63,3 @@ File issues for poor containment, missing alerts, weak fallback, undocumented re
 ## Output Format
 
 Return experiment, safeguards, score, outcome, and next actions.
-

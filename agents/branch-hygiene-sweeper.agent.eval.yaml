@@ -1,6 +1,6 @@
 name: "branch-hygiene-sweeper-routing"
 description: "Routing evaluation — validates trigger activation for the branch-hygiene-sweeper agent."
-skill: "agents/branch-hygiene-sweeper.agent.md"
+skill: "agents/basecoat-10-core-branch-hygiene-sweeper.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help cleaning stale branches, dangling refs, and release branch hygiene."

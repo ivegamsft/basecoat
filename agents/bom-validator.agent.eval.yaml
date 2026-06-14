@@ -1,6 +1,6 @@
 name: "bom-validator-routing"
 description: "Routing evaluation — validates trigger activation for the bom-validator agent."
-skill: "agents/bom-validator.agent.md"
+skill: "agents/basecoat-10-core-bom-validator.agent.md"
 scenarios:
   - id: "pos-1"
     input: "Validate this Workcell intake BOM against the plant registry."

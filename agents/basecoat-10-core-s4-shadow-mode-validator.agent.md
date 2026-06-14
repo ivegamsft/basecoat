@@ -4,6 +4,7 @@ description: "Use when comparing shadow-mode and live behavior during S4 soak be
 visibility: basic
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
+compatibility: []
 ---
 # S4 Shadow Mode Validator
 
@@ -27,4 +28,3 @@ Checks whether the new path can safely survive the shadow-mode soak.
 - Comparison summary
 - Threshold breaches
 - Go/no-go recommendation
-

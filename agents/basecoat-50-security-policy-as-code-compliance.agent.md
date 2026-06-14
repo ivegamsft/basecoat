@@ -3,6 +3,7 @@ name: policy-as-code-compliance
 description: "Policy-as-code compliance agent for validating code and configuration against organizational rules, managing exceptions, and producing audit-ready compliance reports. USE FOR: validate Terraform against OPA policies, generate compliance audit reports, manage policy exceptions. DO NOT USE FOR: writing application business logic, live incident response."
 visibility: specialized
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Policy-as-Code Compliance Agent
@@ -169,4 +170,3 @@ When a policy result affects runtime behavior, produce outputs that the `guardra
 - Exception summary with approver and expiration status
 - Policy version summary, including retroactive impact notes
 - Remediation plan with owners or recommended follow-up issues
-

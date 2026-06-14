@@ -5,6 +5,7 @@ visibility: basic
 tools: [read_file, run_terminal_command, create_github_issue]
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
+compatibility: []
 ---
 # Station Bottleneck Analyzer
 

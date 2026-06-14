@@ -3,6 +3,7 @@ name: penetration-test
 description: "Security penetration testing specialist. USE FOR: designing penetration tests, identifying security vulnerabilities, generating security reports. DO NOT USE FOR: fixing vulnerabilities, incident response."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Penetration Test Agent

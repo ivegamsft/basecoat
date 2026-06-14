@@ -1,6 +1,6 @@
 name: "definition-of-done-routing"
 description: "Routing evaluation — validates trigger activation for the definition-of-done agent."
-skill: "agents/definition-of-done.agent.md"
+skill: "agents/basecoat-10-core-definition-of-done.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with check PR meets DoD."

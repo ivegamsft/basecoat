@@ -3,6 +3,7 @@ name: release-impact-advisor
 description: "Assesses release readiness, change impacts, blast radius, rollback planning, and safe deployment strategies with canary deployments, feature flags, and changelog generation. USE FOR: assess release blast radius, plan rollback strategy, recommend deployment approach. DO NOT USE FOR: executing deployments, live incident response."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Release Impact Advisor Agent

@@ -1,6 +1,6 @@
 name: "ha-architect-routing"
 description: "Routing evaluation — validates trigger activation for the ha-architect agent."
-skill: "agents/ha-architect.agent.md"
+skill: "agents/basecoat-10-core-ha-architect.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with design multi-region failover architecture."

@@ -1,6 +1,6 @@
 name: "dataops-routing"
 description: "Routing evaluation — validates trigger activation for the dataops agent."
-skill: "agents/dataops.agent.md"
+skill: "agents/basecoat-80-data-dataops.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with managing pipeline reliability and data change risk."

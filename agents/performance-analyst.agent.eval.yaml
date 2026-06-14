@@ -1,6 +1,6 @@
 name: "performance-analyst-routing"
 description: "Routing evaluation — validates trigger activation for the performance-analyst agent."
-skill: "agents/performance-analyst.agent.md"
+skill: "agents/basecoat-10-core-performance-analyst.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with evaluating application performance, planning load tests, analyzing Core Web Vitals, or investigating query and caching performance."

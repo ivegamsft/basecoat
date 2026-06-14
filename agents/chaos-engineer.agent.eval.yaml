@@ -1,6 +1,6 @@
 name: "chaos-engineer-routing"
 description: "Routing evaluation — validates trigger activation for the chaos-engineer agent."
-skill: "agents/chaos-engineer.agent.md"
+skill: "agents/basecoat-10-core-chaos-engineer.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with design fault injection experiments."

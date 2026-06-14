@@ -1,0 +1,112 @@
+name: "BaseCoat - Approve Issue for Copilot Agent"
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  issues: write
+  contents: read
+
+concurrency:
+  group: cloud-agent-execution
+  cancel-in-progress: false
+
+env:
+  MAX_CONCURRENT_AGENTS: 4
+
+jobs:
+  approve:
+    if: |
+      !github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/approve')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Verify commenter has write access
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        id: check-access
+        with:
+          script: |
+            const { data: perm } = await github.rest.repos.getCollaboratorPermissionLevel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              username: context.payload.comment.user.login
+            });
+            const allowed = ['admin', 'write'].includes(perm.permission);
+            if (!allowed) {
+              core.setFailed(`User ${context.payload.comment.user.login} does not have write access`);
+            }
+            return allowed;
+
+      - name: Assign to Copilot and update labels
+        if: steps.check-access.outputs.result == 'true'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        with:
+          script: |
+            const issue = context.payload.issue;
+
+            // Remove triage label, add approved
+            try {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                name: 'triage'
+              });
+            } catch (e) {
+              // Label might not exist
+            }
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              labels: ['approved', 'copilot-agent']
+            });
+
+            // Assign to Copilot coding agent (requires Copilot coding agent enabled for repo)
+            let assigned = false;
+            try {
+              await github.rest.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                assignees: ['Copilot']
+              });
+              // Verify assignment actually stuck
+              const { data: updated } = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number
+              });
+              assigned = updated.assignees.some(a => a.login.toLowerCase() === 'copilot');
+            } catch (e) {
+              core.warning(`Could not assign to Copilot: ${e.message}`);
+            }
+
+            // Acknowledge with honest status
+            const body = assigned
+              ? [
+                  '✅ **Approved** — Issue assigned to the Copilot coding agent.',
+                  '',
+                  'Copilot will analyze this issue and open a draft PR with the implementation.',
+                  'Review the PR when ready and merge after CI passes.',
+                ].join('\n')
+              : [
+                  '✅ **Approved** — Labels `approved` + `copilot-agent` applied.',
+                  '',
+                  '⚠️ **Agent assignment failed.** The Copilot coding agent could not be automatically',
+                  'assigned (it may not be enabled for this repository).',
+                  '',
+                  'To trigger the agent manually, assign this issue to **@Copilot** in the sidebar,',
+                  'or implement the changes manually following the triage plan above.',
+                ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              body
+            });
+

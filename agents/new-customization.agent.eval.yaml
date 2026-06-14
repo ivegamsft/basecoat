@@ -1,6 +1,6 @@
 name: "new-customization-routing"
 description: "Routing evaluation — validates trigger activation for the new-customization agent."
-skill: "agents/new-customization.agent.md"
+skill: "agents/basecoat-10-core-new-customization.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with creating or updating a customization asset such as an instruction, skill, prompt, or agent. Chooses the right primitive, authors the file, and validates frontmatter and placement."

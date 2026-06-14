@@ -1,6 +1,6 @@
 name: "resilience-reviewer-routing"
 description: "Routing evaluation — validates trigger activation for the resilience-reviewer agent."
-skill: "agents/resilience-reviewer.agent.md"
+skill: "agents/basecoat-90-quality-resilience-reviewer.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with code-level resilience pattern review for circuit breakers, timeouts, bulkhead isolation, graceful degradation, retry logic, or load shedding. USE FOR: review circuit breaker and retry patterns in code, audit timeout hierarchy, validate graceful degradation. DO NOT USE FOR: live incident response, infrastructure capacity planning."

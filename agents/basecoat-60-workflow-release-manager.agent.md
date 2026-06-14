@@ -3,6 +3,7 @@ name: release-manager
 description: "Automated versioned release workflow. Reads merged PRs since the last release, bumps version.json, writes CHANGELOG entry, creates git tag, and publishes GitHub release. USE FOR: bump semver and publish GitHub release, generate changelog from merged PRs, create git release tag. DO NOT USE FOR: sprint planning, deployment risk assessment."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Release Manager Agent

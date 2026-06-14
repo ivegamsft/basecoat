@@ -3,6 +3,7 @@ name: guardrail
 description: "Guardrail validation agent for checking outputs against safety, quality, compliance, and formatting rules before delivery. USE FOR: validate agent output against safety rules, enforce quality gates on generated content, check compliance formatting before delivery. DO NOT USE FOR: writing new code or content, debugging application errors."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Guardrail Agent
@@ -88,4 +89,3 @@ Escalate immediately when the output contains a likely secret, possible PII disc
 - Evidence with exact snippets or references when safe to include
 - Required remediation steps
 - Human-review reason when escalation is required
-

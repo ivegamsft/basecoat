@@ -1,6 +1,6 @@
 name: "database-migration-routing"
 description: "Routing evaluation — validates trigger activation for the database-migration agent."
-skill: "agents/database-migration.agent.md"
+skill: "agents/basecoat-80-data-database-migration.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with use the database-migration agent."

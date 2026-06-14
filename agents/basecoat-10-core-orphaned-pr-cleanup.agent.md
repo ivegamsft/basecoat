@@ -7,6 +7,7 @@ invocation_rules:
   - "Invoke when user asks to clean stale PRs, unblock review queues, or close abandoned changes."
   - "Prefer batch triage with explicit status buckets: revive, close, escalate."
 visibility: "internal"
+compatibility: []
 ---
 
 # Orphaned PR Cleanup Agent
@@ -43,4 +44,3 @@ Purpose: Reduce pull request backlog drag by classifying stale PRs and driving e
 2. PR #145 — close as superseded by #180
 3. PR #166 — escalate merge conflict to component maintainer
 ```
-

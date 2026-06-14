@@ -4,6 +4,7 @@ description: "Use when gathering requirements, writing user stories, defining ac
 visibility: basic
 model: claude-sonnet-4.6
 tools: [run_terminal_command, read_file, write_file, list_dir]
+compatibility: []
 ---
 
 # Product Manager Agent

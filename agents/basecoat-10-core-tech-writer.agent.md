@@ -3,6 +3,7 @@ name: tech-writer
 description: "Use when creating or improving technical documentation, API docs, runbooks, tutorials, ADRs, changelogs, or implementing docs-as-code workflows."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Tech Writer Agent

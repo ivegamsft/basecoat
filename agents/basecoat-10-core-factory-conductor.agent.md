@@ -4,6 +4,7 @@ description: "Use when reading .factory-state.json and auto-queuing the next rea
 visibility: basic
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
+compatibility: []
 ---
 # Factory Conductor
 
@@ -27,4 +28,3 @@ Routes the next ready wave from the shared factory state.
 - Dispatch plan
 - Routed workflow targets
 - Short note on blocked or deferred items
-

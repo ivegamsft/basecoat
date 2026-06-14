@@ -3,6 +3,7 @@ name: agent-designer
 description: "Agent design and customization specialist. USE FOR: designing new agent personas and workflows, reviewing agent configurations, optimizing agent performance. DO NOT USE FOR: direct agent execution, implementation."
 visibility: basic
 model: gpt-5.3-codex
+compatibility: []
 ---
 
 # Agent Designer Agent
@@ -138,5 +139,3 @@ Trigger conditions:
 - Deliver the complete `.agent.md` file ready to commit.
 - Include a summary listing: agent name, referenced skills, tools granted, and any issues filed.
 - If a multi-agent pattern was designed, include a coordination diagram in Mermaid syntax.
-
-

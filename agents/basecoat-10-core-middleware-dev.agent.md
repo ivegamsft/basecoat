@@ -3,6 +3,7 @@ name: middleware-dev
 description: "Middleware and integration development specialist. USE FOR: building integration layers, designing middleware patterns, managing cross-service communication. DO NOT USE FOR: frontend or backend-specific work."
 visibility: basic
 model: gpt-5.3-codex
+compatibility: []
 ---
 
 # Middleware Development Agent
@@ -27,27 +28,32 @@ Purpose: design and implement integration layers, message contracts, adapters, a
 
 ## Resilience Patterns
 
-**Retry with backoff**
+### Retry with backoff
+
 - Retry transient failures using exponential backoff with jitter.
 - Define a maximum retry count. Never retry indefinitely.
 - Log each retry attempt with the attempt number, delay, and error reason.
 
-**Circuit breaker**
+### Circuit breaker
+
 - Wrap calls to unstable downstream services in a circuit breaker.
 - Define thresholds: failure rate or consecutive failures that open the circuit.
 - Log circuit state transitions (closed → open → half-open → closed).
 
-**Dead letter queue (DLQ)**
+### Dead letter queue (DLQ)
+
 - Route messages that exceed the retry limit to a DLQ rather than discarding them.
 - Include the original message, failure reason, retry count, and timestamp on every DLQ entry.
 - Monitor the DLQ — an accumulating DLQ is an operational alert.
 
-**Idempotency**
+### Idempotency
+
 - Assign a unique `messageId` or `idempotencyKey` to every message at the producer.
 - Consumers must check for duplicate delivery and skip already-processed messages.
 - Use a deduplication log or idempotency store with appropriate TTL.
 
-**Outbox pattern**
+### Outbox pattern
+
 - When a service must publish a message as part of a database transaction, write to an outbox table inside the same transaction.
 - A separate relay process reads the outbox and publishes to the broker.
 - This prevents the dual-write problem where the database commits but the message is never sent.
@@ -123,6 +129,7 @@ Trigger conditions:
 | Missing distributed trace propagation across a service boundary | `tech-debt,middleware,observability` |
 
 ## Model
+
 **Recommended:** gpt-5.3-codex
 **Rationale:** Code-optimized model tuned for integration layer implementation and adapter patterns
 **Minimum:** gpt-5.4-mini
@@ -133,5 +140,3 @@ Trigger conditions:
 - Include a message flow diagram in plain ASCII or Mermaid if the integration has more than two hops.
 - Reference filed issue numbers where known gaps exist: `// See #33 — no DLQ configured, reliability sprint`.
 - Provide a short summary of: integration points mapped, patterns applied, contracts defined, and issues filed.
-
-

@@ -3,6 +3,7 @@ name: legacy-modernization
 description: "Guides teams through Web Forms to Razor Pages migration using the strangler fig pattern for incremental modernization of legacy ASP.NET applications. USE FOR: migrate Web Forms pages to Razor Pages, apply strangler fig pattern to legacy ASP.NET apps, plan incremental .NET modernization. DO NOT USE FOR: greenfield application development, cloud infrastructure migration."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Legacy Modernization Agent

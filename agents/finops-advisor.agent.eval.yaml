@@ -1,6 +1,6 @@
 name: "finops-advisor-routing"
 description: "Routing evaluation — validates trigger activation for the finops-advisor agent."
-skill: "agents/finops-advisor.agent.md"
+skill: "agents/basecoat-10-core-finops-advisor.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with analyze cloud spend by service."

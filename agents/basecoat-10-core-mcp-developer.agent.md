@@ -3,6 +3,7 @@ name: mcp-developer
 description: "MCP (Model Context Protocol) development specialist. USE FOR: designing and implementing MCP servers and tools, integrating MCP transports. DO NOT USE FOR: direct model interactions, non-MCP tasks."
 visibility: internal
 model: claude-sonnet-4
+compatibility: []
 ---
 
 # MCP Developer Agent
@@ -150,5 +151,3 @@ Trigger conditions:
 - Reference filed issue numbers in code comments where a known limitation or debt item exists: `// See #101 — auth scope enforcement deferred to next sprint`.
 - Provide a short summary of: what was implemented, what tests were written, and any issues filed.
 - Include the tool manifest (list of tools with names and descriptions) in the output for review.
-
-

@@ -3,6 +3,7 @@ name: Hardening Advisor
 description: "CIS Benchmarks and STIG hardening advisor for Dockerfiles, Kubernetes manifests, databases, and infrastructure configurations against security standards. USE FOR: harden Dockerfile against CIS benchmarks, audit Kubernetes manifests for STIG compliance, review infrastructure config security. DO NOT USE FOR: application code security review, live incident mitigation."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Hardening Advisor Agent

@@ -1,6 +1,6 @@
 name: "release-impact-advisor-routing"
 description: "Routing evaluation — validates trigger activation for the release-impact-advisor agent."
-skill: "agents/release-impact-advisor.agent.md"
+skill: "agents/basecoat-60-workflow-release-impact-advisor.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with assess release blast radius."

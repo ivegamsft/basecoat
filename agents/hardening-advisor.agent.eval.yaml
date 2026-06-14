@@ -1,6 +1,6 @@
 name: "hardening-advisor-routing"
 description: "Routing evaluation — validates trigger activation for the hardening-advisor agent."
-skill: "agents/hardening-advisor.agent.md"
+skill: "agents/basecoat-10-core-hardening-advisor.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with CIS or STIG hardening guidance for Dockerfiles, Kubernetes manifests, databases, or infrastructure configurations. USE FOR: harden Dockerfiles against CIS benchmarks, audit Kubernetes manifests for STIG compliance, review infrastructure config security. DO NOT USE FOR: application code security review, live incident mitigation."

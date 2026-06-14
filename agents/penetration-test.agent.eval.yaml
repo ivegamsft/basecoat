@@ -1,6 +1,6 @@
 name: "penetration-test-routing"
 description: "Routing evaluation — validates trigger activation for the penetration-test agent."
-skill: "agents/penetration-test.agent.md"
+skill: "agents/basecoat-90-quality-penetration-test.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with planning security testing engagements aligned with OWASP Testing Guide."

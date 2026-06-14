@@ -3,6 +3,7 @@ name: llmops
 description: "LLM operations and prompt engineering specialist. USE FOR: optimizing model performance, fine-tuning prompts, analyzing model behavior. DO NOT USE FOR: model training, infrastructure setup."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # LLMOps Agent
@@ -58,5 +59,3 @@ File issues for unversioned prompts, weak gates, unsafe fallback, weak health ch
 ## Output Format
 
 Return version, route, decision, supporting metrics, and next actions.
-
-

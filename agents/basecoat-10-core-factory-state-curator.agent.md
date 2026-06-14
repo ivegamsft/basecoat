@@ -4,6 +4,7 @@ description: "Use when merging Workcell intake YAML, GitHub labels, and gate res
 visibility: basic
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
+compatibility: []
 ---
 # Factory State Curator
 
@@ -27,4 +28,3 @@ Curates one coherent state file from intake, labels, and gates.
 - Updated `.factory-state.json`
 - Validation summary
 - Blocker list for downstream routing
-

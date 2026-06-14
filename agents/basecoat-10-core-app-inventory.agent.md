@@ -9,6 +9,7 @@ tools:
   - view
   - bash
   - powershell
+compatibility: []
 ---
 
 # App Inventory Agent

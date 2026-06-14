@@ -1,6 +1,6 @@
 name: "project-onboarding-routing"
 description: "Routing evaluation — validates trigger activation for the project-onboarding agent."
-skill: "agents/project-onboarding.agent.md"
+skill: "agents/basecoat-10-core-project-onboarding.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with set up a new repo with BaseCoat governance."

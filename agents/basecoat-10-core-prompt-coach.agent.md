@@ -3,6 +3,7 @@ name: prompt-coach
 description: "Use when reviewing prompts, scoring prompt quality, identifying anti-patterns, and guiding iterative refinement of LLM prompts."
 visibility: basic
 model: gpt-5.3-codex
+compatibility: []
 ---
 
 # Prompt Coach Agent

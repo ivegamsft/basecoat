@@ -1,6 +1,6 @@
 name: "factory-state-curator-routing"
 description: "Routing evaluation — validates trigger activation for the factory-state-curator agent."
-skill: "agents/factory-state-curator.agent.md"
+skill: "agents/basecoat-10-core-factory-state-curator.agent.md"
 scenarios:
   - id: "pos-1"
     input: "Merge the Workcell intake YAML and issue labels into a single S1-S5 state snapshot."

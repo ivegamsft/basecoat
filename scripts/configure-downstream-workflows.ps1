@@ -3,13 +3,13 @@
     Copies and configures downstream-safe BaseCoat workflows into .github/workflows.
 
 .DESCRIPTION
-    Installs only consumer-safe workflows with a bc- filename prefix so they are easy to
-    identify and do not collide with repo-native workflow names.
+    Installs BaseCoat workflows with explicit provenance naming:
+    - basecoat-<capability>.yml         (reusable)
+    - basecoat-agent-<capability>.yml   (advanced templates)
+    - basecoat-internal-<capability>.yml (internal workflows)
 
-    By default, this script also removes known unsupported workflows from the destination:
-    - bc-asset-health.yml
-    - bc-sync-test.yml
-    - bc-template-validation.yml
+    Default behavior installs only reusable workflows. Template and internal workflows are
+    opt-in via parameters.
 
     Source workflows are expected in .github/base-coat/workflows (as synced by BaseCoat).
 
@@ -20,13 +20,21 @@
     Directory where configured workflows are written.
 
 .PARAMETER IncludeUnsupported
-    Also install unsupported workflows (not recommended for consumer repos).
+    Also install advanced/unsupported workflows (not recommended for consumer repos).
 
-.PARAMETER KeepUnsupported
-    Keep unsupported workflow files already present in destination.
+.PARAMETER IncludeTemplates
+    Include template workflows (in addition to reusable workflows).
+
+.PARAMETER IncludeInternal
+    Include internal workflows (in addition to reusable workflows).
+
+.PARAMETER InstallClass
+    Workflow classes to install. Valid values: reusable, templates, internal.
+    Defaults to reusable.
 
 .PARAMETER KeepUnknownBc
-    Keep unknown bc-* workflow files already present in destination.
+    Keep unknown managed workflow files already present in destination.
+    Managed prefixes are bc-, basecoat-, basecoat-agent-, basecoat-internal-.
 
 .PARAMETER DryRun
     Print planned actions without modifying files.
@@ -43,7 +51,10 @@ param(
     [string]$SourceDir = '.github/base-coat/workflows',
     [string]$DestinationDir = '.github/workflows',
     [switch]$IncludeUnsupported,
-    [switch]$KeepUnsupported,
+    [switch]$IncludeTemplates,
+    [switch]$IncludeInternal,
+    [ValidateSet('reusable', 'templates', 'internal')]
+    [string[]]$InstallClass = @('reusable'),
     [switch]$KeepUnknownBc,
     [switch]$DryRun
 )
@@ -89,64 +100,139 @@ if (-not (Test-Path -Path $resolvedDest -PathType Container)) {
 $workflowMap = @(
     [pscustomobject]@{
         Source = 'check-version.yml'
-        Destination = 'bc-check-health.yml'
-        Name = 'BaseCoat Downstream - Check Health'
+        Destination = 'basecoat-upstream-version-drift.yml'
+        LegacyDestinations = @('bc-check-health.yml')
+        Name = 'BaseCoat Reusable - Upstream Version Drift'
+        Class = 'reusable'
         Supported = $true
     }
     [pscustomobject]@{
         Source = 'version-check.yml'
-        Destination = 'bc-version-check.yml'
-        Name = 'BaseCoat Downstream - Version Check'
+        Destination = 'basecoat-version-check.yml'
+        LegacyDestinations = @('bc-version-check.yml')
+        Name = 'BaseCoat Reusable - Version Check'
         Supported = $true
+        Class = 'reusable'
     }
     [pscustomobject]@{
         Source = 'secret-scan.yml'
-        Destination = 'bc-secret-scan.yml'
-        Name = 'BaseCoat Downstream - Secret Scan'
+        Destination = 'basecoat-secret-scan.yml'
+        LegacyDestinations = @('bc-secret-scan.yml')
+        Name = 'BaseCoat Reusable - Secret Scan'
         Supported = $true
-    }
-    [pscustomobject]@{
-        Source = 'prd-spec-gate.yml'
-        Destination = 'bc-prd-spec-gate.yml'
-        Name = 'BaseCoat Downstream - PRD and Spec Gate'
-        Supported = $true
+        Class = 'reusable'
     }
     [pscustomobject]@{
         Source = 'dependency-update-advisor.yml'
-        Destination = 'bc-dependency-update-advisor.yml'
-        Name = 'BaseCoat Downstream - Dependency Update Advisor'
+        Destination = 'basecoat-dependency-update-advisor.yml'
+        LegacyDestinations = @('bc-dependency-update-advisor.yml')
+        Name = 'BaseCoat Template - Dependency Update Advisor'
         Supported = $true
+        Class = 'templates'
+    }
+    [pscustomobject]@{
+        Source = 'issue-approve.yml'
+        Destination = 'basecoat-issue-approve.yml'
+        LegacyDestinations = @()
+        Name = 'BaseCoat Template - Issue Approve'
+        Supported = $true
+        Class = 'templates'
     }
     [pscustomobject]@{
         Source = 'sprint-closeout-branch-audit.yml'
-        Destination = 'bc-sprint-closeout-branch-audit.yml'
-        Name = 'BaseCoat Downstream - Sprint Closeout Branch Audit'
+        Destination = 'basecoat-sprint-closeout-branch-audit.yml'
+        LegacyDestinations = @('bc-sprint-closeout-branch-audit.yml')
+        Name = 'BaseCoat Template - Sprint Closeout Branch Audit'
         Supported = $true
+        Class = 'templates'
     }
     [pscustomobject]@{
-        Source = 'asset-health.yml'
-        Destination = 'bc-asset-health.yml'
-        Name = 'BaseCoat Downstream - Asset Health Report'
-        Supported = $false
+        Source = 'token-inventory.yml'
+        Destination = 'basecoat-token-inventory.yml'
+        LegacyDestinations = @()
+        Name = 'BaseCoat Template - Token Inventory'
+        Supported = $true
+        Class = 'templates'
     }
     [pscustomobject]@{
-        Source = 'sync-test.yml'
-        Destination = 'bc-sync-test.yml'
-        Name = 'BaseCoat Downstream - Consumer Sync Validation'
+        Source = 'code-review-agent.lock.yml'
+        Destination = 'basecoat-agent-code-review.yml'
+        LegacyDestinations = @()
+        Name = 'BaseCoat Agent Template - Code Review'
         Supported = $false
+        Class = 'templates'
     }
     [pscustomobject]@{
-        Source = 'template-validation.yml'
-        Destination = 'bc-template-validation.yml'
-        Name = 'BaseCoat Downstream - Template Validation'
+        Source = 'issue-triage.lock.yml'
+        Destination = 'basecoat-agent-issue-triage.yml'
+        LegacyDestinations = @()
+        Name = 'BaseCoat Agent Template - Issue Triage'
         Supported = $false
+        Class = 'templates'
+    }
+    [pscustomobject]@{
+        Source = 'release-impact-advisor.lock.yml'
+        Destination = 'basecoat-agent-release-impact-advisor.yml'
+        LegacyDestinations = @()
+        Name = 'BaseCoat Agent Template - Release Impact Advisor'
+        Supported = $false
+        Class = 'templates'
+    }
+    [pscustomobject]@{
+        Source = 'retro-facilitator.lock.yml'
+        Destination = 'basecoat-agent-retro-facilitator.yml'
+        LegacyDestinations = @()
+        Name = 'BaseCoat Agent Template - Retro Facilitator'
+        Supported = $false
+        Class = 'templates'
+    }
+    [pscustomobject]@{
+        Source = 'security-analyst.lock.yml'
+        Destination = 'basecoat-agent-security-analyst.yml'
+        LegacyDestinations = @()
+        Name = 'BaseCoat Agent Template - Security Analyst'
+        Supported = $false
+        Class = 'templates'
+    }
+    [pscustomobject]@{
+        Source = 'self-healing-ci.lock.yml'
+        Destination = 'basecoat-agent-self-healing-ci.yml'
+        LegacyDestinations = @()
+        Name = 'BaseCoat Agent Template - Self-Healing CI'
+        Supported = $false
+        Class = 'templates'
+    }
+    [pscustomobject]@{
+        Source = 'auto-approve-cloud-agent-workflows.yml'
+        Destination = 'basecoat-internal-auto-approve-cloud-agent-workflows.yml'
+        LegacyDestinations = @()
+        Name = 'BaseCoat Internal - Auto-approve Cloud Agent Workflows'
+        Supported = $false
+        Class = 'internal'
     }
 )
 
-$knownDownstreamFiles = @($workflowMap | ForEach-Object { $_.Destination })
+$installClasses = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+foreach ($class in $InstallClass) {
+    [void]$installClasses.Add($class)
+}
+if ($IncludeTemplates) {
+    [void]$installClasses.Add('templates')
+}
+if ($IncludeInternal) {
+    [void]$installClasses.Add('internal')
+}
+
+$knownManagedFiles = @(
+    $workflowMap |
+        ForEach-Object { @($_.Destination) + @($_.LegacyDestinations) } |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+        Sort-Object -Unique
+)
 $factoryOnlyWorkflowFiles = @(
     'database-ci-cd.yml',
-    'bc-database-ci-cd.yml'
+    'bc-database-ci-cd.yml',
+    'basecoat-internal-database-ci-cd.yml'
 )
 
 $copied = 0
@@ -154,11 +240,17 @@ $removed = 0
 $skipped = 0
 
 foreach ($workflow in $workflowMap) {
+    if (-not $installClasses.Contains($workflow.Class)) {
+        Write-Info "Skipping workflow outside selected classes ($($workflow.Class)): $($workflow.Source)"
+        $skipped++
+        continue
+    }
+
     $sourceFile = Join-Path $resolvedSource $workflow.Source
     $destFile = Join-Path $resolvedDest $workflow.Destination
 
     if (-not $workflow.Supported -and -not $IncludeUnsupported) {
-        if ((Test-Path $destFile) -and -not $KeepUnsupported) {
+        if (Test-Path $destFile) {
             if ($DryRun) {
                 Write-Info "Would remove unsupported workflow: $($workflow.Destination)"
             } else {
@@ -173,8 +265,8 @@ foreach ($workflow in $workflowMap) {
         continue
     }
 
-    if (-not (Test-Path $sourceFile)) {
-        Write-Warn "Source workflow missing, skipping: $($workflow.Source)"
+    if (-not (Test-Path -Path $sourceFile -PathType Leaf)) {
+        Write-Warn "Source workflow missing in '$SourceDir', skipping: $($workflow.Source)"
         $skipped++
         continue
     }
@@ -196,11 +288,6 @@ foreach ($workflow in $workflowMap) {
     }
     $content = [string]::Join("`n", $lines)
 
-    # Remove repo-specific risky path rule that often does not exist in consumers.
-    if ($workflow.Destination -eq 'bc-prd-spec-gate.yml') {
-        $content = $content -replace "(?m)^\s*/\^docs\\/enterprise-rollout\\.md\$/,?\r?\n", ''
-    }
-
     if ($DryRun) {
         Write-Info "Would copy $($workflow.Source) -> $($workflow.Destination)"
     } else {
@@ -208,18 +295,39 @@ foreach ($workflow in $workflowMap) {
         Write-Ok "Installed workflow: $($workflow.Destination)"
     }
     $copied++
+
+    foreach ($legacyName in $workflow.LegacyDestinations) {
+        if ($legacyName -eq $workflow.Destination) {
+            continue
+        }
+        $legacyPath = Join-Path $resolvedDest $legacyName
+        if (Test-Path -Path $legacyPath -PathType Leaf) {
+            if ($DryRun) {
+                Write-Info "Would remove legacy workflow filename: $legacyName"
+            } else {
+                Remove-Item -Path $legacyPath -Force
+                Write-Ok "Removed legacy workflow filename: $legacyName"
+            }
+            $removed++
+        }
+    }
 }
 
 if (-not $KeepUnknownBc) {
-    $unknownBcFiles = Get-ChildItem -Path $resolvedDest -Filter 'bc-*.yml' -File -ErrorAction SilentlyContinue |
-        Where-Object { $_.Name -notin $knownDownstreamFiles }
+    $managedPrefixes = @('bc-', 'basecoat-', 'basecoat-agent-', 'basecoat-internal-')
+    $unknownManagedFiles = Get-ChildItem -Path $resolvedDest -Filter '*.yml' -File -ErrorAction SilentlyContinue |
+        Where-Object {
+            $name = $_.Name.ToLowerInvariant()
+            @($managedPrefixes | Where-Object { $name.StartsWith($_) }).Count -gt 0 -and
+            $_.Name -notin $knownManagedFiles
+        }
 
-    foreach ($file in $unknownBcFiles) {
+    foreach ($file in $unknownManagedFiles) {
         if ($DryRun) {
-            Write-Info "Would remove unknown downstream workflow: $($file.Name)"
+            Write-Info "Would remove unknown managed workflow: $($file.Name)"
         } else {
             Remove-Item -Path $file.FullName -Force
-            Write-Ok "Removed unknown downstream workflow: $($file.Name)"
+            Write-Ok "Removed unknown managed workflow: $($file.Name)"
         }
         $removed++
     }

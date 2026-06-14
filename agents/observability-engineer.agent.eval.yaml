@@ -1,6 +1,6 @@
 name: "observability-engineer-routing"
 description: "Routing evaluation — validates trigger activation for the observability-engineer agent."
-skill: "agents/observability-engineer.agent.md"
+skill: "agents/basecoat-10-core-observability-engineer.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with OpenTelemetry instrumentation, structured logging, distributed tracing, metrics taxonomy, or dashboard-as-code. USE FOR: instrument services with OpenTelemetry, design structured logging schema, and build dashboard-as-code for metrics. DO NOT USE FOR: incident response triage, infrastructure provisioning."

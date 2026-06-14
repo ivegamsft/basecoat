@@ -4,6 +4,7 @@ description: "Cleans GitHub Actions workflow run history safely by deleting stal
 visibility: basic
 model: gpt-5.4-mini
 fallback_models: [claude-sonnet-4.5]
+compatibility: []
 ---
 
 # Workflow Run History Cleanup Agent
@@ -71,4 +72,3 @@ gh run list --repo {repo} --limit 500 --json databaseId,workflowName,conclusion,
 # delete one run
 gh run delete {run_id} --repo {repo}
 ```
-

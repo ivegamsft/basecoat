@@ -367,7 +367,7 @@ if ($Agent) {
             }
 
             # Fallback for current agent format: parse markdown "## Allowed Skills" bullet list
-            if ($referencedSkills.Count -eq 0) {
+            if ((@($referencedSkills)).Count -eq 0) {
                 $allowedSkillsMatch = [regex]::Match(
                     $agentContent,
                     "(?ms)^##\s+Allowed Skills\s*$\s*(.+?)(?=^##\s+|\z)"

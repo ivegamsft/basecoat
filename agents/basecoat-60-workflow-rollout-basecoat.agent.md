@@ -3,6 +3,7 @@ name: rollout-basecoat
 description: "Use when onboarding a repository to BaseCoat in an enterprise setting. Focuses on pinned versions, safe rollout, installation method, and validation steps."
 visibility: basic
 model: claude-haiku-4.5
+compatibility: []
 ---
 
 # Roll Out BaseCoat Agent

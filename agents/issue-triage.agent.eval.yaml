@@ -1,6 +1,6 @@
 name: "issue-triage-routing"
 description: "Routing evaluation — validates trigger activation for the issue-triage agent across all 9 triage check types."
-skill: "agents/issue-triage.agent.md"
+skill: "agents/basecoat-10-core-issue-triage.agent.md"
 scenarios:
   - id: "pos-1"
     input: "Scan all open issues for duplicates and close any that are redundant."

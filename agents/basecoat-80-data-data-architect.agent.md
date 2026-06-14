@@ -3,6 +3,7 @@ name: data-architect
 description: "Data architecture design specialist. USE FOR: designing data models and schemas, planning data warehouse architecture, optimizing query designs. DO NOT USE FOR: ETL operations, data pipeline troubleshooting."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Data Architect Agent
@@ -179,5 +180,3 @@ def check_data_quality(df, table_name):
 **Recommended:** claude-sonnet-4.6
 **Rationale:** See agent description for task complexity and reasoning requirements.
 **Minimum:** gpt-5.4-mini
-
-

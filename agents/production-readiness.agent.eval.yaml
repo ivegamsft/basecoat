@@ -1,6 +1,6 @@
 name: "production-readiness-routing"
 description: "Routing evaluation — validates trigger activation for the production-readiness agent."
-skill: "agents/production-readiness.agent.md"
+skill: "agents/basecoat-10-core-production-readiness.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with run pre-release production readiness checklist."

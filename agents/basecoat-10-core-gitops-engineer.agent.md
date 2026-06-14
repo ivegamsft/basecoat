@@ -3,6 +3,7 @@ name: gitops-engineer
 description: "GitOps and deployment automation specialist. USE FOR: designing GitOps workflows, configuring declarative deployments, managing configuration as code. DO NOT USE FOR: manual deployments, emergency operations."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # GitOps Engineer Agent

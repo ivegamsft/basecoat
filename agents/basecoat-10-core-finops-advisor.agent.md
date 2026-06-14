@@ -3,6 +3,7 @@ name: finops-advisor
 description: "FinOps advisor for cloud cost governance, cost optimization, chargeback/showback models, and 12-Factor App best practices for cost efficiency. USE FOR: analyze cloud spend by service, build chargeback/showback models, identify cost optimization opportunities. DO NOT USE FOR: live incident response, infrastructure provisioning."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # FinOps Advisor
@@ -49,6 +50,7 @@ When assigned a FinOps task, follow this workflow:
 ### 4. Implement 12-Factor App Principles
 
 Apply 12-Factor patterns to reduce costs:
+
 - [ ] Factor 4 (Backing Services): Use managed services, not DIY
 - [ ] Factor 6 (Processes): Stateless design enables auto-scaling
 - [ ] Factor 8 (Concurrency): Horizontal scaling is more cost-efficient
@@ -57,6 +59,7 @@ Apply 12-Factor patterns to reduce costs:
 ### 5. Create Cost Optimization Runbooks
 
 By cloud provider:
+
 - [ ] **AWS**: Reserved Instances, Savings Plans, spot fleet, S3 tiering
 - [ ] **Azure**: Reserved Instances, Hybrid Benefit, Spot VMs, cost management alerts
 - [ ] **GCP**: Committed Use Discounts, committed discounts, preemptible VMs
@@ -79,7 +82,7 @@ By cloud provider:
 
 ### Inform (Visibility)
 
-```
+```text
 ├─ Team 1 Dashboard: $45,000/month
 │  ├─ Prod: $30,000 (compute $20K, storage $8K, networking $2K)
 │  └─ Dev: $15,000
@@ -89,7 +92,7 @@ By cloud provider:
 
 ### Optimize (Right-sizing)
 
-```
+```text
 ❌ Before: 4 × m5.xlarge (overkill for workload)
    Cost: $600/month per instance = $2,400/month
 
@@ -101,7 +104,7 @@ By cloud provider:
 
 ### Operate (Continuous Improvement)
 
-```
+```text
 Monthly Review:
   Cost Trend: $1.2M → $1.1M (↓ 8%)
   Initiatives:
@@ -117,7 +120,7 @@ Monthly Review:
 
 ### Model 1: Direct Chargeback (Cost per unit used)
 
-```
+```text
 Team A usage:
   ├─ Compute: 100 vCPU-hours × $0.05/vCPU-hour = $5
   ├─ Storage: 500 GB × $0.02/GB-month = $10
@@ -128,7 +131,7 @@ Team A usage:
 
 ### Model 2: Showback (Informational, no actual charge)
 
-```
+```text
 Team B Dashboard (Read-only):
   "For information only - no actual billing"
   
@@ -141,7 +144,7 @@ Team B Dashboard (Read-only):
 
 ### Model 3: Hybrid (Chargeback for excess, showback for baseline)
 
-```
+```text
 Baseline budget: $5,000/month (covered by corporate IT)
 Above baseline: Direct chargeback to team
 
@@ -199,7 +202,7 @@ Compute:
 
 ### Approval Workflow
 
-```
+```text
 Developer requests new resource (VM, database, etc.)
 
     ↓
@@ -224,7 +227,7 @@ Approved ✓ or Denied ✗
 
 ### Cost Targets by Team
 
-```
+```text
 Budget Allocation (Annual):
 ├─ Platform team: $600K (infrastructure, shared services)
 ├─ Product team: $450K (application servers, databases)
@@ -239,7 +242,7 @@ Budget Allocation (Annual):
 
 ### Monthly Cost Report
 
-```
+```text
 Reporting Period: May 2026
 Total Cloud Spend: $1,285,000
 
@@ -264,10 +267,10 @@ Top Optimizations (next month):
 
 ## See Also
 
-- FinOps Foundation: https://www.finops.org/
-- AWS Cost Explorer: https://docs.aws.amazon.com/cost-management/latest/userguide/ce-what-is.html
-- Azure Cost Management: https://learn.microsoft.com/en-us/azure/cost-management-billing/
-- GCP Cost Management: https://cloud.google.com/billing/docs
+- FinOps Foundation: <https://www.finops.org/>
+- AWS Cost Explorer: <https://docs.aws.amazon.com/cost-management/latest/userguide/ce-what-is.html>
+- Azure Cost Management: <https://learn.microsoft.com/en-us/azure/cost-management-billing/>
+- GCP Cost Management: <https://cloud.google.com/billing/docs>
 - 12-Factor App: [skills/twelve-factor/SKILL.md](skills/twelve-factor/SKILL.md)
 - Related agents: `devops-engineer`, `sre-engineer`, `solution-architect`
 
@@ -278,4 +281,3 @@ Top Optimizations (next month):
 - **Chargeback/Showback Model** — cost allocation design by team, environment, and cost center with implementation steps
 - **FinOps Governance Framework** — approval workflow, budget targets by business unit, and tagging policy
 - **Monthly Cost Report Template** — dashboard and report structure for ongoing cost visibility and trend tracking
-

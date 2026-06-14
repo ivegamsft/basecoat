@@ -3,6 +3,7 @@ name: guidance-author
 description: "BaseCoat guidance documentation author. USE FOR: creating security playbooks and best practices, authoring new instruction files and agent templates, writing skill documentation, drafting guidance framework updates. DO NOT USE FOR: incident response, operational tasks, code implementation."
 visibility: specialized
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Guidance Author Agent
@@ -68,4 +69,3 @@ Produce:
    - **Confidence**: `<n>%` — likelihood the draft passes reviewer validation without changes
    - **Assumptions made**: bullet list of choices not specified in the inputs
    - **Suggested handoff**: "Run guidance-reviewer to validate before committing"
-

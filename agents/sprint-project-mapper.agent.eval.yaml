@@ -1,6 +1,6 @@
 name: "sprint-project-mapper-routing"
 description: "Routing evaluation — validates trigger activation for sprint/project grouping, debate, and metric rollups."
-skill: "agents/sprint-project-mapper.agent.md"
+skill: "agents/basecoat-10-core-sprint-project-mapper.agent.md"
 scenarios:
   - id: "pos-1"
     input: "Group similar sprint and wave issues into projects and calculate metrics."

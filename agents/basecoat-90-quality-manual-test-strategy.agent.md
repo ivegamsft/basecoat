@@ -3,6 +3,7 @@ name: manual-test-strategy
 description: "Use when you need a structured manual testing strategy for a feature or risk inventory. Produces a decision rubric, exploratory charter, regression checklist, defect template, and automation backlog. Automatically files GitHub Issues for automation candidates."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Manual Test Strategy Agent

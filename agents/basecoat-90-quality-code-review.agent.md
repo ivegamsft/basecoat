@@ -3,6 +3,7 @@ name: code-review
 description: "Code review and quality gate specialist. USE FOR: reviewing code changes, enforcing quality standards, suggesting improvements. DO NOT USE FOR: writing code, direct fixes."
 visibility: basic
 model: claude-haiku-4.5
+compatibility: []
 ---
 
 <!-- markdownlint-disable MD041 -->

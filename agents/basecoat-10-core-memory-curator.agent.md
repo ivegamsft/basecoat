@@ -3,6 +3,7 @@ name: memory-curator
 description: "Cross-session memory and knowledge management curator. USE FOR: extracting and storing knowledge from long conversations, deduplicating learning across sessions, injecting relevant context into new conversations, managing memory decay and TTLs. DO NOT USE FOR: real-time conversation support, immediate decision-making, output formatting."
 visibility: basic
 model: claude-sonnet-4.6
+compatibility: []
 ---
 
 # Memory Curator Agent

@@ -1,22 +1,16 @@
 # Getting Started with BaseCoat Workflows
 
-BaseCoat distributes workflow templates for consumer repositories. Use the installer script to copy and configure only downstream-safe workflows with `bc-` prefixed filenames.
+BaseCoat distributes workflow templates for consumer repositories. Use the installer script to copy and configure downstream-safe workflows with explicit BaseCoat provenance filenames.
 
 ## What's Included
 
-Nine generic workflows with **zero BaseCoat dependencies**:
+Supported distributable workflows by class:
 
-| Workflow | Purpose | Trigger | Setup Time |
-|----------|---------|---------|-----------|
-| **asset-health.yml** | Asset quality scoring | Cron (Mon 8am) | 1 min |
-| **check-version.yml** | Version consistency checks | Manual | 1 min |
-| **dependency-update-advisor.yml** | Dependency advisory | Cron + Manual | 1 min |
-| **prd-spec-gate.yml** | Enforce PRD/spec documentation | PR labels | 2 min |
-| **secret-scan.yml** | Secret/credential scanning | Push, PR | 1 min |
-| **sprint-closeout-branch-audit.yml** | Cleanup stale branches | Cron (Sun 2am) | 2 min |
-| **sync-test.yml** | Validate sync correctness | Manual | 1 min |
-| **template-validation.yml** | Validate template structure | Manual, PR | 1 min |
-| **version-check.yml** | Version alignment | Manual | 1 min |
+| Class | Installed by default | Workflows |
+|----------|---------|---------|
+| **Reusable** | Yes | `basecoat-upstream-version-drift.yml`, `basecoat-version-check.yml`, `basecoat-secret-scan.yml` |
+| **Templates** | No (`-IncludeTemplates`) | `basecoat-dependency-update-advisor.yml`, `basecoat-issue-approve.yml`, `basecoat-sprint-closeout-branch-audit.yml`, `basecoat-token-inventory.yml` |
+| **Internal** | No (`-IncludeInternal`) | Internal-only automation workflows (unsupported in downstream consumer repos) |
 
 ## Installation
 
@@ -28,20 +22,34 @@ Run the downstream workflow installer from your consumer repository:
 pwsh scripts/configure-downstream-workflows.ps1
 ```
 
-This installs:
+This installs (default reusable class):
 
-- `bc-check-health.yml`
-- `bc-version-check.yml`
-- `bc-secret-scan.yml`
-- `bc-prd-spec-gate.yml`
-- `bc-dependency-update-advisor.yml`
-- `bc-sprint-closeout-branch-audit.yml`
+- `basecoat-upstream-version-drift.yml`
+- `basecoat-version-check.yml`
+- `basecoat-secret-scan.yml`
 
-By default it skips/removes unsupported consumer workflows:
+To include template workflows:
 
-- `bc-asset-health.yml`
-- `bc-sync-test.yml`
-- `bc-template-validation.yml`
+```bash
+pwsh scripts/configure-downstream-workflows.ps1 -IncludeTemplates
+```
+
+To include internal workflows as well (internal workflows are marked unsupported,
+so include both flags):
+
+```bash
+pwsh scripts/configure-downstream-workflows.ps1 -IncludeTemplates -IncludeInternal -IncludeUnsupported
+```
+
+By default it skips advanced unsupported workflows, including:
+
+- `basecoat-agent-code-review.yml`
+- `basecoat-agent-issue-triage.yml`
+- `basecoat-agent-release-impact-advisor.yml`
+- `basecoat-agent-retro-facilitator.yml`
+- `basecoat-agent-security-analyst.yml`
+- `basecoat-agent-self-healing-ci.yml`
+- `basecoat-internal-auto-approve-cloud-agent-workflows.yml`
 
 ### Manual Setup
 
@@ -152,7 +160,7 @@ Each workflow accepts `workflow_dispatch` inputs for customization:
 
 ```bash
 # Run with custom parameters
-gh workflow run bc-check-health.yml \
+gh workflow run basecoat-upstream-version-drift.yml \
   --ref main \
   --field input_param=value
 ```
@@ -163,10 +171,10 @@ To disable a workflow:
 
 ```bash
 # Option 1: Rename file (add .disabled extension)
-mv .github/workflows/bc-sprint-closeout-branch-audit.yml .github/workflows/bc-sprint-closeout-branch-audit.yml.disabled
+mv .github/workflows/basecoat-sprint-closeout-branch-audit.yml .github/workflows/basecoat-sprint-closeout-branch-audit.yml.disabled
 
 # Option 2: Remove from repository
-rm .github/workflows/bc-secret-scan.yml
+rm .github/workflows/basecoat-secret-scan.yml
 
 # Option 3: Set status=skipped in workflow file
 # status: skipped
@@ -188,7 +196,7 @@ rm .github/workflows/bc-secret-scan.yml
 gh workflow list --all
 
 # View workflow details
-gh workflow view bc-check-health.yml
+gh workflow view basecoat-upstream-version-drift.yml
 ```
 
 ### Permission Errors

@@ -4,6 +4,7 @@ description: "Use when S2 assessment data shows the work is far larger than esti
 visibility: basic
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
+compatibility: []
 ---
 # Replanning Engine
 
@@ -27,4 +28,3 @@ Detects when S2 reality has drifted too far from the original estimate.
 - Complexity delta
 - Recommendation
 - Replanning issue title and summary
-

@@ -2,6 +2,103 @@
 
 ## CI/CD Workflow Templatization Design
 
+## 2026-06-12 downstream consumer lens update
+
+This update captures current decisions for candidate workflows that are frequently
+requested by downstream consumers. The design adds two requirements:
+
+1. BaseCoat provenance must be explicit in workflow naming and docs.
+2. Each distributed workflow needs an adoption process (move, configure, validate).
+
+### Naming and packaging convention (vNext)
+
+- Reusable productized workflows: `basecoat-<capability>.yml`
+- Advanced agent packs (opt-in): `basecoat-agent-<capability>.yml`
+- Internal workflows (not distributed): `basecoat-internal-<capability>.yml`
+
+Packaging targets:
+
+- `.github/workflows/reusable/`
+- `.github/workflows/templates/`
+- `.github/workflows/internal/`
+
+### Candidate decisions (consumer value + safety)
+
+| Candidate | Decision | Distribution Class | Notes |
+|---|---|---|---|
+| auto-approve-cloud-agent-workflows.yml | Keep internal by default | internal | High-risk automation; only distribute as governed blueprint with strict allowlists. |
+| check-basecoat-version-callable.yml | Productize | reusable | Rename to upstream drift checker; parameterize upstream repo, labels, and remediation URL. |
+| code-review-agent.lock.yml + code-review-agent.md | Optional advanced pack | templates | Ship as opt-in pack with explicit secret contract and least-privilege mode. |
+| dependency-update-advisor.yml | Productize (template-first) | templates -> reusable | Split core advisory logic from org-specific policy actions. |
+| issue-approve.yml | Productize (template-first) | templates | Parameterize labels, approver policy, and comments. |
+| issue-triage.lock.yml + issue-triage.md | Optional advanced pack | templates | Keep out of default install; publish with tiered capabilities. |
+| release-impact-advisor.lock.yml + release-impact-advisor.md | Optional advanced pack | templates | Valuable but heavy runtime/secrets contract. |
+| retro-facilitator.lock.yml + retro-facilitator.md | Optional advanced pack | templates | Useful for process-heavy teams; not universal default. |
+| secret-scan.yml | Productize now | reusable | High consumer value; low coupling; input-driven fail/warn mode. |
+| security-analyst.lock.yml + security-analyst.md | Optional advanced pack | templates | Package with strict permission profiles and preflight checks. |
+| self-healing-ci.lock.yml + self-healing-ci.md | Optional advanced pack | templates | Default to dry-run and scoped remediation boundaries. |
+| sprint-closeout-branch-audit.yml | Productize (template-first) | templates | Parameterize stale thresholds, branch patterns, and action mode. |
+| token-inventory.yml | Productize as niche template | templates | Governance-oriented; keep optional for platform teams. |
+| version-check.yml | Productize now | reusable | Generic version contract checks with input-driven file targets. |
+| PULL_REQUEST_TEMPLATE.md | Productize now | reusable docs | Provide modular template blocks for risk, rollout, and evidence. |
+
+### Required migration process for distributed workflows
+
+1. **Classify** workflow as `reusable`, `templates`, or `internal`.
+2. **Decouple** hardcoded org/repo/branch/secrets into inputs and documented defaults.
+3. **Add preflight** checks for required secrets/permissions with actionable failures.
+4. **Publish contract** (inputs, secrets, permissions, outputs, examples).
+5. **Add caller examples** for downstream repositories.
+6. **Validate** with a consumer contract test workflow before promotion to `reusable`.
+7. **Version and pin** distributed workflows with tag/SHA guidance and deprecation notes.
+
+### Required refactoring and script updates
+
+To execute the candidate set, the following refactoring and script work is required:
+
+1. **Workflow extraction refactor**
+   - Move distributable workflows into `.github/workflows/reusable/` and
+     `.github/workflows/templates/`.
+   - Keep non-distributed workflows in `.github/workflows/internal/`.
+
+2. **Consumer installer refactor**
+   - Update `scripts/configure-downstream-workflows.ps1` to support:
+     - new naming (`basecoat-*`, `basecoat-agent-*`, `basecoat-internal-*`)
+     - category-aware install (`reusable` default, `templates` opt-in)
+     - migration mapping from existing `bc-*` names and legacy filenames.
+
+3. **Contract validation refactor**
+   - Add a reusable-workflow contract validator that checks required inputs,
+     secrets, permissions, and outputs for distributed workflows.
+   - Wire validation into CI so distributed workflows fail fast on contract drift.
+
+4. **Workflow-specific refactors**
+   - `check-basecoat-version-callable.yml`: replace hardcoded upstream/URLs and
+     expose input-driven upstream source and issue template fields.
+   - `secret-scan.yml`: expose fail/warn mode, config path, and target scope.
+   - `version-check.yml`: generalize version file targets and semver policy.
+   - `dependency-update-advisor.yml`, `issue-approve.yml`,
+     `sprint-closeout-branch-audit.yml`, `token-inventory.yml`:
+     split core logic from org-specific policy defaults.
+
+5. **Agent pack script hardening**
+   - Add shared preflight checks for advanced `*.lock.yml` packs:
+     - secret presence and scope checks
+     - minimal permission checks
+     - dry-run defaults and fork-safe guards.
+
+6. **Documentation pipeline updates**
+   - Update downstream setup/reference docs to new naming and install modes.
+   - Add migration tables: legacy filename -> new canonical filename.
+
+### Capability tiers for advanced agent packs
+
+- Tier 1: Read/report only
+- Tier 2: Comment/label actions
+- Tier 3: Write/fix automation
+
+Each advanced pack must declare tier, required scopes, fork behavior, and rollback mode.
+
 ### Executive Summary
 
 This document assesses feasibility and priority for templatizing BaseCoat's CI/CD workflows within the Consumer Agent SDK model. **Recommendation: Phased approach with 3 workflow categories** based on reusability, consumer demand, and coupling to BaseCoat infrastructure.
