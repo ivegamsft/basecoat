@@ -1,0 +1,177 @@
+name: Audit Environment Drift
+
+on:
+  schedule:
+    # Run daily at 6:00 AM UTC
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      strict_mode:
+        description: 'Fail if any drift detected'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+  push:
+    paths:
+      - '.github/environment-map.yml'
+      - '.release/manifest.json'
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    outputs:
+      drift_status: ${{ steps.audit.outputs.drift_status }}
+      findings_count: ${{ steps.audit.outputs.findings_count }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit environment drift
+        id: audit
+        run: |
+          STRICT_MODE="${{ github.event.inputs.strict_mode || 'false' }}"
+          
+          npx @basecoat/environment-audit-drift \
+            --config .github/environment-map.yml \
+            --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
+            --github-token "${{ secrets.GITHUB_TOKEN }}" \
+            --output drift-report.json \
+            $([ "$STRICT_MODE" = "true" ] && echo "--strict" || echo "")
+          
+          # Parse report and set outputs
+          DRIFT_STATUS=$(jq -r '.severity_summary | if .critical > 0 then "critical" elif .high > 0 then "high" elif .medium > 0 then "medium" else "clean" end' drift-report.json)
+          FINDINGS=$(jq '.total_drifts' drift-report.json)
+          
+          echo "drift_status=$DRIFT_STATUS" >> $GITHUB_OUTPUT
+          echo "findings_count=$FINDINGS" >> $GITHUB_OUTPUT
+          
+          echo "### Environment Drift Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** \`$DRIFT_STATUS\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Findings:** $FINDINGS" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          jq -r '.findings[] | "- [\(.severity | ascii_upcase)] \(.finding) (*\(.resource // "N/A")*)"' drift-report.json >> $GITHUB_STEP_SUMMARY || echo "No findings" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload drift report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: drift-report
+          path: drift-report.json
+          retention-days: 30
+
+      - name: Comment on issues (if critical)
+        if: steps.audit.outputs.drift_status == 'critical'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('drift-report.json', 'utf-8'));
+            
+            const findings = report.findings
+              .filter(f => f.severity === 'critical')
+              .map(f => `- **${f.environment}**: ${f.finding}\n  Remediation: ${f.remediation}`)
+              .join('\n');
+            
+            const body = `## ⚠️ Critical Environment Drift Detected
+            
+            ${findings}
+            
+            **Action Required**: Review and resolve critical drifts before proceeding with deployments.
+            
+            See drift report artifact for full details.
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            }).catch(() => {
+              // Comment silently fails if not in issue/PR context (e.g., scheduled run)
+            });
+
+      - name: Fail if critical drift in strict mode
+        if: |
+          github.event.inputs.strict_mode == 'true' &&
+          steps.audit.outputs.drift_status == 'critical'
+        run: |
+          echo "Critical drift detected in strict mode"
+          exit 1
+
+  notify:
+    needs: audit
+    runs-on: ubuntu-latest
+    if: |
+      always() &&
+      (needs.audit.outputs.drift_status == 'critical' || 
+       needs.audit.outputs.drift_status == 'high')
+    steps:
+      - name: Post Slack notification
+        if: vars.SLACK_WEBHOOK_URL != ''
+        uses: slackapi/slack-github-action@v1
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload: |
+            {
+              "text": "Environment drift detected: ${{ needs.audit.outputs.drift_status }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "⚠️ *Environment Drift Detected*\nStatus: `${{ needs.audit.outputs.drift_status }}`\nFindings: ${{ needs.audit.outputs.findings_count }}"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Report"
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
+                }
+              ]
+            }
+
+      - name: Send email notification
+        if: vars.NOTIFY_EMAIL != ''
+        uses: davisnetwork/actions-mail@v1
+        with:
+          server_address: ${{ secrets.EMAIL_SERVER }}
+          server_port: ${{ secrets.EMAIL_PORT }}
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "🚨 Environment drift: ${{ needs.audit.outputs.drift_status }}"
+          to: ${{ vars.NOTIFY_EMAIL }}
+          from: "drift-audit@github.com"
+          body: |
+            Environment drift has been detected.
+            
+            Status: ${{ needs.audit.outputs.drift_status }}
+            Findings: ${{ needs.audit.outputs.findings_count }}
+            
+            View the full report at:
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
