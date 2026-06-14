@@ -4,6 +4,7 @@ set -euo pipefail
 
 ROOT_DIR="${1:-$(pwd)}"
 FAIL_ON_WARNING=0
+warning_count=0
 if [[ ${2:-} == "--fail-on-warning" ]]; then
   FAIL_ON_WARNING=1
 fi

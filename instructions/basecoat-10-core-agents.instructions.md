@@ -1,5 +1,5 @@
 ---
-description: "Use when creating, updating, or reviewing agent definitions. Covers naming, structure, required sections, skill pairing, multi-agent coordination, model selection, and testing."
+description: "Use when creating, updating, or reviewing agent definitions. Covers naming, structure, required sections, skill pairing, capability-based routing, model policy, and testing."
 applyTo: "agents/**/*.agent.md"
 ---
 
@@ -22,8 +22,19 @@ Every agent file must start with a YAML frontmatter block containing these field
 ---
 name: kebab-case-agent-name
 description: "One-sentence description of the agent's purpose. Start with the role noun and state when to invoke it."
+visibility: internal
 tools: [read_file, write_file, list_dir, run_terminal_command, create_github_issue]
 allowed_skills: [skill-name-a, skill-name-b]
+capabilities:
+  reasoning_depth: medium
+  tool_use: required
+  context_window: medium
+  latency_profile: balanced
+  cost_tier: medium
+  safety_level: standard
+model_policy:
+  fallback: true
+  preferred_families: [claude-sonnet, gpt-5]
 handoffs:
   - label: Next Step
     agent: next-agent-name
@@ -38,13 +49,20 @@ handoffs:
 | `description` | Yes | One sentence. Begin with the role, end with trigger guidance ("Use when …"). |
 | `tools` | Yes | Array of tool identifiers the agent needs. Enforced at runtime — the agent cannot call any tool not in this list. Follow least-privilege — include only tools the agent actually uses. |
 | `allowed_skills` | No | Array of skill folder names the agent may invoke. When omitted, the agent inherits all available skills (legacy behavior). Use `allowed_skills: []` to block all skill invocations. When present, the runtime filters the `<available_skills>` list to this allow-list before injecting it into the agent context. |
+| `capabilities` | Recommended | Capability profile used for routing policy: `reasoning_depth`, `tool_use`, `context_window`, `latency_profile`, `cost_tier`, `safety_level`. |
+| `model_policy` | Recommended | Routing and fallback policy. Include `fallback: true` and `preferred_families` for safe defaults. |
+| `pinned_model` | Conditional | Only for reproducibility/compliance, model-specific dependency, or strict compatibility constraints. |
+| `pin_reason` | Conditional | Required when `pinned_model` is present. Explain why pinning is necessary. |
+| `model` | Legacy | Allowed during migration for compatibility with existing assets and runtimes. |
 | `handoffs` | No | Array of VS Code transition buttons rendered after each response. Each entry requires `label`, `agent`, and `prompt`. Set `send: false` to let the user review before the next agent runs. See `docs/agent-handoffs.md`. |
 
 ### Runtime Enforcement Semantics
 
 - **`tools:` is a whitelist.** At runtime the agent session is restricted to exactly the tools declared. Any tool not listed is unavailable, regardless of what the parent session has enabled.
 - **`allowed_skills:` is a filter.** The platform injects only the skills named in this list into `<available_skills>`. An agent with `allowed_skills: []` receives an empty skill catalog and must stop immediately if its workflow depends on a skill.
-- **`## Model` is binding.** The model named in the agent's **Model** section is used as the actual model selection when the agent is invoked, not merely a suggestion. Specify the recommended model using the identifier exactly as it appears in the platform's model registry.
+- **Capability-first policy applies by default.** New and updated agents should drive routing from `capabilities` and `model_policy`.
+- **Pinned model policy is exception-only.** If `pinned_model` is used, `pin_reason` is mandatory and must document one of the approved pinning justifications.
+- **Legacy model binding remains compatible.** Existing assets that rely on the `## Model` section and/or `model` frontmatter remain valid during migration.
 - **`handoffs:` is declarative.** Handoff entries do not affect the agent's runtime behavior — they configure the VS Code UI to display transition buttons after the agent responds. The `agent` field must match the `name` field of an existing agent.
 
 ## Required Sections Checklist
@@ -57,7 +75,7 @@ Sections 1–8 are required. Omitting any of them is a review-blocking finding. 
 4. **Workflow** — Numbered step-by-step process. Each step starts with a bolded verb phrase. The final step must reference issue filing.
 5. **Domain sections** — One or more H2 sections covering the agent's domain-specific standards, checklists, or reference tables (e.g., API Design Principles, OWASP Top 10 Review).
 6. **GitHub Issue Filing** — Standard `gh issue create` template with labeled trigger conditions table. Agents must file issues inline — deferral is never acceptable.
-7. **Model** — Recommended and minimum model with rationale (see Model Selection Guide below).
+7. **Model & Routing Policy** — Capability profile plus any pinned-model justification (see Capability-First Model Policy below).
 8. **Output Format** — What the agent delivers: code, reports, filed issues, or structured artifacts. Must include reference to issue numbers in deliverables.
 9. **Allowed Skills** *(optional but strongly recommended)* — Allow-list of skills the agent may invoke at runtime. See the Allowed Skills Section below.
 
@@ -67,22 +85,31 @@ Every agent file **should** include an `## Allowed Skills` section. List each sk
 
 See [`references/agents/skill-pairing.md`](references/agents/skill-pairing.md) for examples and multi-agent coordination rules.
 
-## Model Selection Guide
+## Capability-First Model Policy
 
-Choose the model based on the agent's primary workload. Document the choice in the agent's **Model** section.
+Choose capabilities based on the agent's workload first, then pin only when justified.
 
-| Agent Role | Recommended Model | Minimum Model | Rationale |
-|---|---|---|---|
-| Code-heavy (backend-dev, frontend-dev, data-tier) | claude-sonnet-4.6 | gpt-5.4-mini | Multi-file implementation and refactoring with strong code generation. |
-| Analysis / review (security-analyst, code-review, performance-analyst) | claude-sonnet-4.6 | gpt-5.4-mini | Pattern recognition across large diffs; security review benefits from reasoning depth. |
-| Architecture / design (solution-architect, api-designer) | claude-sonnet-4.6 | gpt-5.4-mini | Broad reasoning for trade-off analysis and system design. Use Premium tier (Opus) when cross-cutting decisions span multiple services. |
-| Planning / coordination (sprint-planner, release-manager) | claude-haiku-4.5 | gpt-5.4-mini | Lower token demand; primarily structured output and list management. |
+| Workload Pattern | Capability Profile | Notes |
+|---|---|---|
+| Code-heavy implementation | `reasoning_depth: medium`, `tool_use: required`, `context_window: medium`, `latency_profile: balanced`, `cost_tier: medium`, `safety_level: standard` | Use family preferences for code-capable models; avoid hard pins unless needed. |
+| Analysis and security review | `reasoning_depth: high`, `tool_use: required`, `context_window: large`, `latency_profile: balanced`, `cost_tier: medium`, `safety_level: strict` | Pin only for reproducible compliance baselines. |
+| Architecture and design | `reasoning_depth: high`, `tool_use: optional`, `context_window: large`, `latency_profile: interactive`, `cost_tier: high`, `safety_level: standard` | Prefer families with strong long-horizon reasoning. |
+| Planning and coordination | `reasoning_depth: low`, `tool_use: optional`, `context_window: small`, `latency_profile: interactive`, `cost_tier: low`, `safety_level: standard` | Prioritize low-latency and low-cost routing. |
 
-- Always state the **Recommended** model, the **Minimum** model, and a one-line **Rationale**.
-- If a task requires extended context (e.g., reviewing an entire codebase), prefer models with larger context windows and note the requirement.
+- If `pinned_model` is used, include `pin_reason` and document the compatibility/compliance dependency in the body.
+- Always include a fallback policy (`fallback: true`, `preferred_families`, optional `excluded_tiers`).
+- During migration, legacy `model` values are still permitted; do not churn stable assets only to replace model IDs.
+
+When pinning is required, add this block explicitly:
+
+```yaml
+pinned_model: claude-sonnet-4.6
+pin_reason: "Compatibility with an established evaluation baseline."
+```
+
 ## Reference Files
 
 | File | Contents |
 |---|---|
-| [eferences/agents/skill-pairing.md](references/agents/skill-pairing.md) | Allowed Skills section format, agent-to-skill pairing, multi-agent coordination, token budget rules |
-| [eferences/agents/lifecycle.md](references/agents/lifecycle.md) | Validation checklist, versioning, deprecation, minimal agent skeleton |
+| [references/agents/skill-pairing.md](references/agents/skill-pairing.md) | Allowed Skills section format, agent-to-skill pairing, multi-agent coordination, token budget rules |
+| [references/agents/lifecycle.md](references/agents/lifecycle.md) | Validation checklist, versioning, deprecation, minimal agent skeleton |
