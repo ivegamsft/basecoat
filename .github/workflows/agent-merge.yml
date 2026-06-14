@@ -112,8 +112,16 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
-          RANGE_BASE="${BASE_SHA:-HEAD~1}"
-          RANGE="${RANGE_BASE}...HEAD"
+          if [ -z "${BASE_SHA}" ]; then
+            {
+              echo "# Agent Merge Changelog"
+              echo
+              echo "No pull request base SHA available. Changelog generation is skipped for workflow_dispatch runs."
+            } > agent-merge-changelog.md
+            exit 0
+          fi
+
+          RANGE="${BASE_SHA}...HEAD"
           {
             echo "# Agent Merge Changelog"
             echo
