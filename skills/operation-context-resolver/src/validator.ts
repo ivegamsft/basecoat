@@ -103,3 +103,46 @@ export async function validateEnvironmentMap(repoRoot: string): Promise<Validati
     rules_count: rulesCount,
   };
 }
+
+function parseRepoRootArg(argv: string[]): string {
+  const repoRootFlagIndex = argv.indexOf('--repo-root');
+  if (repoRootFlagIndex === -1) {
+    return process.cwd();
+  }
+
+  const value = argv[repoRootFlagIndex + 1];
+  if (!value) {
+    throw new Error('Missing value for --repo-root');
+  }
+  return value;
+}
+
+if (require.main === module) {
+  (async () => {
+    try {
+      const repoRoot = parseRepoRootArg(process.argv.slice(2));
+      const result = await validateEnvironmentMap(repoRoot);
+
+      if (result.valid) {
+        console.log('[OK] environment-map.yml is valid');
+        console.log(`[OK] Found ${result.environments_found.length} environments: ${result.environments_found.join(', ')}`);
+        console.log(`[OK] Found ${result.rules_count} rules`);
+      } else {
+        console.error('[ERROR] environment-map.yml validation failed');
+      }
+
+      for (const warning of result.warnings) {
+        console.warn(`[WARN] ${warning}`);
+      }
+
+      for (const error of result.errors) {
+        console.error(`[ERROR] ${error}`);
+      }
+
+      process.exit(result.valid ? 0 : 1);
+    } catch (error) {
+      console.error(`[ERROR] ${error instanceof Error ? error.message : String(error)}`);
+      process.exit(1);
+    }
+  })();
+}

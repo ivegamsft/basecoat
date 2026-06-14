@@ -182,7 +182,7 @@ const context = await resolveOperationContext({
 ### Validate environment-map.yml in your repo
 
 ```bash
-npx @basecoat/operation-context-resolver validate \
+npm run validate -- \
   --repo-root .
 ```
 
@@ -200,7 +200,7 @@ Output:
 
 ```yaml
 - name: Validate environment map
-  run: npx @basecoat/operation-context-resolver validate
+  run: npm run validate -- --repo-root .
 ```
 
 ## Customization
