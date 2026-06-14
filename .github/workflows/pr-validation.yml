@@ -48,7 +48,7 @@ jobs:
   markdown-lint:
     name: Markdown lint
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
@@ -64,7 +64,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin "${{ github.base_ref }}" --depth=1
+          # Fetch with timeout to prevent hanging
+          timeout 30 git fetch origin "${{ github.base_ref }}" --depth=1 || { echo "git fetch failed"; exit 1; }
           mapfile -t md_files < <(git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- '*.md')
 
           if [[ ${#md_files[@]} -eq 0 ]]; then
@@ -73,7 +74,22 @@ jobs:
           fi
 
           printf '%s\n' "Markdown files to lint:" "${md_files[@]}"
-          npm install --global markdownlint-cli@0.39.0
+          # npm install with retry logic using exponential backoff
+          npm_installed=0
+          for attempt in 1 2 3; do
+            if npm install --global markdownlint-cli@0.39.0; then
+              npm_installed=1
+              break
+            fi
+            if [[ $attempt -lt 3 ]]; then
+              echo "npm install failed, retrying in $((attempt*5)) seconds..."
+              sleep $((attempt*5))
+            fi
+          done
+          if [[ $npm_installed -eq 0 ]]; then
+            echo "Failed to install markdownlint-cli after 3 attempts"
+            exit 1
+          fi
 
           # Build ignore flags from .markdownlintignore (third-party / generated files)
           ignore_args=()
@@ -89,7 +105,7 @@ jobs:
   gitleaks-scan:
     name: Gitleaks secret scan (warn only)
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 13
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
@@ -101,10 +117,11 @@ jobs:
           GITLEAKS_VERSION: "8.18.4"
         run: |
           FILENAME="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
-          curl -sSfL \
+          # Use curl with retry logic and timeout for reliability
+          curl --retry 3 --retry-delay 2 --max-time 60 -sSfL \
             "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${FILENAME}" \
             -o "${FILENAME}"
-          curl -sSfL \
+          curl --retry 3 --retry-delay 2 --max-time 60 -sSfL \
             "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_checksums.txt" \
             -o checksums.txt
           grep "$FILENAME" checksums.txt | sha256sum --check
@@ -116,7 +133,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin "${{ github.base_ref }}" --depth=1
+          timeout 30 git fetch origin "${{ github.base_ref }}" --depth=1
           set +e
           gitleaks detect \
             --config .gitleaks.toml \
@@ -199,7 +216,7 @@ jobs:
   sync-dry-run:
     name: Sync script dry-run
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
@@ -229,7 +246,7 @@ jobs:
             BASECOAT_REPO="https://github.com/${{ github.repository }}.git" \
             BASECOAT_REF="main" \
             BASECOAT_TARGET_DIR=".github/base-coat" \
-            bash "$GITHUB_WORKSPACE/sync.sh"
+            timeout 120 bash "$GITHUB_WORKSPACE/sync.sh"
           )
 
           test -f "$consumer_repo/.github/base-coat/README.md"

@@ -29,7 +29,7 @@ concurrency:
 jobs:
   validate-commit-messages:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
@@ -40,7 +40,7 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             range="origin/${{ github.base_ref }}..HEAD"
-            git fetch origin "${{ github.base_ref }}" --depth=1
+            timeout 30 git fetch origin "${{ github.base_ref }}" --depth=1 || { echo "git fetch failed"; exit 1; }
           elif [[ "${{ github.event_name }}" == "push" && "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]]; then
             range="${{ github.event.before }}..${{ github.sha }}"
           else
