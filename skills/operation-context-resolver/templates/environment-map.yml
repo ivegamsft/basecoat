@@ -87,7 +87,7 @@ environments:
       App: app-name
       ManagedBy: bicep
     allowed_branch_patterns:
-      - main
+      - staging
       - release/*
     allowed_workflows:
       - ci.yml

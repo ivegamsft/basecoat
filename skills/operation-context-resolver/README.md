@@ -1,4 +1,4 @@
-# Operation Context Resolver — Integration Guide
+# Operation Context Resolver - Integration Guide
 
 ## Overview
 
@@ -18,6 +18,7 @@ cp skills/operation-context-resolver/templates/environment-map.yml .github/envir
 ```
 
 Edit `.github/environment-map.yml`:
+
 - Replace `YOUR_DEV_SUBSCRIPTION_ID` with your Azure dev subscription
 - Replace `YOUR_PROD_SUBSCRIPTION_ID` with your Azure prod subscription
 - Update resource group names, Container Apps names, etc.
@@ -59,7 +60,10 @@ console.log(`Requires approval: ${context.human_approval_required}`);
 ### Check before reading logs
 
 ```typescript
-if (!context.isActionAllowed('read_logs')) {
+const isActionAllowed = (action: string): boolean =>
+  context.allowed_actions.includes(action) && !context.blocked_actions.includes(action);
+
+if (!isActionAllowed('read_logs')) {
   throw new Error(`Action 'read_logs' not allowed in ${context.mode} for ${context.target_environment}`);
 }
 
@@ -85,7 +89,7 @@ await deployToEnvironment(context.target_environment);
 
 ```typescript
 if (context.incident_mode) {
-  console.log(`⚠️  Incident mode: ${context.risk_level}`);
+  console.log(`Incident mode: ${context.risk_level}`);
   console.log(`Target environment: ${context.target_environment}`);
   console.log(`Allowed read-only actions: ${context.allowed_actions.join(', ')}`);
   
@@ -106,11 +110,7 @@ if (context.incident_mode) {
 - name: Resolve operation context
   id: context
   run: |
-    npx @basecoat/operation-context-resolver \
-      --github-event "${{ toJSON(github.event) }}" \
-      --github-ref "${{ github.ref }}" \
-      --user-intent "troubleshoot" \
-      --output context.json
+    node scripts/resolve-context.js > context.json
 
 - name: Read context
   run: |
@@ -187,12 +187,13 @@ npx @basecoat/operation-context-resolver validate \
 ```
 
 Output:
-```
-✓ environment-map.yml is valid
-✓ Found 4 environments: preview, dev, staging, prod
-✓ Found 6 rules
-✓ All environments have required fields
-⚠ warning: preview: no front_door_profile defined
+
+```text
+[OK] environment-map.yml is valid
+[OK] Found 4 environments: preview, dev, staging, prod
+[OK] Found 6 rules
+[OK] All environments have required fields
+[WARN] preview: no front_door_profile defined
 ```
 
 ### Add validation to CI
@@ -242,7 +243,8 @@ blocked_actions:
 Then check:
 
 ```typescript
-if (context.isActionAllowed('my_custom_action')) {
+if (context.allowed_actions.includes('my_custom_action') &&
+    !context.blocked_actions.includes('my_custom_action')) {
   // Safe to proceed
 }
 ```
@@ -261,7 +263,7 @@ describe('my agent with resolver', () => {
     });
 
     expect(context.target_environment).toBe('preview');
-    expect(context.isActionAllowed('read_logs')).toBe(true);
+    expect(context.allowed_actions.includes('read_logs')).toBe(true);
   });
 
   it('should override to prod for incident', async () => {
@@ -296,6 +298,6 @@ describe('my agent with resolver', () => {
 
 ## See Also
 
-- [SKILL.md](./SKILL.md) — Skill overview
-- [Resolver Types](./src/types.ts) — TypeScript interfaces
-- [Environment Map Template](./templates/environment-map.yml) — Customizable template
+- [SKILL.md](./SKILL.md) - Skill overview
+- [Resolver Types](./src/types.ts) - TypeScript interfaces
+- [Environment Map Template](./templates/environment-map.yml) - Customizable template

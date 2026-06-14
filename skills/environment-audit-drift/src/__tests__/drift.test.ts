@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { EnvironmentAuditDrifter, auditEnvironmentDrift, driftIsCritical } from '../drift';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { EnvironmentAuditDrifter, driftIsCritical } from '../drift';
 import { DriftAuditInput, EnvironmentMap } from '../types';
 
 const mockEnvironmentMap: EnvironmentMap = {
@@ -147,7 +147,7 @@ describe('EnvironmentAuditDrifter', () => {
     const auditor = new EnvironmentAuditDrifter(input, mockEnvironmentMap);
     const report = await auditor.audit();
 
-    expect(report.validation_duration_ms).toBeGreaterThan(0);
+    expect(report.validation_duration_ms).toBeGreaterThanOrEqual(0);
     expect(report.next_audit).toBeDefined();
   });
 

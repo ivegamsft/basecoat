@@ -90,7 +90,7 @@ jobs:
               .map(f => `- **${f.environment}**: ${f.finding}\n  Remediation: ${f.remediation}`)
               .join('\n');
             
-            const body = `## ⚠️ Critical Environment Drift Detected
+            const body = `## Critical Environment Drift Detected
             
             ${findings}
             
@@ -137,7 +137,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "⚠️ *Environment Drift Detected*\nStatus: `${{ needs.audit.outputs.drift_status }}`\nFindings: ${{ needs.audit.outputs.findings_count }}"
+                    "text": "*Environment Drift Detected*\nStatus: `${{ needs.audit.outputs.drift_status }}`\nFindings: ${{ needs.audit.outputs.findings_count }}"
                   }
                 },
                 {
@@ -164,7 +164,7 @@ jobs:
           server_port: ${{ secrets.EMAIL_PORT }}
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: "🚨 Environment drift: ${{ needs.audit.outputs.drift_status }}"
+          subject: "Environment drift: ${{ needs.audit.outputs.drift_status }}"
           to: ${{ vars.NOTIFY_EMAIL }}
           from: "drift-audit@github.com"
           body: |

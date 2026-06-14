@@ -37,9 +37,9 @@ export interface EnvironmentConfig {
   tags: Record<string, string>;
   allowed_branch_patterns: string[];
   allowed_workflows: string[];
-  approval_required: Record<OperationMode, boolean>;
-  allowed_actions: Record<OperationMode, string[]>;
-  blocked_actions: Record<OperationMode, string[]>;
+  approval_required: Partial<Record<OperationMode, boolean>>;
+  allowed_actions: Partial<Record<OperationMode, string[]>>;
+  blocked_actions: Partial<Record<OperationMode, string[]>>;
 }
 
 export interface OperationContext {
@@ -76,12 +76,14 @@ export interface EnvironmentMap {
 
 export interface ResolverRule {
   name: string;
-  match: {
-    user_intent_contains?: string[];
-    pr_labels?: string[];
-    event_name?: string;
-    source_branch?: string | string[];
-  };
+  match:
+    | '*'
+    | {
+        user_intent_contains?: string[];
+        pr_labels?: string[];
+        event_name?: string;
+        source_branch?: string | string[];
+      };
   context: {
     target_environment: Environment;
     fallback_environment?: Environment;

@@ -1,5 +1,5 @@
 import { OperationContextResolver } from '../resolver';
-import { OperationContext, EnvironmentMap } from '../types';
+import { EnvironmentMap } from '../types';
 
 describe('OperationContextResolver', () => {
   const mockEnvironmentMap: EnvironmentMap = {
@@ -18,17 +18,33 @@ describe('OperationContextResolver', () => {
         tags: { Environment: 'Preview' },
         allowed_branch_patterns: ['feature/*', 'agent/*'],
         allowed_workflows: ['ci.yml'],
-        approval_required: { read_only: false, branch_deploy: false, incident_readonly: false },
+        approval_required: { 
+          read_only: false, 
+          branch_deploy: false, 
+          staging_deploy: false,
+          incident_readonly: false,
+          prod_readonly: false,
+          prod_incident: false,
+          hotfix: false
+        },
         allowed_actions: {
           read_only: ['read_logs'],
           branch_deploy: ['read_logs', 'deploy'],
+          staging_deploy: ['read_logs'],
           incident_readonly: ['read_logs'],
-        } as any,
+          prod_readonly: ['read_logs'],
+          prod_incident: ['read_logs'],
+          hotfix: ['read_logs']
+        },
         blocked_actions: {
           read_only: ['deploy'],
           branch_deploy: [],
+          staging_deploy: ['deploy'],
           incident_readonly: ['deploy'],
-        } as any,
+          prod_readonly: ['deploy'],
+          prod_incident: ['deploy'],
+          hotfix: []
+        },
       },
       dev: {
         github_environment: 'dev',
@@ -44,9 +60,75 @@ describe('OperationContextResolver', () => {
         tags: { Environment: 'Dev' },
         allowed_branch_patterns: ['dev', 'dev/*'],
         allowed_workflows: ['ci.yml'],
-        approval_required: { read_only: false, branch_deploy: false, incident_readonly: false },
-        allowed_actions: { read_only: ['read_logs'], branch_deploy: ['read_logs', 'deploy'], incident_readonly: ['read_logs'] } as any,
-        blocked_actions: { read_only: ['deploy'], branch_deploy: [], incident_readonly: ['deploy'] } as any,
+        approval_required: { 
+          read_only: false, 
+          branch_deploy: false, 
+          staging_deploy: false,
+          incident_readonly: false,
+          prod_readonly: false,
+          prod_incident: false,
+          hotfix: false
+        },
+        allowed_actions: { 
+          read_only: ['read_logs'], 
+          branch_deploy: ['read_logs', 'deploy'],
+          staging_deploy: ['read_logs'],
+          incident_readonly: ['read_logs'],
+          prod_readonly: ['read_logs'],
+          prod_incident: ['read_logs'],
+          hotfix: ['read_logs']
+        },
+        blocked_actions: { 
+          read_only: ['deploy'], 
+          branch_deploy: [],
+          staging_deploy: ['deploy'],
+          incident_readonly: ['deploy'],
+          prod_readonly: ['deploy'],
+          prod_incident: ['deploy'],
+          hotfix: []
+        },
+      },
+      staging: {
+        github_environment: 'staging',
+        autonomy_level: 'A3',
+        production: false,
+        azure_subscription: 'sub-staging',
+        resource_group: 'rg-staging',
+        container_apps_environment: 'cae-staging',
+        log_analytics_workspace: 'law-staging',
+        app_config: 'appcs-staging',
+        key_vault: 'kv-staging',
+        front_door_profile: 'fd-staging',
+        tags: { Environment: 'Staging' },
+        allowed_branch_patterns: ['staging', 'release/*'],
+        allowed_workflows: ['ci.yml'],
+        approval_required: { 
+          read_only: false, 
+          branch_deploy: false, 
+          staging_deploy: false,
+          incident_readonly: false,
+          prod_readonly: false,
+          prod_incident: false,
+          hotfix: false
+        },
+        allowed_actions: { 
+          read_only: ['read_logs'], 
+          branch_deploy: ['read_logs'],
+          staging_deploy: ['read_logs', 'deploy'],
+          incident_readonly: ['read_logs'],
+          prod_readonly: ['read_logs'],
+          prod_incident: ['read_logs'],
+          hotfix: ['read_logs']
+        },
+        blocked_actions: { 
+          read_only: ['deploy'], 
+          branch_deploy: ['deploy'],
+          staging_deploy: [],
+          incident_readonly: ['deploy'],
+          prod_readonly: ['deploy'],
+          prod_incident: ['deploy'],
+          hotfix: []
+        },
       },
       prod: {
         github_environment: 'production',
@@ -62,9 +144,33 @@ describe('OperationContextResolver', () => {
         tags: { Environment: 'Production' },
         allowed_branch_patterns: ['main'],
         allowed_workflows: ['ci.yml'],
-        approval_required: { read_only: false, branch_deploy: true, incident_readonly: true },
-        allowed_actions: { read_only: ['read_logs'], branch_deploy: ['read_logs'], incident_readonly: ['read_logs'] } as any,
-        blocked_actions: { read_only: ['deploy'], branch_deploy: ['deploy'], incident_readonly: ['deploy'] } as any,
+        approval_required: { 
+          read_only: false, 
+          branch_deploy: true, 
+          staging_deploy: false,
+          incident_readonly: true,
+          prod_readonly: true,
+          prod_incident: false,
+          hotfix: false
+        },
+        allowed_actions: { 
+          read_only: ['read_logs'], 
+          branch_deploy: ['read_logs'],
+          staging_deploy: ['read_logs'],
+          incident_readonly: ['read_logs'],
+          prod_readonly: ['read_logs'],
+          prod_incident: ['read_logs'],
+          hotfix: ['read_logs']
+        },
+        blocked_actions: { 
+          read_only: ['deploy'], 
+          branch_deploy: ['deploy'],
+          staging_deploy: ['deploy'],
+          incident_readonly: ['deploy'],
+          prod_readonly: ['deploy'],
+          prod_incident: ['deploy'],
+          hotfix: []
+        },
       },
     },
     rules: [],

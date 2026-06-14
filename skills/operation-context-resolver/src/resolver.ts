@@ -8,7 +8,7 @@ import {
   EnvironmentMap,
   Environment,
   OperationMode,
-  RiskLevel,
+  ResolverRule,
 } from './types';
 
 const RESOLVER_VERSION = '1.0.0';
@@ -16,11 +16,9 @@ const DEFAULT_SAFE_ENV: Environment = 'dev';
 
 export class OperationContextResolver {
   private environmentMap: EnvironmentMap;
-  private repoRoot: string;
 
-  constructor(environmentMap: EnvironmentMap, repoRoot: string = process.cwd()) {
+  constructor(environmentMap: EnvironmentMap) {
     this.environmentMap = environmentMap;
-    this.repoRoot = repoRoot;
   }
 
   static async fromRepoRoot(repoRoot: string = process.cwd()): Promise<OperationContextResolver> {
@@ -33,7 +31,7 @@ export class OperationContextResolver {
     const content = fs.readFileSync(mapPath, 'utf-8');
     const map = yaml.load(content) as EnvironmentMap;
 
-    return new OperationContextResolver(map, repoRoot);
+    return new OperationContextResolver(map);
   }
 
   async resolve(input: ResolverInput): Promise<OperationContext> {
@@ -43,11 +41,13 @@ export class OperationContextResolver {
     try {
       // Parse GitHub event if provided
       const githubEvent = this.parseGithubEvent(input);
+      const labels = this.normalizeLabelNames(input.pr_labels || (githubEvent?.pull_request as { labels?: unknown } | undefined)?.labels);
+      const branch = this.extractBranch(input.github_ref, githubEvent);
 
       // Step 1: Check explicit override
       if (input.workflow_dispatch_input?.environment) {
         const env = input.workflow_dispatch_input.environment as Environment;
-        return this.buildContext(env, 'explicit_override', operationId, now, input);
+        return this.buildContext(env, 'branch_deploy', operationId, now, input);
       }
 
       // Step 2: Check incident keywords
@@ -60,17 +60,37 @@ export class OperationContextResolver {
       }
 
       // Step 3: Check PR labels
-      const labels = input.pr_labels || githubEvent?.pull_request?.labels || [];
       const envFromLabel = this.extractEnvironmentFromLabels(labels);
       if (envFromLabel) {
         return this.buildContext(envFromLabel, 'branch_deploy', operationId, now, input);
       }
 
-      // Step 4: Check branch pattern
-      const branch = this.extractBranch(input.github_ref, githubEvent);
-      const envFromBranch = this.resolveEnvironmentFromBranch(branch);
+      // Step 4: Check rule decision tree (if present in environment-map)
+      const ruleMatch = this.resolveFromRules(input, labels, branch);
+      if (ruleMatch) {
+        return this.buildContext(
+          ruleMatch.target_environment,
+          ruleMatch.mode,
+          operationId,
+          now,
+          input,
+          {
+            human_approval_required: ruleMatch.human_approval_required,
+            risk_level: ruleMatch.risk_level,
+          }
+        );
+      }
 
-      return this.buildContext(envFromBranch, 'branch_deploy', operationId, now, input);
+      // Step 5: Check branch pattern
+      const envFromBranch = this.resolveEnvironmentFromBranch(branch);
+      if (envFromBranch) {
+        return this.buildContext(envFromBranch, 'branch_deploy', operationId, now, input);
+      }
+
+      // Step 6: Default to safe mode
+      return this.buildContext(DEFAULT_SAFE_ENV, 'read_only', operationId, now, input, {
+        risk_level: 'low',
+      });
     } catch (error) {
       throw new Error(`Resolver error: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -114,6 +134,25 @@ export class OperationContextResolver {
     return null;
   }
 
+  private normalizeLabelNames(labels: unknown): string[] {
+    if (!Array.isArray(labels)) {
+      return [];
+    }
+
+    return labels
+      .map(label => {
+        if (typeof label === 'string') {
+          return label;
+        }
+        if (label && typeof label === 'object' && 'name' in label) {
+          const name = (label as { name?: unknown }).name;
+          return typeof name === 'string' ? name : null;
+        }
+        return null;
+      })
+      .filter((label): label is string => typeof label === 'string' && label.length > 0);
+  }
+
   private extractBranch(githubRef: string | undefined, githubEvent: Record<string, unknown> | null): string {
     // PR source branch takes priority
     if (githubEvent?.pull_request) {
@@ -124,14 +163,17 @@ export class OperationContextResolver {
 
     // Fall back to github.ref
     if (githubRef) {
-      const refParts = githubRef.split('/');
-      return refParts[refParts.length - 1];
+      const headsPrefix = 'refs/heads/';
+      if (githubRef.startsWith(headsPrefix)) {
+        return githubRef.slice(headsPrefix.length);
+      }
+      return githubRef;
     }
 
     return 'unknown';
   }
 
-  private resolveEnvironmentFromBranch(branch: string): Environment {
+  private resolveEnvironmentFromBranch(branch: string): Environment | null {
     for (const [env, config] of Object.entries(this.environmentMap.environments)) {
       for (const pattern of config.allowed_branch_patterns) {
         if (this.matchPattern(branch, pattern)) {
@@ -140,8 +182,56 @@ export class OperationContextResolver {
       }
     }
 
-    // Default to safe environment
-    return DEFAULT_SAFE_ENV;
+    return null;
+  }
+
+  private resolveFromRules(
+    input: ResolverInput,
+    labels: string[],
+    branch: string
+  ): ResolverRule['context'] | null {
+    if (!Array.isArray(this.environmentMap.rules) || this.environmentMap.rules.length === 0) {
+      return null;
+    }
+
+    const intent = input.user_intent?.toLowerCase() || '';
+
+    for (const rule of this.environmentMap.rules) {
+      const matchAll = rule.match === '*';
+      const match = typeof rule.match === 'object' && rule.match !== null ? rule.match : null;
+
+      if (matchAll) {
+        return rule.context;
+      }
+
+      if (!match) {
+        continue;
+      }
+
+      if (Array.isArray(match.user_intent_contains)) {
+        const found = match.user_intent_contains.some(keyword => intent.includes(keyword.toLowerCase()));
+        if (found) {
+          return rule.context;
+        }
+      }
+
+      if (Array.isArray(match.pr_labels)) {
+        const found = match.pr_labels.some(label => labels.includes(label));
+        if (found) {
+          return rule.context;
+        }
+      }
+
+      if (match.source_branch) {
+        const patterns = Array.isArray(match.source_branch) ? match.source_branch : [match.source_branch];
+        const found = patterns.some(pattern => this.matchPattern(branch, pattern));
+        if (found) {
+          return rule.context;
+        }
+      }
+    }
+
+    return null;
   }
 
   private matchPattern(branch: string, pattern: string): boolean {
@@ -214,7 +304,11 @@ export class OperationContextResolver {
   }
 
   requiresHumanApproval(context: OperationContext, action: string): boolean {
-    return context.human_approval_required && context.blocked_actions.includes(action);
+    if (!context.human_approval_required) {
+      return false;
+    }
+
+    return !action.startsWith('read_');
   }
 }
 

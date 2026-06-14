@@ -6,7 +6,8 @@
  * what permissions it has.
  */
 
-import { resolveOperationContext, OperationContext } from '../src/resolver';
+import { resolveOperationContext } from '../src/resolver';
+import { OperationContext } from '../src/types';
 
 async function troubleshootAgent(userRequest: string): Promise<void> {
   console.log(`User request: "${userRequest}"`);
@@ -26,14 +27,17 @@ async function troubleshootAgent(userRequest: string): Promise<void> {
   console.log(`  Human approval required: ${context.human_approval_required}`);
   console.log(`  Incident mode: ${context.incident_mode}`);
 
+  const isActionAllowed = (action: string): boolean =>
+    context.allowed_actions.includes(action) && !context.blocked_actions.includes(action);
+
   // Step 1: Check if we're allowed to read logs
-  if (!context.isActionAllowed('read_logs')) {
+  if (!isActionAllowed('read_logs')) {
     throw new Error(
       `Cannot read logs: action 'read_logs' not allowed in ${context.mode} mode`
     );
   }
 
-  console.log(`\n✓ Permission check passed: read_logs allowed`);
+  console.log('\nPermission check passed: read_logs allowed');
 
   // Step 2: Gather data from the correct environment
   console.log(`\nGathering diagnostic data from ${context.target_environment}...`);
@@ -58,19 +62,19 @@ async function troubleshootAgent(userRequest: string): Promise<void> {
 
   // Step 4: If production incident, check before executing action
   if (context.incident_mode && recommendation.is_mutation) {
-    console.log(`\n⚠️  Production incident detected`);
+    console.log('\nProduction incident detected');
     console.log(`  Human approval required before: ${recommendation.action}`);
     console.log(`  Status: BLOCKED (waiting for human approval)`);
     return;
   }
 
   // Step 5: Execute recommended action if allowed
-  if (context.isActionAllowed(recommendation.action)) {
-    console.log(`\n✓ Executing recommended action: ${recommendation.action}`);
+  if (isActionAllowed(recommendation.action)) {
+    console.log(`\nExecuting recommended action: ${recommendation.action}`);
     await mockExecuteAction(recommendation.action, context.target_environment);
   } else {
     console.log(
-      `\n✗ Cannot execute action: ${recommendation.action} is blocked`
+      `\nCannot execute action: ${recommendation.action} is blocked`
     );
   }
 }
@@ -96,9 +100,10 @@ async function mockCheckInfrastructure(env: string): Promise<string> {
 }
 
 function analyzeAndRecommend(
-  diagnostics: any,
+  diagnostics: { logs: string[]; infra_status: string },
   context: OperationContext
 ): { cause: string; action: string; is_mutation: boolean } {
+  void context;
   const { logs, infra_status } = diagnostics;
 
   if (logs.some(log => log.includes('Connection timeout'))) {
@@ -126,7 +131,7 @@ function analyzeAndRecommend(
 
 async function mockExecuteAction(action: string, env: string): Promise<void> {
   console.log(`  Executing ${action} in ${env}...`);
-  console.log(`  ✓ Action completed successfully`);
+  console.log('  Action completed successfully');
 }
 
 // Run example

@@ -1,9 +1,7 @@
 ---
 name: operation-context-resolver
-description: Deterministic environment routing for agentic troubleshooting and deployment workflows
-category: infrastructure
-visibility: public
-autonomy: A2
+description: "Deterministic environment routing for troubleshooting and deployment workflows that map user intent, labels, and branch context to safe environment actions. USE FOR: resolving target environment before running diagnostics, gating deployments by allowed/blocked actions, enforcing production approval requirements, and standardizing incident-readonly behavior across repositories. DO NOT USE FOR: replacing platform policy enforcement systems, making direct infrastructure mutations without approval controls, or bypassing environment configuration validation."
+compatibility: GHCP
 requires:
   - GitHub Environments configured
   - ".github/environment-map.yml in repo"
@@ -61,18 +59,21 @@ const context = await resolveOperationContext({
 ### 3. Check permissions before action
 
 ```typescript
-if (!context.isActionAllowed('read_logs')) {
+const isActionAllowed = (ctx: OperationContext, action: string): boolean =>
+  ctx.allowed_actions.includes(action) && !ctx.blocked_actions.includes(action);
+
+if (!isActionAllowed(context, 'read_logs')) {
   throw new Error(`Action blocked: read_logs not in allowed_actions`);
 }
 
 if (context.human_approval_required && context.target_environment === 'prod') {
-  console.log(`⚠️  Production operation requires human approval`);
+  console.log('Production operation requires human approval.');
 }
 ```
 
 ## Key Features
 
-- **Deterministic routing**: Branch name, PR labels, incident keywords → environment
+- **Deterministic routing**: Branch name, PR labels, incident keywords to environment
 - **Explicit permissions**: Define allowed/blocked actions per environment and mode
 - **Human gates**: Production operations require approval by default
 - **Incident override**: Keywords like "site is down in prod" override branch context

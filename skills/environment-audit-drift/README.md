@@ -1,4 +1,4 @@
-# Environment Audit Drift Skill — Integration Guide
+# Environment Audit Drift Skill - Integration Guide
 
 The `environment-audit-drift` skill continuously validates that your `.github/environment-map.yml` matches actual infrastructure and GitHub configuration state.
 
@@ -37,6 +37,7 @@ on:
 ### 4. (Optional) Set up notifications
 
 The workflow can post drift findings as:
+
 - GitHub Issue comments
 - Slack notifications (requires webhook)
 - Email alerts (requires action)
@@ -163,8 +164,8 @@ if (context.metadata.drift_status === 'critical') {
 
 ### Actionable vs. Informational
 
-- `actionable: true` — No critical drifts; safe to proceed
-- `actionable: false` — Critical drifts found; needs manual review/fix
+- `actionable: true` - No critical drifts; safe to proceed
+- `actionable: false` - Critical drifts found; needs manual review/fix
 
 ## Common Scenarios
 
@@ -180,16 +181,18 @@ environments:
 ```
 
 **Next audit will find**:
+
 - If you haven't created the Azure resources yet: `config_drift` findings with remediation steps
 - If you create resources but forget GitHub environment: `config_drift` for GitHub environment
 
-**Expected result**: After creating resources and GitHub environment, drift findings clear ✓
+**Expected result**: After creating resources and GitHub environment, drift findings clear.
 
 ### Scenario 2: Promotion workflow broke
 
 Release manifest shows version `1.2.3` but Container Apps shows `1.2.2`.
 
 **Drift finder reports**:
+
 - `deployment_drift` high severity
 - Remediation: "Check promotion workflow or manually promote container image"
 
@@ -200,6 +203,7 @@ Release manifest shows version `1.2.3` but Container Apps shows `1.2.2`.
 Someone accidentally disabled the approval requirement on `main`.
 
 **Drift finder reports**:
+
 - `security_drift` high severity
 - Finding: "main branch is A2 but GitHub shows 0 approvals required"
 - Remediation: "Re-enable branch protection rule"
@@ -219,18 +223,20 @@ az account set --subscription <subscription-id>
 ### Audit fails with "GitHub token has insufficient permissions"
 
 Ensure token has these scopes:
+
 - `repo` (for GitHub Environments)
 - `read:repo_hooks` (for branch protection rules)
 
 ### Drift report is empty
 
 No drifts detected! This means:
+
 - All Azure resources exist and are correctly named
 - GitHub Environments match your config
 - GitHub branch protection matches autonomy levels
 - Azure tags are up-to-date
 
-You're good to go! 
+You're good to go!
 
 ## Advanced Options
 
@@ -265,6 +271,6 @@ npx @basecoat/environment-audit-drift \
 
 ## See Also
 
-- [`operation-context-resolver`](../operation-context-resolver/) — Uses drift reports to gate operations
-- [Workflow Template](./templates/audit-environment-drift.yml) — GitHub Actions configuration
-- [Examples](./examples/) — Agent integration patterns
+- [`operation-context-resolver`](../operation-context-resolver/) - Uses drift reports to gate operations
+- [Workflow Template](./templates/audit-environment-drift.yml) - GitHub Actions configuration
+- [Examples](./examples/) - Agent integration patterns

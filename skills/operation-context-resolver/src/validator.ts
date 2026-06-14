@@ -38,6 +38,7 @@ export async function validateEnvironmentMap(repoRoot: string): Promise<Validati
   if (!map.environments || typeof map.environments !== 'object') {
     errors.push('Root must contain "environments" object');
   }
+  const hasValidEnvironments = !!map.environments && typeof map.environments === 'object';
 
   const environmentsFound: Environment[] = [];
 
@@ -87,7 +88,7 @@ export async function validateEnvironmentMap(repoRoot: string): Promise<Validati
     if (!rule.context) {
       errors.push(`Rule ${index}: missing required field "context"`);
     }
-    if (rule.context?.target_environment && !map.environments[rule.context.target_environment]) {
+    if (hasValidEnvironments && rule.context?.target_environment && !map.environments[rule.context.target_environment]) {
       errors.push(
         `Rule ${index} (${rule.name}): target_environment '${rule.context.target_environment}' not found in environments`
       );

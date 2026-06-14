@@ -29,12 +29,12 @@ export async function executeDeploymentWithDriftCheck() {
 
   // 2. Check severity
   if (driftIsCritical(driftReport)) {
-    console.error('❌ Critical environment drift detected. Cannot proceed.');
+    console.error('Critical environment drift detected. Cannot proceed.');
     console.error('Findings:');
 
     for (const finding of driftReport.findings.filter(f => f.severity === 'critical')) {
       console.error(`  - [${finding.environment}] ${finding.finding}`);
-      console.error(`    → ${finding.remediation}`);
+      console.error(`    ${finding.remediation}`);
     }
 
     process.exit(1);
@@ -43,7 +43,7 @@ export async function executeDeploymentWithDriftCheck() {
   // 3. Warn on high severity (but proceed)
   if (driftReport.severity_summary.high > 0) {
     console.warn(
-      `⚠️  ${driftReport.severity_summary.high} high-severity drift findings. Proceeding with caution.`
+      `${driftReport.severity_summary.high} high-severity drift findings. Proceeding with caution.`
     );
 
     for (const finding of driftReport.findings.filter(f => f.severity === 'high')) {
@@ -55,32 +55,23 @@ export async function executeDeploymentWithDriftCheck() {
   console.log('\nResolving operation context...');
 
   const operationContext = await resolveOperationContext({
-    branch: process.env.GITHUB_REF_NAME || 'main',
-    sha: process.env.GITHUB_SHA || 'unknown',
-    pr_number: process.env.PR_NUMBER ? parseInt(process.env.PR_NUMBER) : undefined,
+    github_ref: process.env.GITHUB_REF || 'refs/heads/main',
     pr_labels: process.env.PR_LABELS?.split(',').map(l => l.trim()) || [],
-    is_incident: process.env.IS_INCIDENT === 'true',
-    incident_description: process.env.INCIDENT_DESC,
+    user_intent: process.env.IS_INCIDENT === 'true' ? process.env.INCIDENT_DESC : 'deployment validation',
     repo_root: repoRoot,
   });
 
-  // 5. Attach drift status to metadata
-  const metadata = {
-    ...operationContext.metadata,
-    drift_audit_id: driftReport.audit_id,
-    drift_status: driftReport.severity_summary.critical === 0 ? 'clean' : 'critical',
-    drift_findings_count: driftReport.total_drifts,
-  };
+  const driftStatus = driftReport.severity_summary.critical === 0 ? 'clean' : 'critical';
 
-  console.log('\n✅ Deployment context resolved');
+  console.log('\nDeployment context resolved');
   console.log(`   Environment: ${operationContext.target_environment}`);
   console.log(`   Mode: ${operationContext.mode}`);
-  console.log(`   Approvals Required: ${operationContext.approval_required ? 'Yes' : 'No'}`);
-  console.log(`   Drift Status: ${metadata.drift_status}`);
+  console.log(`   Approvals Required: ${operationContext.human_approval_required ? 'Yes' : 'No'}`);
+  console.log(`   Drift Status: ${driftStatus}`);
 
   return {
     context: operationContext,
-    metadata,
+    driftStatus,
     driftReport,
   };
 }
@@ -88,7 +79,7 @@ export async function executeDeploymentWithDriftCheck() {
 // Usage in an agent
 export async function deployApplicationWithValidation() {
   try {
-    const { context, metadata, driftReport } = await executeDeploymentWithDriftCheck();
+    const { context, driftStatus } = await executeDeploymentWithDriftCheck();
 
     // Gate 1: Check environment
     if (!['staging', 'prod'].includes(context.target_environment)) {
@@ -96,18 +87,18 @@ export async function deployApplicationWithValidation() {
     }
 
     // Gate 2: Check approvals
-    if (context.approval_required && !context.approver_email) {
+    if (context.human_approval_required) {
       console.log('Approval required but approver not set. Waiting for manual approval...');
       return;
     }
 
     // Gate 3: Check drift
-    if (metadata.drift_status === 'critical') {
+    if (driftStatus === 'critical') {
       throw new Error('Cannot proceed: environment configuration has critical drift');
     }
 
     // Now safe to proceed with deployment
-    console.log('\n🚀 All checks passed. Proceeding with deployment...');
+    console.log('\nAll checks passed. Proceeding with deployment...');
 
     // Your deployment logic here
     console.log(`Deploying to ${context.target_environment}...`);

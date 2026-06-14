@@ -1,9 +1,7 @@
 ---
 name: environment-audit-drift
-description: Detect and report drift between environment-map.yml and actual infrastructure state
-category: infrastructure
-visibility: public
-autonomy: A4
+description: "Detect and report drift between environment-map.yml and actual infrastructure state across Azure resources, GitHub environment settings, and deployment metadata. USE FOR: validating mapped resources before deployment workflows, catching branch-protection mismatches with autonomy levels, auditing required tagging coverage, and generating actionable remediation findings. DO NOT USE FOR: replacing real-time production incident response tooling, directly mutating infrastructure as part of audit execution, or bypassing manual approval requirements for critical drift."
+compatibility: GHCP
 requires:
   - "environment-map.yml in repo"
   - "Azure CLI context (subscription access)"
@@ -101,6 +99,6 @@ console.log(context.metadata.drift_status);  // 'clean' | 'warning' | 'critical'
 
 ## See Also
 
-- [README](./README.md) — Integration guide
-- [Workflow Template](./templates/audit-environment-drift.yml) — CI/CD setup
-- [operation-context-resolver](../operation-context-resolver/) — Companion skill (checks drift status)
+- [README](./README.md) - Integration guide
+- [Workflow Template](./templates/audit-environment-drift.yml) - CI/CD setup
+- [operation-context-resolver](../operation-context-resolver/) - Companion skill (checks drift status)
