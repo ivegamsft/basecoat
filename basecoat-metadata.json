@@ -2045,7 +2045,13 @@
       "name": "governance-auditor",
       "description": "Use when auditing issue and PR metadata, label drift, template gaps, and workflow enforcement coverage. USE FOR: label audits, template consistency checks, workflow drift reviews, gap identification, and issue-ready findings. DO NOT USE FOR: writing application code, implementing product features, or changing labels without evidence.",
       "category": "Meta",
-      "keywords": [],
+      "keywords": [
+        "audit",
+        "labels",
+        "templates",
+        "workflows",
+        "governance"
+      ],
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/governance-auditor.agent.md",
@@ -2056,11 +2062,33 @@
       "name": "governance-author",
       "description": "Use when writing or revising common-vs-specific governance guidance, canonical label contracts, and migration notes. USE FOR: drafting docs/reference/governance-contract.md, separating shared rules from repo-specific rules, mapping legacy labels to canonical labels, and planning governance issue backlogs. DO NOT USE FOR: implementation code, release management, or ad hoc issue cleanup.",
       "category": "Meta",
-      "keywords": [],
+      "keywords": [
+        "documentation",
+        "labels",
+        "templates",
+        "workflows",
+        "governance"
+      ],
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/governance-author.agent.md",
       "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "basecoat-60-workflow-build-master",
+      "description": "Background merge-control agent that keeps healthy lanes moving while isolating broken lanes and dispatching cloud break-fix PRs. USE FOR: lane-aware merge orchestration, CI break containment, cloud fix delegation, and safe resume after recovery. DO NOT USE FOR: bypassing branch protection, direct pushes to protected branches, or autonomous high-risk security/infra remediations.",
+      "category": "Meta",
+      "keywords": [
+        "ci-cd",
+        "merge",
+        "incident",
+        "automation"
+      ],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/basecoat-60-workflow-build-master.agent.md",
+      "model": "claude-sonnet-4.5",
       "argumentHint": ""
     }
   ]
