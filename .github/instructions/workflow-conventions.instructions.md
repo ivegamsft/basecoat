@@ -60,6 +60,18 @@ During fleet or burndown sessions, enforce serialized merge pacing:
 3. Wait for merge completion before starting the next merge.
 4. After each merge, clean up local and remote branch state before continuing.
 
+## PR Flow Hygiene Guardrails
+
+Use the `pr-flow-hygiene.yml` workflow as the fixed-cadence PR backlog guardrail:
+
+1. Run weekly on Monday and publish a visible PR flow report issue.
+2. Track and enforce these thresholds:
+   - Ready-for-review WIP limit (default: 20)
+   - Draft drift age threshold (default: 14 days)
+   - Ready-for-review inactivity threshold (default: 7 days)
+3. Upsert triage nudges on flagged PRs (owner/reviewer/drift gaps) instead of silent reporting only.
+4. Use manual dispatch inputs only for temporary threshold tuning during incident/backlog recovery windows.
+
 ## Token-Efficient Operating Defaults
 
 Use these defaults unless task complexity requires escalation:

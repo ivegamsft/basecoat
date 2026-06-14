@@ -190,6 +190,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running PR flow hygiene workflow tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'pr-flow-hygiene-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'PR flow hygiene workflow tests failed' -ForegroundColor Red
+    Write-FailureLog 'pr-flow-hygiene-tests'
+    exit 1
+}
+
 Write-Host 'Running issue triage script tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'issue-triage-script-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
