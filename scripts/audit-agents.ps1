@@ -123,6 +123,12 @@ foreach ($agentFile in $agentFiles) {
     if ($frontmatter -notmatch '(?m)^handoffs:\s*') {
         $warnings.Add('missing handoffs field')
     }
+    if ($frontmatter -match '(?m)^category:\s*(.+)$') {
+        $categoryValue = $Matches[1].Trim().Trim("'").Trim('"')
+        if ($categoryValue -eq 'Uncategorized') {
+            $warnings.Add('category is Uncategorized')
+        }
+    }
 
     if ($body -notmatch '(?im)^##\s+inputs\b') {
         $warnings.Add('missing ## Inputs section')
@@ -154,6 +160,19 @@ foreach ($agentFile in $agentFiles) {
         Add-Line "[WARN] $shortFileSlug — 0 errors, $warnCount warning$(if ($warnCount -ne 1) {'s'}): $detail"
     } else {
         Add-Line "[PASS] $shortFileSlug — 0 errors, 0 warnings"
+    }
+}
+
+$metadataPath = Join-Path (Get-Location) 'basecoat-metadata.json'
+if (Test-Path $metadataPath) {
+    $metadata = Get-Content $metadataPath -Raw | ConvertFrom-Json
+    $uncategorized = @($metadata.categories.PSObject.Properties | Where-Object { $_.Name -eq 'Uncategorized' -or $_.Value.label -eq 'Uncategorized' })
+    foreach ($bucket in $uncategorized) {
+        $agentList = @($bucket.Value.agents)
+        if ($agentList.Count -gt 0) {
+            Add-Line "[WARN] metadata — Uncategorized category still contains $($agentList.Count) agent(s): $($agentList -join ', ')"
+            $totalWarnings++
+        }
     }
 }
 
