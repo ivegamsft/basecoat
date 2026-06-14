@@ -266,3 +266,34 @@ Track in each session:
 - 5% from heavy orchestration in main session (70–90 report_intent calls)
 
 **Expected total savings from all 5 changes**: 35–50% reduction per backlog session (from 68–84M baseline to 35–45M target).
+
+## Issue #1361 operational scorecard (acceptance enforcement)
+
+For #1361 acceptance checks, run the backlog scorecard command with five measured
+sessions:
+
+```bash
+pwsh scripts/backlog-efficiency-scorecard.ps1 -InputFile docs/templates/backlog-efficiency-sessions.example.json
+```
+
+Machine-readable output:
+
+```bash
+pwsh scripts/backlog-efficiency-scorecard.ps1 -InputFile <path-to-your-5-session-metrics.json> -Json
+```
+
+Required fields per session record:
+
+- `sessionId`
+- `inputTokens`
+- `phaseCompactionApplied`
+- `sprintTemplateUsed`
+- `fileReferencesOnly`
+- `delegatedScanOrTriage`
+
+Pass criteria align to #1361 bullets:
+
+1. At least 5 backlog sessions measured (`measurementReady=true`).
+2. Average tokens for evaluated sessions is within 35M–45M (`targetMetByAverage=true`).
+3. All four operational practices are compliant across evaluated sessions (`allPracticesCompliant=true`).
+4. Combined acceptance state is `overallPass=true`.

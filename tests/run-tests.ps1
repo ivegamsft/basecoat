@@ -286,6 +286,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running backlog efficiency scorecard tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'backlog-efficiency-scorecard-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Backlog efficiency scorecard tests failed' -ForegroundColor Red
+    Write-FailureLog 'backlog-efficiency-scorecard-tests'
+    exit 1
+}
+
 Write-Host 'Running coherence check (non-blocking)...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot '..' 'scripts' 'check-coherence.ps1')
 # Non-blocking: coherence issues are warnings, not failures
