@@ -1,4 +1,4 @@
-﻿---
+---
 name: flow-optimize
 description: "Use when creating a phased optimization plan that combines audit findings and suggested fixes. USE FOR: flow optimization roadmaps, CI tier tuning, merge policy improvements, and KPI-target planning. DO NOT USE FOR: reactive incident firefighting, direct feature coding, or unmanaged policy rollouts."
 compatibility:

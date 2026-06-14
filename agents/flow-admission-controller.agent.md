@@ -1,4 +1,4 @@
-﻿---
+---
 name: flow-admission-controller
 description: "Use when designing or tuning intake controls for PR volume, merge-queue admission, and reviewer/runner capacity limits. USE FOR: WIP limit policies, queue admission rules, stale PR handling, and safe load-shedding design. DO NOT USE FOR: overriding branch protections manually, skipping approvals, or implementing unrelated product features."
 compatibility:

@@ -1,4 +1,4 @@
-﻿---
+---
 name: flow-optimizer
 description: "Use when building an optimization program that combines audit evidence with prioritized fixes and execution sequencing. USE FOR: phased flow optimization plans, merge-queue and CI policy tuning, target KPI definition, and rollout risk reduction. DO NOT USE FOR: one-off bugfix coding, ad hoc release approvals, or force-merging around failed checks."
 compatibility:

@@ -1,7 +1,7 @@
 ---
 name: ci-audit
 visibility: specialized
-description: "CI/CD audit agent for GitHub organization auditing. USE FOR: auditing GitHub organization CI/CD settings, enterprise policies, runner configurations, dependencies, and installed apps. DO NOT USE FOR: writing application code, general code reviews, infrastructure-as-code development unrelated to CI/CD auditing."
+description: "Use when asked to audit repository governance posture or produce a governance evidence pack. USE FOR: auditing branch protection, required status checks, merge queue configuration, environment protection rules, production reviewers, runner groups, workflow dispatch access, CODEOWNERS enforcement, and policy-versus-settings gaps for a single repository. DO NOT USE FOR: writing application code, general code reviews, org-level enterprise policy administration, or infrastructure-as-code development."
 tools: [bash, git, gh, grep, find, powershell]
 model: gpt-5.4-mini
 compatibility: []
