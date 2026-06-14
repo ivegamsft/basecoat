@@ -55,7 +55,7 @@ jobs:
                   failures.append(f"{path}: missing name in frontmatter")
                   continue
               name = name_match.group(1).strip().strip('"').strip("'")
-              tools_match = re.search(r"^allowed-tools:\n((?:^[ \t]+-.*(?:\n|$))+)", frontmatter, flags=re.M)
+              tools_match = re.search(r"^tools:\n((?:^[ \t]+-.*(?:\n|$))+)", frontmatter, flags=re.M)
               tools_block = tools_match.group(1) if tools_match else ""
               tools = tuple(sorted(set(re.findall(r"^\s*-\s*([A-Za-z0-9_.:-]+)\s*$", tools_block, flags=re.M))))
               by_name.setdefault(name, []).append((str(path), tools))
@@ -122,7 +122,7 @@ jobs:
             echo "## Frontmatter changes"
             echo
             git diff --unified=0 "${RANGE}" -- agents skills \
-              | awk '/^diff --git / || /^@@/ || /^[+-](name|description|visibility|model|metadata|allowed-tools|allowed_skills|compatibility):/'
+              | awk '/^diff --git / || /^@@/ || /^[+-](name|description|visibility|model|metadata|tools|allowed_skills|compatibility):/'
           } > agent-merge-changelog.md
 
       - name: Upload changelog artifact
