@@ -5,6 +5,7 @@ compatibility:
   - agent:flow-optimizer
   - agent:flow-admission-controller
 metadata:
+  category: flow-governance
   domain: flow-governance
   maturity: production
   audience:

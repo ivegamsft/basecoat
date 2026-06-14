@@ -5,6 +5,7 @@ compatibility:
   - agent:flow-auditor
   - agent:flow-tracker
 metadata:
+  category: flow-governance
   domain: flow-governance
   maturity: production
   audience:
