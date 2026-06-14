@@ -14,12 +14,36 @@
 #>
 
 param(
-    [string]$OutputPath = (Join-Path $PSScriptRoot ".." "plugins" "copilot-cli-plugin" "schema" "basecoat-registry.json")
+    [string]$OutputPath = (Join-Path $PSScriptRoot ".." "plugins" "copilot-cli-plugin" "schema" "basecoat-registry.json"),
+    [string]$AgentsPath = (Join-Path (Split-Path -Parent $PSScriptRoot) "agents")
 )
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$agentsDir = Join-Path $repoRoot "agents"
+$agentsDir = $AgentsPath
 $agents = @{}
+
+function Get-FrontmatterValue {
+    param(
+        [string]$Frontmatter,
+        [string]$Key
+    )
+
+    $pattern = "(?m)^\s*$([Regex]::Escape($Key))\s*:\s*(.+?)\s*$"
+    $match = [Regex]::Match($Frontmatter, $pattern)
+    if (-not $match.Success) {
+        return $null
+    }
+
+    $value = $match.Groups[1].Value.Trim()
+    if (
+        ($value.StartsWith('"') -and $value.EndsWith('"')) -or
+        ($value.StartsWith("'") -and $value.EndsWith("'"))
+    ) {
+        return $value.Substring(1, $value.Length - 2).Trim()
+    }
+
+    return $value
+}
 
 Get-ChildItem $agentsDir -Filter "*.agent.md" | ForEach-Object {
     $file = $_.FullName
@@ -27,17 +51,26 @@ Get-ChildItem $agentsDir -Filter "*.agent.md" | ForEach-Object {
     $relativePath = "agents/$($_.Name)"
 
     # Extract YAML frontmatter
-    if ($content -match "^---\s*\n([\s\S]+?)\n---") {
+    if ($content -match "^---\s*\r?\n([\s\S]+?)\r?\n---") {
         $frontmatter = $Matches[1]
 
         $id = $_.Name -replace "\.agent\.md$", ""
         # Extract short agent name from new naming convention
         $id = $id -replace '^basecoat-\d+-\w+-', ''
-        $name = if ($frontmatter -match "^name:\s*(.+)$") { $Matches[1].Trim().Trim('"') } else { $id }
-        $description = if ($frontmatter -match "^description:\s*(.+)$") { $Matches[1].Trim().Trim('"') } else { "No description" }
-        $model = if ($frontmatter -match "^model:\s*(.+)$") { $Matches[1].Trim() } else { "claude-sonnet-4.6" }
-        $maturity = if ($frontmatter -match "maturity:\s*[""']?(\w+)[""']?") { $Matches[1].Trim() } else { "production" }
-        $category = if ($frontmatter -match "category:\s*[""']?([^""'\n]+)[""']?") { $Matches[1].Trim() } else { "General" }
+        $name = Get-FrontmatterValue -Frontmatter $frontmatter -Key "name"
+        if (-not $name) { $name = $id }
+
+        $description = Get-FrontmatterValue -Frontmatter $frontmatter -Key "description"
+        if (-not $description) { $description = "No description" }
+
+        $model = Get-FrontmatterValue -Frontmatter $frontmatter -Key "model"
+        if (-not $model) { $model = "claude-sonnet-4.6" }
+
+        $maturity = Get-FrontmatterValue -Frontmatter $frontmatter -Key "maturity"
+        if (-not $maturity) { $maturity = "production" }
+
+        $category = Get-FrontmatterValue -Frontmatter $frontmatter -Key "category"
+        if (-not $category) { $category = "General" }
 
         # Extract tags as keywords
         $keywords = @($id -split "-")

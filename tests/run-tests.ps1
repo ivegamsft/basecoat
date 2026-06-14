@@ -262,6 +262,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running generate registry tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'generate-registry-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Generate registry tests failed' -ForegroundColor Red
+    Write-FailureLog 'generate-registry-tests'
+    exit 1
+}
+
 Write-Host 'Running extension intent routing eval tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'extension-intent-routing-eval-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
