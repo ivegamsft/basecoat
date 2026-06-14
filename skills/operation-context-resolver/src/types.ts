@@ -26,21 +26,21 @@ export interface ResolverInput {
 
 export interface EnvironmentConfig {
   github_environment: string;
-  autonomy_level: string;
-  production: boolean;
+  autonomy_level?: string;
+  production?: boolean;
   azure_subscription: string;
   resource_group: string;
-  container_apps_environment: string;
-  log_analytics_workspace: string;
-  app_config: string;
-  key_vault: string;
-  front_door_profile: string | null;
-  tags: Record<string, string>;
+  container_apps_environment?: string;
+  log_analytics_workspace?: string;
+  app_config?: string;
+  key_vault?: string;
+  front_door_profile?: string | null;
+  tags?: Record<string, string>;
   allowed_branch_patterns?: string[];
-  allowed_workflows: string[];
-  approval_required: Partial<Record<OperationMode, boolean>>;
-  allowed_actions: Partial<Record<OperationMode, string[]>>;
-  blocked_actions: Partial<Record<OperationMode, string[]>>;
+  allowed_workflows?: string[];
+  approval_required?: Partial<Record<OperationMode, boolean>>;
+  allowed_actions?: Partial<Record<OperationMode, string[]>>;
+  blocked_actions?: Partial<Record<OperationMode, string[]>>;
 }
 
 export interface OperationContext {
@@ -51,11 +51,11 @@ export interface OperationContext {
   github_environment: string;
   azure_subscription: string;
   resource_group: string;
-  container_apps_environment: string;
-  log_analytics_workspace: string;
-  app_config: string;
-  key_vault: string;
-  front_door_profile: string | null;
+  container_apps_environment?: string;
+  log_analytics_workspace?: string;
+  app_config?: string;
+  key_vault?: string;
+  front_door_profile?: string | null;
   production: boolean;
   risk_level: RiskLevel;
   mode: OperationMode;
@@ -72,7 +72,7 @@ export interface OperationContext {
 
 export interface EnvironmentMap {
   environments: Record<Environment, EnvironmentConfig>;
-  rules: ResolverRule[];
+  rules?: ResolverRule[];
 }
 
 export interface ResolverRule {

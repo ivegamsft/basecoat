@@ -17,10 +17,7 @@
   },
   "dependencies": {
     "js-yaml": "^4.1.0",
-    "uuid": "^9.0.0",
-    "@azure/arm-resources": "^7.0.0",
-    "@azure/identity": "^4.0.0",
-    "octokit": "^3.0.0"
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

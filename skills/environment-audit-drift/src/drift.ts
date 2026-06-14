@@ -8,6 +8,7 @@ import {
   DriftFinding,
   SeveritySummary,
   EnvironmentMap,
+  EnvironmentConfig,
 } from './types';
 
 export class EnvironmentAuditDrifter {
@@ -41,8 +42,9 @@ export class EnvironmentAuditDrifter {
         await this.auditAppConfigKeyDrift();
       }
 
-      // Always audit tags
-      await this.auditTagDrift();
+      if (!this.input.skip_tag_check) {
+        await this.auditTagDrift();
+      }
     } catch (error) {
       this.addFinding({
         id: 'audit-error',
@@ -74,7 +76,7 @@ export class EnvironmentAuditDrifter {
     };
   }
 
-  private async auditConfigDrift(env: string, config: any): Promise<void> {
+  private async auditConfigDrift(env: string, config: EnvironmentConfig): Promise<void> {
     // Mock Azure resource checks
     const resources = [
       { type: 'resource_group', name: config.resource_group, critical: true },
@@ -138,7 +140,7 @@ export class EnvironmentAuditDrifter {
     }
   }
 
-  private async auditSecurityDrift(env: string, config: any): Promise<void> {
+  private async auditSecurityDrift(env: string, config: EnvironmentConfig): Promise<void> {
     // Mock GitHub branch protection checks
     for (const pattern of config.allowed_branch_patterns || []) {
       const protection = await this.mockCheckBranchProtection(pattern);
@@ -218,7 +220,7 @@ export class EnvironmentAuditDrifter {
       for (const tag of requiredTags) {
         if (!config.tags || !config.tags[tag]) {
           this.addFinding({
-            id: `tag-missing-${tag}`,
+            id: `tag-missing-${env}-${tag}`,
             environment: env,
             severity: 'medium',
             category: 'tag_drift',
@@ -301,9 +303,16 @@ export async function auditEnvironmentDrift(input: DriftAuditInput): Promise<Dri
   // Load environment-map
   const mapPath = path.join(input.repo_root || process.cwd(), input.config_path);
   const content = fs.readFileSync(mapPath, 'utf-8');
-  const envMap = yaml.load(content) as EnvironmentMap;
+  const loaded = yaml.load(content);
+  if (!loaded || typeof loaded !== 'object' || Array.isArray(loaded)) {
+    throw new Error('environment-map.yml root must be a YAML object');
+  }
+  const envMap = loaded as Partial<EnvironmentMap>;
+  if (!envMap.environments || typeof envMap.environments !== 'object' || Array.isArray(envMap.environments)) {
+    throw new Error('environment-map.yml must contain an environments object');
+  }
 
-  const auditor = new EnvironmentAuditDrifter(input, envMap);
+  const auditor = new EnvironmentAuditDrifter(input, envMap as EnvironmentMap);
   return auditor.audit();
 }
 

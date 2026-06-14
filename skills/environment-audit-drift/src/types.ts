@@ -64,6 +64,7 @@ export interface DriftAuditInput {
   release_manifest_path?: string;
   log_analytics_query_enabled?: boolean;
   app_config_key_check?: boolean;
+  skip_tag_check?: boolean;
   strict_mode?: boolean;
   repo_root?: string;
 }

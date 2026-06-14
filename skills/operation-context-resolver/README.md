@@ -199,8 +199,6 @@ Output:
 [OK] environment-map.yml is valid
 [OK] Found 4 environments: preview, dev, staging, prod
 [OK] Found 6 rules
-[OK] All environments have required fields
-[WARN] preview: no front_door_profile defined
 ```
 
 ### Add validation to CI

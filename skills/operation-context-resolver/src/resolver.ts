@@ -29,9 +29,16 @@ export class OperationContextResolver {
     }
 
     const content = fs.readFileSync(mapPath, 'utf-8');
-    const map = yaml.load(content) as EnvironmentMap;
+    const loaded = yaml.load(content);
+    if (!loaded || typeof loaded !== 'object' || Array.isArray(loaded)) {
+      throw new Error('environment-map.yml root must be a YAML object');
+    }
+    const map = loaded as Partial<EnvironmentMap>;
+    if (!map.environments || typeof map.environments !== 'object' || Array.isArray(map.environments)) {
+      throw new Error('environment-map.yml must contain an environments object');
+    }
 
-    return new OperationContextResolver(map);
+    return new OperationContextResolver(map as EnvironmentMap);
   }
 
   async resolve(input: ResolverInput): Promise<OperationContext> {
@@ -189,7 +196,7 @@ export class OperationContextResolver {
 
   private resolveEnvironmentFromBranch(branch: string): Environment | null {
     for (const [env, config] of Object.entries(this.environmentMap.environments)) {
-      for (const pattern of config.allowed_branch_patterns || []) {
+      for (const pattern of config.allowed_branch_patterns ?? []) {
         if (this.matchPattern(branch, pattern)) {
           return env as Environment;
         }
@@ -306,7 +313,7 @@ export class OperationContextResolver {
       app_config: envConfig.app_config,
       key_vault: envConfig.key_vault,
       front_door_profile: envConfig.front_door_profile,
-      production: envConfig.production,
+      production: envConfig.production ?? env === 'prod',
       risk_level: overrides?.risk_level || (env === 'prod' ? 'high' : 'medium'),
       mode,
       allowed_actions: allowedActions,

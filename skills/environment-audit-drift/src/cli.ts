@@ -124,7 +124,8 @@ async function main(): Promise<void> {
     azure_subscription_id: options.subscription || process.env.AZURE_SUBSCRIPTION_ID || '',
     github_token: options.githubToken || process.env.GITHUB_TOKEN || '',
     release_manifest_path: options.skipDeploymentCheck ? undefined : '.release/manifest.json',
-    app_config_key_check: !options.skipTagCheck,
+    app_config_key_check: true,
+    skip_tag_check: options.skipTagCheck,
     strict_mode: options.strict,
     repo_root: process.cwd(),
   };
