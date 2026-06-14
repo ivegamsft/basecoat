@@ -426,6 +426,20 @@ else {
     $guardrailFailures += 'protected-branch-push-pattern'
 }
 
+# Test 13: Publish workflow tag selection must be event-safe for push-triggered runs
+Write-Host '  Test 13: Validate publish workflow tag resolution is event-safe...'
+$publishWorkflowPath = Join-Path $workflowDir 'publish-to-production.yml'
+$publishWorkflow = Get-Content $publishWorkflowPath -Raw
+$unsafePublishTagExpressions = [regex]::Matches($publishWorkflow, '\$\{\{\s*inputs\.tag\b')
+
+if ($unsafePublishTagExpressions.Count -eq 0 -and $publishWorkflow -match "github\.event_name\s*==\s*'workflow_dispatch'\s*&&\s*github\.event\.inputs\.tag\s*\|\|\s*github\.ref_name") {
+    Write-Host '    ✓ Publish workflow uses dispatch-guarded tag resolution'
+}
+else {
+    Write-Host '    ✗ Publish workflow tag resolution is not safe for push-triggered runs' -ForegroundColor Red
+    $guardrailFailures += 'publish-tag-resolution'
+}
+
 if ($guardrailFailures.Count -gt 0) {
     Write-Host "Workflow guardrails failed: $($guardrailFailures -join ', ')" -ForegroundColor Red
     exit 1
