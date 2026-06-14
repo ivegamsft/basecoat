@@ -16,6 +16,12 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+$policyScriptPath = Join-Path $PSScriptRoot 'model-fallback-policy.ps1'
+if (-not (Test-Path $policyScriptPath)) {
+    throw "Model fallback policy script not found: $policyScriptPath"
+}
+. $policyScriptPath
+
 $tierByAgent = @{
     "agent-designer" = "balanced"; "agentops" = "balanced"; "api-designer" = "reasoning"; "api-security" = "reasoning"
     "app-inventory" = "balanced"; "azure-landing-zone" = "reasoning"; "backend-dev" = "balanced"; "chaos-engineer" = "balanced"
@@ -41,7 +47,7 @@ $tierByAgent = @{
 
 $modelByTier = @{
     "fast" = "gpt-5.4-mini"
-    "balanced" = "claude-sonnet-4.6"
+    "balanced" = "gpt-5.3-codex"
     "reasoning" = "gpt-5.3-codex"
 }
 
@@ -95,7 +101,12 @@ Get-ChildItem -Path $AgentsPath -Filter "*.agent.md" -File | Sort-Object Name | 
         return
     }
 
-    $targetModel = $modelByTier[$tierByAgent[$agentName]]
+    $tier = $tierByAgent[$agentName]
+    $resolved = Resolve-FrontmatterModel -RequestedModel $modelByTier[$tier] -Tier $tier -Context $agentName
+    $targetModel = $resolved.Model
+    if ($resolved.Substituted) {
+        Write-Warning "[$agentName] $($resolved.Reason): '$($resolved.Requested)' -> '$targetModel'"
+    }
     $content = Get-Content -Path $_.FullName -Raw
     $newContent = Set-ModelInFrontmatter -Content $content -Model $targetModel
 

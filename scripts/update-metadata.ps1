@@ -35,6 +35,11 @@ $ErrorActionPreference = "Stop"
 
 $repoRoot   = Split-Path -Parent $PSScriptRoot
 $agentsDir  = Join-Path $repoRoot "agents"
+$policyScriptPath = Join-Path $PSScriptRoot 'model-fallback-policy.ps1'
+if (-not (Test-Path $policyScriptPath)) {
+    throw "Model fallback policy script not found: $policyScriptPath"
+}
+. $policyScriptPath
 
 # ── Category mapping: frontmatter metadata.category → metadata.json category key ──
 $categoryMap = @{
@@ -129,7 +134,7 @@ Get-ChildItem $agentsDir -Filter "*.agent.md" | Sort-Object Name | ForEach-Objec
     $content      = Get-Content $_.FullName -Raw
     $agentDesc    = ""
     $agentCatRaw  = ""
-    $agentModel   = "claude-sonnet-4.6"
+    $agentModel   = Get-DefaultFrontmatterModel
     $agentTags    = @()
 
     if ($content -match '(?m)^description:\s*[''"]?(.*?)[''"]?\s*$') {
@@ -143,8 +148,11 @@ Get-ChildItem $agentsDir -Filter "*.agent.md" | Sort-Object Name | ForEach-Objec
             ForEach-Object { $_.Trim().Trim('"').Trim("'") } |
             Where-Object { $_ }
     }
-    if ($content -match '(?m)^model:\s*(\S+)') {
-        $agentModel = $Matches[1]
+    $rawModel = if ($content -match '(?m)^model:\s*(\S+)') { $Matches[1] } else { "" }
+    $resolvedModel = Resolve-FrontmatterModel -RequestedModel $rawModel -Tier "balanced" -Context $agentName
+    $agentModel = $resolvedModel.Model
+    if ($resolvedModel.Substituted) {
+        Write-Host "INFO: [$agentName] $($resolvedModel.Reason): '$($resolvedModel.Requested)' -> '$agentModel'"
     }
 
     $category = if ($categoryMap[$agentCatRaw]) { $categoryMap[$agentCatRaw] } else { "Meta" }

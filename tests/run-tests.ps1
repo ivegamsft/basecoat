@@ -198,6 +198,22 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running update agent metadata tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'update-agent-metadata-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Update agent metadata tests failed' -ForegroundColor Red
+    Write-FailureLog 'update-agent-metadata-tests'
+    exit 1
+}
+
+Write-Host 'Running update metadata model fallback tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'update-metadata-model-fallback-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Update metadata model fallback tests failed' -ForegroundColor Red
+    Write-FailureLog 'update-metadata-model-fallback-tests'
+    exit 1
+}
+
 Write-Host 'Running code review agent workflow contract tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'workflow-code-review-agent-contract.ps1')
 if ($LASTEXITCODE -ne 0) {

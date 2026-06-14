@@ -31,6 +31,7 @@ model: claude-haiku-4.5
 name: api-designer
 description: test fixture
 visibility: specialized
+model: claude-sonnet-4.6
 ---
 '@ | Set-Content -Path (Join-Path $agentsDir 'basecoat-10-core-api-designer.agent.md') -Encoding UTF8
 
@@ -47,6 +48,10 @@ visibility: specialized
     $apiDesigner = Get-Content -Path (Join-Path $agentsDir 'basecoat-10-core-api-designer.agent.md') -Raw
     if ($apiDesigner -notmatch '(?m)^model:\s*gpt-5.3-codex\s*$') {
         throw 'Expected api-designer model to be set to gpt-5.3-codex'
+    }
+
+    if ($apiDesigner -match '(?m)^model:\s*claude-sonnet-4.6\s*$') {
+        throw 'Expected unsupported model to be rewritten via fallback policy'
     }
 
     Write-Host 'Update agent metadata tests passed'
