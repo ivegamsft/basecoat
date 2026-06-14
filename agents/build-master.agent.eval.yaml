@@ -1,6 +1,6 @@
 name: "build-master-routing"
 description: "Routing evaluation — validates trigger activation for the build-master agent."
-skill: "agents/build-master.agent.md"
+skill: "agents/basecoat-60-workflow-build-master.agent.md"
 scenarios:
   - id: "pos-1"
     input: "Act as build master: keep merging healthy lanes and pause only the lane that broke after merge."

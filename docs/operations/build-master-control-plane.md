@@ -45,9 +45,9 @@ See:
 - `skills/build-master-control-plane/references/state-machine.md`
 - `skills/build-master-control-plane/references/policy-matrix.md`
 
-## Spec
+## Inputs/Outputs
 
-## Inputs
+### Inputs
 
 - Repo and protected target branch.
 - Lane mapping policy.
@@ -55,7 +55,7 @@ See:
 - Break-fix eligibility matrix.
 - Retry and auto-revert thresholds.
 
-## Outputs
+### Outputs
 
 - Per-lane state report.
 - Incident log with fix PR linkage.
