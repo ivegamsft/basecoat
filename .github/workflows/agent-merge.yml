@@ -1,0 +1,164 @@
+name: Agent Merge
+
+on:
+  pull_request:
+    paths:
+      - "agents/**/*.agent.md"
+      - "agents/**/*.agent.eval.yaml"
+      - "skills/**/SKILL.md"
+      - "skills/**/eval.yaml"
+  workflow_dispatch:
+    inputs:
+      rollback_ref:
+        description: "Commit SHA to generate rollback patch for"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  guardrails:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate duplicate agent names and tool conflicts
+        shell: bash
+        run: |
+          python - <<'PY'
+          import pathlib
+          import re
+          import sys
+
+          root = pathlib.Path(".")
+          agent_files = sorted(root.glob("agents/*.agent.md"))
+          by_name = {}
+          failures = []
+          for path in agent_files:
+              text = path.read_text(encoding="utf-8")
+              match = re.search(r"^---\n(.*?)\n---\n", text, flags=re.S)
+              if not match:
+                  failures.append(f"{path}: missing YAML frontmatter")
+                  continue
+              frontmatter = match.group(1)
+              name_match = re.search(r"^name:\s*(.+)$", frontmatter, flags=re.M)
+              if not name_match:
+                  failures.append(f"{path}: missing name in frontmatter")
+                  continue
+              name = name_match.group(1).strip().strip('"').strip("'")
+              skills_match = re.search(r"^allowed_skills:\n((?:^[ \t]+-.*(?:\n|$))+)", frontmatter, flags=re.M)
+              skills_block = skills_match.group(1) if skills_match else ""
+              skills = tuple(sorted(set(re.findall(r"^\s*-\s*([A-Za-z0-9_.:-]+)\s*$", skills_block, flags=re.M))))
+              by_name.setdefault(name, []).append((str(path), skills))
+
+          for name, entries in by_name.items():
+              if len(entries) <= 1:
+                  continue
+              skill_sets = {skills for _, skills in entries}
+              paths = ", ".join(path for path, _ in entries)
+              failures.append(f"duplicate agent name '{name}' in: {paths}")
+              if len(skill_sets) > 1:
+                  failures.append(f"conflicting allowed_skills for duplicated agent '{name}'")
+
+          if failures:
+              print("Agent merge guardrail failures:")
+              for failure in failures:
+                  print(f"- {failure}")
+              sys.exit(1)
+
+          print("Agent guardrails passed: no duplicates or conflicting allowed_skills detected.")
+          PY
+
+      - name: Validate eval companions
+        shell: bash
+        run: |
+          python - <<'PY'
+          import pathlib
+          import sys
+
+          root = pathlib.Path(".")
+          missing = []
+
+          for agent in root.glob("agents/*.agent.md"):
+              eval_file = agent.with_name(agent.name.replace(".agent.md", ".agent.eval.yaml"))
+              if not eval_file.exists():
+                  missing.append(f"{agent} -> missing {eval_file.name}")
+
+          for skill in root.glob("skills/*/SKILL.md"):
+              eval_file = skill.with_name("eval.yaml")
+              if not eval_file.exists():
+                  missing.append(f"{skill} -> missing eval.yaml")
+
+          if missing:
+              print("Missing eval companions:")
+              for item in missing:
+                  print(f"- {item}")
+              sys.exit(1)
+
+          print("Eval companion validation passed.")
+          PY
+
+      - name: Generate frontmatter changelog
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [ -z "${BASE_SHA}" ]; then
+            {
+              echo "# Agent Merge Changelog"
+              echo
+              echo "No pull request base SHA available. Changelog generation is skipped for workflow_dispatch runs."
+            } > agent-merge-changelog.md
+            exit 0
+          fi
+
+          RANGE="${BASE_SHA}...HEAD"
+          {
+            echo "# Agent Merge Changelog"
+            echo
+            echo "Diff range: ${RANGE}"
+            echo
+            echo "## Frontmatter changes"
+            echo
+            git diff --unified=0 "${RANGE}" -- agents skills \
+              | awk '/^diff --git / || /^@@/ || /^[+-](name|description|visibility|model|metadata|allowed_skills):/'
+          } > agent-merge-changelog.md
+
+      - name: Upload changelog artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-merge-changelog
+          path: agent-merge-changelog.md
+
+  rollback-plan:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rollback_ref != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate rollback patch
+        shell: bash
+        env:
+          ROLLBACK_REF: ${{ github.event.inputs.rollback_ref }}
+        run: |
+          git revert --no-commit "${ROLLBACK_REF}"
+          git diff --cached > agent-merge-rollback.patch
+          git reset --hard
+
+      - name: Upload rollback patch artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-merge-rollback-patch
+          path: agent-merge-rollback.patch
