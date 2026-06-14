@@ -2,6 +2,17 @@
 name: environment-audit-drift
 description: "Audit environment-map.yml against expected Azure and GitHub state to detect configuration, security, deployment, and tagging drift before automation runs. USE FOR: scheduled drift audits in CI, pre-deployment drift gates, identifying branch-protection mismatches to autonomy levels, and producing remediation-first findings for operators. DO NOT USE FOR: emergency incident execution paths, direct destructive infrastructure changes, or replacing policy engines that enforce approvals."
 compatibility: GHCP
+metadata:
+  domain: platform-governance
+  maturity: production
+  audience:
+    - maintainer
+    - operator
+allowed-tools:
+  - bash
+  - git
+  - gh
+visibility: public
 ---
 
 # Environment Audit Drift
