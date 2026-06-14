@@ -95,7 +95,11 @@ flowchart LR
 
 ## Templates (`docs/templates/`)
 
-- [templates/](templates/) — Reusable file and directory templates (shared memory, repo scaffold, etc.)
+- [templates/](templates/) — File templates and scaffold taxonomy guidance
+
+## Examples (`docs/examples/`)
+
+- [examples/](examples/) — Read-only examples and starter references
 
 ## Archive
 

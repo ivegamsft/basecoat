@@ -6,9 +6,9 @@
 
 ---
 
-## 📚 Report Files (Created in Root)
+## 📚 Report Files (Stored in `docs/archive/`)
 
-### 1. **CLEANUP_REPORT.md** (21 KB) — PRIMARY REFERENCE
+### 1. **[cleanup-report.md](cleanup-report.md)** (21 KB) — PRIMARY REFERENCE
 **Type**: Comprehensive technical audit  
 **Audience**: Team leads, repository maintainers  
 **Content**: Detailed findings, execution plan, validation
@@ -34,7 +34,7 @@
 
 ---
 
-### 2. **CLEANUP_AUDIT_SUMMARY.md** (10 KB) — QUICK REFERENCE
+### 2. **[cleanup-audit-summary.md](cleanup-audit-summary.md)** (10 KB) — QUICK REFERENCE
 **Type**: Executive summary and quick-start guide  
 **Audience**: Anyone executing the cleanup  
 **Content**: Key findings, quick-start steps, before/after comparison
@@ -62,21 +62,21 @@
 ### If you want to...
 
 **...understand the problem**
-→ Read CLEANUP_AUDIT_SUMMARY.md (5 min)
+→ Read cleanup-audit-summary.md (5 min)
 
 **...execute the cleanup**
-→ Read CLEANUP_AUDIT_SUMMARY.md § Quick Start (10 min)  
-→ Then read CLEANUP_REPORT.md § 7 for detailed commands
+→ Read cleanup-audit-summary.md § Quick Start (10 min)  
+→ Then read cleanup-report.md § 7 for detailed commands
 
 **...understand technical details**
-→ Read CLEANUP_REPORT.md § 1-5 (comprehensive analysis)
+→ Read cleanup-report.md § 1-5 (comprehensive analysis)
 
 **...verify cleanup was done correctly**
-→ Use CLEANUP_REPORT.md § 8 (validation checklist)  
-→ Use CLEANUP_AUDIT_SUMMARY.md § Validation Checklist
+→ Use cleanup-report.md § 8 (validation checklist)  
+→ Use cleanup-audit-summary.md § Validation Checklist
 
 **...understand risks**
-→ Read CLEANUP_REPORT.md § 9 (risks & mitigations table)
+→ Read cleanup-report.md § 9 (risks & mitigations table)
 
 ---
 
@@ -110,18 +110,18 @@
 ### Step 1: Review (10 minutes)
 ```bash
 # Read the quick summary
-cat CLEANUP_AUDIT_SUMMARY.md | head -100
+cat cleanup-audit-summary.md | head -100
 ```
 
 ### Step 2: Plan (5 minutes)
 ```bash
 # Review the execution plan
-cat CLEANUP_REPORT.md | grep -A 50 "## 7. EXECUTION PLAN"
+cat cleanup-report.md | grep -A 50 "## 7. EXECUTION PLAN"
 ```
 
 ### Step 3: Execute (2-3 hours)
 ```bash
-# Follow Phase 1-5 from CLEANUP_REPORT.md § 7
+# Follow Phase 1-5 from cleanup-report.md § 7
 # Use validation checklist from § 8
 ```
 
@@ -141,7 +141,7 @@ cat CLEANUP_REPORT.md | grep -A 50 "## 7. EXECUTION PLAN"
 - plan-sharedStandardsRepo.prompt.md → docs/working/
 
 ### Phase 3: Consolidate Catalogs (15 min, P2)
-- CATALOG.md (root) → docs/ASSET_REGISTRY.md
+- CATALOG.md (root) → docs/reference/asset-catalog.md
 - docs/CATALOG.md → DELETE
 
 ### Phase 4: Delete Stale Branches (15 min, P3)
@@ -164,7 +164,7 @@ cat CLEANUP_REPORT.md | grep -A 50 "## 7. EXECUTION PLAN"
 - [ ] On `main` branch
 - [ ] `git fetch origin` completed
 - [ ] Tests pass: `pwsh tests/run-tests.ps1`
-- [ ] Read CLEANUP_REPORT.md § 7
+- [ ] Read cleanup-report.md § 7
 
 ### After Cleanup
 - [ ] 4 commits created (one per phase)
@@ -202,12 +202,12 @@ cat CLEANUP_REPORT.md | grep -A 50 "## 7. EXECUTION PLAN"
 
 | Question | Answer Location |
 |----------|-----------------|
-| What's being cleaned? | CLEANUP_AUDIT_SUMMARY.md § What's the Problem? |
-| Why are we doing this? | CLEANUP_REPORT.md § 1-5 (Rationale) |
-| How do I execute? | CLEANUP_REPORT.md § 7 or CLEANUP_AUDIT_SUMMARY.md § Quick Start |
-| What if something goes wrong? | CLEANUP_REPORT.md § 9 (Risks & Mitigations) |
-| How do I validate? | CLEANUP_REPORT.md § 8 or CLEANUP_AUDIT_SUMMARY.md § Validation Checklist |
-| What are the metrics? | CLEANUP_AUDIT_SUMMARY.md § Impact Summary |
+| What's being cleaned? | cleanup-audit-summary.md § What's the Problem? |
+| Why are we doing this? | cleanup-report.md § 1-5 (Rationale) |
+| How do I execute? | cleanup-report.md § 7 or cleanup-audit-summary.md § Quick Start |
+| What if something goes wrong? | cleanup-report.md § 9 (Risks & Mitigations) |
+| How do I validate? | cleanup-report.md § 8 or cleanup-audit-summary.md § Validation Checklist |
+| What are the metrics? | cleanup-audit-summary.md § Impact Summary |
 
 ---
 
@@ -237,9 +237,9 @@ cat CLEANUP_REPORT.md | grep -A 50 "## 7. EXECUTION PLAN"
 
 | File | Size | Type | Purpose |
 |------|------|------|---------|
-| CLEANUP_REPORT.md | 21 KB | Primary | Comprehensive technical audit |
-| CLEANUP_AUDIT_SUMMARY.md | 10 KB | Reference | Quick-start guide |
-| CLEANUP_AUDIT_INDEX.md | This file | Navigation | Master index |
+| cleanup-report.md | 21 KB | Primary | Comprehensive technical audit |
+| cleanup-audit-summary.md | 10 KB | Reference | Quick-start guide |
+| cleanup-audit-index.md | This file | Navigation | Master index |
 
 ---
 
@@ -250,7 +250,7 @@ cat CLEANUP_REPORT.md | grep -A 50 "## 7. EXECUTION PLAN"
 **Audit Date**: May 2026  
 **Status**: ✅ Ready for Execution
 
-**Next Action**: Read CLEANUP_REPORT.md § 7 (Execution Plan)
+**Next Action**: Read cleanup-report.md § 7 (Execution Plan)
 
 ---
 

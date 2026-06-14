@@ -172,7 +172,7 @@ Expected output: <report/plan/checklist format>.
 
 ## Related references
 
-- `docs/agents/AGENTS.md`
+- `docs/agents/agents.md`
 - `docs/agents/agent-runtime-enforcement.md`
 - `docs/guides/agent-examples.md`
 - `docs/guides/contributing.md`

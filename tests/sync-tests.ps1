@@ -385,7 +385,7 @@ try {
 
     $testCount++
     Assert-SyncPathExists -Path (Join-Path $docsTargetDir 'agents/AGENTS.md') `
-        -Message 'Sync test failed: docs/agents/AGENTS.md missing from overlay'
+        -Message 'Sync test failed: docs/agents/agents.md missing from overlay'
 
     foreach ($excludedDocsSubtree in @('archive', 'architecture', 'diagrams', 'examples', 'memory', 'operations', 'research', 'templates')) {
         $testCount++

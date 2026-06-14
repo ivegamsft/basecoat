@@ -109,22 +109,22 @@ git commit -m "docs: reorganize design and working documents into docs/ subdirec
 
 1. Keep `AGENTS.md` at root (referenced in README.md, stable API)
 2. Keep `INVENTORY.md` at root (keyword-searchable, rich metadata)
-3. Move `CATALOG.md` (root) → `docs/ASSET_REGISTRY.md` (renamed, detailed reference)
+3. Move `CATALOG.md` (root) → `docs/reference/asset-catalog.md` (renamed, detailed reference)
 4. Delete `docs/CATALOG.md` (redundant)
 
 **Git Commands**:
 
 ```powershell
 # Rename root CATALOG.md to emphasize it's a detailed registry
-git mv CATALOG.md docs/ASSET_REGISTRY.md
+git mv CATALOG.md docs/reference/asset-catalog.md
 
-# Update references in README.md to point to docs/ASSET_REGISTRY.md
+# Update references in README.md to point to docs/reference/asset-catalog.md
 # (edit README.md manually or via script)
 
 # Delete redundant docs/CATALOG.md
 git rm docs/CATALOG.md
 
-git commit -m "docs: consolidate asset catalogs and eliminate duplication" -m "- Move root CATALOG.md to docs/ASSET_REGISTRY.md (detailed registry with model recommendations)
+git commit -m "docs: consolidate asset catalogs and eliminate duplication" -m "- Move root CATALOG.md to docs/reference/asset-catalog.md (detailed registry with model recommendations)
 - Delete docs/CATALOG.md (redundant, outdated)
 - Keep AGENTS.md as quick reference (in root, referenced by README.md)
 - Keep INVENTORY.md as searchable instruction/skill index
@@ -300,7 +300,7 @@ $skillRefs | ForEach-Object {
 basecoat/
 ├── AGENTS.md                                  ✅ Keep (referenced by README, API stable)
 ├── INVENTORY.md                               ✅ Keep (keyword index, stable)
-├── CATALOG.md                                 ❌ Move to docs/ASSET_REGISTRY.md
+├── CATALOG.md                                 ❌ Move to docs/reference/asset-catalog.md
 ├── README.md                                  ✅ Keep (standard)
 ├── CHANGELOG.md                               ✅ Keep (standard)
 ├── CONTRIBUTING.md                            ✅ Keep (standard)
@@ -386,10 +386,10 @@ git mv plan-sharedStandardsRepo.prompt.md docs/working/
 git commit -m "docs: move design briefs and working docs to docs/ subdirectories" -m "Move design and working documents to docs/ hierarchy per repository convention." --author "Cleanup Audit <cleanup@basecoat.local>"
 
 # 4. Consolidate catalogs
-git mv CATALOG.md docs/ASSET_REGISTRY.md
+git mv CATALOG.md docs/reference/asset-catalog.md
 git rm docs/CATALOG.md
 
-git commit -m "docs: consolidate catalogs to eliminate duplication" -m "Move root CATALOG.md to docs/ASSET_REGISTRY.md. Delete redundant docs/CATALOG.md. Keeps AGENTS.md and INVENTORY.md as stable APIs." --author "Cleanup Audit <cleanup@basecoat.local>"
+git commit -m "docs: consolidate catalogs to eliminate duplication" -m "Move root CATALOG.md to docs/reference/asset-catalog.md. Delete redundant docs/CATALOG.md. Keeps AGENTS.md and INVENTORY.md as stable APIs." --author "Cleanup Audit <cleanup@basecoat.local>"
 ```text
 
 ### Phase 2: Update Documentation (15-20 minutes)
@@ -398,7 +398,7 @@ git commit -m "docs: consolidate catalogs to eliminate duplication" -m "Move roo
 
 ```markdown
 - Line 7: Update agent count if needed
-- Link to docs/ASSET_REGISTRY.md instead of CATALOG.md
+- Link to docs/reference/asset-catalog.md instead of CATALOG.md
 ```text
 
 **2. Add navigation guidance** to AGENTS.md and INVENTORY.md headers
@@ -476,7 +476,7 @@ Remove-Item -Recurse -Force F:\Git\basecoat-wt -ErrorAction SilentlyContinue
 |------|----------|--------|----------|------|------|
 | AGENTS.md | Root file | KEEP | — | — | — |
 | INVENTORY.md | Root file | KEEP | — | — | — |
-| CATALOG.md (root) | Root file | MOVE to docs/ASSET_REGISTRY.md | P2 | 5 min | Low |
+| CATALOG.md (root) | Root file | MOVE to docs/reference/asset-catalog.md | P2 | 5 min | Low |
 | docs/CATALOG.md | Root file | DELETE | P2 | 2 min | Low |
 | AUDIT_REPORT_v2.3.0.md | Versioned | MOVE to docs/archived/ | P1 | 5 min | Low |
 | FINAL_RELEASE_NOTES.md | Versioned | MOVE to docs/archived/ | P1 | 5 min | Low |
@@ -534,7 +534,7 @@ Moved to docs/ (8 files, 102 KB):
 - docs/archived/ (30 KB)
 - docs/design-briefs/ (9 KB)
 - docs/working/ (4 KB)
-- docs/ASSET_REGISTRY.md (19 KB)
+- docs/reference/asset-catalog.md (current registry)
 ```text
 
 ---

@@ -706,7 +706,7 @@ Three new authoritative docs for the BaseCoat memory model:
 - `agentic-workflow-lifecycle.excalidraw` — PR trigger → filter → agent → safe output
 - `bootstrap-flow.excalidraw` — 4-phase bootstrap script flow
 
-All diagrams indexed at `docs/diagrams/README.md`.
+All diagrams indexed at `docs/diagrams/architecture-diagrams-index.md`.
 
 ## 3.10.0 - 2026-05-08
 
