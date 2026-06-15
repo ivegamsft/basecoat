@@ -17,6 +17,7 @@ environments:
       Environment: Preview
       App: app-name
       ManagedBy: bicep
+      ReleaseId: rel-preview-current
     allowed_branch_patterns:
       - feature/*
       - agent/*
@@ -52,6 +53,7 @@ environments:
       Environment: Dev
       App: app-name
       ManagedBy: bicep
+      ReleaseId: rel-dev-current
     allowed_branch_patterns:
       - dev
       - dev/*
@@ -86,6 +88,7 @@ environments:
       Environment: Staging
       App: app-name
       ManagedBy: bicep
+      ReleaseId: rel-staging-current
     allowed_branch_patterns:
       - staging
       - release/*
@@ -120,6 +123,7 @@ environments:
       Environment: Production
       App: app-name
       ManagedBy: bicep
+      ReleaseId: rel-prod-current
     allowed_branch_patterns:
       - main
       - hotfix/*

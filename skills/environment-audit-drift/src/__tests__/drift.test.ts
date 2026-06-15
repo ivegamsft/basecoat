@@ -1,4 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import { EnvironmentAuditDrifter, driftIsCritical } from '../drift';
 import { DriftAuditInput, EnvironmentMap } from '../types';
 
@@ -18,6 +21,7 @@ const mockEnvironmentMap: EnvironmentMap = {
         Environment: 'production',
         App: 'myapp',
         ManagedBy: 'platform-team',
+        ReleaseId: 'rel-1.0.0',
       },
     },
     staging: {
@@ -34,6 +38,7 @@ const mockEnvironmentMap: EnvironmentMap = {
         Environment: 'staging',
         App: 'myapp',
         ManagedBy: 'platform-team',
+        ReleaseId: 'rel-1.0.0',
       },
     },
   },
@@ -154,6 +159,80 @@ describe('EnvironmentAuditDrifter', () => {
     const report = await auditor.audit();
 
     expect(report.config_file).toBe(input.config_path);
+  });
+
+  it('should detect deployment version mismatch against deployed revision', async () => {
+    const manifestFile = path.join(
+      fs.mkdtempSync(path.join(os.tmpdir(), 'env-audit-drift-')),
+      'manifest.json'
+    );
+    fs.writeFileSync(
+      manifestFile,
+      JSON.stringify(
+        {
+          timestamp: new Date().toISOString(),
+          environments: {
+            prod: { expected_version: '1.2.3', deployed_revision: '1.2.2' },
+            staging: { expected_version: '1.2.3', deployed_revision: '1.2.3' },
+          },
+        },
+        null,
+        2
+      )
+    );
+
+    const auditor = new EnvironmentAuditDrifter(
+      { ...input, release_manifest_path: manifestFile },
+      mockEnvironmentMap
+    );
+    const report = await auditor.audit();
+
+    const mismatch = report.findings.find(f => f.id === 'deployment-version-mismatch-prod');
+    expect(mismatch).toBeDefined();
+
+    fs.rmSync(path.dirname(manifestFile), { recursive: true, force: true });
+  });
+
+  it('should require ReleaseId tag for tag drift checks', async () => {
+    const driftMap: EnvironmentMap = {
+      ...mockEnvironmentMap,
+      environments: {
+        ...mockEnvironmentMap.environments,
+        staging: {
+          ...mockEnvironmentMap.environments.staging,
+          tags: {
+            Environment: 'staging',
+            App: 'myapp',
+            ManagedBy: 'platform-team',
+          },
+        },
+      },
+    };
+
+    const auditor = new EnvironmentAuditDrifter(input, driftMap);
+    const report = await auditor.audit();
+
+    expect(report.findings.some(f => f.id === 'tag-missing-staging-ReleaseId')).toBe(true);
+  });
+
+  it('should enforce approval minimums for A1 autonomy level', async () => {
+    const driftMap: EnvironmentMap = {
+      ...mockEnvironmentMap,
+      environments: {
+        ...mockEnvironmentMap.environments,
+        prod: {
+          ...mockEnvironmentMap.environments.prod,
+          autonomy_level: 'A1',
+          allowed_branch_patterns: ['release/hotfix'],
+        },
+      },
+    };
+
+    const auditor = new EnvironmentAuditDrifter(input, driftMap);
+    const report = await auditor.audit();
+
+    const securityFinding = report.findings.find(f => f.id === 'security-approval-mismatch-prod-release/hotfix');
+    expect(securityFinding?.severity).toBe('critical');
   });
 });
 

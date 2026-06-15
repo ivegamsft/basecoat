@@ -91,7 +91,7 @@ if (driftIsCritical(report)) {
 | **Config Drift** | Does GitHub Environment exist? | Deployments fail if environment is missing |
 | **Deployment Drift** | Does deployed version match release manifest? | Agents might act on stale version info |
 | **Security Drift** | Do GitHub branch protection rules match autonomy levels? | Approval gates could be bypassed |
-| **Tag Drift** | Do Azure resources have required tags? | Cost allocation, compliance reporting fail |
+| **Tag Drift** | Do Azure resources have required tags (`Environment`, `App`, `ManagedBy`, `ReleaseId`)? | Cost allocation, release traceability, compliance reporting fail |
 
 ## Output Format
 
@@ -162,6 +162,32 @@ if (driftIsCritical(report)) {
 
 - `actionable: true` - No critical drifts; safe to proceed
 - `actionable: false` - Critical drifts found; needs manual review/fix
+
+## Release manifest version comparison
+
+Deployment drift compares release intent to deployed Container Apps revisions per environment.
+Provide a `.release/manifest.json` with this shape:
+
+```json
+{
+  "timestamp": "2026-06-14T06:00:00Z",
+  "environments": {
+    "prod": {
+      "expected_version": "1.2.3",
+      "deployed_revision": "1.2.2"
+    },
+    "staging": {
+      "expected_version": "1.2.3",
+      "deployed_revision": "1.2.3"
+    }
+  }
+}
+```
+
+Supported aliases:
+
+- `expected_version` or `release_version` for expected value
+- `deployed_revision`, `deployed_version`, or `container_app_revision` for deployed value
 
 ## Common Scenarios
 

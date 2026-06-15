@@ -36,6 +36,17 @@ Or import directly from BaseCoat:
 import { resolveOperationContext } from '@basecoat/operation-context-resolver';
 ```
 
+### 3. Add drift preflight (recommended)
+
+Run `@basecoat/environment-audit-drift` before resolver-dependent operations so
+`environment-map.yml` and infrastructure policy state stay aligned.
+
+```bash
+npx @basecoat/environment-audit-drift \
+  --config .github/environment-map.yml \
+  --output drift-report.json
+```
+
 ## Usage in Agents
 
 ### Basic pattern
