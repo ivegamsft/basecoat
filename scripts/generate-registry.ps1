@@ -5,8 +5,9 @@
 
 .DESCRIPTION
     Reads all agent files, extracts YAML frontmatter fields (name, description,
-    metadata, model), and writes a registry JSON file consumable by the
-    copilot-cli-plugin.
+    metadata, and model hints), resolves model hints through an allowlisted
+    default policy, and writes a registry JSON file consumable by the
+    copilot-cli-plugin without exposing org-level model configuration.
 
 .EXAMPLE
     pwsh scripts/generate-registry.ps1
@@ -14,36 +15,104 @@
 #>
 
 param(
+    [string]$AgentsPath = (Join-Path $PSScriptRoot ".." "agents"),
     [string]$OutputPath = (Join-Path $PSScriptRoot ".." "plugins" "copilot-cli-plugin" "schema" "basecoat-registry.json"),
-    [string]$AgentsPath = (Join-Path (Split-Path -Parent $PSScriptRoot) "agents")
+    [string[]]$AllowedModels = @("claude-sonnet-4.6", "claude-sonnet-4.5", "claude-haiku-4.5", "gpt-5.3-codex", "gpt-5.4-mini"),
+    [string]$DefaultModel = "claude-sonnet-4.6",
+    [string[]]$DisabledModels = @()
 )
 
-$repoRoot = Split-Path -Parent $PSScriptRoot
-$agentsDir = $AgentsPath
-$agents = @{}
+$ErrorActionPreference = "Stop"
 
-function Get-FrontmatterValue {
+function Get-CanonicalModelId {
+    param([string]$ModelId)
+
+    if ([string]::IsNullOrWhiteSpace($ModelId)) { return "" }
+
+    $normalized = $ModelId.Trim().Trim('"').Trim("'").ToLowerInvariant()
+    $normalized = $normalized -replace '[ _]+', '-'
+    $normalized = $normalized -replace '-+', '-'
+
+    $aliasMap = @{
+        "claude-sonnet-4-6" = "claude-sonnet-4.6"
+        "claude-sonnet-4-5" = "claude-sonnet-4.5"
+        "claude-haiku-4-5" = "claude-haiku-4.5"
+        "claude-opus-4-8" = "claude-opus-4.8"
+        "claude-opus-4-7" = "claude-opus-4.7"
+        "claude-opus-4-6" = "claude-opus-4.6"
+        "claude-opus-4-5" = "claude-opus-4.5"
+        "gpt-5-5" = "gpt-5.5"
+        "gpt-5-4" = "gpt-5.4"
+        "gpt-5-4-mini" = "gpt-5.4-mini"
+        "gpt-5-3-codex" = "gpt-5.3-codex"
+        "gpt-5-mini" = "gpt-5-mini"
+        "gemini-3-1-pro-preview" = "gemini-3.1-pro-preview"
+        "gemini-3-5-flash" = "gemini-3.5-flash"
+    }
+
+    if ($aliasMap.ContainsKey($normalized)) {
+        return $aliasMap[$normalized]
+    }
+
+    return $normalized
+}
+
+function Get-ModelHintFromFrontmatter {
+    param([string]$Frontmatter)
+
+    if ($Frontmatter -match '(?m)^pinned_model:\s*(.+)$') { return $Matches[1].Trim().Trim('"').Trim("'") }
+    if ($Frontmatter -match '(?m)^model:\s*(.+)$') { return $Matches[1].Trim().Trim('"').Trim("'") }
+    return ""
+}
+
+function Resolve-RegistryModel {
     param(
         [string]$Frontmatter,
-        [string]$Key
+        [System.Collections.Generic.HashSet[string]]$AllowedModelSet,
+        [System.Collections.Generic.HashSet[string]]$DisabledModelSet,
+        [string]$FallbackModel
     )
 
-    $pattern = "(?m)^\s*$([Regex]::Escape($Key))\s*:\s*(.+?)\s*$"
-    $match = [Regex]::Match($Frontmatter, $pattern)
-    if (-not $match.Success) {
-        return $null
-    }
+    $modelHint = Get-ModelHintFromFrontmatter -Frontmatter $Frontmatter
+    if ([string]::IsNullOrWhiteSpace($modelHint)) { return $FallbackModel }
 
-    $value = $match.Groups[1].Value.Trim()
-    if (
-        ($value.StartsWith('"') -and $value.EndsWith('"')) -or
-        ($value.StartsWith("'") -and $value.EndsWith("'"))
-    ) {
-        return $value.Substring(1, $value.Length - 2).Trim()
-    }
-
-    return $value
+    $canonicalHint = Get-CanonicalModelId -ModelId $modelHint
+    if ([string]::IsNullOrWhiteSpace($canonicalHint)) { return $FallbackModel }
+    if ($DisabledModelSet.Contains($canonicalHint)) { return $FallbackModel }
+    if (-not $AllowedModelSet.Contains($canonicalHint)) { return $FallbackModel }
+    return $canonicalHint
 }
+
+$allowedCanonical = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+foreach ($allowedModel in $AllowedModels) {
+    $canonicalAllowed = Get-CanonicalModelId -ModelId $allowedModel
+    if (-not [string]::IsNullOrWhiteSpace($canonicalAllowed)) {
+        [void]$allowedCanonical.Add($canonicalAllowed)
+    }
+}
+
+if ($allowedCanonical.Count -eq 0) {
+    throw "Allowed model list is empty after canonicalization."
+}
+
+$defaultCanonical = Get-CanonicalModelId -ModelId $DefaultModel
+if ([string]::IsNullOrWhiteSpace($defaultCanonical)) {
+    throw "Default model '$DefaultModel' could not be canonicalized."
+}
+if (-not $allowedCanonical.Contains($defaultCanonical)) {
+    throw "Default model '$defaultCanonical' must exist in AllowedModels."
+}
+
+$disabledCanonical = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+foreach ($disabledModel in $DisabledModels) {
+    $canonicalDisabled = Get-CanonicalModelId -ModelId $disabledModel
+    if (-not [string]::IsNullOrWhiteSpace($canonicalDisabled)) {
+        [void]$disabledCanonical.Add($canonicalDisabled)
+    }
+}
+
+$agentsDir = $AgentsPath
+$agents = @{}
 
 Get-ChildItem $agentsDir -Filter "*.agent.md" | ForEach-Object {
     $file = $_.FullName
@@ -51,26 +120,17 @@ Get-ChildItem $agentsDir -Filter "*.agent.md" | ForEach-Object {
     $relativePath = "agents/$($_.Name)"
 
     # Extract YAML frontmatter
-    if ($content -match "^---\s*\r?\n([\s\S]+?)\r?\n---") {
+    if ($content -match "^---\s*\n([\s\S]+?)\n---") {
         $frontmatter = $Matches[1]
 
         $id = $_.Name -replace "\.agent\.md$", ""
         # Extract short agent name from new naming convention
         $id = $id -replace '^basecoat-\d+-\w+-', ''
-        $name = Get-FrontmatterValue -Frontmatter $frontmatter -Key "name"
-        if (-not $name) { $name = $id }
-
-        $description = Get-FrontmatterValue -Frontmatter $frontmatter -Key "description"
-        if (-not $description) { $description = "No description" }
-
-        $model = Get-FrontmatterValue -Frontmatter $frontmatter -Key "model"
-        if (-not $model) { $model = "claude-sonnet-4.6" }
-
-        $maturity = Get-FrontmatterValue -Frontmatter $frontmatter -Key "maturity"
-        if (-not $maturity) { $maturity = "production" }
-
-        $category = Get-FrontmatterValue -Frontmatter $frontmatter -Key "category"
-        if (-not $category) { $category = "General" }
+        $name = if ($frontmatter -match "^name:\s*(.+)$") { $Matches[1].Trim().Trim('"') } else { $id }
+        $description = if ($frontmatter -match "^description:\s*(.+)$") { $Matches[1].Trim().Trim('"') } else { "No description" }
+        $model = Resolve-RegistryModel -Frontmatter $frontmatter -AllowedModelSet $allowedCanonical -DisabledModelSet $disabledCanonical -FallbackModel $defaultCanonical
+        $maturity = if ($frontmatter -match "maturity:\s*[""']?(\w+)[""']?") { $Matches[1].Trim() } else { "production" }
+        $category = if ($frontmatter -match "category:\s*[""']?([^""'\n]+)[""']?") { $Matches[1].Trim() } else { "General" }
 
         # Extract tags as keywords
         $keywords = @($id -split "-")

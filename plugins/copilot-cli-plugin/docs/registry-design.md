@@ -40,7 +40,9 @@ Agents are described in a single JSON file (`basecoat-registry.json`) that is ge
 }
 ```text
 
-`model` is sourced directly from each agent file's `model:` frontmatter value. If an agent omits `model:`, the generator defaults to `claude-sonnet-4.6`.
+The `model` field is intentionally resolved from frontmatter hints through a
+small allowlisted set with a safe default fallback during generation. Raw org
+model policy inputs are not emitted into the generated registry artifact.
 
 ### Full JSON Schema (JSON Schema Draft 7)
 

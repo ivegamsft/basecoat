@@ -294,6 +294,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running generate registry tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'generate-registry-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Generate registry tests failed' -ForegroundColor Red
+    Write-FailureLog 'generate-registry-tests'
+    exit 1
+}
+
 Write-Host 'Running coherence check (non-blocking)...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot '..' 'scripts' 'check-coherence.ps1')
 # Non-blocking: coherence issues are warnings, not failures
