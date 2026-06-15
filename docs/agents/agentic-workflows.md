@@ -27,6 +27,19 @@ the Copilot agent:
    - Name: `COPILOT_GITHUB_TOKEN`
    - Value: the token you generated
 
+## Model Compatibility Guardrail
+
+Some repositories or enterprise tenants do not expose every Copilot model. If a
+run fails with `400 The requested model is not supported`, set a supported model
+in the workflow lock file fallback (for example `gpt-5-mini`) and/or configure a
+repository variable override:
+
+- `GH_AW_MODEL_AGENT_COPILOT`
+- `GH_AW_MODEL_DETECTION_COPILOT`
+
+Prefer explicit `gpt-5-mini` defaults for portability unless a workflow requires
+a different model tier.
+
 ## Active Workflows
 
 | Workflow | Trigger | What It Does |
