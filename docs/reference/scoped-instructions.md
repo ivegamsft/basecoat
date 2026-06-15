@@ -12,6 +12,11 @@ The `applyTo` field uses glob patterns to decide which files an instruction appl
 
 Good scoping keeps guidance precise and context-appropriate without adding noise to unrelated work.
 
+See also:
+
+- `.github/instructions/cost-optimization.instructions.md` for token-optimization quick-start policy
+- `.github/instructions/workflow-conventions.instructions.md` for mode and workflow conventions
+
 ---
 
 ## Why Scoping Matters
@@ -146,6 +151,15 @@ Then manually test the mental model:
 - Is any guidance firing where it should not?
 
 Keep a mental model of the instruction stack for common file types and directories.
+
+## Operator Quick-Start (Token-Aware)
+
+When running long AI workflows:
+
+1. Use Ask mode for simple lookups; switch to Agent mode only for multi-step/tool tasks.
+2. Keep instruction scope narrow (`applyTo`) to avoid broad irrelevant context.
+3. Prefer concise text/Markdown artifacts over rich binaries for repeated handoffs.
+4. Reuse canonical summary files by path instead of re-pasting content.
 
 ---
 
