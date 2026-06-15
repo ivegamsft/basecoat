@@ -34,14 +34,12 @@ the code reaches production.
 - **Repository**: `${{ github.repository }}`
 - **Base branch**: `${{ github.event.pull_request.base.sha }}`
 
-Fetch the PR diff and changed files:
+Fetch the PR diff and changed files using GitHub MCP tools. The repository
+`${{ github.repository }}` is in `owner/repo` format — split on `/` to get
+owner and repo name:
 
-```bash
-gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} \
-  --json number,title,body,additions,deletions,changedFiles
-
-gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }}
-```
+- Call `get_pull_request` with `pullNumber: ${{ github.event.pull_request.number }}` to get PR metadata (number, title, body, additions, deletions, changedFiles)
+- Call `get_pull_request_diff` to get the full diff
 
 ## What to Do
 
@@ -85,11 +83,8 @@ If any are found, classify as **Critical** and flag immediately.
 
 ### Step 4 — Dependency Risk (if dependencies changed)
 
-```bash
-# Check for known vulnerabilities in changed dependencies
-gh pr diff ${{ github.event.pull_request.number }} -- '**/package.json' '**/requirements.txt' \
-  '**/go.mod' '**/*.csproj' 2>/dev/null | head -200
-```
+Use `get_pull_request_diff` and filter the result to lines matching dependency
+manifest paths (`package.json`, `requirements.txt`, `go.mod`, `*.csproj`).
 
 Note any new dependency that:
 - Has not been updated in 12+ months

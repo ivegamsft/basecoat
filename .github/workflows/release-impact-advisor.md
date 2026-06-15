@@ -28,11 +28,12 @@ reviewers should be aware of before merging.
 - **Head SHA**: `${{ github.event.pull_request.head.sha }}`
 - **Base SHA**: `${{ github.event.pull_request.base.sha }}`
 
-Fetch the full PR details and diff:
-```bash
-gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json title,body,additions,deletions,changedFiles,baseRefName,headRefName,labels,author
-gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }} | head -500
-```
+Fetch the full PR details and diff using GitHub MCP tools. The repository
+`${{ github.repository }}` is in `owner/repo` format — split on `/` to get
+owner and repo name:
+
+- Call `get_pull_request` with `pullNumber: ${{ github.event.pull_request.number }}` to get PR metadata (title, body, additions, deletions, changedFiles, baseRefName, headRefName, labels, author)
+- Call `get_pull_request_diff` to get the full diff (use the first 500 lines if the diff is large)
 
 ## What to Do
 
