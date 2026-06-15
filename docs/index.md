@@ -74,6 +74,7 @@ flowchart LR
 ## Guides (`docs/guides/`)
 
 - [guides/intent-prefixes.md](guides/intent-prefixes.md) — Intent vocabulary, routing behavior, and prompt templates
+- [guides/token-optimization.md](guides/token-optimization.md) — Operator token-efficiency checklist, model/mode defaults, and context normalization patterns
 - [agents/taxonomy.md](agents/taxonomy.md) — Agent and skill taxonomy with chain archetypes
 
 ## Operations (`docs/operations/`)
