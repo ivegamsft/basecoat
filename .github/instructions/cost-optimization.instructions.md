@@ -155,13 +155,16 @@ Downshift again once the high-complexity segment is complete.
 
 ### MCP server overhead audit checklist
 
-Before adding or using MCP-heavy flows in routine loops, verify:
+Run this audit at least **monthly** and again **before long fleet or burndown runs**.
 
-1. The required data is not already available from local files or direct CLI commands.
-2. Calls are batched to minimize round trips and repeated context transmission.
-3. Returned payloads are scoped to only needed fields and row limits.
-4. The workflow includes a fallback path if MCP is unavailable or slow.
-5. The operation frequency is justified (avoid high-cadence polling without actionability).
+Checklist:
+
+1. **Inventory enabled servers/tools** in your current environment and note owner/purpose.
+2. **Check recent usage** and mark servers that are inactive or rarely used for the target workflow.
+3. **Disable unused servers** for the run to reduce schema/tool payload overhead.
+4. **Verify required platform tooling remains enabled** (auth, repo, deployment, and compliance-critical tooling).
+5. **Validate workflow health after changes** by running a representative task before broad execution.
+6. **Review call patterns**: batch requests, scope returned fields/rows, and avoid high-cadence polling without actionability.
 
 Prefer direct repository tools (`view`, `glob`, `rg`) for local context and reserve MCP usage for external or system-of-record data.
 

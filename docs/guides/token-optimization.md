@@ -277,7 +277,35 @@ Set thresholds to catch runaway usage:
 
 ---
 
-## 7. Instruction File Sizing
+## 7. MCP Server Audit for Token Overhead Control
+
+Tool schemas and capability catalogs increase per-step context size. Keep MCP footprint intentional.
+
+### Recommended Cadence
+
+- Run this audit **monthly** as routine hygiene.
+- Run it again **before long fleet runs** (for example, backlog burndown, broad triage, or multi-PR waves).
+
+### Audit Checklist
+
+| Step | What to do | Why it saves tokens |
+|---|---|---|
+| Inventory | List enabled MCP servers and primary tools used in the run | Reveals unnecessary schema surface area |
+| Usage check | Review recent usage and mark inactive/rarely-used servers | Prevents paying repeated context cost for idle tools |
+| Disable unused | Temporarily disable servers not needed for the current objective | Reduces prompt/tool metadata overhead on each step |
+| Verify required | Confirm required platform tooling remains enabled (auth/repo/deploy/compliance-critical) | Prevents breaking core workflows while optimizing |
+| Smoke test | Run one representative task after changes | Catches accidental tool disablement early |
+
+### Safe Process Notes
+
+- Disable only servers that are unused for the target workflow.
+- Keep required platform tooling enabled.
+- Document the audit outcome so the next operator can restore or reuse the same baseline.
+- Prefer workflow-neutral steps (inventory, usage, disable, verify) rather than IDE-specific controls.
+
+---
+
+## 8. Instruction File Sizing
 
 Instruction files (`.instructions.md`, `.agent.md`) are loaded into every invocation. Oversized instructions waste budget on every call.
 
@@ -296,7 +324,7 @@ Instruction files (`.instructions.md`, `.agent.md`) are loaded into every invoca
 
 ---
 
-## 8. Practical Examples with Token Counts
+## 9. Practical Examples with Token Counts
 
 ### Example A: Code Review — Well-Optimized
 
@@ -342,7 +370,7 @@ Savings:                                            78%
 
 ---
 
-## 9. Task Complexity, Turn Budgets, and Adaptive Learning
+## 10. Task Complexity, Turn Budgets, and Adaptive Learning
 
 Agent work has a cost that goes beyond tokens — it also consumes turns. Turns compound: each one adds history to the context window, narrows decision space, and raises the cost of a wrong approach. This section defines how to classify tasks, budget turns, and convert experience into reusable memory.
 
@@ -474,7 +502,7 @@ On success (within budget + tests pass):
 
 ---
 
-## 10. From the Field: BaseCoat Sprint Experience
+## 11. From the Field: BaseCoat Sprint Experience
 
 These examples come from BaseCoat's own development sprints. They illustrate how
 the strategies in §1–9 play out in practice.
@@ -578,7 +606,7 @@ limits. For UBB cost estimation and monitoring guidance, see
 
 ---
 
-## 11. Sprint Planning & Re-Planning Cost Reduction
+## 12. Sprint Planning & Re-Planning Cost Reduction
 
 ### The Problem: Planning Sessions Are Expensive
 
@@ -675,7 +703,7 @@ Based on measured BaseCoat sprints:
 
 ---
 
-## 12. Agent Model Recommendations (Updated Sprint 31)
+## 13. Agent Model Recommendations (Updated Sprint 31)
 
 ### Routine Agents Downshifted to gpt-5.4-mini (Cost: ~$50–100/mo savings)
 
