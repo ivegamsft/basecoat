@@ -182,6 +182,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running governance metadata drift tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'governance-metadata-drift-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Governance metadata drift tests failed' -ForegroundColor Red
+    Write-FailureLog 'governance-metadata-drift-tests'
+    exit 1
+}
+
 Write-Host 'Running routing guardrail tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'routing-guardrail-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
