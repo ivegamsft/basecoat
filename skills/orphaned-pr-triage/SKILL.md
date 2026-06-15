@@ -1,13 +1,12 @@
 ---
 name: orphaned-pr-triage
 description: "Use when triaging stale pull requests and review backlog to keep repository flow healthy. USE FOR: identify orphaned PRs by inactivity windows, classify revive/close/escalate actions, draft maintainer comments for ownership handoff, and produce weekly cleanup reports with metrics. DO NOT USE FOR: implementing code changes, rewriting product requirements, or replacing security vulnerability triage."
-compatibility: []
+compatibility:
+  - GHCP
 invocation_rules:
   - "Use when PR queue hygiene, stale PR cleanup, or review ownership drift is requested."
 visibility: "internal"
-compatibility: GHCP
 ---
-
 # Orphaned PR Triage Skill
 
 Use this skill to standardize stale PR cleanup and keep merge queues actionable.

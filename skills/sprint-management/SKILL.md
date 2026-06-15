@@ -1,9 +1,9 @@
 ---
 name: sprint-management
 description: "Use when planning or running sprint ceremonies, backlog refinement, and commitment tracking. USE FOR: plan sprint capacity and goals, run backlog grooming session, prepare sprint review agenda, track velocity against commitments, facilitate sprint ceremony workflow. DO NOT USE FOR: writing implementation code, annual roadmap strategy only."
-compatibility: GHCP
+compatibility:
+  - GHCP
 ---
-
 # Sprint Management Skill
 
 Use this skill when the task involves sprint ceremony facilitation, backlog management, branch cleanup coordination, or sprint lifecycle activities.

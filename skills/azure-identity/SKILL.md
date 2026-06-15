@@ -1,9 +1,9 @@
 ---
 name: azure-identity
 description: "Use when designing Azure identity and access patterns across RBAC, managed identities, Entra ID, and workload federation. USE FOR: assign Azure RBAC roles, configure managed identity for an app, create an Entra ID app registration, set up GitHub OIDC federation, design a conditional access policy. DO NOT USE FOR: local password reset flows, network segmentation design, non-Azure IAM platforms."
-compatibility: GHCP
+compatibility:
+  - GHCP
 ---
-
 # Azure Identity & Entra ID Skill
 
 Design and implement Azure identity and access management — RBAC hierarchies, managed identities, Entra ID app registrations, conditional access policies, and workload identity federation.

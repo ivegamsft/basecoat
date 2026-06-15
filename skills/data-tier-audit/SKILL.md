@@ -1,9 +1,9 @@
 ---
 name: data-tier-audit
 description: "Use when reviewing schemas, migrations, indexes, query plans, or data contract safety. USE FOR: audit schema drift, migration rollback safety, index health, query risk, repository patterns. DO NOT USE FOR: UI copywriting, infrastructure-only tasks, generic code review."
-compatibility: GHCP
+compatibility:
+  - GHCP
 ---
-
 # Data Tier Audit Skill
 
 Review data-layer changes for schema drift, migration safety, query risk, and index health.

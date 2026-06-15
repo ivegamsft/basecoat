@@ -1,9 +1,9 @@
 ---
 name: gitops
 description: "Use when designing or reviewing GitOps workflows with Flux or ArgoCD, declarative delivery, drift reconciliation, and secrets management across clusters. USE FOR: set up Flux or ArgoCD workflow, structure multi-environment cluster config, handle Kubernetes drift reconciliation, choose GitOps secrets pattern, review pull-based deployment practices. DO NOT USE FOR: manual kubectl runbooks, non-Kubernetes CI pipelines, imperative server configuration."
-compatibility: GHCP
+compatibility:
+  - GHCP
 ---
-
 # GitOps
 
 GitOps uses Git as the single source of truth for infrastructure and application state.

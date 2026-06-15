@@ -1,9 +1,9 @@
 ---
 name: code-review
 description: "Use when reviewing code, pull requests, or diffs for bugs and regressions. USE FOR: review pull request for bugs, inspect diff for regression risk, identify missing test coverage, rank review findings by severity, review refactor for edge cases. DO NOT USE FOR: writing new features, restyling code for preference, making architecture decisions."
-compatibility: GHCP
+compatibility:
+  - GHCP
 ---
-
 # Code Review
 
 Use this skill when the task is to review code rather than write it.

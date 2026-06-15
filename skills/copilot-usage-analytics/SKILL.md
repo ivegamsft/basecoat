@@ -1,9 +1,9 @@
 ---
 name: copilot-usage-analytics
 description: "Use when estimating Copilot CLI session cost, analyzing model routing efficiency, or mapping available usage APIs. USE FOR: estimate Copilot session cost, analyze expensive agent dispatches, recommend cheaper model routing, audit Copilot workflow token usage, document GitHub Copilot usage APIs. DO NOT USE FOR: general product analytics dashboards, application performance monitoring, non-Copilot billing disputes."
-compatibility: GHCP
+compatibility:
+  - GHCP
 ---
-
 # Copilot Usage Analytics Skill
 
 Estimate per-session Copilot CLI cost, analyze model-routing efficiency, track agent dispatch

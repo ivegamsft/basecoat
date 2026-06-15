@@ -2,6 +2,7 @@
 name: flow-suggest
 description: "Use when translating flow-audit findings into prioritized fixes and issue-ready recommendations. USE FOR: remediation prioritization, high-confidence auto-issue creation, issue drafting, acceptance-criteria definition, and execution-wave planning. DO NOT USE FOR: direct code implementation, unreviewed governance enforcement, or broad roadmap planning without audit input."
 compatibility:
+  - GHCP
   - agent:flow-suggester
   - agent:flow-optimizer
 metadata:
@@ -17,7 +18,6 @@ allowed-tools:
   - gh
 visibility: public
 ---
-
 # Flow Suggest Skill
 
 Use this skill after a flow audit to convert findings into practical fixes with

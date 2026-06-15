@@ -1,9 +1,9 @@
 ---
 name: ci-audit
 description: "Audits live GitHub repository governance controls and produces a markdown evidence pack. USE FOR: exporting branch protection and required checks, verifying merge queue and environment protections, auditing runners and security gates, and reporting policy-vs-live gaps. DO NOT USE FOR: writing application code, creating workflows, infrastructure implementation, or making repo-setting changes."
-compatibility: GHCP
+compatibility:
+  - GHCP
 ---
-
 # CI/CD Audit Skill
 
 Repository governance auditing for CI/CD controls using GitHub API/CLI evidence.

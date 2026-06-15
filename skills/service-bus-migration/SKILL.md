@@ -2,9 +2,9 @@
 name: service-bus-migration
 title: MSMQ to Azure Service Bus Migration
 description: "Use when migrating enterprise messaging from MSMQ to Azure Service Bus with phased cutover and resilience patterns. USE FOR: map MSMQ queues to topics and subscriptions, design hybrid bridge for zero-downtime cutover, convert binary messages to JSON, implement retry and dead-letter handling, plan Service Bus migration phases. DO NOT USE FOR: greenfield Kafka architecture, unrelated REST API migration."
-compatibility: GHCP
+compatibility:
+  - GHCP
 ---
-
 # Service Bus Migration Skill
 
 Migrate enterprise messaging from MSMQ to Azure Service Bus using phased cutover, hybrid bridge, and resilience patterns.

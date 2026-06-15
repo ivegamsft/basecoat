@@ -1,9 +1,9 @@
 ---
 name: azure-policy
 description: "Use when authoring Azure Policy definitions, initiatives, remediation tasks, and compliance reporting assets. USE FOR: write an Azure Policy to require tags, create a policy initiative for CIS controls, build a DeployIfNotExists remediation, generate a KQL compliance dashboard query, restrict allowed VM SKUs. DO NOT USE FOR: application business logic, Azure RBAC role selection, packet capture troubleshooting."
-compatibility: GHCP
+compatibility:
+  - GHCP
 ---
-
 # Azure Policy & Governance Skill
 
 Author Azure governance controls through custom policy definitions, policy initiatives,

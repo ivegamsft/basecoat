@@ -2,6 +2,7 @@
 name: flow-track
 description: "Use when tracking PR/merge/CI flow metrics over time and generating metric-backed corrective suggestions. USE FOR: trend scorecards, regression alerts, threshold monitoring, and action recommendations tied to metrics. DO NOT USE FOR: one-off static audits without history, ad hoc coding work, or replacing SRE incident procedures."
 compatibility:
+  - GHCP
   - agent:flow-tracker
   - agent:flow-auditor
 metadata:
@@ -17,7 +18,6 @@ allowed-tools:
   - gh
 visibility: public
 ---
-
 # Flow Track Skill
 
 Use this skill to monitor delivery flow continuously and trigger early corrective

@@ -1,9 +1,9 @@
 ---
 name: infrastructure-audit
 description: "Audits Infrastructure-as-Code (Bicep/Terraform), resource configurations, and networking. USE FOR: reviewing IaC code quality, validating resource configurations, assessing networking architecture, identifying security misconfigurations, analyzing cost optimization opportunities. DO NOT USE FOR: writing IaC from scratch, provisioning infrastructure, network architecture design, application development, DevOps workflow creation."
-compatibility: GHCP
+compatibility:
+  - GHCP
 ---
-
 # Infrastructure Audit Skill
 
 Comprehensive auditing of Infrastructure-as-Code implementations, resource configurations, networking architecture, and cloud deployment configurations.

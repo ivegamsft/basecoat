@@ -2,6 +2,7 @@
 name: agentic-sdlc-autonomy
 description: "Use when asked to audit, measure, implement, or operate rules-based human-in-the-loop autonomy for agent-operated repositories. USE FOR: SDLC governance, PR risk classification (A0-A5), merge/queue/deploy policy checks, and policy-versus-settings drift. DO NOT USE FOR: direct deployment, production DB migrations, infrastructure apply, secrets rotation, or branch/environment protection changes without explicit human authorization."
 compatibility:
+  - GHCP
   - agent:agentic-sdlc-autonomy
   - skill:ci-audit
   - skill:flow-audit
@@ -22,7 +23,6 @@ allowed-tools:
   - python
 visibility: public
 ---
-
 # Agentic SDLC Autonomy Skill
 
 Rules-based autonomy model: agents execute throughput, CI verifies, policy

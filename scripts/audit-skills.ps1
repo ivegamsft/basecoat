@@ -50,6 +50,76 @@ function Add-Line {
     }
 }
 
+function Get-CompatibilityAnalysis {
+    param([string]$Frontmatter)
+
+    $result = [ordered]@{
+        keyCount = 0
+        tokens = @()
+    }
+
+    if (-not $Frontmatter) {
+        return [pscustomobject]$result
+    }
+
+    $compatMatches = [regex]::Matches($Frontmatter, '(?m)^compatibility\s*:[ \t]*(.*)$')
+    $result.keyCount = $compatMatches.Count
+    if ($compatMatches.Count -eq 0) {
+        return [pscustomobject]$result
+    }
+
+    $tokens = [System.Collections.Generic.List[string]]::new()
+
+    foreach ($match in $compatMatches) {
+        $raw = $match.Groups[1].Value.Trim()
+        if ($raw -and $raw -ne '[]') {
+            if ($raw.StartsWith('[') -and $raw.EndsWith(']')) {
+                $inner = $raw.Trim('[', ']')
+                foreach ($part in ($inner -split ',')) {
+                    $token = $part.Trim().Trim('"').Trim("'")
+                    if ($token) {
+                        $tokens.Add($token)
+                    }
+                }
+            } else {
+                $tokens.Add($raw.Trim('"').Trim("'"))
+            }
+        }
+    }
+
+    $lines = $Frontmatter -split '\r?\n'
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        if ($lines[$i] -notmatch '^compatibility\s*:') {
+            continue
+        }
+
+        for ($j = $i + 1; $j -lt $lines.Count; $j++) {
+            if ($lines[$j] -match '^\s*-\s*(.+)$') {
+                $token = $Matches[1].Trim().Trim('"').Trim("'")
+                if ($token) {
+                    $tokens.Add($token)
+                }
+                continue
+            }
+            if ($lines[$j] -match '^\s*$') {
+                continue
+            }
+            break
+        }
+    }
+
+    $seen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    $deduped = [System.Collections.Generic.List[string]]::new()
+    foreach ($token in $tokens) {
+        if ($seen.Add($token)) {
+            $deduped.Add($token)
+        }
+    }
+
+    $result.tokens = @($deduped)
+    return [pscustomobject]$result
+}
+
 Add-Line "BaseCoat Skill Audit — $date"
 Add-Line "=================================="
 
@@ -99,6 +169,24 @@ foreach ($skillDir in $skillDirs) {
         foreach ($field in @('name', 'description', 'compatibility')) {
             if ($frontmatter -notmatch "(?m)^$field\s*:") {
                 $errors.Add("missing field: $field")
+            }
+        }
+
+        # Check 4: Compatibility taxonomy
+        $compat = Get-CompatibilityAnalysis -Frontmatter $frontmatter
+        if ($compat.keyCount -gt 1) {
+            $errors.Add("duplicate compatibility keys found ($($compat.keyCount))")
+        }
+        if ($compat.tokens.Count -eq 0) {
+            $errors.Add("compatibility has no values")
+        } else {
+            foreach ($token in $compat.tokens) {
+                if ($token -notmatch '^(GHCP|agent:[a-z0-9][a-z0-9-]*|skill:[a-z0-9][a-z0-9-]*)$') {
+                    $errors.Add("invalid compatibility token: $token")
+                }
+            }
+            if ($compat.tokens -notcontains 'GHCP') {
+                $errors.Add("compatibility must include GHCP")
             }
         }
 

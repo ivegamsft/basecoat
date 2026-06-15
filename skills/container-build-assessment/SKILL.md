@@ -7,9 +7,9 @@ scripts:
     entrypoint: scripts/analyze-dockerfile.ps1
     inputs:
       - name: DockerfilePath
-compatibility: GHCP
+compatibility:
+  - GHCP
 ---
-
 # Container Build Assessment
 
 This skill runs four scripts in order to produce a structured container build assessment.

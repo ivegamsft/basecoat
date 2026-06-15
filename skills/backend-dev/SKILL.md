@@ -1,9 +1,9 @@
 ---
 name: backend-dev
 description: "Use when implementing backend APIs, business logic, service layers, or repository-based data access. USE FOR: implement a REST endpoint, scaffold a service layer, define an error response catalog, add repository pattern data access, review backend logic for correctness. DO NOT USE FOR: frontend component styling, infrastructure provisioning, enterprise architecture strategy."
-compatibility: GHCP
+compatibility:
+  - GHCP
 ---
-
 # Backend Development Skill
 
 Design and implement backend services, REST or GraphQL APIs, business logic layers, and database access patterns.

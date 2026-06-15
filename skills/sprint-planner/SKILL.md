@@ -1,9 +1,9 @@
 ---
 name: sprint-planner
 description: "Compatibility routing skill for sprint planning requests that resolve to skill(sprint-planner). USE FOR: sprint goal decomposition, wave/dependency planning, issue breakdown planning, and next-sprint commitment shaping. DO NOT USE FOR: implementing product code changes, CI/build remediation, or production incident response."
-compatibility: GHCP
+compatibility:
+  - GHCP
 ---
-
 # Sprint Planner Skill
 
 Use this skill as the compatibility surface for runtimes that invoke `skill(sprint-planner)`.

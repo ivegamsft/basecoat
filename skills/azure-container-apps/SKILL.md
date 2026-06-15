@@ -2,9 +2,9 @@
 name: azure-container-apps
 title: Azure Container Apps Deployment & Operations
 description: "Use when deploying or operating containerized workloads on Azure Container Apps with scaling, revisions, and Dapr. USE FOR: deploy an app to Azure Container Apps, configure a Dapr sidecar, set Azure Container Apps scaling rules, manage revisions and traffic splitting, create a container apps job. DO NOT USE FOR: AKS cluster administration, App Service troubleshooting, virtual machine sizing."
-compatibility: GHCP
+compatibility:
+  - GHCP
 ---
-
 # Azure Container Apps Skill
 
 Deploy and operate containerized workloads on ACA with Dapr, revision management, and KEDA-based scaling.

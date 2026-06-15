@@ -1,9 +1,9 @@
 ---
 name: twelve-factor
 description: "Use when auditing or redesigning an app for cloud-native 12-Factor practices. USE FOR: move config from code to environment, check stateless process design, separate build release and run stages, verify logs go to stdout, assess dev and prod parity. DO NOT USE FOR: pixel-level UI design, vendor-specific service pricing comparisons."
-compatibility: GHCP
+compatibility:
+  - GHCP
 ---
-
 # 12-Factor App Methodology
 
 The 12-Factor App methodology for building modern, scalable, cloud-native applications.

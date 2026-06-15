@@ -1,9 +1,9 @@
 ---
 name: ux
 description: "Use when defining user journeys, wireframes, component behavior, or accessibility expectations for a product experience. USE FOR: map end-to-end user journey, create wireframe spec for new screen, review component states and interactions, run WCAG accessibility audit, evaluate usability of a workflow. DO NOT USE FOR: backend infrastructure design, low-level API performance tuning."
-compatibility: GHCP
+compatibility:
+  - GHCP
 ---
-
 # UX Design Skill
 
 Design user experiences, map user journeys, specify UI wireframes and components, and audit designs for accessibility and usability.

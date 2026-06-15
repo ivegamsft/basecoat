@@ -1,13 +1,12 @@
 ---
 name: standup-signal-extraction
 description: "Use when extracting actionable standup signals from team updates. USE FOR: convert updates into blockers/actions/dependencies, prioritize escalations, and produce owner-based daily execution plans. DO NOT USE FOR: feature implementation, deep architecture design, or retrospective trend analysis."
-compatibility: []
+compatibility:
+  - GHCP
 invocation_rules:
   - "Use during daily standups to convert updates into concrete actions."
 visibility: "internal"
-compatibility: GHCP
 ---
-
 # Standup Signal Extraction Skill
 
 Use this skill to transform standup chatter into execution-ready actions.

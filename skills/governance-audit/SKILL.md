@@ -2,6 +2,7 @@
 name: governance-audit
 description: "Use when auditing repo metadata, label drift, template gaps, and workflow enforcement coverage. USE FOR: issue and PR metadata audits, canonical-label drift checks, missing governance doc detection, and follow-up issue planning. DO NOT USE FOR: writing app code, changing labels without evidence, or release coordination."
 compatibility:
+  - GHCP
   - agent:governance-auditor
   - agent:governance-author
 metadata:
@@ -17,7 +18,6 @@ allowed-tools:
   - gh
 visibility: public
 ---
-
 # Governance Audit Skill
 
 Use this skill to audit the repo against the canonical governance contract.

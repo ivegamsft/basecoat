@@ -1,9 +1,9 @@
 ---
 name: task-decomposition
 description: "Use when breaking complex tasks into sub-agent-friendly chunks, validating automation fitness, and composing multi-step prompts. USE FOR: split large tasks into smaller async work items, decide if work is automatable vs research vs deferred, validate sub-agent prompts for clarity, design task decomposition workflows. DO NOT USE FOR: single-step code changes, immediate sync problem-solving, architectural design starting from scratch."
-compatibility: GHCP
+compatibility:
+  - GHCP
 ---
-
 # Task Decomposition Skill
 
 Guide for breaking complex tasks into automation-friendly chunks and validating sub-agent prompts.

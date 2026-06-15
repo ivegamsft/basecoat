@@ -2,9 +2,9 @@
 name: electron-apps
 description: "Use when building secure, production-ready Electron desktop apps with guidance for IPC, preload APIs, packaging, updates, and renderer isolation. USE FOR: secure Electron IPC design, preload script API patterns, package and sign desktop app, implement auto-update flow, review BrowserWindow security settings. DO NOT USE FOR: generic web SPA architecture, mobile app development, browser extension work."
 applyTo: agent-electron-developer, agent-desktop-engineer
-compatibility: GHCP
+compatibility:
+  - GHCP
 ---
-
 # Electron Application Development
 
 Secure IPC design, preload APIs, packaging, and release automation for production Electron apps.

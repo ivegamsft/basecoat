@@ -1,9 +1,9 @@
 ---
 name: mcp-audit
 description: "Audits MCP server implementations, tool definitions, and schema compliance. USE FOR: reviewing MCP server code quality, validating tool definitions, assessing schema compliance, identifying integration issues, evaluating error handling. DO NOT USE FOR: implementing MCP servers from scratch, designing tool specifications, writing client applications, general code review."
-compatibility: GHCP
+compatibility:
+  - GHCP
 ---
-
 # MCP Audit Skill
 
 Comprehensive auditing of Model Context Protocol (MCP) server implementations, tool definitions, schema compliance, and integration quality.

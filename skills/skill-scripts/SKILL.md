@@ -1,9 +1,9 @@
 ---
 name: skill-scripts
 description: "Use when a skill needs executable multi-step workflows where each script produces structured JSON that is passed to the next step, enabling composable assessment, planning, validation, and execution with clear contracts."
-compatibility: GHCP
+compatibility:
+  - GHCP
 ---
-
 # Skill Scripts
 
 Use this pattern to split a skill into executable steps instead of one large prompt.

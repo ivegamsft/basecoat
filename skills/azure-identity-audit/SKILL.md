@@ -1,9 +1,9 @@
 ---
 name: azure-identity-audit
 description: "Use when reviewing Azure identity and access designs across RBAC, managed identities, Entra ID, and federation. USE FOR: audit RBAC assignments, managed identity scope, app registration permissions, OIDC federation, least privilege. DO NOT USE FOR: network topology design, app feature code, non-Azure IAM platforms."
-compatibility: GHCP
+compatibility:
+  - GHCP
 ---
-
 # Azure Identity Audit Skill
 
 Review Azure identity and access designs for least privilege, federation hygiene, and scope correctness.

@@ -2,16 +2,15 @@
 name: entity-framework-migration
 title: Entity Framework Migration
 description: "Use when modernizing legacy Entity Framework data layers to EF Core with help for model mapping, DbContext refactors, phased cutovers, and migration risk review. USE FOR: migrate EF6 to EF Core, refactor DbContext configuration, convert model mappings and conventions, plan phased database cutover, validate query compatibility after migration. DO NOT USE FOR: greenfield ORM selection, raw SQL tuning only, non-.NET data pipelines."
-compatibility: []
+compatibility:
+  - GHCP
 author: IBuySpy-Shared
 version: 1.0.0
 category: data
 metadata:
   category: data
 tags: [dotnet, entity-framework, ef-core, migration]
-compatibility: GHCP
 ---
-
 ## Entity Framework Migration
 
 Use this skill when modernizing data layers from Entity Framework 6 or older patterns to EF Core.

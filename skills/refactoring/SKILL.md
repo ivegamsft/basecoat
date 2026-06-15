@@ -1,9 +1,9 @@
 ---
 name: refactoring
 description: "Use when improving code structure while keeping behavior stable and risk controlled. USE FOR: extract large method safely, remove duplication without changing outputs, split module responsibilities, rename confusing abstractions with tests, plan incremental cleanup of legacy code. DO NOT USE FOR: broad rewrites from scratch, intentional feature changes mixed into refactor."
-compatibility: GHCP
+compatibility:
+  - GHCP
 ---
-
 # Refactoring
 
 Use this skill when the goal is to improve code structure, readability, or maintainability while keeping behavior stable.

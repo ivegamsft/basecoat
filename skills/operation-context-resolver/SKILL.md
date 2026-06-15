@@ -1,7 +1,8 @@
 ---
 name: operation-context-resolver
 description: "Resolve deterministic environment context for branch, label, and incident driven workflows using environment-map.yml, returning target environment, operation mode, and action permissions. USE FOR: resolving preview/dev/staging/prod target before troubleshooting or deployment, enforcing allowed and blocked action checks, applying incident-readonly routing, validating human approval requirements for risky actions. DO NOT USE FOR: direct infrastructure mutation without policy checks, replacing platform branch protection controls, or bypassing environment-map validation."
-compatibility: GHCP
+compatibility:
+  - GHCP
 metadata:
   category: platform-governance
   domain: platform-governance
@@ -15,7 +16,6 @@ allowed-tools:
   - gh
 visibility: public
 ---
-
 # Operation Context Resolver
 
 Routes a request to the correct environment and mode, then returns allowed and blocked actions.
