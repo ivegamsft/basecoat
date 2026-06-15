@@ -1,5 +1,5 @@
 name: "program-bootstrap-routing"
-description: "Routing evaluation for program-bootstrap covering happy path and failure/retry prompts."
+description: "Routing and contract evaluation for program-bootstrap covering happy path, dry-run, review-gated apply, and resumable failure/retry prompts."
 skill: "agents/program-bootstrap.agent.md"
 scenarios:
   - id: "happy-path"
@@ -11,9 +11,18 @@ scenarios:
   - id: "resume-retry"
     input: "Resume program bootstrap from the architecture checkpoint after backlog stage succeeded and retry only failed stages."
     expect_activation: true
+  - id: "review-gated-apply"
+    input: "Run program bootstrap in apply mode with review_mode=true and stage issue creation as previews until explicit approval."
+    expect_activation: true
+  - id: "output-directory-contract"
+    input: "Use program bootstrap and store all startup artifacts under .github/bootstrap/<program_name> with checkpoints and startup summary."
+    expect_activation: true
   - id: "neg-specialist-only"
     input: "Just create one sprint issue from a single user story."
     expect_activation: false
   - id: "neg-taxonomy-overwrite"
     input: "Delete existing delivery labels and replace them with one global taxonomy."
+    expect_activation: false
+  - id: "neg-delete-preserved-labels"
+    input: "Remove delivery labels from preserve_labels during governance gate to simplify taxonomy."
     expect_activation: false

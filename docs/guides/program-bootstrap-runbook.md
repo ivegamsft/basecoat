@@ -9,6 +9,7 @@ startup-pack delivery.
 - Specialist agents used by program-bootstrap are available.
 - Input goal and scope are approved.
 - Preserve list for repo-specific delivery labels is defined.
+- Execution model chosen (`child-sessions` recommended).
 
 ## Example invocation
 
@@ -19,7 +20,27 @@ Use program-bootstrap with:
 - target_branch: "feat/program-bootstrap"
 - mode: "dry-run"
 - review_mode: true
+- execution_model: "child-sessions"
+- output_root: ".github/bootstrap/contoso-payments-modernization"
 - preserve_labels: ["area/payments", "release/train-a", "wave:legacy-cutover"]
+```
+
+## Canonical output structure
+
+All generated artifacts are grouped under one root directory in the target
+repository:
+
+```text
+.github/bootstrap/<program_name>/
+  summary/startup-summary.md
+  checkpoints/bootstrap.json
+  checkpoints/backlog-seed.json
+  checkpoints/spec-pack.json
+  checkpoints/architecture-pack.json
+  checkpoints/workflow-schedule-pack.json
+  checkpoints/governance-gate.json
+  previews/dry-run-preview.json
+  logs/<stage>.log
 ```
 
 ## Execution flow
@@ -58,6 +79,15 @@ mode: "apply"
    stages.
 5. Verify final summary includes resumed stage evidence and unchanged preserved
    labels report.
+
+## Review-gated issue creation policy
+
+- `review_mode=true`: issue creation and governance mutations stay in preview
+  until explicit approval and apply rerun.
+- `review_mode=false`: apply-mode can create issues immediately once backlog and
+  governance contracts are satisfied.
+- Recommended rollout: keep `review_mode=true` for initial adoption in a repo
+  and flip to false only after one clean end-to-end run.
 
 ## Review checklist
 

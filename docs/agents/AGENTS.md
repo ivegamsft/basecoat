@@ -11,7 +11,7 @@ This file lists all available agents in the BaseCoat framework.
 - [VS Code Harness Benchmarks](./vs-code-harness-benchmarks.md)
 - [VS Code Agent Mode Tool Confirmation Policy](../reference/guardrails/tool-confirmation-policy.md)
 
-> **86 agents** available
+> **87 agents** available
 
 | Agent | Description |
 |---|---|
@@ -75,6 +75,7 @@ This file lists all available agents in the BaseCoat framework.
 | [policy-as-code-compliance](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-50-security-policy-as-code-compliance.agent.md) | Policy-as-code compliance agent for validating code and configuration against organizational rules, managing exceptions, and producing audit-ready compliance reports. USE FOR: validate Terraform against OPA policies, ... |
 | [product-manager](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-product-manager.agent.md) | Use when gathering requirements, writing user stories, defining acceptance criteria, planning roadmaps, or prioritizing features using frameworks like RICE or MoSCoW. |
 | [production-readiness](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-production-readiness.agent.md) | Production Readiness Agent for ensuring applications meet operational requirements before release; coordinates BCP/DRP, incident response, and safety analysis. USE FOR: run pre-release production readiness checklist, ... |
+| [program-bootstrap](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/program-bootstrap.agent.md) | Thin orchestration entrypoint for end-to-end startup pack generation. Uses specialist agents by contract to produce onboarding, backlog, docs/specs, architecture, and workflow outputs with dry-run and resumable checkpoints. |
 | [project-onboarding](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-project-onboarding.agent.md) | Single-invocation new repo setup with BaseCoat integration. Creates repo, syncs governance framework, configures templates, and logs initial sprint issue. USE FOR: set up a new repo with BaseCoat governance, sync inst... |
 | [prompt-coach](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-prompt-coach.agent.md) | Use when reviewing prompts, scoring prompt quality, identifying anti-patterns, and guiding iterative refinement of LLM prompts. |
 | [prompt-engineer](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-prompt-engineer.agent.md) | Prompt optimization and system prompt engineering agent. Use when designing system prompts, optimizing token usage, crafting few-shot examples, or structuring chain-of-thought instructions. |
