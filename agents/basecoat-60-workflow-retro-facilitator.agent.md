@@ -10,6 +10,7 @@ metadata:
   maturity: alpha
   audience:
     - developer
+allowed-tools: []
 ---
 
 # Retro Facilitator Agent

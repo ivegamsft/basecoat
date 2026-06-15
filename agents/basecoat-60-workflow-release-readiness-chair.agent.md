@@ -12,6 +12,7 @@ metadata:
   maturity: alpha
   audience:
     - developer
+allowed-tools: []
 ---
 
 # Release Readiness Chair Agent

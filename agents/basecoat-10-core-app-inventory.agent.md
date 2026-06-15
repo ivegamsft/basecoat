@@ -15,6 +15,7 @@ metadata:
   maturity: alpha
   audience:
     - developer
+allowed-tools: []
 ---
 
 # App Inventory Agent

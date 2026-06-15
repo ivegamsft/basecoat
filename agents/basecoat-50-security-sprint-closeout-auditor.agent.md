@@ -11,6 +11,7 @@ metadata:
   maturity: alpha
   audience:
     - developer
+allowed-tools: []
 ---
 
 # Sprint Closeout Auditor Agent

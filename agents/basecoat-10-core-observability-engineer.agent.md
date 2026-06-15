@@ -9,6 +9,7 @@ metadata:
   maturity: alpha
   audience:
     - developer
+allowed-tools: []
 ---
 
 # Observability Engineer Agent

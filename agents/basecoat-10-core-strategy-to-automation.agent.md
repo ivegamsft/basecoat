@@ -9,6 +9,7 @@ metadata:
   maturity: alpha
   audience:
     - developer
+allowed-tools: []
 ---
 
 # Strategy to Automation Agent

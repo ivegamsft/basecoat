@@ -10,6 +10,7 @@ metadata:
   maturity: alpha
   audience:
     - developer
+allowed-tools: []
 ---
 # Failure Pattern Process Agent
 

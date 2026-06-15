@@ -10,6 +10,7 @@ metadata:
   maturity: alpha
   audience:
     - developer
+allowed-tools: []
 ---
 # Release Freeze Enforcer
 

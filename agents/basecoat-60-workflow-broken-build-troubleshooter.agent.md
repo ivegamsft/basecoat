@@ -13,6 +13,7 @@ metadata:
   maturity: alpha
   audience:
     - developer
+allowed-tools: []
 ---
 
 # Broken Build Troubleshooter Agent

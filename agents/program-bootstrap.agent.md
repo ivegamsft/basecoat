@@ -19,6 +19,7 @@ metadata:
   maturity: alpha
   audience:
     - developer
+allowed-tools: []
 ---
 
 # Program Bootstrap Agent

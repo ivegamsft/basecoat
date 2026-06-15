@@ -13,6 +13,7 @@ metadata:
   maturity: alpha
   audience:
     - developer
+allowed-tools: []
 ---
 
 # Orphaned PR Cleanup Agent

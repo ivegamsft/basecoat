@@ -11,6 +11,7 @@ metadata:
   maturity: alpha
   audience:
     - developer
+allowed-tools: []
 ---
 
 # Sprint/Project Mapper Agent
