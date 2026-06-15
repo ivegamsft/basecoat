@@ -43,6 +43,9 @@ export interface EnvironmentConfig {
   blocked_actions?: Partial<Record<OperationMode, string[]>>;
 }
 
+/** Status populated from the most recent environment-audit-drift report, if available. */
+export type DriftStatus = 'clean' | 'medium' | 'high' | 'critical' | 'unknown';
+
 export interface OperationContext {
   request: string;
   operation_id: string;
@@ -64,6 +67,10 @@ export interface OperationContext {
   human_approval_required: boolean;
   incident_mode: boolean;
   deployment_lookup_available: boolean;
+  /** Most recent drift audit status for this environment. Populated when a drift report is available; 'unknown' otherwise. */
+  drift_status?: DriftStatus;
+  /** URL to the most recent drift report artifact, if available. */
+  drift_report_url?: string;
   resolved_at: string;
   resolver_version: string;
   warnings?: string[];

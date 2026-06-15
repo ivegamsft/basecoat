@@ -317,3 +317,6 @@ describe('my agent with resolver', () => {
 - [SKILL.md](./SKILL.md) - Skill overview
 - [Resolver Types](./src/types.ts) - TypeScript interfaces
 - [Environment Map Template](./templates/environment-map.yml) - Customizable template
+- [`environment-audit-drift`](../environment-audit-drift/) - Companion skill that surfaces drift into `OperationContext.drift_status`
+- [Integration Guide](../../docs/guides/operation-context-resolver.md) - Agent integration patterns and examples
+- [Validate Workflow](./.github/workflows/validate-operation-context.yml) - CI validation for `environment-map.yml`

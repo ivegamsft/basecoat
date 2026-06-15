@@ -20,6 +20,17 @@ Purpose: coordinate mitigation, communication, recovery, and follow-up for activ
 
 Incident signal, affected scope, customer impact, runbooks, telemetry, rollback paths, and responders.
 
+## Environment Resolution
+
+Before reading logs, querying metrics, or initiating any mitigation action, resolve the target environment using the `operation-context-resolver` skill:
+
+1. Pass the incident signal, severity, and GitHub event context as `ResolverInput`.
+2. Use `OperationContext.azure_subscription`, `resource_group`, and `log_analytics_workspace` for all Azure API calls — never hard-code environment names.
+3. If `OperationContext.mode` resolves to `incident_readonly`, restrict actions to log reads and diagnostics; escalate before taking any write actions.
+4. Check `OperationContext.drift_status` — a `critical` or `high` drift reading may be the root cause of the incident. Surface it in the incident timeline.
+
+See [`docs/guides/operation-context-resolver.md`](../../docs/guides/operation-context-resolver.md) for integration examples.
+
 ## Workflow
 
 Acknowledge, assign command, classify severity, mitigate first, escalate early, communicate on cadence, verify recovery, capture post-incident fixes, and update runbooks.
