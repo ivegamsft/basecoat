@@ -6,6 +6,24 @@ Strategies for managing token budgets, compressing context, and handing off stat
 > **GHCP-specific:** This guidance was developed and tested against GitHub Copilot (GHCP).
 > If you are using Azure OpenAI, Anthropic API, AWS Bedrock, or another provider,
 > model names, tier pricing, and rate limits will differ. See [Adapting for Other Providers](#adapting-for-other-providers).
+
+Start with mode selection before loading context: [Ask mode vs Agent mode decision table](#ask-mode-vs-agent-mode-decision-table).
+---
+
+## Ask mode vs Agent mode decision table
+
+Use this quick triage first; then apply the token techniques in the remaining sections.
+
+| Situation | Preferred mode | Why | BaseCoat example |
+|---|---|---|---|
+| One question or one-file lookup | **Ask mode** | Lowest overhead for focused retrieval | Confirm expected command in `tests/run-tests.ps1` |
+| Single-file, low-risk doc/config tweak | **Ask mode** | Fewer orchestration turns and less history bloat | Adjust one section in `docs/guides/workflows-getting-started.md` |
+| Multi-file updates with generated artifacts | **Agent mode** | Coordinates edits + consistency checks end-to-end | Update inventory docs plus `asset-manifest.json` and `basecoat-metadata.json` |
+| Tool-driven execution loop (tests/build/fix/retest) | **Agent mode** | Handles iterative command workflow efficiently | Run `pwsh tests/run-tests.ps1`, address failures, re-run |
+| Cross-cutting triage or backlog sweep | **Agent mode** | Better batching/delegation for broad scan work | Review multiple open docs issues and prepare PR-ready changes |
+
+If a task starts simple but expands in scope, switch from **Ask mode** to **Agent mode** immediately instead of carrying a large Ask-mode transcript.
+
 ---
 
 ## 1. Context Window Management Strategies
