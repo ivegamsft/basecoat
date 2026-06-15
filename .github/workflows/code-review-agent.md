@@ -8,6 +8,7 @@ permissions:
   issues: read
   pull-requests: read
 safe-outputs:
+  report-failure-as-issue: false
   add-comment:
     hide-older-comments: true
   noop:
