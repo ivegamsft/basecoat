@@ -69,7 +69,10 @@ specific to this repository rather than the shared BaseCoat contract.
 | `P1-high` | `priority:high` |
 | `P2-medium` | `priority:medium` |
 | `P3-low` | `priority:low` |
+| `priority/critical` | `priority:critical` |
 | `priority/high` | `priority:high` |
+| `priority/medium` | `priority:medium` |
+| `priority/low` | `priority:low` |
 
 Legacy labels may still exist on older issues, but new triage, templates, and
 workflows should use the canonical labels above.

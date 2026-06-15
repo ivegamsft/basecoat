@@ -45,7 +45,7 @@ Encoding-integrity failures should be flagged with `needs-info` + `needs-triage`
 | `priority:medium` | Minor feature issue, workaround exists, moderate user impact | Acknowledge within 1 business day |
 | `priority:low` | Cosmetic, nice-to-have, documentation gaps, low user impact | Acknowledge within 1 week |
 
-Legacy labels (`P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/high`) are recognized only for migration and bulk scans.
+Legacy labels (`P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/critical`, `priority/high`, `priority/medium`, `priority/low`) should be normalized to canonical labels during triage automation.
 
 ### State Labels (applied by triage)
 

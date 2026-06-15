@@ -95,7 +95,7 @@ These labels classify the nature of the issue:
 | `priority:medium` | 1 business day | Minor feature issue, workaround exists, moderate user impact |
 | `priority:low` | 1 week | Cosmetic, nice-to-have, or minor improvement |
 
-Use the canonical priority labels for new work. Legacy labels (`P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/high`) are migration-only.
+Use the canonical priority labels for new work. Legacy labels (`P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/critical`, `priority/high`, `priority/medium`, `priority/low`) are migration-only and should be normalized during triage.
 
 #### Approval Status Labels
 

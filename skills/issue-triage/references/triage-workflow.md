@@ -129,7 +129,7 @@ gh issue edit $N --add-label "needs-verification"
 | Sprint | 1 | `sprint-<number>` |
 | Area | 0–1 | `area/*` labels defined in repo |
 
-Legacy labels (`P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/high`) are accepted during bulk scans for backward compatibility.
+Legacy labels (`P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/critical`, `priority/high`, `priority/medium`, `priority/low`) are migration-only and should be normalized to canonical `priority:*` labels during triage runs.
 Repo-specific delivery labels such as `area/*` and `sprint-*` must be preserved during cleanup; only governance labels should be normalized automatically.
 
 ### Inference Rules

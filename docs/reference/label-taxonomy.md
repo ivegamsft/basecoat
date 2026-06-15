@@ -12,7 +12,7 @@ BaseCoat uses a dual taxonomy:
 |---|---|---|
 | Governance/shared | `bug`, `enhancement`, `security`, `priority:critical`, `needs-triage`, `agent`, `skill` | May be normalized across repos |
 | Delivery/repo-specific | `sprint-1`, `sprint-2`, `backlog`, `area/*`, repo-local tracking labels | Preserve unless the repo owner approves removal or rename |
-| Migration-only | `P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/high` | Accept during migration and bulk scans only |
+| Migration-only | `P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/critical`, `priority/high`, `priority/medium`, `priority/low` | Normalize to canonical priority labels during triage |
 
 Shared tooling should never remove a delivery label just because another repo does not use it.
 
@@ -73,7 +73,7 @@ These labels indicate urgency and define service level agreements (SLAs) for res
 | `priority:medium` | 1 business day | Minor feature issue, workaround exists, moderate user impact | Non-critical agent issue with workaround |
 | `priority:low` | 1 week | Cosmetic issue, nice-to-have enhancement, minor improvement | Typo in documentation, minor UI improvement |
 
-Canonical priorities should be used for new triage. Legacy labels (`P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/high`) are accepted only for migration and bulk scanning.
+Canonical priorities should be used for new triage. Legacy labels (`P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/critical`, `priority/high`, `priority/medium`, `priority/low`) are migration-only and should be normalized to canonical labels by triage automation.
 
 **Escalation signals** (auto-elevate to `priority:high` or `priority:medium`):
 
