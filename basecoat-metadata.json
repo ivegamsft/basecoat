@@ -2224,7 +2224,14 @@
       "name": "flow-governance-conductor",
       "description": "Use when coordinating flow-governance analysis across code, PRs, issues, skills, and scripts. USE FOR: reusing existing flow/CI/governance skills first, mapping findings to current agents and scripts, identifying missing skill/script coverage, and producing issue-ready gap backlogs. DO NOT USE FOR: writing product features, bypassing branch or environment protections, or force-merging pull requests.",
       "category": "Meta",
-      "keywords": [],
+      "keywords": [
+        "flow",
+        "governance",
+        "orchestration",
+        "skill-reuse",
+        "issues",
+        "prs"
+      ],
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/flow-governance-conductor.agent.md",
