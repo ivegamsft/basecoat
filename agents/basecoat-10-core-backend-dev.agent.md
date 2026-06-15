@@ -4,6 +4,11 @@ description: "Backend and services development specialist. USE FOR: implementing
 visibility: basic
 model: gpt-5.3-codex
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Backend Development Agent

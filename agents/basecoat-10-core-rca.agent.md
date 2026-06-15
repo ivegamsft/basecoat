@@ -4,6 +4,11 @@ description: "Root Cause Analysis agent for deep-dive incident investigations, h
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # RCA Agent

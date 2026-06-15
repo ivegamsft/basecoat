@@ -4,6 +4,11 @@ description: "Configuration auditor for detecting committed secrets and sensitiv
 visibility: specialized
 model: gpt-5.4-mini
 compatibility: []
+metadata:
+  category: security
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Config Auditor Agent

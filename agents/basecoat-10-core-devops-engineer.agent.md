@@ -4,6 +4,11 @@ description: "DevOps and infrastructure automation specialist. USE FOR: designin
 visibility: basic
 model: gpt-5.3-codex
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # DevOps Engineer Agent

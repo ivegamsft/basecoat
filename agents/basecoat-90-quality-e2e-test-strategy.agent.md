@@ -4,6 +4,11 @@ description: "E2E Test Strategy Agent for end-to-end testing orchestration, crit
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: quality
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # E2E Test Strategy Agent

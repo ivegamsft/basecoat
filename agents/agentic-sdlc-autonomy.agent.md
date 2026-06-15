@@ -3,6 +3,7 @@ name: agentic-sdlc-autonomy
 description: "Audit, measure, implement, and operate rules-based human-in-the-loop autonomy for agent-operated repositories. Use when evaluating or improving agentic SDLC governance: PR risk classification (A0-A5 levels), auto-merge policy, merge queue gates, deployment lane policy, DB migration controls, IaC safety rules, runner isolation, production approval flows, and policy-versus-settings drift."
 visibility: specialized
 metadata:
+  category: uncategorized
   domain: sdlc-governance
   maturity: beta
   audience:

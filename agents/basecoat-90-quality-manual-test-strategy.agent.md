@@ -4,6 +4,11 @@ description: "Use when you need a structured manual testing strategy for a featu
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: quality
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Manual Test Strategy Agent

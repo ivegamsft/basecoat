@@ -4,6 +4,11 @@ description: "Database migration and modernization specialist. USE FOR: planning
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: data
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Database Migration Agent

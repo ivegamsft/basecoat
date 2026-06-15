@@ -4,6 +4,11 @@ description: "Code-level resilience pattern review — circuit breakers, timeout
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: quality
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Resilience Reviewer Agent

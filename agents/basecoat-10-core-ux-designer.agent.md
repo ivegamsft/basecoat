@@ -4,6 +4,11 @@ description: "UX design agent for user journey mapping, wireframe specs, compone
 visibility: basic
 model: claude-sonnet-4-5
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # UX Designer Agent

@@ -4,6 +4,11 @@ description: "Validate that a feature, PR, or release meets the Definition of Do
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Definition of Done Agent

@@ -4,6 +4,11 @@ description: "Analyzes session transcripts and sprint summaries to identify high
 model: claude-haiku-4.5
 visibility: basic
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Memory Promoter Agent

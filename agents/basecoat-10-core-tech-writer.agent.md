@@ -4,6 +4,11 @@ description: "Use when creating or improving technical documentation, API docs, 
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Tech Writer Agent

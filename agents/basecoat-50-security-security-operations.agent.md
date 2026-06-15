@@ -7,6 +7,11 @@ visibility: specialized
   - search-code
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: security
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Security Operations Agent

@@ -4,6 +4,11 @@ description: "Use when onboarding a repository to BaseCoat in an enterprise sett
 visibility: basic
 model: claude-haiku-4.5
 compatibility: []
+metadata:
+  category: workflow
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Roll Out BaseCoat Agent

@@ -6,6 +6,11 @@ model: gpt-5.4-mini
 fallback_models: [claude-sonnet-4.5]
 visibility: public
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Issue Triage Agent

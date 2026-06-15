@@ -6,6 +6,11 @@ visibility: basic
 model: claude-sonnet-4.6
 tools: [read_file, write_file, list_dir, run_terminal_command, create_github_issue]
 compatibility: []
+metadata:
+  category: language
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 ## .NET Modernization Advisor Agent

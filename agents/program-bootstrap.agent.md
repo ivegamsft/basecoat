@@ -14,6 +14,11 @@ model_policy:
   preferred_families: [gpt-5, claude-sonnet]
   excluded_tiers: [nano]
 model: claude-sonnet-4.6
+metadata:
+  category: uncategorized
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Program Bootstrap Agent

@@ -4,6 +4,11 @@ description: "LLM operations and prompt engineering specialist. USE FOR: optimiz
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # LLMOps Agent

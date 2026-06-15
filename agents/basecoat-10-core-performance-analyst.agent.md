@@ -4,6 +4,11 @@ description: "Performance analysis agent for profiling, load testing, and optimi
 visibility: basic
 model: gpt-5.3-codex
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Performance Analyst Agent

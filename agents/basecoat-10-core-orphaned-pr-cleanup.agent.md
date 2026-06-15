@@ -8,6 +8,11 @@ invocation_rules:
   - "Prefer batch triage with explicit status buckets: revive, close, escalate."
 visibility: "internal"
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Orphaned PR Cleanup Agent

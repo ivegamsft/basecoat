@@ -4,6 +4,11 @@ description: "Policy-as-code compliance agent for validating code and configurat
 visibility: specialized
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: security
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Policy-as-Code Compliance Agent

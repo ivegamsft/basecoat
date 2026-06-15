@@ -4,6 +4,11 @@ description: "Single-invocation new repo setup with BaseCoat integration. Create
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Project Onboarding Agent

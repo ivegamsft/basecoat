@@ -4,6 +4,11 @@ description: "Multi-agent orchestrator for complex, cross-domain tasks. USE FOR:
 visibility: advanced
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Orchestrator Agent

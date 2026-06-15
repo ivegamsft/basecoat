@@ -4,6 +4,11 @@ description: "Site reliability engineering agent for SLOs, error budgets, incide
 visibility: basic
 model: gpt-5.3-codex
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # SRE Engineer Agent

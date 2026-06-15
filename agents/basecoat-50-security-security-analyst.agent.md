@@ -4,6 +4,11 @@ description: "Security analysis and threat assessment specialist. USE FOR: threa
 visibility: specialized
 model: gpt-5.3-codex
 compatibility: []
+metadata:
+  category: security
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Security Analyst Agent

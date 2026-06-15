@@ -4,6 +4,11 @@ description: "Detection engineering and SIEM configuration — maps MITRE ATT&CK
 visibility: specialized
 model: gpt-5.4-mini
 compatibility: []
+metadata:
+  category: security
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Security Monitor Agent

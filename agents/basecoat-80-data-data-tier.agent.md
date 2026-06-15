@@ -4,6 +4,11 @@ description: "Data persistence and storage optimization. USE FOR: optimizing dat
 visibility: basic
 model: gpt-5.3-codex
 compatibility: []
+metadata:
+  category: data
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Data Tier Agent

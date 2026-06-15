@@ -6,6 +6,11 @@ model: gpt-5.4-mini
 invocation_rules: ["Invoke when user asks to close a sprint, perform sprint burn-down closeout, or validate sprint completion readiness.", "Use checklist-first flow and require explicit evidence for merge, CI, errors, issues, and test status."]
 visibility: "internal"
 compatibility: []
+metadata:
+  category: security
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Sprint Closeout Auditor Agent

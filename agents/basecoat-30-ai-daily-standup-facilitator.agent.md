@@ -7,6 +7,11 @@ invocation_rules:
   - "Invoke for daily standup facilitation, blocker extraction, or coordination handoff needs."
 visibility: "internal"
 compatibility: []
+metadata:
+  category: ai
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Daily Standup Facilitator Agent

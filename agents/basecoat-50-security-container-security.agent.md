@@ -4,6 +4,11 @@ description: "Container and Kubernetes security — Pod Security Standards, runt
 visibility: specialized
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: security
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Container Security Agent

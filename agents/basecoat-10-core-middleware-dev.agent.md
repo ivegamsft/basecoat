@@ -4,6 +4,11 @@ description: "Middleware and integration development specialist. USE FOR: buildi
 visibility: basic
 model: gpt-5.3-codex
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Middleware Development Agent

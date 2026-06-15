@@ -4,6 +4,11 @@ description: "Use when converting manual test paths into automation candidates. 
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Strategy to Automation Agent

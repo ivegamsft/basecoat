@@ -5,6 +5,11 @@ visibility: basic
 model: gpt-5.4-mini
 fallback_models: [claude-sonnet-4.5]
 compatibility: []
+metadata:
+  category: workflow
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Workflow Run History Cleanup Agent

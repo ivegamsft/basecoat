@@ -4,6 +4,11 @@ description: "MCP (Model Context Protocol) development specialist. USE FOR: desi
 visibility: internal
 model: claude-sonnet-4
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # MCP Developer Agent

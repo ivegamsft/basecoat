@@ -4,6 +4,11 @@ description: "Guardrail validation agent for checking outputs against safety, qu
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: ai
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Guardrail Agent

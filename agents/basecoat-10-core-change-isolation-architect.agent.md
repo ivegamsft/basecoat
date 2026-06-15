@@ -5,6 +5,11 @@ description: "Designs layered CI/CD isolation so independent domains (for exampl
 tools: [bash, git, gh, grep, find]
 model: gpt-5.3-codex
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 # Change Isolation Architect Agent
 

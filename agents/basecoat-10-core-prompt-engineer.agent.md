@@ -4,6 +4,11 @@ description: "Prompt optimization and system prompt engineering agent. Use when 
 visibility: basic
 model: gpt-5.3-codex
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Prompt Engineer Agent

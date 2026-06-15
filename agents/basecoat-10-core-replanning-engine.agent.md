@@ -5,6 +5,11 @@ visibility: basic
 model: claude-sonnet-4.6
 fallback_models: [claude-sonnet-4.5]
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 # Replanning Engine
 

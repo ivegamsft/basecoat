@@ -4,6 +4,11 @@ description: "ML operations and model management specialist. USE FOR: designing 
 visibility: basic
 model: gpt-5.3-codex
 compatibility: []
+metadata:
+  category: ai
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # MLOps Agent

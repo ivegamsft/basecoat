@@ -10,6 +10,11 @@ tools:
   - bash
   - powershell
 compatibility: []
+metadata:
+  category: core
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # App Inventory Agent

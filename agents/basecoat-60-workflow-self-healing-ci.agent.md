@@ -4,6 +4,11 @@ description: "Automated CI failure analysis, log parsing, and pipeline remediati
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
+metadata:
+  category: workflow
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # Self-Healing CI Agent

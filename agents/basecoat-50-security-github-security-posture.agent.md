@@ -6,6 +6,11 @@ tools: [run_terminal_command, create_github_issue]
 visibility: specialized
 allowed_skills: [security]
 compatibility: []
+metadata:
+  category: security
+  maturity: alpha
+  audience:
+    - developer
 ---
 
 # GitHub Security Posture Agent
