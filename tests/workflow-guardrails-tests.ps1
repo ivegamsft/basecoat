@@ -440,6 +440,35 @@ else {
     $guardrailFailures += 'publish-tag-resolution'
 }
 
+# Test 14: Agent merge changelog must stay structured and PR-visible
+Write-Host '  Test 14: Validate agent-merge structured changelog contract...'
+$agentMergeWorkflowPath = Join-Path $workflowDir 'agent-merge.yml'
+$agentMergeWorkflow = Get-Content $agentMergeWorkflowPath -Raw
+
+$hasStructuredJson = $agentMergeWorkflow -match 'agent-merge-changelog\.json'
+$hasSummaryMarkdown = $agentMergeWorkflow -match 'agent-merge-changelog-summary\.md'
+$hasToolPermissionFields = $agentMergeWorkflow -match "allowed-tools" -and $agentMergeWorkflow -match "allowed_skills" -and $agentMergeWorkflow -match "tools"
+$hasPrCommentStep = $agentMergeWorkflow -match 'Publish changelog summary comment' -and $agentMergeWorkflow -match 'actions/github-script@'
+
+if ($hasStructuredJson -and $hasSummaryMarkdown -and $hasToolPermissionFields -and $hasPrCommentStep) {
+    Write-Host '    ✓ Agent merge structured changelog outputs and PR summary comment are wired'
+}
+else {
+    if (-not $hasStructuredJson) {
+        Write-Host '    ✗ Missing machine-readable structured changelog output (agent-merge-changelog.json).' -ForegroundColor Red
+    }
+    if (-not $hasSummaryMarkdown) {
+        Write-Host '    ✗ Missing compact changelog summary output (agent-merge-changelog-summary.md).' -ForegroundColor Red
+    }
+    if (-not $hasToolPermissionFields) {
+        Write-Host '    ✗ Structured changelog is not explicitly tracking tool permission fields.' -ForegroundColor Red
+    }
+    if (-not $hasPrCommentStep) {
+        Write-Host '    ✗ PR summary comment publish step is missing from agent-merge workflow.' -ForegroundColor Red
+    }
+    $guardrailFailures += 'agent-merge-structured-changelog'
+}
+
 if ($guardrailFailures.Count -gt 0) {
     Write-Host "Workflow guardrails failed: $($guardrailFailures -join ', ')" -ForegroundColor Red
     exit 1
