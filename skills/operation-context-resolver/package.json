@@ -2,8 +2,8 @@
   "name": "@basecoat/operation-context-resolver",
   "version": "1.0.0",
   "description": "Deterministic environment routing for agentic troubleshooting and deployment workflows",
-  "main": "dist/resolver.js",
-  "types": "dist/types.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "test": "jest",
