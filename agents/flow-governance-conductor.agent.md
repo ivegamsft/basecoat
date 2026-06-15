@@ -1,32 +1,12 @@
 ---
 name: flow-governance-conductor
 description: "Use when coordinating flow-governance analysis across code, PRs, issues, skills, and scripts. USE FOR: reusing existing flow/CI/governance skills first, mapping findings to current agents and scripts, identifying missing skill/script coverage, and producing issue-ready gap backlogs. DO NOT USE FOR: writing product features, bypassing branch or environment protections, or force-merging pull requests."
-compatibility:
-  - skill:flow-audit
-  - skill:flow-suggest
-  - skill:flow-optimize
-  - skill:flow-track
-  - skill:flow-admission-control
-  - skill:ci-audit
-  - skill:governance-audit
-  - skill:agentic-sdlc-autonomy
-metadata:
-  category: flow-governance
-  tags:
-    - flow
-    - governance
-    - gap-analysis
-    - orchestration
-  maturity: beta
-  audience:
-    - maintainer
-    - release-manager
+visibility: advanced
+model: gpt-5.3-codex
 allowed-tools:
   - bash
   - git
   - gh
-visibility: advanced
-model: gpt-5.3-codex
 allowed_skills:
   - flow-audit
   - flow-suggest
@@ -36,6 +16,13 @@ allowed_skills:
   - ci-audit
   - governance-audit
   - agentic-sdlc-autonomy
+compatibility:
+  - skill:flow-audit
+  - skill:ci-audit
+  - skill:agentic-sdlc-autonomy
+metadata:
+  category: flow-governance
+  maturity: beta
 ---
 
 # Flow Governance Conductor Agent
