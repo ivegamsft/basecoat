@@ -1,4 +1,4 @@
-name: BaseCoat - Governance Metadata Drift Audit
+name: BaseCoat - Governance Audit
 
 on:
   workflow_dispatch:
@@ -20,16 +20,42 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-      - name: Audit governance metadata drift
-        shell: pwsh
+      - name: Audit governance surfaces
+        shell: bash
         run: |
-          ./scripts/governance-metadata-drift.ps1 -Mode audit -SummaryPath governance-metadata-drift-report.md
+          set -euo pipefail
 
-      - name: Upload governance drift report
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: governance-metadata-drift-report
-          path: governance-metadata-drift-report.md
-          if-no-files-found: error
-          retention-days: 14
+          missing=()
+
+          for file in \
+            docs/reference/governance-contract.md \
+            docs/reference/label-taxonomy.md \
+            docs/reference/governance.md \
+            docs/reference/environment-protection.md \
+            docs/operations/label-cleanup-plan.md \
+            docs/operations/environment-protection-enforcement.md \
+            .github/ISSUE_TEMPLATE/issue.md \
+            .github/PULL_REQUEST_TEMPLATE.md \
+            .github/workflows/environment-protection-enforce.yml
+          do
+            [[ -f "$file" ]] || missing+=("$file")
+          done
+
+          if [[ ${#missing[@]} -gt 0 ]]; then
+            printf 'Missing governance files:\n%s\n' "${missing[@]}" >&2
+            exit 1
+          fi
+
+          grep -q 'priority:critical' docs/reference/governance-contract.md
+          grep -q '^## Labels$' docs/reference/governance-contract.md
+          grep -q '^## Versioning$' docs/reference/governance-contract.md
+          grep -q 'priority:critical' docs/reference/label-taxonomy.md
+          grep -qi 'preserve delivery labels' docs/operations/label-cleanup-plan.md
+          grep -q '^## Mandatory production protections$' docs/reference/environment-protection.md
+          grep -q 'manual approvals are required' docs/reference/environment-protection.md
+          grep -q 'environment protection gates' docs/operations/environment-protection-enforcement.md
+          grep -q "Environment 'prod' must have at least one required reviewer" .github/workflows/environment-protection-enforce.yml
+          grep -q 'docs/reference/governance-contract.md' .github/ISSUE_TEMPLATE/issue.md
+          grep -q 'docs/reference/governance-contract.md' .github/PULL_REQUEST_TEMPLATE.md
+
+          echo "Governance audit passed."

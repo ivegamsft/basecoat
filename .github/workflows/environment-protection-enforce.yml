@@ -1,0 +1,87 @@
+name: BaseCoat - Environment Protection Enforcement
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/environment-protection-enforce.yml"
+      - ".github/workflows/governance-audit.yml"
+      - ".github/workflows/extension-deploy.yml"
+      - ".github/workflows/mcp-deploy.yml"
+      - ".github/workflows/portal-deploy.yml"
+      - "docs/reference/environment-protection.md"
+      - "docs/operations/environment-protection-enforcement.md"
+  schedule:
+    - cron: "41 3 * * 2"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  enforce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Validate environment policy docs
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for file in \
+            docs/reference/environment-protection.md \
+            docs/operations/environment-protection-enforcement.md
+          do
+            [[ -f "$file" ]] || { echo "::error::Missing required file: $file"; exit 1; }
+          done
+
+          grep -q '^## Mandatory production protections$' docs/reference/environment-protection.md
+          grep -q 'manual approvals are required' docs/reference/environment-protection.md
+          grep -q 'protected environment secrets/variables' docs/reference/environment-protection.md
+          grep -q 'environment protection gates' docs/operations/environment-protection-enforcement.md
+          grep -q 'No permanent bypasses for production manual approval controls are allowed.' docs/operations/environment-protection-enforcement.md
+
+      - name: Validate deployment workflow environment declarations
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          grep -q 'environment: .*prod' .github/workflows/extension-deploy.yml
+          grep -q "TARGET_ENV: .*'prod'" .github/workflows/extension-deploy.yml
+          grep -q 'environment: .*staging.*prod' .github/workflows/mcp-deploy.yml
+          grep -q "TARGET_ENV: .*'staging'.*'prod'" .github/workflows/mcp-deploy.yml
+          grep -q '^    environment: staging$' .github/workflows/portal-deploy.yml
+
+      - name: Validate GitHub environment protection settings
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          ENV_JSON="$(gh api "repos/${REPOSITORY}/environments/prod")"
+          REVIEWER_COUNT="$(echo "$ENV_JSON" | jq '[.protection_rules[]? | select(.type == "required_reviewers") | (.reviewers // [])[]] | length')"
+          BRANCH_POLICY="$(echo "$ENV_JSON" | jq -r '.deployment_branch_policy.protected_branches // false')"
+
+          if [[ "$REVIEWER_COUNT" -lt 1 ]]; then
+            echo "::error::Environment 'prod' must have at least one required reviewer."
+            exit 1
+          fi
+
+          if [[ "$BRANCH_POLICY" != "true" ]]; then
+            echo "::error::Environment 'prod' must enforce protected branch deployment policy."
+            exit 1
+          fi
+
+          echo "Environment protection settings validated for prod."
+
