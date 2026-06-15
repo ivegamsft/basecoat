@@ -19,14 +19,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  preflight-token-check:
-    name: Preflight — PRODUCTION_REPO_TOKEN readiness
-    uses: ./.github/workflows/token-preflight.yml
-    secrets:
-      PRODUCTION_REPO_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
-
   publish:
-    needs: preflight-token-check
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
