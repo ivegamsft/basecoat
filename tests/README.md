@@ -11,6 +11,7 @@ This directory contains smoke tests for the scaffolding repository.
 - Verify token cost observability thresholds and auto-compact signals
 - **NEW:** Adoption scanner parameter parsing and output formats (table, json, markdown)
 - **NEW:** Workflow guardrails validation (timeout-minutes, concurrency, SHA pinning)
+- **NEW:** PR flow hygiene workflow guardrails (weekly report + draft-drift nudges)
 
 ## Run Tests
 
@@ -63,6 +64,16 @@ Tests for workflow compliance in `.github/workflows/*.yml` covering:
 - **checkout pinning**: Checkout actions pinned to specific versions
 - **matrix bounds**: Matrix strategies have reasonable parallelism
 - **job naming**: Jobs have descriptive names
+
+### `pr-flow-hygiene-tests.ps1`
+
+Tests for `.github/workflows/pr-flow-hygiene.yml` covering:
+
+- Presence of weekly schedule + manual trigger inputs
+- Required policy thresholds (WIP, draft drift, ready stale)
+- Required permissions (`issues: write`, `pull-requests: write`)
+- Required pinned action reference and concurrency pattern
+- Required report and triage nudge markers
 
 ### `token-status-tests.ps1`
 

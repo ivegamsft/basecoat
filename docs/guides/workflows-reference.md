@@ -20,8 +20,9 @@ testing and uses pinned action SHAs.
 | #188 | `.github/workflows/pr-size-labeler.yml` | Automatic PR size labels (`size:XS`..`size:XL`) from diff size |
 | #189 | `.github/workflows/dependency-graph-pages.yml` | Generate dependency graph report and publish via docs PR flow |
 | #190 | `.github/workflows/reviewer-autoassign.yml` | Auto-request reviewers using changed-path commit history |
+| #1557 | `.github/workflows/pr-flow-hygiene.yml` | Weekly PR flow report with WIP limits, draft-drift triage, and owner/reviewer nudges |
 
-## Distributed Workflow Templates (9 Total)
+## Distributed Workflow Templates (10 Total)
 
 ### 1. asset-health.yml
 
@@ -338,6 +339,56 @@ inputs:
 - Prevent version mismatches
 - Automated version validation
 - Standardize version management
+
+---
+
+### 10. pr-flow-hygiene.yml
+
+**Purpose:** Keep open PR backlog healthy and reduce draft drift.
+
+**Trigger:**
+
+- Cron: Every Monday at 1pm UTC
+- Manual: `gh workflow run pr-flow-hygiene.yml`
+
+**What It Does:**
+
+- Scans open PRs and publishes a weekly `PR Flow Hygiene Report` issue
+- Evaluates guardrails with configurable thresholds:
+  - WIP limit for ready-for-review PRs (default: 20)
+  - Draft drift age (default: 14 days)
+  - Ready PR inactivity age (default: 7 days)
+- Upserts triage nudge comments on highest-risk PRs (owner/reviewer/drift gaps)
+
+**Configuration:**
+
+```yaml
+inputs:
+  wip_limit:
+    description: "Max ready-for-review PRs before WIP warning"
+    default: "20"
+  draft_drift_days:
+    description: "Draft PR age threshold in days"
+    default: "14"
+  ready_stale_days:
+    description: "Ready-for-review inactivity threshold in days"
+    default: "7"
+  max_items:
+    description: "Maximum open PRs to evaluate"
+    default: "200"
+```
+
+**Output:**
+
+- Weekly issue with PR flow guardrail status table and top-risk PR lists
+- PR comments for actionable ownership/reviewer/drift nudges
+- Step summary metrics for run-level observability
+
+**Consumer Value:**
+
+- Fixed cadence for backlog triage outcomes
+- Explicit WIP and handoff policy signal
+- Reduced draft and review drift through targeted automation
 
 ---
 
