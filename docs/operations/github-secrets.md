@@ -166,7 +166,8 @@ This is deployment/runtime specific (not just build-time): `GITHUB_TOKEN` can pu
 
 ### `PRODUCTION_REPO_TOKEN`
 
-**Used by:** `.github/workflows/publish-to-production.yml`
+**Used by:** `.github/workflows/publish-to-production.yml`,
+`.github/workflows/docs-production.yml`, `.github/workflows/close-production-issues.yml`
 
 **Purpose:** Authorizes the publish-to-production workflow to push release
 tags and the `main` branch from the internal repository (`IBuySpy-Shared/basecoat`)

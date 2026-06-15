@@ -92,7 +92,7 @@ jobs:
     timeout-minutes: 20
     needs: build-push
     if: ${{ github.event_name != 'pull_request' }}
-    environment: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'prod' }}
+    environment: ${{ github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'prod' && 'production' || github.event.inputs.environment) || 'production' }}
     env:
       TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'prod' }}
 

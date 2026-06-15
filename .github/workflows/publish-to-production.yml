@@ -29,8 +29,7 @@ jobs:
     needs: preflight-token-check
     runs-on: ubuntu-latest
     timeout-minutes: 10
-
-    steps:
+    environment: production
       - name: Check out repository at tag
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:

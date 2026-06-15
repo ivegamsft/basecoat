@@ -21,6 +21,7 @@ jobs:
   close-issues:
     name: Close migrated issues on production repo
     runs-on: ubuntu-latest
+    environment: production
     env:
       PROD_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
       PROD_REPO: ivegamsft/basecoat

@@ -507,6 +507,53 @@ else {
     $guardrailFailures += 'merge-queue-trigger-missing'
 }
 
+# Test 16: Production workflows must route through the protected production environment
+Write-Host '  Test 16: Validate production environment approval gates...'
+$productionEnvironmentRules = @(
+    @{
+        file = 'publish-to-production.yml'
+        pattern = '(?m)^\s+environment:\s+production\s*$'
+    },
+    @{
+        file = 'docs-production.yml'
+        pattern = '(?m)^\s+environment:\s+production\s*$'
+    },
+    @{
+        file = 'close-production-issues.yml'
+        pattern = '(?m)^\s+environment:\s+production\s*$'
+    },
+    @{
+        file = 'mcp-deploy.yml'
+        pattern = '(?m)^\s+environment:\s+\$\{\{[^\r\n]*\|\|\s*''production''\)\s*\}\}\s*$'
+    },
+    @{
+        file = 'extension-deploy.yml'
+        pattern = '(?m)^\s+environment:\s+\$\{\{[^\r\n]*\|\|\s*''production''\s*\}\}\s*$'
+    }
+)
+$productionEnvironmentViolations = @()
+
+foreach ($rule in $productionEnvironmentRules) {
+    $workflowPath = Join-Path $workflowDir $rule.file
+    if (-not (Test-Path $workflowPath)) {
+        $productionEnvironmentViolations += "$($rule.file) (missing file)"
+        continue
+    }
+
+    $workflowContent = Get-Content $workflowPath -Raw
+    if ($workflowContent -notmatch $rule.pattern) {
+        $productionEnvironmentViolations += "$($rule.file) (missing production environment gate)"
+    }
+}
+
+if ($productionEnvironmentViolations.Count -eq 0) {
+    Write-Host '    ✓ Production workflows route through protected production environment'
+}
+else {
+    Write-Host "    ✗ Production environment gate issues found in: $($productionEnvironmentViolations -join ', ')" -ForegroundColor Red
+    $guardrailFailures += 'production-environment-gate'
+}
+
 if ($guardrailFailures.Count -gt 0) {
     Write-Host "Workflow guardrails failed: $($guardrailFailures -join ', ')" -ForegroundColor Red
     exit 1

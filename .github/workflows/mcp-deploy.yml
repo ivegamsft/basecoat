@@ -93,7 +93,7 @@ jobs:
     timeout-minutes: 20
     needs: build-push
     if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork }}
-    environment: ${{ github.event_name == 'pull_request' && 'staging' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'prod') }}
+    environment: ${{ github.event_name == 'pull_request' && 'staging' || (github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'prod' && 'production' || github.event.inputs.environment) || 'production') }}
     env:
       TARGET_ENV: ${{ github.event_name == 'pull_request' && 'staging' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'prod') }}
 
@@ -207,4 +207,3 @@ jobs:
           echo "| **Environment** | \`${{ env.TARGET_ENV }}\` |" >> "$GITHUB_STEP_SUMMARY"
           echo "| **Health** | \`https://${{ steps.infra.outputs.fqdn }}/health\` |" >> "$GITHUB_STEP_SUMMARY"
           echo "| **MCP endpoint** | \`https://${{ steps.infra.outputs.fqdn }}\` |" >> "$GITHUB_STEP_SUMMARY"
-

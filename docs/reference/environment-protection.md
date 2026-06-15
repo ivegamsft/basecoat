@@ -12,7 +12,7 @@ This baseline defines required protection controls for all deployment environmen
 
 ## Mandatory production protections
 
-Production (`prod`) environments must enforce all of the following:
+Production (`prod`) environments must enforce all of the following — manual approvals are required for any release to proceed:
 
 1. Manual approvals are required before deployment jobs start.
 2. Deployment is restricted to protected branches or explicitly listed branch patterns.
@@ -57,4 +57,3 @@ Use GitHub environment deployment history as the canonical approval ledger:
 - When deployment completed
 
 This audit trail must be retained and referenced during incident review and release retro activities.
-
