@@ -39,7 +39,7 @@ jobs:
 
       - name: Rewrite internal repo links for production
         env:
-          TAG: ${{ inputs.tag || github.ref_name }}
+          TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref_name }}
         run: |
           set -euo pipefail
 
@@ -97,7 +97,7 @@ jobs:
       - name: Push to production repository
         env:
           PRODUCTION_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
-          TAG: ${{ inputs.tag || github.ref_name }}
+          TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref_name }}
         run: |
           set -euo pipefail
 
