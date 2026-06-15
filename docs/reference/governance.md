@@ -208,6 +208,7 @@ If in doubt, open an issue. It takes 30 seconds and creates a paper trail.
 | File | Purpose |
 |---|---|
 | `CONTRIBUTING.md` | How to contribute — branch naming, commits, PRs, secrets |
+| `docs/GOVERNANCE.md` | Canonical governance landing page linking shared vs repo-specific rules and label migration notes |
 | `docs/reference/governance-contract.md` | Canonical common-vs-specific governance guide |
 | `docs/reference/label-taxonomy.md` | Canonical label taxonomy used by templates, triage, and automation checks |
 | `docs/operations/label-cleanup-plan.md` | Safe label normalization runbook for shared and repo-specific labels |

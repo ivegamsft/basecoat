@@ -52,6 +52,7 @@ flowchart LR
 
 ## Reference (`docs/reference/`)
 
+- [GOVERNANCE.md](GOVERNANCE.md) — Canonical governance landing page for shared vs repo-specific rules
 - [reference/governance-contract.md](reference/governance-contract.md) — Canonical common-vs-specific governance guide
 - [reference/inventory.md](reference/inventory.md) — Full asset listing (agents, skills, instructions, prompts)
 - [reference/governance.md](reference/governance.md) — Contribution policies and review standards

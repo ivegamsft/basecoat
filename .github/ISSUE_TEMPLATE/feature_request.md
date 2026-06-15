@@ -49,4 +49,4 @@ Please ensure the following labels are applied:
 - `priority:low` if nice-to-have
 - Sprint label: `sprint-YYYY-MM` (for example, `sprint-2026-05`)
 
-See [`governance-contract.md`](../../docs/reference/governance-contract.md#labels) for complete label taxonomy.
+See [`docs/GOVERNANCE.md`](../../docs/GOVERNANCE.md#canonical-label-set-for-new-work) for canonical labels and migration guidance.
