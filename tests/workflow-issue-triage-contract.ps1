@@ -55,6 +55,7 @@ Write-Host 'Running issue-triage workflow contract checks...'
 # Source-of-truth references must be explicit.
 Require-Pattern -Name 'source-of-truth references' -Pattern 'skills/issue-triage/references/quality-checklist\.md'
 Require-Pattern -Name 'triage-workflow reference' -Pattern 'skills/issue-triage/references/triage-workflow\.md'
+Require-Pattern -Name 'safeoutputs add-labels usage' -Pattern 'safeoutputs\.add-labels'
 
 # Required type taxonomy from skill contract.
 Require-Pattern -Name 'type label: bug' -Pattern '\bbug\b'
@@ -78,6 +79,10 @@ if ($prompt -match '\bP[0-3]-(critical|high|medium|low)\b') {
 # Core behavioral invariants.
 Require-Pattern -Name 'duplicate-type exclusivity' -Pattern 'duplicate/type exclusivity'
 Require-Pattern -Name 'minimum-bar quality check' -Pattern 'minimum-bar quality check'
+Require-Pattern -Name 'relationship marker blocked-by' -Pattern 'Blocked by #N'
+Require-Pattern -Name 'relationship marker depends-on' -Pattern 'Depends on #N'
+Require-Pattern -Name 'relationship marker part-of' -Pattern 'Part of #N'
+Require-Pattern -Name 'relationship marker related-to' -Pattern 'Related to #N'
 
 # Runtime model guardrails in compiled workflow.
 Require-LockPattern -Name 'agent model fallback is gpt-5-mini' -Pattern "COPILOT_MODEL:\s*\$\{\{\s*vars\.GH_AW_MODEL_AGENT_COPILOT\s*\|\|\s*'gpt-5-mini'\s*\}\}"

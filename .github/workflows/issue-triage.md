@@ -35,6 +35,16 @@ All classification decisions must conform to those references. When in doubt, co
 - **Issue title**: `${{ github.event.issue.title }}`
 - **Repository**: `${{ github.repository }}`
 
+## Capability Boundaries
+
+This workflow can safely write **labels** and **comments** only. Within this capability set:
+
+- Treat the canonical type label as the issue "type field" (`bug`, `enhancement`, `documentation`, `chore`, `security`, `question`).
+- Treat the canonical priority label as the issue "priority field" (`priority:critical`, `priority:high`, `priority:medium`, `priority:low`).
+- Use relationship comments (for example `Blocked by #123`, `Depends on #456`, `Related to #789`) to persist issue relationships.
+- Use `safeoutputs.add-labels` to apply and normalize labels.
+- Use `safeoutputs.add-comment` to post the triage summary and relationship markers.
+
 Fetch the full issue details using:
 
 ```bash
@@ -91,12 +101,25 @@ Enforce duplicate/type exclusivity: if `duplicate` is applied, remove any type
 label (`bug`, `enhancement`, `documentation`, `chore`, `security`, `question`).
 A `duplicate` issue must not carry a type label simultaneously.
 
-### Step 5 — Apply Labels
+### Step 5 — Apply Structured Fields and Labels
 
 Apply the appropriate type label AND priority label. Add `good-first-issue`
 if the issue is well-scoped and approachable for new contributors.
 
-### Step 6 — Post Triage Summary
+If legacy priority labels are present, normalize them to canonical `priority:*` labels.
+
+### Step 6 — Record Relationships
+
+If the issue body references other issues, add relationship comments using explicit markers:
+
+- `Blocked by #N`
+- `Depends on #N`
+- `Part of #N`
+- `Related to #N`
+
+For duplicate matches, include `Duplicate of #N` in the triage summary.
+
+### Step 7 — Post Triage Summary
 
 Post a comment using this structure:
 

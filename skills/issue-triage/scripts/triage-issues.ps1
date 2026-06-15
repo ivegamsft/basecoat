@@ -209,21 +209,27 @@ Write-Host "Fetched $($allIssues.Count) issues to triage.`n"
 
 $typeLabels     = @("bug","enhancement","documentation","chore","security","question")
 $canonicalPriorityLabels = @{
-    critical = "P0-critical"
-    high     = "P1-high"
-    medium   = "P2-medium"
-    low      = "P3-low"
+    critical = "priority:critical"
+    high     = "priority:high"
+    medium   = "priority:medium"
+    low      = "priority:low"
 }
-$priorityLabels = @(
-    $canonicalPriorityLabels.critical,
-    $canonicalPriorityLabels.high,
-    $canonicalPriorityLabels.medium,
-    $canonicalPriorityLabels.low,
+$legacyPriorityLabels = @(
+    "P0-critical",
+    "P1-high",
+    "P2-medium",
+    "P3-low",
     "priority/critical",
     "priority/high",
     "priority/medium",
     "priority/low"
 )
+$priorityLabels = @(
+    $canonicalPriorityLabels.critical,
+    $canonicalPriorityLabels.high,
+    $canonicalPriorityLabels.medium,
+    $canonicalPriorityLabels.low
+) + $legacyPriorityLabels
 $badTitles      = @("bug","fix","issue","help","todo","test","asdf","qwerty","untitled","new issue","please fix","broken","error")
 
 foreach ($issue in $allIssues) {
@@ -446,7 +452,7 @@ foreach ($issue in $allIssues) {
             Post-Comment $N "This issue has been open for $([math]::Round($agedays)) days with no recent activity. Adding ``stale`` label. If this is still relevant, please comment to keep it active." "stale policy"
         }
 
-        if ($labels -contains "security" -and $labels -notcontains $canonicalPriorityLabels.critical -and $labels -notcontains "priority/critical") {
+        if ($labels -contains "security" -and $labels -notcontains $canonicalPriorityLabels.critical -and $labels -notcontains "P0-critical" -and $labels -notcontains "priority/critical") {
             Add-Label $N $canonicalPriorityLabels.critical "Security issue without critical priority"
         }
 

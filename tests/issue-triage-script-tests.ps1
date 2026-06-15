@@ -78,35 +78,49 @@ Write-Host '  Test 2: Priority label array covers both canonical and legacy form
 
 $labelsScript = @'
 $canonicalPriorityLabels = @{
-    critical = "P0-critical"
-    high     = "P1-high"
-    medium   = "P2-medium"
-    low      = "P3-low"
+    critical = "priority:critical"
+    high     = "priority:high"
+    medium   = "priority:medium"
+    low      = "priority:low"
 }
-$priorityLabels = @(
-    $canonicalPriorityLabels.critical,
-    $canonicalPriorityLabels.high,
-    $canonicalPriorityLabels.medium,
-    $canonicalPriorityLabels.low,
+$legacyPriorityLabels = @(
+    "P0-critical",
+    "P1-high",
+    "P2-medium",
+    "P3-low",
     "priority/critical",
     "priority/high",
     "priority/medium",
     "priority/low"
 )
-$required = @("P0-critical","P1-high","P2-medium","P3-low","priority/critical","priority/high","priority/medium","priority/low")
+$priorityLabels = @(
+    $canonicalPriorityLabels.critical,
+    $canonicalPriorityLabels.high,
+    $canonicalPriorityLabels.medium,
+    $canonicalPriorityLabels.low
+) + $legacyPriorityLabels
+$required = @(
+    "priority:critical","priority:high","priority:medium","priority:low",
+    "P0-critical","P1-high","P2-medium","P3-low",
+    "priority/critical","priority/high","priority/medium","priority/low"
+)
 $missing = $required | Where-Object { $priorityLabels -notcontains $_ }
 $missing.Count
 '@
 
 $labelsOutput = & pwsh -NoProfile -Command $labelsScript
-Assert-Equal 'All 8 priority label variants present in $priorityLabels' $labelsOutput '0'
+Assert-Equal 'All canonical and legacy priority label variants present in $priorityLabels' $labelsOutput '0'
 
 # ---------------------------------------------------------------------------
 # Test 3: Script source contains all canonical and legacy labels
 # ---------------------------------------------------------------------------
 Write-Host '  Test 3: Script source contains all required priority label strings...'
 $psContent = Get-Content $scriptPath -Raw
-$missing3 = @("P0-critical","P1-high","P2-medium","P3-low","priority/critical","priority/high","priority/medium","priority/low") |
+$missing3 = @(
+    "priority:critical","priority:high","priority:medium","priority:low",
+    "P0-critical","P1-high","P2-medium","P3-low",
+    "priority/critical","priority/high","priority/medium","priority/low"
+) |
     Where-Object { $psContent -notmatch [regex]::Escape($_) }
 Assert-True 'All priority label strings present in script source' ($missing3.Count -eq 0)
 
@@ -116,7 +130,7 @@ Assert-True 'All priority label strings present in script source' ($missing3.Cou
 Write-Host '  Test 4: Legacy P1-high prevents stale label...'
 
 $staleScript = @'
-$priorityLabels = @("P0-critical","P1-high","P2-medium","P3-low","priority/critical","priority/high","priority/medium","priority/low")
+$priorityLabels = @("priority:critical","priority:high","priority:medium","priority:low","P0-critical","P1-high","P2-medium","P3-low","priority/critical","priority/high","priority/medium","priority/low")
 $labels   = @("bug","P1-high")
 $agedays  = 100
 $staleAdded = $false
@@ -137,7 +151,7 @@ Assert-Equal 'P1-high blocks stale label on issue >90 days old' $staleOutput 'Fa
 Write-Host '  Test 5: Legacy P2-medium prevents stale label...'
 
 $staleScript5 = @'
-$priorityLabels = @("P0-critical","P1-high","P2-medium","P3-low","priority/critical","priority/high","priority/medium","priority/low")
+$priorityLabels = @("priority:critical","priority:high","priority:medium","priority:low","P0-critical","P1-high","P2-medium","P3-low","priority/critical","priority/high","priority/medium","priority/low")
 $labels   = @("bug","P2-medium")
 $agedays  = 100
 $staleAdded = $false
@@ -158,7 +172,7 @@ Assert-Equal 'P2-medium blocks stale label on issue >90 days old' $staleOutput5 
 Write-Host '  Test 6: No priority label triggers stale after 90 days...'
 
 $staleScript6 = @'
-$priorityLabels = @("P0-critical","P1-high","P2-medium","P3-low","priority/critical","priority/high","priority/medium","priority/low")
+$priorityLabels = @("priority:critical","priority:high","priority:medium","priority:low","P0-critical","P1-high","P2-medium","P3-low","priority/critical","priority/high","priority/medium","priority/low")
 $labels   = @("bug")
 $agedays  = 100
 $staleAdded = $false
@@ -179,7 +193,7 @@ Assert-Equal 'Missing priority triggers stale on issue >90 days old' $staleOutpu
 Write-Host '  Test 7: Legacy priority/critical prevents stale label...'
 
 $staleScript7 = @'
-$priorityLabels = @("P0-critical","P1-high","P2-medium","P3-low","priority/critical","priority/high","priority/medium","priority/low")
+$priorityLabels = @("priority:critical","priority:high","priority:medium","priority:low","P0-critical","P1-high","P2-medium","P3-low","priority/critical","priority/high","priority/medium","priority/low")
 $labels   = @("bug","priority/critical")
 $agedays  = 100
 $staleAdded = $false
@@ -195,21 +209,21 @@ $staleOutput7 = & pwsh -NoProfile -Command $staleScript7
 Assert-Equal 'priority/critical blocks stale label on issue >90 days old' $staleOutput7 'False'
 
 # ---------------------------------------------------------------------------
-# Test 8: Security + P0-critical skips critical escalation
+# Test 8: Security + priority:critical skips critical escalation
 # ---------------------------------------------------------------------------
-Write-Host '  Test 8: Security + P0-critical skips escalation...'
+Write-Host '  Test 8: Security + priority:critical skips escalation...'
 
 $secScript = @'
-$labels       = @("security","P0-critical")
+$labels       = @("security","priority:critical")
 $escalated    = $false
-if ($labels -contains "security" -and $labels -notcontains "P0-critical" -and $labels -notcontains "priority/critical") {
+if ($labels -contains "security" -and $labels -notcontains "priority:critical" -and $labels -notcontains "P0-critical" -and $labels -notcontains "priority/critical") {
     $escalated = $true
 }
 $escalated.ToString()
 '@
 
 $secOutput = & pwsh -NoProfile -Command $secScript
-Assert-Equal 'P0-critical prevents duplicate critical escalation' $secOutput 'False'
+Assert-Equal 'priority:critical prevents duplicate critical escalation' $secOutput 'False'
 
 # ---------------------------------------------------------------------------
 # Test 9: Security without critical label triggers escalation
@@ -219,7 +233,7 @@ Write-Host '  Test 9: Security without critical triggers escalation...'
 $secScript2 = @'
 $labels       = @("security","P1-high")
 $escalated    = $false
-if ($labels -contains "security" -and $labels -notcontains "P0-critical" -and $labels -notcontains "priority/critical") {
+if ($labels -contains "security" -and $labels -notcontains "priority:critical" -and $labels -notcontains "P0-critical" -and $labels -notcontains "priority/critical") {
     $escalated = $true
 }
 $escalated.ToString()
