@@ -43,6 +43,21 @@ model: GPT-5.3-Codex
 ---
 '@ | Set-Content -Path (Join-Path $agentsDir 'three.agent.md') -Encoding UTF8
 
+    @'
+---
+name: four
+description: four
+model: internal-preview-model
+---
+'@ | Set-Content -Path (Join-Path $agentsDir 'four.agent.md') -Encoding UTF8
+
+    @'
+---
+name: five
+description: five
+---
+'@ | Set-Content -Path (Join-Path $agentsDir 'five.agent.md') -Encoding UTF8
+
     & pwsh -NoProfile -File $scriptPath `
         -AgentsPath $agentsDir `
         -ModelMapPath (Join-Path $docsDir 'model-map.json') `
@@ -67,6 +82,12 @@ model: GPT-5.3-Codex
     $gpt = $map.models | Where-Object { $_.canonical -eq 'gpt-5.3-codex' }
     if (-not $gpt) { throw 'Expected canonical key gpt-5.3-codex not found' }
     if ($gpt.count -ne 1) { throw "Expected count 1 for gpt-5.3-codex, got $($gpt.count)" }
+
+    $fallback = $map.models | Where-Object { $_.canonical -eq 'gpt-5.4-mini' }
+    if (-not $fallback) { throw 'Expected fallback canonical key gpt-5.4-mini not found' }
+    if ($fallback.count -ne 2) { throw "Expected count 2 for gpt-5.4-mini, got $($fallback.count)" }
+    if (-not ($fallback.aliases -contains 'gpt-5.4-mini')) { throw 'Expected alias gpt-5.4-mini not found for missing-model fallback' }
+    if ($fallback.aliases -contains 'internal-preview-model') { throw 'Unsupported model alias should not be persisted in model inventory output' }
 
     Write-Host 'Model inventory tests passed'
 }

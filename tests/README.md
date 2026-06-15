@@ -9,6 +9,8 @@ This directory contains smoke tests for the scaffolding repository.
 - Verify git hook installation script configures `.githooks`
 - Verify commit message scanner detects and rejects sensitive commit messages
 - Verify token cost observability thresholds and auto-compact signals
+- Verify model-inventory generation applies shared model fallback policy
+- Verify registry generation resolves unsupported/missing models with safe defaults
 - **NEW:** Adoption scanner parameter parsing and output formats (table, json, markdown)
 - **NEW:** Workflow guardrails validation (timeout-minutes, concurrency, SHA pinning)
 - **NEW:** PR flow hygiene workflow guardrails (weekly report + draft-drift nudges)

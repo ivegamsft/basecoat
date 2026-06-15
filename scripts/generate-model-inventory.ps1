@@ -7,47 +7,21 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-function Get-CanonicalModelId {
-    param([string]$ModelId)
-
-    if ([string]::IsNullOrWhiteSpace($ModelId)) { return "" }
-
-    $normalized = $ModelId.Trim().Trim('"').Trim("'").ToLowerInvariant()
-    $normalized = $normalized -replace '[ _]+', '-'
-    $normalized = $normalized -replace '-+', '-'
-
-    $aliasMap = @{
-        "claude-sonnet-4-6" = "claude-sonnet-4.6"
-        "claude-sonnet-4-5" = "claude-sonnet-4.5"
-        "claude-haiku-4-5" = "claude-haiku-4.5"
-        "claude-opus-4-8" = "claude-opus-4.8"
-        "claude-opus-4-7" = "claude-opus-4.7"
-        "claude-opus-4-6" = "claude-opus-4.6"
-        "claude-opus-4-5" = "claude-opus-4.5"
-        "gpt-5-5" = "gpt-5.5"
-        "gpt-5-4" = "gpt-5.4"
-        "gpt-5-4-mini" = "gpt-5.4-mini"
-        "gpt-5-3-codex" = "gpt-5.3-codex"
-        "gpt-5-mini" = "gpt-5-mini"
-        "gemini-3-1-pro-preview" = "gemini-3.1-pro-preview"
-        "gemini-3-5-flash" = "gemini-3.5-flash"
-    }
-
-    if ($aliasMap.ContainsKey($normalized)) {
-        return $aliasMap[$normalized]
-    }
-
-    return $normalized
+$policyScriptPath = Join-Path $PSScriptRoot "model-fallback-policy.ps1"
+if (-not (Test-Path $policyScriptPath)) {
+    throw "Model fallback policy script not found: $policyScriptPath"
 }
+. $policyScriptPath
 
 $modelBuckets = @{}
 $agentFiles = Get-ChildItem -Path $AgentsPath -Filter "*.agent.md" -File | Sort-Object Name
 
 foreach ($agentFile in $agentFiles) {
     $content = Get-Content -Path $agentFile.FullName -Raw
-    $rawModel = if ($content -match '(?m)^model:\s*(.+)$') { $Matches[1].Trim().Trim('"').Trim("'") } else { "claude-sonnet-4.6" }
-    $canonicalModel = Get-CanonicalModelId -ModelId $rawModel
+    $rawModel = if ($content -match '(?m)^model:\s*(.+)$') { $Matches[1].Trim().Trim('"').Trim("'") } else { "" }
+    $canonicalModel = Resolve-ModelWithFallback -ModelId $rawModel -Context "generate-model-inventory:$($agentFile.Name)"
     if ([string]::IsNullOrWhiteSpace($canonicalModel)) { continue }
+    $aliasValue = if (Test-IsAllowedModel -ModelId $rawModel) { $rawModel } else { $canonicalModel }
 
     if (-not $modelBuckets.ContainsKey($canonicalModel)) {
         $modelBuckets[$canonicalModel] = [ordered]@{
@@ -59,7 +33,7 @@ foreach ($agentFile in $agentFiles) {
 
     $bucket = $modelBuckets[$canonicalModel]
     $bucket.count++
-    [void]$bucket.aliases.Add($rawModel)
+    [void]$bucket.aliases.Add($aliasValue)
 }
 
 $models = @(
@@ -88,7 +62,7 @@ $modelMap | ConvertTo-Json -Depth 6 | Set-Content -Path $ModelMapPath -Encoding 
 $lines = @(
     "# Model Inventory"
     ""
-    "Generated from agent frontmatter models with canonical normalization."
+    "Generated from agent frontmatter models using the shared fallback policy."
     ""
     "| Canonical key | Aliases observed | Count |"
     "|---|---|---|"

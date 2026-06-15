@@ -71,6 +71,7 @@ Guidance:
 - Include only tools and skills the workflow actually needs.
 - Prefer `allowed_skills: []` unless skill invocation is required.
 - Keep description trigger phrases explicit and testable.
+- Frontmatter generation scripts enforce a shared fallback policy: unsupported or missing `model` values are rewritten to safe defaults during generated artifact builds.
 
 ## 5. Write workflow sections that map to real execution
 
