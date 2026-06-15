@@ -194,19 +194,7 @@ jobs:
               exit 1
             fi
 
-            python - "$PROTECTION_BACKUP_FILE" "$PROTECTION_VERIFY_FILE" <<'PY'
-import json
-import sys
-
-with open(sys.argv[1], encoding="utf-8") as before_file:
-    before = json.load(before_file)
-with open(sys.argv[2], encoding="utf-8") as after_file:
-    after = json.load(after_file)
-
-if before != after:
-    print("Branch protection restore mismatch.", file=sys.stderr)
-    sys.exit(1)
-PY
+            python scripts/verify-branch-protection.py "$PROTECTION_BACKUP_FILE" "$PROTECTION_VERIFY_FILE"
           else
             verify_status=$(curl -sS -o /dev/null -w "%{http_code}" \
               -H "Authorization: token ${PRODUCTION_TOKEN}" \
