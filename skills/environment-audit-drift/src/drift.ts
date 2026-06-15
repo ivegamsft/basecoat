@@ -414,6 +414,14 @@ export class EnvironmentAuditDrifter {
     // In real implementation: query GitHub API
     return { required_approvals: branch === 'main' ? 1 : 0 };
   }
+
+  private async mockGetContainerAppRevision(
+    _environment: string,
+    manifestDeployedVersion?: string
+  ): Promise<string> {
+    // In real implementation: query Azure Container Apps latest ready revision
+    return manifestDeployedVersion || '';
+  }
 }
 
 export async function auditEnvironmentDrift(input: DriftAuditInput): Promise<DriftReport> {

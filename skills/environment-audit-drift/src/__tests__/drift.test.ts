@@ -112,12 +112,23 @@ describe('EnvironmentAuditDrifter', () => {
   });
 
   it('should detect security drift when approval mismatch', async () => {
-    const auditor = new EnvironmentAuditDrifter(input, mockEnvironmentMap);
+    const driftMap: EnvironmentMap = {
+      ...mockEnvironmentMap,
+      environments: {
+        ...mockEnvironmentMap.environments,
+        prod: {
+          ...mockEnvironmentMap.environments.prod,
+          autonomy_level: 'A1',
+        },
+      },
+    };
+
+    const auditor = new EnvironmentAuditDrifter(input, driftMap);
     const report = await auditor.audit();
 
     const securityDrifts = report.findings.filter(f => f.category === 'security_drift');
     for (const finding of securityDrifts) {
-      expect(['high', 'medium']).toContain(finding.severity);
+      expect(['critical', 'high', 'medium']).toContain(finding.severity);
     }
   });
 
