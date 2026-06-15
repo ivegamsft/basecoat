@@ -4,12 +4,11 @@ name: "BaseCoat - Publish to Production"
 on:
   push:
     tags:
-      - "v*.*.*"
+      - "v[0-9]+.[0-9]+.[0-9]+"
   workflow_dispatch:
     inputs:
       tag:
         description: "Tag to publish (e.g. v3.31.0)"
-        type: string
         required: true
 
 permissions:
@@ -20,7 +19,14 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  preflight-token-check:
+    name: Preflight — PRODUCTION_REPO_TOKEN readiness
+    uses: ./.github/workflows/token-preflight.yml
+    secrets:
+      PRODUCTION_REPO_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
+
   publish:
+    needs: preflight-token-check
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -31,11 +37,25 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Rewrite internal repo links for production
-        env:
-          TAG: ${{ github.event_name == 'workflow_dispatch' ? github.event.inputs.tag : github.ref_name }}
+      - name: Resolve publish tag from event payload
+        id: resolve-tag
         run: |
           set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            TAG=$(jq -r '.inputs.tag // empty' "$GITHUB_EVENT_PATH")
+            if [[ -z "${TAG}" ]]; then
+              echo "::error::workflow_dispatch requires inputs.tag"
+              exit 1
+            fi
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Rewrite internal repo links for production
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.resolve-tag.outputs.tag }}"
 
           # Rewrite every github.com and raw.githubusercontent.com URL that references
           # the private source repo (IBuySpy-Shared/basecoat) to point at the public
@@ -91,9 +111,9 @@ jobs:
       - name: Push to production repository
         env:
           PRODUCTION_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
-          TAG: ${{ github.event_name == 'workflow_dispatch' ? github.event.inputs.tag : github.ref_name }}
         run: |
           set -euo pipefail
+          TAG="${{ steps.resolve-tag.outputs.tag }}"
 
           PRODUCTION_REMOTE="https://x-access-token:${PRODUCTION_TOKEN}@github.com/ivegamsft/basecoat.git"
           PROTECTION_API="https://api.github.com/repos/ivegamsft/basecoat/branches/main/protection"
