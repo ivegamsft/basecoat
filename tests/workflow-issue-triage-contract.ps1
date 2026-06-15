@@ -27,6 +27,7 @@ if (-not (Test-Path $lockPath)) {
 }
 
 $prompt = Get-Content $promptPath -Raw
+$lock = Get-Content $lockPath -Raw
 $failures = @()
 
 function Require-Pattern {
@@ -35,6 +36,16 @@ function Require-Pattern {
         [string]$Pattern
     )
     if ($prompt -notmatch $Pattern) {
+        $script:failures += $Name
+    }
+}
+
+function Require-LockPattern {
+    param(
+        [string]$Name,
+        [string]$Pattern
+    )
+    if ($lock -notmatch $Pattern) {
         $script:failures += $Name
     }
 }
@@ -67,6 +78,14 @@ if ($prompt -match '\bP[0-3]-(critical|high|medium|low)\b') {
 # Core behavioral invariants.
 Require-Pattern -Name 'duplicate-type exclusivity' -Pattern 'duplicate/type exclusivity'
 Require-Pattern -Name 'minimum-bar quality check' -Pattern 'minimum-bar quality check'
+
+# Runtime model guardrails in compiled workflow.
+Require-LockPattern -Name 'agent model fallback is gpt-5-mini' -Pattern "COPILOT_MODEL:\s*\$\{\{\s*vars\.GH_AW_MODEL_AGENT_COPILOT\s*\|\|\s*'gpt-5-mini'\s*\}\}"
+Require-LockPattern -Name 'detection model fallback is gpt-5-mini' -Pattern "COPILOT_MODEL:\s*\$\{\{\s*vars\.GH_AW_MODEL_DETECTION_COPILOT\s*\|\|\s*'gpt-5-mini'\s*\}\}"
+
+if ($lock -match "COPILOT_MODEL:\s*\$\{\{\s*vars\.GH_AW_MODEL_(AGENT|DETECTION)_COPILOT\s*\|\|\s*'claude-sonnet-4.6'\s*\}\}") {
+    $script:failures += 'unsupported claude-sonnet-4.6 fallback present in lock file'
+}
 
 if ($failures.Count -gt 0) {
     Write-Host 'Issue-triage workflow contract FAILED.' -ForegroundColor Red
