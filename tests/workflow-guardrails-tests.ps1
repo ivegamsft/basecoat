@@ -440,33 +440,41 @@ else {
     $guardrailFailures += 'publish-tag-resolution'
 }
 
-# Test 14: Agent merge changelog must stay structured and PR-visible
-Write-Host '  Test 14: Validate agent-merge structured changelog contract...'
+# Test 14: Agent merge eval validation must be wired as a required status check
+Write-Host '  Test 14: Validate agent-merge eval policy wiring...'
 $agentMergeWorkflowPath = Join-Path $workflowDir 'agent-merge.yml'
 $agentMergeWorkflow = Get-Content $agentMergeWorkflowPath -Raw
+$mergeQueuePsPath = 'scripts/deploy-merge-queue.ps1'
+$mergeQueueShPath = 'scripts/deploy-merge-queue.sh'
+$branchProtectionDocPath = 'docs/operations/security/branch-protection.md'
+$requiredAgentMergeContext = 'Agent Merge / Agent merge guardrails'
 
-$hasStructuredJson = $agentMergeWorkflow -match 'agent-merge-changelog\.json'
-$hasSummaryMarkdown = $agentMergeWorkflow -match 'agent-merge-changelog-summary\.md'
-$hasToolPermissionFields = $agentMergeWorkflow -match "allowed-tools" -and $agentMergeWorkflow -match "allowed_skills" -and $agentMergeWorkflow -match "tools"
-$hasPrCommentStep = $agentMergeWorkflow -match 'Publish changelog summary comment' -and $agentMergeWorkflow -match 'actions/github-script@'
+$agentMergeHasGlobalPrTrigger = $agentMergeWorkflow -notmatch '(?ms)pull_request:\s*\r?\n\s+paths:'
+$agentMergeHasEvalStep = $agentMergeWorkflow -match '(?m)^\s+- name:\s+Validate eval companions\s*$'
+$rulesetPsWired = (Get-Content $mergeQueuePsPath -Raw) -match [regex]::Escape($requiredAgentMergeContext)
+$rulesetShWired = (Get-Content $mergeQueueShPath -Raw) -match [regex]::Escape($requiredAgentMergeContext)
+$branchProtectionDocWired = (Get-Content $branchProtectionDocPath -Raw) -match [regex]::Escape($requiredAgentMergeContext)
 
-if ($hasStructuredJson -and $hasSummaryMarkdown -and $hasToolPermissionFields -and $hasPrCommentStep) {
-    Write-Host '    ✓ Agent merge structured changelog outputs and PR summary comment are wired'
+if ($agentMergeHasGlobalPrTrigger -and $agentMergeHasEvalStep -and $rulesetPsWired -and $rulesetShWired -and $branchProtectionDocWired) {
+    Write-Host '    ✓ Agent merge eval validation is wired into required-check policy'
 }
 else {
-    if (-not $hasStructuredJson) {
-        Write-Host '    ✗ Missing machine-readable structured changelog output (agent-merge-changelog.json).' -ForegroundColor Red
+    if (-not $agentMergeHasGlobalPrTrigger) {
+        Write-Host '    ✗ agent-merge.yml still path-filters pull_request; required status may not publish on every PR.' -ForegroundColor Red
     }
-    if (-not $hasSummaryMarkdown) {
-        Write-Host '    ✗ Missing compact changelog summary output (agent-merge-changelog-summary.md).' -ForegroundColor Red
+    if (-not $agentMergeHasEvalStep) {
+        Write-Host '    ✗ agent-merge.yml is missing the eval validation step.' -ForegroundColor Red
     }
-    if (-not $hasToolPermissionFields) {
-        Write-Host '    ✗ Structured changelog is not explicitly tracking tool permission fields.' -ForegroundColor Red
+    if (-not $rulesetPsWired) {
+        Write-Host '    ✗ deploy-merge-queue.ps1 is missing required Agent Merge status context.' -ForegroundColor Red
     }
-    if (-not $hasPrCommentStep) {
-        Write-Host '    ✗ PR summary comment publish step is missing from agent-merge workflow.' -ForegroundColor Red
+    if (-not $rulesetShWired) {
+        Write-Host '    ✗ deploy-merge-queue.sh is missing required Agent Merge status context.' -ForegroundColor Red
     }
-    $guardrailFailures += 'agent-merge-structured-changelog'
+    if (-not $branchProtectionDocWired) {
+        Write-Host '    ✗ branch-protection.md is missing required Agent Merge status context documentation.' -ForegroundColor Red
+    }
+    $guardrailFailures += 'agent-merge-required-status'
 }
 
 if ($guardrailFailures.Count -gt 0) {

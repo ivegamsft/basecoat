@@ -2,11 +2,6 @@ name: Agent Merge
 
 on:
   pull_request:
-    paths:
-      - "agents/**/*.agent.md"
-      - "agents/**/*.agent.eval.yaml"
-      - "skills/**/SKILL.md"
-      - "skills/**/eval.yaml"
   workflow_dispatch:
     inputs:
       rollback_ref:
@@ -16,59 +11,166 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   guardrails:
+    name: Agent merge guardrails
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0
 
+      - name: Detect agent/skill changes
+        id: changed-assets
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${GITHUB_EVENT_NAME}" != "pull_request" ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          CHANGED_ASSETS=$(git diff --name-only "${BASE_SHA}" "${HEAD_SHA}" -- agents skills || true)
+
+          if [[ -n "${CHANGED_ASSETS}" ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "changed=false" >> "$GITHUB_OUTPUT"
+          echo "No agent/skill changes detected; guardrail validations skipped."
+
       - name: Set up Python
-        uses: actions/setup-python@v5
+        if: ${{ steps.changed-assets.outputs.changed == 'true' }}
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
 
       - name: Validate duplicate agent names and tool conflicts
+        if: ${{ steps.changed-assets.outputs.changed == 'true' }}
         shell: bash
         run: |
           python - <<'PY'
+          import ast
           import pathlib
           import re
           import sys
+
+          FRONTMATTER_PATTERN = re.compile(r"^---\r?\n(.*?)\r?\n---\r?\n", re.S)
+
+          def parse_inline_array(value: str):
+              text = value.strip()
+              if not text.startswith("["):
+                  return []
+              try:
+                  parsed = ast.literal_eval(text)
+              except (SyntaxError, ValueError):
+                  return []
+              if not isinstance(parsed, (list, tuple)):
+                  return []
+              normalized = []
+              for item in parsed:
+                  if isinstance(item, str):
+                      candidate = item.strip()
+                      if candidate:
+                          normalized.append(candidate)
+              return normalized
+
+          def parse_yaml_list(frontmatter: str, key: str):
+              items = []
+              key_match = re.search(rf"(?m)^{re.escape(key)}:\s*(.*)$", frontmatter)
+              if not key_match:
+                  return tuple()
+
+              inline_value = key_match.group(1).strip()
+              if inline_value:
+                  items.extend(parse_inline_array(inline_value))
+
+              block_match = re.search(
+                  rf"(?ms)^{re.escape(key)}:\s*\r?\n((?:^[ \t]+-.*(?:\r?\n|$))+)",
+                  frontmatter,
+              )
+              if block_match:
+                  for line in block_match.group(1).splitlines():
+                      bullet_match = re.match(r"^\s*-\s*(.+?)\s*$", line)
+                      if not bullet_match:
+                          continue
+                      candidate = bullet_match.group(1).strip().strip("'").strip('"')
+                      if candidate:
+                          items.append(candidate)
+
+              return tuple(sorted(set(items)))
 
           root = pathlib.Path(".")
           agent_files = sorted(root.glob("agents/*.agent.md"))
           by_name = {}
           failures = []
+
           for path in agent_files:
               text = path.read_text(encoding="utf-8")
-              match = re.search(r"^---\n(.*?)\n---\n", text, flags=re.S)
+              match = FRONTMATTER_PATTERN.search(text)
               if not match:
                   failures.append(f"{path}: missing YAML frontmatter")
                   continue
+
               frontmatter = match.group(1)
-              name_match = re.search(r"^name:\s*(.+)$", frontmatter, flags=re.M)
+              name_match = re.search(r"(?m)^name:\s*(.+)$", frontmatter)
               if not name_match:
                   failures.append(f"{path}: missing name in frontmatter")
                   continue
-              name = name_match.group(1).strip().strip('"').strip("'")
-              skills_match = re.search(r"^allowed_skills:\n((?:^[ \t]+-.*(?:\n|$))+)", frontmatter, flags=re.M)
-              skills_block = skills_match.group(1) if skills_match else ""
-              skills = tuple(sorted(set(re.findall(r"^\s*-\s*([A-Za-z0-9_.:-]+)\s*$", skills_block, flags=re.M))))
-              by_name.setdefault(name, []).append((str(path), skills))
 
-          for name, entries in by_name.items():
+              raw_name = name_match.group(1).strip().strip('"').strip("'")
+              normalized_name = raw_name.casefold()
+              allowed_skills = parse_yaml_list(frontmatter, "allowed_skills")
+              tools = set()
+              for key in ("tools", "allowed-tools", "allowed_tools"):
+                  tools.update(parse_yaml_list(frontmatter, key))
+              normalized_tools = tuple(sorted(tools))
+
+              by_name.setdefault(normalized_name, []).append(
+                  {
+                      "display_name": raw_name,
+                      "path": str(path),
+                      "skills": allowed_skills,
+                      "tools": normalized_tools,
+                  }
+              )
+
+          for normalized_name, entries in by_name.items():
               if len(entries) <= 1:
                   continue
-              skill_sets = {skills for _, skills in entries}
-              paths = ", ".join(path for path, _ in entries)
-              failures.append(f"duplicate agent name '{name}' in: {paths}")
+
+              display_name = entries[0]["display_name"]
+              paths = ", ".join(entry["path"] for entry in entries)
+              failures.append(f"duplicate agent name '{display_name}' in: {paths}")
+
+              skill_sets = {entry["skills"] for entry in entries}
               if len(skill_sets) > 1:
-                  failures.append(f"conflicting allowed_skills for duplicated agent '{name}'")
+                  details = "; ".join(
+                      f"{entry['path']} -> allowed_skills={list(entry['skills'])}" for entry in entries
+                  )
+                  failures.append(
+                      f"conflicting allowed_skills for duplicated agent '{display_name}': {details}"
+                  )
+
+              tool_sets = {entry["tools"] for entry in entries}
+              if len(tool_sets) > 1:
+                  details = "; ".join(
+                      f"{entry['path']} -> tools={list(entry['tools'])}" for entry in entries
+                  )
+                  failures.append(
+                      f"conflicting tool permissions for duplicated agent '{display_name}': {details}"
+                  )
 
           if failures:
               print("Agent merge guardrail failures:")
@@ -76,10 +178,14 @@ jobs:
                   print(f"- {failure}")
               sys.exit(1)
 
-          print("Agent guardrails passed: no duplicates or conflicting allowed_skills detected.")
+          print(
+              "Agent guardrails passed: no duplicate names or conflicting "
+              "allowed_skills/tool permissions detected."
+          )
           PY
 
       - name: Validate eval companions
+        if: ${{ steps.changed-assets.outputs.changed == 'true' }}
         shell: bash
         run: |
           python - <<'PY'
@@ -109,7 +215,7 @@ jobs:
           PY
 
       - name: Generate frontmatter changelog
-        id: changelog
+        if: ${{ steps.changed-assets.outputs.changed == 'true' }}
         shell: bash
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -120,192 +226,52 @@ jobs:
               echo
               echo "No pull request base SHA available. Changelog generation is skipped for workflow_dispatch runs."
             } > agent-merge-changelog.md
-            echo "summary=" >> "${GITHUB_OUTPUT}"
             exit 0
           fi
 
-          python - <<'PY'
-          import json
-          import os
-          import re
-          import subprocess
-          import sys
-
-          BASE_SHA = os.environ["BASE_SHA"]
-          RANGE = f"{BASE_SHA}...HEAD"
-
-          TOOL_KEYS = {"tools", "allowed-tools", "allowed_tools", "allowed_skills"}
-          TRACKED_KEYS = {
-              "name", "description", "visibility", "model", "pinned_model",
-              "compatibility", "capabilities",
-          } | TOOL_KEYS
-
-          FM_RE = re.compile(r"^---\r?\n(.*?)\r?\n---\r?\n", re.S)
-          KEY_RE = re.compile(r"^(\s*[A-Za-z_-]+):\s*(.*)")
-
-          def parse_fm(text):
-              m = FM_RE.match(text)
-              if not m:
-                  return {}
-              block = m.group(1)
-              result = {}
-              current_key = None
-              for line in block.splitlines():
-                  km = KEY_RE.match(line)
-                  if km:
-                      current_key = km.group(1).strip()
-                      result[current_key] = km.group(2).strip()
-                  elif current_key and line.startswith((" ", "\t")):
-                      result[current_key] = (result.get(current_key, "") + "\n" + line.rstrip()).strip()
-              return result
-
-          def git(*args):
-              return subprocess.check_output(["git"] + list(args), text=True)
-
-          changed_files = git("diff", "--name-only", RANGE, "--", "agents", "skills").splitlines()
-          agent_skill_files = [f for f in changed_files if f.endswith(".agent.md") or f.endswith("SKILL.md")]
-
-          file_diffs = []
-          for path in sorted(agent_skill_files):
-              try:
-                  new_text = git("show", f"HEAD:{path}")
-              except subprocess.CalledProcessError:
-                  new_text = ""
-              try:
-                  old_text = git("show", f"{BASE_SHA}:{path}")
-              except subprocess.CalledProcessError:
-                  old_text = ""
-
-              old_fm = parse_fm(old_text)
-              new_fm = parse_fm(new_text)
-
-              all_keys = (set(old_fm) | set(new_fm)) & TRACKED_KEYS
-              if not all_keys:
-                  continue
-
-              changes = {"added": {}, "removed": {}, "changed": {}}
-              for k in sorted(all_keys):
-                  old_val = old_fm.get(k)
-                  new_val = new_fm.get(k)
-                  if old_val is None and new_val is not None:
-                      changes["added"][k] = new_val
-                  elif old_val is not None and new_val is None:
-                      changes["removed"][k] = old_val
-                  elif old_val != new_val:
-                      changes["changed"][k] = {"from": old_val, "to": new_val}
-
-              if any(changes.values()):
-                  file_diffs.append({"file": path, **changes})
-
-          lines = ["# Agent Merge Changelog", "", f"Diff range: `{RANGE}`", ""]
-
-          if not file_diffs:
-              lines += ["No tracked frontmatter fields changed in agent or skill assets.", ""]
-          else:
-              lines += ["## Frontmatter field changes", ""]
-              for entry in file_diffs:
-                  lines.append(f"### `{entry['file']}`")
-                  lines.append("")
-                  for k, v in entry.get("added", {}).items():
-                      lines.append(f"- **Added** `{k}`: `{v}`")
-                  for k, v in entry.get("removed", {}).items():
-                      lines.append(f"- **Removed** `{k}`: ~~`{v}`~~")
-                  for k, v in entry.get("changed", {}).items():
-                      lines.append(f"- **Changed** `{k}`: `{v['from']}` → `{v['to']}`")
-                  lines.append("")
-
-          changelog = "\n".join(lines)
-          with open("agent-merge-changelog.md", "w") as f:
-              f.write(changelog)
-
-          # Build compact summary for PR comment
-          if not file_diffs:
-              summary = "No tracked frontmatter fields changed."
-          else:
-              parts = []
-              for entry in file_diffs:
-                  counts = []
-                  if entry["added"]:
-                      counts.append(f"+{len(entry['added'])} added")
-                  if entry["removed"]:
-                      counts.append(f"-{len(entry['removed'])} removed")
-                  if entry["changed"]:
-                      counts.append(f"~{len(entry['changed'])} changed")
-                  parts.append(f"`{entry['file']}`: {', '.join(counts)}")
-              summary = "; ".join(parts)
-
-          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
-              out.write(f"summary={summary}\n")
-
-          print(changelog)
-          PY
+          RANGE="${BASE_SHA}...HEAD"
+          {
+            echo "# Agent Merge Changelog"
+            echo
+            echo "Diff range: ${RANGE}"
+            echo
+            echo "## Frontmatter changes"
+            echo
+            git diff --unified=0 "${RANGE}" -- agents skills \
+              | awk '/^diff --git / || /^@@/ || /^[+-](name|description|visibility|model|metadata|allowed_skills):/'
+          } > agent-merge-changelog.md
 
       - name: Upload changelog artifact
-        uses: actions/upload-artifact@v4
+        if: ${{ steps.changed-assets.outputs.changed == 'true' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: agent-merge-changelog
           path: agent-merge-changelog.md
-
-      - name: Post changelog PR comment
-        if: ${{ github.event_name == 'pull_request' && steps.changelog.outputs.summary != '' }}
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
-        with:
-          script: |
-            const summary = `${{ steps.changelog.outputs.summary }}`;
-            const runUrl = `https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
-            const body = [
-              '## 📋 Agent Merge Frontmatter Changelog',
-              '',
-              summary,
-              '',
-              `Full structured changelog: [artifact](${runUrl})`,
-            ].join('\n');
-
-            const existing = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            });
-            const bot = existing.data.find(c =>
-              c.user.type === 'Bot' && c.body.includes('Agent Merge Frontmatter Changelog')
-            );
-
-            if (bot) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: bot.id,
-                body,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body,
-              });
-            }
+          retention-days: 7
 
   rollback-plan:
+    name: Agent merge rollback plan
     if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rollback_ref != '' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0
 
       - name: Generate rollback patch
         shell: bash
         env:
-          ROLLBACK_REF: ${{ github.event.inputs.rollback_ref }}
+          ROLLBACK_REF: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rollback_ref || '' }}
         run: |
           git revert --no-commit "${ROLLBACK_REF}"
           git diff --cached > agent-merge-rollback.patch
           git reset --hard
 
       - name: Upload rollback patch artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: agent-merge-rollback-patch
           path: agent-merge-rollback.patch
+          retention-days: 7

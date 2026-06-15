@@ -133,6 +133,10 @@ deploy_merge_queue() {
           {
             "context": "validate-windows",
             "integration_id": null
+          },
+          {
+            "context": "Agent Merge / Agent merge guardrails",
+            "integration_id": null
           }
         ]
       }

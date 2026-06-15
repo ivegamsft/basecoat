@@ -24,20 +24,11 @@ Implementation lives in:
 That workflow enforces controls during pull requests that modify agent or skill
 assets and supports manual rollback planning through `workflow_dispatch`.
 
-## Changelog Output Contract
+## Required Status Check Policy
 
-`agent-merge.yml` now generates structured frontmatter deltas for changed
-`agents/*.agent.md` and `skills/*/SKILL.md` files:
+Branch-protection and merge-queue policies should require:
 
-- Added keys
-- Removed keys
-- Changed keys
-- Tool-permission specific changes (`tools`, `allowed-tools`, `allowed_skills`)
+- `Agent Merge / Agent merge guardrails`
 
-Artifacts published under `agent-merge-changelog`:
-
-- `agent-merge-changelog.md` (human-readable detailed diff)
-- `agent-merge-changelog.json` (deterministic machine-readable delta data)
-- `agent-merge-changelog-summary.md` (compact summary for PR comment)
-
-The workflow also posts (or updates) a PR comment with the compact summary.
+The workflow now runs on all pull requests so this context is consistently
+published. Guardrail validation still scopes heavy checks to agent/skill changes.
