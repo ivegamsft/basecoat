@@ -266,9 +266,9 @@ as distinct assets and disambiguate by source path (`instructions/` vs
 | `.github/PULL_REQUEST_TEMPLATE.md`                                         | pull request template with PRD/spec reference fields        | pull request, template, prd, spec      |
 | `examples/workflows/bootstrap-from-release.yml`                            | install a pinned Base Coat release into a new repo          | workflow, bootstrap, pinned release    |
 | `examples/workflows/validate-basecoat-consumer.yml`                        | validate a consumer repo keeps Base Coat present            | workflow, consumer, drift, validation  |
-| `examples/repo-template/.github/base-coat.lock.json`                       | lock file contract for template-based Base Coat pinning     | template, lock, pinned version         |
-| `examples/repo-template/.github/workflows/bootstrap-basecoat-template.yml` | bootstrap Base Coat in a new repo from lock file            | template, bootstrap, release, checksum |
-| `examples/repo-template/.github/workflows/enforce-basecoat-template.yml`   | enforce lock/version consistency and block unsafe drift     | template, enforcement, drift, policy   |
+| `.github/template-repos/repo-template/.github/base-coat.lock.json`                       | lock file contract for template-based Base Coat pinning     | template, lock, pinned version         |
+| `.github/template-repos/repo-template/.github/workflows/bootstrap-basecoat-template.yml` | bootstrap Base Coat in a new repo from lock file            | template, bootstrap, release, checksum |
+| `.github/template-repos/repo-template/.github/workflows/enforce-basecoat-template.yml`   | enforce lock/version consistency and block unsafe drift     | template, enforcement, drift, policy   |
 
 ## Test Assets
 

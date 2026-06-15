@@ -28,9 +28,9 @@ jobs:
           import json
           from pathlib import Path
 
-          root = Path('docs/examples/repo-template')
+          root = Path('.github/template-repos/repo-template')
           required_paths = [
-              root / 'README.md',
+              root / 'sample-repo-template.md',
               root / '.github/base-coat.lock.json',
               root / '.github/workflows/bootstrap-basecoat-template.yml',
               root / '.github/workflows/enforce-basecoat-template.yml',
@@ -57,8 +57,8 @@ jobs:
 
       - name: Validate sample workflow contents
         run: |
-          bootstrap="docs/examples/repo-template/.github/workflows/bootstrap-basecoat-template.yml"
-          enforce="docs/examples/repo-template/.github/workflows/enforce-basecoat-template.yml"
+          bootstrap=".github/template-repos/repo-template/.github/workflows/bootstrap-basecoat-template.yml"
+          enforce=".github/template-repos/repo-template/.github/workflows/enforce-basecoat-template.yml"
 
           grep -q "base-coat.lock.json" "$bootstrap"
           grep -q "gh release download" "$bootstrap"
