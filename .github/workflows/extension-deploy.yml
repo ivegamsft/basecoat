@@ -114,12 +114,16 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login "${{ env.REGISTRY }}" -u "${{ github.actor }}" --password-stdin
           docker pull "${{ needs.build-push.outputs.image_ref }}"
 
-      - name: Ensure resource group exists
+      - name: Verify resource group exists
         run: |
-          az group create \
-            --name "${{ secrets.EXTENSION_RESOURCE_GROUP }}" \
-            --location "${{ env.EXTENSION_AZURE_LOCATION }}" \
-            --output none
+          if ! az group show \
+               --name "${{ secrets.EXTENSION_RESOURCE_GROUP }}" \
+               --output none 2>/dev/null; then
+            echo "::error::Resource group '${{ secrets.EXTENSION_RESOURCE_GROUP }}' does not exist."
+            echo "::error::Pre-provision it before running this workflow — the deploy identity does not have 'Microsoft.Resources/subscriptions/resourcegroups/write'."
+            exit 1
+          fi
+          echo "Resource group '${{ secrets.EXTENSION_RESOURCE_GROUP }}' verified."
 
       - name: Staging what-if validation
         if: ${{ env.TARGET_ENV == 'staging' }}
