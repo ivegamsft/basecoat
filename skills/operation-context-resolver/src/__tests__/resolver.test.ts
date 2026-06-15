@@ -1,4 +1,7 @@
-import { OperationContextResolver } from '../resolver';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+import { OperationContextResolver, resolveOperationContext } from '../resolver';
 import { EnvironmentMap } from '../types';
 
 describe('OperationContextResolver', () => {
@@ -235,6 +238,31 @@ describe('OperationContextResolver', () => {
 
       expect(context.target_environment).toBe('prod');
     });
+
+    it('should extract label names from pull request event payload objects', async () => {
+      const context = await resolver.resolve({
+        github_ref: 'refs/heads/feature/something',
+        github_event_payload: {
+          pull_request: {
+            labels: [{ name: 'env:staging' }],
+          },
+        },
+      });
+
+      expect(context.target_environment).toBe('staging');
+    });
+
+    it('should resolve env:dev and env:preview labels', async () => {
+      const devContext = await resolver.resolve({
+        pr_labels: ['env:dev'],
+      });
+      const previewContext = await resolver.resolve({
+        pr_labels: ['env:preview'],
+      });
+
+      expect(devContext.target_environment).toBe('dev');
+      expect(previewContext.target_environment).toBe('preview');
+    });
   });
 
   describe('human approval', () => {
@@ -245,6 +273,15 @@ describe('OperationContextResolver', () => {
 
       expect(context.target_environment).toBe('prod');
       expect(context.human_approval_required).toBe(true);
+    });
+
+    it('should not require human approval for read actions', async () => {
+      const context = await resolver.resolve({
+        github_ref: 'refs/heads/main',
+      });
+
+      expect(resolver.requiresHumanApproval(context, 'read_logs')).toBe(false);
+      expect(resolver.requiresHumanApproval(context, 'deploy')).toBe(true);
     });
   });
 
@@ -274,6 +311,194 @@ describe('OperationContextResolver', () => {
 
       expect(context.target_environment).toBe('dev');
       expect(context.production).toBe(false);
+    });
+  });
+
+  describe('rule resolution', () => {
+    it('should use explicit workflow environment override when valid', async () => {
+      const context = await resolver.resolve({
+        github_ref: 'refs/heads/feature/add-login',
+        workflow_dispatch_input: { environment: 'staging' },
+      });
+
+      expect(context.target_environment).toBe('staging');
+      expect(context.mode).toBe('branch_deploy');
+    });
+
+    it('should reject invalid workflow environment override', async () => {
+      await expect(
+        resolver.resolve({
+          workflow_dispatch_input: { environment: 'qa' },
+        })
+      ).rejects.toThrow("Resolver error: Invalid workflow_dispatch_input.environment 'qa'");
+    });
+
+    it('should resolve read-only deployment lookup context from branch', async () => {
+      const context = await resolver.resolve({
+        github_ref: 'refs/heads/feature/add-login',
+        deployment_record_sha: 'abc123',
+      });
+
+      expect(context.target_environment).toBe('preview');
+      expect(context.mode).toBe('read_only');
+      expect(context.deployment_lookup_available).toBe(true);
+    });
+
+    it('should resolve rule matches by event name', async () => {
+      const resolverWithRules = new OperationContextResolver({
+        ...mockEnvironmentMap,
+        rules: [
+          {
+            name: 'workflow_dispatch_staging',
+            match: {
+              event_name: ['workflow_dispatch'],
+            },
+            context: {
+              target_environment: 'staging',
+              mode: 'staging_deploy',
+            },
+          },
+        ],
+      });
+
+      const context = await resolverWithRules.resolve({
+        github_event_name: 'workflow_dispatch',
+        github_ref: 'refs/heads/feature/add-login',
+      });
+
+      expect(context.target_environment).toBe('staging');
+      expect(context.mode).toBe('staging_deploy');
+    });
+
+    it('should resolve rule matches by user intent, labels, source branch, and wildcard', async () => {
+      const resolverWithRules = new OperationContextResolver({
+        ...mockEnvironmentMap,
+        rules: [
+          {
+            name: 'intent_rule',
+            match: {
+              user_intent_contains: ['deploy to prod'],
+            },
+            context: {
+              target_environment: 'prod',
+              mode: 'prod_readonly',
+            },
+          },
+          {
+            name: 'label_rule',
+            match: {
+              pr_labels: ['go-staging'],
+            },
+            context: {
+              target_environment: 'staging',
+              mode: 'branch_deploy',
+            },
+          },
+          {
+            name: 'source_branch_rule',
+            match: {
+              source_branch: 'release/*',
+            },
+            context: {
+              target_environment: 'staging',
+              mode: 'read_only',
+            },
+          },
+          {
+            name: 'fallback_rule',
+            match: '*',
+            context: {
+              target_environment: 'dev',
+              mode: 'read_only',
+            },
+          },
+        ],
+      });
+
+      const intentContext = await resolverWithRules.resolve({
+        user_intent: 'please deploy to prod after checks',
+      });
+      const labelContext = await resolverWithRules.resolve({
+        pr_labels: ['go-staging'],
+      });
+      const branchContext = await resolverWithRules.resolve({
+        github_ref: 'refs/heads/release/2026.06.14',
+      });
+      const fallbackContext = await resolverWithRules.resolve({
+        github_ref: 'refs/heads/no-match',
+      });
+
+      expect(intentContext.mode).toBe('prod_readonly');
+      expect(labelContext.target_environment).toBe('staging');
+      expect(branchContext.mode).toBe('read_only');
+      expect(fallbackContext.target_environment).toBe('dev');
+    });
+
+    it('should resolve from PR source branch in event payload', async () => {
+      const context = await resolver.resolve({
+        github_ref: 'refs/heads/ignored-branch',
+        github_event_payload: {
+          pull_request: {
+            head: {
+              ref: 'release/2026.06.14',
+            },
+          },
+        },
+      });
+
+      expect(context.target_environment).toBe('staging');
+    });
+
+    it('should fall back when event payload JSON is invalid', async () => {
+      const context = await resolver.resolve({
+        github_ref: 'refs/heads/feature/invalid-json',
+        github_event_payload: '{not-json',
+      });
+
+      expect(context.target_environment).toBe('preview');
+    });
+  });
+
+  describe('repo root loading', () => {
+    it('should resolve from repo root environment-map.yml', async () => {
+      const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'operation-context-resolver-'));
+      fs.mkdirSync(path.join(repoRoot, '.github'), { recursive: true });
+      fs.writeFileSync(
+        path.join(repoRoot, '.github', 'environment-map.yml'),
+        `
+environments:
+  preview:
+    github_environment: preview
+    production: false
+    azure_subscription: sub-preview
+    resource_group: rg-preview
+    allowed_branch_patterns:
+      - feature/*
+    allowed_actions:
+      branch_deploy: [read_logs]
+    blocked_actions:
+      branch_deploy: [deploy]
+  dev:
+    github_environment: dev
+    production: false
+    azure_subscription: sub-dev
+    resource_group: rg-dev
+    allowed_branch_patterns:
+      - dev
+    allowed_actions:
+      read_only: [read_logs]
+    blocked_actions:
+      read_only: [deploy]
+`.trim(),
+        'utf-8'
+      );
+
+      const context = await resolveOperationContext({
+        repo_root: repoRoot,
+        github_ref: 'refs/heads/feature/add-login',
+      });
+
+      expect(context.target_environment).toBe('preview');
     });
   });
 });

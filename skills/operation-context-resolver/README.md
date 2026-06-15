@@ -126,16 +126,24 @@ if (context.incident_mode) {
 
 ```yaml
 - name: Resolve operation context
-  id: context
+  working-directory: skills/operation-context-resolver
   run: |
-    node scripts/resolve-context.js > context.json
+    npm ci --no-audit --prefer-offline
+    npm run build
+    node dist/cli.js resolve \
+      --repo-root "${GITHUB_WORKSPACE}" \
+      --output "${RUNNER_TEMP}/operation-context.json" \
+      --github-ref "${GITHUB_REF}" \
+      --github-event-name "${GITHUB_EVENT_NAME}"
 
 - name: Read context
   run: |
-    jq '.' context.json
-    TARGET_ENV=$(jq -r '.target_environment' context.json)
+    jq '.' "${RUNNER_TEMP}/operation-context.json"
+    TARGET_ENV=$(jq -r '.target_environment' "${RUNNER_TEMP}/operation-context.json")
     echo "Target environment: $TARGET_ENV"
 ```
+
+Repository workflow example: [`.github/workflows/operation-context-resolver.yml`](../../.github/workflows/operation-context-resolver.yml)
 
 ## Common Scenarios
 
@@ -217,6 +225,16 @@ Output:
 ```yaml
 - name: Validate environment map
   run: npx @basecoat/operation-context-resolver validate --repo-root .
+```
+
+To emit a reusable artifact for downstream jobs:
+
+```bash
+npx @basecoat/operation-context-resolver resolve \
+  --repo-root . \
+  --output operation-context.json \
+  --github-ref "$GITHUB_REF" \
+  --github-event-name "$GITHUB_EVENT_NAME"
 ```
 
 ## Customization

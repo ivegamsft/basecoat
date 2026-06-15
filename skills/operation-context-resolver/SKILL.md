@@ -28,7 +28,7 @@ Routes a request to the correct environment and mode, then returns allowed and b
 
 ## Output
 
-`OperationContext` includes:
+`OperationContext` includes (and can be emitted as `operation-context.json` from the CLI):
 
 - `target_environment`, `mode`, `risk_level`
 - `allowed_actions`, `blocked_actions`
