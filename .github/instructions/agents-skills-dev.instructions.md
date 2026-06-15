@@ -53,7 +53,9 @@ model: string (legacy compatibility; allowed during migration)
 All skills require:
 
 ```yaml
+name: string (required)
 description: string (required) — USE FOR: [trigger cases]
+compatibility: string (required)
 visibility: public|private (optional, defaults to public)
 capabilities: (optional, recommended for model-sensitive skills)
 model_policy: (optional)
