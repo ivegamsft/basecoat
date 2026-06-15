@@ -17,17 +17,23 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   guardrails:
+    name: Agent merge guardrails
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.11"
 
@@ -35,39 +41,116 @@ jobs:
         shell: bash
         run: |
           python - <<'PY'
+          import ast
           import pathlib
           import re
           import sys
+
+          FRONTMATTER_PATTERN = re.compile(r"^---\r?\n(.*?)\r?\n---\r?\n", re.S)
+
+          def parse_inline_array(value: str):
+              text = value.strip()
+              if not text.startswith("["):
+                  return []
+              try:
+                  parsed = ast.literal_eval(text)
+              except (SyntaxError, ValueError):
+                  return []
+              if not isinstance(parsed, (list, tuple)):
+                  return []
+              normalized = []
+              for item in parsed:
+                  if isinstance(item, str):
+                      candidate = item.strip()
+                      if candidate:
+                          normalized.append(candidate)
+              return normalized
+
+          def parse_yaml_list(frontmatter: str, key: str):
+              items = []
+              key_match = re.search(rf"(?m)^{re.escape(key)}:\s*(.*)$", frontmatter)
+              if not key_match:
+                  return tuple()
+
+              inline_value = key_match.group(1).strip()
+              if inline_value:
+                  items.extend(parse_inline_array(inline_value))
+
+              block_match = re.search(
+                  rf"(?ms)^{re.escape(key)}:\s*\r?\n((?:^[ \t]+-.*(?:\r?\n|$))+)",
+                  frontmatter,
+              )
+              if block_match:
+                  for line in block_match.group(1).splitlines():
+                      bullet_match = re.match(r"^\s*-\s*(.+?)\s*$", line)
+                      if not bullet_match:
+                          continue
+                      candidate = bullet_match.group(1).strip().strip("'").strip('"')
+                      if candidate:
+                          items.append(candidate)
+
+              return tuple(sorted(set(items)))
 
           root = pathlib.Path(".")
           agent_files = sorted(root.glob("agents/*.agent.md"))
           by_name = {}
           failures = []
+
           for path in agent_files:
               text = path.read_text(encoding="utf-8")
-              match = re.search(r"^---\n(.*?)\n---\n", text, flags=re.S)
+              match = FRONTMATTER_PATTERN.search(text)
               if not match:
                   failures.append(f"{path}: missing YAML frontmatter")
                   continue
+
               frontmatter = match.group(1)
-              name_match = re.search(r"^name:\s*(.+)$", frontmatter, flags=re.M)
+              name_match = re.search(r"(?m)^name:\s*(.+)$", frontmatter)
               if not name_match:
                   failures.append(f"{path}: missing name in frontmatter")
                   continue
-              name = name_match.group(1).strip().strip('"').strip("'")
-              skills_match = re.search(r"^allowed_skills:\n((?:^[ \t]+-.*(?:\n|$))+)", frontmatter, flags=re.M)
-              skills_block = skills_match.group(1) if skills_match else ""
-              skills = tuple(sorted(set(re.findall(r"^\s*-\s*([A-Za-z0-9_.:-]+)\s*$", skills_block, flags=re.M))))
-              by_name.setdefault(name, []).append((str(path), skills))
 
-          for name, entries in by_name.items():
+              raw_name = name_match.group(1).strip().strip('"').strip("'")
+              normalized_name = raw_name.casefold()
+              allowed_skills = parse_yaml_list(frontmatter, "allowed_skills")
+              tools = set()
+              for key in ("tools", "allowed-tools", "allowed_tools"):
+                  tools.update(parse_yaml_list(frontmatter, key))
+              normalized_tools = tuple(sorted(tools))
+
+              by_name.setdefault(normalized_name, []).append(
+                  {
+                      "display_name": raw_name,
+                      "path": str(path),
+                      "skills": allowed_skills,
+                      "tools": normalized_tools,
+                  }
+              )
+
+          for normalized_name, entries in by_name.items():
               if len(entries) <= 1:
                   continue
-              skill_sets = {skills for _, skills in entries}
-              paths = ", ".join(path for path, _ in entries)
-              failures.append(f"duplicate agent name '{name}' in: {paths}")
+
+              display_name = entries[0]["display_name"]
+              paths = ", ".join(entry["path"] for entry in entries)
+              failures.append(f"duplicate agent name '{display_name}' in: {paths}")
+
+              skill_sets = {entry["skills"] for entry in entries}
               if len(skill_sets) > 1:
-                  failures.append(f"conflicting allowed_skills for duplicated agent '{name}'")
+                  details = "; ".join(
+                      f"{entry['path']} -> allowed_skills={list(entry['skills'])}" for entry in entries
+                  )
+                  failures.append(
+                      f"conflicting allowed_skills for duplicated agent '{display_name}': {details}"
+                  )
+
+              tool_sets = {entry["tools"] for entry in entries}
+              if len(tool_sets) > 1:
+                  details = "; ".join(
+                      f"{entry['path']} -> tools={list(entry['tools'])}" for entry in entries
+                  )
+                  failures.append(
+                      f"conflicting tool permissions for duplicated agent '{display_name}': {details}"
+                  )
 
           if failures:
               print("Agent merge guardrail failures:")
@@ -75,7 +158,10 @@ jobs:
                   print(f"- {failure}")
               sys.exit(1)
 
-          print("Agent guardrails passed: no duplicates or conflicting allowed_skills detected.")
+          print(
+              "Agent guardrails passed: no duplicate names or conflicting "
+              "allowed_skills/tool permissions detected."
+          )
           PY
 
       - name: Validate eval companions
@@ -134,31 +220,35 @@ jobs:
           } > agent-merge-changelog.md
 
       - name: Upload changelog artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: agent-merge-changelog
           path: agent-merge-changelog.md
+          retention-days: 7
 
   rollback-plan:
+    name: Agent merge rollback plan
     if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rollback_ref != '' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0
 
       - name: Generate rollback patch
         shell: bash
         env:
-          ROLLBACK_REF: ${{ github.event.inputs.rollback_ref }}
+          ROLLBACK_REF: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rollback_ref || '' }}
         run: |
           git revert --no-commit "${ROLLBACK_REF}"
           git diff --cached > agent-merge-rollback.patch
           git reset --hard
 
       - name: Upload rollback patch artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: agent-merge-rollback-patch
           path: agent-merge-rollback.patch
+          retention-days: 7
