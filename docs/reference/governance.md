@@ -109,7 +109,7 @@ Use the canonical priority labels for new work. Legacy labels (`P0-critical`, `P
 Common search patterns for issue discovery:
 
 - `is:issue label:agent` — Find all agent-related issues
-- `is:issue label:sprint-3 label:skill` — Find Sprint 3 skill work
+- `is:issue label:sprint:35 label:skill` — Find Sprint 35 skill work
 - `is:issue label:bug label:priority:high` — Find high-priority bugs
 - `is:issue label:blocked is:open` — Find open blocked issues
 - `is:issue label:documentation` — Find documentation work

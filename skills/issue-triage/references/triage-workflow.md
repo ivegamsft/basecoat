@@ -126,11 +126,11 @@ gh issue edit $N --add-label "needs-verification"
 |----------|----------|-------------|
 | Type | 1 | `bug`, `enhancement`, `documentation`, `chore`, `security`, `question` |
 | Priority | 1 | `priority:critical`, `priority:high`, `priority:medium`, `priority:low` |
-| Sprint | 1 | `sprint-<number>` |
+| Sprint | 1 | `sprint:<number>` |
 | Area | 0–1 | `area/*` labels defined in repo |
 
 Legacy labels (`P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/critical`, `priority/high`, `priority/medium`, `priority/low`) are migration-only and should be normalized to canonical `priority:*` labels during triage runs.
-Repo-specific delivery labels such as `area/*` and `sprint-*` must be preserved during cleanup; only governance labels should be normalized automatically.
+Repo-specific delivery labels such as `area/*`, `sprint:*`, and legacy `sprint-*` labels must be preserved during cleanup; only governance labels should be normalized automatically.
 
 ### Inference Rules
 
@@ -154,7 +154,7 @@ gh issue edit $N --add-label "bug,priority:high"
 
 # Flag for manual triage
 gh issue edit $N --add-label "needs-triage"
-gh issue comment $N --body "This issue is missing required labels:\n- [ ] Type: bug / enhancement / documentation / chore / security / question\n- [ ] Priority: priority:critical / priority:high / priority:medium / priority:low\n- [ ] Sprint: sprint-<number>"
+gh issue comment $N --body "This issue is missing required labels:\n- [ ] Type: bug / enhancement / documentation / chore / security / question\n- [ ] Priority: priority:critical / priority:high / priority:medium / priority:low\n- [ ] Sprint: sprint:<number> (for example, sprint:35)"
 ```
 
 ---

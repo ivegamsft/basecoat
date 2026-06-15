@@ -11,7 +11,7 @@ BaseCoat uses a dual taxonomy:
 | Namespace | Examples | Cleanup rule |
 |---|---|---|
 | Governance/shared | `bug`, `enhancement`, `security`, `priority:critical`, `needs-triage`, `agent`, `skill` | May be normalized across repos |
-| Delivery/repo-specific | `sprint-1`, `sprint-2`, `backlog`, `area/*`, repo-local tracking labels | Preserve unless the repo owner approves removal or rename |
+| Delivery/repo-specific | `sprint:35`, `sprint:36`, `backlog`, `area/*`, repo-local tracking labels | Preserve unless the repo owner approves removal or rename |
 | Migration-only | `P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/critical`, `priority/high`, `priority/medium`, `priority/low` | Normalize to canonical priority labels during triage |
 
 Shared tooling should never remove a delivery label just because another repo does not use it.
@@ -96,19 +96,17 @@ These labels indicate which sprint (if any) an issue is assigned to.
 
 | Label | Meaning |
 |---|---|
-| `sprint-1` | Assigned to Sprint 1 |
-| `sprint-2` | Assigned to Sprint 2 |
-| `sprint-3` | Assigned to Sprint 3 |
-| `sprint-4` | Assigned to Sprint 4 |
+| `sprint:<number>` | Assigned to the named sprint (for example, `sprint:35`) |
 | `backlog` | Not yet assigned to a sprint |
 
 **Workflow:**
 
 - Backlog issues start with `backlog` label
-- During sprint planning, move to appropriate sprint label: `sprint-1`, `sprint-2`, etc.
+- During sprint planning, move to the appropriate sprint label: `sprint:<number>` (for example, `sprint:35`)
 - Remove `backlog` when assigning to a sprint
 - If moved between sprints, update the label accordingly
 - Cleanup automation must preserve sprint labels unless the repo owner explicitly declares them obsolete.
+- Legacy `sprint-<number>` labels are tolerated during migration, but new sprint assignment should use `sprint:<number>`.
 
 ---
 
@@ -185,7 +183,7 @@ is:issue label:enhancement        # Find all feature requests
 Combine labels for compound queries:
 
 ```bash
-is:issue label:sprint-3 label:agent           # Sprint 3 agent work
+is:issue label:sprint:35 label:agent          # Sprint 35 agent work
 is:issue label:bug label:priority:critical    # Critical bugs
 is:issue label:blocked is:open                # Open blocked issues
 is:issue label:security label:priority:high   # High-priority security issues
@@ -194,8 +192,8 @@ is:issue label:security label:priority:high   # High-priority security issues
 Filter by sprint and type:
 
 ```bash
-is:issue label:sprint-2 label:documentation   # Sprint 2 documentation work
-is:issue label:sprint-3 label:chore           # Sprint 3 maintenance work
+is:issue label:sprint:35 label:documentation  # Sprint 35 documentation work
+is:issue label:sprint:35 label:chore          # Sprint 35 maintenance work
 ```
 
 Find approval-pending or assigned work:
@@ -227,7 +225,7 @@ During sprint planning:
 
 1. **Review** untriaged issues (missing priority or sprint label)
 2. **Assign priority** based on severity and business impact
-3. **Assign sprint** using `sprint-1`, `sprint-2`, etc.
+3. **Assign sprint** using `sprint:<number>` labels
 4. **Remove `backlog`** label when assigning to a sprint
 5. **Mark blocked** issues with `blocked` label (and explain in a comment)
 
@@ -283,10 +281,10 @@ The `issue-triage` agent uses these labels to classify and prioritize issues aut
 
 ### Sprint Planning
 
-Sprint labels (`sprint-1`, `sprint-2`, etc.) are used to track issues assigned to each sprint. Filter by sprint label to see all issues in a sprint:
+Sprint labels (`sprint:<number>`) are used to track issues assigned to each sprint. Filter by sprint label to see all issues in a sprint:
 
 ```bash
-is:issue label:sprint-3 is:open
+is:issue label:sprint:35 is:open
 ```
 
 ### Release Tracking
