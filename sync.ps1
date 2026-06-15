@@ -170,7 +170,7 @@ try {
         }
     }
 
-    $agentsCatalog = Join-Path $sourcePath 'docs/agents/agents.md'
+    $agentsCatalog = Join-Path $sourcePath 'docs/agents/AGENTS.md'
     if (Test-Path $agentsCatalog) {
         $agentsDocsDest = Join-Path $docsDest 'agents'
         New-Item -ItemType Directory -Force -Path $agentsDocsDest | Out-Null

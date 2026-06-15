@@ -268,7 +268,7 @@ jobs:
       - name: Validate rollback target commit metadata
         shell: bash
         env:
-          ROLLBACK_REF: ${{ github.event.inputs.rollback_ref }}
+          ROLLBACK_REF: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rollback_ref || '' }}
         run: |
           set -euo pipefail
 
@@ -289,7 +289,7 @@ jobs:
       - name: Generate rollback patch
         shell: bash
         env:
-          ROLLBACK_REF: ${{ github.event.inputs.rollback_ref }}
+          ROLLBACK_REF: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rollback_ref || '' }}
         run: |
           set -euo pipefail
           git revert --no-commit "${ROLLBACK_REF}"
@@ -305,10 +305,7 @@ jobs:
 
   rollback-apply:
     name: Agent merge rollback apply
-    if: >-
-      ${{ github.event_name == 'workflow_dispatch'
-          && github.event.inputs.rollback_ref != ''
-          && github.event.inputs.rollback_apply == 'true' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rollback_ref != '' && github.event.inputs.rollback_apply == 'true' }}
     needs: rollback-plan
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -331,7 +328,7 @@ jobs:
         run: |
           set -euo pipefail
           if [[ ! -s agent-merge-rollback.patch ]]; then
-            echo "::error::Rollback patch is empty — nothing to revert for ref ${{ github.event.inputs.rollback_ref }}."
+            echo "::error::Rollback patch is empty — nothing to revert for ref ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rollback_ref || '' }}."
             exit 1
           fi
           echo "Patch size: $(wc -c < agent-merge-rollback.patch) bytes"
@@ -340,7 +337,7 @@ jobs:
         id: apply
         shell: bash
         env:
-          ROLLBACK_REF: ${{ github.event.inputs.rollback_ref }}
+          ROLLBACK_REF: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rollback_ref || '' }}
         run: |
           set -euo pipefail
 
@@ -366,7 +363,7 @@ jobs:
         if: always()
         shell: bash
         env:
-          ROLLBACK_REF: ${{ github.event.inputs.rollback_ref }}
+          ROLLBACK_REF: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rollback_ref || '' }}
           REVERTED_FILES: ${{ steps.apply.outputs.reverted_files }}
           APPLIED_SHA: ${{ steps.apply.outputs.applied_sha }}
           APPLY_OUTCOME: ${{ steps.apply.outcome }}

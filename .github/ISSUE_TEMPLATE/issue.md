@@ -53,4 +53,4 @@ Please apply **at least one label from each category below:**
 
 - `azure`, `dotnet`, `kubernetes`, `python`, `terraform`, etc.
 
-See [`docs/GOVERNANCE.md`](../../docs/GOVERNANCE.md#canonical-label-set-for-new-work) for canonical labels and migration guidance.
+See [`docs/reference/governance-contract.md`](../../docs/reference/governance-contract.md) and [`docs/GOVERNANCE.md`](../../docs/GOVERNANCE.md#canonical-label-set-for-new-work) for canonical labels and migration guidance.
