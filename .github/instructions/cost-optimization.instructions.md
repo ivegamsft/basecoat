@@ -130,14 +130,14 @@ Measured data from last 30 days: 42.4% gpt-5.3-codex, 24% gpt-5.4-mini, 18.2% Ha
 
 #### Auto/default model baseline and explicit upshift triggers
 
-Start in Auto/default routing for routine workflows. Upshift model strength only when one or more of these triggers is present:
+Treat Auto/default routing as the baseline for routine workflows. Do not upshift for routine docs, simple lookups, git hygiene, or run monitoring. Upshift model strength only when one or more of these non-overlapping triggers is present:
 
-1. Cross-repository or cross-system reasoning with ambiguous root cause.
-2. Security-sensitive review where subtle exploit paths must be analyzed.
-3. Large refactors requiring strict behavior preservation across many touchpoints.
-4. Architectural tradeoff decisions with long-lived platform impact.
+1. **Ambiguous cross-system root cause**: cross-repository or cross-system reasoning where the failure path is not yet clear.
+2. **Security-sensitive review**: subtle exploit paths, trust boundaries, or abuse cases must be analyzed.
+3. **Large behavior-preserving refactor**: many touchpoints must change while preserving existing behavior.
+4. **Architectural tradeoff decision**: long-lived platform or design choices require deeper reasoning.
 
-Downshift again once the high-complexity segment is complete.
+Context reduction remains the primary cost lever: compact first when session history is bloated, and downshift again once the high-complexity segment is complete.
 
 ### MCP server overhead audit checklist
 
