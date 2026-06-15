@@ -174,6 +174,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running validate workflow gating tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'workflow-validate-basecoat-gating-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Validate workflow gating tests failed' -ForegroundColor Red
+    Write-FailureLog 'workflow-validate-basecoat-gating-tests'
+    exit 1
+}
+
 Write-Host 'Running workflow enhancements (#1389) tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'workflow-enhancements-1389-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

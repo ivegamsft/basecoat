@@ -76,7 +76,12 @@ jobs:
 
       - name: Run PowerShell test suite
         shell: pwsh
-        run: ./tests/run-tests.ps1 -GuidanceAuditFailOnError:${{ github.event_name != 'workflow_call' || inputs.fail_on_guidance_audit_errors }}
+        run: |
+          $failOnGuidanceAuditErrors = $true
+          if ('${{ github.event_name }}' -eq 'workflow_call') {
+            $failOnGuidanceAuditErrors = [System.Convert]::ToBoolean('${{ inputs.fail_on_guidance_audit_errors }}')
+          }
+          ./tests/run-tests.ps1 -GuidanceAuditFailOnError:$failOnGuidanceAuditErrors
 
       - name: Registry metadata freshness check (blocking)
         shell: pwsh
