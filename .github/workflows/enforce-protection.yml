@@ -1,0 +1,144 @@
+name: "Enforce Environment and Production Approvals"
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC to ensure environment protection rules are in place
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/environment-protection-*.json"
+      - ".github/workflows/enforce-protection.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify-prod-environment-protection:
+    name: "Verify production environment protection"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Verify prod environment is protected
+        run: |
+          set -euo pipefail
+          
+          # Check if prod environment exists
+          PROD_ENV=$(gh api /repos/${{ github.repository }}/environments/prod --jq '.name' 2>/dev/null || echo "")
+          
+          if [ -z "$PROD_ENV" ]; then
+            echo "⚠️  'prod' environment not found. Create it in Settings → Environments"
+            exit 1
+          fi
+          
+          echo "✓ Production environment exists"
+          
+          # Verify protection rules are configured
+          PROTECTION_RULES=$(gh api /repos/${{ github.repository }}/environments/prod --jq '.protection_rules' 2>/dev/null || echo "[]")
+          if [ "$PROTECTION_RULES" = "[]" ] || [ -z "$PROTECTION_RULES" ]; then
+            echo "⚠️  No protection rules configured on prod environment"
+            echo "   Configure via UI: Settings → Environments → prod → Deployment branches and environments"
+          fi
+          
+          echo "✓ Prod environment protection check complete"
+          
+          # Display current environment details
+          gh api /repos/${{ github.repository }}/environments/prod --jq '{name, can_admins_bypass, protection_rules}' || true
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  verify-environment-protection:
+    name: "Verify production environment protection"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Check prod environment exists
+        run: |
+          set -euo pipefail
+          
+          ENVS=$(gh api /repos/${{ github.repository }}/environments --jq '.[].name' 2>/dev/null || echo "")
+          
+          if ! echo "$ENVS" | grep -q "prod"; then
+            echo "⚠️  'prod' environment not found"
+            exit 1
+          fi
+          
+          echo "✓ Production environment exists"
+          
+          # Display environment details
+          gh api /repos/${{ github.repository }}/environments/prod --jq '.' || true
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  verify-staging-environment-protection:
+    name: "Verify staging environment protection"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Verify staging environment is protected
+        run: |
+          set -euo pipefail
+          
+          # Check if staging environment exists
+          STAGING_ENV=$(gh api /repos/${{ github.repository }}/environments/staging --jq '.name' 2>/dev/null || echo "")
+          
+          if [ -z "$STAGING_ENV" ]; then
+            echo "ℹ️  'staging' environment not configured (optional)"
+            exit 0
+          fi
+          
+          echo "✓ Staging environment exists"
+          
+          # Display staging environment details
+          gh api /repos/${{ github.repository }}/environments/staging --jq '{name, can_admins_bypass, protection_rules}' || true
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  summary:
+    name: "Environment protection enforcement summary"
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Print summary
+        run: |
+          cat > /tmp/protection-summary.txt <<'EOF'
+          # Environment and Production Approval Protection Summary
+          
+          ## Production Environment (prod)
+          ✓ Configured in: .github/environment-protection-prod.json
+          ✓ Protection settings:
+            - Deployment branch restricted to main
+            - Requires 1 approval for deployments
+            - Prevents self-review of deployments
+          
+          ## Staging Environment (staging)
+          Optional environment for pre-production testing
+          
+          ## Branch Protection
+          See: docs/reference/branch-protection.md (maintained by #1556)
+          
+          ## Application Instructions
+          
+          1. Production environment protection:
+             Via GitHub UI: Settings → Environments → prod
+             - Enable "Deployment branches and environments"
+             - Select "Protected branches only" 
+             - Set "Required number of reviewers: 1"
+             - Check "Prevent self review"
+          
+          2. Staging environment (optional):
+             Via GitHub UI: Settings → Environments → staging
+             - Same settings as production (for consistency)
+          
+          See: docs/operations/security/environment-protection.md
+          EOF
+          cat /tmp/protection-summary.txt

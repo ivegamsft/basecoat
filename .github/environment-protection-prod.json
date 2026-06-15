@@ -1,0 +1,26 @@
+{
+  "name": "prod",
+  "environment": "prod",
+  "deployment_branch_policy": {
+    "protected_branches": false,
+    "custom_branch_policies": true
+  },
+  "branch_policies": [
+    {
+      "pattern": "main",
+      "type": "named_branch"
+    }
+  ],
+  "protection_rules": {
+    "require_deployment_approvals": {
+      "enabled": true,
+      "required_reviewers": 1,
+      "dismissal_restrictions": {
+        "users": [],
+        "teams": []
+      }
+    },
+    "wait_timer": 0,
+    "prevent_self_review": true
+  }
+}
