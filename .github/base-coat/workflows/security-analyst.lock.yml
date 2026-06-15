@@ -423,7 +423,19 @@ jobs:
             const { main } = require('${{ runner.temp }}/gh-aw/actions/checkout_pr_branch.cjs');
             await main();
       - name: Install GitHub Copilot CLI
-        run: bash "${RUNNER_TEMP}/gh-aw/actions/install_copilot_cli.sh" 1.0.40
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if bash "${RUNNER_TEMP}/gh-aw/actions/install_copilot_cli.sh" 1.0.40; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              echo "Copilot CLI install attempt ${attempt} failed; retrying in 30s..."
+              sleep 30
+            fi
+          done
+          echo "Copilot CLI install failed after 3 attempts." >&2
+          exit 1
         env:
           GH_HOST: github.com
       - name: Install AWF binary
@@ -1161,7 +1173,19 @@ jobs:
           node-version: '24'
           package-manager-cache: false
       - name: Install GitHub Copilot CLI
-        run: bash "${RUNNER_TEMP}/gh-aw/actions/install_copilot_cli.sh" 1.0.40
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if bash "${RUNNER_TEMP}/gh-aw/actions/install_copilot_cli.sh" 1.0.40; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              echo "Copilot CLI install attempt ${attempt} failed; retrying in 30s..."
+              sleep 30
+            fi
+          done
+          echo "Copilot CLI install failed after 3 attempts." >&2
+          exit 1
         env:
           GH_HOST: github.com
       - name: Install AWF binary
