@@ -2,24 +2,7 @@
 name: program-bootstrap
 description: "Thin orchestration entrypoint for end-to-end startup pack generation. USE FOR: bootstrapping a new program with coordinated onboarding/backlog/spec/architecture/workflow outputs, running dry-run orchestration before writing artifacts, resuming partially completed orchestration with checkpoints, preserving repo-specific delivery labels while normalizing governance labels. DO NOT USE FOR: replacing specialist agents, forcing one repo taxonomy, direct single-step authoring that a specialist agent already handles."
 visibility: advanced
-capabilities:
-  reasoning_depth: high
-  tool_use: required
-  context_window: large
-  latency_profile: balanced
-  cost_tier: medium
-  safety_level: strict
-model_policy:
-  fallback: true
-  preferred_families: [gpt-5, claude-sonnet]
-  excluded_tiers: [nano]
 model: claude-sonnet-4.6
-metadata:
-  category: uncategorized
-  maturity: alpha
-  audience:
-    - developer
-allowed-tools: []
 ---
 
 # Program Bootstrap Agent
@@ -46,15 +29,10 @@ specialists. It dispatches and validates:
 - `target_branch`: branch for output changes.
 - `mode`: `dry-run` or `apply`.
 - `review_mode`: `true|false` (gate issue creation behind review when true).
-- `execution_model`: `child-sessions` or `single-session` (default: `child-sessions`).
-- `output_root`: canonical startup artifact root (default: `.github/bootstrap/<program_name>`).
-- `checkpoint_store`: checkpoint path under `output_root/checkpoints`.
 - `resume_from_checkpoint`: optional checkpoint ID to restart from.
 - `preserve_labels`: list of repo-specific delivery labels that must be kept.
 
-## Workflow
-
-### Stage pipeline
+## Stage pipeline
 
 1. **Bootstrap stage**
    - Delegates to `project-onboarding`.
@@ -74,27 +52,6 @@ specialists. It dispatches and validates:
 6. **Governance gate**
    - Normalizes governance labels only.
    - Must not delete, rename, or overwrite repo-specific delivery labels.
-
-## Session model
-
-- Default execution model is `child-sessions` per stage for isolation, retries, and
-  independent evidence capture.
-- `single-session` is allowed for lightweight repositories where dispatch overhead
-  is not justified.
-- Checkpoint payloads must include `execution_model` to support deterministic
-  resume behavior.
-
-## Output directory contract
-
-All artifacts must be written under one canonical root:
-`.github/bootstrap/<program_name>`.
-
-Required layout:
-
-1. `summary/startup-summary.md` for final rollup.
-2. `checkpoints/<stage>.json` for stage envelopes.
-3. `previews/dry-run-preview.json` for dry-run proposed writes.
-4. `logs/<stage>.log` for stage evidence and retry trace.
 
 ## Checkpointing and resume
 
@@ -123,12 +80,13 @@ In `dry-run` mode:
   blocker evidence.
 - Never continue to downstream stages when an upstream contract is unmet.
 
-## Review-mode policy
+## Process
 
-- When `review_mode=true`, issue creation and label mutations are staged to the
-  preview artifact and require explicit approval before `mode=apply`.
-- When `review_mode=false`, apply-mode can create issues immediately after
-  backlog and governance stage contracts are satisfied.
+1. **Pre-flight validation**: Verify specialist agents are available and callable.
+2. **Stage orchestration**: Execute each stage sequentially; write checkpoints.
+3. **Resume support**: Skip completed stages when resuming from checkpoints.
+4. **Governance normalization**: Apply governance labels without mutating delivery labels.
+5. **Summary generation**: Aggregate all stage outputs into a single startup report.
 
 ## Output contract
 

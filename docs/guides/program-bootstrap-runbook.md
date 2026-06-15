@@ -75,10 +75,8 @@ resume_from_checkpoint: "<checkpoint-id-from-architecture-pack>"
 mode: "apply"
 ```
 
-4. Program-bootstrap resumes at `architecture-pack` and skips completed prior
-   stages.
-5. Verify final summary includes resumed stage evidence and unchanged preserved
-   labels report.
+1. Program-bootstrap resumes at `architecture-pack` and skips completed prior stages.
+2. Verify final summary includes resumed stage evidence and unchanged preserved labels report.
 
 ## Review-gated issue creation policy
 

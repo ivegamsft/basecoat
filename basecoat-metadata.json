@@ -208,6 +208,7 @@
       "description": "Orchestration agents",
       "icon": "🎯",
       "agents": [
+        "program-bootstrap",
         "orchestrator"
       ]
     },
@@ -912,6 +913,23 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-orchestrator.agent.md",
+      "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "program-bootstrap",
+      "description": "Thin orchestration entrypoint for end-to-end startup pack generation. USE FOR: bootstrapping a new program with coordinated onboarding/backlog/spec/architecture/workflow outputs, running dry-run orchestration before writing artifacts, resuming partially completed orchestration with checkpoints, preserving repo-specific delivery labels while normalizing governance labels. DO NOT USE FOR: replacing specialist agents, forcing one repo taxonomy, direct single-step authoring that a specialist agent already handles.",
+      "category": "Orchestration",
+      "keywords": [
+        "bootstrap",
+        "orchestration",
+        "startup",
+        "onboarding",
+        "program-init"
+      ],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/program-bootstrap.agent.md",
       "model": "claude-sonnet-4.6",
       "argumentHint": ""
     },
