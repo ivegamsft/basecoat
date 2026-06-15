@@ -63,6 +63,23 @@ Prefer markdown or plain text artifacts before running AI-heavy analysis on rich
 
 This keeps prompts smaller, reduces repeated representation overhead, and stabilizes downstream reasoning quality.
 
+### Output-token control defaults
+
+Use these response-shape defaults unless the task has high uncertainty, high risk, or the user explicitly asks for depth:
+
+1. Lead with the outcome in 1-2 short paragraphs.
+2. Prefer bullets or a compact table over long narrative prose when listing multiple items.
+3. Include only the minimum supporting detail needed to act; expand with deep rationale only when it changes a decision.
+4. Avoid repeating the request, process narration, or obvious validation chatter.
+
+#### Concise vs verbose pattern
+
+| Scenario | Preferred concise default | Overly verbose pattern (avoid by default) |
+|---|---|---|
+| Straightforward fix/update | "Updated `.github/instructions/cost-optimization.instructions.md` with output-token defaults and examples." | "I carefully reviewed the repository structure, analyzed multiple policy surfaces in detail, and then made comprehensive updates..." |
+| Multi-step status | "Completed: docs updated, tests passed, PR opened." | "First I did A, then B, then C, then D, with a long narrative for each step regardless of risk." |
+| Recommendation | "Use option B because it reduces tokens and keeps intent clear." | "Long background history plus exhaustive alternatives when only one clear option fits." |
+
 ### 1. Compact at phase transitions (not just time)
 
 Invoke `/compact` when switching between semantic phases:
