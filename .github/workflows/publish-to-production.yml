@@ -234,3 +234,57 @@ jobs:
             }' \
             && echo "Production repo metadata updated" \
             || echo "Warning: could not update repo metadata (non-fatal)"
+
+      - name: Create GitHub release on production repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PRODUCTION_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.resolve-tag.outputs.tag }}"
+
+          # Fetch the release notes from the source repo release (already published).
+          SOURCE_RELEASE=$(curl -sf \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/${TAG}" || echo "null")
+
+          if [ "$SOURCE_RELEASE" = "null" ] || [ -z "$SOURCE_RELEASE" ]; then
+            echo "No source release found for ${TAG} — skipping release creation."
+            exit 0
+          fi
+
+          RELEASE_NAME=$(echo "$SOURCE_RELEASE" | jq -r '.name // empty')
+          RELEASE_BODY=$(echo "$SOURCE_RELEASE" | jq -r '.body // empty')
+
+          # Check if a release already exists on the production repo.
+          EXISTING=$(curl -sf \
+            -H "Authorization: token ${PRODUCTION_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/ivegamsft/basecoat/releases/tags/${TAG}" \
+            -o /dev/null -w "%{http_code}" || true)
+
+          if [ "$EXISTING" = "200" ]; then
+            echo "Release ${TAG} already exists on ivegamsft/basecoat — skipping."
+            exit 0
+          fi
+
+          PAYLOAD=$(jq -n \
+            --arg tag_name "$TAG" \
+            --arg name "${RELEASE_NAME:-$TAG}" \
+            --arg body "$RELEASE_BODY" \
+            '{tag_name: $tag_name, name: $name, body: $body, draft: false, prerelease: false, make_latest: "true"}')
+
+          create_status=$(curl -sS -o /dev/null -w "%{http_code}" -X POST \
+            -H "Authorization: token ${PRODUCTION_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Content-Type: application/json" \
+            "https://api.github.com/repos/ivegamsft/basecoat/releases" \
+            -d "$PAYLOAD")
+
+          if [ "$create_status" = "201" ]; then
+            echo "GitHub Release ${TAG} created on ivegamsft/basecoat."
+          else
+            echo "::warning::Release creation returned HTTP ${create_status} — may need manual creation."
+          fi
+
