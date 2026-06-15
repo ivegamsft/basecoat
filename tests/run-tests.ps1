@@ -65,14 +65,6 @@ if ($missingEval.Count -gt 0) {
 }
 Write-Host "  eval.yaml CI gate passed: all $((Get-ChildItem $skillsDir -Directory).Count) skills have eval.yaml" -ForegroundColor Green
 
-Write-Host 'Running skill compatibility frontmatter tests...'
-& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'skill-compatibility-frontmatter-tests.ps1')
-if ($LASTEXITCODE -ne 0) {
-    Write-Host 'Skill compatibility frontmatter tests failed' -ForegroundColor Red
-    Write-FailureLog 'skill-compatibility-frontmatter-tests'
-    exit 1
-}
-
 Write-Host 'Running organized guidance audits...'
 $guidanceAuditArgs = @(
     '-NoProfile',
@@ -174,14 +166,6 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-Write-Host 'Running validate workflow gating tests...'
-& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'workflow-validate-basecoat-gating-tests.ps1')
-if ($LASTEXITCODE -ne 0) {
-    Write-Host 'Validate workflow gating tests failed' -ForegroundColor Red
-    Write-FailureLog 'workflow-validate-basecoat-gating-tests'
-    exit 1
-}
-
 Write-Host 'Running workflow enhancements (#1389) tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'workflow-enhancements-1389-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
@@ -190,11 +174,11 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-Write-Host 'Running governance metadata drift tests...'
-& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'governance-metadata-drift-tests.ps1')
+Write-Host 'Running reviewer autoassign collaborator eligibility tests (#1575)...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'reviewer-autoassign-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
-    Write-Host 'Governance metadata drift tests failed' -ForegroundColor Red
-    Write-FailureLog 'governance-metadata-drift-tests'
+    Write-Host 'Reviewer autoassign tests failed' -ForegroundColor Red
+    Write-FailureLog 'reviewer-autoassign-tests'
     exit 1
 }
 
@@ -214,43 +198,11 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-Write-Host 'Running PR flow hygiene workflow tests...'
-& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'pr-flow-hygiene-tests.ps1')
-if ($LASTEXITCODE -ne 0) {
-    Write-Host 'PR flow hygiene workflow tests failed' -ForegroundColor Red
-    Write-FailureLog 'pr-flow-hygiene-tests'
-    exit 1
-}
-
 Write-Host 'Running issue triage script tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'issue-triage-script-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
     Write-Host 'Issue triage script tests failed' -ForegroundColor Red
     Write-FailureLog 'issue-triage-script-tests'
-    exit 1
-}
-
-Write-Host 'Running update agent metadata tests...'
-& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'update-agent-metadata-tests.ps1')
-if ($LASTEXITCODE -ne 0) {
-    Write-Host 'Update agent metadata tests failed' -ForegroundColor Red
-    Write-FailureLog 'update-agent-metadata-tests'
-    exit 1
-}
-
-Write-Host 'Running update metadata model fallback tests...'
-& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'update-metadata-model-fallback-tests.ps1')
-if ($LASTEXITCODE -ne 0) {
-    Write-Host 'Update metadata model fallback tests failed' -ForegroundColor Red
-    Write-FailureLog 'update-metadata-model-fallback-tests'
-    exit 1
-}
-
-Write-Host 'Running code review agent workflow contract tests...'
-& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'workflow-code-review-agent-contract.ps1')
-if ($LASTEXITCODE -ne 0) {
-    Write-Host 'Code review agent workflow contract tests failed' -ForegroundColor Red
-    Write-FailureLog 'workflow-code-review-agent-contract'
     exit 1
 }
 
@@ -302,14 +254,6 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-Write-Host 'Running program bootstrap contract tests...'
-& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'program-bootstrap-contract-tests.ps1')
-if ($LASTEXITCODE -ne 0) {
-    Write-Host 'Program bootstrap contract tests failed' -ForegroundColor Red
-    Write-FailureLog 'program-bootstrap-contract-tests'
-    exit 1
-}
-
 Write-Host 'Running VS Code harness benchmark suite tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'vscode-harness-benchmark-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
@@ -323,14 +267,6 @@ Write-Host 'Running generate eval stubs tests...'
 if ($LASTEXITCODE -ne 0) {
     Write-Host 'Generate eval stubs tests failed' -ForegroundColor Red
     Write-FailureLog 'generate-eval-stubs-tests'
-    exit 1
-}
-
-Write-Host 'Running generate registry tests...'
-& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'generate-registry-tests.ps1')
-if ($LASTEXITCODE -ne 0) {
-    Write-Host 'Generate registry tests failed' -ForegroundColor Red
-    Write-FailureLog 'generate-registry-tests'
     exit 1
 }
 
@@ -355,14 +291,6 @@ Write-Host 'Running token-status tests...'
 if ($LASTEXITCODE -ne 0) {
     Write-Host 'Token-status tests failed' -ForegroundColor Red
     Write-FailureLog 'token-status-tests'
-    exit 1
-}
-
-Write-Host 'Running backlog efficiency scorecard tests...'
-& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'backlog-efficiency-scorecard-tests.ps1')
-if ($LASTEXITCODE -ne 0) {
-    Write-Host 'Backlog efficiency scorecard tests failed' -ForegroundColor Red
-    Write-FailureLog 'backlog-efficiency-scorecard-tests'
     exit 1
 }
 

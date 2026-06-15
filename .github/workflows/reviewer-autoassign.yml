@@ -73,13 +73,39 @@ jobs:
               }
             }
 
-            const candidates = [...score.entries()]
+            const rawCandidates = [...score.entries()]
               .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
               .map(([login]) => login)
-              .slice(0, 2);
+              .slice(0, 5);
 
-            if (candidates.length === 0) {
+            if (rawCandidates.length === 0) {
               core.info('No eligible reviewers discovered from path history.');
+              return;
+            }
+
+            // Filter candidates to confirmed repository collaborators to prevent
+            // "Reviews may only be requested from collaborators" API errors (#1575).
+            const eligibleReviewers = [];
+            for (const login of rawCandidates) {
+              try {
+                await github.rest.repos.checkCollaborator({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  username: login
+                });
+                eligibleReviewers.push(login);
+                if (eligibleReviewers.length === 2) break;
+              } catch (err) {
+                if (err.status === 404) {
+                  core.warning(`Skipping reviewer @${login}: not a repository collaborator.`);
+                } else {
+                  core.warning(`Collaborator check for @${login} failed (HTTP ${err.status ?? 'unknown'}): ${err.message}. Skipping.`);
+                }
+              }
+            }
+
+            if (eligibleReviewers.length === 0) {
+              core.info('No confirmed collaborator reviewers found after eligibility check; skipping reviewer assignment.');
               return;
             }
 
@@ -87,10 +113,10 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: prNumber,
-              reviewers: candidates
+              reviewers: eligibleReviewers
             });
 
             core.summary
               .addHeading('Auto-assigned reviewers')
-              .addRaw(`PR #${prNumber} reviewers requested: ${candidates.map(name => `@${name}`).join(', ')}\n`)
+              .addRaw(`PR #${prNumber} reviewers requested: ${eligibleReviewers.map(name => `@${name}`).join(', ')}\n`)
               .write();
