@@ -200,8 +200,10 @@ whether a full or scoped sync is recommended.
 If neither changelog section nor merged PR list is available, the workflow auto-generates release notes from commit history as a final fallback.
 
 If you need to create the release manually (e.g., workflows are disabled), create
-it in the canonical source repository (`IBuySpy-Shared/basecoat`). Production
-release metadata is synchronized by the publish workflow.
+it in the canonical source repository (`IBuySpy-Shared/basecoat`). The
+production mirror (`ivegamsft/basecoat`) is synchronized by
+`publish-to-production.yml` and should never be targeted directly for manual
+release creation.
 
 ```bash
 gh release create vX.Y.Z \
