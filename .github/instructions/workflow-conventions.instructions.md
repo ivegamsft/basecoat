@@ -79,8 +79,9 @@ Use the `pr-flow-hygiene.yml` workflow as the fixed-cadence PR backlog guardrail
 Use these defaults unless task complexity requires escalation:
 
 1. Keep responses concise by default and expand only when risk, ambiguity, or investigation depth requires it.
-2. Start in Auto/default model routing for routine work; upshift only for architecture/security reasoning or complex cross-system debugging.
-3. Audit each tool call for overhead: prefer direct file tools for local repo work and reserve remote/MCP calls for data not available in-repo.
+2. Start in Auto/default model routing for routine work; upshift only for ambiguous cross-system root-cause work, security-sensitive review, large behavior-preserving refactors, or architectural tradeoff decisions.
+3. Compact or otherwise reduce context before blaming model choice; context reduction is the primary cost lever.
+4. Audit each tool call for overhead: prefer direct file tools for local repo work and reserve remote/MCP calls for data not available in-repo.
 
 ## Triggering the Copilot Coding Agent
 
