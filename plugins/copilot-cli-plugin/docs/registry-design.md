@@ -40,6 +40,8 @@ Agents are described in a single JSON file (`basecoat-registry.json`) that is ge
 }
 ```text
 
+`model` is sourced directly from each agent file's `model:` frontmatter value. If an agent omits `model:`, the generator defaults to `claude-sonnet-4.6`.
+
 ### Full JSON Schema (JSON Schema Draft 7)
 
 See `schema/agent-registry.schema.json`.
