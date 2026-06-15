@@ -50,3 +50,5 @@ When continuing work, use:
 Use canonical summary: docs/templates/attachment-canonical-summary.md (filled copy at <path-or-link>)
 Do not reload raw attachments unless new evidence appears.
 ```
+
+Before creating or updating the canonical summary, normalize rich files to markdown/text using the policy in [`../guides/token-optimization.md`](../guides/token-optimization.md#35-normalize-rich-files-to-markdowntext-first).

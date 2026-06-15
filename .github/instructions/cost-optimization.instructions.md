@@ -52,6 +52,17 @@ Use this table before starting work so mode selection is explicit, not implied.
 
 If uncertain, start in **Ask mode** and switch to **Agent mode** when scope expands beyond a focused answer or single-step edit.
 
+### Rich-file normalization before AI analysis
+
+Prefer markdown or plain text artifacts before running AI-heavy analysis on rich/binary inputs.
+
+1. Convert `.docx` and `.pdf` content to markdown or plain text summaries.
+2. Convert `.pptx` decks to markdown slide outlines (title + bullets + notes).
+3. Convert `.xlsx/.xls/.csv/.tsv` data to normalized tables or markdown summaries with only needed columns.
+4. Store one canonical normalized artifact by path and reuse it across turns instead of repeatedly loading the original rich files.
+
+This keeps prompts smaller, reduces repeated representation overhead, and stabilizes downstream reasoning quality.
+
 ### 1. Compact at phase transitions (not just time)
 
 Invoke `/compact` when switching between semantic phases:
