@@ -479,6 +479,34 @@ else {
     $guardrailFailures += 'agent-merge-required-status'
 }
 
+# Test 15: Required-check workflows must support merge queue
+Write-Host '  Test 15: Validate required-check workflows support merge_group...'
+$mergeQueueWorkflowRequirements = @(
+    '.github/workflows/validate-basecoat.yml',
+    '.github/workflows/prd-spec-gate.yml'
+)
+$mergeQueueTriggerViolations = @()
+
+foreach ($workflowPath in $mergeQueueWorkflowRequirements) {
+    if (-not (Test-Path $workflowPath)) {
+        $mergeQueueTriggerViolations += "$workflowPath (missing file)"
+        continue
+    }
+
+    $workflowContent = Get-Content $workflowPath -Raw
+    if ($workflowContent -notmatch "(?m)^\s+merge_group:\s*$") {
+        $mergeQueueTriggerViolations += "$workflowPath (missing merge_group trigger)"
+    }
+}
+
+if ($mergeQueueTriggerViolations.Count -eq 0) {
+    Write-Host '    ✓ Required-check workflows include merge_group triggers'
+}
+else {
+    Write-Host "    ✗ Missing merge_group support in: $($mergeQueueTriggerViolations -join ', ')" -ForegroundColor Red
+    $guardrailFailures += 'merge-queue-trigger-missing'
+}
+
 if ($guardrailFailures.Count -gt 0) {
     Write-Host "Workflow guardrails failed: $($guardrailFailures -join ', ')" -ForegroundColor Red
     exit 1

@@ -10,6 +10,9 @@ on:
       - ready_for_review
       - labeled
       - unlabeled
+  merge_group:
+    types:
+      - checks_requested
 
 permissions:
   contents: read
@@ -28,6 +31,11 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
+            if (!context.payload.pull_request) {
+              core.notice('Merge queue event detected (no PR payload). Passing PRD/spec gate because PR-specific checks are not applicable.');
+              return;
+            }
+
             const pr = context.payload.pull_request;
             const labels = (pr.labels || []).map(l => l.name);
 

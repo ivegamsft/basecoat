@@ -66,6 +66,7 @@ Navigate to: **Repository Settings → Branches → Add rule** (or edit existing
 | Dismiss stale reviews | ✅ | Re-review after new push |
 | Require review from code owners | ✅ (if CODEOWNERS exists) | Enforce ownership boundaries |
 | Require status checks to pass | ✅ | See status checks list below |
+| Require merge queue | ✅ | Ensures only checked merge groups land on `main` |
 | Require branches to be up to date | ✅ | Prevents stale-branch merges |
 | Require conversation resolution | ✅ | All review comments must be resolved |
 | Require signed commits | ✅ | Verify author identity |
@@ -84,8 +85,8 @@ These are the checks defined in basecoat workflows:
 | `validate-unix` | `validate-basecoat.yml` | Bash validation suite |
 | `validate-windows` | `validate-basecoat.yml` | PowerShell validation suite |
 | `Agent Merge / Agent merge guardrails` | `agent-merge.yml` | Eval companion validation and agent/skill guardrails (runs on all PRs; skips heavy checks when assets are unchanged) |
+| `prd-spec-gate` | `prd-spec-gate.yml` | PRD/spec compliance; passes automatically for merge queue events |
 | `gitleaks` | `secret-scan.yml` | ⚠️ Warn-only — **do NOT add as required check** |
-| `prd-spec-gate` | `prd-spec-gate.yml` | PRD spec compliance |
 
 > **Important:** Do **not** add the `gitleaks` / `Secret Scanning (warn only)`
 > check as a required status check. It is intentionally warn-only and must
@@ -168,9 +169,16 @@ Save this as `branch-protection-ruleset.json` and import via CLI (see next secti
           {
             "context": "Agent Merge / Agent merge guardrails",
             "integration_id": null
+          },
+          {
+            "context": "prd-spec-gate",
+            "integration_id": null
           }
         ]
       }
+    },
+    {
+      "type": "merge_queue"
     },
     {
       "type": "commit_message_pattern",
@@ -226,7 +234,7 @@ gh api \
   --method PUT \
   -H "Accept: application/vnd.github+json" \
   /repos/{OWNER}/{REPO}/branches/main/protection \
-  --field required_status_checks='{"strict":true,"contexts":["validate-commit-messages","validate-unix","validate-windows","Agent Merge / Agent merge guardrails"]}' \
+  --field required_status_checks='{"strict":true,"contexts":["validate-commit-messages","validate-unix","validate-windows","Agent Merge / Agent merge guardrails","prd-spec-gate"]}' \
   --field enforce_admins=true \
   --field required_pull_request_reviews='{"required_approving_review_count":1,"dismiss_stale_reviews":true}' \
   --field restrictions=null \
