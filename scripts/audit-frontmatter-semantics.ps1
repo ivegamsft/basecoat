@@ -41,6 +41,36 @@ function Test-Field {
     return $Frontmatter -match "(?m)^$([regex]::Escape($Field))\s*:"
 }
 
+function Get-CompatibilityValues {
+    param([string]$Frontmatter)
+
+    if (-not $Frontmatter) { return @() }
+
+    if ($Frontmatter -match '(?ms)^compatibility:\s*\[(.*?)\]\s*$') {
+        return @($Matches[1] -split ',' | ForEach-Object { $_.Trim().Trim('"').Trim("'") } | Where-Object { $_ })
+    }
+
+    if ($Frontmatter -match '(?ms)^compatibility:\s*\r?\n((?:\s*-\s*.+\r?\n?)*)') {
+        $block = $Matches[1]
+        return @(
+            ($block -split "\r?\n") |
+            ForEach-Object { ($_ -replace '^\s*-\s*', '').Trim().Trim('"').Trim("'") } |
+            Where-Object { $_ }
+        )
+    }
+
+    return @()
+}
+
+$allowedCompatibility = @(
+    'copilot-chat',
+    'copilot-coding-agent',
+    'github-copilot-cli',
+    'vscode-chat',
+    'mcp',
+    'github-actions'
+)
+
 $assetSets = @(
     @{
         Category = 'agents'
@@ -65,6 +95,7 @@ $assetSets = @(
 )
 
 $reportRows = [System.Collections.Generic.List[object]]::new()
+$compatibilityViolations = [System.Collections.Generic.List[object]]::new()
 
 foreach ($set in $assetSets) {
     $total = $set.Files.Count
@@ -74,6 +105,24 @@ foreach ($set in $assetSets) {
             $frontmatter = Get-Frontmatter -FilePath $file.FullName
             if ($frontmatter -and (Test-Field -Frontmatter $frontmatter -Field $field)) {
                 $present++
+            }
+
+            foreach ($file in $set.Files) {
+                $frontmatter = Get-Frontmatter -FilePath $file.FullName
+                if (-not $frontmatter -or -not (Test-Field -Frontmatter $frontmatter -Field 'compatibility')) {
+                    continue
+                }
+
+                $values = Get-CompatibilityValues -Frontmatter $frontmatter
+                foreach ($value in $values) {
+                    if ($allowedCompatibility -notcontains $value) {
+                        $compatibilityViolations.Add([pscustomobject]@{
+                            category = $set.Category
+                            file = $file.FullName.Replace($repoRoot + [IO.Path]::DirectorySeparatorChar, '')
+                            value = $value
+                        })
+                    }
+                }
             }
         }
         $missing = $total - $present
@@ -101,6 +150,21 @@ $md.Add('| Category | Field | Present | Missing | Coverage % |')
 $md.Add('|---|---|---:|---:|---:|')
 foreach ($row in $reportRows | Sort-Object category, field) {
     $md.Add("| $($row.category) | `$($row.field)` | $($row.present)/$($row.total) | $($row.missing) | $($row.coverage_pct) |")
+}
+
+$md.Add('')
+$md.Add('## Compatibility Value Audit')
+$md.Add('')
+$md.Add("Allowed values: $($allowedCompatibility -join ', ')")
+$md.Add('')
+if ($compatibilityViolations.Count -eq 0) {
+    $md.Add('No invalid compatibility values found.')
+} else {
+    $md.Add('| Category | File | Invalid value |')
+    $md.Add('|---|---|---|')
+    foreach ($violation in $compatibilityViolations | Sort-Object category, file, value) {
+        $md.Add("| $($violation.category) | $($violation.file) | `$($violation.value)` |")
+    }
 }
 
 $md | Set-Content -Path $mdFile -Encoding UTF8
