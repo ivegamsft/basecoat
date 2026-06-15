@@ -8,6 +8,11 @@ on:
         description: "Commit SHA to generate rollback patch for"
         required: false
         type: string
+      rollback_apply:
+        description: "Apply the rollback patch for rollback_ref (true/false)"
+        required: false
+        default: "false"
+        type: string
 
 permissions:
   contents: read
@@ -260,11 +265,33 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Validate rollback target commit metadata
+        shell: bash
+        env:
+          ROLLBACK_REF: ${{ github.event.inputs.rollback_ref }}
+        run: |
+          set -euo pipefail
+
+          if ! git cat-file -e "${ROLLBACK_REF}^{commit}" 2>/dev/null; then
+            echo "::error::Rollback ref '${ROLLBACK_REF}' is not a valid commit in this repository."
+            exit 1
+          fi
+
+          COMMIT_SUBJECT="$(git log -1 --pretty=%s "${ROLLBACK_REF}")"
+          COMMIT_DATE="$(git log -1 --pretty=%ci "${ROLLBACK_REF}")"
+          COMMIT_AUTHOR="$(git log -1 --pretty=%an "${ROLLBACK_REF}")"
+          echo "Rollback target validated:"
+          echo "  SHA:     ${ROLLBACK_REF}"
+          echo "  Subject: ${COMMIT_SUBJECT}"
+          echo "  Date:    ${COMMIT_DATE}"
+          echo "  Author:  ${COMMIT_AUTHOR}"
+
       - name: Generate rollback patch
         shell: bash
         env:
-          ROLLBACK_REF: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rollback_ref || '' }}
+          ROLLBACK_REF: ${{ github.event.inputs.rollback_ref }}
         run: |
+          set -euo pipefail
           git revert --no-commit "${ROLLBACK_REF}"
           git diff --cached > agent-merge-rollback.patch
           git reset --hard
@@ -275,3 +302,92 @@ jobs:
           name: agent-merge-rollback-patch
           path: agent-merge-rollback.patch
           retention-days: 7
+
+  rollback-apply:
+    name: Agent merge rollback apply
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch'
+          && github.event.inputs.rollback_ref != ''
+          && github.event.inputs.rollback_apply == 'true' }}
+    needs: rollback-plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download rollback patch artifact
+        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935
+        with:
+          name: agent-merge-rollback-patch
+
+      - name: Validate patch is non-empty
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! -s agent-merge-rollback.patch ]]; then
+            echo "::error::Rollback patch is empty — nothing to revert for ref ${{ github.event.inputs.rollback_ref }}."
+            exit 1
+          fi
+          echo "Patch size: $(wc -c < agent-merge-rollback.patch) bytes"
+
+      - name: Apply rollback patch
+        id: apply
+        shell: bash
+        env:
+          ROLLBACK_REF: ${{ github.event.inputs.rollback_ref }}
+        run: |
+          set -euo pipefail
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git apply --index agent-merge-rollback.patch
+
+          REVERTED_FILES="$(git diff --cached --name-only | tr '\n' ',')"
+          echo "reverted_files=${REVERTED_FILES}" >> "${GITHUB_OUTPUT}"
+
+          git commit -m "revert(agents): rollback apply for ${ROLLBACK_REF}
+
+          Automated rollback applied via agent-merge workflow.
+          Reverted files: ${REVERTED_FILES}
+
+          Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+          APPLIED_SHA="$(git rev-parse HEAD)"
+          echo "applied_sha=${APPLIED_SHA}" >> "${GITHUB_OUTPUT}"
+          git push origin HEAD
+
+      - name: Emit rollback execution summary
+        if: always()
+        shell: bash
+        env:
+          ROLLBACK_REF: ${{ github.event.inputs.rollback_ref }}
+          REVERTED_FILES: ${{ steps.apply.outputs.reverted_files }}
+          APPLIED_SHA: ${{ steps.apply.outputs.applied_sha }}
+          APPLY_OUTCOME: ${{ steps.apply.outcome }}
+        run: |
+          {
+            echo "# Agent Merge Rollback Execution Summary"
+            echo
+            echo "| Field | Value |"
+            echo "|-------|-------|"
+            echo "| Rollback target | \`${ROLLBACK_REF}\` |"
+            echo "| Status | ${APPLY_OUTCOME} |"
+            echo "| Applied commit | \`${APPLIED_SHA:-N/A}\` |"
+            echo "| Reverted files | ${REVERTED_FILES:-none} |"
+            echo "| Timestamp | $(date -u '+%Y-%m-%dT%H:%M:%SZ') |"
+          } > agent-merge-rollback-summary.md
+          cat agent-merge-rollback-summary.md
+
+      - name: Upload rollback summary artifact
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: agent-merge-rollback-summary
+          path: agent-merge-rollback-summary.md
+          retention-days: 14
