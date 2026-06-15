@@ -74,6 +74,28 @@ Post `/approve` as an issue comment to trigger the Copilot coding agent workflow
 (`issue-approve.yml`). This adds `approved` + `copilot-agent` labels and assigns
 the issue to Copilot. The `@copilot` mention does **not** trigger the agent.
 
+## Keep/Fix/Throttle Operating Model
+
+BaseCoat uses a Keep/Fix/Throttle governance framework to balance agent autonomy with safety:
+
+| Tier | Pattern | Approval | Timeout | Rollback |
+|------|---------|----------|---------|----------|
+| **Keep** | Standardized, proven patterns | None | Ongoing | N/A |
+| **Fix** | Recurring failures as product work | None | 1–2 week cycle | Tracked in failure archive |
+| **Tier 1** | Read-only feedback | None | N/A | N/A |
+| **Tier 2** | Staging deployments, feature merges | PR review | 2h | Auto (health check) |
+| **Tier 3** | Production merge, quota changes | SLA + explicit approval | 4h | Manual |
+| **Tier 4** | Emergency, account-level changes | Admin + on-call | Real-time | Manual + incident runbook |
+
+**How to apply**:
+
+1. Classify workflow or operation by risk tier (see `docs/reference/risk-tier-policy.md`).
+2. Add tier label to workflow: `env.RISK_TIER: "1"` (or 2, 3, 4).
+3. Enforce tier governance in CI via status checks (approval, timeout, validation).
+4. Document runbook for each tier workflow (see `docs/operations/operational-runbook.md` template).
+
+**Reference**: `docs/operations/keep-fix-throttle-model.md` (full framework and measurable criteria).
+
 ## Worktrees
 
 When creating worktrees, use naming pattern: `../<repo>-wt-<issue-or-pr>` (e.g., `../basecoat-wt-1334`).
