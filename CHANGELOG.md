@@ -4,21 +4,24 @@ All notable changes to this repository should be recorded in this file.
 
 ## Unreleased
 
+- No unreleased changes.
+
+## 3.32.0 - 2026-06-14
+
 ### Added
 
-- Added consolidated workflow enhancements for issue #1389:
-  - `.github/workflows/dependency-audit.yml` (#181)
-  - `.github/workflows/stale-management.yml` (#182)
-  - `.github/workflows/release-changelog-generation.yml` (#183)
-  - `.github/workflows/cross-repo-sync-validation.yml` (#184)
-  - `.github/workflows/docs-link-checker.yml` (#185)
-  - `.github/workflows/skill-coverage-report.yml` (#186)
-  - `.github/workflows/repo-health-check.yml` (#187)
-  - `.github/workflows/pr-size-labeler.yml` (#188)
-  - `.github/workflows/dependency-graph-pages.yml` (#189)
-  - `.github/workflows/reviewer-autoassign.yml` (#190)
-- Added workflow contract coverage test: `tests/workflow-enhancements-1389-tests.ps1`
-  and wired it into `tests/run-tests.ps1`.
+- Added operation-context-resolver environment routing skill coverage and environment-audit-drift infrastructure validation. (#1624, #1636)
+- Added governance/metadata hardening updates for agent catalog consistency. (#1625)
+
+### Changed
+
+- Updated Auto model-baseline documentation with explicit upshift triggers and integrated token-optimization guidance. (#1637, #1631)
+- Updated dependency maintenance for `mcp/basecoat-extension` (`esbuild` dev dependency bump). (#1638)
+
+### Fixed
+
+- Fixed publish-to-production workflow dispatch tag resolution and reduced false workflow-agent failure issue noise. (#1632, #1629)
+- Fixed stale docs inventory counts and release-impact-advisor unsupported model handling. (#1620, #1618)
 
 ## 3.31.0 - 2026-06-13
 

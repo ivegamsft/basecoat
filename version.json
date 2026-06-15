@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "3.31.0",
-  "releaseDate": "2026-06-13",
-  "notes": "Release: Sprint 35 cost-optimization execution and workflow unblock fixes"
+  "version": "3.32.0",
+  "releaseDate": "2026-06-14",
+  "notes": "Release: environment-routing skill/infra validation additions and publish workflow reliability fixes"
 }
