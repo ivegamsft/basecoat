@@ -109,6 +109,7 @@ jobs:
           git diff --cached --quiet || git commit -m "chore(publish): rewrite internal repo links for ${TAG}"
 
       - name: Push to production repository
+        id: push-production
         env:
           PRODUCTION_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
         run: |
@@ -118,34 +119,6 @@ jobs:
           PRODUCTION_REMOTE="https://x-access-token:${PRODUCTION_TOKEN}@github.com/ivegamsft/basecoat.git"
           PROTECTION_API="https://api.github.com/repos/ivegamsft/basecoat/branches/main/protection"
           PROTECTION_BACKUP_FILE=".production-main-protection.json"
-          PROTECTION_VERIFY_FILE=".production-main-protection-post.json"
-          HAD_PROTECTION=0
-          PROTECTION_RESTORED=0
-
-          restore_branch_protection() {
-            if [ "$PROTECTION_RESTORED" -eq 1 ]; then
-              return
-            fi
-
-            if [ "$HAD_PROTECTION" -eq 1 ]; then
-              echo "Restoring original branch protection..."
-              curl -sf -X PUT \
-                -H "Authorization: token ${PRODUCTION_TOKEN}" \
-                -H "Accept: application/vnd.github+json" \
-                "$PROTECTION_API" \
-                --data-binary "@${PROTECTION_BACKUP_FILE}" >/dev/null
-            else
-              echo "Branch had no protection before publish; ensuring unprotected state is preserved..."
-              curl -sf -X DELETE \
-                -H "Authorization: token ${PRODUCTION_TOKEN}" \
-                -H "Accept: application/vnd.github+json" \
-                "$PROTECTION_API" >/dev/null || true
-            fi
-
-            PROTECTION_RESTORED=1
-          }
-
-          trap 'restore_branch_protection' EXIT
 
           echo "Capturing existing branch protection..."
           protection_status=$(curl -sS -o "$PROTECTION_BACKUP_FILE" -w "%{http_code}" \
@@ -154,22 +127,19 @@ jobs:
             "$PROTECTION_API")
 
           if [ "$protection_status" = "200" ]; then
-            HAD_PROTECTION=1
+            echo "had_protection=true" >> "$GITHUB_OUTPUT"
             echo "Existing branch protection captured."
-          elif [ "$protection_status" = "404" ]; then
-            echo "Branch protection is currently disabled."
-            echo '{}' > "$PROTECTION_BACKUP_FILE"
-          else
-            echo "Failed to capture branch protection (HTTP ${protection_status})."
-            exit 1
-          fi
-
-          if [ "$HAD_PROTECTION" -eq 1 ]; then
             echo "Temporarily disabling branch protection to allow force-push..."
             curl -sf -X DELETE \
               -H "Authorization: token ${PRODUCTION_TOKEN}" \
               -H "Accept: application/vnd.github+json" \
               "$PROTECTION_API" >/dev/null
+          elif [ "$protection_status" = "404" ]; then
+            echo "had_protection=false" >> "$GITHUB_OUTPUT"
+            echo "Branch protection is currently disabled."
+          else
+            echo "Failed to capture branch protection (HTTP ${protection_status})."
+            exit 1
           fi
 
           # Clear any persisted Actions bot credentials so PAT is used for push
@@ -181,34 +151,68 @@ jobs:
           # Push the tag
           git push "${PRODUCTION_REMOTE}" "refs/tags/${TAG}"
 
-          restore_branch_protection
+          echo "Pushed ${TAG} to ivegamsft/basecoat"
 
-          echo "Verifying branch protection round-trip..."
-          if [ "$HAD_PROTECTION" -eq 1 ]; then
-            verify_status=$(curl -sS -o "$PROTECTION_VERIFY_FILE" -w "%{http_code}" \
-              -H "Authorization: token ${PRODUCTION_TOKEN}" \
-              -H "Accept: application/vnd.github+json" \
-              "$PROTECTION_API")
-            if [ "$verify_status" != "200" ]; then
-              echo "Branch protection verification failed (HTTP ${verify_status})."
-              exit 1
-            fi
+      - name: Restore branch protection
+        if: always() && steps.push-production.outputs.had_protection == 'true'
+        env:
+          PRODUCTION_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
+        run: |
+          set -euo pipefail
+          PROTECTION_API="https://api.github.com/repos/ivegamsft/basecoat/branches/main/protection"
+          PROTECTION_BACKUP_FILE=".production-main-protection.json"
 
-            python scripts/verify-branch-protection.py "$PROTECTION_BACKUP_FILE" "$PROTECTION_VERIFY_FILE"
-          else
-            verify_status=$(curl -sS -o /dev/null -w "%{http_code}" \
-              -H "Authorization: token ${PRODUCTION_TOKEN}" \
-              -H "Accept: application/vnd.github+json" \
-              "$PROTECTION_API")
-            if [ "$verify_status" != "404" ]; then
-              echo "Expected unprotected branch after restore, got HTTP ${verify_status}."
-              exit 1
-            fi
+          if [ ! -f "$PROTECTION_BACKUP_FILE" ]; then
+            echo "::warning::No backup file found — branch protection must be restored manually."
+            exit 0
           fi
 
-          rm -f "$PROTECTION_BACKUP_FILE" "$PROTECTION_VERIFY_FILE"
+          # Transform GET response to PUT-compatible payload.
+          # GitHub's GET /branches/{branch}/protection returns read-only fields (url,
+          # enforcement_level, context_url) that the PUT endpoint rejects with HTTP 422.
+          PUT_PAYLOAD=$(jq '{
+            required_status_checks: (
+              if .required_status_checks then {
+                strict: (.required_status_checks.strict // false),
+                contexts: (.required_status_checks.contexts // [])
+              } else null end
+            ),
+            enforce_admins: (.enforce_admins.enabled // false),
+            required_pull_request_reviews: (
+              if .required_pull_request_reviews then {
+                dismissal_restrictions: (
+                  if ((.required_pull_request_reviews.dismissal_restrictions.users // [] | length) > 0)
+                    or ((.required_pull_request_reviews.dismissal_restrictions.teams // [] | length) > 0)
+                  then {
+                    users: [.required_pull_request_reviews.dismissal_restrictions.users[]?.login],
+                    teams: [.required_pull_request_reviews.dismissal_restrictions.teams[]?.slug]
+                  } else {} end
+                ),
+                dismiss_stale_reviews: (.required_pull_request_reviews.dismiss_stale_reviews // false),
+                require_code_owner_reviews: (.required_pull_request_reviews.require_code_owner_reviews // false),
+                required_approving_review_count: (.required_pull_request_reviews.required_approving_review_count // 1),
+                require_last_push_approval: (.required_pull_request_reviews.require_last_push_approval // false)
+              } else null end
+            ),
+            restrictions: null
+          }' "$PROTECTION_BACKUP_FILE")
 
-          echo "Pushed ${TAG} to ivegamsft/basecoat"
+          echo "Restoring branch protection..."
+          restore_status=$(curl -sS -o /dev/null -w "%{http_code}" -X PUT \
+            -H "Authorization: token ${PRODUCTION_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Content-Type: application/json" \
+            "$PROTECTION_API" \
+            -d "${PUT_PAYLOAD}")
+
+          if [ "$restore_status" = "200" ]; then
+            echo "Branch protection restored successfully."
+          else
+            echo "::warning::Branch protection restore returned HTTP ${restore_status}. Manual restore may be needed for ivegamsft/basecoat main."
+          fi
+
+          rm -f "$PROTECTION_BACKUP_FILE"
+
 
       - name: Update production repo metadata
         env:
