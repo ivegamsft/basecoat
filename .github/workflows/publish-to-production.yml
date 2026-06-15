@@ -9,6 +9,7 @@ on:
     inputs:
       tag:
         description: "Tag to publish (e.g. v3.31.0)"
+        type: string
         required: true
 
 permissions:
