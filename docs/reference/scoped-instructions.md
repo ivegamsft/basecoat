@@ -41,6 +41,32 @@ Recommended companion references:
 
 ---
 
+## Token Optimization Quick Start for Instruction Operators
+
+Use this checklist when enabling or auditing scoped instruction stacks for cost-efficient operation.
+
+### Quick-Start Checklist
+
+1. **Default output constraint policy**: keep responses terse by default, and use code-only output for implementation-focused requests.
+2. **Ask-vs-Agent mode selection**: run Ask mode for focused single-scope work; use Agent mode only when work spans multiple files, broad scans, or long-running command loops.
+3. **Auto model baseline policy**: start in Auto/default model routing and upshift only for architecture, security, or high-ambiguity reasoning segments.
+4. **MCP server audit policy**: keep active MCP servers minimal; disable unused servers and prefer local file tools for repo-local data.
+5. **Rich-file normalization policy**: convert rich files (PDF, DOCX, PPTX, screenshots) to Markdown summaries before AI execution so downstream turns reuse compact context.
+
+### Rollout Plan
+
+1. **Phase 1 (baseline, week 1)**: enforce output constraints, Ask-vs-Agent routing, and Auto/default model baseline in active instruction files.
+2. **Phase 2 (tooling hygiene, week 2)**: add MCP server audit steps to runbooks and disable unused servers in team configs.
+3. **Phase 3 (artifact hygiene, week 3)**: require rich-file to Markdown conversion in attachment-heavy workflows and validate summary-path reuse during PR review.
+
+### Related BaseCoat References
+
+- `/.github/instructions/workflow-conventions.instructions.md` — execution defaults and mode-routing policy
+- `/.github/instructions/cost-optimization.instructions.md` — session hygiene and MCP overhead guidance
+- `docs/guides/token-optimization.md` — token budgeting and context compression patterns
+
+---
+
 ## `applyTo` Pattern Reference
 
 | Pattern | Matches | Use Case |

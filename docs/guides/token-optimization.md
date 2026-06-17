@@ -2,6 +2,8 @@
 
 Strategies for managing token budgets, compressing context, and handing off state between agents in a multi-agent system. Companion to [`model-optimization.md`](model-optimization.md) (model selection) and [`../architecture/multi-agent-orchestration-patterns.md`](../architecture/multi-agent-orchestration-patterns.md) (branch coordination).
 
+For an operator-first rollout checklist that maps token controls to scoped instruction policy, see [`../reference/scoped-instructions.md#token-optimization-quick-start-for-instruction-operators`](../reference/scoped-instructions.md#token-optimization-quick-start-for-instruction-operators).
+
 > **Tracking:** Issue [#42](https://github.com/IBuySpy-Shared/basecoat/issues/42)
 > **GHCP-specific:** This guidance was developed and tested against GitHub Copilot (GHCP).
 > If you are using Azure OpenAI, Anthropic API, AWS Bedrock, or another provider,
@@ -777,6 +779,7 @@ Based on Sprint 31 empirical testing, the following agent categories are safe to
 
 - [`model-optimization.md`](model-optimization.md) — Model tier matrix and cost considerations
 - [`../architecture/multi-agent-orchestration-patterns.md`](../architecture/multi-agent-orchestration-patterns.md) — Branch coordination for parallel agents
+- [`../reference/scoped-instructions.md`](../reference/scoped-instructions.md) — Quick-start checklist and rollout policy for scoped instruction operators
 - [`instructions/basecoat-20-lang-governance.instructions.md`](/instructions/basecoat-20-lang-governance.instructions.md) — Section 10: Token and Model Awareness
 - [`.github/instructions/cost-optimization.instructions.md`](/.github/instructions/cost-optimization.instructions.md) — Operator defaults, model upshift triggers, and MCP overhead checklist
 - [`.github/instructions/workflow-conventions.instructions.md`](/.github/instructions/workflow-conventions.instructions.md) — Ask vs Agent mode policy and transition hygiene
