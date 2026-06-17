@@ -1,6 +1,6 @@
 ---
 description: "Session hygiene, fleet management, and token cost optimization patterns"
-applyTo: "agents/**/*,skills/**/*"
+applyTo: "**/*"
 ---
 
 # Cost Optimization & Session Management
@@ -28,57 +28,6 @@ Execute these in order to reduce input-token bloat first, then optimize routing:
 3. If switching to a new domain (for example: sprint planning -> release operations), run `/new` and reload only relevant references.
 4. Keep main-thread messages decision-focused; delegate scan/research work.
 5. For attachment-heavy tasks, create one canonical summary artifact and reference it by path/link.
-6. Choose Ask mode by default for focused answers; use Agent mode when execution spans multiple files, long-running commands, or broad research.
-7. Keep output tokens lean by default: concise responses, small diffs, and escalation to deeper explanations only when needed.
-8. Normalize rich files (PPTX, PDF, DOCX, XLSX) into one markdown summary artifact before reuse across turns.
-
-Cross-reference surfaces:
-
-- `docs/guides/token-optimization.md` (operator quick-start + normalization workflow)
-- `.github/instructions/workflow-conventions.instructions.md` (session transition and mode defaults)
-- `docs/reference/scoped-instructions.md` (scope design that prevents token-heavy universal activation)
-
-### Ask mode vs Agent mode decision table
-
-Use this table before starting work so mode selection is explicit, not implied.
-
-| Situation | Preferred mode | Why | BaseCoat example |
-|---|---|---|---|
-| Single question, quick lookup, or one-file clarification | **Ask mode** | Avoids agent startup and orchestration overhead | "What does `.github/instructions/testing-validation.instructions.md` require for local validation?" |
-| Small edit in one file with low ambiguity | **Ask mode** | Lower turn count and less context carry-over | Update one markdown section in `docs/guides/workflows-getting-started.md` |
-| Multi-file change with generated artifacts or cross-reference updates | **Agent mode** | Better for coordinated edits and consistency checks | Refresh inventory docs plus `asset-manifest.json` and metadata artifacts |
-| Command-heavy workflow with verification loops | **Agent mode** | Handles tool execution and iteration without main-thread churn | Run full validation/test scripts and fix breakages before PR |
-| Broad triage/research across many modules or issues | **Agent mode** | Delegation and batching reduce repeated reads in the main thread | Backlog burndown scan across multiple issues/PRs |
-
-If uncertain, start in **Ask mode** and switch to **Agent mode** when scope expands beyond a focused answer or single-step edit.
-
-### Rich-file normalization before AI analysis
-
-Prefer markdown or plain text artifacts before running AI-heavy analysis on rich/binary inputs.
-
-1. Convert `.docx` and `.pdf` content to markdown or plain text summaries.
-2. Convert `.pptx` decks to markdown slide outlines (title + bullets + notes).
-3. Convert `.xlsx/.xls/.csv/.tsv` data to normalized tables or markdown summaries with only needed columns.
-4. Store one canonical normalized artifact by path and reuse it across turns instead of repeatedly loading the original rich files.
-
-This keeps prompts smaller, reduces repeated representation overhead, and stabilizes downstream reasoning quality.
-
-### Output-token control defaults
-
-Use these response-shape defaults unless the task has high uncertainty, high risk, or the user explicitly asks for depth:
-
-1. Lead with the outcome in 1-2 short paragraphs.
-2. Prefer bullets or a compact table over long narrative prose when listing multiple items.
-3. Include only the minimum supporting detail needed to act; expand with deep rationale only when it changes a decision.
-4. Avoid repeating the request, process narration, or obvious validation chatter.
-
-#### Concise vs verbose pattern
-
-| Scenario | Preferred concise default | Overly verbose pattern (avoid by default) |
-|---|---|---|
-| Straightforward fix/update | "Updated `.github/instructions/cost-optimization.instructions.md` with output-token defaults and examples." | "I carefully reviewed the repository structure, analyzed multiple policy surfaces in detail, and then made comprehensive updates..." |
-| Multi-step status | "Completed: docs updated, tests passed, PR opened." | "First I did A, then B, then C, then D, with a long narrative for each step regardless of risk." |
-| Recommendation | "Use option B because it reduces tokens and keeps intent clear." | "Long background history plus exhaustive alternatives when only one clear option fits." |
 
 ### 1. Compact at phase transitions (not just time)
 
@@ -177,32 +126,6 @@ Measured data from last 30 days: 42.4% gpt-5.3-codex, 24% gpt-5.4-mini, 18.2% Ha
 | File scans, pattern lookups, lightweight triage | gpt-5.4-mini or Haiku | Ambiguous architecture/security tradeoffs |
 | Deep refactor, architecture change, security reasoning | gpt-5.3-codex or stronger | N/A |
 
-#### Auto/default model baseline and explicit upshift triggers
-
-Treat Auto/default routing as the baseline for routine workflows. Do not upshift for routine docs, simple lookups, git hygiene, or run monitoring. Upshift model strength only when one or more of these non-overlapping triggers is present:
-
-1. **Ambiguous cross-system root cause**: cross-repository or cross-system reasoning where the failure path is not yet clear.
-2. **Security-sensitive review**: subtle exploit paths, trust boundaries, or abuse cases must be analyzed.
-3. **Large behavior-preserving refactor**: many touchpoints must change while preserving existing behavior.
-4. **Architectural tradeoff decision**: long-lived platform or design choices require deeper reasoning.
-
-Context reduction remains the primary cost lever: compact first when session history is bloated, and downshift again once the high-complexity segment is complete.
-
-### MCP server overhead audit checklist
-
-Run this audit at least **monthly** and again **before long fleet or burndown runs**.
-
-Checklist:
-
-1. **Inventory enabled servers/tools** in your current environment and note owner/purpose.
-2. **Check recent usage** and mark servers that are inactive or rarely used for the target workflow.
-3. **Disable unused servers** for the run to reduce schema/tool payload overhead.
-4. **Verify required platform tooling remains enabled** (auth, repo, deployment, and compliance-critical tooling).
-5. **Validate workflow health after changes** by running a representative task before broad execution.
-6. **Review call patterns**: batch requests, scope returned fields/rows, and avoid high-cadence polling without actionability.
-
-Prefer direct repository tools (`view`, `glob`, `rg`) for local context and reserve MCP usage for external or system-of-record data.
-
 ## Fleet Patterns
 
 ### Direct Skill Targeting (Skip the Router)
@@ -254,47 +177,31 @@ After watchdog stops being actionable, stop it: `/every stop <schedule-id>`.
 
 ## Cost Observability & Auto-Compaction
 
-Issue #1363 introduces an in-repo observability command and threshold checks:
+Issue #1363 is implemented through an explicit operator loop:
 
-### `/token-status` command
+1. Run `/token-status` at each phase boundary (triage -> implementation -> merge waiting).
+2. If `events >= 400` **or** `tokens >= 50M`, run `/compact` immediately.
+3. If ratio enters expensive zone (`>= 300x`), log a cost warning in chat and either compact or pivot.
+4. If ratio stays high after one compact, start `/new` with only canonical references.
 
-Run the command directly:
+`/token-status` output contract:
 
-```bash
-pwsh scripts/token-status.ps1 -InputTokens <n> -OutputTokens <n> -Events <n> -ElapsedMinutes <n>
+```text
+Token Status
+- Tokens sent: <n>
+- Event count: <n>
+- Input/output ratio: <n>x
+- Elapsed time: <duration>
+- Estimated budget remaining: <n>
 ```
 
-JSON mode for automation:
+Warning thresholds:
 
-```bash
-pwsh scripts/token-status.ps1 -InputFile session-metrics.json -Json
-```
+- **Warning**: ratio >= 300x
+- **Critical**: events >= 500
+- **Hard stop**: events >= 594 or tokens >= 50M without compaction
 
-The command reports:
-
-- tokens sent so far (`inputTokens`)
-- event count (`eventCount`)
-- input/output ratio (`inputOutputRatio`)
-- elapsed time (`elapsedMinutes`)
-- estimated remaining budget (`estimatedRemainingBudget`)
-
-### Auto-compact trigger thresholds
-
-`autoCompactTriggered=true` when either threshold is crossed:
-
-- event count `>= 400`
-- input tokens `>= 50,000,000`
-
-### Cost warning markers
-
-`markers[]` emits `[COST-WARN] ...` entries when thresholds are crossed:
-
-- ratio `>= 300x`
-- events `>= 500`
-- input tokens `>= 50,000,000`
-
-These markers are designed for chat log visibility so agents can compact earlier and
-delegate low-signal scans before sessions enter expensive ranges.
+Expected impact: agents self-correct mid-session instead of waiting for post-hoc review, reducing expensive-run frequency.
 
 ## Token Budget Monitoring
 
@@ -318,34 +225,3 @@ Track in each session:
 - 5% from heavy orchestration in main session (70–90 report_intent calls)
 
 **Expected total savings from all 5 changes**: 35–50% reduction per backlog session (from 68–84M baseline to 35–45M target).
-
-## Issue #1361 operational scorecard (acceptance enforcement)
-
-For #1361 acceptance checks, run the backlog scorecard command with five measured
-sessions:
-
-```bash
-pwsh scripts/backlog-efficiency-scorecard.ps1 -InputFile docs/templates/backlog-efficiency-sessions.example.json
-```
-
-Machine-readable output:
-
-```bash
-pwsh scripts/backlog-efficiency-scorecard.ps1 -InputFile <path-to-your-5-session-metrics.json> -Json
-```
-
-Required fields per session record:
-
-- `sessionId`
-- `inputTokens`
-- `phaseCompactionApplied`
-- `sprintTemplateUsed`
-- `fileReferencesOnly`
-- `delegatedScanOrTriage`
-
-Pass criteria align to #1361 bullets:
-
-1. At least 5 backlog sessions measured (`measurementReady=true`).
-2. Average tokens for evaluated sessions is within 35M–45M (`targetMetByAverage=true`).
-3. All four operational practices are compliant across evaluated sessions (`allPracticesCompliant=true`).
-4. Combined acceptance state is `overallPass=true`.

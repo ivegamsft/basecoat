@@ -1,64 +1,78 @@
 ---
-description: "Sprint closeout protocol for label hygiene, carryover tracking, and planning handoff"
-applyTo: ".github/**/*,docs/**/*,agents/**/*"
+description: "Sprint closeout guidance for label timing, triage, carryover tracking, and planning handoff"
+applyTo: "skills/sprint-closeout/**/*,agents/basecoat-50-security-sprint-closeout-auditor.agent.md,.github/workflows/sprint-closeout-branch-audit.yml"
 ---
 
-# Sprint Closeout Auditor Protocol
+# Sprint Closeout Auditor
 
-Use this guidance when closing a sprint and preparing the next planning cycle.
+Use this guide when running sprint closeout so operational follow-up is captured
+as structured work, not buried in prose.
 
-## Label Enforcement During Sprint
+## 1. Label Enforcement During Sprint
 
-Apply sprint and wave labels during active delivery, not only at closeout:
+Apply sprint labels during active delivery, not at closeout.
 
-1. Apply `sprint:*` and `wave:*` labels during issue intake and PR review.
-2. Reject closeout checklists that require label backfill.
-3. If unlabeled work is found, create a corrective issue and capture owner/date.
+- During PR review, verify sprint and wave labels are present before approval.
+- Enforce `sprint:*` and `wave:*` labels on linked issues and pull requests.
+- Treat missing labels as a workflow defect to fix immediately.
+- Do not backfill labels at release-cut unless correcting a verified exception.
 
-## Error and Failure Triage
+## 2. Error and Failure Triage
 
-Treat unresolved failures as explicit closeout outcomes:
+Classify closeout findings by severity and escalate consistently.
 
-1. Classify each failure as `critical`, `high`, `medium`, or `low`.
-2. Escalate `critical` and `high` failures to a tracked GitHub issue before signoff.
-3. Record affected workflow/run links and expected resolution window.
+- **Critical**: production risk, blocked deploy, or data/security impact.
+- **High**: repeat CI failures, merge blockers, or unresolved sprint blockers.
+- **Medium/Low**: hygiene gaps, documentation updates, or non-blocking drift.
 
-## Two-Phase Checklist
+Escalation rules:
 
-Separate sprint closeout from release-readiness to avoid mixed concerns:
+1. Critical and High findings must become explicit GitHub issues before closeout ends.
+2. Each escalated issue needs an owner, due date, and evidence link.
+3. Keep low-severity items in the closeout notes only if they are informational.
 
-### Phase 1: Sprint Closeout
+## 3. Two-Phase Checklist
 
-1. Scope complete (merged or formally deferred)
-2. CI status verified for sprint work
-3. Open defects triaged
-4. Carryover created as issues
-5. Closeout decision documented
+Keep sprint closeout and release readiness as separate decisions.
 
-### Phase 2: Release Readiness
+### Phase A - Sprint Closeout
 
-1. Release blockers reviewed
-2. Deployment gates validated
-3. Production-specific risks tracked
+1. Scope complete and merged status confirmed
+2. CI status verified on target branch
+3. Error and blocker triage completed
+4. Carryover captured as issues (when applicable)
 
-Do not block sprint closure on non-sprint release tasks; track them in release workflows.
+### Phase B - Release Readiness
 
-## Carryover Management
+1. Release candidate branch/tag readiness verified
+2. Environment-specific checks complete
+3. Promotion blockers tracked separately from sprint carryover
 
-Carryover items must be first-class artifacts:
+Never mark sprint closeout complete based on release-only signals.
 
-1. Convert every unresolved action into a GitHub issue.
-2. Include owner, due date, sprint target, and dependency references.
-3. Link each carryover issue from the closeout report.
-4. Avoid prose-only "action needed" items.
+## 4. Carryover Management
 
-## Handoff to Sprint Planning
+Carryover items must be tracked as issues, not free-text action lines.
 
-Produce a structured handoff consumed by sprint planning:
+For each carryover:
 
-1. Completed scope summary
-2. Carryover issue list
-3. Failure and risk summary
-4. Recommended ordering for oldest-first backlog execution
+1. Create a GitHub issue with clear problem statement and acceptance criteria.
+2. Link the carryover issue to the closeout summary.
+3. Set labels (`carryover`, sprint label, priority) and assignee.
+4. Record source context (issue/PR/run URL) in the issue body.
 
-Reference `docs/templates/sprint-structure.md` and provide deltas instead of full backlog restatement.
+Target outcome: zero untracked "Action (if needed)" prose items.
+
+## 5. Handoff to Sprint Planning
+
+Produce a structured handoff artifact for sprint-planner consumption.
+
+Required handoff sections:
+
+1. Sprint metrics (completed, carryover count, defect count)
+2. Carryover issues list (issue number, owner, priority, due date)
+3. New escalations from closeout triage
+4. Recommended sprint planning priorities and sequencing constraints
+
+The handoff must reference issue numbers directly so planning can ingest it
+without re-triage.
