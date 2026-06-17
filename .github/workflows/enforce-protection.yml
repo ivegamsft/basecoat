@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: read
+  deployments: read
 
 jobs:
   verify-prod-environment-protection:
@@ -60,7 +61,7 @@ jobs:
         run: |
           set -euo pipefail
           
-          ENVS=$(gh api /repos/${{ github.repository }}/environments --jq '.[].name' 2>/dev/null || echo "")
+          ENVS=$(gh api /repos/${{ github.repository }}/environments --jq '.environments[].name' 2>/dev/null || echo "")
           
           if ! echo "$ENVS" | grep -q "prod"; then
             echo "⚠️  'prod' environment not found"

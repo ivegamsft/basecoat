@@ -18,7 +18,7 @@ BaseCoat gives your organization one place to manage agents, skills, instruction
 | **Agents** | 117 | End-to-end task executors — sprint planners, code reviewers, security analysts, and more |
 | **Skills** | 116 | Reusable domain capabilities invoked by agents |
 | **Instructions** | 91 | Copilot behavior rules scoped by file path pattern |
-| **Prompts** | 5 | Structured templates for repeatable tasks |
+| **Prompts** | 6 | Structured templates for repeatable tasks |
 
 ---
 

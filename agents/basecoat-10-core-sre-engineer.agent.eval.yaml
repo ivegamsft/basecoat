@@ -1,0 +1,17 @@
+name: 'basecoat-10-core-sre-engineer-routing'
+description: 'Routing evaluation - validates trigger activation for the sre-engineer agent.'
+skill: 'agents/basecoat-10-core-sre-engineer.agent.md'
+scenarios:
+  - id: 'pos-1'
+    input: 'Use the sre-engineer agent to handle its documented responsibilities.'
+    expect_activation: true
+  - id: 'pos-2'
+    input: 'Please route this task to the sre-engineer agent.'
+    expect_activation: true
+  - id: 'neg-1'
+    input: 'Write a haiku about programming.'
+    expect_activation: false
+  - id: 'neg-2'
+    input: 'Give me a recipe for chocolate chip cookies.'
+    expect_activation: false
+

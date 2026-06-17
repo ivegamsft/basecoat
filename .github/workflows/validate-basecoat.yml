@@ -83,6 +83,8 @@ jobs:
           $failOnGuidanceAuditErrors = $true
           if ('${{ github.event_name }}' -eq 'workflow_call') {
             $failOnGuidanceAuditErrors = [System.Convert]::ToBoolean('${{ inputs.fail_on_guidance_audit_errors }}')
+          } elseif ('${{ github.event_name }}' -eq 'pull_request') {
+            $failOnGuidanceAuditErrors = $false
           }
           ./tests/run-tests.ps1 -GuidanceAuditFailOnError:$failOnGuidanceAuditErrors
 

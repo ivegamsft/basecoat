@@ -19,9 +19,14 @@ $agentFiles = Get-ChildItem -Path $AgentsPath -Filter "*.agent.md" -File | Sort-
 foreach ($agentFile in $agentFiles) {
     $content = Get-Content -Path $agentFile.FullName -Raw
     $rawModel = if ($content -match '(?m)^model:\s*(.+)$') { $Matches[1].Trim().Trim('"').Trim("'") } else { "" }
-    $canonicalModel = Resolve-ModelWithFallback -ModelId $rawModel -Context "generate-model-inventory:$($agentFile.Name)"
+    $resolution = Resolve-FrontmatterModel -RequestedModel $rawModel -Context "generate-model-inventory:$($agentFile.Name)"
+    $canonicalModel = $resolution.Model
     if ([string]::IsNullOrWhiteSpace($canonicalModel)) { continue }
-    $aliasValue = if (Test-IsAllowedModel -ModelId $rawModel) { $rawModel } else { $canonicalModel }
+    $aliasValue = if (-not $resolution.Substituted -and -not [string]::IsNullOrWhiteSpace($rawModel)) {
+        $rawModel
+    } else {
+        $canonicalModel
+    }
 
     if (-not $modelBuckets.ContainsKey($canonicalModel)) {
         $modelBuckets[$canonicalModel] = [ordered]@{

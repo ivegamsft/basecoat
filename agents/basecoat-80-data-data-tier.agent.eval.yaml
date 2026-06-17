@@ -1,0 +1,17 @@
+name: 'basecoat-80-data-data-tier-routing'
+description: 'Routing evaluation - validates trigger activation for the data-tier agent.'
+skill: 'agents/basecoat-80-data-data-tier.agent.md'
+scenarios:
+  - id: 'pos-1'
+    input: 'Use the data-tier agent to handle its documented responsibilities.'
+    expect_activation: true
+  - id: 'pos-2'
+    input: 'Please route this task to the data-tier agent.'
+    expect_activation: true
+  - id: 'neg-1'
+    input: 'Write a haiku about programming.'
+    expect_activation: false
+  - id: 'neg-2'
+    input: 'Give me a recipe for chocolate chip cookies.'
+    expect_activation: false
+
