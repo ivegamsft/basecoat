@@ -21,23 +21,16 @@ Write-Host 'Running adoption scanner tests...'
 
 # Test 1: Parameter validation - OutputFormat must be one of: table, json, markdown
 Write-Host '  Test 1: Validate OutputFormat parameter constraints...'
-try {
-    # This should fail due to invalid format
-    $result = & pwsh -NoProfile -Command {
-        $script = @'
-[CmdletBinding()]
-param(
-    [ValidateSet("table", "json", "markdown")]
-    [string]$OutputFormat = "invalid"
-)
-'@
-        $script | Out-Null
-        Write-Host "ERROR: Should have failed with invalid OutputFormat"
-        exit 1
-    } 2>&1
-}
-catch {
-    # Expected to fail during parameter binding
+& pwsh -NoProfile -Command {
+    param(
+        [ValidateSet("table", "json", "markdown")]
+        [string]$Mode = "table"
+    )
+    Write-Output $Mode
+} -Mode "invalid" *>$null
+
+if ($LASTEXITCODE -eq 0) {
+    throw "OutputFormat validation failed: invalid value was accepted"
 }
 Write-Host '    ✓ OutputFormat validation works'
 
