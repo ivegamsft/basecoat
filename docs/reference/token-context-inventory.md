@@ -2,7 +2,7 @@
 
 Generated as a standalone inventory (no edits to agent/skill/instruction files).
 
-- Generated: 2026-06-13 14:36:18 -0400
+- Generated: 2026-06-13 14:52:06 -0400
 - Estimation method: `approx_tokens = round(word_count × 1.35)` (same heuristic used in `scripts/validate-basecoat.ps1`).
 - Scope: `agents/*.agent.md`, `skills/*/SKILL.md`, `instructions/*.instructions.md`.
 
