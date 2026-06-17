@@ -6,6 +6,7 @@ compatibility:
 invocation_rules:
   - "Use during daily standups to convert updates into concrete actions."
 visibility: "internal"
+category: operations
 ---
 # Standup Signal Extraction Skill
 

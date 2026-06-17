@@ -6,6 +6,7 @@ compatibility:
 invocation_rules:
   - "Use when a pipeline or local build is red and root-cause triage is required."
 visibility: "internal"
+category: operations
 ---
 # Build Failure Triage Skill
 

@@ -166,7 +166,7 @@ foreach ($skillDir in $skillDirs) {
         }
 
         # Check 3: Required frontmatter fields
-        foreach ($field in @('name', 'description', 'compatibility')) {
+        foreach ($field in @('name', 'description', 'compatibility', 'category')) {
             if ($frontmatter -notmatch "(?m)^$field\s*:") {
                 $errors.Add("missing field: $field")
             }

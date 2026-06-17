@@ -6,6 +6,7 @@ compatibility:
 invocation_rules:
   - "Use when meeting or ceremony outcomes must be persisted with explicit ownership."
 visibility: "internal"
+category: architecture
 ---
 # Decision Log Capture Skill
 

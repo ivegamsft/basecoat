@@ -6,6 +6,7 @@ compatibility:
 invocation_rules:
   - "Use when the task requires mining failure evidence and producing the full A1-D2 artifact chain."
 visibility: "internal"
+category: operations
 ---
 # Failure Pattern Process Skill
 
