@@ -29,6 +29,9 @@ scenarios:
   - id: "pos-9"
     input: "This bug report is gibberish — validate it and close it with an explanation if invalid."
     expect_activation: true
+  - id: "pos-10"
+    input: "For each new issue, set type and priority fields, apply a category label, and annotate duplicate/blocked/depends relationships."
+    expect_activation: true
   - id: "neg-1"
     input: "Write unit tests for the authentication module."
     expect_activation: false
