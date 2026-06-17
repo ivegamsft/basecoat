@@ -150,6 +150,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running model inventory tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'model-inventory-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Model inventory tests failed' -ForegroundColor Red
+    Write-FailureLog 'model-inventory-tests'
+    exit 1
+}
+
 Write-Host 'Running A/B experiment harness tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'ab-experiment-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
@@ -203,6 +211,14 @@ Write-Host 'Running issue triage script tests...'
 if ($LASTEXITCODE -ne 0) {
     Write-Host 'Issue triage script tests failed' -ForegroundColor Red
     Write-FailureLog 'issue-triage-script-tests'
+    exit 1
+}
+
+Write-Host 'Running generate registry tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'generate-registry-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Generate registry tests failed' -ForegroundColor Red
+    Write-FailureLog 'generate-registry-tests'
     exit 1
 }
 

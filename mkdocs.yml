@@ -77,7 +77,7 @@ nav:
   - Asset Reference:
     - Overview: reference/quick-reference.md
     - Inventory: reference/inventory.md
-    - Agent Merge Concept: reference/agent-merge-concept.md
+    - Model Inventory: reference/model-inventory.md
     - Token Context Inventory: reference/token-context-inventory.md
     - Agents: reference/asset-registry.md
     - Governance Landing: GOVERNANCE.md

@@ -1,42 +1,653 @@
 {
-  "generated": "2026-06-14T22:37:06Z",
-  "source": "agents/*.agent.md",
+  "generatedAt": "2026-06-14 18:01:35 -04:00",
+  "canonicalFormat": "lowercase kebab-case with dotted versions",
+  "totalReferences": 114,
+  "uniqueRawIdentifiers": 7,
   "models": [
     {
       "canonical": "claude-haiku-4.5",
-      "count": 4,
-      "aliases": [
-        "claude-haiku-4.5"
+      "referenceCount": 4,
+      "rawIdentifiers": [
+        {
+          "value": "claude-haiku-4.5",
+          "count": 4
+        }
+      ],
+      "assets": [
+        {
+          "asset": "agents/basecoat-10-core-memory-promoter.agent.md",
+          "field": "model",
+          "raw": "claude-haiku-4.5"
+        },
+        {
+          "asset": "agents/basecoat-10-core-merge-coordinator.agent.md",
+          "field": "model",
+          "raw": "claude-haiku-4.5"
+        },
+        {
+          "asset": "agents/basecoat-60-workflow-rollout-basecoat.agent.md",
+          "field": "model",
+          "raw": "claude-haiku-4.5"
+        },
+        {
+          "asset": "agents/basecoat-90-quality-code-review.agent.md",
+          "field": "model",
+          "raw": "claude-haiku-4.5"
+        }
+      ]
+    },
+    {
+      "canonical": "claude-sonnet-4",
+      "referenceCount": 1,
+      "rawIdentifiers": [
+        {
+          "value": "claude-sonnet-4",
+          "count": 1
+        }
+      ],
+      "assets": [
+        {
+          "asset": "agents/basecoat-10-core-mcp-developer.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4"
+        }
       ]
     },
     {
       "canonical": "claude-sonnet-4.5",
-      "count": 4,
-      "aliases": [
-        "claude-sonnet-4-5",
-        "claude-sonnet-4.5"
+      "referenceCount": 4,
+      "rawIdentifiers": [
+        {
+          "value": "claude-sonnet-4-5",
+          "count": 2
+        },
+        {
+          "value": "claude-sonnet-4.5",
+          "count": 2
+        }
+      ],
+      "assets": [
+        {
+          "asset": "agents/basecoat-10-core-solution-architect.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4-5"
+        },
+        {
+          "asset": "agents/basecoat-10-core-ux-designer.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4-5"
+        },
+        {
+          "asset": "agents/basecoat-50-security-github-security-posture.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.5"
+        },
+        {
+          "asset": "agents/basecoat-60-workflow-build-master.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.5"
+        }
       ]
     },
     {
       "canonical": "claude-sonnet-4.6",
-      "count": 70,
-      "aliases": [
-        "claude-sonnet-4",
-        "claude-sonnet-4.6"
+      "referenceCount": 69,
+      "rawIdentifiers": [
+        {
+          "value": "claude-sonnet-4.6",
+          "count": 69
+        }
+      ],
+      "assets": [
+        {
+          "asset": "agents/basecoat-10-core-agentops.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-app-inventory.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-bom-validator.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-contract-testing.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-definition-of-done.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-dependency-lifecycle.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-exploratory-charter.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-factory-conductor.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-factory-state-curator.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-feedback-loop.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-finops-advisor.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-gitops-engineer.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-ha-architect.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-hardening-advisor.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-legacy-modernization.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-llmops.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-memory-curator.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-new-customization.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-observability-engineer.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-orchestrator.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-product-manager.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-production-readiness.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-project-onboarding.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-rca.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-replanning-engine.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-s4-shadow-mode-validator.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-sprint-planner.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-sprint-project-mapper.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-sprint-retrospective.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-station-bottleneck-analyzer.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-strategy-to-automation.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-takt-time-tracker.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-10-core-tech-writer.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-20-lang-dotnet-modernization-advisor.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-30-ai-containerization-planner.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-30-ai-daily-standup-facilitator.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-30-ai-domain-designer.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-30-ai-failure-pattern-process.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-30-ai-guardrail.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-40-azure-azure-landing-zone.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-50-security-api-security.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-50-security-container-security.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-50-security-guidance-author.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-50-security-policy-as-code-compliance.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-50-security-secrets-manager.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-50-security-security-operations.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-50-security-supply-chain-security.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-60-workflow-data-pipeline.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-60-workflow-incident-responder.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-60-workflow-infrastructure-deploy.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-60-workflow-release-freeze-enforcer.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-60-workflow-release-impact-advisor.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-60-workflow-release-manager.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-60-workflow-release-readiness-chair.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-60-workflow-retro-facilitator.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-60-workflow-self-healing-ci.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-60-workflow-task-scope-validator.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-80-data-data-architect.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-80-data-data-integrity.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-80-data-database-migration.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-90-quality-e2e-test-strategy.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-90-quality-guidance-reviewer.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-90-quality-manual-test-strategy.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-90-quality-penetration-test.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/basecoat-90-quality-resilience-reviewer.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/flow-admission-controller.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/flow-optimizer.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/governance-author.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        },
+        {
+          "asset": "agents/program-bootstrap.agent.md",
+          "field": "model",
+          "raw": "claude-sonnet-4.6"
+        }
       ]
     },
     {
       "canonical": "gpt-5.3-codex",
-      "count": 18,
-      "aliases": [
-        "gpt-5.3-codex"
+      "referenceCount": 18,
+      "rawIdentifiers": [
+        {
+          "value": "gpt-5.3-codex",
+          "count": 18
+        }
+      ],
+      "assets": [
+        {
+          "asset": "agents/basecoat-10-core-agent-designer.agent.md",
+          "field": "model",
+          "raw": "gpt-5.3-codex"
+        },
+        {
+          "asset": "agents/basecoat-10-core-api-designer.agent.md",
+          "field": "model",
+          "raw": "gpt-5.3-codex"
+        },
+        {
+          "asset": "agents/basecoat-10-core-backend-dev.agent.md",
+          "field": "model",
+          "raw": "gpt-5.3-codex"
+        },
+        {
+          "asset": "agents/basecoat-10-core-change-isolation-architect.agent.md",
+          "field": "model",
+          "raw": "gpt-5.3-codex"
+        },
+        {
+          "asset": "agents/basecoat-10-core-chaos-engineer.agent.md",
+          "field": "model",
+          "raw": "gpt-5.3-codex"
+        },
+        {
+          "asset": "agents/basecoat-10-core-devops-engineer.agent.md",
+          "field": "model",
+          "raw": "gpt-5.3-codex"
+        },
+        {
+          "asset": "agents/basecoat-10-core-frontend-dev.agent.md",
+          "field": "model",
+          "raw": "gpt-5.3-codex"
+        },
+        {
+          "asset": "agents/basecoat-10-core-identity-architect.agent.md",
+          "field": "model",
+          "raw": "gpt-5.3-codex"
+        },
+        {
+          "asset": "agents/basecoat-10-core-middleware-dev.agent.md",
+          "field": "model",
+          "raw": "gpt-5.3-codex"
+        },
+        {
+          "asset": "agents/basecoat-10-core-performance-analyst.agent.md",
+          "field": "model",
+          "raw": "gpt-5.3-codex"
+        },
+        {
+          "asset": "agents/basecoat-10-core-prompt-coach.agent.md",
+          "field": "model",
+          "raw": "gpt-5.3-codex"
+        },
+        {
+          "asset": "agents/basecoat-10-core-prompt-engineer.agent.md",
+          "field": "model",
+          "raw": "gpt-5.3-codex"
+        },
+        {
+          "asset": "agents/basecoat-10-core-sre-engineer.agent.md",
+          "field": "model",
+          "raw": "gpt-5.3-codex"
+        },
+        {
+          "asset": "agents/basecoat-30-ai-mlops.agent.md",
+          "field": "model",
+          "raw": "gpt-5.3-codex"
+        },
+        {
+          "asset": "agents/basecoat-50-security-security-analyst.agent.md",
+          "field": "model",
+          "raw": "gpt-5.3-codex"
+        },
+        {
+          "asset": "agents/basecoat-80-data-data-tier.agent.md",
+          "field": "model",
+          "raw": "gpt-5.3-codex"
+        },
+        {
+          "asset": "agents/basecoat-80-data-dataops.agent.md",
+          "field": "model",
+          "raw": "gpt-5.3-codex"
+        },
+        {
+          "asset": "agents/flow-governance-conductor.agent.md",
+          "field": "model",
+          "raw": "gpt-5.3-codex"
+        }
       ]
     },
     {
       "canonical": "gpt-5.4-mini",
-      "count": 20,
-      "aliases": [
-        "gpt-5.4-mini"
+      "referenceCount": 18,
+      "rawIdentifiers": [
+        {
+          "value": "gpt-5.4-mini",
+          "count": 18
+        }
+      ],
+      "assets": [
+        {
+          "asset": "agents/basecoat-10-core-branch-hygiene-sweeper.agent.md",
+          "field": "model",
+          "raw": "gpt-5.4-mini"
+        },
+        {
+          "asset": "agents/basecoat-10-core-dependency-blocker-monitor.agent.md",
+          "field": "model",
+          "raw": "gpt-5.4-mini"
+        },
+        {
+          "asset": "agents/basecoat-10-core-dependency-update-advisor.agent.md",
+          "field": "model",
+          "raw": "gpt-5.4-mini"
+        },
+        {
+          "asset": "agents/basecoat-10-core-escalation-router.agent.md",
+          "field": "model",
+          "raw": "gpt-5.4-mini"
+        },
+        {
+          "asset": "agents/basecoat-10-core-issue-triage.agent.md",
+          "field": "model",
+          "raw": "gpt-5.4-mini"
+        },
+        {
+          "asset": "agents/basecoat-10-core-orphaned-pr-cleanup.agent.md",
+          "field": "model",
+          "raw": "gpt-5.4-mini"
+        },
+        {
+          "asset": "agents/basecoat-50-security-ci-audit.agent.md",
+          "field": "model",
+          "raw": "gpt-5.4-mini"
+        },
+        {
+          "asset": "agents/basecoat-50-security-config-auditor.agent.md",
+          "field": "model",
+          "raw": "gpt-5.4-mini"
+        },
+        {
+          "asset": "agents/basecoat-50-security-instruction-auditor.agent.md",
+          "field": "model",
+          "raw": "gpt-5.4-mini"
+        },
+        {
+          "asset": "agents/basecoat-50-security-security-monitor.agent.md",
+          "field": "model",
+          "raw": "gpt-5.4-mini"
+        },
+        {
+          "asset": "agents/basecoat-50-security-sprint-closeout-auditor.agent.md",
+          "field": "model",
+          "raw": "gpt-5.4-mini"
+        },
+        {
+          "asset": "agents/basecoat-60-workflow-broken-build-troubleshooter.agent.md",
+          "field": "model",
+          "raw": "gpt-5.4-mini"
+        },
+        {
+          "asset": "agents/basecoat-60-workflow-ci-failure-escalation.agent.md",
+          "field": "model",
+          "raw": "gpt-5.4-mini"
+        },
+        {
+          "asset": "agents/basecoat-60-workflow-run-history-cleanup.agent.md",
+          "field": "model",
+          "raw": "gpt-5.4-mini"
+        },
+        {
+          "asset": "agents/flow-auditor.agent.md",
+          "field": "model",
+          "raw": "gpt-5.4-mini"
+        },
+        {
+          "asset": "agents/flow-suggester.agent.md",
+          "field": "model",
+          "raw": "gpt-5.4-mini"
+        },
+        {
+          "asset": "agents/flow-tracker.agent.md",
+          "field": "model",
+          "raw": "gpt-5.4-mini"
+        },
+        {
+          "asset": "agents/governance-auditor.agent.md",
+          "field": "model",
+          "raw": "gpt-5.4-mini"
+        }
       ]
     }
   ]
