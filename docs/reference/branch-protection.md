@@ -1,0 +1,109 @@
+# Main Branch Protection Policy
+
+This document defines the required branch protection baseline for the `main` branch and enforcement procedures.
+
+## Objective
+
+Establish a consistent, auditable baseline for main branch protection that prevents accidental or unauthorized changes, requires code review, and ensures all changes pass required checks before merge.
+
+## Baseline Controls
+
+### 1. Required Pull Request Reviews
+
+- **Minimum reviewers**: 1
+- **Dismissal of stale reviews**: Enabled
+- **Require code owner reviews**: Disabled (repo has no CODEOWNERS enforcement requirement)
+- **Restrict who can dismiss reviews**: Admins only
+- **Apply to admins**: Yes
+
+### 2. Required Status Checks Before Merge
+
+The following status checks **must pass** before a pull request can be merged to `main`:
+
+| Check | Description | Purpose |
+|-------|-------------|---------|
+| `validate-basecoat` | Repository validation (structure, file integrity) | Ensure repo standards compliance |
+| `ci` | Continuous integration (tests, build, lint) | Catch regressions and quality issues |
+| `docs` | Documentation validation and link checking | Ensure docs are built and links work |
+
+Additional checks may be enabled dynamically based on file changes (e.g., security scans for secret detection).
+
+### 3. Restricted Direct Pushes
+
+- **Allow force pushes**: No
+- **Allow deletions**: No
+- **Require branches to be up to date before merging**: Yes
+- **Require status checks to pass on up-to-date branches**: Yes
+
+### 4. Bypass Rules
+
+- **Admins can bypass protection**: Yes (with audit trail expected)
+- **GitHub Apps bypass**: Not allowed
+- **Automation bypass**: Not allowed (all automation must work within protection constraints)
+
+## Enforcement
+
+### Automated Enforcement
+
+The `governance-enforce` workflow (triggered on main branch changes to this file or related governance docs) validates that:
+
+1. This policy document exists and is current
+2. Repository API confirms branch protection is active
+3. All baseline controls are enforced via `gh api` or Terraform
+
+### Manual Enforcement (Repository Settings)
+
+To apply branch protection via GitHub UI:
+
+1. Navigate to **Settings** > **Branches**
+2. Click **Add rule** under **Branch protection rules**
+3. Pattern: `main`
+4. Enable:
+   - ✓ Require a pull request before merging
+   - ✓ Require approvals (1)
+   - ✓ Dismiss stale pull request approvals when new commits are pushed
+   - ✓ Require status checks to pass before merging
+   - ✓ Require branches to be up to date before merging
+5. Search for and select required status checks:
+   - `validate-basecoat`
+   - `ci`
+   - `docs`
+6. Restrict who can push to matching branches:
+   - [ ] No one (if all changes must go through PR)
+   - Or [ ] Specify teams/individuals allowed to push directly
+7. Disable:
+   - ☐ Allow force pushes
+   - ☐ Allow deletions
+
+## Validation
+
+### Audit Evidence
+
+The `governance-audit` workflow queries the repository API to confirm:
+
+```bash
+gh api repos/{owner}/{repo}/branches/main/protection
+```
+
+Expected payload shape:
+- `required_pull_request_reviews.required_approving_review_count >= 1`
+- `required_status_checks.strict === true`
+- `required_status_checks.contexts` includes at least `validate-basecoat`, `ci`, `docs`
+- `allow_force_pushes.enabled === false`
+- `allow_deletions.enabled === false`
+- `enforce_admins.enabled === true`
+
+### Remediation
+
+If validation fails:
+
+1. **Missing protection rules**: Re-apply via Settings UI or run `branch-protection-enforce.yml` manually
+2. **Incomplete status checks**: Update workflow triggers in `.github/workflows/*` to ensure all required checks run
+3. **Admin bypass enabled**: Review and disable if not permitted by security policy
+
+## References
+
+- [GitHub Branch Protection API](https://docs.github.com/en/rest/branches/branch-protection)
+- [Repository Settings](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/managing-a-branch-protection-rule)
+- Governance Contract: `docs/reference/governance-contract.md`
+- Governance Audit: `.github/workflows/governance-audit.yml`

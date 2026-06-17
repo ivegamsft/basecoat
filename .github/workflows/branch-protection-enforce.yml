@@ -1,0 +1,71 @@
+name: BaseCoat - Branch Protection Enforcement
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "docs/reference/branch-protection.md"
+      - "docs/operations/branch-protection-enforcement.md"
+      - ".github/workflows/branch-protection-enforce.yml"
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  enforce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Validate branch protection policy exists
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ ! -f docs/reference/branch-protection.md ]]; then
+            echo "❌ Branch protection policy not found at docs/reference/branch-protection.md"
+            exit 1
+          fi
+
+          if [[ ! -f docs/operations/branch-protection-enforcement.md ]]; then
+            echo "❌ Enforcement procedures not found at docs/operations/branch-protection-enforcement.md"
+            exit 1
+          fi
+
+          echo "✓ Branch protection policy and procedures documented"
+          grep -q "Main Branch Protection Policy" docs/reference/branch-protection.md
+          grep -q "Required Pull Request Reviews" docs/reference/branch-protection.md
+          grep -q "Required Status Checks Before Merge" docs/reference/branch-protection.md
+          grep -q "Restricted Direct Pushes" docs/reference/branch-protection.md
+
+          echo "✓ All baseline controls documented"
+
+      - name: Verify required status checks are defined
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "Checking required status checks..."
+          grep -q "validate-basecoat" docs/reference/branch-protection.md || {
+            echo "❌ validate-basecoat check not documented"
+            exit 1
+          }
+          grep -q "ci" docs/reference/branch-protection.md || {
+            echo "❌ ci check not documented"
+            exit 1
+          }
+          grep -q "docs" docs/reference/branch-protection.md || {
+            echo "❌ docs check not documented"
+            exit 1
+          }
+
+          echo "✓ All required status checks are documented"
