@@ -14,6 +14,10 @@ permissions:
 safe-outputs:
   add-comment:
     hide-older-comments: true
+  missing-tool:
+    create-issue: false
+  report-incomplete:
+    create-issue: false
   noop:
     report-as-issue: false
 engine: copilot
