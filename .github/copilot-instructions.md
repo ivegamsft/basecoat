@@ -73,3 +73,7 @@ instruction files:
 | **Model choice is secondary** | ~5–10% gain | Focus on context reduction (35–50%) not model downshift |
 
 Target: Reduce expensive backlog runs from 68–84M tokens to 35–45M tokens (42–50% savings).
+
+Record each long backlog run in `.github/backlog-session-metrics.json`, then regenerate
+`docs/reference/BACKLOG_SESSION_SCORECARD.md` with
+`python scripts/generate-backlog-efficiency-scorecard.py`.

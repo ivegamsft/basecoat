@@ -1,0 +1,19 @@
+{
+  "trackingWindow": 5,
+  "baseline": {
+    "expensiveTokensMin": 68000000,
+    "expensiveTokensMax": 84000000,
+    "targetTokensMin": 35000000,
+    "targetTokensMax": 45000000,
+    "bestReferenceTokens": 9100000,
+    "bestReferenceEvents": 101,
+    "bestReferenceRatio": 207
+  },
+  "policyThresholds": {
+    "phaseCompactionsMin": 2,
+    "maxPromptKb": 10,
+    "maxEventsWarning": 400,
+    "maxRatioWarning": 400
+  },
+  "sessions": []
+}

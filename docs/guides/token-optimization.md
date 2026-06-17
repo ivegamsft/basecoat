@@ -749,6 +749,8 @@ Based on measured BaseCoat sprints:
 - [ ] List P1 blockers (if any)
 - [ ] Note bulk tasks suitable for parallelization
 - [ ] Reference prior sprint (don't reload)
+- [ ] Plan to log the finished session in `.github/backlog-session-metrics.json`
+- [ ] Regenerate `docs/reference/BACKLOG_SESSION_SCORECARD.md` after the run
 
 ---
 
@@ -785,6 +787,7 @@ Based on Sprint 31 empirical testing, the following agent categories are safe to
 - [`.github/instructions/workflow-conventions.instructions.md`](/.github/instructions/workflow-conventions.instructions.md) — Ask vs Agent mode policy and transition hygiene
 - [`../reference/scoped-instructions.md`](../reference/scoped-instructions.md) — Scope patterns that prevent universal instruction bloat
 - [`../templates/sprint-structure.md`](../templates/sprint-structure.md) — Reusable sprint planning template (reduces re-planning cost 62%)
+- [`../reference/BACKLOG_SESSION_SCORECARD.md`](../reference/BACKLOG_SESSION_SCORECARD.md) — Latest 5-session scorecard for the 35-45M backlog target
 - Issue [#42](https://github.com/IBuySpy-Shared/basecoat/issues/42) — Tracking issue for token optimization
 - Issue [#44](https://github.com/IBuySpy-Shared/basecoat/issues/44) — Token budget and cost attribution
 - Issue [#1361](https://github.com/IBuySpy-Shared/basecoat/issues/1361) — Efficiency target: reduce backlog runs 68→35-45M tokens

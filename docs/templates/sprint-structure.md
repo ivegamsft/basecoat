@@ -82,6 +82,33 @@ Use this block to execute, not only plan:
 - [ ] Follow-up tracking issues closed or moved
 ```
 
+## Backlog Session Capture Block
+
+Use this capture block when a sprint execution session finishes so issue #1361 stays
+measured against the 35-45M token target:
+
+```json
+{
+  "date": "2026-06-13",
+  "label": "Backlog sprint execution",
+  "tokens": 41200000,
+  "events": 188,
+  "ratio": 233,
+  "phaseCompactions": 2,
+  "maxPromptKb": 6.4,
+  "usedSprintTemplate": true,
+  "usedFileReferencesOnly": true,
+  "delegatedScanWork": true,
+  "notes": "Compact at triage->implementation and implementation->merge-waiting."
+}
+```
+
+Workflow:
+
+1. Append the object to `.github/backlog-session-metrics.json`.
+2. Run `python scripts/generate-backlog-efficiency-scorecard.py`.
+3. Review `docs/reference/BACKLOG_SESSION_SCORECARD.md` before closing the PR.
+
 ## Sample Sprint (Reference)
 
 **Sprint 31: Cost Optimization Focus**

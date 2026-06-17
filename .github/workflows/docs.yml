@@ -7,12 +7,16 @@ on:
     paths:
       - 'docs/**'
       - 'scripts/generate-token-context-inventory.py'
+      - 'scripts/generate-backlog-efficiency-scorecard.py'
+      - '.github/backlog-session-metrics.json'
       - 'mkdocs.yml'
       - '.github/workflows/docs.yml'
   pull_request:
     paths:
       - 'docs/**'
       - 'scripts/generate-token-context-inventory.py'
+      - 'scripts/generate-backlog-efficiency-scorecard.py'
+      - '.github/backlog-session-metrics.json'
       - 'mkdocs.yml'
   workflow_dispatch:
 
@@ -39,6 +43,9 @@ jobs:
 
       - name: Generate token context inventory
         run: python scripts/generate-token-context-inventory.py
+
+      - name: Generate backlog efficiency scorecard
+        run: python scripts/generate-backlog-efficiency-scorecard.py
 
       - name: Validate docs
         run: |
@@ -68,6 +75,9 @@ jobs:
 
       - name: Generate token context inventory
         run: python scripts/generate-token-context-inventory.py
+
+      - name: Generate backlog efficiency scorecard
+        run: python scripts/generate-backlog-efficiency-scorecard.py
 
       - name: Configure site URLs for this repository
         run: |
