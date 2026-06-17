@@ -120,7 +120,9 @@ jobs:
 
       - name: Run PowerShell test suite
         shell: pwsh
-        run: pwsh tests/run-tests.ps1
+        run: |
+          $failOnGuidanceAuditErrors = '${{ github.event_name }}' -ne 'pull_request'
+          pwsh tests/run-tests.ps1 -GuidanceAuditFailOnError:$failOnGuidanceAuditErrors
 
       - name: Upload test results on failure
         if: failure()
