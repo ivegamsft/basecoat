@@ -1,362 +1,384 @@
 # Asset Catalog
 
-Complete reference of all BaseCoat assets grouped by category. Counts reflect the current
-repository state (79 basecoat-10-core-agents · 57 skills · 64 instructions · 3 prompts).
+Complete reference of BaseCoat assets grouped by category. Counts reflect the current repository state (**116 agents**, **115 skills**, **91 instructions**, **10 prompts**).
 
-## basecoat-10-core-agents
+## Agents
 
-basecoat-10-core-agents are end-to-end task executors stored as `agents/<name>.agent.md`.
-
-### basecoat-10-core-architecture & Design
+### Uncategorized
 
 | Agent | Description |
 |---|---|
-| `basecoat-10-core-agent-designer` | Designs and authors Copilot agent definitions; covers skill composition and multi-agent coordination |
-| `basecoat-10-core-api-designer` | OpenAPI spec authoring, REST and GraphQL design, versioning strategy, breaking-change analysis |
-| `basecoat-80-data-data-architect` | Scalable data architectures, medallion layers, data governance, and analytics workflows |
-| `basecoat-30-ai-domain-designer` | Domain-Driven Design agent for bounded context modeling, aggregate design, ubiquitous language |
-| `basecoat-10-core-ha-architect` | High-availability, resilience, and chaos basecoat-10-core-testing strategies for distributed systems |
-| `basecoat-10-core-identity-architect` | basecoat-40-azure-azure RBAC design, managed identity configuration, Entra ID app registrations |
-| `basecoat-10-core-solution-architect` | System design, C4 diagrams, ADRs, technology selection, and cross-cutting concerns |
-| `basecoat-10-core-ux-designer` | User journey mapping, wireframe specs, component design, and accessibility audits |
+| `agentic-sdlc-autonomy` | Audit, measure, implement, and operate rules-based human-in-the-loop autonomy for agent-operated repositories. Use when evaluating or improving agentic SDLC governance: PR risk classification (A0-A5 levels), auto-merge policy, merge queue gates, deployment lane policy, DB migration controls, IaC safety rules, runner isolation, production approval flows, and policy-versus-settings drift. |
+| `agentops` | Agent operations and infrastructure specialist. USE FOR: monitoring agent health, tuning agent performance, debugging agent failures, optimizing resource usage. DO NOT USE FOR: individual agent tasks, direct coding. |
+| `api-designer` | REST API and contract design specialist. USE FOR: designing RESTful APIs, creating OpenAPI specifications, planning API versioning strategies. DO NOT USE FOR: API implementation, testing. |
+| `api-security` | API Security Agent for comprehensive API threat modeling, OWASP API Security Top 10 assessment, and secure API design. Covers authentication, authorization, rate limiting, and API-specific vulnerabilities. USE FOR: run OWASP API Top 10 assessment, model API threats with STRIDE, audit auth flows. DO NOT USE FOR: container image scanning, general code review. |
+| `app-inventory` | Scans legacy applications to discover dependencies, identify technology stacks, assess migration complexity, and generate architecture diagrams for portfolio analysis. USE FOR: scan legacy app tech stack, assess migration complexity, generate dependency inventory. DO NOT USE FOR: writing new code, live production monitoring. |
+| `azure-landing-zone` | Azure Landing Zone (ESLZ) agent for scaffolding enterprise-scale landing zones following Microsoft's Cloud Adoption Framework. Use when designing management group hierarchies, platform subscriptions, hub networking, policy baselines, or landing zone vending templates. |
+| `backend-dev` | Backend and services development specialist. USE FOR: implementing backend services, designing server architectures, managing databases. DO NOT USE FOR: frontend work, DevOps operations. |
+| `bom-validator` | Use when validating a Workcell BOM against the plant registry before S2 starts. USE FOR: schema validation, CAF naming checks, circular dependency detection, and GitHub check results. DO NOT USE FOR: runtime state merges or cutover decisions. |
+| `branch-hygiene-sweeper` | Use when cleaning stale branches, dangling refs, and release branch hygiene while preserving active work. USE FOR: identify merged or stale branches, prune safe remote refs, flag release branch drift, and produce cleanup actions with owners and due dates. DO NOT USE FOR: deleting branches with open PRs, changing branch protection, or resolving merge conflicts. |
+| `broken-build-troubleshooter` | Use when CI or local builds are failing and the team needs fast, repeatable triage to isolate root cause and restore green status. USE FOR: classify failure signatures, pinpoint failing stage/test/toolchain segment, propose minimal safe remediation, and generate a fix validation checklist. DO NOT USE FOR: feature implementation, long-form architecture documents, or security incident response ownership. |
+| `change-isolation-architect` | Designs layered CI/CD isolation so independent domains (for example mobile, database, portal, extension, and infra) can evolve and release separately without cross-triggered pipeline noise. |
+| `chaos-engineer` | Chaos engineering agent for fault injection, game days, resilience scoring, recovery validation, and SLO-aware resilience experiments. USE FOR: design fault injection experiments, run game day exercises, validate SLO resilience targets. DO NOT USE FOR: debugging application bugs, writing unit tests. |
+| `ci-audit` | Use when asked to audit repository governance posture or produce a governance evidence pack. USE FOR: auditing branch protection, required status checks, merge queue configuration, environment protection rules, production reviewers, runner groups, workflow dispatch access, CODEOWNERS enforcement, and policy-versus-settings gaps for a single repository. DO NOT USE FOR: writing application code, general code reviews, org-level enterprise policy administration, or infrastructure-as-code development. |
+| `ci-failure-escalation` | Detects N consecutive CI failures on the same workflow job, opens a blocking issue, and gates further deploys to that environment — the andon cord / halt-the-line pattern for CI/CD pipelines. USE FOR: gate deploys on CI failures, open blocking issues, enforce halt-line policy. DO NOT USE FOR: fixing failing tests, writing CI config. |
+| `code-review` | Code review and quality gate specialist. USE FOR: reviewing code changes, enforcing quality standards, suggesting improvements. DO NOT USE FOR: writing code, direct fixes. |
+| `config-auditor` | Configuration auditor for detecting committed secrets and sensitive config. USE FOR: scanning repositories for hardcoded credentials, API keys, and PII; enforcing encryption standards for secrets at rest; generating compliance reports; performing pre-commit validation. DO NOT USE FOR: real-time monitoring, incident response (use Secrets Manager instead), general code reviews. |
+| `Container Security` | Container and Kubernetes security — Pod Security Standards, runtime security, CSPM findings, image scanning, and supply chain security for containerized workloads. USE FOR: scan container images for CVEs, audit Pod Security Standards, assess Kubernetes runtime security. DO NOT USE FOR: writing application code, network firewall rules. |
+| `containerization-planner` | Helps assess containerization readiness, choose deployment platforms (Docker/AKS/ACA), and generate container configurations including Dockerfiles, multi-stage builds, health probes, resource limits, and deployment manifests. USE FOR: containerize an app, choose AKS vs ACA, generate Dockerfiles. DO NOT USE FOR: image scanning, cluster incidents. |
+| `contract-testing` | Contract Testing Agent for consumer-driven contracts, E2E testing strategy, and mutation testing for distributed systems. USE FOR: write Pact consumer-driven contracts, design service integration tests, set up contract verification in CI. DO NOT USE FOR: load testing, manual QA workflows. |
+| `daily-standup-facilitator` | Use when running daily standup ceremonies to surface blockers, dependencies, and near-term execution risk. USE FOR: extract actionable updates, identify blockers needing escalation, map dependencies across team members, and produce a day plan with owners. DO NOT USE FOR: writing feature code, replacing sprint planning, or long-term roadmap analysis. |
+| `Data Integrity` | > |
+| `data-architect` | Data architecture design specialist. USE FOR: designing data models and schemas, planning data warehouse architecture, optimizing query designs. DO NOT USE FOR: ETL operations, data pipeline troubleshooting. |
+| `data-pipeline` | Data pipeline agent for medallion lakehouse architecture, data quality, ML pipeline orchestration, and feature store integration. Use when building or reviewing bronze/silver/gold Delta Lake pipelines, data quality checks, feature engineering, or ML training workflows. |
+| `data-tier` | Data persistence and storage optimization. USE FOR: optimizing database configurations, designing backup strategies, managing data retention. DO NOT USE FOR: application development, real-time operations. |
+| `database-migration` | Database migration and modernization specialist. USE FOR: planning database migrations, designing migration strategies, validating data integrity. DO NOT USE FOR: operational database management, routine backups. |
+| `dataops` | Data operations and pipeline management. USE FOR: managing data pipelines, monitoring data quality, optimizing data flow. DO NOT USE FOR: data analysis, business intelligence. |
+| `definition-of-done` | Validate that a feature, PR, or release meets the Definition of Done before closing. Enforces testing evidence, config verification, response validation, and acceptance criteria. USE FOR: check PR meets DoD, validate acceptance criteria, verify release readiness. DO NOT USE FOR: writing acceptance criteria, implementing features. |
+| `dependency-blocker-monitor` | Use when monitoring workcell BOM dependencies and cell health to open or resolve blocker issues when a cell fails or recovers. USE FOR: read workcell BOM dependencies, monitor cell deployment status, create blocker issues, and resolve them on recovery. DO NOT USE FOR: general incident response, application code, or one-off issue triage. |
+| `dependency-lifecycle` | Agent for managing dependency updates, tracking breaking changes, planning upgrade paths, monitoring vulnerabilities, analyzing semantic versioning, and generating migration guides. USE FOR: plan upgrade paths, generate migration guides, audit dependency CVEs. DO NOT USE FOR: writing new features, infrastructure provisioning. |
+| `dependency-update-advisor` | Reviews Dependabot pull requests and posts a structured risk assessment comment: semver bump type, breaking change likelihood, suggested test focus areas, and known CVE context. USE FOR: assess Dependabot PR risk, evaluate semver bump safety, get CVE context for dependency update. DO NOT USE FOR: creating Dependabot config, general code review. |
+| `devops-engineer` | DevOps and infrastructure automation specialist. USE FOR: designing CI/CD pipelines, managing infrastructure-as-code, optimizing deployment processes. DO NOT USE FOR: application code, product feature development. |
+| `domain-designer` | Domain-driven design specialist. USE FOR: designing domain models, planning domain-oriented architectures, designing bounded contexts. DO NOT USE FOR: implementation, code generation. |
+| `dotnet-modernization-advisor` | Advisor for .NET modernization assessment, upgrade planning, and execution guidance. Use when migrating legacy .NET Framework/older .NET solutions to modern .NET versions. |
+| `e2e-test-strategy` | E2E Test Strategy Agent for end-to-end testing orchestration, critical path identification, flakiness prevention, and cross-browser coverage. Covers Playwright, Cypress, Selenium patterns and integration with CI/CD pipelines. USE FOR: design E2E suite, map critical user paths, fix flaky tests. DO NOT USE FOR: unit testing, contract testing. |
+| `escalation-router` | Use when high-risk decisions need a human approver and a PR-comment approval trail. USE FOR: release signoff, irreversible changes, compliance gates. DO NOT USE FOR: routine automation. |
+| `exploratory-charter` | Use when you need time-boxed exploratory testing sessions. Generates mission-driven charters with scope, triage routing, and evidence capture. Automatically files GitHub Issues for automation candidates found during exploration. |
+| `factory-conductor` | Use when reading .factory-state.json and auto-queuing the next ready wave of factory work. USE FOR: route S2/S3/S4 work, batch dispatch by wave, and ping the right follow-up workflow. DO NOT USE FOR: state normalization, BOM validation, or product backlog prioritization. |
+| `factory-state-curator` | Use when merging Workcell intake YAML, GitHub labels, and gate results into a single S1-S5 state snapshot. USE FOR: normalize station state, publish .factory-state.json, reconcile blockers, and surface stale work. DO NOT USE FOR: implementing product code or changing workflow policy. |
+| `failure-pattern-process` | Failure pattern process agent for evidence-first mining, raw logging, triage, and enhancement planning. USE FOR: mining failure signals across issues/PRs/CI/logs/incidents, producing append-only raw findings logs, classifying common versus repo-specific patterns with rationale, and building prioritized enhancement plans with early-detection gates. DO NOT USE FOR: implementing feature code changes, auto-remediating production incidents, or bypassing evidence and gate requirements. |
+| `feedback-loop` | Continuous learning and optimization through user feedback collection, prompt effectiveness tracking, outcome measurement, A/B testing, regression detection, and instruction refinement. USE FOR: track prompt effectiveness, run A/B test on instructions, detect quality regression. DO NOT USE FOR: product feature feedback, writing new prompts. |
+| `finops-advisor` | FinOps advisor for cloud cost governance, cost optimization, chargeback/showback models, and 12-Factor App best practices for cost efficiency. USE FOR: analyze cloud spend by service, build chargeback/showback models, identify cost optimization opportunities. DO NOT USE FOR: live incident response, infrastructure provisioning. |
+| `frontend-dev` | Frontend and UI development specialist. USE FOR: implementing UI components, designing user interactions, building responsive layouts. DO NOT USE FOR: backend development, infrastructure. |
+| `github-security-posture` | GitHub organization security posture auditor. USE FOR: auditing GitHub organization settings and policies, reviewing branch protection configurations, analyzing secret scanning and Dependabot alerts, assessing team and RBAC permissions, evaluating OAuth app restrictions. DO NOT USE FOR: fixing security issues (use individual remediation agents), real-time threat detection, application code security review. |
+| `gitops-engineer` | GitOps and deployment automation specialist. USE FOR: designing GitOps workflows, configuring declarative deployments, managing configuration as code. DO NOT USE FOR: manual deployments, emergency operations. |
+| `guardrail` | Guardrail validation agent for checking outputs against safety, quality, compliance, and formatting rules before delivery. USE FOR: validate agent output against safety rules, enforce quality gates on generated content, check compliance formatting before delivery. DO NOT USE FOR: writing new code or content, debugging application errors. |
+| `guidance-author` | BaseCoat guidance documentation author. USE FOR: creating security playbooks and best practices, authoring new instruction files and agent templates, writing skill documentation, drafting guidance framework updates. DO NOT USE FOR: incident response, operational tasks, code implementation. |
+| `guidance-reviewer` | Use when validating a BaseCoat guidance draft (instruction, skill, agent, prompt) before committing. Checks lint rules, required sections, frontmatter schema, and BaseCoat conventions. Returns a structured pass/fail verdict with actionable fixes. |
+| `ha-architect` | Design high-availability, resilience, and chaos testing strategies for distributed systems. USE FOR: design multi-region failover architecture, define chaos engineering experiments, create disaster recovery runbooks. DO NOT USE FOR: day-to-day incident response, cost optimization analysis. |
+| `Hardening Advisor` | CIS Benchmarks and STIG hardening advisor for Dockerfiles, Kubernetes manifests, databases, and infrastructure configurations against security standards. USE FOR: harden Dockerfile against CIS benchmarks, audit Kubernetes manifests for STIG compliance, review infrastructure config security. DO NOT USE FOR: application code security review, live incident mitigation. |
+| `identity-architect` | Identity and access architecture specialist. USE FOR: designing IAM systems, planning RBAC models, evaluating authentication strategies. DO NOT USE FOR: IAM implementation, directory administration. |
+| `incident-responder` | Structured incident response and recovery agent for classifying incidents, guiding mitigation, coordinating communications, verifying recovery, and facilitating post-incident learning. USE FOR: classify and triage active production incidents, guide on-call mitigation steps, facilitate post-incident retrospectives. DO NOT USE FOR: proactive security hardening, routine deployment tasks. |
+| `infrastructure-deploy` | Orchestrates Azure infrastructure deployments using Bicep, handles resource group management, parameter validation, and rollback strategies. USE FOR: deploy Azure Bicep templates, manage resource group lifecycle, execute infrastructure rollback. DO NOT USE FOR: application code deployments, cost analysis and optimization. |
+| `instruction-auditor` | Detects missing instruction coverage for a repo — identifies tech stacks and workflow patterns present in the codebase that have no corresponding BaseCoat instruction file in the overlay. USE FOR: find uncovered tech stacks in a repo overlay, audit BaseCoat instruction file gaps, identify missing workflow pattern coverage. DO NOT USE FOR: writing new instruction files, general code review. |
+| `issue-triage` | Use when GitHub issues need systematic quality review and triage. USE FOR: detecting duplicates and invalid issues, verifying closed issues were actually resolved, enforcing label/type/priority standards, linking related issues and PRs, checking branch connections, proposing fixes, and ensuring titles are meaningful. DO NOT USE FOR: writing implementation code, managing PRs that are not issue-linked, or sprint capacity planning. |
+| `legacy-modernization` | Guides teams through Web Forms to Razor Pages migration using the strangler fig pattern for incremental modernization of legacy ASP.NET applications. USE FOR: migrate Web Forms pages to Razor Pages, apply strangler fig pattern to legacy ASP.NET apps, plan incremental .NET modernization. DO NOT USE FOR: greenfield application development, cloud infrastructure migration. |
+| `llmops` | LLM operations and prompt engineering specialist. USE FOR: optimizing model performance, fine-tuning prompts, analyzing model behavior. DO NOT USE FOR: model training, infrastructure setup. |
+| `manual-test-strategy` | Use when you need a structured manual testing strategy for a feature or risk inventory. Produces a decision rubric, exploratory charter, regression checklist, defect template, and automation backlog. Automatically files GitHub Issues for automation candidates. |
+| `mcp-developer` | MCP (Model Context Protocol) development specialist. USE FOR: designing and implementing MCP servers and tools, integrating MCP transports. DO NOT USE FOR: direct model interactions, non-MCP tasks. |
+| `memory-curator` | Cross-session memory and knowledge management curator. USE FOR: extracting and storing knowledge from long conversations, deduplicating learning across sessions, injecting relevant context into new conversations, managing memory decay and TTLs. DO NOT USE FOR: real-time conversation support, immediate decision-making, output formatting. |
+| `memory-promoter` | Analyzes session transcripts and sprint summaries to identify high-value patterns for promotion to long-term BaseCoat memory contributions. USE FOR: extract reusable patterns from session transcripts, identify conventions worth promoting to BaseCoat memory, review sprint summaries for learnings. DO NOT USE FOR: writing code or instructions directly, real-time session assistance. |
+| `merge-coordinator` | Parallel branch merge coordinator. Use when multiple feature branches need to be merged into a target branch without interactive git editors hanging automated pipelines. Handles conflict detection, safe resolution, and ordered PR merging. |
+| `middleware-dev` | Middleware and integration development specialist. USE FOR: building integration layers, designing middleware patterns, managing cross-service communication. DO NOT USE FOR: frontend or backend-specific work. |
+| `mlops` | ML operations and model management specialist. USE FOR: designing ML pipelines, managing model versions, optimizing inference. DO NOT USE FOR: model training, data science. |
+| `new-customization` | Use when creating or updating a customization asset such as an instruction, skill, prompt, or agent. Chooses the right primitive, authors the file, and validates frontmatter and placement. |
+| `Observability Engineer` | OpenTelemetry instrumentation, structured logging, distributed tracing, metrics taxonomy, and dashboard-as-code for operational excellence. USE FOR: instrument services with OpenTelemetry, design structured logging schema, build dashboard-as-code for metrics. DO NOT USE FOR: incident response triage, infrastructure provisioning. |
+| `orchestrator` | Multi-agent orchestrator for complex, cross-domain tasks. USE FOR: decomposing large goals into subtasks, routing work to specialist agents, coordinating parallel execution, monitoring progress and escalating blockers, aggregating results. DO NOT USE FOR: simple single-agent tasks, real-time requirements, direct implementation. |
+| `orchestrator` | Compatibility alias for the orchestrator agent. Preserves the legacy filename while the prefixed BaseCoat agent is the canonical source. USE FOR: routing multi-step workflows, coordinating parallel agents, tracking execution state. DO NOT USE FOR: single-step tasks, user-facing triage, direct tool calls. |
+| `orphaned-pr-cleanup` | Use when identifying and resolving stale or orphaned pull requests that have no active owner, blocked reviews, or outdated mergeability status. USE FOR: detect PRs without recent activity, classify close/revive/merge candidates, request ownership reassignment, and produce cleanup actions with SLA windows. DO NOT USE FOR: code implementation work, deep architecture design, or replacing release governance decisions. |
+| `penetration-test` | Security penetration testing specialist. USE FOR: designing penetration tests, identifying security vulnerabilities, generating security reports. DO NOT USE FOR: fixing vulnerabilities, incident response. |
+| `performance-analyst` | Performance analysis agent for profiling, load testing, and optimization. Use when evaluating application performance, planning load tests, analyzing Core Web Vitals, or investigating query and caching performance. |
+| `policy-as-code-compliance` | Policy-as-code compliance agent for validating code and configuration against organizational rules, managing exceptions, and producing audit-ready compliance reports. USE FOR: validate Terraform against OPA policies, generate compliance audit reports, manage policy exceptions. DO NOT USE FOR: writing application business logic, live incident response. |
+| `product-manager` | Use when gathering requirements, writing user stories, defining acceptance criteria, planning roadmaps, or prioritizing features using frameworks like RICE or MoSCoW. |
+| `production-readiness` | Production Readiness Agent for ensuring applications meet operational requirements before release; coordinates BCP/DRP, incident response, and safety analysis. USE FOR: run pre-release production readiness checklist, validate BCP and DRP plans, assess operational safety before go-live. DO NOT USE FOR: feature development, post-incident root cause analysis. |
+| `program-bootstrap` | Thin orchestration entrypoint for end-to-end startup pack generation. USE FOR: bootstrapping a new program with coordinated onboarding/backlog/spec/architecture/workflow outputs, running dry-run orchestration before writing artifacts, resuming partially completed orchestration with checkpoints, preserving repo-specific delivery labels while normalizing governance labels. DO NOT USE FOR: replacing specialist agents, forcing one repo taxonomy, direct single-step authoring that a specialist agent already handles. |
+| `project-onboarding` | Single-invocation new repo setup with BaseCoat integration. Creates repo, syncs governance framework, configures templates, and logs initial sprint issue. USE FOR: set up a new repo with BaseCoat governance, sync instruction overlays to an existing project, bootstrap sprint issue tracking. DO NOT USE FOR: onboarding individual developers, migrating existing codebases. |
+| `prompt-coach` | Use when reviewing prompts, scoring prompt quality, identifying anti-patterns, and guiding iterative refinement of LLM prompts. |
+| `prompt-engineer` | Prompt optimization and system prompt engineering agent. Use when designing system prompts, optimizing token usage, crafting few-shot examples, or structuring chain-of-thought instructions. |
+| `rca` | Root Cause Analysis agent for deep-dive incident investigations, hypothesis testing, and prevention follow-up. USE FOR: run post-incident root cause analysis, trace production outage to contributing factors, generate 5-why analysis report. DO NOT USE FOR: live incident triage and containment, general performance tuning. |
+| `release-freeze-enforcer` | Use when enforcing release freeze windows, routing exception requests, and coordinating branch access during a freeze. USE FOR: evaluate freeze exceptions, block unauthorized merge attempts, and publish go/no-go decisions for frozen branches. DO NOT USE FOR: merging changes, bypassing approvals, or resolving code conflicts. |
+| `release-impact-advisor` | Assesses release readiness, change impacts, blast radius, rollback planning, and safe deployment strategies with canary deployments, feature flags, and changelog generation. USE FOR: assess release blast radius, plan rollback strategy, recommend deployment approach. DO NOT USE FOR: executing deployments, live incident response. |
+| `release-manager` | Automated versioned release workflow. Reads merged PRs since the last release, bumps version.json, writes CHANGELOG entry, creates git tag, and publishes GitHub release. USE FOR: bump semver and publish GitHub release, generate changelog from merged PRs, create git release tag. DO NOT USE FOR: sprint planning, deployment risk assessment. |
+| `release-readiness-chair` | Use when facilitating release readiness ceremonies and making explicit go/no-go decisions. USE FOR: collect release evidence across quality, operations, and rollback readiness; identify unresolved launch risks; enforce gate criteria; and publish decision records with owners and due dates. DO NOT USE FOR: implementing feature code, replacing incident response command, or product roadmap planning. |
+| `replanning-engine` | Use when S2 assessment data shows the work is far larger than estimated and a replanning decision is needed. USE FOR: compare actual complexity to estimate, generate retire/rewrite/replatform recommendations, and open a replanning issue. DO NOT USE FOR: routine triage or deployment execution. |
+| `Resilience Reviewer` | Code-level resilience pattern review — circuit breakers, timeouts, bulkhead isolation, graceful degradation, retry logic, and load shedding implementation. USE FOR: review circuit breaker and retry patterns in code, audit timeout hierarchy, validate graceful degradation. DO NOT USE FOR: live incident response, infrastructure capacity planning. |
+| `retro-facilitator` | End-of-sprint retrospective agent. Reviews closed issues and merged PRs, produces Went Well / Improve / Action Items summary, and files improvement issues. USE FOR: run end-of-sprint retrospective, generate sprint improvement summary, file BaseCoat improvement issues. DO NOT USE FOR: planning next sprint, velocity estimation. |
+| `rollout-basecoat` | Use when onboarding a repository to BaseCoat in an enterprise setting. Focuses on pinned versions, safe rollout, installation method, and validation steps. |
+| `run-history-cleanup` | Cleans GitHub Actions workflow run history safely by deleting stale, completed runs according to retention policy while preserving evidence for active incidents and compliance windows. USE FOR: pruning old completed workflow runs, reducing run-history noise, enforcing run-retention policy, and producing a cleanup report. DO NOT USE FOR: deleting in-progress runs, deleting runs tied to active incidents, changing workflow YAML retention-days, or bypassing compliance retention rules. |
+| `s4-shadow-mode-validator` | Use when comparing shadow-mode and live behavior during S4 soak before cutover. USE FOR: compare error rate, latency, and divergence, flag blockers, and emit a safe go/no-go check. DO NOT USE FOR: state curation or general monitoring. |
+| `Secrets Manager` | Secrets lifecycle management — discovery, rotation, expiry scanning, emergency revocation, and Vault patterns for infrastructure and application secrets. USE FOR: plan secrets rotation schedule, scan for expiring credentials, execute emergency revocation. DO NOT USE FOR: detecting hardcoded secrets in code, general performance optimization. |
+| `Security Monitor` | Detection engineering and SIEM configuration — maps MITRE ATT&CK tactics to detection rules, builds alerting baselines, and operationalizes NIST CSF Detect. USE FOR: build ATT&CK-mapped detection rules, calibrate SIEM alert thresholds, map compliance to detection coverage. DO NOT USE FOR: live incident response, secrets rotation. |
+| `security-analyst` | Security analysis and threat assessment specialist. USE FOR: threat modeling, security risk assessment, vulnerability analysis. DO NOT USE FOR: incident response, remediation. |
+| `security-operations` | Provide SOC (Security Operations Center) playbook guidance for threat detection, incident response, secrets rotation, audit logging, and operational security. USE FOR: run SOC incident response playbook, triage security alerts, coordinate credential rotation post-breach. DO NOT USE FOR: building SIEM detection rules, code-level security review. |
+| `self-healing-ci` | Automated CI failure analysis, log parsing, and pipeline remediation with retry strategies, flaky test detection, dependency resolution, and cache invalidation. USE FOR: auto-remediate CI failures, quarantine flaky tests, resolve build dependency and cache errors. DO NOT USE FOR: designing CI pipeline architecture, code-level debugging. |
+| `solution-architect` | Solution architecture agent for system design, C4 diagrams, ADRs, technology selection, and cross-cutting concerns. Use when designing new systems, evaluating technology choices, or reviewing architecture for scalability and risk. |
+| `sprint-closeout-auditor` | Use when closing a sprint and validating completion evidence before planning the next sprint. USE FOR: verify merged PR coverage, confirm CI health, identify unresolved errors and open issues, check test evidence, and produce carry-forward actions with owners. DO NOT USE FOR: writing feature code, replacing incident postmortems, or long-term roadmap prioritization. |
+| `sprint-planner` | Goal-to-issues decomposition and wave dependency mapping. Accepts a sprint goal, produces GitHub issues with labels, wave dependency maps, agent assignments, and acceptance criteria. USE FOR: decompose sprint goal into GitHub issues, build wave dependency map, assign agent roles. DO NOT USE FOR: running sprint retrospectives, story point estimation. |
+| `sprint-project-mapper` | Use when issues/PRs need clustering into meaningful sprint/project groups and rollup metrics for planning or release notes. USE FOR: grouping by sprint/wave/tags, computing issue-PR-LOC-cycle-time metrics, validating group size significance, and producing release-note-ready summaries. DO NOT USE FOR: code implementation, CI/CD deployment, or one-off issue editing. |
+| `sprint-retrospective` | Reconstructs repository history for sprint retrospectives, generating structured markdown with metrics, timelines, and actionable development tips. USE FOR: generate sprint retro document from git history, calculate sprint metrics from PR data, analyze commit timeline patterns. DO NOT USE FOR: planning next sprint, filing improvement issues. |
+| `sre-engineer` | Site reliability engineering agent for SLOs, error budgets, incident response, chaos engineering, and toil reduction. Use when improving service reliability and resilience. |
+| `station-bottleneck-analyzer` | Use when analyzing takt-time JSON to compute queue length and throughput by station, rank bottlenecks, and file the weekly bottleneck report issue. USE FOR: station-level queue pressure, throughput trends, weekly issue filing, and follow-up actions. DO NOT USE FOR: dispatching work or changing replanning policy. |
+| `strategy-to-automation` | Use when converting manual test paths into automation candidates. Maps paths to smoke tests, regression tiers, or agent specs. ALWAYS files a GitHub Issue for every automation candidate identified. |
+| `supply-chain-security` | Secure software supply chain with artifact signing, SBOM generation, and provenance tracking. USE FOR: generate SBOM for a release build, sign artifacts with Sigstore and verify provenance, assess and improve SLSA compliance level. DO NOT USE FOR: general dependency vulnerability scanning, runtime security monitoring. |
+| `takt-time-tracker` | Use when measuring dwell time at each station and flagging SLA breaches. USE FOR: compute median and p95 time at S1-S5, identify bottlenecks, and export dashboard-ready JSON. DO NOT USE FOR: dispatching work or making replanning decisions. |
+| `task-scope-validator` | Task scope validator for sub-agent dispatch. Analyzes task prompts to detect overscope, ambiguity, and risk before forwarding to explore, task, or general-purpose agents. USE FOR: validate task prompts pre-dispatch, classify tasks as automatable/gather-only/defer, identify scope refinement needs. DO NOT USE FOR: executing tasks, writing implementation code, or modifying task prompts without user feedback. |
+| `tech-writer` | Use when creating or improving technical documentation, API docs, runbooks, tutorials, ADRs, changelogs, or implementing docs-as-code workflows. |
+| `ux-designer` | UX design agent for user journey mapping, wireframe specs, component design, and accessibility audits. Use when designing user experiences, evaluating usability, or auditing interfaces for WCAG compliance. |
 
-### Modernization & Migration
-
-| Agent | Description |
-|---|---|
-| `basecoat-10-core-app-inventory` | Scans legacy applications to discover dependencies, identify technology stacks, assess migration readiness |
-| `basecoat-30-ai-containerization-planner` | Assesses containerization readiness, chooses deployment platforms (Docker/AKS/ACA) |
-| `basecoat-80-data-database-migration` | Plans and executes database migrations: schema evolution, replication, zero-downtime upgrades |
-| `basecoat-20-lang-dotnet-modernization-advisor` | .NET modernization assessment, upgrade planning, and execution guidance |
-| `entity-framework-migration` | Entity Framework Core migration planning and execution |
-| `identity-migration` | Identity provider migration strategy and execution |
-| `basecoat-10-core-legacy-modernization` | Web Forms to Razor Pages migration using the strangler fig pattern |
-
-### basecoat-40-azure-azure & Cloud
-
-| Agent | Description |
-|---|---|
-| `basecoat-40-azure-azure-landing-zone` | Scaffolds enterprise-scale landing zones following Microsoft ESLZ guidance |
-| `basecoat-10-core-finops-advisor` | Cloud cost governance, cost optimization, chargeback/showback models, and 12-Factor FinOps |
-| `basecoat-10-core-gitops-engineer` | GitOps workflows for Infrastructure-as-Code, declarative configuration, automated deployment |
-| `basecoat-60-workflow-infrastructure-deploy` | Orchestrates basecoat-40-azure-azure infrastructure deployments using basecoat-10-core-bicep with parallel resource management |
-
-### basecoat-50-security-security
-
-| Agent | Description |
-|---|---|
-| `basecoat-50-security-api-basecoat-50-security-security` | API threat modeling, OWASP API basecoat-50-security-security Top 10 assessment, and remediation |
-| `basecoat-10-core-chaos-engineer` | Fault injection, game days, resilience scoring, and recovery validation |
-| `basecoat-50-security-config-auditor` | Scans repositories for committed or unprotected configuration files containing secrets |
-| `basecoat-50-security-container-basecoat-50-security-security` | Container image and runtime basecoat-50-security-security hardening |
-| `basecoat-50-security-github-security-posture` | GitHub org and repository policy auditor |
-| `basecoat-10-core-hardening-advisor` | basecoat-50-security-security hardening guidance for applications and infrastructure |
-| `basecoat-90-quality-penetration-test` | basecoat-50-security-security assessments, vulnerability discovery, and remediation workflows |
-| `basecoat-50-security-policy-as-code-compliance` | Validates code and configuration against organizational rules and compliance frameworks |
-| `basecoat-50-security-secrets-manager` | Secrets lifecycle management and rotation |
-| `basecoat-50-security-security-analyst` | Vulnerability assessment, threat modeling, and secure coding review |
-| `basecoat-50-security-security-monitor` | basecoat-50-security-security monitoring and alerting strategy |
-| `basecoat-50-security-security-operations` | SOC playbook guidance for threat detection, incident response, and basecoat-50-security-security operations |
-| `basecoat-50-security-supply-chain-basecoat-50-security-security` | Artifact signing, SBOM generation, and provenance tracking |
-
-### basecoat-10-core-development
-
-| Agent | Description |
-|---|---|
-| `basecoat-10-core-backend-dev` | APIs, services, and business logic; basecoat-10-core-architecture patterns and data access |
-| `basecoat-10-core-frontend-dev` | UI components and applications; component-driven basecoat-10-core-development and state management |
-| `basecoat-10-core-middleware-dev` | API gateways, message-passing, and integration layer design |
-| `basecoat-10-core-mcp-developer` | basecoat-10-core-mcp server basecoat-10-core-development for building Model Context Protocol servers and tools |
-| `basecoat-80-data-data-tier` | Schema design, migrations, query optimization, and data access patterns |
-
-### basecoat-10-core-testing & basecoat-90-quality-quality
-
-| Agent | Description |
-|---|---|
-| `basecoat-90-quality-code-review` | Structured multi-step code review with findings prioritized by severity |
-| `basecoat-10-core-contract-basecoat-10-core-testing` | Consumer-driven contracts, E2E basecoat-10-core-testing strategy, and mutation basecoat-10-core-testing |
-| `basecoat-90-quality-e2e-test-strategy` | End-to-end basecoat-10-core-testing orchestration, critical path identification, flakiness reduction |
-| `basecoat-10-core-exploratory-charter` | Time-boxed exploratory basecoat-10-core-testing sessions with mission-driven charters |
-| `basecoat-30-ai-guardrail` | Validates outputs against safety, quality, compliance, and formatting constraints |
-| `basecoat-90-quality-manual-test-strategy` | Structured manual basecoat-10-core-testing strategy for a feature or risk inventory |
-| `basecoat-10-core-performance-analyst` | Profiling, load testing, and optimization; evaluating application performance |
-| `basecoat-10-core-strategy-to-automation` | Converts manual test paths into automation candidates |
-
-### CI/CD & DevOps
-
-| Agent | Description |
-|---|---|
-| `basecoat-10-core-agentops` | Agent versioning, rollout, health monitoring, rollback, and operational basecoat-20-lang-governance |
-| `basecoat-10-core-dependency-lifecycle` | Manages dependency updates, tracks breaking changes, plans upgrade paths |
-| `basecoat-10-core-dependency-update-advisor` | Reviews Dependabot PRs with structured risk assessment comments |
-| `basecoat-10-core-devops-engineer` | CI/CD pipelines, infrastructure as code, container strategy, environment management |
-| `basecoat-60-workflow-release-impact-advisor` | Release readiness assessment, change impact analysis, blast radius estimation |
-| `basecoat-60-workflow-release-manager` | Automated versioned release workflow from merged PRs to GitHub releases |
-| `basecoat-60-workflow-self-healing-ci` | CI failure analysis, log parsing, pipeline remediation, and retry strategies |
-| `basecoat-10-core-sre-engineer` | SLOs, error budgets, incident response, chaos engineering for site basecoat-10-core-reliability |
-
-### Memory & Knowledge
-
-| Agent | Description |
-|---|---|
-| `basecoat-10-core-feedback-loop` | Continuous learning through user feedback collection and prompt effectiveness tracking |
-| `basecoat-10-core-memory-curator` | Extracts, deduplicates, validates, and retrieves cross-session knowledge |
-| `basecoat-10-core-memory-promoter` | Analyzes session transcripts to identify high-value patterns for promotion to BaseCoat memory |
-| `basecoat-10-core-prompt-coach` | Interactive prompt optimization coach; reviews and scores prompt basecoat-90-quality-quality |
-| `basecoat-10-core-prompt-engineer` | System prompt engineering; designing prompts, optimizing few-shot examples |
-
-### Delivery & Planning
-
-| Agent | Description |
-|---|---|
-| `basecoat-60-workflow-incident-responder` | Structured incident response: classification, mitigation coordination, post-mortem |
-| `basecoat-10-core-issue-triage` | GitHub issue classification, priority assignment (P0-P3), label management |
-| `basecoat-10-core-merge-coordinator` | Parallel branch merge coordination into a target branch |
-| `basecoat-10-core-product-manager` | Requirements gathering, user stories, acceptance criteria, roadmap planning |
-| `basecoat-10-core-production-readiness` | Ensures applications meet operational requirements before release |
-| `basecoat-10-core-project-onboarding` | Single-invocation new repo setup with BaseCoat integration |
-| `basecoat-60-workflow-retro-facilitator` | End-of-sprint retrospective from closed issues and merged PRs |
-| `basecoat-60-workflow-rollout-basecoat` | Onboards a repository to BaseCoat in an enterprise setting with pinned versioning |
-| `basecoat-10-core-sprint-planner` | Goal-to-issues decomposition and wave dependency mapping |
-| `basecoat-10-core-sprint-retrospective` | Reconstructs repository history for sprint retrospectives |
-
-### BaseCoat Authoring
+### Workflow
 
 | Agent | Description |
 |---|---|
-| `basecoat-50-security-guidance-author` | Drafts new BaseCoat guidance assets (instructions, skills, agents, prompts) |
-| `basecoat-90-quality-guidance-reviewer` | Validates a BaseCoat guidance draft before committing |
-| `basecoat-10-core-new-customization` | Creates or updates customization assets such as instructions, skills, prompts, or basecoat-10-core-agents |
+| `build-master` | Background merge-control agent that keeps healthy lanes moving while isolating broken lanes and dispatching cloud break-fix PRs. USE FOR: lane-aware merge orchestration, CI break containment, cloud fix delegation, and safe resume after recovery. DO NOT USE FOR: bypassing branch protection, direct pushes to protected branches, or autonomous high-risk security/infra remediations. |
 
-### Data & ML
+### agent-development
 
 | Agent | Description |
 |---|---|
-| `basecoat-10-core-chaos-engineer` | Fault injection and resilience validation for distributed systems |
-| `basecoat-80-data-data-integrity` | Data integrity validation and constraint enforcement |
-| `basecoat-60-workflow-data-pipeline` | Medallion lakehouse architecture, data quality, ML pipeline orchestration |
-| `basecoat-80-data-dataops` | Data quality, lineage, governance, orchestration, and data contracts |
-| `basecoat-10-core-llmops` | Prompt deployment pipelines, model gateway configuration, inference monitoring |
-| `basecoat-30-ai-mlops` | Model lifecycle, experiment tracking, model registry, deployment automation, drift detection |
-| `basecoat-10-core-observability-engineer` | basecoat-10-core-observability strategy including metrics, traces, logs, and alerting |
+| `agent-designer` | Agent factory specialist. USE FOR: creating agent specs, auditing agent/skill definitions, capability-based routing decisions, and revising weak specs. DO NOT USE FOR: product feature coding, infrastructure deployment, unrelated code review. |
 
----
+### flow-governance
+
+| Agent | Description |
+|---|---|
+| `flow-admission-controller` | Use when designing or tuning intake controls for PR volume, merge-queue admission, and reviewer/runner capacity limits. USE FOR: WIP limit policies, queue admission rules, stale PR handling, and safe load-shedding design. DO NOT USE FOR: overriding branch protections manually, skipping approvals, or implementing unrelated product features. |
+| `flow-auditor` | Use when auditing PR intake, merge queue health, CI tier efficiency, and stale-branch pressure across repositories. USE FOR: queue bottleneck audits, CI waste analysis, PR aging reviews, merge-path risk scoring, and evidence-backed findings. DO NOT USE FOR: writing feature code, merging PRs without approval, or changing branch protections directly. |
+| `flow-governance-conductor` | Use when coordinating flow-governance analysis across code, PRs, issues, skills, and scripts. USE FOR: reusing existing flow/CI/governance skills first, mapping findings to current agents and scripts, identifying missing skill/script coverage, and producing issue-ready gap backlogs. DO NOT USE FOR: writing product features, bypassing branch or environment protections, or force-merging pull requests. |
+| `flow-optimizer` | Use when building an optimization program that combines audit evidence with prioritized fixes and execution sequencing. USE FOR: phased flow optimization plans, merge-queue and CI policy tuning, target KPI definition, and rollout risk reduction. DO NOT USE FOR: one-off bugfix coding, ad hoc release approvals, or force-merging around failed checks. |
+| `flow-suggester` | Use when converting audit findings into prioritized, issue-ready fixes with acceptance criteria and owners. USE FOR: translating audit evidence into GitHub issues, prioritizing queue and CI fixes, auto-creating high-confidence issues, sequencing remediation work, and defining measurable outcomes. DO NOT USE FOR: running uncontrolled migrations, bypassing governance gates, or shipping code changes directly. |
+| `flow-tracker` | Use when tracking repository flow metrics over time and recommending corrective actions when trends degrade. USE FOR: weekly flow scorecards, trend analysis, regression alerts, and metric-backed improvement suggestions. DO NOT USE FOR: speculative architecture redesign, editing production code, or replacing incident response workflows. |
+
+### governance
+
+| Agent | Description |
+|---|---|
+| `governance-auditor` | Use when auditing issue and PR metadata, label drift, template gaps, and workflow enforcement coverage. USE FOR: label audits, template consistency checks, workflow drift reviews, gap identification, and issue-ready findings. DO NOT USE FOR: writing application code, implementing product features, or changing labels without evidence. |
+| `governance-author` | Use when writing or revising common-vs-specific governance guidance, canonical label contracts, and migration notes. USE FOR: drafting docs/reference/governance-contract.md, separating shared rules from repo-specific rules, mapping legacy labels to canonical labels, and planning governance issue backlogs. DO NOT USE FOR: implementation code, release management, or ad hoc issue cleanup. |
 
 ## Skills
 
-Skills are reusable domain capabilities stored as `skills/<name>/SKILL.md`.
-
-### basecoat-40-azure-azure
+### Visibility: internal
 
 | Skill | Description |
 |---|---|
-| `azure-container-apps` | basecoat-40-azure-azure Container Apps deployment patterns |
-| `azure-devops-rest` | basecoat-40-azure-azure DevOps REST API integration |
-| `azure-identity` | basecoat-40-azure-azure managed identity and Entra ID configuration |
-| `basecoat-40-azure-azure-landing-zone` | Enterprise-scale landing zone scaffolding |
-| `azure-linux-app-service` | basecoat-40-azure-azure App Service for Linbasecoat-10-core-ux deployment and configuration |
-| `azure-networking` | basecoat-40-azure-azure virtual networks, NSGs, private endpoints |
-| `azure-policy` | basecoat-40-azure-azure Policy definition and assignment |
-| `azure-waf-review` | basecoat-40-azure-azure Well-Architected Framework review automation |
+| `bom-schema` | Use when defining or validating BOM schemas, resource ID formats, required cells, or naming conventions. USE FOR: JSON schema for BOM validation, required-field checks, and template creation. DO NOT USE FOR: unrelated app schemas or general data-model design. |
+| `bom-validation` | Validates Workcell BOMs against plant registry and CAF naming rules. USE FOR: validating BOM completeness before S2, detecting circular dependencies, enforcing CAF naming compliance, checking registry references before handoff. DO NOT USE FOR: approving incomplete BOMs, inferring missing resources, writing application code, running release/deployment tasks. |
+| `build-failure-triage` | Use when diagnosing failed builds to quickly isolate fault class and restore delivery flow. USE FOR: identify first failing stage, map log signatures to likely causes, recommend smallest safe fix path, and produce validation checklist for CI and local runs. DO NOT USE FOR: writing new feature code, replacing incident commander workflows, or making unreviewed production changes. |
+| `build-master-control-plane` | Use when defining or operating a build-master control plane that keeps merges flowing while containing CI breakage. USE FOR: lane-state policy, break-fix eligibility, retry/revert thresholds, and escalation rules. DO NOT USE FOR: direct code implementation, bypassing branch protection, or approving high-risk fixes without policy gates. |
+| `ci-flake-quarantine` | Use when isolating flaky CI tests with evidence-based quarantine windows and expiry policy. USE FOR: confirm flakiness, quarantine only after repeat evidence, and produce owner/expiry tracking. DO NOT USE FOR: hiding failures, permanently disabling tests, or replacing root-cause remediation. |
+| `decision-log-capture` | Use when capturing ceremony outcomes into durable decision records. USE FOR: document decision, rationale, options considered, owner, and follow-up actions from standup, sprint, and release ceremonies. DO NOT USE FOR: writing implementation code, replacing full ADR workflows, or generating marketing content. |
+| `dependency-blocker-monitoring` | Use when monitoring workcell BOM dependencies and cell health so blocker issues are opened when a cell fails and resolved when it recovers. USE FOR: dependency maps, cell health checks, blocker issue creation, and recovery closures. DO NOT USE FOR: general project tracking or unrelated CI triage. |
+| `escalation-routing` | Use when routing high-risk decisions to the right human approver with a PR-comment approval trail. USE FOR: release signoff, irreversible changes, compliance gates. DO NOT USE FOR: routine automation. |
+| `factory-state-machine` | Use when defining factory state transitions, reading or writing .github/factory-state.json, or orchestrating workcell workflow gates. USE FOR: intake/complete/pending transitions, auto-proceed rules, escalation checks, and state validation. DO NOT USE FOR: general app state management or unrelated workflow docs. |
+| `failure-pattern-process` | Use when running the failure-pattern consumer process from mining through enhancement planning. USE FOR: evidence mining, append-only raw finding capture, common-versus-local triage with rationale, and prioritized enhancement planning with early-detection gates. DO NOT USE FOR: implementing repository feature changes, incident hotfix execution, or unsupported analysis without evidence links. |
+| `merge-conflict-mediator` | Use when a merge conflict needs a deterministic playbook for docs, config, manifests, or release artifacts. USE FOR: classify conflict types, choose a merge policy, and hand a resolution plan to merge-coordinator. DO NOT USE FOR: auto-resolving source code conflicts, silently dropping dependency changes, or bypassing human review. |
+| `orphaned-pr-triage` | Use when triaging stale pull requests and review backlog to keep repository flow healthy. USE FOR: identify orphaned PRs by inactivity windows, classify revive/close/escalate actions, draft maintainer comments for ownership handoff, and produce weekly cleanup reports with metrics. DO NOT USE FOR: implementing code changes, rewriting product requirements, or replacing security vulnerability triage. |
+| `public-safe-sanitization` | Converts internal material to public-safe artifacts. USE FOR: sanitizing roadmap/issue notes for sharing, redacting private URLs/customer names/IDs, producing public-safe summaries with redaction ledger, rewriting internal details into generic guidance. DO NOT USE FOR: publishing raw internal notes, preserving sensitive identifiers, generating legal/compliance determinations, creating unrelated product plans. |
+| `s4-deployment-checklist` | Use when preparing an S4 cutover, shadow-mode soak, rollback validation, or deployment readiness review. USE FOR: checklist-driven release gating, rollback testing, monitoring readiness, and team briefing. DO NOT USE FOR: generic release notes or unrelated sprint planning. |
+| `s4-rollback-testing` | Designs and runs S4 rollback drills and recovery tests. USE FOR: building repeatable rollback rehearsal workflows, verifying rollback activation after soak windows, sequencing deploy/wait/rollback/verify/smoke-test steps, documenting drill outcomes for readiness checks. DO NOT USE FOR: skipping rollback verification, treating deploy success as rollback proof, implementing application features, drafting unrelated communications. |
+| `sprint-closeout-audit` | Use when auditing sprint closure readiness with explicit pass/fail evidence for merge state, CI health, unresolved errors, open issues, and test execution. USE FOR: run end-of-sprint completion checklist, validate carry-forward decisions, produce closeout report for leadership, and gate next-sprint planning until closure criteria are explicit. DO NOT USE FOR: feature implementation, architecture design, or standalone incident response. |
+| `standup-signal-extraction` | Use when extracting actionable standup signals from team updates. USE FOR: convert updates into blockers/actions/dependencies, prioritize escalations, and produce owner-based daily execution plans. DO NOT USE FOR: feature implementation, deep architecture design, or retrospective trend analysis. |
+| `station-bottleneck-analyzer` | Use when analyzing takt-time JSON to calculate queue length and throughput by station, rank bottlenecks, and draft the weekly bottleneck report issue. USE FOR: station-level queue pressure, throughput trends, bottleneck ranking, and weekly issue filing. DO NOT USE FOR: dispatching work or changing routing policy. |
+| `takt-time-measurement` | Use when measuring takt time, exporting throughput metrics, or building a GitHub Actions workflow that captures timing data. USE FOR: workflow templates, takt calculations, and metric export guidance. DO NOT USE FOR: general project management or unrelated observability tasks. |
 
-### Modernization
-
-| Skill | Description |
-|---|---|
-| `basecoat-10-core-app-inventory` | Application inventory and dependency discovery |
-| `cross-stack-modernization` | Cross-technology stack modernization patterns |
-| `dotnet-modernization` | .NET upgrade and modernization execution |
-| `entity-framework-migration` | EF Core migration generation and validation |
-| `identity-migration` | Identity provider migration execution |
-
-### basecoat-10-core-development Domains
-
-| Skill | Description |
-|---|---|
-| `agent-design` | Copilot agent definition authoring |
-| `api-design` | OpenAPI/REST/GraphQL API specification authoring |
-| `basecoat-50-security-api-basecoat-50-security-security` | API basecoat-50-security-security assessment and hardening |
-| `basecoat-10-core-backend-dev` | basecoat-10-core-backend service and API basecoat-10-core-development patterns |
-| `basecoat-90-quality-code-review` | Structured code review workflow |
-| `basecoat-10-core-contract-basecoat-10-core-testing` | Consumer-driven contract test generation |
-| `cqrs-event-sourcing` | CQRS and event sourcing implementation patterns |
-| `basecoat-80-data-data-tier` | Data schema design and access patterns |
-| `basecoat-80-data-database-migration` | Database migration planning and execution |
-| `domain-driven-design` | Bounded context and aggregate modeling |
-| `e2e-basecoat-10-core-testing` | End-to-end test strategy and implementation |
-| `electron-apps` | basecoat-10-core-electron desktop application basecoat-50-security-security patterns |
-| `basecoat-10-core-frontend-dev` | basecoat-10-core-frontend component and state management patterns |
-| `basecoat-90-quality-manual-test-strategy` | Manual test plan and exploratory charter creation |
-| `mcp-basecoat-10-core-development` | Model Context Protocol server basecoat-10-core-development |
-| `performance-profiling` | Application profiling and load basecoat-10-core-testing |
-| `refactoring` | Safe refactoring techniques and patterns |
-
-### DevOps & Operations
+### Visibility: public
 
 | Skill | Description |
 |---|---|
-| `basecoat` | BaseCoat sync, version management, and asset authoring |
-| `create-instruction` | Creates new instruction files following BaseCoat conventions |
-| `create-skill` | Creates new skill directories following BaseCoat conventions |
-| `dev-containers` | Dev container configuration and optimization |
-| `devops` | CI/CD pipeline design and implementation |
-| `environment-bootstrap` | Environment provisioning and bootstrap automation |
-| `gitops` | GitOps workflow implementation with declarative configuration |
-| `ha-resilience` | High-availability and resilience pattern implementation |
-| `handoff` | Session and task handoff basecoat-10-core-documentation |
-| `human-in-the-loop` | Human review checkpoints and escalation workflows |
-| `basecoat-10-core-observability` | Metrics, tracing, logging, and alerting setup |
-| `basecoat-10-core-production-readiness` | Pre-release operational readiness validation |
-| `sprint-management` | Sprint planning, issue decomposition, and wave mapping |
-| `basecoat-10-core-sprint-retrospective` | Sprint retrospective generation from repository history |
-| `basecoat-50-security-supply-chain-basecoat-50-security-security` | SBOM, artifact signing, and provenance |
-| `tech-debt` | Technical debt identification and remediation planning |
-| `twelve-factor` | Twelve-factor app compliance review |
-
-### basecoat-50-security-security
-
-| Skill | Description |
-|---|---|
-| `basecoat-50-security-github-security-posture` | GitHub organization and repository basecoat-50-security-security posture audit |
-| `penetration-basecoat-10-core-testing` | basecoat-50-security-security assessment and penetration basecoat-10-core-testing execution |
-| `basecoat-50-security-security` | General basecoat-50-security-security review and hardening |
-| `basecoat-50-security-security-operations` | SOC playbook and threat response guidance |
-
-### Memory & Intelligence
-
-| Skill | Description |
-|---|---|
-| `basecoat-10-core-architecture` | Architectural decision recording and system design |
-| `copilot-usage-analytics` | GitHub Copilot usage metrics and adoption reporting |
-| `basecoat-10-core-documentation` | Technical basecoat-10-core-documentation authoring and review |
-| `basecoat-10-core-ux` | User experience design and accessibility patterns |
-
----
+| `agent-design` | Use when designing Copilot agents, skills, or instruction assets for a shared customization repo. USE FOR: design a new Copilot agent, scaffold a skill folder, create an instruction file, choose agent vs skill vs instruction, author agent frontmatter and conventions. DO NOT USE FOR: implementing product features, troubleshooting runtime incidents, deploying infrastructure. |
+| `agentic-sdlc-autonomy` | Use when asked to audit, measure, implement, or operate rules-based human-in-the-loop autonomy for agent-operated repositories. USE FOR: agentic SDLC governance, PR risk classification (A0-A5), auto-merge policy, merge queue gates, deployment lane policy, DB migration controls, IaC safety rules, runner isolation, production approval flows, and policy-versus-settings drift. DO NOT USE FOR: direct deployment, production DB migrations, infrastructure apply, secrets rotation, or branch/environment protection changes without explicit human authorization. |
+| `agentops-audit` | Audits and improves agent/skill specs with a scored rubric and routing rationale. USE FOR: scoring spec quality, identifying concrete fixes, producing revised specs, validating cost/latency fit, generating routing profiles. DO NOT USE FOR: implementing product features, unrelated code review, infrastructure deployment. |
+| `api-audit` | Audits API endpoint designs, contracts, versioning strategies, and error handling. USE FOR: reviewing API endpoint definitions, validating request/response contracts, assessing error handling patterns, evaluating versioning strategies, analyzing documentation completeness. DO NOT USE FOR: implementing API endpoints, writing backend code, database design, frontend development, infrastructure setup. |
+| `api-design` | Use when designing or reviewing API contracts, versioning decisions, and governance standards. USE FOR: design a REST API contract, review an OpenAPI diff for breaking changes, choose an API versioning strategy, draft GraphQL schema changes, create a deprecation or sunset plan. DO NOT USE FOR: implementing request handlers, tuning database indexes, penetration testing an API. |
+| `api-security` | Use when securing REST or GraphQL APIs against common auth, authorization, validation, and abuse risks. USE FOR: secure JWT authentication for an API, add rate limiting to endpoints, review API authorization flaws, harden GraphQL queries and mutations, prevent SQL injection in API handlers. DO NOT USE FOR: network firewall design, frontend styling work, general cloud cost reviews. |
+| `app-inventory` | Use when inventorying legacy applications to capture dependencies, service bindings, framework versions, and migration complexity. USE FOR: inventory a legacy application portfolio, scan app dependencies and connection strings, assess migration complexity for an app, create an application inventory report, map external service bindings before modernization. DO NOT USE FOR: rewriting application code, deploying workloads, designing the target-state architecture. |
+| `architecture` | Use when shaping system architecture, documenting decisions, and evaluating cross-cutting tradeoffs. USE FOR: design a system architecture, create a C4 diagram, write an ADR for a platform choice, compare technology options with a matrix, assess architectural risks and mitigations. DO NOT USE FOR: implementing endpoints, fixing CI failures, pixel-perfect UI design. |
+| `azure-container-apps` | Use when deploying or operating containerized workloads on Azure Container Apps with scaling, revisions, and Dapr. USE FOR: deploy an app to Azure Container Apps, configure a Dapr sidecar, set Azure Container Apps scaling rules, manage revisions and traffic splitting, create a container apps job. DO NOT USE FOR: AKS cluster administration, App Service troubleshooting, virtual machine sizing. |
+| `azure-devops-rest` | Use when building automations that call Azure DevOps REST APIs for work items, pipelines, repos, and artifacts. USE FOR: query Azure DevOps work items via REST, trigger a pipeline run from a script, paginate Azure DevOps API results, authenticate with PAT or System.AccessToken, update a work item with JSON Patch. DO NOT USE FOR: GitHub REST automation, Azure resource deployment, browser UI test scripting. |
+| `azure-identity` | Use when designing Azure identity and access patterns across RBAC, managed identities, Entra ID, and workload federation. USE FOR: assign Azure RBAC roles, configure managed identity for an app, create an Entra ID app registration, set up GitHub OIDC federation, design a conditional access policy. DO NOT USE FOR: local password reset flows, network segmentation design, non-Azure IAM platforms. |
+| `azure-identity-audit` | Use when reviewing Azure identity and access designs across RBAC, managed identities, Entra ID, and federation. USE FOR: audit RBAC assignments, managed identity scope, app registration permissions, OIDC federation, least privilege. DO NOT USE FOR: network topology design, app feature code, non-Azure IAM platforms. |
+| `azure-landing-zone` | Use when designing Azure enterprise-scale landing zones aligned to the Cloud Adoption Framework. USE FOR: design an Azure landing zone, scaffold a management group hierarchy, create a hub networking platform subscription, assign a regulatory policy initiative, vend a new application landing zone. DO NOT USE FOR: single-resource app deployment, AWS organization design, application code generation. |
+| `azure-linux-app-service` | Use when deploying or operating Python, Ruby, or Node.js apps on Azure App Service Linux. USE FOR: deploy a Flask or FastAPI app to App Service Linux, configure a startup command for a Node app, set up a deployment slot swap, stream Azure App Service logs, choose between code deploy and container deploy. DO NOT USE FOR: Windows App Service configuration, AKS ingress tuning, desktop app packaging. |
+| `azure-networking` | Use when designing Azure network topology, private connectivity, and traffic control patterns. USE FOR: design a hub-spoke VNet topology, set up private endpoints and Private DNS zones, author an NSG rule matrix, create forced-tunneling route tables, review hybrid connectivity on Azure. DO NOT USE FOR: identity role assignments, Kubernetes app manifests, non-Azure CDN setup. |
+| `azure-policy` | Use when authoring Azure Policy definitions, initiatives, remediation tasks, and compliance reporting assets. USE FOR: write an Azure Policy to require tags, create a policy initiative for CIS controls, build a DeployIfNotExists remediation, generate a KQL compliance dashboard query, restrict allowed VM SKUs. DO NOT USE FOR: application business logic, Azure RBAC role selection, packet capture troubleshooting. |
+| `azure-policy-audit` | Use when reviewing Azure Policy definitions, initiatives, exemptions, remediation tasks, or compliance reporting. USE FOR: audit policy coverage, remediation completeness, exemption hygiene, policy drift, compliance reporting. DO NOT USE FOR: app business logic, RBAC-only questions, generic troubleshooting. |
+| `azure-waf-review` | Use when assessing an Azure workload against the Well-Architected Framework and prioritizing remediation. USE FOR: run an Azure Well-Architected review, score a workload across WAF pillars, review Terraform or Bicep for reliability and security gaps, prioritize remediation actions, assess an architecture before production. DO NOT USE FOR: penetration testing, incident response triage, writing new product features. |
+| `backend-audit` | Audits generated or implemented backend code output. Evaluates code quality, testing coverage, performance, security, and maintainability. USE FOR: reviewing backend implementations, analyzing code quality, assessing test coverage, identifying performance bottlenecks, security vulnerabilities, structural debt. DO NOT USE FOR: writing backend code from scratch, database schema design, API contract design, frontend code review, infrastructure provisioning. |
+| `backend-dev` | Use when implementing backend APIs, business logic, service layers, or repository-based data access. USE FOR: implement a REST endpoint, scaffold a service layer, define an error response catalog, add repository pattern data access, review backend logic for correctness. DO NOT USE FOR: frontend component styling, infrastructure provisioning, enterprise architecture strategy. |
+| `backlog-burndown` | Use when managing backlog burn-down and flow health across a sprint window or milestone. USE FOR: build burn-down tables from issue state changes, detect spillover risk from velocity and remaining scope, prioritize blockers to protect sprint goals, and produce daily backlog status updates with explicit actions. DO NOT USE FOR: writing implementation code, replacing sprint retrospective analysis, or setting annual portfolio strategy. |
+| `basecoat` | Use when you need to discover the right BaseCoat agent or route a request to the correct discipline. USE FOR: find the right BaseCoat agent, browse the BaseCoat agent catalog, route a prompt to backend-dev, discover which agent handles code review, delegate a task to the right discipline. DO NOT USE FOR: implementing the task directly, editing skill internals, general package installation guidance. |
+| `change-isolation` | Use when designing or reviewing monorepo workflow isolation so independent layers (mobile, database, portal, extension, infra) can build, test, and release separately. USE FOR: define path-based lane boundaries, isolate deploy workflows by layer, design independent versioning lanes, audit cross-trigger coupling in GitHub Actions, create release lane contracts. DO NOT USE FOR: implementing application feature logic, writing database queries unrelated to CI/CD boundaries, or generic project planning without workflow scope. |
+| `ci-audit` | Audits live GitHub repository governance controls and produces a markdown evidence pack. USE FOR: exporting branch protection and required checks, verifying merge queue and environment protections, auditing runners and security gates, and reporting policy-vs-live gaps. DO NOT USE FOR: writing application code, creating workflows, infrastructure implementation, or making repo-setting changes. |
+| `code-review` | Use when reviewing code, pull requests, or diffs for bugs and regressions. USE FOR: review pull request for bugs, inspect diff for regression risk, identify missing test coverage, rank review findings by severity, review refactor for edge cases. DO NOT USE FOR: writing new features, restyling code for preference, making architecture decisions. |
+| `container-build-assessment` | Assess Docker build readiness with composable scripts that analyze Dockerfile structure, inspect dependency footprint, estimate image size, and report security posture in structured JSON suitable for automation and remediation planning. |
+| `container-migration` | Scaffold containerization of a legacy app for Azure Container Apps or Kubernetes with Dockerfile, health probes, and deployment assets. USE FOR: containerize this legacy app, create a Dockerfile for production, migrate app to Azure Container Apps, add Kubernetes manifests and health checks, set up ACR build and push workflow. DO NOT USE FOR: simple VM deployment without containers, tuning application business logic, non-container desktop packaging. |
+| `contract-testing` | Use when implementing consumer-driven contracts, Pact verification, provider states, or integration test orchestration across services. USE FOR: add Pact contract tests between services, verify provider won't break consumers, set up Pact Broker in CI, orchestrate multi-service integration tests with Docker Compose, add mutation testing gate for APIs. DO NOT USE FOR: unit testing a single function, load testing production traffic, frontend visual regression testing. |
+| `copilot-usage-analytics` | Use when estimating Copilot CLI session cost, analyzing model routing efficiency, or mapping available usage APIs. USE FOR: estimate Copilot session cost, analyze expensive agent dispatches, recommend cheaper model routing, audit Copilot workflow token usage, document GitHub Copilot usage APIs. DO NOT USE FOR: general product analytics dashboards, application performance monitoring, non-Copilot billing disputes. |
+| `cqrs-event-sourcing` | CQRS and Event Sourcing patterns for scalable, auditable distributed systems with command models, event stores, and read projections. USE FOR: design CQRS architecture for a service, implement event sourcing for audit history, separate command and query models, plan read model projections and replay, add saga orchestration for eventual consistency. DO NOT USE FOR: simple CRUD app design, single-table admin tools, basic ORM mapping questions. |
+| `create-instruction` | Use when creating a new instruction file for a domain, language, or workflow in a customization repo. USE FOR: create a new instructions file, choose applyTo glob for an instruction, write guardrails for a coding workflow, add repository standards for a language, draft instruction frontmatter and naming. DO NOT USE FOR: creating a reusable skill, writing end-user product docs, editing unrelated source code. |
+| `create-skill` | Use when creating a new reusable skill with clear triggers, workflow steps, and starter assets in a customization repository. USE FOR: add a new SKILL.md file, design skill trigger phrases, decide if work belongs in a skill, scaffold skill folder with templates, write discovery-focused skill frontmatter. DO NOT USE FOR: creating a file instruction only, writing application business logic, generating a one-off prompt response. |
+| `cross-stack-modernization` | Language-agnostic modernization guidance for incrementally replacing legacy applications using strangler fig, ACLs, and risk scoring. USE FOR: plan legacy app modernization strategy, choose rewrite versus refactor versus replace, design strangler fig migration, sequence service extraction by dependency risk, decide database-first or UI-first migration. DO NOT USE FOR: greenfield system design, minor bug fixes in one service, container-only deployment setup. |
+| `data-tier` | Use when designing schemas, writing migrations, reviewing queries, or defining repository and indexing patterns for an application's data layer. USE FOR: design a relational schema, write migration with rollback support, review SQL for N+1 or missing indexes, build a data dictionary, define repository or data access patterns. DO NOT USE FOR: business UI copywriting, infrastructure-only deployment tasks, debugging frontend CSS. |
+| `data-tier-audit` | Use when reviewing schemas, migrations, indexes, query plans, or data contract safety. USE FOR: audit schema drift, migration rollback safety, index health, query risk, repository patterns. DO NOT USE FOR: UI copywriting, infrastructure-only tasks, generic code review. |
+| `database-migration` | Zero-downtime database migration patterns, blue-green cutovers, and rollback strategy guidance for production data changes. USE FOR: plan expand-contract schema migration, design blue-green database cutover, write Flyway versioned migration and undo scripts, prepare rollback plan for production schema change, validate zero-downtime database release process. DO NOT USE FOR: ad hoc query tuning only, application feature design, non-production toy database setup. |
+| `dev-containers` | VS Code Dev Containers and GitHub Codespaces guidance for reproducible development environments and team onboarding. USE FOR: create devcontainer.json for this repo, set up Codespaces for contributors, containerize local dev toolchain, add VS Code extensions inside container, make development setup reproducible across machines. DO NOT USE FOR: production container deployment, Kubernetes runtime troubleshooting, packaging a desktop application. |
+| `devops` | Use when designing CI/CD pipelines, infrastructure as code, deployment workflows, rollback plans, or observability setup. USE FOR: create GitHub Actions pipeline, review Bicep or Terraform deployment templates, define release promotion gates, write rollback runbook for a service, add monitoring and health checks for deployment. DO NOT USE FOR: writing application feature code, database schema modeling, drafting product marketing copy. |
+| `devops-audit` | Audits CI/CD pipelines, deployment configurations, and environment management. USE FOR: reviewing GitHub Actions workflows, analyzing deployment processes, validating environment configurations, assessing automation completeness, identifying workflow bottlenecks. DO NOT USE FOR: implementing CI/CD workflows from scratch, infrastructure provisioning, application code development, database administration. |
+| `docs-site` | Scaffold a MkDocs Material documentation site with GitHub Pages deployment, navigation, and starter content for a repository. USE FOR: create a docs site for this repo, set up MkDocs Material, publish documentation to GitHub Pages, generate getting-started docs with diagrams, add docs CI workflow. DO NOT USE FOR: writing a single inline code comment, building an app frontend, creating product marketing landing pages. |
+| `documentation` | Use when writing or improving technical documentation such as READMEs, ADRs, runbooks, and reference guides. USE FOR: write a project README, record an architecture decision, create an operational runbook, review docs for accuracy and gaps, establish docs-as-code standards. DO NOT USE FOR: implementing application features, generating code-only refactors, designing infrastructure topology diagrams from scratch. |
+| `domain-driven-design` | Domain-driven design guidance covering bounded contexts, aggregates, event sourcing, CQRS, and saga coordination in complex domains. USE FOR: model bounded contexts and aggregates, design domain events and invariants, apply DDD to microservice boundaries, implement saga orchestration for business workflows, combine DDD with CQRS patterns. DO NOT USE FOR: simple CRUD scaffolding, basic SQL report queries, generic UI styling tasks. |
+| `dotnet-modernization` | Structured guidance for assessing and executing modernization from .NET Framework or older .NET targets to modern .NET. USE FOR: inventory a legacy .NET solution, plan phased .NET upgrade, review NuGet and framework compatibility, define modernization test and release gates, remediate breaking changes during migration. DO NOT USE FOR: brand-new .NET app scaffolding, non-.NET platform migrations, day-to-day feature development unrelated to upgrades. |
+| `e2e-testing` | Use when designing or hardening production E2E tests with Playwright or Cypress, including flake reduction, CI strategy, and browser coverage. USE FOR: choose between Playwright and Cypress, reduce flaky browser tests, test login or checkout journeys, set up cross-browser CI coverage, plan E2E fixtures and mocks. DO NOT USE FOR: unit test design, API-only load testing, visual brand design. |
+| `electron-apps` | Use when building secure, production-ready Electron desktop apps with guidance for IPC, preload APIs, packaging, updates, and renderer isolation. USE FOR: secure Electron IPC design, preload script API patterns, package and sign desktop app, implement auto-update flow, review BrowserWindow security settings. DO NOT USE FOR: generic web SPA architecture, mobile app development, browser extension work. |
+| `entity-framework-migration` | Use when modernizing legacy Entity Framework data layers to EF Core with help for model mapping, DbContext refactors, phased cutovers, and migration risk review. USE FOR: migrate EF6 to EF Core, refactor DbContext configuration, convert model mappings and conventions, plan phased database cutover, validate query compatibility after migration. DO NOT USE FOR: greenfield ORM selection, raw SQL tuning only, non-.NET data pipelines. |
+| `environment-audit-drift` | Audit environment-map.yml against expected Azure and GitHub state to detect configuration, security, deployment, and tagging drift before automation runs. USE FOR: scheduled drift audits in CI, pre-deployment drift gates, identifying branch-protection mismatches to autonomy levels, and producing remediation-first findings for operators. DO NOT USE FOR: emergency incident execution paths, direct destructive infrastructure changes, or replacing policy engines that enforce approvals. |
+| `environment-bootstrap` | Use when bootstrapping secure Azure delivery environments with OIDC federation, state storage, Key Vault, promotion workflows, and Fabric access automation. USE FOR: set up GitHub Actions OIDC to Azure, provision Terraform state storage, configure Key Vault for CI/CD secrets, design dev-to-prod environment promotion, grant Fabric workspace service principal access. DO NOT USE FOR: application feature coding, non-Azure local dev setup, Kubernetes app debugging. |
+| `flow-admission-control` | Use when defining capacity-aware intake and merge-queue admission rules to prevent queue overload. USE FOR: WIP limit policy, merge-ready admission criteria, stale PR expiration rules, and load-shedding strategy. DO NOT USE FOR: manual override of required checks, arbitrary PR closure without policy, or unrelated feature planning. |
+| `flow-audit` | Use when auditing PR/merge/CI delivery flow for bottlenecks and governance drift. USE FOR: merge queue bottleneck scans, stale PR analysis, CI waste detection, throughput baseline creation, and severity-ranked findings. DO NOT USE FOR: implementing product features, force-merging changes, or direct workflow mutation without review. |
+| `flow-optimize` | Use when creating a phased optimization plan that combines audit findings and suggested fixes. USE FOR: flow optimization roadmaps, CI tier tuning, merge policy improvements, and KPI-target planning. DO NOT USE FOR: reactive incident firefighting, direct feature coding, or unmanaged policy rollouts. |
+| `flow-suggest` | Use when translating flow-audit findings into prioritized fixes and issue-ready recommendations. USE FOR: remediation prioritization, high-confidence auto-issue creation, issue drafting, acceptance-criteria definition, and execution-wave planning. DO NOT USE FOR: direct code implementation, unreviewed governance enforcement, or broad roadmap planning without audit input. |
+| `flow-track` | Use when tracking PR/merge/CI flow metrics over time and generating metric-backed corrective suggestions. USE FOR: trend scorecards, regression alerts, threshold monitoring, and action recommendations tied to metrics. DO NOT USE FOR: one-off static audits without history, ad hoc coding work, or replacing SRE incident procedures. |
+| `frontend-audit` | Use when reviewing frontend implementations, component output, responsive behavior, accessibility states, or UI consistency. USE FOR: audit generated UI, review a PR for WCAG or responsive issues, verify interaction states and copy consistency, check performance-sensitive patterns. DO NOT USE FOR: building UI features from scratch, backend API design, database schema modeling. |
+| `frontend-dev` | Use when building frontend components, responsive layouts, accessibility audits, or client-side state patterns with templates and review checklists. USE FOR: scaffold accessible UI component, review page for WCAG issues, design frontend state management, implement responsive layout behavior, audit frontend performance and correctness. DO NOT USE FOR: backend API design, database schema modeling, infrastructure provisioning. |
+| `git-worktrees` | Use when isolating parallel tasks, experiments, or hotfixes into separate working directories. USE FOR: create isolated workspace for feature branch, run parallel tasks without stashing, set up clean environment for risky experiment, manage multiple branches simultaneously, clean up stale worktrees. DO NOT USE FOR: simple branch switching, single-task linear workflows, repos with submodule-heavy setups that complicate worktrees. |
+| `github-security-posture` | Use when auditing GitHub organization or repository security settings with traffic-light scoring and remediation guidance. USE FOR: review branch protection and rulesets, check secret scanning and push protection, triage Dependabot or code scanning alerts, assess CODEOWNERS coverage, produce GitHub security posture report. DO NOT USE FOR: fixing application code vulnerabilities, cloud IAM auditing, incident response for active breaches. |
+| `gitops` | Use when designing or reviewing GitOps workflows with Flux or ArgoCD, declarative delivery, drift reconciliation, and secrets management across clusters. USE FOR: set up Flux or ArgoCD workflow, structure multi-environment cluster config, handle Kubernetes drift reconciliation, choose GitOps secrets pattern, review pull-based deployment practices. DO NOT USE FOR: manual kubectl runbooks, non-Kubernetes CI pipelines, imperative server configuration. |
+| `governance` | Use when defining the shared governance layer, separating common from repo-specific rules, or revising canonical metadata. USE FOR: common-vs-specific policy docs, canonical label contracts, migration maps, template guidance, and governance issue planning. DO NOT USE FOR: application implementation, one-off issue cleanup, or release operations. |
+| `governance-audit` | Use when auditing repo metadata, label drift, template gaps, and workflow enforcement coverage. USE FOR: issue and PR metadata audits, canonical-label drift checks, missing governance doc detection, and follow-up issue planning. DO NOT USE FOR: writing app code, changing labels without evidence, or release coordination. |
+| `ha-resilience` | Use when designing highly available systems with retries, circuit breakers, failover, chaos testing, and SRE guardrails for recovery objectives. USE FOR: design multi-region failover, add retry and jitter strategy, introduce circuit breaker for flaky dependency, plan chaos testing against SLOs, define health probes and recovery behavior. DO NOT USE FOR: single-host app setup, feature UI design, cost-only optimization reviews. |
+| `handoff` | Use when ending a session or transferring work so another agent or future session can resume with preserved reasoning, exact files, commands, and blockers. USE FOR: create end-of-session handoff, transfer task between agents, summarize unfinished work with next steps, capture commands and validations run, package follow-up deployment context. DO NOT USE FOR: solving the task itself, long-term project planning, writing user-facing release notes. |
+| `human-in-the-loop` | Use when agent workflows need explicit human judgment for destructive, ambiguous, high-stakes, or low-confidence actions, with approval gates and escalation patterns. USE FOR: add approval step before production deploy, define escalation triggers for risky automation, design asynchronous human review workflow, defer destructive action pending approval, document graceful degradation when reviewers are unavailable. DO NOT USE FOR: fully autonomous low-risk tasks, replacing security policy, general chatbot conversation design. |
+| `identity-migration` | Use when migrating legacy authentication to ASP.NET Core Identity with Entra ID, claims transformation, password hash compatibility, and hybrid auth flows. USE FOR: migrate ASP.NET Membership users, preserve legacy password verification, integrate Entra ID OIDC with Identity, convert roles to claims, plan hybrid local and Entra authentication. DO NOT USE FOR: non-.NET identity stacks, frontend-only login widgets, generic network access control. |
+| `infrastructure-audit` | Audits Infrastructure-as-Code (Bicep/Terraform), resource configurations, and networking. USE FOR: reviewing IaC code quality, validating resource configurations, assessing networking architecture, identifying security misconfigurations, analyzing cost optimization opportunities. DO NOT USE FOR: writing IaC from scratch, provisioning infrastructure, network architecture design, application development, DevOps workflow creation. |
+| `issue-triage` | Audits GitHub issues for quality, validity, duplicates, labels, and priority. USE FOR: backlog hygiene and duplicate detection, validating closed issues have resolution evidence, enforcing label/type/priority conventions, auditing titles and relationships. DO NOT USE FOR: implementing product features, writing deployment pipelines, editing application runtime code, running non-triage project planning. |
+| `landing-zone-audit` | Use when reviewing Azure landing zone designs, management group hierarchies, hub/spoke patterns, policy baselines, or vending completeness. USE FOR: audit landing zone designs, verify hierarchy and platform subscriptions, check policy baseline coverage, review vending readiness. DO NOT USE FOR: single-resource deployment, AWS org design, application code generation. |
+| `lexicon` | Use when defining or auditing a project's vocabulary, taxonomy, ontology, and brand voice so docs, agents, and prompts use consistent canonical terms. USE FOR: create project lexicon file, audit docs for terminology drift, define naming taxonomy for assets, detect off-brand tone or vibe mismatches, standardize canonical product terms. DO NOT USE FOR: copyediting grammar only, generating logos or visuals, source code refactoring unrelated to language. |
+| `manual-test-strategy` | Use when deciding what should stay manual, what should become automated, and how exploratory testing, checklists, and defect evidence are captured. USE FOR: classify manual versus automated coverage, create exploratory test charter, build repeatable manual regression checklist, capture defect evidence for triage, identify automation candidates from manual testing. DO NOT USE FOR: writing automated test code, performance benchmarking, production incident response. |
+| `mcp-audit` | Audits MCP server implementations, tool definitions, and schema compliance. USE FOR: reviewing MCP server code quality, validating tool definitions, assessing schema compliance, identifying integration issues, evaluating error handling. DO NOT USE FOR: implementing MCP servers from scratch, designing tool specifications, writing client applications, general code review. |
+| `mcp-development` | Use when building or extending MCP servers, defining tool schemas, or choosing stdio, SSE, or Streamable HTTP transports. USE FOR: scaffold MCP server, define MCP tool contract, configure MCP transport, review MCP server security, integrate MCP server with client. DO NOT USE FOR: generic REST API design, non-MCP frontend styling. |
+| `memory-promoter` | Use when mining completed sessions and sprint summaries for reusable patterns that should be promoted into long-term team memory. USE FOR: extract recurring fix patterns, rank memory candidates by frequency and impact, produce contribution-ready memory payloads, filter ephemeral or secret content before memory submission. DO NOT USE FOR: writing production code, real-time troubleshooting during active debugging, or storing personal/project-sensitive data. |
+| `observability` | Use when adding logs, metrics, traces, or alertable telemetry to apps, services, and distributed systems. USE FOR: instrument service with OpenTelemetry, add structured logging and trace IDs, define SLI or latency metrics, trace requests across queues and APIs, improve incident debugging telemetry. DO NOT USE FOR: pure UI redesign, business analytics reporting. |
+| `operation-context-resolver` | Resolve deterministic environment context for branch, label, and incident driven workflows using environment-map.yml, returning target environment, operation mode, and action permissions. USE FOR: resolving preview/dev/staging/prod target before troubleshooting or deployment, enforcing allowed and blocked action checks, applying incident-readonly routing, validating human approval requirements for risky actions. DO NOT USE FOR: direct infrastructure mutation without policy checks, replacing platform branch protection controls, or bypassing environment-map validation. |
+| `penetration-testing` | Use when executing authorized penetration tests, validating OWASP risks, or producing exploit-backed findings. USE FOR: test for SQL injection or SSRF, run OWASP Top 10 web assessment, validate broken access control, reproduce API auth bypass, write penetration test findings report. DO NOT USE FOR: testing without authorization, destructive load testing in production. |
+| `performance-profiling` | Use when code is slow, latency regressed, or throughput dropped and you need measurements before fixing it. USE FOR: profile hot path in service, compare baseline vs optimized runtime, find CPU or memory bottleneck, investigate slow database or I/O path, verify performance regression fix. DO NOT USE FOR: guessing at optimizations without data, feature prioritization only. |
+| `production-readiness` | Use when deciding whether a service is safe to launch, scale, or recover in production. USE FOR: run production readiness review, check rollback and canary plan, assess disaster recovery readiness, review incident response runbooks, evaluate release go-live checklist. DO NOT USE FOR: day-to-day bug fixing, early product ideation without deployment scope. |
+| `receiving-code-review` | Use when responding to pull request review feedback. Covers acknowledging comments, categorizing severity, addressing changes, and re-requesting review. USE FOR: address PR review comments, respond to code review feedback, categorize review items, re-request review after changes, resolve review threads. DO NOT USE FOR: performing initial code review, writing review comments on others' PRs, general PR creation. |
+| `refactoring` | Use when improving code structure while keeping behavior stable and risk controlled. USE FOR: extract large method safely, remove duplication without changing outputs, split module responsibilities, rename confusing abstractions with tests, plan incremental cleanup of legacy code. DO NOT USE FOR: broad rewrites from scratch, intentional feature changes mixed into refactor. |
+| `release-audit` | Use when reviewing release readiness, changelog quality, version bumps, tags, or publish completeness. USE FOR: audit a release candidate, verify semver and changelog entries, check tag and release note completeness, review rollback readiness. DO NOT USE FOR: cutting the release, planning sprint work, debugging product bugs, deployment troubleshooting. |
+| `release-notes` | Use when drafting or updating release notes from commits, pull requests, tags, waves, or sprints. USE FOR: create release notes for a version, summarize changes since a tag, generate notes by wave/sprint labels, produce internal or customer-facing changelog drafts, and structure upgrade notes with traceability. DO NOT USE FOR: release readiness audits, deployment execution, rollback operations, or post-release production incident troubleshooting. |
+| `rollout-basecoat` | Use when refreshing a consumer repository to the latest BaseCoat build or a pinned BaseCoat release tag. USE FOR: refresh basecoat, update basecoat in a consumer repo, run sync.ps1 or sync.sh with .basecoat.yml defaults, verify installed basecoat version after sync, recover when rollout-basecoat skill invocation fails. DO NOT USE FOR: editing BaseCoat framework internals, designing new agents or skills, running unrelated CI/CD deployments. |
+| `security` | Use when auditing code, modeling threats, or reviewing dependencies for exploitable weaknesses. USE FOR: run OWASP security review, create STRIDE threat model, scan for hardcoded secrets, audit dependencies for CVEs, write structured vulnerability report. DO NOT USE FOR: live incident response handling, general performance tuning. |
+| `security-operations` | Use when implementing threat detection, audit logging, secret rotation, or incident response automation. USE FOR: write SIEM or KQL detection rules, automate secret rotation workflow, centralize security audit logs, build security alert triage playbook, monitor cloud or Kubernetes threats. DO NOT USE FOR: one-time app pentest reports, feature UX design. |
+| `service-bus-migration` | Use when migrating enterprise messaging from MSMQ to Azure Service Bus with phased cutover and resilience patterns. USE FOR: map MSMQ queues to topics and subscriptions, design hybrid bridge for zero-downtime cutover, convert binary messages to JSON, implement retry and dead-letter handling, plan Service Bus migration phases. DO NOT USE FOR: greenfield Kafka architecture, unrelated REST API migration. |
+| `skill-scripts` | Use when a skill needs executable multi-step workflows where each script produces structured JSON that is passed to the next step, enabling composable assessment, planning, validation, and execution with clear contracts. |
+| `sprint-closeout` | Use when closing a sprint and preparing handoff artifacts for the next planning cycle. USE FOR: run closeout checklist across goals, completed work, spillover items, and unresolved blockers; produce release notes inputs and stakeholder summary; capture carry-forward actions with owners and due dates; and package evidence for retrospective and planning. DO NOT USE FOR: coding features, replacing incident postmortems, or long-term roadmap prioritization. |
+| `sprint-management` | Use when planning or running sprint ceremonies, backlog refinement, and commitment tracking. USE FOR: plan sprint capacity and goals, run backlog grooming session, prepare sprint review agenda, track velocity against commitments, facilitate sprint ceremony workflow. DO NOT USE FOR: writing implementation code, annual roadmap strategy only. |
+| `sprint-planner` | Compatibility routing skill for sprint planning requests that resolve to skill(sprint-planner). USE FOR: sprint goal decomposition, wave/dependency planning, issue breakdown planning, and next-sprint commitment shaping. DO NOT USE FOR: implementing product code changes, CI/build remediation, or production incident response. |
+| `sprint-project-mapper` | Use when mapping issue/PR items into meaningful sprint or project groups. USE FOR: clustering by sprint/wave/project tags, split-vs-merge debate, and release-note metric rollups. DO NOT USE FOR: code implementation, issue-by-issue triage cleanup, or deployment execution. |
+| `sprint-retrospective` | Use when generating evidence-based sprint retrospectives with metrics, timelines, and actionable improvement tips. USE FOR: create sprint retrospective document, summarize merged PR and issue metrics, analyze time-to-merge trends, identify rework or PR size patterns, produce improvement actions from sprint data. DO NOT USE FOR: sprint planning or estimation, writing code changes. |
+| `supply-chain-security` | Use when securing build and release pipelines with signing, SBOMs, provenance, and dependency scanning. USE FOR: sign container image with Cosign, generate CycloneDX or SPDX SBOM, add SLSA provenance to GitHub Actions, scan dependencies and images for vulnerabilities, verify release artifact integrity. DO NOT USE FOR: application authorization logic, runtime incident triage only. |
+| `task-decomposition` | Use when breaking complex tasks into sub-agent-friendly chunks, validating automation fitness, and composing multi-step prompts. USE FOR: split large tasks into smaller async work items, decide if work is automatable vs research vs deferred, validate sub-agent prompts for clarity, design task decomposition workflows. DO NOT USE FOR: single-step code changes, immediate sync problem-solving, architectural design starting from scratch. |
+| `tech-debt` | Use when inventorying, scoring, budgeting, or reducing technical debt across a repo or team. USE FOR: build technical debt register, rank cleanup work with RICE, reserve sprint capacity for remediation, compare debt items by impact and effort, track debt amortization over time. DO NOT USE FOR: implementing feature work directly, emergency production incident response. |
+| `twelve-factor` | Use when auditing or redesigning an app for cloud-native 12-Factor practices. USE FOR: move config from code to environment, check stateless process design, separate build release and run stages, verify logs go to stdout, assess dev and prod parity. DO NOT USE FOR: pixel-level UI design, vendor-specific service pricing comparisons. |
+| `ux` | Use when defining user journeys, wireframes, component behavior, or accessibility expectations for a product experience. USE FOR: map end-to-end user journey, create wireframe spec for new screen, review component states and interactions, run WCAG accessibility audit, evaluate usability of a workflow. DO NOT USE FOR: backend infrastructure design, low-level API performance tuning. |
 
 ## Instructions
 
-Instructions are Copilot behavior rules stored as `instructions/<name>.instructions.md`,
-applied automatically based on `applyTo` glob patterns.
-
-### basecoat-20-lang-governance & Safety
-
 | Instruction | Description |
 |---|---|
-| `basecoat-20-lang-governance` | **Read first.** basecoat-20-lang-governance rules for all AI basecoat-10-core-agents in this repository |
-| `basecoat-30-ai-ai-basecoat-10-core-verification` | Risk-tiered basecoat-10-core-verification protocol for reviewing or accepting AI-generated code |
-| `basecoat-10-core-config` | Safety rules for creating, modifying, or staging configuration files |
-| `basecoat-10-core-output-style` | Keeps agent responses concise while preserving clarity and full-fidelity detail |
-| `basecoat-10-core-plan-first` | Enforces planning before execution for multi-step or cross-file tasks |
-| `basecoat-10-core-tool-minimization` | Selective tool enablement to reduce surface area during agent execution |
-| `basecoat-10-core-verification` | Requires explicit success criteria before planning, implementing, or reviewing |
-
-### Agent Behavior
-
-| Instruction | Description |
-|---|---|
-| `basecoat-10-core-agent-behavior` | Prevents infinite retry loops, edit thrashing, and repeated failed actions |
-| `basecoat-10-core-agents` | Naming, structure, required sections, skill pairing, and multi-agent coordination |
-| `basecoat-10-core-model-routing` | Cost-aware model routing for sub-agent dispatch and model selection |
-| `basecoat-10-core-session-hygiene` | Long-running session management, task switching, and handoff coordination |
-| `basecoat-50-security-token-economics` | Cost-aware context loading; model escalation cost control |
-
-### basecoat-10-core-architecture & Design
-
-| Instruction | Description |
-|---|---|
-| `basecoat-10-core-architecture` | Architectural decisions, API design, system diagrams, and cross-cutting standards |
-| `basecoat-10-core-naming` | Repository, file, type, variable, test, infrastructure, and basecoat-40-azure-azure resource basecoat-10-core-naming |
-| `basecoat-10-core-hrm-execution` | Formal layer contracts, two-dimensional routing matrix, and guidance signals |
-| `basecoat-10-core-trm-reflexion` | TRM Reflexion loop for intent classification and turn budget estimation |
-
-### basecoat-10-core-development
-
-| Instruction | Description |
-|---|---|
-| `basecoat-10-core-backend` | APIs, services, workers, integrations, and data access layer best practices |
-| `basecoat-10-core-development` | Shared conventions when using backend-dev, frontend-dev, basecoat-10-core-middleware-dev basecoat-10-core-agents |
-| `basecoat-10-core-frontend` | UI, client-side state, styling, forms, and interaction best practices |
-| `basecoat-10-core-nextjs-react19` | Next.js and React 19: Server Components, App Router, streaming, forms |
-| `basecoat-10-core-npm-workspaces` | npm workspaces and monorepo management setup and best practices |
-| `basecoat-20-lang-python` | basecoat-20-lang-python conventions for data science and ML pipelines |
-| `basecoat-10-core-cpp` | Memory safety, concurrency, and undefined behavior for C++ and native code |
-| `basecoat-10-core-electron` | Secure basecoat-10-core-electron desktop application patterns |
-| `basecoat-30-ai-tailwind-v4` | Tailwind CSS v4 patterns and CSS-first configuration |
-| `basecoat-10-core-monolith` | Context management for large basecoat-10-core-monolith codebases with tightly coupled modules |
-
-### basecoat-40-azure-azure & Cloud
-
-| Instruction | Description |
-|---|---|
-| `basecoat-40-azure-azure` | basecoat-40-azure-azure services, basecoat-40-azure-azure SDK integrations, and deployment configuration |
-| `basecoat-40-azure-azure-app-configuration` | basecoat-40-azure-azure App Configuration for feature flags and centralized settings |
-| `basecoat-40-azure-azure-service-connector` | basecoat-40-azure-azure Service Connector for App Service, Container Apps, AKS |
-| `basecoat-10-core-bicep` | basecoat-10-core-bicep file authoring: symbolic names, parameters, and module patterns |
-| `basecoat-10-core-bootstrap-autodetect` | Bootstrap scripts that auto-detect values from existing infrastructure |
-| `basecoat-50-security-bootstrap-github-secrets` | Bootstrap scripts provisioning identity or infrastructure for GitHub Actions |
-| `basecoat-10-core-bootstrap-structure` | Bootstrap script decomposition, idempotency, and basecoat-10-core-documentation |
-| `basecoat-60-workflow-ci-firewall` | GitHub Actions workflows accessing firewalled basecoat-40-azure-azure resources |
-| `basecoat-50-security-rbac-authentication` | RBAC-only authentication enforcement — no shared keys or connection strings |
-| `basecoat-10-core-terraform` | basecoat-10-core-terraform for Azure: provider pinning and shared infrastructure patterns |
-| `basecoat-10-core-terraform-init` | Running `basecoat-10-core-terraform init` in bootstrap scripts and CI/CD pipelines |
+| `architecture` | BaseCoat compatibility alias for architecture guidance. Preserves the legacy filename while the prefixed BaseCoat instruction is the canonical source. |
+| `basecoat-10-core-agent-behavior` | Use when an agent is retrying work, revising the same change repeatedly, or deciding whether to continue versus escalate. Prevents infinite retry loops, edit thrashing, and repeated failed actions. |
+| `basecoat-10-core-agent-routing` | Use when deciding which agent tier to invoke for a task. Provides cost-aware, security-conscious agent routing to avoid mismatches between task requirements and agent capabilities. |
+| `basecoat-10-core-agents` | Use when creating, updating, or reviewing agent definitions. Covers naming, structure, required sections, skill pairing, capability-based routing, model policy, and testing. |
+| `basecoat-10-core-architecture` | Use when making architectural decisions, designing APIs, creating system diagrams, or establishing cross-cutting patterns. Covers ADRs, diagram standards, API design, agent collaboration, and review gates. |
+| `basecoat-10-core-backend` | Use when working on APIs, services, workers, integrations, or data access layers. Covers backend best practices for contracts, failure handling, and testability. |
+| `basecoat-10-core-bicep` | Use when creating or reviewing Azure Bicep files or parameter files. Covers symbolic names, parameters, secure values, and Bicep validation best practices. |
+| `basecoat-10-core-bootstrap-autodetect` | Use when writing or reviewing bootstrap scripts. Ensures scripts auto-detect values from context and run without interactive prompts. |
+| `basecoat-10-core-bootstrap-structure` | Use when designing or reviewing bootstrap scripts. Covers decomposition, idempotency, documentation, and cross-platform requirements. |
+| `basecoat-10-core-capability-frontmatter` | Use when authoring or reviewing agent and skill frontmatter with capability-first routing, justified model pinning, and safe fallback policy. |
+| `basecoat-10-core-config` | Config file safety instructions. Apply before creating, modifying, or staging any configuration file. Ensures secrets stay out of source control. |
+| `basecoat-10-core-cpp` | Use when AI generates or modifies C++ or native code. Covers memory safety, concurrency, undefined behavior, and mandatory validation with sanitizers. |
+| `basecoat-10-core-data-workload-testing` | Comprehensive test suite for data workloads: medallion patterns, data quality validation, and convention-driven testing for bronze/silver/gold layers. |
+| `basecoat-10-core-development` | Use when working with backend-dev, frontend-dev, middleware-dev, or data-tier agents. Covers shared code style, error handling, security, logging, testing, and agent collaboration expectations. |
+| `basecoat-10-core-documentation` | Use when a change affects setup, workflows, public contracts, operational behavior, or developer experience. Covers common documentation best practices. |
 | `basecoat-10-core-drift-monitor` | Infrastructure-as-Code drift detection and remediation strategies |
-
-### basecoat-50-security-security
-
-| Instruction | Description |
-|---|---|
-| `basecoat-50-security-security` | Authentication, authorization, secrets, input handling, and security-sensitive changes |
-| `basecoat-50-security-secrets-management` | Secrets lifecycle, rotation, and storage basecoat-20-lang-governance |
-| `basecoat-50-security-security-monitoring` | basecoat-50-security-security monitoring, alerting, and incident detection |
-| `basecoat-60-workflow-workflow-integrity` | GitHub Actions security: script injection, credential exposure prevention |
-| `basecoat-60-workflow-workflow-file-integrity` | Silent GitHub Actions workflow file corruption prevention and checksum validation |
-
-### basecoat-10-core-testing & basecoat-90-quality-quality
-
-| Instruction | Description |
-|---|---|
-| `basecoat-10-core-testing` | Common basecoat-10-core-testing best practices for regression, unit, integration tests |
-| `basecoat-90-quality-quality` | PR review, basecoat-50-security-security posture, performance measurement, and coverage enforcement |
-| `basecoat-10-core-data-workload-basecoat-10-core-testing` | Medallion data patterns, data basecoat-90-quality-quality validation, and contract basecoat-10-core-testing |
-| `basecoat-20-lang-dotnet-dependency-analysis` | .NET dependency compatibility and remediation analysis |
-| `basecoat-20-lang-dotnet-test-strategy` | .NET modernization test strategy and regression-gate guidance |
-| `basecoat-20-lang-dotnet-upgrade-planning` | .NET upgrade planning checklist and phased execution |
-| `basecoat-10-core-mutation-basecoat-10-core-testing` | Mutation basecoat-10-core-testing strategy and tooling integration |
-
-### Data & ML
-
-| Instruction | Description |
-|---|---|
-| `basecoat-80-data-data-science` | Data science and ML conventions: Jupyter, pandas, scikit-learn |
-| `basecoat-10-core-fabric-notebooks` | Microsoft Fabric notebooks with CI/CD, lakehouse integration, and basecoat-20-lang-governance |
-| `basecoat-10-core-observability` | Metrics, traces, logs, and alerting configuration guidance |
-
-### basecoat-10-core-reliability
-
-| Instruction | Description |
-|---|---|
-| `basecoat-10-core-reliability` | Uptime, retries, background work, and dependency failure handling |
-| `basecoat-10-core-rest-client-resilience` | HTTP client resilience: timeouts, retries, circuit breakers |
-| `basecoat-10-core-runtime-debugging` | Debugging with crash dumps, logs, memory state, and production diagnostics |
-| `basecoat-10-core-error-kb` | Building and consulting an error knowledge base for agent failure classification |
-
-### Memory & Knowledge
-
-| Instruction | Description |
-|---|---|
-| `basecoat-10-core-memory-index` | L2 memory index loaded at session start to prime fast pattern recall |
-| `basecoat-10-core-enterprise-configuration` | GitHub Copilot policy configuration, usage metrics, and seat management |
-| `basecoat-10-core-documentation` | basecoat-10-core-documentation standards for setup, workflows, public contracts, and runbooks |
-| `basecoat-10-core-process` | Sprint planning, issue triage, PR management, and release evaluation |
-
----
+| `basecoat-10-core-electron` | Use when building secure Electron desktop applications. Covers process architecture, inter-process communication, content security policy, code signing, auto-updates, credential storage, and ASAR integrity. Reference skill at skills/electron-apps/SKILL.md for implementation patterns. |
+| `basecoat-10-core-enterprise-configuration` | Enterprise-level GitHub Copilot policy configuration, including usage metrics enablement, seat management, and security policies. |
+| `basecoat-10-core-error-kb` | Use when building, extending, or consulting an error knowledge base so agents can classify failures, reuse proven fixes, and capture new patterns safely. |
+| `basecoat-10-core-escalation-criteria` | Use when deciding whether work should escalate for design review, approval, or compliance sign-off. |
+| `basecoat-10-core-fabric-notebooks` | Deploy and manage Microsoft Fabric notebooks with CI/CD, lakehouse integration, governance, and production patterns. |
+| `basecoat-10-core-frontend` | Use when changing UI, client-side state, styling, forms, or interactions. Covers frontend best practices for accessibility, responsive behavior, and UX clarity. |
+| `basecoat-10-core-hrm-execution` | HRM Phase 2 — Formal layer contracts, two-dimensional routing matrix, guidance signals, and agent decomposition scope rules for the BaseCoat execution hierarchy. |
+| `basecoat-10-core-intent-routing` | Intent prefix routing — interprets user-defined prefixes to determine urgency, timing, and which agents or skills to invoke. Applies to all conversations. |
+| `basecoat-10-core-j2ee-jakarta-ee` | Use when migrating J2EE / Jakarta EE applications. Covers namespace migration, EJB modernization, Azure deployment targets, Strangler Fig decomposition, database migration, and auth modernization. |
+| `basecoat-10-core-mcp` | Use when configuring, invoking, building, or reviewing MCP servers and MCP tool usage. Covers server development standards, tool definition conventions, transport protocols, trust boundaries, secrets handling, testing, and safe operation patterns. |
+| `basecoat-10-core-memory-index` | L2 memory index. Loads at session start to prime fast pattern recall. Maps trigger contexts to known high-confidence patterns and subject tags for deeper retrieval. Keep under 500 tokens — index only, no full memories. |
+| `basecoat-10-core-model-routing` | Use when dispatching sub-agents or choosing models for tasks. Provides cost-aware model routing to avoid over-spending on premium models for simple tasks. |
+| `basecoat-10-core-monolith` | Use when AI agents work on large monolith codebases with tightly coupled modules. Covers context scoping, dependency awareness, and safe decomposition strategies. |
+| `basecoat-10-core-mutation-testing` | > |
+| `basecoat-10-core-naming` | Use when defining repository, file, type, variable, test, infrastructure, or Azure resource names. Covers consistent naming conventions across code and platform assets. |
+| `basecoat-10-core-nextjs-react19` | Next.js and React 19 frontend instruction covering Server Components, App Router, streaming, form actions, and modern patterns |
+| `basecoat-10-core-npm-workspaces` | Setup and best practices for npm workspaces and monorepo management |
+| `basecoat-10-core-observability` | > |
+| `basecoat-10-core-output-style` | Use to keep agent responses concise by default while preserving clarity, accuracy, and full-fidelity code output. |
+| `basecoat-10-core-plan-first` | Use when tasks require multiple steps, cross-file changes, or non-trivial design decisions. Enforces an explore-plan-implement-verify workflow so work stays scoped and intentional. |
+| `basecoat-10-core-process` | Use when planning sprints, triaging issues, managing pull requests, coordinating releases, or evaluating delivery health. Covers the end-to-end delivery lifecycle from intake through production release. |
+| `basecoat-10-core-public-guidance` | Use when converting internal roadmap or feedback into a separate public-safe guidance artifact. |
+| `basecoat-10-core-reliability` | Use when changing code paths where uptime, retries, background work, or dependency failures matter. Covers common reliability and operability best practices. |
+| `basecoat-10-core-rest-client-resilience` | Use when building or reviewing HTTP client code that calls external APIs. Covers timeouts, retries, 429 handling, circuit breakers, and structured failure logging. |
+| `basecoat-10-core-runtime-debugging` | Use when debugging requires runtime context such as crash dumps, logs, memory state, or production telemetry. Covers how to feed runtime data into AI-assisted debugging workflows. |
+| `basecoat-10-core-s4-safety-gates` | Use when defining S4 cutover safety gates, including shadow-mode validation, rollback testing, and on-call review. |
+| `basecoat-10-core-session-hygiene` | Use when managing long-running Copilot sessions, switching tasks, or coordinating handoffs. Covers context hygiene, session rotation, and clean-state working practices. |
+| `basecoat-10-core-shearing-layers` | Shearing Layers design framework — guides contributors and AI agents to reason about change velocity and coupling between BaseCoat layers. |
+| `basecoat-10-core-subagent-review` | Defines a two-stage review protocol for subagent task output. Stage 1 checks spec compliance, Stage 2 checks code quality. Applies when orchestrating multi-agent work. |
+| `basecoat-10-core-tdd-enforcement` | Enforces RED-GREEN-REFACTOR test-driven development as a sequence gate for implementation work. Applies to feature code, bug fixes, and refactors in source directories. |
+| `basecoat-10-core-terraform` | Use when creating or reviewing Terraform for Azure or shared infrastructure. Covers provider pinning, state hygiene, modules, validation, and safe Terraform workflows. |
+| `basecoat-10-core-terraform-init` | Use when running terraform init in bootstrap scripts or CI/CD pipelines. Ensures backend re-initialization doesn't block automation. |
+| `basecoat-10-core-testing` | Use when adding, updating, or reviewing tests. Covers common testing best practices for regression protection, determinism, and change validation. |
+| `basecoat-10-core-tool-minimization` | Use when configuring agent tool access or planning task execution. Enforces selective tool enablement, lower context noise, and disciplined MCP server usage. |
+| `basecoat-10-core-trm-reflexion` | TRM (Tiny Recursive Model) Reflexion loop for intent classification and turn budget estimation. Apply whenever classifying task intent or tracking progress against a turn budget. |
+| `basecoat-10-core-ux` | Use when working on user experience, interface design, accessibility, component specifications, or user journey mapping. Covers design system reference, WCAG compliance, naming conventions, handoff format, and journey standards. |
+| `basecoat-10-core-verification` | Use when planning, implementing, or reviewing changes. Requires explicit success criteria before coding and completed verification with evidence before declaring work done. |
+| `basecoat-20-lang-django` | Use when working on Django applications targeting Azure. Covers Azure deployment targets, production configuration, PostgreSQL, Entra ID OIDC auth, Redis sessions, and CI/CD. |
+| `basecoat-20-lang-dotnet-dependency-analysis` | .NET dependency compatibility and remediation analysis guidance. |
+| `basecoat-20-lang-dotnet-test-strategy` | .NET modernization test strategy and regression-gate guidance. |
+| `basecoat-20-lang-dotnet-upgrade-planning` | .NET upgrade planning checklist and phased execution guidance. |
+| `basecoat-20-lang-governance` | CRITICAL — Read this first. Governance rules for all AI agents working in this repository. Covers issue-first mandate, secret policy, PR-only workflow, branch naming, when to stop vs proceed, and token/model awareness stub. |
+| `basecoat-20-lang-java-spring-boot` | Conventions for Java Spring Boot projects targeting Azure: deployment targets, containerization, database migration, auth modernization, and CI/CD patterns. |
+| `basecoat-20-lang-python` | Conventions for Python-centric projects, including data science and ML pipelines with pandas, scikit-learn, DuckDB, and Jupyter notebooks. |
+| `basecoat-20-lang-ruby-on-rails` | Conventions for Ruby on Rails projects targeting Azure: deployment targets, containerization, database migration, auth modernization, and CI/CD patterns. |
+| `basecoat-30-ai-ai-verification` | Use when reviewing or accepting AI-generated code. Provides a risk-tiered verification protocol to reduce trust overhead while catching real issues. |
+| `basecoat-30-ai-tailwind-v4` | Tailwind CSS v4 patterns, CSS-first configuration, and migration guidance |
+| `basecoat-40-azure-azure` | Use when working on Azure services, Azure SDK integrations, Azure deployment configuration, or cloud architecture for Azure. Covers secure Azure defaults, authentication, and service usage patterns. |
+| `basecoat-40-azure-azure-app-configuration` | Use when working with Azure App Configuration — centralizing feature flags, application settings, and dynamic configuration for Azure-hosted applications. |
+| `basecoat-40-azure-azure-service-connector` | Use when working with Azure Service Connector — connecting App Service, Container Apps, AKS, or Azure Functions to backing services (databases, storage, cache, messaging) using passwordless authentication. |
+| `basecoat-50-security-bootstrap-github-secrets` | Use when writing bootstrap scripts that provision identity or infrastructure for GitHub Actions. Ensures CI/CD secrets and variables are pushed automatically. |
+| `basecoat-50-security-copilot-github-token-bootstrap` | Use when configuring COPILOT_GITHUB_TOKEN for gh-aw workflows. Enforces repo-level secret setup, least-privilege token guidance, and non-echo handling for PAT input. |
+| `basecoat-50-security-entra-oidc-user-auth` | Use when implementing human user authentication via browser — Authorization Code Flow with PKCE, confidential client flows, MSAL token caching, and Entra ID app registration. Complements bac-authentication.instructions.md which covers service-to-service managed identity. |
+| `basecoat-50-security-rbac-authentication` | Use when provisioning or reviewing Azure resources. Enforces RBAC-only authentication — no shared keys, SAS tokens, access policies, or connection string auth. |
+| `basecoat-50-security-secrets-management` | > |
+| `basecoat-50-security-security` | Use when working on authentication, authorization, secrets, input handling, or any change with security implications. Covers common secure coding best practices. |
+| `basecoat-50-security-security-monitoring` | > |
+| `basecoat-50-security-token-economics` | Use when selecting models, escalating reasoning cost, or loading context. Enforces cost-aware routing and token budget discipline for all agent work. |
+| `basecoat-60-workflow-ci-firewall` | Use when writing GitHub Actions workflows that access firewalled Azure resources (Storage, Key Vault, SQL, Cosmos). Covers the single-job runner IP pattern with guaranteed cleanup. |
+| `basecoat-60-workflow-factory-orchestration` | Use when editing factory orchestration workflows, state files, escalation paths, or Workcell triggers. |
+| `basecoat-60-workflow-high-stakes-workflow` | Enforces a mandatory sequential workflow for high-stakes changes. Prevents skipping phases when work involves architecture, public APIs, multi-agent dispatch, or new features with broad impact. |
+| `basecoat-60-workflow-multi-repo-orchestration` | Multi-repo orchestration guidance for hub-and-spoke CI/CD patterns using workflow_dispatch. |
+| `basecoat-60-workflow-workflow-file-integrity` | Guard against silent GitHub Actions workflow file corruption and enforce checksum validation when programmatically modifying workflow YAML. |
+| `basecoat-60-workflow-workflow-integrity` | Prevent common GitHub Actions workflow security vulnerabilities including script injection, credential embedding, and unpinned actions. |
+| `basecoat-80-data-data-science` | Conventions for data science, ML, and notebook-driven projects using Jupyter, pandas, scikit-learn, DuckDB, and the medallion lakehouse architecture. |
+| `basecoat-90-quality-quality` | Use when reviewing PRs, evaluating security posture, measuring performance, or enforcing coverage thresholds. Covers quality gates that every change must pass and how review agents collaborate. |
+| `ci-firewall` | BaseCoat compatibility alias for CI/CD runner firewall management. Preserves the legacy filename while the prefixed BaseCoat instruction is the canonical source. |
+| `documentation` | BaseCoat compatibility alias for documentation guidance. Preserves the legacy filename while the prefixed BaseCoat instruction is the canonical source. |
+| `governance` | BaseCoat compatibility alias for governance rules. Preserves the legacy filename while the prefixed BaseCoat instruction is the canonical source. |
+| `intent-routing` | BaseCoat compatibility alias for intent prefix routing. Preserves the legacy filename while the prefixed BaseCoat instruction is the canonical source. |
+| `observability` | BaseCoat compatibility alias for observability guidance. Preserves the legacy filename while the prefixed BaseCoat instruction is the canonical source. |
+| `plan-first` | BaseCoat compatibility alias for the plan-first workflow. Preserves the legacy filename while the prefixed BaseCoat instruction is the canonical source. |
+| `rbac-authentication` | BaseCoat compatibility alias for RBAC-only Azure authentication. Preserves the legacy filename while the prefixed BaseCoat instruction is the canonical source. |
+| `security` | BaseCoat compatibility alias for security guidance. Preserves the legacy filename while the prefixed BaseCoat instruction is the canonical source. |
+| `ux` | BaseCoat compatibility alias for UX guidance. Preserves the legacy filename while the prefixed BaseCoat instruction is the canonical source. |
 
 ## Prompts
 
-Prompts are structured templates stored as `prompts/<name>.prompt.md`.
-
 | Prompt | Description |
 |---|---|
-| `architect` | Break down a feature or system change into options, tradeoffs, and execution steps before editing code |
-| `bugfix` | Root-cause analysis, minimal safe fix, and validation for a bug, regression, or production failure |
-| `basecoat-90-quality-code-review` | Risk-focused code review of a diff, branch, or set of files; returns findings, open questions, summary |
+| `portal/prompts/portal-audit-risk-analysis.prompt.md` | AI-powered security audit finding risk assessment with severity scoring and compliance impact analysis |
+| `portal/prompts/portal-compliance-mapping.prompt.md` | AI-powered compliance standards mapping with requirement verification and audit evidence guidance |
+| `portal/prompts/portal-plain-language.prompt.md` | AI-powered compliance finding explanation in plain language for non-technical compliance officers and executives |
+| `portal/prompts/portal-remediation-planning.prompt.md` | AI-powered compliance remediation planning with phased execution steps and resource estimation |
+| `portal/prompts/portal-threat-analysis.prompt.md` | AI-powered security threat analysis with OWASP mapping, attack vector assessment, and control recommendations |
+| `prompts/architect.prompt.md` | Use when you want an implementation plan before editing code. Helps break down a feature or system change into options, tradeoffs, and execution steps. |
+| `prompts/bugfix.prompt.md` | Use when investigating a bug, regression, or production failure. Focuses on root-cause analysis, a minimal safe fix, and validation. |
+| `prompts/code-review.prompt.md` | Use when you want a risk-focused code review of a diff, branch, or set of files. Returns findings first, then open questions, then a short summary. |
+| `prompts/integrate.prompt.md` | Integrate BaseCoat into a repository and run a baseline audit. Invoke with a GitHub repo URL or run from inside the target repo. Works in GitHub Copilot CLI, VS Code Copilot Chat, and any editor with Copilot Chat support. |
+| `prompts/plan-sharedStandardsRepo.prompt.md` | Use when planning a shared standards repository with auto-sync capabilities for GitHub Copilot customizations across teams. |

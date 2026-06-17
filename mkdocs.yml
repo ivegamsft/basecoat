@@ -77,7 +77,7 @@ nav:
   - Asset Reference:
     - Overview: reference/quick-reference.md
     - Inventory: reference/inventory.md
-    - Token Context Inventory: reference/token-context-inventory.md
+    - Token Context Inventory: reference/TOKEN_CONTEXT_INVENTORY.md
     - Agents: reference/asset-registry.md
     - Governance Landing: GOVERNANCE.md
     - Governance: reference/governance.md
