@@ -13,12 +13,12 @@ all active files for your workflow.
 
 | File | Context | ApplyTo |
 |---|---|---|
-| `repo-structure.instructions.md` | Directory org, file layout, markdown standards | `.github/**/*`, `docs/**/*`, `instructions/**/*`, `agents/**/*`, `skills/**/*`, `prompts/**/*`, `scripts/**/*`, `tests/**/*`, `*.md` |
+| `repo-structure.instructions.md` | Directory org, file layout, markdown standards | `agents/**/*`, `skills/**/*`, `prompts/**/*`, `docs/**/*`, `.github/instructions/**/*` |
 | `agents-skills-dev.instructions.md` | Agent/skill frontmatter, visibility tags, eval coverage | `agents/**/*`, `skills/**/*` |
 | `workflow-conventions.instructions.md` | Git workflow, branch naming, commit conventions | `.github/**/*`, `*.md` files |
 | `testing-validation.instructions.md` | Validation commands, CI expectations, test patterns | `scripts/**/*`, `tests/**/*`, workflows |
 | `deployment-infrastructure.instructions.md` | Workflows, PRD gates, MCP servers, authentication | `.github/workflows/**/*`, IaC |
-| `cost-optimization.instructions.md` | Session hygiene, fleet patterns, token budgeting | `.github/**/*`, `docs/**/*`, `scripts/**/*`, `tests/**/*` |
+| `cost-optimization.instructions.md` | Session hygiene, fleet patterns, token budgeting | `docs/**/*`, `.github/**/*` |
 
 ## How to Use
 
