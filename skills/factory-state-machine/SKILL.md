@@ -1,6 +1,7 @@
 ---
 name: factory-state-machine
 description: "Use when defining factory state transitions, reading or writing .github/factory-state.json, or orchestrating workcell workflow gates. USE FOR: intake/complete/pending transitions, auto-proceed rules, escalation checks, and state validation. DO NOT USE FOR: general app state management or unrelated workflow docs."
+compatibility: [github-copilot-cli]
 visibility: "internal"
 compatibility:
   - GHCP

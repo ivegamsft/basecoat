@@ -1,6 +1,7 @@
 ---
 name: container-build-assessment
 description: "Assess Docker build readiness with composable scripts that analyze Dockerfile structure, inspect dependency footprint, estimate image size, and report security posture in structured JSON suitable for automation and remediation planning."
+compatibility: [github-copilot-cli]
 scripts:
   - name: analyze-dockerfile
     description: "Parse Dockerfile structure and detect common build issues."

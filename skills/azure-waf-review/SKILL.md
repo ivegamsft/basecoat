@@ -1,6 +1,7 @@
 ---
 name: azure-waf-review
 description: "Use when assessing an Azure workload against the Well-Architected Framework and prioritizing remediation. USE FOR: run an Azure Well-Architected review, score a workload across WAF pillars, review Terraform or Bicep for reliability and security gaps, prioritize remediation actions, assess an architecture before production. DO NOT USE FOR: penetration testing, incident response triage, writing new product features."
+compatibility: [github-copilot-cli]
 context: fork
 compatibility:
   - GHCP

@@ -1,6 +1,7 @@
 ---
 name: s4-deployment-checklist
 description: "Use when preparing an S4 cutover, shadow-mode soak, rollback validation, or deployment readiness review. USE FOR: checklist-driven release gating, rollback testing, monitoring readiness, and team briefing. DO NOT USE FOR: generic release notes or unrelated sprint planning."
+compatibility: [github-copilot-cli]
 visibility: "internal"
 compatibility:
   - GHCP
