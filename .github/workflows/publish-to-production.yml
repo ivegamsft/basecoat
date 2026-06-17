@@ -218,7 +218,7 @@ jobs:
           PRODUCTION_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
         run: |
           # Set homepage, description, and topics on the production repo.
-          # PRODUCTION_REPO_TOKEN (classic PAT with repo scope) has the permissions
+          # PRODUCTION_REPO_TOKEN (fine-grained PAT owned by ivegamsft) has the permissions
           # that GITHUB_TOKEN integration tokens lack for repo metadata updates.
           curl -sf -X PATCH \
             -H "Authorization: token ${PRODUCTION_TOKEN}" \

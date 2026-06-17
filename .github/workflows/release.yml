@@ -14,7 +14,14 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  production-token-preflight:
+    name: Preflight — PRODUCTION_REPO_TOKEN readiness
+    uses: ./.github/workflows/token-preflight.yml
+    secrets:
+      PRODUCTION_REPO_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
+
   release:
+    needs: production-token-preflight
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
