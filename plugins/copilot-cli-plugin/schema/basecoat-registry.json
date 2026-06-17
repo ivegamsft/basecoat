@@ -1,1601 +1,796 @@
 {
   "version": "1.0.0",
-  "generated": "2026-06-14T19:04:49Z",
+  "generated": "2026-05-10T22:22:11Z",
   "agents": {
-    "app-inventory": {
-      "id": "app-inventory",
-      "name": "app-inventory",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-app-inventory.agent.md",
-      "keywords": [
-        "app",
-        "inventory"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "prompt-coach": {
-      "id": "prompt-coach",
-      "name": "prompt-coach",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-prompt-coach.agent.md",
-      "keywords": [
-        "prompt",
-        "coach"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "ci-audit": {
-      "id": "ci-audit",
-      "name": "ci-audit",
-      "description": "No description",
-      "file": "agents/basecoat-50-security-ci-audit.agent.md",
-      "keywords": [
-        "ci",
-        "audit"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "General"
-    },
-    "security-monitor": {
-      "id": "security-monitor",
-      "name": "security-monitor",
-      "description": "No description",
-      "file": "agents/basecoat-50-security-security-monitor.agent.md",
-      "keywords": [
-        "security",
-        "monitor"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "General"
-    },
-    "release-readiness-chair": {
-      "id": "release-readiness-chair",
-      "name": "release-readiness-chair",
-      "description": "No description",
-      "file": "agents/basecoat-60-workflow-release-readiness-chair.agent.md",
-      "keywords": [
-        "release",
-        "readiness",
-        "chair"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "program-bootstrap": {
-      "id": "program-bootstrap",
-      "name": "program-bootstrap",
-      "description": "No description",
-      "file": "agents/program-bootstrap.agent.md",
-      "keywords": [
-        "program",
-        "bootstrap"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "broken-build-troubleshooter": {
-      "id": "broken-build-troubleshooter",
-      "name": "broken-build-troubleshooter",
-      "description": "No description",
-      "file": "agents/basecoat-60-workflow-broken-build-troubleshooter.agent.md",
-      "keywords": [
-        "broken",
-        "build",
-        "troubleshooter"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "General"
-    },
-    "guidance-author": {
-      "id": "guidance-author",
-      "name": "guidance-author",
-      "description": "No description",
-      "file": "agents/basecoat-50-security-guidance-author.agent.md",
-      "keywords": [
-        "guidance",
-        "author"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "project-onboarding": {
-      "id": "project-onboarding",
-      "name": "project-onboarding",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-project-onboarding.agent.md",
-      "keywords": [
-        "project",
-        "onboarding"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "agentops": {
-      "id": "agentops",
-      "name": "agentops",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-agentops.agent.md",
-      "keywords": [
-        "agentops"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "data-pipeline": {
-      "id": "data-pipeline",
-      "name": "data-pipeline",
-      "description": "No description",
-      "file": "agents/basecoat-60-workflow-data-pipeline.agent.md",
-      "keywords": [
-        "data",
-        "pipeline"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "azure-landing-zone": {
-      "id": "azure-landing-zone",
-      "name": "azure-landing-zone",
-      "description": "No description",
-      "file": "agents/basecoat-40-azure-azure-landing-zone.agent.md",
-      "keywords": [
-        "azure",
-        "landing",
-        "zone"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "release-impact-advisor": {
-      "id": "release-impact-advisor",
-      "name": "release-impact-advisor",
-      "description": "No description",
-      "file": "agents/basecoat-60-workflow-release-impact-advisor.agent.md",
-      "keywords": [
-        "release",
-        "impact",
-        "advisor"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "penetration-test": {
-      "id": "penetration-test",
-      "name": "penetration-test",
-      "description": "No description",
-      "file": "agents/basecoat-90-quality-penetration-test.agent.md",
-      "keywords": [
-        "penetration",
-        "test"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "flow-governance-conductor": {
-      "id": "flow-governance-conductor",
-      "name": "flow-governance-conductor",
-      "description": "No description",
-      "file": "agents/flow-governance-conductor.agent.md",
-      "keywords": [
-        "flow",
-        "governance",
-        "conductor"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "beta",
-      "category": "flow-governance"
-    },
-    "identity-architect": {
-      "id": "identity-architect",
-      "name": "identity-architect",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-identity-architect.agent.md",
-      "keywords": [
-        "identity",
-        "architect"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "governance-author": {
-      "id": "governance-author",
-      "name": "governance-author",
-      "description": "No description",
-      "file": "agents/governance-author.agent.md",
-      "keywords": [
-        "governance",
-        "author"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "governance"
-    },
-    "frontend-dev": {
-      "id": "frontend-dev",
-      "name": "frontend-dev",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-frontend-dev.agent.md",
-      "keywords": [
-        "frontend",
-        "dev"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "rca": {
-      "id": "rca",
-      "name": "rca",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-rca.agent.md",
-      "keywords": [
-        "rca"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "factory-conductor": {
-      "id": "factory-conductor",
-      "name": "factory-conductor",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-factory-conductor.agent.md",
-      "keywords": [
-        "factory",
-        "conductor"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "backend-dev": {
-      "id": "backend-dev",
-      "name": "backend-dev",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-backend-dev.agent.md",
-      "keywords": [
-        "backend",
-        "dev"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "flow-suggester": {
-      "id": "flow-suggester",
-      "name": "flow-suggester",
-      "description": "No description",
-      "file": "agents/flow-suggester.agent.md",
-      "keywords": [
-        "flow",
-        "suggester"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "flow-governance"
-    },
-    "new-customization": {
-      "id": "new-customization",
-      "name": "new-customization",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-new-customization.agent.md",
-      "keywords": [
-        "new",
-        "customization"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "exploratory-charter": {
-      "id": "exploratory-charter",
-      "name": "exploratory-charter",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-exploratory-charter.agent.md",
-      "keywords": [
-        "exploratory",
-        "charter"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "llmops": {
-      "id": "llmops",
-      "name": "llmops",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-llmops.agent.md",
-      "keywords": [
-        "llmops"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "policy-as-code-compliance": {
-      "id": "policy-as-code-compliance",
-      "name": "policy-as-code-compliance",
-      "description": "No description",
-      "file": "agents/basecoat-50-security-policy-as-code-compliance.agent.md",
-      "keywords": [
-        "policy",
-        "as",
-        "code",
-        "compliance"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "api-designer": {
-      "id": "api-designer",
-      "name": "api-designer",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-api-designer.agent.md",
-      "keywords": [
-        "api",
-        "designer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "flow-admission-controller": {
-      "id": "flow-admission-controller",
-      "name": "flow-admission-controller",
-      "description": "No description",
-      "file": "agents/flow-admission-controller.agent.md",
-      "keywords": [
-        "flow",
-        "admission",
-        "controller"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "flow-governance"
-    },
-    "branch-hygiene-sweeper": {
-      "id": "branch-hygiene-sweeper",
-      "name": "branch-hygiene-sweeper",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-branch-hygiene-sweeper.agent.md",
-      "keywords": [
-        "branch",
-        "hygiene",
-        "sweeper"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "General"
-    },
-    "station-bottleneck-analyzer": {
-      "id": "station-bottleneck-analyzer",
-      "name": "station-bottleneck-analyzer",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-station-bottleneck-analyzer.agent.md",
-      "keywords": [
-        "station",
-        "bottleneck",
-        "analyzer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "build-master": {
-      "id": "build-master",
-      "name": "build-master",
-      "description": "No description",
-      "file": "agents/basecoat-60-workflow-build-master.agent.md",
-      "keywords": [
-        "build",
-        "master",
-        "ci-cd",
-        "merge",
-        "incident",
-        "automation"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.5",
-      "maturity": "beta",
-      "category": "Workflow"
-    },
-    "escalation-router": {
-      "id": "escalation-router",
-      "name": "escalation-router",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-escalation-router.agent.md",
-      "keywords": [
-        "escalation",
-        "router"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "General"
-    },
-    "run-history-cleanup": {
-      "id": "run-history-cleanup",
-      "name": "run-history-cleanup",
-      "description": "No description",
-      "file": "agents/basecoat-60-workflow-run-history-cleanup.agent.md",
-      "keywords": [
-        "run",
-        "history",
-        "cleanup"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "General"
-    },
-    "instruction-auditor": {
-      "id": "instruction-auditor",
-      "name": "instruction-auditor",
-      "description": "No description",
-      "file": "agents/basecoat-50-security-instruction-auditor.agent.md",
-      "keywords": [
-        "instruction",
-        "auditor"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "General"
-    },
-    "failure-pattern-process": {
-      "id": "failure-pattern-process",
-      "name": "failure-pattern-process",
-      "description": "No description",
-      "file": "agents/basecoat-30-ai-failure-pattern-process.agent.md",
-      "keywords": [
-        "failure",
-        "pattern",
-        "process"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "merge-coordinator": {
-      "id": "merge-coordinator",
-      "name": "merge-coordinator",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-merge-coordinator.agent.md",
-      "keywords": [
-        "merge",
-        "coordinator"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-haiku-4.5",
-      "maturity": "production",
-      "category": "General"
-    },
-    "s4-shadow-mode-validator": {
-      "id": "s4-shadow-mode-validator",
-      "name": "s4-shadow-mode-validator",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-s4-shadow-mode-validator.agent.md",
-      "keywords": [
-        "s4",
-        "shadow",
-        "mode",
-        "validator"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "daily-standup-facilitator": {
-      "id": "daily-standup-facilitator",
-      "name": "daily-standup-facilitator",
-      "description": "No description",
-      "file": "agents/basecoat-30-ai-daily-standup-facilitator.agent.md",
-      "keywords": [
-        "daily",
-        "standup",
-        "facilitator"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "dependency-blocker-monitor": {
-      "id": "dependency-blocker-monitor",
-      "name": "dependency-blocker-monitor",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-dependency-blocker-monitor.agent.md",
-      "keywords": [
-        "dependency",
-        "blocker",
-        "monitor"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "General"
-    },
-    "retro-facilitator": {
-      "id": "retro-facilitator",
-      "name": "retro-facilitator",
-      "description": "No description",
-      "file": "agents/basecoat-60-workflow-retro-facilitator.agent.md",
-      "keywords": [
-        "retro",
-        "facilitator"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "data-architect": {
-      "id": "data-architect",
-      "name": "data-architect",
-      "description": "No description",
-      "file": "agents/basecoat-80-data-data-architect.agent.md",
-      "keywords": [
-        "data",
-        "architect"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "containerization-planner": {
-      "id": "containerization-planner",
-      "name": "containerization-planner",
-      "description": "No description",
-      "file": "agents/basecoat-30-ai-containerization-planner.agent.md",
-      "keywords": [
-        "containerization",
-        "planner"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "bom-validator": {
-      "id": "bom-validator",
-      "name": "bom-validator",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-bom-validator.agent.md",
-      "keywords": [
-        "bom",
-        "validator"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "definition-of-done": {
-      "id": "definition-of-done",
-      "name": "definition-of-done",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-definition-of-done.agent.md",
-      "keywords": [
-        "definition",
-        "of",
-        "done"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "secrets-manager": {
-      "id": "secrets-manager",
-      "name": "secrets-manager",
-      "description": "No description",
-      "file": "agents/basecoat-50-security-secrets-manager.agent.md",
-      "keywords": [
-        "secrets",
-        "manager"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "replanning-engine": {
-      "id": "replanning-engine",
-      "name": "replanning-engine",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-replanning-engine.agent.md",
-      "keywords": [
-        "replanning",
-        "engine"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "contract-testing": {
-      "id": "contract-testing",
-      "name": "contract-testing",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-contract-testing.agent.md",
-      "keywords": [
-        "contract",
-        "testing"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "sprint-planner": {
-      "id": "sprint-planner",
-      "name": "sprint-planner",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-sprint-planner.agent.md",
-      "keywords": [
-        "sprint",
-        "planner"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "security-analyst": {
-      "id": "security-analyst",
-      "name": "security-analyst",
-      "description": "No description",
-      "file": "agents/basecoat-50-security-security-analyst.agent.md",
-      "keywords": [
-        "security",
-        "analyst"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "dependency-lifecycle": {
-      "id": "dependency-lifecycle",
-      "name": "dependency-lifecycle",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-dependency-lifecycle.agent.md",
-      "keywords": [
-        "dependency",
-        "lifecycle"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "takt-time-tracker": {
-      "id": "takt-time-tracker",
-      "name": "takt-time-tracker",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-takt-time-tracker.agent.md",
-      "keywords": [
-        "takt",
-        "time",
-        "tracker"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "dataops": {
-      "id": "dataops",
-      "name": "dataops",
-      "description": "No description",
-      "file": "agents/basecoat-80-data-dataops.agent.md",
-      "keywords": [
-        "dataops"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "agent-designer": {
-      "id": "agent-designer",
-      "name": "agent-designer",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-agent-designer.agent.md",
-      "keywords": [
-        "agent",
-        "designer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "agent-development"
-    },
-    "memory-curator": {
-      "id": "memory-curator",
-      "name": "memory-curator",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-memory-curator.agent.md",
-      "keywords": [
-        "memory",
-        "curator"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "governance-auditor": {
-      "id": "governance-auditor",
-      "name": "governance-auditor",
-      "description": "No description",
-      "file": "agents/governance-auditor.agent.md",
-      "keywords": [
-        "governance",
-        "auditor"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "governance"
-    },
-    "code-review": {
-      "id": "code-review",
-      "name": "code-review",
-      "description": "No description",
-      "file": "agents/basecoat-90-quality-code-review.agent.md",
-      "keywords": [
-        "code",
-        "review"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-haiku-4.5",
-      "maturity": "production",
-      "category": "General"
-    },
-    "sprint-project-mapper": {
-      "id": "sprint-project-mapper",
-      "name": "sprint-project-mapper",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-sprint-project-mapper.agent.md",
-      "keywords": [
-        "sprint",
-        "project",
-        "mapper"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "data-tier": {
-      "id": "data-tier",
-      "name": "data-tier",
-      "description": "No description",
-      "file": "agents/basecoat-80-data-data-tier.agent.md",
-      "keywords": [
-        "data",
-        "tier"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "data-integrity": {
-      "id": "data-integrity",
-      "name": "data-integrity",
-      "description": "No description",
-      "file": "agents/basecoat-80-data-data-integrity.agent.md",
-      "keywords": [
-        "data",
-        "integrity"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "resilience-reviewer": {
-      "id": "resilience-reviewer",
-      "name": "resilience-reviewer",
-      "description": "No description",
-      "file": "agents/basecoat-90-quality-resilience-reviewer.agent.md",
-      "keywords": [
-        "resilience",
-        "reviewer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "flow-auditor": {
-      "id": "flow-auditor",
-      "name": "flow-auditor",
-      "description": "No description",
-      "file": "agents/flow-auditor.agent.md",
-      "keywords": [
-        "flow",
-        "auditor"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "flow-governance"
-    },
-    "flow-tracker": {
-      "id": "flow-tracker",
-      "name": "flow-tracker",
-      "description": "No description",
-      "file": "agents/flow-tracker.agent.md",
-      "keywords": [
-        "flow",
-        "tracker"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "flow-governance"
-    },
-    "domain-designer": {
-      "id": "domain-designer",
-      "name": "domain-designer",
-      "description": "No description",
-      "file": "agents/basecoat-30-ai-domain-designer.agent.md",
-      "keywords": [
-        "domain",
-        "designer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "e2e-test-strategy": {
-      "id": "e2e-test-strategy",
-      "name": "e2e-test-strategy",
-      "description": "No description",
-      "file": "agents/basecoat-90-quality-e2e-test-strategy.agent.md",
-      "keywords": [
-        "e2e",
-        "test",
-        "strategy"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "chaos-engineer": {
-      "id": "chaos-engineer",
-      "name": "chaos-engineer",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-chaos-engineer.agent.md",
-      "keywords": [
-        "chaos",
-        "engineer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "ha-architect": {
-      "id": "ha-architect",
-      "name": "ha-architect",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-ha-architect.agent.md",
-      "keywords": [
-        "ha",
-        "architect"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "factory-state-curator": {
-      "id": "factory-state-curator",
-      "name": "factory-state-curator",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-factory-state-curator.agent.md",
-      "keywords": [
-        "factory",
-        "state",
-        "curator"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "api-security": {
-      "id": "api-security",
-      "name": "api-security",
-      "description": "No description",
-      "file": "agents/basecoat-50-security-api-security.agent.md",
-      "keywords": [
-        "api",
-        "security"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "performance-analyst": {
-      "id": "performance-analyst",
-      "name": "performance-analyst",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-performance-analyst.agent.md",
-      "keywords": [
-        "performance",
-        "analyst"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "devops-engineer": {
-      "id": "devops-engineer",
-      "name": "devops-engineer",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-devops-engineer.agent.md",
-      "keywords": [
-        "devops",
-        "engineer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "prompt-engineer": {
-      "id": "prompt-engineer",
-      "name": "prompt-engineer",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-prompt-engineer.agent.md",
-      "keywords": [
-        "prompt",
-        "engineer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "ux-designer": {
-      "id": "ux-designer",
-      "name": "ux-designer",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-ux-designer.agent.md",
-      "keywords": [
-        "ux",
-        "designer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.5",
-      "maturity": "production",
-      "category": "General"
-    },
-    "mcp-developer": {
-      "id": "mcp-developer",
-      "name": "mcp-developer",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-mcp-developer.agent.md",
-      "keywords": [
-        "mcp",
-        "developer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "guidance-reviewer": {
-      "id": "guidance-reviewer",
-      "name": "guidance-reviewer",
-      "description": "No description",
-      "file": "agents/basecoat-90-quality-guidance-reviewer.agent.md",
-      "keywords": [
-        "guidance",
-        "reviewer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "solution-architect": {
-      "id": "solution-architect",
-      "name": "solution-architect",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-solution-architect.agent.md",
-      "keywords": [
-        "solution",
-        "architect"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.5",
-      "maturity": "production",
-      "category": "General"
-    },
-    "mlops": {
-      "id": "mlops",
-      "name": "mlops",
-      "description": "No description",
-      "file": "agents/basecoat-30-ai-mlops.agent.md",
-      "keywords": [
-        "mlops"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "strategy-to-automation": {
-      "id": "strategy-to-automation",
-      "name": "strategy-to-automation",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-strategy-to-automation.agent.md",
-      "keywords": [
-        "strategy",
-        "to",
-        "automation"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "flow-optimizer": {
-      "id": "flow-optimizer",
-      "name": "flow-optimizer",
-      "description": "No description",
-      "file": "agents/flow-optimizer.agent.md",
-      "keywords": [
-        "flow",
-        "optimizer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "flow-governance"
-    },
-    "legacy-modernization": {
-      "id": "legacy-modernization",
-      "name": "legacy-modernization",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-legacy-modernization.agent.md",
-      "keywords": [
-        "legacy",
-        "modernization"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "security-operations": {
-      "id": "security-operations",
-      "name": "security-operations",
-      "description": "No description",
-      "file": "agents/basecoat-50-security-security-operations.agent.md",
-      "keywords": [
-        "security",
-        "operations"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "infrastructure-deploy": {
-      "id": "infrastructure-deploy",
-      "name": "infrastructure-deploy",
-      "description": "No description",
-      "file": "agents/basecoat-60-workflow-infrastructure-deploy.agent.md",
-      "keywords": [
-        "infrastructure",
-        "deploy"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "gitops-engineer": {
-      "id": "gitops-engineer",
-      "name": "gitops-engineer",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-gitops-engineer.agent.md",
-      "keywords": [
-        "gitops",
-        "engineer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "self-healing-ci": {
-      "id": "self-healing-ci",
-      "name": "self-healing-ci",
-      "description": "No description",
-      "file": "agents/basecoat-60-workflow-self-healing-ci.agent.md",
-      "keywords": [
-        "self",
-        "healing",
-        "ci"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "tech-writer": {
-      "id": "tech-writer",
-      "name": "tech-writer",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-tech-writer.agent.md",
-      "keywords": [
-        "tech",
-        "writer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "github-security-posture": {
-      "id": "github-security-posture",
-      "name": "github-security-posture",
-      "description": "No description",
-      "file": "agents/basecoat-50-security-github-security-posture.agent.md",
-      "keywords": [
-        "github",
-        "security",
-        "posture"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.5",
-      "maturity": "production",
-      "category": "General"
-    },
-    "dotnet-modernization-advisor": {
-      "id": "dotnet-modernization-advisor",
-      "name": "dotnet-modernization-advisor",
-      "description": "No description",
-      "file": "agents/basecoat-20-lang-dotnet-modernization-advisor.agent.md",
-      "keywords": [
-        "dotnet",
+    "database-migration": {
+      "id": "database-migration",
+      "name": "database-migration",
+      "description": "No description",
+      "file": "agents/database-migration.agent.md",
+      "keywords": [
+        "database",
+        "migration",
+        "database-migration",
+        "schema-evolution",
+        "data-replication",
         "modernization",
-        "advisor"
+        "sql"
       ],
       "capabilities": [
-        "general"
+        "backend"
       ],
       "model": "claude-sonnet-4.6",
       "maturity": "production",
-      "category": "General"
-    },
-    "change-isolation-architect": {
-      "id": "change-isolation-architect",
-      "name": "change-isolation-architect",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-change-isolation-architect.agent.md",
-      "keywords": [
-        "change",
-        "isolation",
-        "architect"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "finops-advisor": {
-      "id": "finops-advisor",
-      "name": "finops-advisor",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-finops-advisor.agent.md",
-      "keywords": [
-        "finops",
-        "advisor"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "middleware-dev": {
-      "id": "middleware-dev",
-      "name": "middleware-dev",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-middleware-dev.agent.md",
-      "keywords": [
-        "middleware",
-        "dev"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "sre-engineer": {
-      "id": "sre-engineer",
-      "name": "sre-engineer",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-sre-engineer.agent.md",
-      "keywords": [
-        "sre",
-        "engineer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "manual-test-strategy": {
-      "id": "manual-test-strategy",
-      "name": "manual-test-strategy",
-      "description": "No description",
-      "file": "agents/basecoat-90-quality-manual-test-strategy.agent.md",
-      "keywords": [
-        "manual",
-        "test",
-        "strategy"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
+      "category": "Data & Analytics"
     },
     "ci-failure-escalation": {
       "id": "ci-failure-escalation",
       "name": "ci-failure-escalation",
       "description": "No description",
-      "file": "agents/basecoat-60-workflow-ci-failure-escalation.agent.md",
+      "file": "agents/ci-failure-escalation.agent.md",
       "keywords": [
         "ci",
         "failure",
-        "escalation"
+        "escalation",
+        "ci-cd",
+        "automation",
+        "pipeline",
+        "deployment-gate"
       ],
       "capabilities": [
         "general"
       ],
-      "model": "gpt-5.4-mini",
+      "model": "claude-sonnet-4.6",
       "maturity": "production",
-      "category": "General"
+      "category": "CI/CD & Automation"
     },
     "memory-promoter": {
       "id": "memory-promoter",
       "name": "memory-promoter",
       "description": "No description",
-      "file": "agents/basecoat-10-core-memory-promoter.agent.md",
+      "file": "agents/memory-promoter.agent.md",
       "keywords": [
         "memory",
-        "promoter"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-haiku-4.5",
-      "maturity": "production",
-      "category": "General"
-    },
-    "guardrail": {
-      "id": "guardrail",
-      "name": "guardrail",
-      "description": "No description",
-      "file": "agents/basecoat-30-ai-guardrail.agent.md",
-      "keywords": [
-        "guardrail"
+        "promoter",
+        "pattern-detection",
+        "learning",
+        "contributions"
       ],
       "capabilities": [
         "general"
       ],
       "model": "claude-sonnet-4.6",
       "maturity": "production",
-      "category": "General"
+      "category": "Knowledge & Learning"
     },
-    "orphaned-pr-cleanup": {
-      "id": "orphaned-pr-cleanup",
-      "name": "orphaned-pr-cleanup",
+    "containerization-planner": {
+      "id": "containerization-planner",
+      "name": "containerization-planner",
       "description": "No description",
-      "file": "agents/basecoat-10-core-orphaned-pr-cleanup.agent.md",
+      "file": "agents/containerization-planner.agent.md",
       "keywords": [
-        "orphaned",
-        "pr",
-        "cleanup"
+        "containerization",
+        "planner",
+        "docker",
+        "kubernetes",
+        "container-apps",
+        "deployment"
       ],
       "capabilities": [
-        "general"
+        "infrastructure"
       ],
-      "model": "gpt-5.4-mini",
+      "model": "claude-sonnet-4.6",
       "maturity": "production",
-      "category": "General"
+      "category": "Infrastructure & Operations"
     },
     "sprint-retrospective": {
       "id": "sprint-retrospective",
       "name": "sprint-retrospective",
       "description": "No description",
-      "file": "agents/basecoat-10-core-sprint-retrospective.agent.md",
+      "file": "agents/sprint-retrospective.agent.md",
       "keywords": [
         "sprint",
-        "retrospective"
+        "retrospective",
+        "sprint-review",
+        "metrics",
+        "analysis"
       ],
       "capabilities": [
-        "general"
+        "planning"
       ],
       "model": "claude-sonnet-4.6",
       "maturity": "production",
-      "category": "General"
+      "category": "Project Management & Planning"
     },
-    "product-manager": {
-      "id": "product-manager",
-      "name": "product-manager",
+    "container-security": {
+      "id": "container-security",
+      "name": "container-security",
       "description": "No description",
-      "file": "agents/basecoat-10-core-product-manager.agent.md",
+      "file": "agents/container-security.agent.md",
       "keywords": [
-        "product",
-        "manager"
+        "container",
+        "security",
+        "kubernetes",
+        "cspm"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "beta",
+      "category": "Security & Compliance"
+    },
+    "penetration-test": {
+      "id": "penetration-test",
+      "name": "penetration-test",
+      "description": "No description",
+      "file": "agents/penetration-test.agent.md",
+      "keywords": [
+        "penetration",
+        "test",
+        "penetration-testing",
+        "security-assessment",
+        "vulnerability-discovery",
+        "owasp"
+      ],
+      "capabilities": [
+        "security"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Security & Compliance"
+    },
+    "devops-engineer": {
+      "id": "devops-engineer",
+      "name": "devops-engineer",
+      "description": "No description",
+      "file": "agents/devops-engineer.agent.md",
+      "keywords": [
+        "devops",
+        "engineer",
+        "ci-cd",
+        "infrastructure",
+        "containers",
+        "kubernetes",
+        "terraform"
+      ],
+      "capabilities": [
+        "infrastructure"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Infrastructure & Operations"
+    },
+    "middleware-dev": {
+      "id": "middleware-dev",
+      "name": "middleware-dev",
+      "description": "No description",
+      "file": "agents/middleware-dev.agent.md",
+      "keywords": [
+        "middleware",
+        "dev",
+        "integration",
+        "api-gateway",
+        "event-driven",
+        "messaging"
       ],
       "capabilities": [
         "general"
       ],
       "model": "claude-sonnet-4.6",
       "maturity": "production",
-      "category": "General"
+      "category": "Development & Engineering"
+    },
+    "frontend-dev": {
+      "id": "frontend-dev",
+      "name": "frontend-dev",
+      "description": "No description",
+      "file": "agents/frontend-dev.agent.md",
+      "keywords": [
+        "frontend",
+        "dev",
+        "ui",
+        "react",
+        "vue",
+        "accessibility",
+        "performance"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Development & Engineering"
+    },
+    "self-healing-ci": {
+      "id": "self-healing-ci",
+      "name": "self-healing-ci",
+      "description": "No description",
+      "file": "agents/self-healing-ci.agent.md",
+      "keywords": [
+        "self",
+        "healing",
+        "ci",
+        "ci-cd",
+        "automation",
+        "pipeline",
+        "remediation",
+        "failure-analysis"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "CI/CD & Automation"
+    },
+    "data-integrity": {
+      "id": "data-integrity",
+      "name": "data-integrity",
+      "description": "No description",
+      "file": "agents/data-integrity.agent.md",
+      "keywords": [
+        "data",
+        "integrity",
+        "consistency",
+        "recovery"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "beta",
+      "category": "Data & Analytics"
+    },
+    "observability-engineer": {
+      "id": "observability-engineer",
+      "name": "observability-engineer",
+      "description": "No description",
+      "file": "agents/observability-engineer.agent.md",
+      "keywords": [
+        "observability",
+        "engineer",
+        "opentelemetry",
+        "tracing"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "beta",
+      "category": "Infrastructure & Operations"
+    },
+    "gitops-engineer": {
+      "id": "gitops-engineer",
+      "name": "gitops-engineer",
+      "description": "No description",
+      "file": "agents/gitops-engineer.agent.md",
+      "keywords": [
+        "gitops",
+        "engineer",
+        "argo-cd",
+        "flux",
+        "infrastructure-as-code",
+        "kubernetes",
+        "ci-cd"
+      ],
+      "capabilities": [
+        "infrastructure"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Infrastructure & DevOps"
+    },
+    "release-manager": {
+      "id": "release-manager",
+      "name": "release-manager",
+      "description": "No description",
+      "file": "agents/release-manager.agent.md",
+      "keywords": [
+        "release",
+        "manager",
+        "release-management",
+        "versioning",
+        "changelog",
+        "semver",
+        "git-tagging"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Release & Deployment"
+    },
+    "mcp-developer": {
+      "id": "mcp-developer",
+      "name": "mcp-developer",
+      "description": "No description",
+      "file": "agents/mcp-developer.agent.md",
+      "keywords": [
+        "mcp",
+        "developer",
+        "model-context-protocol",
+        "tools",
+        "integration",
+        "ai-systems"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "AI & Machine Learning"
+    },
+    "performance-analyst": {
+      "id": "performance-analyst",
+      "name": "performance-analyst",
+      "description": "No description",
+      "file": "agents/performance-analyst.agent.md",
+      "keywords": [
+        "performance",
+        "analyst",
+        "performance-analysis",
+        "profiling",
+        "load-testing",
+        "optimization",
+        "core-web-vitals"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Performance & Optimization"
+    },
+    "hardening-advisor": {
+      "id": "hardening-advisor",
+      "name": "hardening-advisor",
+      "description": "No description",
+      "file": "agents/hardening-advisor.agent.md",
+      "keywords": [
+        "hardening",
+        "advisor",
+        "cis",
+        "stig"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "beta",
+      "category": "Security & Compliance"
+    },
+    "guardrail": {
+      "id": "guardrail",
+      "name": "guardrail",
+      "description": "No description",
+      "file": "agents/guardrail.agent.md",
+      "keywords": [
+        "guardrail",
+        "guardrails",
+        "validation",
+        "safety",
+        "compliance"
+      ],
+      "capabilities": [
+        "security"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Security & Compliance"
+    },
+    "definition-of-done": {
+      "id": "definition-of-done",
+      "name": "definition-of-done",
+      "description": "No description",
+      "file": "agents/definition-of-done.agent.md",
+      "keywords": [
+        "definition",
+        "of",
+        "done",
+        "definition-of-done",
+        "quality-gate",
+        "testing",
+        "acceptance-criteria",
+        "dod"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Development & Review"
+    },
+    "incident-responder": {
+      "id": "incident-responder",
+      "name": "incident-responder",
+      "description": "No description",
+      "file": "agents/incident-responder.agent.md",
+      "keywords": [
+        "incident",
+        "responder",
+        "incident-response",
+        "sre",
+        "on-call",
+        "troubleshooting",
+        "post-mortem"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Operations & Support"
+    },
+    "supply-chain-security": {
+      "id": "supply-chain-security",
+      "name": "supply-chain-security",
+      "description": "No description",
+      "file": "agents/supply-chain-security.agent.md",
+      "keywords": [
+        "supply",
+        "chain",
+        "security",
+        "supply-chain",
+        "sbom",
+        "slsa",
+        "signing",
+        "provenance"
+      ],
+      "capabilities": [
+        "security"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Security & Compliance"
+    },
+    "domain-designer": {
+      "id": "domain-designer",
+      "name": "domain-designer",
+      "description": "No description",
+      "file": "agents/domain-designer.agent.md",
+      "keywords": [
+        "domain",
+        "designer",
+        "domain-driven-design",
+        "bounded-contexts",
+        "aggregates",
+        "ubiquitous-language",
+        "microservices",
+        "domain-events"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Architecture & Design"
+    },
+    "exploratory-charter": {
+      "id": "exploratory-charter",
+      "name": "exploratory-charter",
+      "description": "No description",
+      "file": "agents/exploratory-charter.agent.md",
+      "keywords": [
+        "exploratory",
+        "charter",
+        "exploratory-testing",
+        "testing",
+        "qa"
+      ],
+      "capabilities": [
+        "testing"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Testing & Quality"
+    },
+    "solution-architect": {
+      "id": "solution-architect",
+      "name": "solution-architect",
+      "description": "No description",
+      "file": "agents/solution-architect.agent.md",
+      "keywords": [
+        "solution",
+        "architect",
+        "architecture",
+        "design",
+        "c4-diagrams",
+        "adr",
+        "technology-selection",
+        "system-design"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Architecture & Design"
+    },
+    "llmops": {
+      "id": "llmops",
+      "name": "llmops",
+      "description": "No description",
+      "file": "agents/llmops.agent.md",
+      "keywords": [
+        "llmops",
+        "mlops",
+        "prompts",
+        "inference",
+        "model-serving",
+        "observability"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "AI & Machine Learning"
+    },
+    "ha-architect": {
+      "id": "ha-architect",
+      "name": "ha-architect",
+      "description": "No description",
+      "file": "agents/ha-architect.agent.md",
+      "keywords": [
+        "ha",
+        "architect",
+        "high-availability",
+        "resilience",
+        "disaster-recovery",
+        "chaos-engineering",
+        "sre"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Architecture & Design"
+    },
+    "manual-test-strategy": {
+      "id": "manual-test-strategy",
+      "name": "manual-test-strategy",
+      "description": "No description",
+      "file": "agents/manual-test-strategy.agent.md",
+      "keywords": [
+        "manual",
+        "test",
+        "strategy",
+        "test-strategy",
+        "manual-testing",
+        "qa",
+        "testing"
+      ],
+      "capabilities": [
+        "testing"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Testing & Quality"
+    },
+    "merge-coordinator": {
+      "id": "merge-coordinator",
+      "name": "merge-coordinator",
+      "description": "No description",
+      "file": "agents/merge-coordinator.agent.md",
+      "keywords": [
+        "merge",
+        "coordinator",
+        "git",
+        "ci-cd",
+        "automation",
+        "conflict-resolution"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "CI/CD & Automation"
+    },
+    "e2e-test-strategy": {
+      "id": "e2e-test-strategy",
+      "name": "e2e-test-strategy",
+      "description": "No description",
+      "file": "agents/e2e-test-strategy.agent.md",
+      "keywords": [
+        "e2e",
+        "test",
+        "strategy",
+        "e2e-testing",
+        "playwright",
+        "cypress",
+        "test-automation",
+        "qa"
+      ],
+      "capabilities": [
+        "testing"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Testing & Quality"
+    },
+    "identity-architect": {
+      "id": "identity-architect",
+      "name": "identity-architect",
+      "description": "No description",
+      "file": "agents/identity-architect.agent.md",
+      "keywords": [
+        "identity",
+        "architect",
+        "iam",
+        "azure-rbac",
+        "entra-id",
+        "zero-trust",
+        "conditional-access"
+      ],
+      "capabilities": [
+        "security"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Security & Compliance"
+    },
+    "feedback-loop": {
+      "id": "feedback-loop",
+      "name": "feedback-loop",
+      "description": "No description",
+      "file": "agents/feedback-loop.agent.md",
+      "keywords": [
+        "feedback",
+        "loop",
+        "optimization",
+        "learning",
+        "a-b-testing",
+        "metrics"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "AI & Learning"
+    },
+    "prompt-engineer": {
+      "id": "prompt-engineer",
+      "name": "prompt-engineer",
+      "description": "No description",
+      "file": "agents/prompt-engineer.agent.md",
+      "keywords": [
+        "prompt",
+        "engineer",
+        "prompt-engineering",
+        "llm",
+        "system-prompts",
+        "optimization",
+        "token-efficiency"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "AI & Machine Learning"
     },
     "rollout-basecoat": {
       "id": "rollout-basecoat",
       "name": "rollout-basecoat",
       "description": "No description",
-      "file": "agents/basecoat-60-workflow-rollout-basecoat.agent.md",
+      "file": "agents/rollout-basecoat.agent.md",
       "keywords": [
         "rollout",
-        "basecoat"
+        "basecoat",
+        "onboarding",
+        "enterprise",
+        "deployment"
       ],
       "capabilities": [
         "general"
       ],
-      "model": "claude-haiku-4.5",
+      "model": "claude-sonnet-4.6",
       "maturity": "production",
-      "category": "General"
+      "category": "Onboarding & Deployment"
+    },
+    "rca": {
+      "id": "rca",
+      "name": "rca",
+      "description": "No description",
+      "file": "agents/rca.agent.md",
+      "keywords": [
+        "rca",
+        "incident-response",
+        "root-cause-analysis",
+        "postmortem",
+        "troubleshooting"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Operations & Support"
+    },
+    "memory-curator": {
+      "id": "memory-curator",
+      "name": "memory-curator",
+      "description": "No description",
+      "file": "agents/memory-curator.agent.md",
+      "keywords": [
+        "memory",
+        "curator",
+        "knowledge-management",
+        "cross-session",
+        "learning"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Knowledge & Learning"
+    },
+    "agent-designer": {
+      "id": "agent-designer",
+      "name": "agent-designer",
+      "description": "No description",
+      "file": "agents/agent-designer.agent.md",
+      "keywords": [
+        "agent",
+        "designer",
+        "agent-design",
+        "copilot",
+        "agent-authoring",
+        "skill-composition"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "AI & Development"
+    },
+    "dotnet-modernization-advisor": {
+      "id": "dotnet-modernization-advisor",
+      "name": "dotnet-modernization-advisor",
+      "description": "No description",
+      "file": "agents/dotnet-modernization-advisor.agent.md",
+      "keywords": [
+        "dotnet",
+        "modernization",
+        "advisor",
+        "migration",
+        "upgrade",
+        "legacy"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Modernization & Migration"
+    },
+    "sprint-planner": {
+      "id": "sprint-planner",
+      "name": "sprint-planner",
+      "description": "No description",
+      "file": "agents/sprint-planner.agent.md",
+      "keywords": [
+        "sprint",
+        "planner",
+        "sprint-planning",
+        "agile",
+        "issue-decomposition",
+        "dependency-mapping",
+        "roadmapping"
+      ],
+      "capabilities": [
+        "planning"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Project Management & Planning"
     },
     "orchestrator": {
       "id": "orchestrator",
@@ -1603,276 +798,863 @@
       "description": "No description",
       "file": "agents/orchestrator.agent.md",
       "keywords": [
-        "orchestrator"
+        "orchestrator",
+        "multi-agent",
+        "task-decomposition",
+        "routing",
+        "coordination"
       ],
       "capabilities": [
         "general"
       ],
       "model": "claude-sonnet-4.6",
       "maturity": "production",
-      "category": "General"
+      "category": "Orchestration"
     },
-    "hardening-advisor": {
-      "id": "hardening-advisor",
-      "name": "hardening-advisor",
+    "mlops": {
+      "id": "mlops",
+      "name": "mlops",
       "description": "No description",
-      "file": "agents/basecoat-10-core-hardening-advisor.agent.md",
+      "file": "agents/mlops.agent.md",
       "keywords": [
-        "hardening",
-        "advisor"
+        "mlops",
+        "ml-engineering",
+        "model-registry",
+        "experiment-tracking",
+        "ml-deployment"
       ],
       "capabilities": [
         "general"
       ],
       "model": "claude-sonnet-4.6",
       "maturity": "production",
-      "category": "General"
+      "category": "AI & Machine Learning"
     },
-    "release-manager": {
-      "id": "release-manager",
-      "name": "release-manager",
+    "instruction-auditor": {
+      "id": "instruction-auditor",
+      "name": "instruction-auditor",
       "description": "No description",
-      "file": "agents/basecoat-60-workflow-release-manager.agent.md",
+      "file": "agents/instruction-auditor.agent.md",
       "keywords": [
-        "release",
-        "manager"
+        "instruction",
+        "auditor",
+        "instructions",
+        "coverage",
+        "audit",
+        "tech-stack",
+        "overlay"
       ],
       "capabilities": [
-        "general"
+        "security"
       ],
       "model": "claude-sonnet-4.6",
       "maturity": "production",
-      "category": "General"
+      "category": "Governance & Compliance"
     },
-    "incident-responder": {
-      "id": "incident-responder",
-      "name": "incident-responder",
+    "security-monitor": {
+      "id": "security-monitor",
+      "name": "security-monitor",
       "description": "No description",
-      "file": "agents/basecoat-60-workflow-incident-responder.agent.md",
+      "file": "agents/security-monitor.agent.md",
       "keywords": [
-        "incident",
-        "responder"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "agentic-sdlc-autonomy": {
-      "id": "agentic-sdlc-autonomy",
-      "name": "agentic-sdlc-autonomy",
-      "description": "No description",
-      "file": "agents/agentic-sdlc-autonomy.agent.md",
-      "keywords": [
-        "agentic",
-        "sdlc",
-        "autonomy"
+        "security",
+        "monitor",
+        "siem",
+        "mitre-attack"
       ],
       "capabilities": [
         "general"
       ],
       "model": "claude-sonnet-4.6",
       "maturity": "beta",
-      "category": "General"
+      "category": "Security & Compliance"
     },
-    "dependency-update-advisor": {
-      "id": "dependency-update-advisor",
-      "name": "dependency-update-advisor",
+    "prompt-coach": {
+      "id": "prompt-coach",
+      "name": "prompt-coach",
       "description": "No description",
-      "file": "agents/basecoat-10-core-dependency-update-advisor.agent.md",
+      "file": "agents/prompt-coach.agent.md",
       "keywords": [
-        "dependency",
-        "update",
-        "advisor"
+        "prompt",
+        "coach",
+        "prompt-coaching",
+        "prompt-optimization",
+        "llm",
+        "ai-development"
       ],
       "capabilities": [
         "general"
       ],
-      "model": "gpt-5.4-mini",
+      "model": "claude-sonnet-4.6",
       "maturity": "production",
-      "category": "General"
+      "category": "AI & Machine Learning"
+    },
+    "legacy-modernization": {
+      "id": "legacy-modernization",
+      "name": "legacy-modernization",
+      "description": "No description",
+      "file": "agents/legacy-modernization.agent.md",
+      "keywords": [
+        "legacy",
+        "modernization",
+        "legacy-code",
+        "migration",
+        "asp.net",
+        "dotnet",
+        "refactoring"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Modernization & Migration"
+    },
+    "backend-dev": {
+      "id": "backend-dev",
+      "name": "backend-dev",
+      "description": "No description",
+      "file": "agents/backend-dev.agent.md",
+      "keywords": [
+        "backend",
+        "dev",
+        "api",
+        "services",
+        "database",
+        "performance",
+        "security"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Development & Engineering"
+    },
+    "strategy-to-automation": {
+      "id": "strategy-to-automation",
+      "name": "strategy-to-automation",
+      "description": "No description",
+      "file": "agents/strategy-to-automation.agent.md",
+      "keywords": [
+        "strategy",
+        "to",
+        "automation",
+        "test-automation",
+        "testing-strategy",
+        "qa",
+        "regression-testing"
+      ],
+      "capabilities": [
+        "testing"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Testing & Quality"
+    },
+    "guidance-reviewer": {
+      "id": "guidance-reviewer",
+      "name": "guidance-reviewer",
+      "description": "No description",
+      "file": "agents/guidance-reviewer.agent.md",
+      "keywords": [
+        "guidance",
+        "reviewer",
+        "review",
+        "validation",
+        "quality-assurance",
+        "creator-verifier"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "experimental",
+      "category": "Knowledge & Learning"
+    },
+    "release-impact-advisor": {
+      "id": "release-impact-advisor",
+      "name": "release-impact-advisor",
+      "description": "No description",
+      "file": "agents/release-impact-advisor.agent.md",
+      "keywords": [
+        "release",
+        "impact",
+        "advisor",
+        "release-management",
+        "impact-analysis",
+        "deployment-strategy",
+        "rollback",
+        "canary"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Release & Deployment"
+    },
+    "policy-as-code-compliance": {
+      "id": "policy-as-code-compliance",
+      "name": "policy-as-code-compliance",
+      "description": "No description",
+      "file": "agents/policy-as-code-compliance.agent.md",
+      "keywords": [
+        "policy",
+        "as",
+        "code",
+        "compliance",
+        "policy-as-code",
+        "governance",
+        "audit",
+        "opa",
+        "rego"
+      ],
+      "capabilities": [
+        "security"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Security & Compliance"
+    },
+    "github-security-posture": {
+      "id": "github-security-posture",
+      "name": "github-security-posture",
+      "description": "No description",
+      "file": "agents/github-security-posture.agent.md",
+      "keywords": [
+        "github",
+        "security",
+        "posture",
+        "rulesets"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "beta",
+      "category": "Security & Compliance"
+    },
+    "chaos-engineer": {
+      "id": "chaos-engineer",
+      "name": "chaos-engineer",
+      "description": "No description",
+      "file": "agents/chaos-engineer.agent.md",
+      "keywords": [
+        "chaos",
+        "engineer",
+        "chaos-engineering",
+        "resilience",
+        "reliability",
+        "slo",
+        "testing"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Operations & Support"
+    },
+    "guidance-author": {
+      "id": "guidance-author",
+      "name": "guidance-author",
+      "description": "No description",
+      "file": "agents/guidance-author.agent.md",
+      "keywords": [
+        "guidance",
+        "author",
+        "authoring",
+        "instructions",
+        "skills",
+        "agents",
+        "creator-verifier"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "experimental",
+      "category": "Knowledge & Learning"
+    },
+    "code-review": {
+      "id": "code-review",
+      "name": "code-review",
+      "description": "No description",
+      "file": "agents/code-review.agent.md",
+      "keywords": [
+        "code",
+        "review",
+        "code-review",
+        "quality-assurance",
+        "testing",
+        "security",
+        "performance"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Development & Review"
+    },
+    "sre-engineer": {
+      "id": "sre-engineer",
+      "name": "sre-engineer",
+      "description": "No description",
+      "file": "agents/sre-engineer.agent.md",
+      "keywords": [
+        "sre",
+        "engineer",
+        "reliability",
+        "slo",
+        "error-budget",
+        "incident-response",
+        "chaos-engineering"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Operations & Support"
     },
     "production-readiness": {
       "id": "production-readiness",
       "name": "production-readiness",
       "description": "No description",
-      "file": "agents/basecoat-10-core-production-readiness.agent.md",
+      "file": "agents/production-readiness.agent.md",
       "keywords": [
         "production",
-        "readiness"
+        "readiness",
+        "production-readiness",
+        "release-readiness",
+        "bcp",
+        "drp",
+        "incident-response"
       ],
       "capabilities": [
         "general"
       ],
       "model": "claude-sonnet-4.6",
       "maturity": "production",
-      "category": "General"
+      "category": "Operations & Support"
     },
-    "supply-chain-security": {
-      "id": "supply-chain-security",
-      "name": "supply-chain-security",
+    "api-security": {
+      "id": "api-security",
+      "name": "api-security",
       "description": "No description",
-      "file": "agents/basecoat-50-security-supply-chain-security.agent.md",
+      "file": "agents/api-security.agent.md",
       "keywords": [
-        "supply",
-        "chain",
+        "api",
+        "security",
+        "api-security",
+        "owasp-api",
+        "threat-modeling",
+        "authorization"
+      ],
+      "capabilities": [
         "security"
       ],
-      "capabilities": [
-        "general"
-      ],
       "model": "claude-sonnet-4.6",
       "maturity": "production",
-      "category": "General"
+      "category": "Security & Compliance"
     },
-    "database-migration": {
-      "id": "database-migration",
-      "name": "database-migration",
+    "resilience-reviewer": {
+      "id": "resilience-reviewer",
+      "name": "resilience-reviewer",
       "description": "No description",
-      "file": "agents/basecoat-80-data-database-migration.agent.md",
+      "file": "agents/resilience-reviewer.agent.md",
       "keywords": [
-        "database",
-        "migration"
+        "resilience",
+        "reviewer",
+        "circuit-breaker",
+        "timeout"
       ],
       "capabilities": [
         "general"
       ],
       "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
+      "maturity": "beta",
+      "category": "Testing & Quality"
     },
-    "task-scope-validator": {
-      "id": "task-scope-validator",
-      "name": "task-scope-validator",
+    "ux-designer": {
+      "id": "ux-designer",
+      "name": "ux-designer",
       "description": "No description",
-      "file": "agents/basecoat-60-workflow-task-scope-validator.agent.md",
+      "file": "agents/ux-designer.agent.md",
       "keywords": [
-        "task",
-        "scope",
-        "validator"
+        "ux",
+        "designer",
+        "ux-design",
+        "user-experience",
+        "accessibility",
+        "wireframes",
+        "ui-design"
       ],
       "capabilities": [
-        "general"
+        "frontend"
       ],
       "model": "claude-sonnet-4.6",
       "maturity": "production",
-      "category": "General"
-    },
-    "container-security": {
-      "id": "container-security",
-      "name": "container-security",
-      "description": "No description",
-      "file": "agents/basecoat-50-security-container-security.agent.md",
-      "keywords": [
-        "container",
-        "security"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
+      "category": "Design & UX"
     },
     "config-auditor": {
       "id": "config-auditor",
       "name": "config-auditor",
       "description": "No description",
-      "file": "agents/basecoat-50-security-config-auditor.agent.md",
+      "file": "agents/config-auditor.agent.md",
       "keywords": [
         "config",
-        "auditor"
+        "auditor",
+        "config-audit",
+        "secrets-scanning",
+        "security",
+        "compliance"
+      ],
+      "capabilities": [
+        "security"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Security & Compliance"
+    },
+    "dependency-update-advisor": {
+      "id": "dependency-update-advisor",
+      "name": "dependency-update-advisor",
+      "description": "No description",
+      "file": "agents/dependency-update-advisor.agent.md",
+      "keywords": [
+        "dependency",
+        "update",
+        "advisor",
+        "dependabot",
+        "dependency-updates",
+        "security",
+        "risk-assessment"
       ],
       "capabilities": [
         "general"
       ],
-      "model": "gpt-5.4-mini",
+      "model": "claude-sonnet-4.6",
       "maturity": "production",
-      "category": "General"
+      "category": "Developer Experience"
+    },
+    "dependency-lifecycle": {
+      "id": "dependency-lifecycle",
+      "name": "dependency-lifecycle",
+      "description": "No description",
+      "file": "agents/dependency-lifecycle.agent.md",
+      "keywords": [
+        "dependency",
+        "lifecycle",
+        "dependency-management",
+        "version-upgrades",
+        "vulnerability-tracking",
+        "breaking-changes"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Development & Engineering"
+    },
+    "contract-testing": {
+      "id": "contract-testing",
+      "name": "contract-testing",
+      "description": "No description",
+      "file": "agents/contract-testing.agent.md",
+      "keywords": [
+        "contract",
+        "testing",
+        "contract-testing",
+        "cdc",
+        "integration-testing",
+        "e2e-testing"
+      ],
+      "capabilities": [
+        "testing"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Testing & Quality"
+    },
+    "product-manager": {
+      "id": "product-manager",
+      "name": "product-manager",
+      "description": "No description",
+      "file": "agents/product-manager.agent.md",
+      "keywords": [
+        "product",
+        "manager",
+        "product-management",
+        "requirements",
+        "roadmap",
+        "user-stories",
+        "prioritization"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Product & Strategy"
+    },
+    "data-tier": {
+      "id": "data-tier",
+      "name": "data-tier",
+      "description": "No description",
+      "file": "agents/data-tier.agent.md",
+      "keywords": [
+        "data",
+        "tier",
+        "data-tier",
+        "schema-design",
+        "migrations",
+        "query-optimization",
+        "database"
+      ],
+      "capabilities": [
+        "backend"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Data & Analytics"
+    },
+    "project-onboarding": {
+      "id": "project-onboarding",
+      "name": "project-onboarding",
+      "description": "No description",
+      "file": "agents/project-onboarding.agent.md",
+      "keywords": [
+        "project",
+        "onboarding",
+        "project-setup",
+        "basecoat",
+        "governance"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Onboarding & Deployment"
+    },
+    "security-operations": {
+      "id": "security-operations",
+      "name": "security-operations",
+      "description": "No description",
+      "file": "agents/security-operations.agent.md",
+      "keywords": [
+        "security",
+        "operations",
+        "uncategorized"
+      ],
+      "capabilities": [
+        "security"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "security"
+    },
+    "data-pipeline": {
+      "id": "data-pipeline",
+      "name": "data-pipeline",
+      "description": "No description",
+      "file": "agents/data-pipeline.agent.md",
+      "keywords": [
+        "data",
+        "pipeline",
+        "medallion",
+        "feature-store"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "beta",
+      "category": "Data & Analytics"
+    },
+    "azure-landing-zone": {
+      "id": "azure-landing-zone",
+      "name": "azure-landing-zone",
+      "description": "No description",
+      "file": "agents/azure-landing-zone.agent.md",
+      "keywords": [
+        "azure",
+        "landing",
+        "zone",
+        "azure-landing-zone",
+        "caf",
+        "cloud-adoption-framework",
+        "enterprise-scale"
+      ],
+      "capabilities": [
+        "infrastructure"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Infrastructure & Operations"
+    },
+    "finops-advisor": {
+      "id": "finops-advisor",
+      "name": "finops-advisor",
+      "description": "No description",
+      "file": "agents/finops-advisor.agent.md",
+      "keywords": [
+        "finops",
+        "advisor",
+        "cost-optimization",
+        "cloud-cost",
+        "governance",
+        "chargeback",
+        "showback"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Cost & FinOps"
+    },
+    "tech-writer": {
+      "id": "tech-writer",
+      "name": "tech-writer",
+      "description": "No description",
+      "file": "agents/tech-writer.agent.md",
+      "keywords": [
+        "tech",
+        "writer",
+        "technical-writing",
+        "documentation",
+        "api-docs",
+        "runbooks",
+        "adr"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Documentation & Knowledge"
+    },
+    "security-analyst": {
+      "id": "security-analyst",
+      "name": "security-analyst",
+      "description": "No description",
+      "file": "agents/security-analyst.agent.md",
+      "keywords": [
+        "security",
+        "analyst",
+        "security-analysis",
+        "vulnerability-assessment",
+        "threat-modeling",
+        "owasp"
+      ],
+      "capabilities": [
+        "security"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Security & Compliance"
+    },
+    "infrastructure-deploy": {
+      "id": "infrastructure-deploy",
+      "name": "infrastructure-deploy",
+      "description": "No description",
+      "file": "agents/infrastructure-deploy.agent.md",
+      "keywords": [
+        "infrastructure",
+        "deploy",
+        "azure",
+        "bicep",
+        "deployment",
+        "iac"
+      ],
+      "capabilities": [
+        "infrastructure"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Infrastructure & Operations"
+    },
+    "data-architect": {
+      "id": "data-architect",
+      "name": "data-architect",
+      "description": "No description",
+      "file": "agents/data-architect.agent.md",
+      "keywords": [
+        "data",
+        "architect",
+        "data-architecture",
+        "medallion",
+        "data-governance",
+        "etl",
+        "analytics",
+        "dbt"
+      ],
+      "capabilities": [
+        "backend"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Data & Analytics"
+    },
+    "agentops": {
+      "id": "agentops",
+      "name": "agentops",
+      "description": "No description",
+      "file": "agents/agentops.agent.md",
+      "keywords": [
+        "agentops",
+        "lifecycle-management",
+        "deployment",
+        "monitoring"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "AI & Operations"
+    },
+    "api-designer": {
+      "id": "api-designer",
+      "name": "api-designer",
+      "description": "No description",
+      "file": "agents/api-designer.agent.md",
+      "keywords": [
+        "api",
+        "designer",
+        "api-design",
+        "openapi",
+        "graphql",
+        "rest",
+        "api-governance"
+      ],
+      "capabilities": [
+        "backend"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "API & Integration"
     },
     "issue-triage": {
       "id": "issue-triage",
       "name": "issue-triage",
       "description": "No description",
-      "file": "agents/basecoat-10-core-issue-triage.agent.md",
+      "file": "agents/issue-triage.agent.md",
       "keywords": [
         "issue",
-        "triage"
+        "triage",
+        "issue-triage",
+        "github",
+        "prioritization",
+        "classification"
+      ],
+      "capabilities": [
+        "planning"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Project Management & Planning"
+    },
+    "dataops": {
+      "id": "dataops",
+      "name": "dataops",
+      "description": "No description",
+      "file": "agents/dataops.agent.md",
+      "keywords": [
+        "dataops",
+        "data-quality",
+        "lineage",
+        "governance",
+        "data-contracts"
+      ],
+      "capabilities": [
+        "backend"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "production",
+      "category": "Data & Analytics"
+    },
+    "secrets-manager": {
+      "id": "secrets-manager",
+      "name": "secrets-manager",
+      "description": "No description",
+      "file": "agents/secrets-manager.agent.md",
+      "keywords": [
+        "secrets",
+        "manager",
+        "rotation",
+        "vault"
       ],
       "capabilities": [
         "general"
       ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "General"
+      "model": "claude-sonnet-4.6",
+      "maturity": "beta",
+      "category": "Security & Compliance"
     },
-    "feedback-loop": {
-      "id": "feedback-loop",
-      "name": "feedback-loop",
+    "app-inventory": {
+      "id": "app-inventory",
+      "name": "app-inventory",
       "description": "No description",
-      "file": "agents/basecoat-10-core-feedback-loop.agent.md",
+      "file": "agents/app-inventory.agent.md",
       "keywords": [
-        "feedback",
-        "loop"
+        "app",
+        "inventory",
+        "app-discovery",
+        "legacy-systems",
+        "technology-stack",
+        "assessment"
       ],
       "capabilities": [
         "general"
       ],
       "model": "claude-sonnet-4.6",
       "maturity": "production",
-      "category": "General"
+      "category": "Modernization & Migration"
     },
-    "sprint-closeout-auditor": {
-      "id": "sprint-closeout-auditor",
-      "name": "sprint-closeout-auditor",
+    "new-customization": {
+      "id": "new-customization",
+      "name": "new-customization",
       "description": "No description",
-      "file": "agents/basecoat-50-security-sprint-closeout-auditor.agent.md",
+      "file": "agents/new-customization.agent.md",
       "keywords": [
-        "sprint",
-        "closeout",
-        "auditor"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "General"
-    },
-    "observability-engineer": {
-      "id": "observability-engineer",
-      "name": "observability-engineer",
-      "description": "No description",
-      "file": "agents/basecoat-10-core-observability-engineer.agent.md",
-      "keywords": [
-        "observability",
-        "engineer"
+        "new",
+        "customization",
+        "basecoat",
+        "agent-authoring",
+        "skill-creation"
       ],
       "capabilities": [
         "general"
       ],
       "model": "claude-sonnet-4.6",
       "maturity": "production",
-      "category": "General"
+      "category": "AI & Development"
     },
-    "release-freeze-enforcer": {
-      "id": "release-freeze-enforcer",
-      "name": "release-freeze-enforcer",
+    "retro-facilitator": {
+      "id": "retro-facilitator",
+      "name": "retro-facilitator",
       "description": "No description",
-      "file": "agents/basecoat-60-workflow-release-freeze-enforcer.agent.md",
+      "file": "agents/retro-facilitator.agent.md",
       "keywords": [
-        "release",
-        "freeze",
-        "enforcer"
+        "retro",
+        "facilitator",
+        "retrospective",
+        "sprint-review",
+        "agile",
+        "continuous-improvement"
       ],
       "capabilities": [
-        "general"
+        "planning"
       ],
       "model": "claude-sonnet-4.6",
       "maturity": "production",
-      "category": "General"
+      "category": "Project Management & Planning"
     }
   }
 }

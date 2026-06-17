@@ -88,6 +88,11 @@ foreach ($agentFile in $agentFiles) {
         $descriptionValue = $Matches[1].Trim().Trim("'").Trim('"')
     }
 
+    $categoryValue = ''
+    if ($frontmatter -match '(?m)^\s*category:\s*["'']?([^"''\r\n]+)["'']?\s*$') {
+        $categoryValue = $Matches[1].Trim()
+    }
+
     if (-not $nameValue) {
         $errors.Add('missing field: name')
     } elseif ($nameValue -ne $shortFileSlug) {
@@ -106,6 +111,10 @@ foreach ($agentFile in $agentFiles) {
         if ($descriptionValue -notmatch 'DO NOT USE FOR') {
             $warnings.Add('description missing DO NOT USE FOR trigger section')
         }
+    }
+
+    if ($categoryValue -and $categoryValue -match '(?i)^uncategorized$') {
+        $warnings.Add("metadata.category uses placeholder value '$categoryValue'")
     }
 
     if ($frontmatter -notmatch '(?m)^model:\s*') {
