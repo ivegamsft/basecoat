@@ -1,160 +1,11 @@
 {
   "version": "1.0.0",
-  "generated": "2026-06-13T14:47:35Z",
+  "generated": "2026-06-13T14:58:24Z",
   "agents": {
-    "release-freeze-enforcer": {
-      "id": "release-freeze-enforcer",
-      "name": "release-freeze-enforcer",
-      "description": "Use when enforcing release freeze windows, routing exception requests, and coordinating branch access during a freeze. U",
-      "file": "agents/basecoat-60-workflow-release-freeze-enforcer.agent.md",
-      "keywords": [
-        "release",
-        "freeze",
-        "enforcer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "supply-chain-security": {
-      "id": "supply-chain-security",
-      "name": "supply-chain-security",
-      "description": "Secure software supply chain with artifact signing, SBOM generation, and provenance tracking. USE FOR: generate SBOM for",
-      "file": "agents/basecoat-50-security-supply-chain-security.agent.md",
-      "keywords": [
-        "supply",
-        "chain",
-        "security"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "chaos-engineer": {
-      "id": "chaos-engineer",
-      "name": "chaos-engineer",
-      "description": "Chaos engineering agent for fault injection, game days, resilience scoring, recovery validation, and SLO-aware resilienc",
-      "file": "agents/basecoat-10-core-chaos-engineer.agent.md",
-      "keywords": [
-        "chaos",
-        "engineer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "definition-of-done": {
-      "id": "definition-of-done",
-      "name": "definition-of-done",
-      "description": "Validate that a feature, PR, or release meets the Definition of Done before closing. Enforces testing evidence, config v",
-      "file": "agents/basecoat-10-core-definition-of-done.agent.md",
-      "keywords": [
-        "definition",
-        "of",
-        "done"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "container-security": {
-      "id": "container-security",
-      "name": "Container Security",
-      "description": "Container and Kubernetes security — Pod Security Standards, runtime security, CSPM findings, image scanning, and supply ",
-      "file": "agents/basecoat-50-security-container-security.agent.md",
-      "keywords": [
-        "container",
-        "security"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "finops-advisor": {
-      "id": "finops-advisor",
-      "name": "finops-advisor",
-      "description": "FinOps advisor for cloud cost governance, cost optimization, chargeback/showback models, and 12-Factor App best practice",
-      "file": "agents/basecoat-10-core-finops-advisor.agent.md",
-      "keywords": [
-        "finops",
-        "advisor"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "legacy-modernization": {
-      "id": "legacy-modernization",
-      "name": "legacy-modernization",
-      "description": "Guides teams through Web Forms to Razor Pages migration using the strangler fig pattern for incremental modernization of",
-      "file": "agents/basecoat-10-core-legacy-modernization.agent.md",
-      "keywords": [
-        "legacy",
-        "modernization"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "dependency-update-advisor": {
-      "id": "dependency-update-advisor",
-      "name": "dependency-update-advisor",
-      "description": "Reviews Dependabot pull requests and posts a structured risk assessment comment: semver bump type, breaking change likel",
-      "file": "agents/basecoat-10-core-dependency-update-advisor.agent.md",
-      "keywords": [
-        "dependency",
-        "update",
-        "advisor"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "General"
-    },
-    "azure-landing-zone": {
-      "id": "azure-landing-zone",
-      "name": "azure-landing-zone",
-      "description": "Azure Landing Zone (ESLZ) agent for scaffolding enterprise-scale landing zones following Microsoft's Cloud Adoption Fram",
-      "file": "agents/basecoat-40-azure-azure-landing-zone.agent.md",
-      "keywords": [
-        "azure",
-        "landing",
-        "zone"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
     "merge-coordinator": {
       "id": "merge-coordinator",
       "name": "merge-coordinator",
-      "description": "Parallel branch merge coordinator. Use when multiple feature branches need to be merged into a target branch without int",
+      "description": "No description",
       "file": "agents/basecoat-10-core-merge-coordinator.agent.md",
       "keywords": [
         "merge",
@@ -167,984 +18,10 @@
       "maturity": "production",
       "category": "General"
     },
-    "contract-testing": {
-      "id": "contract-testing",
-      "name": "contract-testing",
-      "description": "Contract Testing Agent for consumer-driven contracts, E2E testing strategy, and mutation testing for distributed systems",
-      "file": "agents/basecoat-10-core-contract-testing.agent.md",
-      "keywords": [
-        "contract",
-        "testing"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "instruction-auditor": {
-      "id": "instruction-auditor",
-      "name": "instruction-auditor",
-      "description": "Detects missing instruction coverage for a repo — identifies tech stacks and workflow patterns present in the codebase t",
-      "file": "agents/basecoat-50-security-instruction-auditor.agent.md",
-      "keywords": [
-        "instruction",
-        "auditor"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "General"
-    },
-    "performance-analyst": {
-      "id": "performance-analyst",
-      "name": "performance-analyst",
-      "description": "Performance analysis agent for profiling, load testing, and optimization. Use when evaluating application performance, p",
-      "file": "agents/basecoat-10-core-performance-analyst.agent.md",
-      "keywords": [
-        "performance",
-        "analyst"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "task-scope-validator": {
-      "id": "task-scope-validator",
-      "name": "task-scope-validator",
-      "description": "Task scope validator for sub-agent dispatch. Analyzes task prompts to detect overscope, ambiguity, and risk before forwa",
-      "file": "agents/basecoat-60-workflow-task-scope-validator.agent.md",
-      "keywords": [
-        "task",
-        "scope",
-        "validator"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "agent-designer": {
-      "id": "agent-designer",
-      "name": "agent-designer",
-      "description": "Agent design and customization specialist. USE FOR: designing new agent personas and workflows, reviewing agent configur",
-      "file": "agents/basecoat-10-core-agent-designer.agent.md",
-      "keywords": [
-        "agent",
-        "designer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "self-healing-ci": {
-      "id": "self-healing-ci",
-      "name": "self-healing-ci",
-      "description": "Automated CI failure analysis, log parsing, and pipeline remediation with retry strategies, flaky test detection, depend",
-      "file": "agents/basecoat-60-workflow-self-healing-ci.agent.md",
-      "keywords": [
-        "self",
-        "healing",
-        "ci"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "app-inventory": {
-      "id": "app-inventory",
-      "name": "app-inventory",
-      "description": "Scans legacy applications to discover dependencies, identify technology stacks, assess migration complexity, and generat",
-      "file": "agents/basecoat-10-core-app-inventory.agent.md",
-      "keywords": [
-        "app",
-        "inventory"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "incident-responder": {
-      "id": "incident-responder",
-      "name": "incident-responder",
-      "description": "Structured incident response and recovery agent for classifying incidents, guiding mitigation, coordinating communicatio",
-      "file": "agents/basecoat-60-workflow-incident-responder.agent.md",
-      "keywords": [
-        "incident",
-        "responder"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "escalation-router": {
-      "id": "escalation-router",
-      "name": "escalation-router",
-      "description": "Use when high-risk decisions need a human approver and a PR-comment approval trail. USE FOR: release signoff, irreversib",
-      "file": "agents/basecoat-10-core-escalation-router.agent.md",
-      "keywords": [
-        "escalation",
-        "router"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "General"
-    },
-    "github-security-posture": {
-      "id": "github-security-posture",
-      "name": "github-security-posture",
-      "description": "GitHub organization security posture auditor. USE FOR: auditing GitHub organization settings and policies, reviewing bra",
-      "file": "agents/basecoat-50-security-github-security-posture.agent.md",
-      "keywords": [
-        "github",
-        "security",
-        "posture"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.5",
-      "maturity": "production",
-      "category": "General"
-    },
-    "e2e-test-strategy": {
-      "id": "e2e-test-strategy",
-      "name": "e2e-test-strategy",
-      "description": "E2E Test Strategy Agent for end-to-end testing orchestration, critical path identification, flakiness prevention, and cr",
-      "file": "agents/basecoat-90-quality-e2e-test-strategy.agent.md",
-      "keywords": [
-        "e2e",
-        "test",
-        "strategy"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "prompt-coach": {
-      "id": "prompt-coach",
-      "name": "prompt-coach",
-      "description": "Use when reviewing prompts, scoring prompt quality, identifying anti-patterns, and guiding iterative refinement of LLM p",
-      "file": "agents/basecoat-10-core-prompt-coach.agent.md",
-      "keywords": [
-        "prompt",
-        "coach"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "sprint-retrospective": {
-      "id": "sprint-retrospective",
-      "name": "sprint-retrospective",
-      "description": "Reconstructs repository history for sprint retrospectives, generating structured markdown with metrics, timelines, and a",
-      "file": "agents/basecoat-10-core-sprint-retrospective.agent.md",
-      "keywords": [
-        "sprint",
-        "retrospective"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "frontend-dev": {
-      "id": "frontend-dev",
-      "name": "frontend-dev",
-      "description": "Frontend and UI development specialist. USE FOR: implementing UI components, designing user interactions, building respo",
-      "file": "agents/basecoat-10-core-frontend-dev.agent.md",
-      "keywords": [
-        "frontend",
-        "dev"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "data-architect": {
-      "id": "data-architect",
-      "name": "data-architect",
-      "description": "Data architecture design specialist. USE FOR: designing data models and schemas, planning data warehouse architecture, o",
-      "file": "agents/basecoat-80-data-data-architect.agent.md",
-      "keywords": [
-        "data",
-        "architect"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "broken-build-troubleshooter": {
-      "id": "broken-build-troubleshooter",
-      "name": "broken-build-troubleshooter",
-      "description": "Use when CI or local builds are failing and the team needs fast, repeatable triage to isolate root cause and restore gre",
-      "file": "agents/basecoat-60-workflow-broken-build-troubleshooter.agent.md",
-      "keywords": [
-        "broken",
-        "build",
-        "troubleshooter"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "General"
-    },
-    "config-auditor": {
-      "id": "config-auditor",
-      "name": "config-auditor",
-      "description": "Configuration auditor for detecting committed secrets and sensitive config. USE FOR: scanning repositories for hardcoded",
-      "file": "agents/basecoat-50-security-config-auditor.agent.md",
-      "keywords": [
-        "config",
-        "auditor"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "General"
-    },
-    "data-pipeline": {
-      "id": "data-pipeline",
-      "name": "data-pipeline",
-      "description": "Data pipeline agent for medallion lakehouse architecture, data quality, ML pipeline orchestration, and feature store int",
-      "file": "agents/basecoat-60-workflow-data-pipeline.agent.md",
-      "keywords": [
-        "data",
-        "pipeline"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "hardening-advisor": {
-      "id": "hardening-advisor",
-      "name": "Hardening Advisor",
-      "description": "CIS Benchmarks and STIG hardening advisor for Dockerfiles, Kubernetes manifests, databases, and infrastructure configura",
-      "file": "agents/basecoat-10-core-hardening-advisor.agent.md",
-      "keywords": [
-        "hardening",
-        "advisor"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "feedback-loop": {
-      "id": "feedback-loop",
-      "name": "feedback-loop",
-      "description": "Continuous learning and optimization through user feedback collection, prompt effectiveness tracking, outcome measuremen",
-      "file": "agents/basecoat-10-core-feedback-loop.agent.md",
-      "keywords": [
-        "feedback",
-        "loop"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "retro-facilitator": {
-      "id": "retro-facilitator",
-      "name": "retro-facilitator",
-      "description": "End-of-sprint retrospective agent. Reviews closed issues and merged PRs, produces Went Well / Improve / Action Items sum",
-      "file": "agents/basecoat-60-workflow-retro-facilitator.agent.md",
-      "keywords": [
-        "retro",
-        "facilitator"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "domain-designer": {
-      "id": "domain-designer",
-      "name": "domain-designer",
-      "description": "Domain-driven design specialist. USE FOR: designing domain models, planning domain-oriented architectures, designing bou",
-      "file": "agents/basecoat-30-ai-domain-designer.agent.md",
-      "keywords": [
-        "domain",
-        "designer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "security-monitor": {
-      "id": "security-monitor",
-      "name": "Security Monitor",
-      "description": "Detection engineering and SIEM configuration — maps MITRE ATT&CK tactics to detection rules, builds alerting baselines, ",
-      "file": "agents/basecoat-50-security-security-monitor.agent.md",
-      "keywords": [
-        "security",
-        "monitor"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "General"
-    },
-    "mlops": {
-      "id": "mlops",
-      "name": "mlops",
-      "description": "ML operations and model management specialist. USE FOR: designing ML pipelines, managing model versions, optimizing infe",
-      "file": "agents/basecoat-30-ai-mlops.agent.md",
-      "keywords": [
-        "mlops"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "guardrail": {
-      "id": "guardrail",
-      "name": "guardrail",
-      "description": "Guardrail validation agent for checking outputs against safety, quality, compliance, and formatting rules before deliver",
-      "file": "agents/basecoat-30-ai-guardrail.agent.md",
-      "keywords": [
-        "guardrail"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "prompt-engineer": {
-      "id": "prompt-engineer",
-      "name": "prompt-engineer",
-      "description": "Prompt optimization and system prompt engineering agent. Use when designing system prompts, optimizing token usage, craf",
-      "file": "agents/basecoat-10-core-prompt-engineer.agent.md",
-      "keywords": [
-        "prompt",
-        "engineer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "branch-hygiene-sweeper": {
-      "id": "branch-hygiene-sweeper",
-      "name": "branch-hygiene-sweeper",
-      "description": "Use when cleaning stale branches, dangling refs, and release branch hygiene while preserving active work. USE FOR: ident",
-      "file": "agents/basecoat-10-core-branch-hygiene-sweeper.agent.md",
-      "keywords": [
-        "branch",
-        "hygiene",
-        "sweeper"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "General"
-    },
-    "s4-shadow-mode-validator": {
-      "id": "s4-shadow-mode-validator",
-      "name": "s4-shadow-mode-validator",
-      "description": "Use when comparing shadow-mode and live behavior during S4 soak before cutover. USE FOR: compare error rate, latency, an",
-      "file": "agents/basecoat-10-core-s4-shadow-mode-validator.agent.md",
-      "keywords": [
-        "s4",
-        "shadow",
-        "mode",
-        "validator"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "rollout-basecoat": {
-      "id": "rollout-basecoat",
-      "name": "rollout-basecoat",
-      "description": "Use when onboarding a repository to BaseCoat in an enterprise setting. Focuses on pinned versions, safe rollout, install",
-      "file": "agents/basecoat-60-workflow-rollout-basecoat.agent.md",
-      "keywords": [
-        "rollout",
-        "basecoat"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-haiku-4.5",
-      "maturity": "production",
-      "category": "General"
-    },
-    "resilience-reviewer": {
-      "id": "resilience-reviewer",
-      "name": "Resilience Reviewer",
-      "description": "Code-level resilience pattern review — circuit breakers, timeouts, bulkhead isolation, graceful degradation, retry logic",
-      "file": "agents/basecoat-90-quality-resilience-reviewer.agent.md",
-      "keywords": [
-        "resilience",
-        "reviewer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "agentops": {
-      "id": "agentops",
-      "name": "agentops",
-      "description": "Agent operations and infrastructure specialist. USE FOR: monitoring agent health, tuning agent performance, debugging ag",
-      "file": "agents/basecoat-10-core-agentops.agent.md",
-      "keywords": [
-        "agentops"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "dotnet-modernization-advisor": {
-      "id": "dotnet-modernization-advisor",
-      "name": "dotnet-modernization-advisor",
-      "description": "Advisor for .NET modernization assessment, upgrade planning, and execution guidance. Use when migrating legacy .NET Fram",
-      "file": "agents/basecoat-20-lang-dotnet-modernization-advisor.agent.md",
-      "keywords": [
-        "dotnet",
-        "modernization",
-        "advisor"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "mcp-developer": {
-      "id": "mcp-developer",
-      "name": "mcp-developer",
-      "description": "MCP (Model Context Protocol) development specialist. USE FOR: designing and implementing MCP servers and tools, integrat",
-      "file": "agents/basecoat-10-core-mcp-developer.agent.md",
-      "keywords": [
-        "mcp",
-        "developer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4",
-      "maturity": "production",
-      "category": "General"
-    },
-    "bom-validator": {
-      "id": "bom-validator",
-      "name": "bom-validator",
-      "description": "Use when validating a Workcell BOM against the plant registry before S2 starts. USE FOR: schema validation, CAF naming c",
-      "file": "agents/basecoat-10-core-bom-validator.agent.md",
-      "keywords": [
-        "bom",
-        "validator"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "manual-test-strategy": {
-      "id": "manual-test-strategy",
-      "name": "manual-test-strategy",
-      "description": "Use when you need a structured manual testing strategy for a feature or risk inventory. Produces a decision rubric, expl",
-      "file": "agents/basecoat-90-quality-manual-test-strategy.agent.md",
-      "keywords": [
-        "manual",
-        "test",
-        "strategy"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "data-integrity": {
-      "id": "data-integrity",
-      "name": "Data Integrity",
-      "description": ">",
-      "file": "agents/basecoat-80-data-data-integrity.agent.md",
-      "keywords": [
-        "data",
-        "integrity"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "observability-engineer": {
-      "id": "observability-engineer",
-      "name": "Observability Engineer",
-      "description": "OpenTelemetry instrumentation, structured logging, distributed tracing, metrics taxonomy, and dashboard-as-code for oper",
-      "file": "agents/basecoat-10-core-observability-engineer.agent.md",
-      "keywords": [
-        "observability",
-        "engineer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "code-review": {
-      "id": "code-review",
-      "name": "code-review",
-      "description": "Code review and quality gate specialist. USE FOR: reviewing code changes, enforcing quality standards, suggesting improv",
-      "file": "agents/basecoat-90-quality-code-review.agent.md",
-      "keywords": [
-        "code",
-        "review"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-haiku-4.5",
-      "maturity": "production",
-      "category": "General"
-    },
-    "memory-curator": {
-      "id": "memory-curator",
-      "name": "memory-curator",
-      "description": "Cross-session memory and knowledge management curator. USE FOR: extracting and storing knowledge from long conversations",
-      "file": "agents/basecoat-10-core-memory-curator.agent.md",
-      "keywords": [
-        "memory",
-        "curator"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "ha-architect": {
-      "id": "ha-architect",
-      "name": "ha-architect",
-      "description": "Design high-availability, resilience, and chaos testing strategies for distributed systems. USE FOR: design multi-region",
-      "file": "agents/basecoat-10-core-ha-architect.agent.md",
-      "keywords": [
-        "ha",
-        "architect"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "daily-standup-facilitator": {
-      "id": "daily-standup-facilitator",
-      "name": "daily-standup-facilitator",
-      "description": "Use when running daily standup ceremonies to surface blockers, dependencies, and near-term execution risk. USE FOR: extr",
-      "file": "agents/basecoat-30-ai-daily-standup-facilitator.agent.md",
-      "keywords": [
-        "daily",
-        "standup",
-        "facilitator"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "sprint-planner": {
-      "id": "sprint-planner",
-      "name": "sprint-planner",
-      "description": "Goal-to-issues decomposition and wave dependency mapping. Accepts a sprint goal, produces GitHub issues with labels, wav",
-      "file": "agents/basecoat-10-core-sprint-planner.agent.md",
-      "keywords": [
-        "sprint",
-        "planner"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "dependency-blocker-monitor": {
-      "id": "dependency-blocker-monitor",
-      "name": "dependency-blocker-monitor",
-      "description": "Use when monitoring workcell BOM dependencies and cell health to open or resolve blocker issues when a cell fails or rec",
-      "file": "agents/basecoat-10-core-dependency-blocker-monitor.agent.md",
-      "keywords": [
-        "dependency",
-        "blocker",
-        "monitor"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "General"
-    },
-    "production-readiness": {
-      "id": "production-readiness",
-      "name": "production-readiness",
-      "description": "Production Readiness Agent for ensuring applications meet operational requirements before release; coordinates BCP/DRP, ",
-      "file": "agents/basecoat-10-core-production-readiness.agent.md",
-      "keywords": [
-        "production",
-        "readiness"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "security-analyst": {
-      "id": "security-analyst",
-      "name": "security-analyst",
-      "description": "Security analysis and threat assessment specialist. USE FOR: threat modeling, security risk assessment, vulnerability an",
-      "file": "agents/basecoat-50-security-security-analyst.agent.md",
-      "keywords": [
-        "security",
-        "analyst"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "change-isolation-architect": {
-      "id": "change-isolation-architect",
-      "name": "change-isolation-architect",
-      "description": "Designs layered CI/CD isolation so independent domains (for example mobile, database, portal, extension, and infra) can ",
-      "file": "agents/basecoat-10-core-change-isolation-architect.agent.md",
-      "keywords": [
-        "change",
-        "isolation",
-        "architect"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.3-codex",
-      "maturity": "production",
-      "category": "General"
-    },
-    "factory-state-curator": {
-      "id": "factory-state-curator",
-      "name": "factory-state-curator",
-      "description": "Use when merging Workcell intake YAML, GitHub labels, and gate results into a single S1-S5 state snapshot. USE FOR: norm",
-      "file": "agents/basecoat-10-core-factory-state-curator.agent.md",
-      "keywords": [
-        "factory",
-        "state",
-        "curator"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "solution-architect": {
-      "id": "solution-architect",
-      "name": "solution-architect",
-      "description": "Solution architecture agent for system design, C4 diagrams, ADRs, technology selection, and cross-cutting concerns. Use ",
-      "file": "agents/basecoat-10-core-solution-architect.agent.md",
-      "keywords": [
-        "solution",
-        "architect"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4-5",
-      "maturity": "production",
-      "category": "General"
-    },
-    "memory-promoter": {
-      "id": "memory-promoter",
-      "name": "memory-promoter",
-      "description": "Analyzes session transcripts and sprint summaries to identify high-value patterns for promotion to long-term BaseCoat me",
-      "file": "agents/basecoat-10-core-memory-promoter.agent.md",
-      "keywords": [
-        "memory",
-        "promoter"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-haiku-4.5",
-      "maturity": "production",
-      "category": "General"
-    },
-    "ci-audit": {
-      "id": "ci-audit",
-      "name": "ci-audit",
-      "description": "CI/CD audit agent for GitHub organization auditing. USE FOR: auditing GitHub organization CI/CD settings, enterprise pol",
-      "file": "agents/basecoat-50-security-ci-audit.agent.md",
-      "keywords": [
-        "ci",
-        "audit"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "General"
-    },
-    "takt-time-tracker": {
-      "id": "takt-time-tracker",
-      "name": "takt-time-tracker",
-      "description": "Use when measuring dwell time at each station and flagging SLA breaches. USE FOR: compute median and p95 time at S1-S5, ",
-      "file": "agents/basecoat-10-core-takt-time-tracker.agent.md",
-      "keywords": [
-        "takt",
-        "time",
-        "tracker"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "project-onboarding": {
-      "id": "project-onboarding",
-      "name": "project-onboarding",
-      "description": "Single-invocation new repo setup with BaseCoat integration. Creates repo, syncs governance framework, configures templat",
-      "file": "agents/basecoat-10-core-project-onboarding.agent.md",
-      "keywords": [
-        "project",
-        "onboarding"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "new-customization": {
-      "id": "new-customization",
-      "name": "new-customization",
-      "description": "Use when creating or updating a customization asset such as an instruction, skill, prompt, or agent. Chooses the right p",
-      "file": "agents/basecoat-10-core-new-customization.agent.md",
-      "keywords": [
-        "new",
-        "customization"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "api-security": {
-      "id": "api-security",
-      "name": "api-security",
-      "description": "API Security Agent for comprehensive API threat modeling, OWASP API Security Top 10 assessment, and secure API design. C",
-      "file": "agents/basecoat-50-security-api-security.agent.md",
-      "keywords": [
-        "api",
-        "security"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "factory-conductor": {
-      "id": "factory-conductor",
-      "name": "factory-conductor",
-      "description": "Use when reading .factory-state.json and auto-queuing the next ready wave of factory work. USE FOR: route S2/S3/S4 work,",
-      "file": "agents/basecoat-10-core-factory-conductor.agent.md",
-      "keywords": [
-        "factory",
-        "conductor"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "infrastructure-deploy": {
-      "id": "infrastructure-deploy",
-      "name": "infrastructure-deploy",
-      "description": "Orchestrates Azure infrastructure deployments using Bicep, handles resource group management, parameter validation, and ",
-      "file": "agents/basecoat-60-workflow-infrastructure-deploy.agent.md",
-      "keywords": [
-        "infrastructure",
-        "deploy"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "ci-failure-escalation": {
-      "id": "ci-failure-escalation",
-      "name": "ci-failure-escalation",
-      "description": "Detects N consecutive CI failures on the same workflow job, opens a blocking issue, and gates further deploys to that en",
-      "file": "agents/basecoat-60-workflow-ci-failure-escalation.agent.md",
-      "keywords": [
-        "ci",
-        "failure",
-        "escalation"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "gpt-5.4-mini",
-      "maturity": "production",
-      "category": "General"
-    },
-    "gitops-engineer": {
-      "id": "gitops-engineer",
-      "name": "gitops-engineer",
-      "description": "GitOps and deployment automation specialist. USE FOR: designing GitOps workflows, configuring declarative deployments, m",
-      "file": "agents/basecoat-10-core-gitops-engineer.agent.md",
-      "keywords": [
-        "gitops",
-        "engineer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "security-operations": {
-      "id": "security-operations",
-      "name": "security-operations",
-      "description": "Provide SOC (Security Operations Center) playbook guidance for threat detection, incident response, secrets rotation, au",
-      "file": "agents/basecoat-50-security-security-operations.agent.md",
-      "keywords": [
-        "security",
-        "operations"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "strategy-to-automation": {
-      "id": "strategy-to-automation",
-      "name": "strategy-to-automation",
-      "description": "Use when converting manual test paths into automation candidates. Maps paths to smoke tests, regression tiers, or agent ",
-      "file": "agents/basecoat-10-core-strategy-to-automation.agent.md",
-      "keywords": [
-        "strategy",
-        "to",
-        "automation"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
     "orphaned-pr-cleanup": {
       "id": "orphaned-pr-cleanup",
       "name": "orphaned-pr-cleanup",
-      "description": "Use when identifying and resolving stale or orphaned pull requests that have no active owner, blocked reviews, or outdat",
+      "description": "No description",
       "file": "agents/basecoat-10-core-orphaned-pr-cleanup.agent.md",
       "keywords": [
         "orphaned",
@@ -1158,10 +35,224 @@
       "maturity": "production",
       "category": "General"
     },
+    "observability-engineer": {
+      "id": "observability-engineer",
+      "name": "observability-engineer",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-observability-engineer.agent.md",
+      "keywords": [
+        "observability",
+        "engineer"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "strategy-to-automation": {
+      "id": "strategy-to-automation",
+      "name": "strategy-to-automation",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-strategy-to-automation.agent.md",
+      "keywords": [
+        "strategy",
+        "to",
+        "automation"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "exploratory-charter": {
+      "id": "exploratory-charter",
+      "name": "exploratory-charter",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-exploratory-charter.agent.md",
+      "keywords": [
+        "exploratory",
+        "charter"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "solution-architect": {
+      "id": "solution-architect",
+      "name": "solution-architect",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-solution-architect.agent.md",
+      "keywords": [
+        "solution",
+        "architect"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "gpt-5.4-mini",
+      "maturity": "production",
+      "category": "General"
+    },
+    "security-operations": {
+      "id": "security-operations",
+      "name": "security-operations",
+      "description": "No description",
+      "file": "agents/basecoat-50-security-security-operations.agent.md",
+      "keywords": [
+        "security",
+        "operations"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "broken-build-troubleshooter": {
+      "id": "broken-build-troubleshooter",
+      "name": "broken-build-troubleshooter",
+      "description": "No description",
+      "file": "agents/basecoat-60-workflow-broken-build-troubleshooter.agent.md",
+      "keywords": [
+        "broken",
+        "build",
+        "troubleshooter"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "gpt-5.4-mini",
+      "maturity": "production",
+      "category": "General"
+    },
+    "takt-time-tracker": {
+      "id": "takt-time-tracker",
+      "name": "takt-time-tracker",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-takt-time-tracker.agent.md",
+      "keywords": [
+        "takt",
+        "time",
+        "tracker"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "dependency-lifecycle": {
+      "id": "dependency-lifecycle",
+      "name": "dependency-lifecycle",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-dependency-lifecycle.agent.md",
+      "keywords": [
+        "dependency",
+        "lifecycle"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "retro-facilitator": {
+      "id": "retro-facilitator",
+      "name": "retro-facilitator",
+      "description": "No description",
+      "file": "agents/basecoat-60-workflow-retro-facilitator.agent.md",
+      "keywords": [
+        "retro",
+        "facilitator"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "sprint-retrospective": {
+      "id": "sprint-retrospective",
+      "name": "sprint-retrospective",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-sprint-retrospective.agent.md",
+      "keywords": [
+        "sprint",
+        "retrospective"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "supply-chain-security": {
+      "id": "supply-chain-security",
+      "name": "supply-chain-security",
+      "description": "No description",
+      "file": "agents/basecoat-50-security-supply-chain-security.agent.md",
+      "keywords": [
+        "supply",
+        "chain",
+        "security"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "tech-writer": {
+      "id": "tech-writer",
+      "name": "tech-writer",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-tech-writer.agent.md",
+      "keywords": [
+        "tech",
+        "writer"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "policy-as-code-compliance": {
+      "id": "policy-as-code-compliance",
+      "name": "policy-as-code-compliance",
+      "description": "No description",
+      "file": "agents/basecoat-50-security-policy-as-code-compliance.agent.md",
+      "keywords": [
+        "policy",
+        "as",
+        "code",
+        "compliance"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
     "failure-pattern-process": {
       "id": "failure-pattern-process",
       "name": "failure-pattern-process",
-      "description": "Failure pattern process agent for evidence-first mining, raw logging, triage, and enhancement planning. USE FOR: mining ",
+      "description": "No description",
       "file": "agents/basecoat-30-ai-failure-pattern-process.agent.md",
       "keywords": [
         "failure",
@@ -1171,17 +262,66 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-4.5",
       "maturity": "production",
       "category": "General"
     },
-    "sre-engineer": {
-      "id": "sre-engineer",
-      "name": "sre-engineer",
-      "description": "Site reliability engineering agent for SLOs, error budgets, incident response, chaos engineering, and toil reduction. Us",
-      "file": "agents/basecoat-10-core-sre-engineer.agent.md",
+    "guidance-reviewer": {
+      "id": "guidance-reviewer",
+      "name": "guidance-reviewer",
+      "description": "No description",
+      "file": "agents/basecoat-90-quality-guidance-reviewer.agent.md",
       "keywords": [
-        "sre",
+        "guidance",
+        "reviewer"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "change-isolation-architect": {
+      "id": "change-isolation-architect",
+      "name": "change-isolation-architect",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-change-isolation-architect.agent.md",
+      "keywords": [
+        "change",
+        "isolation",
+        "architect"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "gpt-5.3-codex",
+      "maturity": "production",
+      "category": "General"
+    },
+    "middleware-dev": {
+      "id": "middleware-dev",
+      "name": "middleware-dev",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-middleware-dev.agent.md",
+      "keywords": [
+        "middleware",
+        "dev"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "gpt-5.3-codex",
+      "maturity": "production",
+      "category": "General"
+    },
+    "devops-engineer": {
+      "id": "devops-engineer",
+      "name": "devops-engineer",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-devops-engineer.agent.md",
+      "keywords": [
+        "devops",
         "engineer"
       ],
       "capabilities": [
@@ -1191,25 +331,43 @@
       "maturity": "production",
       "category": "General"
     },
-    "llmops": {
-      "id": "llmops",
-      "name": "llmops",
-      "description": "LLM operations and prompt engineering specialist. USE FOR: optimizing model performance, fine-tuning prompts, analyzing ",
-      "file": "agents/basecoat-10-core-llmops.agent.md",
+    "release-impact-advisor": {
+      "id": "release-impact-advisor",
+      "name": "release-impact-advisor",
+      "description": "No description",
+      "file": "agents/basecoat-60-workflow-release-impact-advisor.agent.md",
       "keywords": [
-        "llmops"
+        "release",
+        "impact",
+        "advisor"
       ],
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "ha-architect": {
+      "id": "ha-architect",
+      "name": "ha-architect",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-ha-architect.agent.md",
+      "keywords": [
+        "ha",
+        "architect"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
       "maturity": "production",
       "category": "General"
     },
     "backend-dev": {
       "id": "backend-dev",
       "name": "backend-dev",
-      "description": "Backend and services development specialist. USE FOR: implementing backend services, designing server architectures, man",
+      "description": "No description",
       "file": "agents/basecoat-10-core-backend-dev.agent.md",
       "keywords": [
         "backend",
@@ -1222,10 +380,153 @@
       "maturity": "production",
       "category": "General"
     },
+    "infrastructure-deploy": {
+      "id": "infrastructure-deploy",
+      "name": "infrastructure-deploy",
+      "description": "No description",
+      "file": "agents/basecoat-60-workflow-infrastructure-deploy.agent.md",
+      "keywords": [
+        "infrastructure",
+        "deploy"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "security-analyst": {
+      "id": "security-analyst",
+      "name": "security-analyst",
+      "description": "No description",
+      "file": "agents/basecoat-50-security-security-analyst.agent.md",
+      "keywords": [
+        "security",
+        "analyst"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "gpt-5.3-codex",
+      "maturity": "production",
+      "category": "General"
+    },
+    "orchestrator": {
+      "id": "orchestrator",
+      "name": "orchestrator",
+      "description": "No description",
+      "file": "agents/orchestrator.agent.md",
+      "keywords": [
+        "orchestrator"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "gpt-5.4-mini",
+      "maturity": "production",
+      "category": "General"
+    },
+    "agentops": {
+      "id": "agentops",
+      "name": "agentops",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-agentops.agent.md",
+      "keywords": [
+        "agentops"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "manual-test-strategy": {
+      "id": "manual-test-strategy",
+      "name": "manual-test-strategy",
+      "description": "No description",
+      "file": "agents/basecoat-90-quality-manual-test-strategy.agent.md",
+      "keywords": [
+        "manual",
+        "test",
+        "strategy"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "api-designer": {
+      "id": "api-designer",
+      "name": "api-designer",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-api-designer.agent.md",
+      "keywords": [
+        "api",
+        "designer"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "gpt-5.3-codex",
+      "maturity": "production",
+      "category": "General"
+    },
+    "llmops": {
+      "id": "llmops",
+      "name": "llmops",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-llmops.agent.md",
+      "keywords": [
+        "llmops"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "data-tier": {
+      "id": "data-tier",
+      "name": "data-tier",
+      "description": "No description",
+      "file": "agents/basecoat-80-data-data-tier.agent.md",
+      "keywords": [
+        "data",
+        "tier"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "gpt-5.3-codex",
+      "maturity": "production",
+      "category": "General"
+    },
+    "dependency-blocker-monitor": {
+      "id": "dependency-blocker-monitor",
+      "name": "dependency-blocker-monitor",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-dependency-blocker-monitor.agent.md",
+      "keywords": [
+        "dependency",
+        "blocker",
+        "monitor"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "gpt-5.4-mini",
+      "maturity": "production",
+      "category": "General"
+    },
     "sprint-project-mapper": {
       "id": "sprint-project-mapper",
       "name": "sprint-project-mapper",
-      "description": "Use when issues/PRs need clustering into meaningful sprint/project groups and rollup metrics for planning or release not",
+      "description": "No description",
       "file": "agents/basecoat-10-core-sprint-project-mapper.agent.md",
       "keywords": [
         "sprint",
@@ -1235,30 +536,294 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-4.5",
       "maturity": "production",
       "category": "General"
     },
-    "product-manager": {
-      "id": "product-manager",
-      "name": "product-manager",
-      "description": "Use when gathering requirements, writing user stories, defining acceptance criteria, planning roadmaps, or prioritizing ",
-      "file": "agents/basecoat-10-core-product-manager.agent.md",
+    "mcp-developer": {
+      "id": "mcp-developer",
+      "name": "mcp-developer",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-mcp-developer.agent.md",
       "keywords": [
-        "product",
-        "manager"
+        "mcp",
+        "developer"
       ],
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "gpt-5.4-mini",
+      "maturity": "production",
+      "category": "General"
+    },
+    "data-architect": {
+      "id": "data-architect",
+      "name": "data-architect",
+      "description": "No description",
+      "file": "agents/basecoat-80-data-data-architect.agent.md",
+      "keywords": [
+        "data",
+        "architect"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "daily-standup-facilitator": {
+      "id": "daily-standup-facilitator",
+      "name": "daily-standup-facilitator",
+      "description": "No description",
+      "file": "agents/basecoat-30-ai-daily-standup-facilitator.agent.md",
+      "keywords": [
+        "daily",
+        "standup",
+        "facilitator"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "contract-testing": {
+      "id": "contract-testing",
+      "name": "contract-testing",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-contract-testing.agent.md",
+      "keywords": [
+        "contract",
+        "testing"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "s4-shadow-mode-validator": {
+      "id": "s4-shadow-mode-validator",
+      "name": "s4-shadow-mode-validator",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-s4-shadow-mode-validator.agent.md",
+      "keywords": [
+        "s4",
+        "shadow",
+        "mode",
+        "validator"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "dotnet-modernization-advisor": {
+      "id": "dotnet-modernization-advisor",
+      "name": "dotnet-modernization-advisor",
+      "description": "No description",
+      "file": "agents/basecoat-20-lang-dotnet-modernization-advisor.agent.md",
+      "keywords": [
+        "dotnet",
+        "modernization",
+        "advisor"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "github-security-posture": {
+      "id": "github-security-posture",
+      "name": "github-security-posture",
+      "description": "No description",
+      "file": "agents/basecoat-50-security-github-security-posture.agent.md",
+      "keywords": [
+        "github",
+        "security",
+        "posture"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "rollout-basecoat": {
+      "id": "rollout-basecoat",
+      "name": "rollout-basecoat",
+      "description": "No description",
+      "file": "agents/basecoat-60-workflow-rollout-basecoat.agent.md",
+      "keywords": [
+        "rollout",
+        "basecoat"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-haiku-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "new-customization": {
+      "id": "new-customization",
+      "name": "new-customization",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-new-customization.agent.md",
+      "keywords": [
+        "new",
+        "customization"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "azure-landing-zone": {
+      "id": "azure-landing-zone",
+      "name": "azure-landing-zone",
+      "description": "No description",
+      "file": "agents/basecoat-40-azure-azure-landing-zone.agent.md",
+      "keywords": [
+        "azure",
+        "landing",
+        "zone"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "database-migration": {
+      "id": "database-migration",
+      "name": "database-migration",
+      "description": "No description",
+      "file": "agents/basecoat-80-data-database-migration.agent.md",
+      "keywords": [
+        "database",
+        "migration"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "definition-of-done": {
+      "id": "definition-of-done",
+      "name": "definition-of-done",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-definition-of-done.agent.md",
+      "keywords": [
+        "definition",
+        "of",
+        "done"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "release-readiness-chair": {
+      "id": "release-readiness-chair",
+      "name": "release-readiness-chair",
+      "description": "No description",
+      "file": "agents/basecoat-60-workflow-release-readiness-chair.agent.md",
+      "keywords": [
+        "release",
+        "readiness",
+        "chair"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "dataops": {
+      "id": "dataops",
+      "name": "dataops",
+      "description": "No description",
+      "file": "agents/basecoat-80-data-dataops.agent.md",
+      "keywords": [
+        "dataops"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "gpt-5.3-codex",
+      "maturity": "production",
+      "category": "General"
+    },
+    "finops-advisor": {
+      "id": "finops-advisor",
+      "name": "finops-advisor",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-finops-advisor.agent.md",
+      "keywords": [
+        "finops",
+        "advisor"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "branch-hygiene-sweeper": {
+      "id": "branch-hygiene-sweeper",
+      "name": "branch-hygiene-sweeper",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-branch-hygiene-sweeper.agent.md",
+      "keywords": [
+        "branch",
+        "hygiene",
+        "sweeper"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "gpt-5.4-mini",
+      "maturity": "production",
+      "category": "General"
+    },
+    "app-inventory": {
+      "id": "app-inventory",
+      "name": "app-inventory",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-app-inventory.agent.md",
+      "keywords": [
+        "app",
+        "inventory"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
       "maturity": "production",
       "category": "General"
     },
     "run-history-cleanup": {
       "id": "run-history-cleanup",
       "name": "run-history-cleanup",
-      "description": "Cleans GitHub Actions workflow run history safely by deleting stale, completed runs according to retention policy while ",
+      "description": "No description",
       "file": "agents/basecoat-60-workflow-run-history-cleanup.agent.md",
       "keywords": [
         "run",
@@ -1272,10 +837,42 @@
       "maturity": "production",
       "category": "General"
     },
+    "agent-designer": {
+      "id": "agent-designer",
+      "name": "agent-designer",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-agent-designer.agent.md",
+      "keywords": [
+        "agent",
+        "designer"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "gpt-5.3-codex",
+      "maturity": "production",
+      "category": "General"
+    },
+    "secrets-manager": {
+      "id": "secrets-manager",
+      "name": "secrets-manager",
+      "description": "No description",
+      "file": "agents/basecoat-50-security-secrets-manager.agent.md",
+      "keywords": [
+        "secrets",
+        "manager"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
     "penetration-test": {
       "id": "penetration-test",
       "name": "penetration-test",
-      "description": "Security penetration testing specialist. USE FOR: designing penetration tests, identifying security vulnerabilities, gen",
+      "description": "No description",
       "file": "agents/basecoat-90-quality-penetration-test.agent.md",
       "keywords": [
         "penetration",
@@ -1284,100 +881,34 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-4.5",
       "maturity": "production",
       "category": "General"
     },
-    "policy-as-code-compliance": {
-      "id": "policy-as-code-compliance",
-      "name": "policy-as-code-compliance",
-      "description": "Policy-as-code compliance agent for validating code and configuration against organizational rules, managing exceptions,",
-      "file": "agents/basecoat-50-security-policy-as-code-compliance.agent.md",
+    "api-security": {
+      "id": "api-security",
+      "name": "api-security",
+      "description": "No description",
+      "file": "agents/basecoat-50-security-api-security.agent.md",
       "keywords": [
-        "policy",
-        "as",
-        "code",
-        "compliance"
+        "api",
+        "security"
       ],
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-4.5",
       "maturity": "production",
       "category": "General"
     },
-    "database-migration": {
-      "id": "database-migration",
-      "name": "database-migration",
-      "description": "Database migration and modernization specialist. USE FOR: planning database migrations, designing migration strategies, ",
-      "file": "agents/basecoat-80-data-database-migration.agent.md",
+    "security-monitor": {
+      "id": "security-monitor",
+      "name": "security-monitor",
+      "description": "No description",
+      "file": "agents/basecoat-50-security-security-monitor.agent.md",
       "keywords": [
-        "database",
-        "migration"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "tech-writer": {
-      "id": "tech-writer",
-      "name": "tech-writer",
-      "description": "Use when creating or improving technical documentation, API docs, runbooks, tutorials, ADRs, changelogs, or implementing",
-      "file": "agents/basecoat-10-core-tech-writer.agent.md",
-      "keywords": [
-        "tech",
-        "writer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "containerization-planner": {
-      "id": "containerization-planner",
-      "name": "containerization-planner",
-      "description": "Helps assess containerization readiness, choose deployment platforms (Docker/AKS/ACA), and generate container configurat",
-      "file": "agents/basecoat-30-ai-containerization-planner.agent.md",
-      "keywords": [
-        "containerization",
-        "planner"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "guidance-author": {
-      "id": "guidance-author",
-      "name": "guidance-author",
-      "description": "BaseCoat guidance documentation author. USE FOR: creating security playbooks and best practices, authoring new instructi",
-      "file": "agents/basecoat-50-security-guidance-author.agent.md",
-      "keywords": [
-        "guidance",
-        "author"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "issue-triage": {
-      "id": "issue-triage",
-      "name": "issue-triage",
-      "description": "Use when GitHub issues need systematic quality review and triage. USE FOR: detecting duplicates and invalid issues, veri",
-      "file": "agents/basecoat-10-core-issue-triage.agent.md",
-      "keywords": [
-        "issue",
-        "triage"
+        "security",
+        "monitor"
       ],
       "capabilities": [
         "general"
@@ -1386,10 +917,187 @@
       "maturity": "production",
       "category": "General"
     },
+    "data-integrity": {
+      "id": "data-integrity",
+      "name": "data-integrity",
+      "description": "No description",
+      "file": "agents/basecoat-80-data-data-integrity.agent.md",
+      "keywords": [
+        "data",
+        "integrity"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "release-manager": {
+      "id": "release-manager",
+      "name": "release-manager",
+      "description": "No description",
+      "file": "agents/basecoat-60-workflow-release-manager.agent.md",
+      "keywords": [
+        "release",
+        "manager"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "sprint-planner": {
+      "id": "sprint-planner",
+      "name": "sprint-planner",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-sprint-planner.agent.md",
+      "keywords": [
+        "sprint",
+        "planner"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "self-healing-ci": {
+      "id": "self-healing-ci",
+      "name": "self-healing-ci",
+      "description": "No description",
+      "file": "agents/basecoat-60-workflow-self-healing-ci.agent.md",
+      "keywords": [
+        "self",
+        "healing",
+        "ci"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "ci-audit": {
+      "id": "ci-audit",
+      "name": "ci-audit",
+      "description": "No description",
+      "file": "agents/basecoat-50-security-ci-audit.agent.md",
+      "keywords": [
+        "ci",
+        "audit"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "gpt-5.4-mini",
+      "maturity": "production",
+      "category": "General"
+    },
+    "code-review": {
+      "id": "code-review",
+      "name": "code-review",
+      "description": "No description",
+      "file": "agents/basecoat-90-quality-code-review.agent.md",
+      "keywords": [
+        "code",
+        "review"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-haiku-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "bom-validator": {
+      "id": "bom-validator",
+      "name": "bom-validator",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-bom-validator.agent.md",
+      "keywords": [
+        "bom",
+        "validator"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "guidance-author": {
+      "id": "guidance-author",
+      "name": "guidance-author",
+      "description": "No description",
+      "file": "agents/basecoat-50-security-guidance-author.agent.md",
+      "keywords": [
+        "guidance",
+        "author"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "prompt-coach": {
+      "id": "prompt-coach",
+      "name": "prompt-coach",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-prompt-coach.agent.md",
+      "keywords": [
+        "prompt",
+        "coach"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "gpt-5.3-codex",
+      "maturity": "production",
+      "category": "General"
+    },
+    "project-onboarding": {
+      "id": "project-onboarding",
+      "name": "project-onboarding",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-project-onboarding.agent.md",
+      "keywords": [
+        "project",
+        "onboarding"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "gitops-engineer": {
+      "id": "gitops-engineer",
+      "name": "gitops-engineer",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-gitops-engineer.agent.md",
+      "keywords": [
+        "gitops",
+        "engineer"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
     "sprint-closeout-auditor": {
       "id": "sprint-closeout-auditor",
       "name": "sprint-closeout-auditor",
-      "description": "Use when closing a sprint and validating completion evidence before planning the next sprint. USE FOR: verify merged PR ",
+      "description": "No description",
       "file": "agents/basecoat-50-security-sprint-closeout-auditor.agent.md",
       "keywords": [
         "sprint",
@@ -1403,74 +1111,204 @@
       "maturity": "production",
       "category": "General"
     },
-    "release-readiness-chair": {
-      "id": "release-readiness-chair",
-      "name": "release-readiness-chair",
-      "description": "Use when facilitating release readiness ceremonies and making explicit go/no-go decisions. USE FOR: collect release evid",
-      "file": "agents/basecoat-60-workflow-release-readiness-chair.agent.md",
+    "issue-triage": {
+      "id": "issue-triage",
+      "name": "issue-triage",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-issue-triage.agent.md",
+      "keywords": [
+        "issue",
+        "triage"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "gpt-5.4-mini",
+      "maturity": "production",
+      "category": "General"
+    },
+    "release-freeze-enforcer": {
+      "id": "release-freeze-enforcer",
+      "name": "release-freeze-enforcer",
+      "description": "No description",
+      "file": "agents/basecoat-60-workflow-release-freeze-enforcer.agent.md",
       "keywords": [
         "release",
-        "readiness",
-        "chair"
+        "freeze",
+        "enforcer"
       ],
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-4.5",
       "maturity": "production",
       "category": "General"
     },
-    "guidance-reviewer": {
-      "id": "guidance-reviewer",
-      "name": "guidance-reviewer",
-      "description": "Use when validating a BaseCoat guidance draft (instruction, skill, agent, prompt) before committing. Checks lint rules, ",
-      "file": "agents/basecoat-90-quality-guidance-reviewer.agent.md",
+    "task-scope-validator": {
+      "id": "task-scope-validator",
+      "name": "task-scope-validator",
+      "description": "No description",
+      "file": "agents/basecoat-60-workflow-task-scope-validator.agent.md",
       "keywords": [
-        "guidance",
-        "reviewer"
+        "task",
+        "scope",
+        "validator"
       ],
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-4.5",
       "maturity": "production",
       "category": "General"
     },
-    "orchestrator": {
-      "id": "orchestrator",
-      "name": "orchestrator",
-      "description": "Compatibility alias for the orchestrator agent. Preserves the legacy filename while the prefixed BaseCoat agent is the c",
-      "file": "agents/orchestrator.agent.md",
+    "production-readiness": {
+      "id": "production-readiness",
+      "name": "production-readiness",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-production-readiness.agent.md",
       "keywords": [
-        "orchestrator"
+        "production",
+        "readiness"
       ],
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-4.5",
       "maturity": "production",
       "category": "General"
     },
-    "dependency-lifecycle": {
-      "id": "dependency-lifecycle",
-      "name": "dependency-lifecycle",
-      "description": "Agent for managing dependency updates, tracking breaking changes, planning upgrade paths, monitoring vulnerabilities, an",
-      "file": "agents/basecoat-10-core-dependency-lifecycle.agent.md",
+    "feedback-loop": {
+      "id": "feedback-loop",
+      "name": "feedback-loop",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-feedback-loop.agent.md",
       "keywords": [
-        "dependency",
-        "lifecycle"
+        "feedback",
+        "loop"
       ],
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "prompt-engineer": {
+      "id": "prompt-engineer",
+      "name": "prompt-engineer",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-prompt-engineer.agent.md",
+      "keywords": [
+        "prompt",
+        "engineer"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "gpt-5.3-codex",
+      "maturity": "production",
+      "category": "General"
+    },
+    "config-auditor": {
+      "id": "config-auditor",
+      "name": "config-auditor",
+      "description": "No description",
+      "file": "agents/basecoat-50-security-config-auditor.agent.md",
+      "keywords": [
+        "config",
+        "auditor"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "gpt-5.4-mini",
+      "maturity": "production",
+      "category": "General"
+    },
+    "hardening-advisor": {
+      "id": "hardening-advisor",
+      "name": "hardening-advisor",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-hardening-advisor.agent.md",
+      "keywords": [
+        "hardening",
+        "advisor"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "instruction-auditor": {
+      "id": "instruction-auditor",
+      "name": "instruction-auditor",
+      "description": "No description",
+      "file": "agents/basecoat-50-security-instruction-auditor.agent.md",
+      "keywords": [
+        "instruction",
+        "auditor"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "gpt-5.4-mini",
+      "maturity": "production",
+      "category": "General"
+    },
+    "ux-designer": {
+      "id": "ux-designer",
+      "name": "ux-designer",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-ux-designer.agent.md",
+      "keywords": [
+        "ux",
+        "designer"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "gpt-5.4-mini",
+      "maturity": "production",
+      "category": "General"
+    },
+    "mlops": {
+      "id": "mlops",
+      "name": "mlops",
+      "description": "No description",
+      "file": "agents/basecoat-30-ai-mlops.agent.md",
+      "keywords": [
+        "mlops"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "gpt-5.3-codex",
+      "maturity": "production",
+      "category": "General"
+    },
+    "e2e-test-strategy": {
+      "id": "e2e-test-strategy",
+      "name": "e2e-test-strategy",
+      "description": "No description",
+      "file": "agents/basecoat-90-quality-e2e-test-strategy.agent.md",
+      "keywords": [
+        "e2e",
+        "test",
+        "strategy"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
       "maturity": "production",
       "category": "General"
     },
     "identity-architect": {
       "id": "identity-architect",
       "name": "identity-architect",
-      "description": "Identity and access architecture specialist. USE FOR: designing IAM systems, planning RBAC models, evaluating authentica",
+      "description": "No description",
       "file": "agents/basecoat-10-core-identity-architect.agent.md",
       "keywords": [
         "identity",
@@ -1483,47 +1321,29 @@
       "maturity": "production",
       "category": "General"
     },
-    "exploratory-charter": {
-      "id": "exploratory-charter",
-      "name": "exploratory-charter",
-      "description": "Use when you need time-boxed exploratory testing sessions. Generates mission-driven charters with scope, triage routing,",
-      "file": "agents/basecoat-10-core-exploratory-charter.agent.md",
+    "rca": {
+      "id": "rca",
+      "name": "rca",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-rca.agent.md",
       "keywords": [
-        "exploratory",
-        "charter"
+        "rca"
       ],
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-4.5",
       "maturity": "production",
       "category": "General"
     },
-    "station-bottleneck-analyzer": {
-      "id": "station-bottleneck-analyzer",
-      "name": "station-bottleneck-analyzer",
-      "description": "Use when analyzing takt-time JSON to compute queue length and throughput by station, rank bottlenecks, and file the week",
-      "file": "agents/basecoat-10-core-station-bottleneck-analyzer.agent.md",
+    "frontend-dev": {
+      "id": "frontend-dev",
+      "name": "frontend-dev",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-frontend-dev.agent.md",
       "keywords": [
-        "station",
-        "bottleneck",
-        "analyzer"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "data-tier": {
-      "id": "data-tier",
-      "name": "data-tier",
-      "description": "Data persistence and storage optimization. USE FOR: optimizing database configurations, designing backup strategies, man",
-      "file": "agents/basecoat-80-data-data-tier.agent.md",
-      "keywords": [
-        "data",
-        "tier"
+        "frontend",
+        "dev"
       ],
       "capabilities": [
         "general"
@@ -1532,13 +1352,61 @@
       "maturity": "production",
       "category": "General"
     },
-    "devops-engineer": {
-      "id": "devops-engineer",
-      "name": "devops-engineer",
-      "description": "DevOps and infrastructure automation specialist. USE FOR: designing CI/CD pipelines, managing infrastructure-as-code, op",
-      "file": "agents/basecoat-10-core-devops-engineer.agent.md",
+    "data-pipeline": {
+      "id": "data-pipeline",
+      "name": "data-pipeline",
+      "description": "No description",
+      "file": "agents/basecoat-60-workflow-data-pipeline.agent.md",
       "keywords": [
-        "devops",
+        "data",
+        "pipeline"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "container-security": {
+      "id": "container-security",
+      "name": "container-security",
+      "description": "No description",
+      "file": "agents/basecoat-50-security-container-security.agent.md",
+      "keywords": [
+        "container",
+        "security"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "replanning-engine": {
+      "id": "replanning-engine",
+      "name": "replanning-engine",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-replanning-engine.agent.md",
+      "keywords": [
+        "replanning",
+        "engine"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "sre-engineer": {
+      "id": "sre-engineer",
+      "name": "sre-engineer",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-sre-engineer.agent.md",
+      "keywords": [
+        "sre",
         "engineer"
       ],
       "capabilities": [
@@ -1548,92 +1416,63 @@
       "maturity": "production",
       "category": "General"
     },
-    "replanning-engine": {
-      "id": "replanning-engine",
-      "name": "replanning-engine",
-      "description": "Use when S2 assessment data shows the work is far larger than estimated and a replanning decision is needed. USE FOR: co",
-      "file": "agents/basecoat-10-core-replanning-engine.agent.md",
+    "station-bottleneck-analyzer": {
+      "id": "station-bottleneck-analyzer",
+      "name": "station-bottleneck-analyzer",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-station-bottleneck-analyzer.agent.md",
       "keywords": [
-        "replanning",
-        "engine"
+        "station",
+        "bottleneck",
+        "analyzer"
       ],
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-4.5",
       "maturity": "production",
       "category": "General"
     },
-    "secrets-manager": {
-      "id": "secrets-manager",
-      "name": "Secrets Manager",
-      "description": "Secrets lifecycle management — discovery, rotation, expiry scanning, emergency revocation, and Vault patterns for infras",
-      "file": "agents/basecoat-50-security-secrets-manager.agent.md",
+    "resilience-reviewer": {
+      "id": "resilience-reviewer",
+      "name": "resilience-reviewer",
+      "description": "No description",
+      "file": "agents/basecoat-90-quality-resilience-reviewer.agent.md",
       "keywords": [
-        "secrets",
-        "manager"
+        "resilience",
+        "reviewer"
       ],
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-4.5",
       "maturity": "production",
       "category": "General"
     },
-    "ux-designer": {
-      "id": "ux-designer",
-      "name": "ux-designer",
-      "description": "UX design agent for user journey mapping, wireframe specs, component design, and accessibility audits. Use when designin",
-      "file": "agents/basecoat-10-core-ux-designer.agent.md",
+    "legacy-modernization": {
+      "id": "legacy-modernization",
+      "name": "legacy-modernization",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-legacy-modernization.agent.md",
       "keywords": [
-        "ux",
-        "designer"
+        "legacy",
+        "modernization"
       ],
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4-5",
+      "model": "claude-sonnet-4.5",
       "maturity": "production",
       "category": "General"
     },
-    "rca": {
-      "id": "rca",
-      "name": "rca",
-      "description": "Root Cause Analysis agent for deep-dive incident investigations, hypothesis testing, and prevention follow-up. USE FOR: ",
-      "file": "agents/basecoat-10-core-rca.agent.md",
+    "performance-analyst": {
+      "id": "performance-analyst",
+      "name": "performance-analyst",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-performance-analyst.agent.md",
       "keywords": [
-        "rca"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "release-manager": {
-      "id": "release-manager",
-      "name": "release-manager",
-      "description": "Automated versioned release workflow. Reads merged PRs since the last release, bumps version.json, writes CHANGELOG entr",
-      "file": "agents/basecoat-60-workflow-release-manager.agent.md",
-      "keywords": [
-        "release",
-        "manager"
-      ],
-      "capabilities": [
-        "general"
-      ],
-      "model": "claude-sonnet-4.6",
-      "maturity": "production",
-      "category": "General"
-    },
-    "dataops": {
-      "id": "dataops",
-      "name": "dataops",
-      "description": "Data operations and pipeline management. USE FOR: managing data pipelines, monitoring data quality, optimizing data flow",
-      "file": "agents/basecoat-80-data-dataops.agent.md",
-      "keywords": [
-        "dataops"
+        "performance",
+        "analyst"
       ],
       "capabilities": [
         "general"
@@ -1642,14 +1481,96 @@
       "maturity": "production",
       "category": "General"
     },
-    "api-designer": {
-      "id": "api-designer",
-      "name": "api-designer",
-      "description": "REST API and contract design specialist. USE FOR: designing RESTful APIs, creating OpenAPI specifications, planning API ",
-      "file": "agents/basecoat-10-core-api-designer.agent.md",
+    "memory-promoter": {
+      "id": "memory-promoter",
+      "name": "memory-promoter",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-memory-promoter.agent.md",
       "keywords": [
-        "api",
-        "designer"
+        "memory",
+        "promoter"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-haiku-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "ci-failure-escalation": {
+      "id": "ci-failure-escalation",
+      "name": "ci-failure-escalation",
+      "description": "No description",
+      "file": "agents/basecoat-60-workflow-ci-failure-escalation.agent.md",
+      "keywords": [
+        "ci",
+        "failure",
+        "escalation"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "gpt-5.4-mini",
+      "maturity": "production",
+      "category": "General"
+    },
+    "factory-state-curator": {
+      "id": "factory-state-curator",
+      "name": "factory-state-curator",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-factory-state-curator.agent.md",
+      "keywords": [
+        "factory",
+        "state",
+        "curator"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "incident-responder": {
+      "id": "incident-responder",
+      "name": "incident-responder",
+      "description": "No description",
+      "file": "agents/basecoat-60-workflow-incident-responder.agent.md",
+      "keywords": [
+        "incident",
+        "responder"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "factory-conductor": {
+      "id": "factory-conductor",
+      "name": "factory-conductor",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-factory-conductor.agent.md",
+      "keywords": [
+        "factory",
+        "conductor"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "chaos-engineer": {
+      "id": "chaos-engineer",
+      "name": "chaos-engineer",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-chaos-engineer.agent.md",
+      "keywords": [
+        "chaos",
+        "engineer"
       ],
       "capabilities": [
         "general"
@@ -1658,36 +1579,115 @@
       "maturity": "production",
       "category": "General"
     },
-    "release-impact-advisor": {
-      "id": "release-impact-advisor",
-      "name": "release-impact-advisor",
-      "description": "Assesses release readiness, change impacts, blast radius, rollback planning, and safe deployment strategies with canary ",
-      "file": "agents/basecoat-60-workflow-release-impact-advisor.agent.md",
+    "containerization-planner": {
+      "id": "containerization-planner",
+      "name": "containerization-planner",
+      "description": "No description",
+      "file": "agents/basecoat-30-ai-containerization-planner.agent.md",
       "keywords": [
-        "release",
-        "impact",
+        "containerization",
+        "planner"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "dependency-update-advisor": {
+      "id": "dependency-update-advisor",
+      "name": "dependency-update-advisor",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-dependency-update-advisor.agent.md",
+      "keywords": [
+        "dependency",
+        "update",
         "advisor"
       ],
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "gpt-5.4-mini",
       "maturity": "production",
       "category": "General"
     },
-    "middleware-dev": {
-      "id": "middleware-dev",
-      "name": "middleware-dev",
-      "description": "Middleware and integration development specialist. USE FOR: building integration layers, designing middleware patterns, ",
-      "file": "agents/basecoat-10-core-middleware-dev.agent.md",
+    "domain-designer": {
+      "id": "domain-designer",
+      "name": "domain-designer",
+      "description": "No description",
+      "file": "agents/basecoat-30-ai-domain-designer.agent.md",
       "keywords": [
-        "middleware",
-        "dev"
+        "domain",
+        "designer"
       ],
       "capabilities": [
         "general"
       ],
-      "model": "gpt-5.3-codex",
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "guardrail": {
+      "id": "guardrail",
+      "name": "guardrail",
+      "description": "No description",
+      "file": "agents/basecoat-30-ai-guardrail.agent.md",
+      "keywords": [
+        "guardrail"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "product-manager": {
+      "id": "product-manager",
+      "name": "product-manager",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-product-manager.agent.md",
+      "keywords": [
+        "product",
+        "manager"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "memory-curator": {
+      "id": "memory-curator",
+      "name": "memory-curator",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-memory-curator.agent.md",
+      "keywords": [
+        "memory",
+        "curator"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.5",
+      "maturity": "production",
+      "category": "General"
+    },
+    "escalation-router": {
+      "id": "escalation-router",
+      "name": "escalation-router",
+      "description": "No description",
+      "file": "agents/basecoat-10-core-escalation-router.agent.md",
+      "keywords": [
+        "escalation",
+        "router"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "gpt-5.4-mini",
       "maturity": "production",
       "category": "General"
     }
