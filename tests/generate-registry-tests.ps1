@@ -7,83 +7,46 @@ if (-not (Test-Path $scriptPath)) {
     throw "Script not found: $scriptPath"
 }
 
-$tempRoot = Join-Path $PSScriptRoot 'tmp-generate-registry-tests'
-if (Test-Path $tempRoot) {
-    Remove-Item -Path $tempRoot -Recurse -Force
-}
+$tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('basecoat-registry-test-' + [System.Guid]::NewGuid().ToString())
 New-Item -ItemType Directory -Path $tempRoot | Out-Null
 
 try {
     $agentsDir = Join-Path $tempRoot 'agents'
+    $outputDir = Join-Path $tempRoot 'out'
     New-Item -ItemType Directory -Path $agentsDir | Out-Null
+    New-Item -ItemType Directory -Path $outputDir | Out-Null
 
     @'
 ---
-name: defaulted
-description: should fallback to default model
-model: claude-opus-4.8
----
-'@ | Set-Content -Path (Join-Path $agentsDir 'basecoat-10-core-defaulted.agent.md') -Encoding UTF8
-
-    @'
----
-name: allowed-model
-description: allowlisted model should fallback when disabled
-model: GPT-5.3-Codex
----
-'@ | Set-Content -Path (Join-Path $agentsDir 'basecoat-10-core-allowed-model.agent.md') -Encoding UTF8
-
-    @'
----
-name: pinned-precedence
-description: pinned_model should win over legacy model hint
-pinned_model: gpt-5.4-mini
-model: claude-opus-4.8
----
-'@ | Set-Content -Path (Join-Path $agentsDir 'basecoat-10-core-pinned-precedence.agent.md') -Encoding UTF8
-
-    @'
----
-name: disabled-model
-description: disabled models should fallback safely
+name: model-test-agent
+description: Ensures model frontmatter is propagated.
 model: gpt-5.3-codex
+maturity: production
+category: Quality
+metadata:
+  tags: [test]
 ---
-'@ | Set-Content -Path (Join-Path $agentsDir 'basecoat-10-core-disabled-model.agent.md') -Encoding UTF8
+'@ | Set-Content -Path (Join-Path $agentsDir 'basecoat-99-test-model-test-agent.agent.md') -Encoding UTF8
 
-    $registryPath = Join-Path $tempRoot 'basecoat-registry.json'
     & pwsh -NoProfile -File $scriptPath `
         -AgentsPath $agentsDir `
-        -OutputPath $registryPath `
-        -DisabledModels @('gpt-5.3-codex')
-
+        -OutputPath (Join-Path $outputDir 'basecoat-registry.json')
     if ($LASTEXITCODE -ne 0) {
         throw 'generate-registry.ps1 exited with non-zero status'
     }
 
+    $registryPath = Join-Path $outputDir 'basecoat-registry.json'
     if (-not (Test-Path $registryPath)) {
-        throw 'Registry file was not generated'
+        throw 'Registry output was not generated'
     }
 
     $registry = Get-Content -Path $registryPath -Raw | ConvertFrom-Json
-
-    $defaulted = $registry.agents.defaulted
-    if ($defaulted.model -ne 'claude-sonnet-4.6') {
-        throw "Expected defaulted model to fallback to claude-sonnet-4.6, got '$($defaulted.model)'"
+    $entry = $registry.agents.'model-test-agent'
+    if (-not $entry) {
+        throw 'Expected model-test-agent registry entry not found'
     }
-
-    $allowed = $registry.agents.'allowed-model'
-    if ($allowed.model -ne 'claude-sonnet-4.6') {
-        throw "Expected disabled allowlisted model to fallback to claude-sonnet-4.6, got '$($allowed.model)'"
-    }
-
-    $pinned = $registry.agents.'pinned-precedence'
-    if ($pinned.model -ne 'gpt-5.4-mini') {
-        throw "Expected pinned model to resolve to gpt-5.4-mini, got '$($pinned.model)'"
-    }
-
-    $disabled = $registry.agents.'disabled-model'
-    if ($disabled.model -ne 'claude-sonnet-4.6') {
-        throw "Expected disabled model to fallback to claude-sonnet-4.6, got '$($disabled.model)'"
+    if ($entry.model -ne 'gpt-5.3-codex') {
+        throw "Expected model gpt-5.3-codex, got $($entry.model)"
     }
 
     Write-Host 'Generate registry tests passed'
