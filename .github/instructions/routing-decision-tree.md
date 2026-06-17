@@ -1,6 +1,6 @@
 ---
 description: "Routing decision tree: map user intent directly to an agent or skill without routing through the legacy router"
-applyTo: "**/*"
+applyTo: ".github/**/*,docs/**/*,*.md"
 ---
 
 # Routing Decision Tree

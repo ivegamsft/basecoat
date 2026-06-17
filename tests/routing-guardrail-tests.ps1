@@ -207,6 +207,50 @@ if (Test-Path $prefixGuide) {
     }
 }
 
+# Test 12: only the routing guide may use applyTo "**/*"
+Write-Host '  Test 12: Validate applyTo scope policy for routing instruction files...'
+$routingGuide = Join-Path $repoRoot '.github\copilot-instructions.md'
+if (-not (Test-Path $routingGuide)) {
+    $failures += 'routing-guide-missing'
+    Write-Host '    ✗ .github/copilot-instructions.md not found' -ForegroundColor Red
+}
+else {
+    $guideContent = Get-Content $routingGuide -Raw
+    if ($guideContent -notmatch '(?m)^applyTo:\s*"\*\*/\*"') {
+        $failures += 'routing-guide-not-global'
+        Write-Host '    ✗ routing guide must retain applyTo "**/*"' -ForegroundColor Red
+    }
+    else {
+        Write-Host '    ✓ routing guide retains applyTo "**/*"'
+    }
+}
+
+$routingInstructionFiles = @()
+$routingInstructionsDir = Join-Path $repoRoot '.github\instructions'
+if (Test-Path $routingInstructionsDir) {
+    $routingInstructionFiles += Get-ChildItem $routingInstructionsDir -Filter '*.instructions.md' -File
+    $decisionTree = Join-Path $routingInstructionsDir 'routing-decision-tree.md'
+    if (Test-Path $decisionTree) {
+        $routingInstructionFiles += Get-Item $decisionTree
+    }
+}
+
+$broadApplyToFiles = @()
+foreach ($file in $routingInstructionFiles) {
+    $header = (Get-Content $file.FullName -TotalCount 20) -join "`n"
+    if ($header -match '(?m)^applyTo:\s*"\*\*/\*"') {
+        $broadApplyToFiles += $file.Name
+    }
+}
+
+if ($broadApplyToFiles.Count -gt 0) {
+    $failures += 'routing-instruction-scope-too-broad'
+    Write-Host "    ✗ Non-guide routing files using applyTo ""**/*"": $($broadApplyToFiles -join ', ')" -ForegroundColor Red
+}
+else {
+    Write-Host '    ✓ All non-guide routing instruction files use scoped applyTo patterns'
+}
+
 if ($failures.Count -gt 0) {
     Write-Host "Routing guardrail tests FAILED: $($failures -join ', ')" -ForegroundColor Red
     exit 1
