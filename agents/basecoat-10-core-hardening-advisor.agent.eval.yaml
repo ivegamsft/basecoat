@@ -1,0 +1,17 @@
+name: 'basecoat-10-core-hardening-advisor-routing'
+description: 'Routing evaluation - validates trigger activation for the Hardening Advisor agent.'
+skill: 'agents/basecoat-10-core-hardening-advisor.agent.md'
+scenarios:
+  - id: 'pos-1'
+    input: 'Use the Hardening Advisor agent to handle its documented responsibilities.'
+    expect_activation: true
+  - id: 'pos-2'
+    input: 'Please route this task to the Hardening Advisor agent.'
+    expect_activation: true
+  - id: 'neg-1'
+    input: 'Write a haiku about programming.'
+    expect_activation: false
+  - id: 'neg-2'
+    input: 'Give me a recipe for chocolate chip cookies.'
+    expect_activation: false
+
