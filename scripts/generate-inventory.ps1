@@ -73,7 +73,16 @@ $errors += Check "prompts"      $counts.prompts      $readmePrompts "README.md"
 Write-Host ""
 
 # --- Validate INVENTORY.md counts ---
-$inventoryPath = Join-Path $repoRoot "INVENTORY.md"
+$inventoryPath = @(
+    (Join-Path $repoRoot "INVENTORY.md")
+    (Join-Path $repoRoot "docs/reference/INVENTORY.md")
+    (Join-Path $repoRoot "docs/reference/inventory.md")
+) | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+if (-not $inventoryPath) {
+    throw "Cannot validate inventory counts: INVENTORY.md not found in root or docs/reference/"
+}
+
 $inventoryContent = Get-Content $inventoryPath -Raw
 
 $invAgents = ($inventoryContent | Select-String '`agents/[^`]+\.agent\.md`' -AllMatches).Matches.Count

@@ -40,7 +40,7 @@ jobs:
       - name: Detect inventory changes
         id: changes
         run: |
-          if git diff --quiet -- docs/reference/TOKEN_CONTEXT_INVENTORY.md; then
+          if git diff --quiet -- docs/reference/token-context-inventory.md; then
             echo "No inventory changes detected."
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
@@ -55,7 +55,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -B "${BRANCH}"
-          git add docs/reference/TOKEN_CONTEXT_INVENTORY.md
+          git add docs/reference/token-context-inventory.md
           git commit -m "chore(docs): auto-update token context inventory [skip ci]"
           REMOTE_SHA="$(git ls-remote --heads origin "${BRANCH}" | awk '{print $1}')"
           if [ -n "${REMOTE_SHA}" ]; then
@@ -125,4 +125,3 @@ jobs:
             echo "Creating a new PR from ${BRANCH} to main"
             run_pr_command "create" gh pr create --base main --head "${BRANCH}" --title "${PR_TITLE}" --body "${PR_BODY}"
           fi
-

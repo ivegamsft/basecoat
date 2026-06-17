@@ -4,7 +4,7 @@
 
 BaseCoat provides a curated library of agents, skills, instructions, and prompts that teams adopt across repositories through a single sync command. Instead of every team writing Copilot customizations from scratch, BaseCoat gives you production-ready assets that enforce consistent standards, accelerate development workflows, and scale across an entire GitHub Enterprise organization.
 
-**82 agents** · **59 skills** · **71 instruction files** · **5 prompt starters**
+**105 agents** · **104 skills** · **90 instruction files** · **10 prompt starters**
 
 ---
 

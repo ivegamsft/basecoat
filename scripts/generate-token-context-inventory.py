@@ -70,7 +70,7 @@ def table_rows(rows: list[Row]) -> str:
 
 def main() -> None:
     repo_root = Path(__file__).resolve().parents[1]
-    output_path = repo_root / "docs" / "reference" / "TOKEN_CONTEXT_INVENTORY.md"
+    output_path = repo_root / "docs" / "reference" / "token-context-inventory.md"
 
     agents = collect_rows(repo_root, "agents/*.agent.md", "Agent")
     skills = collect_rows(repo_root, "skills/*/SKILL.md", "Skill")
