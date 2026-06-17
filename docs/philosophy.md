@@ -164,8 +164,7 @@ script (Structure) should never enumerate specific skill names (Stuff).
 **Review principle:** Changes to slower layers demand broader consensus. A tweak to
 an agent prompt is lightweight; a change to the frontmatter schema is an RFC.
 
-For the full framework and anti-patterns, see
-[`instructions/basecoat-10-core-shearing-layers.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/basecoat-10-core-shearing-layers.instructions.md).
+The shearing-layers framework helps organize components by pace of change and coupling constraints.
 
 ---
 
