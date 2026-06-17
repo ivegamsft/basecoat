@@ -73,21 +73,19 @@ description: five
     if (-not (Test-Path $inventoryPath)) { throw 'model-inventory.md was not generated' }
 
     $map = Get-Content -Path $mapPath -Raw | ConvertFrom-Json
-    $claude = $map.models | Where-Object { $_.canonical -eq 'claude-sonnet-4.6' }
-    if (-not $claude) { throw 'Expected canonical key claude-sonnet-4.6 not found' }
-    if ($claude.count -ne 2) { throw "Expected count 2 for claude-sonnet-4.6, got $($claude.count)" }
-    if (-not ($claude.aliases -contains 'Claude Sonnet 4.6')) { throw 'Expected alias Claude Sonnet 4.6 not found' }
-    if (-not ($claude.aliases -contains 'claude-sonnet-4.6')) { throw 'Expected alias claude-sonnet-4.6 not found' }
-
     $gpt = $map.models | Where-Object { $_.canonical -eq 'gpt-5.3-codex' }
     if (-not $gpt) { throw 'Expected canonical key gpt-5.3-codex not found' }
     if ($gpt.count -ne 1) { throw "Expected count 1 for gpt-5.3-codex, got $($gpt.count)" }
+    if (-not ($gpt.aliases -contains 'GPT-5.3-Codex')) { throw 'Expected alias GPT-5.3-Codex not found' }
 
     $fallback = $map.models | Where-Object { $_.canonical -eq 'gpt-5.4-mini' }
     if (-not $fallback) { throw 'Expected fallback canonical key gpt-5.4-mini not found' }
-    if ($fallback.count -ne 2) { throw "Expected count 2 for gpt-5.4-mini, got $($fallback.count)" }
+    if ($fallback.count -ne 4) { throw "Expected count 4 for gpt-5.4-mini, got $($fallback.count)" }
     if (-not ($fallback.aliases -contains 'gpt-5.4-mini')) { throw 'Expected alias gpt-5.4-mini not found for missing-model fallback' }
     if ($fallback.aliases -contains 'internal-preview-model') { throw 'Unsupported model alias should not be persisted in model inventory output' }
+    if ($fallback.aliases -contains 'Claude Sonnet 4.6' -or $fallback.aliases -contains 'claude-sonnet-4.6') {
+        throw 'Unsupported model aliases should not be persisted in model inventory output'
+    }
 
     Write-Host 'Model inventory tests passed'
 }
