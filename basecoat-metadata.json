@@ -1,7 +1,7 @@
 {
   "$schema": "basecoat-metadata-schema",
   "version": "3.26.0",
-  "generated": "2026-06-14",
+  "generated": "2026-06-15",
   "categories": {
     "AI & Development": {
       "label": "AI & Development",
@@ -157,8 +157,7 @@
         "basecoat-40-azure-azure-landing-zone",
         "basecoat-30-ai-containerization-planner",
         "basecoat-10-core-devops-engineer",
-        "basecoat-60-workflow-infrastructure-deploy",
-        "basecoat-10-core-observability-engineer"
+        "basecoat-60-workflow-infrastructure-deploy"
       ]
     },
     "Knowledge & Learning": {
@@ -200,7 +199,8 @@
         "basecoat-60-workflow-incident-responder",
         "basecoat-10-core-production-readiness",
         "basecoat-10-core-rca",
-        "basecoat-10-core-sre-engineer"
+        "basecoat-10-core-sre-engineer",
+        "basecoat-10-core-observability-engineer"
       ]
     },
     "Orchestration": {
@@ -208,6 +208,7 @@
       "description": "Orchestration agents",
       "icon": "🎯",
       "agents": [
+        "program-bootstrap",
         "orchestrator"
       ]
     },
@@ -254,17 +255,17 @@
       "agents": [
         "basecoat-50-security-api-security",
         "basecoat-50-security-config-auditor",
+        "basecoat-50-security-container-security",
         "basecoat-30-ai-guardrail",
+        "basecoat-50-security-github-security-posture",
+        "basecoat-10-core-hardening-advisor",
         "basecoat-10-core-identity-architect",
         "basecoat-90-quality-penetration-test",
         "basecoat-50-security-policy-as-code-compliance",
-        "basecoat-50-security-security-analyst",
-        "basecoat-50-security-supply-chain-security",
-        "basecoat-50-security-container-security",
-        "basecoat-50-security-github-security-posture",
-        "basecoat-10-core-hardening-advisor",
         "basecoat-50-security-secrets-manager",
-        "basecoat-50-security-security-monitor"
+        "basecoat-50-security-security-monitor",
+        "basecoat-50-security-security-analyst",
+        "basecoat-50-security-supply-chain-security"
       ]
     },
     "Testing & Quality": {
@@ -279,12 +280,6 @@
         "basecoat-10-core-strategy-to-automation",
         "basecoat-90-quality-resilience-reviewer"
       ]
-    },
-    "Uncategorized": {
-      "label": "Uncategorized",
-      "description": "Uncategorized agents",
-      "icon": "📦",
-      "agents": []
     },
     "security": {
       "label": "security",
@@ -709,12 +704,9 @@
     {
       "name": "basecoat-10-core-hardening-advisor",
       "description": "CIS Benchmarks and STIG hardening advisor for Dockerfiles, Kubernetes manifests, databases, and infrastructure configurations against security standards. USE FOR: harden Dockerfile against CIS benchmarks, audit Kubernetes manifests for STIG compliance, review infrastructure config security. DO NOT USE FOR: application code security review, live incident mitigation.",
-      "category": "Security & Compliance",
+      "category": "Meta",
       "keywords": [
-        "hardening",
-        "cis",
-        "stig",
-        "security"
+        "uncategorized"
       ],
       "aliases": [],
       "pairedSkill": "",
@@ -898,12 +890,9 @@
     {
       "name": "basecoat-10-core-observability-engineer",
       "description": "OpenTelemetry instrumentation, structured logging, distributed tracing, metrics taxonomy, and dashboard-as-code for operational excellence. USE FOR: instrument services with OpenTelemetry, design structured logging schema, build dashboard-as-code for metrics. DO NOT USE FOR: incident response triage, infrastructure provisioning.",
-      "category": "Infrastructure & Operations",
+      "category": "Meta",
       "keywords": [
-        "observability",
-        "opentelemetry",
-        "logging",
-        "tracing"
+        "uncategorized"
       ],
       "aliases": [],
       "pairedSkill": "",
@@ -924,6 +913,23 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-orchestrator.agent.md",
+      "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "program-bootstrap",
+      "description": "Thin orchestration entrypoint for end-to-end startup pack generation. USE FOR: bootstrapping a new program with coordinated onboarding/backlog/spec/architecture/workflow outputs, running dry-run orchestration before writing artifacts, resuming partially completed orchestration with checkpoints, preserving repo-specific delivery labels while normalizing governance labels. DO NOT USE FOR: replacing specialist agents, forcing one repo taxonomy, direct single-step authoring that a specialist agent already handles.",
+      "category": "Orchestration",
+      "keywords": [
+        "bootstrap",
+        "orchestration",
+        "startup",
+        "onboarding",
+        "program-init"
+      ],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/program-bootstrap.agent.md",
       "model": "claude-sonnet-4.6",
       "argumentHint": ""
     },
@@ -1455,12 +1461,9 @@
     {
       "name": "basecoat-50-security-container-security",
       "description": "Container and Kubernetes security — Pod Security Standards, runtime security, CSPM findings, image scanning, and supply chain security for containerized workloads. USE FOR: scan container images for CVEs, audit Pod Security Standards, assess Kubernetes runtime security. DO NOT USE FOR: writing application code, network firewall rules.",
-      "category": "Security & Compliance",
+      "category": "Meta",
       "keywords": [
-        "container-security",
-        "kubernetes",
-        "cspm",
-        "image-scanning"
+        "uncategorized"
       ],
       "aliases": [],
       "pairedSkill": "",
@@ -1471,12 +1474,9 @@
     {
       "name": "basecoat-50-security-github-security-posture",
       "description": "GitHub security posture auditor for org and repository policy checks. Use when auditing GitHub organization code security configurations, repository rulesets, secret scanning alerts, Dependabot configuration, or branch protection rules.",
-      "category": "Security & Compliance",
+      "category": "Meta",
       "keywords": [
-        "github-security",
-        "org-audit",
-        "rulesets",
-        "branch-protection"
+        "uncategorized"
       ],
       "aliases": [],
       "pairedSkill": "",
@@ -1540,12 +1540,9 @@
     {
       "name": "basecoat-50-security-secrets-manager",
       "description": "Secrets lifecycle management — discovery, rotation, expiry scanning, emergency revocation, and Vault patterns for infrastructure and application secrets. USE FOR: plan secrets rotation schedule, scan for expiring credentials, execute emergency revocation. DO NOT USE FOR: detecting hardcoded secrets in code, general performance optimization.",
-      "category": "Security & Compliance",
+      "category": "Meta",
       "keywords": [
-        "secrets",
-        "rotation",
-        "vault",
-        "credential-lifecycle"
+        "uncategorized"
       ],
       "aliases": [],
       "pairedSkill": "",
@@ -1572,12 +1569,9 @@
     {
       "name": "basecoat-50-security-security-monitor",
       "description": "Detection engineering and SIEM configuration — maps MITRE ATT&CK tactics to detection rules, builds alerting baselines, and operationalizes NIST CSF Detect. USE FOR: build ATT&CK-mapped detection rules, calibrate SIEM alert thresholds, map compliance to detection coverage. DO NOT USE FOR: live incident response, secrets rotation.",
-      "category": "Security & Compliance",
+      "category": "Meta",
       "keywords": [
-        "siem",
-        "mitre-attack",
-        "detection-engineering",
-        "alerting"
+        "uncategorized"
       ],
       "aliases": [],
       "pairedSkill": "",
@@ -1673,12 +1667,9 @@
     {
       "name": "basecoat-60-workflow-data-pipeline",
       "description": "Data pipeline agent for medallion lakehouse architecture, data quality, ML pipeline orchestration, and feature store integration. Use when building or reviewing bronze/silver/gold Delta Lake pipelines, data quality checks, feature engineering, or ML training workflows.",
-      "category": "Data & Analytics",
+      "category": "Meta",
       "keywords": [
-        "data-pipeline",
-        "medallion",
-        "data-quality",
-        "feature-store"
+        "uncategorized"
       ],
       "aliases": [],
       "pairedSkill": "",
@@ -1893,12 +1884,9 @@
     {
       "name": "basecoat-80-data-data-integrity",
       "description": ">",
-      "category": "Data & Analytics",
+      "category": "Meta",
       "keywords": [
-        "data-integrity",
-        "consistency",
-        "recovery",
-        "conflict-resolution"
+        "uncategorized"
       ],
       "aliases": [],
       "pairedSkill": "",
@@ -2043,12 +2031,9 @@
     {
       "name": "basecoat-90-quality-resilience-reviewer",
       "description": "Code-level resilience pattern review — circuit breakers, timeouts, bulkhead isolation, graceful degradation, retry logic, and load shedding implementation. USE FOR: review circuit breaker and retry patterns in code, audit timeout hierarchy, validate graceful degradation. DO NOT USE FOR: live incident response, infrastructure capacity planning.",
-      "category": "Testing & Quality",
+      "category": "Meta",
       "keywords": [
-        "resilience",
-        "circuit-breaker",
-        "timeout",
-        "load-shedding"
+        "uncategorized"
       ],
       "aliases": [],
       "pairedSkill": "",
@@ -2239,7 +2224,14 @@
       "name": "flow-governance-conductor",
       "description": "Use when coordinating flow-governance analysis across code, PRs, issues, skills, and scripts. USE FOR: reusing existing flow/CI/governance skills first, mapping findings to current agents and scripts, identifying missing skill/script coverage, and producing issue-ready gap backlogs. DO NOT USE FOR: writing product features, bypassing branch or environment protections, or force-merging pull requests.",
       "category": "Meta",
-      "keywords": [],
+      "keywords": [
+        "flow",
+        "governance",
+        "orchestration",
+        "skill-reuse",
+        "issues",
+        "prs"
+      ],
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/flow-governance-conductor.agent.md",
@@ -2247,14 +2239,14 @@
       "argumentHint": ""
     },
     {
-      "name": "program-bootstrap",
-      "description": "Thin orchestration entrypoint for end-to-end startup pack generation. USE FOR: bootstrapping a new program with coordinated onboarding/backlog/spec/architecture/workflow outputs, running dry-run orchestration before writing artifacts, resuming partially completed orchestration with checkpoints, preserving repo-specific delivery labels while normalizing governance labels. DO NOT USE FOR: replacing specialist agents, forcing one repo taxonomy, direct single-step authoring that a specialist agent already handles.",
+      "name": "basecoat-10-core-delivery-gap-mapper",
+      "description": "Use when you need to detect delivery gaps, cluster issues/PRs by function, map dependencies, and operationalize execution in a GitHub Project. USE FOR: identifying issue/PR patterns, grouping backlog by feature/function, mapping hard vs soft dependencies, creating/updating a GitHub Project and linking items. DO NOT USE FOR: implementing product code changes, bypassing governance gates, or force-closing issues without evidence.",
       "category": "Meta",
       "keywords": [],
       "aliases": [],
       "pairedSkill": "",
-      "file": "agents/program-bootstrap.agent.md",
-      "model": "claude-sonnet-4.6",
+      "file": "agents/basecoat-10-core-delivery-gap-mapper.agent.md",
+      "model": "gpt-5.4-mini",
       "argumentHint": ""
     }
   ]

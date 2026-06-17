@@ -1,0 +1,19 @@
+name: "delivery-gap-mapper-routing"
+description: "Routing evaluation — validates trigger activation for the delivery-gap-mapper agent."
+skill: "agents/basecoat-10-core-delivery-gap-mapper.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "Group our remaining CI/CD issues and PRs by function, map dependencies, and show the critical path."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Create a GitHub project for open delivery gaps and link existing issues and PRs without duplicates."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Find recurring backlog patterns, classify by feature area, and identify what is blocked versus in flight."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Write and ship the fix for publish-to-production.yml."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Implement a new API endpoint and unit tests."
+    expect_activation: false
