@@ -98,11 +98,12 @@ if (Test-Path $routingFile) {
     }
 }
 
-# Test 5: intent-routing includes azure: and infra: in prefix vocabulary
-Write-Host '  Test 5: Validate azure: and infra: prefixes are in intent-routing vocabulary...'
+# Test 5: intent-routing includes portfolio:, azure:, and infra: in prefix vocabulary
+Write-Host '  Test 5: Validate portfolio:, azure:, and infra: prefixes are in intent-routing vocabulary...'
 if (Test-Path $routingFile) {
     $content = Get-Content $routingFile -Raw
     $missingPrefixes = @()
+    if ($content -notmatch '`portfolio:`') { $missingPrefixes += 'portfolio:' }
     if ($content -notmatch '`azure:`') { $missingPrefixes += 'azure:' }
     if ($content -notmatch '`infra:`') { $missingPrefixes += 'infra:' }
     if ($content -notmatch '`architect:`') { $missingPrefixes += 'architect:' }
@@ -111,7 +112,7 @@ if (Test-Path $routingFile) {
         Write-Host "    ✗ Prefix vocabulary missing: $($missingPrefixes -join ', ')" -ForegroundColor Red
     }
     else {
-        Write-Host '    ✓ azure:, infra:, and architect: prefixes present'
+        Write-Host '    ✓ portfolio:, azure:, infra:, and architect: prefixes present'
     }
 }
 
@@ -160,12 +161,13 @@ foreach ($ref in $referencedFiles) {
     }
 }
 
-# Test 9: intent-prefixes guide includes azure: and infra:
-Write-Host '  Test 9: Validate intent-prefixes guide includes new prefixes...'
+# Test 9: intent-prefixes guide includes portfolio:, azure:, and infra:
+Write-Host '  Test 9: Validate intent-prefixes guide includes portfolio:, azure:, and infra: prefixes...'
 $prefixGuide = Join-Path $repoRoot 'docs\guides\intent-prefixes.md'
 if (Test-Path $prefixGuide) {
     $content = Get-Content $prefixGuide -Raw
     $missingPrefixes = @()
+    if ($content -notmatch '`portfolio:`') { $missingPrefixes += 'portfolio:' }
     if ($content -notmatch '`azure:`') { $missingPrefixes += 'azure:' }
     if ($content -notmatch '`infra:`') { $missingPrefixes += 'infra:' }
     if ($missingPrefixes.Count -gt 0) {
@@ -173,7 +175,7 @@ if (Test-Path $prefixGuide) {
         Write-Host "    ✗ intent-prefixes guide missing: $($missingPrefixes -join ', ')" -ForegroundColor Red
     }
     else {
-        Write-Host '    ✓ azure: and infra: prefixes in intent-prefixes guide'
+        Write-Host '    ✓ portfolio:, azure:, and infra: prefixes in intent-prefixes guide'
     }
 }
 else {
@@ -207,8 +209,21 @@ if (Test-Path $prefixGuide) {
     }
 }
 
-# Test 12: only the routing guide may use applyTo "**/*"
-Write-Host '  Test 12: Validate applyTo scope policy for routing instruction files...'
+# Test 12: intent-routing includes deterministic GitHub-native routing for portfolio:
+Write-Host '  Test 12: Validate deterministic GitHub-native routing includes portfolio:...'
+if (Test-Path $routingFile) {
+    $content = Get-Content $routingFile -Raw
+    if ($content -notmatch 'workflow:.*actions:.*pr:.*issue:.*portfolio:.*release:') {
+        $failures += 'portfolio-github-native-routing-missing'
+        Write-Host '    ✗ GitHub-native deterministic routing contract missing portfolio:' -ForegroundColor Red
+    }
+    else {
+        Write-Host '    ✓ GitHub-native deterministic routing includes portfolio:'
+    }
+}
+
+# Test 13: only the routing guide may use applyTo "**/*"
+Write-Host '  Test 13: Validate applyTo scope policy for routing instruction files...'
 $routingGuide = Join-Path $repoRoot '.github\copilot-instructions.md'
 if (-not (Test-Path $routingGuide)) {
     $failures += 'routing-guide-missing'
