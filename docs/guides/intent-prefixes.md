@@ -24,7 +24,7 @@ release, version drift) to reduce routing ambiguity.
 | `workflow:` | GitHub Actions workflow failure triage and repair | **Now** | `@broken-build-troubleshooter`, `@self-healing-ci`, `@devops-engineer` |
 | `actions:` | GitHub Actions configuration, runs, and policy checks | **Now** | `@self-healing-ci`, `@ci-failure-escalation`, `@devops-engineer` |
 | `issue:` | GitHub issue triage, labeling, and backlog hygiene | **Now** | `@issue-triage`, `@sprint-planner` |
-| `portfolio:` | Project audit across issues and PRs: dedupe, categorization, dependency wiring, feature grouping, and project linking | **Now** | `@issue-triage`, `@orphaned-pr-cleanup`, `@sprint-project-mapper`, `@sprint-planner`, `@dependency-blocker-monitor` |
+| `portfolio:` | Project audit across issues and PRs: dedupe, categorization, dependency wiring, feature grouping, and project linking | **Now** | `@issue-triage`, `@orphaned-pr-cleanup`, `@sprint-project-mapper`, `@sprint-planner`, `@governance-auditor` |
 | `release:` | Release planning, version bumping, and publication | **Now** | `@release-manager`, `@release-readiness-chair`, `@release-impact-advisor` |
 | `version:` | BaseCoat version inspection and drift check | **Now** | `@release-manager`, `@devops-engineer` |
 | `security:` | Security concern or vulnerability | **Now, high priority** | `@security-analyst`, `@guardrail` |
@@ -422,7 +422,7 @@ Use these default chains unless there is a task-specific reason to override.
 | `security:` | `security-analyst -> policy-as-code-compliance -> guardrail` | remediation and policy validation |
 | `plan:` | `product-manager -> sprint-planner` | scoped sprint-ready backlog |
 | `test:` | `manual-test-strategy -> strategy-to-automation` | test strategy and automation candidates |
-| `portfolio:` | `issue-triage -> orphaned-pr-cleanup -> sprint-project-mapper -> sprint-planner -> dependency-blocker-monitor` | end-to-end project hygiene with dedupe, grouping, and dependency traceability |
+| `portfolio:` | `issue-triage -> orphaned-pr-cleanup -> sprint-project-mapper -> sprint-planner -> governance-auditor` | end-to-end project hygiene with dedupe, grouping, dependency traceability, and governance checks |
 
 When chaining, each handoff prompt should include:
 

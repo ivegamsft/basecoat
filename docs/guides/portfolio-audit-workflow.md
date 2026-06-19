@@ -71,26 +71,26 @@ Outputs:
 - Reviewer/owner action list
 - Missing-label report for merged PRs
 
-## Phase 3: Dependency mapping and blocker traceability
+## Phase 3: Dependency mapping and issue traceability
 
-Primary route: `@dependency-blocker-monitor`
+Primary route: `@issue-triage` plus `@sprint-planner`
 
 Goals:
 
 - Verify dependency links exist for blocked work.
-- Ensure one blocker artifact per active dependency failure.
+- Ensure blocked work includes explicit issue-level dependency links.
 
 Suggested checks:
 
 ```bash
-gh issue list --state open --label blocker --limit 200 --json number,title,labels,updatedAt
-gh issue list --state open --limit 500 --json number,title,body | jq '.[] | select(.body | test("blocked by|depends on"; "i")) | .number'
+gh issue list --state open --limit 500 --json number,title,labels,body \
+  | jq '.[] | select((.body // "" | test("blocked by|depends on"; "i")) or ((.labels // []) | map(.name) | any(test("blocked|dependency"; "i")))) | .number'
 ```
 
 Outputs:
 
 - Dependency edge map
-- Blocker issue lifecycle updates
+- Dependency-link update actions
 - Unlinked dependency gap list
 
 ## Phase 4: Feature grouping and significance gate

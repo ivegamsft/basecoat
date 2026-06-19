@@ -30,7 +30,7 @@ routing signal before any plain-text interpretation occurs.
 | `actions:` | GitHub Actions configuration, runs, and policy checks | Now | `@self-healing-ci`, `@ci-failure-escalation`, `@devops-engineer` |
 | `pr:` | Pull request triage, mergeability, or stale PR cleanup | Now | `@orphaned-pr-cleanup`, `@merge-coordinator`, `@code-review` |
 | `issue:` | GitHub issue triage, labeling, and backlog hygiene | Now | `@issue-triage`, `@sprint-planner` |
-| `portfolio:` | Project audit for issue/PR dedupe, categorization, dependency mapping, feature grouping, and project linkage | Now | `@issue-triage`, `@orphaned-pr-cleanup`, `@sprint-project-mapper`, `@sprint-planner`, `@dependency-blocker-monitor` |
+| `portfolio:` | Project audit for issue/PR dedupe, categorization, dependency mapping, feature grouping, and project linkage | Now | `@issue-triage`, `@orphaned-pr-cleanup`, `@sprint-project-mapper`, `@sprint-planner`, `@governance-auditor` |
 | `release:` | Release planning, version bumping, and publication | Now | `@release-manager`, `@release-readiness-chair`, `@release-impact-advisor` |
 | `version:` | BaseCoat version inspection and drift check | Now | `@release-manager`, `@devops-engineer` |
 | `azure:` | Azure-scoped operation | Now | `@devops-engineer`, `@solution-architect` |
