@@ -2,6 +2,10 @@
 
 Reference for upstream workflow templates in BaseCoat. Consumer installs use `scripts/configure-downstream-workflows.ps1`, which currently installs only the supported subset (`reusable` by default, with supported `templates` via opt-in) from `.github/base-coat/workflows`.
 
+## Related operational workflows
+
+- [Portfolio Audit Workflow](./portfolio-audit-workflow.md) for issue/PR dedupe, dependency traceability, feature grouping, and active project-link verification.
+
 ## Consolidated Workflow Enhancements (#1389)
 
 The following workflows implement the consolidated production enhancement set for

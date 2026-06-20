@@ -41,6 +41,7 @@ Rules:
 | `actions:` | GitHub Actions configuration, runs, and policy checks | Now | `@self-healing-ci`, `@ci-failure-escalation`, `@devops-engineer` |
 | `pr:` | Pull request triage, mergeability, or stale PR cleanup | Now | `@orphaned-pr-cleanup`, `@merge-coordinator`, `@code-review` |
 | `issue:` | GitHub issue triage, labeling, and backlog hygiene | Now | `@issue-triage`, `@sprint-planner` |
+| `portfolio:` | Project audit for issue/PR dedupe, categorization, dependency mapping, feature grouping, and project linkage | Now | `@issue-triage`, `@orphaned-pr-cleanup`, `@sprint-project-mapper`, `@sprint-planner`, `@governance-auditor` |
 | `release:` | Release planning, version bumping, and publication | Now | `@release-manager`, `@release-readiness-chair`, `@release-impact-advisor` |
 | `security:` | Security concern or vulnerability | Now | `@security-analyst`, `@guardrail` |
 | `perf:` | Performance degradation or concern | Now | `@performance-analyst` |
@@ -109,7 +110,10 @@ Execution contracts:
 2. `pr:` routes to PR-first triage (mergeability, stale ownership, review
    blockers) before any broad repo analysis.
 3. `issue:` routes to issue quality/label/backlog triage first.
-4. `release:` routes to release workflow (version source, changelog, tag/release
+4. `portfolio:` routes to issue/PR hygiene and grouping workflow first: dedupe,
+   categorize, wire dependencies, cluster by feature, then ensure a canonical
+   sprint/project link is captured in repo docs.
+5. `release:` routes to release workflow (version source, changelog, tag/release
    operations) first.
 
 ## Version Routing

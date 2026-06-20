@@ -23,8 +23,8 @@ release, version drift) to reduce routing ambiguity.
 | `fleet:` | Close previous sprint, plan and execute the next sprint, triage oldest issues, audit PRs/builds, clean branches | **Now** | `@sprint-closeout-auditor`, `@sprint-planner`, `@issue-triage`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
 | `workflow:` | GitHub Actions workflow failure triage and repair | **Now** | `@broken-build-troubleshooter`, `@self-healing-ci`, `@devops-engineer` |
 | `actions:` | GitHub Actions configuration, runs, and policy checks | **Now** | `@self-healing-ci`, `@ci-failure-escalation`, `@devops-engineer` |
-| `pr:` | Pull request triage, mergeability, or stale PR cleanup | **Now** | `@orphaned-pr-cleanup`, `@merge-coordinator`, `@code-review` |
 | `issue:` | GitHub issue triage, labeling, and backlog hygiene | **Now** | `@issue-triage`, `@sprint-planner` |
+| `portfolio:` | Project audit across issues and PRs: dedupe, categorization, dependency wiring, feature grouping, and project linking | **Now** | `@issue-triage`, `@orphaned-pr-cleanup`, `@sprint-project-mapper`, `@sprint-planner`, `@governance-auditor` |
 | `release:` | Release planning, version bumping, and publication | **Now** | `@release-manager`, `@release-readiness-chair`, `@release-impact-advisor` |
 | `version:` | BaseCoat version inspection and drift check | **Now** | `@release-manager`, `@devops-engineer` |
 | `security:` | Security concern or vulnerability | **Now, high priority** | `@security-analyst`, `@guardrail` |
@@ -52,7 +52,7 @@ for selecting chain patterns.
 | Delivery | `feature:`, `refactor:`, `deploy:`, `architect:` | implementation plan, code changes, or staged deployment |
 | Reliability | `bug:`, `perf:`, `outage:`, `rca:` | fix, mitigation, incident analysis, or root-cause report |
 | Governance | `audit:`, `security:`, `chore:` | findings, policy action, risk controls |
-| GitHub Operations | `workflow:`, `actions:`, `pr:`, `issue:`, `release:`, `version:` | run triage, repo hygiene, release/version decisions |
+| GitHub Operations | `workflow:`, `actions:`, `pr:`, `issue:`, `portfolio:`, `release:`, `version:` | run triage, repo hygiene, release/version decisions |
 | Planning | `plan:`, `spike:` | prioritized backlog, design notes, decision doc |
 | Quality | `test:`, `docs:`, `ux:` | tests, documentation, or design artifacts |
 | Infrastructure | `azure:`, `infra:`, `deploy:` | preflight advisory, IaC changes, staged deployment |
@@ -422,6 +422,7 @@ Use these default chains unless there is a task-specific reason to override.
 | `security:` | `security-analyst -> policy-as-code-compliance -> guardrail` | remediation and policy validation |
 | `plan:` | `product-manager -> sprint-planner` | scoped sprint-ready backlog |
 | `test:` | `manual-test-strategy -> strategy-to-automation` | test strategy and automation candidates |
+| `portfolio:` | `issue-triage -> orphaned-pr-cleanup -> sprint-project-mapper -> sprint-planner -> governance-auditor` | end-to-end project hygiene with dedupe, grouping, dependency traceability, and governance checks |
 
 When chaining, each handoff prompt should include:
 
