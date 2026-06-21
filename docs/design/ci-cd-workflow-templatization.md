@@ -416,6 +416,8 @@ Consumer Repo
 - **#1305 Design**: Agentic Workflow Distribution & Consumer Agent SDK
   - Section "Decision 5: Integration with Related Initiatives"
   - Section "Impact on CI/CD Templatization (#1303)"
+- **#1665 Design**: Local + cloud testing workflows
+  - `docs/design/local-cloud-testing-workflows.md`
 - **Current Workflows**: `.github/workflows/(validate-basecoat|pr-validation|ci).yml`
 - **Related Issue**: #1304 (Memory Workflows Distribution — defer to Phase 3)
 
