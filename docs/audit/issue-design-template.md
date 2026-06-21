@@ -104,6 +104,7 @@ All agents serialize through a shared merge queue. When one agent's PRs encounte
 ### Related Issues / PRs
 
 - Related findings: See `docs/audit/ci-cd-findings-2026-06-14.md` section "1. Merge Bottleneck"
+- Published design spec: `docs/audit/merge-bottleneck-per-agent-lanes-design.md`
 - Reactive PRs: #1641, #1642, #1643 (tagged sprint:35-reactive-debt)
 - Dependent issues: #1662 (PR merge + cloud agent pairing), #1667 (dedicated sessions)
 

@@ -31,7 +31,7 @@ The BaseCoat CI/CD process has **diverged into two distinct patterns**:
 ### Workflow Reliability
 
 | Category | Success Rate | Status | Impact |
-|----------|-------------|--------|--------|
+| --- | --- | --- | --- |
 | Core validation (CI, PR validation, deployment) | 0–25% | 🔴 **CRITICAL** | Blocks releases; masking via manual override |
 | Gates & infra (secrets, version consistency, docs) | 75–100% | ✅ **Reliable** | Working as designed |
 | Agent workflows (code review, risk assessment) | 0–50% | 🔴 **UNRELIABLE** | Inconsistent; sometimes skip silently |
@@ -106,6 +106,7 @@ Each learning identifies a different bottleneck that velocity is masking:
 - **Current problem:** All agents serialize through shared merge queue
 - **Symptom:** When merges fail, all downstream work blocks
 - **Design question:** Should each agent type have its own lane?
+- **Design spec:** `docs/audit/merge-bottleneck-per-agent-lanes-design.md` (Issue #1661)
 
 ### 2. PR Merge Agent + Cloud Agent
 
@@ -172,5 +173,6 @@ The reactive damage-control PRs (#1641-1652) violated this principle. They shoul
 
 - **Design issues:** #1661-1669 (9 learnings logged for debate/design)
 - **Design template:** `docs/audit/issue-design-template.md`
+- **Issue #1661 design spec:** `docs/audit/merge-bottleneck-per-agent-lanes-design.md`
 - **Issue #1664 design ADR:** `docs/architecture/decisions/adr-002-agent-model-shifting-and-cost-governance.md`
 - **Cost-optimization strategy:** `.github/instructions/cost-optimization.instructions.md`
