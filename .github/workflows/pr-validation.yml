@@ -21,27 +21,78 @@ jobs:
     steps:
       - name: Validate PR has wave/sprint release label
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+
+          is_release_label() {
+            local normalized
+            normalized="$(tr '[:upper:]' '[:lower:]' <<<"$1")"
+            [[ "$normalized" =~ ^(wave:|sprint:|wave-|sprint-).+ ]] || [[ "$normalized" == "wave/sprint" ]]
+          }
+
+          # Guardrail validation for allowed and disallowed release label patterns.
+          for expected in "wave:1" "sprint:40" "wave-1" "sprint-2026-05" "wave/sprint"; do
+            if ! is_release_label "$expected"; then
+              echo "::error::Release label matcher rejected expected format: $expected"
+              exit 1
+            fi
+          done
+          for unexpected in "wave" "sprint" "size:S" "needs-triage"; do
+            if is_release_label "$unexpected"; then
+              echo "::error::Release label matcher accepted invalid format: $unexpected"
+              exit 1
+            fi
+          done
 
           if [[ ! -f "${GITHUB_EVENT_PATH}" ]]; then
             echo "::error::Missing event payload at ${GITHUB_EVENT_PATH}."
             exit 1
           fi
 
-          mapfile -t labels < <(jq -r '.pull_request.labels[].name // empty' "${GITHUB_EVENT_PATH}")
+          mapfile -t labels < <(jq -r '.pull_request.labels[]?.name // empty' "${GITHUB_EVENT_PATH}")
+          mapfile -t api_labels < <(
+            gh pr view "${{ github.event.pull_request.number }}" \
+              --repo "${{ github.repository }}" \
+              --json labels \
+              --jq '.labels[].name' 2>/dev/null || true
+          )
 
-          if printf '%s\n' "${labels[@]}" | grep -Eq '^(wave:|sprint:)'; then
+          if [[ ${#api_labels[@]} -gt 0 ]]; then
+            labels=("${api_labels[@]}")
+          fi
+
+          if [[ ${#labels[@]} -gt 0 ]]; then
+            printf 'Observed PR labels:\n'
+            printf -- '- %s\n' "${labels[@]}"
+          else
+            echo "Observed PR labels: (none)"
+          fi
+
+          has_release_label=0
+          has_skip_label=0
+          for label in "${labels[@]}"; do
+            if [[ "$(tr '[:upper:]' '[:lower:]' <<<"$label")" == "skip-release-label-gate" ]]; then
+              has_skip_label=1
+            fi
+
+            if is_release_label "$label"; then
+              has_release_label=1
+            fi
+          done
+
+          if [[ "$has_release_label" -eq 1 ]]; then
             echo "Release label gate passed."
             exit 0
           fi
 
-          if printf '%s\n' "${labels[@]}" | grep -Eq '^skip-release-label-gate$'; then
+          if [[ "$has_skip_label" -eq 1 ]]; then
             echo "::warning::Release label gate bypassed by skip-release-label-gate."
             exit 0
           fi
 
-          echo "::error::PR is missing release labels. Add at least one label matching wave:* or sprint:*."
+          echo "::error::PR is missing release labels. Add one label matching wave:*, sprint:*, wave-*, sprint-* or wave/sprint."
           echo "::error::If this PR is exempt, apply label: skip-release-label-gate."
           exit 1
 

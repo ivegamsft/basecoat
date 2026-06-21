@@ -146,7 +146,7 @@ jobs:
 
           pr_json="$(gh pr list --repo "${GITHUB_REPOSITORY}" --state merged --limit 500 --search "${search}" --json number,title,author,labels)"
           total="$(jq 'length' <<<"${pr_json}")"
-          unlabeled="$(jq '[.[] | select((.labels | map(.name | test("^wave:|^sprint:")) | any) | not)]' <<<"${pr_json}")"
+          unlabeled="$(jq '[.[] | select((.labels | map(.name | test("^(wave:|sprint:|wave-|sprint-).+|^wave/sprint$"; "i")) | any) | not)]' <<<"${pr_json}")"
           unlabeled_count="$(jq 'length' <<<"${unlabeled}")"
 
           echo "Release label coverage window: ${prev_tag}..${tag}"
