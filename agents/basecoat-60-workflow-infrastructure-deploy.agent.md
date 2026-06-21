@@ -28,10 +28,29 @@ The agent accepts the following inputs:
 - **Validation Only**: Boolean flag to run validation without deploying
 - **Rollback On Failure**: Enable automatic rollback on deployment failure
 - **Deployment Strategy**: Strategy type (complete, incremental)
+- **Deployment Handoff**: `deployment_handoff_v1` payload from merge coordinator
+
+## Pairing Contract: Cloud Deploy Intake
+
+When invoked as the paired deploy agent, consume `deployment_handoff_v1` and enforce:
+
+1. **Mode-aware behavior**
+   - `deploy_mode=blocking`: return hard veto on failed readiness preflight.
+   - `deploy_mode=advisory`: return deferred/advisory result without blocking merge history.
+2. **Risk-aware escalation**
+   - High-risk or `prod` handoffs default to blocking mode unless explicitly overridden by policy.
+3. **Status reporting**
+   - Publish one of `approved`, `blocked`, `deferred` with concise reason codes.
 
 ## Workflow
 
 The deployment workflow follows these phases:
+
+### 0. Handoff Intake & Policy Evaluation
+
+- Validate required handoff fields are present.
+- Map `environment` + `risk_tier` to effective `deploy_mode`.
+- Fail fast on malformed payload with explicit reason code.
 
 ### 1. Pre-Deployment Validation
 
@@ -243,6 +262,19 @@ The agent provides structured deployment results:
     "monthlyCost": 2500,
     "currencyCode": "USD"
   }
+}
+```
+
+### Pairing Response (Handoff Mode)
+
+```json
+{
+  "status": "approved|blocked|deferred",
+  "reasonCode": "all_checks_passed|missing_rollback_reference|quota_insufficient|policy_denied|malformed_handoff",
+  "environment": "dev|staging|prod",
+  "riskTier": "low|medium|high",
+  "deployMode": "advisory|blocking",
+  "mergeSha": "<sha>"
 }
 ```
 

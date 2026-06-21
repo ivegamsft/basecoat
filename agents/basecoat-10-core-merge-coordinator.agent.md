@@ -38,7 +38,29 @@ Prefer `git merge --no-commit --no-ff` for conflict detection. Use strategy flag
 4. Detect conflicts before commit.
 5. Auto-resolve only simple documentation or ignore-file conflicts.
 6. Escalate source-code conflicts for human review.
-7. Push safe merges and publish a clear report.
+7. Evaluate merge-time deployment readiness checks for the target environment.
+8. Emit a deployment handoff payload for the cloud deployment agent.
+9. Push safe merges and publish a clear report.
+
+## Pairing Contract: Merge -> Cloud Deploy
+
+When operating with a deployment agent, this agent emits `deployment_handoff_v1` with:
+
+- `pr_number`, `merge_sha`, `target_branch`
+- `environment`, `risk_tier`, `deploy_mode`
+- `required_checks` and final states
+- `change_surface` summary
+- `rollback_reference`
+
+### Merge-Time Mandatory Readiness Checks
+
+Before final merge completion, verify:
+
+1. Required status checks are green.
+2. Target deployment environment is declared.
+3. Rollback reference exists (runbook/path/link).
+
+If any mandatory check fails, do not emit handoff as ready; mark outcome `blocked`.
 
 ## Conflict Resolution Strategies
 
@@ -62,7 +84,7 @@ File issues for human-review conflicts, stale branches, broken post-merge tests,
 
 ## Output Format
 
-Return branch-by-branch status, conflicts, actions taken, issues filed, skipped branches, and final target state.
+Return branch-by-branch status, conflicts, actions taken, issues filed, skipped branches, final target state, and deployment handoff status (`approved`, `blocked`, `deferred`).
 
 ## Model
 
