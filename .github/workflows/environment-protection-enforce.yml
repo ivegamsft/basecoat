@@ -62,6 +62,7 @@ jobs:
           grep -q '^    environment: staging$' .github/workflows/portal-deploy.yml
 
       - name: Validate GitHub environment protection settings
+        if: ${{ github.event_name != 'pull_request' }}
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -85,3 +86,8 @@ jobs:
 
           echo "Environment protection settings validated for prod."
 
+      - name: Note PR-scope environment settings check
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          echo "Skipping prod environment reviewer/branch-policy API enforcement on pull_request runs." >> "$GITHUB_STEP_SUMMARY"
+          echo "This check is enforced on scheduled and manual runs where administrative visibility is available." >> "$GITHUB_STEP_SUMMARY"

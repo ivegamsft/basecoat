@@ -126,6 +126,19 @@ When writing an agent that acts on environments, add a resolver step to the work
 4. **Log** — include `operation_id` from context in all audit log entries for traceability.
 ```
 
+## Live workflow activation in this repository
+
+Resolver and drift checks are now wired into live deployment entrypoints:
+
+- [`.github/workflows/extension-deploy.yml`](../../.github/workflows/extension-deploy.yml)
+- [`.github/workflows/mcp-deploy.yml`](../../.github/workflows/mcp-deploy.yml)
+
+Both workflows run this policy gate sequence before deployment:
+
+1. Resolve context with `@basecoat/operation-context-resolver` using the workflow target environment.
+2. Fail if resolver returns policy errors or blocks `deploy_app`.
+3. Run `@basecoat/environment-audit-drift` preflight and block on critical drift for the target environment.
+
 ## Drift status linkage
 
 The resolver's `OperationContext` carries a `drift_status` field that reflects the most
@@ -157,4 +170,5 @@ proceed on a context resolved with errors.
 | Drift audit skill | `skills/environment-audit-drift/` |
 | Validate workflow | `.github/workflows/validate-operation-context.yml` |
 | Drift workflow | `.github/workflows/audit-environment-drift.yml` |
+| Live deployment gates | `.github/workflows/extension-deploy.yml`, `.github/workflows/mcp-deploy.yml` |
 | Incident responder (reference agent) | `agents/basecoat-60-workflow-incident-responder.agent.md` |

@@ -100,10 +100,127 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
+      - name: Set up Node.js for policy preflight
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '20'
+
+      - name: Build operation context resolver
+        working-directory: skills/operation-context-resolver
+        run: |
+          npm ci --no-audit --prefer-offline
+          npm run build
+
+      - name: Resolve operation context
+        id: op-context
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          node skills/operation-context-resolver/dist/cli.js resolve \
+            --repo-root "${GITHUB_WORKSPACE}" \
+            --github-ref "${GITHUB_REF}" \
+            --github-event-name "${GITHUB_EVENT_NAME}" \
+            --workflow-environment "${TARGET_ENV}" \
+            --user-intent "deploy extension image to ${TARGET_ENV}" \
+            --output "${RUNNER_TEMP}/operation-context.json"
+
+          echo "context_path=${RUNNER_TEMP}/operation-context.json" >> "$GITHUB_OUTPUT"
+
+      - name: Enforce operation context policy
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          CONTEXT_PATH="${{ steps.op-context.outputs.context_path }}"
+          TARGET_CONTEXT_ENV="$(jq -r '.target_environment' "${CONTEXT_PATH}")"
+          MODE="$(jq -r '.mode' "${CONTEXT_PATH}")"
+          GITHUB_ENVIRONMENT="$(jq -r '.github_environment' "${CONTEXT_PATH}")"
+          APPROVAL_REQUIRED="$(jq -r '.human_approval_required' "${CONTEXT_PATH}")"
+
+          if jq -e '.errors and (.errors | length > 0)' "${CONTEXT_PATH}" >/dev/null; then
+            echo "::error::operation-context-resolver returned errors."
+            jq -r '.errors[]' "${CONTEXT_PATH}" | sed 's/^/::error::/'
+            exit 1
+          fi
+
+          if ! jq -e '.allowed_actions | index("deploy_app")' "${CONTEXT_PATH}" >/dev/null; then
+            echo "::error::deploy_app is not allowed for ${TARGET_CONTEXT_ENV} (${MODE})."
+            exit 1
+          fi
+
+          if jq -e '.blocked_actions | index("deploy_app")' "${CONTEXT_PATH}" >/dev/null; then
+            echo "::error::deploy_app is blocked for ${TARGET_CONTEXT_ENV} (${MODE})."
+            exit 1
+          fi
+
+          if [[ "${TARGET_CONTEXT_ENV}" != "${TARGET_ENV}" ]]; then
+            echo "::error::Resolver target environment (${TARGET_CONTEXT_ENV}) does not match workflow target (${TARGET_ENV})."
+            exit 1
+          fi
+
+          if [[ "${APPROVAL_REQUIRED}" == "true" ]]; then
+            echo "::error::Resolver policy requires human approval for ${TARGET_CONTEXT_ENV} (${MODE}); automated deploy is blocked."
+            exit 1
+          fi
+
+          echo "### Operation context preflight" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Key | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Target environment | \`${TARGET_CONTEXT_ENV}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Mode | \`${MODE}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| GitHub environment | \`${GITHUB_ENVIRONMENT}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Human approval required | \`${APPROVAL_REQUIRED}\` |" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Azure login
         uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Build environment drift auditor
+        working-directory: skills/environment-audit-drift
+        run: |
+          npm ci --no-audit --prefer-offline
+          npm run build
+
+      - name: Advisory environment drift snapshot
+        id: drift-preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
+          node skills/environment-audit-drift/dist/cli.js \
+            --config .github/environment-map.yml \
+            --subscription "${SUBSCRIPTION_ID}" \
+            --github-token "${{ secrets.GITHUB_TOKEN }}" \
+            --output "${RUNNER_TEMP}/drift-report.json"
+
+          TARGET_CRITICAL=$(jq --arg env "${TARGET_ENV}" '[.findings[] | select(.environment == $env and .severity == "critical")] | length' "${RUNNER_TEMP}/drift-report.json")
+          TARGET_HIGH=$(jq --arg env "${TARGET_ENV}" '[.findings[] | select(.environment == $env and .severity == "high")] | length' "${RUNNER_TEMP}/drift-report.json")
+          TARGET_TOTAL=$(jq --arg env "${TARGET_ENV}" '[.findings[] | select(.environment == $env)] | length' "${RUNNER_TEMP}/drift-report.json")
+
+          echo "target_critical=${TARGET_CRITICAL}" >> "$GITHUB_OUTPUT"
+          echo "target_high=${TARGET_HIGH}" >> "$GITHUB_OUTPUT"
+          echo "target_total=${TARGET_TOTAL}" >> "$GITHUB_OUTPUT"
+
+          echo "### Environment drift snapshot (advisory)" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Target | Critical | High | Findings |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---:|---:|---:|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| \`${TARGET_ENV}\` | ${TARGET_CRITICAL} | ${TARGET_HIGH} | ${TARGET_TOTAL} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "> This snapshot is informational and does not replace environment protection rules, what-if validation, or health checks." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload drift preflight report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: extension-drift-preflight-${{ github.run_id }}
+          path: ${{ runner.temp }}/drift-report.json
+          if-no-files-found: ignore
+          retention-days: 14
 
       - name: Lowercase owner
         id: owner
