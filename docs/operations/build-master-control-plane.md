@@ -97,3 +97,14 @@ This pattern is intentionally aligned with existing repository guidance:
 
 It does not replace `merge-coordinator` or `ci-failure-escalation`; it composes
 with them as a higher-level control plane.
+
+## CI remediation traceability baseline
+
+The implementation-linked traceability follow-up for CI reliability remediation is
+tracked in `docs/audit/ci-remediation-traceability-2026-06-21.md` (issue #1659).
+
+Use that record as the auditable source for:
+
+1. Remediation PR linkage to failure classes.
+2. Broken versus flaky classification with owner/status.
+3. Retry versus escalation policy application and validation window targets.

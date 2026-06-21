@@ -175,4 +175,5 @@ The reactive damage-control PRs (#1641-1652) violated this principle. They shoul
 - **Design template:** `docs/audit/issue-design-template.md`
 - **Issue #1661 design spec:** `docs/audit/merge-bottleneck-per-agent-lanes-design.md`
 - **Issue #1664 design ADR:** `docs/architecture/decisions/adr-002-agent-model-shifting-and-cost-governance.md`
+- **Remediation traceability follow-up:** `docs/audit/ci-remediation-traceability-2026-06-21.md`
 - **Cost-optimization strategy:** `.github/instructions/cost-optimization.instructions.md`
