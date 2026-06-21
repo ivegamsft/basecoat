@@ -80,6 +80,7 @@ flowchart LR
 ## Operations (`docs/operations/`)
 
 - [operations/fleet-dispatch-policy.md](operations/fleet-dispatch-policy.md) — Guardrails and checklist for parallel sub-agent dispatch in fleet mode
+- [operations/session-per-task.md](operations/session-per-task.md) — Policy for issue-scoped dedicated sessions and cross-session handoffs
 - [operations/label-cleanup-plan.md](operations/label-cleanup-plan.md) — Safe label normalization plan that preserves repo-specific labels
 - [operations/release-process.md](operations/release-process.md) — How releases are cut and published
 - [operations/release-metrics.md](operations/release-metrics.md) — Release metrics and KPIs

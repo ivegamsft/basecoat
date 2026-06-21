@@ -24,10 +24,11 @@ Execute these in order to reduce input-token bloat first, then optimize routing:
 ### Operator checklist for every long CLI run
 
 1. Start with short context and file references only.
-2. At each phase switch (triage -> implementation -> merge waiting), run `/compact`.
-3. If switching to a new domain (for example: sprint planning -> release operations), run `/new` and reload only relevant references.
-4. Keep main-thread messages decision-focused; delegate scan/research work.
-5. For attachment-heavy tasks, create one canonical summary artifact and reference it by path/link.
+2. Default to one dedicated session per issue/task; use a new session when objective or deliverable changes.
+3. At each phase switch (triage -> implementation -> merge waiting), run `/compact`.
+4. If switching to a new domain (for example: sprint planning -> release operations), run `/new` and reload only relevant references.
+5. Keep main-thread messages decision-focused; delegate scan/research work.
+6. For attachment-heavy tasks, create one canonical summary artifact and reference it by path/link.
 
 ### 1. Compact at phase transitions (not just time)
 
