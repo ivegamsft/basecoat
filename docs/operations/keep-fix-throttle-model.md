@@ -248,6 +248,7 @@ Before deploying any KFT workstreams, capture baseline:
 - `docs/operations/failure-pattern-consumer-process.md` — Failure triage workflow
 - `docs/operations/operational-runbook.md` — Runbook template for kept patterns
 - `docs/reference/governance-contract.md` — Label taxonomy and governance labels
+- `docs/design/pr-only-agent-responsibility-model.md` — PR-only tiered responsibility design
 
 ---
 

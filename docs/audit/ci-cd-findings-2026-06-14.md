@@ -118,6 +118,7 @@ Each learning identifies a different bottleneck that velocity is masking:
 - **Current problem:** Agents mix PR authorship, review, merge, deployment responsibilities
 - **Symptom:** One failure cascades; unclear accountability
 - **Design question:** Should agent responsibilities be split by lifecycle stage?
+- **Design output:** `docs/design/pr-only-agent-responsibility-model.md` (issue #1663)
 
 ### 4–9. Other Learnings
 
