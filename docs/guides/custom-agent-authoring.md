@@ -59,6 +59,17 @@ metadata:
 allowed-tools: ["bash", "git"]
 visibility: basic
 model: gpt-5.3-codex
+model_policy:
+  fallback: true
+  preferred_families: ["gpt", "claude"]
+  upshift:
+    allowed: true
+    owner: runtime
+    max_tier: reasoning
+    triggers: ["complexity", "safety_risk"]
+  cost_tracking:
+    budget_tier: standard
+    chargeback_tag: release-automation
 allowed_skills: []
 color: gray
 handoffs: []
@@ -71,6 +82,9 @@ Guidance:
 - Include only tools and skills the workflow actually needs.
 - Prefer `allowed_skills: []` unless skill invocation is required.
 - Keep description trigger phrases explicit and testable.
+- Prefer `model_policy` for preferred/fallback and upshift routing rules.
+- Keep `model` only for legacy compatibility during migration.
+- Add `cost_tracking.chargeback_tag` for workflows that run regularly in CI or fleet automation.
 - Frontmatter generation scripts enforce a shared fallback policy: unsupported or missing `model` values are rewritten to safe defaults during generated artifact builds.
 
 ## 5. Write workflow sections that map to real execution

@@ -25,6 +25,14 @@ model_policy: (recommended when model behavior matters)
   fallback: true
   preferred_families: [family-a, family-b]
   excluded_tiers: [tier-a] # optional
+  upshift: # optional, recommended for non-trivial agents
+    allowed: true
+    owner: runtime|orchestrator|human
+    max_tier: reasoning|premium
+    triggers: [complexity, safety_risk, repeated_failures, low_confidence]
+  cost_tracking: # optional, recommended for production workflows
+    budget_tier: low|standard|high
+    chargeback_tag: string
 pinned_model: string (optional; only for justified pinning)
 pin_reason: string (required when pinned_model is set)
 model: string (legacy compatibility; allowed during migration)
@@ -39,6 +47,9 @@ model: string (legacy compatibility; allowed during migration)
   - strict compatibility constraint
 - If `pinned_model` is present, `pin_reason` is required.
 - New and updated assets should include a safe fallback policy (`fallback: true` and preferred families).
+- If `upshift.allowed` is true, define explicit `owner` and `triggers` so model shifts are deterministic.
+- Prefer `owner: runtime` for automatic upshift rules; use `owner: human` only for regulated/high-risk flows.
+- For assets used in long-running or production workflows, include `cost_tracking` fields for per-agent spend attribution.
 - Legacy `model` fields remain valid during migration; do not force bulk rewrites.
 
 ### Visibility Tags
@@ -59,6 +70,16 @@ compatibility: string (required)
 visibility: public|private (optional, defaults to public)
 capabilities: (optional, recommended for model-sensitive skills)
 model_policy: (optional)
+  fallback: true
+  preferred_families: [family-a, family-b]
+  upshift:
+    allowed: true
+    owner: runtime|orchestrator|human
+    max_tier: reasoning|premium
+    triggers: [complexity, safety_risk, repeated_failures, low_confidence]
+  cost_tracking:
+    budget_tier: low|standard|high
+    chargeback_tag: string
 pinned_model: string (optional; requires pin_reason)
 pin_reason: string (required when pinned_model is set)
 ```

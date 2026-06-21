@@ -69,6 +69,32 @@ Override the recommended model when:
 
 ---
 
+## Model Shift Governance Contract
+
+Use explicit metadata, not prompt prose, to control shifts:
+
+- Declare preferred/fallback using `model_policy.fallback` and
+  `model_policy.preferred_families`.
+- If dynamic upshifts are allowed, declare:
+  - `model_policy.upshift.allowed`
+  - `model_policy.upshift.owner` (`runtime`, `orchestrator`, or `human`)
+  - `model_policy.upshift.max_tier`
+  - `model_policy.upshift.triggers`
+- Keep trigger vocabulary constrained to:
+  `complexity`, `safety_risk`, `repeated_failures`, `low_confidence`.
+
+Who decides when to upshift:
+
+| Owner | Use when | Example |
+|---|---|---|
+| `runtime` | Deterministic local signal is sufficient | A code task repeatedly fails tests; runtime escalates from Fast to Code tier |
+| `orchestrator` | Cross-agent context is required | Security reviewer upshifts a downstream implementation agent after risk detection |
+| `human` | Regulated or approval-bound workflows | Production compliance analysis requires explicit operator approval before Premium tier |
+
+Reference: `docs/architecture/decisions/adr-002-agent-model-shifting-and-cost-governance.md`.
+
+---
+
 ## Cost Considerations
 
 Rough relative cost per million tokens (input + output blended):
@@ -83,6 +109,28 @@ Rough relative cost per million tokens (input + output blended):
 | gpt-4.1 | 0.05× | Binary checks, guardrails, cheapest |
 
 **Rule of thumb:** If 10 Haiku runs cost less than 1 Sonnet run _and_ the Haiku output is good enough, use Haiku. If a single Opus run saves you from a production incident, use Opus.
+
+---
+
+## Per-Agent Cost Tracking
+
+For recurring automation and production workflows, include:
+
+- `model_policy.cost_tracking.budget_tier` (`low`, `standard`, `high`)
+- `model_policy.cost_tracking.chargeback_tag` (team/workflow identifier)
+
+At runtime, collect these fields for each agent session:
+
+- `agent_name`
+- `selected_model`
+- `shift_reason` (when a model shift occurred)
+- `input_tokens`
+- `output_tokens`
+- `estimated_cost_usd`
+- `chargeback_tag`
+
+This supports spend attribution per agent and per workflow without forcing all
+agents onto pinned models.
 
 ---
 

@@ -104,6 +104,7 @@ nav:
     - Overview: architecture/overview.md
     - Diagrams: diagrams/architecture-diagrams-index.md
     - ADR-001 Naming Convention: architecture/decisions/adr-001-naming-convention.md
+    - ADR-002 Agent Model Shifting and Cost Governance: architecture/decisions/adr-002-agent-model-shifting-and-cost-governance.md
     - Multi-Agent Patterns: architecture/multi-agent-orchestration-patterns.md
   - About:
     - Philosophy: philosophy.md
