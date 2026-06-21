@@ -51,9 +51,42 @@ jobs:
         run: |
           python -m mkdocs build
 
-  deploy:
+  verify-github-pages-environment:
     if: github.event_name != 'pull_request'
     needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify github-pages environment allows main deployments
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          ENV_PAYLOAD="$(gh api "repos/${{ github.repository }}/environments/github-pages" 2>/dev/null || true)"
+          if [[ -z "$ENV_PAYLOAD" ]]; then
+            echo "::notice::Environment 'github-pages' is not yet configured. GitHub may create it automatically on first deployment."
+            exit 0
+          fi
+
+          CUSTOM_POLICY="$(echo "$ENV_PAYLOAD" | jq -r '.deployment_branch_policy.custom_branch_policies // false')"
+          PROTECTED_ONLY="$(echo "$ENV_PAYLOAD" | jq -r '.deployment_branch_policy.protected_branches // false')"
+
+          if [[ "$CUSTOM_POLICY" == "true" ]]; then
+            BRANCHES="$(gh api "repos/${{ github.repository }}/environments/github-pages/deployment-branch-policies" --jq '.branch_policies[].name' 2>/dev/null || true)"
+            if ! echo "$BRANCHES" | grep -qx 'main'; then
+              echo "::error::Environment 'github-pages' allows selected branches, but 'main' is not included."
+              echo "Update Settings → Environments → github-pages → Deployment branches and add 'main', or switch to protected branches only."
+              exit 1
+            fi
+          elif [[ "$PROTECTED_ONLY" != "true" ]]; then
+            echo "::notice::Environment 'github-pages' does not enforce branch restrictions. This does not block deploy, but branch policy is recommended."
+          fi
+
+          echo "github-pages environment policy permits deployments from main."
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: [validate, verify-github-pages-environment]
     runs-on: ubuntu-latest
     environment:
       name: github-pages

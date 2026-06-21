@@ -77,15 +77,18 @@ Navigate to: **Repository Settings → Branches → Add rule** (or edit existing
 
 #### Required status checks for `main`
 
-These are the checks defined in basecoat workflows:
+These are the minimum checks required for readiness gating on `main`:
 
 | Check name | Workflow | Notes |
 |-----------|----------|-------|
+| `lint-and-validate` | `ci.yml` | CI lint and validation gate |
+| `test` | `ci.yml` | CI test gate |
 | `validate-commit-messages` | `validate-basecoat.yml` | Commit message format |
 | `validate-unix` | `validate-basecoat.yml` | Bash validation suite |
 | `validate-windows` | `validate-basecoat.yml` | PowerShell validation suite |
-| `Agent Merge / Agent merge guardrails` | `agent-merge.yml` | Eval companion validation and agent/skill guardrails (runs on all PRs; skips heavy checks when assets are unchanged) |
-| `prd-spec-gate` | `prd-spec-gate.yml` | PRD/spec compliance; passes automatically for merge queue events |
+| `release-label-gate` | `pr-validation.yml` | PR release-label readiness gate |
+| `Agent Merge / Agent merge guardrails` | `agent-merge.yml` | Optional additional governance guardrail |
+| `prd-spec-gate` | `prd-spec-gate.yml` | Optional PRD/spec governance gate |
 | `gitleaks` | `secret-scan.yml` | ⚠️ Warn-only — **do NOT add as required check** |
 
 > **Important:** Do **not** add the `gitleaks` / `Secret Scanning (warn only)`
@@ -271,6 +274,21 @@ prototype repos), enable at minimum:
 3. ✅ No force pushes
 4. ✅ No deletions
 5. ✅ Local gitleaks pre-commit hook installed
+
+---
+
+## Verification checklist for issue #1764
+
+After admins apply branch protection, verify all of the following:
+
+1. `gh api /repos/IBuySpy-Shared/basecoat/branches/main/protection` returns `200` (not `404`).
+2. `required_status_checks.strict` is `true`.
+3. Required checks include: `lint-and-validate`, `test`, `validate-commit-messages`, `validate-unix`, `validate-windows`, `release-label-gate`.
+4. `required_pull_request_reviews.required_approving_review_count` is at least `1`.
+5. `enforce_admins.enabled` is `true` (recommended).
+6. A PR with one failing required check cannot be merged.
+
+The `Main branch protection readiness gate` job in `.github/workflows/pr-validation.yml` validates this baseline on every PR to `main`.
 
 ---
 

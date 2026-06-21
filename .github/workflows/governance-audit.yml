@@ -54,7 +54,7 @@ jobs:
           grep -q '^## Mandatory production protections$' docs/reference/environment-protection.md
           grep -q 'manual approvals are required' docs/reference/environment-protection.md
           grep -q 'environment protection gates' docs/operations/environment-protection-enforcement.md
-          grep -q "Environment 'prod' must have at least one required reviewer" .github/workflows/environment-protection-enforce.yml
+          grep -q "must have at least one required reviewer" .github/workflows/environment-protection-enforce.yml
           grep -q 'docs/reference/governance-contract.md' .github/ISSUE_TEMPLATE/issue.md
           grep -q 'docs/reference/governance-contract.md' .github/PULL_REQUEST_TEMPLATE.md
 

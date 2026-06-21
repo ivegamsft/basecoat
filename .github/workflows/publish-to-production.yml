@@ -30,6 +30,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment: production
+
+    steps:
       - name: Check out repository at tag
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
@@ -286,4 +288,3 @@ jobs:
           else
             echo "::warning::Release creation returned HTTP ${create_status} — may need manual creation."
           fi
-

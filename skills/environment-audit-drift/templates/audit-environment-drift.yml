@@ -39,12 +39,18 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Install local environment drift CLI dependencies
+        run: npm ci --prefix skills/environment-audit-drift
+
+      - name: Build local environment drift CLI
+        run: npm run --prefix skills/environment-audit-drift build
+
       - name: Audit environment drift
         id: audit
         run: |
-          STRICT_MODE="${{ github.event.inputs.strict_mode || 'false' }}"
+          STRICT_MODE="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.strict_mode || 'false' }}"
           
-          npx --yes @basecoat/environment-audit-drift \
+          node skills/environment-audit-drift/dist/cli.js \
             --config .github/environment-map.yml \
             --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
             --github-token "${{ secrets.GITHUB_TOKEN }}" \
@@ -105,9 +111,7 @@ jobs:
             });
 
       - name: Fail if critical drift in strict mode
-        if: |
-          github.event.inputs.strict_mode == 'true' &&
-          steps.audit.outputs.drift_status == 'critical'
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.strict_mode == 'true' && steps.audit.outputs.drift_status == 'critical' }}
         run: |
           echo "Critical drift detected in strict mode"
           exit 1

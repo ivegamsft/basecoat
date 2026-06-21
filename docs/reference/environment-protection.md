@@ -8,28 +8,28 @@ This baseline defines required protection controls for all deployment environmen
 |---|---|---|---|
 | `dev` | Early validation and integration | Optional | Any branch for workflow-dispatch testing |
 | `staging` | Pre-production validation | Optional (recommended for regulated repos) | `main` and release/hotfix branches only |
-| `prod` | Production-facing deployments | Required manual approval | Protected branches only (`main`, `release/*`, `hotfix/*`) |
+| `production` (`prod` alias) | Production-facing deployments | Required manual approval | Protected branches only (`main`, `release/*`, `hotfix/*`) |
 
 ## Mandatory production protections
 
-Production (`prod`) environments must enforce all of the following — manual approvals are required for any release to proceed:
+Production (`production`, with `prod` as optional alias) environments must enforce all of the following — manual approvals are required for any release to proceed:
 
 1. Manual approvals are required before deployment jobs start.
 2. Deployment is restricted to protected branches or explicitly listed branch patterns.
-3. Workflow jobs targeting production use an explicit GitHub environment (`environment: prod`).
+3. Workflow jobs targeting production use an explicit GitHub environment (`environment: production` preferred).
 4. Production deployment configuration is sourced from protected environment secrets/variables, not inline literals.
 5. Approval and deployment history remains available in GitHub environment audit trails.
 
 ## Manual approval policy
 
-- At least one required reviewer is configured on `prod`.
+- At least one required reviewer is configured on `production` (or `prod` where still in use).
 - Required reviewers should map to release owners or on-call maintainers.
 - Self-approval should remain disabled when repository settings support it.
 - Emergency bypasses are allowed only when documented in an incident or release issue.
 
 ## Protected environment variables and secrets
 
-The `prod` environment is the source of truth for production deployment values:
+The `production` environment is the source of truth for production deployment values:
 
 - Environment-scoped credentials and tokens
 - Environment-specific resource identifiers

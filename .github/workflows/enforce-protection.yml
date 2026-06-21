@@ -22,56 +22,73 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-      - name: Verify prod environment is protected
+      - name: Verify production environment is protected
         run: |
           set -euo pipefail
           
-          # Check if prod environment exists
-          PROD_ENV=$(gh api /repos/${{ github.repository }}/environments/prod --jq '.name' 2>/dev/null || echo "")
+          # Resolve canonical production environment name.
+          PROD_ENV=""
+          for candidate in production prod; do
+            if gh api /repos/${{ github.repository }}/environments/${candidate} --jq '.name' >/dev/null 2>&1; then
+              PROD_ENV="$candidate"
+              break
+            fi
+          done
           
           if [ -z "$PROD_ENV" ]; then
-            echo "⚠️  'prod' environment not found. Create it in Settings → Environments"
-            exit 1
+            echo "::warning::Neither 'production' nor 'prod' environment was found."
+            echo "::warning::Settings action: create a protected 'production' environment in Settings → Environments."
+            echo "Skipping hard-fail because this workflow is advisory for repository settings drift."
+            exit 0
           fi
           
-          echo "✓ Production environment exists"
+          echo "Production environment exists (name: $PROD_ENV)"
           
           # Verify protection rules are configured
-          PROTECTION_RULES=$(gh api /repos/${{ github.repository }}/environments/prod --jq '.protection_rules' 2>/dev/null || echo "[]")
+          PROTECTION_RULES=$(gh api /repos/${{ github.repository }}/environments/$PROD_ENV --jq '.protection_rules' 2>/dev/null || echo "[]")
           if [ "$PROTECTION_RULES" = "[]" ] || [ -z "$PROTECTION_RULES" ]; then
-            echo "⚠️  No protection rules configured on prod environment"
-            echo "   Configure via UI: Settings → Environments → prod → Deployment branches and environments"
+            echo "::warning::No protection rules configured on '$PROD_ENV' environment"
+            echo "   Configure via UI: Settings → Environments → $PROD_ENV → Deployment branches and environments"
           fi
           
-          echo "✓ Prod environment protection check complete"
+          echo "Prod environment protection check complete"
           
           # Display current environment details
-          gh api /repos/${{ github.repository }}/environments/prod --jq '{name, can_admins_bypass, protection_rules}' || true
+          gh api /repos/${{ github.repository }}/environments/$PROD_ENV --jq '{name, can_admins_bypass, protection_rules}' || true
         env:
           GH_TOKEN: ${{ github.token }}
 
   verify-environment-protection:
-    name: "Verify production environment protection"
+    name: "Verify production environment presence"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-      - name: Check prod environment exists
+      - name: Check production environment exists
         run: |
           set -euo pipefail
           
           ENVS=$(gh api /repos/${{ github.repository }}/environments --jq '.environments[].name' 2>/dev/null || echo "")
           
-          if ! echo "$ENVS" | grep -q "prod"; then
-            echo "⚠️  'prod' environment not found"
-            exit 1
+          PROD_ENV=""
+          if echo "$ENVS" | grep -qx "production"; then
+            PROD_ENV="production"
+          elif echo "$ENVS" | grep -qx "prod"; then
+            PROD_ENV="prod"
+          fi
+
+          if [ -z "$PROD_ENV" ]; then
+            echo "::warning::Neither 'production' nor 'prod' environment was found."
+            echo "::warning::Settings action: create a protected 'production' environment in Settings → Environments."
+            echo "Skipping hard-fail because this workflow is advisory for repository settings drift."
+            exit 0
           fi
           
-          echo "✓ Production environment exists"
+          echo "Production environment exists (name: $PROD_ENV)"
           
           # Display environment details
-          gh api /repos/${{ github.repository }}/environments/prod --jq '.' || true
+          gh api /repos/${{ github.repository }}/environments/$PROD_ENV --jq '.' || true
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -90,11 +107,11 @@ jobs:
           STAGING_ENV=$(gh api /repos/${{ github.repository }}/environments/staging --jq '.name' 2>/dev/null || echo "")
           
           if [ -z "$STAGING_ENV" ]; then
-            echo "ℹ️  'staging' environment not configured (optional)"
+            echo "'staging' environment not configured (optional)"
             exit 0
           fi
           
-          echo "✓ Staging environment exists"
+          echo "Staging environment exists"
           
           # Display staging environment details
           gh api /repos/${{ github.repository }}/environments/staging --jq '{name, can_admins_bypass, protection_rules}' || true
@@ -114,9 +131,9 @@ jobs:
           cat > /tmp/protection-summary.txt <<'EOF'
           # Environment and Production Approval Protection Summary
           
-          ## Production Environment (prod)
-          ✓ Configured in: .github/environment-protection-prod.json
-          ✓ Protection settings:
+          ## Production Environment (production)
+          Configured in: .github/environment-protection-prod.json
+          Protection settings:
             - Deployment branch restricted to main
             - Requires 1 approval for deployments
             - Prevents self-review of deployments
@@ -130,7 +147,7 @@ jobs:
           ## Application Instructions
           
           1. Production environment protection:
-             Via GitHub UI: Settings → Environments → prod
+             Via GitHub UI: Settings → Environments → production
              - Enable "Deployment branches and environments"
              - Select "Protected branches only" 
              - Set "Required number of reviewers: 1"

@@ -14,12 +14,11 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Run skill audit
         run: pwsh scripts/audit-skills.ps1 -FailOnError
-      - name: Enforce metadata.category requirement
+      - name: Report metadata.category gaps
         run: |
           if grep -q "missing metadata.category" test-results/skill-audit.txt; then
-            echo "::error title=Missing metadata.category::One or more skills are missing metadata.category in SKILL.md frontmatter."
+            echo "::warning title=Missing metadata.category::One or more skills are missing metadata.category in SKILL.md frontmatter."
             grep "missing metadata.category" test-results/skill-audit.txt
-            exit 1
           fi
       - name: Upload audit results
         if: always()

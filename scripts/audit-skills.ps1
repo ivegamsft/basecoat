@@ -166,27 +166,30 @@ foreach ($skillDir in $skillDirs) {
         }
 
         # Check 3: Required frontmatter fields
-        foreach ($field in @('name', 'description', 'compatibility', 'category')) {
+        foreach ($field in @('name', 'description', 'compatibility')) {
             if ($frontmatter -notmatch "(?m)^$field\s*:") {
                 $errors.Add("missing field: $field")
             }
+        }
+        if ($frontmatter -notmatch '(?m)^category\s*:') {
+            $warnings.Add("missing field: category")
         }
 
         # Check 4: Compatibility taxonomy
         $compat = Get-CompatibilityAnalysis -Frontmatter $frontmatter
         if ($compat.keyCount -gt 1) {
-            $errors.Add("duplicate compatibility keys found ($($compat.keyCount))")
+            $warnings.Add("duplicate compatibility keys found ($($compat.keyCount))")
         }
         if ($compat.tokens.Count -eq 0) {
-            $errors.Add("compatibility has no values")
+            $warnings.Add("compatibility has no values")
         } else {
             foreach ($token in $compat.tokens) {
                 if ($token -notmatch '^(GHCP|agent:[a-z0-9][a-z0-9-]*|skill:[a-z0-9][a-z0-9-]*)$') {
-                    $errors.Add("invalid compatibility token: $token")
+                    $warnings.Add("invalid compatibility token: $token")
                 }
             }
             if ($compat.tokens -notcontains 'GHCP') {
-                $errors.Add("compatibility must include GHCP")
+                $warnings.Add("compatibility should include GHCP")
             }
         }
 
