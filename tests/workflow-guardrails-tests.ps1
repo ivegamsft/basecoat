@@ -479,8 +479,8 @@ else {
     $guardrailFailures += 'agent-merge-required-status'
 }
 
-# Test 15: Required-check workflows must support merge queue
-Write-Host '  Test 15: Validate required-check workflows support merge_group...'
+# Test 15: Required-check workflows must support merge queue and prd-spec-gate semantics
+Write-Host '  Test 15: Validate required-check workflows and prd-spec-gate semantics...'
 $mergeQueueWorkflowRequirements = @(
     '.github/workflows/validate-basecoat.yml',
     '.github/workflows/prd-spec-gate.yml'
@@ -494,7 +494,7 @@ foreach ($workflowPath in $mergeQueueWorkflowRequirements) {
     }
 
     $workflowContent = Get-Content $workflowPath -Raw
-    if ($workflowContent -notmatch "(?m)^\s+merge_group:\s*$") {
+    if ($workflowContent -notmatch '(?m)^\s+merge_group:\s*$') {
         $mergeQueueTriggerViolations += "$workflowPath (missing merge_group trigger)"
     }
 }
@@ -505,6 +505,78 @@ if ($mergeQueueTriggerViolations.Count -eq 0) {
 else {
     Write-Host "    ✗ Missing merge_group support in: $($mergeQueueTriggerViolations -join ', ')" -ForegroundColor Red
     $guardrailFailures += 'merge-queue-trigger-missing'
+}
+
+$prdSpecWorkflowPath = Join-Path $workflowDir 'prd-spec-gate.yml'
+$prdSpecDocPath = 'docs/operations/security/branch-protection.md'
+$mergeQueueDocPath = 'docs/operations/merge-queue-enforcement.md'
+$prdSpecWorkflowIssues = @()
+
+if (-not (Test-Path $prdSpecWorkflowPath)) {
+    $prdSpecWorkflowIssues += 'prd-spec-gate.yml (missing file)'
+}
+else {
+    $prdSpecWorkflow = Get-Content $prdSpecWorkflowPath -Raw
+
+    if ($prdSpecWorkflow -notmatch '(?m)^\s{2}prd-spec-gate:\s*$') {
+        $prdSpecWorkflowIssues += 'prd-spec-gate.yml (missing prd-spec-gate job)'
+    }
+
+    if ($prdSpecWorkflow -notmatch '(?m)^\s+merge_group:\s*$') {
+        $prdSpecWorkflowIssues += 'prd-spec-gate.yml (missing merge_group trigger)'
+    }
+
+    if ($prdSpecWorkflow -notmatch '(?m)^\s+-\s+checks_requested\s*$') {
+        $prdSpecWorkflowIssues += 'prd-spec-gate.yml (missing merge_group checks_requested type)'
+    }
+
+    foreach ($requiredType in @('opened', 'edited', 'synchronize', 'reopened', 'ready_for_review', 'labeled', 'unlabeled')) {
+        if ($prdSpecWorkflow -notmatch "(?m)^\s+-\s+$requiredType\s*$") {
+            $prdSpecWorkflowIssues += "prd-spec-gate.yml (missing pull_request type: $requiredType)"
+        }
+    }
+
+    if ($prdSpecWorkflow -notmatch 'skip-prd-spec-check') {
+        $prdSpecWorkflowIssues += 'prd-spec-gate.yml (missing skip-prd-spec-check label handling)'
+    }
+
+    if ($prdSpecWorkflow -notmatch 'if\s*\(\s*!context\.payload\.pull_request\s*\)' -or $prdSpecWorkflow -notmatch 'return;') {
+        $prdSpecWorkflowIssues += 'prd-spec-gate.yml (missing merge_group no-PR payload guard)'
+    }
+
+    if ($prdSpecWorkflow -notmatch 'changedFiles\s*>=\s*12\s*\|\|\s*churn\s*>=\s*500') {
+        $prdSpecWorkflowIssues += 'prd-spec-gate.yml (missing high-change threshold semantics)'
+    }
+
+    if ($prdSpecWorkflow -notmatch '\^\\\.github\\/workflows\\/' -or $prdSpecWorkflow -notmatch 'hasPrd\s*&&\s*hasSpec') {
+        $prdSpecWorkflowIssues += 'prd-spec-gate.yml (missing risky-path or PRD/spec requirement semantics)'
+    }
+}
+
+$contractDocIssues = @()
+foreach ($docPath in @($prdSpecDocPath, $mergeQueueDocPath)) {
+    if (-not (Test-Path $docPath)) {
+        $contractDocIssues += "$docPath (missing file)"
+        continue
+    }
+
+    $docContent = Get-Content $docPath -Raw
+    if ($docContent -notmatch 'prd-spec-gate' -or $docContent -notmatch 'prd-spec-gate\.yml') {
+        $contractDocIssues += "$docPath (missing prd-spec-gate contract reference)"
+    }
+}
+
+if ($prdSpecWorkflowIssues.Count -eq 0 -and $contractDocIssues.Count -eq 0) {
+    Write-Host '    ✓ prd-spec-gate workflow semantics and required-check docs are aligned'
+}
+else {
+    foreach ($issue in $prdSpecWorkflowIssues) {
+        Write-Host "    ✗ $issue" -ForegroundColor Red
+    }
+    foreach ($issue in $contractDocIssues) {
+        Write-Host "    ✗ $issue" -ForegroundColor Red
+    }
+    $guardrailFailures += 'prd-spec-gate-contract'
 }
 
 # Test 16: Production workflows must route through the protected production environment
