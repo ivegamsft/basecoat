@@ -7,6 +7,7 @@ All notable changes to this repository should be recorded in this file.
 ### Added
 
 - Added local-vs-cloud test gating design with tiered gate model, conditional cloud routing, and environment parity strategy (`docs/design/local-cloud-testing-workflows.md`). (#1665)
+- Added PR gate intake rollout runbook plus matching issue and PR template intake fields for PRD/spec readiness (`docs/operations/pr-gate-intake-rollout.md`, `docs/templates/pr-template.md`). (#1815)
 
 ## 3.32.0 - 2026-06-14
 
