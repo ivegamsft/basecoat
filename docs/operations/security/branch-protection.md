@@ -88,7 +88,7 @@ These are the minimum checks required for readiness gating on `main`:
 | `validate-windows` | `validate-basecoat.yml` | PowerShell validation suite |
 | `release-label-gate` | `pr-validation.yml` | PR release-label readiness gate |
 | `Agent Merge / Agent merge guardrails` | `agent-merge.yml` | Optional additional governance guardrail |
-| `prd-spec-gate` | `prd-spec-gate.yml` | Optional PRD/spec governance gate |
+| `prd-spec-gate` | `prd-spec-gate.yml` | Intake gate: blocks only high-change PRs missing both PRD+Spec refs; warns for risky-path-only PRs |
 | `gitleaks` | `secret-scan.yml` | ⚠️ Warn-only — **do NOT add as required check** |
 
 > **Important:** Do **not** add the `gitleaks` / `Secret Scanning (warn only)`

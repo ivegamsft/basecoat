@@ -110,8 +110,10 @@ Do not point consumers at repo-local or personal spaces for BaseCoat canonical g
 Base Coat includes validation workflows. Ensure these run on your fork:
 
 - **`validate-basecoat.yml`** — Validates file structure, naming conventions, and commit message security
-- **`prd-spec-gate.yml`** — Enforces PRD/spec references on high-change pull requests
+- **`prd-spec-gate.yml`** — Intake gate: high-change PRs (`>=12` files or `>=500` churn) require both PRD+spec refs; risky-path-only PRs (`instructions/`, `skills/`, `agents/`, `scripts/`, `.github/workflows/`) get advisory warning when missing refs
 - **`validate-repo-template-sample.yml`** — Validates sample repo template assets
+
+For merge-queue runs (`merge_group`), the gate passes with a notice because PR body context is unavailable in the merge group payload.
 
 ### Distribution Channels
 

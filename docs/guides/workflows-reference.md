@@ -137,27 +137,24 @@ inputs:
 
 **Trigger:**
 
-- Automatic: On pull requests that exceed size thresholds
-- Blocks merge if PRD/spec missing (can override with label)
+- Automatic: Pull request lifecycle events
+- Blocks merge only for high-change PRs if intake evidence is missing
+- Supports skip override via PR label
 
 **What It Does:**
 
-- Checks PR size (lines changed)
-- Checks file count
-- Requires PRD/spec links for large PRs
-- Advisory-only for smaller changes
+- Calculates high-change thresholds from the PR payload:
+  - `changed_files >= 12` or
+  - `additions + deletions >= 500`
+- Detects risky path changes (`instructions/`, `skills/`, `agents/`, `scripts/`, `.github/workflows/`)
+- Requires both PRD and spec references for high-change PRs
+- Emits advisory warning (non-blocking) for risky-path-only PRs when no PRD/spec reference is present
+- Accepts links in markdown or structured lines (`PRD: <link>`, `Spec: <link>`)
 
 **Configuration:**
 
-```yaml
-inputs:
-  size_threshold:
-    description: "PR size threshold (default: 500 lines)"
-    default: "500"
-  file_count_threshold:
-    description: "File count threshold (default: 12 files)"
-    default: "12"
-```
+- No `workflow_dispatch` inputs for thresholds
+- Behavior is fixed in workflow code to keep intake policy consistent across repos
 
 **Bypass:**
 
@@ -166,8 +163,8 @@ inputs:
 **Output:**
 
 - Status check (pass/fail)
-- Comment with PRD/spec link requirements
-- Advisory warning for medium changes
+- Failure message for high-change PRs missing intake links
+- Advisory warning for risky-path-only PRs missing intake links
 
 **Consumer Value:**
 

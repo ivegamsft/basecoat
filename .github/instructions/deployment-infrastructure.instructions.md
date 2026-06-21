@@ -36,7 +36,7 @@ the `publish` job runs. See issue #575 for PAT rotation steps.
 The `prd-spec-gate.yml` workflow blocks PRs with:
 
 - ≥ 500 line churn **OR** ≥ 12 files that lack PRD and spec links
-- PRs touching risky paths (skills/, agents/, instructions/) get advisory warning below threshold
+- PRs touching risky paths (`skills/`, `agents/`, `instructions/`, `scripts/`, `.github/workflows/`) get advisory warning below threshold
 - Add the `skip-prd-spec-check` label to bypass
 
 Contributor guideline: Keep PRs within 15 files or fewer and 300 changed lines or fewer

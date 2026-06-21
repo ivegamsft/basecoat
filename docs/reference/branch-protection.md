@@ -25,6 +25,7 @@ The following status checks **must pass** before a pull request can be merged to
 | `validate-basecoat` | Repository validation (structure, file integrity) | Ensure repo standards compliance |
 | `ci` | Continuous integration (tests, build, lint) | Catch regressions and quality issues |
 | `docs` | Documentation validation and link checking | Ensure docs are built and links work |
+| `prd-spec-gate` | PRD/spec intake gate | For high-change PRs, require both PRD and spec references; for risky-path-only PRs, emit advisory warning when missing |
 
 Additional checks may be enabled dynamically based on file changes (e.g., security scans for secret detection).
 
@@ -86,6 +87,7 @@ gh api repos/{owner}/{repo}/branches/main/protection
 ```
 
 Expected payload shape:
+
 - `required_pull_request_reviews.required_approving_review_count >= 1`
 - `required_status_checks.strict === true`
 - `required_status_checks.contexts` includes at least `validate-basecoat`, `ci`, `docs`

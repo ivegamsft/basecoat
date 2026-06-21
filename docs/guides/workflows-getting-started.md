@@ -114,19 +114,15 @@ gh workflow run version-check.yml
 
 ### 5. PR Spec Gate
 
-Enforces PRD/spec documentation for large changes.
+Enforces PRD/spec intake evidence on high-change PRs and warns on risky-path PRs.
 
-**Customize via workflow inputs:**
+**Built-in policy (no workflow inputs):**
 
-```yaml
-inputs:
-  size_threshold:
-    description: "PR size threshold (default: 500 lines)"
-    default: "500"
-  file_count_threshold:
-    description: "File count threshold (default: 12 files)"
-    default: "12"
-```
+- High-change threshold: `changed_files >= 12` or `additions + deletions >= 500`
+- Risky paths: `instructions/`, `skills/`, `agents/`, `scripts/`, `.github/workflows/`
+- High-change PRs must include both PRD and spec references in PR description
+- Risky-path-only PRs get advisory warning when no PRD/spec reference is present
+- References can be markdown links or structured lines (`PRD: <link>`, `Spec: <link>`)
 
 **Skip check:** Add `skip-prd-spec-check` label to PR
 

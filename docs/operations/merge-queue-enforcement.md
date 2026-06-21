@@ -22,6 +22,7 @@ This document defines the merge queue enforcement policy for **basecoat** and co
 GitHub Merge Queues are configured via Repository Rulesets API. This is the recommended approach for enterprise repositories.
 
 **Prerequisites:**
+
 - GitHub Advanced Security (Enterprise or Pro plan)
 - Write access to repository settings
 - Enable merge queue in repository settings:
@@ -120,11 +121,11 @@ The following checks **must pass** before a PR can enter the merge queue:
 | `validate-unix` | `validate-basecoat.yml` | Bash/Unix-style linting and validation |
 | `validate-windows` | `validate-basecoat.yml` | PowerShell/Windows validation suite |
 
-**Additional recommended checks (org-specific):**
+**Additional governance checks (enable where intake policy is enforced):**
 
 | Check Name | Workflow | Purpose |
 |-----------|----------|---------|
-| `prd-spec-gate` | `prd-spec-gate.yml` | PRD spec compliance (if applicable) |
+| `prd-spec-gate` | `prd-spec-gate.yml` | Enforce PRD/spec intake contract for high-change PRs; advisory for risky-path-only PRs |
 | `code-review-agent` | `code-review-agent.md` | Security & code quality analysis |
 
 ---
@@ -145,7 +146,7 @@ The following checks **must pass** before a PR can enter the merge queue:
 
 ### Merge Queue Workflow
 
-```
+```text
 PR submitted → Status checks run → PR enters merge queue
                                    ↓
                           Check grouping strategy

@@ -133,7 +133,7 @@ The Risk-Tier Autonomy Policy ensures that:
 
 | Rule | Implementation |
 |------|-----------------|
-| Approval required | Explicit approval via GitHub PR + PRD/spec gate |
+| Approval required | Explicit approval via GitHub PR + PRD/spec intake evidence per `prd-spec-gate.yml` (high-change is blocking; risky-path-only findings are advisory) |
 | Scope restriction | Main/release branches only; no feature branch bypass |
 | SLA verification | Verify: no P0–P1 incidents active, uptime ≥99.5% last 7 days |
 | State changes | Destructive (merge, release); require pre-deployment testing |
@@ -148,7 +148,7 @@ The Risk-Tier Autonomy Policy ensures that:
 **Guardrails Checklist**:
 
 ```yaml
-- [ ] PRD or spec gate passed (prd-spec-gate.yml)
+- [ ] PRD/spec intake evidence present (`prd-spec-gate.yml`): high-change PRs include both PRD and spec; risky-path-only PRs include at least one reference (advisory warning path, not hard block)
 - [ ] SLA verified: no P0–P1 incidents, uptime ≥99.5%
 - [ ] Merge target is main or release branch
 - [ ] Smoke tests passed (mandatory)

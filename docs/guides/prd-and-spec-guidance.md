@@ -116,12 +116,13 @@ This repository includes a PR gate in `.github/workflows/prd-spec-gate.yml`.
 
 Policy:
 
-- For high-change pull requests, include both PRD and spec references.
-- For risky-path pull requests, include at least one PRD or spec reference.
+- For high-change pull requests (`changed_files >= 12` or `additions + deletions >= 500`), include both PRD and spec references.
+- For risky-path pull requests (`instructions/`, `skills/`, `agents/`, `scripts/`, `.github/workflows/`), include at least one PRD or spec reference.
 - If a reference is not needed, use `N/A` and add a short rationale.
 - You can provide references as markdown links or explicit lines:
   - `PRD: <link or N/A + rationale>`
   - `Spec: <link or N/A + rationale>`
+- The `skip-prd-spec-check` label bypasses enforcement when explicitly approved.
 
 Recommended practice:
 

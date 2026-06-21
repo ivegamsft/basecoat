@@ -283,7 +283,7 @@ Every PR targeting `main` must pass **all** of the following checks before it ca
 | `Validate agent file structure` | `pr-validation.yml` | Verifies agents have required frontmatter and sections |
 | `Sync script dry-run` | `pr-validation.yml` | Validates sync.sh runs cleanly against a temp consumer repo |
 | `version-consistency` | `version-check.yml` | Ensures version.json and latest CHANGELOG.md entry match |
-| `prd-spec-gate` | `prd-spec-gate.yml` | Requires PRD/spec links for high-change or risky PRs |
+| `prd-spec-gate` | `prd-spec-gate.yml` | Intake contract gate: high-change PRs (`>=12` files or `>=500` churn) require both PRD+Spec refs; risky-path-only PRs get advisory warning |
 | `validate-commit-messages` | `validate-basecoat.yml` | Scans commit messages for secrets and PII patterns |
 | `validate-unix` | `validate-basecoat.yml` | Runs full validation suite on Ubuntu |
 | `validate-windows` | `validate-basecoat.yml` | Runs full validation suite on Windows |
