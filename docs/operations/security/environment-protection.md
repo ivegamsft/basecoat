@@ -88,6 +88,9 @@ The `.github/workflows/enforce-protection.yml` workflow:
 - Runs on a schedule (daily at 2 AM UTC)
 - Runs on manual dispatch
 - Runs when environment protection configs are changed
+- Bootstraps `prod` when missing via GitHub environment API
+- Retries environment list checks with deterministic backoff to handle API propagation delay
+- Emits direct API/list API/template diagnostics when `prod` is still not observable
 - Verifies:
   - Production environment exists and is configured
   - Staging environment (if present) is documented
@@ -122,11 +125,13 @@ The `.github/workflows/enforce-protection.yml` workflow:
 **Symptom:** Deployments to prod succeed without approval
 
 **Causes:**
+
 - Environment protection not configured (Settings → Environments → prod)
 - User is org admin (admins may bypass environment protection)
 - Deployment job missing `environment: prod` in workflow
 
 **Resolution:**
+
 1. Verify environment config via UI or API: `gh api /repos/IBuySpy-Shared/basecoat/environments/prod`
 2. Check workflow has `environment: prod` in the deployment job
 3. Review environment protection rules for bypass actors
@@ -137,11 +142,13 @@ The `.github/workflows/enforce-protection.yml` workflow:
 **Symptom:** UI shows protection rules grayed out or API returns 422
 
 **Causes:**
+
 - Organization-level environment policies conflict
 - User lacks permission to manage environments
 - Environment is managed at org level
 
 **Resolution:**
+
 1. Check org Settings → Environments for inherited policies
 2. Verify user has "Manage environments" permission
 3. Contact org admin if policies restrict environment-level overrides
