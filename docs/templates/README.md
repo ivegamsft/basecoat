@@ -27,6 +27,7 @@ Use this directory for reusable file-level starting points that are meant to be 
 | `sprint-structure.md` | Reusable sprint planning scaffold |
 | `attachment-canonical-summary.md` | Canonical summary template for attachment-heavy sessions |
 | `prd-template.md` | Product requirements starting template |
-| `issue-template.md` | Structured issue authoring template |
+| `issue-template.md` | Shared issue intake contract mirrored by live issue templates |
+| `pr-template.md` | Shared pull request intake contract mirrored by the live PR template |
 
 Project scaffolds previously under `docs/templates/` were moved to `.github/template-repos/`.

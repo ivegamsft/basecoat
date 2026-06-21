@@ -118,9 +118,10 @@ Policy:
 
 - For high-change pull requests, include both PRD and spec references.
 - For risky-path pull requests, include at least one PRD or spec reference.
+- If a reference is not needed, use `N/A` and add a short rationale.
 - You can provide references as markdown links or explicit lines:
-  - `PRD: <link>`
-  - `Spec: <link>`
+  - `PRD: <link or N/A + rationale>`
+  - `Spec: <link or N/A + rationale>`
 
 Recommended practice:
 

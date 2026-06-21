@@ -9,6 +9,34 @@ labels: "bug"
 
 <!-- Concise summary of the bug -->
 
+## Intake Contract
+
+### RCA
+
+<!-- Root cause or failure mode that justifies the work. If not applicable, write N/A and why. -->
+
+### Design
+
+<!-- Proposed design or implementation shape. If not applicable, write N/A and why. -->
+
+### Debate
+
+<!-- Alternatives considered and why this approach wins. If not applicable, write N/A and why. -->
+
+### PRD and Spec References
+
+- PRD: <link or N/A with rationale>
+- Spec: <link or N/A with rationale>
+
+### Planning Metadata
+
+| Field | Value |
+|---|---|
+| Target sprint | |
+| Priority | |
+| Expected change size | small / medium / large |
+| Risky-path indicator | yes / no |
+
 ## Steps to Reproduce
 
 1. <!-- First step -->

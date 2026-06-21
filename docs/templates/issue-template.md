@@ -1,176 +1,82 @@
-# Issue Templates
+# Issue Intake Contract
 
-This file contains standard issue templates for basecoat.  
-Copy the relevant section when filing an issue, or use GitHub's issue template picker if configured.
+Use this template as the shared intake contract for issue authoring in BaseCoat.
+Live GitHub issue templates in `.github/ISSUE_TEMPLATE/` should match these fields.
 
----
+## Description
 
-## Bug Report
+<!-- Concise summary of the issue, enhancement, or task -->
 
-**Title format:** `[BUG] <short description>`
+## Intake Contract
 
-```markdown
-## Bug Description
-<!-- What is broken? Be specific. -->
+### RCA
 
-## Steps to Reproduce
-1. 
-2. 
-3. 
+<!-- Root cause or failure mode that justifies the work. If not applicable, write N/A and why. -->
 
-## Expected Behavior
-<!-- What should happen? -->
+### Design
 
-## Actual Behavior
-<!-- What actually happens? Include error messages, output, or screenshots. -->
+<!-- Proposed design or implementation shape. If not applicable, write N/A and why. -->
 
-## Environment
-- basecoat version: 
-- OS: 
-- Shell / runtime: 
-- Relevant tool versions: 
+### Debate
 
-## Minimal Reproduction
-<!-- Paste the smallest config, command, or script that reproduces the bug. 
-     IMPORTANT: Do NOT include secrets, tokens, keys, or credentials. -->
+<!-- Alternatives considered and why this approach wins. If not applicable, write N/A and why. -->
 
-## Impact
-- [ ] Blocks development
-- [ ] Breaks CI
-- [ ] Incorrect output (non-blocking)
-- [ ] Documentation error
+### PRD and Spec References
 
-## Additional Context
-<!-- Anything else that might help. -->
-```
+- PRD: <link or N/A with rationale>
+- Spec: <link or N/A with rationale>
 
----
+### Planning Metadata
 
-## Feature Request
+| Field | Value |
+|---|---|
+| Target sprint | |
+| Priority | |
+| Expected change size | small / medium / large |
+| Risky-path indicator | yes / no |
 
-**Title format:** `[FEATURE] <short description>`
+## Context
 
-```markdown
-## Summary
-<!-- One paragraph: what you want, why it matters, who benefits. -->
+<!-- Add relevant context:
+- What were you trying to do?
+- What happened instead?
+- What was expected?
+-->
 
-## Problem Statement
-<!-- What gap or pain point does this address? -->
+## Suggested Labels
 
-## Proposed Solution
-<!-- What should be built? Be as specific as you can. -->
+Please apply at least one label from each category below:
 
-## Acceptance Criteria
-- [ ] Given X, when Y, then Z
-- [ ] ...
+**Asset Type** (if applicable):
 
-## Alternatives Considered
-<!-- What else did you consider? Why is this the right approach? -->
+- `agent` — Related to an agent definition
+- `skill` — Related to a skill or template
+- `instruction` — Related to an instruction file
+- `prompt` — Related to a prompt template
 
-## Dependencies
-<!-- Does this block or get blocked by other issues? -->
-- Blocks: #
-- Blocked by: #
+**Issue Type** (required):
 
-## Spec Required?
-<!-- Does this need a PRD before implementation starts? -->
-- [ ] Yes — will file PRD at docs/templates/PRD_TEMPLATE.md
-- [ ] No — small enough to go straight to implementation
+- `bug` — Unexpected behavior or error
+- `enhancement` — New feature or improvement
+- `documentation` — Missing or incorrect documentation
+- `question` — Question or clarification needed
+- `chore` — Maintenance or tech debt
+- `security` — Security concern or vulnerability
 
-## Additional Context
-<!-- Links, prior art, related issues. -->
-```
+**Priority** (recommended):
 
----
+- `priority:critical` — Service down, data loss, active security breach, CVE
+- `priority:high` — Blocking work or major user impact
+- `priority:medium` — Moderate user impact
+- `priority:low` — Nice-to-have or cosmetic
 
-## Documentation Update
+**Sprint** (required):
 
-**Title format:** `[DOCS] <short description>`
+- `sprint-YYYY-MM` (for example, `sprint-2026-05`)
+- Use `needs-triage` only if a target sprint cannot be assigned yet.
 
-```markdown
-## What needs to change?
-<!-- Describe the documentation that is missing, incorrect, or outdated. -->
+**Technology** (optional):
 
-## Why?
-<!-- What is the impact of the current state? -->
+- `azure`, `dotnet`, `kubernetes`, `python`, `terraform`, etc.
 
-## Proposed Changes
-<!-- What should the updated doc say or cover? -->
-
-## Files Affected
-<!-- List the files that need to change. -->
-
-## Additional Context
-```
-
----
-
-## Governance / Process Change
-
-**Title format:** `[GOVERNANCE] <short description>`
-
-```markdown
-## What governance rule or process needs to change?
-
-## Why is the current approach insufficient?
-
-## Proposed Change
-<!-- Be specific. If changing a rule, quote the current text and propose new text. -->
-
-## Impact on Existing Workflows
-<!-- How does this affect humans and AI agents currently following the old rule? -->
-
-## Migration Path
-<!-- How do existing contributors/agents adapt? -->
-
-## Stakeholders
-<!-- Who needs to be aware of or agree to this change? -->
-```
-
----
-
-## Security Issue
-
-**⚠️ Do NOT file security vulnerabilities in public issues.**
-
-For security disclosures, contact the repo owner directly or use GitHub's private security advisory workflow:
-`Security → Advisories → Report a vulnerability`
-
-For non-sensitive security improvements (e.g., adding a scan, tightening a rule):
-
-**Title format:** `[SECURITY] <short description>`
-
-```markdown
-## Security Concern
-<!-- Describe the security improvement or hardening needed. 
-     Do NOT include proof-of-concept exploit details in a public issue. -->
-
-## Risk Level
-- [ ] Critical — active exploit possible
-- [ ] High — exploit requires effort but is plausible
-- [ ] Medium — defense-in-depth improvement
-- [ ] Low — minor hardening
-
-## Proposed Fix
-
-## Testing / Validation Approach
-```
-
----
-
-## Checklist Before Filing Any Issue
-
-- [ ] Searched existing issues to avoid duplicates
-- [ ] Title follows the format for the issue type
-- [ ] No secrets, tokens, credentials, or PII included
-- [ ] Linked to related issues where applicable
-- [ ] Applied the correct labels
-
-### Canonical priority labels
-
-- `priority:critical`
-- `priority:high`
-- `priority:medium`
-- `priority:low`
-
-Legacy `P0-critical` / `P1-high` / `P2-medium` / `P3-low` labels are migration-only.
+See [`docs/reference/governance-contract.md`](../../docs/reference/governance-contract.md) and [`docs/GOVERNANCE.md`](../../docs/GOVERNANCE.md#canonical-label-set-for-new-work) for canonical labels and migration guidance.
