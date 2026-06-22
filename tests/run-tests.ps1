@@ -326,6 +326,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running publish-to-production dispatch tag tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'publish-to-production-dispatch-tag-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Publish-to-production dispatch tag tests failed' -ForegroundColor Red
+    Write-FailureLog 'publish-to-production-dispatch-tag-tests'
+    exit 1
+}
+
 Write-Host 'Running coherence check (non-blocking)...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot '..' 'scripts' 'check-coherence.ps1')
 # Non-blocking: coherence issues are warnings, not failures

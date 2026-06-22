@@ -431,8 +431,8 @@ Write-Host '  Test 13: Validate publish workflow tag resolution is event-safe...
 $publishWorkflowPath = Join-Path $workflowDir 'publish-to-production.yml'
 $publishWorkflow = Get-Content $publishWorkflowPath -Raw
 $unsafePublishTagExpressions = [regex]::Matches($publishWorkflow, 'github\.event\.inputs\.tag')
-$hasResolverStep = $publishWorkflow -match '(?ms)name:\s*Resolve publish tag from event payload.*?\$GITHUB_EVENT_PATH'
-$usesResolvedTagOutput = $publishWorkflow -match 'steps\.resolve-tag\.outputs\.tag'
+$hasResolverStep = $publishWorkflow -match 'name:\s*Resolve publish tag' -and $publishWorkflow -match 'id:\s*resolve_tag'
+$usesResolvedTagOutput = $publishWorkflow -match 'steps\.resolve_tag\.outputs\.tag'
 
 if ($unsafePublishTagExpressions.Count -eq 0 -and $hasResolverStep -and $usesResolvedTagOutput) {
     Write-Host '    ✓ Publish workflow uses dispatch-guarded tag resolution'

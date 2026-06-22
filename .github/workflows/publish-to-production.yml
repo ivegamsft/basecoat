@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag to publish (e.g. v3.31.0)"
-        required: true
+        description: "Tag to publish (e.g. v3.31.0); leave empty to publish the latest semver tag"
+        required: false
 
 permissions:
   contents: read
@@ -31,31 +31,42 @@ jobs:
     timeout-minutes: 10
     environment: production
     steps:
-      - name: Check out repository at tag
+      - name: Fetch repository for tag resolution
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Resolve publish tag from event payload
-        id: resolve-tag
+      - name: Resolve publish tag
+        id: resolve_tag
         run: |
           set -euo pipefail
-          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
-            TAG=$(jq -r '.inputs.tag // empty' "$GITHUB_EVENT_PATH")
+          if [[ "${GITHUB_EVENT_NAME}" == "push" ]]; then
+            TAG="${GITHUB_REF_NAME}"
+          elif [[ -n "${{ inputs.tag }}" ]]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -1)
             if [[ -z "${TAG}" ]]; then
-              echo "::error::workflow_dispatch requires inputs.tag"
+              echo "::error::No semver tags found; provide inputs.tag or push a version tag"
               exit 1
             fi
-          else
-            TAG="${GITHUB_REF_NAME}"
+            echo "Resolved latest semver tag: ${TAG}"
           fi
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
+      - name: Check out repository at tag
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          ref: refs/tags/${{ steps.resolve_tag.outputs.tag }}
+          fetch-depth: 0
+          persist-credentials: false
+
       - name: Rewrite internal repo links for production
+        env:
+          TAG: ${{ steps.resolve_tag.outputs.tag }}
         run: |
           set -euo pipefail
-          TAG="${{ steps.resolve-tag.outputs.tag }}"
 
           # Rewrite every github.com and raw.githubusercontent.com URL that references
           # the private source repo (IBuySpy-Shared/basecoat) to point at the public
@@ -112,9 +123,9 @@ jobs:
         id: push-production
         env:
           PRODUCTION_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
+          TAG: ${{ steps.resolve_tag.outputs.tag }}
         run: |
           set -euo pipefail
-          TAG="${{ steps.resolve-tag.outputs.tag }}"
 
           PRODUCTION_REMOTE="https://x-access-token:${PRODUCTION_TOKEN}@github.com/ivegamsft/basecoat.git"
           PROTECTION_API="https://api.github.com/repos/ivegamsft/basecoat/branches/main/protection"
@@ -170,6 +181,8 @@ jobs:
           # Transform GET response to PUT-compatible payload.
           # GitHub's GET /branches/{branch}/protection returns read-only fields (url,
           # enforcement_level, context_url) that the PUT endpoint rejects with HTTP 422.
+          # All known settable fields are explicitly mapped with safe defaults so the
+          # round-trip faithfully preserves every protection setting (fixes #1682).
           PUT_PAYLOAD=$(jq '{
             required_status_checks: (
               if .required_status_checks then {
@@ -194,7 +207,13 @@ jobs:
                 require_last_push_approval: (.required_pull_request_reviews.require_last_push_approval // false)
               } else null end
             ),
-            restrictions: null
+            restrictions: null,
+            lock_branch: (.lock_branch.enabled // false),
+            allow_force_pushes: (.allow_force_pushes.enabled // false),
+            allow_deletions: (.allow_deletions.enabled // false),
+            block_creations: (.block_creations.enabled // false),
+            required_linear_history: (.required_linear_history.enabled // false),
+            required_conversation_resolution: (.required_conversation_resolution.enabled // false)
           }' "$PROTECTION_BACKUP_FILE")
 
           echo "Restoring branch protection..."
@@ -213,8 +232,28 @@ jobs:
 
           rm -f "$PROTECTION_BACKUP_FILE"
 
+      - name: Verify branch protection restore
+        if: always() && steps.push-production.outputs.had_protection == 'true'
+        env:
+          PRODUCTION_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
+        run: |
+          set -euo pipefail
+          PROTECTION_API="https://api.github.com/repos/ivegamsft/basecoat/branches/main/protection"
+
+          verify_status=$(curl -sS -o /tmp/restored-protection.json -w "%{http_code}" \
+            -H "Authorization: token ${PRODUCTION_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "$PROTECTION_API")
+
+          if [ "$verify_status" = "200" ]; then
+            echo "Branch protection confirmed active after restore."
+            jq '{enforce_admins: .enforce_admins.enabled, required_status_checks: (.required_status_checks != null), required_pull_request_reviews: (.required_pull_request_reviews != null)}' /tmp/restored-protection.json
+          else
+            echo "::warning::Post-restore verification returned HTTP ${verify_status} — branch protection state unknown for ivegamsft/basecoat main."
+          fi
 
       - name: Update production repo metadata
+        if: always() && steps.push-production.outcome == 'success'
         env:
           PRODUCTION_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
         run: |
@@ -239,9 +278,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PRODUCTION_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
+          TAG: ${{ steps.resolve_tag.outputs.tag }}
         run: |
           set -euo pipefail
-          TAG="${{ steps.resolve-tag.outputs.tag }}"
 
           # Fetch the release notes from the source repo release (already published).
           SOURCE_RELEASE=$(curl -sf \
