@@ -165,6 +165,11 @@ if ($DryRun) {
     }
   }
 } else {
+  $tempRoot = [System.IO.Path]::GetTempPath()
+  if ([string]::IsNullOrWhiteSpace($tempRoot)) {
+    throw "Unable to resolve a writable temporary directory."
+  }
+
   Ensure-Label -Repo $TargetRepo -Name "intent-control-plane" -Color "4c1d95" -Description "Tracks intent-driven SDLC execution."
   Ensure-Label -Repo $TargetRepo -Name "ship-it" -Color "0e8a16" -Description "Tracks ship-it intent workflows."
   Ensure-Label -Repo $TargetRepo -Name "spec-2-prod" -Color "1d76db" -Description "Tracks spec-to-production delivery workflows."
@@ -174,7 +179,7 @@ if ($DryRun) {
   Ensure-Label -Repo $TargetRepo -Name "risk-critical" -Color "b60205" -Description "Critical-risk intent run."
   Ensure-Label -Repo $TargetRepo -Name "sprint" -Color "5319e7" -Description "Sprint tracking issue."
 
-  $bodyPath = Join-Path $env:TEMP "ship-it-parent-$([Guid]::NewGuid().ToString()).md"
+  $bodyPath = Join-Path $tempRoot "ship-it-parent-$([Guid]::NewGuid().ToString()).md"
   Set-Content -Path $bodyPath -Value $parentBody -Encoding UTF8
 
   $createParentArgs = @(
@@ -222,7 +227,7 @@ $exitCriteria
 - [ ] Learning log update
 "@
 
-    $sprintBodyPath = Join-Path $env:TEMP "ship-it-sprint-$index-$([Guid]::NewGuid().ToString()).md"
+    $sprintBodyPath = Join-Path $tempRoot "ship-it-sprint-$index-$([Guid]::NewGuid().ToString()).md"
     Set-Content -Path $sprintBodyPath -Value $sprintBody -Encoding UTF8
 
     $createSprintArgs = @(
