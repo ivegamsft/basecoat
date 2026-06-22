@@ -11,7 +11,7 @@ This file lists all available agents in the BaseCoat framework.
 - [VS Code Harness Benchmarks](./vs-code-harness-benchmarks.md)
 - [VS Code Agent Mode Tool Confirmation Policy](../reference/guardrails/tool-confirmation-policy.md)
 
-> **87 agents** available
+> **88 agents** available
 
 | Agent | Description |
 |---|---|
@@ -79,6 +79,7 @@ This file lists all available agents in the BaseCoat framework.
 | [project-onboarding](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-project-onboarding.agent.md) | Single-invocation new repo setup with BaseCoat integration. Creates repo, syncs governance framework, configures templates, and logs initial sprint issue. USE FOR: set up a new repo with BaseCoat governance, sync inst... |
 | [prompt-coach](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-prompt-coach.agent.md) | Use when reviewing prompts, scoring prompt quality, identifying anti-patterns, and guiding iterative refinement of LLM prompts. |
 | [prompt-engineer](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-prompt-engineer.agent.md) | Prompt optimization and system prompt engineering agent. Use when designing system prompts, optimizing token usage, crafting few-shot examples, or structuring chain-of-thought instructions. |
+| [queue-rebalancer](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-queue-rebalancer.agent.md) | Dependency-aware unblock lane coordinator for reshuffling PR/issue queues to clear active blockers first, cherry-picking minimal fixes, enforcing no-feature-without-tests gates, and returning to regular dependency order after verification. |
 | [rca](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-rca.agent.md) | Root Cause Analysis agent for deep-dive incident investigations, hypothesis testing, and prevention follow-up. USE FOR: run post-incident root cause analysis, trace production outage to contributing factors, generate ... |
 | [release-impact-advisor](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-release-impact-advisor.agent.md) | Assesses release readiness, change impacts, blast radius, rollback planning, and safe deployment strategies with canary deployments, feature flags, and changelog generation. USE FOR: assess release blast radius, plan ... |
 | [release-manager](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-release-manager.agent.md) | Automated versioned release workflow. Reads merged PRs since the last release, bumps version.json, writes CHANGELOG entry, creates git tag, and publishes GitHub release. USE FOR: bump semver and publish GitHub release... |

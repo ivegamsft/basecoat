@@ -1,7 +1,7 @@
 {
   "$schema": "basecoat-metadata-schema",
   "version": "3.26.0",
-  "generated": "2026-06-15",
+  "generated": "2026-06-20",
   "categories": {
     "AI & Development": {
       "label": "AI & Development",
@@ -2246,6 +2246,17 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-delivery-gap-mapper.agent.md",
+      "model": "gpt-5.4-mini",
+      "argumentHint": ""
+    },
+    {
+      "name": "basecoat-60-workflow-queue-rebalancer",
+      "description": "Dependency-aware unblock lane coordinator. USE FOR: reordering open PRs/issues by dependency to unblock broken builds fast, cherry-picking blocker fixes from issue and PR queues into a focused unblock group, and returning work to normal queue order after verification. DO NOT USE FOR: sprint capacity planning, standalone feature design/spec work, adding new product scope without explicit check-in, or promoting feature work without tests.",
+      "category": "Meta",
+      "keywords": [],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/basecoat-60-workflow-queue-rebalancer.agent.md",
       "model": "gpt-5.4-mini",
       "argumentHint": ""
     }
