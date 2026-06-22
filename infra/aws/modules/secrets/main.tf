@@ -88,7 +88,7 @@ resource "aws_secretsmanager_secret" "encryption_keys" {
 resource "aws_secretsmanager_secret_version" "encryption_keys" {
   secret_id = aws_secretsmanager_secret.encryption_keys.id
   secret_string = jsonencode({
-    master_key = "placeholder"
+    master_key    = "placeholder"
     secondary_key = "placeholder"
   })
 }

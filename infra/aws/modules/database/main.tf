@@ -61,27 +61,27 @@ resource "random_password" "database" {
 }
 
 resource "aws_db_instance" "main" {
-  allocated_storage       = var.allocated_storage
-  engine                  = "postgres"
-  engine_version          = var.engine_version
-  instance_class          = var.instance_class
-  identifier              = "${var.project_name}-db"
-  username                = "postgres"
-  password                = random_password.database.result
-  parameter_group_name    = aws_db_parameter_group.main.name
-  skip_final_snapshot     = var.environment == "dev"
-  final_snapshot_identifier = "${var.project_name}-final-snapshot-${formatdate("YYYY-MM-DD-hhmm", timestamp())}"
-  db_subnet_group_name    = var.database_subnet_group_name
-  vpc_security_group_ids          = [var.security_group_id]
-  multi_az                        = var.multi_az
-  publicly_accessible             = false
-  storage_encrypted               = var.enable_encryption_at_rest
-  backup_retention_period         = var.backup_retention_days
-  backup_window                   = "03:00-04:00"
-  maintenance_window              = "mon:04:00-mon:05:00"
+  allocated_storage                   = var.allocated_storage
+  engine                              = "postgres"
+  engine_version                      = var.engine_version
+  instance_class                      = var.instance_class
+  identifier                          = "${var.project_name}-db"
+  username                            = "postgres"
+  password                            = random_password.database.result
+  parameter_group_name                = aws_db_parameter_group.main.name
+  skip_final_snapshot                 = var.environment == "dev"
+  final_snapshot_identifier           = "${var.project_name}-final-snapshot-${formatdate("YYYY-MM-DD-hhmm", timestamp())}"
+  db_subnet_group_name                = var.database_subnet_group_name
+  vpc_security_group_ids              = [var.security_group_id]
+  multi_az                            = var.multi_az
+  publicly_accessible                 = false
+  storage_encrypted                   = var.enable_encryption_at_rest
+  backup_retention_period             = var.backup_retention_days
+  backup_window                       = "03:00-04:00"
+  maintenance_window                  = "mon:04:00-mon:05:00"
   iam_database_authentication_enabled = true
-  enabled_cloudwatch_logs_exports = ["postgresql"]
-  deletion_protection             = var.environment == "prod"
+  enabled_cloudwatch_logs_exports     = ["postgresql"]
+  deletion_protection                 = var.environment == "prod"
 
   tags = merge(var.tags, {
     Name = "${var.project_name}-database"
@@ -116,13 +116,13 @@ resource "aws_db_parameter_group" "main" {
 }
 
 resource "aws_db_instance" "read_replica" {
-  count                  = var.enable_read_replicas ? 1 : 0
-  identifier             = "${var.project_name}-db-read-replica"
-  replicate_source_db    = aws_db_instance.main.identifier
-  instance_class         = var.instance_class
-  publicly_accessible    = false
+  count                      = var.enable_read_replicas ? 1 : 0
+  identifier                 = "${var.project_name}-db-read-replica"
+  replicate_source_db        = aws_db_instance.main.identifier
+  instance_class             = var.instance_class
+  publicly_accessible        = false
   auto_minor_version_upgrade = true
-  skip_final_snapshot    = var.environment == "dev"
+  skip_final_snapshot        = var.environment == "dev"
 
   tags = merge(var.tags, {
     Name = "${var.project_name}-database-read-replica"
@@ -130,8 +130,8 @@ resource "aws_db_instance" "read_replica" {
 }
 
 resource "aws_db_proxy" "main" {
-  name                   = "${var.project_name}-proxy"
-  engine_family          = "POSTGRESQL"
+  name          = "${var.project_name}-proxy"
+  engine_family = "POSTGRESQL"
   auth {
     auth_scheme = "SECRETS"
     secret_arn  = aws_secretsmanager_secret.database_password.arn

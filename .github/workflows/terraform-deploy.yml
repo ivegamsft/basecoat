@@ -45,6 +45,10 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
+      - name: Terraform Init
+        working-directory: ${{ matrix.working-directory }}
+        run: terraform init -backend=false
+
       - name: Terraform Format Check
         working-directory: ${{ matrix.working-directory }}
         run: terraform fmt -check -recursive

@@ -92,15 +92,15 @@ resource "aws_launch_template" "app" {
 }
 
 resource "aws_autoscaling_group" "main" {
-  name              = "${var.project_name}-asg"
-  vpc_zone_identifier = var.vpc_subnets
-  target_group_arns = [aws_lb_target_group.app.arn]
-  health_check_type = "ELB"
+  name                      = "${var.project_name}-asg"
+  vpc_zone_identifier       = var.vpc_subnets
+  target_group_arns         = [aws_lb_target_group.app.arn]
+  health_check_type         = "ELB"
   health_check_grace_period = 300
-  min_size          = var.min_size
-  max_size          = var.max_size
-  desired_capacity  = var.desired_capacity
-  default_cooldown  = 300
+  min_size                  = var.min_size
+  max_size                  = var.max_size
+  desired_capacity          = var.desired_capacity
+  default_cooldown          = 300
 
   launch_template {
     id      = aws_launch_template.app.id

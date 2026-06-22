@@ -21,7 +21,7 @@ terraform {
     hostname     = "app.terraform.io"
 
     workspaces {
-      prefix = "basecoat-"
+      tags = ["basecoat", "portal"]
     }
   }
 }
