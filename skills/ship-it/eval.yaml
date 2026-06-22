@@ -1,0 +1,18 @@
+skill: ship-it
+tests:
+  - id: ship-it-positive
+    description: Routes intent language to the ship-it skill
+    messages:
+      - role: user
+        content: "Ship this spec to prod with full governance checks."
+    expect:
+      decision: trigger
+      confidence: 0.9
+  - id: ship-it-negative
+    description: Does not trigger for unrelated coding requests
+    messages:
+      - role: user
+        content: "Fix this one typo in the README."
+    expect:
+      decision: no_trigger
+      confidence: 0.9

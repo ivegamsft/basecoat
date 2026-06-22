@@ -1,7 +1,7 @@
 {
   "$schema": "basecoat-metadata-schema",
   "version": "3.26.0",
-  "generated": "2026-06-20",
+  "generated": "2026-06-22",
   "categories": {
     "AI & Development": {
       "label": "AI & Development",
@@ -2258,6 +2258,17 @@
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-queue-rebalancer.agent.md",
       "model": "gpt-5.4-mini",
+      "argumentHint": ""
+    },
+    {
+      "name": "basecoat-60-workflow-ship-it-orchestrator",
+      "description": "Intent-to-production orchestrator that converts `ship-it` / `spec-2-prod` goals into governed, multi-sprint execution loops with tracked PR, validation, release, and learning artifacts.",
+      "category": "Meta",
+      "keywords": [],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/basecoat-60-workflow-ship-it-orchestrator.agent.md",
+      "model": "gpt-5.3-codex",
       "argumentHint": ""
     }
   ]

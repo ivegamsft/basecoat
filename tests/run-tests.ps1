@@ -174,6 +174,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running ship-it intent dispatch tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'ship-it-dispatch-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Ship-it intent dispatch tests failed' -ForegroundColor Red
+    Write-FailureLog 'ship-it-dispatch-tests'
+    exit 1
+}
+
 Write-Host 'Running workflow enhancements (#1389) tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'workflow-enhancements-1389-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
