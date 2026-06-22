@@ -24,8 +24,8 @@ $requiredSnippets = @(
     'timeout-minutes: 20',
     'group: ${{ github.workflow }}-${{ github.ref }}',
     'actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3',
-    'PR Flow Hygiene Report - Week of',
-    'PR flow hygiene nudge'
+    'PR Lifecycle Hygiene Report - Week of',
+    'PR lifecycle hygiene nudge'
 )
 
 foreach ($snippet in $requiredSnippets) {
@@ -35,4 +35,3 @@ foreach ($snippet in $requiredSnippets) {
 }
 
 Write-Host 'pr-flow-hygiene tests passed' -ForegroundColor Green
-

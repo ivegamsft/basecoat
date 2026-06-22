@@ -18,7 +18,7 @@ allowed-tools: []
 
 Sweep stale branches and dangling refs without touching live work. This agent keeps
 topic branches, release branches, and remote refs tidy while preserving anything
-with active PRs, recent commits, or freeze protection.
+with active PRs, recent commits, preserved-WIP status, or freeze protection.
 
 ## Inputs
 
@@ -30,8 +30,8 @@ with active PRs, recent commits, or freeze protection.
 ## Workflow
 
 1. Enumerate local and remote branches plus merge status.
-2. Check each candidate for open PRs, recent commits, and branch protection.
-3. Classify each branch as keep, prune, review, or escalate.
+2. Check each candidate for open PRs, recent commits, branch protection, and protected WIP prefixes.
+3. Classify each branch as keep, prune, preserved-wip, review, or escalate.
 4. Remove only branches proven safe to delete or prune.
 5. Publish a cleanup summary with owners, rationale, and follow-up items.
 
@@ -55,6 +55,7 @@ with active PRs, recent commits, or freeze protection.
 
 - Never delete a branch with an open PR or active deployment reference.
 - Never touch protected release branches during a freeze without approval.
+- Never auto-delete `preserved/`, `backup/`, or `wip/` branches; log owner follow-up instead.
 - Prefer `gh pr list --head` over branch-name guessing for squash-merged PRs.
 - Hand off conflict-heavy cleanup to `merge-coordinator`.
 

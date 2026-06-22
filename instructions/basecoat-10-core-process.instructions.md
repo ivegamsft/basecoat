@@ -28,6 +28,17 @@ Triage → Backlog → Sprint → In Progress → In Review → Done
 - Issues inactive 14 days in Backlog are reviewed in refinement and re-prioritized or closed.
 - See [issue-and-pr-workflow.md](references/process/issue-and-pr-workflow.md) for stage criteria, branch naming, commit conventions, review requirements, and merge strategy.
 
+## PR Lifecycle (`pr-lifecycle=full`)
+
+Use `pr-lifecycle=full` when PR work must stay end-to-end across triage,
+review, merge readiness, and cleanup.
+
+- Every remaining WIP item must be logged as one of: `merge-ready`, `blocked`,
+  `revive`, `close`, or `cleanup-only`.
+- Each logged item needs an owner plus next review or cleanup date.
+- Branch cleanup starts only after a PR is merged or explicitly closed and the
+  remaining WIP log is updated.
+
 ## Definition of Done
 
 A work item is Done when:
@@ -35,7 +46,7 @@ A work item is Done when:
 - All acceptance criteria met; unit + integration tests written and passing.
 - Coverage thresholds met (see `quality.instructions.md`).
 - Security scan clean; documentation updated.
-- PR reviewed and approved; squash-merged, branch deleted.
+- PR reviewed and approved; remaining WIP log resolved; squash-merged, branch deleted or intentionally preserved.
 - Deployed to staging and verified; linked issue closed.
 
 ## Escalation SLAs

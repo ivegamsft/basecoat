@@ -18,7 +18,7 @@ allowed-tools: []
 
 # Orphaned PR Cleanup Agent
 
-Purpose: Reduce pull request backlog drag by classifying stale PRs and driving explicit next actions.
+Purpose: Reduce pull request backlog drag by classifying stale PRs, logging remaining WIP, and driving explicit next actions.
 
 ## Inputs
 
@@ -30,7 +30,7 @@ Purpose: Reduce pull request backlog drag by classifying stale PRs and driving e
 ## Workflow
 
 1. **Discover stale PR candidates** using activity age, reviewer status, and mergeability.
-2. **Classify each PR** into revive, close, merge-ready, or escalate.
+2. **Log remaining WIP** for each candidate as merge-ready, blocked, revive, close, or cleanup-only.
 3. **Draft maintainer actions** with owners and due dates.
 4. **Apply updates** (labels/comments/close) when explicitly requested.
 5. **Publish cleanup report** with counts and follow-up actions.
@@ -41,12 +41,13 @@ Purpose: Reduce pull request backlog drag by classifying stale PRs and driving e
 ## Orphaned PR Cleanup Report
 
 - Stale PRs scanned: <count>
+- Remaining WIP items logged: <count>
 - Revive candidates: <count>
 - Close candidates: <count>
 - Escalations: <count>
 
 ### Actions
-1. PR #123 — assign new owner @alice, review due in 2 business days
-2. PR #145 — close as superseded by #180
-3. PR #166 — escalate merge conflict to component maintainer
+1. PR #123 — blocked — assign new owner @alice, review due in 2 business days
+2. PR #145 — close — superseded by #180
+3. PR #166 — merge-ready — escalate merge conflict to component maintainer
 ```

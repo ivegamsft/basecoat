@@ -24,7 +24,7 @@ testing and uses pinned action SHAs.
 | #188 | `.github/workflows/pr-size-labeler.yml` | Automatic PR size labels (`size:XS`..`size:XL`) from diff size |
 | #189 | `.github/workflows/dependency-graph-pages.yml` | Generate dependency graph report and publish via docs PR flow |
 | #190 | `.github/workflows/reviewer-autoassign.yml` | Auto-request reviewers using changed-path commit history |
-| #1557 | `.github/workflows/pr-flow-hygiene.yml` | Weekly PR flow report with WIP limits, draft-drift triage, and owner/reviewer nudges |
+| #1557 | `.github/workflows/pr-flow-hygiene.yml` | Weekly PR lifecycle report with WIP limits, draft-drift triage, remaining-WIP logging, and owner/reviewer nudges |
 
 ## Distributed Workflow Templates (10 Total)
 
@@ -345,7 +345,7 @@ inputs:
 
 ### 10. pr-flow-hygiene.yml
 
-**Purpose:** Keep open PR backlog healthy and reduce draft drift.
+**Purpose:** Keep the open PR lifecycle healthy, reduce draft drift, and surface remaining WIP that still needs an explicit owner, merge, or cleanup action.
 
 **Trigger:**
 
@@ -355,6 +355,7 @@ inputs:
 **What It Does:**
 
 - Scans open PRs and publishes a weekly `PR Flow Hygiene Report` issue
+- Treats the flagged PR set as the remaining WIP follow-up queue for the full lifecycle
 - Evaluates guardrails with configurable thresholds:
   - WIP limit for ready-for-review PRs (default: 20)
   - Draft drift age (default: 14 days)
@@ -382,6 +383,7 @@ inputs:
 **Output:**
 
 - Weekly issue with PR flow guardrail status table and top-risk PR lists
+- Weekly issue with a remaining-WIP follow-up count and top-risk PR lists
 - PR comments for actionable ownership/reviewer/drift nudges
 - Step summary metrics for run-level observability
 

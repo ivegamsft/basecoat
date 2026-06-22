@@ -19,6 +19,8 @@ param(
 
     [string[]]$ProtectedBranches = @('main', 'master', 'develop'),
 
+    [string[]]$ProtectedBranchPrefixes = @('preserved/', 'backup/', 'wip/'),
+
     [switch]$ApplyChanges,
 
     [switch]$AssumeYes
@@ -63,6 +65,21 @@ function Confirm-Continue {
 
     $response = Read-Host "$Message (y/N)"
     return $response -match '^(y|yes)$'
+}
+
+function Test-ProtectedBranchPrefix {
+    param(
+        [string]$Branch,
+        [string[]]$Prefixes
+    )
+
+    foreach ($prefix in $Prefixes) {
+        if (-not [string]::IsNullOrWhiteSpace($prefix) -and $Branch.StartsWith($prefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+            return $true
+        }
+    }
+
+    return $false
 }
 
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
@@ -133,10 +150,14 @@ foreach ($line in @($remoteRefs)) {
     $isStale = $ageDays -ge $StaleDays
     $isMerged = $mergedSet.Contains($branch)
     $hasOpenPr = $openPrHeads.ContainsKey($branch)
-    $safeToDelete = $isStale -and $isMerged -and -not $hasOpenPr
+    $hasProtectedPrefix = Test-ProtectedBranchPrefix -Branch $branch -Prefixes $ProtectedBranchPrefixes
+    $safeToDelete = $isStale -and $isMerged -and -not $hasOpenPr -and -not $hasProtectedPrefix
 
     $state = if (-not $isStale) {
         'recent'
+    }
+    elseif ($hasProtectedPrefix) {
+        'retained-protected-wip'
     }
     elseif ($safeToDelete) {
         'stale-merged'
@@ -170,6 +191,7 @@ $retainedStale = @($staleRemote | Where-Object { -not $_.SafeToDelete })
 
 $currentBranch = (git branch --show-current).Trim()
 $localOrphaned = @()
+$localRetained = @()
 $localRefs = git for-each-ref refs/heads --format='%(refname:short)|%(upstream:track)'
 foreach ($line in @($localRefs)) {
     if ([string]::IsNullOrWhiteSpace($line)) {
@@ -188,6 +210,15 @@ foreach ($line in @($localRefs)) {
         continue
     }
     if ($track -match '\[gone\]') {
+        if (Test-ProtectedBranchPrefix -Branch $branch -Prefixes $ProtectedBranchPrefixes) {
+            $localRetained += [pscustomobject]@{
+                Branch        = $branch
+                AgeDays       = '-'
+                LastCommitUtc = '-'
+                State         = 'orphaned-local-retained'
+            }
+            continue
+        }
         $localOrphaned += [pscustomobject]@{
             Branch        = $branch
             AgeDays       = '-'
@@ -225,6 +256,7 @@ Write-Host "  stale remote branches: $($staleRemote.Count)"
 Write-Host "  safe remote deletions: $($deletableRemote.Count)"
 Write-Host "  retained stale branches: $($retainedStale.Count)"
 Write-Host "  orphaned local branches: $($localOrphaned.Count)"
+Write-Host "  retained protected local branches: $($localRetained.Count)"
 if ($ApplyChanges) {
     Write-Host "  deleted remote branches: $($deletedRemote.Count)"
     Write-Host "  deleted local branches: $($deletedLocal.Count)"
@@ -251,6 +283,12 @@ if ($localOrphaned.Count -gt 0) {
     $localOrphaned | Format-Table Branch, State -AutoSize
 }
 
+if ($localRetained.Count -gt 0) {
+    Write-Host ''
+    Write-Host 'Retained protected local branches (manual follow-up required):'
+    $localRetained | Format-Table Branch, State -AutoSize
+}
+
 if ($env:GITHUB_STEP_SUMMARY) {
     Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "# Branch Audit"
     Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value ""
@@ -260,8 +298,10 @@ if ($env:GITHUB_STEP_SUMMARY) {
     Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "| Safe remote deletions | $($deletableRemote.Count) |"
     Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "| Retained stale branches | $($retainedStale.Count) |"
     Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "| Orphaned local branches | $($localOrphaned.Count) |"
+    Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "| Retained protected local branches | $($localRetained.Count) |"
     Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value ""
 
     Write-MarkdownTable -Path $env:GITHUB_STEP_SUMMARY -Title 'Safe Remote Deletion Candidates' -Rows $deletableRemote
     Write-MarkdownTable -Path $env:GITHUB_STEP_SUMMARY -Title 'Retained Stale Branches' -Rows $retainedStale
+    Write-MarkdownTable -Path $env:GITHUB_STEP_SUMMARY -Title 'Retained Protected Local Branches' -Rows $localRetained
 }

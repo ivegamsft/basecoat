@@ -187,3 +187,7 @@ portal/app/backend/.env
 portal/app/backend/.env.*
 portal/app/dashboard/.env
 portal/app/dashboard/.env.*
+
+# Agent/workflow runtime logs and temp artifacts
+.github/aw/logs/
+.pr-body.txt

@@ -19,7 +19,7 @@ release, version drift) to reduce routing ambiguity.
 | `plan:` | Sprint or project planning | **Now, no implementation** | `@sprint-planner`, `@product-manager` |
 | `spike:` | Time-boxed investigation, no deliverable | **Now, research only** | `@solution-architect` |
 | `chore:` | Maintenance, cleanup, non-functional | **Soon** | `@devops-engineer`, `@release-manager` |
-| `pr:` | Pull request lifecycle handling: triage, merge readiness, build-gated closeout, and branch hygiene | **Now** | `@orphaned-pr-cleanup`, `@merge-coordinator`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
+| `pr:` | Pull request lifecycle handling: remaining WIP logging, merge readiness, build-gated closeout, and branch hygiene. Use `pr-lifecycle=full` when you want the whole chain kept together. | **Now** | `@orphaned-pr-cleanup`, `@merge-coordinator`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
 | `fleet:` | Close previous sprint, plan and execute the next sprint, triage oldest issues, audit PRs/builds, clean branches | **Now** | `@sprint-closeout-auditor`, `@sprint-planner`, `@issue-triage`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
 | `workflow:` | GitHub Actions workflow failure triage and repair | **Now** | `@broken-build-troubleshooter`, `@self-healing-ci`, `@devops-engineer` |
 | `actions:` | GitHub Actions configuration, runs, and policy checks | **Now** | `@self-healing-ci`, `@ci-failure-escalation`, `@devops-engineer` |
@@ -261,9 +261,13 @@ for retry caps, path lock, and bootstrap immutability rules.
 
 `pr:` is the direct intent for PR lifecycle execution.
 
+`pr-lifecycle=full` is a lifecycle modifier for `pr:` requests. Keep `pr:` as
+the prefix, and use the modifier when the request should stay end-to-end across
+triage, merge, broken-build recovery, and cleanup.
+
 ### Default sequence
 
-1. Triage stale or blocked pull requests with `@orphaned-pr-cleanup`.
+1. Log remaining WIP and triage stale or blocked pull requests with `@orphaned-pr-cleanup`.
 2. Validate merge readiness and ordering with `@merge-coordinator`.
 3. Verify required CI status before closure; if builds are red, route to `@broken-build-troubleshooter`.
 4. Run `@branch-hygiene-sweeper` after merge/close actions to prune only safe branches.
@@ -273,6 +277,7 @@ for retry caps, path lock, and bootstrap immutability rules.
 - Do not close or mark complete while required builds are still pending.
 - If required builds fail, keep the PR open and attach failure evidence.
 - Only run branch cleanup for branches tied to merged/closed PRs with required builds passing.
+- Do not auto-prune `preserved/`, `backup/`, or `wip/` branches; log them as retained WIP with an owner and next action.
 - Prefer serial merges for overlapping branches to reduce conflict churn.
 
 ---

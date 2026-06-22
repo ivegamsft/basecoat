@@ -39,7 +39,7 @@ Rules:
 | `fleet:` | Close the sprint, plan the next one, triage oldest issues, and clean branches | Now | `@sprint-closeout-auditor`, `@sprint-planner`, `@issue-triage`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
 | `workflow:` | GitHub Actions/workflow failure triage and repair | Now | `@broken-build-troubleshooter`, `@self-healing-ci`, `@devops-engineer` |
 | `actions:` | GitHub Actions configuration, runs, and policy checks | Now | `@self-healing-ci`, `@ci-failure-escalation`, `@devops-engineer` |
-| `pr:` | Pull request triage, mergeability, or stale PR cleanup | Now | `@orphaned-pr-cleanup`, `@merge-coordinator`, `@code-review` |
+| `pr:` | Pull request lifecycle execution: remaining WIP logging, mergeability, broken-build recovery, and safe cleanup | Now | `@orphaned-pr-cleanup`, `@merge-coordinator`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
 | `issue:` | GitHub issue triage, labeling, and backlog hygiene | Now | `@issue-triage`, `@sprint-planner` |
 | `portfolio:` | Project audit for issue/PR dedupe, categorization, dependency mapping, feature grouping, and project linkage | Now | `@issue-triage`, `@orphaned-pr-cleanup`, `@sprint-project-mapper`, `@sprint-planner`, `@governance-auditor` |
 | `release:` | Release planning, version bumping, and publication | Now | `@release-manager`, `@release-readiness-chair`, `@release-impact-advisor` |
@@ -107,8 +107,8 @@ Execution contracts:
 
 1. `workflow:` and `actions:` go straight to failed-run evidence first (run,
    job, failing step), then apply a minimal fix, then rerun the affected scope.
-2. `pr:` routes to PR-first triage (mergeability, stale ownership, review
-   blockers) before any broad repo analysis.
+2. `pr:` routes to PR-first lifecycle triage (remaining WIP log, mergeability,
+   stale ownership, review blockers) before any broad repo analysis.
 3. `issue:` routes to issue quality/label/backlog triage first.
 4. `portfolio:` routes to issue/PR hygiene and grouping workflow first: dedupe,
    categorize, wire dependencies, cluster by feature, then ensure a canonical
@@ -129,6 +129,19 @@ Execution contract:
    - Non-published/manual/local customization source
 3. If origin is published BaseCoat, fetch latest published BaseCoat release and report drift (`installed` vs `latest`).
 4. If origin is not published BaseCoat, report installed version and state that latest published comparison is not authoritative for that source.
+
+## PR Lifecycle Modifier
+
+`pr-lifecycle=full` is a supported lifecycle modifier for `pr:` work.
+
+Execution contract:
+
+1. Keep `pr:` as the authoritative prefix and runtime trigger.
+2. When `pr-lifecycle=full` is present, expand the PR route to cover the whole
+   lifecycle: remaining WIP logging, merge-readiness triage, broken-build
+   follow-up, closure evidence, and post-merge branch hygiene.
+3. Keep branch cleanup subordinate to PR state: only merged or explicitly closed
+   work moves into branch-hygiene actions.
 
 ## Plan-First Enforcement
 
