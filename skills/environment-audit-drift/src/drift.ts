@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { randomUUID } from 'crypto';
 import * as yaml from 'js-yaml';
-import { v4 as uuidv4 } from 'uuid';
 import {
   DriftAuditInput,
   DriftReport,
@@ -23,7 +23,7 @@ export class EnvironmentAuditDrifter {
 
   async audit(): Promise<DriftReport> {
     const startTime = Date.now();
-    const auditId = uuidv4();
+    const auditId = randomUUID();
     const now = new Date().toISOString();
 
     try {
