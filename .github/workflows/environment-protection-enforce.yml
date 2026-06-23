@@ -91,7 +91,7 @@ jobs:
 
           if [[ "$REVIEWER_COUNT" -lt 1 ]]; then
             echo "::warning::Environment '${PROD_ENV}' has no required reviewers."
-            echo "::warning::Settings action required: configure at least one required reviewer."
+            echo "::warning::Settings action required: environment must have at least one required reviewer."
           fi
 
           if [[ "$BRANCH_POLICY" != "true" ]]; then
