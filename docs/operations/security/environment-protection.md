@@ -102,6 +102,7 @@ The `.github/workflows/enforce-protection.yml` workflow:
 
 - [Branch Protection Ruleset](docs/reference/branch-protection.md) — Main branch controls (Issue #1556)
 - [Secret Scanning](docs/operations/security/secret-scanning.md) — Complementary security control
+- [Security Remediation Traceability Workflow](docs/operations/security/remediation-traceability-workflow.md) — Canonical closure-evidence workflow for security findings
 - [Deployment Checklist](docs/guides/deployment-checklist.md) — How to execute safe deployments
 
 ---

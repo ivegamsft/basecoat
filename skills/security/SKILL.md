@@ -24,3 +24,4 @@ Use with `security-analyst` agent. For backend security pair with `backend-dev`;
 ## Related Guardrails
 
 - [Security Findings Triage](references/security-findings-triage.md) — SLA-based triage process for severity classification, ownership, and remediation tracking
+- [Remediation Closure Evidence Template](references/remediation-closure-evidence-template.md) — Required evidence fields for implementation-linked closure and risk-acceptance records

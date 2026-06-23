@@ -95,6 +95,7 @@ flowchart LR
 - [operations/github-secrets.md](operations/github-secrets.md) — Repository secrets setup and rotation guide
 - [operations/copilot-extension-github-app-registration.md](operations/copilot-extension-github-app-registration.md) — GitHub App registration runbook for BaseCoat Copilot Extension
 - [operations/build-master-control-plane.md](operations/build-master-control-plane.md) — Build master architecture, policy matrix, and runbook for lane-aware continuous merge with cloud break-fix
+- [operations/security/remediation-traceability-workflow.md](operations/security/remediation-traceability-workflow.md) — Canonical implementation-linked closure workflow for security remediation
 - [operations/security/](operations/security/) — Security policies and audit docs
 
 ## Templates (`docs/templates/`)
