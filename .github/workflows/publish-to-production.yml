@@ -27,7 +27,7 @@ jobs:
 
   publish:
     needs: preflight-token-check
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER_RELEASE || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
     timeout-minutes: 10
     environment: production
     steps:

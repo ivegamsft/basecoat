@@ -17,6 +17,7 @@ Canonical runner classes live in:
 | `github-hosted-macos` | `macos-latest` | macOS-specific validation |
 | `self-hosted-linux` | self-hosted group + labels | deploy/release jobs requiring private network or managed identity |
 | `configurable-deploy` | `${{ vars.RUNNER_DEPLOY \|\| 'ubuntu-latest' }}` | deploy-path migration with a safe fallback |
+| `configurable-release` | `${{ vars.RUNNER_RELEASE \|\| vars.RUNNER_DEPLOY \|\| 'ubuntu-latest' }}` | release/publish lane isolation with a deploy-lane fallback |
 | `github-hosted-matrix` | `${{ matrix.os }}` | multi-OS validation where a single job fans out across OS images |
 | `reusable-workflow` | `uses: ./.github/workflows/<reusable>.yml` | delegated runner choice managed by a reusable workflow |
 
@@ -56,7 +57,28 @@ runs-on: ${{ vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
 This pattern is currently used by deployment-oriented workflows and remains
 compatible with protected self-hosted rollouts.
 
-Deployment workflows that use `RUNNER_DEPLOY` now include a mandatory
+Release/publish workflows now isolate onto a dedicated release lane variable:
+
+```yaml
+runs-on: ${{ vars.RUNNER_RELEASE || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
+```
+
+Set `RUNNER_RELEASE` to your release pool (for example, a protected self-hosted
+group). If `RUNNER_RELEASE` is not configured, release jobs inherit
+`RUNNER_DEPLOY` and finally fall back to `ubuntu-latest`.
+
+## Runner-health observability
+
+The repository now includes a dedicated workflow to report queue wait, offline
+capacity, and wrong-runner failure patterns for release/deploy lanes:
+
+- `.github/workflows/runner-health-observability.yml`
+- `scripts/report-runner-health.ps1`
+
+This workflow emits markdown and JSON artifacts plus a step summary so lane
+routing debt can be spotted quickly without inspecting each run manually.
+
+Deployment workflows that use `RUNNER_DEPLOY` include a mandatory
 `Validate self-hosted runner routing contract` step. This fails early when
 `vars.RUNNER_DEPLOY` is missing or resolves to plain `ubuntu-latest`, preventing
 silent wrong-runner execution.

@@ -136,6 +136,7 @@ function Get-ActualRunnerClass {
         return 'missing-runs-on'
     }
     if ($RunsOnRaw -match 'matrix\.os') { return 'github-hosted-matrix' }
+    if ($RunsOnRaw -match 'vars\.RUNNER_RELEASE') { return 'configurable-release' }
     if ($RunsOnRaw -match 'vars\.RUNNER_DEPLOY') { return 'configurable-deploy' }
     if ($RunsOnRaw -match 'self-hosted' -or $RunsOnRaw -match 'group:') { return 'self-hosted-linux' }
     if ($RunsOnRaw -match 'windows-latest') { return 'github-hosted-windows' }
@@ -261,6 +262,7 @@ function Get-AssignmentStatus {
     if ($ActualRunnerClass -eq 'reusable-workflow' -and $RecommendedRunnerClass -eq 'reusable-workflow') { return 'aligned' }
     if ($ActualRunnerClass -eq $RecommendedRunnerClass) { return 'aligned' }
     if ($ActualRunnerClass -eq 'configurable-deploy' -and $RecommendedRunnerClass -eq 'self-hosted-linux') { return 'conditional' }
+    if ($ActualRunnerClass -eq 'configurable-release' -and $RecommendedRunnerClass -eq 'self-hosted-linux') { return 'conditional' }
     return 'mismatch'
 }
 
