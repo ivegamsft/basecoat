@@ -30,6 +30,31 @@ This is useful for team adoption: each bootstrap run can surface issues requirin
 
 ## Required Secrets
 
+### Profile-driven bootstrap matrix
+
+`pwsh scripts/bootstrap.ps1` now evaluates required secrets and variables using
+the onboarding profile contract (`solo-dev`, `team-dev`, `regulated-team`).
+
+- Explicit override: `-OnboardingProfile <profile>`
+- Contract-driven: `-OnboardingContractPath <path-to-contract-json>`
+- Non-interactive CI mode: `-Silent` (fails checks with exact remediation text)
+
+Default profile resolution order:
+
+1. `-OnboardingProfile`
+2. `BASECOAT_ONBOARDING_PROFILE`
+3. Contract file profile (default `.github/basecoat-onboarding-profile.json`)
+4. `team-dev`
+
+| Profile | Workflow pack | Required secrets/variables surfaced by bootstrap |
+|---|---|---|
+| `solo-dev` | `solo` | `COPILOT_GITHUB_TOKEN` |
+| `team-dev` | `team` | `COPILOT_GITHUB_TOKEN`, `GH_AW_GITHUB_TOKEN` (+ `PRODUCTION_REPO_TOKEN` when publish workflow exists; portal variables and `GHCR_PULL_TOKEN` when portal deploy workflow exists) |
+| `regulated-team` | `regulated` | `COPILOT_GITHUB_TOKEN`, `GH_AW_GITHUB_TOKEN`, `GH_AW_GITHUB_MCP_SERVER_TOKEN` (+ same workflow-conditional requirements as team-dev) |
+
+Bootstrap output includes token rotation/expiration guidance and never writes
+plaintext secrets to repository files.
+
 ### Portal deploy bootstrap order (staging)
 
 Use this order to avoid mixed bootstrap/deploy failures:

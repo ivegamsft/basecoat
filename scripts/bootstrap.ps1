@@ -6,7 +6,7 @@
     Idempotent four-phase setup for new BaseCoat adopters:
       Phase 1 — Repo setup      (fork detection, GitHub settings, gh aw extension)
       Phase 2 — Memory layer    (SQLite init, gitignore guard, optional shared memory sync)
-      Phase 3 — Secrets check   (validate secrets and, in interactive mode, optionally configure missing portal deploy secrets)
+      Phase 3 — Secrets check   (profile-driven required secret/variable matrix with precise remediation, plus interactive bootstrap for missing values)
       Phase 4 — Validation      (validate-basecoat.ps1 + run-tests.ps1)
     
     Generates audit log to .memory/bootstrap-audit.json with all checks, warnings, and errors.
@@ -27,6 +27,16 @@
     Override the shared org memory repo (e.g., 'MyOrg/basecoat-memory').
     Defaults to BASECOAT_SHARED_MEMORY_REPO environment variable if set.
 
+.PARAMETER OnboardingProfile
+    Optional profile selector for secret and variable requirements:
+    solo-dev, team-dev, or regulated-team.
+    Defaults to BASECOAT_ONBOARDING_PROFILE, then onboarding contract, then team-dev.
+
+.PARAMETER OnboardingContractPath
+    Optional path to onboarding profile contract JSON file. Used to resolve
+    profile when -OnboardingProfile is not provided.
+    Defaults to BASECOAT_ONBOARDING_CONTRACT_PATH, then .github/basecoat-onboarding-profile.json.
+
 .EXAMPLE
     pwsh scripts/bootstrap.ps1
 
@@ -38,6 +48,9 @@
 
 .EXAMPLE
     pwsh scripts/bootstrap.ps1 -SharedMemoryRepo "MyOrg/basecoat-memory"
+
+.EXAMPLE
+    pwsh scripts/bootstrap.ps1 -OnboardingProfile regulated-team -Silent
 #>
 
 [CmdletBinding()]
@@ -45,7 +58,10 @@ param(
     [switch]$Silent,
     [switch]$SkipTests,
     [switch]$CreateIssues,
-    [string]$SharedMemoryRepo = $env:BASECOAT_SHARED_MEMORY_REPO
+    [string]$SharedMemoryRepo = $env:BASECOAT_SHARED_MEMORY_REPO,
+    [ValidateSet('solo-dev', 'team-dev', 'regulated-team')]
+    [string]$OnboardingProfile,
+    [string]$OnboardingContractPath = $(if ($env:BASECOAT_ONBOARDING_CONTRACT_PATH) { $env:BASECOAT_ONBOARDING_CONTRACT_PATH } else { '.github\basecoat-onboarding-profile.json' })
 )
 
 Set-StrictMode -Version Latest
@@ -118,6 +134,17 @@ function Set-GitHubSecretValue(
     return ($LASTEXITCODE -eq 0)
 }
 
+function Set-GitHubRepoSecretValue(
+    [string]$repoSlug,
+    [string]$secretName,
+    [string]$secretValue
+) {
+    if ([string]::IsNullOrWhiteSpace($secretValue)) { return $false }
+
+    $secretValue | gh secret set $secretName -R $repoSlug 2>$null
+    return ($LASTEXITCODE -eq 0)
+}
+
 function Get-AzureAccountContext {
     if (-not (Test-CommandExists 'az')) { return $null }
 
@@ -173,6 +200,240 @@ function Get-GitHubOidcAudience {
     }
 
     return $script:DefaultGitHubOidcAudience
+}
+
+function Get-OnboardingProfileSelection(
+    [string]$requestedProfile,
+    [string]$contractPath
+) {
+    $profileFromContract = $null
+    if (-not [string]::IsNullOrWhiteSpace($contractPath)) {
+        $resolvedContractPath = if ([System.IO.Path]::IsPathRooted($contractPath)) {
+            $contractPath
+        } else {
+            Join-Path (Get-Location) $contractPath
+        }
+
+        if (Test-Path $resolvedContractPath) {
+            try {
+                $contractRaw = Get-Content -Path $resolvedContractPath -Raw
+                if (-not [string]::IsNullOrWhiteSpace($contractRaw)) {
+                    $contract = $contractRaw | ConvertFrom-Json -ErrorAction Stop
+                    if ($contract.profile) {
+                        $profileFromContract = $contract.profile.ToString().Trim()
+                    }
+                }
+            } catch {
+                Write-Warn "Could not parse onboarding contract at '$resolvedContractPath': $($_.Exception.Message)"
+            }
+        }
+    }
+
+    $candidateProfile = @(
+        $requestedProfile,
+        $env:BASECOAT_ONBOARDING_PROFILE,
+        $profileFromContract,
+        'team-dev'
+    ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -First 1
+
+    $profiles = @{
+        'solo-dev' = [ordered]@{
+            profile = 'solo-dev'
+            branch_policy = 'minimal'
+            workflow_pack = 'solo'
+            template_pack = 'solo'
+            telemetry_mode = 'local'
+            secrets_mode = 'local'
+            hook_pack = 'none'
+        }
+        'team-dev' = [ordered]@{
+            profile = 'team-dev'
+            branch_policy = 'shared'
+            workflow_pack = 'team'
+            template_pack = 'team'
+            telemetry_mode = 'shared'
+            secrets_mode = 'workflow-secrets'
+            hook_pack = 'standard'
+        }
+        'regulated-team' = [ordered]@{
+            profile = 'regulated-team'
+            branch_policy = 'locked-down'
+            workflow_pack = 'regulated'
+            template_pack = 'regulated'
+            telemetry_mode = 'org-managed'
+            secrets_mode = 'org-managed'
+            hook_pack = 'guardrails'
+        }
+    }
+
+    if (-not $profiles.ContainsKey($candidateProfile)) {
+        throw "Unsupported onboarding profile '$candidateProfile'. Allowed values: solo-dev, team-dev, regulated-team."
+    }
+
+    return [pscustomobject]$profiles[$candidateProfile]
+}
+
+function Get-OnboardingSecretVariableRequirements(
+    [pscustomobject]$profileSelection,
+    [bool]$hasPublishWorkflow,
+    [bool]$hasPortalDeployWorkflow
+) {
+    $requirements = [System.Collections.Generic.List[object]]::new()
+
+    $requirements.Add([pscustomobject]@{
+        Name = 'COPILOT_GITHUB_TOKEN'
+        Kind = 'secret'
+        Remediation = "Run 'pwsh scripts/bootstrap-copilot-github-token.ps1 -Repo <repo>' or set with 'gh secret set COPILOT_GITHUB_TOKEN -R <repo>'."
+        Rotation = 'Rotate every 30 days (set PAT expiration <=30 days).'
+    })
+
+    if ($profileSelection.secrets_mode -in @('workflow-secrets', 'org-managed')) {
+        $requirements.Add([pscustomobject]@{
+            Name = 'GH_AW_GITHUB_TOKEN'
+            Kind = 'secret'
+            Remediation = "Set with 'gh secret set GH_AW_GITHUB_TOKEN -R <repo>' using a least-privilege fine-grained PAT."
+            Rotation = 'Rotate every 30 days (set PAT expiration <=30 days).'
+        })
+    }
+
+    if ($profileSelection.secrets_mode -eq 'org-managed') {
+        $requirements.Add([pscustomobject]@{
+            Name = 'GH_AW_GITHUB_MCP_SERVER_TOKEN'
+            Kind = 'secret'
+            Remediation = "Set with 'gh secret set GH_AW_GITHUB_MCP_SERVER_TOKEN -R <repo>' scoped to Issues/PR read-write and Contents read."
+            Rotation = 'Rotate every 30 days (set PAT expiration <=30 days).'
+        })
+    }
+
+    if ($hasPublishWorkflow) {
+        $requirements.Add([pscustomobject]@{
+            Name = 'PRODUCTION_REPO_TOKEN'
+            Kind = 'secret'
+            Remediation = "Set with 'gh secret set PRODUCTION_REPO_TOKEN --repo <repo>' after creating PAT on ivegamsft/basecoat with Contents/Admin/Workflows read-write."
+            Rotation = 'Rotate before PAT expiration; keep expiration <=30 days where possible.'
+        })
+    }
+
+    if ($hasPortalDeployWorkflow -and $profileSelection.profile -ne 'solo-dev') {
+        $requirements.Add([pscustomobject]@{
+            Name = 'AZURE_CLIENT_ID'
+            Kind = 'variable'
+            Pattern = '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+            Remediation = "Set with 'gh variable set AZURE_CLIENT_ID -R <repo>' using a valid Entra application (GUID) client ID."
+            Rotation = ''
+        })
+        $requirements.Add([pscustomobject]@{
+            Name = 'AZURE_TENANT_ID'
+            Kind = 'variable'
+            Pattern = '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+            Remediation = "Set with 'gh variable set AZURE_TENANT_ID -R <repo>' using your Entra tenant GUID."
+            Rotation = ''
+        })
+        $requirements.Add([pscustomobject]@{
+            Name = 'AZURE_SUBSCRIPTION_ID'
+            Kind = 'variable'
+            Pattern = '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+            Remediation = "Set with 'gh variable set AZURE_SUBSCRIPTION_ID -R <repo>' using your target Azure subscription GUID."
+            Rotation = ''
+        })
+        $requirements.Add([pscustomobject]@{
+            Name = 'GHCR_PULL_TOKEN'
+            Kind = 'secret'
+            Remediation = "Set with 'gh secret set GHCR_PULL_TOKEN -R <repo>' using a PAT with read:packages."
+            Rotation = 'Rotate every 30 days (set PAT expiration <=30 days).'
+        })
+    }
+
+    return $requirements
+}
+
+function Test-OnboardingSecretVariableRequirements(
+    [string]$repoSlug,
+    [array]$requirements,
+    [bool]$interactiveMode
+) {
+    $secretNames = @()
+    $repoVarLookup = @{}
+
+    try {
+        $secretNames = @(
+            gh secret list -R $repoSlug --json name --jq '.[].name' 2>$null |
+                Where-Object { $_ }
+        )
+    } catch {
+        Write-Warn "Could not inspect repository secrets (needs repo admin access)."
+    }
+
+    try {
+        $repoVariablesRaw = gh variable list -R $repoSlug --json name,value 2>$null | ConvertFrom-Json -ErrorAction Stop
+        foreach ($variable in @($repoVariablesRaw)) {
+            if ($variable.name) {
+                $repoVarLookup[$variable.name] = [string]$variable.value
+            }
+        }
+    } catch {
+        Write-Warn "Could not inspect repository variables (needs repo admin access)."
+    }
+
+    Write-Host "  Required configuration matrix:" -ForegroundColor Cyan
+    foreach ($requirement in $requirements) {
+        Write-Host "    - $($requirement.Kind): $($requirement.Name)" -ForegroundColor DarkGray
+    }
+
+    foreach ($requirement in $requirements) {
+        if ($requirement.Kind -eq 'secret') {
+            $hasSecret = $secretNames -contains $requirement.Name
+            if ($hasSecret) {
+                Write-Check "$($requirement.Name) repo secret present" $true "required"
+                continue
+            }
+
+            Write-Fail "$($requirement.Name) missing. $($requirement.Remediation.Replace('<repo>', $repoSlug))"
+            if ($interactiveMode -and (Confirm-Step "  Configure missing secret '$($requirement.Name)' now?")) {
+                $secretValue = Read-SecretValue "  Enter value for $($requirement.Name)"
+                if (Set-GitHubRepoSecretValue -repoSlug $repoSlug -secretName $requirement.Name -secretValue $secretValue) {
+                    Write-Check "$($requirement.Name) configured" $true "repo secret"
+                } else {
+                    Write-Fail "Could not configure $($requirement.Name). $($requirement.Remediation.Replace('<repo>', $repoSlug))"
+                }
+            }
+            continue
+        }
+
+        if (-not $repoVarLookup.ContainsKey($requirement.Name)) {
+            Write-Fail "$($requirement.Name) missing. $($requirement.Remediation.Replace('<repo>', $repoSlug))"
+            if ($interactiveMode -and (Confirm-Step "  Configure missing variable '$($requirement.Name)' now?")) {
+                $inputValue = Read-Host "  Enter value for $($requirement.Name)"
+                if (Set-GitHubVariableValue -repoSlug $repoSlug -variableName $requirement.Name -variableValue $inputValue) {
+                    Write-Check "$($requirement.Name) configured" $true "repo variable"
+                    $repoVarLookup[$requirement.Name] = $inputValue
+                } else {
+                    Write-Fail "Could not configure $($requirement.Name). $($requirement.Remediation.Replace('<repo>', $repoSlug))"
+                }
+            }
+            continue
+        }
+
+        $currentValue = [string]$repoVarLookup[$requirement.Name]
+        if (-not [string]::IsNullOrWhiteSpace($requirement.Pattern) -and ($currentValue -notmatch $requirement.Pattern)) {
+            Write-Fail "$($requirement.Name) has invalid format ('$currentValue'). $($requirement.Remediation.Replace('<repo>', $repoSlug))"
+            continue
+        }
+
+        Write-Check "$($requirement.Name) available for workflows" $true "repo variable"
+    }
+
+    $rotationEntries = @(
+        $requirements |
+            Where-Object { $_.Kind -eq 'secret' -and -not [string]::IsNullOrWhiteSpace($_.Rotation) } |
+            ForEach-Object { "$($_.Name): $($_.Rotation)" }
+    )
+    if ($rotationEntries.Count -gt 0) {
+        Write-Host "  Rotation/expiration guidance:" -ForegroundColor DarkGray
+        foreach ($entry in $rotationEntries) {
+            Write-Host "    • $entry" -ForegroundColor DarkGray
+        }
+    }
 }
 
 function Ensure-PortalOidcBootstrap(
@@ -489,63 +750,30 @@ if ($SharedMemoryRepo) {
 
 Write-Header "Phase 3 — Secrets & Config"
 
-# COPILOT_GITHUB_TOKEN
+# Resolve repo + onboarding profile once for all checks.
 try {
     $repoSlug = (gh repo view --json nameWithOwner --jq '.nameWithOwner' 2>$null).Trim()
     if (-not $repoSlug) {
         throw "Unable to resolve repository slug"
     }
-    
-    $secrets = gh secret list -R $repoSlug 2>$null | Out-String
-    if ($secrets -match 'COPILOT_GITHUB_TOKEN') {
-        Write-Check "COPILOT_GITHUB_TOKEN repo secret present" $true "required for agentic workflows"
-    } else {
-        Write-Warn "COPILOT_GITHUB_TOKEN not set — agentic workflows won't run"
-        Write-Host "  → Create a fine-grained PAT with 'Copilot Requests: Read'" -ForegroundColor DarkGray
-        Write-Host "    https://github.com/settings/personal-access-tokens/new" -ForegroundColor DarkGray
-        Write-Host "    Then: gh secret set COPILOT_GITHUB_TOKEN" -ForegroundColor DarkGray
-    }
 } catch {
-    Write-Warn "Could not check repo secrets (needs repo admin access)"
+    Write-Fail "Could not resolve repository slug from gh CLI: $($_.Exception.Message)"
+    $repoSlug = $null
 }
 
-# PRODUCTION_REPO_TOKEN (if publish-to-production workflow is present)
+$profileSelection = $null
+try {
+    $profileSelection = Get-OnboardingProfileSelection -requestedProfile $OnboardingProfile -contractPath $OnboardingContractPath
+    Write-Check "Onboarding profile selected" $true "$($profileSelection.profile) (workflow_pack=$($profileSelection.workflow_pack), secrets_mode=$($profileSelection.secrets_mode))"
+} catch {
+    Write-Fail $_.Exception.Message
+}
+
 $publishWorkflow = Join-Path $repoRoot '.github\workflows\publish-to-production.yml'
-if (Test-Path $publishWorkflow) {
-    try {
-        $prodRepoSlug = if (-not [string]::IsNullOrWhiteSpace($repoSlug)) {
-            $repoSlug
-        } else {
-            (gh repo view --json nameWithOwner --jq '.nameWithOwner' 2>$null).Trim()
-        }
-        $prodSecretList = gh secret list -R $prodRepoSlug 2>$null | Out-String
-        if ($prodSecretList -match 'PRODUCTION_REPO_TOKEN') {
-            Write-Check "PRODUCTION_REPO_TOKEN repo secret present" $true "required for publish-to-production"
-        } else {
-            Write-Warn "PRODUCTION_REPO_TOKEN not set — publish-to-production workflow will fail on release"
-            Write-Host "  -> Required: a fine-grained PAT created by the ivegamsft account owner" -ForegroundColor DarkGray
-            Write-Host "     1. Sign in to https://github.com as ivegamsft" -ForegroundColor DarkGray
-            Write-Host "     2. Settings -> Developer settings -> Fine-grained tokens -> Generate new token" -ForegroundColor DarkGray
-            Write-Host "     3. Resource owner: ivegamsft  |  Repository: ivegamsft/basecoat" -ForegroundColor DarkGray
-            Write-Host "     4. Permissions: Contents (R/W), Administration (R/W), Workflows (R/W)" -ForegroundColor DarkGray
-            Write-Host "     5. After generating: gh secret set PRODUCTION_REPO_TOKEN --repo $prodRepoSlug" -ForegroundColor DarkGray
-            Write-Host "  -> See docs/operations/github-secrets.md for full steps." -ForegroundColor DarkGray
-        }
-    } catch {
-        Write-Warn "Could not check PRODUCTION_REPO_TOKEN (needs repo admin access)"
-    }
-}
-
-# Portal deployment secrets (if portal deploy workflow is present)
 $portalDeployWorkflow = Join-Path $repoRoot '.github\workflows\portal-deploy.yml'
 $script:portalDeployReady = $false
-if (Test-Path $portalDeployWorkflow) {
+if ((Test-Path $portalDeployWorkflow) -and $profileSelection -and $profileSelection.profile -ne 'solo-dev' -and $repoSlug) {
     try {
-        $repoSlug = (gh repo view --json nameWithOwner --jq '.nameWithOwner' 2>$null).Trim()
-        if (-not $repoSlug) {
-            throw "Unable to resolve repository slug"
-        }
-
         $requiredPortalVars = @(
             'AZURE_CLIENT_ID',
             'AZURE_TENANT_ID',
@@ -562,7 +790,7 @@ if (Test-Path $portalDeployWorkflow) {
         )
 
         if ($missingPortalVars.Count -gt 0) {
-            Write-Warn "Missing portal deploy variables: $($missingPortalVars -join ', ')"
+            Write-Warn "Portal deploy variables missing for profile '$($profileSelection.profile)': $($missingPortalVars -join ', ')"
 
             if ($missingPortalVars.Count -gt 0 -and -not $Silent) {
                 $portalOidcReady = Ensure-PortalOidcBootstrap -repoSlug $repoSlug -environmentName 'staging'
@@ -576,18 +804,6 @@ if (Test-Path $portalDeployWorkflow) {
             gh variable list -R $repoSlug --json name --jq '.[].name' 2>$null |
                 Where-Object { $_ }
         )
-        $repoSecretNames = @(
-            gh secret list -R $repoSlug --json name --jq '.[].name' 2>$null |
-                Where-Object { $_ }
-        )
-
-        foreach ($variableName in $requiredPortalVars) {
-            if ($repoVarNames -contains $variableName) {
-                Write-Check "$variableName available for portal deploy" $true
-            } else {
-                Write-Fail "$variableName missing for portal deploy (set as repo variable)"
-            }
-        }
 
         $script:portalDeployReady = @(
             $requiredPortalVars | Where-Object {
@@ -601,6 +817,17 @@ if (Test-Path $portalDeployWorkflow) {
     } catch {
         Write-Warn "Could not verify portal deployment secrets: $_"
     }
+}
+
+if ($repoSlug -and $profileSelection) {
+    $requirements = Get-OnboardingSecretVariableRequirements `
+        -profileSelection $profileSelection `
+        -hasPublishWorkflow (Test-Path $publishWorkflow) `
+        -hasPortalDeployWorkflow (Test-Path $portalDeployWorkflow)
+    Test-OnboardingSecretVariableRequirements `
+        -repoSlug $repoSlug `
+        -requirements $requirements `
+        -interactiveMode (-not $Silent)
 }
 
 # BASECOAT_SHARED_MEMORY_REPO env var
