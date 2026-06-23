@@ -355,8 +355,8 @@ foreach ($issue in $allIssues) {
         }
     }
 
+    $inferredType = $null
     if (-not $hasType -and $isOpen -and -not $hasDuplicate) {
-        $inferredType = $null
         if ($title -match '(?i)(error|crash|fail|broken|regression|wrong|incorrect|not working)' -or $body -match '(?i)(error|exception|stack trace|traceback)') {
             $inferredType = "bug"
         } elseif ($title -match '(?i)(add|support|allow|feature|request|improve|enhance|new)') {
@@ -373,6 +373,8 @@ foreach ($issue in $allIssues) {
 
         if ($inferredType) {
             Add-Label $N $inferredType "Inferred from title/body"
+            $labels += @($inferredType)
+            $hasType = $true
         } else {
             Add-Label $N "needs-triage" "Missing type label — could not infer from title/body"
             Post-Comment $N "This issue is missing a type label. Please apply one of:`n- `bug`n- `enhancement`n- `documentation`n- `chore`n- `security`n- `question`" "missing type label"

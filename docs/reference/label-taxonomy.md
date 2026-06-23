@@ -18,6 +18,20 @@ Shared tooling should never remove a delivery label just because another repo do
 
 ---
 
+## Delivery Taxonomy: Sprint, Wave, Feature
+
+Use these terms consistently in planning, triage, and reporting:
+
+| Term | Definition | Practical use |
+|---|---|---|
+| Sprint | Main delivery bucket: the timeboxed board/field that says when work lands | Use sprint projects (for example, Sprint 40, Sprint 41) and the Sprint field in backlog records for historical attribution |
+| Wave | Sub-sequence inside a sprint: the order in which related work should happen | Use `wave:1` for prerequisites/foundations and `wave:2` for follow-on work that depends on Wave 1 |
+| Feature | The actual work item or capability being delivered | Use to describe scope/content, independent from scheduling and dependency sequencing |
+
+Rule of thumb: **feature = what**, **wave = dependency order**, **sprint = delivery window**.
+
+---
+
 ## Label Categories
 
 ### 1. Asset Type Labels (Custom)
