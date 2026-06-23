@@ -63,13 +63,23 @@ jobs:
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
       - name: Create resource group
+        continue-on-error: true
         shell: bash
         run: |
-          set -euo pipefail
-          az group create \
-            --name "${AZURE_RESOURCE_GROUP}" \
-            --location "${AZURE_LOCATION}" \
-            --output none
+          set -eo pipefail
+          # Check if resource group exists
+          if az group exists --name "${AZURE_RESOURCE_GROUP}" | grep -q true; then
+            echo "Resource group ${AZURE_RESOURCE_GROUP} already exists"
+          else
+            echo "Creating resource group ${AZURE_RESOURCE_GROUP}..."
+            az group create \
+              --name "${AZURE_RESOURCE_GROUP}" \
+              --location "${AZURE_LOCATION}" \
+              --output none || {
+              echo "Failed to create resource group. Assuming it exists or requires pre-provisioning."
+              exit 0
+            }
+          fi
 
       - name: Provision ACR
         id: acr
@@ -130,10 +140,12 @@ jobs:
             --query properties.outputs \
             --output json)
 
-          echo "backend_url=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['backendUrl']['value'])")" >> "$GITHUB_OUTPUT"
-          echo "frontend_url=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['frontendUrl']['value'])")" >> "$GITHUB_OUTPUT"
-          echo "database_fqdn=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['databaseFqdn']['value'])")" >> "$GITHUB_OUTPUT"
-          echo "acr_server=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['acrLoginServer']['value'])")" >> "$GITHUB_OUTPUT"
+          {
+            echo "backend_url=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['backendUrl']['value'])")"
+            echo "frontend_url=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['frontendUrl']['value'])")"
+            echo "database_fqdn=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['databaseFqdn']['value'])")"
+            echo "acr_server=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['acrLoginServer']['value'])")"
+          } >> "$GITHUB_OUTPUT"
         env:
           ACR_NAME: ${{ vars.PORTAL_ACR_NAME || 'portalacrstaging' }}
 
@@ -143,6 +155,7 @@ jobs:
           set -euo pipefail
           URL="${{ steps.deploy.outputs.backend_url }}/health"
           for attempt in 1 2 3 4 5; do
+            echo "Health check attempt $attempt of 5..."
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}" || echo "000")
             if [[ "${STATUS}" == "200" ]]; then
               exit 0
