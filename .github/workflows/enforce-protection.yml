@@ -83,8 +83,10 @@ jobs:
               direct=false
             fi
 
+            # The /environments endpoint returns {"total_count":N,"environments":[...]}.
+            # Use .environments[] (not .[]) to iterate; .[].name silently returns nothing.
             if gh api "/repos/${repo}/environments" > /tmp/prod-env-list.json 2>/tmp/prod-list.err; then
-              if jq -e '.environments[]? | select(.name == "prod")' /tmp/prod-env-list.json >/dev/null; then
+              if jq -e '.environments[] | select(.name == "prod")' /tmp/prod-env-list.json >/dev/null; then
                 listed=true
               else
                 listed=false
