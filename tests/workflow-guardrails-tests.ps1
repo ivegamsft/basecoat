@@ -698,6 +698,38 @@ else {
     $guardrailFailures += 'sprint-36-ci-stabilization'
 }
 
+# Test 18: Runner capability audit must classify every workflow job
+Write-Host '  Test 18: Validate runner capability classification coverage...'
+$runnerCapabilityIssues = @()
+$runnerAuditScriptPath = Join-Path $repoRoot 'scripts\audit-workflow-runner-capabilities.ps1'
+$runnerClassPolicyPath = Join-Path $repoRoot '.github\workflow-runner-capability-classes.json'
+
+if (-not (Test-Path $runnerAuditScriptPath)) {
+    $runnerCapabilityIssues += 'scripts/audit-workflow-runner-capabilities.ps1 (missing file)'
+}
+
+if (-not (Test-Path $runnerClassPolicyPath)) {
+    $runnerCapabilityIssues += '.github/workflow-runner-capability-classes.json (missing file)'
+}
+
+if ($runnerCapabilityIssues.Count -eq 0) {
+    $auditJson = & pwsh -NoProfile -File $runnerAuditScriptPath -OutputFormat json | ConvertFrom-Json
+    if ($auditJson.summary.unclassified_jobs -gt 0) {
+        $runnerCapabilityIssues += "audit-workflow-runner-capabilities (found $($auditJson.summary.unclassified_jobs) unclassified jobs)"
+    }
+    if ($auditJson.summary.total_jobs -le 0) {
+        $runnerCapabilityIssues += 'audit-workflow-runner-capabilities (no workflow jobs classified)'
+    }
+}
+
+if ($runnerCapabilityIssues.Count -eq 0) {
+    Write-Host '    ✓ Runner capability audit classifies all workflow jobs'
+}
+else {
+    Write-Host "    ✗ Runner capability audit issues found in: $($runnerCapabilityIssues -join ', ')" -ForegroundColor Red
+    $guardrailFailures += 'runner-capability-classification'
+}
+
 if ($guardrailFailures.Count -gt 0) {
     Write-Host "Workflow guardrails failed: $($guardrailFailures -join ', ')" -ForegroundColor Red
     exit 1
