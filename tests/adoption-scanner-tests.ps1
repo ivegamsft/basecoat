@@ -21,13 +21,24 @@ Write-Host 'Running adoption scanner tests...'
 
 # Test 1: Parameter validation - OutputFormat must be one of: table, json, markdown
 Write-Host '  Test 1: Validate OutputFormat parameter constraints...'
-& pwsh -NoProfile -Command {
-    param(
-        [ValidateSet("table", "json", "markdown")]
-        [string]$Mode = "table"
-    )
-    Write-Output $Mode
-} -Mode "invalid" *>$null
+
+$validationScript = Join-Path ([System.IO.Path]::GetTempPath()) ("adoption-scanner-outputformat-" + [System.Guid]::NewGuid().ToString() + ".ps1")
+Set-Content -Path $validationScript -Value @'
+[CmdletBinding()]
+param(
+    [ValidateSet("table", "json", "markdown")]
+    [string]$Mode = "table"
+)
+
+Write-Output $Mode
+'@
+
+try {
+    & pwsh -NoProfile -File $validationScript -Mode "invalid" *>$null
+}
+finally {
+    Remove-Item -Path $validationScript -Force -ErrorAction SilentlyContinue
+}
 
 if ($LASTEXITCODE -eq 0) {
     throw "OutputFormat validation failed: invalid value was accepted"
