@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "./scripts/hooks/pre-tool-use.sh",
+        "powershell": "./scripts/hooks/pre-tool-use.ps1",
+        "timeoutSec": 3
+      }
+    ],
+    "postToolUse": [
+      {
+        "type": "command",
+        "bash": "./scripts/hooks/post-tool-use.sh",
+        "powershell": "./scripts/hooks/post-tool-use.ps1",
+        "timeoutSec": 3
+      }
+    ]
+  }
+}

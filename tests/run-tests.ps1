@@ -222,6 +222,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running hook pack contract tests...'
+& pwsh -NoProfile -File (Join-Path $repoRoot 'scripts' 'validate-hook-packs.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Hook pack contract tests failed' -ForegroundColor Red
+    Write-FailureLog 'validate-hook-packs'
+    exit 1
+}
+
 Write-Host 'Running generate registry tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'generate-registry-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

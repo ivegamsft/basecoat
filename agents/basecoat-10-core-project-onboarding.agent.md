@@ -24,6 +24,7 @@ Purpose: stand up a new GitHub repository with BaseCoat governance, standard sca
 - **sprint_1_goal** — Plain-language objective for the first sprint (used to generate the initial issue with acceptance criteria)
 - **github_org** — GitHub org or user namespace (default: current authenticated user)
 - **basecoat_version** — BaseCoat release tag to pin (default: `main`)
+- **hook_profile** — Hook onboarding profile to apply (`none`, `memory`, `guardrails`, or `standard`; default `standard`)
 
 ## Process
 
@@ -229,7 +230,28 @@ Verify the sync produced the expected structure:
 └── agents/
 ```text
 
-### 5. Configure Issue Templates
+### 5. Configure Hook Packs
+
+If `hook_profile` is not `none`, copy the standardized hook onboarding assets from the BaseCoat repo template into the target repository:
+
+- `.github/basecoat-hook-profiles.json`
+- the selected `.github/hooks/*.json` pack files
+- `scripts/hooks/*` safe default handler stubs
+
+Profile behavior:
+
+- `memory` enables `10-session-memory.json`
+- `guardrails` enables `20-tool-guardrails.json` and `30-error-and-budget.json`
+- `standard` enables all three packs
+
+Validation rules:
+
+1. Use native runtime event names in `.github/hooks/*.json` (`Stop`, `preToolUse`, `postToolUse`, `errorOccurred`).
+2. Do not emit `SessionEnd`, `OnError`, or `OnBudgetExceeded` in native JSON files.
+3. Route budget threshold handling through `postToolUse` because native runtimes do not expose `OnBudgetExceeded`.
+4. Ensure every hook command points to a checked-in bash handler and PowerShell handler.
+
+### 6. Configure Issue Templates
 
 Create `.github/ISSUE_TEMPLATE/` with two templates if the directory does not already exist:
 
@@ -283,7 +305,7 @@ body:
       required: true
 ```text
 
-### 6. Log the First Sprint Issue
+### 7. Log the First Sprint Issue
 
 Create a GitHub issue for the sprint-1 goal with acceptance criteria:
 
@@ -308,7 +330,7 @@ $sprint_1_goal
 Created by the project-onboarding agent during initial repo setup."
 ```text
 
-### 7. Commit and Push
+### 8. Commit and Push
 
 Stage all scaffolded files, commit with a conventional message, and push:
 
@@ -338,6 +360,8 @@ After completion, report the following:
 | Repository | `$github_org/$repo_name` — created or already existed |
 | Visibility | `$visibility` |
 | BaseCoat version | `$basecoat_version` synced into `.github/base-coat/` |
+| Hook profile | `$hook_profile` applied via `.github/basecoat-hook-profiles.json` |
+| Hook packs | `.github/hooks/*.json` plus `scripts/hooks/*` |
 | Sync mechanism | `sync.ps1` / `sync.sh` at repo root |
 | Setup script | `setup.ps1` at repo root |
 | `.gitignore` | Configured with secrets protection |
@@ -353,6 +377,11 @@ $repo_name/
 │   ├── ISSUE_TEMPLATE/
 │   │   ├── feature.yml
 │   │   └── bug.yml
+│   ├── basecoat-hook-profiles.json
+│   ├── hooks/
+│   │   ├── 10-session-memory.json
+│   │   ├── 20-tool-guardrails.json
+│   │   └── 30-error-and-budget.json
 │   └── base-coat/          ← synced via sync.ps1
 │       ├── README.md
 │       ├── CHANGELOG.md
@@ -364,6 +393,20 @@ $repo_name/
 │       └── agents/
 ├── .gitignore
 ├── README.md
+├── scripts/
+│   └── hooks/
+│       ├── budget-threshold.ps1
+│       ├── budget-threshold.sh
+│       ├── error-occurred.ps1
+│       ├── error-occurred.sh
+│       ├── post-tool-use.ps1
+│       ├── post-tool-use.sh
+│       ├── pre-tool-use.ps1
+│       ├── pre-tool-use.sh
+│       ├── session-start.ps1
+│       ├── session-start.sh
+│       ├── session-stop.ps1
+│       └── session-stop.sh
 ├── setup.ps1
 ├── sync.ps1
 └── sync.sh
@@ -383,6 +426,7 @@ This agent is safe to re-run on an existing repository:
 - **Repo creation** — skipped if the repo already exists; clones instead.
 - **Root files** — only written if they do not already exist; existing files are preserved.
 - **BaseCoat sync** — `sync.ps1` replaces the `.github/base-coat/` directory cleanly on each run.
+- **Hook profile** — re-apply the selected pack set from `.github/basecoat-hook-profiles.json`; existing hook files are replaced as a unit for the chosen profile.
 - **Issue templates** — only created if the `.github/ISSUE_TEMPLATE/` directory is missing.
 - **Sprint-1 issue** — a new issue is created each run. Check for duplicates before re-running if this is undesirable.
 

@@ -18,6 +18,21 @@ Every template repository must include:
 
 The lock file is the source of truth for the approved Base Coat version.
 
+## Optional First-Class Hook Onboarding Assets
+
+Templates that want standardized hook onboarding should include:
+
+- `.github/basecoat-hook-profiles.json`
+- `.github/hooks/*.json`
+- `scripts/hooks/*`
+
+These assets are optional at the template level, but when present they must be validated as a coherent pack:
+
+1. Profiles must enable or disable whole hook packs, not ad hoc individual handlers.
+2. Native JSON files must use runtime event names such as `Stop`, `preToolUse`, `postToolUse`, and `errorOccurred`.
+3. Budget threshold handling must be routed through `postToolUse`; do not emit a non-native `OnBudgetExceeded` event in `.github/hooks/*.json`.
+4. Every declared bash or PowerShell hook command must resolve to a checked-in script.
+
 ## Lock File Contract
 
 `.github/base-coat.lock.json` must include:

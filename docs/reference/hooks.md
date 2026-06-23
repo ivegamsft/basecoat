@@ -369,6 +369,60 @@ Use this when targeting VS Code, Copilot CLI, or the Copilot Cloud Agent directl
 
 > **Cloud Agent:** Only `bash` commands are honored in the ephemeral Linbasecoat-10-core-ux sandbox. `powershell` entries are silently ignored. Use the cross-platform `command` field as a fallback.
 
+#### Onboarding hook packs
+
+For repository onboarding, treat `.github/hooks/*.json` as **pack files** that can be turned on or off by profile. Keep the profile manifest in `.github/basecoat-hook-profiles.json` and let each profile enable whole packs instead of hand-editing individual handlers.
+
+Recommended pack breakdown:
+
+- `10-session-memory.json` - `SessionStart` and `Stop`
+- `20-tool-guardrails.json` - `preToolUse` and `postToolUse`
+- `30-error-and-budget.json` - `errorOccurred` plus budget threshold handling via `postToolUse`
+
+Example profile manifest:
+
+```json
+{
+  "version": 1,
+  "defaultProfile": "standard",
+  "profiles": {
+    "none": { "enabledHookPacks": [] },
+    "memory": { "enabledHookPacks": ["10-session-memory"] },
+    "guardrails": {
+      "enabledHookPacks": ["20-tool-guardrails", "30-error-and-budget"]
+    },
+    "standard": {
+      "enabledHookPacks": [
+        "10-session-memory",
+        "20-tool-guardrails",
+        "30-error-and-budget"
+      ]
+    }
+  }
+}
+```
+
+| Profile | Enabled packs | Platform support |
+|---|---|---|
+| `none` | none | n/a |
+| `memory` | `10-session-memory` | VS Code, Copilot CLI, Cloud Agent (bash only) |
+| `guardrails` | `20-tool-guardrails`, `30-error-and-budget` | VS Code, Copilot CLI, Cloud Agent (bash only) |
+| `standard` | all three packs | VS Code, Copilot CLI, Cloud Agent (bash only) |
+
+Safe defaults for onboarding:
+
+- `SessionStart` / `Stop` should be pass-through stubs until the repo adds memory persistence or telemetry logic.
+- `preToolUse` / `postToolUse` should default to non-blocking guardrail stubs.
+- `errorOccurred` should normalize or forward errors without crashing the runtime.
+- Budget threshold handling should use a dedicated `postToolUse` stub because there is no native `OnBudgetExceeded` event in `.github/hooks/*.json`.
+
+Validation rules for onboarding packs:
+
+1. Use `Stop` instead of `SessionEnd` in native JSON files.
+2. Use `errorOccurred` instead of `OnError` in native JSON files.
+3. Do not emit `OnBudgetExceeded` in native JSON files; map budget handling to `postToolUse`.
+4. Require bash handlers for Cloud Agent compatibility and PowerShell handlers for local Windows sessions.
+
 #### Agent-Scoped Hooks (VS Code Preview)
 
 Hooks can be declared directly in an `.agent.md` YAML frontmatter. They run only when that specific agent is active and supplement any workspace-level hooks.
