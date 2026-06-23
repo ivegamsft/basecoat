@@ -132,16 +132,26 @@ Execution contract:
 
 ## PR Lifecycle Modifier
 
-`pr-lifecycle=full` is a supported lifecycle modifier for `pr:` work.
+`pr-lifecycle=<none|standard|full>` is a supported lifecycle modifier for
+`feature:` and `pr:` work.
 
 Execution contract:
 
-1. Keep `pr:` as the authoritative prefix and runtime trigger.
-2. When `pr-lifecycle=full` is present, expand the PR route to cover the whole
-   lifecycle: remaining WIP logging, merge-readiness triage, broken-build
+1. Keep the recognized prefix (`feature:` or `pr:`) as the authoritative routing
+   trigger.
+2. Parse `pr-lifecycle=<none|standard|full>` as a first-class modifier when
+   present.
+3. For `feature:` requests, if PR language is present but `pr-lifecycle` is
+   omitted, default to `pr-lifecycle=standard`.
+4. For `feature:` requests without PR language and without `pr-lifecycle`, do
+   not infer lifecycle mode.
+5. Reject invalid `pr-lifecycle` values and return explicit guidance listing
+   allowed values.
+6. When `pr-lifecycle=full` is selected, expand routing to full lifecycle
+   coverage: remaining WIP logging, merge-readiness triage, broken-build
    follow-up, closure evidence, and post-merge branch hygiene.
-3. Keep branch cleanup subordinate to PR state: only merged or explicitly closed
-   work moves into branch-hygiene actions.
+7. Keep branch cleanup subordinate to PR state: only merged or explicitly
+   closed work moves into branch-hygiene actions.
 
 ## Plan-First Enforcement
 
