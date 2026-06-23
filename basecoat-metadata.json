@@ -1,7 +1,7 @@
 {
   "$schema": "basecoat-metadata-schema",
   "version": "3.26.0",
-  "generated": "2026-06-22",
+  "generated": "2026-06-23",
   "categories": {
     "AI & Development": {
       "label": "AI & Development",
@@ -2269,6 +2269,39 @@
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-ship-it-orchestrator.agent.md",
       "model": "gpt-5.3-codex",
+      "argumentHint": ""
+    },
+    {
+      "name": "basecoat-10-core-dependabot-prioritizer",
+      "description": "Triage and prioritize open Dependabot PR queues by CVE severity, semver risk, ecosystem impact, and blocking dependency chains. USE FOR: rank Dependabot PRs for merge order, identify security-blocking updates, group safe batch merges, surface dependency chain blockers. DO NOT USE FOR: creating Dependabot config, general code review, implementing upgrade changes.",
+      "category": "Meta",
+      "keywords": [],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/basecoat-10-core-dependabot-prioritizer.agent.md",
+      "model": "gpt-5.4-mini",
+      "argumentHint": ""
+    },
+    {
+      "name": "basecoat-60-workflow-ci-guardrail-accelerator",
+      "description": "Accelerate CI pipeline guardrail checks by parallelizing independent jobs, fast-pathing known-safe change sets, and eliminating redundant validation steps. USE FOR: reduce CI cycle time, identify parallelizable job groups, detect redundant checks, fast-path documentation-only or config-only PRs. DO NOT USE FOR: disabling required security gates, bypassing approval policies, deploying to production.",
+      "category": "Meta",
+      "keywords": [],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/basecoat-60-workflow-ci-guardrail-accelerator.agent.md",
+      "model": "gpt-5.4-mini",
+      "argumentHint": ""
+    },
+    {
+      "name": "basecoat-60-workflow-parallel-session-coordinator",
+      "description": "Coordinate multiple concurrent Copilot worktree sessions executing independent issues in parallel, with merge serialization and conflict prevention. USE FOR: run parallel feature sprints, coordinate multi-worktree execution, enforce serialized merge pacing across sessions, detect and prevent merge conflicts before they occur. DO NOT USE FOR: single-session work, direct code implementation, bypassing required CI checks.",
+      "category": "Meta",
+      "keywords": [],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/basecoat-60-workflow-parallel-session-coordinator.agent.md",
+      "model": "gpt-5.4-mini",
       "argumentHint": ""
     }
   ]

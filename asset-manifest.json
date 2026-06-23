@@ -1,14 +1,14 @@
 {
   "schemaVersion": "1.0",
-  "libraryVersion": "3.31.0",
-  "generatedAt": "2026-06-14T22:10:31.0750977Z",
+  "libraryVersion": "3.32.0",
+  "generatedAt": "2026-06-23T08:32:22.6529428Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
       "type": "agent",
-      "sha": "998458d9471495a830c889c28e0b034a59c8842f",
+      "sha": "3494802047de146c08e89bae914839e4be1ea074",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -16,639 +16,655 @@
       "type": "agent",
       "sha": "5de2289aadf5f0cb8053dc0e2f2a491f8be0ce6b",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-agentops.agent.md",
       "type": "agent",
-      "sha": "2b48f2580ae9b9f1618f08f0e614ac3e88ad14c4",
+      "sha": "3c9a46406f00e89b95d0a21712da30794a394960",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-api-designer.agent.md",
       "type": "agent",
-      "sha": "e21822f5814600f1bf6b8d3b497ab5123aa58c74",
+      "sha": "aede96e4a76824ee7bcfc43e44cd0f9d252160a2",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-app-inventory.agent.md",
       "type": "agent",
-      "sha": "73698f3b3c7d5461819670feb1fc4be51cf19c00",
+      "sha": "f4ccc08b835e1009ac92973e1f111974e78c3da2",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-backend-dev.agent.md",
       "type": "agent",
-      "sha": "f325402adeae70ab7ed7f584a9e4d42edfaf8fbd",
+      "sha": "1e805366f63d35c471d3d1e924a586cce8cecf71",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-bom-validator.agent.md",
       "type": "agent",
-      "sha": "dd8a32590d174caa7a1a63863178d302e8819e08",
+      "sha": "67fe7ecc23b9928dd63920210a5b2b1f1377cbaf",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-branch-hygiene-sweeper.agent.md",
       "type": "agent",
-      "sha": "6a188c1bd8c8b7c8236bf32ef052566920436700",
+      "sha": "13d55761e68cea43241040e67fae84122e6b208b",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-change-isolation-architect.agent.md",
       "type": "agent",
-      "sha": "1971e1eec30c0e7838d2f40436d905d76825cd10",
+      "sha": "fe090cca93ee0844cf34ef1a47a91dc1513f8aaf",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-chaos-engineer.agent.md",
       "type": "agent",
-      "sha": "a968334f05a13dcccba3af42c2a417d3994fbb8d",
+      "sha": "d6e38b24734d9609d4d00fd40644f695c0b88318",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-contract-testing.agent.md",
       "type": "agent",
-      "sha": "76d1fdfe8932f806ea8d9860aa991a906287d51c",
+      "sha": "604e77c49c2e590b3263d4e7fad351254fcd43d7",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-definition-of-done.agent.md",
       "type": "agent",
-      "sha": "3ea6324a354e1fb7536fbc65f754ee28972ab25a",
+      "sha": "6d5386b3283f6634a0efb88c6bd697c4f2e24ea7",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
+      "versionSource": "library"
+    },
+    {
+      "path": "agents/basecoat-10-core-delivery-gap-mapper.agent.md",
+      "type": "agent",
+      "sha": "c7e00891e7d8c2c0f91dd4703ce5bd84c28eb963",
+      "version": null,
+      "effectiveVersion": "3.32.0",
+      "versionSource": "library"
+    },
+    {
+      "path": "agents/basecoat-10-core-dependabot-prioritizer.agent.md",
+      "type": "agent",
+      "sha": "96cab9e0ca908c78b61ede63f7de5ef146d8e67c",
+      "version": null,
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-dependency-blocker-monitor.agent.md",
       "type": "agent",
-      "sha": "55bc024dbef838d94ece5cc91004f0bb8f5734f1",
+      "sha": "d7fb730874946ff0c3ab40f2fcf933e8d8719529",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-dependency-lifecycle.agent.md",
       "type": "agent",
-      "sha": "57f9a9f9cf4632ec096ab0f28f67be8c74f08491",
+      "sha": "58698c6e10a575250604af11aa3e5845d8ee3137",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-dependency-update-advisor.agent.md",
       "type": "agent",
-      "sha": "196e878f03f71fc2f2790603be1d523ba0a3291b",
+      "sha": "51a960f9fcf46325d1c5ed8124dc9e90b9856640",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-devops-engineer.agent.md",
       "type": "agent",
-      "sha": "f0c07bff0d21b7e6a75f110a07c1cc9cccdd0bbb",
+      "sha": "bde2278dac48ea4b786d478b18c24c7c026b4ed7",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-escalation-router.agent.md",
       "type": "agent",
-      "sha": "2e06a8f93fb15830575e3f6f83e78c2360e9e24c",
+      "sha": "de0760ced40c75d0e5391d9d21ea2a26ffdb96a6",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-exploratory-charter.agent.md",
       "type": "agent",
-      "sha": "9b679f3ee9358c2bc99cf2297deaa873b680addc",
+      "sha": "7b91233b3f009546f64195fc36129273aa1e62e8",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-factory-conductor.agent.md",
       "type": "agent",
-      "sha": "65481644b34a0a6511fb3907d074b43920ef8f15",
+      "sha": "2e45096179914bfa31a756d464e776f29a665ad9",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-factory-state-curator.agent.md",
       "type": "agent",
-      "sha": "82be7afc6abff4c7f8b4e7dae897f77f938178cc",
+      "sha": "9c050ee249638ca4f5224022417e598fb8e3b860",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-feedback-loop.agent.md",
       "type": "agent",
-      "sha": "3a1514c943f8dc6deb204132238e7d46b4c7539d",
+      "sha": "898daec633949eeaccf5838a8672638ef4dd9923",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-finops-advisor.agent.md",
       "type": "agent",
-      "sha": "4aee05ac17230dddcd696d366b8688cfe23ea804",
+      "sha": "811b4929d902a7353418e9d0af721b2737c2c72a",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-frontend-dev.agent.md",
       "type": "agent",
-      "sha": "5981a2f630b9683f1c009ee6be08fe0c4cd728dc",
+      "sha": "e42b8d83ee482d191cf2518b5f295b55bc516298",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-gitops-engineer.agent.md",
       "type": "agent",
-      "sha": "774eba854b324686b9f71ca7be2d5dd0da75ce93",
+      "sha": "243b82edd1263ced04e608d68a92002f535aa67d",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-ha-architect.agent.md",
       "type": "agent",
-      "sha": "b2e42f6b6713b73b5125f759df8b7ae76f8a8b84",
+      "sha": "a78f29bbad42d4a2dbb3379a7038c8abdf15bf52",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-hardening-advisor.agent.md",
       "type": "agent",
-      "sha": "8cb9612bb8baed21f9d090a9dbeebb3f6958da6f",
+      "sha": "36dd04c25b53d622680583bf718fff86e7fbc71d",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-identity-architect.agent.md",
       "type": "agent",
-      "sha": "2a42a07f530a6afe546809995ff989fa3aa0f850",
+      "sha": "461af0c8d12d230b216acaf4c483eaf11c646f66",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-issue-triage.agent.md",
       "type": "agent",
-      "sha": "e481a002c7aede827bb2b33e6c5cd8c6e50b1ba6",
+      "sha": "7a7a9aa9e584019044085c7f7985d27af2eb2b95",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-legacy-modernization.agent.md",
       "type": "agent",
-      "sha": "02d54b1e195eeee8c6270db496f1c12cacff746e",
+      "sha": "b2868de10d57355f9b8e228737bd22760dd025ce",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-llmops.agent.md",
       "type": "agent",
-      "sha": "5d42b8fb80c3273b539192bc94b7f21b9525906f",
+      "sha": "65cd02d80f8142bd6bb312404a36ece4df21839a",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-mcp-developer.agent.md",
       "type": "agent",
-      "sha": "32f13a3500d04101bd2e7c9a426a9800606c2f67",
+      "sha": "31071ce6cc146cc690aa96b8fe9161d8fbce6492",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-memory-curator.agent.md",
       "type": "agent",
-      "sha": "05b16d61101032cc9b734368b4fd4e92ce41c64a",
+      "sha": "c59e639c28f46a3e1b1bc09dd07fc0f069d4a618",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-memory-promoter.agent.md",
       "type": "agent",
-      "sha": "0af1ac2489002d21e507ec26cf9ffc8144d7a5c4",
+      "sha": "24f020967ea0a6f1c5745d9dc9c7b96a7dfc2d6c",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-merge-coordinator.agent.md",
       "type": "agent",
-      "sha": "e41a5fc7c1f79eb615b4da705ee3db93447ca656",
+      "sha": "abcdabf91fa18e15576818b762196d012fde0a2e",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-middleware-dev.agent.md",
       "type": "agent",
-      "sha": "f1d93efb8d7c0e085180423bc2be69d227cfa794",
+      "sha": "ab6fe635405f2d6fbfac3243ff18e4e7651bfd7f",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-new-customization.agent.md",
       "type": "agent",
-      "sha": "1a0ef5d6c15e22762387ca56a6b75f04b0a23a27",
+      "sha": "26d415579ecd3d88212cbc690c8a179653e4122d",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-observability-engineer.agent.md",
       "type": "agent",
-      "sha": "43837dfb96f30e28c67b4c1e45d52ed33b6a7ba8",
+      "sha": "c1ba773d3a2b55a1e30060305047a188eeb3f86b",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-orchestrator.agent.md",
       "type": "agent",
-      "sha": "8a010108ca66777afa174f7ff30d5d6c48a1f78c",
+      "sha": "53473ce8322154bf503dea8bcb60bddbbf888278",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-orphaned-pr-cleanup.agent.md",
       "type": "agent",
-      "sha": "ad514deb19d5ce12b6c7ca07a2d0777c2644a015",
+      "sha": "6c63db604e29ad2e094824d821a924f29999eb76",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-performance-analyst.agent.md",
       "type": "agent",
-      "sha": "cbf677bd84715d0515524e8ec25876706aa08513",
+      "sha": "d93885695ab855acbf91c87e1d05349f94dc05af",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-product-manager.agent.md",
       "type": "agent",
-      "sha": "4fee4d669b5898ab4f53cf50a5092d9f692cc9d4",
+      "sha": "79d52a4f5be7c0d1f6d08ee98a28b203709ee48c",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-production-readiness.agent.md",
       "type": "agent",
-      "sha": "8bb1ae1d65649f0fd347928cf026a3a45fa90473",
+      "sha": "919f0155e3e702832092972e04fc17241e3a9d28",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-project-onboarding.agent.md",
       "type": "agent",
-      "sha": "a26e3a1ee4ef7ef5ca97420e17dd88299061d263",
+      "sha": "910c515ba44aaab616cd41d7640268acb65ecd31",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-prompt-coach.agent.md",
       "type": "agent",
-      "sha": "f5a241ebb6f94ec5c786a37aca5c41f668e657d2",
+      "sha": "d11ad83a0ba2dce80495d77029f10003960f41a9",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-prompt-engineer.agent.md",
       "type": "agent",
-      "sha": "83091732be43dc2f8f522f028c3d9d60e7b38a7b",
+      "sha": "fe4d0d5538a08b10f5141010bd1503f7d15ec07a",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-rca.agent.md",
       "type": "agent",
-      "sha": "fb3db3521b63771caa82f181079fa92b21b5737f",
+      "sha": "ad17467ecfd7319bbfab7574526d026ed3e93c53",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-replanning-engine.agent.md",
       "type": "agent",
-      "sha": "41eeae5781e0ee78e41e556325678fa947ea387b",
+      "sha": "45a65e12d832eb6b416dec312e9ed451b3f0d014",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-s4-shadow-mode-validator.agent.md",
       "type": "agent",
-      "sha": "8fbc1dade6148cf6a82a6d30d2b7bf75112a3253",
+      "sha": "9069388da0770bceca61b27099de9bb09e330034",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-solution-architect.agent.md",
       "type": "agent",
-      "sha": "98f07933899646455f5fa7e22a8ad591661508dc",
+      "sha": "f2480779a4fb376b529dc947126c490a39d0456b",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-sprint-planner.agent.md",
       "type": "agent",
-      "sha": "dc93acaa879616ab287ce551e390c2d81ffc06d3",
+      "sha": "0e42b7dc3bf9e12fa63004af3dcbe1768e050b49",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-sprint-project-mapper.agent.md",
       "type": "agent",
-      "sha": "46c1d74c795081f96c3af2313e9b6ec461b3f9a8",
+      "sha": "94120cd569fdc9cad3d4a6686b942e5f0b01da9f",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-sprint-retrospective.agent.md",
       "type": "agent",
-      "sha": "d19ca795377b771213ccafb882d480f783874359",
+      "sha": "feaece4a87d74c6db70c752084f21647aa1f0442",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-sre-engineer.agent.md",
       "type": "agent",
-      "sha": "5c4175c42d0664076a2f806acdbfa74a474529b4",
+      "sha": "5b7679cafba75f059849bf2c45f1c45c19eee990",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-station-bottleneck-analyzer.agent.md",
       "type": "agent",
-      "sha": "214c9508854ca582b57e29a9203b50be3924d944",
+      "sha": "dfdb05a12de573008511d2a5344d18f60ad98971",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-strategy-to-automation.agent.md",
       "type": "agent",
-      "sha": "f89e1d837060155b62d90f3fd8f6c221d8ff55fc",
+      "sha": "d2a767b3d3610682f7d4b6923f3f428f4587f766",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-takt-time-tracker.agent.md",
       "type": "agent",
-      "sha": "89d98f906114082d3754412e437f6f92a2c98fcb",
+      "sha": "0576f8ba0ceb4d2b9277c15fb80c9cad3a77ccf6",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-tech-writer.agent.md",
       "type": "agent",
-      "sha": "b77669c77a1dc2026084d45e92cc0f6c23c54148",
+      "sha": "a914315bd1fbf2b53b47b484b4c865b13caabfcf",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-10-core-ux-designer.agent.md",
       "type": "agent",
-      "sha": "ac50d77f8e67db9e1e795473f8c9598d0d8fa8bc",
+      "sha": "c2a8ac0aa63a384a4585194c6178bba43ae16609",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-20-lang-dotnet-modernization-advisor.agent.md",
       "type": "agent",
-      "sha": "185fb627cf73ccb26a66b408c63df9ed856574d8",
+      "sha": "6d8f1fc77752811828b5479497dea704283019c1",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-30-ai-containerization-planner.agent.md",
       "type": "agent",
-      "sha": "bbf157fc734d867d8ebc7dcf1aa062ab6fbf51d3",
+      "sha": "b8f8573814380cd1e74c78a21a1dddc58aa6c7f3",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-30-ai-daily-standup-facilitator.agent.md",
       "type": "agent",
-      "sha": "cf2a5344024369156c9514e0307241357760e83b",
+      "sha": "08f82b2501939f31aef873057d640c6638e3400b",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-30-ai-domain-designer.agent.md",
       "type": "agent",
-      "sha": "979ae7a3226c166768572526deaa0b5fbcb2a44c",
+      "sha": "77addda426ce7fe2ec8cf5da5f8e728e93862c38",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-30-ai-failure-pattern-process.agent.md",
       "type": "agent",
-      "sha": "b30e6aa75d9e768d63292d34bb24ed66aefc51c9",
+      "sha": "cfdb3d1c29ec560b749d7ce9b8fb69e62178dbe5",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-30-ai-guardrail.agent.md",
       "type": "agent",
-      "sha": "1a8f123b851d1eb9daad823931aef1a73c23ae0c",
+      "sha": "170da494f8e2e21a8b2f80dffd89d82ebc99d919",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-30-ai-mlops.agent.md",
       "type": "agent",
-      "sha": "509383cc22e6f2d70c311c352e009852a88d49a9",
+      "sha": "3fc5924aa32bd1038848e461399f172052f084ff",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-40-azure-azure-landing-zone.agent.md",
       "type": "agent",
-      "sha": "9165232b35facaae9f96244ac61a2e7e972c88fc",
+      "sha": "a49e466a7ae51538afad172fcacf14b5d018a392",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-50-security-api-security.agent.md",
       "type": "agent",
-      "sha": "3e3f989ee23eddd88b3f468e18c42df37ef880ec",
+      "sha": "22230f44436edbd3e8bd0b9395408667a953c4bc",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-50-security-ci-audit.agent.md",
       "type": "agent",
-      "sha": "fcdd6400f105515e84e2c5f642da7a705c9d17d8",
+      "sha": "ba650214bffe58cb89f4b7c98d574a0d78fc616a",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-50-security-config-auditor.agent.md",
       "type": "agent",
-      "sha": "7adecb66acb7ebe5fe0eb214195856f7b4db0a90",
+      "sha": "c017487f1a41072dfb397cfa76e665e47f12f0f9",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-50-security-container-security.agent.md",
       "type": "agent",
-      "sha": "566b0c387f04bb0549b0ad0ed2aeb55f4300cb10",
+      "sha": "1e710682df034b97c77f1890a3df3afadc1b2398",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-50-security-github-security-posture.agent.md",
       "type": "agent",
-      "sha": "c711d57b9d56e2adff1721f697a82507fa0a2e20",
+      "sha": "b645231002dbcc753f2ef36c1efb3cde3f1ddf7d",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-50-security-guidance-author.agent.md",
       "type": "agent",
-      "sha": "a779db451a9558c7134678c6001e58c00a805180",
+      "sha": "c8e96dd8cba9a50a90abaad889344304b9881074",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-50-security-instruction-auditor.agent.md",
       "type": "agent",
-      "sha": "1db3d118641c43bf68987b7af51cb53faae0f33c",
+      "sha": "c0f977d832cf2e93d571f16a2aa84b1242d0d48e",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-50-security-policy-as-code-compliance.agent.md",
       "type": "agent",
-      "sha": "741a174224ff2fa411c9ac59674bad2dc782cd20",
+      "sha": "ead6572231fc7725b713890970266ec5fcf2ace1",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-50-security-secrets-manager.agent.md",
       "type": "agent",
-      "sha": "f23164112b9bfabc71c0d2b506264ee375dbe773",
+      "sha": "0c4dedec30c152772464be86089916824248a234",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-50-security-security-analyst.agent.md",
       "type": "agent",
-      "sha": "b465ce4f2382bbc8afaadd12a5112b730326ada7",
+      "sha": "85adf15d312f0c9621caea46891cd4aec78f6e49",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-50-security-security-monitor.agent.md",
       "type": "agent",
-      "sha": "a719a250912a6a4f59397418332eed6cbed6fe9c",
+      "sha": "f469a3eb443c29ad226b0f344fd16d86187f3110",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-50-security-security-operations.agent.md",
       "type": "agent",
-      "sha": "51f3eea58e65ec7caf28bb2d1f0fd6d904ee0f4e",
+      "sha": "9ca971e4887f371b93e691540219b8d3d832e680",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-50-security-sprint-closeout-auditor.agent.md",
       "type": "agent",
-      "sha": "a3953447b9784396c0028f999f726c677a01fbd4",
+      "sha": "aa736b9829db44204358ce410ebccbd9a6b0b5d4",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-50-security-supply-chain-security.agent.md",
       "type": "agent",
-      "sha": "db29e42f3bf36b5f145cd159f27e3dc83671d0ab",
+      "sha": "d4d0fa192edaf3c6fad7325197be0a597d315d11",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-60-workflow-broken-build-troubleshooter.agent.md",
       "type": "agent",
-      "sha": "3eb482327d56d7822be77b66467f939c8578b46d",
+      "sha": "26890f19bfa167c11e9e04acfe7dc4714e724e73",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -656,199 +672,231 @@
       "type": "agent",
       "sha": "7b7d9095db9ab3206be315ba3d6cf3998cacea3e",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-60-workflow-ci-failure-escalation.agent.md",
       "type": "agent",
-      "sha": "a89b8d2bb3d28577d03b9a3aee6f58339a7d2c8d",
+      "sha": "f970d6c97ede126f49c85bd93d753408a5c7d333",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
+      "versionSource": "library"
+    },
+    {
+      "path": "agents/basecoat-60-workflow-ci-guardrail-accelerator.agent.md",
+      "type": "agent",
+      "sha": "3d2f46f45f8971386be0a768add1d9b77740b2fd",
+      "version": null,
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-60-workflow-data-pipeline.agent.md",
       "type": "agent",
-      "sha": "5761e8a963d940bb78e83024a4784762d23c8346",
+      "sha": "ee4e18a940ddf7fd559ef09427282295374427df",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-60-workflow-incident-responder.agent.md",
       "type": "agent",
-      "sha": "ac962bb3dac6796df90c31040993ef30bb406514",
+      "sha": "8b85ffa0d0ea1e5033279f553c61b2ccdfdb6b7e",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-60-workflow-infrastructure-deploy.agent.md",
       "type": "agent",
-      "sha": "1dd0a1d79af7944b06d8617b13c82f6185846d06",
+      "sha": "9e11dd9660daff075360b78a6b3f1d4b2be3d2fe",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
+      "versionSource": "library"
+    },
+    {
+      "path": "agents/basecoat-60-workflow-parallel-session-coordinator.agent.md",
+      "type": "agent",
+      "sha": "c46dca1efa1548ceec48eeea6f13e7bdd7004549",
+      "version": null,
+      "effectiveVersion": "3.32.0",
+      "versionSource": "library"
+    },
+    {
+      "path": "agents/basecoat-60-workflow-queue-rebalancer.agent.md",
+      "type": "agent",
+      "sha": "9d43a343cf166367ebe740e4fdd0bf125a303f35",
+      "version": null,
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-60-workflow-release-freeze-enforcer.agent.md",
       "type": "agent",
-      "sha": "e8d68d8fee06ec6a24e1569bd141be73c71cb162",
+      "sha": "8340036c240cd1a0cfd2fcfbd654294e3dac7261",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-60-workflow-release-impact-advisor.agent.md",
       "type": "agent",
-      "sha": "f9b09ec4400b99b224e77d4efa0e303c2333cdb4",
+      "sha": "e6cff582f55d9bf6d441bf84725bac267b0f3220",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-60-workflow-release-manager.agent.md",
       "type": "agent",
-      "sha": "9109b64d7525465ed25cfb6b98b6bb7cc499f0fa",
+      "sha": "4dcb9ab2156799a1d82fddb596cc8f379ddcee6e",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-60-workflow-release-readiness-chair.agent.md",
       "type": "agent",
-      "sha": "b4c76f0888cddd765b88733a6b37cff2918eb9d7",
+      "sha": "9fbe5ee6c38100c0e617607ff85c509afbfa1e4e",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-60-workflow-retro-facilitator.agent.md",
       "type": "agent",
-      "sha": "0bb135f2b7401c09a4c9f2eb3ceb5a0dcd3fddc1",
+      "sha": "05cba220c99b30a86277fdfb3ec98959fb7543a3",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-60-workflow-rollout-basecoat.agent.md",
       "type": "agent",
-      "sha": "edb2c01f2c86bf9c92a869898671105848c26ed1",
+      "sha": "b0764c8a3cf1ef3b7ba0ca8bb6aba7af18cc859b",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-60-workflow-run-history-cleanup.agent.md",
       "type": "agent",
-      "sha": "c5a7d6c49150d57f0d8d159f9ecf633fca1e988e",
+      "sha": "5e64486a07a2f71c4ee80d3b53a82d260de8a720",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-60-workflow-self-healing-ci.agent.md",
       "type": "agent",
-      "sha": "48fdf2a0c0b67245dc23e7be631b9fe8478ae124",
+      "sha": "b34a0970c3673b6f22cdd55d8380c7200cded6ab",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
+      "versionSource": "library"
+    },
+    {
+      "path": "agents/basecoat-60-workflow-ship-it-orchestrator.agent.md",
+      "type": "agent",
+      "sha": "0abdaf0787b55743cd78c704abbf1273c9abaef0",
+      "version": null,
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-60-workflow-task-scope-validator.agent.md",
       "type": "agent",
-      "sha": "0212dce03e9af47b04f379cd5f3081be3fc1e52c",
+      "sha": "b67044947a774442ad82433cde006b83f1282b75",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-80-data-data-architect.agent.md",
       "type": "agent",
-      "sha": "51d6ab7f5e716001121121ca923b9eb72bce8326",
+      "sha": "5e2f97e357ebae263b70625ac2920eb836396e44",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-80-data-data-integrity.agent.md",
       "type": "agent",
-      "sha": "d7f6103925a8224e5024e1b6512a18661cdf4d1c",
+      "sha": "23c4f48a6d720a6ce1248eec1328e86325b31856",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-80-data-data-tier.agent.md",
       "type": "agent",
-      "sha": "03fbf721ff3051a0120fd3ac116b61718fd72898",
+      "sha": "86a9a5d952a811c27cb99b1d606c781b3ccad9a8",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-80-data-database-migration.agent.md",
       "type": "agent",
-      "sha": "a3b7107f575412704fd2ac50a58ed0d3b0e1447d",
+      "sha": "b4188c193e7091fc0e23a5e650add20675d84bad",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-80-data-dataops.agent.md",
       "type": "agent",
-      "sha": "9cca4d71f65790ec1ad3851a197c65218d089670",
+      "sha": "4b45635c04fa196240b0af8ccdd80efb0ab3f9c2",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-90-quality-code-review.agent.md",
       "type": "agent",
-      "sha": "d575e58a1bcc4329b59329b1f30783e29dd9f741",
+      "sha": "91a7d7b7ed0ffbacb3babdd91573cff922c58872",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-90-quality-e2e-test-strategy.agent.md",
       "type": "agent",
-      "sha": "94446d72401b4982be997071c354f57d63ff8483",
+      "sha": "e031bb3b64c377f6cb156010a230a93ca0263f6a",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-90-quality-guidance-reviewer.agent.md",
       "type": "agent",
-      "sha": "94fecbdad51a11e738593712278e1c70c9d364e4",
+      "sha": "2b97fe13c6c1ac4e878f342d803d79c7c05bc262",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-90-quality-manual-test-strategy.agent.md",
       "type": "agent",
-      "sha": "440ec9ee186a7d790227cf863df1389c98cf41ce",
+      "sha": "a3a01c5a0f0a7509efc0b939599d00703587a545",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-90-quality-penetration-test.agent.md",
       "type": "agent",
-      "sha": "5f0e04a795ae416b2f0b82e2fdaf9b81622aa72e",
+      "sha": "9b08780bf13bc8f2eb75d38b28dde545c4093baf",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/basecoat-90-quality-resilience-reviewer.agent.md",
       "type": "agent",
-      "sha": "a7142ddfaedb2bbeb25d2fd1c26db510bdb1ef0e",
+      "sha": "93b3c8c793f925da9916dfa72cdbb7250f265c65",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -856,7 +904,7 @@
       "type": "agent",
       "sha": "ea736d8b621138920fa7ff256313b854a0873976",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -864,15 +912,15 @@
       "type": "agent",
       "sha": "b0efc04a5ef8831f68f210dabce2dd83627cef1a",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/flow-governance-conductor.agent.md",
       "type": "agent",
-      "sha": "e481f0a0944210d37ae42dc6dc32138f31a06592",
+      "sha": "2fd5e2b3cbbe6c9b1ebe82f00b8b1d8196c4980d",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -880,7 +928,7 @@
       "type": "agent",
       "sha": "e2d8d2b71f6b4f7ae473a34572e2ee9999bb8d62",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -888,7 +936,7 @@
       "type": "agent",
       "sha": "6e6f9d0dde5e20bee282b1d7b9d11d23a6be2915",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -896,7 +944,7 @@
       "type": "agent",
       "sha": "c85f651a285a8e092c1b875555c2ee70c167eefe",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -904,7 +952,7 @@
       "type": "agent",
       "sha": "36fd1ad65367601b79d105ae29f35c82add7fce4",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -912,23 +960,23 @@
       "type": "agent",
       "sha": "d4ae6beec0b5b3395c7077c7157615cbc7035b29",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/orchestrator.agent.md",
       "type": "agent",
-      "sha": "d2f190a1968815dbd4a0ce4c5ac96844dff75149",
+      "sha": "318da204203aea0c179ef4716b2f9d8d9bf13506",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "agents/program-bootstrap.agent.md",
       "type": "agent",
-      "sha": "89e512d2b67fe18cbfec5642cce40da5bbdd399a",
+      "sha": "7737dde37706f5cfc004c36356f0ffa419409121",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -936,7 +984,7 @@
       "type": "instruction",
       "sha": "af3f5a4b316434bfadd4c81aafff0592e20be9cc",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -944,7 +992,7 @@
       "type": "instruction",
       "sha": "8dc73e94c491541ed13604c962a82f57a0055549",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -952,7 +1000,7 @@
       "type": "instruction",
       "sha": "5c9bc890bc627a9d813874903091a7d26489cae4",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -960,7 +1008,7 @@
       "type": "instruction",
       "sha": "139b8b098bcc87068389653cd12c04019cce3af1",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -968,7 +1016,7 @@
       "type": "instruction",
       "sha": "5e109d48ac7840fe8392812ac5942bafd52dc029",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -976,7 +1024,7 @@
       "type": "instruction",
       "sha": "ae54c9eb362e81a3627068b82a3ac9b1ecb31bf1",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -984,7 +1032,7 @@
       "type": "instruction",
       "sha": "bb683e45cf4bc753eead30175e66cc0bfaf66fb6",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -992,7 +1040,7 @@
       "type": "instruction",
       "sha": "0e761f863f6bf1efec4f96d1f91d2731782af12e",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1000,7 +1048,7 @@
       "type": "instruction",
       "sha": "793735bccf0426a8fd69c9141e9e78142c3b04c0",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1008,7 +1056,7 @@
       "type": "instruction",
       "sha": "6f7ff7af7ecc26cbf6993926f96419e7c23144e8",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1016,7 +1064,7 @@
       "type": "instruction",
       "sha": "dab47333b3388ccd3924b113d456133f4ebfec12",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1024,7 +1072,7 @@
       "type": "instruction",
       "sha": "6b727dd7bd0481fffa64d79335061a2c58217f5e",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1032,7 +1080,7 @@
       "type": "instruction",
       "sha": "aae72f8242125e94ca225201c536328a24fb2410",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1040,7 +1088,7 @@
       "type": "instruction",
       "sha": "14dbecfa923abe827a329cc9344765a2de79050c",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1048,7 +1096,7 @@
       "type": "instruction",
       "sha": "657b5a23a0360d5cbc77061d26f578e7c228a9c1",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1056,7 +1104,7 @@
       "type": "instruction",
       "sha": "9a810660f319235481d545751e795d9639a69e77",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1064,7 +1112,7 @@
       "type": "instruction",
       "sha": "0266bf109aa121bca82d1cd92eaae62519fe79ad",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1072,7 +1120,7 @@
       "type": "instruction",
       "sha": "56c37d17cd22302888eb22b7d734a27d40a97397",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1080,7 +1128,7 @@
       "type": "instruction",
       "sha": "ee3ffa1a369bb9bf7d503b865014021a8a4be2cd",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1088,7 +1136,7 @@
       "type": "instruction",
       "sha": "c823c0f5e734a684ff140a85d3c64ccc2c1a1528",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1096,7 +1144,7 @@
       "type": "instruction",
       "sha": "86673987fb2488f3713a24a5a8685e21cb2759dc",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1104,7 +1152,7 @@
       "type": "instruction",
       "sha": "aa3efe3923cd040dbfab5e593a2246b836ecda90",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1112,15 +1160,15 @@
       "type": "instruction",
       "sha": "774ce4ab8235efb7a8a56be31cac7941e9a0b2d3",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "instructions/basecoat-10-core-intent-routing.instructions.md",
       "type": "instruction",
-      "sha": "fe9eb445397e3912545fab3ac5c17008c739e557",
+      "sha": "e6e70747a172f5509362ce9fc2d995af8621f2dc",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1128,7 +1176,7 @@
       "type": "instruction",
       "sha": "f49af76d69135cd7094c5627914af8537b2fb1f1",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1136,7 +1184,7 @@
       "type": "instruction",
       "sha": "c99744f54a580de5fb15e30f01bf05a52343be0d",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1144,7 +1192,7 @@
       "type": "instruction",
       "sha": "26f8b84416a48087b0e029695aaa07f840a642df",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1152,7 +1200,7 @@
       "type": "instruction",
       "sha": "d17e02c3c2bc4f6a3187d70872a7b1defd166a64",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1160,7 +1208,7 @@
       "type": "instruction",
       "sha": "416a9f62f9fa9103cb226d3483d225c64a65db77",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1168,7 +1216,7 @@
       "type": "instruction",
       "sha": "bef0914e8564e229a32964803fe6de3259df2c03",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1176,7 +1224,7 @@
       "type": "instruction",
       "sha": "dd1ea9059af3a0275109a67d604594dee30f5a5a",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1184,7 +1232,7 @@
       "type": "instruction",
       "sha": "33089137a2f0ab451cadf2d9935c9605f7c67a7b",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1192,7 +1240,7 @@
       "type": "instruction",
       "sha": "e41d9beb10626eaf2e5848e3206bc3db2fb85fb1",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1200,7 +1248,7 @@
       "type": "instruction",
       "sha": "fbe9528f7d952acd2aa57aac13954054e6d2d9a2",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1208,7 +1256,7 @@
       "type": "instruction",
       "sha": "6725dfb8a3975519b1f873606c72b338826cd0f6",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1216,15 +1264,15 @@
       "type": "instruction",
       "sha": "cdda0c7e8c09f06ec6136e36b2968f8ed5072faa",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "instructions/basecoat-10-core-process.instructions.md",
       "type": "instruction",
-      "sha": "f72476a071b1099a7d1fb09c77d6eda9af986c50",
+      "sha": "080fa450597d859fe047083a208f5c0180abca86",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1232,7 +1280,7 @@
       "type": "instruction",
       "sha": "17774c5d814667da18d04d95b6d8c3594717f56d",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1240,7 +1288,7 @@
       "type": "instruction",
       "sha": "0ac4e8512c3593db742937e8e732b72248d100fa",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1248,7 +1296,7 @@
       "type": "instruction",
       "sha": "f19fa23984c677154084c785ae9aa7009f4a5b7b",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1256,7 +1304,7 @@
       "type": "instruction",
       "sha": "c26792777f88209afffbab8ded3ab4331f4bfa7c",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1264,7 +1312,7 @@
       "type": "instruction",
       "sha": "59047deaaae4415611afa65a9a31109a8faf31c4",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1272,7 +1320,7 @@
       "type": "instruction",
       "sha": "85f86f192b58198a46a00022a28b58d16cc35f94",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1280,7 +1328,7 @@
       "type": "instruction",
       "sha": "667bf72bf26bce2051d95752f325695e5bfef800",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1288,7 +1336,7 @@
       "type": "instruction",
       "sha": "8e9597988fab436f5ab58bfc4bce2743f89e823c",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1296,7 +1344,7 @@
       "type": "instruction",
       "sha": "87d451f04f529ae1e53b11022e4d4f47bd586391",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1304,7 +1352,7 @@
       "type": "instruction",
       "sha": "6c620fc6bead6866b29a75f196b7b323a3d27025",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1312,7 +1360,7 @@
       "type": "instruction",
       "sha": "e45f9ae569fccf12c87ea6dcde4a17ce95423de1",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1320,7 +1368,7 @@
       "type": "instruction",
       "sha": "84bb6cf25b8cb920f7b922f6fa08d537279f540b",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1328,7 +1376,7 @@
       "type": "instruction",
       "sha": "f0416cb5714abf93bc829a1445a941d7d79a1fe4",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1336,7 +1384,7 @@
       "type": "instruction",
       "sha": "7d0a9c73e9cba2e6b60beb8be3402c022247bd4f",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1344,7 +1392,7 @@
       "type": "instruction",
       "sha": "6c8d2fe47a749aaf81c25c4d2b7db5c40142df44",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1352,7 +1400,7 @@
       "type": "instruction",
       "sha": "c8cae344abcc8e2ed17228c850b7992524309d13",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1360,7 +1408,7 @@
       "type": "instruction",
       "sha": "ebd5d3b2995f00ca041d99a1469c17b8e09b0469",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1368,7 +1416,7 @@
       "type": "instruction",
       "sha": "da1be39d6e43cea0819c98dd26929a31d57bfe60",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1376,7 +1424,7 @@
       "type": "instruction",
       "sha": "b0707da7c5f38f99959fa4b87d073545ce420a84",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1384,7 +1432,7 @@
       "type": "instruction",
       "sha": "0704f434dc9a374994f8b361d8f5a9a0940ac442",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1392,7 +1440,7 @@
       "type": "instruction",
       "sha": "86260583d51a2cbf5c6d996be903ffe7958589d4",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1400,7 +1448,7 @@
       "type": "instruction",
       "sha": "d1fd6dd6c645482ab38a6c46e16d35033bc0d08e",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1408,7 +1456,7 @@
       "type": "instruction",
       "sha": "413d58a6ecd34d613a662ea2b8acd6e749ff0429",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1416,7 +1464,7 @@
       "type": "instruction",
       "sha": "1849e0eae7c35c0895319d80d83880ffad229600",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1424,7 +1472,7 @@
       "type": "instruction",
       "sha": "4246378eaa37871c66c2cdbd0cb84a76d6079fbb",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1432,7 +1480,7 @@
       "type": "instruction",
       "sha": "0e47820fe924d1a01ea820b0cb2de1595206134d",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1440,7 +1488,7 @@
       "type": "instruction",
       "sha": "1456f4f77845d966b413ee9ec49855c413daafd0",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1448,7 +1496,7 @@
       "type": "instruction",
       "sha": "52cde2119b34162398f93dbe4910f39601a12603",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1456,7 +1504,7 @@
       "type": "instruction",
       "sha": "eb8af4fa86351f0c64e0c5365a0971cd85b4c1e8",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1464,7 +1512,7 @@
       "type": "instruction",
       "sha": "5cdd5775305b0007fa0f615bc7e78387e2ccc094",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1472,7 +1520,7 @@
       "type": "instruction",
       "sha": "62c65763b1c38c30a2cd692c677ebccead05f603",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1480,7 +1528,7 @@
       "type": "instruction",
       "sha": "493382e34b264f63cc58377bebad5397712675c4",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1488,7 +1536,7 @@
       "type": "instruction",
       "sha": "58734ab068f9a8b4c1b997ba59c5bfef3535c916",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1496,7 +1544,7 @@
       "type": "instruction",
       "sha": "522d08b2de409bfd351c766c1896468b16e9949c",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1504,7 +1552,7 @@
       "type": "instruction",
       "sha": "b81a80e32fc50256379fd8ca79903f3334f132dc",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1512,7 +1560,7 @@
       "type": "instruction",
       "sha": "0abd958199f9d734e96090e837bbb0c0f8caf94b",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1520,7 +1568,7 @@
       "type": "instruction",
       "sha": "98497208f2fb4bc957512f36d07d955239153237",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1528,7 +1576,7 @@
       "type": "instruction",
       "sha": "702d8ffc041a7174944c7566734a1a2aa70df05f",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1536,7 +1584,7 @@
       "type": "instruction",
       "sha": "f5bbb43675a60d985256dc5ef7ecfc4e85a90ac3",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1544,7 +1592,7 @@
       "type": "instruction",
       "sha": "d66df87a0f25b3b469a1ac3c39bca44821cc8ac7",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1552,7 +1600,7 @@
       "type": "instruction",
       "sha": "90217e0353c0a3dd26cb5ee67a0980685deb7697",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1560,7 +1608,7 @@
       "type": "instruction",
       "sha": "b9272ed63e9184745a3e42c7a232a8258ff50298",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1568,7 +1616,7 @@
       "type": "instruction",
       "sha": "a2e38f60a00ca96144c5f46a33d3cd4a1426df01",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1576,7 +1624,7 @@
       "type": "instruction",
       "sha": "ad7078777beca3431b838d05d75d6946ffac38c1",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1584,7 +1632,7 @@
       "type": "instruction",
       "sha": "b9ec53fcfa881e818fcd2ba382d134e7bc6c8a3d",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1592,7 +1640,7 @@
       "type": "instruction",
       "sha": "9aa4296b3ebfb7202900abfb798a66aee5da4775",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1600,7 +1648,7 @@
       "type": "instruction",
       "sha": "a2dc117dbd950cbb0b7d5bf1d6b1913f76636420",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1608,15 +1656,15 @@
       "type": "instruction",
       "sha": "fff8d76a976f9f7792abff102a4810e97929e621",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "instructions/intent-routing.instructions.md",
       "type": "instruction",
-      "sha": "c4596b862339b95bc558318c1e3b1cec6a6097de",
+      "sha": "431df01ac1b0da0cecfd294f9606b697d9bc9b0e",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1624,7 +1672,7 @@
       "type": "instruction",
       "sha": "9d574d1d55b3f0acecaa43a40d49fdd9d1bae3ce",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1632,7 +1680,7 @@
       "type": "instruction",
       "sha": "e2f0e52098121995c35f604b9995871d31c94c6e",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1640,7 +1688,7 @@
       "type": "instruction",
       "sha": "05eb5a8de10e2f0f84018a259dcada5b37202f23",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1648,7 +1696,7 @@
       "type": "instruction",
       "sha": "7360d0d1ee5bdc6aa94bb99482650e270c138691",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1656,7 +1704,7 @@
       "type": "instruction",
       "sha": "94f9abe7271a1e59c2d1ac0de56aebde6387e1c0",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1664,7 +1712,7 @@
       "type": "prompt",
       "sha": "3029585971d0069b96e4c92a68dfea89abce0256",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1672,7 +1720,7 @@
       "type": "prompt",
       "sha": "48a200ce84e838c05399e61689099f3c54d15e55",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1680,7 +1728,7 @@
       "type": "prompt",
       "sha": "cdad05deda68f5b3f53fd16540e20a11898cee28",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1688,7 +1736,7 @@
       "type": "prompt",
       "sha": "acc6985d3a9f4fa60795167777756cb69abd146b",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
@@ -1696,405 +1744,421 @@
       "type": "prompt",
       "sha": "362994b7b20303346bd9cd30fac1e7f0994e0960",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
+      "versionSource": "library"
+    },
+    {
+      "path": "prompts/token-status.prompt.md",
+      "type": "prompt",
+      "sha": "93d1c22f56ec8684203d3fc8953f6b8b1cdeca72",
+      "version": null,
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/agent-design/SKILL.md",
       "type": "skill",
-      "sha": "be4882c0ff161ce7dce832e5f72a5f8b317ac1d3",
+      "sha": "41f28c6a7e44842ad3ba16d8dff5f725f878e4f0",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/agentic-sdlc-autonomy/SKILL.md",
       "type": "skill",
-      "sha": "a31609e04077ed196664d5d68541dd3b2385570d",
+      "sha": "a285cd9eef45b299575a4e4e65b2e6c3bbe557d3",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/agentops-audit/SKILL.md",
       "type": "skill",
-      "sha": "16233616ee8af5d961f06fef4008f89d79f11133",
+      "sha": "e1dc4cd57a74825535218f8d57ebd12c2d3ce1da",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/api-audit/SKILL.md",
       "type": "skill",
-      "sha": "6b21c1ecf0b7d07ae4e07613445e9c2f10491d5a",
+      "sha": "937f93693231ac040eeca99ff2b6c2ec1ca96557",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/api-design/SKILL.md",
       "type": "skill",
-      "sha": "46581023adfccf005d16360c381303a9b7bbd32a",
+      "sha": "f9c478bb0e0fa4df2c8f666183eae6a41f81e62c",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/api-security/SKILL.md",
       "type": "skill",
-      "sha": "a60a40a32f48b520c4c26d02e81631cf9c52253c",
+      "sha": "8f0b20fafd027c5be0f0fe50931b99b7c0c934f3",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/app-inventory/SKILL.md",
       "type": "skill",
-      "sha": "309fdce286cc29d1c81ea5f6e480ecab956eca3f",
+      "sha": "46d0e250db48540130e3d8ddc4bb63d323b37497",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/architecture/SKILL.md",
       "type": "skill",
-      "sha": "7aac7b62f6a07f52969429b9a646d3d6085976c6",
+      "sha": "cc4a75669543b296dec7294334e1534d3d85ac18",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/azure-container-apps/SKILL.md",
       "type": "skill",
-      "sha": "c20860d0c377c16ede19d8724a18d89adb5d43c7",
+      "sha": "1439ea156f04207b0dccba30207f714d17966f0b",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/azure-devops-rest/SKILL.md",
       "type": "skill",
-      "sha": "749ffd10832d65ff4fa542fdc4169a06fa637dcf",
+      "sha": "1a98be2f24741d4b2df0f05ac786011958a4bb3d",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/azure-identity-audit/SKILL.md",
       "type": "skill",
-      "sha": "3f3563d03b1db6ac1a56600425c8005edff7a175",
+      "sha": "cf44353e51cea191e38846e6c08087606d627c06",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/azure-identity/SKILL.md",
       "type": "skill",
-      "sha": "8da5d5a65e843e5c645f27c8bfba7725c8b366ac",
+      "sha": "9ba403ae01ff69f8a764721fd7b2032646f99255",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/azure-landing-zone/SKILL.md",
       "type": "skill",
-      "sha": "2f1f18c68407e2ed40f43ccf459284990021856b",
+      "sha": "2ca4adf3ae9e409475cb595ffc7ce24c49a90917",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/azure-linux-app-service/SKILL.md",
       "type": "skill",
-      "sha": "976444d7b4a355f4c154ec7ce8b2758fd73aaded",
+      "sha": "a19dfc8e4e1f55f297f2ec4a11aa729453959bfa",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/azure-networking/SKILL.md",
       "type": "skill",
-      "sha": "1bbae0f3d6110d3340b4fc3656f77b4a905014ef",
+      "sha": "5620352cf5bc539a0ab5d29a4130678e05cb1ceb",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/azure-policy-audit/SKILL.md",
       "type": "skill",
-      "sha": "44e59bd653e63d1569f31db6ef660debd0c1d265",
+      "sha": "daa0504df91a9c9dc65a00d126c3f62e77afdd65",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/azure-policy/SKILL.md",
       "type": "skill",
-      "sha": "fecdaeac90c74f789415bf78961dfc2c4119338d",
+      "sha": "d6e53e021ab1d26c6888ce40630523a922ec475f",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/azure-waf-review/SKILL.md",
       "type": "skill",
-      "sha": "e2342e5a3b0ea6e9048299c5f025d11e84753077",
+      "sha": "b29f2c3c1a8109e093b7d52c3e27aba93439086f",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/backend-audit/SKILL.md",
       "type": "skill",
-      "sha": "863b1d0ba119fafccf036c53fbabe17cd40ed26b",
+      "sha": "8f77562501ff45023ffbacf5a92ebc3188976e25",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/backend-dev/SKILL.md",
       "type": "skill",
-      "sha": "50ed0753b19a9b5f4a07a2a36f27277ec7b191cb",
+      "sha": "9d8de461efc172776f1bb6a2b1215a86b2f6146b",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/backlog-burndown/SKILL.md",
       "type": "skill",
-      "sha": "9995e34ff46486bb9b78d019b1d06961a966764d",
+      "sha": "5807b21f5846f8b7b83fe2bb13a0ba3d62bdf16f",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/basecoat/SKILL.md",
       "type": "skill",
-      "sha": "b49e81267599b79a23c380ca6ad4559b7f35c1ea",
+      "sha": "a9e2528bb067ca6ce874cadae7474dd68b703f1c",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/bom-schema/SKILL.md",
       "type": "skill",
-      "sha": "8c22aebbca2ffc9136eae8c56e982f1c7aab7500",
+      "sha": "6d57eb4ca3c39e366a43cfcb134dba685be603cb",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/bom-validation/SKILL.md",
       "type": "skill",
-      "sha": "f9dee197eeb1c4483b1039b00d70faa5e4ca081b",
+      "sha": "7ab66f8435efaa139810590f829db23234f77f49",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/build-failure-triage/SKILL.md",
       "type": "skill",
-      "sha": "e587f43b7218f6f770e4352c7ccd3282c3e57e09",
+      "sha": "86fdf660f7d0049836139beca3b4541b6ec52359",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/build-master-control-plane/SKILL.md",
       "type": "skill",
-      "sha": "2415d6c2d8344d438995c15e2a46afb9d9d20375",
+      "sha": "ce5c31266b4a9faaaa63cef202c3e85a2b3d9f90",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/change-isolation/SKILL.md",
       "type": "skill",
-      "sha": "6efe6acbaec3e007c4c407d9113c8e970e592754",
+      "sha": "183b94d03eb5d931881a3f2b87cff00ce3325d9f",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/ci-audit/SKILL.md",
       "type": "skill",
-      "sha": "8156e984557fffd8a6fffad45ac6aadd91bf20f9",
+      "sha": "aecf2ca05e119f90956a64fca8778e3ddbe748fb",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/ci-flake-quarantine/SKILL.md",
       "type": "skill",
-      "sha": "faa0d69d23867d9fcbc9e757e1099e7d4a9b9359",
+      "sha": "b10367bf6f9f6dfec063d174c1cc3763051719ab",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/code-review/SKILL.md",
       "type": "skill",
-      "sha": "9f1ec569e14ca7bf226b2475e8f8d22a513d49be",
+      "sha": "405eb575828a7d11f12f48fc2fa35f4a25a32469",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
+      "versionSource": "library"
+    },
+    {
+      "path": "skills/config-secrets-audit/SKILL.md",
+      "type": "skill",
+      "sha": "11695f8eb439d7d2bca0663da305ab3b8fe54783",
+      "version": null,
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/container-build-assessment/SKILL.md",
       "type": "skill",
-      "sha": "9415fd808828a2ddfea6ba7e14a347cdeecb2151",
+      "sha": "ad4a84ffc4aa0c00738d782069d414c3cf858fd3",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/container-migration/SKILL.md",
       "type": "skill",
-      "sha": "29f9aaa4a417410cbd9a77264c5f6812aec45435",
+      "sha": "eb0d072b97b522e7fdc3637e79d0a141a75aefe4",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/contract-testing/SKILL.md",
       "type": "skill",
-      "sha": "f6cfc8afe0fc0650dbef381f9709be5071b0a118",
+      "sha": "c64412ca8de962f4f5c4a09ee2bfbfa95fd6a3c5",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/copilot-usage-analytics/SKILL.md",
       "type": "skill",
-      "sha": "cc4a5befff45efe5dc77a4fb978d5ea6de5a57c2",
+      "sha": "e67b0a54b12bc9966b58ae017d5b773530225f08",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/cqrs-event-sourcing/SKILL.md",
       "type": "skill",
-      "sha": "c59e0dbbf63f4d7e68066785c24c81d1267b2f22",
+      "sha": "11e4e6def7ca7abff2488fa4c85116fb479bd211",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/create-instruction/SKILL.md",
       "type": "skill",
-      "sha": "5faab7f84a9f6b3880f31b51154ab4c05f6bb0b5",
+      "sha": "acf748a9d76c723d1f4a0441e1db288905b49454",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/create-skill/SKILL.md",
       "type": "skill",
-      "sha": "6d0a76d915b3fccda79b8406d4652b5a0ca3dd0d",
+      "sha": "fd488de2d6a72300a575b9b9eb805b986bdd36cd",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/cross-stack-modernization/SKILL.md",
       "type": "skill",
-      "sha": "8eafc04d14558f91636d93d6dd394f8e23f5f636",
+      "sha": "291fe28d5ea2187ba4b0196a8df31deb95b5f9eb",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/data-tier-audit/SKILL.md",
       "type": "skill",
-      "sha": "782b36c16f250abcbce6806e6ba6339b18664845",
+      "sha": "95c99c97421bb0dd9cee311a5613bc5e8fae589c",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/data-tier/SKILL.md",
       "type": "skill",
-      "sha": "19e771d50c2d62014aa31657ec21380834d24e71",
+      "sha": "7d49f7d8f28579db62110529a03deae5d06dd1df",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/database-migration/SKILL.md",
       "type": "skill",
-      "sha": "37bfb37564845634d8371b1563a041b180a77467",
+      "sha": "394b0c792265cbc25bb177e872604cb29fe1281f",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/decision-log-capture/SKILL.md",
       "type": "skill",
-      "sha": "2677722b746a8d6b57efc9cc48698eea7cb602eb",
+      "sha": "0ac0edea899635d7b3d0b88898c3d4b76bac7c8d",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/dependency-blocker-monitoring/SKILL.md",
       "type": "skill",
-      "sha": "69a3bff561774b227351157cf4d10651a2e3f8ea",
+      "sha": "70a4409eaf255f1e2ed2979ae26afedca13ef6f2",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/dev-containers/SKILL.md",
       "type": "skill",
-      "sha": "9ed864cecc7d3ea127afa18470b6c31bf68239dc",
+      "sha": "613b6dae4511413976668c4817a64f8c572d0f1f",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/devops-audit/SKILL.md",
       "type": "skill",
-      "sha": "ce04151844959a0ab1915c0d063cfaa01b65f30a",
+      "sha": "f5dc5064e9e706b7329a3bfea44c73e8b6a3ef3c",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/devops/SKILL.md",
       "type": "skill",
-      "sha": "90b7266669759f764cba34ce268ef2ada6478292",
+      "sha": "278f16d83555611e1dbf19016a5b748102595b1a",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/docs-site/SKILL.md",
       "type": "skill",
-      "sha": "b5c5a5050a3ff9c289cbea77f3934e8f53ef0176",
+      "sha": "8dad69c932d6c9962cc0b0f791c27b660dbd53d7",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/documentation/SKILL.md",
       "type": "skill",
-      "sha": "14be16ffd0cdaa0f802a1870b9003a5d72dc55ed",
+      "sha": "bf7b6eaebfe7d3d50fe035e417b71a8c571d0518",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/domain-driven-design/SKILL.md",
       "type": "skill",
-      "sha": "aacd5a21528f5382411bac9d8eb4a34f4dc124ae",
+      "sha": "5d92f6ce98391eaa28b3fec177526748f15e174c",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/dotnet-modernization/SKILL.md",
       "type": "skill",
-      "sha": "43d27eddbde8b06c221665f61325ced0ece653b0",
+      "sha": "e77815f7e810428ec684cb4edbefa4ef78a50e21",
       "version": "1.0.0",
       "effectiveVersion": "1.0.0",
       "versionSource": "frontmatter"
@@ -2102,23 +2166,23 @@
     {
       "path": "skills/e2e-testing/SKILL.md",
       "type": "skill",
-      "sha": "0b834893c27f6bb48daec250e37a53096945b404",
+      "sha": "0ee31eeec31f2761a8b0e940d00e683872a1528e",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/electron-apps/SKILL.md",
       "type": "skill",
-      "sha": "6b483898f4eddf9a5876c2643a3f7e145ed19f53",
+      "sha": "235bd1b327a4e514bf090cebb4276f17f3148c75",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/entity-framework-migration/SKILL.md",
       "type": "skill",
-      "sha": "f918ff15cd1f0ae1776fd1b7e26a04f82cff43cf",
+      "sha": "975885cb6b31b61b8fcf7c167185b1fe4630c0db",
       "version": "1.0.0",
       "effectiveVersion": "1.0.0",
       "versionSource": "frontmatter"
@@ -2126,497 +2190,529 @@
     {
       "path": "skills/environment-audit-drift/SKILL.md",
       "type": "skill",
-      "sha": "a36d97b165098ae2bfa1de6b4ab93028fb123aee",
+      "sha": "fc919bd02b8c2253f12733d0ad5d929c3fba38ff",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/environment-bootstrap/SKILL.md",
       "type": "skill",
-      "sha": "40eb10af3f12a30b123bcb9a44034f5d1f72e3e5",
+      "sha": "dbc0a4a931463eb0750457b11a872f88a7386759",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/escalation-routing/SKILL.md",
       "type": "skill",
-      "sha": "c6278a5c45ce554be2fd2a4c982ca5374cd282e7",
+      "sha": "23cfb81c75b01fa33c8f38631910d4455effe59f",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/factory-state-machine/SKILL.md",
       "type": "skill",
-      "sha": "9c5e7707ce5fe433dbc95f58690b2c8f61fe814f",
+      "sha": "ac404c96597fe486101ec4e62dbd72346cd7df8f",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/failure-pattern-process/SKILL.md",
       "type": "skill",
-      "sha": "42f8c82c19985b950dbb1cc77a6a56f827ba855f",
+      "sha": "9284c84d2b9158ac507f5e65ed7ae074644acb78",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/flow-admission-control/SKILL.md",
       "type": "skill",
-      "sha": "c68958b3502c966f2fab98e96bb389e215ff0f0e",
+      "sha": "bca09b8e367acd79e8c6f95c296e2b08abc0d1c1",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/flow-audit/SKILL.md",
       "type": "skill",
-      "sha": "da3072c38989b7094b6a2b71c7ddeae0682c0faf",
+      "sha": "a7254efebb3fd450c641cda61a6bea395b67284f",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/flow-optimize/SKILL.md",
       "type": "skill",
-      "sha": "6d3b50cb97e262c08b6376402e98c5a0e2bc8342",
+      "sha": "598b25253f5d4b4d5a3bad9439cb440615c53c4e",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/flow-suggest/SKILL.md",
       "type": "skill",
-      "sha": "39bbea33009037c47b73accd8a4bcc43d084dfed",
+      "sha": "510800fc13e14ce3b71d83a71fde6d632cabe90e",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/flow-track/SKILL.md",
       "type": "skill",
-      "sha": "691090519198265fb471a3ff9bf01298ab365082",
+      "sha": "fe77af82df18ac79f3596e7c7f839fbe318c0da2",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/frontend-audit/SKILL.md",
       "type": "skill",
-      "sha": "4596c8785dfe606e8dca571ba17c4b7e2745d215",
+      "sha": "5d7d8f1e16c668c6c68cda058ad219f5935527cc",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/frontend-dev/SKILL.md",
       "type": "skill",
-      "sha": "449b2637ce1f07b325f2d5ba2b7c0ef150d0c62b",
+      "sha": "4b1e79faca8848be1455a427aebc11fc12d21635",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/git-worktrees/SKILL.md",
       "type": "skill",
-      "sha": "dad465296eef3fe973b6717ad04b9ac2a8499f5f",
+      "sha": "26e4bb1a84d344896fdaeaabfe171e810b54fe4d",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/github-security-posture/SKILL.md",
       "type": "skill",
-      "sha": "80168473165dc9300f666ebcb5e83b9ffa9f6ae5",
+      "sha": "32500ca1de75def3f511fcf13254ccc35afe1848",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/gitops/SKILL.md",
       "type": "skill",
-      "sha": "eafa7dcfba61d511ae59dbcf4f06ed4e4d73ebf5",
+      "sha": "5268b88e803f52fd6df31d3d90d3e1b8ef5dfb7b",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/governance-audit/SKILL.md",
       "type": "skill",
-      "sha": "cddb21d5dd109a68c3b5adacd6185657b47d9c72",
+      "sha": "7340b8f9a931f35f0d70be7bb9ce88befb1ba3d4",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/governance/SKILL.md",
       "type": "skill",
-      "sha": "fea00ee2b403a3f1b7b8c2b9d7fec84e85a60655",
+      "sha": "6f9c82b3c52f6667a91f5fc19790497feb566e86",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/ha-resilience/SKILL.md",
       "type": "skill",
-      "sha": "37c1a261e4bd37a3b1cc6df25541a91da21a44b0",
+      "sha": "8e15aa3cd48db419dfbdad4312fd41745cd01037",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/handoff/SKILL.md",
       "type": "skill",
-      "sha": "40763974c3cba77828b910e4376247893b065e4c",
+      "sha": "aa864f096d12152af6af96973e2bdcc0ce0ba818",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/human-in-the-loop/SKILL.md",
       "type": "skill",
-      "sha": "e0a9bdec09af8e2c1b7ae75e3ae9cbae0b22e0a5",
+      "sha": "6fff3c031096b9200f525b096a393c98c01779dc",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/identity-migration/SKILL.md",
       "type": "skill",
-      "sha": "f392a3bb8058801ef3474c6cb93b6b3a996eb158",
+      "sha": "699f5d2cdacaa169aaa1422fa9dabacb75574a4d",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/infrastructure-audit/SKILL.md",
       "type": "skill",
-      "sha": "00ce8fbd5a8faf90f57aed88afd8d7f5da030893",
+      "sha": "95f267aec3c4e3699463dbf1c6b5ee2fe6ccc028",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/issue-triage/SKILL.md",
       "type": "skill",
-      "sha": "9da7fb3de00d6340477f3c349b6a20e188239e2b",
+      "sha": "277dbbce43276c0cc2aa14a83cfccc8c44b8a5a8",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/landing-zone-audit/SKILL.md",
       "type": "skill",
-      "sha": "9675ae4597c46991651e28c62bac4c8ade8238b4",
+      "sha": "9c5517a5a8d49469e319ef33f56627a5e23dadbb",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/lexicon/SKILL.md",
       "type": "skill",
-      "sha": "cf1dfba18eec116f38bd245c35eaacb50254451f",
+      "sha": "e732fc1aa01d6b8c900851bdaef3a021547389fa",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/manual-test-strategy/SKILL.md",
       "type": "skill",
-      "sha": "d7c6de3224c2ec6fe3ab263a2420103595d0ca64",
+      "sha": "c42cc52c3bdcbe6d14509ff7a00fc8d59618b985",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/mcp-audit/SKILL.md",
       "type": "skill",
-      "sha": "94fc7ce496edeb61008a176465c273c7c74561d4",
+      "sha": "392f7f745ba7b08d6ad41043557066bf1b647ac6",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/mcp-development/SKILL.md",
       "type": "skill",
-      "sha": "ed09e63db2129f746c58bf961398ee36b840f56b",
+      "sha": "9607016251bd1d1fabb07baae3ee3c1f4916c0a4",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/memory-promoter/SKILL.md",
       "type": "skill",
-      "sha": "30b683f7d66c4464bddae0ac9783865687d180d1",
+      "sha": "6bc1368946a3b8b3641d6b6787951a18ab14d2cd",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/merge-conflict-mediator/SKILL.md",
       "type": "skill",
-      "sha": "6f599d42a2ea4db25a71d19857debac050927249",
+      "sha": "b61f941885763ddf70a37650561ccc3851a35cfa",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/observability/SKILL.md",
       "type": "skill",
-      "sha": "3a3b1e463f18f3ea84f29ee8c075cbe36779baa7",
+      "sha": "343f1ddb3f64a7666c64f53c6cac742eff1fa57f",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/operation-context-resolver/SKILL.md",
       "type": "skill",
-      "sha": "2e427bda361fd4a4836d138444751591902b4b9c",
+      "sha": "4a5317ff95237c8cbdff907edabae4c889b19312",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/orphaned-pr-triage/SKILL.md",
       "type": "skill",
-      "sha": "47b1120514eae0e9f5d5c659fc6de707753b1aef",
+      "sha": "02b1e976db99210b7bdb7b0c0bd90a648637d39f",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/penetration-testing/SKILL.md",
       "type": "skill",
-      "sha": "baa108e92f97a49dc0ac70fb1b23e17eb0fddbb3",
+      "sha": "3fa974ca01836beeafc34a415e69dc0f92f275d6",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/performance-profiling/SKILL.md",
       "type": "skill",
-      "sha": "36b80308b394c3eedc4d6d5318822aae5ee306ac",
+      "sha": "dca784c7734f105c5c233cbe874591e1476fd154",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/production-readiness/SKILL.md",
       "type": "skill",
-      "sha": "d1c02848a359449d9ff6321c006080e98da8b918",
+      "sha": "e173ff8faf91dc5c02ccce846504533014d49f3b",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/public-safe-sanitization/SKILL.md",
       "type": "skill",
-      "sha": "f64210fb7a776b57855c4b7e923a091aaa39e0bb",
+      "sha": "3132ebede09af17f09a4036ba630b707ff20de33",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
+      "versionSource": "library"
+    },
+    {
+      "path": "skills/queue-rebalancer/SKILL.md",
+      "type": "skill",
+      "sha": "b003ee75e8a6d0e0c5c5c0c3fd55d2ae9bb4ad3c",
+      "version": null,
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/receiving-code-review/SKILL.md",
       "type": "skill",
-      "sha": "2dbe503d21db298f14af22604bad4bf48b0a1f02",
+      "sha": "eceda158493f626bf201d932a78dda99243bac03",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/refactoring/SKILL.md",
       "type": "skill",
-      "sha": "b8fb34f6360080ab340af49b18b10be53e559be5",
+      "sha": "0509fad40bdb8b88b400607bf85101a790b0e540",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/release-audit/SKILL.md",
       "type": "skill",
-      "sha": "9099bf23c1a16d12350cc895dc4a4c168a537895",
+      "sha": "e2c54482d43ee891e25daff749705b9a317c75f6",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/release-notes/SKILL.md",
       "type": "skill",
-      "sha": "44a5a23a642f3ab304dc356acb39305c47fddeab",
+      "sha": "508bab716ea01b00915984c06e08ede7ae14eb51",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/rollout-basecoat/SKILL.md",
       "type": "skill",
-      "sha": "6f9b68691d873223edd1bd9aadfd0e4a09e5d3a8",
+      "sha": "4b2fc02ce778018b85f9a6741d029095bd7c58da",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/s4-deployment-checklist/SKILL.md",
       "type": "skill",
-      "sha": "bab3b4763c0c46a21b5f203b9e70aa0b4080e993",
+      "sha": "58cfcc2a49b9cd4ad06a7d009032db2bf5ac42db",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/s4-rollback-testing/SKILL.md",
       "type": "skill",
-      "sha": "4f96e27f5151d1e65517705bafeb844c8c7bd4ea",
+      "sha": "48ba9018aa98d026937c88f3313b776ccbc4fde0",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/security-operations/SKILL.md",
       "type": "skill",
-      "sha": "7c3027fd68cc837495201e634d92ae170553a663",
+      "sha": "a3f32e94f53f146814049d89f4fe65c648217544",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/security/SKILL.md",
       "type": "skill",
-      "sha": "d7a0a1fd514f78f75cc94a07aa7b7e57ac40efc9",
+      "sha": "6cd6b53b07480bb14dc5c32fe0c7895eac427ca8",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/service-bus-migration/SKILL.md",
       "type": "skill",
-      "sha": "5a1a147019754b10e70fa8a7bab5f8f22eba337a",
+      "sha": "4f98723dda150b143cfebef261bb999cb6dc0649",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
+      "versionSource": "library"
+    },
+    {
+      "path": "skills/session-optimization/SKILL.md",
+      "type": "skill",
+      "sha": "723674a3091ca90edd43da64aec4e669c41e2607",
+      "version": null,
+      "effectiveVersion": "3.32.0",
+      "versionSource": "library"
+    },
+    {
+      "path": "skills/ship-it/SKILL.md",
+      "type": "skill",
+      "sha": "91f583ea0b79f8c2d08d7b4cbb14341fb4020994",
+      "version": null,
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/skill-scripts/SKILL.md",
       "type": "skill",
-      "sha": "3990c63163169df6bc2bde23c3091bf7568f5780",
+      "sha": "314800a13586aa33564b869d411f4de1418642c4",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/sprint-closeout-audit/SKILL.md",
       "type": "skill",
-      "sha": "fa58258f495a486ed5a9ba3422cac6a41a4fb671",
+      "sha": "b9b305c19f2ba3c44843d1f8b99ecf7026e069b9",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/sprint-closeout/SKILL.md",
       "type": "skill",
-      "sha": "02b16bd2753b69f56dbe09b1b37bd386ef11c9e7",
+      "sha": "51e1db10b3ff75e6bdde0156975ed54ad057c3b6",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/sprint-management/SKILL.md",
       "type": "skill",
-      "sha": "68fa5dddc38d295fb113f9d0206478dfe9655819",
+      "sha": "710b004e37239cfe3d650058266184e82d197640",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/sprint-planner/SKILL.md",
       "type": "skill",
-      "sha": "bb3726c288f3832414f2dd3d72b78743f26f6417",
+      "sha": "8b77385fb199def66a65e2a606dadbeffdea7e67",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/sprint-project-mapper/SKILL.md",
       "type": "skill",
-      "sha": "58b384bd663cf72b54e9d9e36be3c0cc81667d24",
+      "sha": "82512f60e4b7a5672d98345ed42d827b89a02c38",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/sprint-retrospective/SKILL.md",
       "type": "skill",
-      "sha": "63b8f2f198e141d84e8337f64eaccfa91e0174ec",
+      "sha": "0e2a31578033176c473a710ca20e9f86d8479e9f",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/standup-signal-extraction/SKILL.md",
       "type": "skill",
-      "sha": "f23af9dab4ef860e77617d9ade2a6eac30d50a58",
+      "sha": "a143eed59a99b669c5d3ca0da510c434b86e1162",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/station-bottleneck-analyzer/SKILL.md",
       "type": "skill",
-      "sha": "58330aa2112a1da46686686293f241e6851896e8",
+      "sha": "e0978f16cee02e3b393ab2b40aa938f85e554a7f",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/supply-chain-security/SKILL.md",
       "type": "skill",
-      "sha": "a31883b3b57ae6796e46ab37a12a1f97fa615cb6",
+      "sha": "6b46f8db2b5ad55db06afe09f9cf30cbf8e19470",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/takt-time-measurement/SKILL.md",
       "type": "skill",
-      "sha": "4117e07084de3f54de0163c82f9122875628411e",
+      "sha": "20c9e8ad8dc67b4119d4e9707af75b030cae6e5d",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/task-decomposition/SKILL.md",
       "type": "skill",
-      "sha": "faf99012f085a574b53dfadb2b81bb8e7b9fc9ac",
+      "sha": "e3e23bb766c29c98905fa846f95b4e0f7e8845a6",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/tech-debt/SKILL.md",
       "type": "skill",
-      "sha": "e1b38a3cefc54875c112a3c452b1a0b9cfae1621",
+      "sha": "f95902dba79578955acde1072d648a47e07edba1",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/twelve-factor/SKILL.md",
       "type": "skill",
-      "sha": "63998b61338af8ec38e043053e6753e9dac5af18",
+      "sha": "55bbb8c2900da42dc86b14083a09d7ace1591056",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     },
     {
       "path": "skills/ux/SKILL.md",
       "type": "skill",
-      "sha": "b4e377fe87e34e955f9525f10efd1c3d0d58bc2b",
+      "sha": "adffeb0c55f6a5205d22f10d76dd5681c6475c3b",
       "version": null,
-      "effectiveVersion": "3.31.0",
+      "effectiveVersion": "3.32.0",
+      "versionSource": "library"
+    },
+    {
+      "path": "skills/workflow-parallelization/SKILL.md",
+      "type": "skill",
+      "sha": "ecd1f9cae00d4426dffdb0336daddb5b6fdfeb40",
+      "version": null,
+      "effectiveVersion": "3.32.0",
       "versionSource": "library"
     }
   ]

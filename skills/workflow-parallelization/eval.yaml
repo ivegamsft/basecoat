@@ -1,0 +1,21 @@
+name: workflow-parallelization
+description: Routing and behavior evaluation for the workflow-parallelization skill.
+scenarios:
+  - id: trigger-ci-parallel
+    input: Which of our CI jobs can run in parallel to reduce build time?
+    expect:
+      contains:
+        - parallel
+  - id: trigger-fan-out
+    input: How do I dispatch multiple agent subtasks simultaneously?
+    expect:
+      contains:
+        - fan-out
+  - id: trigger-merge-pacing
+    input: We have 4 sessions ready to merge. How do we serialize the merges?
+    expect:
+      contains:
+        - serialized
+  - id: neg-feature-code
+    input: Write a Python function to sort a list.
+    expect_activation: false

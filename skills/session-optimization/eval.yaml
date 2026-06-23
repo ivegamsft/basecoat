@@ -1,0 +1,21 @@
+name: session-optimization
+description: Routing and behavior evaluation for the session-optimization skill.
+scenarios:
+  - id: trigger-compact
+    input: My session has 450 events and tokens are building up. What should I do?
+    expect:
+      contains:
+        - compact
+  - id: trigger-file-reference
+    input: How do I avoid pasting large instruction files into chat?
+    expect:
+      contains:
+        - file reference
+  - id: trigger-model-routing
+    input: What model should I use for routine PR hygiene checks?
+    expect:
+      contains:
+        - gpt-5.4-mini
+  - id: neg-feature-code
+    input: Implement a new REST endpoint for user authentication.
+    expect_activation: false
