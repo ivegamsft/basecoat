@@ -3,6 +3,7 @@
 BaseCoat distributes workflow templates for consumer repositories. Use the installer script to copy and configure downstream-safe workflows with explicit BaseCoat provenance filenames.
 
 For centralized fleet audits of downstream reviewer-routing health, see `downstream-reviewer-routing-audit.md`.
+For weekly post-onboarding drift detection with remediation issue dedupe and trend scorecards, see `.github/workflows/post-onboarding-drift-loop.yml`.
 
 ## What's Included
 

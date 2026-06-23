@@ -4,6 +4,7 @@ This guide covers the fleet loop for detecting reviewer-routing failures across 
 
 - Workflow: `.github/workflows/downstream-reviewer-routing-audit.yml`
 - Opt-in registry: `.github/downstream-reviewer-routing-targets.json`
+- Companion loop: `.github/workflows/post-onboarding-drift-loop.yml` for full post-onboarding drift detection (branch/ruleset, intake, reviewer-routing, metadata hygiene) plus remediation issue dedupe and trend scorecards.
 
 ## What the audit checks
 

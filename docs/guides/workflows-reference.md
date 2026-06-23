@@ -28,6 +28,7 @@ testing and uses pinned action SHAs.
 | #1557 | `.github/workflows/pr-flow-hygiene.yml` | Event-driven PR readiness routing (`ready_for_review` + metadata transitions) plus weekly PR lifecycle audit summary |
 | #1823 | `.github/workflows/dependency-relationship-routing.yml` | Parses `Blocked by`/`Depends on`/`Part of`/`Related to` markers on issues and PRs, applies blocker labels, and publishes weekly dependency bottleneck reports |
 | #1828 | `.github/workflows/downstream-reviewer-routing-audit.yml` | Weekly cross-repo reviewer-routing scorecard; escalates missing/unconfigured/ineffective routing automation states across opted-in consumer repos |
+| #1832 | `.github/workflows/post-onboarding-drift-loop.yml` | Weekly post-onboarding drift loop across opted-in repos. Detects branch/ruleset, intake, reviewer-routing, and metadata hygiene drift; opens/updates deduplicated remediation issues; publishes fleet + per-repo trend scorecards |
 
 ## Distributed Workflow Templates (10 Total)
 
@@ -458,6 +459,54 @@ inputs:
 - Dependency blockers become machine-actionable state
 - Blocked issues/PRs are discoverable without manual comment inspection
 - Weekly bottleneck visibility for dependency-chain triage
+
+---
+
+### 12. post-onboarding-drift-loop.yml
+
+**Purpose:** Keep onboarded repositories aligned with their governance/profile contract after onboarding by running a weekly drift loop with deduplicated remediation issue automation.
+
+**Trigger:**
+
+- Cron: Every Monday at 10am UTC
+- Event-driven: `workflow_run` after successful `BaseCoat - Adoption Metrics`
+- Manual: `gh workflow run post-onboarding-drift-loop.yml`
+
+**What It Does:**
+
+- Uses `.github/downstream-reviewer-routing-targets.json` as the default opted-in repo registry
+- Detects drift in four contract surfaces:
+  - branch/ruleset protection posture
+  - intake surface presence (issue + PR templates)
+  - reviewer-routing automation effectiveness in live ready PRs
+  - metadata hygiene surfaces
+- Opens/updates one remediation issue per repo when drift is present
+- Closes remediation issues when the repo returns to healthy state
+- Publishes an aggregate + per-repo scorecard issue with trend classification (`regression`, `improvement`, `stable`, `new`)
+
+**Configuration:**
+
+```yaml
+inputs:
+  repositories:
+    description: "Optional comma-separated owner/repo list"
+    default: ""
+  reviewer_gap_threshold:
+    description: "Escalation threshold for ready PRs with no reviewer requests"
+    default: 3
+```
+
+**Output:**
+
+- Fleet scorecard issue: `Post-onboarding drift fleet scorecard`
+- Deduplicated remediation issues labeled `drift-remediation`
+- Artifacts: `post-onboarding-drift-scorecard.md`, `post-onboarding-drift-latest.json`
+
+**Consumer Value:**
+
+- Prevents profile/governance decay after initial onboarding
+- Creates persistent remediation ownership without duplicate issue noise
+- Distinguishes regressions from improvements week-over-week
 
 ---
 
