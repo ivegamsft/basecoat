@@ -1,7 +1,7 @@
 # Sprint 40 Execution Plan — Portfolio Governance & Reliability Audit
 
 **Sprint Duration:** September 1–15, 2026 (14 days)  
-**Status:** **READY_FOR_EXECUTION — Wave 1 kickoff Sept 1**  
+**Status:** **IN_PROGRESS — tracker reconciliation and carryover planning update (2026-06-23)**  
 **Scope:** 11 issues, ~55-65 estimated points (balanced sprint, 38% reduction from planned 95 pts)  
 **Critical Path:** 10-12 days (6-8 day buffer — comfortable margin)
 
@@ -134,19 +134,25 @@
 
 ### Feature #1774: Architecture & Reliability Audit (~34 pts)
 
-**Status:** Ready  
-**Child Issues:** #1742, #1749, #1750, #1751, #1752 (Wave 1 specs)  
+**Status:** Blocked (active carryover candidate for Sprint 41)  
+**Child Issues:** #1742, #1749, #1750, #1751, #1752, #1756, #1757 (all currently open)  
 **Wave Sequence:**
 
-- Wave 1: All 5 audit specs (#1742, #1749–#1752)
-- Wave 2: Framework implementation (NOT CREATED — scope gap)
-- Wave 3: Rollup & optimization (NOT CREATED — scope gap)
+- Wave 1: Audit specification set (#1742, #1749–#1752) — open
+- Wave 2: PR lifecycle implementation dependencies (#1756, #1757) — blocked on Wave 1 completion
+- Wave 3: Rollup and optimization references in tracker body (#1758–#1760) do not map to open implementation issues and require re-planning
 
 **Success Criteria:**
 
-- All 5 audit specs completed with full acceptance criteria
-- Audit framework cadence and scoring rubric approved
-- Ready for implementation phase (Sprint 41)
+- Wave 1 specs are completed and merged with acceptance criteria
+- #1756 and #1757 are unblocked and delivered after Wave 1 gates pass
+- Wave 3 scope is re-baselined into explicit Sprint 41 issues before execution
+
+**Blockers / Carryover Snapshot (2026-06-23):**
+
+- Hard blocker: #1742 architecture baseline remains open, so Wave 2 policy execution work cannot start
+- Scope drift: tracker references #1758 and #1760 as Wave 3 items, but both numbers are already merged PRs unrelated to Sprint 40 Wave 3 implementation
+- Carryover action: keep #1774 open as the parent tracker until re-planned Wave 3 issue IDs are created and linked
 
 ---
 
@@ -384,7 +390,7 @@ Wave 3 (Sept 12–15): Optimization [PENDING scope reconciliation]
 
 ---
 
-**Status: Ready for Wave 1 kickoff on September 1, 2026.**  
-**Last Updated:** 2026-06-21 04:47 UTC  
+**Status: In progress with carryover reconciliation for Feature #1774.**  
+**Last Updated:** 2026-06-23 09:55 UTC  
 **Plan Owner:** Copilot Fleet Executor  
 **Validated By:** sprint40-deps-validator (0 blockers)
