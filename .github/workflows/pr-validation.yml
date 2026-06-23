@@ -20,13 +20,46 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
       - name: Verify main branch protection baseline
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
+          POLICY_PACK: ${{ vars.BASECOAT_POLICY_PACK }}
         shell: bash
         run: |
           set -euo pipefail
+
+          POLICY_FILE=".github/governance/policy-packs.json"
+          if [[ ! -f "${POLICY_FILE}" ]]; then
+            echo "::error::Missing governance policy pack file: ${POLICY_FILE}"
+            exit 1
+          fi
+
+          SELECTED_PACK="${POLICY_PACK:-$(jq -r '.default_profile' "${POLICY_FILE}")}"
+          if [[ -z "${SELECTED_PACK}" || "${SELECTED_PACK}" == "null" ]]; then
+            echo "::error::Unable to resolve governance policy pack."
+            exit 1
+          fi
+
+          if ! jq -e --arg p "${SELECTED_PACK}" '.profiles[$p]' "${POLICY_FILE}" >/dev/null; then
+            echo "::error::Unknown BASECOAT_POLICY_PACK '${SELECTED_PACK}'."
+            exit 1
+          fi
+
+          echo "Using governance policy pack: ${SELECTED_PACK}"
+          mapfile -t required_checks < <(
+            jq -r --arg p "${SELECTED_PACK}" '.profiles[$p].main.required_checks[]' "${POLICY_FILE}"
+          )
+          mapfile -t cloud_agent_checks < <(
+            jq -r --arg p "${SELECTED_PACK}" '.profiles[$p].cloud_agent.required_status_checks[]' "${POLICY_FILE}"
+          )
+
+          if [[ ${#cloud_agent_checks[@]} -gt 0 ]]; then
+            printf 'Cloud-agent guardrails for %s: %s\n' "${SELECTED_PACK}" "${cloud_agent_checks[*]}"
+          fi
 
           if ! PROTECTION_JSON="$(gh api "repos/${REPOSITORY}/branches/main/protection" 2>/dev/null)"; then
             echo "::warning::Main branch classic protection is not configured (API returned 404)."
@@ -45,23 +78,9 @@ jobs:
             exit 1
           fi
 
-          if [[ "$REVIEW_COUNT" -lt 1 ]]; then
-            echo "::warning::Main protection has fewer than 1 required approving review."
-            echo "::warning::Consider requiring at least 1 review, or configure a Ruleset to allow the cloud agent or PR submitter to self-approve."
-          fi
-
           if [[ "$ENFORCE_ADMINS" != "true" ]]; then
             echo "::warning::Include administrators is not enabled. Enabling it is recommended."
           fi
-
-          required_checks=(
-            "lint-and-validate"
-            "test"
-            "validate-commit-messages"
-            "validate-unix"
-            "validate-windows"
-            "release-label-gate"
-          )
 
           missing=0
           for check in "${required_checks[@]}"; do
@@ -76,6 +95,69 @@ jobs:
             exit 1
           fi
 
+          if [[ "${GITHUB_EVENT_NAME}" != "pull_request" ]]; then
+            echo "Main branch protection baseline is configured."
+            exit 0
+          fi
+
+          risk_tier="low"
+          mapfile -t changed_files < <(
+            gh api "repos/${REPOSITORY}/pulls/${{ github.event.pull_request.number }}/files?per_page=100" --paginate \
+              --jq '.[].filename'
+          )
+          for file in "${changed_files[@]}"; do
+            while IFS= read -r prefix; do
+              [[ -z "${prefix}" ]] && continue
+              if [[ "${file}" == "${prefix}"* ]]; then
+                risk_tier="critical"
+                break 2
+              fi
+            done < <(jq -r '.risk_tier_routing.critical[]' "${POLICY_FILE}")
+          done
+
+          if [[ "${risk_tier}" != "critical" ]]; then
+            for file in "${changed_files[@]}"; do
+              while IFS= read -r prefix; do
+                [[ -z "${prefix}" ]] && continue
+                if [[ "${file}" == "${prefix}"* ]]; then
+                  risk_tier="high"
+                  break 2
+                fi
+              done < <(jq -r '.risk_tier_routing.high[]' "${POLICY_FILE}")
+            done
+          fi
+
+          if [[ "${risk_tier}" != "critical" && "${risk_tier}" != "high" ]]; then
+            for file in "${changed_files[@]}"; do
+              while IFS= read -r prefix; do
+                [[ -z "${prefix}" ]] && continue
+                if [[ "${file}" == "${prefix}"* ]]; then
+                  risk_tier="medium"
+                  break 2
+                fi
+              done < <(jq -r '.risk_tier_routing.medium[]' "${POLICY_FILE}")
+            done
+          fi
+
+          required_approvals="$(
+            jq -r --arg p "${SELECTED_PACK}" --arg t "${risk_tier}" \
+              '.profiles[$p].main.required_approvals_by_risk_tier[$t] // 0' "${POLICY_FILE}"
+          )"
+
+          if [[ "${required_approvals}" =~ ^[0-9]+$ ]] && [[ "${required_approvals}" -gt "${REVIEW_COUNT}" ]]; then
+            echo "::warning::Configured policy pack '${SELECTED_PACK}' expects ${required_approvals} review(s) for risk tier '${risk_tier}', but branch protection baseline requires ${REVIEW_COUNT}."
+          fi
+
+          approved_reviewers="$(
+            gh pr view "${{ github.event.pull_request.number }}" --repo "${REPOSITORY}" --json reviews \
+              --jq '[.reviews[] | select(.state=="APPROVED") | .author.login] | unique | length'
+          )"
+          if [[ "${approved_reviewers}" -lt "${required_approvals}" ]]; then
+            echo "::error::Policy pack '${SELECTED_PACK}' requires ${required_approvals} approval(s) for risk tier '${risk_tier}', but PR has ${approved_reviewers}."
+            exit 1
+          fi
+
+          echo "Risk tier '${risk_tier}' satisfied for policy pack '${SELECTED_PACK}' with ${approved_reviewers} approval(s)."
           echo "Main branch protection baseline is configured."
 
   release-label-gate:

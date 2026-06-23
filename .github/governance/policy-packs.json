@@ -1,0 +1,115 @@
+{
+  "default_profile": "team-dev",
+  "profiles": {
+    "solo-dev": {
+      "description": "Single maintainer optimization with strict checks and low-risk autonomy.",
+      "main": {
+        "required_checks": [
+          "lint-and-validate",
+          "test",
+          "validate-commit-messages",
+          "validate-unix",
+          "validate-windows",
+          "release-label-gate"
+        ],
+        "required_approvals_by_risk_tier": {
+          "low": 0,
+          "medium": 0,
+          "high": 1,
+          "critical": 1
+        }
+      },
+      "cloud_agent": {
+        "auto_approve_workflow_runs": true,
+        "required_status_checks": [
+          "Agent merge guardrails"
+        ]
+      },
+      "override_path": "Open a governance issue with label governance and include risk, owner, expiry, and rollback plan."
+    },
+    "team-dev": {
+      "description": "Collaborative team defaults with tiered human approval for medium/high-risk changes.",
+      "main": {
+        "required_checks": [
+          "lint-and-validate",
+          "test",
+          "validate-commit-messages",
+          "validate-unix",
+          "validate-windows",
+          "release-label-gate"
+        ],
+        "required_approvals_by_risk_tier": {
+          "low": 0,
+          "medium": 1,
+          "high": 1,
+          "critical": 1
+        }
+      },
+      "cloud_agent": {
+        "auto_approve_workflow_runs": true,
+        "required_status_checks": [
+          "Agent merge guardrails"
+        ]
+      },
+      "override_path": "Use temporary exception issue approved by repo owner; expires within one sprint."
+    },
+    "regulated-team": {
+      "description": "Strictest controls for critical, production, and security-sensitive changes.",
+      "main": {
+        "required_checks": [
+          "lint-and-validate",
+          "test",
+          "validate-commit-messages",
+          "validate-unix",
+          "validate-windows",
+          "release-label-gate",
+          "prd-spec-gate"
+        ],
+        "required_approvals_by_risk_tier": {
+          "low": 1,
+          "medium": 1,
+          "high": 2,
+          "critical": 2
+        }
+      },
+      "cloud_agent": {
+        "auto_approve_workflow_runs": false,
+        "required_status_checks": [
+          "Agent merge guardrails",
+          "prd-spec-gate"
+        ]
+      },
+      "override_path": "Escalate through security/governance issue plus recorded incident or change-approval ticket."
+    }
+  },
+  "risk_tier_routing": {
+    "low": [
+      "docs/",
+      ".github/ISSUE_TEMPLATE/",
+      ".github/PULL_REQUEST_TEMPLATE.md"
+    ],
+    "medium": [
+      "agents/",
+      "skills/",
+      "instructions/",
+      "prompts/",
+      "scripts/",
+      "tests/"
+    ],
+    "high": [
+      ".github/workflows/",
+      "docs/reference/governance.md",
+      "docs/reference/governance-contract.md",
+      "docs/reference/branch-protection.md",
+      "docs/reference/environment-protection.md",
+      "docs/reference/risk-tier-policy.md"
+    ],
+    "critical": [
+      "iac/",
+      ".github/environment-protection-prod.json",
+      ".github/workflows/portal-deploy.yml",
+      ".github/workflows/mcp-deploy.yml",
+      ".github/workflows/extension-deploy.yml"
+    ]
+  }
+}

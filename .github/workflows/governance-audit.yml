@@ -31,9 +31,11 @@ jobs:
             docs/reference/governance-contract.md \
             docs/reference/label-taxonomy.md \
             docs/reference/governance.md \
+            docs/reference/governance-policy-packs.md \
             docs/reference/environment-protection.md \
             docs/operations/label-cleanup-plan.md \
             docs/operations/environment-protection-enforcement.md \
+            .github/governance/policy-packs.json \
             .github/ISSUE_TEMPLATE/issue.md \
             .github/PULL_REQUEST_TEMPLATE.md \
             .github/workflows/environment-protection-enforce.yml
@@ -53,6 +55,9 @@ jobs:
           grep -qi 'preserve delivery labels' docs/operations/label-cleanup-plan.md
           grep -q '^## Mandatory production protections$' docs/reference/environment-protection.md
           grep -q 'manual approvals are required' docs/reference/environment-protection.md
+          grep -q '^## Policy pack matrix$' docs/reference/governance-policy-packs.md
+          grep -q 'BASECOAT_POLICY_PACK' docs/reference/governance-policy-packs.md
+          jq -e '.profiles["solo-dev"] and .profiles["team-dev"] and .profiles["regulated-team"]' .github/governance/policy-packs.json >/dev/null
           grep -q 'environment protection gates' docs/operations/environment-protection-enforcement.md
           grep -q "must have at least one required reviewer" .github/workflows/environment-protection-enforce.yml
           grep -q 'docs/reference/governance-contract.md' .github/ISSUE_TEMPLATE/issue.md

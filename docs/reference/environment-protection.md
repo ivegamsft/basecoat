@@ -27,6 +27,10 @@ Production (`production`, with `prod` as optional alias) environments must enfor
 - Self-approval should remain disabled when repository settings support it.
 - Emergency bypasses are allowed only when documented in an incident or release issue.
 
+Risk-tier and profile selection for non-production flows are defined in
+`docs/reference/governance-policy-packs.md` and
+`.github/governance/policy-packs.json`.
+
 ## Protected environment variables and secrets
 
 The `production` environment is the source of truth for production deployment values:
