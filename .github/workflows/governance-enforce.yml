@@ -13,6 +13,8 @@ on:
       - ".github/PULL_REQUEST_TEMPLATE.md"
       - ".github/workflows/issue-triage.md"
       - "skills/issue-triage/**"
+      - ".github/workflows/issue-approve.yml"
+      - ".github/workflows/issue-metadata-hygiene.yml"
 
 permissions:
   contents: read

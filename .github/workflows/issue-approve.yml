@@ -39,8 +39,72 @@ jobs:
             }
             return allowed;
 
-      - name: Assign to Copilot and update labels
+      - name: Validate metadata contract
         if: steps.check-access.outputs.result == 'true'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        id: validate-metadata
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const labels = issue.labels.map(l => l.name);
+
+            const TYPE_LABELS = ['bug', 'enhancement', 'documentation', 'chore', 'security', 'question'];
+            const PRIORITY_LABELS = ['priority:critical', 'priority:high', 'priority:medium', 'priority:low'];
+            const BLOCKING_LABELS = ['duplicate', 'invalid', 'wontfix'];
+
+            const missing = [];
+
+            const hasType = TYPE_LABELS.some(l => labels.includes(l));
+            if (!hasType) missing.push('**Type label** — add one of: `bug`, `enhancement`, `documentation`, `chore`, `security`, `question`');
+
+            const hasPriority = PRIORITY_LABELS.some(l => labels.includes(l));
+            if (!hasPriority) missing.push('**Priority label** — add one of: `priority:critical`, `priority:high`, `priority:medium`, `priority:low`');
+
+            const hasBlocker = BLOCKING_LABELS.some(l => labels.includes(l));
+            if (hasBlocker) {
+              const blocker = BLOCKING_LABELS.find(l => labels.includes(l));
+              missing.push(`**Blocking label present** — remove \`${blocker}\` before approving, or close the issue instead`);
+            }
+
+            if (missing.length > 0) {
+              // Add needs-triage to surface for cleanup
+              try {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  labels: ['needs-triage']
+                });
+              } catch (e) {
+                core.warning(`Could not add needs-triage label: ${e.message}`);
+              }
+
+              const checklist = missing.map(m => `- [ ] ${m}`).join('\n');
+              const body = [
+                '⛔ **Approval blocked — incomplete metadata**',
+                '',
+                'This issue cannot be approved until the following required metadata is complete:',
+                '',
+                checklist,
+                '',
+                'Once all required labels are present, comment `/approve` again to retry.',
+              ].join('\n');
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body
+              });
+
+              core.setFailed(`Metadata contract not satisfied: ${missing.length} requirement(s) missing.`);
+              return false;
+            }
+
+            return true;
+
+      - name: Assign to Copilot and update labels
+        if: steps.check-access.outputs.result == 'true' && steps.validate-metadata.outputs.result == 'true'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |

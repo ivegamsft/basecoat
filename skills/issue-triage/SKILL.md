@@ -24,6 +24,7 @@ Use this skill to audit and improve GitHub issue quality. It can run standalone 
 |---|---|
 | [`references/triage-workflow.md`](references/triage-workflow.md) | Step-by-step triage workflow with decision trees for each check |
 | [`references/quality-checklist.md`](references/quality-checklist.md) | Minimum-bar criteria, label taxonomy, type definitions, and priority matrix |
+| [`references/metadata-contract.md`](references/metadata-contract.md) | Minimum metadata required before `approved` and `copilot-agent` labels can be applied |
 
 ## Scripts
 
