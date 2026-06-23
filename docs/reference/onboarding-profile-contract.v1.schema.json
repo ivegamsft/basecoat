@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/IBuySpy-Shared/basecoat/blob/main/docs/reference/onboarding-profile-contract.v1.schema.json",
+  "title": "BaseCoat onboarding profile contract v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "profile"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Version of the onboarding profile contract."
+    },
+    "profile": {
+      "type": "string",
+      "enum": [
+        "solo-dev",
+        "team-dev",
+        "regulated-team"
+      ],
+      "description": "Selected onboarding posture."
+    },
+    "branch_policy": {
+      "type": "string",
+      "enum": [
+        "minimal",
+        "shared",
+        "locked-down"
+      ],
+      "description": "Branch protection and ruleset posture."
+    },
+    "workflow_pack": {
+      "type": "string",
+      "enum": [
+        "solo",
+        "team",
+        "regulated"
+      ],
+      "description": "Workflow pack to apply during onboarding."
+    },
+    "template_pack": {
+      "type": "string",
+      "enum": [
+        "solo",
+        "team",
+        "regulated"
+      ],
+      "description": "Template pack to apply during onboarding."
+    },
+    "telemetry_mode": {
+      "type": "string",
+      "enum": [
+        "local",
+        "shared",
+        "org-managed"
+      ],
+      "description": "Telemetry and reporting mode."
+    },
+    "secrets_mode": {
+      "type": "string",
+      "enum": [
+        "local",
+        "workflow-secrets",
+        "org-managed"
+      ],
+      "description": "Secrets wiring mode."
+    },
+    "hook_pack": {
+      "type": "string",
+      "enum": [
+        "none",
+        "memory",
+        "standard",
+        "guardrails"
+      ],
+      "description": "Hook pack applied by the onboarding flow."
+    },
+    "preserve_local_customizations": {
+      "type": "boolean",
+      "default": true,
+      "description": "Preserve repo-owned customizations when refreshing generated files."
+    },
+    "migration_from": {
+      "type": "string",
+      "enum": [
+        "solo-dev",
+        "team-dev",
+        "regulated-team"
+      ],
+      "description": "Profile being migrated from on a rerun."
+    },
+    "allow_profile_downgrade": {
+      "type": "boolean",
+      "default": false,
+      "description": "Allow a weaker profile to replace a stronger one."
+    }
+  }
+}

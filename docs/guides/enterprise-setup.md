@@ -105,6 +105,8 @@ Consumer repositories should reference the shared BaseCoat Copilot Space using:
 Use this exact owner/name pair when invoking Copilot Space context retrieval from consumers.
 Do not point consumers at repo-local or personal spaces for BaseCoat canonical guidance.
 
+For onboarding posture selection, use the versioned profile contract in `docs/reference/onboarding-profile-contract.v1.md`.
+
 ### CI/CD Pipeline
 
 Base Coat includes validation workflows. Ensure these run on your fork:
@@ -123,6 +125,10 @@ For merge-queue runs (`merge_group`), the gate passes with a notice because PR b
 | Release artifacts | Strict change control | Use `scripts/package-basecoat.ps1` or `.sh` to build, publish via GitHub Releases |
 | Git submodule | Explicit version pinning | `git submodule add` pointing at your fork |
 | Artifact mirror | Air-gapped environments | Download release assets, host on internal artifact server |
+
+### Onboarding profile contract
+
+The profile contract in `docs/reference/onboarding-profile-contract.v1.md` is the canonical place to choose between `solo-dev`, `team-dev`, and `regulated-team` without editing each consumer repo by hand.
 
 ---
 

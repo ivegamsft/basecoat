@@ -69,5 +69,6 @@ jobs:
 ## Next steps
 
 - [Enterprise setup](guides/enterprise-setup.md) — reduced-friction setup for IBuySpy-Shared org members
+- [Onboarding profile contract](reference/onboarding-profile-contract.v1.md) — versioned profile posture and migration rules
 - [Asset reference](reference/quick-reference.md) — browse all available agents, skills, and instructions
 - [Contributing](guides/contributing.md) — add your own patterns back to BaseCoat
