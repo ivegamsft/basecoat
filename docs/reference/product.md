@@ -2,7 +2,7 @@
 
 ## What is Base Coat?
 
-Base Coat is a full-SDLC agent framework for GitHub Copilot. It provides 50 specialized agents, 33 skills, and 34 instruction sets that cover the entire software development lifecycle — from architecture and coding to testing, security, DevOps, and project management.
+Base Coat is a full-SDLC Copilot customization framework built on four primitives: agents, skills, instructions, and prompts. It provides specialized assets that cover the entire software development lifecycle — from architecture and coding to testing, security, DevOps, and project management.
 
 ## Who is it for?
 

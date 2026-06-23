@@ -4,6 +4,8 @@
 
 BaseCoat provides a curated library of agents, skills, instructions, and prompts that teams adopt across repositories through a single sync command. Instead of every team writing Copilot customizations from scratch, BaseCoat gives you production-ready assets that enforce consistent standards, accelerate development workflows, and scale across an entire GitHub Enterprise organization.
 
+The operating model combines **Guardrails** (BaseCoat assets and standards) with **Visibility** (issues, PRs, workflows, and milestones) so execution is both governed and observable.
+
 **105 agents** · **104 skills** · **90 instruction files** · **10 prompt starters**
 
 ---
@@ -122,6 +124,8 @@ BaseCoat is built on four GitHub Copilot customization primitives:
 - **Skills** (`skills/`) — Reusable workflow recipes with templates. A skill contains a `SKILL.md` workflow definition plus template files (checklists, specs, scaffolds) that agents and users invoke during work.
 - **Instructions** (`instructions/`) — Coding standards and guardrails that Copilot loads automatically. These govern how code is written, reviewed, tested, and deployed across every conversation.
 - **Prompts** (`prompts/`) — Quick-start entry points for common tasks like architecture planning, code review, and bugfixing.
+
+- **Operating model reference:** [`docs/reference/ai-sdlc-operating-model.md`](docs/reference/ai-sdlc-operating-model.md)
 
 ---
 

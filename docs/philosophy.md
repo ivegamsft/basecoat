@@ -88,7 +88,7 @@ instructions (mixing policy with reference material).
 ## The Router: Tying It Together
 
 The `/basecoat` router skill sits on top, providing a **single entry point**. Users
-don't need to know about the three primitives — they just say:
+don't need to memorize the four primitives — they just say:
 
 ```text
 /basecoat backend build a REST API

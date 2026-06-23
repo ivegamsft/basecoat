@@ -35,13 +35,14 @@ the right agent, attaches paired skills, and ensures ambient instructions are ac
 (`/basecoat`) shows a categorized catalog; delegation mode (`/basecoat [discipline] [prompt]`)
 routes directly.
 
-### 3. Composable Three-Primitive basecoat-10-core-architecture
+### 3. Composable Four-Primitive Architecture
 
-Base Coat separates concerns into three primitives that compose cleanly:
+Base Coat separates concerns into four primitives that compose cleanly:
 
 - **Agents** define *who* does the work and *how* (workflow, persona, model)
 - **Skills** provide *what knowledge* they use (templates, checklists, decision trees)
 - **Instructions** enforce *what rules* everyone follows (ambient, cross-cutting)
+- **Prompts** provide *how work gets invoked quickly* (structured entry points)
 
 This separation means a new basecoat-50-security-security policy updates one instruction file and every
 agent inherits it — not 49 agent files edited individually.

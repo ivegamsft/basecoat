@@ -59,6 +59,7 @@ flowchart LR
 - [reference/distribution.md](reference/distribution.md) — Sync mechanism for consumer repos
 - [reference/hooks.md](reference/hooks.md) — Git hooks and pre-commit validation
 - [reference/goals.md](reference/goals.md) — Project goals and OKRs
+- [reference/ai-sdlc-operating-model.md](reference/ai-sdlc-operating-model.md) — Canonical Guardrails vs Visibility operating model
 - [reference/scoped-instructions.md](reference/scoped-instructions.md) — Scoped instruction authoring guide
 - [reference/label-taxonomy.md](reference/label-taxonomy.md) — GitHub label taxonomy
 - [reference/prompt-registry.md](reference/prompt-registry.md) — Prompt catalog and registry
