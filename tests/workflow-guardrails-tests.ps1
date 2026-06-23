@@ -703,6 +703,7 @@ Write-Host '  Test 18: Validate runner capability classification coverage...'
 $runnerCapabilityIssues = @()
 $runnerAuditScriptPath = Join-Path $repoRoot 'scripts\audit-workflow-runner-capabilities.ps1'
 $runnerClassPolicyPath = Join-Path $repoRoot '.github\workflow-runner-capability-classes.json'
+$runnerContractPolicyPath = Join-Path $repoRoot '.github\workflow-runner-routing-contracts.json'
 
 if (-not (Test-Path $runnerAuditScriptPath)) {
     $runnerCapabilityIssues += 'scripts/audit-workflow-runner-capabilities.ps1 (missing file)'
@@ -712,6 +713,10 @@ if (-not (Test-Path $runnerClassPolicyPath)) {
     $runnerCapabilityIssues += '.github/workflow-runner-capability-classes.json (missing file)'
 }
 
+if (-not (Test-Path $runnerContractPolicyPath)) {
+    $runnerCapabilityIssues += '.github/workflow-runner-routing-contracts.json (missing file)'
+}
+
 if ($runnerCapabilityIssues.Count -eq 0) {
     $auditJson = & pwsh -NoProfile -File $runnerAuditScriptPath -OutputFormat json | ConvertFrom-Json
     if ($auditJson.summary.unclassified_jobs -gt 0) {
@@ -719,6 +724,12 @@ if ($runnerCapabilityIssues.Count -eq 0) {
     }
     if ($auditJson.summary.total_jobs -le 0) {
         $runnerCapabilityIssues += 'audit-workflow-runner-capabilities (no workflow jobs classified)'
+    }
+    if ($auditJson.summary.contract_violations -gt 0) {
+        $runnerCapabilityIssues += "audit-workflow-runner-capabilities (found $($auditJson.summary.contract_violations) runner contract violations)"
+    }
+    if ($auditJson.summary.contracted_jobs -le 0) {
+        $runnerCapabilityIssues += 'audit-workflow-runner-capabilities (no runner contracts evaluated)'
     }
 }
 

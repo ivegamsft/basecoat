@@ -7,6 +7,8 @@
 | Mismatches | 7 |
 | Conditional routes | 6 |
 | Unclassified jobs | 0 |
+| Contracted jobs | 6 |
+| Contract violations | 0 |
 
 | Workflow | Job | Required capabilities | Recommended runner class | Actual runner class | Status |
 |---|---|---|---|---|---|
@@ -53,7 +55,7 @@
 | harness-change-eval-gate.yml | run-harness-eval | public-internet | github-hosted-linux | github-hosted-linux | aligned |
 | issue-approve.yml | approve | public-internet | github-hosted-linux | github-hosted-linux | aligned |
 | issue-metadata-hygiene.yml | audit | public-internet | github-hosted-linux | github-hosted-linux | aligned |
-| mcp-build.yml | build | managed-identity, public-internet | self-hosted-linux | configurable-deploy | conditional |
+| mcp-build.yml | build | managed-identity, private-network, public-internet | self-hosted-linux | configurable-deploy | conditional |
 | mcp-deploy.yml | build-push | deployment-credentials, private-network, public-internet | self-hosted-linux | configurable-deploy | conditional |
 | mcp-deploy.yml | deploy | deployment-credentials, managed-identity, private-network, public-internet | self-hosted-linux | configurable-deploy | conditional |
 | memory-audit.yml | audit | public-internet | github-hosted-linux | github-hosted-linux | aligned |

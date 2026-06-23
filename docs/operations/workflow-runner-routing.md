@@ -8,6 +8,7 @@ selection is deterministic rather than ad hoc.
 Canonical runner classes live in:
 
 - `.github/workflow-runner-capability-classes.json`
+- `.github/workflow-runner-routing-contracts.json` (enforceable job-level contracts for deploy paths)
 
 | Runner class | Default runs-on | Use for |
 |---|---|---|
@@ -27,11 +28,18 @@ Every workflow job is classified by required capability via:
 pwsh scripts/audit-workflow-runner-capabilities.ps1 -OutputFormat markdown -OutputPath docs/operations/workflow-runner-capability-audit.md
 ```
 
+To enforce contracts in CI (fail on violations):
+
+```powershell
+pwsh scripts/audit-workflow-runner-capabilities.ps1 -OutputFormat markdown -FailOnContractViolation
+```
+
 The audit report includes:
 
 1. Classification of every workflow job.
 2. Recommended runner class versus actual runner assignment.
 3. Logged mismatches and conditional routes.
+4. Runner contract violations (missing fail-fast guardrails, timeout bounds, or routing markers).
 
 The scheduled automation lives at:
 
@@ -47,6 +55,11 @@ runs-on: ${{ vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
 
 This pattern is currently used by deployment-oriented workflows and remains
 compatible with protected self-hosted rollouts.
+
+Deployment workflows that use `RUNNER_DEPLOY` now include a mandatory
+`Validate self-hosted runner routing contract` step. This fails early when
+`vars.RUNNER_DEPLOY` is missing or resolves to plain `ubuntu-latest`, preventing
+silent wrong-runner execution.
 
 ## Intentionally GitHub-hosted workflows
 

@@ -53,6 +53,29 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
+      - name: Validate self-hosted runner routing contract
+        shell: bash
+        env:
+          RUNNER_DEPLOY: ${{ vars.RUNNER_DEPLOY }}
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            echo "::notice::Skipping strict self-hosted contract enforcement on pull_request events."
+            exit 0
+          fi
+          if [[ -z "${RUNNER_DEPLOY:-}" ]]; then
+            echo "::error::vars.RUNNER_DEPLOY is not configured."
+            echo "::error::Set RUNNER_DEPLOY to self-hosted labels/group for deploy-class jobs."
+            exit 1
+          fi
+          NORMALIZED="$(echo "${RUNNER_DEPLOY}" | tr '[:upper:]' '[:lower:]')"
+          if [[ "${NORMALIZED}" == *"ubuntu-latest"* && "${NORMALIZED}" != *"self-hosted"* ]]; then
+            echo "::error::vars.RUNNER_DEPLOY resolves to ubuntu-latest fallback."
+            echo "::error::This workflow requires explicit self-hosted routing."
+            exit 1
+          fi
+          echo "Runner contract satisfied: ${RUNNER_DEPLOY}"
+
       - name: Log in to GHCR
         uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee
         with:
@@ -100,6 +123,29 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Validate self-hosted runner routing contract
+        shell: bash
+        env:
+          RUNNER_DEPLOY: ${{ vars.RUNNER_DEPLOY }}
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            echo "::notice::Skipping strict self-hosted contract enforcement on pull_request events."
+            exit 0
+          fi
+          if [[ -z "${RUNNER_DEPLOY:-}" ]]; then
+            echo "::error::vars.RUNNER_DEPLOY is not configured."
+            echo "::error::Set RUNNER_DEPLOY to self-hosted labels/group for deploy-class jobs."
+            exit 1
+          fi
+          NORMALIZED="$(echo "${RUNNER_DEPLOY}" | tr '[:upper:]' '[:lower:]')"
+          if [[ "${NORMALIZED}" == *"ubuntu-latest"* && "${NORMALIZED}" != *"self-hosted"* ]]; then
+            echo "::error::vars.RUNNER_DEPLOY resolves to ubuntu-latest fallback."
+            echo "::error::This workflow requires explicit self-hosted routing."
+            exit 1
+          fi
+          echo "Runner contract satisfied: ${RUNNER_DEPLOY}"
 
       - name: Set up Node.js for policy preflight
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
@@ -165,14 +211,16 @@ jobs:
             exit 1
           fi
 
-          echo "### Operation context preflight" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Key | Value |" >> "$GITHUB_STEP_SUMMARY"
-          echo "|---|---|" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Target environment | \`${TARGET_CONTEXT_ENV}\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Mode | \`${MODE}\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| GitHub environment | \`${GITHUB_ENVIRONMENT}\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Human approval required | \`${APPROVAL_REQUIRED}\` |" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "### Operation context preflight"
+            echo ""
+            echo "| Key | Value |"
+            echo "|---|---|"
+            echo "| Target environment | \`${TARGET_CONTEXT_ENV}\` |"
+            echo "| Mode | \`${MODE}\` |"
+            echo "| GitHub environment | \`${GITHUB_ENVIRONMENT}\` |"
+            echo "| Human approval required | \`${APPROVAL_REQUIRED}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Azure login
         uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43
@@ -202,17 +250,21 @@ jobs:
           TARGET_HIGH=$(jq --arg env "${TARGET_ENV}" '[.findings[] | select(.environment == $env and .severity == "high")] | length' "${RUNNER_TEMP}/drift-report.json")
           TARGET_TOTAL=$(jq --arg env "${TARGET_ENV}" '[.findings[] | select(.environment == $env)] | length' "${RUNNER_TEMP}/drift-report.json")
 
-          echo "target_critical=${TARGET_CRITICAL}" >> "$GITHUB_OUTPUT"
-          echo "target_high=${TARGET_HIGH}" >> "$GITHUB_OUTPUT"
-          echo "target_total=${TARGET_TOTAL}" >> "$GITHUB_OUTPUT"
+          {
+            echo "target_critical=${TARGET_CRITICAL}"
+            echo "target_high=${TARGET_HIGH}"
+            echo "target_total=${TARGET_TOTAL}"
+          } >> "$GITHUB_OUTPUT"
 
-          echo "### Environment drift snapshot (advisory)" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Target | Critical | High | Findings |" >> "$GITHUB_STEP_SUMMARY"
-          echo "|---|---:|---:|---:|" >> "$GITHUB_STEP_SUMMARY"
-          echo "| \`${TARGET_ENV}\` | ${TARGET_CRITICAL} | ${TARGET_HIGH} | ${TARGET_TOTAL} |" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "> This snapshot is informational and does not replace environment protection rules, what-if validation, or health checks." >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "### Environment drift snapshot (advisory)"
+            echo ""
+            echo "| Target | Critical | High | Findings |"
+            echo "|---|---:|---:|---:|"
+            echo "| \`${TARGET_ENV}\` | ${TARGET_CRITICAL} | ${TARGET_HIGH} | ${TARGET_TOTAL} |"
+            echo ""
+            echo "> This snapshot is informational and does not replace environment protection rules, what-if validation, or health checks."
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload drift preflight report
         if: always()
@@ -316,11 +368,13 @@ jobs:
 
       - name: Output deployed endpoint
         run: |
-          echo "### MCP Deployed ✅" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "| | |" >> "$GITHUB_STEP_SUMMARY"
-          echo "|---|---|" >> "$GITHUB_STEP_SUMMARY"
-          echo "| **Image** | \`${{ needs.build-push.outputs.image_ref }}\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| **Environment** | \`${{ env.TARGET_ENV }}\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| **Health** | \`https://${{ steps.infra.outputs.fqdn }}/health\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| **MCP endpoint** | \`https://${{ steps.infra.outputs.fqdn }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "### MCP Deployed ✅"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| **Image** | \`${{ needs.build-push.outputs.image_ref }}\` |"
+            echo "| **Environment** | \`${{ env.TARGET_ENV }}\` |"
+            echo "| **Health** | \`https://${{ steps.infra.outputs.fqdn }}/health\` |"
+            echo "| **MCP endpoint** | \`https://${{ steps.infra.outputs.fqdn }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"

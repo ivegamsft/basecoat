@@ -30,11 +30,31 @@ jobs:
   deploy:
     name: Build and deploy portal
     runs-on: ${{ vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
+    timeout-minutes: 20
     environment: staging
 
     steps:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Validate self-hosted runner routing contract
+        shell: bash
+        env:
+          RUNNER_DEPLOY: ${{ vars.RUNNER_DEPLOY }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${RUNNER_DEPLOY:-}" ]]; then
+            echo "::error::vars.RUNNER_DEPLOY is not configured."
+            echo "::error::Set RUNNER_DEPLOY to self-hosted labels/group for deploy-class jobs."
+            exit 1
+          fi
+          NORMALIZED="$(echo "${RUNNER_DEPLOY}" | tr '[:upper:]' '[:lower:]')"
+          if [[ "${NORMALIZED}" == *"ubuntu-latest"* && "${NORMALIZED}" != *"self-hosted"* ]]; then
+            echo "::error::vars.RUNNER_DEPLOY resolves to ubuntu-latest fallback."
+            echo "::error::This workflow requires explicit self-hosted routing."
+            exit 1
+          fi
+          echo "Runner contract satisfied: ${RUNNER_DEPLOY}"
 
       - name: Select Azure auth mode
         id: azure-auth
