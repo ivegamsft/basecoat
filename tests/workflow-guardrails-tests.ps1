@@ -626,6 +626,78 @@ else {
     $guardrailFailures += 'production-environment-gate'
 }
 
+# Test 17: CI stabilization regressions for Sprint 36 workflows
+Write-Host '  Test 17: Validate Sprint 36 CI stabilization workflow safeguards...'
+$stabilizationGuardrailIssues = @()
+
+$auditEnvironmentPath = Join-Path $workflowDir 'audit-environment-drift.yml'
+if (-not (Test-Path $auditEnvironmentPath)) {
+    $stabilizationGuardrailIssues += 'audit-environment-drift.yml (missing file)'
+}
+else {
+    $auditEnvironmentWorkflow = Get-Content $auditEnvironmentPath -Raw
+
+    if ($auditEnvironmentWorkflow -match 'npx\s+--yes\s+@basecoat/environment-audit-drift') {
+        $stabilizationGuardrailIssues += 'audit-environment-drift.yml (still depends on unpublished npm package via npx)'
+    }
+
+    if ($auditEnvironmentWorkflow -notmatch 'npm ci --prefix skills/environment-audit-drift' -or
+        $auditEnvironmentWorkflow -notmatch 'node skills/environment-audit-drift/dist/cli\.js') {
+        $stabilizationGuardrailIssues += 'audit-environment-drift.yml (missing local CLI install/build execution path)'
+    }
+}
+
+$dependencyGraphWorkflowPath = Join-Path $workflowDir 'dependency-graph-pages.yml'
+if (-not (Test-Path $dependencyGraphWorkflowPath)) {
+    $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (missing file)'
+}
+else {
+    $dependencyGraphWorkflow = Get-Content $dependencyGraphWorkflowPath -Raw
+
+    if ($dependencyGraphWorkflow -notmatch 'Add-Content -Path \$env:GITHUB_OUTPUT -Value "should_open_pr=true"' -or
+        $dependencyGraphWorkflow -notmatch 'Add-Content -Path \$env:GITHUB_OUTPUT -Value "should_open_pr=false"' -or
+        $dependencyGraphWorkflow -notmatch 'Add-Content -Path \$env:GITHUB_OUTPUT -Value "branch_name=\$branch"' -or
+        $dependencyGraphWorkflow -notmatch 'Add-Content -Path \$env:GITHUB_OUTPUT -Value "branch_name="') {
+        $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (missing guarded branch output assignments to GITHUB_OUTPUT)'
+    }
+}
+
+$assetHealthWorkflowPath = Join-Path $workflowDir 'asset-health.yml'
+if (-not (Test-Path $assetHealthWorkflowPath)) {
+    $stabilizationGuardrailIssues += 'asset-health.yml (missing file)'
+}
+else {
+    $assetHealthWorkflow = Get-Content $assetHealthWorkflowPath -Raw
+
+    $orphanGuardIndex = $assetHealthWorkflow.IndexOf('Orphaned nodes \((\d+)')
+    $matchesDereferenceIndex = $assetHealthWorkflow.IndexOf('$Matches[1]')
+
+    if ($orphanGuardIndex -lt 0 -or $matchesDereferenceIndex -lt 0 -or $matchesDereferenceIndex -lt $orphanGuardIndex) {
+        $stabilizationGuardrailIssues += 'asset-health.yml (orphan count parsing is not regex-guarded before $Matches dereference)'
+    }
+}
+
+$docsWorkflowPath = Join-Path $workflowDir 'docs.yml'
+if (-not (Test-Path $docsWorkflowPath)) {
+    $stabilizationGuardrailIssues += 'docs.yml (missing file)'
+}
+else {
+    $docsWorkflow = Get-Content $docsWorkflowPath -Raw
+
+    if ($docsWorkflow -notmatch 'verify-github-pages-environment' -or
+        $docsWorkflow -notmatch 'github-pages environment policy permits deployments from main') {
+        $stabilizationGuardrailIssues += 'docs.yml (missing github-pages environment preflight gate for main branch deployments)'
+    }
+}
+
+if ($stabilizationGuardrailIssues.Count -eq 0) {
+    Write-Host '    ✓ Sprint 36 CI stabilization safeguards are present in workflow definitions'
+}
+else {
+    Write-Host "    ✗ Sprint 36 stabilization guardrail issues found in: $($stabilizationGuardrailIssues -join ', ')" -ForegroundColor Red
+    $guardrailFailures += 'sprint-36-ci-stabilization'
+}
+
 if ($guardrailFailures.Count -gt 0) {
     Write-Host "Workflow guardrails failed: $($guardrailFailures -join ', ')" -ForegroundColor Red
     exit 1
