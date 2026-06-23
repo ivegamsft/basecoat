@@ -40,7 +40,21 @@ Collect issues targeted by the rebalance plan. Common sources:
 gh issue list --repo <owner/repo> --label "sprint:<n>" --state open --json number,url,title,state
 ```
 
-## 4) Classify Each Issue
+## 4) Validate Metadata Mutation Policy
+
+Before applying any write:
+
+1. Validate target labels (global arguments and item-level overrides):
+   - `priority:(critical|high|medium|low)`
+   - `sprint:<number>`
+   - `wave:<number>`
+2. Build a deterministic mutation plan per issue:
+   - compare existing label families to target values
+   - decide **replace** (remove family labels + add target) or **skip**
+3. If freeze-window mode is active and metadata label changes are planned, block the run unless an
+   explicit freeze override flag is set.
+
+## 5) Classify Each Issue
 
 For each issue in the rebalance list, classify against the current board snapshot:
 
@@ -57,7 +71,7 @@ Expected status mapping:
 | `OPEN` | `Todo` |
 | `CLOSED` | `Done` |
 
-## 5) Apply Changes (Add / Update)
+## 6) Apply Changes (Add / Update / Metadata Mutation)
 
 ### Add a new item
 
@@ -85,12 +99,20 @@ gh api graphql -f query='
   -f fieldId="$STATUS_FIELD_ID" -f optionId="$OPTION_ID"
 ```
 
-## 6) Preserve Delivery Labels
+### Update delivery metadata labels
 
-Do not remove or overwrite existing `sprint:*`, `wave:*`, or `priority:*` labels on issues
-during sync. Sync only operates on board item status and board membership, not on issue labels.
+For each metadata family (`priority`, `sprint`, `wave`) with a target:
 
-## 7) Emit Sync Report
+1. Remove existing labels in that family.
+2. Add the target label.
+3. Emit reason code `METADATA_MUTATION_<FAMILY>`.
+
+## 7) Freeze-Window Guardrail
+
+When freeze mode is enabled, metadata label mutations are blocked unless an explicit override is
+provided. The run exits non-zero with reason code `POLICY_FREEZE_WINDOW_BLOCK`.
+
+## 8) Emit Sync Report and Change Log
 
 After processing all items, emit a structured report:
 
@@ -115,7 +137,19 @@ Sync complete: added=0 updated=0 skipped=<n>
 No changes required -- board is already aligned with rebalance plan.
 ```
 
-## 8) Idempotency Guarantee
+Additionally, emit a JSON change log with per-item reason codes and planned/applied mutations.
+
+## 9) Rollback Artifact
+
+Generate one rollback artifact per run (JSON), including inverse operations for every applied
+mutation:
+
+- project item add -> delete item
+- status update -> restore previous status option
+- label remove -> add label back
+- label add -> remove label
+
+## 10) Idempotency Guarantee
 
 A second run on an unchanged issue list must produce `added=0 updated=0`.
 The snapshot-before-write pattern in step 2 enforces this guarantee without additional flags.
@@ -127,4 +161,6 @@ The snapshot-before-write pattern in step 2 enforces this guarantee without addi
 | Project not found | Exit non-zero with message "Project not found: TITLE" |
 | Issue already in project (add race) | Catch duplicate error; count as `skipped` |
 | Status field option not found | Exit non-zero with message "Status option not found: NAME" |
+| Invalid metadata target label | Exit non-zero with reason code `POLICY_INVALID_TARGET_LABEL` |
+| Freeze-window block | Exit non-zero with reason code `POLICY_FREEZE_WINDOW_BLOCK` |
 | Rate limit hit | Back off 10 s and retry up to 3 times |

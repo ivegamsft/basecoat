@@ -17,6 +17,15 @@ scenarios:
   - id: "pos-5"
     input: "Add unmapped rebalanced issues to the sprint board and align their status column."
     expect_activation: true
+  - id: "pos-6"
+    input: "Apply metadata mutation policy for priority, sprint, and wave labels during backlog rebalance sync."
+    expect_activation: true
+  - id: "pos-7"
+    input: "Validate sprint and wave label targets before mutation, then emit rollback and reason-coded change log artifacts."
+    expect_activation: true
+  - id: "pos-8"
+    input: "Run backlog rebalance project sync in freeze-window mode and block metadata label writes unless override is provided."
+    expect_activation: true
   - id: "neg-1"
     input: "Write unit tests for the authentication service."
     expect_activation: false
