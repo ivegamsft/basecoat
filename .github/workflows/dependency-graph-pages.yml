@@ -40,7 +40,7 @@ jobs:
             '# Dependency Graph',
             '',
             "- Generated: $timestamp",
-            "- Source workflow: `.github/workflows/dependency-graph-pages.yml`",
+            '- Source workflow: .github/workflows/dependency-graph-pages.yml',
             '',
             $graph
           ) -join "`n"
@@ -54,6 +54,10 @@ jobs:
             git add docs/reports/dependency-graph.md
             git commit -m 'docs(graph): refresh dependency graph report'
             git push origin $branch
+            if ($branch -notmatch '^[A-Za-z0-9._/-]+$') {
+              throw "Generated branch name '$branch' is not safe for GITHUB_OUTPUT assignment."
+            }
+
             Add-Content -Path $env:GITHUB_OUTPUT -Value "should_open_pr=true"
             Add-Content -Path $env:GITHUB_OUTPUT -Value "branch_name=$branch"
           } else {

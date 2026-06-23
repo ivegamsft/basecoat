@@ -94,15 +94,20 @@ jobs:
         run: |
           $graph = pwsh scripts/graph-dependencies.ps1 -ShowOrphans
           $graph | Out-File -FilePath /tmp/dep-graph.md -Encoding utf8
+          $graphText = ($graph | Out-String)
 
           # Append to job summary
           $separator = "`n`n---`n`n## Dependency Graph`n`n"
-          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value ($separator + $graph)
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value ($separator + $graphText)
 
           # Surface orphan count as annotation
-          if ($graph -match 'Orphaned nodes \((\d+)') {
-            $count = $Matches[1]
-            if ([int]$count -gt 0) {
+          if ($graphText -match 'Orphaned nodes \((\d+)') {
+            if ($Matches.Count -lt 2) {
+              throw "Unexpected orphan-count match state; expected capture group for orphan count."
+            }
+
+            $count = [int]$Matches[1]
+            if ($count -gt 0) {
               Write-Host "::warning::$count orphaned asset nodes detected. Run 'pwsh scripts/graph-dependencies.ps1 -ShowOrphans' to review."
             }
           }
@@ -111,15 +116,17 @@ jobs:
         shell: pwsh
         run: |
           $report = pwsh scripts/find-unused-assets.ps1 -Format markdown -ThresholdDays 90 2>&1
+          $reportText = ($report | Out-String)
 
           # Append to job summary
           $separator = "`n`n---`n`n## Unused Assets`n`n"
-          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value ($separator + $report)
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value ($separator + $reportText)
 
           # Warn (non-blocking) if stale unused assets exist
-          if ($report -match '(\d+) exceed the 90-day stale threshold') {
-            $count = $Matches[1]
-            if ([int]$count -gt 0) {
+          $staleMatch = [regex]::Match($reportText, '(\d+) exceed the 90-day stale threshold')
+          if ($staleMatch.Success) {
+            $count = [int]$staleMatch.Groups[1].Value
+            if ($count -gt 0) {
               Write-Host "::warning::$count assets unreferenced for >90 days. Run 'pwsh scripts/find-unused-assets.ps1' to review."
             }
           }
@@ -129,4 +136,3 @@ jobs:
         run: |
           echo "::error::Asset library health is grade F (avg ${{ steps.audit.outputs.avg_score }}/10). Run 'pwsh scripts/audit-assets.ps1 -Weak' to investigate."
           exit 1
-
