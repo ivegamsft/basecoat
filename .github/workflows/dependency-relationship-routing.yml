@@ -23,11 +23,6 @@ on:
       - closed
       - labeled
       - unlabeled
-  pull_request_review_comment:
-    types:
-      - created
-      - edited
-      - deleted
   workflow_dispatch:
     inputs:
       max_items:
