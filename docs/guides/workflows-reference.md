@@ -24,7 +24,7 @@ testing and uses pinned action SHAs.
 | #188 | `.github/workflows/pr-size-labeler.yml` | Automatic PR size labels (`size:XS`..`size:XL`) from diff size |
 | #189 | `.github/workflows/dependency-graph-pages.yml` | Generate dependency graph report and publish via docs PR flow |
 | #190 | `.github/workflows/reviewer-autoassign.yml` | Auto-request reviewers using changed-path commit history |
-| #1557 | `.github/workflows/pr-flow-hygiene.yml` | Weekly PR lifecycle report with WIP limits, draft-drift triage, remaining-WIP logging, and owner/reviewer nudges |
+| #1557 | `.github/workflows/pr-flow-hygiene.yml` | Event-driven PR readiness routing (`ready_for_review` + metadata transitions) plus weekly PR lifecycle audit summary |
 
 ## Distributed Workflow Templates (10 Total)
 
@@ -345,15 +345,23 @@ inputs:
 
 ### 10. pr-flow-hygiene.yml
 
-**Purpose:** Keep the open PR lifecycle healthy, reduce draft drift, and surface remaining WIP that still needs an explicit owner, merge, or cleanup action.
+**Purpose:** Keep PR readiness event-driven after intake, enforce required metadata quickly, and retain a weekly hygiene report as the audit layer.
 
 **Trigger:**
 
-- Cron: Every Monday at 1pm UTC
+- Event-driven: `pull_request_target` on `ready_for_review`, `synchronize`, `reopened`, reviewer/assignee transitions, and label changes
+- Cron: Every Monday at 1pm UTC (summary / audit)
 - Manual: `gh workflow run pr-flow-hygiene.yml`
 
 **What It Does:**
 
+- Routes each PR event through immediate readiness checks:
+  - reviewer/team coverage
+  - ownership coverage (assignee)
+  - release/planning label coverage (`wave:*` or `sprint:*`)
+  - `BEHIND` mergeability nudge
+- Applies deterministic escalation label (`pr-readiness-blocked`) and upserts routing comments when metadata is incomplete
+- Removes `pr-readiness-blocked` automatically once the PR passes readiness checks
 - Scans open PRs and publishes a weekly `PR Flow Hygiene Report` issue
 - Treats the flagged PR set as the remaining WIP follow-up queue for the full lifecycle
 - Evaluates guardrails with configurable thresholds:
@@ -382,6 +390,7 @@ inputs:
 
 **Output:**
 
+- Event-cycle PR comments and label updates for readiness routing gaps
 - Weekly issue with PR flow guardrail status table and top-risk PR lists
 - Weekly issue with a remaining-WIP follow-up count and top-risk PR lists
 - PR comments for actionable ownership/reviewer/drift nudges
@@ -389,6 +398,8 @@ inputs:
 
 **Consumer Value:**
 
+- Same-cycle readiness feedback instead of waiting for weekly cadence
+- Deterministic escalation signal for blocked readiness states
 - Fixed cadence for backlog triage outcomes
 - Explicit WIP and handoff policy signal
 - Reduced draft and review drift through targeted automation

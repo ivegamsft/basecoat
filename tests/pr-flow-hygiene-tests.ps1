@@ -13,6 +13,14 @@ $workflowContent = Get-Content $workflowPath -Raw
 
 $requiredSnippets = @(
     'name: "BaseCoat - PR Flow Hygiene"',
+    'pull_request_target:',
+    'ready_for_review',
+    'review_requested',
+    'review_request_removed',
+    'assigned',
+    'unassigned',
+    'labeled',
+    'unlabeled',
     'schedule:',
     'workflow_dispatch:',
     'wip_limit',
@@ -24,6 +32,9 @@ $requiredSnippets = @(
     'timeout-minutes: 20',
     'group: ${{ github.workflow }}-${{ github.ref }}',
     'actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3',
+    'PR readiness routing nudge',
+    'pr-readiness-blocked',
+    'Event-driven readiness checks run on pull_request_target transitions; this weekly report is summary/audit only.',
     'PR Lifecycle Hygiene Report - Week of',
     'PR lifecycle hygiene nudge'
 )

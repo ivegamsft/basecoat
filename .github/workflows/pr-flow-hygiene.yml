@@ -1,6 +1,17 @@
 name: "BaseCoat - PR Flow Hygiene"
 
 on:
+  pull_request_target:
+    types:
+      - ready_for_review
+      - synchronize
+      - reopened
+      - review_requested
+      - review_request_removed
+      - assigned
+      - unassigned
+      - labeled
+      - unlabeled
   schedule:
     - cron: "0 13 * * 1"
   workflow_dispatch:
@@ -37,11 +48,11 @@ concurrency:
 
 jobs:
   hygiene:
-    name: Weekly PR lifecycle hygiene report and triage nudges
+    name: PR readiness routing and weekly hygiene report
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Analyze PR flow and publish outcomes
+      - name: Route PR readiness events and publish weekly outcomes
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         env:
           WIP_LIMIT: ${{ inputs.wip_limit || '20' }}
@@ -50,7 +61,9 @@ jobs:
           MAX_ITEMS: ${{ inputs.max_items || '200' }}
         with:
           script: |
-            const marker = '<!-- pr-flow-hygiene:v1 -->';
+            const weeklyMarker = '<!-- pr-flow-hygiene:weekly:v2 -->';
+            const eventMarker = '<!-- pr-flow-hygiene:event:v1 -->';
+            const blockedLabel = 'pr-readiness-blocked';
             const toInt = (value, fallback) => {
               const parsed = Number(value);
               return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
@@ -63,12 +76,192 @@ jobs:
               d.setUTCDate(d.getUTCDate() - day + 1);
               return d;
             };
+            const normalizeLabels = labels =>
+              labels
+                .map(label => (typeof label === 'string' ? label : label?.name || ''))
+                .filter(Boolean);
+            const isReleaseLabel = label => {
+              const normalized = String(label || '').toLowerCase();
+              return /^(wave:|sprint:|wave-|sprint-).+/.test(normalized) || normalized === 'wave/sprint';
+            };
+            const hasReleaseLabel = labels => normalizeLabels(labels).some(isReleaseLabel);
+
+            const upsertBotComment = async ({ issueNumber, marker, body }) => {
+              const comments = await github.paginate(github.rest.issues.listComments, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                per_page: 100
+              });
+              const existing = comments.find(comment =>
+                comment.user?.login === 'github-actions[bot]' &&
+                typeof comment.body === 'string' &&
+                comment.body.includes(marker)
+              );
+              if (existing) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existing.id,
+                  body
+                });
+                return 'updated';
+              }
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                body
+              });
+              return 'created';
+            };
+
+            const ensureLabelExists = async ({ name, color, description }) => {
+              try {
+                await github.rest.issues.getLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name
+                });
+              } catch (err) {
+                if (err.status !== 404) {
+                  throw err;
+                }
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name,
+                  color,
+                  description
+                });
+              }
+            };
+
+            const setBlockedLabel = async (prNumber, enabled) => {
+              if (enabled) {
+                await ensureLabelExists({
+                  name: blockedLabel,
+                  color: 'B60205',
+                  description: 'PR readiness loop found missing reviewer/owner/release metadata or BEHIND status'
+                });
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  labels: [blockedLabel]
+                });
+                return;
+              }
+
+              try {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  name: blockedLabel
+                });
+              } catch (err) {
+                if (err.status !== 404) {
+                  throw err;
+                }
+              }
+            };
 
             const wipLimit = toInt(process.env.WIP_LIMIT, 20);
             const draftDriftDays = toInt(process.env.DRAFT_DRIFT_DAYS, 14);
             const readyStaleDays = toInt(process.env.READY_STALE_DAYS, 7);
             const maxItems = toInt(process.env.MAX_ITEMS, 200);
             const now = new Date();
+
+            if (context.eventName === 'pull_request_target') {
+              const prNumber = context.payload.pull_request?.number;
+              if (!prNumber) {
+                core.setFailed('pull_request_target event does not include pull_request.number.');
+                return;
+              }
+
+              const { data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+
+              const labels = normalizeLabels(pr.labels || []);
+              const assigneeCount = pr.assignees?.length || 0;
+              const reviewerCount = (pr.requested_reviewers?.length || 0) + (pr.requested_teams?.length || 0);
+              const ageDays = daysBetween(now, new Date(pr.created_at));
+              const idleDays = daysBetween(now, new Date(pr.updated_at));
+              const reasons = [];
+
+              if (pr.draft) {
+                if (ageDays >= draftDriftDays) {
+                  reasons.push(`Draft age is ${ageDays} days (threshold: ${draftDriftDays}).`);
+                }
+              } else {
+                if (reviewerCount === 0) {
+                  reasons.push('No requested reviewer or reviewer team is set.');
+                }
+                if (assigneeCount === 0) {
+                  reasons.push('No assignee is set for ownership handoff.');
+                }
+                if (!hasReleaseLabel(labels)) {
+                  reasons.push('Missing release/planning label (wave:* or sprint:* policy).');
+                }
+                if (String(pr.mergeable_state || '').toLowerCase() === 'behind') {
+                  reasons.push('PR mergeable_state is BEHIND; branch needs update before review can complete.');
+                }
+              }
+
+              if (reasons.length > 0) {
+                const mode = pr.draft ? 'draft-drift' : 'ready-routing';
+                const body = [
+                  eventMarker,
+                  '## PR readiness routing nudge',
+                  '',
+                  `This PR was evaluated by the event-driven readiness loop on \`${context.payload.action || 'update'}\` and needs lifecycle action (\`${mode}\`).`,
+                  ...reasons.map(reason => `- ${reason}`),
+                  '',
+                  'Deterministic escalation path:',
+                  `- Label \`${blockedLabel}\` is applied while readiness requirements are incomplete.`,
+                  '- Resolve the blockers listed above, then re-trigger by updating metadata or pushing a commit.',
+                  '',
+                  'Suggested next actions:',
+                  '- Request reviewers (or a reviewer team).',
+                  '- Confirm an assignee/owner.',
+                  '- Add a release/planning label (wave:* or sprint:*).',
+                  '- If BEHIND, update branch from base before final review.',
+                  '',
+                  '_Automated by BaseCoat PR readiness event loop._'
+                ].join('\n');
+
+                await setBlockedLabel(prNumber, true);
+                const commentAction = await upsertBotComment({
+                  issueNumber: prNumber,
+                  marker: eventMarker,
+                  body
+                });
+
+                core.summary
+                  .addHeading('PR readiness event routing result')
+                  .addTable([
+                    [{ data: 'Metric', header: true }, { data: 'Value', header: true }],
+                    ['PR', `#${prNumber}`],
+                    ['Mode', mode],
+                    ['Reasons', String(reasons.length)],
+                    ['Comment', commentAction],
+                    ['Blocked label', blockedLabel]
+                  ])
+                  .write();
+                return;
+              }
+
+              await setBlockedLabel(prNumber, false);
+              core.summary
+                .addHeading('PR readiness event routing result')
+                .addRaw(`PR #${prNumber} passed readiness checks for ${context.payload.action || 'update'}.\n`)
+                .write();
+              return;
+            }
 
             const pullRequests = await github.paginate(github.rest.pulls.list, {
               owner: context.repo.owner,
@@ -157,10 +350,10 @@ jobs:
             let nudgeCommentsUpserted = 0;
             for (const pr of actionCandidates) {
               const body = [
-                marker,
+                weeklyMarker,
                 '## PR lifecycle hygiene nudge',
                 '',
-                `This PR was flagged during the weekly full PR lifecycle sweep. Please address the following to avoid backlog drift:`,
+                'This PR was flagged during the weekly full PR lifecycle sweep. Please address the following to avoid backlog drift:',
                 ...pr.reasons.map(reason => `- ${reason}`),
                 '',
                 'Suggested next actions:',
@@ -171,34 +364,11 @@ jobs:
                 '_Automated by BaseCoat PR lifecycle hygiene workflow._'
               ].join('\n');
 
-              const comments = await github.paginate(github.rest.issues.listComments, {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: pr.number,
-                per_page: 100
+              await upsertBotComment({
+                issueNumber: pr.number,
+                marker: weeklyMarker,
+                body
               });
-
-              const existing = comments.find(comment =>
-                comment.user?.login === 'github-actions[bot]' &&
-                typeof comment.body === 'string' &&
-                comment.body.includes(marker)
-              );
-
-              if (existing) {
-                await github.rest.issues.updateComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  comment_id: existing.id,
-                  body
-                });
-              } else {
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: pr.number,
-                  body
-                });
-              }
               nudgeCommentsUpserted += 1;
             }
 
@@ -228,8 +398,8 @@ jobs:
               '',
               '## Guardrail status',
               '',
-              `| Guardrail | Status | Value |`,
-              `|---|---|---|`,
+              '| Guardrail | Status | Value |',
+              '|---|---|---|',
               `| Ready-for-review WIP limit | ${wipStatus} | ${readyCount}/${wipLimit} |`,
               `| Draft drift threshold | ${draftDrift.length > 0 ? 'Action needed' : 'Healthy'} | ${draftDrift.length} PR(s) >= ${draftDriftDays}d |`,
               `| Ready PR inactivity threshold | ${readyStale.length > 0 ? 'Action needed' : 'Healthy'} | ${readyStale.length} PR(s) >= ${readyStaleDays}d idle |`,
@@ -239,6 +409,7 @@ jobs:
               '',
               '## Fixed-cadence triage outcomes',
               '',
+              '- Event-driven readiness checks run on pull_request_target transitions; this weekly report is summary/audit only.',
               `- Nudge comments upserted this run: ${nudgeCommentsUpserted}`,
               `- Candidate PRs triaged this run: ${actionCandidates.length}`,
               `- Remaining WIP items needing explicit owner, reviewer, merge, or cleanup follow-up: ${remainingWipCount}`,
