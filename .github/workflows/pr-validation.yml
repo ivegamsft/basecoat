@@ -380,4 +380,6 @@ jobs:
           test -f "$consumer_repo/.github/base-coat/README.md"
           test -d "$consumer_repo/.github/base-coat/agents"
           test -d "$consumer_repo/.github/base-coat/instructions"
+          test -f "$consumer_repo/.github/PULL_REQUEST_TEMPLATE.md"
+          test -f "$consumer_repo/.github/ISSUE_TEMPLATE/issue.md"
           echo "sync.sh dry-run passed."

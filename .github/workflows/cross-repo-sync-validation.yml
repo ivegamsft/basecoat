@@ -74,6 +74,9 @@ jobs:
               .slice(0, repoLimit);
             const report = [];
 
+            const hasRequiredIntakeSurface = row =>
+              row.hasPrTemplate && row.issueTemplateCount > 0;
+
             for (const repo of candidates) {
               try {
                 const file = await github.rest.repos.getContent({
@@ -88,12 +91,64 @@ jobs:
                 const json = JSON.parse(decoded);
                 const currentVersion = String(json.version || '0.0.0');
                 const minorDrift = drift(currentVersion, latestVersion);
+                let hasPrTemplate = false;
+                let issueTemplateCount = 0;
+
+                try {
+                  const prTemplate = await github.rest.repos.getContent({
+                    owner: org,
+                    repo: repo.name,
+                    path: '.github/PULL_REQUEST_TEMPLATE.md'
+                  });
+                  hasPrTemplate = !Array.isArray(prTemplate.data) && !!prTemplate.data.path;
+                } catch (error) {
+                  if (error.status !== 404) {
+                    core.warning(`Failed to inspect PR template in ${repo.name}: ${error.message}`);
+                  }
+                }
+
+                try {
+                  const issueTemplateDir = await github.rest.repos.getContent({
+                    owner: org,
+                    repo: repo.name,
+                    path: '.github/ISSUE_TEMPLATE'
+                  });
+                  if (Array.isArray(issueTemplateDir.data)) {
+                    issueTemplateCount = issueTemplateDir.data.filter(item =>
+                      item.type === 'file' && /\.(md|ya?ml)$/i.test(item.name)
+                    ).length;
+                  }
+                } catch (error) {
+                  if (error.status !== 404) {
+                    core.warning(`Failed to inspect ISSUE_TEMPLATE directory in ${repo.name}: ${error.message}`);
+                  }
+                }
+
+                if (issueTemplateCount === 0) {
+                  try {
+                    const issueTemplateLegacy = await github.rest.repos.getContent({
+                      owner: org,
+                      repo: repo.name,
+                      path: '.github/ISSUE_TEMPLATE.md'
+                    });
+                    if (!Array.isArray(issueTemplateLegacy.data) && issueTemplateLegacy.data.path) {
+                      issueTemplateCount = 1;
+                    }
+                  } catch (error) {
+                    if (error.status !== 404) {
+                      core.warning(`Failed to inspect legacy issue template in ${repo.name}: ${error.message}`);
+                    }
+                  }
+                }
+
                 report.push({
                   repo: repo.name,
                   visibility: repo.visibility,
                   currentVersion,
                   latestVersion,
-                  minorDrift
+                  minorDrift,
+                  hasPrTemplate,
+                  issueTemplateCount
                 });
               } catch (error) {
                 if (error.status !== 404) {
@@ -103,7 +158,10 @@ jobs:
             }
 
             report.sort((a, b) => b.minorDrift - a.minorDrift || a.repo.localeCompare(b.repo));
-            const highDrift = report.filter(row => row.minorDrift >= threshold);
+            const actionRequired = report.filter(row =>
+              row.minorDrift >= threshold || !hasRequiredIntakeSurface(row)
+            );
+            const missingIntake = report.filter(row => !hasRequiredIntakeSurface(row));
             const markdown = [
               '# Cross-Repo Sync Validation Report',
               '',
@@ -112,11 +170,15 @@ jobs:
               `- Drift threshold: ${threshold}`,
               `- Repositories scanned: ${candidates.length}`,
               `- Repositories with synced BaseCoat assets: ${report.length}`,
-              `- Repositories above threshold: ${highDrift.length}`,
+              `- Repositories above threshold or missing intake contract surfaces: ${actionRequired.length}`,
+              `- Repositories missing required intake surfaces: ${missingIntake.length}`,
               '',
-              '| Repository | Current | Latest | Minor Drift | Visibility |',
-              '|---|---:|---:|---:|---|',
-              ...report.map(row => `| \`${row.repo}\` | v${row.currentVersion} | v${row.latestVersion} | ${row.minorDrift} | ${row.visibility} |`)
+              '| Repository | Current | Latest | Minor Drift | PR Template | Issue Templates | Intake Contract | Visibility |',
+              '|---|---:|---:|---:|---|---:|---|---|',
+              ...report.map(row => {
+                const intakeStatus = hasRequiredIntakeSurface(row) ? 'pass' : 'fail';
+                return `| \`${row.repo}\` | v${row.currentVersion} | v${row.latestVersion} | ${row.minorDrift} | ${row.hasPrTemplate ? 'yes' : 'no'} | ${row.issueTemplateCount} | ${intakeStatus} | ${row.visibility} |`;
+              })
             ].join('\n');
 
             fs.writeFileSync('cross-repo-sync-validation-report.md', markdown);
@@ -128,7 +190,7 @@ jobs:
               repositories: report
             }, null, 2));
 
-            core.setOutput('high_drift_count', String(highDrift.length));
+            core.setOutput('high_drift_count', String(actionRequired.length));
             core.summary.addRaw(markdown).write();
 
       - name: Upload cross-repo validation report

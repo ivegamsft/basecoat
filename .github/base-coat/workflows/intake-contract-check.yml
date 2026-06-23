@@ -1,0 +1,51 @@
+name: "BaseCoat - Intake Contract Check"
+
+on:
+  workflow_call:
+    inputs:
+      issue_template_path:
+        description: Path to issue template directory
+        type: string
+        default: .github/ISSUE_TEMPLATE
+      pr_template_path:
+        description: Path to PR template file
+        type: string
+        default: .github/PULL_REQUEST_TEMPLATE.md
+
+jobs:
+  validate-intake-contract:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Validate required intake surfaces
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          pr_template="${{ inputs.pr_template_path }}"
+          issue_dir="${{ inputs.issue_template_path }}"
+          legacy_issue_template=".github/ISSUE_TEMPLATE.md"
+
+          if [[ ! -f "$pr_template" ]]; then
+            echo "::error::Missing required PR template: $pr_template"
+            exit 1
+          fi
+
+          issue_count=0
+          if [[ -d "$issue_dir" ]]; then
+            issue_count=$(find "$issue_dir" -maxdepth 1 -type f \( -name '*.md' -o -name '*.yml' -o -name '*.yaml' \) | wc -l | tr -d ' ')
+          fi
+
+          if [[ "$issue_count" -eq 0 ]] && [[ -f "$legacy_issue_template" ]]; then
+            issue_count=1
+          fi
+
+          if [[ "$issue_count" -eq 0 ]]; then
+            echo "::error::Missing required issue template surface. Add at least one template under $issue_dir or create $legacy_issue_template."
+            exit 1
+          fi
+
+          echo "Intake contract check passed."

@@ -255,6 +255,22 @@ try {
         Copy-Item -Path $managedReleaseTemplate -Destination $customReleaseTemplate -Force
     }
 
+    # Seed intake contract templates into downstream-customizable locations.
+    # Never overwrite local customizations.
+    $managedPrTemplate = Join-Path $fullTargetDir 'templates/intake/PULL_REQUEST_TEMPLATE.md'
+    $customPrTemplate = Join-Path $repoRoot '.github/PULL_REQUEST_TEMPLATE.md'
+    if ((Test-Path $managedPrTemplate) -and -not (Test-Path $customPrTemplate)) {
+        New-Item -ItemType Directory -Force -Path (Split-Path -Parent $customPrTemplate) | Out-Null
+        Copy-Item -Path $managedPrTemplate -Destination $customPrTemplate -Force
+    }
+
+    $managedIssueTemplate = Join-Path $fullTargetDir 'templates/intake/issue.md'
+    $customIssueTemplate = Join-Path $repoRoot '.github/ISSUE_TEMPLATE/issue.md'
+    if ((Test-Path $managedIssueTemplate) -and -not (Test-Path $customIssueTemplate)) {
+        New-Item -ItemType Directory -Force -Path (Split-Path -Parent $customIssueTemplate) | Out-Null
+        Copy-Item -Path $managedIssueTemplate -Destination $customIssueTemplate -Force
+    }
+
     # Optional cleanup pass for stale managed files from prior versions.
     # Uses hash snapshoting to avoid deleting customized files.
     $cleanupScript = Join-Path $repoRoot 'scripts/cleanup-basecoat-upgrade.ps1'

@@ -103,7 +103,9 @@ try {
             '.github/base-coat/skills',
             '.github/base-coat/prompts',
             '.github/base-coat/agents',
-            '.github/base-coat/version.json'
+            '.github/base-coat/version.json',
+            '.github/base-coat/templates/intake/PULL_REQUEST_TEMPLATE.md',
+            '.github/base-coat/templates/intake/issue.md'
         )) {
         Assert-PathExists -Path $path -Message "Installed baseline missing: $path"
     }

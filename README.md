@@ -61,7 +61,12 @@ The sync script clones BaseCoat, copies the standard assets into `.github/base-c
 
 The sync script copies these items into `BASECOAT_TARGET_DIR`:
 
-`README.md` · `CHANGELOG.md` · `inventory.md` · `version.json` · `instructions/` · `skills/` · `prompts/` · `agents/`
+`README.md` · `CHANGELOG.md` · `inventory.md` · `version.json` · `instructions/` · `skills/` · `prompts/` · `agents/` · `templates/`
+
+On first adoption, BaseCoat also seeds intake defaults if they are missing:
+
+- `.github/PULL_REQUEST_TEMPLATE.md`
+- `.github/ISSUE_TEMPLATE/issue.md`
 
 Everything else (tests, scripts, CI workflows, examples) stays in the source repo and is **not** copied into consumers.
 

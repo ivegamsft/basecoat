@@ -10,6 +10,16 @@ common rules from repo-specific rules.
 | Common | Rules that should apply across repos | label taxonomy, PRD/spec gates, issue template structure, agent/skill authoring rules |
 | Specific | Rules that depend on this repo's structure or release flow | sprint labels, area labels, workflow names, repo-only exceptions |
 
+## Downstream intake contract (consumer repos)
+
+| Tier | Ownership | Requirement |
+|---|---|---|
+| Packaged by BaseCoat | BaseCoat | `.github/base-coat/templates/intake/PULL_REQUEST_TEMPLATE.md` and `.github/base-coat/templates/intake/issue.md` are shipped as defaults. |
+| Required local surface | Consumer repo | `.github/PULL_REQUEST_TEMPLATE.md` must exist and `.github/ISSUE_TEMPLATE/` must contain at least one template file (`.md`, `.yml`, or `.yaml`). |
+| Optional repo-specific extension | Consumer repo | Additional issue forms, PR templates, or repository-specific intake sections may be added without changing the BaseCoat defaults. |
+
+The sync/bootstrap flows seed required local surfaces only when missing and never overwrite existing local customizations.
+
 ## Label namespaces
 
 | Namespace | Ownership | Cleanup rule |

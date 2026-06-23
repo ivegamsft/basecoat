@@ -151,6 +151,22 @@ if [[ -f "$managed_release_template" ]] && [[ ! -f "$custom_release_template" ]]
   cp "$managed_release_template" "$custom_release_template"
 fi
 
+# Seed intake contract templates into downstream-customizable locations.
+# Never overwrite local customizations.
+managed_pr_template="$REPO_ROOT/$TARGET_DIR/templates/intake/PULL_REQUEST_TEMPLATE.md"
+custom_pr_template="$REPO_ROOT/.github/PULL_REQUEST_TEMPLATE.md"
+if [[ -f "$managed_pr_template" ]] && [[ ! -f "$custom_pr_template" ]]; then
+  mkdir -p "$(dirname "$custom_pr_template")"
+  cp "$managed_pr_template" "$custom_pr_template"
+fi
+
+managed_issue_template="$REPO_ROOT/$TARGET_DIR/templates/intake/issue.md"
+custom_issue_template="$REPO_ROOT/.github/ISSUE_TEMPLATE/issue.md"
+if [[ -f "$managed_issue_template" ]] && [[ ! -f "$custom_issue_template" ]]; then
+  mkdir -p "$(dirname "$custom_issue_template")"
+  cp "$managed_issue_template" "$custom_issue_template"
+fi
+
 # Optional cleanup pass for stale managed files from prior versions.
 # Uses hash snapshoting to avoid deleting customized files.
 if [[ -x "$REPO_ROOT/scripts/cleanup-basecoat-upgrade.sh" ]]; then
