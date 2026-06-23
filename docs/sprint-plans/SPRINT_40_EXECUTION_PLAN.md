@@ -68,7 +68,7 @@
 |-------|-------|--------|-------------|---------|
 | #1756 | Implement full pr-lifecycle execution policy across CLI/VS Code/Cloud | 8 | #1742, #1749 | PR Lifecycle & Quality Gates |
 | #1757 | Implement pr-lifecycle modifier parsing for feature intent | 5 | #1756 | PR Lifecycle & Quality Gates |
-| [Feature #1773] | Portfolio Management & Governance | — | #1742 | Portfolio Governance |
+| [Feature #1773] | Portfolio Management & Governance | feature-only | #1742 | Portfolio Governance |
 
 **Wave 2 Focus:** Implementation of audit execution framework + PR lifecycle policy rollout  
 **Wave 2 Duration:** 6 days (Sept 6–11, parallel to Wave 1 end)  
@@ -83,7 +83,7 @@
 
 ---
 
-### Wave 3 (Optimization & Rollup) — 3 feature trackers (no concrete issues)
+### Wave 3 (Optimization & Rollup) — 3 feature trackers (feature-only rollup)
 
 **Status:** **Pending scope reconciliation** (see Scope Discrepancy section)
 
@@ -117,12 +117,12 @@
 
 ### Feature #1773: Portfolio Management & Governance (~8 pts)
 
-**Status:** Ready (created but no child issues linked yet)  
+**Status:** Ready (feature-only tracker; no repo-linked child issues)  
 **Wave Sequence:**
 
 - Wave 1: None (depends on architecture spec #1742)
-- Wave 2: Portfolio bootstrap initialized (feature body)
-- Wave 3: None (incident routing deferred to Sprint 41)
+- Wave 2: Portfolio bootstrap initialized (tracker-owned scope)
+- Wave 3: Incident routing and learning capture deferred to Sprint 41
 
 **Success Criteria:**
 
@@ -205,14 +205,13 @@ Wave 3 (Sept 12–15): Optimization [PENDING scope reconciliation]
 - Feature #1773: Portfolio Governance (8 pts) — 0 issues (feature only)
 - Feature #1774: Architecture & Reliability Audit (34 pts) — 9 issues (Wave 1 specs only)
 
-**Missing Issues (not created):**
+**Tracker Reconciliation:**
 
-- Wave 1-2 Portfolio bootstrap (#1804, #1805)
-- Wave 2-3 Incident routing, learning framework (#1806, #1814)
-- Wave 2-3 Cost audit, learning pipeline (#1815, #1757 partial)
-- Wave 3 Drift detector, rollup publisher, learning pipeline (#1758, #1759, #1760)
+- Feature #1773 remains a feature-only tracker in the current repo.
+- The wave-specific issue references in the source tracker body are stale and do not map cleanly to live repository issues.
+- Incident routing and learning capture work is intentionally deferred out of Sprint 40 scope.
 
-**Root Cause:** Scope plan issues were partially sourced; 7 of 18 planned issues do not exist in the repository.
+**Root Cause:** Scope plan issues were partially sourced; the tracker body and live repository issue set are not fully aligned.
 
 ### Reconciliation Recommendation
 
@@ -223,12 +222,12 @@ Wave 3 (Sept 12–15): Optimization [PENDING scope reconciliation]
 - Gives team 14-day buffer for unplanned work
 - Reduces scope by 42% vs. plan (95 → 55 pts)
 
-### Option B: Create Missing 7 Issues Before Sprint Starts
+### Option B: Reconcile Feature #1773 into the live issue set
 
-- Brings scope to 18 issues, 95 pts (matches plan)
-- Tight schedule (2 days to create, spec, and validate)
-- Critical path would expand to 12-14 days (0-2 day buffer only)
-- Higher risk of Wave 3 delays
+- Update the tracker to reflect the actual repository issues and remove stale placeholders
+- Keep the sprint bounded at 11 issues, 55-65 pts
+- Avoid inventing duplicate issue numbers or cross-sprint collisions
+- Preserve Sprint 41 as the landing zone for deferred incident-routing work
 
 **Recommendation:** **Proceed with Option A** (11 issues, 55-65 pts). Wave 1-2 scope is well-defined and ready to execute. Deferred Wave 3 items can be groomed in parallel for Sprint 41, reducing execution risk.
 
@@ -340,7 +339,7 @@ Wave 3 (Sept 12–15): Optimization [PENDING scope reconciliation]
 - **Sprint Milestone:** [Sprint 40](https://github.com/IBuySpy-Shared/basecoat/milestone/8)
 - **Project Board:** [Project 7 - Architecture & Reliability](https://github.com/IBuySpy-Shared/basecoat/projects/7)
 - **Prior Sprint Plans:** [Sprint 39 Plan](./SPRINT_39_EXECUTION_PLAN.md) | [Sprint 38 Plan](./SPRINT_38_EXECUTION_PLAN.md)
-- **Process Documentation:** [Issue & PR Workflow](../../instructions/references/process/issue-and-pr-workflow.md)
+- **Process Documentation:** [Issue & PR Workflow](/instructions/references/process/issue-and-pr-workflow.md)
 
 ---
 
