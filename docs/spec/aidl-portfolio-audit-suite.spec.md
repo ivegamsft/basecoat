@@ -124,3 +124,5 @@ Track:
 1. `docs/spec/aidl-portfolio-management.spec.md`
 2. `docs/operations/aidl-portfolio-audit-suite.md`
 3. `docs/operations/aidl-portfolio-operator-playbook.md`
+4. `docs/operations/aidl-portfolio-posture-assessment.md`
+5. `docs/operations/aidl-sre-feedback-loop.md`

@@ -183,3 +183,5 @@ Track:
 2. `docs/guides/prd-and-spec-guidance.md`
 3. `docs/operations/aidl-portfolio-audit-suite.md`
 4. `docs/operations/aidl-portfolio-operator-playbook.md`
+5. `docs/operations/aidl-portfolio-posture-assessment.md`
+6. `docs/operations/aidl-sre-feedback-loop.md`

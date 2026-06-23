@@ -112,6 +112,11 @@ Minimum report sections:
 4. Remediation backlog with owners/dates
 5. Waiver status
 
+## Linked Operational Controls
+
+1. Portfolio posture rollup and scoring: `docs/operations/aidl-portfolio-posture-assessment.md`
+2. Reliability incident closure loop: `docs/operations/aidl-sre-feedback-loop.md`
+
 ## Related Issues
 
 See the AIDL Portfolio Audit issue set for implementation and tracking.

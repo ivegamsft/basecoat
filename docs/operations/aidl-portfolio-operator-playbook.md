@@ -105,5 +105,7 @@ When an incident is opened:
 
 1. `docs/spec/aidl-portfolio-management.spec.md`
 2. `docs/operations/aidl-portfolio-audit-suite.md`
-3. `docs/operations/branch-protection-enforcement.md`
-4. `docs/operations/merge-queue-enforcement.md`
+3. `docs/operations/aidl-portfolio-posture-assessment.md`
+4. `docs/operations/aidl-sre-feedback-loop.md`
+5. `docs/operations/branch-protection-enforcement.md`
+6. `docs/operations/merge-queue-enforcement.md`
