@@ -376,7 +376,7 @@ try {
 
     # 1. Reference copy: core metadata and asset directories
     foreach ($item in @('README.md', 'CHANGELOG.md', 'version.json',
-                        'instructions', 'skills', 'prompts', 'agents', 'docs')) {
+                        'instructions', 'skills', 'prompts', 'agents', 'docs', 'templates')) {
         Copy-OverlayItem `
             -Src   (Join-Path $sourcePath $item) `
             -Dest  (Join-Path $overlayDir $item) `
@@ -419,11 +419,27 @@ try {
         Copy-OverlayItem -Src $skillsSrc -Dest $agentSkillsDest -Label '.agents/skills'
     }
 
+    # 5. Intake contract templates
+    $managedPrTemplate = Join-Path $sourcePath 'templates/intake/PULL_REQUEST_TEMPLATE.md'
+    $customPrTemplate = Join-Path $githubDir 'PULL_REQUEST_TEMPLATE.md'
+    if ((Test-Path $managedPrTemplate) -and -not (Test-Path $customPrTemplate)) {
+        Copy-OverlayItem -Src $managedPrTemplate -Dest $customPrTemplate -Label '.github/PULL_REQUEST_TEMPLATE.md'
+    }
+
+    $managedIssueTemplate = Join-Path $sourcePath 'templates/intake/issue.md'
+    $customIssueTemplate = Join-Path $githubDir 'ISSUE_TEMPLATE' 'issue.md'
+    if ((Test-Path $managedIssueTemplate) -and -not (Test-Path $customIssueTemplate)) {
+        if (-not $DryRun) {
+            New-Item -ItemType Directory -Force -Path (Split-Path -Parent $customIssueTemplate) | Out-Null
+        }
+        Copy-OverlayItem -Src $managedIssueTemplate -Dest $customIssueTemplate -Label '.github/ISSUE_TEMPLATE/issue.md'
+    }
+
     # ── Phase 4: validate ─────────────────────────────────────────────────────
 
     Write-Header 'Phase 5 — Validation'
 
-    $requiredOverlay = @('README.md', 'CHANGELOG.md', 'version.json', 'instructions', 'agents', 'skills', 'prompts')
+    $requiredOverlay = @('README.md', 'CHANGELOG.md', 'version.json', 'instructions', 'agents', 'skills', 'prompts', 'templates')
     $validationOk = $true
     foreach ($item in $requiredOverlay) {
         $path = Join-Path $overlayDir $item

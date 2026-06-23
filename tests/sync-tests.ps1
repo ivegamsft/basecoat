@@ -145,6 +145,14 @@ try {
         throw 'Sync test failed: .github/prompts/ contains no prompt files'
     }
 
+    $testCount++
+    Assert-SyncPathExists -Path (Join-Path $consumer '.github/PULL_REQUEST_TEMPLATE.md') `
+        -Message 'Sync test failed: .github/PULL_REQUEST_TEMPLATE.md not seeded'
+
+    $testCount++
+    Assert-SyncPathExists -Path (Join-Path $consumer '.github/ISSUE_TEMPLATE/issue.md') `
+        -Message 'Sync test failed: .github/ISSUE_TEMPLATE/issue.md not seeded'
+
     Write-Host "  Passed: agents($agentCount), instructions($instrCount), prompts($promptCount) synced" -ForegroundColor Green
 }
 catch {
@@ -414,6 +422,49 @@ try {
     }
 
     Write-Host '  Passed: docs overlay constrained to minimal scope' -ForegroundColor Green
+}
+catch {
+    $failures += $_.Exception.Message
+}
+finally {
+    if ($consumer -and (Test-Path $consumer)) {
+        Remove-Item -Path $consumer -Recurse -Force
+    }
+}
+
+# ============================================================================
+# Test 8: Sync does not overwrite customized intake templates
+# ============================================================================
+Write-Host "`nTest 8: Sync preserves customized intake templates" -ForegroundColor Yellow
+
+$consumer = $null
+try {
+    $consumer = New-ConsumerRepo -WithGitHubDir
+
+    $customPrTemplate = Join-Path $consumer '.github/PULL_REQUEST_TEMPLATE.md'
+    $customIssueTemplate = Join-Path $consumer '.github/ISSUE_TEMPLATE/issue.md'
+    New-Item -ItemType Directory -Force -Path (Split-Path $customIssueTemplate -Parent) | Out-Null
+
+    $prSentinel = '# custom-pr-template-sentinel'
+    $issueSentinel = '# custom-issue-template-sentinel'
+    Set-Content -Path $customPrTemplate -Value $prSentinel -Encoding UTF8
+    Set-Content -Path $customIssueTemplate -Value $issueSentinel -Encoding UTF8
+
+    Invoke-SyncToConsumer -ConsumerPath $consumer
+
+    $testCount++
+    $prAfter = Get-Content -Path $customPrTemplate -Raw
+    if ($prAfter -notmatch [regex]::Escape($prSentinel)) {
+        throw 'Sync test failed: custom PR template was overwritten'
+    }
+
+    $testCount++
+    $issueAfter = Get-Content -Path $customIssueTemplate -Raw
+    if ($issueAfter -notmatch [regex]::Escape($issueSentinel)) {
+        throw 'Sync test failed: custom issue template was overwritten'
+    }
+
+    Write-Host '  Passed: custom intake templates are preserved' -ForegroundColor Green
 }
 catch {
     $failures += $_.Exception.Message

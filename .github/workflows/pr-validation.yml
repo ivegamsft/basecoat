@@ -354,6 +354,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           GH_TOKEN: ${{ github.token }}
+          BASECOAT_SOURCE_REPO: ${{ github.event.pull_request.head.repo.clone_url || format('https://github.com/{0}.git', github.repository) }}
+          BASECOAT_SOURCE_REF: ${{ github.head_ref || github.ref_name }}
         run: |
           set -euo pipefail
 
@@ -371,8 +373,8 @@ jobs:
 
           (
             cd "$consumer_repo"
-            BASECOAT_REPO="https://github.com/${{ github.repository }}.git" \
-            BASECOAT_REF="main" \
+            BASECOAT_REPO="$BASECOAT_SOURCE_REPO" \
+            BASECOAT_REF="$BASECOAT_SOURCE_REF" \
             BASECOAT_TARGET_DIR=".github/base-coat" \
             timeout 120 bash "$GITHUB_WORKSPACE/sync.sh"
           )
@@ -380,4 +382,6 @@ jobs:
           test -f "$consumer_repo/.github/base-coat/README.md"
           test -d "$consumer_repo/.github/base-coat/agents"
           test -d "$consumer_repo/.github/base-coat/instructions"
+          test -f "$consumer_repo/.github/PULL_REQUEST_TEMPLATE.md"
+          test -f "$consumer_repo/.github/ISSUE_TEMPLATE/issue.md"
           echo "sync.sh dry-run passed."
