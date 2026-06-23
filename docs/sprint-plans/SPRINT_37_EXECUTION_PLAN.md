@@ -63,6 +63,21 @@ Wave 3 (Days 9-11):
     Owner: [TBD]
     Status: Todo
 ```text
+
+#### Feature #1736 execution closeout (2026-06-23)
+
+| Child issue | Outcome | Evidence |
+|---|---|---|
+| #1666 | Design delivered and merged | PR #1791 |
+| #1665 | Design delivered and merged | PR #1793 |
+| #1668 | Design delivered and merged | PR #1786 |
+
+Feature tracker #1736 status on closeout date:
+
+- Completed: 3 of 3
+- In Progress: 0
+- Blocked: 0
+
 ### Feature #1737: Testing & Quality Assurance (Wave 1-3)  CRITICAL PATH
 
 **Priority:** CRITICAL | **Points:** ~21 | **Status:** READY | **Risk:** HIGH
@@ -330,5 +345,5 @@ Wave 3 (Todo, Blocked):
 ---
 
 **Document Owner:** Sprint Master / Tech Lead  
-**Last Updated:** 2026-06-20 16:40 UTC  
+**Last Updated:** 2026-06-23 06:45 UTC  
 **Sprint Status:**  READY FOR EXECUTION
