@@ -3,6 +3,9 @@
 This guide explains how consumer repositories install and manage BaseCoat workflows
 using `scripts/configure-downstream-workflows.ps1`.
 
+For cross-repo detection/escalation of reviewer-routing failures, see
+`docs/guides/downstream-reviewer-routing-audit.md`.
+
 ## Naming model
 
 Installed workflows use explicit BaseCoat provenance:

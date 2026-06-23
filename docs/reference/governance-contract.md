@@ -20,6 +20,22 @@ common rules from repo-specific rules.
 
 The sync/bootstrap flows seed required local surfaces only when missing and never overwrite existing local customizations.
 
+## Downstream reviewer-routing audit opt-in
+
+BaseCoat runs a fleet audit loop to detect reviewer-routing failures across consumer repositories:
+
+- Workflow: `.github/workflows/downstream-reviewer-routing-audit.yml`
+- Opt-in registry: `.github/downstream-reviewer-routing-targets.json`
+- Remediation guide: `docs/guides/downstream-reviewer-routing-audit.md`
+
+Repositories are considered opted in when listed in the target registry with `"enabled": true`.
+The audit classifies each repo into exactly one routing state:
+
+1. `no reviewer-routing automation installed`
+2. `automation installed but not configured`
+3. `automation configured but ineffective in live PRs`
+4. `healthy`
+
 ## Label namespaces
 
 | Namespace | Ownership | Cleanup rule |

@@ -2,6 +2,8 @@
 
 BaseCoat distributes workflow templates for consumer repositories. Use the installer script to copy and configure downstream-safe workflows with explicit BaseCoat provenance filenames.
 
+For centralized fleet audits of downstream reviewer-routing health, see `downstream-reviewer-routing-audit.md`.
+
 ## What's Included
 
 Supported distributable workflows by class:

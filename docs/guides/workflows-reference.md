@@ -5,6 +5,7 @@ Reference for upstream workflow templates in BaseCoat. Consumer installs use `sc
 ## Related operational workflows
 
 - [Portfolio Audit Workflow](./portfolio-audit-workflow.md) for issue/PR dedupe, dependency traceability, feature grouping, and active project-link verification.
+- [Downstream Reviewer-Routing Audit](./downstream-reviewer-routing-audit.md) for cross-repo detection and escalation of missing or ineffective reviewer-routing automation.
 
 ## Consolidated Workflow Enhancements (#1389)
 
@@ -26,6 +27,7 @@ testing and uses pinned action SHAs.
 | #190 | `.github/workflows/reviewer-autoassign.yml` | Auto-request reviewers using changed-path commit history |
 | #1557 | `.github/workflows/pr-flow-hygiene.yml` | Event-driven PR readiness routing (`ready_for_review` + metadata transitions) plus weekly PR lifecycle audit summary |
 | #1823 | `.github/workflows/dependency-relationship-routing.yml` | Parses `Blocked by`/`Depends on`/`Part of`/`Related to` markers on issues and PRs, applies blocker labels, and publishes weekly dependency bottleneck reports |
+| #1828 | `.github/workflows/downstream-reviewer-routing-audit.yml` | Weekly cross-repo reviewer-routing scorecard; escalates missing/unconfigured/ineffective routing automation states across opted-in consumer repos |
 
 ## Distributed Workflow Templates (10 Total)
 
