@@ -92,14 +92,17 @@ jobs:
           if [[ "$REVIEWER_COUNT" -lt 1 ]]; then
             echo "::warning::Environment '${PROD_ENV}' has no required reviewers."
             echo "::warning::Settings action required: environment must have at least one required reviewer."
+            echo "- ADVISORY: '${PROD_ENV}' environment has no required reviewers." >> "$GITHUB_STEP_SUMMARY"
           fi
 
           if [[ "$BRANCH_POLICY" != "true" ]]; then
             echo "::warning::Environment '${PROD_ENV}' does not enforce protected-branch deployment policy."
             echo "::warning::Settings action required: enable deployment branch policy for protected branches."
+            echo "- ADVISORY: '${PROD_ENV}' environment does not enforce protected-branch deployment policy." >> "$GITHUB_STEP_SUMMARY"
           fi
 
           echo "Environment protection settings check completed for ${PROD_ENV} (advisory mode)."
+          echo "Advisory check complete for '${PROD_ENV}' — any warnings above require manual settings remediation." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Note PR-scope environment settings check
         if: ${{ github.event_name == 'pull_request' }}
