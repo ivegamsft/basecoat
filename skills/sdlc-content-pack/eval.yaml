@@ -1,0 +1,72 @@
+name: "sdlc-content-pack-routing-and-quality"
+description: "Routing and quality definition for SDLC-aligned content bundle generation."
+skill: "skills/sdlc-content-pack/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Generate a rollout content pack with a diagram, click-through, video script, and deck for our approval workflow."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Create an SDLC-aligned bundle for this skill handoff across planning and validation audiences."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Write the production code for a new API endpoint."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Review this pull request for regressions."
+    expect_activation: false
+quality_gates:
+  - id: "completeness"
+    description: "Every requested artifact is generated and references the shared bundle identifier."
+    pass_condition:
+      - "manifest.json exists"
+      - "requested artifacts exist"
+      - "quality-report.json exists"
+  - id: "sdlc-alignment"
+    description: "Artifacts consistently reflect the requested SDLC phase, audience, and maturity."
+    pass_condition:
+      - "phase label is present in every artifact"
+      - "audience intent is explicit"
+      - "maturity guidance is preserved"
+  - id: "handoff-clarity"
+    description: "Each artifact surfaces the owning handoff, exit criteria, and next consumer."
+    pass_condition:
+      - "handoff summary is present"
+      - "decision or approval points are named"
+      - "source references support downstream review"
+  - id: "consistency"
+    description: "Terminology, step order, and identifiers stay aligned across the bundle."
+    pass_condition:
+      - "step sequence matches across artifacts"
+      - "bundle_id is reused everywhere"
+      - "shared terms do not drift between artifacts"
+artifact_rubric:
+  diagram:
+    scoring_scale: "0-3"
+    criteria:
+      - "Workflow steps are visible and ordered."
+      - "Decision points and handoffs are explicit."
+      - "Diagram language matches the bundle vocabulary."
+  click-through:
+    scoring_scale: "0-3"
+    criteria:
+      - "Walkthrough steps are actionable."
+      - "Reviewer prompts cover controls and approvals."
+      - "Step details mirror the canonical flow."
+  video-script:
+    scoring_scale: "0-3"
+    criteria:
+      - "Narration fits a 60-120 second explanation."
+      - "Scenes map cleanly to the workflow steps."
+      - "Closing handoff is understandable without extra context."
+  deck:
+    scoring_scale: "0-3"
+    criteria:
+      - "Slides tell a concise story for the target audience."
+      - "Controls and handoff expectations are visible."
+      - "Source references and next actions are ready for review."
+human_review_checklist:
+  - "Confirm the bundle uses the same terminology as the source workflow."
+  - "Check that every artifact names the same handoff owner and exit signal."
+  - "Verify the audience and maturity assumptions are appropriate."
+  - "Confirm source references are sufficient for downstream teams."
+  - "Approve edits before converting artifacts into presentation or media formats."

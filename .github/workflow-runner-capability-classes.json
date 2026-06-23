@@ -67,6 +67,17 @@
       ]
     },
     {
+      "runner_class": "configurable-release",
+      "runs_on": "${{ vars.RUNNER_RELEASE || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}",
+      "use_for": [
+        "release and publish workflows with a dedicated lane override"
+      ],
+      "required_capabilities": [
+        "private-network",
+        "deployment-credentials"
+      ]
+    },
+    {
       "runner_class": "github-hosted-matrix",
       "runs_on": "${{ matrix.os }}",
       "use_for": [

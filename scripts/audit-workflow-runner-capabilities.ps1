@@ -2,7 +2,9 @@ param(
     [ValidateSet('markdown', 'json')]
     [string]$OutputFormat = 'markdown',
     [string]$OutputPath,
-    [switch]$FailOnMismatch
+    [switch]$FailOnMismatch,
+    [string]$ContractPath = '.github\workflow-runner-routing-contracts.json',
+    [switch]$FailOnContractViolation
 )
 
 $ErrorActionPreference = 'Stop'
@@ -106,6 +108,21 @@ function Get-RunsOnRaw {
     return ''
 }
 
+function Get-TimeoutMinutes {
+    param(
+        [string]$JobContent
+    )
+
+    $lines = $JobContent -split "`n"
+    foreach ($line in $lines) {
+        if ($line -match '^\s{4}timeout-minutes:\s*(\d+)\s*$') {
+            return [int]$matches[1]
+        }
+    }
+
+    return $null
+}
+
 function Get-ActualRunnerClass {
     param(
         [string]$RunsOnRaw,
@@ -119,6 +136,7 @@ function Get-ActualRunnerClass {
         return 'missing-runs-on'
     }
     if ($RunsOnRaw -match 'matrix\.os') { return 'github-hosted-matrix' }
+    if ($RunsOnRaw -match 'vars\.RUNNER_RELEASE') { return 'configurable-release' }
     if ($RunsOnRaw -match 'vars\.RUNNER_DEPLOY') { return 'configurable-deploy' }
     if ($RunsOnRaw -match 'self-hosted' -or $RunsOnRaw -match 'group:') { return 'self-hosted-linux' }
     if ($RunsOnRaw -match 'windows-latest') { return 'github-hosted-windows' }
@@ -244,6 +262,7 @@ function Get-AssignmentStatus {
     if ($ActualRunnerClass -eq 'reusable-workflow' -and $RecommendedRunnerClass -eq 'reusable-workflow') { return 'aligned' }
     if ($ActualRunnerClass -eq $RecommendedRunnerClass) { return 'aligned' }
     if ($ActualRunnerClass -eq 'configurable-deploy' -and $RecommendedRunnerClass -eq 'self-hosted-linux') { return 'conditional' }
+    if ($ActualRunnerClass -eq 'configurable-release' -and $RecommendedRunnerClass -eq 'self-hosted-linux') { return 'conditional' }
     return 'mismatch'
 }
 
@@ -258,24 +277,33 @@ function Escape-MarkdownCell {
 
 $workflowFiles = Get-ChildItem $workflowDir -Filter '*.yml' -File | Where-Object { $_.Name -notmatch '\.lock\.yml$' -and $_.Name -ne 'README.md' } | Sort-Object Name
 $rows = @()
+$jobLookup = @{}
 
 foreach ($workflow in $workflowFiles) {
     $jobBlocks = Get-WorkflowJobBlocks -WorkflowPath $workflow.FullName
     foreach ($job in $jobBlocks) {
         $runsOnRaw = Get-RunsOnRaw -JobContent $job.Content
+        $timeoutMinutes = Get-TimeoutMinutes -JobContent $job.Content
         $actualRunnerClass = Get-ActualRunnerClass -RunsOnRaw $runsOnRaw -JobContent $job.Content
         $requiredCaps = Get-RequiredCapabilities -WorkflowName $workflow.Name -JobName $job.JobKey -JobContent $job.Content
         $recommendedRunnerClass = Get-RecommendedRunnerClass -Capabilities $requiredCaps
         $status = Get-AssignmentStatus -ActualRunnerClass $actualRunnerClass -RecommendedRunnerClass $recommendedRunnerClass
 
-        $rows += [pscustomobject]@{
+        $row = [pscustomobject]@{
             Workflow               = $workflow.Name
             Job                    = $job.JobKey
             RequiredCapabilities   = ($requiredCaps -join ', ')
             RecommendedRunnerClass = $recommendedRunnerClass
             ActualRunnerClass      = $actualRunnerClass
             RunsOn                 = if ($runsOnRaw) { $runsOnRaw } else { '(missing)' }
+            TimeoutMinutes         = $timeoutMinutes
             Status                 = $status
+        }
+
+        $rows += $row
+        $jobLookup["$($workflow.Name)|$($job.JobKey)"] = [pscustomobject]@{
+            Row        = $row
+            JobContent = $job.Content
         }
     }
 }
@@ -283,6 +311,83 @@ foreach ($workflow in $workflowFiles) {
 $mismatches = @($rows | Where-Object { $_.Status -eq 'mismatch' })
 $conditionals = @($rows | Where-Object { $_.Status -eq 'conditional' })
 $unclassified = @($rows | Where-Object { $_.ActualRunnerClass -in @('unknown', 'missing-runs-on') })
+$contractViolations = @()
+$contracts = @()
+
+$contractFilePath = Join-Path $repoRoot $ContractPath
+if (Test-Path $contractFilePath) {
+    $contractData = Get-Content $contractFilePath -Raw | ConvertFrom-Json
+    $contracts = @($contractData.contracts)
+
+    foreach ($contract in $contracts) {
+        $key = "$($contract.workflow)|$($contract.job)"
+        if (-not $jobLookup.ContainsKey($key)) {
+            $contractViolations += [pscustomobject]@{
+                Workflow = $contract.workflow
+                Job = $contract.job
+                Rule = 'job-exists'
+                Message = 'Contracted workflow/job was not found in repository workflows.'
+            }
+            continue
+        }
+
+        $jobInfo = $jobLookup[$key]
+        $row = $jobInfo.Row
+        $jobContent = $jobInfo.JobContent
+
+        if ($null -ne $contract.allowed_runner_classes -and $contract.allowed_runner_classes.Count -gt 0) {
+            $allowedClasses = @($contract.allowed_runner_classes)
+            if ($allowedClasses -notcontains $row.ActualRunnerClass) {
+                $contractViolations += [pscustomobject]@{
+                    Workflow = $contract.workflow
+                    Job = $contract.job
+                    Rule = 'allowed-runner-classes'
+                    Message = "Runner class '$($row.ActualRunnerClass)' is not in allowed classes: $($allowedClasses -join ', ')."
+                }
+            }
+        }
+
+        if ($null -ne $contract.max_timeout_minutes) {
+            if ($null -eq $row.TimeoutMinutes) {
+                $contractViolations += [pscustomobject]@{
+                    Workflow = $contract.workflow
+                    Job = $contract.job
+                    Rule = 'max-timeout-minutes'
+                    Message = "Missing timeout-minutes; expected <= $($contract.max_timeout_minutes)."
+                }
+            }
+            elseif ([int]$row.TimeoutMinutes -gt [int]$contract.max_timeout_minutes) {
+                $contractViolations += [pscustomobject]@{
+                    Workflow = $contract.workflow
+                    Job = $contract.job
+                    Rule = 'max-timeout-minutes'
+                    Message = "timeout-minutes is $($row.TimeoutMinutes); expected <= $($contract.max_timeout_minutes)."
+                }
+            }
+        }
+
+        if ($null -ne $contract.required_job_markers -and $contract.required_job_markers.Count -gt 0) {
+            foreach ($marker in @($contract.required_job_markers)) {
+                if ($jobContent -notmatch [regex]::Escape($marker)) {
+                    $contractViolations += [pscustomobject]@{
+                        Workflow = $contract.workflow
+                        Job = $contract.job
+                        Rule = 'required-job-marker'
+                        Message = "Missing required marker '$marker'."
+                    }
+                }
+            }
+        }
+    }
+}
+elseif ($FailOnContractViolation) {
+    $contractViolations += [pscustomobject]@{
+        Workflow = '(global)'
+        Job = '(global)'
+        Rule = 'contract-file-present'
+        Message = "Runner contract file not found: $ContractPath"
+    }
+}
 
 $summary = [pscustomobject]@{
     total_workflows    = $workflowFiles.Count
@@ -290,12 +395,15 @@ $summary = [pscustomobject]@{
     mismatches         = $mismatches.Count
     conditional_routes = $conditionals.Count
     unclassified_jobs  = $unclassified.Count
+    contracted_jobs    = if ($null -ne $contracts) { @($contracts).Count } else { 0 }
+    contract_violations = $contractViolations.Count
 }
 
 if ($OutputFormat -eq 'json') {
     $result = [pscustomobject]@{
-        summary = $summary
-        jobs    = $rows
+        summary            = $summary
+        jobs               = $rows
+        contract_violations = $contractViolations
     } | ConvertTo-Json -Depth 5
 }
 else {
@@ -309,6 +417,8 @@ else {
     $lines += "| Mismatches | $($summary.mismatches) |"
     $lines += "| Conditional routes | $($summary.conditional_routes) |"
     $lines += "| Unclassified jobs | $($summary.unclassified_jobs) |"
+    $lines += "| Contracted jobs | $($summary.contracted_jobs) |"
+    $lines += "| Contract violations | $($summary.contract_violations) |"
     $lines += ''
     $lines += "| Workflow | Job | Required capabilities | Recommended runner class | Actual runner class | Status |"
     $lines += "|---|---|---|---|---|---|"
@@ -325,6 +435,17 @@ else {
         foreach ($row in $mismatches) {
             $lines += "| $(Escape-MarkdownCell $row.Workflow) | $(Escape-MarkdownCell $row.Job) | $(Escape-MarkdownCell $row.RequiredCapabilities) | $(Escape-MarkdownCell $row.RecommendedRunnerClass) | $(Escape-MarkdownCell $row.ActualRunnerClass) | $(Escape-MarkdownCell $row.RunsOn) |"
         }
+
+        if ($contractViolations.Count -gt 0) {
+            $lines += ''
+            $lines += '## Runner Contract Violations'
+            $lines += ''
+            $lines += '| Workflow | Job | Rule | Message |'
+            $lines += '|---|---|---|---|'
+            foreach ($violation in $contractViolations) {
+                $lines += "| $(Escape-MarkdownCell $violation.Workflow) | $(Escape-MarkdownCell $violation.Job) | $(Escape-MarkdownCell $violation.Rule) | $(Escape-MarkdownCell $violation.Message) |"
+            }
+        }
     }
 
     $result = $lines -join "`n"
@@ -339,6 +460,10 @@ else {
 
 if ($FailOnMismatch -and ($summary.mismatches -gt 0 -or $summary.unclassified_jobs -gt 0)) {
     throw "Runner capability audit failed with $($summary.mismatches) mismatch(es) and $($summary.unclassified_jobs) unclassified job(s)."
+}
+
+if ($FailOnContractViolation -and $summary.contract_violations -gt 0) {
+    throw "Runner capability contracts failed with $($summary.contract_violations) violation(s)."
 }
 
 exit 0

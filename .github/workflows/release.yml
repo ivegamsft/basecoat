@@ -22,7 +22,7 @@ jobs:
 
   release:
     needs: production-token-preflight
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER_RELEASE || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
     timeout-minutes: 20
 
     steps:

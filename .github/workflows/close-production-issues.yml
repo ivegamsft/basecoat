@@ -20,7 +20,7 @@ permissions:
 jobs:
   close-issues:
     name: Close migrated issues on production repo
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER_RELEASE || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
     environment: production
     env:
       PROD_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}

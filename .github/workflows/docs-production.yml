@@ -25,7 +25,7 @@ permissions:
 jobs:
   dispatch-production-docs:
     name: Trigger docs build on production repo
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER_RELEASE || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
     environment: production
     # Only run after a successful publish (skip on failure/cancellation)
     # workflow_dispatch always runs (user explicitly triggered)
@@ -58,10 +58,10 @@ jobs:
 
           if [ "$HTTP_STATUS" = "204" ]; then
             echo "::notice::Docs workflow dispatched successfully on ivegamsft/basecoat"
-            echo "dispatched=true" >> $GITHUB_OUTPUT
+            echo "dispatched=true" >> "$GITHUB_OUTPUT"
           elif [ "$HTTP_STATUS" = "404" ]; then
             echo "::warning::docs.yml not found on ivegamsft/basecoat — production repo may not have been published yet"
-            echo "dispatched=false" >> $GITHUB_OUTPUT
+            echo "dispatched=false" >> "$GITHUB_OUTPUT"
             exit 0
           elif [ "$HTTP_STATUS" = "422" ]; then
             echo "::error::Invalid dispatch request (422) — check that docs.yml has a workflow_dispatch trigger"
@@ -76,19 +76,21 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          echo "## Production Docs Dispatch Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
           TRIGGER="${{ github.event_name }}"
-          if [ "$TRIGGER" = "workflow_run" ]; then
-            echo "**Trigger**: Publish to Production completed (run: ${{ github.event.workflow_run.html_url }})" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "**Trigger**: Manual workflow_dispatch" >> $GITHUB_STEP_SUMMARY
-          fi
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ steps.dispatch.outputs.dispatched }}" = "true" ]; then
-            echo "**Result**: Docs workflow dispatched on [ivegamsft/basecoat](https://github.com/ivegamsft/basecoat/actions)" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Pages will be available at: https://ivegamsft.github.io/basecoat" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "**Result**: Dispatch skipped — docs.yml not found on production repo yet" >> $GITHUB_STEP_SUMMARY
-          fi
+          {
+            echo "## Production Docs Dispatch Summary"
+            echo ""
+            if [ "$TRIGGER" = "workflow_run" ]; then
+              echo "**Trigger**: Publish to Production completed (run: ${{ github.event.workflow_run.html_url }})"
+            else
+              echo "**Trigger**: Manual workflow_dispatch"
+            fi
+            echo ""
+            if [ "${{ steps.dispatch.outputs.dispatched }}" = "true" ]; then
+              echo "**Result**: Docs workflow dispatched on [ivegamsft/basecoat](https://github.com/ivegamsft/basecoat/actions)"
+              echo ""
+              echo "Pages will be available at: https://ivegamsft.github.io/basecoat"
+            else
+              echo "**Result**: Dispatch skipped — docs.yml not found on production repo yet"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

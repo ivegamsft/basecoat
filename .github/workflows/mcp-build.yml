@@ -26,6 +26,29 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
+      - name: Validate self-hosted runner routing contract
+        shell: bash
+        env:
+          RUNNER_DEPLOY: ${{ vars.RUNNER_DEPLOY }}
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            echo "::notice::Skipping strict self-hosted contract enforcement on pull_request events."
+            exit 0
+          fi
+          if [[ -z "${RUNNER_DEPLOY:-}" ]]; then
+            echo "::error::vars.RUNNER_DEPLOY is not configured."
+            echo "::error::Set RUNNER_DEPLOY to self-hosted labels/group for deploy-class jobs."
+            exit 1
+          fi
+          NORMALIZED="$(echo "${RUNNER_DEPLOY}" | tr '[:upper:]' '[:lower:]')"
+          if [[ "${NORMALIZED}" == *"ubuntu-latest"* && "${NORMALIZED}" != *"self-hosted"* ]]; then
+            echo "::error::vars.RUNNER_DEPLOY resolves to ubuntu-latest fallback."
+            echo "::error::This workflow requires explicit self-hosted routing."
+            exit 1
+          fi
+          echo "Runner contract satisfied: ${RUNNER_DEPLOY}"
+
       - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
@@ -50,4 +73,3 @@ jobs:
 
       - name: Lint Bicep template
         run: az bicep build --file infra/mcp/main.bicep --stdout > /dev/null
-
