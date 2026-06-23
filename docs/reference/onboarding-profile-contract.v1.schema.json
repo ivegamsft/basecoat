@@ -96,6 +96,11 @@
       "type": "boolean",
       "default": false,
       "description": "Allow a weaker profile to replace a stronger one."
+    },
+    "telemetry_scorecard_schema": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Version of the telemetry scorecard schema used for this onboarding. Defaults to 1.0.0."
     }
   }
 }

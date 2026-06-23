@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/IBuySpy-Shared/basecoat/blob/main/docs/reference/telemetry-scorecard-schema.v1.schema.json",
+  "title": "BaseCoat onboarding telemetry scorecard v1",
+  "description": "Reusable scorecard schema for goal-based loop metrics. Emitted by onboarded repos during the weekly adoption-metrics run.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "repo",
+    "collected_at",
+    "profile",
+    "metrics"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Version of the telemetry scorecard schema."
+    },
+    "repo": {
+      "type": "string",
+      "description": "Repository in owner/repo format.",
+      "pattern": "^[^/]+/[^/]+$"
+    },
+    "collected_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC timestamp of when this scorecard was collected."
+    },
+    "profile": {
+      "type": "string",
+      "enum": [
+        "solo-dev",
+        "team-dev",
+        "regulated-team"
+      ],
+      "description": "Onboarding profile active for this repo."
+    },
+    "telemetry_mode": {
+      "type": "string",
+      "enum": [
+        "local",
+        "shared",
+        "org-managed"
+      ],
+      "description": "Telemetry mode active for this repo. Derived from onboarding profile when omitted."
+    },
+    "app_insights_connected": {
+      "type": "boolean",
+      "description": "Whether APPLICATIONINSIGHTS_CONNECTION_STRING is configured for this repo."
+    },
+    "metrics": {
+      "type": "object",
+      "description": "Goal-based loop metrics for this repo.",
+      "additionalProperties": false,
+      "required": [
+        "reviewer_closure",
+        "intake_completeness",
+        "merge_health",
+        "drift_trend"
+      ],
+      "properties": {
+        "reviewer_closure": {
+          "$ref": "#/$defs/metric_entry",
+          "description": "Ratio of PRs that received at least one review before merge over the measurement window."
+        },
+        "intake_completeness": {
+          "$ref": "#/$defs/metric_entry",
+          "description": "Ratio of issues opened with required template fields filled in (title, body, acceptance criteria) over the measurement window."
+        },
+        "merge_health": {
+          "$ref": "#/$defs/metric_entry",
+          "description": "CI pass rate over the last 20 measurable runs. Mirrors ci_pass_rate_last_20_runs from latest.json."
+        },
+        "drift_trend": {
+          "$ref": "#/$defs/metric_entry",
+          "description": "Signed percentage change in basecoat_coverage.percentage versus the prior snapshot. Negative values indicate drift away from baseline."
+        }
+      }
+    },
+    "readiness": {
+      "$ref": "#/$defs/readiness_block",
+      "description": "Telemetry readiness status for this repo."
+    }
+  },
+  "$defs": {
+    "metric_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value",
+        "window",
+        "status"
+      ],
+      "properties": {
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Numeric value of the metric. Null when data is unavailable."
+        },
+        "window": {
+          "type": "string",
+          "description": "Measurement window description (e.g., '28d', '20-run', '1-snapshot')."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "healthy",
+            "warning",
+            "critical",
+            "unavailable"
+          ],
+          "description": "Signal health status based on thresholds."
+        },
+        "threshold_warn": {
+          "type": "number",
+          "description": "Warning threshold. Signal transitions to warning when value drops below this."
+        },
+        "threshold_critical": {
+          "type": "number",
+          "description": "Critical threshold. Signal transitions to critical when value drops below this."
+        },
+        "note": {
+          "type": "string",
+          "description": "Optional human-readable note about this metric value."
+        }
+      }
+    },
+    "readiness_block": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "overall": {
+          "type": "string",
+          "enum": [
+            "ready",
+            "partial",
+            "not-ready"
+          ],
+          "description": "Overall telemetry readiness for this repo."
+        },
+        "missing_dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of missing telemetry dependencies that must be resolved before full readiness."
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Non-blocking warnings about telemetry configuration."
+        }
+      }
+    }
+  }
+}
