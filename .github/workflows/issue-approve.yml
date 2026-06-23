@@ -51,6 +51,7 @@ jobs:
             const TYPE_LABELS = ['bug', 'enhancement', 'documentation', 'chore', 'security', 'question'];
             const PRIORITY_LABELS = ['priority:critical', 'priority:high', 'priority:medium', 'priority:low'];
             const BLOCKING_LABELS = ['duplicate', 'invalid', 'wontfix'];
+            const DEPENDENCY_REGEX = /(?:^|\n)\s*(Blocked by|Depends on)\s+(?:#(\d+)|https?:\/\/github\.com\/[^/\s]+\/[^/\s]+\/(?:issues|pull)\/(\d+))/gim;
 
             const missing = [];
 
@@ -64,6 +65,59 @@ jobs:
             if (hasBlocker) {
               const blocker = BLOCKING_LABELS.find(l => labels.includes(l));
               missing.push(`**Blocking label present** — remove \`${blocker}\` before approving, or close the issue instead`);
+            }
+
+            const dependencyRefs = new Set();
+            const collectRefs = text => {
+              if (!text || typeof text !== 'string') {
+                return;
+              }
+              DEPENDENCY_REGEX.lastIndex = 0;
+              let match;
+              while ((match = DEPENDENCY_REGEX.exec(text)) !== null) {
+                const ref = Number(match[2] || match[3]);
+                if (Number.isInteger(ref) && ref > 0) {
+                  dependencyRefs.add(ref);
+                }
+              }
+            };
+
+            collectRefs(issue.body || '');
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              per_page: 100
+            });
+            for (const comment of comments) {
+              collectRefs(comment.body || '');
+            }
+
+            const unresolvedDependencies = [];
+            for (const ref of dependencyRefs) {
+              const { data: linked } = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: ref
+              });
+              let resolved = linked.state === 'closed';
+              let status = linked.state;
+              if (linked.pull_request) {
+                const { data: linkedPr } = await github.rest.pulls.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: ref
+                });
+                resolved = Boolean(linkedPr.merged);
+                status = linkedPr.merged ? 'merged' : linkedPr.state;
+              }
+              if (!resolved) {
+                unresolvedDependencies.push(`#${ref} (${status})`);
+              }
+            }
+
+            if (unresolvedDependencies.length > 0) {
+              missing.push(`**Unresolved dependencies** — resolve ${unresolvedDependencies.join(', ')} before approving`);
             }
 
             if (missing.length > 0) {
@@ -173,4 +227,3 @@ jobs:
               issue_number: issue.number,
               body
             });
-

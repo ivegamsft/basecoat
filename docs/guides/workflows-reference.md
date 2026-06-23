@@ -25,6 +25,7 @@ testing and uses pinned action SHAs.
 | #189 | `.github/workflows/dependency-graph-pages.yml` | Generate dependency graph report and publish via docs PR flow |
 | #190 | `.github/workflows/reviewer-autoassign.yml` | Auto-request reviewers using changed-path commit history |
 | #1557 | `.github/workflows/pr-flow-hygiene.yml` | Event-driven PR readiness routing (`ready_for_review` + metadata transitions) plus weekly PR lifecycle audit summary |
+| #1823 | `.github/workflows/dependency-relationship-routing.yml` | Parses `Blocked by`/`Depends on`/`Part of`/`Related to` markers on issues and PRs, applies blocker labels, and publishes weekly dependency bottleneck reports |
 
 ## Distributed Workflow Templates (10 Total)
 
@@ -403,6 +404,58 @@ inputs:
 - Fixed cadence for backlog triage outcomes
 - Explicit WIP and handoff policy signal
 - Reduced draft and review drift through targeted automation
+
+---
+
+### 11. dependency-relationship-routing.yml
+
+**Purpose:** Operationalize relationship markers into issue/PR blocker state, approval routing safety, and dependency-chain visibility.
+
+**Trigger:**
+
+- Event-driven: `issues`, `issue_comment`, `pull_request_target`, `pull_request_review_comment`
+- Cron: Every Monday at 9am UTC (dependency routing audit report)
+- Manual: `gh workflow run dependency-relationship-routing.yml`
+
+**What It Does:**
+
+- Parses relationship markers in issue/PR body and comments:
+  - `Blocked by #N`
+  - `Depends on #N`
+  - `Part of #N`
+  - `Related to #N`
+- Treats `Blocked by` and `Depends on` as blocker edges and resolves targets by state:
+  - Issues must be `closed`
+  - Pull requests must be `merged`
+- Applies/removes deterministic blocker labels:
+  - Issues: `blocked`
+  - Pull requests: `dependency-blocked`
+- Upserts an in-thread routing status comment with parsed markers and unresolved blockers.
+- Publishes a weekly `Dependency Routing Report` issue summarizing blocked counts, hottest blockers, and stale blocked items.
+
+**Configuration:**
+
+```yaml
+inputs:
+  max_items:
+    description: "Maximum open issues and PRs to evaluate in batch mode"
+    default: "150"
+  stale_days:
+    description: "Days since update to classify blocked work as stale"
+    default: "7"
+```
+
+**Output:**
+
+- Event-cycle blocker labels and routing comments
+- Weekly dependency report issue with bottleneck and stale-blocked visibility
+- Step summary metrics for run-level observability
+
+**Consumer Value:**
+
+- Dependency blockers become machine-actionable state
+- Blocked issues/PRs are discoverable without manual comment inspection
+- Weekly bottleneck visibility for dependency-chain triage
 
 ---
 
