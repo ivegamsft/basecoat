@@ -119,7 +119,34 @@ If the issue body references other issues, add relationship comments using expli
 
 For duplicate matches, include `Duplicate of #N` in the triage summary.
 
-### Step 7 — Post Triage Summary
+### Step 7 — PRD/Spec Pre-flight
+
+For `enhancement` issues (or any issue whose body references risky paths such as
+`skills/`, `agents/`, `instructions/`, `scripts/`, or `.github/workflows/`), check
+whether the issue body contains both a PRD link and a spec link. Use the patterns
+defined in `prd-spec-gate.yml`:
+
+- **PRD present**: body matches `/prd/i` in plain text or in a markdown link URL
+- **Spec present**: body matches `/\bspec\b|technical specification/i`
+
+If EITHER link is missing:
+
+1. Apply the `needs-prd` label via `safeoutputs.add-labels`.
+2. Post an advisory comment via `safeoutputs.add-comment` explaining that any PR
+   for this issue will be blocked by the PRD/spec gate, and providing the standard
+   format to add to both the issue and the eventual PR description:
+
+```text
+PRD: <link>
+Spec: <link>
+```
+
+Reference `skills/issue-triage/references/triage-workflow.md` Check 10 for the full
+advisory comment template.
+
+If both links are already present in the issue body, no action is needed for this step.
+
+### Step 8 — Post Triage Summary
 
 Post a comment using this structure:
 

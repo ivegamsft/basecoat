@@ -289,3 +289,66 @@ gh issue comment $N --body "Priority escalated to critical: security issues are 
 gh issue edit $N --add-label "stale"
 gh issue comment $N --body "This issue has been open for >90 days with no activity. Marking as stale. If still relevant, please add a comment to keep it active."
 ```
+
+---
+
+## Check 10: PRD/Spec Pre-flight
+
+**Goal**: Warn early when an enhancement will require a PRD and spec link before its PR can merge, preventing downstream blocking at the `prd-spec-gate`.
+
+### When to Run
+
+Run this check for every `enhancement` issue. Also run for `chore` or `documentation`
+issues whose body references risky paths (`skills/`, `agents/`, `instructions/`,
+`scripts/`, `.github/workflows/`).
+
+### Decision Tree
+
+```text
+Issue type == enhancement (or body mentions risky paths)?
+├── Yes → does the issue body contain a PRD link (text matching /prd/i) OR a spec link (/\bspec\b|technical specification/i)?
+│   ├── Yes → no action needed; PRD/spec pre-flight passes
+│   └── No → add `needs-prd` label; post advisory comment (see template below)
+└── No → skip this check
+```
+
+### Advisory Comment Template
+
+```markdown
+## PRD/Spec Pre-flight Advisory
+
+This issue is classified as an **enhancement** that is likely to touch risky paths
+(`skills/`, `agents/`, `instructions/`, `scripts/`, or `.github/workflows/`).
+
+Any pull request for this work will be **blocked by the PRD/spec gate** unless the PR
+description contains both a PRD link and a spec link (or the `skip-prd-spec-check`
+label is applied).
+
+To resolve before opening a PR:
+
+1. Create or link the PRD document in this issue body.
+2. Create or link the technical spec in this issue body.
+3. Copy both links to the PR description when you open the PR.
+
+Standard format (add to both this issue and the PR description):
+
+PRD: https://example.com/prd
+Spec: https://example.com/spec
+
+Once these links are added to this issue, remove the `needs-prd` label.
+```
+
+### gh Commands
+
+```bash
+# Flag issue as needing PRD/spec before a PR can merge
+gh issue edit $N --add-label "needs-prd"
+gh issue comment $N --body "$(cat <<'EOF'
+## PRD/Spec Pre-flight Advisory
+...
+EOF
+)"
+
+# Remove once links are added
+gh issue edit $N --remove-label "needs-prd"
+```

@@ -17,6 +17,7 @@ An issue passes the minimum bar if ALL of the following are true:
 | **Priority label** | Exactly one from the priority taxonomy |
 | **For bugs** | Must include expected vs actual behavior, or error message/stack trace |
 | **For enhancements** | Must include a problem statement or user story |
+| **PRD/spec pre-flight** | `enhancement` issues touching risky paths (`skills/`, `agents/`, `instructions/`, `scripts/`, `.github/workflows/`) must include a PRD or spec link in the body. Missing links → add `needs-prd` and comment. |
 
 Issues that fail any required field receive `needs-triage` and a comment listing what is missing.
 Encoding-integrity failures should be flagged with `needs-info` + `needs-triage` and a request to resubmit with UTF-8-safe text; they should not be auto-closed as invalid unless clearly spam.
@@ -59,6 +60,7 @@ Legacy labels (`P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/critic
 | `blocked` | Cannot proceed until another issue or external action is resolved |
 | `stale` | No activity for >90 days; may be closed if not updated |
 | `wontfix` | Intentionally not resolved; out of scope or by design |
+| `needs-prd` | Enhancement touches risky paths and is missing a PRD or spec link; PR will be blocked by the PRD/spec gate until a link is added |
 
 **Exclusivity rule:** `duplicate` cannot coexist with any type label (`bug`, `enhancement`, `documentation`, `chore`, `security`, `question`). If both are present, triage must resolve the conflict by keeping only one side.
 
