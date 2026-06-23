@@ -8,6 +8,14 @@ tests:
     expect:
       decision: trigger
       confidence: 0.9
+  - id: onboarding-conductor-positive
+    description: Routes onboarding conductor language to the ship-it skill
+    messages:
+      - role: user
+        content: "Run onboarding conductor in dry-run mode for a regulated-team profile."
+    expect:
+      decision: trigger
+      confidence: 0.9
   - id: ship-it-negative
     description: Does not trigger for unrelated coding requests
     messages:

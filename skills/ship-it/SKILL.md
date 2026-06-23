@@ -1,6 +1,6 @@
 ---
 name: ship-it
-description: "Use when converting a delivery intent (`ship-it` or `spec-2-prod`) into a governed multi-sprint execution plan with live issue side effects. USE FOR: dispatching ship-it intents, creating tracked sprint issue bundles, enforcing risk-band governance checklists, and handing intent execution to orchestration agents. DO NOT USE FOR: direct production deployment without gates, ad hoc one-off bugfixes, or bypassing approval policies."
+description: "Use when converting a delivery intent (`ship-it`, `spec-2-prod`, or `onboarding-conductor`) into a governed execution plan with live issue side effects. USE FOR: dispatching ship-it intents, creating tracked phase/sprint issue bundles, enforcing risk-band governance checklists, and handing intent execution to orchestration agents. DO NOT USE FOR: direct production deployment without gates, ad hoc one-off bugfixes, or bypassing approval policies."
 compatibility:
   - GHCP
 category: workflow
@@ -26,7 +26,7 @@ turn it into a governed, trackable execution bundle.
 
 ## Inputs
 
-1. `intent`: `ship-it` or `spec-2-prod`
+1. `intent`: `ship-it`, `spec-2-prod`, or `onboarding-conductor`
 2. `goal`: short delivery objective
 3. `target_repo`: `owner/repo`
 4. `spec_ref` (optional): PRD/spec URL or path
@@ -36,7 +36,7 @@ turn it into a governed, trackable execution bundle.
 
 1. Validate the intent contract.
 2. Dispatch `.github/workflows/ship-it-intent-dispatch.yml`.
-3. Generate parent goal issue and sprint child issues with governance checklists.
+3. Generate parent goal issue and phase/sprint child issues with governance checklists.
 4. Add labels for risk, intent, and control-plane tracking.
 5. Hand off execution to `orchestrator` or `agentic-sdlc-autonomy`.
 
@@ -50,5 +50,5 @@ turn it into a governed, trackable execution bundle.
 ## Output
 
 - Parent goal issue URL
-- Child sprint issue URLs
-- JSON summary artifact for automation and reporting
+- Child phase/sprint issue URLs
+- JSON summary artifact for automation, desired-state diff, and remediation tracking

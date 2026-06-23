@@ -29,11 +29,12 @@ if (Test-Path $outputDirectory) {
 }
 
 & $dispatchScript `
-  -Intent "ship-it" `
-  -Goal "Validate ship-it dispatch test path" `
+  -Intent "onboarding-conductor" `
+  -Goal "Validate onboarding conductor dispatch test path" `
   -TargetRepo "IBuySpy-Shared/basecoat" `
   -SpecRef "https://example.com/specs/ship-it-test" `
   -RiskBand "medium" `
+  -Profile "team-dev" `
   -DryRun `
   -OutputPath $outputJson
 
@@ -42,17 +43,26 @@ if (-not (Test-Path $outputJson)) {
 }
 
 $summary = Get-Content -Raw -Path $outputJson | ConvertFrom-Json
-if ($summary.intent -ne "ship-it") {
-  throw "Expected intent ship-it but found '$($summary.intent)'"
+if ($summary.intent -ne "onboarding-conductor") {
+  throw "Expected intent onboarding-conductor but found '$($summary.intent)'"
 }
 if (-not $summary.dry_run) {
   throw "Dry-run summary should report dry_run=true."
 }
-if ($summary.child_issues.Count -ne 3) {
-  throw "Expected 3 child sprint issues but found $($summary.child_issues.Count)"
+if ($summary.child_issues.Count -ne 4) {
+  throw "Expected 4 child phase issues but found $($summary.child_issues.Count)"
 }
 if ([string]::IsNullOrWhiteSpace($summary.parent_issue_url)) {
   throw "parent_issue_url should not be empty in summary output."
+}
+if ($summary.profile -ne "team-dev") {
+  throw "Expected profile team-dev but found '$($summary.profile)'"
+}
+if ($summary.desired_state_diff.Count -lt 5) {
+  throw "Expected actionable desired_state_diff entries but found $($summary.desired_state_diff.Count)"
+}
+if ($summary.remediation_tasks.Count -lt 1) {
+  throw "Expected at least one remediation task in summary output."
 }
 
 $workflowContent = Get-Content -Raw -Path $workflowFile
@@ -64,6 +74,15 @@ if ($workflowContent -notmatch "issue_comment:") {
 }
 if ($workflowContent -notmatch "/ship-it") {
   throw "Ship-it workflow must detect /ship-it comment command."
+}
+if ($workflowContent -notmatch "/onboarding") {
+  throw "Ship-it workflow must detect /onboarding comment command."
+}
+if ($workflowContent -notmatch "onboarding-conductor") {
+  throw "Ship-it workflow must expose onboarding-conductor intent option."
+}
+if ($workflowContent -notmatch "profile:") {
+  throw "Ship-it workflow must include profile input for onboarding-conductor intent."
 }
 
 Write-Host "Ship-it dispatch tests passed."

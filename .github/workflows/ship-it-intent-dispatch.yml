@@ -12,6 +12,7 @@ on:
         options:
           - ship-it
           - spec-2-prod
+          - onboarding-conductor
       goal:
         description: Delivery goal statement
         required: true
@@ -35,6 +36,15 @@ on:
           - medium
           - high
           - critical
+      profile:
+        description: Onboarding profile (used by onboarding-conductor)
+        required: false
+        default: team-dev
+        type: choice
+        options:
+          - solo-dev
+          - team-dev
+          - regulated-team
       project_owner:
         description: Optional project owner for project sync
         required: false
@@ -72,6 +82,7 @@ jobs:
       project_owner: ${{ steps.resolve.outputs.project_owner }}
       project_number: ${{ steps.resolve.outputs.project_number }}
       dry_run: ${{ steps.resolve.outputs.dry_run }}
+      profile: ${{ steps.resolve.outputs.profile }}
       source_issue_number: ${{ steps.resolve.outputs.source_issue_number }}
       requester: ${{ steps.resolve.outputs.requester }}
     steps:
@@ -91,6 +102,7 @@ jobs:
               project_owner: "",
               project_number: "",
               dry_run: "false",
+              profile: "team-dev",
               source_issue_number: "",
               requester: context.actor
             };
@@ -106,11 +118,14 @@ jobs:
               result.project_owner = inputs.project_owner || "";
               result.project_number = inputs.project_number || "";
               result.dry_run = `${inputs.dry_run === true || `${inputs.dry_run}`.toLowerCase() === "true"}`;
+              result.profile = inputs.profile || "team-dev";
             } else {
               const issue = context.payload.issue;
               const comment = context.payload.comment?.body || "";
               const isPullRequestComment = !!issue.pull_request;
-              const commandMatch = comment.match(/^\/ship-it(?:\s+(.+))?$/im);
+              const shipItMatch = comment.match(/^\/ship-it(?:\s+(.+))?$/im);
+              const onboardingMatch = comment.match(/^\/onboarding(?:\s+(.+))?$/im);
+              const commandMatch = shipItMatch || onboardingMatch;
               if (isPullRequestComment || !commandMatch) {
                 core.setOutput("should_run", "false");
                 return;
@@ -123,12 +138,12 @@ jobs:
               });
               const allowed = ["admin", "maintain", "write"].includes(perm.data.permission);
               if (!allowed) {
-                core.setFailed(`@${context.actor} does not have write permission for /ship-it.`);
+                core.setFailed(`@${context.actor} does not have write permission for intent commands (/ship-it, /onboarding).`);
                 return;
               }
 
               result.should_run = "true";
-              result.intent = "ship-it";
+              result.intent = onboardingMatch ? "onboarding-conductor" : "ship-it";
               result.goal = commandMatch[1]?.trim() || issue.title;
               result.source_issue_number = `${issue.number}`;
               const issueBody = issue.body || "";
@@ -151,6 +166,8 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v4.1.7
 
       - name: Dispatch intent
+        id: dispatch
+        continue-on-error: true
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
@@ -162,6 +179,7 @@ jobs:
           PROJECT_OWNER: ${{ needs.resolve-intent.outputs.project_owner }}
           PROJECT_NUMBER: ${{ needs.resolve-intent.outputs.project_number }}
           DRY_RUN: ${{ needs.resolve-intent.outputs.dry_run }}
+          PROFILE: ${{ needs.resolve-intent.outputs.profile }}
         run: |
           $dryRun = $env:DRY_RUN -eq 'true'
           $projectNumberRaw = $env:PROJECT_NUMBER
@@ -178,6 +196,7 @@ jobs:
             RiskBand = $env:RISK_BAND
             ProjectNumber = $projectNumber
             ProjectOwner = $env:PROJECT_OWNER
+            Profile = $env:PROFILE
             OutputPath = 'test-results\ship-it\summary.json'
           }
           if ($dryRun) {
@@ -186,8 +205,90 @@ jobs:
 
           .\scripts\ship-it\dispatch-intent.ps1 @params
 
+      - name: Create remediation issue when dispatch fails
+        if: steps.dispatch.outcome == 'failure'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const intent = "${{ needs.resolve-intent.outputs.intent }}";
+            const goal = "${{ needs.resolve-intent.outputs.goal }}";
+            const targetRepo = "${{ needs.resolve-intent.outputs.target_repo }}";
+            const profile = "${{ needs.resolve-intent.outputs.profile }}";
+            const crypto = require("crypto");
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const remediationTitle = `[Intent][${intent}] Remediation required: ${goal}`;
+            const markerKey = `${intent}|${targetRepo}|${goal}|${profile}`;
+            const markerHash = crypto.createHash("sha256").update(markerKey.toLowerCase()).digest("hex");
+            const marker = `<!-- basecoat-intent-remediation:${markerHash} -->`;
+            const intentLabel = intent;
+            const remediationBody = [
+              "## Remediation Trigger",
+              "",
+              `- Intent: \`${intent}\``,
+              `- Goal: ${goal}`,
+              `- Target repo: ${targetRepo}`,
+              `- Profile: \`${profile}\``,
+              `- Workflow run: https://github.com/${owner}/${repo}/actions/runs/${context.runId}`,
+              "",
+              "## Required follow-up tasks",
+              "",
+              "- [ ] Investigate dispatch failure root cause",
+              "- [ ] Capture actionable fix plan",
+              `- [ ] Re-run ${intent} intent after fix`,
+              "",
+              marker
+            ].join("\n");
+            const labels = ["intent-control-plane", "remediation", intentLabel];
+
+            for (const label of labels) {
+              try {
+                await github.rest.issues.createLabel({
+                  owner,
+                  repo,
+                  name: label,
+                  color: label === "remediation" ? "b60205" : "1d76db",
+                  description: label === "remediation" ? "Follow-up issue created from intent-dispatch failure." : "Tracks intent-driven dispatch runs."
+                });
+              } catch (error) {
+                if (error.status !== 422) {
+                  throw error;
+                }
+              }
+            }
+
+            const search = await github.rest.search.issuesAndPullRequests({
+              q: `repo:${owner}/${repo} is:issue is:open label:intent-control-plane label:remediation label:${intentLabel} "${marker}"`,
+              per_page: 1
+            });
+            const match = search.data.items[0];
+            if (match) {
+              await github.rest.issues.update({
+                owner,
+                repo,
+                issue_number: match.number,
+                title: remediationTitle,
+                body: remediationBody
+              });
+            } else {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title: remediationTitle,
+                body: remediationBody,
+                labels
+              });
+            }
+
+      - name: Fail after remediation issue creation
+        if: steps.dispatch.outcome == 'failure'
+        run: |
+          echo "Dispatch failed. Remediation issue generated or updated."
+          exit 1
+
       - name: Export parent issue URL
         id: summary
+        if: steps.dispatch.outcome == 'success'
         shell: pwsh
         run: |
           $summaryPath = "test-results\ship-it\summary.json"
@@ -195,6 +296,7 @@ jobs:
           "parent_issue_url=$($summary.parent_issue_url)" >> $env:GITHUB_OUTPUT
 
       - name: Upload dispatch artifacts
+        if: steps.dispatch.outcome == 'success'
         uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
           name: ship-it-dispatch
@@ -202,15 +304,16 @@ jobs:
           retention-days: 7
 
       - name: Comment back on source issue
-        if: needs.resolve-intent.outputs.source_issue_number != ''
+        if: needs.resolve-intent.outputs.source_issue_number != '' && steps.dispatch.outcome == 'success'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             const issueNumber = Number("${{ needs.resolve-intent.outputs.source_issue_number }}");
             const parentUrl = "${{ steps.summary.outputs.parent_issue_url }}";
             const requester = "${{ needs.resolve-intent.outputs.requester }}";
+            const intent = "${{ needs.resolve-intent.outputs.intent }}";
             const message = [
-              `@${requester} ship-it intent accepted.`,
+              `@${requester} ${intent} intent accepted.`,
               "",
               `Control-plane parent issue: ${parentUrl}`,
               "",

@@ -1,6 +1,6 @@
 ---
 name: ship-it-orchestrator
-description: "Intent-to-production orchestrator that converts `ship-it` / `spec-2-prod` goals into governed, multi-sprint execution loops with tracked PR, validation, release, and learning artifacts. USE FOR: goal-driven spec-to-prod orchestration, governed multi-sprint execution, build-break recovery coordination, and release readiness tracking. DO NOT USE FOR: bypassing approval gates, direct production deployment without evidence, or ad hoc one-off edits with no delivery loop."
+description: "Intent-to-production orchestrator that converts `ship-it`, `spec-2-prod`, and `onboarding-conductor` goals into governed execution loops with tracked PR, validation, release, and learning artifacts. USE FOR: goal-driven spec-to-prod orchestration, onboarding conductor discover/plan/apply/validate loops, build-break recovery coordination, and release readiness tracking. DO NOT USE FOR: bypassing approval gates, direct production deployment without evidence, or ad hoc one-off edits with no delivery loop."
 model: claude-sonnet-4.6
 visibility: advanced
 tools: [bash, git, gh, powershell]
@@ -24,7 +24,7 @@ plan, implement, validate, release, and close out with learnings.
 
 ## Inputs
 
-1. Intent contract (`ship-it` or `spec-2-prod`)
+1. Intent contract (`ship-it`, `spec-2-prod`, or `onboarding-conductor`)
 2. Goal statement
 3. Repo and branch scope
 4. Risk band and required gates
