@@ -80,43 +80,60 @@ Feature tracker #1736 status on closeout date:
 
 ### Feature #1737: Testing & Quality Assurance (Wave 1-3)  CRITICAL PATH
 
-**Priority:** CRITICAL | **Points:** ~21 | **Status:** READY | **Risk:** HIGH
+**Priority:** CRITICAL | **Points:** ~21 | **Status:** COMPLETED | **Risk:** HIGH
 
 ```text
 Wave 1 (Days 1-3):
   🔴 #1732 — Design: Project model (CRITICAL BLOCKER)
     Priority: CRITICAL | Points: 5
     Dependencies: NONE
-    Owner: [Domain expert required]
-    Status: Todo → In Progress
-     GATE: This blocks all Wave 2-3 design work
+    Owner: [Completed]
+    Status: Completed
+    GATE: Unblocked Wave 2-3 design work
 
 Wave 2 (Days 5-8):
   ✓ #1735 — Design: Duplicate prevention
     Priority: CRITICAL | Points: 5
     Dependencies: #1732
-    Owner: [TBD]
-    Status: Todo (blocked on #1732)
+    Owner: [Completed]
+    Status: Completed
 
   ✓ #1733 — Design: Canonical workflow
     Priority: CRITICAL | Points: 5
     Dependencies: #1732, #1735
-    Owner: [TBD]
-    Status: Todo (blocked on #1732, #1735)
+    Owner: [Completed]
+    Status: Completed
 
   ✓ #1731 — Design: Downstream repo contract
     Priority: CRITICAL | Points: 5
     Dependencies: #1732, #1733
-    Owner: [TBD]
-    Status: Todo (blocked on #1732, #1733)
+    Owner: [Completed]
+    Status: Completed
 
 Wave 3 (Days 8-10):
   ✓ #1734 — Design: Verification gate
     Priority: CRITICAL | Points: 4
     Dependencies: #1733
-    Owner: [TBD]
-    Status: Todo (blocked on #1733)
+    Owner: [Completed]
+    Status: Completed
 ```text
+
+#### Feature #1737 execution closeout (2026-06-23)
+
+| Child issue | Outcome | Evidence |
+|---|---|---|
+| #1732 | Design delivered | `docs/design/testing-quality-project-model.md` |
+| #1735 | Design delivered | `docs/design/testing-quality-dedup-canonical-linking.md` |
+| #1733 | Design delivered | `docs/design/testing-quality-canonical-intake-workflow.md` |
+| #1731 | Design delivered | `docs/design/testing-quality-downstream-remap-contract.md` |
+| #1734 | Design delivered | `docs/design/testing-quality-verification-first-closure-gate.md` |
+
+Feature tracker #1737 status on closeout date:
+
+- Completed: 5 of 5
+- In Progress: 0
+- Blocked: 0
+
 ### Feature #1738: Observability & Monitoring (Wave 1-3)
 
 **Priority:** MEDIUM | **Points:** ~8 | **Status:** READY
