@@ -44,7 +44,7 @@ Guardrail semantics across these specs use a shared contract.
 
 - Sprint 1 scope: completed by this README.
 - Sprint 2 implementation evidence: completed.
-- Sprint 3 closeout evidence: pending.
+- Sprint 3 closeout evidence: completed.
 
 ## Sprint 2 Evidence
 
@@ -53,3 +53,17 @@ Guardrail semantics across these specs use a shared contract.
 | Portfolio management architecture spec (#1742) | PR #1963 (`management-architecture.md`) |
 | PR lifecycle policy and parsing contract (#1756, #1757) | PR #1969 (`pr-lifecycle-policy.md` and intent-routing update) |
 | Sprint 2 closeout issue | #1884 |
+
+## Sprint 3 Evidence
+
+| Item | Evidence |
+|---|---|
+| Audit framework spec (#1749) | PR #1974 (`audit-framework.md`) |
+| Governance audit spec (#1750) | PR #1974 (`audit-governance.md`) |
+| Reliability audit spec (#1751) | PR #1974 (`audit-reliability.md`) |
+| Learning and memory audit spec (#1752) | PR #1974 (`audit-learning-memory.md`) |
+| Sprint 3 closeout issue | #1885 |
+
+## Sprint 40 Completion
+
+Sprint 40 portfolio feature execution is complete for sprints 1 through 3, with implementation artifacts merged and tracker closeout queued.
