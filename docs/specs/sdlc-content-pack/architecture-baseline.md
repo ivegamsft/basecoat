@@ -168,6 +168,28 @@ skills/sdlc-content-pack/
 
 | Area | Status | Notes |
 |---|---|---|
-| Sprint 1 planning baseline | Planned | This document defines scope and acceptance targets |
-| Sprint 2 skill implementation | Planned | Templates, eval, and orchestration script to follow |
-| Sprint 3 closeout and onboarding | Planned | Adoption guide and final implementation status update |
+| Sprint 1 planning baseline | Complete | Scope, architecture, and acceptance mapping merged in PR #1956 |
+| Sprint 2 skill implementation | Complete | `skills/sdlc-content-pack/` added in PR #1962 with templates, eval, orchestration, and inventory refresh |
+| Sprint 3 closeout and onboarding | Complete | Onboarding guidance and pilot adoption assets added for downstream rollout |
+
+## Final Delivered Assets
+
+| Path | Status | Purpose |
+|---|---|---|
+| `skills/sdlc-content-pack/SKILL.md` | Delivered | Routing contract, workflow, guardrails, and onboarding entry point |
+| `skills/sdlc-content-pack/templates/diagram-template.md` | Delivered | Reusable workflow diagram template |
+| `skills/sdlc-content-pack/templates/click-through-template.md` | Delivered | Ordered walkthrough template |
+| `skills/sdlc-content-pack/templates/video-script-template.md` | Delivered | Short-form narration template |
+| `skills/sdlc-content-pack/templates/deck-template.md` | Delivered | Review and handoff deck outline |
+| `skills/sdlc-content-pack/eval.yaml` | Delivered | Quality gates, rubric, and review checklist |
+| `skills/sdlc-content-pack/generate-bundle.ps1` | Delivered | Basic bundle orchestration and export script |
+| `skills/sdlc-content-pack/adoption-guide.md` | Delivered | Pilot rollout guide for downstream teams |
+
+## Closeout Notes
+
+- The first release is intentionally markdown-first so teams can inspect and
+  adapt artifacts in-repo before converting them into richer media.
+- The orchestration contract now standardizes bundle identifiers, workflow
+  steps, source references, and handoff expectations across every artifact.
+- The adoption path assumes human review remains part of the rollout loop for
+  pilot teams before the skill is treated as a standardized asset.

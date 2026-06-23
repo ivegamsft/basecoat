@@ -57,3 +57,11 @@ across every artifact.
 - Use the same bundle identifier, SDLC phase, and audience labels everywhere.
 - Surface handoff points and approval gates explicitly.
 - Prefer markdown-first outputs that can be versioned and edited in-repo.
+
+## Onboarding Guide
+
+1. Start with one pilot workflow and define a canonical `workflow_steps` list.
+2. Run `generate-bundle.ps1` to export a first draft bundle.
+3. Review the draft against `eval.yaml` before sharing it downstream.
+4. Tailor the templates for the target audience without changing core terms.
+5. Use `adoption-guide.md` for rollout, review cadence, and ownership guidance.
