@@ -22,12 +22,15 @@ The following status checks **must pass** before a pull request can be merged to
 
 | Check | Description | Purpose |
 |-------|-------------|---------|
-| `validate-basecoat` | Repository validation (structure, file integrity) | Ensure repo standards compliance |
-| `ci` | Continuous integration (tests, build, lint) | Catch regressions and quality issues |
-| `docs` | Documentation validation and link checking | Ensure docs are built and links work |
-| `prd-spec-gate` | PRD/spec intake gate | For high-change PRs, require both PRD and spec references; for risky-path-only PRs, emit advisory warning when missing |
+| `lint-and-validate` | Linting and repository validation | Catch lint errors and enforce repo standards |
+| `test` | Test suite | Catch regressions and quality issues |
+| `validate-commit-messages` | Commit message format validation | Enforce conventional commits |
+| `validate-unix` | Unix-environment validation | Ensure cross-platform compatibility |
+| `validate-windows` | Windows-environment validation | Ensure Windows compatibility |
+| `release-label-gate` | Release label gate | Require release label for delivery tracking |
 
-Additional checks may be enabled dynamically based on file changes (e.g., security scans for secret detection).
+Additional checks may run and fail without blocking merge (advisory-only checks), but the
+above six are required for all PRs to `main`.
 
 ### 3. Restricted Direct Pushes
 
@@ -88,9 +91,8 @@ gh api repos/{owner}/{repo}/branches/main/protection
 
 Expected payload shape:
 
-- `required_pull_request_reviews.required_approving_review_count >= 1`
 - `required_status_checks.strict === true`
-- `required_status_checks.contexts` includes at least `validate-basecoat`, `ci`, `docs`
+- `required_status_checks.contexts` includes at least `lint-and-validate`, `test`, `validate-commit-messages`, `validate-unix`, `validate-windows`, `release-label-gate`
 - `allow_force_pushes.enabled === false`
 - `allow_deletions.enabled === false`
 - `enforce_admins.enabled === true`

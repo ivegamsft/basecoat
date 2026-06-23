@@ -2,6 +2,8 @@ name: BaseCoat - Branch Protection Enforcement
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "23 3 * * 1"
   pull_request:
     branches:
       - main
@@ -55,17 +57,65 @@ jobs:
           set -euo pipefail
 
           echo "Checking required status checks..."
-          grep -q "validate-basecoat" docs/reference/branch-protection.md || {
-            echo "❌ validate-basecoat check not documented"
+          grep -q "lint-and-validate" docs/reference/branch-protection.md || {
+            echo "lint-and-validate check not documented"
             exit 1
           }
-          grep -q "ci" docs/reference/branch-protection.md || {
-            echo "❌ ci check not documented"
+          grep -q "validate-unix" docs/reference/branch-protection.md || {
+            echo "validate-unix check not documented"
             exit 1
           }
-          grep -q "docs" docs/reference/branch-protection.md || {
-            echo "❌ docs check not documented"
+          grep -q "validate-windows" docs/reference/branch-protection.md || {
+            echo "validate-windows check not documented"
             exit 1
           }
 
-          echo "✓ All required status checks are documented"
+          echo "All required status checks are documented"
+
+      - name: Audit branch protection API settings
+        if: ${{ github.event_name != 'pull_request' }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          PROTECTION="$(gh api "repos/${REPOSITORY}/branches/main/protection" 2>/dev/null || echo '')"
+
+          if [[ -z "$PROTECTION" ]]; then
+            echo "::error::main branch has no protection rules configured (GET /branches/main/protection returned empty)."
+            exit 1
+          fi
+
+          STRICT="$(echo "$PROTECTION" | jq -r '.required_status_checks.strict // false')"
+          FORCE_PUSH="$(echo "$PROTECTION" | jq -r '.allow_force_pushes.enabled // true')"
+          DELETIONS="$(echo "$PROTECTION" | jq -r '.allow_deletions.enabled // true')"
+
+          ADVISORY=false
+
+          if [[ "$STRICT" != "true" ]]; then
+            echo "::warning::Branch protection: required_status_checks.strict is not enabled."
+            echo "::warning::Branches should be required to be up to date before merging."
+            ADVISORY=true
+          fi
+
+          if [[ "$FORCE_PUSH" != "false" ]]; then
+            echo "::warning::Branch protection: allow_force_pushes is enabled on main."
+            echo "::warning::Force pushes to main should be disabled."
+            ADVISORY=true
+          fi
+
+          if [[ "$DELETIONS" != "false" ]]; then
+            echo "::warning::Branch protection: allow_deletions is enabled on main."
+            echo "::warning::Branch deletion should be disabled."
+            ADVISORY=true
+          fi
+
+          if [[ "$ADVISORY" == "true" ]]; then
+            echo "Branch protection audit: advisory findings recorded above." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Branch protection audit passed: strict checks, no force pushes, no deletions." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          echo "Branch protection audit complete."
