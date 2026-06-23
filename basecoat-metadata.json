@@ -2303,6 +2303,17 @@
       "file": "agents/basecoat-60-workflow-parallel-session-coordinator.agent.md",
       "model": "gpt-5.4-mini",
       "argumentHint": ""
+    },
+    {
+      "name": "basecoat-60-workflow-backlog-rebalancer",
+      "description": "Unified backlog management orchestrator supporting three operational modes: reprioritize (priority-only adjustments), reshuffle (sprint/wave reassignment), and rebalance (portfolio optimization under constraints). USE FOR: reordering backlog items by priority, redistributing work across sprints/waves, optimizing portfolio allocation against capacity constraints, and generating deterministic action plans. DO NOT USE FOR: code reviews, deployment execution, individual contributor task assignment, or unilateral feature scope decisions.",
+      "category": "Meta",
+      "keywords": [],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/basecoat-60-workflow-backlog-rebalancer.agent.md",
+      "model": "gpt-5.3-codex",
+      "argumentHint": ""
     }
   ]
 }

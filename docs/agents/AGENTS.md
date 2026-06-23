@@ -11,7 +11,7 @@ This file lists all available agents in the BaseCoat framework.
 - [VS Code Harness Benchmarks](./vs-code-harness-benchmarks.md)
 - [VS Code Agent Mode Tool Confirmation Policy](../reference/guardrails/tool-confirmation-policy.md)
 
-> **88 agents** available
+> **123 agents** available
 
 | Agent | Description |
 |---|---|
@@ -22,7 +22,8 @@ This file lists all available agents in the BaseCoat framework.
 | [app-inventory](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-app-inventory.agent.md) | Scans legacy applications to discover dependencies, identify technology stacks, assess migration complexity, and generate architecture diagrams for portfolio analysis. USE FOR: scan legacy app tech stack, assess migra... |
 | [azure-landing-zone](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-40-azure-azure-landing-zone.agent.md) | Azure Landing Zone (ESLZ) agent for scaffolding enterprise-scale landing zones following Microsoft's Cloud Adoption Framework. Use when designing management group hierarchies, platform subscriptions, hub networking, p... |
 | [backend-dev](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-backend-dev.agent.md) | Backend development agent for APIs, services, and business logic. Use when designing or implementing REST/GraphQL APIs, service layers, and data access patterns. |
-| [chaos-engineer](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-chaos-engineer.agent.md) | Chaos engineering agent for fault injection, game days, resilience scoring, recovery validation, and SLO-aware resilience experiments. USE FOR: design fault injection experiments, run game day exercises, validate SLO ... |
+| [backlog-rebalancer](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-backlog-rebalancer.agent.md) | Unified backlog management orchestrator supporting three operational modes: reprioritize (priority-only adjustments), reshuffle (sprint/wave reassignment), and rebalance (portfolio optimization under constraints). USE FOR: reorder backlog items by priority, redistribute work across sprints/waves, optimize portfolio allocation against capacity constraints, and generate deterministic action plans. |
+| [chaos-engineer](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-chaos-engineer.agent.md) | Chaos engineering agent for fault injection, game days, resilience scoring, recovery validation, and SLO-aware resilience experiments. USE FOR: design fault injection experiments, run game day exercises, validate SLO  ... |
 | [ci-failure-escalation](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-ci-failure-escalation.agent.md) | Detects N consecutive CI failures on the same workflow job, opens a blocking issue, and gates further deploys to that environment — the andon cord / halt-the-line pattern for CI/CD pipelines. USE FOR: gate deploys on ... |
 | [code-review](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-90-quality-code-review.agent.md) | Use when a task needs a structured, multi-step code review workflow with findings prioritized by severity and file references. |
 | [config-auditor](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-50-security-config-auditor.agent.md) | Use when you need to scan a repository for committed or unprotected configuration files that contain secrets, credentials, or sensitive environment-specific values. Produces a findings report with remediation steps. |

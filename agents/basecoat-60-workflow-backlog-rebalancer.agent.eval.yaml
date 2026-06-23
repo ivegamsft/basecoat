@@ -1,0 +1,61 @@
+name: "basecoat-60-workflow-backlog-rebalancer-routing"
+description: "Routing evaluation - validates trigger activation for the backlog-rebalancer agent supporting reprioritize, reshuffle, and rebalance modes."
+skill: "agents/basecoat-60-workflow-backlog-rebalancer.agent.md"
+scenarios:
+  # Reprioritize Mode - Positive Cases
+  - id: "reprioritize-pos-1"
+    input: "Use the backlog-rebalancer in reprioritize mode to reorder backlog items by priority without changing sprint assignments."
+    expect_activation: true
+  - id: "reprioritize-pos-2"
+    input: "Generate a priority-reranked backlog with deterministic scoring based on impact and urgency metrics."
+    expect_activation: true
+  - id: "reprioritize-pos-3"
+    input: "Reorder the current backlog to surface highest-impact items first for upcoming sprint planning."
+    expect_activation: true
+  
+  # Reshuffle Mode - Positive Cases
+  - id: "reshuffle-pos-1"
+    input: "Use backlog-rebalancer in reshuffle mode to move items across sprints while respecting dependency constraints."
+    expect_activation: true
+  - id: "reshuffle-pos-2"
+    input: "Redistribute backlog items between sprint 40 and sprint 41 to balance load, preserving dependent ordering."
+    expect_activation: true
+  - id: "reshuffle-pos-3"
+    input: "Generate a wave reassignment plan that moves items to different waves with safe dependency validation."
+    expect_activation: true
+  
+  # Rebalance Mode - Positive Cases
+  - id: "rebalance-pos-1"
+    input: "Use backlog-rebalancer in rebalance mode to optimize portfolio allocation under sprint capacity constraints."
+    expect_activation: true
+  - id: "rebalance-pos-2"
+    input: "Generate a portfolio rebalance plan that distributes work across teams and components while respecting dependencies."
+    expect_activation: true
+  - id: "rebalance-pos-3"
+    input: "Produce a deterministic action plan for rebalancing backlog to meet team capacity and component allocation targets."
+    expect_activation: true
+  
+  # Dry-run and General - Positive Cases
+  - id: "general-pos-1"
+    input: "Execute a dry-run backlog rebalance in reprioritize mode to preview changes without applying metadata updates."
+    expect_activation: true
+  - id: "general-pos-2"
+    input: "Generate machine-readable action plans with audit trails for backlog management operations."
+    expect_activation: true
+  
+  # Negative Cases - Not Appropriate for Backlog Rebalancer
+  - id: "neg-1"
+    input: "Review code changes and provide feedback on implementation quality."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Deploy the application to production and monitor the release."
+    expect_activation: false
+  - id: "neg-3"
+    input: "Unilaterally reassign individual contributor work items without team input."
+    expect_activation: false
+  - id: "neg-4"
+    input: "Design a brand-new feature and create specifications for next quarter."
+    expect_activation: false
+  - id: "neg-5"
+    input: "Perform detailed code review and request specific implementation changes."
+    expect_activation: false
