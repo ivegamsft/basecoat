@@ -18,11 +18,14 @@ Use this skill to run a fast unblock lane when older PRs or issues are breaking 
 ## Workflow
 
 1. Build a dependency graph from open PRs and issues (`Blocks`, `Blocked by`, `Depends on`, linked close references).
-2. Rank blockers by unblock impact (most blocked dependents first).
-3. Form a small unblock group from both issue queue and PR queue.
-4. Cherry-pick or merge only minimal fix commits required to unblock.
-5. Run targeted tests and verify blocker resolution.
-6. Return remaining work to regular dependency order.
+2. Classify edges as hard or soft dependencies and capture rationale per edge.
+3. Map work into executable feature clusters with confidence and rationale.
+4. Rank blockers by unblock impact (most blocked dependents first).
+5. Form a small unblock group from both issue queue and PR queue.
+6. Cherry-pick or merge only minimal fix commits required to unblock.
+7. In `rebalance` mode, emit blocker-critical-path output for sequencing decisions.
+8. Run targeted tests and verify blocker resolution.
+9. Return remaining work to regular dependency order.
 
 ## Unblock Group Rules
 
@@ -40,7 +43,10 @@ Use this skill to run a fast unblock lane when older PRs or issues are breaking 
 
 ## Output
 
+- Hard/soft dependency graph with edge rationale
+- Feature clusters with confidence and rationale
 - Reordered blocker-first queue
 - Unblock group list (issues + PRs selected for fast lane)
+- Critical-path output for `rebalance` mode
 - Gated items requiring tests or explicit check-in
 - Verification summary and handoff back to regular queue order

@@ -14,6 +14,12 @@ scenarios:
   - id: "pos-4"
     input: "Use queue-rebalancer with weighted scoring and high-risk approval check-ins for backlog rebalance recommendations."
     expect_activation: true
+  - id: "pos-5"
+    input: "Build a hard/soft dependency graph and output feature clusters with confidence and rationale for the rebalance run."
+    expect_activation: true
+  - id: "pos-6"
+    input: "In rebalance mode, return the blocker-critical path derived from dependency chains."
+    expect_activation: true
   - id: "neg-1"
     input: "Plan and spec a new feature set for next quarter."
     expect_activation: false
