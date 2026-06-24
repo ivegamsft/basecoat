@@ -17,6 +17,7 @@ The Sprint 40 execution backlog is covered by the following specification work i
 | #1750 | Governance policy enforcement and exception hygiene | `audit-governance.md` |
 | #1751 | Reliability and SRE feedback-loop audit quality | `audit-reliability.md` |
 | #1752 | Learning and memory pattern promotion quality | `audit-learning-memory.md` |
+| #1753 | Delivery-flow economics baseline, waste-driver mapping, and sprint trend tracking | `../../reference/aidl-delivery-flow-economics-baseline.md`, `../../reference/aidl-delivery-flow-economics-optimization-backlog.md`, `../../templates/aidl-delivery-flow-economics-before-after-metrics-template.md` |
 | #1883 | Sprint 1 planning and scope confirmation | This README |
 | #1992 | Sprint 1 planning/scoping for governance backlog carry-forward | `sprint-1992-scope-plan.md` |
 | #1884 | Sprint 2 implementation closeout evidence | README update in Sprint 2 close PR |

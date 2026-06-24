@@ -114,6 +114,12 @@ pwsh -File scripts/aidl-learning-memory-promotion.ps1 `
 - [ ] Optimization actions are linked to owners
 - [ ] Before/after trend is measured per sprint
 
+Supporting artifacts:
+
+1. Baseline thresholds and waste-driver mapping: `docs/reference/aidl-delivery-flow-economics-baseline.md`
+2. Prioritized optimization backlog structure: `docs/reference/aidl-delivery-flow-economics-optimization-backlog.md`
+3. Sprint before/after metrics capture template: `docs/templates/aidl-delivery-flow-economics-before-after-metrics-template.md`
+
 ## Escalation Policy
 
 1. Critical security or policy failure: open blocking issue and escalate immediately.
