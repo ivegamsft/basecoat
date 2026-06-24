@@ -12,9 +12,14 @@ and applies only safe additive changes.
 
 ## Modes
 
-1. `validate`: Validate manifest and emit drift report; exits non-zero when additive creates or mismatches are detected.
+1. `validate`: Validate manifest and emit drift report.
 2. `dry-run`: Plan additive creates and report drift without changing project state.
 3. `apply`: Apply additive creates only; never delete or rewrite mismatched config.
+
+Validation behavior is controlled by `-ConformanceMode`:
+
+1. `enforce` (default): exits non-zero when drift is detected.
+2. `advisory`: always exits zero and reports drift for planning.
 
 All modes require at least one current-state source:
 
@@ -47,7 +52,8 @@ pwsh -File scripts/aidl-portfolio-project-bootstrap.ps1 `
 Each run produces:
 
 1. **Machine-readable report** (`bootstrap-report.json`) with summary counts, planned/applied actions, and drift findings.
-2. **Human-readable report** (`bootstrap-report.md`) with action tables and drift details.
+2. **Human-readable report** (`bootstrap-report.md`) with action tables, drift details, and remediation payload summaries.
+3. **Remediation issue payloads** (`remediationIssues` in JSON) with severity labels (`critical/high/medium/low`) and prefilled issue bodies.
 
 ## Idempotency contract
 

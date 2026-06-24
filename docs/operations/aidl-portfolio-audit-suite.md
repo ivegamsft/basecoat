@@ -69,6 +69,7 @@ Runbook command for this check:
 pwsh -File scripts/aidl-portfolio-project-bootstrap.ps1 `
   -ManifestPath docs/specs/aidl-portfolio/project-bootstrap-manifest.json `
   -Mode validate `
+  -ConformanceMode enforce `
   -CurrentStatePath <project-state-export.json>
 ```
 

@@ -25,6 +25,8 @@ try {
     $dryRunMd = Join-Path $tempDir 'dry-run-report.md'
     $validateJson = Join-Path $tempDir 'validate-report.json'
     $validateMd = Join-Path $tempDir 'validate-report.md'
+    $validateAdvisoryJson = Join-Path $tempDir 'validate-advisory-report.json'
+    $validateAdvisoryMd = Join-Path $tempDir 'validate-advisory-report.md'
     $applyJson = Join-Path $tempDir 'apply-report.json'
     $applyMd = Join-Path $tempDir 'apply-report.md'
     $secondApplyJson = Join-Path $tempDir 'apply2-report.json'
@@ -73,6 +75,35 @@ try {
 
     if ($LASTEXITCODE -eq 0) {
         throw 'Validate mode should fail when drift exists'
+    }
+
+    $validateReport = Get-Content $validateJson -Raw | ConvertFrom-Json -Depth 100
+    if ($validateReport.conformanceMode -ne 'enforce') {
+        throw "Validate report conformanceMode expected 'enforce', got '$($validateReport.conformanceMode)'"
+    }
+    if ($validateReport.summary.remediationIssues -lt 1) {
+        throw 'Validate report expected remediation issue payloads'
+    }
+    $hasCritical = @($validateReport.findings | Where-Object { $_.severity -eq 'critical' }).Count -ge 1
+    if (-not $hasCritical) {
+        throw 'Validate report expected at least one critical severity drift finding'
+    }
+
+    Write-Host '  Running validate mode (advisory)...'
+    & pwsh -NoProfile -File $scriptPath `
+        -ManifestPath $manifestPath `
+        -Mode validate `
+        -ConformanceMode advisory `
+        -CurrentStatePath $statePath `
+        -JsonReportPath $validateAdvisoryJson `
+        -MarkdownReportPath $validateAdvisoryMd
+
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Validate advisory mode should not fail when drift exists'
+    }
+    $validateAdvisoryReport = Get-Content $validateAdvisoryJson -Raw | ConvertFrom-Json -Depth 100
+    if ($validateAdvisoryReport.conformanceMode -ne 'advisory') {
+        throw "Validate advisory report conformanceMode expected 'advisory', got '$($validateAdvisoryReport.conformanceMode)'"
     }
 
     Write-Host '  Running dry-run mode...'
