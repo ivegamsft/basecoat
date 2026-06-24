@@ -81,12 +81,33 @@ jobs:
             });
 
             if (!hasReleaseLabel) {
-              // Default to current sprint based on ISO week
+              // Default to current sprint based on ISO week (ISO-8601)
               const now = new Date();
-              const weekNum = Math.ceil((now - new Date(now.getFullYear(), 0, 1)) / 86400000 / 7);
-              const isoYear = now.getUTCFullYear();
-              const isoWeek = weekNum;
+              const isoDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+              const dayNum = isoDate.getUTCDay() || 7; // Mon=1..Sun=7
+              isoDate.setUTCDate(isoDate.getUTCDate() + 4 - dayNum); // shift to Thursday
+              const isoYear = isoDate.getUTCFullYear();
+              const yearStart = new Date(Date.UTC(isoYear, 0, 1));
+              const isoWeek = Math.ceil((((isoDate - yearStart) / 86400000) + 1) / 7);
               const sprintLabel = `sprint:${isoYear}-W${String(isoWeek).padStart(2, '0')}`;
+
+              try {
+                await github.rest.issues.getLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: sprintLabel
+                });
+              } catch (err) {
+                if (err.status !== 404) throw err;
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: sprintLabel,
+                  color: '1d76db',
+                  description: 'Auto-assigned sprint label (ISO week)'
+                });
+              }
+
               labelsToAdd.push(sprintLabel);
               core.info(`Auto-assigning sprint label: ${sprintLabel}`);
             }
