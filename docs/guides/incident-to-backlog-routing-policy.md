@@ -54,7 +54,7 @@ Every remediation issue created by the router must have these portfolio fields p
 | `Guardrail State` | Environment context | Set `guardrail-active` if a deploy freeze or gate is in effect at routing time |
 | `SRE Impact` | Incident `sre_impact` field | revenue_loss, user_facing_degradation, data_integrity, latency, availability, or none; default: availability for SEV1/2 |
 | `Wave` | Severity | SEV1/2 → `wave:1`; SEV3 → `wave:2`; SEV4/5 → no wave label |
-| `Sprint` label | Routing target | SEV1/2 → `sprint:{current}`; SEV3 → `sprint:{next}`; SEV4/5 → `backlog` |
+| `Sprint` label | Routing target | SEV1/2 → `sprint:{current}`; SEV3/4 → `sprint:{next}` + `maintenance`; SEV5 → `backlog` |
 | `incident-followup` label | All incidents | Applied to every remediation issue for cross-cut reporting |
 
 ### Required Label Set
@@ -62,7 +62,7 @@ Every remediation issue created by the router must have these portfolio fields p
 Every remediation issue must carry:
 
 ```text
-{type}  {priority}  {risk}  incident-followup  sprint:{N} OR backlog
+{type}  {priority}  {risk}  incident-followup  sprint:{N} OR sprint:{N},maintenance OR backlog
 ```
 
 Optional labels applied when conditions are met:
@@ -120,12 +120,22 @@ linked remediation issue in its body or comments.
 Run orphan detection on demand or on a scheduled cadence:
 
 ```bash
+# Open incidents
 gh issue list --repo {repo} --state open \
   --label "incident" --json number,title,body,labels,comments \
   | jq '[.[] | select(
-      (.body | contains("Remediation issue created") | not) and
-      (.comments[] | .body | contains("Remediation issue created") | not // true)
+      ((.body // "") | contains("Remediation issue created") | not) and
+      (any(.comments[]?; .body | contains("Remediation issue created")) | not)
     )]'
+
+# Recently closed incidents (within 14 days) — run separately and merge results
+gh issue list --repo {repo} --state closed \
+  --label "incident" --json number,title,body,labels,comments,closedAt \
+  | jq --arg cutoff "$(date -u -d '14 days ago' +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -v-14d +%Y-%m-%dT%H:%M:%SZ)" \
+    '[.[] | select(.closedAt >= $cutoff) | select(
+        ((.body // "") | contains("Remediation issue created") | not) and
+        (any(.comments[]?; .body | contains("Remediation issue created")) | not)
+      )]'
 ```
 
 ### Response Protocol

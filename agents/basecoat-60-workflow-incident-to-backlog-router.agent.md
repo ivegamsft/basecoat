@@ -12,7 +12,7 @@ capabilities:
 model_policy:
   fallback: true
   preferred_families: [gpt, claude]
-allowed_skills: [decision-log-capture, flow-admission-control, observability, security-operations]
+allowed_skills: [decision-log-capture, flow-admission-control, observability, security-operations, operation-context-resolver]
 compatibility: []
 metadata:
   category: workflow
@@ -36,6 +36,8 @@ Purpose: ingest incident signals and deterministically create or update prioriti
 - `repo` (optional) — GitHub owner/repo for issue creation (defaults to current repo from `git remote get-url origin`)
 - `sprint` (optional) — sprint number to route SEV1/SEV2 items into (defaults to current sprint)
 - `dry_run` (optional, boolean) — preview actions without writing to GitHub
+- `create` (optional, boolean) — when `true`, write the remediation issue to GitHub (default: false unless `dry_run` is also false and all required inputs are present)
+- `check_orphans` (optional, boolean) — when `true`, scan for orphaned incidents rather than routing a new incident
 
 ## Routing Policy
 
@@ -46,7 +48,7 @@ See [`docs/guides/incident-to-backlog-routing-policy.md`](../../docs/guides/inci
 | SEV1 | Current sprint | < 2 hours | Assigned to current sprint; wave:1 |
 | SEV2 | Current sprint | < 8 hours | Assigned to current sprint; wave:1 |
 | SEV3 | Maintenance queue | < 24 hours | Assigned to next sprint; wave:2 |
-| SEV4 | Maintenance queue | < 72 hours | Backlog — next maintenance window |
+| SEV4 | Maintenance queue | < 72 hours | Maintenance queue — next sprint |
 | SEV5 | Backlog | < 1 week | Backlog — unassigned sprint |
 
 ## Workflow
@@ -76,7 +78,7 @@ Populate all required portfolio fields before creating the issue:
 |---|---|
 | `Type` | From classification in Phase 1 |
 | `Priority` | From severity-to-priority map (see routing policy) |
-| `Risk` | From `security_involved` flag and service criticality |
+| `Risk` | From severity and `security_involved` flag per routing policy |
 | `Guardrail State` | Set to `active` if a deploy gate or freeze is in effect |
 | `SRE Impact` | From `sre_impact` input; default `availability` for SEV1/2 |
 | `Wave` | From severity: SEV1/2 → `wave:1`; SEV3 → `wave:2`; SEV4/5 → none |
@@ -89,7 +91,7 @@ Create the GitHub issue with pre-populated fields:
 gh issue create \
   --repo {repo} \
   --title "[Incident #{incident_id}] {title}" \
-  --label "{type},{priority_label},{risk_label},incident-followup,sprint:{sprint}" \
+  --label "{type},{priority_label},{risk_label},incident-followup" \
   --body "{issue_body}"
 ```
 
@@ -157,7 +159,13 @@ gh project item-add {project_number} --owner {owner} --url {issue_url}
 gh issue edit {issue_number} --repo {repo} --add-label "sprint:{next_sprint},wave:2,maintenance"
 ```
 
-#### SEV4/SEV5 — Backlog
+#### SEV4 — Maintenance queue (next sprint)
+
+```bash
+gh issue edit {issue_number} --repo {repo} --add-label "sprint:{next_sprint},maintenance"
+```
+
+#### SEV5 — Backlog
 
 ```bash
 gh issue edit {issue_number} --repo {repo} --add-label "backlog"
@@ -193,7 +201,10 @@ When invoked with `--check-orphans`, scan for open incidents without a linked re
 ```bash
 gh issue list --repo {repo} --state open \
   --label "incident" --json number,title,body,labels,comments \
-  | jq '[.[] | select(.body | contains("Remediation issue created") | not)]'
+  | jq '[.[] | select(
+      ((.body // "") | contains("Remediation issue created") | not) and
+      (any(.comments[]?; .body | contains("Remediation issue created")) | not)
+    )]'
 ```
 
 For each orphaned incident found:
