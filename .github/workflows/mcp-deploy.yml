@@ -24,9 +24,9 @@ on:
       environment:
         description: "Target environment"
         required: false
-        default: "prod"
+        default: "production"
         type: choice
-        options: ["prod", "staging"]
+        options: ["production", "prod", "staging"]
 
 permissions:
   contents: read
@@ -40,11 +40,11 @@ env:
 jobs:
   build-push:
     name: Build and push image to GHCR
-    runs-on: ${{ vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
+    runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-latest' || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
     timeout-minutes: 20
     if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork }}
     env:
-      TARGET_ENV: ${{ github.event_name == 'pull_request' && 'staging' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'prod') }}
+      TARGET_ENV: ${{ github.event_name == 'pull_request' && 'staging' || (github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'production' && 'prod' || github.event.inputs.environment) || 'prod') }}
     outputs:
       image_tag: ${{ steps.meta.outputs.version }}
       image_ref: ${{ env.REGISTRY }}/${{ steps.owner.outputs.lc }}/basecoat-metrics-mcp:${{ steps.meta.outputs.version }}
@@ -112,13 +112,13 @@ jobs:
 
   deploy:
     name: Deploy to Azure Container Apps
-    runs-on: ${{ vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
+    runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-latest' || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
     timeout-minutes: 20
     needs: build-push
     if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork }}
-    environment: ${{ github.event_name == 'pull_request' && 'staging' || (github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'prod' && 'production' || github.event.inputs.environment) || 'production') }}
+    environment: ${{ github.event_name == 'pull_request' && 'staging' || (github.event_name == 'workflow_dispatch' && ((github.event.inputs.environment == 'prod' || github.event.inputs.environment == 'production') && 'production' || github.event.inputs.environment) || 'production') }}
     env:
-      TARGET_ENV: ${{ github.event_name == 'pull_request' && 'staging' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'prod') }}
+      TARGET_ENV: ${{ github.event_name == 'pull_request' && 'staging' || (github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'production' && 'prod' || github.event.inputs.environment) || 'prod') }}
 
     steps:
       - name: Check out repository
