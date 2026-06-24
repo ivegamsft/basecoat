@@ -87,8 +87,8 @@ jobs:
         shell: bash
         env:
           EVENT_NAME: ${{ github.event_name }}
-          INPUT_MODE: ${{ inputs.deployment_mode || 'internal' }}
-          TARGET_ENV: ${{ inputs.environment || 'staging' }}
+          INPUT_MODE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.deployment_mode || 'internal' }}
+          TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'staging' }}
           TARGET_RG: ${{ env.AZURE_RESOURCE_GROUP }}
           DOWNSTREAM_BACKEND_IMAGE: ${{ env.DOWNSTREAM_BACKEND_IMAGE }}
           DOWNSTREAM_FRONTEND_IMAGE: ${{ env.DOWNSTREAM_FRONTEND_IMAGE }}
