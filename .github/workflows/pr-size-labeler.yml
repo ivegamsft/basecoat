@@ -80,7 +80,9 @@ jobs:
               return /^(wave:|sprint:|wave-|sprint-).+/.test(normalized) || normalized === 'wave/sprint';
             });
 
-            if (!hasReleaseLabel) {
+            const isForkPR = context.payload.pull_request?.head?.repo?.fork === true;
+
+            if (!hasReleaseLabel && !isForkPR) {
               // Default to current sprint based on ISO week (ISO-8601)
               const now = new Date();
               const isoDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
@@ -110,6 +112,8 @@ jobs:
 
               labelsToAdd.push(sprintLabel);
               core.info(`Auto-assigning sprint label: ${sprintLabel}`);
+            } else if (!hasReleaseLabel && isForkPR) {
+              core.info('Skipping sprint auto-assignment: PR is from a fork repository.');
             }
 
             await github.rest.issues.addLabels({
@@ -127,6 +131,6 @@ jobs:
                 [{ data: 'Deletions', header: true }, String(pr.data.deletions || 0)],
                 [{ data: 'Total changes', header: true }, String(totalChanges)],
                 [{ data: 'Size label', header: true }, selected.label],
-                [{ data: 'Sprint auto-assign', header: true }, !hasReleaseLabel ? 'Yes' : 'Skipped (already has release label)']
+                [{ data: 'Sprint auto-assign', header: true }, !hasReleaseLabel && !isForkPR ? 'Yes' : isForkPR ? 'Skipped (fork PR)' : 'Skipped (already has release label)']
               ])
               .write();
