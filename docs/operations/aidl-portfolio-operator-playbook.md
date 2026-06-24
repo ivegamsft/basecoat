@@ -169,6 +169,14 @@ Learning capture flows from sprint retrospectives to permanent BaseCoat guidance
    - **Agent**: Complex agentic workflow (file in `agents/`)
 4. **Track adoption**: Measure how often teams reference the artifact; refine based on feedback.
 
+Operational command:
+
+```powershell
+pwsh -File scripts/aidl-learning-memory-promotion.ps1 `
+  -InputPath <learning-candidate-export.json> `
+  -OutputDir artifacts/aidl-learning-memory-pipeline
+```
+
 ### Example: CI Flakiness Learning
 
 ```text

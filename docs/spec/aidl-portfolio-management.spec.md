@@ -139,6 +139,9 @@ Use **GitHub Actions** for:
 4. Implement cross-repo rollup and KPI publisher.
 5. Implement incident-to-backlog router.
 6. Implement learning-to-memory pipeline.
+   - Pipeline script: `scripts/aidl-learning-memory-promotion.ps1`
+   - Operator guide: `docs/guides/aidl-learning-memory-promotion-pipeline.md`
+   - Validation test: `tests/aidl-learning-memory-promotion-tests.ps1`
 7. Normalize routing and naming ambiguity.
 
 ## Testing Strategy

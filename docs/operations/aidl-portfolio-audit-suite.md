@@ -99,6 +99,14 @@ pwsh -File scripts/aidl-portfolio-project-bootstrap.ps1 `
 - [ ] Sensitive content controls are applied
 - [ ] Adoption impact is measured
 
+Runbook command for this check:
+
+```powershell
+pwsh -File scripts/aidl-learning-memory-promotion.ps1 `
+  -InputPath <learning-candidate-export.json> `
+  -OutputDir artifacts/aidl-learning-memory-pipeline
+```
+
 ## 7) Delivery-flow economics audit
 
 - [ ] Token and turn baseline is tracked
