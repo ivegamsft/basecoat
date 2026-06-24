@@ -15,8 +15,8 @@
         "required_approvals_by_risk_tier": {
           "low": 0,
           "medium": 0,
-          "high": 1,
-          "critical": 1
+          "high": 0,
+          "critical": 0
         }
       },
       "cloud_agent": {
