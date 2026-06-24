@@ -195,7 +195,22 @@ jobs:
 
               const labels = normalizeLabels(pr.labels || []);
               const assigneeCount = pr.assignees?.length || 0;
-              const reviewerCount = (pr.requested_reviewers?.length || 0) + (pr.requested_teams?.length || 0);
+              const requestedReviewerCount = (pr.requested_reviewers?.length || 0) + (pr.requested_teams?.length || 0);
+
+              // Also count submitted reviews (including bot reviews) so single-person repos
+              // and Copilot-reviewed PRs are not blocked for missing a requested reviewer.
+              const { data: submittedReviews } = await github.rest.pulls.listReviews({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+              const submittedReviewerCount = new Set(
+                submittedReviews
+                  .filter(r => r.state !== 'DISMISSED' && r.user?.login !== pr.user?.login)
+                  .map(r => r.user?.login)
+              ).size;
+              const reviewerCount = requestedReviewerCount + submittedReviewerCount;
+
               const ageDays = daysBetween(now, new Date(pr.created_at));
               const idleDays = daysBetween(now, new Date(pr.updated_at));
               const reasons = [];
