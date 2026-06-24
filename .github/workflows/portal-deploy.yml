@@ -33,6 +33,7 @@ permissions:
 env:
   AZURE_LOCATION: ${{ vars.PORTAL_AZURE_LOCATION || 'eastus' }}
   AZURE_RESOURCE_GROUP: ${{ vars.PORTAL_RESOURCE_GROUP || 'basecoat-portal-staging-rg' }}
+  DEPLOYMENT_MODE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.deployment_mode || 'internal' }}
 
 jobs:
   deploy:
@@ -124,7 +125,6 @@ jobs:
         shell: bash
         run: |
           set -eo pipefail
-          # Check if resource group exists
           if az group exists --name "${AZURE_RESOURCE_GROUP}" | grep -q true; then
             echo "Resource group ${AZURE_RESOURCE_GROUP} already exists"
           else
@@ -143,7 +143,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # Deploy ACR via its module — idempotent
           az deployment group create \
             --resource-group "${AZURE_RESOURCE_GROUP}" \
             --template-file portal/app/iac/modules/container-registry.bicep \
@@ -206,6 +205,7 @@ jobs:
             echo "database_fqdn=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['databaseFqdn']['value'])")"
             echo "acr_server=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['acrLoginServer']['value'])")"
             echo "app_insights_name=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['appInsightsName']['value'])")"
+            echo "app_insights_resource_id=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['appInsightsResourceId']['value'])")"
             echo "log_analytics_id=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['logAnalyticsWorkspaceId']['value'])")"
             echo "backend_resource_id=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['backendContainerAppId']['value'])")"
             echo "frontend_resource_id=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['frontendContainerAppId']['value'])")"
@@ -256,6 +256,7 @@ jobs:
             echo "| PostgreSQL | ${{ steps.deploy.outputs.database_fqdn }} |"
             echo "| ACR | ${{ steps.deploy.outputs.acr_server }} |"
             echo "| App Insights | ${{ steps.deploy.outputs.app_insights_name }} |"
+            echo "| App Insights resource ID | ${{ steps.deploy.outputs.app_insights_resource_id }} |"
             echo "| Log Analytics workspace ID | ${{ steps.deploy.outputs.log_analytics_id }} |"
             echo "| Backend resource ID | ${{ steps.deploy.outputs.backend_resource_id }} |"
             echo "| Frontend resource ID | ${{ steps.deploy.outputs.frontend_resource_id }} |"
