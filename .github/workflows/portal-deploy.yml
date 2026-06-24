@@ -35,6 +35,11 @@ on:
         required: false
         default: ""
         type: string
+      resource_group:
+        description: "Target Azure resource group override (required for downstream mode)"
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: read
@@ -42,7 +47,7 @@ permissions:
 
 env:
   AZURE_LOCATION: ${{ vars.PORTAL_AZURE_LOCATION || 'eastus' }}
-  AZURE_RESOURCE_GROUP: ${{ vars.PORTAL_RESOURCE_GROUP || 'basecoat-portal-staging-rg' }}
+  AZURE_RESOURCE_GROUP: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.resource_group != '') && github.event.inputs.resource_group || vars.PORTAL_RESOURCE_GROUP || 'basecoat-portal-staging-rg' }}
   DEPLOYMENT_MODE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.deployment_mode || 'internal' }}
   DOWNSTREAM_BACKEND_IMAGE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.downstream_backend_image || '' }}
   DOWNSTREAM_FRONTEND_IMAGE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.downstream_frontend_image || '' }}

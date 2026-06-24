@@ -55,11 +55,11 @@ var postgresServerName = toLower('${prefix}-pg-${envSuffix}-${modeSuffix}-${stab
 var acrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
 var acrPullIdentityName = '${prefix}-acr-pull-${envSuffix}-${modeSuffix}'
 var backendImage = deploymentMode == 'internal'
-  ? (empty(backendImageTag) ? error('backendImageTag is required when deploymentMode=internal') : '${registry!.outputs.loginServer}/${backendImageTag}')
-  : (empty(downstreamBackendImage) ? error('downstreamBackendImage is required when deploymentMode=downstream') : downstreamBackendImage)
+  ? (empty(backendImageTag) ? fail('backendImageTag is required when deploymentMode=internal') : '${registry!.outputs.loginServer}/${backendImageTag}')
+  : (empty(downstreamBackendImage) ? fail('downstreamBackendImage is required when deploymentMode=downstream') : downstreamBackendImage)
 var frontendImage = deploymentMode == 'internal'
-  ? '${registry!.outputs.loginServer}/${frontendImageTag}'
-  : (empty(downstreamFrontendImage) ? error('downstreamFrontendImage is required when deploymentMode=downstream') : downstreamFrontendImage)
+  ? (empty(frontendImageTag) ? fail('frontendImageTag is required when deploymentMode=internal') : '${registry!.outputs.loginServer}/${frontendImageTag}')
+  : (empty(downstreamFrontendImage) ? fail('downstreamFrontendImage is required when deploymentMode=downstream') : downstreamFrontendImage)
 
 resource acrPullIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = if (deploymentMode == 'internal') {
   name: acrPullIdentityName
@@ -81,6 +81,7 @@ resource acrRegistry 'Microsoft.ContainerRegistry/registries@2023-07-01' existin
 resource acrPullRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (deploymentMode == 'internal') {
   name: guid(resourceGroup().id, acrPullIdentityName, acrPullRoleId)
   scope: acrRegistry
+  dependsOn: [registry]
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', acrPullRoleId)
     principalId: acrPullIdentity!.properties.principalId
@@ -136,7 +137,7 @@ module database './modules/postgresql-flexible-server.bicep' = {
     databaseName: postgresDatabaseName
     administratorLogin: postgresAdminLogin
     administratorLoginPassword: postgresAdminPassword
-    publicNetworkAccess: deploymentMode == 'internal' ? 'Enabled' : 'Disabled'
+    publicNetworkAccess: 'Enabled'
   }
 }
 
