@@ -131,6 +131,10 @@ Use **GitHub Actions** for:
 
 1. Publish baseline spec and operations docs.
 2. Implement project bootstrap manifest and validator.
+   - Manifest schema: `docs/specs/aidl-portfolio/project-bootstrap-manifest.schema.json`
+   - Baseline manifest: `docs/specs/aidl-portfolio/project-bootstrap-manifest.json`
+   - Validator/apply script: `scripts/aidl-portfolio-project-bootstrap.ps1`
+   - Usage guide: `docs/guides/aidl-portfolio-project-bootstrap.md`
 3. Implement project rules drift auditor.
 4. Implement cross-repo rollup and KPI publisher.
 5. Implement incident-to-backlog router.
@@ -185,3 +189,4 @@ Track:
 4. `docs/operations/aidl-portfolio-operator-playbook.md`
 5. `docs/operations/aidl-portfolio-posture-assessment.md`
 6. `docs/operations/aidl-sre-feedback-loop.md`
+7. `docs/guides/aidl-portfolio-project-bootstrap.md`

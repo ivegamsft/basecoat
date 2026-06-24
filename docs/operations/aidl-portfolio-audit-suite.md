@@ -63,6 +63,15 @@ Critical control failures force red regardless of aggregate score.
 - [ ] Required automation rules exist and are active
 - [ ] Drift report generated
 
+Runbook command for this check:
+
+```powershell
+pwsh -File scripts/aidl-portfolio-project-bootstrap.ps1 `
+  -ManifestPath docs/specs/aidl-portfolio/project-bootstrap-manifest.json `
+  -Mode validate `
+  -CurrentStatePath <project-state-export.json>
+```
+
 ## 3) Governance and exception hygiene audit
 
 - [ ] `Waived` states include owner/rationale/expiry
