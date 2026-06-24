@@ -254,6 +254,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running AIDL portfolio rollup and KPI publisher tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'aidl-portfolio-rollup-kpi-publisher-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'AIDL portfolio rollup and KPI publisher tests failed' -ForegroundColor Red
+    Write-FailureLog 'aidl-portfolio-rollup-kpi-publisher-tests'
+    exit 1
+}
+
 Write-Host 'Running AIDL learning-to-memory promotion pipeline tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'aidl-learning-memory-promotion-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
