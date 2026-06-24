@@ -66,7 +66,7 @@ Navigate to: **Repository Settings → Branches → Add rule** (or edit existing
 | Dismiss stale reviews | ✅ | Re-review after new push |
 | Require review from code owners | ✅ (if CODEOWNERS exists) | Enforce ownership boundaries |
 | Require status checks to pass | ✅ | See status checks list below |
-| Require merge queue | ✅ | Ensures only checked merge groups land on `main` |
+| Require merge queue | Deferred | Documented temporary exception; enforce via policy-pack posture until queue is enabled |
 | Require branches to be up to date | ✅ | Prevents stale-branch merges |
 | Require conversation resolution | ✅ | All review comments must be resolved |
 | Require signed commits | ✅ | Verify author identity |
@@ -91,6 +91,10 @@ These are the minimum checks required for readiness gating on `main`:
 | `prd-spec-gate` | `prd-spec-gate.yml` | Intake gate: blocks only high-change PRs missing both PRD+Spec refs; warns for risky-path-only PRs |
 | `gitleaks` | `secret-scan.yml` | ⚠️ Warn-only — **do NOT add as required check** |
 
+> **Merge queue posture (BaseCoat):** current default policy pack posture is
+> `deferred`. Teams can set merge queue to `required` by policy pack when an
+> active branch ruleset with a `merge_queue` rule is in place.
+>
 > **Important:** Do **not** add the `gitleaks` / `Secret Scanning (warn only)`
 > check as a required status check. It is intentionally warn-only and must
 > never block merges. See [Secret Scanning design rationale](./secret-scanning.md#overview).
@@ -285,8 +289,9 @@ After admins apply branch protection, verify all of the following:
 2. `required_status_checks.strict` is `true`.
 3. Required checks include: `lint-and-validate`, `test`, `validate-commit-messages`, `validate-unix`, `validate-windows`, `release-label-gate`.
 4. `required_pull_request_reviews.required_approving_review_count` is at least `1`.
-5. `enforce_admins.enabled` is `true` (recommended).
-6. A PR with one failing required check cannot be merged.
+5. `required_conversation_resolution.enabled` is `true`.
+6. `enforce_admins.enabled` is `true` (recommended).
+7. A PR with one failing required check cannot be merged.
 
 The `Main branch protection readiness gate` job in `.github/workflows/pr-validation.yml` validates this baseline on every PR to `main`.
 

@@ -18,6 +18,7 @@ The Sprint 40 execution backlog is covered by the following specification work i
 | #1751 | Reliability and SRE feedback-loop audit quality | `audit-reliability.md` |
 | #1752 | Learning and memory pattern promotion quality | `audit-learning-memory.md` |
 | #1883 | Sprint 1 planning and scope confirmation | This README |
+| #1992 | Sprint 1 planning/scoping for governance backlog carry-forward | `sprint-1992-scope-plan.md` |
 | #1884 | Sprint 2 implementation closeout evidence | README update in Sprint 2 close PR |
 | #1885 | Sprint 3 closeout evidence | README update in Sprint 3 close PR |
 | #1759 | Feature tracker for portfolio management and governance | Tracker close after Sprint 3 merge |
@@ -43,6 +44,7 @@ Guardrail semantics across these specs use a shared contract.
 ## Current Evidence Status
 
 - Sprint 1 scope: completed by this README.
+- Sprint 1 scope refresh for #1992: captured in `sprint-1992-scope-plan.md`.
 - Sprint 2 implementation evidence: completed.
 - Sprint 3 closeout evidence: completed.
 
