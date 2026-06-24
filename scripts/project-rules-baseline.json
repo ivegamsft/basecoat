@@ -1,0 +1,131 @@
+{
+  "$schema": "project-rules-baseline-schema",
+  "version": "1.0.0",
+  "description": "Canonical AIDL guardrail baseline for GitHub Project automation rules.",
+  "rules": [
+    {
+      "rule_id": "PRD-001",
+      "name": "Auto-set status to In Progress on PR open",
+      "enabled": true,
+      "condition": {
+        "type": "pull_request_event",
+        "event": "opened"
+      },
+      "action": {
+        "type": "set_field",
+        "field": "Status",
+        "value": "In Progress"
+      },
+      "severity_if_missing": "high",
+      "rationale": "Ensures all open PRs are immediately visible in the in-progress swim lane, preventing work from being invisible to the team."
+    },
+    {
+      "rule_id": "PRD-002",
+      "name": "Auto-set status to Done on PR merge",
+      "enabled": true,
+      "condition": {
+        "type": "pull_request_event",
+        "event": "merged"
+      },
+      "action": {
+        "type": "set_field",
+        "field": "Status",
+        "value": "Done"
+      },
+      "severity_if_missing": "high",
+      "rationale": "Closes work items automatically on merge so the board reflects the true delivery state without manual updates."
+    },
+    {
+      "rule_id": "PRD-003",
+      "name": "Auto-set status to Done on issue close",
+      "enabled": true,
+      "condition": {
+        "type": "issue_event",
+        "event": "closed"
+      },
+      "action": {
+        "type": "set_field",
+        "field": "Status",
+        "value": "Done"
+      },
+      "severity_if_missing": "high",
+      "rationale": "Mirrors issue closure to the board so completed work is not left in an active swim lane."
+    },
+    {
+      "rule_id": "PRD-004",
+      "name": "Auto-archive items when status is Done",
+      "enabled": true,
+      "condition": {
+        "type": "field_value_change",
+        "field": "Status",
+        "value": "Done"
+      },
+      "action": {
+        "type": "archive_item"
+      },
+      "severity_if_missing": "medium",
+      "rationale": "Keeps the active board clean by archiving completed items automatically, reducing cognitive load for operators."
+    },
+    {
+      "rule_id": "PRD-005",
+      "name": "Auto-add items with sprint label to project",
+      "enabled": true,
+      "condition": {
+        "type": "label_added",
+        "label_prefix": "sprint:"
+      },
+      "action": {
+        "type": "add_to_project"
+      },
+      "severity_if_missing": "critical",
+      "rationale": "Sprint-labeled issues must be tracked in the AIDL project board. Missing this rule causes sprint scope to be invisible to the project view."
+    },
+    {
+      "rule_id": "PRD-006",
+      "name": "Auto-set status to Todo on item add",
+      "enabled": true,
+      "condition": {
+        "type": "item_added_to_project"
+      },
+      "action": {
+        "type": "set_field",
+        "field": "Status",
+        "value": "Todo"
+      },
+      "severity_if_missing": "medium",
+      "rationale": "New items default to Todo status so they are immediately visible in the backlog swim lane."
+    },
+    {
+      "rule_id": "PRD-007",
+      "name": "Auto-reopen item when PR is reopened",
+      "enabled": true,
+      "condition": {
+        "type": "pull_request_event",
+        "event": "reopened"
+      },
+      "action": {
+        "type": "set_field",
+        "field": "Status",
+        "value": "In Progress"
+      },
+      "severity_if_missing": "medium",
+      "rationale": "Reopened PRs should move back to In Progress to prevent silent staleness on the board."
+    },
+    {
+      "rule_id": "PRD-008",
+      "name": "Auto-set status to In Review on review requested",
+      "enabled": true,
+      "condition": {
+        "type": "pull_request_event",
+        "event": "review_requested"
+      },
+      "action": {
+        "type": "set_field",
+        "field": "Status",
+        "value": "In Review"
+      },
+      "severity_if_missing": "low",
+      "rationale": "Tracks PR review state on the board so reviewers can see what requires their attention without reading PR lists."
+    }
+  ]
+}

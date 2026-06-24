@@ -1,0 +1,25 @@
+name: "project-rules-drift-auditor-routing"
+description: "Routing evaluation — validates trigger activation for the project-rules-drift-auditor agent."
+skill: "agents/basecoat-50-security-project-rules-drift-auditor.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "Audit the GitHub Project automation rules for drift against the AIDL guardrail baseline."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Compare live project rules to the canonical baseline and classify any drift by severity."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Run the project rules drift audit in enforce mode and open remediation issues for any high or critical findings."
+    expect_activation: true
+  - id: "pos-4"
+    input: "Detect missing, modified, and extra project automation rules and produce a deterministic drift report."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Write a new feature for the login flow."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Fix the broken CSS layout in the dashboard."
+    expect_activation: false
+  - id: "neg-3"
+    input: "Deploy the latest release to production."
+    expect_activation: false
