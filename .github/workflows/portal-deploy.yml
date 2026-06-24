@@ -17,6 +17,14 @@ on:
         type: choice
         options:
           - staging
+      deployment_mode:
+        description: "Deployment boundary mode"
+        required: true
+        default: internal
+        type: choice
+        options:
+          - internal
+          - downstream
 
 permissions:
   contents: read
@@ -55,6 +63,35 @@ jobs:
             exit 1
           fi
           echo "Runner contract satisfied: ${RUNNER_DEPLOY}"
+
+      - name: Validate deployment mode boundary
+        id: mode
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_MODE: ${{ inputs.deployment_mode || 'internal' }}
+          TARGET_ENV: ${{ inputs.environment || 'staging' }}
+          TARGET_RG: ${{ env.AZURE_RESOURCE_GROUP }}
+        run: |
+          set -euo pipefail
+          MODE="$(echo "${INPUT_MODE}" | tr '[:upper:]' '[:lower:]')"
+          if [[ "${MODE}" != "internal" && "${MODE}" != "downstream" ]]; then
+            echo "::error::Unsupported deployment_mode: ${MODE}"
+            exit 1
+          fi
+          if [[ "${EVENT_NAME}" == "push" && "${MODE}" != "internal" ]]; then
+            echo "::error::Push-triggered deploys must run in internal mode."
+            exit 1
+          fi
+          if [[ "${MODE}" == "downstream" && "${TARGET_RG}" == "basecoat-portal-staging-rg" ]]; then
+            echo "::error::Downstream mode cannot target internal default resource group."
+            exit 1
+          fi
+          if [[ "${MODE}" == "downstream" && "${TARGET_ENV}" == "staging" ]]; then
+            echo "::warning::Downstream mode requested with staging environment input; ensure this run targets downstream resources only."
+          fi
+          echo "deployment_mode=${MODE}" >> "$GITHUB_OUTPUT"
+          echo "Deployment mode validated: ${MODE}"
 
       - name: Select Azure auth mode
         id: azure-auth
@@ -156,15 +193,23 @@ jobs:
               acrName="${ACR_NAME}" \
               backendImageTag="${{ steps.build.outputs.backend_tag }}" \
               frontendImageTag="${{ steps.build.outputs.frontend_tag }}" \
+              deploymentMode="${{ steps.mode.outputs.deployment_mode }}" \
             --name "portal-staging-${{ github.run_number }}" \
             --query properties.outputs \
             --output json)
 
           {
+            echo "deployment_mode=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['deploymentMode']['value'])")"
+            echo "resource_group_name=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['resourceGroupName']['value'])")"
             echo "backend_url=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['backendUrl']['value'])")"
             echo "frontend_url=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['frontendUrl']['value'])")"
             echo "database_fqdn=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['databaseFqdn']['value'])")"
             echo "acr_server=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['acrLoginServer']['value'])")"
+            echo "app_insights_name=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['appInsightsName']['value'])")"
+            echo "log_analytics_id=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['logAnalyticsWorkspaceId']['value'])")"
+            echo "backend_resource_id=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['backendContainerAppId']['value'])")"
+            echo "frontend_resource_id=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['frontendContainerAppId']['value'])")"
+            echo "postgres_resource_id=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['postgresServerResourceId']['value'])")"
           } >> "$GITHUB_OUTPUT"
         env:
           ACR_NAME: ${{ vars.PORTAL_ACR_NAME || 'portalacrstaging' }}
@@ -204,8 +249,15 @@ jobs:
             echo ""
             echo "| Output | Value |"
             echo "|---|---|"
+            echo "| Deployment mode | ${{ steps.deploy.outputs.deployment_mode }} |"
+            echo "| Resource group | ${{ steps.deploy.outputs.resource_group_name }} |"
             echo "| Backend | ${{ steps.deploy.outputs.backend_url }} |"
             echo "| Frontend | ${{ steps.deploy.outputs.frontend_url }} |"
             echo "| PostgreSQL | ${{ steps.deploy.outputs.database_fqdn }} |"
             echo "| ACR | ${{ steps.deploy.outputs.acr_server }} |"
+            echo "| App Insights | ${{ steps.deploy.outputs.app_insights_name }} |"
+            echo "| Log Analytics workspace ID | ${{ steps.deploy.outputs.log_analytics_id }} |"
+            echo "| Backend resource ID | ${{ steps.deploy.outputs.backend_resource_id }} |"
+            echo "| Frontend resource ID | ${{ steps.deploy.outputs.frontend_resource_id }} |"
+            echo "| PostgreSQL resource ID | ${{ steps.deploy.outputs.postgres_resource_id }} |"
           } >> "$GITHUB_STEP_SUMMARY"
