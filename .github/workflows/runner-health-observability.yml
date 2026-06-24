@@ -74,10 +74,9 @@ jobs:
             -OutputPath "runner-health-report.json"
 
       - name: Publish runner-health summary
-        shell: bash
+        shell: pwsh
         run: |
-          set -euo pipefail
-          cat runner-health-report.md >> "$GITHUB_STEP_SUMMARY"
+          Get-Content -Path "runner-health-report.md" -Raw | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
 
       - name: Upload runner-health artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
