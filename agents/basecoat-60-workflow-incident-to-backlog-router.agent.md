@@ -294,4 +294,4 @@ incident_router_result:
 - **No secrets**: never include credentials, tokens, or sensitive environment details in issue bodies or routing logs.
 - **Blamelessness**: issue titles and bodies focus on systems and failure modes, not individual fault.
 - **Audit trail**: all routing decisions are logged via `decision-log-capture` for post-incident review.
-- See `docs/guides/incident-to-backlog-routing-policy.md` for the canonical routing policy.
+- **Canonical policy**: see `docs/guides/incident-to-backlog-routing-policy.md` for the full routing policy.
