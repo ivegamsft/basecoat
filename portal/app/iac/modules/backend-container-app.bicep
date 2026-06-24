@@ -47,6 +47,12 @@ param corsOrigins string = '*'
 @description('API prefix exposed by the backend.')
 param apiPrefix string = '/api/v1'
 
+@description('Application Insights connection string.')
+param appInsightsConnectionString string = ''
+
+@description('Whether ingress is externally exposed.')
+param ingressExternal bool = true
+
 resource app 'Microsoft.App/containerApps@2024-03-01' = {
   name: appName
   location: location
@@ -60,7 +66,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
     managedEnvironmentId: environmentId
     configuration: {
       ingress: {
-        external: true
+        external: ingressExternal
         targetPort: targetPort
         transport: 'http'
         allowInsecure: false
@@ -131,6 +137,10 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             {
               name: 'DB_SSL'
               value: 'true'
+            }
+            {
+              name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+              value: appInsightsConnectionString
             }
           ]
         }

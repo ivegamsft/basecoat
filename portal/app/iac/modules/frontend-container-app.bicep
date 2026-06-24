@@ -25,6 +25,12 @@ param minReplicas int = 0
 @description('Maximum replica count.')
 param maxReplicas int = 2
 
+@description('Application Insights connection string.')
+param appInsightsConnectionString string = ''
+
+@description('Whether ingress is externally exposed.')
+param ingressExternal bool = true
+
 resource app 'Microsoft.App/containerApps@2024-03-01' = {
   name: appName
   location: location
@@ -38,7 +44,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
     managedEnvironmentId: environmentId
     configuration: {
       ingress: {
-        external: true
+        external: ingressExternal
         targetPort: targetPort
         transport: 'http'
         allowInsecure: false
@@ -59,6 +65,12 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             cpu: json('0.25')
             memory: '0.5Gi'
           }
+          env: [
+            {
+              name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+              value: appInsightsConnectionString
+            }
+          ]
         }
       ]
       scale: {
