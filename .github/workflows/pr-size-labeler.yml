@@ -131,6 +131,6 @@ jobs:
                 [{ data: 'Deletions', header: true }, String(pr.data.deletions || 0)],
                 [{ data: 'Total changes', header: true }, String(totalChanges)],
                 [{ data: 'Size label', header: true }, selected.label],
-                [{ data: 'Sprint auto-assign', header: true }, !hasReleaseLabel && !isForkPR ? 'Yes' : isForkPR ? 'Skipped (fork PR)' : 'Skipped (already has release label)']
+                [{ data: 'Sprint auto-assign', header: true }, isForkPR ? 'Skipped (fork PR)' : !hasReleaseLabel ? 'Yes' : 'Skipped (already has release label)']
               ])
               .write();
