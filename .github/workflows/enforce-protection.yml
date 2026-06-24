@@ -41,8 +41,8 @@ jobs:
               "/repos/${repo}/environments/prod" \
               -F wait_timer=0 \
               -F prevent_self_review=true \
-              -F deployment_branch_policy[protected_branches]=true \
-              -F deployment_branch_policy[custom_branch_policies]=false \
+              -F 'deployment_branch_policy[protected_branches]=true' \
+              -F 'deployment_branch_policy[custom_branch_policies]=false' \
               --jq '{name, html_url, deployment_branch_policy}' 2>&1)" || {
               if echo "$bootstrap_output" | grep -Fq 'Resource not accessible by integration'; then
                 echo "::warning::Unable to bootstrap 'prod' environment with github.token in this run."
