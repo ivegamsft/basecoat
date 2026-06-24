@@ -56,7 +56,7 @@ var acrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
 var acrPullIdentityName = '${prefix}-acr-pull-${envSuffix}-${modeSuffix}'
 var backendImage = deploymentMode == 'internal'
   ? '${registry!.outputs.loginServer}/${backendImageTag}'
-  : downstreamBackendImage
+  : (empty(downstreamBackendImage) ? error('downstreamBackendImage is required when deploymentMode=downstream') : downstreamBackendImage)
 var frontendImage = deploymentMode == 'internal'
   ? '${registry!.outputs.loginServer}/${frontendImageTag}'
   : downstreamFrontendImage
