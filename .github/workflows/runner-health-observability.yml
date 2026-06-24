@@ -47,7 +47,22 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
-      - name: Generate markdown runner-health report
+      - name: Generate markdown runner-health report (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        env:
+          LOOKBACK_DAYS: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.lookback_days || '14' }}
+          QUEUE_WARN_SECONDS: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.queue_warn_seconds || '300' }}
+        run: |
+          ./scripts/report-runner-health.ps1 `
+            -Repository "${{ github.repository }}" `
+            -LookbackDays ([int]$env:LOOKBACK_DAYS) `
+            -QueueWarnSeconds ([int]$env:QUEUE_WARN_SECONDS) `
+            -OutputFormat markdown `
+            -OutputPath "runner-health-report.md"
+
+      - name: Generate markdown runner-health report (non-Windows)
+        if: runner.os != 'Windows'
         shell: pwsh
         env:
           LOOKBACK_DAYS: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.lookback_days || '14' }}
@@ -60,7 +75,22 @@ jobs:
             -OutputFormat markdown `
             -OutputPath "runner-health-report.md"
 
-      - name: Generate json runner-health report
+      - name: Generate json runner-health report (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        env:
+          LOOKBACK_DAYS: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.lookback_days || '14' }}
+          QUEUE_WARN_SECONDS: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.queue_warn_seconds || '300' }}
+        run: |
+          ./scripts/report-runner-health.ps1 `
+            -Repository "${{ github.repository }}" `
+            -LookbackDays ([int]$env:LOOKBACK_DAYS) `
+            -QueueWarnSeconds ([int]$env:QUEUE_WARN_SECONDS) `
+            -OutputFormat json `
+            -OutputPath "runner-health-report.json"
+
+      - name: Generate json runner-health report (non-Windows)
+        if: runner.os != 'Windows'
         shell: pwsh
         env:
           LOOKBACK_DAYS: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.lookback_days || '14' }}
@@ -73,10 +103,18 @@ jobs:
             -OutputFormat json `
             -OutputPath "runner-health-report.json"
 
-      - name: Publish runner-health summary
-        shell: pwsh
+      - name: Publish runner-health summary (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
         run: |
           Get-Content -Path "runner-health-report.md" -Raw | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+
+      - name: Publish runner-health summary (non-Windows)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat runner-health-report.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload runner-health artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
