@@ -24,9 +24,9 @@ on:
       environment:
         description: "Target environment"
         required: false
-        default: "prod"
+        default: "production"
         type: choice
-        options: ["prod", "staging", "dev"]
+        options: ["production", "prod", "staging", "dev"]
 
 permissions:
   contents: read
@@ -115,9 +115,9 @@ jobs:
     timeout-minutes: 20
     needs: build-push
     if: ${{ github.event_name != 'pull_request' }}
-    environment: ${{ github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'prod' && 'production' || github.event.inputs.environment) || 'production' }}
+    environment: ${{ github.event_name == 'workflow_dispatch' && ((github.event.inputs.environment == 'prod' || github.event.inputs.environment == 'production') && 'production' || github.event.inputs.environment) || 'production' }}
     env:
-      TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'prod' }}
+      TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'production' && 'prod' || github.event.inputs.environment) || 'prod' }}
 
     steps:
       - name: Check out repository
