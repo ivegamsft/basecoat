@@ -31,7 +31,7 @@ flowchart TD
 |---|---|
 | Trigger | `pull_request_target` (`opened`, `synchronize`, `reopened`, `ready_for_review`) |
 | Manual trigger | `workflow_dispatch` with `pr_number` |
-| Concurrency | `${{ github.workflow }}-${{ github.event.pull_request.number \|\| github.ref }}` |
+| Concurrency | `${{ github.workflow }}-${{ github.event.pull_request.number or github.ref }}` |
 | Permissions | `contents: read`, `issues: write`, `pull-requests: write` |
 
 ## Exit
