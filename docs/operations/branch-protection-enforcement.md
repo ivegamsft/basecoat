@@ -15,6 +15,7 @@ Branch protection enforcement is handled through three mechanisms:
 **Trigger**: Every PR targeting `main` and `workflow_dispatch`
 
 **What it does**:
+
 - Queries repository API for main branch protection settings
 - Enforces strict required status checks baseline
 - Enforces at least one required approving review
@@ -31,10 +32,12 @@ Branch protection enforcement is handled through three mechanisms:
 **Trigger**: Weekly (Monday 3:23 AM UTC), PR edits to branch-protection policy files, or manual via `workflow_dispatch`
 
 **Permissions required**:
+
 - Repository admin access via `GITHUB_TOKEN` or `BRANCH_PROTECT_TOKEN` (PAT)
 - Write access to repository settings
 
 **What it does**:
+
 1. Checks out repository
 2. Validates branch protection policy documents exist and include expected controls
 3. Audits live `main` branch protection via GitHub API
@@ -69,6 +72,7 @@ Branch protection enforcement is handled through three mechanisms:
 ### Exception Handling
 
 **Temporary Bypass (Emergency)**:
+
 - If admins need to bypass protection for emergency merge:
   1. Document reason in issue or PR comment
   2. Admin pushes directly to main (logged in audit trail)
@@ -76,6 +80,7 @@ Branch protection enforcement is handled through three mechanisms:
   4. Post-incident review to prevent recurrence
 
 **Status Check Removal**:
+
 - If a required status check is no longer used:
   1. Update `docs/reference/branch-protection.md` baseline
   2. Re-apply via Settings UI or `branch-protection-enforce.yml`
@@ -101,6 +106,7 @@ Keep these files in sync:
 4. **`.github/workflows/branch-protection-enforce.yml`** — Scheduled drift detection
 
 When policy changes:
+
 1. Update `branch-protection.md` first
 2. Update enforcement workflow(s) to match
 3. Create PR with both docs and workflows
