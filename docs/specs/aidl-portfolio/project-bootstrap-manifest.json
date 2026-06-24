@@ -1,0 +1,203 @@
+{
+  "schemaVersion": "1.0",
+  "project": {
+    "name": "AIDL Portfolio Baseline",
+    "description": "Canonical baseline for repo-scoped GitHub Projects used by AIDL portfolio operations."
+  },
+  "fields": [
+    {
+      "name": "Status",
+      "type": "single_select",
+      "required": true,
+      "options": [
+        "Backlog",
+        "Ready",
+        "In Progress",
+        "In Review",
+        "Release Ready",
+        "Done",
+        "Blocked"
+      ]
+    },
+    {
+      "name": "Type",
+      "type": "single_select",
+      "required": true,
+      "options": [
+        "Feature",
+        "Bug",
+        "Security",
+        "Tech Debt",
+        "Incident",
+        "Maintenance",
+        "Docs",
+        "Chore"
+      ]
+    },
+    {
+      "name": "Priority",
+      "type": "single_select",
+      "required": true,
+      "options": [
+        "Critical",
+        "High",
+        "Medium",
+        "Low"
+      ]
+    },
+    {
+      "name": "Iteration",
+      "type": "iteration",
+      "required": true
+    },
+    {
+      "name": "Area",
+      "type": "single_select",
+      "required": true,
+      "options": [
+        "Platform",
+        "Workflow",
+        "Docs",
+        "Security",
+        "Reliability",
+        "Data"
+      ]
+    },
+    {
+      "name": "Effort",
+      "type": "number",
+      "required": true
+    },
+    {
+      "name": "Risk",
+      "type": "single_select",
+      "required": true,
+      "options": [
+        "Critical",
+        "High",
+        "Medium",
+        "Low"
+      ]
+    },
+    {
+      "name": "Guardrail State",
+      "type": "single_select",
+      "required": true,
+      "options": [
+        "Pass",
+        "Warn",
+        "Block",
+        "Waived"
+      ]
+    },
+    {
+      "name": "SRE Impact",
+      "type": "single_select",
+      "required": true,
+      "options": [
+        "None",
+        "Latency",
+        "Availability",
+        "Error Rate",
+        "Capacity"
+      ]
+    },
+    {
+      "name": "Runbook Link",
+      "type": "text",
+      "required": false
+    },
+    {
+      "name": "Learning Capture",
+      "type": "single_select",
+      "required": false,
+      "options": [
+        "None",
+        "Candidate",
+        "Approved",
+        "Promoted"
+      ]
+    }
+  ],
+  "views": [
+    {
+      "name": "Sprint Delivery",
+      "layout": "BOARD",
+      "groupBy": "Status",
+      "filters": [
+        "Type!=Maintenance"
+      ]
+    },
+    {
+      "name": "Backlog",
+      "layout": "TABLE",
+      "groupBy": "Priority"
+    },
+    {
+      "name": "PR and Review Queue",
+      "layout": "TABLE",
+      "filters": [
+        "Status=In Review",
+        "Status=Release Ready"
+      ]
+    },
+    {
+      "name": "Security and High Risk",
+      "layout": "TABLE",
+      "filters": [
+        "Type=Security",
+        "Risk=Critical|High"
+      ]
+    },
+    {
+      "name": "Incidents and Reliability",
+      "layout": "TABLE",
+      "filters": [
+        "Type=Incident",
+        "SRE Impact!=None"
+      ]
+    },
+    {
+      "name": "Maintenance and Audit",
+      "layout": "TABLE",
+      "filters": [
+        "Type=Maintenance"
+      ]
+    },
+    {
+      "name": "Learning and Memory",
+      "layout": "TABLE",
+      "filters": [
+        "Learning Capture=Candidate|Approved"
+      ]
+    },
+    {
+      "name": "Roadmap",
+      "layout": "ROADMAP",
+      "groupBy": "Iteration"
+    }
+  ],
+  "rules": [
+    {
+      "id": "rule-auto-add-and-baseline-routing",
+      "name": "Auto-add and baseline field routing",
+      "mode": "advisory",
+      "required": true,
+      "description": "Repository issues and PRs are auto-added and mapped to baseline fields."
+    },
+    {
+      "id": "rule-label-to-risk-sync",
+      "name": "Label-to-risk synchronization",
+      "mode": "advisory",
+      "required": true,
+      "description": "Risk and priority labels map consistently into project fields."
+    },
+    {
+      "id": "rule-guardrail-state-gate",
+      "name": "Guardrail state gate",
+      "mode": "advisory",
+      "required": true,
+      "description": "Blocked and waived controls require owner, rationale, and expiry evidence."
+    }
+  ]
+}

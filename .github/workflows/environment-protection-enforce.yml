@@ -79,7 +79,7 @@ jobs:
           done
 
           if [[ -z "$PROD_ENV" ]]; then
-            echo "::warning::Neither 'production' nor 'prod' environment exists."
+            echo "::warning::Neither canonical 'production' nor legacy alias 'prod' environment exists."
             echo "::warning::Settings action required: create a protected production environment."
             echo "Skipping hard-fail because this check is advisory for repository settings drift."
             exit 0
@@ -107,5 +107,5 @@ jobs:
       - name: Note PR-scope environment settings check
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-          echo "Skipping prod environment reviewer/branch-policy API enforcement on pull_request runs." >> "$GITHUB_STEP_SUMMARY"
+          echo "Skipping production environment reviewer/branch-policy API enforcement on pull_request runs." >> "$GITHUB_STEP_SUMMARY"
           echo "This check is enforced on scheduled and manual runs where administrative visibility is available." >> "$GITHUB_STEP_SUMMARY"

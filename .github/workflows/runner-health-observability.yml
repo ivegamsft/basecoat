@@ -41,7 +41,7 @@ concurrency:
 jobs:
   runner-health:
     name: Runner health and queue observability
-    runs-on: ${{ vars.RUNNER_RELEASE || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
+    runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-latest' || vars.RUNNER_RELEASE || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
     timeout-minutes: 20
     steps:
       - name: Check out repository
