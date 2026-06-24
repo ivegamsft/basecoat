@@ -1,7 +1,7 @@
 {
   "$schema": "basecoat-metadata-schema",
   "version": "3.26.0",
-  "generated": "2026-06-23",
+  "generated": "2026-06-24",
   "categories": {
     "AI & Development": {
       "label": "AI & Development",
@@ -2313,6 +2313,17 @@
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-backlog-rebalancer.agent.md",
       "model": "gpt-5.3-codex",
+      "argumentHint": ""
+    },
+    {
+      "name": "basecoat-60-workflow-incident-to-backlog-router",
+      "description": "Automates routing of incident signals into prioritized backlog or maintenance work items with required portfolio fields pre-populated and closure linkage tracked. USE FOR: create GitHub issues from incident metadata with Type/Priority/Risk/Guardrail State/SRE Impact pre-filled, route incidents to sprint or maintenance queue by severity policy, detect orphaned incidents with no remediation issue, track SLA targets by severity. DO NOT USE FOR: active incident mitigation (use incident-responder), SLO definition (use sre-engineer), proactive hardening or security review.",
+      "category": "Meta",
+      "keywords": [],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/basecoat-60-workflow-incident-to-backlog-router.agent.md",
+      "model": "gpt-5.4-mini",
       "argumentHint": ""
     }
   ]
