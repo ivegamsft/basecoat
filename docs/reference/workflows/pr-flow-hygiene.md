@@ -82,6 +82,40 @@ It still enforces:
 - release/planning label presence
 - `mergeable_state == behind` blocker
 
+## Troubleshooting
+
+### PR is `BLOCKED` but all six required checks are `SUCCESS`
+
+If `mergeStateStatus` is `BLOCKED`, `mergeable` is `MERGEABLE`, `pr-readiness-blocked` label is
+absent, and all required status checks pass — the blocker is almost always **unresolved review
+threads** from Copilot/bot reviewers combined with `required_conversation_resolution: true` in
+branch protection.
+
+**Diagnose:**
+
+```bash
+gh api graphql -f query='{ repository(owner: "IBuySpy-Shared", name: "basecoat") {
+  pullRequest(number: <N>) {
+    reviewThreads(first: 50) { nodes { id isResolved } }
+  }
+} }' | jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false)]'
+```
+
+**Fix:** Resolve each thread with:
+
+```bash
+gh api graphql -f query='mutation {
+  resolveReviewThread(input: { threadId: "<THREAD_ID>" }) {
+    thread { id isResolved }
+  }
+}'
+```
+
+Then enable auto-merge (`gh pr merge <N> --merge --auto`) — it fires immediately after the last
+thread resolves.
+
+See also: [blocked-issues.md — PR Blocked With All Checks Passing](../../../operations/blocked-issues.md#pr-blocked-with-all-checks-passing--unresolved-review-threads)
+
 ## Job-level entry and exit contract
 
 | Job | Entry | Success exit | Failure exit |

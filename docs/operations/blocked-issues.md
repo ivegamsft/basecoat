@@ -4,6 +4,61 @@ description: Tracking for known limitations and prerequisites for certain featur
 
 # Known Limitations & Blocked Issues
 
+## Known Failure Patterns
+
+### PR Blocked With All Checks Passing — Unresolved Review Threads
+
+**Status:** ACTIVE PATTERN (discovered 2026-06-24, issue #1763 hotfix)
+
+**Symptom:** `mergeStateStatus: BLOCKED`, `mergeable: MERGEABLE`, all six required status checks
+`SUCCESS`, no `pr-readiness-blocked` label — yet `gh pr merge` fails with
+`"the base branch policy prohibits the merge"`.
+
+**Root Cause:**
+`required_conversation_resolution: true` is set in branch protection for `main`.
+Copilot code review bots (Copilot PR Reviewer, Security Analyst agent, etc.) leave inline comment
+threads that are never auto-resolved. Each push to the PR branch can add new threads.
+The GitHub API `mergeable_state` will return `blocked` even when no human reviewer action is
+pending — the blocker is entirely the open bot-authored threads.
+
+**How to Detect:**
+
+```bash
+gh api graphql -f query='{ repository(owner: "IBuySpy-Shared", name: "basecoat") {
+  pullRequest(number: <N>) {
+    reviewThreads(first: 50) { nodes { id isResolved } }
+  }
+} }' | jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false)] | length'
+```
+
+If the count is non-zero and all required checks are green, this is the blocker.
+
+**Resolution:**
+
+Resolve all open threads via GraphQL mutations (safe — does not dismiss reviews, just marks threads resolved):
+
+```bash
+# Replace THREAD_ID with each thread node ID from the query above
+gh api graphql -f query='mutation {
+  resolveReviewThread(input: { threadId: "THREAD_ID" }) {
+    thread { id isResolved }
+  }
+}'
+```
+
+Auto-merge fires immediately after the last thread is resolved if it was already enabled.
+
+**Enable auto-merge first to get instant merge after resolution:**
+
+```bash
+gh pr merge <N> --repo IBuySpy-Shared/basecoat --merge --auto
+```
+
+**Prevention (proposed):** Add a step in `pr-flow-hygiene.yml` to surface unresolved thread count
+as a readiness comment so the blocker is visible without manual API inspection.
+
+---
+
 ## Blocked by External Constraints
 
 ### SHA Pin Scanner False Positives from Synced BaseCoat Templates
