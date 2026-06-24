@@ -34,6 +34,8 @@ $requiredSnippets = @(
     'actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3',
     'PR readiness routing nudge',
     'pr-readiness-blocked',
+    'const isHotfixBranch = ref => /^hotfix\//i.test(String(ref || ''''))',
+    'Hotfix fast path',
     'Event-driven readiness checks run on pull_request_target transitions; this weekly report is summary/audit only.',
     'PR Lifecycle Hygiene Report - Week of',
     'PR lifecycle hygiene nudge'

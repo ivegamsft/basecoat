@@ -85,6 +85,7 @@ jobs:
               return /^(wave:|sprint:|wave-|sprint-).+/.test(normalized) || normalized === 'wave/sprint';
             };
             const hasReleaseLabel = labels => normalizeLabels(labels).some(isReleaseLabel);
+            const isHotfixBranch = ref => /^hotfix\//i.test(String(ref || ''));
 
             const upsertBotComment = async ({ issueNumber, marker, body }) => {
               const comments = await github.paginate(github.rest.issues.listComments, {
@@ -192,16 +193,17 @@ jobs:
               const ageDays = daysBetween(now, new Date(pr.created_at));
               const idleDays = daysBetween(now, new Date(pr.updated_at));
               const reasons = [];
+              const hotfixFastPath = !pr.draft && isHotfixBranch(pr.head?.ref);
 
               if (pr.draft) {
                 if (ageDays >= draftDriftDays) {
                   reasons.push(`Draft age is ${ageDays} days (threshold: ${draftDriftDays}).`);
                 }
               } else {
-                if (reviewerCount === 0) {
+                if (!hotfixFastPath && reviewerCount === 0) {
                   reasons.push('No requested reviewer or reviewer team is set.');
                 }
-                if (assigneeCount === 0) {
+                if (!hotfixFastPath && assigneeCount === 0) {
                   reasons.push('No assignee is set for ownership handoff.');
                 }
                 if (!hasReleaseLabel(labels)) {
@@ -247,6 +249,7 @@ jobs:
                     [{ data: 'Metric', header: true }, { data: 'Value', header: true }],
                     ['PR', `#${prNumber}`],
                     ['Mode', mode],
+                    ['Hotfix fast path', hotfixFastPath ? 'Yes' : 'No'],
                     ['Reasons', String(reasons.length)],
                     ['Comment', commentAction],
                     ['Blocked label', blockedLabel]
@@ -290,6 +293,7 @@ jobs:
               const idleDays = daysBetween(now, updatedAt);
               const assigneeCount = pr.assignees?.length || 0;
               const reviewerCount = (pr.requested_reviewers?.length || 0) + (pr.requested_teams?.length || 0);
+              const hotfixFastPath = isHotfixBranch(pr.head?.ref);
               const detail = {
                 number: pr.number,
                 title: pr.title,
@@ -298,7 +302,8 @@ jobs:
                 idleDays,
                 assigneeCount,
                 reviewerCount,
-                draft: Boolean(pr.draft)
+                draft: Boolean(pr.draft),
+                hotfixFastPath
               };
 
               if (detail.draft) {
@@ -313,10 +318,10 @@ jobs:
               if (idleDays >= readyStaleDays) {
                 readyStale.push(detail);
               }
-              if (assigneeCount === 0) {
+              if (!hotfixFastPath && assigneeCount === 0) {
                 readyNoOwner.push(detail);
               }
-              if (reviewerCount === 0) {
+              if (!hotfixFastPath && reviewerCount === 0) {
                 readyNoReviewer.push(detail);
               }
             }
