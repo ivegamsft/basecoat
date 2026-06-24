@@ -12,26 +12,11 @@ capabilities:
 model_policy:
   fallback: true
   preferred_families: [gpt, claude]
-  upshift:
-    allowed: true
-    owner: runtime
-    max_tier: reasoning
-    triggers: [complexity, low_confidence, repeated_failures]
-  cost_tracking:
-    budget_tier: standard
-    chargeback_tag: incident-to-backlog-router
-allowed_skills:
-  - decision-log-capture
-  - flow-admission-control
-  - observability
-  - security-operations
+allowed_skills: [decision-log-capture, flow-admission-control, observability, security-operations]
 compatibility: []
 metadata:
   category: workflow
   maturity: alpha
-  audience:
-    - developer
-    - sre
 allowed-tools: []
 ---
 
