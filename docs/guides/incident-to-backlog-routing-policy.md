@@ -61,13 +61,13 @@ Every remediation issue created by the router must have these portfolio fields p
 
 Every remediation issue must carry:
 
-```
+```text
 {type}  {priority}  {risk}  incident-followup  sprint:{N} OR backlog
 ```
 
 Optional labels applied when conditions are met:
 
-```
+```text
 wave:1 OR wave:2       (SEV1-3 only)
 maintenance            (SEV3/4 maintenance queue)
 guardrail-active       (when deploy freeze is in effect)

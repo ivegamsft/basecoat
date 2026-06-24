@@ -70,9 +70,11 @@ See [`docs/guides/incident-to-backlog-routing-policy.md`](../../docs/guides/inci
 
 1. **Resolve context** — use the `operation-context-resolver` skill if Azure subscription or environment context is needed for telemetry references.
 2. **Detect duplicates** — search open issues for title similarity (>80% keyword overlap) and existing incident linkage:
+
    ```bash
    gh issue list --repo {repo} --state open --search "{title_keywords}" --json number,title,body
    ```
+
    - If a duplicate exists: link to it, post a comment on the incident reference, and halt issue creation.
    - If the duplicate is closed but unresolved: reopen it and update with current incident details.
 3. **Classify the issue type** — apply the type matrix:
@@ -210,6 +212,7 @@ gh issue list --repo {repo} --state open \
 ```
 
 For each orphaned incident found:
+
 1. Post a warning comment: `No remediation issue detected. Router will auto-create one in {grace_period}.`
 2. If grace period has elapsed (default 24 hours): auto-create the remediation issue using the incident body as input.
 3. Add `orphan-risk` label to the incident issue.
