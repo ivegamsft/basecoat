@@ -81,6 +81,12 @@ nav:
     - Token Context Inventory: reference/token-context-inventory.md
     - Onboarding Profile Contract: reference/onboarding-profile-contract.v1.md
     - Agents: reference/asset-registry.md
+    - Workflow Control Plane:
+      - Overview: reference/workflows/index.md
+      - PR Validation: reference/workflows/pr-validation.md
+      - PR Flow Hygiene: reference/workflows/pr-flow-hygiene.md
+      - PR Size and Sprint Labeler: reference/workflows/pr-size-labeler.md
+      - Reviewer Auto-Assign: reference/workflows/reviewer-autoassign.md
     - Governance Landing: GOVERNANCE.md
     - Governance: reference/governance.md
   - How-To Guides:
