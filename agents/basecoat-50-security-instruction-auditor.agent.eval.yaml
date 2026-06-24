@@ -8,10 +8,19 @@ scenarios:
   - id: 'pos-2'
     input: 'Please route this task to the instruction-auditor agent.'
     expect_activation: true
+  - id: 'pos-3'
+    input: 'I need help with find uncovered tech stacks in a repo overlay.'
+    expect_activation: true
+  - id: 'pos-4'
+    input: 'Can you audit BaseCoat instruction file gaps for my repo?'
+    expect_activation: true
+  - id: 'pos-5'
+    input: 'Please use the instruction-auditor agent to identify missing workflow pattern coverage.'
+    expect_activation: true
   - id: 'neg-1'
-    input: 'Write a haiku about programming.'
+    input: 'Write a new instruction file for Node.js conventions.'
     expect_activation: false
   - id: 'neg-2'
-    input: 'Give me a recipe for chocolate chip cookies.'
+    input: 'General code review of my pull request.'
     expect_activation: false
 

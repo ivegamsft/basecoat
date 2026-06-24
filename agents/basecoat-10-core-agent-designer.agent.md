@@ -4,6 +4,14 @@ description: "Agent factory specialist. USE FOR: creating agent specs, auditing 
 compatibility:
   - skill:agent-design
   - skill:agentops-audit
+model: gpt-5.3-codex
+pinned_model: gpt-5.3-codex
+pin_reason: "Code generation strength required for structured agent spec authoring and routing profile synthesis."
+model_policy:
+  fallback: true
+  preferred_families:
+    - gpt
+    - claude
 metadata:
   category: agent-development
   tags:
@@ -11,15 +19,11 @@ metadata:
     - audit
     - routing
   maturity: production
-  audience:
-    - maintainer
-    - prompt-engineer
 allowed-tools:
   - bash
   - git
   - gh
 visibility: basic
-model: gpt-5.3-codex
 allowed_skills:
   - agent-design
   - agentops-audit
