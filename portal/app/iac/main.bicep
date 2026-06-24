@@ -59,7 +59,7 @@ var backendImage = deploymentMode == 'internal'
   : (empty(downstreamBackendImage) ? error('downstreamBackendImage is required when deploymentMode=downstream') : downstreamBackendImage)
 var frontendImage = deploymentMode == 'internal'
   ? '${registry!.outputs.loginServer}/${frontendImageTag}'
-  : downstreamFrontendImage
+  : (empty(downstreamFrontendImage) ? error('downstreamFrontendImage is required when deploymentMode=downstream') : downstreamFrontendImage)
 
 resource acrPullIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = if (deploymentMode == 'internal') {
   name: acrPullIdentityName
@@ -186,7 +186,6 @@ output databaseFqdn string = database.outputs.fqdn
 output acrLoginServer string = deploymentMode == 'internal' ? registry!.outputs.loginServer : ''
 output logAnalyticsWorkspaceId string = law.id
 output appInsightsName string = appInsights.name
-output appInsightsConnectionString string = appInsights.properties.ConnectionString
 output appInsightsResourceId string = appInsights.id
 output backendContainerAppId string = backend.outputs.resourceId
 output frontendContainerAppId string = frontend.outputs.resourceId
