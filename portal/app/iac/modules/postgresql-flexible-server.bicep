@@ -79,3 +79,4 @@ output fqdn string = server.properties.fullyQualifiedDomainName
 output serverName string = server.name
 output databaseName string = database.name
 output adminLogin string = administratorLogin
+output resourceId string = server.id

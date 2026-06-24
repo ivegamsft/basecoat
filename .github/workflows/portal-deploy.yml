@@ -25,6 +25,21 @@ on:
         options:
           - internal
           - downstream
+      downstream_backend_image:
+        description: "Fully-qualified backend image reference for downstream mode"
+        required: false
+        default: ""
+        type: string
+      downstream_frontend_image:
+        description: "Fully-qualified frontend image reference for downstream mode"
+        required: false
+        default: ""
+        type: string
+      resource_group:
+        description: "Target Azure resource group override (required for downstream mode)"
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: read
@@ -32,7 +47,10 @@ permissions:
 
 env:
   AZURE_LOCATION: ${{ vars.PORTAL_AZURE_LOCATION || 'eastus' }}
-  AZURE_RESOURCE_GROUP: ${{ vars.PORTAL_RESOURCE_GROUP || 'basecoat-portal-staging-rg' }}
+  AZURE_RESOURCE_GROUP: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.resource_group != '') && github.event.inputs.resource_group || vars.PORTAL_RESOURCE_GROUP || 'basecoat-portal-staging-rg' }}
+  DEPLOYMENT_MODE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.deployment_mode || 'internal' }}
+  DOWNSTREAM_BACKEND_IMAGE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.downstream_backend_image || '' }}
+  DOWNSTREAM_FRONTEND_IMAGE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.downstream_frontend_image || '' }}
 
 jobs:
   deploy:
@@ -69,9 +87,11 @@ jobs:
         shell: bash
         env:
           EVENT_NAME: ${{ github.event_name }}
-          INPUT_MODE: ${{ inputs.deployment_mode || 'internal' }}
-          TARGET_ENV: ${{ inputs.environment || 'staging' }}
+          INPUT_MODE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.deployment_mode || 'internal' }}
+          TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'staging' }}
           TARGET_RG: ${{ env.AZURE_RESOURCE_GROUP }}
+          DOWNSTREAM_BACKEND_IMAGE: ${{ env.DOWNSTREAM_BACKEND_IMAGE }}
+          DOWNSTREAM_FRONTEND_IMAGE: ${{ env.DOWNSTREAM_FRONTEND_IMAGE }}
         run: |
           set -euo pipefail
           MODE="$(echo "${INPUT_MODE}" | tr '[:upper:]' '[:lower:]')"
@@ -89,6 +109,16 @@ jobs:
           fi
           if [[ "${MODE}" == "downstream" && "${TARGET_ENV}" == "staging" ]]; then
             echo "::warning::Downstream mode requested with staging environment input; ensure this run targets downstream resources only."
+          fi
+          if [[ "${MODE}" == "downstream" ]]; then
+            if [[ -z "${DOWNSTREAM_BACKEND_IMAGE}" ]]; then
+              echo "::error::downstream_backend_image is required for downstream mode."
+              exit 1
+            fi
+            if [[ -z "${DOWNSTREAM_FRONTEND_IMAGE}" ]]; then
+              echo "::error::downstream_frontend_image is required for downstream mode."
+              exit 1
+            fi
           fi
           echo "deployment_mode=${MODE}" >> "$GITHUB_OUTPUT"
           echo "Deployment mode validated: ${MODE}"
@@ -124,7 +154,6 @@ jobs:
         shell: bash
         run: |
           set -eo pipefail
-          # Check if resource group exists
           if az group exists --name "${AZURE_RESOURCE_GROUP}" | grep -q true; then
             echo "Resource group ${AZURE_RESOURCE_GROUP} already exists"
           else
@@ -139,11 +168,11 @@ jobs:
           fi
 
       - name: Provision ACR
+        if: ${{ steps.mode.outputs.deployment_mode == 'internal' }}
         id: acr
         shell: bash
         run: |
           set -euo pipefail
-          # Deploy ACR via its module — idempotent
           az deployment group create \
             --resource-group "${AZURE_RESOURCE_GROUP}" \
             --template-file portal/app/iac/modules/container-registry.bicep \
@@ -156,6 +185,7 @@ jobs:
           ACR_NAME: ${{ vars.PORTAL_ACR_NAME || 'portalacrstaging' }}
 
       - name: Build images in ACR
+        if: ${{ steps.mode.outputs.deployment_mode == 'internal' }}
         id: build
         shell: bash
         run: |
@@ -193,6 +223,8 @@ jobs:
               acrName="${ACR_NAME}" \
               backendImageTag="${{ steps.build.outputs.backend_tag }}" \
               frontendImageTag="${{ steps.build.outputs.frontend_tag }}" \
+              downstreamBackendImage="${DOWNSTREAM_BACKEND_IMAGE}" \
+              downstreamFrontendImage="${DOWNSTREAM_FRONTEND_IMAGE}" \
               deploymentMode="${{ steps.mode.outputs.deployment_mode }}" \
             --name "portal-staging-${{ github.run_number }}" \
             --query properties.outputs \
@@ -206,6 +238,7 @@ jobs:
             echo "database_fqdn=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['databaseFqdn']['value'])")"
             echo "acr_server=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['acrLoginServer']['value'])")"
             echo "app_insights_name=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['appInsightsName']['value'])")"
+            echo "app_insights_resource_id=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['appInsightsResourceId']['value'])")"
             echo "log_analytics_id=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['logAnalyticsWorkspaceId']['value'])")"
             echo "backend_resource_id=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['backendContainerAppId']['value'])")"
             echo "frontend_resource_id=$(echo "${DEPLOYMENT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['frontendContainerAppId']['value'])")"
@@ -215,6 +248,7 @@ jobs:
           ACR_NAME: ${{ vars.PORTAL_ACR_NAME || 'portalacrstaging' }}
 
       - name: Smoke test backend
+        if: ${{ steps.mode.outputs.deployment_mode == 'internal' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -231,6 +265,7 @@ jobs:
           exit 1
 
       - name: Smoke test frontend
+        if: ${{ steps.mode.outputs.deployment_mode == 'internal' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -256,6 +291,7 @@ jobs:
             echo "| PostgreSQL | ${{ steps.deploy.outputs.database_fqdn }} |"
             echo "| ACR | ${{ steps.deploy.outputs.acr_server }} |"
             echo "| App Insights | ${{ steps.deploy.outputs.app_insights_name }} |"
+            echo "| App Insights resource ID | ${{ steps.deploy.outputs.app_insights_resource_id }} |"
             echo "| Log Analytics workspace ID | ${{ steps.deploy.outputs.log_analytics_id }} |"
             echo "| Backend resource ID | ${{ steps.deploy.outputs.backend_resource_id }} |"
             echo "| Frontend resource ID | ${{ steps.deploy.outputs.frontend_resource_id }} |"

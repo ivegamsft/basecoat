@@ -1,4 +1,4 @@
-name: "BaseCoat - PR Size Labeler"
+name: "BaseCoat - PR Size and Sprint Labeler"
 
 on:
   pull_request_target:
@@ -21,11 +21,11 @@ concurrency:
 
 jobs:
   label:
-    name: Apply deterministic PR size label
+    name: Apply deterministic PR size and sprint labels
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Calculate and apply size label
+      - name: Calculate and apply size label + auto-assign sprint label
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         env:
           PR_NUMBER_INPUT: ${{ inputs.pr_number || '' }}
@@ -72,20 +72,65 @@ jobs:
               });
             }
 
+            const labelsToAdd = [selected.label];
+
+            // Auto-assign sprint label if PR doesn't already have one
+            const hasReleaseLabel = current.some(label => {
+              const normalized = String(label || '').toLowerCase();
+              return /^(wave:|sprint:|wave-|sprint-).+/.test(normalized) || normalized === 'wave/sprint';
+            });
+
+            const isForkPR = context.payload.pull_request?.head?.repo?.fork === true;
+
+            if (!hasReleaseLabel && !isForkPR) {
+              // Default to current sprint based on ISO week (ISO-8601)
+              const now = new Date();
+              const isoDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+              const dayNum = isoDate.getUTCDay() || 7; // Mon=1..Sun=7
+              isoDate.setUTCDate(isoDate.getUTCDate() + 4 - dayNum); // shift to Thursday
+              const isoYear = isoDate.getUTCFullYear();
+              const yearStart = new Date(Date.UTC(isoYear, 0, 1));
+              const isoWeek = Math.ceil((((isoDate - yearStart) / 86400000) + 1) / 7);
+              const sprintLabel = `sprint:${isoYear}-W${String(isoWeek).padStart(2, '0')}`;
+
+              try {
+                await github.rest.issues.getLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: sprintLabel
+                });
+              } catch (err) {
+                if (err.status !== 404) throw err;
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: sprintLabel,
+                  color: '1d76db',
+                  description: 'Auto-assigned sprint label (ISO week)'
+                });
+              }
+
+              labelsToAdd.push(sprintLabel);
+              core.info(`Auto-assigning sprint label: ${sprintLabel}`);
+            } else if (!hasReleaseLabel && isForkPR) {
+              core.info('Skipping sprint auto-assignment: PR is from a fork repository.');
+            }
+
             await github.rest.issues.addLabels({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: prNumber,
-              labels: [selected.label]
+              labels: labelsToAdd
             });
 
             core.summary
-              .addHeading('PR size labeling result')
+              .addHeading('PR size and sprint labeling result')
               .addTable([
                 [{ data: 'PR', header: true }, `#${prNumber}`],
                 [{ data: 'Additions', header: true }, String(pr.data.additions || 0)],
                 [{ data: 'Deletions', header: true }, String(pr.data.deletions || 0)],
                 [{ data: 'Total changes', header: true }, String(totalChanges)],
-                [{ data: 'Applied label', header: true }, selected.label]
+                [{ data: 'Size label', header: true }, selected.label],
+                [{ data: 'Sprint auto-assign', header: true }, isForkPR ? 'Skipped (fork PR)' : !hasReleaseLabel ? 'Yes' : 'Skipped (already has release label)']
               ])
               .write();

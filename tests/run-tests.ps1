@@ -246,6 +246,22 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running AIDL portfolio project bootstrap tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'aidl-portfolio-project-bootstrap-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'AIDL portfolio project bootstrap tests failed' -ForegroundColor Red
+    Write-FailureLog 'aidl-portfolio-project-bootstrap-tests'
+    exit 1
+}
+
+Write-Host 'Running AIDL learning-to-memory promotion pipeline tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'aidl-learning-memory-promotion-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'AIDL learning-to-memory promotion pipeline tests failed' -ForegroundColor Red
+    Write-FailureLog 'aidl-learning-memory-promotion-tests'
+    exit 1
+}
+
 Write-Host 'Running MCP tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'mcp-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
