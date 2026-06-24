@@ -1,0 +1,994 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.44.1.10279",
+      "templateHash": "11076367319584267164"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Azure region for all resources."
+      }
+    },
+    "environment": {
+      "type": "string",
+      "defaultValue": "staging",
+      "allowedValues": [
+        "staging"
+      ],
+      "metadata": {
+        "description": "Deployment environment name."
+      }
+    },
+    "deploymentMode": {
+      "type": "string",
+      "defaultValue": "internal",
+      "allowedValues": [
+        "internal",
+        "downstream"
+      ],
+      "metadata": {
+        "description": "Deployment mode boundary for internal vs downstream deployments."
+      }
+    },
+    "acrName": {
+      "type": "string",
+      "defaultValue": "[toLower(format('portalacr{0}{1}{2}', parameters('environment'), parameters('deploymentMode'), substring(uniqueString(subscription().subscriptionId, parameters('environment'), parameters('deploymentMode')), 0, 4)))]",
+      "metadata": {
+        "description": "Azure Container Registry name (globally unique, alphanumeric)."
+      }
+    },
+    "backendImageTag": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Backend container image tag (repo:tag, without registry prefix)."
+      }
+    },
+    "frontendImageTag": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Frontend container image tag (repo:tag, without registry prefix)."
+      }
+    },
+    "downstreamBackendImage": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Downstream backend image reference (fully qualified)."
+      }
+    },
+    "downstreamFrontendImage": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Downstream frontend image reference (fully qualified)."
+      }
+    },
+    "downstreamCorsOrigins": {
+      "type": "string",
+      "defaultValue": "*",
+      "metadata": {
+        "description": "Downstream CORS origins for backend container app."
+      }
+    },
+    "postgresAdminLogin": {
+      "type": "string",
+      "defaultValue": "portaladmin",
+      "metadata": {
+        "description": "PostgreSQL administrator login."
+      }
+    },
+    "postgresAdminPassword": {
+      "type": "securestring",
+      "defaultValue": "[format('Pg!{0}Aa1', substring(replace(newGuid(), '-', ''), 0, 20))]",
+      "metadata": {
+        "description": "PostgreSQL administrator password. If omitted, Bicep generates one for this deployment."
+      }
+    },
+    "postgresDatabaseName": {
+      "type": "string",
+      "defaultValue": "portaldb",
+      "metadata": {
+        "description": "PostgreSQL database name."
+      }
+    }
+  },
+  "variables": {
+    "envSuffix": "[if(equals(parameters('environment'), 'staging'), 'stg', toLower(parameters('environment')))]",
+    "modeSuffix": "[if(equals(parameters('deploymentMode'), 'internal'), 'int', 'dwn')]",
+    "stableSuffix": "[substring(uniqueString(subscription().subscriptionId, parameters('environment'), parameters('deploymentMode')), 0, 6)]",
+    "prefix": "portal",
+    "lawName": "[format('{0}-law-{1}-{2}', variables('prefix'), variables('envSuffix'), variables('modeSuffix'))]",
+    "appInsightsName": "[format('{0}-appi-{1}-{2}', variables('prefix'), variables('envSuffix'), variables('modeSuffix'))]",
+    "envName": "[format('{0}-env-{1}-{2}', variables('prefix'), variables('envSuffix'), variables('modeSuffix'))]",
+    "backendName": "[format('{0}-backend-{1}-{2}', variables('prefix'), variables('envSuffix'), variables('modeSuffix'))]",
+    "frontendName": "[format('{0}-frontend-{1}-{2}', variables('prefix'), variables('envSuffix'), variables('modeSuffix'))]",
+    "postgresServerName": "[toLower(format('{0}-pg-{1}-{2}-{3}', variables('prefix'), variables('envSuffix'), variables('modeSuffix'), variables('stableSuffix')))]",
+    "acrPullRoleId": "7f951dda-4ed3-4680-a7ca-43fe172d538d",
+    "acrPullIdentityName": "[format('{0}-acr-pull-{1}-{2}', variables('prefix'), variables('envSuffix'), variables('modeSuffix'))]"
+  },
+  "resources": [
+    {
+      "condition": "[equals(parameters('deploymentMode'), 'internal')]",
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "apiVersion": "2023-01-31",
+      "name": "[variables('acrPullIdentityName')]",
+      "location": "[parameters('location')]"
+    },
+    {
+      "condition": "[equals(parameters('deploymentMode'), 'internal')]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[resourceId('Microsoft.ContainerRegistry/registries', parameters('acrName'))]",
+      "name": "[guid(resourceGroup().id, variables('acrPullIdentityName'), variables('acrPullRoleId'))]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('acrPullRoleId'))]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('acrPullIdentityName')), '2023-01-31').principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('acrPullIdentityName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2023-09-01",
+      "name": "[variables('lawName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "sku": {
+          "name": "PerGB2018"
+        },
+        "retentionInDays": 30,
+        "features": {
+          "enableLogAccessUsingOnlyResourcePermissions": true
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2020-02-02",
+      "name": "[variables('appInsightsName')]",
+      "location": "[parameters('location')]",
+      "kind": "web",
+      "properties": {
+        "Application_Type": "web",
+        "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName'))]",
+        "DisableIpMasking": false,
+        "IngestionMode": "LogAnalytics"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.App/managedEnvironments",
+      "apiVersion": "2024-03-01",
+      "name": "[variables('envName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "appLogsConfiguration": {
+          "destination": "log-analytics",
+          "logAnalyticsConfiguration": {
+            "customerId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName')), '2023-09-01').customerId]",
+            "sharedKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName')), '2023-09-01').primarySharedKey]"
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName'))]"
+      ]
+    },
+    {
+      "condition": "[equals(parameters('deploymentMode'), 'internal')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "container-registry",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "registryName": {
+            "value": "[parameters('acrName')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "1522817581854274526"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().location]",
+              "metadata": {
+                "description": "Azure region for the registry."
+              }
+            },
+            "registryName": {
+              "type": "string",
+              "metadata": {
+                "description": "Container registry name (must be globally unique, alphanumeric only)."
+              }
+            },
+            "sku": {
+              "type": "string",
+              "defaultValue": "Basic",
+              "allowedValues": [
+                "Basic",
+                "Standard"
+              ],
+              "metadata": {
+                "description": "SKU for the container registry."
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.ContainerRegistry/registries",
+              "apiVersion": "2023-07-01",
+              "name": "[parameters('registryName')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "[parameters('sku')]"
+              },
+              "properties": {
+                "adminUserEnabled": false,
+                "publicNetworkAccess": "Enabled"
+              }
+            }
+          ],
+          "outputs": {
+            "loginServer": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.ContainerRegistry/registries', parameters('registryName')), '2023-07-01').loginServer]"
+            },
+            "registryId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.ContainerRegistry/registries', parameters('registryName'))]"
+            },
+            "registryName": {
+              "type": "string",
+              "value": "[parameters('registryName')]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "postgresql-flexible-server",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "serverName": {
+            "value": "[variables('postgresServerName')]"
+          },
+          "databaseName": {
+            "value": "[parameters('postgresDatabaseName')]"
+          },
+          "administratorLogin": {
+            "value": "[parameters('postgresAdminLogin')]"
+          },
+          "administratorLoginPassword": {
+            "value": "[parameters('postgresAdminPassword')]"
+          },
+          "publicNetworkAccess": "[if(equals(parameters('deploymentMode'), 'internal'), createObject('value', 'Enabled'), createObject('value', 'Disabled'))]"
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "384398698069407751"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().location]",
+              "metadata": {
+                "description": "Azure region for the database server."
+              }
+            },
+            "serverName": {
+              "type": "string",
+              "metadata": {
+                "description": "PostgreSQL flexible server name."
+              }
+            },
+            "databaseName": {
+              "type": "string",
+              "defaultValue": "portaldb",
+              "metadata": {
+                "description": "Database name."
+              }
+            },
+            "administratorLogin": {
+              "type": "string",
+              "defaultValue": "portaladmin",
+              "metadata": {
+                "description": "Administrator login name."
+              }
+            },
+            "administratorLoginPassword": {
+              "type": "securestring",
+              "metadata": {
+                "description": "Administrator password."
+              }
+            },
+            "version": {
+              "type": "string",
+              "defaultValue": "16",
+              "metadata": {
+                "description": "PostgreSQL version."
+              }
+            },
+            "skuName": {
+              "type": "string",
+              "defaultValue": "Standard_B1ms",
+              "metadata": {
+                "description": "Flexible server SKU name."
+              }
+            },
+            "storageSizeGB": {
+              "type": "int",
+              "defaultValue": 32,
+              "metadata": {
+                "description": "Storage size in GB."
+              }
+            },
+            "backupRetentionDays": {
+              "type": "int",
+              "defaultValue": 7,
+              "metadata": {
+                "description": "Backup retention in days."
+              }
+            },
+            "publicNetworkAccess": {
+              "type": "string",
+              "defaultValue": "Enabled",
+              "allowedValues": [
+                "Enabled",
+                "Disabled"
+              ],
+              "metadata": {
+                "description": "PostgreSQL public network access posture."
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.DBforPostgreSQL/flexibleServers",
+              "apiVersion": "2023-06-01-preview",
+              "name": "[parameters('serverName')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "[parameters('skuName')]",
+                "tier": "Burstable"
+              },
+              "properties": {
+                "version": "[parameters('version')]",
+                "administratorLogin": "[parameters('administratorLogin')]",
+                "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
+                "storage": {
+                  "storageSizeGB": "[parameters('storageSizeGB')]"
+                },
+                "backup": {
+                  "backupRetentionDays": "[parameters('backupRetentionDays')]",
+                  "geoRedundantBackup": "Disabled"
+                },
+                "network": {
+                  "publicNetworkAccess": "[parameters('publicNetworkAccess')]"
+                }
+              }
+            },
+            {
+              "condition": "[equals(parameters('publicNetworkAccess'), 'Enabled')]",
+              "type": "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules",
+              "apiVersion": "2023-06-01-preview",
+              "name": "[format('{0}/{1}', parameters('serverName'), 'allow-azure-services')]",
+              "properties": {
+                "startIpAddress": "0.0.0.0",
+                "endIpAddress": "0.0.0.0"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', parameters('serverName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.DBforPostgreSQL/flexibleServers/databases",
+              "apiVersion": "2023-06-01-preview",
+              "name": "[format('{0}/{1}', parameters('serverName'), parameters('databaseName'))]",
+              "properties": {
+                "charset": "UTF8",
+                "collation": "en_US.utf8"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', parameters('serverName'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "fqdn": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.DBforPostgreSQL/flexibleServers', parameters('serverName')), '2023-06-01-preview').fullyQualifiedDomainName]"
+            },
+            "serverName": {
+              "type": "string",
+              "value": "[parameters('serverName')]"
+            },
+            "databaseName": {
+              "type": "string",
+              "value": "[parameters('databaseName')]"
+            },
+            "adminLogin": {
+              "type": "string",
+              "value": "[parameters('administratorLogin')]"
+            },
+            "resourceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', parameters('serverName'))]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "frontend-container-app",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "appName": {
+            "value": "[variables('frontendName')]"
+          },
+          "environmentId": {
+            "value": "[resourceId('Microsoft.App/managedEnvironments', variables('envName'))]"
+          },
+          "image": "[if(equals(parameters('deploymentMode'), 'internal'), createObject('value', format('{0}/{1}', reference(resourceId('Microsoft.Resources/deployments', 'container-registry'), '2025-04-01').outputs.loginServer.value, parameters('frontendImageTag'))), createObject('value', parameters('downstreamFrontendImage')))]",
+          "acrLoginServer": "[if(equals(parameters('deploymentMode'), 'internal'), createObject('value', reference(resourceId('Microsoft.Resources/deployments', 'container-registry'), '2025-04-01').outputs.loginServer.value), createObject('value', ''))]",
+          "acrPullIdentityId": "[if(equals(parameters('deploymentMode'), 'internal'), createObject('value', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('acrPullIdentityName'))), createObject('value', ''))]",
+          "ingressExternal": {
+            "value": "[equals(parameters('deploymentMode'), 'internal')]"
+          },
+          "deploymentMode": {
+            "value": "[parameters('deploymentMode')]"
+          },
+          "appInsightsConnectionString": {
+            "value": "[reference(resourceId('Microsoft.Insights/components', variables('appInsightsName')), '2020-02-02').ConnectionString]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "14583332790040433267"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().location]",
+              "metadata": {
+                "description": "Azure region for the app."
+              }
+            },
+            "appName": {
+              "type": "string",
+              "metadata": {
+                "description": "Container App name."
+              }
+            },
+            "environmentId": {
+              "type": "string",
+              "metadata": {
+                "description": "Managed environment resource ID."
+              }
+            },
+            "image": {
+              "type": "string",
+              "metadata": {
+                "description": "Container image reference."
+              }
+            },
+            "targetPort": {
+              "type": "int",
+              "defaultValue": 80,
+              "metadata": {
+                "description": "Target port exposed by the container."
+              }
+            },
+            "acrLoginServer": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "ACR login server for managed identity pull."
+              }
+            },
+            "acrPullIdentityId": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "User-assigned managed identity resource ID for ACR pull."
+              }
+            },
+            "minReplicas": {
+              "type": "int",
+              "defaultValue": 0,
+              "metadata": {
+                "description": "Minimum replica count."
+              }
+            },
+            "maxReplicas": {
+              "type": "int",
+              "defaultValue": 2,
+              "metadata": {
+                "description": "Maximum replica count."
+              }
+            },
+            "ingressExternal": {
+              "type": "bool",
+              "defaultValue": true,
+              "metadata": {
+                "description": "Whether the app ingress should be public."
+              }
+            },
+            "deploymentMode": {
+              "type": "string",
+              "defaultValue": "internal",
+              "allowedValues": [
+                "internal",
+                "downstream"
+              ],
+              "metadata": {
+                "description": "Deployment mode identifier."
+              }
+            },
+            "appInsightsConnectionString": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Optional App Insights connection string."
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.App/containerApps",
+              "apiVersion": "2024-03-01",
+              "name": "[parameters('appName')]",
+              "location": "[parameters('location')]",
+              "identity": "[if(empty(parameters('acrPullIdentityId')), createObject('type', 'None'), createObject('type', 'UserAssigned', 'userAssignedIdentities', createObject(format('{0}', parameters('acrPullIdentityId')), createObject())))]",
+              "properties": {
+                "managedEnvironmentId": "[parameters('environmentId')]",
+                "configuration": {
+                  "ingress": {
+                    "external": "[parameters('ingressExternal')]",
+                    "targetPort": "[parameters('targetPort')]",
+                    "transport": "http",
+                    "allowInsecure": false
+                  },
+                  "registries": "[if(empty(parameters('acrLoginServer')), createArray(), createArray(createObject('server', parameters('acrLoginServer'), 'identity', parameters('acrPullIdentityId'))))]"
+                },
+                "template": {
+                  "containers": [
+                    {
+                      "name": "frontend",
+                      "image": "[parameters('image')]",
+                      "resources": {
+                        "cpu": "[json('0.25')]",
+                        "memory": "0.5Gi"
+                      },
+                      "env": "[concat(createArray(createObject('name', 'DEPLOYMENT_MODE', 'value', parameters('deploymentMode'))), if(empty(parameters('appInsightsConnectionString')), createArray(), createArray(createObject('name', 'APPLICATIONINSIGHTS_CONNECTION_STRING', 'value', parameters('appInsightsConnectionString')))))]"
+                    }
+                  ],
+                  "scale": {
+                    "minReplicas": "[parameters('minReplicas')]",
+                    "maxReplicas": "[parameters('maxReplicas')]",
+                    "rules": [
+                      {
+                        "name": "http-scaling",
+                        "http": {
+                          "metadata": {
+                            "concurrentRequests": "20"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "outputs": {
+            "fqdn": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.App/containerApps', parameters('appName')), '2024-03-01').configuration.ingress.fqdn]"
+            },
+            "resourceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.App/containerApps', parameters('appName'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('acrPullIdentityName'))]",
+        "[extensionResourceId(resourceId('Microsoft.ContainerRegistry/registries', parameters('acrName')), 'Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, variables('acrPullIdentityName'), variables('acrPullRoleId')))]",
+        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]",
+        "[resourceId('Microsoft.App/managedEnvironments', variables('envName'))]",
+        "[resourceId('Microsoft.Resources/deployments', 'container-registry')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "backend-container-app",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "appName": {
+            "value": "[variables('backendName')]"
+          },
+          "environmentId": {
+            "value": "[resourceId('Microsoft.App/managedEnvironments', variables('envName'))]"
+          },
+          "image": "[if(equals(parameters('deploymentMode'), 'internal'), createObject('value', format('{0}/{1}', reference(resourceId('Microsoft.Resources/deployments', 'container-registry'), '2025-04-01').outputs.loginServer.value, parameters('backendImageTag'))), createObject('value', parameters('downstreamBackendImage')))]",
+          "acrLoginServer": "[if(equals(parameters('deploymentMode'), 'internal'), createObject('value', reference(resourceId('Microsoft.Resources/deployments', 'container-registry'), '2025-04-01').outputs.loginServer.value), createObject('value', ''))]",
+          "acrPullIdentityId": "[if(equals(parameters('deploymentMode'), 'internal'), createObject('value', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('acrPullIdentityName'))), createObject('value', ''))]",
+          "ingressExternal": {
+            "value": "[equals(parameters('deploymentMode'), 'internal')]"
+          },
+          "deploymentMode": {
+            "value": "[parameters('deploymentMode')]"
+          },
+          "appInsightsConnectionString": {
+            "value": "[reference(resourceId('Microsoft.Insights/components', variables('appInsightsName')), '2020-02-02').ConnectionString]"
+          },
+          "dbHost": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'postgresql-flexible-server'), '2025-04-01').outputs.fqdn.value]"
+          },
+          "dbPort": {
+            "value": 5432
+          },
+          "dbName": {
+            "value": "[parameters('postgresDatabaseName')]"
+          },
+          "dbUser": {
+            "value": "[parameters('postgresAdminLogin')]"
+          },
+          "dbPassword": {
+            "value": "[parameters('postgresAdminPassword')]"
+          },
+          "corsOrigins": "[if(equals(parameters('deploymentMode'), 'internal'), createObject('value', format('https://{0}', reference(resourceId('Microsoft.Resources/deployments', 'frontend-container-app'), '2025-04-01').outputs.fqdn.value)), createObject('value', parameters('downstreamCorsOrigins')))]"
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "16347789662246336141"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().location]",
+              "metadata": {
+                "description": "Azure region for the app."
+              }
+            },
+            "appName": {
+              "type": "string",
+              "metadata": {
+                "description": "Container App name."
+              }
+            },
+            "environmentId": {
+              "type": "string",
+              "metadata": {
+                "description": "Managed environment resource ID."
+              }
+            },
+            "image": {
+              "type": "string",
+              "metadata": {
+                "description": "Container image reference."
+              }
+            },
+            "targetPort": {
+              "type": "int",
+              "defaultValue": 3000,
+              "metadata": {
+                "description": "Target port exposed by the container."
+              }
+            },
+            "acrLoginServer": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "ACR login server for managed identity pull."
+              }
+            },
+            "acrPullIdentityId": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "User-assigned managed identity resource ID for ACR pull."
+              }
+            },
+            "minReplicas": {
+              "type": "int",
+              "defaultValue": 0,
+              "metadata": {
+                "description": "Minimum replica count."
+              }
+            },
+            "maxReplicas": {
+              "type": "int",
+              "defaultValue": 2,
+              "metadata": {
+                "description": "Maximum replica count."
+              }
+            },
+            "dbHost": {
+              "type": "string",
+              "metadata": {
+                "description": "Database host name."
+              }
+            },
+            "dbPort": {
+              "type": "int",
+              "defaultValue": 5432,
+              "metadata": {
+                "description": "Database port."
+              }
+            },
+            "dbName": {
+              "type": "string",
+              "metadata": {
+                "description": "Database name."
+              }
+            },
+            "dbUser": {
+              "type": "string",
+              "metadata": {
+                "description": "Database user."
+              }
+            },
+            "dbPassword": {
+              "type": "securestring",
+              "metadata": {
+                "description": "Database password."
+              }
+            },
+            "corsOrigins": {
+              "type": "string",
+              "defaultValue": "*",
+              "metadata": {
+                "description": "Allowed CORS origins."
+              }
+            },
+            "apiPrefix": {
+              "type": "string",
+              "defaultValue": "/api/v1",
+              "metadata": {
+                "description": "API prefix exposed by the backend."
+              }
+            },
+            "ingressExternal": {
+              "type": "bool",
+              "defaultValue": true,
+              "metadata": {
+                "description": "Whether the app ingress should be public."
+              }
+            },
+            "deploymentMode": {
+              "type": "string",
+              "defaultValue": "internal",
+              "allowedValues": [
+                "internal",
+                "downstream"
+              ],
+              "metadata": {
+                "description": "Deployment mode identifier."
+              }
+            },
+            "appInsightsConnectionString": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Optional App Insights connection string."
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.App/containerApps",
+              "apiVersion": "2024-03-01",
+              "name": "[parameters('appName')]",
+              "location": "[parameters('location')]",
+              "identity": "[if(empty(parameters('acrPullIdentityId')), createObject('type', 'None'), createObject('type', 'UserAssigned', 'userAssignedIdentities', createObject(format('{0}', parameters('acrPullIdentityId')), createObject())))]",
+              "properties": {
+                "managedEnvironmentId": "[parameters('environmentId')]",
+                "configuration": {
+                  "ingress": {
+                    "external": "[parameters('ingressExternal')]",
+                    "targetPort": "[parameters('targetPort')]",
+                    "transport": "http",
+                    "allowInsecure": false
+                  },
+                  "secrets": [
+                    {
+                      "name": "db-password",
+                      "value": "[parameters('dbPassword')]"
+                    }
+                  ],
+                  "registries": "[if(empty(parameters('acrLoginServer')), createArray(), createArray(createObject('server', parameters('acrLoginServer'), 'identity', parameters('acrPullIdentityId'))))]"
+                },
+                "template": {
+                  "containers": [
+                    {
+                      "name": "backend",
+                      "image": "[parameters('image')]",
+                      "resources": {
+                        "cpu": "[json('0.5')]",
+                        "memory": "1Gi"
+                      },
+                      "env": "[concat(createArray(createObject('name', 'NODE_ENV', 'value', 'production'), createObject('name', 'PORT', 'value', string(parameters('targetPort'))), createObject('name', 'APP_NAME', 'value', 'basecoat-portal-api'), createObject('name', 'DEPLOYMENT_MODE', 'value', parameters('deploymentMode')), createObject('name', 'API_PREFIX', 'value', parameters('apiPrefix')), createObject('name', 'CORS_ORIGINS', 'value', parameters('corsOrigins')), createObject('name', 'DB_HOST', 'value', parameters('dbHost')), createObject('name', 'DB_PORT', 'value', string(parameters('dbPort'))), createObject('name', 'DB_NAME', 'value', parameters('dbName')), createObject('name', 'DB_USER', 'value', parameters('dbUser')), createObject('name', 'DB_PASSWORD', 'secretRef', 'db-password'), createObject('name', 'DB_SSL', 'value', 'true')), if(empty(parameters('appInsightsConnectionString')), createArray(), createArray(createObject('name', 'APPLICATIONINSIGHTS_CONNECTION_STRING', 'value', parameters('appInsightsConnectionString')))))]"
+                    }
+                  ],
+                  "scale": {
+                    "minReplicas": "[parameters('minReplicas')]",
+                    "maxReplicas": "[parameters('maxReplicas')]",
+                    "rules": [
+                      {
+                        "name": "http-scaling",
+                        "http": {
+                          "metadata": {
+                            "concurrentRequests": "10"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "outputs": {
+            "fqdn": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.App/containerApps', parameters('appName')), '2024-03-01').configuration.ingress.fqdn]"
+            },
+            "resourceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.App/containerApps', parameters('appName'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('acrPullIdentityName'))]",
+        "[extensionResourceId(resourceId('Microsoft.ContainerRegistry/registries', parameters('acrName')), 'Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, variables('acrPullIdentityName'), variables('acrPullRoleId')))]",
+        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]",
+        "[resourceId('Microsoft.Resources/deployments', 'postgresql-flexible-server')]",
+        "[resourceId('Microsoft.App/managedEnvironments', variables('envName'))]",
+        "[resourceId('Microsoft.Resources/deployments', 'frontend-container-app')]",
+        "[resourceId('Microsoft.Resources/deployments', 'container-registry')]"
+      ]
+    }
+  ],
+  "outputs": {
+    "deploymentMode": {
+      "type": "string",
+      "value": "[parameters('deploymentMode')]"
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "value": "[resourceGroup().name]"
+    },
+    "backendUrl": {
+      "type": "string",
+      "value": "[if(equals(parameters('deploymentMode'), 'internal'), format('https://{0}', reference(resourceId('Microsoft.Resources/deployments', 'backend-container-app'), '2025-04-01').outputs.fqdn.value), '')]"
+    },
+    "frontendUrl": {
+      "type": "string",
+      "value": "[format('https://{0}', reference(resourceId('Microsoft.Resources/deployments', 'frontend-container-app'), '2025-04-01').outputs.fqdn.value)]"
+    },
+    "databaseFqdn": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'postgresql-flexible-server'), '2025-04-01').outputs.fqdn.value]"
+    },
+    "acrLoginServer": {
+      "type": "string",
+      "value": "[if(equals(parameters('deploymentMode'), 'internal'), reference(resourceId('Microsoft.Resources/deployments', 'container-registry'), '2025-04-01').outputs.loginServer.value, '')]"
+    },
+    "logAnalyticsWorkspaceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName'))]"
+    },
+    "appInsightsName": {
+      "type": "string",
+      "value": "[variables('appInsightsName')]"
+    },
+    "appInsightsConnectionString": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Insights/components', variables('appInsightsName')), '2020-02-02').ConnectionString]"
+    },
+    "appInsightsResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+    },
+    "backendContainerAppId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'backend-container-app'), '2025-04-01').outputs.resourceId.value]"
+    },
+    "frontendContainerAppId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'frontend-container-app'), '2025-04-01').outputs.resourceId.value]"
+    },
+    "postgresServerResourceId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'postgresql-flexible-server'), '2025-04-01').outputs.resourceId.value]"
+    },
+    "targetResourceGroupName": {
+      "type": "string",
+      "value": "[resourceGroup().name]"
+    },
+    "targetResourceGroupId": {
+      "type": "string",
+      "value": "[resourceGroup().id]"
+    },
+    "acrResourceId": {
+      "type": "string",
+      "value": "[if(equals(parameters('deploymentMode'), 'internal'), reference(resourceId('Microsoft.Resources/deployments', 'container-registry'), '2025-04-01').outputs.registryId.value, '')]"
+    }
+  }
+}

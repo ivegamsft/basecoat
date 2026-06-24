@@ -18,16 +18,19 @@ param deploymentMode string = 'internal'
 param acrName string = toLower('portalacr${environment}${deploymentMode}${substring(uniqueString(subscription().subscriptionId, environment, deploymentMode), 0, 4)}')
 
 @description('Backend container image tag (repo:tag, without registry prefix).')
-param backendImageTag string
+param backendImageTag string = ''
 
 @description('Frontend container image tag (repo:tag, without registry prefix).')
-param frontendImageTag string
+param frontendImageTag string = ''
 
 @description('Downstream backend image reference (fully qualified).')
 param downstreamBackendImage string = ''
 
 @description('Downstream frontend image reference (fully qualified).')
 param downstreamFrontendImage string = ''
+
+@description('Downstream CORS origins for backend container app.')
+param downstreamCorsOrigins string = '*'
 
 @description('PostgreSQL administrator login.')
 param postgresAdminLogin string = 'portaladmin'
@@ -147,7 +150,7 @@ module frontend './modules/frontend-container-app.bicep' = {
     image: frontendImage
     acrLoginServer: deploymentMode == 'internal' ? registry!.outputs.loginServer : ''
     acrPullIdentityId: deploymentMode == 'internal' ? acrPullIdentity!.id : ''
-    ingressExternal: true
+    ingressExternal: deploymentMode == 'internal'
     deploymentMode: deploymentMode
     appInsightsConnectionString: appInsights.properties.ConnectionString
   }
@@ -171,7 +174,7 @@ module backend './modules/backend-container-app.bicep' = {
     dbName: postgresDatabaseName
     dbUser: postgresAdminLogin
     dbPassword: postgresAdminPassword
-    corsOrigins: deploymentMode == 'internal' ? 'https://${frontend.outputs.fqdn}' : ''
+    corsOrigins: deploymentMode == 'internal' ? 'https://${frontend.outputs.fqdn}' : downstreamCorsOrigins
   }
 }
 

@@ -13,9 +13,9 @@ parameters, and deployment notes.
 
 ## Architecture
 
-Images are pushed to an Azure Container Registry (ACR) deployed by this template.
-Container Apps pull images via user-assigned managed identity with AcrPull role —
-no registry credentials are stored as secrets.
+In `internal` mode, images are pushed to an Azure Container Registry (ACR)
+deployed by this template. Container Apps pull images via user-assigned managed
+identity with AcrPull role — no registry credentials are stored as secrets.
 
 ## Deployment boundary modes
 
