@@ -127,8 +127,8 @@ jobs:
             echo "---- environments list payload ----"
             cat /tmp/prod-env-list.json || true
 
-            echo "---- environment template (.github/environment-protection-prod.json) ----"
-            cat .github/environment-protection-prod.json || true
+            echo "---- environment template (.github/environment-protection-production.json) ----"
+            cat .github/environment-protection-production.json || true
             exit 1
           fi
         env:
@@ -223,7 +223,7 @@ jobs:
           # Environment and Production Approval Protection Summary
           
           ## Production Environment (production)
-          ✓ Configured in: .github/environment-protection-prod.json
+          ✓ Configured in: .github/environment-protection-production.json
           ✓ Bootstrap mode: ${{ needs.bootstrap-prod-environment.outputs.bootstrap_mode }}
           ✓ Protection settings:
             - Deployment branch restricted to main

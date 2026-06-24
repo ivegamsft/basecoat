@@ -106,7 +106,7 @@
     ],
     "critical": [
       "iac/",
-      ".github/environment-protection-prod.json",
+      ".github/environment-protection-production.json",
       ".github/workflows/portal-deploy.yml",
       ".github/workflows/mcp-deploy.yml",
       ".github/workflows/extension-deploy.yml"
