@@ -1,0 +1,2 @@
+# Compiled ARM template - regenerate with: az bicep build --file main.bicep
+main.json

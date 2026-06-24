@@ -14,10 +14,10 @@ param image string
 param targetPort int = 80
 
 @description('ACR login server for managed identity pull.')
-param acrLoginServer string
+param acrLoginServer string = ''
 
 @description('User-assigned managed identity resource ID for ACR pull.')
-param acrPullIdentityId string
+param acrPullIdentityId string = ''
 
 @description('Minimum replica count.')
 param minReplicas int = 0
@@ -25,21 +25,32 @@ param minReplicas int = 0
 @description('Maximum replica count.')
 param maxReplicas int = 2
 
-@description('Application Insights connection string.')
-param appInsightsConnectionString string = ''
-
-@description('Whether ingress is externally exposed.')
+@description('Whether the app ingress should be public.')
 param ingressExternal bool = true
+
+@description('Deployment mode identifier.')
+@allowed([
+  'internal'
+  'downstream'
+])
+param deploymentMode string = 'internal'
+
+@description('Optional App Insights connection string.')
+param appInsightsConnectionString string = ''
 
 resource app 'Microsoft.App/containerApps@2024-03-01' = {
   name: appName
   location: location
-  identity: {
-    type: 'UserAssigned'
-    userAssignedIdentities: {
-      '${acrPullIdentityId}': {}
-    }
-  }
+  identity: empty(acrPullIdentityId)
+    ? {
+        type: 'None'
+      }
+    : {
+        type: 'UserAssigned'
+        userAssignedIdentities: {
+          '${acrPullIdentityId}': {}
+        }
+      }
   properties: {
     managedEnvironmentId: environmentId
     configuration: {
@@ -49,12 +60,14 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
         transport: 'http'
         allowInsecure: false
       }
-      registries: [
-        {
-          server: acrLoginServer
-          identity: acrPullIdentityId
-        }
-      ]
+      registries: empty(acrLoginServer)
+        ? []
+        : [
+            {
+              server: acrLoginServer
+              identity: acrPullIdentityId
+            }
+          ]
     }
     template: {
       containers: [
@@ -65,12 +78,19 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             cpu: json('0.25')
             memory: '0.5Gi'
           }
-          env: [
+          env: concat([
             {
-              name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-              value: appInsightsConnectionString
+              name: 'DEPLOYMENT_MODE'
+              value: deploymentMode
             }
-          ]
+          ], empty(appInsightsConnectionString)
+            ? []
+            : [
+                {
+                  name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+                  value: appInsightsConnectionString
+                }
+              ])
         }
       ]
       scale: {
@@ -92,3 +112,4 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
 }
 
 output fqdn string = app.properties.configuration.ingress.fqdn
+output resourceId string = app.id
