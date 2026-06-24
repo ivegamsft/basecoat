@@ -13,7 +13,6 @@ on:
 permissions:
   contents: read
   deployments: read
-  environments: read
 
 jobs:
   bootstrap-prod-environment:
