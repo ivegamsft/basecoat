@@ -16,6 +16,10 @@ on:
     - cron: "0 13 * * 1"
   workflow_dispatch:
     inputs:
+      pr_number:
+        description: "Optional PR number to evaluate immediately using the selected ref"
+        required: false
+        type: string
       wip_limit:
         description: "Max ready-for-review PRs before WIP warning"
         required: false
@@ -55,6 +59,7 @@ jobs:
       - name: Route PR readiness events and publish weekly outcomes
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         env:
+          PR_NUMBER_INPUT: ${{ inputs.pr_number || '' }}
           WIP_LIMIT: ${{ inputs.wip_limit || '20' }}
           DRAFT_DRIFT_DAYS: ${{ inputs.draft_drift_days || '14' }}
           READY_STALE_DAYS: ${{ inputs.ready_stale_days || '7' }}
@@ -172,12 +177,13 @@ jobs:
             const draftDriftDays = toInt(process.env.DRAFT_DRIFT_DAYS, 14);
             const readyStaleDays = toInt(process.env.READY_STALE_DAYS, 7);
             const maxItems = toInt(process.env.MAX_ITEMS, 200);
+            const targetedPrNumber = toInt(process.env.PR_NUMBER_INPUT, 0);
             const now = new Date();
 
-            if (context.eventName === 'pull_request_target') {
-              const prNumber = context.payload.pull_request?.number;
+            if (context.eventName === 'pull_request_target' || (context.eventName === 'workflow_dispatch' && targetedPrNumber > 0)) {
+              const prNumber = context.payload.pull_request?.number || targetedPrNumber;
               if (!prNumber) {
-                core.setFailed('pull_request_target event does not include pull_request.number.');
+                core.setFailed('Unable to resolve target pull request number from event payload or workflow_dispatch input.');
                 return;
               }
 
@@ -249,6 +255,7 @@ jobs:
                     [{ data: 'Metric', header: true }, { data: 'Value', header: true }],
                     ['PR', `#${prNumber}`],
                     ['Mode', mode],
+                    ['Trigger', context.eventName === 'workflow_dispatch' ? 'workflow_dispatch' : (context.payload.action || 'update')],
                     ['Hotfix fast path', hotfixFastPath ? 'Yes' : 'No'],
                     ['Reasons', String(reasons.length)],
                     ['Comment', commentAction],
@@ -261,7 +268,7 @@ jobs:
               await setBlockedLabel(prNumber, false);
               core.summary
                 .addHeading('PR readiness event routing result')
-                .addRaw(`PR #${prNumber} passed readiness checks for ${context.payload.action || 'update'}.\n`)
+                .addRaw(`PR #${prNumber} passed readiness checks for ${context.eventName === 'workflow_dispatch' ? 'workflow_dispatch' : (context.payload.action || 'update')}.\n`)
                 .write();
               return;
             }
