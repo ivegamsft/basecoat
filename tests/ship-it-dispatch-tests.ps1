@@ -149,6 +149,9 @@ if ($workflowContent -notmatch "pilot-luxesite") {
 if ($workflowContent -notmatch "pilot-wawkr") {
   throw "Ship-it workflow must expose pilot-wawkr profile option."
 }
+if ($workflowContent -notmatch "pilot-work-tracker") {
+  throw "Ship-it workflow must expose pilot-work-tracker profile option."
+}
 
 $wawkrOutputJson = Join-Path $outputDirectory "summary-pilot-wawkr.json"
 & $dispatchScript `
@@ -180,6 +183,38 @@ if ($wawkrSummary.child_issues[3].stage_artifact.execution_lane -ne "pilot-wawkr
 }
 if ($wawkrSummary.release_gate_contract.lane_profiles.'pilot-wawkr'.required_artifacts.Count -lt 5) {
   throw "Expected wawkr lane profile to include strict required artifact policy."
+}
+
+$workTrackerOutputJson = Join-Path $outputDirectory "summary-pilot-work-tracker.json"
+& $dispatchScript `
+  -Intent "onboarding-conductor" `
+  -Goal "Validate work-tracker lane-aware onboarding path" `
+  -TargetRepo "IBuySpy-Shared/basecoat" `
+  -SpecRef "https://example.com/specs/work-tracker-lane-aware" `
+  -RiskBand "medium" `
+  -Profile "pilot-work-tracker" `
+  -DryRun `
+  -OutputPath $workTrackerOutputJson
+
+if (-not (Test-Path $workTrackerOutputJson)) {
+  throw "Work-tracker dispatch summary JSON was not created: $workTrackerOutputJson"
+}
+
+$workTrackerSummary = Get-Content -Raw -Path $workTrackerOutputJson | ConvertFrom-Json
+if ($workTrackerSummary.profile -ne "pilot-work-tracker") {
+  throw "Expected work-tracker profile pilot-work-tracker but found '$($workTrackerSummary.profile)'"
+}
+if ($workTrackerSummary.child_issues.Count -ne 4) {
+  throw "Expected 4 work-tracker child phase issues but found $($workTrackerSummary.child_issues.Count)"
+}
+if ($workTrackerSummary.child_issues[0].stage_artifact.execution_lane -ne "pilot-work-tracker-baseline") {
+  throw "Expected Discover phase lane to be pilot-work-tracker-baseline but found '$($workTrackerSummary.child_issues[0].stage_artifact.execution_lane)'."
+}
+if ($workTrackerSummary.child_issues[3].stage_artifact.execution_lane -ne "pilot-work-tracker-validation") {
+  throw "Expected Validate phase lane to be pilot-work-tracker-validation but found '$($workTrackerSummary.child_issues[3].stage_artifact.execution_lane)'."
+}
+if ($workTrackerSummary.release_gate_contract.lane_profiles.'pilot-work-tracker'.required_artifacts.Count -lt 5) {
+  throw "Expected work-tracker lane profile to include strict required artifact policy."
 }
 
 Write-Host "Ship-it dispatch tests passed."

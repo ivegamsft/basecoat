@@ -13,7 +13,7 @@ param(
   [ValidateSet("low", "medium", "high", "critical")]
   [string]$RiskBand = "medium",
 
-  [ValidateSet("solo-dev", "team-dev", "regulated-team", "pilot-luxesite", "pilot-wawkr")]
+  [ValidateSet("solo-dev", "team-dev", "regulated-team", "pilot-luxesite", "pilot-wawkr", "pilot-work-tracker")]
   [string]$Profile = "team-dev",
 
   [int]$ProjectNumber = 0,
@@ -213,6 +213,17 @@ function Get-DesiredStateDiff {
       release_gate_mode = "lane-strict"
       artifact_completeness_mode = "lane-strict"
     }
+    "pilot-work-tracker" = @{
+      branch_policy = "shared-protected"
+      workflow_pack = "team-plus-pilot-lane-aware"
+      template_pack = "team-plus-pilot"
+      telemetry_mode = "shared"
+      secrets_mode = "workflow-secrets"
+      hook_pack = "standard"
+      execution_lane = "pilot-work-tracker"
+      release_gate_mode = "lane-strict"
+      artifact_completeness_mode = "lane-strict"
+    }
   }
 
   if (-not $profiles.ContainsKey($ProfileName)) {
@@ -305,6 +316,16 @@ function Get-ExecutionLane {
       "apply" { return "pilot-wawkr-canary-deployment" }
       "validate" { return "pilot-wawkr-canary-validation" }
       default { return "pilot-wawkr" }
+    }
+  }
+
+  if ($IntentName -eq "onboarding-conductor" -and $ProfileName -eq "pilot-work-tracker") {
+    switch ($StageSlug) {
+      "discover" { return "pilot-work-tracker-baseline" }
+      "plan" { return "pilot-work-tracker-contract" }
+      "apply" { return "pilot-work-tracker-deployment" }
+      "validate" { return "pilot-work-tracker-validation" }
+      default { return "pilot-work-tracker" }
     }
   }
 
@@ -421,6 +442,15 @@ function Get-ReleaseGateContract {
         notes = @(
           "Forces all gates for canary validation and evidence collection.",
           "Requires spec, docs, tests, runbook, and release-notes for canary contractual completeness."
+        )
+      }
+      "pilot-work-tracker" = [ordered]@{
+        required_gates = @("lint", "build", "type", "e2e", "security", "smoke")
+        required_artifacts = @("spec", "docs", "tests", "runbook", "release_notes")
+        notes = @(
+          "Forces all gates for lane-aware execution and evidence collection.",
+          "Requires spec, docs, tests, runbook, and release-notes for work-tracker lane contractual completeness.",
+          "Work-tracker deployment model emphasizes lane-aware orchestration and merge sequencing."
         )
       }
     }

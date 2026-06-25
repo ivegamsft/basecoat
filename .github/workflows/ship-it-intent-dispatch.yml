@@ -47,6 +47,7 @@ on:
           - regulated-team
           - pilot-luxesite
           - pilot-wawkr
+          - pilot-work-tracker
       project_owner:
         description: Optional project owner for project sync
         required: false
