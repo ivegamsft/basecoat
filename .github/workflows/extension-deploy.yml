@@ -242,7 +242,7 @@ jobs:
           npm ci --no-audit --prefer-offline
           npm run build
 
-      - name: Advisory environment drift snapshot
+      - name: Environment drift preflight (gating)
         id: drift-preflight
         shell: bash
         run: |
@@ -266,14 +266,25 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
           {
-            echo "### Environment drift snapshot (advisory)"
+            echo "### Environment drift preflight (gating)"
             echo ""
             echo "| Target | Critical | High | Findings |"
             echo "|---|---:|---:|---:|"
             echo "| \`${TARGET_ENV}\` | ${TARGET_CRITICAL} | ${TARGET_HIGH} | ${TARGET_TOTAL} |"
             echo ""
-            echo "> This snapshot is informational and does not replace environment protection rules, what-if validation, or health checks."
+            echo "> Critical findings block deployment for the target environment."
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Enforce target-environment drift gate
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TARGET_CRITICAL="${{ steps.drift-preflight.outputs.target_critical }}"
+          if [[ "${TARGET_CRITICAL}" -gt 0 ]]; then
+            echo "::error::Critical environment drift detected for ${TARGET_ENV} (${TARGET_CRITICAL} finding(s)); see drift-report.json artifact and step summary for details."
+            exit 1
+          fi
 
       - name: Upload drift preflight report
         if: always()

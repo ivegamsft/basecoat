@@ -1,0 +1,211 @@
+name: "BaseCoat - Project Rules Drift Audit"
+
+on:
+  schedule:
+    # Run weekly on Monday at 7:00 AM UTC
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Audit mode: advisory (report only) or enforce (open issues)'
+        required: false
+        default: 'advisory'
+        type: choice
+        options:
+          - advisory
+          - enforce
+      severity_threshold:
+        description: 'Minimum severity to include in the report'
+        required: false
+        default: 'low'
+        type: choice
+        options:
+          - critical
+          - high
+          - medium
+          - low
+      project_url:
+        description: 'GitHub Project URL (leave blank to skip live rule fetch and report baseline only)'
+        required: false
+        default: ''
+        type: string
+  push:
+    paths:
+      - 'scripts/project-rules-baseline.json'
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  drift-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      drift_status: ${{ steps.audit.outputs.drift_status }}
+      findings_count: ${{ steps.audit.outputs.findings_count }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Determine audit parameters
+        id: params
+        run: |
+          MODE="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.mode || 'advisory' }}"
+          THRESHOLD="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.severity_threshold || 'low' }}"
+          # Dispatch: use the provided project_url. Schedule/push: fall back to vars.PROJECT_RULES_AUDIT_URL.
+          # When neither is set, the script runs in baseline-only validation mode.
+          PROJECT_URL="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.project_url || vars.PROJECT_RULES_AUDIT_URL }}"
+          {
+            echo "mode=$MODE"
+            echo "threshold=$THRESHOLD"
+            echo "project_url=$PROJECT_URL"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Validate baseline manifest
+        run: |
+          if [ ! -f scripts/project-rules-baseline.json ]; then
+            echo "ERROR: scripts/project-rules-baseline.json not found."
+            exit 1
+          fi
+          if python3 -c "import json, sys; json.load(open('scripts/project-rules-baseline.json'))"; then
+            echo "Baseline manifest is valid JSON."
+          else
+            echo "ERROR: Baseline manifest is not valid JSON."
+            exit 1
+          fi
+
+      - name: Run project rules drift audit
+        id: audit
+        env:
+          # GITHUB_TOKEN covers issues:write but does NOT include read:project (Projects v2).
+          # For live project rule comparison, set a PAT with read:project in a repository secret
+          # named PROJECT_AUDIT_TOKEN and reference it here instead of secrets.GITHUB_TOKEN.
+          # Baseline-only validation works with the default token.
+          GH_TOKEN: ${{ secrets.PROJECT_AUDIT_TOKEN || secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          $params = @{
+            Repo              = '${{ github.repository }}'
+            BaselinePath      = 'scripts/project-rules-baseline.json'
+            Mode              = '${{ steps.params.outputs.mode }}'
+            SeverityThreshold = '${{ steps.params.outputs.threshold }}'
+            OutputPath        = 'drift-report.json'
+            AssumeYes         = $true
+          }
+
+          $projectUrl = '${{ steps.params.outputs.project_url }}'
+          if ($projectUrl) {
+            $params.ProjectUrl = $projectUrl
+          }
+
+          $exitCode = 0
+          try {
+            pwsh scripts/project-rules-drift-audit.ps1 @params
+            $exitCode = $LASTEXITCODE
+          } catch {
+            Write-Host "Audit script error: $_"
+            $exitCode = 3
+          }
+
+          if (Test-Path 'drift-report.json') {
+            $report = Get-Content 'drift-report.json' -Raw | ConvertFrom-Json
+            $critical = $report.summary.by_severity.critical
+            $high     = $report.summary.by_severity.high
+            $medium   = $report.summary.by_severity.medium
+            $total    = $report.summary.total_findings
+
+            $status = if ($critical -gt 0) { 'critical' } `
+                      elseif ($high -gt 0) { 'high' } `
+                      elseif ($medium -gt 0) { 'medium' } `
+                      else { 'clean' }
+
+            echo "drift_status=$status" >> $env:GITHUB_OUTPUT
+            echo "findings_count=$total" >> $env:GITHUB_OUTPUT
+
+            # Write step summary
+            "### Project Rules Drift Audit" >> $env:GITHUB_STEP_SUMMARY
+            "" >> $env:GITHUB_STEP_SUMMARY
+            "**Status:** $status" >> $env:GITHUB_STEP_SUMMARY
+            "**Findings:** $total (critical: $critical, high: $high, medium: $medium)" >> $env:GITHUB_STEP_SUMMARY
+            "**Mode:** $($report.mode)" >> $env:GITHUB_STEP_SUMMARY
+            "**Baseline:** v$($report.baseline_version)" >> $env:GITHUB_STEP_SUMMARY
+          } else {
+            echo "drift_status=unknown" >> $env:GITHUB_OUTPUT
+            echo "findings_count=0" >> $env:GITHUB_OUTPUT
+          }
+
+          # Exit code contract: 0=clean/advisory, 1=high drift, 2=critical drift, 3=execution error
+          # Any non-zero exit code other than an expected drift signal should fail the workflow.
+          if ($exitCode -eq 2) { exit 1 }   # critical drift → fail
+          if ($exitCode -eq 1) { exit 0 }   # high drift → advisory (warn only)
+          if ($exitCode -eq 0) { exit 0 }   # clean
+          # Unexpected exit code (e.g., script crash) → fail the workflow so operators notice
+          Write-Host "Unexpected audit exit code: $exitCode"
+          exit 1
+
+      - name: Upload drift report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: project-rules-drift-report
+          path: drift-report.json
+          retention-days: 90
+
+      - name: Open issue on critical drift
+        if: steps.audit.outputs.drift_status == 'critical'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v7
+        with:
+          script: |
+            const fs = require('fs');
+            if (!fs.existsSync('drift-report.json')) return;
+            const report = JSON.parse(fs.readFileSync('drift-report.json', 'utf-8'));
+            const criticalFindings = report.findings.filter(f => f.severity === 'critical');
+            if (criticalFindings.length === 0) return;
+
+            const rows = criticalFindings
+              .map(f => `| \`${f.finding_id}\` | ${f.rule_name} | ${f.drift_type} | ${f.remediation} |`)
+              .join('\n');
+
+            const body = [
+              '## Critical Project Rules Drift Detected',
+              '',
+              `**Audit ID:** ${report.audit_id}`,
+              `**Baseline version:** ${report.baseline_version}`,
+              `**Run:** ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              '',
+              '| Finding ID | Rule | Drift Type | Remediation |',
+              '|---|---|---|---|',
+              rows,
+              '',
+              '_Resolve critical findings immediately to restore AIDL guardrail compliance._',
+            ].join('\n');
+
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'governance',
+              state: 'open',
+              per_page: 50,
+            });
+
+            const title = 'Critical project rules drift detected';
+            if (!existing.some(i => i.title === title)) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['governance', 'priority:critical'],
+              });
+            }
+
+      - name: Fail on critical drift
+        if: steps.audit.outputs.drift_status == 'critical'
+        run: |
+          echo "Critical project rules drift detected. Review the drift report and resolve before the next sprint."
+          exit 1

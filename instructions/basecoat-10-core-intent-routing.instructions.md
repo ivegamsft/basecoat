@@ -147,11 +147,15 @@ Execution contract:
    not infer lifecycle mode.
 5. Reject invalid `pr-lifecycle` values and return explicit guidance listing
    allowed values.
-6. When `pr-lifecycle=full` is selected, expand routing to full lifecycle
+6. Reject dual-prefix combinations (for example `feature: pr:`) and require a
+   single authoritative prefix.
+7. When `pr-lifecycle=full` is selected, expand routing to full lifecycle
    coverage: remaining WIP logging, merge-readiness triage, broken-build
    follow-up, closure evidence, and post-merge branch hygiene.
-7. Keep branch cleanup subordinate to PR state: only merged or explicitly
+8. Keep branch cleanup subordinate to PR state: only merged or explicitly
    closed work moves into branch-hygiene actions.
+9. In `pr-lifecycle=full` mode, do not mark the request complete while WIP
+   tasks or uncommitted changes remain unresolved.
 
 ## Plan-First Enforcement
 
