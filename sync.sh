@@ -152,9 +152,12 @@ for doc_subdir in reference guides; do
     cp -R "$TMP_DIR/source/docs/$doc_subdir" "$REPO_ROOT/$TARGET_DIR/docs/$doc_subdir"
   fi
 done
-if [[ -f "$TMP_DIR/source/docs/agents/agents.md" ]]; then
+if [[ -f "$TMP_DIR/source/docs/agents/AGENTS.md" ]]; then
   mkdir -p "$REPO_ROOT/$TARGET_DIR/docs/agents"
-  cp "$TMP_DIR/source/docs/agents/agents.md" "$REPO_ROOT/$TARGET_DIR/docs/agents/agents.md"
+  cp "$TMP_DIR/source/docs/agents/AGENTS.md" "$REPO_ROOT/$TARGET_DIR/docs/agents/AGENTS.md"
+elif [[ -f "$TMP_DIR/source/docs/agents/agents.md" ]]; then
+  mkdir -p "$REPO_ROOT/$TARGET_DIR/docs/agents"
+  cp "$TMP_DIR/source/docs/agents/agents.md" "$REPO_ROOT/$TARGET_DIR/docs/agents/AGENTS.md"
 fi
 
 for path in "$REPO_ROOT/$TARGET_DIR/docs"/*; do

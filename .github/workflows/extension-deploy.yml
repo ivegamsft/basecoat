@@ -39,10 +39,44 @@ env:
   EXTENSION_AZURE_LOCATION: ${{ vars.EXTENSION_AZURE_LOCATION || 'eastus' }}
 
 jobs:
+  resolve-deploy-runner:
+    name: Resolve deploy runner contract
+    runs-on: ubuntu-latest
+    outputs:
+      deploy_runner: ${{ steps.contract.outputs.deploy_runner }}
+    steps:
+      - name: Validate self-hosted runner routing contract
+        id: contract
+        shell: bash
+        env:
+          RUNNER_DEPLOY: ${{ vars.RUNNER_DEPLOY }}
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            echo "deploy_runner=ubuntu-latest" >> "$GITHUB_OUTPUT"
+            echo "::notice::Using ubuntu-latest for pull_request events."
+            exit 0
+          fi
+          if [[ -z "${RUNNER_DEPLOY:-}" ]]; then
+            echo "::error::vars.RUNNER_DEPLOY is not configured."
+            echo "::error::Set RUNNER_DEPLOY to self-hosted labels/group for deploy-class jobs."
+            echo "::error::Repository settings: https://github.com/${GITHUB_REPOSITORY}/settings/variables/actions"
+            exit 1
+          fi
+          NORMALIZED="$(echo "${RUNNER_DEPLOY}" | tr '[:upper:]' '[:lower:]')"
+          if [[ "${NORMALIZED}" == *"ubuntu-latest"* && "${NORMALIZED}" != *"self-hosted"* ]]; then
+            echo "::error::vars.RUNNER_DEPLOY resolves to ubuntu-latest fallback."
+            echo "::error::This workflow requires explicit self-hosted routing."
+            exit 1
+          fi
+          echo "deploy_runner=${RUNNER_DEPLOY}" >> "$GITHUB_OUTPUT"
+          echo "Runner contract satisfied: ${RUNNER_DEPLOY}"
+
   build-push:
     name: Build and push extension image
     runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-latest' || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
     timeout-minutes: 20
+    needs: resolve-deploy-runner
     if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork }}
     outputs:
       image_tag: ${{ steps.meta.outputs.version }}
@@ -54,26 +88,8 @@ jobs:
 
       - name: Validate self-hosted runner routing contract
         shell: bash
-        env:
-          RUNNER_DEPLOY: ${{ vars.RUNNER_DEPLOY }}
         run: |
-          set -euo pipefail
-          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
-            echo "::notice::Skipping strict self-hosted contract enforcement on pull_request events."
-            exit 0
-          fi
-          if [[ -z "${RUNNER_DEPLOY:-}" ]]; then
-            echo "::error::vars.RUNNER_DEPLOY is not configured."
-            echo "::error::Set RUNNER_DEPLOY to self-hosted labels/group for deploy-class jobs."
-            exit 1
-          fi
-          NORMALIZED="$(echo "${RUNNER_DEPLOY}" | tr '[:upper:]' '[:lower:]')"
-          if [[ "${NORMALIZED}" == *"ubuntu-latest"* && "${NORMALIZED}" != *"self-hosted"* ]]; then
-            echo "::error::vars.RUNNER_DEPLOY resolves to ubuntu-latest fallback."
-            echo "::error::This workflow requires explicit self-hosted routing."
-            exit 1
-          fi
-          echo "Runner contract satisfied: ${RUNNER_DEPLOY}"
+          echo "Runner contract already validated by resolve-deploy-runner: ${{ needs.resolve-deploy-runner.outputs.deploy_runner }}"
 
       - name: Log in to GHCR
         uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee
@@ -113,7 +129,7 @@ jobs:
     name: Deploy extension to Azure Container Apps
     runs-on: ${{ vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
     timeout-minutes: 20
-    needs: build-push
+    needs: [resolve-deploy-runner, build-push]
     if: ${{ github.event_name != 'pull_request' }}
     environment: ${{ github.event_name == 'workflow_dispatch' && ((github.event.inputs.environment == 'prod' || github.event.inputs.environment == 'production') && 'production' || github.event.inputs.environment) || 'production' }}
     env:
@@ -125,26 +141,8 @@ jobs:
 
       - name: Validate self-hosted runner routing contract
         shell: bash
-        env:
-          RUNNER_DEPLOY: ${{ vars.RUNNER_DEPLOY }}
         run: |
-          set -euo pipefail
-          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
-            echo "::notice::Skipping strict self-hosted contract enforcement on pull_request events."
-            exit 0
-          fi
-          if [[ -z "${RUNNER_DEPLOY:-}" ]]; then
-            echo "::error::vars.RUNNER_DEPLOY is not configured."
-            echo "::error::Set RUNNER_DEPLOY to self-hosted labels/group for deploy-class jobs."
-            exit 1
-          fi
-          NORMALIZED="$(echo "${RUNNER_DEPLOY}" | tr '[:upper:]' '[:lower:]')"
-          if [[ "${NORMALIZED}" == *"ubuntu-latest"* && "${NORMALIZED}" != *"self-hosted"* ]]; then
-            echo "::error::vars.RUNNER_DEPLOY resolves to ubuntu-latest fallback."
-            echo "::error::This workflow requires explicit self-hosted routing."
-            exit 1
-          fi
-          echo "Runner contract satisfied: ${RUNNER_DEPLOY}"
+          echo "Runner contract already validated by resolve-deploy-runner: ${{ needs.resolve-deploy-runner.outputs.deploy_runner }}"
 
       - name: Validate extension resource group is configured
         run: |

@@ -57,6 +57,34 @@ runs-on: ${{ vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
 This pattern is currently used by deployment-oriented workflows and remains
 compatible with protected self-hosted rollouts.
 
+For deploy workflows that must fail with explicit guidance when
+`RUNNER_DEPLOY` is missing, use a resolver/preflight job on
+`ubuntu-latest` and route deploy jobs through its output:
+
+```yaml
+jobs:
+  resolve-deploy-runner:
+    runs-on: ubuntu-latest
+    outputs:
+      deploy_runner: ${{ steps.contract.outputs.deploy_runner }}
+    steps:
+      - name: Validate self-hosted runner routing contract
+        id: contract
+        env:
+          RUNNER_DEPLOY: ${{ vars.RUNNER_DEPLOY }}
+        run: |
+          if [[ -z "${RUNNER_DEPLOY:-}" ]]; then
+            echo "::error::vars.RUNNER_DEPLOY is not configured."
+            echo "::error::Set RUNNER_DEPLOY to self-hosted labels/group for deploy-class jobs."
+            exit 1
+          fi
+          echo "deploy_runner=${RUNNER_DEPLOY}" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: resolve-deploy-runner
+    runs-on: ${{ needs.resolve-deploy-runner.outputs.deploy_runner }}
+```
+
 Release/publish workflows now isolate onto a dedicated release lane variable:
 
 ```yaml
@@ -79,9 +107,10 @@ This workflow emits markdown and JSON artifacts plus a step summary so lane
 routing debt can be spotted quickly without inspecting each run manually.
 
 Deployment workflows that use `RUNNER_DEPLOY` include a mandatory
-`Validate self-hosted runner routing contract` step. This fails early when
-`vars.RUNNER_DEPLOY` is missing or resolves to plain `ubuntu-latest`, preventing
-silent wrong-runner execution.
+`Validate self-hosted runner routing contract` guard. In deploy workflows this
+is enforced in a resolver/preflight job so runs fail before build/deploy work
+starts when `vars.RUNNER_DEPLOY` is missing or resolves to plain
+`ubuntu-latest`, preventing silent wrong-runner execution.
 
 ## Intentionally GitHub-hosted workflows
 
