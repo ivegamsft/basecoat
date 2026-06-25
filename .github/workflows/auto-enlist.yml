@@ -79,8 +79,6 @@ jobs:
 
           SUCCEEDED=0
           FAILED=0
-          SKIPPED=0
-
           while IFS= read -r repo; do
             [[ -z "$repo" ]] && continue
             echo "──────────────────────────────────────────"
@@ -101,4 +99,3 @@ jobs:
           if [[ "$DRY_RUN" == "true" ]]; then
             echo "ℹ️  This was a dry run. Re-run with dry_run=false to apply changes."
           fi
-

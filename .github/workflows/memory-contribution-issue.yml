@@ -112,13 +112,18 @@ jobs:
           TEAM:     ${{ steps.parse.outputs.team }}
           ISSUE_URL: ${{ github.event.issue.html_url }}
         run: |
+          TEAM_ARGS=()
+          if [[ -n "$TEAM" ]]; then
+            TEAM_ARGS+=(--team "$TEAM")
+          fi
+
           bash basecoat/scripts/submit-learning.sh \
             --subject  "$SUBJECT" \
             --fact     "$FACT" \
             --evidence "$EVIDENCE" \
             --domain   "$DOMAIN" \
             --source   "$SOURCE" \
-            $([ -n "$TEAM" ] && echo "--team '$TEAM'" || true) \
+            "${TEAM_ARGS[@]}" \
             --open-pr
 
       - name: Comment — success
@@ -158,4 +163,3 @@ jobs:
               issue_number: context.issue.number,
               body: msg
             });
-
