@@ -30,6 +30,21 @@ Execute these in order to reduce input-token bloat first, then optimize routing:
 5. Keep main-thread messages decision-focused; delegate scan/research work.
 6. For attachment-heavy tasks, create one canonical summary artifact and reference it by path/link.
 
+### Keep-pattern defaults (workstream #2046)
+
+These defaults are promoted to Keep status and should be treated as baseline
+operator behavior:
+
+| Default pattern | Minimum adoption target | Runbook |
+|---|---|---|
+| Phase-boundary compaction | >=80% of tracked runs | `docs/guides/kept-patterns/phase-boundary-compaction.md` |
+| File-reference-only context loading | >=80% of tracked runs | `docs/guides/kept-patterns/file-reference-only-context.md` |
+| Single kickoff plus `/tasks` monitoring | >=80% of tracked runs | `docs/guides/kept-patterns/single-kickoff-tasks-monitoring.md` |
+
+Promotion and future-candidate review must follow:
+
+- `docs/guides/keep-candidate-acceptance-checklist.md`
+
 ### 1. Compact at phase transitions (not just time)
 
 Invoke `/compact` when switching between semantic phases:

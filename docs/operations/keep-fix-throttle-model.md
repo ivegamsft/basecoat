@@ -54,7 +54,10 @@ Patterns that meet the "Keep" criteria are standardized as defaults and document
 Kept patterns are documented in:
 
 - `docs/guides/kept-patterns/` — Consolidated runbooks for each pattern
+- `docs/guides/kept-patterns/README.md` — Keep registry with adoption targets
+- `docs/guides/keep-candidate-acceptance-checklist.md` — Promotion gates for future candidates
 - `.github/instructions/workflow-conventions.instructions.md` — Embedded defaults
+- `.github/instructions/cost-optimization.instructions.md` — Token-efficiency defaults and thresholds
 - `docs/reference/governance-contract.md` — Standardized naming and labels
 
 ### Example: PR-Only Agent Pattern
@@ -70,6 +73,15 @@ Kept patterns are documented in:
 **Documentation**: `docs/guides/agent-pr-safety-protocol.md` and `.github/workflows/code-review-agent.md`.
 
 **Status**: ✅ KEEP (standardize as default for new agents).
+
+### Current promoted defaults (Workstream 1, #2046)
+
+1. **Phase-boundary compaction** (`/compact` between major phases).
+2. **File-reference-only context loading** (no large instruction pastes).
+3. **Single kickoff plus `/tasks` monitoring** (delta steering, no repeated orchestration restarts).
+
+Each promoted default has a runbook under `docs/guides/kept-patterns/` and is
+wired into default guidance under `.github/instructions/`.
 
 ---
 
