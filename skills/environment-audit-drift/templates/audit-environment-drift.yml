@@ -39,6 +39,19 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Verify local environment drift CLI source
+        run: |
+          if [ ! -f skills/environment-audit-drift/package.json ]; then
+            echo "::error::Local environment drift CLI source is missing: skills/environment-audit-drift/package.json"
+            echo "::error::Do not use npm registry fallback for @basecoat/environment-audit-drift in this workflow."
+            exit 1
+          fi
+
+          if ! grep -q '"name": "@basecoat/environment-audit-drift"' skills/environment-audit-drift/package.json; then
+            echo "::error::Local CLI manifest does not match @basecoat/environment-audit-drift."
+            exit 1
+          fi
+
       - name: Install local environment drift CLI dependencies
         run: npm ci --prefix skills/environment-audit-drift
 

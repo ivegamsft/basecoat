@@ -666,13 +666,17 @@ if (-not (Test-Path $auditEnvironmentPath)) {
 else {
     $auditEnvironmentWorkflow = Get-Content $auditEnvironmentPath -Raw
 
-    if ($auditEnvironmentWorkflow -match 'npx\s+--yes\s+@basecoat/environment-audit-drift') {
+    if ($auditEnvironmentWorkflow -match 'npx\s+(--yes\s+)?@basecoat/environment-audit-drift') {
         $stabilizationGuardrailIssues += 'audit-environment-drift.yml (still depends on unpublished npm package via npx)'
     }
 
     if ($auditEnvironmentWorkflow -notmatch 'npm ci --prefix skills/environment-audit-drift' -or
         $auditEnvironmentWorkflow -notmatch 'node skills/environment-audit-drift/dist/cli\.js') {
         $stabilizationGuardrailIssues += 'audit-environment-drift.yml (missing local CLI install/build execution path)'
+    }
+
+    if ($auditEnvironmentWorkflow -notmatch 'Do not use npm registry fallback for @basecoat/environment-audit-drift') {
+        $stabilizationGuardrailIssues += 'audit-environment-drift.yml (missing explicit npm-registry fallback guardrail for local CLI source)'
     }
 }
 
