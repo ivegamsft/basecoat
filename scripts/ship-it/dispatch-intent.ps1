@@ -13,7 +13,7 @@ param(
   [ValidateSet("low", "medium", "high", "critical")]
   [string]$RiskBand = "medium",
 
-  [ValidateSet("solo-dev", "team-dev", "regulated-team")]
+  [ValidateSet("solo-dev", "team-dev", "regulated-team", "pilot-luxesite")]
   [string]$Profile = "team-dev",
 
   [int]$ProjectNumber = 0,
@@ -165,6 +165,9 @@ function Get-DesiredStateDiff {
       telemetry_mode = "local"
       secrets_mode = "local"
       hook_pack = "none"
+      execution_lane = "standard"
+      release_gate_mode = "risk-band-default"
+      artifact_completeness_mode = "risk-band-default"
     }
     "team-dev" = @{
       branch_policy = "shared"
@@ -173,6 +176,9 @@ function Get-DesiredStateDiff {
       telemetry_mode = "shared"
       secrets_mode = "workflow-secrets"
       hook_pack = "standard"
+      execution_lane = "standard"
+      release_gate_mode = "risk-band-default"
+      artifact_completeness_mode = "risk-band-default"
     }
     "regulated-team" = @{
       branch_policy = "locked-down"
@@ -181,6 +187,20 @@ function Get-DesiredStateDiff {
       telemetry_mode = "org-managed"
       secrets_mode = "org-managed"
       hook_pack = "guardrails"
+      execution_lane = "standard"
+      release_gate_mode = "risk-band-default"
+      artifact_completeness_mode = "risk-band-default"
+    }
+    "pilot-luxesite" = @{
+      branch_policy = "shared-protected"
+      workflow_pack = "team-plus-pilot-hardening"
+      template_pack = "team-plus-pilot"
+      telemetry_mode = "shared"
+      secrets_mode = "workflow-secrets"
+      hook_pack = "standard"
+      execution_lane = "pilot-luxesite"
+      release_gate_mode = "lane-strict"
+      artifact_completeness_mode = "lane-strict"
     }
   }
 
@@ -225,8 +245,49 @@ function Get-DesiredStateDiff {
       current_state = "detect-at-runtime"
       desired_state = $selection.hook_pack
       action = "create_or_update"
+    },
+    [ordered]@{
+      surface = "execution_lane"
+      current_state = "detect-at-runtime"
+      desired_state = $selection.execution_lane
+      action = "create_or_update"
+    },
+    [ordered]@{
+      surface = "release_gate_mode"
+      current_state = "detect-at-runtime"
+      desired_state = $selection.release_gate_mode
+      action = "create_or_update"
+    },
+    [ordered]@{
+      surface = "artifact_completeness_mode"
+      current_state = "detect-at-runtime"
+      desired_state = $selection.artifact_completeness_mode
+      action = "create_or_update"
     }
   )
+}
+
+function Get-ExecutionLane {
+  param(
+    [Parameter(Mandatory)]
+    [string]$IntentName,
+    [Parameter(Mandatory)]
+    [string]$ProfileName,
+    [Parameter(Mandatory)]
+    [string]$StageSlug
+  )
+
+  if ($IntentName -eq "onboarding-conductor" -and $ProfileName -eq "pilot-luxesite") {
+    switch ($StageSlug) {
+      "discover" { return "pilot-luxesite-baseline-remediation" }
+      "plan" { return "pilot-luxesite-artifact-contract" }
+      "apply" { return "pilot-luxesite-stabilization" }
+      "validate" { return "pilot-luxesite-release-readiness" }
+      default { return "pilot-luxesite" }
+    }
+  }
+
+  return "standard"
 }
 
 function Get-StageArtifact {
@@ -242,7 +303,9 @@ function Get-StageArtifact {
     [Parameter(Mandatory)]
     [string]$StageSlug,
     [Parameter(Mandatory)]
-    [string]$RunHash
+    [string]$RunHash,
+    [Parameter(Mandatory)]
+    [string]$ExecutionLane
   )
 
   $safeGoalSlug = ($GoalText.ToLowerInvariant() -replace "[^a-z0-9]+", "-").Trim("-")
@@ -257,23 +320,80 @@ function Get-StageArtifact {
   $branchName = "intent/$IntentName/$hashSegment/s$StageIndex-$StageSlug-$safeGoalSlug"
   $prTitlePrefix = if ($IntentName -eq "onboarding-conductor") { "Phase" } else { "Sprint" }
 
+  $requiredChecks = @(
+    "BaseCoat - PR Flow Hygiene / PR readiness routing and weekly hygiene report",
+    "BaseCoat - Sprint Closeout Branch Audit / branch-audit"
+  )
+  if ($StageIndex -eq 3) {
+    $requiredChecks += "Ship-it Release Gate / enforce-release-gate"
+  }
+
   return [ordered]@{
     stage = $StageIndex
+    execution_lane = $ExecutionLane
     branch_name = $branchName
     pr_title = "[Intent][$IntentName][$prTitlePrefix $StageIndex][$RepoShortName] $GoalText"
     pr_search_query = "is:pr is:open head:$branchName"
     merge_policy = [ordered]@{
       sequencing = "serial"
-      required_checks = @(
-        "BaseCoat - PR Flow Hygiene / PR readiness routing and weekly hygiene report",
-        "BaseCoat - Sprint Closeout Branch Audit / branch-audit"
-      )
+      required_checks = $requiredChecks
       merge_ready_condition = "all_required_checks_green"
     }
-    cleanup_policy = [ordered]@{
-      workflow = ".github/workflows/sprint-closeout-branch-audit.yml"
-      script = "scripts/cleanup-branches.ps1"
-      audit_log = "GITHUB_STEP_SUMMARY"
+  cleanup_policy = [ordered]@{
+    workflow = ".github/workflows/sprint-closeout-branch-audit.yml"
+    script = "scripts/cleanup-branches.ps1"
+    audit_log = "GITHUB_STEP_SUMMARY"
+  }
+}
+}
+
+function Get-ReleaseGateContract {
+  return [ordered]@{
+    workflow = ".github/workflows/ship-it-release-gate.yml"
+    promotion_order = @("validate", "canary", "staging", "production")
+    required_gates_by_risk_band = [ordered]@{
+      low = @("lint", "build", "smoke")
+      medium = @("lint", "build", "type", "smoke")
+      high = @("lint", "build", "type", "e2e", "security", "smoke")
+      critical = @("lint", "build", "type", "e2e", "security", "smoke")
+    }
+    production_cutover_requirements = @(
+      "environment_protection_configured",
+      "required_approvals_recorded",
+      "rollback_runbook_reference_present",
+      "rollback_validation_passed"
+    )
+    artifact_matrix = [ordered]@{
+      low = @("spec", "docs", "tests")
+      medium = @("spec", "docs", "tests")
+      high = @("spec", "docs", "tests", "runbook", "release_notes")
+      critical = @("spec", "docs", "tests", "runbook", "release_notes")
+      production_override = @("runbook", "release_notes")
+    }
+    drift_detection = @(
+      "compare_contract_goal_ids_to_spec_goal_ids",
+      "compare_contract_goal_ids_to_implementation_goal_ids",
+      "emit_remediation_suggestions"
+    )
+    goal_id_linkage_requirements = @(
+      "runbook_delta_mapped_to_goal_ids",
+      "release_notes_delta_mapped_to_goal_ids"
+    )
+    evidence_bundle_output = "test-results/ship-it/promotion-evidence-bundle.json"
+    lane_profiles = [ordered]@{
+      standard = [ordered]@{
+        required_gates = @()
+        required_artifacts = @()
+        notes = @("Uses risk-band defaults.")
+      }
+      "pilot-luxesite" = [ordered]@{
+        required_gates = @("lint", "build", "type", "e2e", "security", "smoke")
+        required_artifacts = @("spec", "docs", "tests", "runbook", "release_notes")
+        notes = @(
+          "Forces security and e2e gates for stabilization validation.",
+          "Requires runbook and release-note artifacts for all promotion stages."
+        )
+      }
     }
   }
 }
@@ -347,6 +467,7 @@ function Find-ExistingIssueByMarker {
 
 $sprints = Get-IntentPhases -IntentName $Intent
 $desiredStateDiff = Get-DesiredStateDiff -IntentName $Intent -ProfileName $Profile
+$releaseGateContract = Get-ReleaseGateContract
 $runKey = "$Intent|$TargetRepo|$trimmedGoal|$Profile"
 $runKeyHash = Get-ContentHash -InputText $runKey
 $parentMarker = "<!-- basecoat-intent-parent:$runKeyHash -->"
@@ -412,6 +533,7 @@ $parentBody = @"
 
 - [ ] Scope and acceptance criteria confirmed
 - [ ] Required validation gates identified
+- [ ] Required release gates satisfy the risk-band policy
 - [ ] Rollout strategy documented
 - [ ] Rollback strategy documented
 - [ ] Documentation updates identified
@@ -432,6 +554,13 @@ foreach ($diff in $desiredStateDiff) {
 
 $parentBody += @"
 
+## Staged Promotion Contract
+
+- Release gate workflow: `$($releaseGateContract.workflow)`
+- Promotion order: `$($releaseGateContract.promotion_order -join " -> ")`
+- Evidence bundle output: `$($releaseGateContract.evidence_bundle_output)`
+- [ ] Production cutover uses validated rollback evidence
+
 $parentMarker
 "@
 
@@ -447,6 +576,7 @@ $summary = [ordered]@{
   run_key = $runKey
   run_key_hash = $runKeyHash
   desired_state_diff = $desiredStateDiff
+  release_gate_contract = $releaseGateContract
   remediation_tasks = @(
     [ordered]@{
       name = "Open remediation issue on failed apply or validate phases"
@@ -466,13 +596,15 @@ if ($DryRun) {
   for ($i = 0; $i -lt $sprints.Count; $i++) {
     $phaseName = [string]$sprints[$i].Name
     $phaseSlug = ($phaseName.ToLowerInvariant() -replace "[^a-z0-9]+", "-").Trim("-")
+    $executionLane = Get-ExecutionLane -IntentName $Intent -ProfileName $Profile -StageSlug $phaseSlug
     $stageArtifact = Get-StageArtifact `
       -IntentName $Intent `
       -RepoShortName $repoName `
       -GoalText $trimmedGoal `
       -StageIndex ($i + 1) `
       -StageSlug $phaseSlug `
-      -RunHash $runKeyHash
+      -RunHash $runKeyHash `
+      -ExecutionLane $executionLane
     $summary.child_issues += [ordered]@{
       sprint = $phaseName
       phase = $phaseName
@@ -543,13 +675,15 @@ if ($DryRun) {
     $phaseName = [string]$sprint.Name
     $phaseSlug = ($phaseName.ToLowerInvariant() -replace "[^a-z0-9]+", "-").Trim("-")
     $phaseMarker = "<!-- basecoat-intent-child:${runKeyHash}:${phaseSlug} -->"
+    $executionLane = Get-ExecutionLane -IntentName $Intent -ProfileName $Profile -StageSlug $phaseSlug
     $stageArtifact = Get-StageArtifact `
       -IntentName $Intent `
       -RepoShortName $repoName `
       -GoalText $trimmedGoal `
       -StageIndex $index `
       -StageSlug $phaseSlug `
-      -RunHash $runKeyHash
+      -RunHash $runKeyHash `
+      -ExecutionLane $executionLane
     $sprintTitlePrefix = if ($Intent -eq "onboarding-conductor") { "Phase" } else { "Sprint" }
     $sprintTitle = "[Intent][$Intent][$sprintTitlePrefix $index][$repoName] $trimmedGoal"
     $exitCriteria = $sprint.ExitCriteria | ForEach-Object { "- [ ] $_" } | Out-String
@@ -579,6 +713,7 @@ $exitCriteria
 - Planned branch: `$($stageArtifact.branch_name)`
 - Planned PR title: $($stageArtifact.pr_title)
 - Planned PR search: `$($stageArtifact.pr_search_query)`
+- Execution lane: `$($stageArtifact.execution_lane)`
 - [ ] Linked PR created or updated for this stage
 
 ## Merge Sequencing Guardrail
@@ -588,6 +723,21 @@ $exitCriteria
   - `$($stageArtifact.merge_policy.required_checks[0])`
   - `$($stageArtifact.merge_policy.required_checks[1])`
 - [ ] Merge this stage only after prior stage closure and all required checks are green
+
+## Release Gate Enforcement
+
+- Release gate workflow: `$($releaseGateContract.workflow)`
+- Promotion order: `$($releaseGateContract.promotion_order -join " -> ")`
+- Release gate lane input: `$($stageArtifact.execution_lane)`
+- Lane strict profile for pilot-luxesite:
+  - Required gates: `lint, build, type, e2e, security, smoke`
+  - Required artifacts: `spec, docs, tests, runbook, release_notes`
+- [ ] Evidence bundle attached for this stage (`promotion-evidence-bundle.json`)
+- [ ] Promotion blocked when any required gate fails for `risk-$RiskBand`
+- [ ] Rollback validation evidence captured before production cutover
+- [ ] Runbook delta mapped to goal IDs
+- [ ] Release-note delta mapped to goal IDs
+- [ ] Spec drift report reviewed with remediation actions
 
 ## Branch Cleanup and Audit
 

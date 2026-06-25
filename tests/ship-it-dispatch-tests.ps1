@@ -64,6 +64,21 @@ if ($summary.desired_state_diff.Count -lt 5) {
 if ($summary.remediation_tasks.Count -lt 1) {
   throw "Expected at least one remediation task in summary output."
 }
+if ([string]::IsNullOrWhiteSpace($summary.release_gate_contract.workflow)) {
+  throw "Expected release_gate_contract workflow to be present."
+}
+if ($summary.release_gate_contract.promotion_order.Count -ne 4) {
+  throw "Expected staged promotion order with 4 phases."
+}
+if (-not $summary.release_gate_contract.required_gates_by_risk_band.high.Contains("security")) {
+  throw "Expected high-risk required gates to include security."
+}
+if (-not $summary.release_gate_contract.artifact_matrix.high.Contains("runbook")) {
+  throw "Expected high-risk artifact matrix to include runbook."
+}
+if (-not $summary.release_gate_contract.goal_id_linkage_requirements.Contains("release_notes_delta_mapped_to_goal_ids")) {
+  throw "Expected release gate contract to require goal-ID linkage for release notes."
+}
 if ($summary.child_issues[0].stage_artifact.branch_name -notmatch '^intent/') {
   throw "Expected stage artifact branch_name to use intent/* naming."
 }
@@ -75,6 +90,38 @@ if ($summary.child_issues[0].stage_artifact.merge_policy.sequencing -ne "serial"
 }
 if ([string]::IsNullOrWhiteSpace($summary.child_issues[0].stage_artifact.cleanup_policy.workflow)) {
   throw "Expected cleanup workflow path in stage artifact."
+}
+
+$pilotOutputJson = Join-Path $outputDirectory "summary-pilot-luxesite.json"
+& $dispatchScript `
+  -Intent "onboarding-conductor" `
+  -Goal "Validate luxesite pilot lane onboarding path" `
+  -TargetRepo "IBuySpy-Shared/basecoat" `
+  -SpecRef "https://example.com/specs/luxesite-pilot" `
+  -RiskBand "medium" `
+  -Profile "pilot-luxesite" `
+  -DryRun `
+  -OutputPath $pilotOutputJson
+
+if (-not (Test-Path $pilotOutputJson)) {
+  throw "Pilot dispatch summary JSON was not created: $pilotOutputJson"
+}
+
+$pilotSummary = Get-Content -Raw -Path $pilotOutputJson | ConvertFrom-Json
+if ($pilotSummary.profile -ne "pilot-luxesite") {
+  throw "Expected pilot profile pilot-luxesite but found '$($pilotSummary.profile)'"
+}
+if ($pilotSummary.child_issues.Count -ne 4) {
+  throw "Expected 4 pilot child phase issues but found $($pilotSummary.child_issues.Count)"
+}
+if ($pilotSummary.child_issues[0].stage_artifact.execution_lane -ne "pilot-luxesite-baseline-remediation") {
+  throw "Expected Discover phase lane to be pilot-luxesite-baseline-remediation but found '$($pilotSummary.child_issues[0].stage_artifact.execution_lane)'."
+}
+if ($pilotSummary.child_issues[3].stage_artifact.execution_lane -ne "pilot-luxesite-release-readiness") {
+  throw "Expected Validate phase lane to be pilot-luxesite-release-readiness but found '$($pilotSummary.child_issues[3].stage_artifact.execution_lane)'."
+}
+if ($pilotSummary.release_gate_contract.lane_profiles.'pilot-luxesite'.required_artifacts.Count -lt 5) {
+  throw "Expected pilot lane profile to include strict required artifact policy."
 }
 
 $workflowContent = Get-Content -Raw -Path $workflowFile
@@ -95,6 +142,9 @@ if ($workflowContent -notmatch "onboarding-conductor") {
 }
 if ($workflowContent -notmatch "profile:") {
   throw "Ship-it workflow must include profile input for onboarding-conductor intent."
+}
+if ($workflowContent -notmatch "pilot-luxesite") {
+  throw "Ship-it workflow must expose pilot-luxesite profile option."
 }
 
 Write-Host "Ship-it dispatch tests passed."

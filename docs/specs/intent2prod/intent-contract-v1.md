@@ -27,7 +27,7 @@ state machine, and governance expectations for all governed execution runs.
 | `target_repo` | string | Yes | `$GITHUB_REPOSITORY` | `owner/repo` format |
 | `spec_ref` | string | No | `""` | URL or issue reference |
 | `risk_band` | string | Yes | `"medium"` | `low`, `medium`, `high`, `critical` |
-| `profile` | string | No | `"team-dev"` | `solo-dev`, `team-dev`, `regulated-team` |
+| `profile` | string | No | `"team-dev"` | `solo-dev`, `team-dev`, `regulated-team`, `pilot-luxesite` |
 | `project_number` | integer | No | `0` | If non-zero, `project_owner` is required |
 | `project_owner` | string | Conditional | `""` | Required when `project_number` is set |
 | `dry_run` | boolean | No | `false` | Set `true` to skip live side effects |
@@ -85,6 +85,9 @@ The autonomy band is derived from `risk_band` and `profile`:
 | `medium` | `regulated-team` | A1 (human-approved start, automated execution) |
 | `high` | any | A1 |
 | `critical` | any | A0 (fully human-gated) |
+
+`pilot-luxesite` uses the `onboarding-conductor` path with lane-specific policy overlays
+for release gates and artifact completeness.
 
 ## Idempotency Contract
 

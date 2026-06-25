@@ -117,6 +117,7 @@ with opt-in canary and blue/green modes.
 
 - `scripts/ship-it/release-gate-enforcer.ps1`
 - `docs/specs/intent2prod/staged-promotion-contract.md`
+- Workflow: `.github/workflows/ship-it-release-gate.yml`
 
 ### Track F: Artifact Completeness Contract (#1850)
 

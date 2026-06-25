@@ -182,6 +182,22 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running ship-it build-break detector tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'ship-it-build-break-detector-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Ship-it build-break detector tests failed' -ForegroundColor Red
+    Write-FailureLog 'ship-it-build-break-detector-tests'
+    exit 1
+}
+
+Write-Host 'Running ship-it release gate enforcer tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'ship-it-release-gate-enforcer-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Ship-it release gate enforcer tests failed' -ForegroundColor Red
+    Write-FailureLog 'ship-it-release-gate-enforcer-tests'
+    exit 1
+}
+
 Write-Host 'Running workflow enhancements (#1389) tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'workflow-enhancements-1389-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

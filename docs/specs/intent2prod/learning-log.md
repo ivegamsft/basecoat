@@ -8,9 +8,9 @@
 ## Run 1 Summary (June 2026)
 
 **Sprints completed**: 1, 2, 3  
-**Tracks completed**: A (Intent Contract), B (Goal-Loop Engine)  
-**PRs merged**: #1955, #1958  
-**Issues closed**: #1875, #1876, #1877, #1853, #1857
+**Tracks completed**: A-F (Intent Contract, Goal-Loop Engine, PR hygiene, build-break recovery, release gates, artifact completeness)  
+**PRs merged**: #1955, #1958, #2063, #2064, #2065, #2066  
+**Issues closed**: #1875, #1876, #1877, #1853, #1857, #1849, #1856, #1848, #1850
 
 ---
 
@@ -30,13 +30,13 @@
 
 ## What Needs Improvement
 
-1. **Tracks C–F not implemented**: This run only covered Tracks A and B. Tracks C (PR hygiene), D (build-break recovery), E (release gates), and F (artifact completeness) remain as follow-up work. The architecture-baseline.md spec covers them, but no scripts or workflows have been created.
+1. **Lane policy overlays need ongoing calibration**: pilot lanes can enforce stricter checks than risk-band defaults; keep lane rules narrow to avoid unnecessary promotion friction for non-pilot runs.
 
 2. **Dispatch-intent.ps1 does not validate against Intent Contract v1**: The dispatcher script (`scripts/ship-it/dispatch-intent.ps1`) predates the intent contract spec. Future work should add schema validation at dispatch time.
 
 3. **Goal-loop engine requires manual invocation**: There is no CI trigger for the engine. Future work should wire it into the ship-it workflow or a scheduled job to auto-report stale control-plane runs.
 
-4. **Pilot onboarding deferred**: All three pilots (luxesite #1851, wawkr #1852, work-tracker #1855) are blocked on Track C–F completion. They should be re-activated once the automation tracks are built.
+4. **Pilot onboarding sequencing remains important**: luxesite (#1851) is now active on the completed C-F control plane, while wawkr (#1852) and work-tracker (#1855) still require staged activation and evidence baselines.
 
 5. **Autonomy band configuration not yet enforced**: The intent contract v1 defines autonomy bands A0–A5, but no enforcement mechanism exists in the dispatch workflow yet. The goal-loop engine reports the band from issue metadata but does not gate actions on it.
 
@@ -46,13 +46,10 @@
 
 | Priority | Topic | Notes |
 |----------|-------|-------|
-| High | Track C — PR/Merge Hygiene | Depends on architecture-baseline.md Track C section |
-| High | Track D — Build-Break Auto-Recovery | Depends on Track C baseline |
-| Medium | Track E — Release Gate Enforcement | Can start in parallel with Track D |
-| Medium | Track F — Artifact Completeness | Can start in parallel with Track E |
+| High | Pilot luxesite stabilization | Verify lane-aware dispatch artifacts and strict release-gate overlays for #1851 |
 | Low | Dispatch-intent schema validation | Integrate intent-contract-v1.md into dispatch-intent.ps1 |
 | Low | Automate goal-loop status reporting | Wire engine into scheduled workflow |
-| Low | Pilot onboarding (luxesite, wawkr, work-tracker) | Re-activate after Tracks C–F complete |
+| Low | Pilot onboarding (wawkr, work-tracker) | Sequence activation after luxesite pilot evidence stabilizes |
 
 ---
 

@@ -34,16 +34,16 @@
 |-------|----|--------|
 | Track A — Intent Contract | #1853 | ✅ Closed (Sprint 2) |
 | Track B — Goal-Loop Engine | #1857 | ✅ Closed (Sprint 2) |
+| Track C — PR/Merge Hygiene | #1849 | ✅ Implemented ([PR #2063](https://github.com/IBuySpy-Shared/basecoat/pull/2063)) |
+| Track D — Build-Break Auto-Recovery | #1856 | ✅ Implemented ([PR #2064](https://github.com/IBuySpy-Shared/basecoat/pull/2064)) |
+| Track E — Release Gate Enforcement | #1848 | ✅ Implemented ([PR #2065](https://github.com/IBuySpy-Shared/basecoat/pull/2065)) |
+| Track F — Artifact Completeness | #1850 | ✅ Implemented ([PR #2066](https://github.com/IBuySpy-Shared/basecoat/pull/2066)) |
 
 ## Tracks Deferred to Future Runs
 
 | Track | ID | Next Step |
 |-------|----|-----------|
-| Track C — PR/Merge Hygiene | #1849 | Future sprint |
-| Track D — Build-Break Auto-Recovery | #1856 | Future sprint |
-| Track E — Release Gate Enforcement | #1848 | Future sprint |
-| Track F — Artifact Completeness | #1850 | Future sprint |
-| Pilot: luxesite | #1851 | Pending Track C–F completion |
+| Pilot: luxesite | #1851 | In progress (lane-aware onboarding and stabilization) |
 | Pilot: wawkr | #1852 | Pending Track C–F completion |
 | Pilot: work-tracker | #1855 | Pending Track C–F completion |
 
@@ -67,5 +67,4 @@ The deliverables in this run are **additive documentation and scripts only** —
 
 ## Known Issues
 
-- Tracks C–F are not yet implemented; the goal-loop engine will report `PROMOTING` state until those tracks are completed in a future run.
 - The `dispatch-intent.ps1` script does not yet validate against the Intent Contract v1 schema; that integration is deferred to Track A follow-up.

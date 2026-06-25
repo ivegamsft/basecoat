@@ -14,6 +14,7 @@ This directory contains smoke tests for the scaffolding repository.
 - **NEW:** Adoption scanner parameter parsing and output formats (table, json, markdown)
 - **NEW:** Workflow guardrails validation (timeout-minutes, concurrency, SHA pinning)
 - **NEW:** PR flow hygiene workflow guardrails (weekly report + draft-drift nudges)
+- **NEW:** Ship-it build-break detector classification and bounded retry/escalation behavior
 
 ## Run Tests
 

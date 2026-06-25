@@ -45,6 +45,7 @@ on:
           - solo-dev
           - team-dev
           - regulated-team
+          - pilot-luxesite
       project_owner:
         description: Optional project owner for project sync
         required: false
