@@ -26,6 +26,9 @@ If a change affects runtime behavior, UX flows, auth, or integration boundaries,
 do not claim success without targeted E2E validation (for example, Playwright in
 consumer repos).
 
+**See also:** [E2E Validation Lifecycle diagrams](../../docs/diagrams/e2e-validation-lifecycle.md)
+for visual reference of the gate funnel, pass/fail outcomes, and test scope mapping.
+
 Required preconditions before running E2E:
 
 1. Lint, build, and typecheck complete successfully.

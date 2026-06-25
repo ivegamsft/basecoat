@@ -10,6 +10,9 @@ Design reliable, maintainable end-to-end coverage for critical user journeys. Ch
 framework, define resilient selectors and waits, and connect browser tests to CI pipelines
 without creating brittle suites.
 
+**See also:** [E2E Validation Lifecycle diagrams](../../docs/diagrams/e2e-validation-lifecycle.md)
+for visual guidance on gate preconditions, pass/fail branching, and test scope decisions.
+
 ## Reference Files
 
 | File | Contents |

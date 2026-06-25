@@ -44,6 +44,12 @@ If you only need the gist, read these three first:
 | [bootstrap-flow.excalidraw](bootstrap-flow.excalidraw) | 4-phase bootstrap script: repo, memory, secrets, validation |
 | [queue-rebalancer-dependency-dag-and-lane-gates.excalidraw](queue-rebalancer-dependency-dag-and-lane-gates.excalidraw) | Queue rebalancer dependency DAG, unblock lane flow, and gate outcomes (`gate:no-tests`, `gate:needs-check-in`) with stalled-chain handling ([notes](queue-rebalancer-dependency-dag-and-lane-gates.md)) |
 
+## Validation & Testing
+
+| Diagram | Description |
+|---|---|
+| [e2e-validation-lifecycle.md](e2e-validation-lifecycle.md) | E2E gate funnel, pass/fail branching, test scope map |
+
 ---
 
 !!! tip "Viewing diagrams"
