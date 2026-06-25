@@ -479,8 +479,37 @@ else {
     $guardrailFailures += 'agent-merge-required-status'
 }
 
-# Test 15: Required-check workflows must support merge queue and prd-spec-gate semantics
-Write-Host '  Test 15: Validate required-check workflows and prd-spec-gate semantics...'
+# Test 15: Agent merge changelog generation must stay structured for policy parsing
+Write-Host '  Test 15: Validate agent-merge structured changelog generation...'
+$agentMergeChangelogChecks = @(
+    '(?m)^\s+- name:\s+Generate frontmatter changelog\s*$',
+    '# Agent Merge Changelog',
+    '## Frontmatter changes',
+    'git diff --unified=0 "\$\{RANGE\}" -- agents skills',
+    'name:\s*agent-merge-changelog',
+    'path:\s*agent-merge-changelog\.md'
+)
+$agentMergeChangelogIssues = @()
+
+foreach ($requiredPattern in $agentMergeChangelogChecks) {
+    if ($agentMergeWorkflow -notmatch $requiredPattern) {
+        $agentMergeChangelogIssues += $requiredPattern
+    }
+}
+
+if ($agentMergeChangelogIssues.Count -eq 0) {
+    Write-Host '    PASS Agent merge workflow emits structured changelog artifact'
+}
+else {
+    Write-Host '    FAIL agent-merge.yml is missing structured changelog requirements:' -ForegroundColor Red
+    foreach ($issue in $agentMergeChangelogIssues) {
+        Write-Host "      - missing pattern: $issue" -ForegroundColor Red
+    }
+    $guardrailFailures += 'agent-merge-structured-changelog'
+}
+
+# Test 16: Required-check workflows must support merge queue and prd-spec-gate semantics
+Write-Host '  Test 16: Validate required-check workflows and prd-spec-gate semantics...'
 $mergeQueueWorkflowRequirements = @(
     '.github/workflows/validate-basecoat.yml',
     '.github/workflows/prd-spec-gate.yml'
@@ -579,8 +608,8 @@ else {
     $guardrailFailures += 'prd-spec-gate-contract'
 }
 
-# Test 16: Production workflows must route through the protected production environment
-Write-Host '  Test 16: Validate production environment approval gates...'
+# Test 17: Production workflows must route through the protected production environment
+Write-Host '  Test 17: Validate production environment approval gates...'
 $productionEnvironmentRules = @(
     @{
         file = 'publish-to-production.yml'
@@ -626,8 +655,8 @@ else {
     $guardrailFailures += 'production-environment-gate'
 }
 
-# Test 17: CI stabilization regressions for Sprint 36 workflows
-Write-Host '  Test 17: Validate Sprint 36 CI stabilization workflow safeguards...'
+# Test 18: CI stabilization regressions for Sprint 36 workflows
+Write-Host '  Test 18: Validate Sprint 36 CI stabilization workflow safeguards...'
 $stabilizationGuardrailIssues = @()
 
 $auditEnvironmentPath = Join-Path $workflowDir 'audit-environment-drift.yml'
@@ -698,8 +727,8 @@ else {
     $guardrailFailures += 'sprint-36-ci-stabilization'
 }
 
-# Test 18: Runner capability audit must classify every workflow job
-Write-Host '  Test 18: Validate runner capability classification coverage...'
+# Test 19: Runner capability audit must classify every workflow job
+Write-Host '  Test 19: Validate runner capability classification coverage...'
 $runnerCapabilityIssues = @()
 $runnerAuditScriptPath = Join-Path $repoRoot 'scripts\audit-workflow-runner-capabilities.ps1'
 $runnerClassPolicyPath = Join-Path $repoRoot '.github\workflow-runner-capability-classes.json'
