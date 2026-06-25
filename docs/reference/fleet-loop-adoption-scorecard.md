@@ -61,6 +61,7 @@ opens.
 **Status: Reviewer-routing gap. Label drift. Intake surface below minimum.**
 
 Remediation:
+
 1. Follow `docs/guides/downstream-reviewer-routing-audit.md` remediation playbook for `automation configured but ineffective` state.
 2. Normalize intake issue template to include `priority` field per BaseCoat contract.
 3. Run `gh label create` to add canonical `priority:*` labels and update triage agent configuration to stop emitting legacy labels.
@@ -102,6 +103,7 @@ Reusable patterns from this repo:
 **Status: Highest risk repo in fleet. Four gaps requiring remediation.**
 
 Remediation priority order:
+
 1. Enable branch protection on `main` (blocks direct-to-main pushes; required before other governance can function).
 2. Add `.github/ISSUE_TEMPLATE/` with at minimum one template file per BaseCoat contract.
 3. Enable and trigger reviewer-routing workflows (`reviewer-autoassign.yml`, `pr-flow-hygiene.yml`).
@@ -144,6 +146,7 @@ canonical `priority:*` labels. The triage agent creates canonical labels when it
 but does not replace legacy labels on existing issues.
 
 Recommendation: add a one-time normalization step to the onboarding runbook that:
+
 1. Creates canonical `priority:*` labels if absent.
 2. Migrates open issues from legacy to canonical label.
 3. Archives (does not delete) legacy labels to preserve closed-issue history.
@@ -172,6 +175,7 @@ workflow log. This gives the team a persistent, queryable history without extern
 dashboards or data sinks.
 
 Reuse pattern:
+
 1. Create a standing `[dashboard] runner capacity` issue.
 2. Workflow posts a comment with current capacity metrics on each run.
 3. Issue body contains the latest snapshot; comments contain the history.
