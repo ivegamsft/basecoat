@@ -27,7 +27,7 @@ param(
   [ValidateSet("code", "docs-only", "config", "release")]
   [string]$ChangeType = "code",
 
-  [ValidateSet("standard", "pilot-luxesite")]
+  [ValidateSet("standard", "pilot-luxesite", "pilot-wawkr")]
   [string]$ExecutionLane = "standard",
 
   [ValidateSet("present", "missing", "not_applicable")]
@@ -199,6 +199,14 @@ function Get-LanePolicy {
       return [ordered]@{
         lane = "pilot-luxesite"
         description = "Pilot stabilization lane with strict promotion checks and artifacts."
+        required_gates = @("lint", "build", "type", "e2e", "security", "smoke")
+        required_artifacts = @("spec", "docs", "tests", "runbook", "release_notes")
+      }
+    }
+    "pilot-wawkr" {
+      return [ordered]@{
+        lane = "pilot-wawkr"
+        description = "Pilot canary lane for wawkr downstream repo with strict promotion checks and evidence."
         required_gates = @("lint", "build", "type", "e2e", "security", "smoke")
         required_artifacts = @("spec", "docs", "tests", "runbook", "release_notes")
       }

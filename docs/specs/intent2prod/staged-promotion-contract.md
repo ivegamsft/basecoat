@@ -36,6 +36,7 @@ Execution lanes can add stricter rules on top of risk-band defaults.
 |---|---|---|
 | `standard` | none | none |
 | `pilot-luxesite` | `lint`, `build`, `type`, `e2e`, `security`, `smoke` | `spec`, `docs`, `tests`, `runbook`, `release_notes` |
+| `pilot-wawkr` | `lint`, `build`, `type`, `e2e`, `security`, `smoke` | `spec`, `docs`, `tests`, `runbook`, `release_notes` |
 
 The lane overlay is additive: the final requirement set is the union of
 risk-band rules and lane rules.

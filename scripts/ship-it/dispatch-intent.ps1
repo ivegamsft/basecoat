@@ -13,7 +13,7 @@ param(
   [ValidateSet("low", "medium", "high", "critical")]
   [string]$RiskBand = "medium",
 
-  [ValidateSet("solo-dev", "team-dev", "regulated-team", "pilot-luxesite")]
+  [ValidateSet("solo-dev", "team-dev", "regulated-team", "pilot-luxesite", "pilot-wawkr")]
   [string]$Profile = "team-dev",
 
   [int]$ProjectNumber = 0,
@@ -202,6 +202,17 @@ function Get-DesiredStateDiff {
       release_gate_mode = "lane-strict"
       artifact_completeness_mode = "lane-strict"
     }
+    "pilot-wawkr" = @{
+      branch_policy = "shared-protected"
+      workflow_pack = "team-plus-pilot-canary"
+      template_pack = "team-plus-pilot"
+      telemetry_mode = "shared"
+      secrets_mode = "workflow-secrets"
+      hook_pack = "standard"
+      execution_lane = "pilot-wawkr"
+      release_gate_mode = "lane-strict"
+      artifact_completeness_mode = "lane-strict"
+    }
   }
 
   if (-not $profiles.ContainsKey($ProfileName)) {
@@ -284,6 +295,16 @@ function Get-ExecutionLane {
       "apply" { return "pilot-luxesite-stabilization" }
       "validate" { return "pilot-luxesite-release-readiness" }
       default { return "pilot-luxesite" }
+    }
+  }
+
+  if ($IntentName -eq "onboarding-conductor" -and $ProfileName -eq "pilot-wawkr") {
+    switch ($StageSlug) {
+      "discover" { return "pilot-wawkr-canary-baseline" }
+      "plan" { return "pilot-wawkr-canary-contract" }
+      "apply" { return "pilot-wawkr-canary-deployment" }
+      "validate" { return "pilot-wawkr-canary-validation" }
+      default { return "pilot-wawkr" }
     }
   }
 
@@ -392,6 +413,14 @@ function Get-ReleaseGateContract {
         notes = @(
           "Forces security and e2e gates for stabilization validation.",
           "Requires runbook and release-note artifacts for all promotion stages."
+        )
+      }
+      "pilot-wawkr" = [ordered]@{
+        required_gates = @("lint", "build", "type", "e2e", "security", "smoke")
+        required_artifacts = @("spec", "docs", "tests", "runbook", "release_notes")
+        notes = @(
+          "Forces all gates for canary validation and evidence collection.",
+          "Requires spec, docs, tests, runbook, and release-notes for canary contractual completeness."
         )
       }
     }

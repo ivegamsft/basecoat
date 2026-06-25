@@ -249,7 +249,7 @@ jobs:
 
       - name: Generate promotion evidence bundle
         run: |
-          cat <<'"'"'JSON'"'"' > promotion-evidence-bundle.json
+          cat <<'JSON' > promotion-evidence-bundle.json
           {
             "target_repo": "${{ inputs.target_repo }}",
             "target_branch": "${{ inputs.target_branch }}",

@@ -146,5 +146,40 @@ if ($workflowContent -notmatch "profile:") {
 if ($workflowContent -notmatch "pilot-luxesite") {
   throw "Ship-it workflow must expose pilot-luxesite profile option."
 }
+if ($workflowContent -notmatch "pilot-wawkr") {
+  throw "Ship-it workflow must expose pilot-wawkr profile option."
+}
+
+$wawkrOutputJson = Join-Path $outputDirectory "summary-pilot-wawkr.json"
+& $dispatchScript `
+  -Intent "onboarding-conductor" `
+  -Goal "Validate wawkr canary lane onboarding path" `
+  -TargetRepo "IBuySpy-Shared/basecoat" `
+  -SpecRef "https://example.com/specs/wawkr-canary" `
+  -RiskBand "medium" `
+  -Profile "pilot-wawkr" `
+  -DryRun `
+  -OutputPath $wawkrOutputJson
+
+if (-not (Test-Path $wawkrOutputJson)) {
+  throw "Wawkr dispatch summary JSON was not created: $wawkrOutputJson"
+}
+
+$wawkrSummary = Get-Content -Raw -Path $wawkrOutputJson | ConvertFrom-Json
+if ($wawkrSummary.profile -ne "pilot-wawkr") {
+  throw "Expected wawkr profile pilot-wawkr but found '$($wawkrSummary.profile)'"
+}
+if ($wawkrSummary.child_issues.Count -ne 4) {
+  throw "Expected 4 wawkr child phase issues but found $($wawkrSummary.child_issues.Count)"
+}
+if ($wawkrSummary.child_issues[0].stage_artifact.execution_lane -ne "pilot-wawkr-canary-baseline") {
+  throw "Expected Discover phase lane to be pilot-wawkr-canary-baseline but found '$($wawkrSummary.child_issues[0].stage_artifact.execution_lane)'."
+}
+if ($wawkrSummary.child_issues[3].stage_artifact.execution_lane -ne "pilot-wawkr-canary-validation") {
+  throw "Expected Validate phase lane to be pilot-wawkr-canary-validation but found '$($wawkrSummary.child_issues[3].stage_artifact.execution_lane)'."
+}
+if ($wawkrSummary.release_gate_contract.lane_profiles.'pilot-wawkr'.required_artifacts.Count -lt 5) {
+  throw "Expected wawkr lane profile to include strict required artifact policy."
+}
 
 Write-Host "Ship-it dispatch tests passed."

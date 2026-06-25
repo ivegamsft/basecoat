@@ -53,6 +53,26 @@
 
 ---
 
+## Run 2 Summary (Wawkr Canary Onboarding — #1852)
+
+**Issues implemented**: #1852 (wawkr canary pilot activation)  
+**Deliverables**: Profile registration, lane policies, test coverage, doc updates  
+**Implementation approach**:
+
+1. Added `pilot-wawkr` profile to `dispatch-intent.ps1` with canary-specific configuration
+2. Registered `pilot-wawkr` execution lane in `release-gate-enforcer.ps1` with same strict requirements as luxesite
+3. Defined stage-specific canary lanes (baseline, contract, deployment, validation) aligned to onboarding conductor phases
+4. Extended test scenarios to exercise wawkr canary requirements (gates and artifacts)
+5. Updated workflows and docs to expose pilot-wawkr as onboarding profile option
+
+**Key Design Decisions**:
+
+- Wawkr uses identical gate and artifact policies to luxesite (both require all 6 gates + 5 artifacts)
+- Canary stage lanes named `pilot-wawkr-canary-*` to signal execution context
+- Tests validate both full-pass and blocking scenarios (missing gates/artifacts, gate failures)
+
+---
+
 ## Metrics
 
 | Metric | Value |

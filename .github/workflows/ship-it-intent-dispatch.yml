@@ -46,6 +46,7 @@ on:
           - team-dev
           - regulated-team
           - pilot-luxesite
+          - pilot-wawkr
       project_owner:
         description: Optional project owner for project sync
         required: false

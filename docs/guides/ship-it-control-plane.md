@@ -47,7 +47,7 @@ Run **Ship-it Intent Dispatch** with:
 - `goal`: objective statement
 - `target_repo`: `owner/repo`
 - `risk_band`: `low|medium|high|critical`
-- `profile`: `solo-dev|team-dev|regulated-team|pilot-luxesite` (used by onboarding-conductor)
+- `profile`: `solo-dev|team-dev|regulated-team|pilot-luxesite|pilot-wawkr` (used by onboarding-conductor)
 - `spec_ref` (optional)
 - `project_owner` + `project_number` (optional)
 - `dry_run`: `false` for live side effects
@@ -84,6 +84,13 @@ For `profile=pilot-luxesite`, phase artifacts carry explicit lane metadata:
 2. `Plan` -> `pilot-luxesite-artifact-contract`
 3. `Apply` -> `pilot-luxesite-stabilization`
 4. `Validate` -> `pilot-luxesite-release-readiness`
+
+For `profile=pilot-wawkr`, phase artifacts carry canary-specific lane metadata:
+
+1. `Discover` -> `pilot-wawkr-canary-baseline`
+2. `Plan` -> `pilot-wawkr-canary-contract`
+3. `Apply` -> `pilot-wawkr-canary-deployment`
+4. `Validate` -> `pilot-wawkr-canary-validation`
 
 ## Governance Expectations
 
