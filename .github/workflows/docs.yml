@@ -56,11 +56,14 @@ jobs:
     needs: validate
     runs-on: ubuntu-latest
     steps:
-      - name: Verify github-pages environment allows main deployments
+      - name: Verify github-pages environment allows this deployment branch
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+
+          DEPLOY_BRANCH="${{ github.ref_name }}"
+          DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
 
           ENV_PAYLOAD="$(gh api "repos/${{ github.repository }}/environments/github-pages" 2>/dev/null || true)"
           if [[ -z "$ENV_PAYLOAD" ]]; then
@@ -73,16 +76,32 @@ jobs:
 
           if [[ "$CUSTOM_POLICY" == "true" ]]; then
             BRANCHES="$(gh api "repos/${{ github.repository }}/environments/github-pages/deployment-branch-policies" --jq '.branch_policies[].name' 2>/dev/null || true)"
-            if ! echo "$BRANCHES" | grep -qx 'main'; then
-              echo "::error::Environment 'github-pages' allows selected branches, but 'main' is not included."
-              echo "Update Settings → Environments → github-pages → Deployment branches and add 'main', or switch to protected branches only."
+            if ! echo "$BRANCHES" | grep -Fqx "$DEPLOY_BRANCH"; then
+              echo "::error::Environment 'github-pages' allows selected branches, but '${DEPLOY_BRANCH}' is not included."
+              echo "Update Settings → Environments → github-pages → Deployment branches and add '${DEPLOY_BRANCH}', or switch to protected branches only."
+              if [[ "$DEPLOY_BRANCH" != "$DEFAULT_BRANCH" ]]; then
+                echo "The default branch remains '${DEFAULT_BRANCH}'. Keep deploys on '${DEFAULT_BRANCH}' unless a documented exception approves another branch."
+              fi
               exit 1
             fi
           elif [[ "$PROTECTED_ONLY" != "true" ]]; then
             echo "::notice::Environment 'github-pages' does not enforce branch restrictions. This does not block deploy, but branch policy is recommended."
+          else
+            ENCODED_DEPLOY_BRANCH="$(jq -rn --arg value "$DEPLOY_BRANCH" '$value|@uri')"
+            BRANCH_PROTECTED="$(gh api "repos/${{ github.repository }}/branches/${ENCODED_DEPLOY_BRANCH}" --jq '.protected' 2>/dev/null || echo false)"
+            if [[ "$BRANCH_PROTECTED" != "true" ]]; then
+              echo "::error::Environment 'github-pages' only allows protected branches, but '${DEPLOY_BRANCH}' is not protected."
+              if [[ "$DEPLOY_BRANCH" != "$DEFAULT_BRANCH" ]]; then
+                echo "Run Deploy Docs from the protected default branch '${DEFAULT_BRANCH}', or protect '${DEPLOY_BRANCH}' before retrying."
+              fi
+              exit 1
+            fi
           fi
 
-          echo "github-pages environment policy permits deployments from main."
+          if [[ "$DEFAULT_BRANCH" == "main" ]]; then
+            echo "github-pages environment policy permits deployments from main."
+          fi
+          echo "github-pages environment policy permits deployments from ${DEPLOY_BRANCH}."
 
   deploy:
     if: github.event_name != 'pull_request'
