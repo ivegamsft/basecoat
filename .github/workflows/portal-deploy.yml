@@ -135,6 +135,27 @@ jobs:
         env:
           AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Validate Azure OIDC configuration
+        if: ${{ steps.azure-auth.outputs.mode == 'oidc' }}
+        shell: bash
+        env:
+          AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          missing=0
+          for required in AZURE_CLIENT_ID AZURE_TENANT_ID AZURE_SUBSCRIPTION_ID; do
+            if [[ -z "${!required:-}" ]]; then
+              echo "::error::Missing required repo variable: ${required}"
+              missing=1
+            fi
+          done
+          if [[ ${missing} -ne 0 ]]; then
+            echo "::error::OIDC mode requires AZURE_CLIENT_ID, AZURE_TENANT_ID, and AZURE_SUBSCRIPTION_ID."
+            exit 1
+          fi
+
       - name: Azure login (credentials)
         if: ${{ steps.azure-auth.outputs.mode == 'creds' }}
         uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43
@@ -149,23 +170,80 @@ jobs:
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Create resource group
-        continue-on-error: true
+      - name: Validate Azure account context
+        id: azure-context
+        shell: bash
+        env:
+          EXPECTED_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          ACCOUNT_JSON="$(az account show --output json)"
+          CURRENT_SUBSCRIPTION_ID="$(echo "${ACCOUNT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['id'])")"
+          CURRENT_SUBSCRIPTION_NAME="$(echo "${ACCOUNT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['name'])")"
+          CURRENT_TENANT_ID="$(echo "${ACCOUNT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['tenantId'])")"
+          CURRENT_PRINCIPAL="$(echo "${ACCOUNT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['user']['name'])")"
+          CURRENT_PRINCIPAL_TYPE="$(echo "${ACCOUNT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin)['user']['type'])")"
+
+          echo "subscription_id=${CURRENT_SUBSCRIPTION_ID}" >> "$GITHUB_OUTPUT"
+          echo "tenant_id=${CURRENT_TENANT_ID}" >> "$GITHUB_OUTPUT"
+
+          echo "Azure principal ${CURRENT_PRINCIPAL} (${CURRENT_PRINCIPAL_TYPE}) authenticated to subscription ${CURRENT_SUBSCRIPTION_NAME} (${CURRENT_SUBSCRIPTION_ID})"
+          if [[ -n "${EXPECTED_SUBSCRIPTION_ID}" && "${CURRENT_SUBSCRIPTION_ID}" != "${EXPECTED_SUBSCRIPTION_ID}" ]]; then
+            echo "::error::Azure login is targeting subscription ${CURRENT_SUBSCRIPTION_ID}, but workflow expects ${EXPECTED_SUBSCRIPTION_ID}."
+            echo "::error::Fix repo variable AZURE_SUBSCRIPTION_ID or credentials/identity scope."
+            exit 1
+          fi
+
+      - name: Ensure target resource group exists
         shell: bash
         run: |
-          set -eo pipefail
+          set -euo pipefail
           if az group exists --name "${AZURE_RESOURCE_GROUP}" | grep -q true; then
             echo "Resource group ${AZURE_RESOURCE_GROUP} already exists"
           else
             echo "Creating resource group ${AZURE_RESOURCE_GROUP}..."
-            az group create \
+            CREATE_OUTPUT_FILE="$(mktemp)"
+            if ! az group create \
               --name "${AZURE_RESOURCE_GROUP}" \
               --location "${AZURE_LOCATION}" \
-              --output none || {
-              echo "Failed to create resource group. Assuming it exists or requires pre-provisioning."
-              exit 0
-            }
+              --output json >"${CREATE_OUTPUT_FILE}" 2>&1; then
+              CREATE_OUTPUT="$(cat "${CREATE_OUTPUT_FILE}")"
+              echo "::error::Failed to create resource group ${AZURE_RESOURCE_GROUP}."
+              if grep -qi "AuthorizationFailed" <<<"${CREATE_OUTPUT}"; then
+                echo "::error::Missing permission Microsoft.Resources/subscriptions/resourcegroups/write on subscription ${{ steps.azure-context.outputs.subscription_id }}."
+                echo "::error::Grant Contributor (or equivalent custom role) at subscription scope, or pre-provision ${AZURE_RESOURCE_GROUP}."
+              fi
+              echo "::error::Azure CLI output: ${CREATE_OUTPUT}"
+              exit 1
+            fi
+            echo "Resource group ${AZURE_RESOURCE_GROUP} created"
           fi
+
+      - name: Validate ACR deployment authorization
+        if: ${{ steps.mode.outputs.deployment_mode == 'internal' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          VALIDATE_OUTPUT_FILE="$(mktemp)"
+          if ! az deployment group validate \
+            --resource-group "${AZURE_RESOURCE_GROUP}" \
+            --template-file portal/app/iac/modules/container-registry.bicep \
+            --parameters registryName="${ACR_NAME}" \
+            --name "acr-validate-${{ github.run_id }}" \
+            --output none >"${VALIDATE_OUTPUT_FILE}" 2>&1; then
+            VALIDATE_OUTPUT="$(cat "${VALIDATE_OUTPUT_FILE}")"
+            echo "::error::ACR preflight validation failed for resource group ${AZURE_RESOURCE_GROUP}."
+            if grep -qi "AuthorizationFailed" <<<"${VALIDATE_OUTPUT}"; then
+              echo "::error::Missing RBAC for deployment identity on /subscriptions/${{ steps.azure-context.outputs.subscription_id }}/resourceGroups/${AZURE_RESOURCE_GROUP}."
+              echo "::error::Required permissions include Microsoft.Resources/deployments/validate/action and write permissions to deployment/ACR resources."
+              echo "::error::Grant Contributor at resource-group scope (recommended), or equivalent custom role including deployments validate/write + Container Registry write."
+            fi
+            echo "::error::Azure CLI output: ${VALIDATE_OUTPUT}"
+            exit 1
+          fi
+          echo "ACR deployment preflight authorization passed"
+        env:
+          ACR_NAME: ${{ vars.PORTAL_ACR_NAME || 'portalacrstaging' }}
 
       - name: Provision ACR
         if: ${{ steps.mode.outputs.deployment_mode == 'internal' }}

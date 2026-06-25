@@ -54,6 +54,14 @@ Required repo variables:
 - `AZURE_TENANT_ID` — Entra tenant ID
 - `AZURE_SUBSCRIPTION_ID` — target Azure subscription
 
+Required Azure RBAC for the deploy identity:
+
+- Subscription scope: permission to create the target resource group (`Microsoft.Resources/subscriptions/resourcegroups/write`) or pre-provision the resource group out-of-band.
+- Target resource group scope (`PORTAL_RESOURCE_GROUP`): Contributor role (recommended) or an equivalent custom role that includes:
+  - `Microsoft.Resources/deployments/validate/action`
+  - `Microsoft.Resources/deployments/write`
+  - `Microsoft.ContainerRegistry/registries/*`
+
 Optional overrides:
 
 - `PORTAL_RESOURCE_GROUP` — defaults to `basecoat-portal-staging-rg`

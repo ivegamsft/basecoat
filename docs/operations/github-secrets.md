@@ -163,6 +163,14 @@ does not block merges since branch protection is not enforced on `main`.
 
 **Purpose:** Target Azure subscription for portal staging deployment.
 
+**RBAC prerequisite for the identity referenced by `AZURE_CLIENT_ID`:**
+
+- Subscription scope access to create the target resource group (`Microsoft.Resources/subscriptions/resourcegroups/write`), or the target group must be pre-provisioned.
+- Contributor (recommended) on the target portal resource group, or equivalent custom permissions including:
+  - `Microsoft.Resources/deployments/validate/action`
+  - `Microsoft.Resources/deployments/write`
+  - `Microsoft.ContainerRegistry/registries/*`
+
 ---
 
 ### `PORTAL_POSTGRES_ADMIN_PASSWORD`
