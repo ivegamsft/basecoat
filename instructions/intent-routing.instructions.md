@@ -41,6 +41,21 @@ routing signal before any plain-text interpretation occurs.
 `workflow:`, `actions:`, `pr:`, `issue:`, `portfolio:`, and `release:` are deterministic
 GitHub-scoped routes and should not trigger extra disambiguation turns.
 
+## PR Lifecycle Modifier
+
+`pr-lifecycle=<none|standard|full>` is supported for `feature:` and `pr:`.
+
+Execution contract:
+
+1. Keep a single authoritative prefix (`feature:` or `pr:`).
+2. Parse `pr-lifecycle` when present and validate enum values.
+3. Reject dual-prefix combinations such as `feature: pr:`.
+4. For `feature:` requests with PR language but no modifier, default to
+   `pr-lifecycle=standard`.
+5. In `pr-lifecycle=full`, require required-check readiness before closeout,
+   keep cleanup after merge or explicit close, and block completion while WIP
+   or uncommitted state remains.
+
 ## Version Routing
 
 `version:` inspects downstream installed BaseCoat version and, when the install

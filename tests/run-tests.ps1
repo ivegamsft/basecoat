@@ -206,6 +206,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running pr-lifecycle routing coverage tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'pr-lifecycle-routing-coverage-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'pr-lifecycle routing coverage tests failed' -ForegroundColor Red
+    Write-FailureLog 'pr-lifecycle-routing-coverage-tests'
+    exit 1
+}
+
 Write-Host 'Running cleanup branch automation tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'cleanup-branches-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

@@ -261,9 +261,20 @@ for retry caps, path lock, and bootstrap immutability rules.
 
 `pr:` is the direct intent for PR lifecycle execution.
 
-`pr-lifecycle=full` is a lifecycle modifier for `pr:` requests. Keep `pr:` as
-the prefix, and use the modifier when the request should stay end-to-end across
-triage, merge, broken-build recovery, and cleanup.
+`pr-lifecycle` is an optional modifier for `pr:` requests. Supported values are
+`none`, `standard` (default), and `full`. Keep `pr:` as the prefix and append
+the modifier only when the default behavior needs to change:
+
+- `pr-lifecycle=none` — skip lifecycle steps; operate on a single PR without
+  triage, branch hygiene, or cleanup passes.
+- `pr-lifecycle=standard` — default; merge-ready validation, required-CI check,
+  and branch cleanup for the affected PR only.
+- `pr-lifecycle=full` — end-to-end across triage, merge, broken-build recovery,
+  and cleanup for all open PRs in scope.
+
+Use one authoritative prefix per request. Inputs that combine prefixes (for
+example `feature: pr:`) are invalid and should be rejected with guidance to
+choose either `feature:` or `pr:`.
 
 ### Default sequence
 
@@ -277,6 +288,7 @@ triage, merge, broken-build recovery, and cleanup.
 - Do not close or mark complete while required builds are still pending.
 - If required builds fail, keep the PR open and attach failure evidence.
 - Only run branch cleanup for branches tied to merged/closed PRs with required builds passing.
+- Do not mark a full lifecycle request complete while WIP tasks or uncommitted changes remain.
 - Do not auto-prune `preserved/`, `backup/`, or `wip/` branches; log them as retained WIP with an owner and next action.
 - Prefer serial merges for overlapping branches to reduce conflict churn.
 
