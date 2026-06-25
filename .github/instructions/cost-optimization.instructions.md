@@ -29,6 +29,10 @@ Execute these in order to reduce input-token bloat first, then optimize routing:
 4. If switching to a new domain (for example: sprint planning -> release operations), run `/new` and reload only relevant references.
 5. Keep main-thread messages decision-focused; delegate scan/research work.
 6. For attachment-heavy tasks, create one canonical summary artifact and reference it by path/link.
+7. At events >= 300 or ratio >= 300x, run the context-rot triage checklist in
+   `docs/operations/context-rot-runbook.md` before continuing.
+8. After each `/compact`, scan the first three post-compact turns for restatement signals;
+   if any appear, escalate to soft-fork (Step 3 in the runbook).
 
 ### Keep-pattern defaults (workstream #2046)
 
@@ -216,6 +220,16 @@ Warning thresholds:
 - **Warning**: ratio >= 300x
 - **Critical**: events >= 500
 - **Hard stop**: events >= 594 or tokens >= 50M without compaction
+
+Context-rot heuristics (check when Warning or Critical threshold is reached):
+
+- Repeated restatement: >= 3 consecutive turns where the agent recaps prior context before acting.
+- Contradictory outputs: output conflicts with a decision from the last 10 turns without an acknowledged pivot.
+- Rising setup-to-action ratio: > 30% of the last 10 turns are recap rather than artifact production.
+- Tool-call churn: >= 5 identical tool calls in a 10-turn window with no artifact change between calls.
+
+Two or more active heuristics confirm rot risk. See the full detection and mitigation
+runbook: `docs/operations/context-rot-runbook.md`.
 
 Expected impact: agents self-correct mid-session instead of waiting for post-hoc review, reducing expensive-run frequency.
 

@@ -777,6 +777,47 @@ Based on Sprint 31 empirical testing, the following agent categories are safe to
 
 ---
 
+## 14. Context-Rot Detection
+
+Context rot is the condition in which accumulated session history actively degrades
+response quality and inflates token cost, even when the individual turns are short.
+It is distinct from high event count alone: a well-compacted session can run 400 events
+healthily; a cycling 200-event session can be severely rot-impacted.
+
+### Primary detection signals
+
+Any two or more of the following in the same session indicate rot risk:
+
+| Signal | Measurable threshold |
+|---|---|
+| Repeated restatement | >= 3 consecutive turns where the agent recaps prior context before acting |
+| Contradictory outputs | Output conflicts with a decision from the last 10 turns without an acknowledged pivot |
+| Rising setup-to-action ratio | > 30% of the last 10 turns are recap rather than artifact production |
+| Tool-call churn | >= 5 identical tool calls in a 10-turn window with no artifact change between calls |
+| Expanding preamble | Agent preamble grows >= 50 tokens per turn for 5 or more consecutive turns |
+
+### Quick triage table
+
+| `/token-status` output | Action |
+|---|---|
+| Ratio < 250x AND events < 300 | Continue; compact at next phase boundary |
+| Ratio >= 300x OR events >= 400 | Run `/compact` immediately |
+| Two or more primary signals active | Run triage checklist in the runbook |
+| Contradictory output detected | Soft-fork minimum (Step 3 in the runbook) |
+| Events >= 594 OR tokens >= 50M | Hard-fork immediately (Step 4 in the runbook) |
+
+### Mitigation ladder (summary)
+
+1. **Delta prompt** — re-anchor with a compact message; no history recap.
+2. **Compact** — persist canonical refs, run `/compact`, reload only current-phase refs.
+3. **Soft-fork** — open a new skill-scoped session with a handoff artifact; minimal context.
+4. **Hard-fork** — revert to last-known-good commit; new session with only issue link and next file.
+
+For the full runbook with triage checklist, escalation criteria, and recovery verification,
+see [`../operations/context-rot-runbook.md`](../operations/context-rot-runbook.md).
+
+---
+
 ## Related References
 
 - [`model-optimization.md`](model-optimization.md) — Model tier matrix and cost considerations
