@@ -60,8 +60,7 @@ across every artifact.
 
 ## Onboarding Guide
 
-1. Start with one pilot workflow and define a canonical `workflow_steps` list.
-2. Run `generate-bundle.ps1` to export a first draft bundle.
-3. Review the draft against `eval.yaml` before sharing it downstream.
-4. Tailor the templates for the target audience without changing core terms.
-5. Use `adoption-guide.md` for rollout, review cadence, and ownership guidance.
+1. Define a canonical `workflow_steps` list for one pilot workflow.
+2. Run `generate-bundle.ps1` to export a first draft.
+3. Review against `eval.yaml` before sharing downstream.
+4. Tailor templates for the target audience without changing core terms.

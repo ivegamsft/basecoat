@@ -62,26 +62,31 @@ jobs:
           STRICT_MODE="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.strict_mode || 'false' }}"
           SKIP_TAG="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.skip_tag_check || 'false' }}"
 
+          extra_args=()
+          if [ "$SKIP_TAG" = "true" ]; then extra_args+=("--skip-tag-check"); fi
+          if [ "$STRICT_MODE" = "true" ]; then extra_args+=("--strict"); fi
+
           node skills/environment-audit-drift/dist/cli.js \
             --config .github/environment-map.yml \
             --subscription "$AZURE_SUBSCRIPTION_ID" \
             --github-token "${{ secrets.GITHUB_TOKEN }}" \
             --output drift-report.json \
-            $([ "$SKIP_TAG" = "true" ] && echo "--skip-tag-check" || echo "") \
-            $([ "$STRICT_MODE" = "true" ] && echo "--strict" || echo "")
+            "${extra_args[@]}"
 
           DRIFT_STATUS=$(jq -r '.severity_summary | if .critical > 0 then "critical" elif .high > 0 then "high" elif .medium > 0 then "medium" else "clean" end' drift-report.json)
           FINDINGS=$(jq '.total_drifts' drift-report.json)
 
-          echo "drift_status=$DRIFT_STATUS" >> $GITHUB_OUTPUT
-          echo "findings_count=$FINDINGS" >> $GITHUB_OUTPUT
+          echo "drift_status=${DRIFT_STATUS}" >> "$GITHUB_OUTPUT"
+          echo "findings_count=${FINDINGS}" >> "$GITHUB_OUTPUT"
 
-          echo "### Environment Drift Report" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Status:** \`$DRIFT_STATUS\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Findings:** $FINDINGS" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          jq -r '.findings[] | "- [\(.severity | ascii_upcase)] **\(.environment)**: \(.finding)"' drift-report.json >> $GITHUB_STEP_SUMMARY || echo "No findings." >> $GITHUB_STEP_SUMMARY
+          {
+            echo "### Environment Drift Report"
+            echo ""
+            echo "**Status:** \`${DRIFT_STATUS}\`"
+            echo "**Findings:** ${FINDINGS}"
+            echo ""
+            jq -r '.findings[] | "- [\(.severity | ascii_upcase)] **\(.environment)**: \(.finding)"' drift-report.json || echo "No findings."
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload drift report
         if: always()
