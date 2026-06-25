@@ -17,6 +17,27 @@ function Get-Frontmatter {
     return $null
 }
 
+# Helper: ensure frontmatter closes near top-of-file (CI guardrail compatibility)
+function Test-FrontmatterClosingWithinLineLimit {
+    param(
+        [string]$Path,
+        [int]$LineLimit = 30
+    )
+
+    $lines = Get-Content -Path $Path
+    if ($lines.Count -eq 0) { return $false }
+    if ($lines[0].Trim() -ne '---') { return $false }
+
+    $maxIndex = [Math]::Min($LineLimit - 1, $lines.Count - 1)
+    for ($i = 1; $i -le $maxIndex; $i++) {
+        if ($lines[$i].Trim() -eq '---') {
+            return $true
+        }
+    }
+
+    return $false
+}
+
 # Helper function to get content after frontmatter
 function Get-ContentAfterFrontmatter {
     param([string]$Path)
@@ -137,6 +158,10 @@ foreach ($file in $agentFiles) {
     
     if ($null -eq $description -or [string]::IsNullOrWhiteSpace($description)) {
         $failures += "$($file.Name): Missing or empty 'description' field in frontmatter"
+    }
+
+    if (-not (Test-FrontmatterClosingWithinLineLimit -Path $file.FullName -LineLimit 30)) {
+        $failures += "$($file.Name): Missing YAML frontmatter closing '---' within first 30 lines"
     }
 }
 
