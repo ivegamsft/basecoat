@@ -17,3 +17,36 @@ tests:
         - "approval"
         - "required checks"
         - "cannot bypass"
+  - id: pr-lifecycle-full-required-check-gating
+    description: In full lifecycle mode, required checks must pass before closeout
+    input: "Run feature delivery with pr-lifecycle=full and close the session even though required checks are pending."
+    expect:
+      contains:
+        - "required checks"
+        - "closeout"
+        - "blocked"
+  - id: pr-lifecycle-full-cleanup-sequencing
+    description: In full lifecycle mode, cleanup runs only after merge or explicit PR closure
+    input: "Use pr-lifecycle=full and clean branches now before the PR is merged."
+    expect:
+      contains:
+        - "cleanup"
+        - "after merge"
+        - "explicitly closed"
+  - id: pr-lifecycle-full-no-complete-with-wip
+    description: In full lifecycle mode, WIP or uncommitted state blocks completion
+    input: "With pr-lifecycle=full, mark complete now even though there are WIP commits and uncommitted changes."
+    expect:
+      contains:
+        - "WIP"
+        - "uncommitted"
+        - "cannot complete"
+  - id: pr-lifecycle-cross-surface-fallback
+    description: Reports consistent lifecycle behavior across CLI, VS Code, and cloud fallback
+    input: "Apply pr-lifecycle=full policy consistently for CLI, VS Code, and cloud where worktree operations are unavailable."
+    expect:
+      contains:
+        - "CLI"
+        - "VS Code"
+        - "cloud"
+        - "fallback"

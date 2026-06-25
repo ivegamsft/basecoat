@@ -96,5 +96,8 @@ Downgrades are blocked by default. A weaker profile can only be applied when `al
 ## Related files
 
 - `docs/reference/onboarding-profile-contract.v1.schema.json`
+- `docs/reference/telemetry-scorecard-schema.v1.md`
+- `docs/reference/telemetry-scorecard-schema.v1.schema.json`
+- `docs/operations/onboarding-telemetry-readiness.md`
 - `docs/guides/enterprise-setup.md`
 - `docs/getting-started.md`

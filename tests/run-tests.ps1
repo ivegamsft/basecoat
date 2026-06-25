@@ -206,6 +206,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running pr-lifecycle routing coverage tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'pr-lifecycle-routing-coverage-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'pr-lifecycle routing coverage tests failed' -ForegroundColor Red
+    Write-FailureLog 'pr-lifecycle-routing-coverage-tests'
+    exit 1
+}
+
 Write-Host 'Running cleanup branch automation tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'cleanup-branches-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
@@ -243,6 +251,38 @@ Write-Host 'Running data workload tests...'
 if ($LASTEXITCODE -ne 0) {
     Write-Host 'Data workload tests failed' -ForegroundColor Red
     Write-FailureLog 'data-workload-tests'
+    exit 1
+}
+
+Write-Host 'Running AIDL portfolio project bootstrap tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'aidl-portfolio-project-bootstrap-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'AIDL portfolio project bootstrap tests failed' -ForegroundColor Red
+    Write-FailureLog 'aidl-portfolio-project-bootstrap-tests'
+    exit 1
+}
+
+Write-Host 'Running AIDL portfolio rollup and KPI publisher tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'aidl-portfolio-rollup-kpi-publisher-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'AIDL portfolio rollup and KPI publisher tests failed' -ForegroundColor Red
+    Write-FailureLog 'aidl-portfolio-rollup-kpi-publisher-tests'
+    exit 1
+}
+ 
+Write-Host 'Running Keep/Fix/Throttle weekly scorecard tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'keep-fix-throttle-weekly-scorecard-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Keep/Fix/Throttle weekly scorecard tests failed' -ForegroundColor Red
+    Write-FailureLog 'keep-fix-throttle-weekly-scorecard-tests'
+    exit 1
+}
+ 
+Write-Host 'Running AIDL learning-to-memory promotion pipeline tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'aidl-learning-memory-promotion-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'AIDL learning-to-memory promotion pipeline tests failed' -ForegroundColor Red
+    Write-FailureLog 'aidl-learning-memory-promotion-tests'
     exit 1
 }
 
@@ -299,6 +339,22 @@ Write-Host 'Running generate eval stubs tests...'
 if ($LASTEXITCODE -ne 0) {
     Write-Host 'Generate eval stubs tests failed' -ForegroundColor Red
     Write-FailureLog 'generate-eval-stubs-tests'
+    exit 1
+}
+
+Write-Host 'Running agent-merge eval policy tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'agent-merge-eval-policy-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Agent-merge eval policy tests failed' -ForegroundColor Red
+    Write-FailureLog 'agent-merge-eval-policy-tests'
+    exit 1
+}
+
+Write-Host 'Running generate agent eval stubs tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'generate-agent-eval-stubs-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Generate agent eval stubs tests failed' -ForegroundColor Red
+    Write-FailureLog 'generate-agent-eval-stubs-tests'
     exit 1
 }
 

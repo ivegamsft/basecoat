@@ -26,6 +26,13 @@ param storageSizeGB int = 32
 @description('Backup retention in days.')
 param backupRetentionDays int = 7
 
+@description('PostgreSQL public network access posture.')
+@allowed([
+  'Enabled'
+  'Disabled'
+])
+param publicNetworkAccess string = 'Enabled'
+
 resource server 'Microsoft.DBforPostgreSQL/flexibleServers@2023-06-01-preview' = {
   name: serverName
   location: location
@@ -45,12 +52,12 @@ resource server 'Microsoft.DBforPostgreSQL/flexibleServers@2023-06-01-preview' =
       geoRedundantBackup: 'Disabled'
     }
     network: {
-      publicNetworkAccess: 'Enabled'
+      publicNetworkAccess: publicNetworkAccess
     }
   }
 }
 
-resource allowAzureServices 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2023-06-01-preview' = {
+resource allowAzureServices 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2023-06-01-preview' = if (publicNetworkAccess == 'Enabled') {
   parent: server
   name: 'allow-azure-services'
   properties: {
@@ -72,3 +79,4 @@ output fqdn string = server.properties.fullyQualifiedDomainName
 output serverName string = server.name
 output databaseName string = database.name
 output adminLogin string = administratorLogin
+output resourceId string = server.id

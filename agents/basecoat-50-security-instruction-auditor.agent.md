@@ -2,14 +2,30 @@
 name: instruction-auditor
 description: "Detects missing instruction coverage for a repo — identifies tech stacks and workflow patterns present in the codebase that have no corresponding BaseCoat instruction file in the overlay. USE FOR: find uncovered tech stacks in a repo overlay, audit BaseCoat instruction file gaps, identify missing workflow pattern coverage. DO NOT USE FOR: writing new instruction files, general code review."
 visibility: specialized
-model: gpt-5.4-mini
-compatibility: []
+model_policy:
+  fallback: true
+  preferred_families:
+    - claude
+    - gpt
+  upshift:
+    allowed: true
+    owner: runtime
+    max_tier: premium
+    triggers:
+      - complexity
+compatibility:
+  - skill:agent-design
 metadata:
-  category: security
-  maturity: alpha
-  audience:
-    - developer
+  category: meta
+  tags:
+    - instruction
+    - coverage
+    - audit
+    - repo-scan
+  maturity: experimental
 allowed-tools: []
+allowed_skills:
+  - agent-design
 ---
 
 # Instruction Auditor Agent
@@ -80,9 +96,9 @@ detected stack:
 
 Assign a status to each mapping:
 
-- ✅ **Present** — the expected file exists in the overlay
-- ❌ **Missing** — the expected file is absent from the overlay
-- ⚠️ **Partial** — a related file exists but does not exactly match the canonical name
+- `[PRESENT]` — the expected file exists in the overlay
+- `[MISSING]` — the expected file is absent from the overlay
+- `[PARTIAL]` — a related file exists but does not exactly match the canonical name
 
 ### 4. Generate Coverage Report
 
@@ -95,9 +111,9 @@ Produce a coverage table in the requested `report_format`.
 
 | Tech Stack | Expected File | Status |
 |---|---|---|
-| Node.js / Express | `nodejs-express.instructions.md` | ✅ Present |
-| Java / Spring Boot | `java-spring-boot.instructions.md` | ❌ Missing |
-| Azure Bicep | `azure-bicep.instructions.md` | ⚠️ Partial |
+| Node.js / Express | `nodejs-express.instructions.md` | [PRESENT] |
+| Java / Spring Boot | `java-spring-boot.instructions.md` | [MISSING] |
+| Azure Bicep | `azure-bicep.instructions.md` | [PARTIAL] |
 
 **Summary:** 1 of 3 stacks covered. 1 missing, 1 partial.
 ```
@@ -130,7 +146,7 @@ Group all sync commands together at the end of the report for easy copy-paste.
 
 The agent produces:
 
-1. **Coverage table** — one row per detected tech stack with status icons
+1. **Coverage table** — one row per detected tech stack with status (`[PRESENT]`, `[MISSING]`, or `[PARTIAL]`)
 2. **Sync commands** — one `sync-basecoat.ps1` invocation per missing file
 3. **Summary line** — `X of Y stacks covered (Z missing, W partial)`
 
@@ -144,10 +160,10 @@ Scanned: 2025-07-01
 
 | Tech Stack | Expected File | Status |
 |---|---|---|
-| Node.js / Express | `nodejs-express.instructions.md` | ✅ Present |
-| Containers | `azure-linux-app-service.instructions.md` | ❌ Missing |
-| Azure Bicep | `azure-bicep.instructions.md` | ❌ Missing |
-| CI/CD (Azure deploy) | `azure-devops.instructions.md` | ⚠️ Partial |
+| Node.js / Express | `nodejs-express.instructions.md` | [PRESENT] |
+| Containers | `azure-linux-app-service.instructions.md` | [MISSING] |
+| Azure Bicep | `azure-bicep.instructions.md` | [MISSING] |
+| CI/CD (Azure deploy) | `azure-devops.instructions.md` | [PARTIAL] |
 
 **Summary:** 1 of 4 stacks covered — 2 missing, 1 partial.
 
@@ -158,13 +174,6 @@ Run the following to add missing instruction files to your overlay:
 pwsh scripts/sync-basecoat.ps1 -Include instructions/azure-linux-app-service.instructions.md
 pwsh scripts/sync-basecoat.ps1 -Include instructions/azure-bicep.instructions.md
 ```
-
-## Model
-
-**Recommended:** claude-sonnet-4.6
-**Rationale:** Codebase scanning and gap analysis across many file types requires
-broad pattern recognition across potentially large directory trees.
-**Minimum:** gpt-5.4-mini
 
 ## Governance
 

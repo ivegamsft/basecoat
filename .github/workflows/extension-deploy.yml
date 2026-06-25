@@ -24,9 +24,9 @@ on:
       environment:
         description: "Target environment"
         required: false
-        default: "prod"
+        default: "production"
         type: choice
-        options: ["prod", "staging", "dev"]
+        options: ["production", "prod", "staging", "dev"]
 
 permissions:
   contents: read
@@ -41,7 +41,7 @@ env:
 jobs:
   build-push:
     name: Build and push extension image
-    runs-on: ${{ vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
+    runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-latest' || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
     timeout-minutes: 20
     if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork }}
     outputs:
@@ -51,6 +51,29 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Validate self-hosted runner routing contract
+        shell: bash
+        env:
+          RUNNER_DEPLOY: ${{ vars.RUNNER_DEPLOY }}
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            echo "::notice::Skipping strict self-hosted contract enforcement on pull_request events."
+            exit 0
+          fi
+          if [[ -z "${RUNNER_DEPLOY:-}" ]]; then
+            echo "::error::vars.RUNNER_DEPLOY is not configured."
+            echo "::error::Set RUNNER_DEPLOY to self-hosted labels/group for deploy-class jobs."
+            exit 1
+          fi
+          NORMALIZED="$(echo "${RUNNER_DEPLOY}" | tr '[:upper:]' '[:lower:]')"
+          if [[ "${NORMALIZED}" == *"ubuntu-latest"* && "${NORMALIZED}" != *"self-hosted"* ]]; then
+            echo "::error::vars.RUNNER_DEPLOY resolves to ubuntu-latest fallback."
+            echo "::error::This workflow requires explicit self-hosted routing."
+            exit 1
+          fi
+          echo "Runner contract satisfied: ${RUNNER_DEPLOY}"
 
       - name: Log in to GHCR
         uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee
@@ -92,13 +115,36 @@ jobs:
     timeout-minutes: 20
     needs: build-push
     if: ${{ github.event_name != 'pull_request' }}
-    environment: ${{ github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'prod' && 'production' || github.event.inputs.environment) || 'production' }}
+    environment: ${{ github.event_name == 'workflow_dispatch' && ((github.event.inputs.environment == 'prod' || github.event.inputs.environment == 'production') && 'production' || github.event.inputs.environment) || 'production' }}
     env:
-      TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'prod' }}
+      TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'production' && 'prod' || github.event.inputs.environment) || 'prod' }}
 
     steps:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Validate self-hosted runner routing contract
+        shell: bash
+        env:
+          RUNNER_DEPLOY: ${{ vars.RUNNER_DEPLOY }}
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            echo "::notice::Skipping strict self-hosted contract enforcement on pull_request events."
+            exit 0
+          fi
+          if [[ -z "${RUNNER_DEPLOY:-}" ]]; then
+            echo "::error::vars.RUNNER_DEPLOY is not configured."
+            echo "::error::Set RUNNER_DEPLOY to self-hosted labels/group for deploy-class jobs."
+            exit 1
+          fi
+          NORMALIZED="$(echo "${RUNNER_DEPLOY}" | tr '[:upper:]' '[:lower:]')"
+          if [[ "${NORMALIZED}" == *"ubuntu-latest"* && "${NORMALIZED}" != *"self-hosted"* ]]; then
+            echo "::error::vars.RUNNER_DEPLOY resolves to ubuntu-latest fallback."
+            echo "::error::This workflow requires explicit self-hosted routing."
+            exit 1
+          fi
+          echo "Runner contract satisfied: ${RUNNER_DEPLOY}"
 
       - name: Validate extension resource group is configured
         run: |
@@ -174,14 +220,16 @@ jobs:
             exit 1
           fi
 
-          echo "### Operation context preflight" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Key | Value |" >> "$GITHUB_STEP_SUMMARY"
-          echo "|---|---|" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Target environment | \`${TARGET_CONTEXT_ENV}\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Mode | \`${MODE}\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| GitHub environment | \`${GITHUB_ENVIRONMENT}\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Human approval required | \`${APPROVAL_REQUIRED}\` |" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "### Operation context preflight"
+            echo ""
+            echo "| Key | Value |"
+            echo "|---|---|"
+            echo "| Target environment | \`${TARGET_CONTEXT_ENV}\` |"
+            echo "| Mode | \`${MODE}\` |"
+            echo "| GitHub environment | \`${GITHUB_ENVIRONMENT}\` |"
+            echo "| Human approval required | \`${APPROVAL_REQUIRED}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Azure login
         uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43
@@ -194,7 +242,7 @@ jobs:
           npm ci --no-audit --prefer-offline
           npm run build
 
-      - name: Advisory environment drift snapshot
+      - name: Environment drift preflight (gating)
         id: drift-preflight
         shell: bash
         run: |
@@ -211,17 +259,32 @@ jobs:
           TARGET_HIGH=$(jq --arg env "${TARGET_ENV}" '[.findings[] | select(.environment == $env and .severity == "high")] | length' "${RUNNER_TEMP}/drift-report.json")
           TARGET_TOTAL=$(jq --arg env "${TARGET_ENV}" '[.findings[] | select(.environment == $env)] | length' "${RUNNER_TEMP}/drift-report.json")
 
-          echo "target_critical=${TARGET_CRITICAL}" >> "$GITHUB_OUTPUT"
-          echo "target_high=${TARGET_HIGH}" >> "$GITHUB_OUTPUT"
-          echo "target_total=${TARGET_TOTAL}" >> "$GITHUB_OUTPUT"
+          {
+            echo "target_critical=${TARGET_CRITICAL}"
+            echo "target_high=${TARGET_HIGH}"
+            echo "target_total=${TARGET_TOTAL}"
+          } >> "$GITHUB_OUTPUT"
 
-          echo "### Environment drift snapshot (advisory)" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Target | Critical | High | Findings |" >> "$GITHUB_STEP_SUMMARY"
-          echo "|---|---:|---:|---:|" >> "$GITHUB_STEP_SUMMARY"
-          echo "| \`${TARGET_ENV}\` | ${TARGET_CRITICAL} | ${TARGET_HIGH} | ${TARGET_TOTAL} |" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "> This snapshot is informational and does not replace environment protection rules, what-if validation, or health checks." >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "### Environment drift preflight (gating)"
+            echo ""
+            echo "| Target | Critical | High | Findings |"
+            echo "|---|---:|---:|---:|"
+            echo "| \`${TARGET_ENV}\` | ${TARGET_CRITICAL} | ${TARGET_HIGH} | ${TARGET_TOTAL} |"
+            echo ""
+            echo "> Critical findings block deployment for the target environment."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Enforce target-environment drift gate
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TARGET_CRITICAL="${{ steps.drift-preflight.outputs.target_critical }}"
+          if [[ "${TARGET_CRITICAL}" -gt 0 ]]; then
+            echo "::error::Critical environment drift detected for ${TARGET_ENV} (${TARGET_CRITICAL} finding(s)); see drift-report.json artifact and step summary for details."
+            exit 1
+          fi
 
       - name: Upload drift preflight report
         if: always()

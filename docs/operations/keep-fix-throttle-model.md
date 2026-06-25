@@ -12,6 +12,49 @@ The Keep/Fix/Throttle model is a 3-tier approach to standardize proven patterns,
 | **Fix** | Prioritize recurring failure modes as first-class product work | 1–2 week cycle | Engineering | MTTR reduction ≥20% |
 | **Throttle** | Apply risk-tier governance instead of broad restrictions | Per-deployment | Governance | Autonomy maintained while reducing incident rate ≥15% |
 
+## Workstream Execution Tracker (Epic #1452)
+
+The six execution workstreams are tracked as dedicated issues with explicit owners and measurable outcomes:
+
+| Workstream | Tracker | Owner | Delivery signal |
+|---|---|---|---|
+| 1. Standardize proven patterns as defaults | [#2046](https://github.com/IBuySpy-Shared/basecoat/issues/2046) | @ibuyspy | ≥3 patterns promoted and adoption target met |
+| 2. Reliability debt program for recurring failures | [#2047](https://github.com/IBuySpy-Shared/basecoat/issues/2047) | @ibuyspy | Top recurring failures fixed with MTTR/recurrence targets |
+| 3. Tooling routing matrix (local/background/cloud/manual) | [#2048](https://github.com/IBuySpy-Shared/basecoat/issues/2048) | @ibuyspy | Routing defaults published and orchestration overhead reduced |
+| 4. Risk-tier autonomy policy enforcement | [#2049](https://github.com/IBuySpy-Shared/basecoat/issues/2049) | @ibuyspy | Tier coverage + enforcement guardrails in place |
+| 5. Weekly scorecard + trend reporting | [#2050](https://github.com/IBuySpy-Shared/basecoat/issues/2050) | @ibuyspy | Weekly scorecard cadence with trend classification |
+| 6. 4-6 week adoption experiment and readout | [#2051](https://github.com/IBuySpy-Shared/basecoat/issues/2051) | @ibuyspy | Experiment complete with go/no-go readout |
+
+### Workstream 5 delivery path
+
+The weekly scorecard and trend readout pipeline is implemented with:
+
+- Workflow: `.github/workflows/keep-fix-throttle-weekly-scorecard.yml`
+- Generator: `scripts/keep-fix-throttle-weekly-scorecard.ps1`
+- Runbook: `docs/operations/keep-fix-throttle-weekly-scorecard.md`
+- Spec: `docs/spec/keep-fix-throttle-weekly-scorecard.spec.md`
+
+### Workstream 3 delivery path
+
+The tooling routing matrix baseline for execution modes is implemented with:
+
+- PRD: `docs/design/keep-fix-throttle-tooling-routing-matrix-prd.md`
+- Runbook: `docs/operations/keep-fix-throttle-tooling-routing-matrix.md`
+- Spec: `docs/spec/keep-fix-throttle-tooling-routing-matrix.spec.md`
+
+### Baseline Snapshot (captured 2026-06-25)
+
+The baseline below is captured before workstream rollout and used as the experiment start point.
+
+| Metric | Baseline value | Collection window / source |
+|---|---|---|
+| Throughput proxy (merged PRs/day) | 10.0 | Last 30 days (`gh pr list`, capped at 300 results) |
+| Workflow failure rate | 0.0% | Last 14 days (`gh run list`, capped at 500 runs) |
+| Manual intervention proxy (approved merged PR share) | 100.0% | Last 30 days (`gh search prs review:approved`) |
+| Open P0 incidents | 0 | Snapshot (`gh issue list --label P0-critical`) |
+| Open P1 incidents | 1 | Snapshot (`gh issue list --label P1-high`) |
+| P0/P1 incident creation rate | 7 in 30 days | Last 30 days (`gh issue list --search created:>=...`) |
+
 ## 1. Keep: Standardize Proven Patterns
 
 Patterns that meet the "Keep" criteria are standardized as defaults and documented for reuse.
@@ -28,7 +71,10 @@ Patterns that meet the "Keep" criteria are standardized as defaults and document
 Kept patterns are documented in:
 
 - `docs/guides/kept-patterns/` — Consolidated runbooks for each pattern
+- `docs/guides/kept-patterns/README.md` — Keep registry with adoption targets
+- `docs/guides/keep-candidate-acceptance-checklist.md` — Promotion gates for future candidates
 - `.github/instructions/workflow-conventions.instructions.md` — Embedded defaults
+- `.github/instructions/cost-optimization.instructions.md` — Token-efficiency defaults and thresholds
 - `docs/reference/governance-contract.md` — Standardized naming and labels
 
 ### Example: PR-Only Agent Pattern
@@ -44,6 +90,15 @@ Kept patterns are documented in:
 **Documentation**: `docs/guides/agent-pr-safety-protocol.md` and `.github/workflows/code-review-agent.md`.
 
 **Status**: ✅ KEEP (standardize as default for new agents).
+
+### Current promoted defaults (Workstream 1, #2046)
+
+1. **Phase-boundary compaction** (`/compact` between major phases).
+2. **File-reference-only context loading** (no large instruction pastes).
+3. **Single kickoff plus `/tasks` monitoring** (delta steering, no repeated orchestration restarts).
+
+Each promoted default has a runbook under `docs/guides/kept-patterns/` and is
+wired into default guidance under `.github/instructions/`.
 
 ---
 
@@ -68,6 +123,10 @@ Recurring failures are elevated to first-class product work with owners and meas
 3. **Fix committed**: Repair implemented and deployed; monitored for recurrence
 4. **Validation**: Zero recurrence over ≥2 weeks; update runbook and guard rails
 5. **Archive**: Documented in `docs/operations/failure-archive.md` with resolution details
+
+For issue #2047 execution, enforce minimum-slice acceptance fields in
+`docs/operations/failure-pattern-run-contract.md` (`top3_failures`,
+`mttr_improvement_pct`, `recurrence_rate_2w_pct`).
 
 ### SLO Targets
 

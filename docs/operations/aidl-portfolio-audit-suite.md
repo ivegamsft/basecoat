@@ -63,6 +63,16 @@ Critical control failures force red regardless of aggregate score.
 - [ ] Required automation rules exist and are active
 - [ ] Drift report generated
 
+Runbook command for this check:
+
+```powershell
+pwsh -File scripts/aidl-portfolio-project-bootstrap.ps1 `
+  -ManifestPath docs/specs/aidl-portfolio/project-bootstrap-manifest.json `
+  -Mode validate `
+  -ConformanceMode enforce `
+  -CurrentStatePath <project-state-export.json>
+```
+
 ## 3) Governance and exception hygiene audit
 
 - [ ] `Waived` states include owner/rationale/expiry
@@ -89,12 +99,26 @@ Critical control failures force red regardless of aggregate score.
 - [ ] Sensitive content controls are applied
 - [ ] Adoption impact is measured
 
+Runbook command for this check:
+
+```powershell
+pwsh -File scripts/aidl-learning-memory-promotion.ps1 `
+  -InputPath <learning-candidate-export.json> `
+  -OutputDir artifacts/aidl-learning-memory-pipeline
+```
+
 ## 7) Delivery-flow economics audit
 
 - [ ] Token and turn baseline is tracked
 - [ ] Top waste drivers are identified
 - [ ] Optimization actions are linked to owners
 - [ ] Before/after trend is measured per sprint
+
+Supporting artifacts:
+
+1. Baseline thresholds and waste-driver mapping: `docs/reference/aidl-delivery-flow-economics-baseline.md`
+2. Prioritized optimization backlog structure: `docs/reference/aidl-delivery-flow-economics-optimization-backlog.md`
+3. Sprint before/after metrics capture template: `docs/templates/aidl-delivery-flow-economics-before-after-metrics-template.md`
 
 ## Escalation Policy
 

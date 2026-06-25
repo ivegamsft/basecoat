@@ -77,7 +77,7 @@ jobs:
   release:
     if: startsWith(github.ref, 'refs/tags/')
     needs: package
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER_RELEASE || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
     timeout-minutes: 20
     steps:
       - name: Check out repository
@@ -94,9 +94,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           # Upload only files (not the stage directory left by the packaging script)
-          files=$(find dist -maxdepth 1 -type f)
+          mapfile -t files < <(find dist -maxdepth 1 -type f)
+          if [[ ${#files[@]} -eq 0 ]]; then
+            echo "::error::No release artifacts found in dist/"
+            exit 1
+          fi
           if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" $files --clobber --repo "${{ github.repository }}"
+            gh release upload "$GITHUB_REF_NAME" "${files[@]}" --clobber --repo "${{ github.repository }}"
           else
-            gh release create "$GITHUB_REF_NAME" $files --title "Base Coat $GITHUB_REF_NAME" --generate-notes --repo "${{ github.repository }}"
+            gh release create "$GITHUB_REF_NAME" "${files[@]}" --title "Base Coat $GITHUB_REF_NAME" --generate-notes --repo "${{ github.repository }}"
           fi

@@ -32,20 +32,20 @@ jobs:
           repo="${{ github.repository }}"
           bootstrap_mode="existing"
 
-          if gh api "/repos/${repo}/environments/prod" --jq '.name' >/dev/null 2>/tmp/prod-direct-before.err; then
-            echo "✓ Found existing 'prod' environment"
+          if gh api "/repos/${repo}/environments/production" --jq '.name' >/dev/null 2>/tmp/prod-direct-before.err; then
+            echo "✓ Found existing 'production' environment"
           else
-            echo "ℹ️  'prod' environment missing; creating baseline environment via API"
+            echo "ℹ️  'production' environment missing; creating baseline environment via API"
             bootstrap_output="$(gh api \
               --method PUT \
-              "/repos/${repo}/environments/prod" \
+              "/repos/${repo}/environments/production" \
               -F wait_timer=0 \
               -F prevent_self_review=true \
-              -F deployment_branch_policy[protected_branches]=true \
-              -F deployment_branch_policy[custom_branch_policies]=false \
+              -F 'deployment_branch_policy[protected_branches]=true' \
+              -F 'deployment_branch_policy[custom_branch_policies]=false' \
               --jq '{name, html_url, deployment_branch_policy}' 2>&1)" || {
               if echo "$bootstrap_output" | grep -Fq 'Resource not accessible by integration'; then
-                echo "::warning::Unable to bootstrap 'prod' environment with github.token in this run."
+                echo "::warning::Unable to bootstrap 'production' environment with github.token in this run."
                 echo "::warning::Skipping hard-fail because environment bootstrap is advisory when token permissions are limited."
                 echo "$bootstrap_output"
                 bootstrap_mode="permission_limited"
@@ -66,7 +66,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
-      - name: Verify prod environment is listed
+      - name: Verify production environment is listed
         run: |
           set -euo pipefail
 
@@ -77,14 +77,16 @@ jobs:
           direct=false
 
           for attempt in $(seq 1 "$max_attempts"); do
-            if gh api "/repos/${repo}/environments/prod" --jq '.name' >/dev/null 2>/tmp/prod-direct.err; then
+            if gh api "/repos/${repo}/environments/production" --jq '.name' >/dev/null 2>/tmp/prod-direct.err; then
               direct=true
             else
               direct=false
             fi
 
+            # The /environments endpoint returns {"total_count":N,"environments":[...]}.
+            # Use .environments[] (not .[]) to iterate; .[].name silently returns nothing.
             if gh api "/repos/${repo}/environments" > /tmp/prod-env-list.json 2>/tmp/prod-list.err; then
-              if jq -e '.environments[]? | select(.name == "prod")' /tmp/prod-env-list.json >/dev/null; then
+              if jq -e '.environments[] | select(.name == "production")' /tmp/prod-env-list.json >/dev/null; then
                 listed=true
               else
                 listed=false
@@ -94,7 +96,7 @@ jobs:
             fi
 
             if [[ "$direct" == "true" && "$listed" == "true" ]]; then
-              echo "✓ 'prod' environment is visible via direct lookup and list API (attempt ${attempt}/${max_attempts})"
+              echo "✓ 'production' environment is visible via direct lookup and list API (attempt ${attempt}/${max_attempts})"
               break
             fi
 
@@ -106,12 +108,12 @@ jobs:
 
           if [[ "$direct" != "true" || "$listed" != "true" ]]; then
             if [[ "${{ steps.bootstrap.outputs.bootstrap_mode }}" == "permission_limited" ]]; then
-              echo "::warning::'prod' environment could not be bootstrapped because github.token lacks environment admin permissions in this run."
+              echo "::warning::'production' environment could not be bootstrapped because github.token lacks environment admin permissions in this run."
               echo "::warning::Skipping hard-fail because environment bootstrap is advisory when token permissions are limited."
               exit 0
             fi
 
-            echo "::error::'prod' environment not listed after bootstrap — propagation check failed"
+            echo "::error::'production' environment not listed after bootstrap — propagation check failed"
             echo "repository=${repo}"
             echo "direct_lookup_success=${direct}"
             echo "list_lookup_success=${listed}"
@@ -125,8 +127,8 @@ jobs:
             echo "---- environments list payload ----"
             cat /tmp/prod-env-list.json || true
 
-            echo "---- environment template (.github/environment-protection-prod.json) ----"
-            cat .github/environment-protection-prod.json || true
+            echo "---- environment template (.github/environment-protection-production.json) ----"
+            cat .github/environment-protection-production.json || true
             exit 1
           fi
         env:
@@ -154,7 +156,7 @@ jobs:
           done
           
           if [ -z "$PROD_ENV" ]; then
-            echo "::warning::Neither 'production' nor 'prod' environment was found."
+            echo "::warning::Neither canonical 'production' nor legacy alias 'prod' environment was found."
             echo "::warning::Settings action: create a protected 'production' environment in Settings → Environments."
             echo "Skipping hard-fail because this workflow is advisory for repository settings drift."
             exit 0
@@ -220,8 +222,8 @@ jobs:
           cat > /tmp/protection-summary.txt <<'EOF'
           # Environment and Production Approval Protection Summary
           
-          ## Production Environment (prod)
-          ✓ Configured in: .github/environment-protection-prod.json
+          ## Production Environment (production)
+          ✓ Configured in: .github/environment-protection-production.json
           ✓ Bootstrap mode: ${{ needs.bootstrap-prod-environment.outputs.bootstrap_mode }}
           ✓ Protection settings:
             - Deployment branch restricted to main

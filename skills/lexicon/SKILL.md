@@ -3,6 +3,15 @@ name: lexicon
 description: "Use when defining or auditing a project's vocabulary, taxonomy, ontology, and brand voice so docs, agents, and prompts use consistent canonical terms. USE FOR: create project lexicon file, audit docs for terminology drift, define naming taxonomy for assets, detect off-brand tone or vibe mismatches, standardize canonical product terms. DO NOT USE FOR: copyediting grammar only, generating logos or visuals, source code refactoring unrelated to language."
 compatibility:
   - GHCP
+allowed-tools: []
+metadata:
+  category: governance
+  domain: governance
+  maturity: production
+  audience:
+    - docs-author
+    - maintainer
+visibility: public
 ---
 # Lexicon Skill
 

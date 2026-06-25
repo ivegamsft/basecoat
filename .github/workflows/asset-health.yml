@@ -101,12 +101,9 @@ jobs:
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value ($separator + $graphText)
 
           # Surface orphan count as annotation
-          if ($graphText -match 'Orphaned nodes \((\d+)') {
-            if ($Matches.Count -lt 2) {
-              throw "Unexpected orphan-count match state; expected capture group for orphan count."
-            }
-
-            $count = [int]$Matches[1]
+          $orphanMatch = [regex]::Match($graphText, 'Orphaned nodes \((\d+)')
+          if ($orphanMatch.Success) {
+            $count = [int]$orphanMatch.Groups[1].Value
             if ($count -gt 0) {
               Write-Host "::warning::$count orphaned asset nodes detected. Run 'pwsh scripts/graph-dependencies.ps1 -ShowOrphans' to review."
             }

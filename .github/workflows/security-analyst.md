@@ -45,6 +45,14 @@ owner and repo name:
 - Call `get_pull_request` with `pullNumber: ${{ github.event.pull_request.number }}` to get PR metadata (number, title, body, additions, deletions, changedFiles)
 - Call `get_pull_request_diff` to get the full diff
 
+If MCP diff retrieval is unavailable or returns empty output, use CLI fallback
+before reporting failure:
+
+- Run `gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json files`
+- Run `gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }}`
+- Continue security analysis using the fallback diff
+- If MCP and CLI both fail to produce a usable diff, report `missing_data` with exact failing command/tool details
+
 ## What to Do
 
 Only post a comment if you find security issues. If the diff is clean, post nothing.
@@ -52,6 +60,7 @@ Only post a comment if you find security issues. If the diff is clean, post noth
 ### Step 1 — Scope the Changed Surface
 
 Identify which of the following are touched by this PR:
+
 - Authentication or authorization logic
 - Input handling, parsing, or validation
 - Data access or query construction
@@ -78,6 +87,7 @@ For each changed area, check the most relevant OWASP categories:
 ### Step 3 — Secret Scan
 
 Scan the diff for patterns that suggest hardcoded secrets:
+
 - API keys, tokens, passwords in string literals
 - Base64-encoded values that decode to credentials
 - Private key headers (`-----BEGIN`)
@@ -91,6 +101,7 @@ Use `get_pull_request_diff` and filter the result to lines matching dependency
 manifest paths (`package.json`, `requirements.txt`, `go.mod`, `*.csproj`).
 
 Note any new dependency that:
+
 - Has not been updated in 12+ months
 - Has a known CVE in the added version range
 - Adds significant transitive dependencies

@@ -15,8 +15,9 @@ BaseCoat gives your organization one place to manage agents, skills, instruction
 
 | Asset type | Count | What it does |
 |---|---|---|
-| **Agents** | 122 | End-to-end task executors — sprint planners, code reviewers, security analysts, and more |
-| **Skills** | 121 | Reusable domain capabilities invoked by agents |
+<<<<<<< HEAD
+| **Agents** | 125 | End-to-end task executors — sprint planners, code reviewers, security analysts, and more |
+| **Skills** | 124 | Reusable domain capabilities invoked by agents |
 | **Instructions** | 91 | Copilot behavior rules scoped by file path pattern |
 | **Prompts** | 6 | Structured templates for repeatable tasks |
 
@@ -70,6 +71,7 @@ flowchart LR
 - [reference/quick-reference.md](reference/quick-reference.md) — Quick reference card
 - [reference/guidance-vocabulary-syntax-guide.md](reference/guidance-vocabulary-syntax-guide.md) — Canonical vocabulary, taxonomy, ontology, and prompt syntax
 - [reference/treatment-matrix.md](reference/treatment-matrix.md) — Issue treatment matrix
+- [reference/fleet-loop-adoption-scorecard.md](reference/fleet-loop-adoption-scorecard.md) — Fleet audit findings: policy vs implementation vs live behavior across consumer repos
 - [reference/guardrails/](reference/guardrails/) — Guardrail configuration files
 
 ## Guides (`docs/guides/`)

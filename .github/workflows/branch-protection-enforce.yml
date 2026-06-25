@@ -1,7 +1,9 @@
-name: BaseCoat - Branch Protection Enforcement
+name: BaseCoat - Branch Protection Drift Gate
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "23 3 * * 1"
   pull_request:
     branches:
       - main
@@ -55,17 +57,67 @@ jobs:
           set -euo pipefail
 
           echo "Checking required status checks..."
-          grep -q "validate-basecoat" docs/reference/branch-protection.md || {
-            echo "❌ validate-basecoat check not documented"
+          grep -q "lint-and-validate" docs/reference/branch-protection.md || {
+            echo "lint-and-validate check not documented"
             exit 1
           }
-          grep -q "ci" docs/reference/branch-protection.md || {
-            echo "❌ ci check not documented"
+          grep -q "validate-unix" docs/reference/branch-protection.md || {
+            echo "validate-unix check not documented"
             exit 1
           }
-          grep -q "docs" docs/reference/branch-protection.md || {
-            echo "❌ docs check not documented"
+          grep -q "validate-windows" docs/reference/branch-protection.md || {
+            echo "validate-windows check not documented"
             exit 1
           }
 
-          echo "✓ All required status checks are documented"
+          echo "All required status checks are documented"
+
+      - name: Audit branch protection API settings
+        if: ${{ github.event_name != 'pull_request' }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          PROTECTION="$(gh api "repos/${REPOSITORY}/branches/main/protection" 2>/dev/null || echo '')"
+
+          if [[ -z "$PROTECTION" ]]; then
+            echo "::error::main branch has no protection rules configured (GET /branches/main/protection returned empty)."
+            exit 1
+          fi
+
+          STRICT="$(echo "$PROTECTION" | jq -r '.required_status_checks.strict // false')"
+          REVIEW_COUNT="$(echo "$PROTECTION" | jq -r '.required_pull_request_reviews.required_approving_review_count // 0')"
+          CONVERSATION_RESOLUTION="$(echo "$PROTECTION" | jq -r '.required_conversation_resolution.enabled // false')"
+          FORCE_PUSH="$(echo "$PROTECTION" | jq -r '.allow_force_pushes.enabled // true')"
+          DELETIONS="$(echo "$PROTECTION" | jq -r '.allow_deletions.enabled // true')"
+
+          if [[ "$STRICT" != "true" ]]; then
+            echo "::error::Branch protection drift: required_status_checks.strict must be true."
+            exit 1
+          fi
+
+          if [[ "${REVIEW_COUNT}" -lt 1 ]]; then
+            echo "::error::Branch protection drift: required_approving_review_count must be at least 1."
+            exit 1
+          fi
+
+          if [[ "${CONVERSATION_RESOLUTION}" != "true" ]]; then
+            echo "::error::Branch protection drift: required_conversation_resolution must be enabled."
+            exit 1
+          fi
+
+          if [[ "$FORCE_PUSH" != "false" ]]; then
+            echo "::error::Branch protection drift: allow_force_pushes must be disabled."
+            exit 1
+          fi
+
+          if [[ "$DELETIONS" != "false" ]]; then
+            echo "::error::Branch protection drift: allow_deletions must be disabled."
+            exit 1
+          fi
+
+          echo "Branch protection audit passed: strict checks, >=1 required approval, conversation resolution enabled, no force pushes, no deletions." >> "$GITHUB_STEP_SUMMARY"
+          echo "Branch protection audit complete."

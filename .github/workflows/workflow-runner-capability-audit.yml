@@ -1,0 +1,46 @@
+name: "Workflow Runner Capability Audit"
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/**"
+      - "scripts/audit-workflow-runner-capabilities.ps1"
+      - "docs/operations/workflow-runner-routing.md"
+      - "docs/operations/workflow-runner-capability-audit.md"
+      - ".github/workflow-runner-capability-classes.json"
+      - ".github/workflow-runner-routing-contracts.json"
+  schedule:
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  runner-capability-audit:
+    name: runner-capability-audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Generate runner capability audit report
+        shell: pwsh
+        run: |
+          ./scripts/audit-workflow-runner-capabilities.ps1 `
+            -OutputFormat markdown `
+            -OutputPath docs/operations/workflow-runner-capability-audit.md `
+            -FailOnContractViolation
+
+      - name: Upload runner capability audit report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: workflow-runner-capability-audit
+          path: docs/operations/workflow-runner-capability-audit.md
+          if-no-files-found: error
+          retention-days: 14

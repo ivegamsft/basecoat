@@ -35,6 +35,28 @@ while IFS= read -r file; do
     exit 1
   fi
 
+  if [[ "$(basename "$file")" == *.agent.md ]]; then
+    if ! sed -n '2,30p' "$file" | grep -qxF -- '---'; then
+      echo "Missing YAML frontmatter closing '---' within first 30 lines in $file" >&2
+      exit 1
+    fi
+
+    if ! grep -Eq '^## Inputs$' "$file"; then
+      echo "Missing required section '## Inputs' in $file" >&2
+      exit 1
+    fi
+
+    if ! grep -Eq '^## (Process|Workflow)$' "$file"; then
+      echo "Missing required section '## Process' or '## Workflow' in $file" >&2
+      exit 1
+    fi
+
+    if ! grep -Eiq '^##.*(output|report|results)' "$file"; then
+      echo "Missing required output/report/results section in $file" >&2
+      exit 1
+    fi
+  fi
+
   if [[ "$(basename "$file")" == "SKILL.md" ]]; then
     if ! sed -n '1,20p' "$file" | grep -qi '^name:'; then
       echo "Missing name in frontmatter for $file" >&2
