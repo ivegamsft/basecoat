@@ -1,8 +1,9 @@
 # Fleet Loop Adoption Scorecard
 
-This document records the findings of the BaseCoat fleet audit across four downstream
-consumer repositories. It exists so audit findings are reusable guidance for future
-rollouts rather than session-trapped history.
+This document records the findings of the BaseCoat fleet audit. `basecoat` serves as
+the baseline reference; `work-tracker`, `gh-devops-runners`, and `luxesite` are the
+downstream consumer repositories evaluated against it. It exists so audit findings are
+reusable guidance for future rollouts rather than session-trapped history.
 
 - Audit scope: `basecoat`, `work-tracker`, `gh-devops-runners`, `luxesite`
 - Tracking issue: [#1827](https://github.com/IBuySpy-Shared/basecoat/issues/1827)
@@ -37,7 +38,7 @@ opens.
 | Dimension | Policy | Implementation | Live Behavior |
 |---|---|---|---|
 | Reviewer-routing automation | Required | Installed: `reviewer-autoassign.yml`, `pr-flow-hygiene.yml` | Active; no open PRs with unrouted ready state detected |
-| Intake surface | Required (PR template + issue template) | Present; `.github/PULL_REQUEST_TEMPLATE.md` and `ISSUE_TEMPLATE/` exist | Compliant |
+| Intake surface | Required (PR template + issue template) | Present; `.github/PULL_REQUEST_TEMPLATE.md` and `.github/ISSUE_TEMPLATE/` exist | Compliant |
 | Label/priority normalization | Canonical taxonomy enforced by triage agent | Triage agent runs on open event | Recent labels normalized; legacy labels present in older closed issues |
 | Branch/merge governance | PR-only to `main`; branch protection enabled | Enforced via ruleset | Compliant; direct-to-main pushes blocked |
 | Cron loop activity | Expected: triage, compliance, sprint hygiene | Scheduled workflows active in `.github/workflows/` | Active; runs confirmed in Actions history |
@@ -186,7 +187,7 @@ A `### Deployment impact` section in the PR template causes reviewers to assess 
 before approving. This pattern reduces post-merge incidents without adding review process
 overhead.
 
-Reuse: copy the section into BaseCoat's packaged `PR_TEMPLATE.md` and document it in
+Reuse: copy the section into BaseCoat's packaged `.github/PULL_REQUEST_TEMPLATE.md` and document it in
 `docs/guides/contributing.md`.
 
 ### Admin-override audit trail (work-tracker)
