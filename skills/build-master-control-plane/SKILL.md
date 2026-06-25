@@ -1,11 +1,8 @@
 ---
 name: build-master-control-plane
+compatibility: [github-copilot-cli]
 description: "Use when defining or operating a build-master control plane that keeps merges flowing while containing CI breakage. USE FOR: lane-state policy, break-fix eligibility, retry/revert thresholds, and escalation rules. DO NOT USE FOR: direct code implementation, bypassing branch protection, or approving high-risk fixes without policy gates."
-compatibility:
-  - GHCP
-  - agent:build-master
-  - agent:merge-coordinator
-  - agent:ci-failure-escalation
+
 visibility: "internal"
 ---
 # Build Master Control Plane Skill

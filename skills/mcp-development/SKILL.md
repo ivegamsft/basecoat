@@ -1,8 +1,7 @@
 ---
 name: mcp-development
+compatibility: [github-copilot-cli]
 description: "Use when building or extending MCP servers, defining tool schemas, or choosing stdio, SSE, or Streamable HTTP transports. USE FOR: scaffold MCP server, define MCP tool contract, configure MCP transport, review MCP server security, integrate MCP server with client. DO NOT USE FOR: generic REST API design, non-MCP frontend styling."
-compatibility:
-  - GHCP
 ---
 # MCP Development Skill
 

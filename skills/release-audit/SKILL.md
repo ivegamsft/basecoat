@@ -1,8 +1,7 @@
 ---
 name: release-audit
+compatibility: [github-copilot-cli]
 description: "Use when reviewing release readiness, changelog quality, version bumps, tags, or publish completeness. USE FOR: audit a release candidate, verify semver and changelog entries, check tag and release note completeness, review rollback readiness. DO NOT USE FOR: cutting the release, planning sprint work, debugging product bugs, deployment troubleshooting."
-compatibility:
-  - GHCP
 ---
 # Release Audit Skill
 

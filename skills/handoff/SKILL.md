@@ -1,8 +1,7 @@
 ---
 name: handoff
+compatibility: [github-copilot-cli]
 description: "Use when ending a session or transferring work so another agent or future session can resume with preserved reasoning, exact files, commands, and blockers. USE FOR: create end-of-session handoff, transfer task between agents, summarize unfinished work with next steps, capture commands and validations run, package follow-up deployment context. DO NOT USE FOR: solving the task itself, long-term project planning, writing user-facing release notes."
-compatibility:
-  - GHCP
 ---
 # Handoff Skill
 

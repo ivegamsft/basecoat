@@ -176,6 +176,14 @@ foreach ($skillDir in $skillDirs) {
         }
 
         # Check 4: Compatibility taxonomy
+        $allowedCompatibility = @(
+            'copilot-chat',
+            'copilot-coding-agent',
+            'github-copilot-cli',
+            'vscode-chat',
+            'mcp',
+            'github-actions'
+        )
         $compat = Get-CompatibilityAnalysis -Frontmatter $frontmatter
         if ($compat.keyCount -gt 1) {
             $warnings.Add("duplicate compatibility keys found ($($compat.keyCount))")
@@ -183,13 +191,20 @@ foreach ($skillDir in $skillDirs) {
         if ($compat.tokens.Count -eq 0) {
             $warnings.Add("compatibility has no values")
         } else {
+            # Check for deprecated GHCP value
+            if ($compat.tokens -contains 'GHCP') {
+                $warnings.Add("GHCP is deprecated; use canonical value 'github-copilot-cli'")
+            }
+            # Validate against canonical values
             foreach ($token in $compat.tokens) {
-                if ($token -notmatch '^(GHCP|agent:[a-z0-9][a-z0-9-]*|skill:[a-z0-9][a-z0-9-]*)$') {
-                    $warnings.Add("invalid compatibility token: $token")
+                if ($allowedCompatibility -notcontains $token -and $token -ne 'GHCP') {
+                    $warnings.Add("invalid compatibility value: '$token' (allowed: $($allowedCompatibility -join ', '))")
                 }
             }
-            if ($compat.tokens -notcontains 'GHCP') {
-                $warnings.Add("compatibility should include GHCP")
+            # Verify at least one valid canonical value is present
+            $hasValidValue = $compat.tokens | Where-Object { $allowedCompatibility -contains $_ }
+            if (-not $hasValidValue) {
+                $warnings.Add("compatibility must include at least one canonical value")
             }
         }
 

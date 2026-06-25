@@ -1,10 +1,9 @@
 ---
 name: environment-bootstrap
-description: "Use when bootstrapping secure Azure delivery environments with OIDC federation, state storage, Key Vault, promotion workflows, and Fabric access automation. USE FOR: set up GitHub Actions OIDC to Azure, provision Terraform state storage, configure Key Vault for CI/CD secrets, design dev-to-prod environment promotion, grant Fabric workspace service principal access. DO NOT USE FOR: application feature coding, non-Azure local dev setup, Kubernetes app debugging."
 compatibility: [github-copilot-cli]
+description: "Use when bootstrapping secure Azure delivery environments with OIDC federation, state storage, Key Vault, promotion workflows, and Fabric access automation. USE FOR: set up GitHub Actions OIDC to Azure, provision Terraform state storage, configure Key Vault for CI/CD secrets, design dev-to-prod environment promotion, grant Fabric workspace service principal access. DO NOT USE FOR: application feature coding, non-Azure local dev setup, Kubernetes app debugging."
+
 context: fork
-compatibility:
-  - GHCP
 ---
 # Environment Bootstrap Skill
 

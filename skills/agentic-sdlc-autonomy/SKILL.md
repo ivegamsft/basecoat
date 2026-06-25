@@ -1,13 +1,8 @@
 ---
 name: agentic-sdlc-autonomy
+compatibility: [github-copilot-cli]
 description: "Use when asked to audit, measure, implement, or operate rules-based human-in-the-loop autonomy for agent-operated repositories. USE FOR: SDLC governance, PR risk classification (A0-A5), merge/queue/deploy policy checks, and policy-versus-settings drift. DO NOT USE FOR: direct deployment, production DB migrations, infrastructure apply, secrets rotation, or branch/environment protection changes without explicit human authorization."
-compatibility:
-  - GHCP
-  - agent:agentic-sdlc-autonomy
-  - skill:ci-audit
-  - skill:flow-audit
-  - skill:flow-admission-control
-  - skill:human-in-the-loop
+
 metadata:
   category: sdlc-governance
   domain: sdlc-governance

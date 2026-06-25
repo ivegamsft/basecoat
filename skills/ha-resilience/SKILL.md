@@ -1,9 +1,8 @@
 ---
 name: ha-resilience
+compatibility: [github-copilot-cli]
 title: High-Availability & Resilience Design Patterns
 description: "Use when designing highly available systems with retries, circuit breakers, failover, chaos testing, and SRE guardrails for recovery objectives. USE FOR: design multi-region failover, add retry and jitter strategy, introduce circuit breaker for flaky dependency, plan chaos testing against SLOs, define health probes and recovery behavior. DO NOT USE FOR: single-host app setup, feature UI design, cost-only optimization reviews."
-compatibility:
-  - GHCP
 ---
 # HA & Resilience Skill
 

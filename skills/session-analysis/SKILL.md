@@ -1,8 +1,8 @@
 ---
 name: session-analysis
+compatibility: [github-copilot-cli]
 description: "Use when analyzing Copilot CLI session behavior and efficiency from session telemetry. USE FOR: rank top tools by frequency, summarize assistant message volume and token usage, detect model changes within a session, compute average turns and turn distribution, produce optimization actions paired with session-optimization and copilot-usage-analytics. DO NOT USE FOR: feature implementation, infrastructure deployment, non-session product analytics."
-compatibility:
-  - GHCP
+
 category: workflow
 visibility: public
 metadata:

@@ -1,8 +1,7 @@
 ---
 name: database-migration
+compatibility: [github-copilot-cli]
 description: "Zero-downtime database migration patterns, blue-green cutovers, and rollback strategy guidance for production data changes. USE FOR: plan expand-contract schema migration, design blue-green database cutover, write Flyway versioned migration and undo scripts, prepare rollback plan for production schema change, validate zero-downtime database release process. DO NOT USE FOR: ad hoc query tuning only, application feature design, non-production toy database setup."
-compatibility:
-  - GHCP
 ---
 # Database Migration
 

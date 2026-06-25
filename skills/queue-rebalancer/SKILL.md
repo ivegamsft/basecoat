@@ -1,8 +1,8 @@
 ---
 name: queue-rebalancer
+compatibility: [github-copilot-cli]
 description: "Use when active blockers are buried in the queue and work must be reshuffled by dependency to unblock builds quickly. USE FOR: blocker-first ordering, focused unblock group formation, cherry-picking minimal fixes, and post-unblock return to normal order. DO NOT USE FOR: proposing standalone feature roadmaps, broad redesign work, or promoting feature changes without tests and check-in."
-compatibility:
-  - GHCP
+
 category: workflow
 metadata:
   category: workflow

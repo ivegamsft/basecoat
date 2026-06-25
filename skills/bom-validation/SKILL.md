@@ -1,10 +1,9 @@
 ---
 name: bom-validation
-description: "Validates Workcell BOMs against plant registry and CAF naming rules. USE FOR: validating BOM completeness before S2, detecting circular dependencies, enforcing CAF naming compliance, checking registry references before handoff. DO NOT USE FOR: approving incomplete BOMs, inferring missing resources, writing application code, running release/deployment tasks."
 compatibility: [github-copilot-cli]
+description: "Validates Workcell BOMs against plant registry and CAF naming rules. USE FOR: validating BOM completeness before S2, detecting circular dependencies, enforcing CAF naming compliance, checking registry references before handoff. DO NOT USE FOR: approving incomplete BOMs, inferring missing resources, writing application code, running release/deployment tasks."
+
 visibility: "internal"
-compatibility:
-  - GHCP
 ---
 # BOM Validation Skill
 

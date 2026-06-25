@@ -1,9 +1,8 @@
 ---
 name: production-readiness
+compatibility: [github-copilot-cli]
 title: Production Readiness Review & Release Management
 description: "Use when deciding whether a service is safe to launch, scale, or recover in production. USE FOR: run production readiness review, check rollback and canary plan, assess disaster recovery readiness, review incident response runbooks, evaluate release go-live checklist. DO NOT USE FOR: day-to-day bug fixing, early product ideation without deployment scope."
-compatibility:
-  - GHCP
 ---
 # Production Readiness Skill
 

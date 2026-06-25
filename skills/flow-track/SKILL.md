@@ -1,10 +1,8 @@
 ---
 name: flow-track
+compatibility: [github-copilot-cli]
 description: "Use when tracking PR/merge/CI flow metrics over time and generating metric-backed corrective suggestions. USE FOR: trend scorecards, regression alerts, threshold monitoring, and action recommendations tied to metrics. DO NOT USE FOR: one-off static audits without history, ad hoc coding work, or replacing SRE incident procedures."
-compatibility:
-  - GHCP
-  - agent:flow-tracker
-  - agent:flow-auditor
+
 metadata:
   category: flow-governance
   domain: flow-governance
