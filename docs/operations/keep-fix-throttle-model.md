@@ -34,6 +34,14 @@ The weekly scorecard and trend readout pipeline is implemented with:
 - Runbook: `docs/operations/keep-fix-throttle-weekly-scorecard.md`
 - Spec: `docs/spec/keep-fix-throttle-weekly-scorecard.spec.md`
 
+### Workstream 3 delivery path
+
+The tooling routing matrix baseline for execution modes is implemented with:
+
+- PRD: `docs/design/keep-fix-throttle-tooling-routing-matrix-prd.md`
+- Runbook: `docs/operations/keep-fix-throttle-tooling-routing-matrix.md`
+- Spec: `docs/spec/keep-fix-throttle-tooling-routing-matrix.spec.md`
+
 ### Baseline Snapshot (captured 2026-06-25)
 
 The baseline below is captured before workstream rollout and used as the experiment start point.
