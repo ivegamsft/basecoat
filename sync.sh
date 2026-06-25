@@ -24,6 +24,89 @@ cleanup() {
 }
 trap cleanup EXIT
 
+validate_workflow_directory() {
+  local workflows_dir="$1"
+  [[ -d "$workflows_dir" ]] || return 0
+
+  local failures=()
+  local workflow_file=""
+  local block_scalar_pattern='^[[:space:]]*(run|script):[[:space:]]*[|>][-+]?[[:space:]]*($|#)'
+
+  while IFS= read -r workflow_file; do
+    [[ -n "$workflow_file" ]] || continue
+
+    if command -v ruby >/dev/null 2>&1; then
+      if ! ruby -e "require 'yaml'; YAML.safe_load(File.read(ARGV[0]), permitted_classes: [], aliases: true)" "$workflow_file" >/dev/null 2>&1; then
+        failures+=("$(basename "$workflow_file"): malformed YAML")
+        continue
+      fi
+    fi
+
+    local line_number=0
+    local in_literal_block=0
+    local literal_block_indent=-1
+    local line=""
+    while IFS= read -r line || [[ -n "$line" ]]; do
+      ((line_number++))
+
+      local indent=0
+      if [[ "$line" =~ ^([[:space:]]*) ]]; then
+        indent=${#BASH_REMATCH[1]}
+      fi
+
+      local trimmed="$line"
+      trimmed="${trimmed#"${trimmed%%[![:space:]]*}"}"
+      trimmed="${trimmed%"${trimmed##*[![:space:]]}"}"
+
+      if (( in_literal_block )); then
+        if [[ -z "$trimmed" || $indent -gt $literal_block_indent ]]; then
+          continue
+        fi
+        in_literal_block=0
+        literal_block_indent=-1
+      fi
+
+      if [[ "$line" =~ $block_scalar_pattern ]]; then
+        in_literal_block=1
+        literal_block_indent=$indent
+        continue
+      fi
+
+      if [[ "$line" =~ ^[[:space:]]*uses:[[:space:]]*(.+)$ ]]; then
+        local uses_ref="${BASH_REMATCH[1]}"
+        uses_ref="${uses_ref%%#*}"
+        uses_ref="${uses_ref#"${uses_ref%%[![:space:]]*}"}"
+        uses_ref="${uses_ref%"${uses_ref##*[![:space:]]}"}"
+
+        if [[ "${uses_ref:0:1}" == "\"" || "${uses_ref:0:1}" == "'" ]]; then
+          local quote_char="${uses_ref:0:1}"
+          uses_ref="${uses_ref:1}"
+          if [[ "${uses_ref: -1}" == "$quote_char" ]]; then
+            uses_ref="${uses_ref:0:${#uses_ref}-1}"
+          fi
+        fi
+
+        if [[ "$uses_ref" == ./.github/base-coat/workflows/* ]]; then
+          failures+=("$(basename "$workflow_file"):$line_number invalid reusable workflow reference '$uses_ref' (must use ./.github/workflows/<file>.yml for local reusable workflows)")
+          continue
+        fi
+
+        if [[ ( "$uses_ref" == ./*.yml || "$uses_ref" == ./*.yaml ) && "$uses_ref" != ./.github/workflows/* ]]; then
+          failures+=("$(basename "$workflow_file"):$line_number invalid local workflow path '$uses_ref' (local reusable workflows must be under ./.github/workflows/)")
+        fi
+      fi
+    done < "$workflow_file"
+  done < <(find "$workflows_dir" -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) | sort)
+
+  if (( ${#failures[@]} > 0 )); then
+    echo "Workflow validation failed before sync. Invalid workflow definitions detected:" >&2
+    for failure in "${failures[@]}"; do
+      echo " - $failure" >&2
+    done
+    exit 1
+  fi
+}
+
 echo "Cloning $SOURCE_REPO#$SOURCE_REF"
 if ! git clone --depth 1 --branch "$SOURCE_REF" "$SOURCE_REPO" "$TMP_DIR/source" >/dev/null 2>&1; then
   # In CI for private GitHub repos, anonymous clone can fail. Retry with an auth
@@ -53,6 +136,7 @@ done
 
 # Copy workflows from .github/base-coat/workflows/ in source
 if [[ -d "$TMP_DIR/source/.github/base-coat/workflows" ]]; then
+  validate_workflow_directory "$TMP_DIR/source/.github/base-coat/workflows"
   rm -rf "$REPO_ROOT/$TARGET_DIR/workflows"
   cp -R "$TMP_DIR/source/.github/base-coat/workflows" "$REPO_ROOT/$TARGET_DIR/workflows"
 fi

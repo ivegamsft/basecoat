@@ -125,6 +125,86 @@ function Assert-MinimalDocsScope {
     }
 }
 
+function Assert-SafeWorkflowDirectory {
+    param(
+        [string]$WorkflowsPath
+    )
+
+    if (-not (Test-Path $WorkflowsPath)) {
+        return
+    }
+
+    $workflowFiles = Get-ChildItem -Path $WorkflowsPath -File | Where-Object { $_.Extension -in @('.yml', '.yaml') } | Sort-Object -Property Name
+    if ($workflowFiles.Count -eq 0) {
+        return
+    }
+
+    $supportsYamlParsing = $null -ne (Get-Command ConvertFrom-Yaml -ErrorAction SilentlyContinue)
+    $issues = [System.Collections.Generic.List[string]]::new()
+
+    foreach ($workflowFile in $workflowFiles) {
+        $content = Get-Content -Path $workflowFile.FullName -Raw
+
+        if ($supportsYamlParsing) {
+            try {
+                $null = $content | ConvertFrom-Yaml -ErrorAction Stop
+            }
+            catch {
+                $issues.Add("$($workflowFile.Name): malformed YAML ($($_.Exception.Message))")
+                continue
+            }
+        }
+
+        $lineNumber = 0
+        $insideLiteralBlock = $false
+        $literalBlockIndent = -1
+        foreach ($line in ($content -split "`r?`n")) {
+            $lineNumber++
+
+            if ($line -match '^(\s*)') {
+                $lineIndent = $Matches[1].Length
+            } else {
+                $lineIndent = 0
+            }
+            $trimmedLine = $line.Trim()
+
+            if ($insideLiteralBlock) {
+                if ($trimmedLine.Length -eq 0 -or $lineIndent -gt $literalBlockIndent) {
+                    continue
+                }
+
+                $insideLiteralBlock = $false
+                $literalBlockIndent = -1
+            }
+
+            if ($line -match '^\s*(run|script):\s*[|>][-+]?\s*(#.*)?$') {
+                $insideLiteralBlock = $true
+                $literalBlockIndent = $lineIndent
+                continue
+            }
+
+            if ($line -notmatch '^\s*uses:\s*["'']?(?<uses>[^\s"''#]+)') {
+                continue
+            }
+
+            $usesRef = $Matches['uses']
+            if ($usesRef -like './.github/base-coat/workflows/*') {
+                $issues.Add("$($workflowFile.Name):$lineNumber invalid reusable workflow reference '$usesRef' (must use ./.github/workflows/<file>.yml for local reusable workflows)")
+                continue
+            }
+
+            if (($usesRef -like './*.yml' -or $usesRef -like './*.yaml') -and $usesRef -notlike './.github/workflows/*') {
+                $issues.Add("$($workflowFile.Name):$lineNumber invalid local workflow path '$usesRef' (local reusable workflows must be under ./.github/workflows/)")
+            }
+        }
+    }
+
+    if ($issues.Count -gt 0) {
+        $details = ($issues | ForEach-Object { " - $_" }) -join "`n"
+        throw "Workflow validation failed before sync. Invalid workflow definitions detected:`n$details"
+    }
+}
+
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString())
 $sourcePath = Join-Path $tempRoot 'source'
 
@@ -150,6 +230,7 @@ try {
     $workflowsSource = Join-Path $sourcePath '.github' 'base-coat' 'workflows'
     $workflowsDest = Join-Path $fullTargetDir 'workflows'
     if (Test-Path $workflowsSource) {
+        Assert-SafeWorkflowDirectory -WorkflowsPath $workflowsSource
         if (Test-Path $workflowsDest) {
             Remove-Item -Path $workflowsDest -Recurse -Force
         }

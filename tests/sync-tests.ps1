@@ -476,6 +476,81 @@ finally {
 }
 
 # ============================================================================
+# Test 9: Sync blocks invalid workflow definitions before propagation (#2040)
+# ============================================================================
+Write-Host "`nTest 9: Sync blocks invalid workflow definitions before propagation (#2040)" -ForegroundColor Yellow
+
+$consumer = $null
+$sourceFixture = $null
+try {
+    $consumer = New-ConsumerRepo -WithGitHubDir
+    $sourceFixture = Join-Path ([System.IO.Path]::GetTempPath()) ("basecoat-sync-source-" + [System.Guid]::NewGuid().ToString())
+    $invalidRef = "sync-invalid-workflow-" + [System.Guid]::NewGuid().ToString().Substring(0, 8)
+
+    git clone --no-hardlinks $repoRoot $sourceFixture | Out-Null
+    git -C $sourceFixture checkout -B $invalidRef HEAD | Out-Null
+    git -C $sourceFixture config user.name 'basecoat-test' | Out-Null
+    git -C $sourceFixture config user.email 'basecoat-test@example.com' | Out-Null
+
+    $workflowDir = Join-Path $sourceFixture '.github/base-coat/workflows'
+    New-Item -ItemType Directory -Force -Path $workflowDir | Out-Null
+
+    $invalidWorkflow = Join-Path $workflowDir 'invalid-local-uses.yml'
+    @'
+name: Invalid Local Uses
+on:
+  workflow_dispatch:
+jobs:
+  bad:
+    uses: ./.github/base-coat/workflows/check-version.yml
+'@ | Set-Content -Path $invalidWorkflow -Encoding UTF8
+
+    git -C $sourceFixture add .github/base-coat/workflows/invalid-local-uses.yml | Out-Null
+    git -C $sourceFixture commit -m 'test(sync): add invalid workflow fixture' | Out-Null
+
+    Push-Location $consumer
+    try {
+        $env:BASECOAT_REPO = "file://$sourceFixture"
+        $env:BASECOAT_REF = $invalidRef
+        $output = & pwsh -NoProfile -File (Join-Path $repoRoot 'sync.ps1') 2>&1 | Out-String
+        $exitCode = $LASTEXITCODE
+    }
+    finally {
+        Remove-Item Env:\BASECOAT_REPO -ErrorAction SilentlyContinue
+        Remove-Item Env:\BASECOAT_REF -ErrorAction SilentlyContinue
+        Pop-Location
+    }
+
+    $testCount++
+    if ($exitCode -eq 0) {
+        throw 'Sync test failed: sync.ps1 should fail when source workflows contain invalid reusable workflow paths'
+    }
+
+    $testCount++
+    if ($output -notmatch 'Workflow validation failed before sync') {
+        throw "Sync test failed: expected pre-sync validation failure message, got: $output"
+    }
+
+    $testCount++
+    if ($output -notmatch 'invalid-local-uses\.yml') {
+        throw "Sync test failed: expected invalid workflow file to be reported, got: $output"
+    }
+
+    Write-Host '  Passed: invalid workflow definitions are rejected before sync copy' -ForegroundColor Green
+}
+catch {
+    $failures += $_.Exception.Message
+}
+finally {
+    if ($consumer -and (Test-Path $consumer)) {
+        Remove-Item -Path $consumer -Recurse -Force
+    }
+    if ($sourceFixture -and (Test-Path $sourceFixture)) {
+        Remove-Item -Path $sourceFixture -Recurse -Force
+    }
+}
+
+# ============================================================================
 # Summary
 # ============================================================================
 Write-Host "`n================================================" -ForegroundColor Cyan
