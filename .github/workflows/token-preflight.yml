@@ -99,16 +99,36 @@ jobs:
           ) || PUSH_ACCESS="false"
 
           if [[ "${PUSH_ACCESS}" != "true" ]]; then
+            ADMIN_VAL=$(python3 -c "import json; d=json.load(open('repo.json')); print(d.get('permissions',{}).get('admin','false'))" 2>/dev/null || echo "false")
             PUSH_VAL=$(python3 -c "import json; d=json.load(open('repo.json')); print(d.get('permissions',{}).get('push','false'))" 2>/dev/null || echo "false")
-            echo "::error title=Token lacks push access::PRODUCTION_REPO_TOKEN cannot push to ivegamsft/basecoat (permissions.push=${PUSH_VAL})."
-            echo "::error::The PAT must be created by the ivegamsft account owner, not by an IBuySpy-Shared org member."
-            echo "::error::Steps to fix:"
-            echo "::error::  1. Sign in to GitHub as ivegamsft"
-            echo "::error::  2. Settings > Developer settings > Fine-grained personal access tokens"
-            echo "::error::  3. Generate new token: resource owner=ivegamsft, repo=ivegamsft/basecoat"
-            echo "::error::  4. Permissions: Contents R/W + Administration R/W + Workflows R/W"
-            echo "::error::  5. gh secret set PRODUCTION_REPO_TOKEN --repo IBuySpy-Shared/basecoat"
-            echo "::error::Reference: https://github.com/IBuySpy-Shared/basecoat/issues/575"
+            PULL_VAL=$(python3 -c "import json; d=json.load(open('repo.json')); print(d.get('permissions',{}).get('pull','false'))" 2>/dev/null || echo "false")
+            
+            echo "::error title=Token lacks push access::PRODUCTION_REPO_TOKEN cannot push to ivegamsft/basecoat."
+            echo "::error::Current permissions: push=${PUSH_VAL}, admin=${ADMIN_VAL}, pull=${PULL_VAL}"
+            echo "::error::"
+            echo "::error::Root Cause:"
+            echo "::error::The fine-grained PAT must be owned by the ivegamsft account, not IBuySpy-Shared org."
+            echo "::error::Fine-grained tokens are scoped to their resource owner — only ivegamsft can create one"
+            echo "::error::that has access to ivegamsft/basecoat."
+            echo "::error::"
+            echo "::error::Required Permissions (for the new token):"
+            echo "::error::  • Contents: Read and write"
+            echo "::error::  • Administration: Read and write"
+            echo "::error::  • Workflows: Read and write"
+            echo "::error::"
+            echo "::error::See detailed fix instructions at:"
+            echo "::error::  https://github.com/IBuySpy-Shared/basecoat/blob/main/docs/guides/PRODUCTION_TOKEN_SETUP.md"
+            echo "::error::"
+            echo "::error::Quick Fix:"
+            echo "::error::  1. Sign in as ivegamsft on github.com"
+            echo "::error::  2. Settings → Developer settings → Fine-grained tokens → Generate new token"
+            echo "::error::  3. Resource owner: ivegamsft, Repository: ivegamsft/basecoat"
+            echo "::error::  4. Permissions: Contents RW, Administration RW, Workflows RW"
+            echo "::error::  5. Copy token → gh secret set PRODUCTION_REPO_TOKEN --repo IBuySpy-Shared/basecoat"
+            echo "::error::  6. Re-run publish-to-production workflow"
+            echo "::error::"
+            echo "::error::Related: https://github.com/IBuySpy-Shared/basecoat/issues/575"
+            echo "::error::Issue: https://github.com/IBuySpy-Shared/basecoat/issues/1352"
             exit 1
           fi
 
