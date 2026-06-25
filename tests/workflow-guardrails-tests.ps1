@@ -726,10 +726,16 @@ else {
     $assetHealthWorkflow = Get-Content $assetHealthWorkflowPath -Raw
 
     $orphanGuardIndex = $assetHealthWorkflow.IndexOf('Orphaned nodes \((\d+)')
-    $matchesDereferenceIndex = $assetHealthWorkflow.IndexOf('$Matches[1]')
+    $regexMatchIndex = $assetHealthWorkflow.IndexOf('[regex]::Match($graphText')
+    $groupValueIndex = $assetHealthWorkflow.IndexOf('$orphanMatch.Groups[1].Value')
+    $legacyMatchesIndex = $assetHealthWorkflow.IndexOf('$Matches[1]')
 
-    if ($orphanGuardIndex -lt 0 -or $matchesDereferenceIndex -lt 0 -or $matchesDereferenceIndex -lt $orphanGuardIndex) {
-        $stabilizationGuardrailIssues += 'asset-health.yml (orphan count parsing is not regex-guarded before $Matches dereference)'
+    if ($orphanGuardIndex -lt 0 -or
+        $regexMatchIndex -lt 0 -or
+        $groupValueIndex -lt 0 -or
+        $groupValueIndex -lt $regexMatchIndex -or
+        $legacyMatchesIndex -ge 0) {
+        $stabilizationGuardrailIssues += 'asset-health.yml (orphan count parsing is not guarded via [regex]::Match before capture-group read)'
     }
 }
 
