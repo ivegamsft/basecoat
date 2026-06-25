@@ -47,7 +47,7 @@ validate_workflow_directory() {
     local literal_block_indent=-1
     local line=""
     while IFS= read -r line || [[ -n "$line" ]]; do
-      ((line_number++))
+      line_number=$((line_number + 1))
 
       local indent=0
       if [[ "$line" =~ ^([[:space:]]*) ]]; then
