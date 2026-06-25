@@ -231,6 +231,38 @@ foreach ($file in $files) {
         $errors++
     }
 
+    if ($file.Name -like '*.agent.md') {
+        $maxFrontmatterLine = [Math]::Min($lines.Count, 30)
+        $frontmatterClosed = $false
+        for ($i = 1; $i -lt $maxFrontmatterLine; $i++) {
+            if ($lines[$i] -eq '---') {
+                $frontmatterClosed = $true
+                break
+            }
+        }
+
+        if (-not $frontmatterClosed) {
+            Write-Host "ERROR: Missing YAML frontmatter closing '---' within first 30 lines in $($file.FullName)" -ForegroundColor Red
+            $errors++
+            continue
+        }
+
+        if ($content -notmatch '(?im)^##\s+Inputs\s*$') {
+            Write-Host "ERROR: Missing required section '## Inputs' in $($file.FullName)" -ForegroundColor Red
+            $errors++
+        }
+
+        if ($content -notmatch '(?im)^##\s+(Process|Workflow)\s*$') {
+            Write-Host "ERROR: Missing required section '## Process' or '## Workflow' in $($file.FullName)" -ForegroundColor Red
+            $errors++
+        }
+
+        if ($content -notmatch '(?im)^##.*\b(Output|Report|Results)\b') {
+            Write-Host "ERROR: Missing required output/report/results section in $($file.FullName)" -ForegroundColor Red
+            $errors++
+        }
+    }
+
     # Instructions require applyTo
     if ($file.Name -like '*.instructions.md' -and -not ($lines | Select-String -Pattern '^applyTo:' -Quiet)) {
         Write-Host "ERROR: $($file.Name) missing 'applyTo' in frontmatter" -ForegroundColor Red

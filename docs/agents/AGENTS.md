@@ -11,7 +11,7 @@ This file lists all available agents in the BaseCoat framework.
 - [VS Code Harness Benchmarks](./vs-code-harness-benchmarks.md)
 - [VS Code Agent Mode Tool Confirmation Policy](../reference/guardrails/tool-confirmation-policy.md)
 
-> **123 agents** available
+> **124 agents** available
 
 | Agent | Description |
 |---|---|
@@ -56,6 +56,7 @@ This file lists all available agents in the BaseCoat framework.
 | [Hardening Advisor](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-hardening-advisor.agent.md) | CIS Benchmarks and STIG hardening advisor for Dockerfiles, Kubernetes manifests, databases, and infrastructure configurations against security standards. USE FOR: harden Dockerfile against CIS benchmarks, audit Kubern... |
 | [identity-architect](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-identity-architect.agent.md) | Identity architecture agent for Azure RBAC design, managed identity configuration, Entra ID app registrations, conditional access policies, and workload identity federation. Use when designing identity and access mana... |
 | [incident-responder](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-incident-responder.agent.md) | Structured incident response and recovery agent for classifying incidents, guiding mitigation, coordinating communications, verifying recovery, and facilitating post-incident learning. USE FOR: classify and triage act... |
+| [incident-to-backlog-router](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-incident-to-backlog-router.agent.md) | Automates routing of incident signals into prioritized backlog or maintenance work items with required portfolio fields pre-populated and closure linkage tracked. USE FOR: create GitHub issues from incident metadata with Type/Priority/Risk/Guardrail State/SRE Impact pre-filled, route incidents to sprint or maintenance queue by severity policy, detect orphaned incidents with no remediation issue. |
 | [infrastructure-deploy](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-infrastructure-deploy.agent.md) | Orchestrates Azure infrastructure deployments using Bicep, handles resource group management, parameter validation, and rollback strategies. USE FOR: deploy Azure Bicep templates, manage resource group lifecycle, exec... |
 | [instruction-auditor](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-50-security-instruction-auditor.agent.md) | Detects missing instruction coverage for a repo — identifies tech stacks and workflow patterns present in the codebase that have no corresponding BaseCoat instruction file in the overlay. USE FOR: find uncovered tech ... |
 | [issue-triage](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-issue-triage.agent.md) | Use when triaging GitHub issues — classifying type, assigning priority (P0-P3), applying labels, detecting duplicates, tracking SLAs, and recommending sprint placement. |

@@ -16,6 +16,10 @@ on:
     - cron: "0 13 * * 1"
   workflow_dispatch:
     inputs:
+      pr_number:
+        description: "Optional PR number to evaluate immediately using the selected ref"
+        required: false
+        type: string
       wip_limit:
         description: "Max ready-for-review PRs before WIP warning"
         required: false
@@ -55,6 +59,7 @@ jobs:
       - name: Route PR readiness events and publish weekly outcomes
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         env:
+          PR_NUMBER_INPUT: ${{ inputs.pr_number || '' }}
           WIP_LIMIT: ${{ inputs.wip_limit || '20' }}
           DRAFT_DRIFT_DAYS: ${{ inputs.draft_drift_days || '14' }}
           READY_STALE_DAYS: ${{ inputs.ready_stale_days || '7' }}
@@ -85,6 +90,7 @@ jobs:
               return /^(wave:|sprint:|wave-|sprint-).+/.test(normalized) || normalized === 'wave/sprint';
             };
             const hasReleaseLabel = labels => normalizeLabels(labels).some(isReleaseLabel);
+            const isHotfixBranch = ref => /^hotfix\//i.test(String(ref || ''));
 
             const upsertBotComment = async ({ issueNumber, marker, body }) => {
               const comments = await github.paginate(github.rest.issues.listComments, {
@@ -171,12 +177,13 @@ jobs:
             const draftDriftDays = toInt(process.env.DRAFT_DRIFT_DAYS, 14);
             const readyStaleDays = toInt(process.env.READY_STALE_DAYS, 7);
             const maxItems = toInt(process.env.MAX_ITEMS, 200);
+            const targetedPrNumber = toInt(process.env.PR_NUMBER_INPUT, 0);
             const now = new Date();
 
-            if (context.eventName === 'pull_request_target') {
-              const prNumber = context.payload.pull_request?.number;
+            if (context.eventName === 'pull_request_target' || (context.eventName === 'workflow_dispatch' && targetedPrNumber > 0)) {
+              const prNumber = context.payload.pull_request?.number || targetedPrNumber;
               if (!prNumber) {
-                core.setFailed('pull_request_target event does not include pull_request.number.');
+                core.setFailed('Unable to resolve target pull request number from event payload or workflow_dispatch input.');
                 return;
               }
 
@@ -188,20 +195,36 @@ jobs:
 
               const labels = normalizeLabels(pr.labels || []);
               const assigneeCount = pr.assignees?.length || 0;
-              const reviewerCount = (pr.requested_reviewers?.length || 0) + (pr.requested_teams?.length || 0);
+              const requestedReviewerCount = (pr.requested_reviewers?.length || 0) + (pr.requested_teams?.length || 0);
+
+              // Also count submitted reviews (including bot reviews) so single-person repos
+              // and Copilot-reviewed PRs are not blocked for missing a requested reviewer.
+              const { data: submittedReviews } = await github.rest.pulls.listReviews({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+              const submittedReviewerCount = new Set(
+                submittedReviews
+                  .filter(r => r.state !== 'DISMISSED' && r.user?.login !== pr.user?.login)
+                  .map(r => r.user?.login)
+              ).size;
+              const reviewerCount = requestedReviewerCount + submittedReviewerCount;
+
               const ageDays = daysBetween(now, new Date(pr.created_at));
               const idleDays = daysBetween(now, new Date(pr.updated_at));
               const reasons = [];
+              const hotfixFastPath = !pr.draft && isHotfixBranch(pr.head?.ref);
 
               if (pr.draft) {
                 if (ageDays >= draftDriftDays) {
                   reasons.push(`Draft age is ${ageDays} days (threshold: ${draftDriftDays}).`);
                 }
               } else {
-                if (reviewerCount === 0) {
+                if (!hotfixFastPath && reviewerCount === 0) {
                   reasons.push('No requested reviewer or reviewer team is set.');
                 }
-                if (assigneeCount === 0) {
+                if (!hotfixFastPath && assigneeCount === 0) {
                   reasons.push('No assignee is set for ownership handoff.');
                 }
                 if (!hasReleaseLabel(labels)) {
@@ -247,6 +270,8 @@ jobs:
                     [{ data: 'Metric', header: true }, { data: 'Value', header: true }],
                     ['PR', `#${prNumber}`],
                     ['Mode', mode],
+                    ['Trigger', context.eventName === 'workflow_dispatch' ? 'workflow_dispatch' : (context.payload.action || 'update')],
+                    ['Hotfix fast path', hotfixFastPath ? 'Yes' : 'No'],
                     ['Reasons', String(reasons.length)],
                     ['Comment', commentAction],
                     ['Blocked label', blockedLabel]
@@ -258,7 +283,7 @@ jobs:
               await setBlockedLabel(prNumber, false);
               core.summary
                 .addHeading('PR readiness event routing result')
-                .addRaw(`PR #${prNumber} passed readiness checks for ${context.payload.action || 'update'}.\n`)
+                .addRaw(`PR #${prNumber} passed readiness checks for ${context.eventName === 'workflow_dispatch' ? 'workflow_dispatch' : (context.payload.action || 'update')}.\n`)
                 .write();
               return;
             }
@@ -290,6 +315,7 @@ jobs:
               const idleDays = daysBetween(now, updatedAt);
               const assigneeCount = pr.assignees?.length || 0;
               const reviewerCount = (pr.requested_reviewers?.length || 0) + (pr.requested_teams?.length || 0);
+              const hotfixFastPath = isHotfixBranch(pr.head?.ref);
               const detail = {
                 number: pr.number,
                 title: pr.title,
@@ -298,7 +324,8 @@ jobs:
                 idleDays,
                 assigneeCount,
                 reviewerCount,
-                draft: Boolean(pr.draft)
+                draft: Boolean(pr.draft),
+                hotfixFastPath
               };
 
               if (detail.draft) {
@@ -313,10 +340,10 @@ jobs:
               if (idleDays >= readyStaleDays) {
                 readyStale.push(detail);
               }
-              if (assigneeCount === 0) {
+              if (!hotfixFastPath && assigneeCount === 0) {
                 readyNoOwner.push(detail);
               }
-              if (reviewerCount === 0) {
+              if (!hotfixFastPath && reviewerCount === 0) {
                 readyNoReviewer.push(detail);
               }
             }

@@ -22,7 +22,7 @@ This document describes the implementation of environment protection and product
 
 ### Environment Protection (prod)
 
-Configuration file: `.github/environment-protection-prod.json`
+Configuration file: `.github/environment-protection-production.json`
 
 **Enforced rules:**
 
@@ -56,7 +56,7 @@ gh api \
 # Currently no direct API for setting approval requirement; use UI
 ```
 
-**Status:** Template documented in `.github/environment-protection-prod.json` for reference and audit trail.
+**Status:** Template documented in `.github/environment-protection-production.json` for reference and audit trail.
 
 ### Staging Environment (optional)
 
@@ -109,7 +109,7 @@ The `.github/workflows/enforce-protection.yml` workflow:
 
 ## Rollout Checklist
 
-- [x] Create environment protection template (`.github/environment-protection-prod.json`)
+- [x] Create environment protection template (`.github/environment-protection-production.json`)
 - [x] Create verification workflow (`.github/workflows/enforce-protection.yml`)
 - [x] Document implementation (this file)
 - [ ] Configure prod environment protection via UI (requires Settings access)

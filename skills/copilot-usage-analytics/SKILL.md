@@ -24,3 +24,7 @@ patterns, and document which GitHub Copilot usage APIs exist.
 | `templates/model-routing-recommendation-template.md` | Recommendations for right-sizing model selection per task type |
 | `templates/api-landscape.md` | Reference map of GitHub Copilot usage APIs — what exists, what is missing, and workarounds |
 | `templates/usage-report.md` | Automated-style usage report with Handlebars placeholders for tooling integration |
+
+## Pairing
+
+Pair with `session-analysis` when a user asks for session metrics (top tools, assistant message volume, model changes, average turns). Use this skill to translate those findings into cost estimates, expensive-dispatch ranking, and routing ROI.

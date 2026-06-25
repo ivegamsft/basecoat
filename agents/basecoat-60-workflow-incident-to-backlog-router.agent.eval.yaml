@@ -1,0 +1,31 @@
+name: 'basecoat-60-workflow-incident-to-backlog-router-routing'
+description: 'Routing evaluation - validates trigger activation for the incident-to-backlog-router agent.'
+skill: 'agents/basecoat-60-workflow-incident-to-backlog-router.agent.md'
+scenarios:
+  - id: 'pos-1'
+    input: 'Use the incident-to-backlog-router agent to handle its documented responsibilities.'
+    expect_activation: true
+  - id: 'pos-2'
+    input: 'Please route this task to the incident-to-backlog-router agent.'
+    expect_activation: true
+  - id: 'pos-3'
+    input: 'A SEV2 incident just resolved. Create a remediation issue with the required portfolio fields and route it to the current sprint.'
+    expect_activation: true
+  - id: 'pos-4'
+    input: 'Check for orphaned incidents — any open incident issues that have no linked remediation issue.'
+    expect_activation: true
+  - id: 'pos-5'
+    input: 'Ingest this PagerDuty alert and create a backlog item with Type, Priority, Risk, Guardrail State, and SRE Impact populated.'
+    expect_activation: true
+  - id: 'neg-1'
+    input: 'Write a haiku about programming.'
+    expect_activation: false
+  - id: 'neg-2'
+    input: 'Give me a recipe for chocolate chip cookies.'
+    expect_activation: false
+  - id: 'neg-3'
+    input: 'Help me triage the open issues in this repo and apply correct labels.'
+    expect_activation: false
+  - id: 'neg-4'
+    input: 'We have an active production outage right now — walk me through mitigation steps.'
+    expect_activation: false

@@ -17,6 +17,7 @@ Apply this runbook when:
 | Environment policy exists in docs | Governance audit + enforcement workflow | Per PR + weekly |
 | Production manual approvals configured | GitHub environment API check (`production`, fallback `prod`) | Per PR + weekly |
 | Production branch restrictions configured | GitHub environment API check (`production`, fallback `prod`) | Per PR + weekly |
+| GitHub Pages branch restrictions configured | GitHub environment API check (`github-pages`) | Per docs workflow PR + weekly |
 | Deployment workflows declare environments | Workflow YAML static checks | Per PR + weekly |
 | Audit trail availability | Environment deployment history review | Per release and incident |
 
@@ -27,7 +28,8 @@ Apply this runbook when:
 3. Confirm the resolved production environment deployment branch policy is enabled.
 4. Confirm deployment workflows use `environment:` for deployment jobs.
 5. Confirm production-targeting jobs resolve to `production` (or legacy `prod`) and consume secrets/vars from protected scope.
-6. Capture any exception with issue reference before merge.
+6. If `docs.yml` changed, confirm the `github-pages` environment still resolves to protected branches or a selected-branch list that includes `main`.
+7. Capture any exception with issue reference before merge.
 
 ## GitHub Pages environment requirement
 

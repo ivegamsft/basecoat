@@ -9,6 +9,7 @@ This baseline defines required protection controls for all deployment environmen
 | `dev` | Early validation and integration | Optional | Any branch for workflow-dispatch testing |
 | `staging` | Pre-production validation | Optional (recommended for regulated repos) | `main` and release/hotfix branches only |
 | `production` (`prod` alias) | Production-facing deployments | Required manual approval | Protected branches only (`main`, `release/*`, `hotfix/*`) |
+| `github-pages` | Docs site publishing via `docs.yml` | None | Protected branches only with `main` protected, or selected branches including `main` |
 
 ## Mandatory production protections
 

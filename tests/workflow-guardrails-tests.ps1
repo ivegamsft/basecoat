@@ -479,8 +479,37 @@ else {
     $guardrailFailures += 'agent-merge-required-status'
 }
 
-# Test 15: Required-check workflows must support merge queue and prd-spec-gate semantics
-Write-Host '  Test 15: Validate required-check workflows and prd-spec-gate semantics...'
+# Test 15: Agent merge changelog generation must stay structured for policy parsing
+Write-Host '  Test 15: Validate agent-merge structured changelog generation...'
+$agentMergeChangelogChecks = @(
+    '(?m)^\s+- name:\s+Generate frontmatter changelog\s*$',
+    '# Agent Merge Changelog',
+    '## Frontmatter changes',
+    'git diff --unified=0 "\$\{RANGE\}" -- agents skills',
+    'name:\s*agent-merge-changelog',
+    'path:\s*agent-merge-changelog\.md'
+)
+$agentMergeChangelogIssues = @()
+
+foreach ($requiredPattern in $agentMergeChangelogChecks) {
+    if ($agentMergeWorkflow -notmatch $requiredPattern) {
+        $agentMergeChangelogIssues += $requiredPattern
+    }
+}
+
+if ($agentMergeChangelogIssues.Count -eq 0) {
+    Write-Host '    PASS Agent merge workflow emits structured changelog artifact'
+}
+else {
+    Write-Host '    FAIL agent-merge.yml is missing structured changelog requirements:' -ForegroundColor Red
+    foreach ($issue in $agentMergeChangelogIssues) {
+        Write-Host "      - missing pattern: $issue" -ForegroundColor Red
+    }
+    $guardrailFailures += 'agent-merge-structured-changelog'
+}
+
+# Test 16: Required-check workflows must support merge queue and prd-spec-gate semantics
+Write-Host '  Test 16: Validate required-check workflows and prd-spec-gate semantics...'
 $mergeQueueWorkflowRequirements = @(
     '.github/workflows/validate-basecoat.yml',
     '.github/workflows/prd-spec-gate.yml'
@@ -579,8 +608,8 @@ else {
     $guardrailFailures += 'prd-spec-gate-contract'
 }
 
-# Test 16: Production workflows must route through the protected production environment
-Write-Host '  Test 16: Validate production environment approval gates...'
+# Test 17: Production workflows must route through the protected production environment
+Write-Host '  Test 17: Validate production environment approval gates...'
 $productionEnvironmentRules = @(
     @{
         file = 'publish-to-production.yml'
@@ -626,8 +655,8 @@ else {
     $guardrailFailures += 'production-environment-gate'
 }
 
-# Test 17: CI stabilization regressions for Sprint 36 workflows
-Write-Host '  Test 17: Validate Sprint 36 CI stabilization workflow safeguards...'
+# Test 18: CI stabilization regressions for Sprint 36 workflows
+Write-Host '  Test 18: Validate Sprint 36 CI stabilization workflow safeguards...'
 $stabilizationGuardrailIssues = @()
 
 $auditEnvironmentPath = Join-Path $workflowDir 'audit-environment-drift.yml'
@@ -637,13 +666,36 @@ if (-not (Test-Path $auditEnvironmentPath)) {
 else {
     $auditEnvironmentWorkflow = Get-Content $auditEnvironmentPath -Raw
 
-    if ($auditEnvironmentWorkflow -match 'npx\s+--yes\s+@basecoat/environment-audit-drift') {
+    if ($auditEnvironmentWorkflow -match 'npx\s+(--yes\s+)?@basecoat/environment-audit-drift') {
         $stabilizationGuardrailIssues += 'audit-environment-drift.yml (still depends on unpublished npm package via npx)'
     }
 
     if ($auditEnvironmentWorkflow -notmatch 'npm ci --prefix skills/environment-audit-drift' -or
         $auditEnvironmentWorkflow -notmatch 'node skills/environment-audit-drift/dist/cli\.js') {
         $stabilizationGuardrailIssues += 'audit-environment-drift.yml (missing local CLI install/build execution path)'
+    }
+
+    if ($auditEnvironmentWorkflow -notmatch 'Do not use npm registry fallback for @basecoat/environment-audit-drift') {
+        $stabilizationGuardrailIssues += 'audit-environment-drift.yml (missing explicit npm-registry fallback guardrail for local CLI source)'
+    }
+}
+
+$auditTemplatePath = 'skills/environment-audit-drift/templates/audit-environment-drift.yml'
+if (-not (Test-Path $auditTemplatePath)) {
+    $stabilizationGuardrailIssues += 'skills/environment-audit-drift/templates/audit-environment-drift.yml (missing file)'
+}
+else {
+    $auditTemplateWorkflow = Get-Content $auditTemplatePath -Raw
+    $templateLines = $auditTemplateWorkflow -split "`n"
+    $templateLineNum = 0
+    foreach ($templateLine in $templateLines) {
+        $templateLineNum++
+        if ($templateLine -match 'uses:\s*(.+)') {
+            $templateUses = $matches[1].Trim()
+            if ($templateUses -notmatch '@[a-f0-9]{40}$') {
+                $stabilizationGuardrailIssues += "skills/environment-audit-drift/templates/audit-environment-drift.yml:$templateLineNum (action reference must be pinned to a full-length SHA: $templateUses)"
+            }
+        }
     }
 }
 
@@ -660,6 +712,14 @@ else {
         $dependencyGraphWorkflow -notmatch 'Add-Content -Path \$env:GITHUB_OUTPUT -Value "branch_name="') {
         $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (missing guarded branch output assignments to GITHUB_OUTPUT)'
     }
+
+    if ($dependencyGraphWorkflow -match '"- Source workflow: `\.github/workflows/dependency-graph-pages\.yml`"') {
+        $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (uses markdown backticks in a PowerShell double-quoted string, which can escape the terminator and break parsing)'
+    }
+
+    if ($dependencyGraphWorkflow -notmatch '''- Source workflow: \.github/workflows/dependency-graph-pages\.yml''') {
+        $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (missing parser-safe source workflow metadata line in dependency graph report content)'
+    }
 }
 
 $assetHealthWorkflowPath = Join-Path $workflowDir 'asset-health.yml'
@@ -670,10 +730,16 @@ else {
     $assetHealthWorkflow = Get-Content $assetHealthWorkflowPath -Raw
 
     $orphanGuardIndex = $assetHealthWorkflow.IndexOf('Orphaned nodes \((\d+)')
-    $matchesDereferenceIndex = $assetHealthWorkflow.IndexOf('$Matches[1]')
+    $regexMatchIndex = $assetHealthWorkflow.IndexOf('[regex]::Match($graphText')
+    $groupValueIndex = $assetHealthWorkflow.IndexOf('$orphanMatch.Groups[1].Value')
+    $legacyMatchesIndex = $assetHealthWorkflow.IndexOf('$Matches[1]')
 
-    if ($orphanGuardIndex -lt 0 -or $matchesDereferenceIndex -lt 0 -or $matchesDereferenceIndex -lt $orphanGuardIndex) {
-        $stabilizationGuardrailIssues += 'asset-health.yml (orphan count parsing is not regex-guarded before $Matches dereference)'
+    if ($orphanGuardIndex -lt 0 -or
+        $regexMatchIndex -lt 0 -or
+        $groupValueIndex -lt 0 -or
+        $groupValueIndex -lt $regexMatchIndex -or
+        $legacyMatchesIndex -ge 0) {
+        $stabilizationGuardrailIssues += 'asset-health.yml (orphan count parsing is not guarded via [regex]::Match before capture-group read)'
     }
 }
 
@@ -698,8 +764,8 @@ else {
     $guardrailFailures += 'sprint-36-ci-stabilization'
 }
 
-# Test 18: Runner capability audit must classify every workflow job
-Write-Host '  Test 18: Validate runner capability classification coverage...'
+# Test 19: Runner capability audit must classify every workflow job
+Write-Host '  Test 19: Validate runner capability classification coverage...'
 $runnerCapabilityIssues = @()
 $runnerAuditScriptPath = Join-Path $repoRoot 'scripts\audit-workflow-runner-capabilities.ps1'
 $runnerClassPolicyPath = Join-Path $repoRoot '.github\workflow-runner-capability-classes.json'

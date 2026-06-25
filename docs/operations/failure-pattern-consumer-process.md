@@ -69,9 +69,25 @@ Define a reusable, evidence-first process for consumer repositories, based on th
 
 A process run is complete only when all four gates pass and all required artifacts are present with evidence links.
 
+## #2047 Outcome Mapping (Smallest Viable Slice)
+
+When this process is used to execute workstream 2
+([#2047](https://github.com/IBuySpy-Shared/basecoat/issues/2047)), treat the
+following as required completion mapping:
+
+| Issue #2047 outcome | Process artifact expectation |
+|---|---|
+| Top 3 recurring failure modes are triaged with owner + RCA + fix plan | `C1-triage-matrix` includes at least 3 ranked recurring failure classes; each includes `owner`, `rca_link`, and `fix_plan_link` |
+| MTTR trend improves by >=20% versus captured baseline | `run-summary` records `mttr_baseline_hours`, `mttr_current_hours`, and `mttr_improvement_pct`; trend target met at `>=20%` |
+| Recurrence rate for fixed failure classes is <=10% over a 2-week window | `run-summary` records `recurrence_rate_2w_pct` for fixed classes and verifies `<=10%` |
+
+Use this formula for deterministic recurrence calculation in the 2-week
+validation window:
+
+`recurrence_rate_2w_pct = (repeat_incidents_after_fix / total_incidents_after_fix) * 100`
+
 ## Out of Scope
 
 - Implementing agents, skills, scripts, or workflows
 - Applying repository code changes from the enhancement plan
 - Pruning historical evidence before triage completion
-

@@ -9,6 +9,7 @@ on:
       - ".github/workflows/governance-audit.yml"
       - ".github/workflows/extension-deploy.yml"
       - ".github/workflows/mcp-deploy.yml"
+      - ".github/workflows/docs.yml"
       - ".github/workflows/portal-deploy.yml"
       - "docs/reference/environment-protection.md"
       - "docs/operations/environment-protection-enforcement.md"
@@ -47,7 +48,9 @@ jobs:
           grep -q '^## Mandatory production protections$' docs/reference/environment-protection.md
           grep -q 'manual approvals are required' docs/reference/environment-protection.md
           grep -q 'protected environment secrets/variables' docs/reference/environment-protection.md
+          grep -q '`github-pages`' docs/reference/environment-protection.md
           grep -q 'environment protection gates' docs/operations/environment-protection-enforcement.md
+          grep -q 'GitHub Pages branch restrictions configured' docs/operations/environment-protection-enforcement.md
           grep -q 'No permanent bypasses for production manual approval controls are allowed.' docs/operations/environment-protection-enforcement.md
 
       - name: Validate deployment workflow environment declarations
@@ -57,6 +60,8 @@ jobs:
 
           grep -Eq "environment: .*(prod|production)" .github/workflows/extension-deploy.yml
           grep -Eq "TARGET_ENV: .*'(prod|production)'" .github/workflows/extension-deploy.yml
+          grep -q '^  verify-github-pages-environment:$' .github/workflows/docs.yml
+          grep -q '^      name: github-pages$' .github/workflows/docs.yml
           grep -Eq "environment: .*staging.*(prod|production)" .github/workflows/mcp-deploy.yml
           grep -Eq "TARGET_ENV: .*'staging'.*'(prod|production)'" .github/workflows/mcp-deploy.yml
           grep -q '^    environment: staging$' .github/workflows/portal-deploy.yml
@@ -67,6 +72,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           set -euo pipefail
 
@@ -79,7 +85,7 @@ jobs:
           done
 
           if [[ -z "$PROD_ENV" ]]; then
-            echo "::warning::Neither 'production' nor 'prod' environment exists."
+            echo "::warning::Neither canonical 'production' nor legacy alias 'prod' environment exists."
             echo "::warning::Settings action required: create a protected production environment."
             echo "Skipping hard-fail because this check is advisory for repository settings drift."
             exit 0
@@ -101,11 +107,42 @@ jobs:
             echo "- ADVISORY: '${PROD_ENV}' environment does not enforce protected-branch deployment policy." >> "$GITHUB_STEP_SUMMARY"
           fi
 
-          echo "Environment protection settings check completed for ${PROD_ENV} (advisory mode)."
-          echo "Advisory check complete for '${PROD_ENV}' — any warnings above require manual settings remediation." >> "$GITHUB_STEP_SUMMARY"
+          if ! PAGES_ENV_JSON="$(gh api "repos/${REPOSITORY}/environments/github-pages" 2>/dev/null)"; then
+            echo "::warning::Environment 'github-pages' does not exist yet."
+            echo "::warning::Docs deployment will create it automatically on first successful deploy, but branch-policy enforcement is unavailable until then."
+            echo "- ADVISORY: 'github-pages' environment does not exist yet." >> "$GITHUB_STEP_SUMMARY"
+          else
+            PAGES_PROTECTED_ONLY="$(echo "$PAGES_ENV_JSON" | jq -r '.deployment_branch_policy.protected_branches // false')"
+            PAGES_CUSTOM_POLICY="$(echo "$PAGES_ENV_JSON" | jq -r '.deployment_branch_policy.custom_branch_policies // false')"
+
+            if [[ "$PAGES_PROTECTED_ONLY" == "true" ]]; then
+              ENCODED_DEFAULT_BRANCH="$(jq -rn --arg value "$DEFAULT_BRANCH" '$value|@uri')"
+              DEFAULT_BRANCH_PROTECTED="$(gh api "repos/${REPOSITORY}/branches/${ENCODED_DEFAULT_BRANCH}" --jq '.protected' 2>/dev/null || echo false)"
+              if [[ "$DEFAULT_BRANCH_PROTECTED" != "true" ]]; then
+                echo "::warning::Environment 'github-pages' allows protected branches only, but '${DEFAULT_BRANCH}' is not protected."
+                echo "::warning::Settings action required: protect '${DEFAULT_BRANCH}' or switch github-pages to selected branches including '${DEFAULT_BRANCH}'."
+                echo "- ADVISORY: '${DEFAULT_BRANCH}' is not protected while github-pages requires protected branches." >> "$GITHUB_STEP_SUMMARY"
+              fi
+              echo "github-pages environment allows protected-branch deployments."
+            elif [[ "$PAGES_CUSTOM_POLICY" == "true" ]]; then
+              PAGES_BRANCHES="$(gh api "repos/${REPOSITORY}/environments/github-pages/deployment-branch-policies" --jq '.branch_policies[].name' 2>/dev/null || true)"
+              if ! echo "$PAGES_BRANCHES" | grep -Fqx "$DEFAULT_BRANCH"; then
+                echo "::warning::Environment 'github-pages' uses selected branches, but '${DEFAULT_BRANCH}' is not included."
+                echo "::warning::Settings action required: add '${DEFAULT_BRANCH}' to the github-pages environment deployment branches, or switch to protected branches only."
+                echo "- ADVISORY: 'github-pages' selected branches do not include '${DEFAULT_BRANCH}'." >> "$GITHUB_STEP_SUMMARY"
+              fi
+            else
+              echo "::warning::Environment 'github-pages' does not enforce deployment branch restrictions."
+              echo "::warning::Settings action required: enable protected branches or select '${DEFAULT_BRANCH}' explicitly."
+              echo "- ADVISORY: 'github-pages' environment does not enforce deployment branch restrictions." >> "$GITHUB_STEP_SUMMARY"
+            fi
+          fi
+
+          echo "Environment protection settings check completed for ${PROD_ENV} and github-pages (advisory mode)."
+          echo "Advisory check complete for '${PROD_ENV}' and 'github-pages' — any warnings above require manual settings remediation." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Note PR-scope environment settings check
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-          echo "Skipping prod environment reviewer/branch-policy API enforcement on pull_request runs." >> "$GITHUB_STEP_SUMMARY"
+          echo "Skipping production environment reviewer/branch-policy API enforcement on pull_request runs." >> "$GITHUB_STEP_SUMMARY"
           echo "This check is enforced on scheduled and manual runs where administrative visibility is available." >> "$GITHUB_STEP_SUMMARY"

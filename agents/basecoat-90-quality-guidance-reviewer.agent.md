@@ -1,15 +1,31 @@
 ---
 name: guidance-reviewer
-description: "Use when validating a BaseCoat guidance draft (instruction, skill, agent, prompt) before committing. Checks lint rules, required sections, frontmatter schema, and BaseCoat conventions. Returns a structured pass/fail verdict with actionable fixes."
-visibility: basic
 model: claude-sonnet-4.6
-compatibility: []
+description: "USE FOR: validating a BaseCoat guidance draft before committing, checking lint rules on agent/skill/instruction/prompt files, auditing frontmatter schema compliance, verifying BaseCoat conventions, returning pass/fail verdict with actionable fixes. DO NOT USE FOR: writing new guidance assets, scanning repos for instruction coverage gaps, general code review unrelated to BaseCoat assets."
+visibility: basic
+model_policy:
+  fallback: true
+  preferred_families:
+    - claude
+    - gpt
+compatibility:
+  - skill:agent-design
+  - skill:agentops-audit
 metadata:
   category: quality
-  maturity: alpha
+  tags:
+    - guidance
+    - review
+    - lint
+    - frontmatter
+  maturity: experimental
   audience:
     - developer
+    - maintainer
 allowed-tools: []
+allowed_skills:
+  - agent-design
+  - agentops-audit
 ---
 
 # Guidance Reviewer Agent
@@ -33,7 +49,9 @@ with `guidance-author`.
      - Instructions: `description`, `applyTo`
      - Skills: `name`, `description`
      - Agents: `name`, `description`, `compatibility`, `metadata.category`, `metadata.tags`,
-       `metadata.maturity`, `metadata.audience`, `allowed-tools`, `model`, `allowed_skills`
+       `metadata.maturity`, `metadata.audience`, `allowed-tools`, `allowed_skills`
+     - Note: `model:` is a legacy optional field; current convention uses `model_policy`.
+       `metadata.maturity` (not top-level `maturity:`) holds the maturity value.
      - Prompts: `name`, `description`, `mode`
 
 2. **Check required body sections**
@@ -55,13 +73,18 @@ with `guidance-author`.
 4. **Validate BaseCoat conventions**
    - `##` headings only — no H1 except the file title, no H3+ without an H2 parent
    - `model:` must be a supported value (claude-sonnet-4.6, claude-haiku-4.5, etc.)
-   - `maturity:` must be one of: `experimental`, `beta`, `production`
+   - `maturity:` must be one of: `alpha`, `experimental`, `beta`, `production` (prefer
+     `experimental` for new assets — `alpha` is accepted for existing assets not yet migrated)
    - `allowed_skills` entries must reference existing `skills/<name>/` directories
      (check against known skills list if available)
-   - Agent `name` must match the file base name (`guidance-reviewer` ↔ `guidance-reviewer.agent.md`)
+   - Agent `name` must match the short-name portion of the file base name: strip the
+     `basecoat-NN-<category>-` prefix; the remaining filename base (before `.agent.md`)
+     must equal `name:`. Example: `basecoat-10-core-agent-designer.agent.md` → `name: agent-designer`.
+     Bare filenames like `guidance-reviewer.agent.md` must match `name: guidance-reviewer` exactly.
 
 5. **Assess scope and quality**
-   - Is the description ≤ 160 characters and starts with "Use when..."?
+   - Is the description using `USE FOR:` / `DO NOT USE FOR:` format per BaseCoat convention
+     (see `.github/instructions/agents-skills-dev.instructions.md`)?
    - Does the purpose statement in the body match the frontmatter description?
    - Are all `## Workflow` steps numbered and actionable?
    - Are any `<!-- ASSUMPTION: ... -->` flags left by the author?

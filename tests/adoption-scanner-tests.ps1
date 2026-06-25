@@ -22,26 +22,35 @@ Write-Host 'Running adoption scanner tests...'
 # Test 1: Parameter validation - OutputFormat must be one of: table, json, markdown
 Write-Host '  Test 1: Validate OutputFormat parameter constraints...'
 
-$validationScript = Join-Path ([System.IO.Path]::GetTempPath()) ("adoption-scanner-outputformat-" + [System.Guid]::NewGuid().ToString() + ".ps1")
-Set-Content -Path $validationScript -Value @'
-[CmdletBinding()]
-param(
-    [ValidateSet("table", "json", "markdown")]
-    [string]$Mode = "table"
-)
-
-Write-Output $Mode
-'@
+$scannerScript = Join-Path (Join-Path $repoRoot 'scripts') 'adoption/detect-basecoat.ps1'
+if (-not (Test-Path $scannerScript)) {
+    throw "OutputFormat validation failed: scanner script path missing ($scannerScript)"
+}
+$stdoutPath = Join-Path ([System.IO.Path]::GetTempPath()) ("adoption-scanner-outputformat-stdout-" + [System.Guid]::NewGuid().ToString() + ".log")
+$stderrPath = Join-Path ([System.IO.Path]::GetTempPath()) ("adoption-scanner-outputformat-stderr-" + [System.Guid]::NewGuid().ToString() + ".log")
+$stderrContent = ''
 
 try {
-    & pwsh -NoProfile -File $validationScript -Mode "invalid" *>$null
+    $process = Start-Process -FilePath 'pwsh' -ArgumentList @(
+        '-NoProfile',
+        '-File',
+        $scannerScript,
+        '-OutputFormat',
+        'invalid'
+    ) -NoNewWindow -Wait -PassThru -RedirectStandardOutput $stdoutPath -RedirectStandardError $stderrPath
+    if (Test-Path $stderrPath) {
+        $stderrContent = Get-Content -Path $stderrPath -Raw -ErrorAction SilentlyContinue
+    }
 }
 finally {
-    Remove-Item -Path $validationScript -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path $stdoutPath, $stderrPath -Force -ErrorAction SilentlyContinue
 }
 
-if ($LASTEXITCODE -eq 0) {
+if ($process.ExitCode -eq 0) {
     throw "OutputFormat validation failed: invalid value was accepted"
+}
+if ($stderrContent -notmatch 'OutputFormat') {
+    throw "OutputFormat validation failed: expected invalid OutputFormat error details"
 }
 Write-Host '    ✓ OutputFormat validation works'
 

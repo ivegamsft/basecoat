@@ -1,0 +1,19 @@
+name: session-analysis
+description: Routing and behavior evaluation for the session-analysis skill.
+skill: skills/session-analysis/SKILL.md
+scenarios:
+  - id: trigger-top-tools
+    input: Review this session and list the top tools used with counts.
+    expect_activation: true
+  - id: trigger-assistant-tokens
+    input: How many assistant messages were there, and what is the token usage?
+    expect_activation: true
+  - id: trigger-model-changes
+    input: Did the model switch mid-session? Show me where.
+    expect_activation: true
+  - id: trigger-average-turns
+    input: What's the average turn count and how can I optimize it?
+    expect_activation: true
+  - id: neg-feature-work
+    input: Build a new authentication endpoint and wire it into the app.
+    expect_activation: false

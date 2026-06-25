@@ -8,6 +8,15 @@ scenarios:
   - id: 'pos-2'
     input: 'Please route this task to the guidance-reviewer agent.'
     expect_activation: true
+  - id: 'pos-3'
+    input: 'I need help with validating a BaseCoat guidance draft (instruction, skill, agent, prompt) before committing. Checks lint rules, required sections, frontmatter schema, and BaseCoat conventions. Returns a structured pass/fail verdict with actionable fixes.'
+    expect_activation: true
+  - id: 'pos-4'
+    input: 'Can you validate this agent file and check it meets frontmatter schema and BaseCoat lint rules?'
+    expect_activation: true
+  - id: 'pos-5'
+    input: 'Please use the guidance-reviewer agent for validating a BaseCoat guidance draft before committing.'
+    expect_activation: true
   - id: 'neg-1'
     input: 'Write a haiku about programming.'
     expect_activation: false
