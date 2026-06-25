@@ -43,6 +43,7 @@ If you only need the gist, read these three first:
 | [agentic-workflow-lifecycle.excalidraw](agentic-workflow-lifecycle.excalidraw) | PR trigger → filter → agent → buffer → safe output |
 | [bootstrap-flow.excalidraw](bootstrap-flow.excalidraw) | 4-phase bootstrap script: repo, memory, secrets, validation |
 | [queue-rebalancer-dependency-dag-and-lane-gates.excalidraw](queue-rebalancer-dependency-dag-and-lane-gates.excalidraw) | Queue rebalancer dependency DAG, unblock lane flow, and gate outcomes (`gate:no-tests`, `gate:needs-check-in`) with stalled-chain handling ([notes](queue-rebalancer-dependency-dag-and-lane-gates.md)) |
+| [orchestrator-dispatch-fan-in-conflict-resolution.md](orchestrator-dispatch-fan-in-conflict-resolution.md) | Orchestrator dispatch sequence, branch status lifecycle (`in_progress`, `blocked`, retry, `resolved`), and conflict tie-break decision flow |
 
 ## Validation & Testing
 

@@ -401,6 +401,9 @@ Policy notes:
 Use this lifecycle when an orchestrator runs fan-out work and must converge to one
 final answer.
 
+Visual diagram set:
+[orchestrator-dispatch-fan-in-conflict-resolution.md](../diagrams/orchestrator-dispatch-fan-in-conflict-resolution.md)
+
 #### Sequence
 
 1. **Plan and scope** — decompose request, define task envelopes, and set budgets.
@@ -436,6 +439,8 @@ final answer.
 
 #### Related harness and policy docs
 
+- [Orchestrator Dispatch, Fan-In, and Conflict Resolution Flow](../diagrams/orchestrator-dispatch-fan-in-conflict-resolution.md)
+  — sequence, status lifecycle, and tie-break decision visuals.
 - [Agent Testing Harness](./agent-testing-harness.md) — run/turn/round semantics,
   stop conditions, and cancellation behavior for dispatch loops.
 - [VS Code Agent Mode Tool Confirmation Policy](../reference/guardrails/tool-confirmation-policy.md)
