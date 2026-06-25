@@ -24,7 +24,7 @@ model_policy:
 
 # Session Optimization Skill
 
-Apply session hygiene patterns to reduce token cost, event count, and context bloat in long-running Copilot CLI sessions.
+Apply session hygiene to reduce token cost, event count, and context bloat.
 
 ## Shortcut Phrases
 
@@ -36,22 +36,20 @@ Apply session hygiene patterns to reduce token cost, event count, and context bl
 
 ## Phase-Boundary Compaction
 
-Run `/compact` at each semantic phase boundary to drop stale context:
+Run `/compact` at each phase boundary:
 
 | Phase transition | Action |
 |---|---|
-| Triage to implementation | `/compact` — backlog context is no longer needed |
-| Implementation to merge-waiting | `/compact` — code diff context is no longer needed |
-| Merge-waiting to next phase | `/compact` — CI logs and merge state are transient |
-| Domain pivot (sprint planning to release ops) | `/new` — reload only relevant references |
+| Triage to implementation | `/compact` |
+| Implementation to merge-waiting | `/compact` |
+| Merge-waiting to next phase | `/compact` |
+| Domain pivot | `/new` |
 
-Target: < 150 events per phase; compact before reaching 400 events total.
+Target: <150 events per phase; compact before 400 total.
 
 ## File-Reference Discipline
 
-Never paste large blocks into chat. Use file references instead.
-
-Instead of pasting a 170k-character skill or instruction file, write:
+Never paste large blocks into chat. Use file references:
 
 ```text
 See: skills/session-optimization/SKILL.md
@@ -60,23 +58,14 @@ See: .github/instructions/cost-optimization.instructions.md
 
 Expected savings: ~300x tokens per pasted block.
 
-## Model Routing for Routine Loops
-
-| Work type | Default model | Upshift trigger |
-|---|---|---|
-| Status checks, PR hygiene, branch monitoring | gpt-5.4-mini or Haiku | Complex multi-system failure |
-| File scans, lightweight triage | gpt-5.4-mini or Haiku | Architecture tradeoffs |
-| Deep refactor, security, architecture | gpt-5.3-codex or stronger | N/A |
-
 ## Session Efficiency Metrics
 
 Track per session:
 
-- **Events**: target < 150 per phase; alert at > 400 in a single session.
-- **Compact calls**: target >= 1 at each phase boundary.
-- **Main-session tool calls**: target < 30 per phase; alert at > 70.
-- **Pasted message size**: target < 10 KB per message; alert at > 100 KB.
-- **Re-plan count**: target 1 per sprint; alert if > 1 indicates template reuse failure.
+- **Events**: target <150 per phase; alert at >400.
+- **Compact calls**: target >=1 per phase boundary.
+- **Main-session tool calls**: target <30 per phase.
+- **Pasted message size**: target <10KB per message.
 
 ## Auto-Compaction Thresholds
 
@@ -89,5 +78,5 @@ Track per session:
 ## Output
 
 - Session efficiency score
-- Recommended action (compact, new, model downshift, file reference)
+- Recommended action (compact, new, downshift, file reference)
 - Projected token savings
