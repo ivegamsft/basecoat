@@ -708,6 +708,14 @@ else {
         $dependencyGraphWorkflow -notmatch 'Add-Content -Path \$env:GITHUB_OUTPUT -Value "branch_name="') {
         $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (missing guarded branch output assignments to GITHUB_OUTPUT)'
     }
+
+    if ($dependencyGraphWorkflow -match '"- Source workflow: `\.github/workflows/dependency-graph-pages\.yml`"') {
+        $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (uses markdown backticks in a PowerShell double-quoted string, which can escape the terminator and break parsing)'
+    }
+
+    if ($dependencyGraphWorkflow -notmatch '''- Source workflow: \.github/workflows/dependency-graph-pages\.yml''') {
+        $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (missing parser-safe source workflow metadata line in dependency graph report content)'
+    }
 }
 
 $assetHealthWorkflowPath = Join-Path $workflowDir 'asset-health.yml'
