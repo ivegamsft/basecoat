@@ -676,6 +676,25 @@ else {
     }
 }
 
+$auditTemplatePath = 'skills/environment-audit-drift/templates/audit-environment-drift.yml'
+if (-not (Test-Path $auditTemplatePath)) {
+    $stabilizationGuardrailIssues += 'skills/environment-audit-drift/templates/audit-environment-drift.yml (missing file)'
+}
+else {
+    $auditTemplateWorkflow = Get-Content $auditTemplatePath -Raw
+    $templateLines = $auditTemplateWorkflow -split "`n"
+    $templateLineNum = 0
+    foreach ($templateLine in $templateLines) {
+        $templateLineNum++
+        if ($templateLine -match 'uses:\s*(.+)') {
+            $templateUses = $matches[1].Trim()
+            if ($templateUses -notmatch '@[a-f0-9]{40}$') {
+                $stabilizationGuardrailIssues += "skills/environment-audit-drift/templates/audit-environment-drift.yml:$templateLineNum (action reference must be pinned to a full-length SHA: $templateUses)"
+            }
+        }
+    }
+}
+
 $dependencyGraphWorkflowPath = Join-Path $workflowDir 'dependency-graph-pages.yml'
 if (-not (Test-Path $dependencyGraphWorkflowPath)) {
     $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (missing file)'
