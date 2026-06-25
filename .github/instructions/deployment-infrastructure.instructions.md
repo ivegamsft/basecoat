@@ -29,7 +29,12 @@ push permissions. Only proceed with tagging after a passing run.
 If the preflight fails, follow the remediation steps in the error output to rotate the
 token before tagging. The `publish-to-production.yml` workflow enforces this gate
 automatically at runtime via a `preflight-token-check` job that must pass before
-the `publish` job runs. See issue #575 for PAT rotation steps.
+the `publish` job runs.
+
+**Setup or troubleshooting?** See the comprehensive guide:
+- `docs/guides/PRODUCTION_TOKEN_SETUP.md` — Complete token generation & troubleshooting
+- Issue #575 — Original setup guidance (closed, regex applied)
+- Issue #1352 — Current blocker tracking token permission fix
 
 ## PRD / Spec Gate
 
