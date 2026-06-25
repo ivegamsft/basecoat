@@ -78,21 +78,16 @@ Track per session:
 - **Pasted message size**: target < 10 KB per message; alert at > 100 KB.
 - **Re-plan count**: target 1 per sprint; alert if > 1 indicates template reuse failure.
 
-## Sprint Template Reuse
-
-Use persistent sprint template (`docs/templates/sprint-structure.md`) instead of re-planning from scratch each sprint. Load the template once, then provide only the delta (issue changes). Expected savings: 62% per sprint-planning session.
-
-## Auto-Compaction Threshold
+## Auto-Compaction Thresholds
 
 | Metric | Warning | Action |
 |---|---|---|
-| Ratio | >= 300x | Log warning, consider `/compact` |
-| Events | >= 400 | Run `/compact` immediately |
-| Tokens | >= 50M | Run `/compact` or `/new` |
-| Events | >= 500 | Critical; start `/new` with canonical refs only |
+| Events | >= 400 | `/compact` immediately |
+| Tokens | >= 50M | `/compact` or `/new` |
+| Events | >= 500 | Critical — `/new` with canonical refs only |
 
 ## Output
 
-- Current session efficiency score
+- Session efficiency score
 - Recommended action (compact, new, model downshift, file reference)
-- Projected token savings from recommended action
+- Projected token savings

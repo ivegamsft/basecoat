@@ -86,39 +86,18 @@ jobs:
 
 ## Agent Fan-Out Pattern
 
-For multi-agent task decomposition with parallel dispatch:
-
-1. **Decompose** — split the task into independent subtasks with no data dependency.
-2. **Dispatch simultaneously** — launch all independent subtasks in a single orchestrator turn.
-3. **Track states** — monitor each subtask's completion state; surface blockers promptly.
-4. **Fan-in** — collect all results before aggregating; normalize output format.
-5. **Serialize writes** — even with parallel reads, serialize any write operations (merges, commits, deployments).
+1. **Decompose** — split into independent subtasks with no data dependency.
+2. **Dispatch simultaneously** — launch all in a single orchestrator turn.
+3. **Track states** — monitor completion; surface blockers promptly.
+4. **Fan-in** — collect all results before aggregating.
+5. **Serialize writes** — parallel reads, but serialize merges/commits/deployments.
 
 ## Multi-Session Sprint Execution
 
-When running parallel sessions across multiple GitHub Copilot worktrees:
-
-1. Assign one issue per session; avoid cross-session dependencies when possible.
-2. Use `parallel-session-coordinator` agent to track states and enforce merge order.
-3. Apply serialized merge pacing: only one PR merges at a time.
+1. One issue per session; avoid cross-session dependencies.
+2. Use `parallel-session-coordinator` to track states and enforce merge order.
+3. Serialized merge pacing: one PR merges at a time.
 4. After each merge, rebase dependent sessions before continuing.
-5. Detect and resolve file-level conflicts before they reach the merge queue.
-
-## Serialized Merge Pacing
-
-Parallelism during implementation; serialization at merge time:
-
-```text
-[session-1: implementing] ──┐
-[session-2: implementing] ──┼── merge queue ──► merge-1 ──► merge-2 ──► merge-3
-[session-3: implementing] ──┘   (one at a time)
-```
-
-Rules:
-
-- Confirm required CI checks are green before each merge.
-- Wait for merge completion and post-merge checks before merging the next PR.
-- Clean up local and remote branch state after each merge.
 
 ## Output
 
