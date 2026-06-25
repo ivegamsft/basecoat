@@ -25,6 +25,15 @@ The six execution workstreams are tracked as dedicated issues with explicit owne
 | 5. Weekly scorecard + trend reporting | [#2050](https://github.com/IBuySpy-Shared/basecoat/issues/2050) | @ibuyspy | Weekly scorecard cadence with trend classification |
 | 6. 4-6 week adoption experiment and readout | [#2051](https://github.com/IBuySpy-Shared/basecoat/issues/2051) | @ibuyspy | Experiment complete with go/no-go readout |
 
+### Workstream 5 delivery path
+
+The weekly scorecard and trend readout pipeline is implemented with:
+
+- Workflow: `.github/workflows/keep-fix-throttle-weekly-scorecard.yml`
+- Generator: `scripts/keep-fix-throttle-weekly-scorecard.ps1`
+- Runbook: `docs/operations/keep-fix-throttle-weekly-scorecard.md`
+- Spec: `docs/spec/keep-fix-throttle-weekly-scorecard.spec.md`
+
 ### Baseline Snapshot (captured 2026-06-25)
 
 The baseline below is captured before workstream rollout and used as the experiment start point.
