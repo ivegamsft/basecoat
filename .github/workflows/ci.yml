@@ -74,7 +74,7 @@ jobs:
           status=0
 
           # Extract all backtick-quoted file/dir paths from CATALOG.md
-          refs=$(grep -oP '`(agents|skills|instructions|prompts|docs)/[^`]+`' CATALOG.md | tr -d '`' | sort -u)
+          refs=$(grep -oP "\`(agents|skills|instructions|prompts|docs)/[^\`]+\`" CATALOG.md | tr -d "\`" | sort -u)
 
           for ref in $refs; do
             # Skill directory references end with /
