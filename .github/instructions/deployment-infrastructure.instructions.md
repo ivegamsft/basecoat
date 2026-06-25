@@ -32,6 +32,7 @@ automatically at runtime via a `preflight-token-check` job that must pass before
 the `publish` job runs.
 
 **Setup or troubleshooting?** See the comprehensive guide:
+
 - `docs/guides/PRODUCTION_TOKEN_SETUP.md` — Complete token generation & troubleshooting
 - Issue #575 — Original setup guidance (closed, regex applied)
 - Issue #1352 — Current blocker tracking token permission fix

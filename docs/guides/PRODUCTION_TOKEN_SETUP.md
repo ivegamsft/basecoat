@@ -13,6 +13,7 @@ The `PRODUCTION_REPO_TOKEN` is a fine-grained Personal Access Token (PAT) that a
 The current `PRODUCTION_REPO_TOKEN` has `permissions.push=False`, preventing the publish workflow from pushing to `ivegamsft/basecoat`.
 
 **Symptoms:**
+
 - Workflow `BaseCoat - Publish to Production` fails at the `Push to production repository` step
 - Error: `PRODUCTION_REPO_TOKEN cannot push to ivegamsft/basecoat (permissions.push=False)`
 - Release cannot reach the production mirror
@@ -60,6 +61,7 @@ Select **Repository Permissions** and configure:
 All other permissions can remain unchecked (not applicable for this workflow).
 
 **Why these permissions?**
+
 - **Contents**: Push commits and create releases
 - **Administration**: Temporarily disable/restore branch protection during force-push
 - **Workflows**: Update GitHub Actions workflows in the production repo (if needed)
@@ -75,17 +77,20 @@ All other permissions can remain unchecked (not applicable for this workflow).
 Before setting it as a secret, validate that the token has the correct permissions:
 
 **Bash:**
+
 ```bash
 export PRODUCTION_REPO_TOKEN="ghp_YourTokenHere"
 bash scripts/validate-production-token.sh
 ```
 
 **PowerShell:**
+
 ```powershell
 .\scripts\validate-production-token.ps1 -Token "ghp_YourTokenHere"
 ```
 
 **Manual verification (curl):**
+
 ```bash
 curl -s -H "Authorization: token ghp_YourTokenHere" \
   https://api.github.com/repos/ivegamsft/basecoat | \
@@ -109,6 +114,7 @@ gh secret set PRODUCTION_REPO_TOKEN --repo IBuySpy-Shared/basecoat
 ```
 
 Alternatively, using the GitHub UI:
+
 1. Go to `https://github.com/IBuySpy-Shared/basecoat`
 2. Settings → Secrets and variables → Actions
 3. Click **New repository secret**
@@ -121,11 +127,13 @@ Alternatively, using the GitHub UI:
 Once the secret is set, re-trigger the publish workflow for the stuck release:
 
 **From CLI:**
+
 ```bash
 gh workflow run publish-to-production.yml --repo IBuySpy-Shared/basecoat --ref v3.30.6
 ```
 
 **From GitHub UI:**
+
 1. Go to `https://github.com/IBuySpy-Shared/basecoat/actions`
 2. Find **BaseCoat - Publish to Production**
 3. Click **Run workflow** → Select branch/tag and run
@@ -169,16 +177,19 @@ If the validation script or workflow preflight fails, check:
 ### Workflow Still Fails After Secret Update
 
 1. **Ensure secret was updated in the correct repository:**
+
    ```bash
    gh secret list --repo IBuySpy-Shared/basecoat | grep PRODUCTION_REPO_TOKEN
    ```
 
 2. **Check workflow preflight logs:**
+
    ```bash
    gh run list --repo IBuySpy-Shared/basecoat --workflow publish-to-production.yml --limit 1
    ```
 
 3. **Verify token is accessible in workflow:**
+
    ```bash
    # Re-run the token preflight check manually
    gh workflow run token-preflight.yml --repo IBuySpy-Shared/basecoat
@@ -227,6 +238,7 @@ A: The token is set to expire after 90 days. GitHub will not notify when it expi
 
 **Q: What if I accidentally commit the token to the repository?**
 A: GitHub's secret scanning should flag it. Immediately:
+
 1. Delete the token from GitHub (Settings → Developer settings → Fine-grained tokens)
 2. Generate a new one
 3. Update the secret in IBuySpy-Shared/basecoat
