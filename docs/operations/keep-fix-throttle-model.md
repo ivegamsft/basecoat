@@ -12,6 +12,32 @@ The Keep/Fix/Throttle model is a 3-tier approach to standardize proven patterns,
 | **Fix** | Prioritize recurring failure modes as first-class product work | 1–2 week cycle | Engineering | MTTR reduction ≥20% |
 | **Throttle** | Apply risk-tier governance instead of broad restrictions | Per-deployment | Governance | Autonomy maintained while reducing incident rate ≥15% |
 
+## Workstream Execution Tracker (Epic #1452)
+
+The six execution workstreams are tracked as dedicated issues with explicit owners and measurable outcomes:
+
+| Workstream | Tracker | Owner | Delivery signal |
+|---|---|---|---|
+| 1. Standardize proven patterns as defaults | [#2046](https://github.com/IBuySpy-Shared/basecoat/issues/2046) | @ibuyspy | ≥3 patterns promoted and adoption target met |
+| 2. Reliability debt program for recurring failures | [#2047](https://github.com/IBuySpy-Shared/basecoat/issues/2047) | @ibuyspy | Top recurring failures fixed with MTTR/recurrence targets |
+| 3. Tooling routing matrix (local/background/cloud/manual) | [#2048](https://github.com/IBuySpy-Shared/basecoat/issues/2048) | @ibuyspy | Routing defaults published and orchestration overhead reduced |
+| 4. Risk-tier autonomy policy enforcement | [#2049](https://github.com/IBuySpy-Shared/basecoat/issues/2049) | @ibuyspy | Tier coverage + enforcement guardrails in place |
+| 5. Weekly scorecard + trend reporting | [#2050](https://github.com/IBuySpy-Shared/basecoat/issues/2050) | @ibuyspy | Weekly scorecard cadence with trend classification |
+| 6. 4-6 week adoption experiment and readout | [#2051](https://github.com/IBuySpy-Shared/basecoat/issues/2051) | @ibuyspy | Experiment complete with go/no-go readout |
+
+### Baseline Snapshot (captured 2026-06-25)
+
+The baseline below is captured before workstream rollout and used as the experiment start point.
+
+| Metric | Baseline value | Collection window / source |
+|---|---|---|
+| Throughput proxy (merged PRs/day) | 10.0 | Last 30 days (`gh pr list`, capped at 300 results) |
+| Workflow failure rate | 0.0% | Last 14 days (`gh run list`, capped at 500 runs) |
+| Manual intervention proxy (approved merged PR share) | 100.0% | Last 30 days (`gh search prs review:approved`) |
+| Open P0 incidents | 0 | Snapshot (`gh issue list --label P0-critical`) |
+| Open P1 incidents | 1 | Snapshot (`gh issue list --label P1-high`) |
+| P0/P1 incident creation rate | 7 in 30 days | Last 30 days (`gh issue list --search created:>=...`) |
+
 ## 1. Keep: Standardize Proven Patterns
 
 Patterns that meet the "Keep" criteria are standardized as defaults and documented for reuse.
