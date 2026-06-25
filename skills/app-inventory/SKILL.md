@@ -1,7 +1,8 @@
 ---
 name: app-inventory
+compatibility: [github-copilot-cli]
 description: "Use when inventorying legacy applications to capture dependencies, service bindings, framework versions, and migration complexity. USE FOR: inventory a legacy application portfolio, scan app dependencies and connection strings, assess migration complexity for an app, create an application inventory report, map external service bindings before modernization. DO NOT USE FOR: rewriting application code, deploying workloads, designing the target-state architecture."
-compatibility: GHCP
+
 category: architecture
 ---
 
@@ -25,3 +26,5 @@ Reusable templates and workflows for inventorying legacy application portfolios 
 ## Paired Agent
 
 `agents/basecoat-10-core-app-inventory.agent.md` — see `docs/treatment-matrix.md` for app disposition decisions.
+
+

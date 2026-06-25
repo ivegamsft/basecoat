@@ -1,10 +1,9 @@
 ---
 name: dependency-blocker-monitoring
-description: "Use when monitoring workcell BOM dependencies and cell health so blocker issues are opened when a cell fails and resolved when it recovers. USE FOR: dependency maps, cell health checks, blocker issue creation, and recovery closures. DO NOT USE FOR: general project tracking or unrelated CI triage."
 compatibility: [github-copilot-cli]
+description: "Use when monitoring workcell BOM dependencies and cell health so blocker issues are opened when a cell fails and resolved when it recovers. USE FOR: dependency maps, cell health checks, blocker issue creation, and recovery closures. DO NOT USE FOR: general project tracking or unrelated CI triage."
+
 visibility: "internal"
-compatibility:
-  - GHCP
 ---
 # Dependency Blocker Monitoring Skill
 
@@ -42,3 +41,5 @@ On recovery, add a short closure comment, then close the issue after the health 
 - Dependency impact map
 - Open or closed blocker issues
 - Short recovery summary
+
+

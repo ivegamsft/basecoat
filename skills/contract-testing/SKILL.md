@@ -1,9 +1,8 @@
 ---
 name: contract-testing
+compatibility: [github-copilot-cli]
 title: Contract Testing & Integration Patterns
 description: "Use when implementing consumer-driven contracts, Pact verification, provider states, or integration test orchestration across services. USE FOR: add Pact contract tests between services, verify provider won't break consumers, set up Pact Broker in CI, orchestrate multi-service integration tests with Docker Compose, add mutation testing gate for APIs. DO NOT USE FOR: unit testing a single function, load testing production traffic, frontend visual regression testing."
-compatibility:
-  - GHCP
 ---
 # Contract Testing Skill
 
@@ -32,3 +31,5 @@ Consumer-driven contract tests, Pact broker workflows, provider verification, an
 | Provider states | `/provider-states` endpoint seeds DB before each interaction |
 | Mutation gate | >85% mutation score required before merging |
 | Deployment gate | BLOCKED if any contract fails verification |
+
+

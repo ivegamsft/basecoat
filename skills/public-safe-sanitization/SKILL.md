@@ -1,10 +1,9 @@
 ---
 name: public-safe-sanitization
-description: "Converts internal material to public-safe artifacts. USE FOR: sanitizing roadmap/issue notes for sharing, redacting private URLs/customer names/IDs, producing public-safe summaries with redaction ledger, rewriting internal details into generic guidance. DO NOT USE FOR: publishing raw internal notes, preserving sensitive identifiers, generating legal/compliance determinations, creating unrelated product plans."
 compatibility: [github-copilot-cli]
+description: "Converts internal material to public-safe artifacts. USE FOR: sanitizing roadmap/issue notes for sharing, redacting private URLs/customer names/IDs, producing public-safe summaries with redaction ledger, rewriting internal details into generic guidance. DO NOT USE FOR: publishing raw internal notes, preserving sensitive identifiers, generating legal/compliance determinations, creating unrelated product plans."
+
 visibility: "internal"
-compatibility:
-  - GHCP
 ---
 # Public Safe Sanitization Skill
 
@@ -42,3 +41,5 @@ Use this skill to convert internal material into a reusable public artifact with
 - `instructions/basecoat-10-core-public-guidance.instructions.md`
 - `docs/guides/public-guidance-workflow.md`
 - `agents/basecoat-30-ai-guardrail.agent.md`
+
+

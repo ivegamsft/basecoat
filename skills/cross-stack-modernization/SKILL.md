@@ -1,8 +1,7 @@
 ---
 name: cross-stack-modernization
+compatibility: [github-copilot-cli]
 description: "Language-agnostic modernization guidance for incrementally replacing legacy applications using strangler fig, ACLs, and risk scoring. USE FOR: plan legacy app modernization strategy, choose rewrite versus refactor versus replace, design strangler fig migration, sequence service extraction by dependency risk, decide database-first or UI-first migration. DO NOT USE FOR: greenfield system design, minor bug fixes in one service, container-only deployment setup."
-compatibility:
-  - GHCP
 ---
 # Cross-Stack Modernization
 
@@ -23,3 +22,5 @@ anti-corruption layer (ACL), risk scoring, and dependency extraction sequencing.
 | Test coverage | > 60 % | 30–60 % | < 30 % |
 | Time horizon | Weeks | Months | Quarters |
 | Risk tolerance | Low | Medium | High |
+
+

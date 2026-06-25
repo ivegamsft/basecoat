@@ -1,10 +1,9 @@
 ---
 name: station-bottleneck-analyzer
-description: "Use when analyzing takt-time JSON to calculate queue length and throughput by station, rank bottlenecks, and draft the weekly bottleneck report issue. USE FOR: station-level queue pressure, throughput trends, bottleneck ranking, and weekly issue filing. DO NOT USE FOR: dispatching work or changing routing policy."
 compatibility: [github-copilot-cli]
+description: "Use when analyzing takt-time JSON to calculate queue length and throughput by station, rank bottlenecks, and draft the weekly bottleneck report issue. USE FOR: station-level queue pressure, throughput trends, bottleneck ranking, and weekly issue filing. DO NOT USE FOR: dispatching work or changing routing policy."
+
 visibility: "internal"
-compatibility:
-  - GHCP
 ---
 # Station Bottleneck Analyzer Skill
 
@@ -29,3 +28,5 @@ Analyze takt-time exports to identify the stations that are backing up flow.
 
 - `takt-time-tracker` for upstream dwell-time exports.
 - `issue-triage` for report follow-up and labeling after filing.
+
+

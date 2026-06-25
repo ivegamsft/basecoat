@@ -66,7 +66,7 @@ All skills require:
 ```yaml
 name: string (required)
 description: string (required) — USE FOR: [trigger cases]
-compatibility: string (required)
+compatibility: [list of values] (required) — Each skill must declare all platforms it supports
 visibility: public|private (optional, defaults to public)
 capabilities: (optional, recommended for model-sensitive skills)
 model_policy: (optional)
@@ -83,6 +83,42 @@ model_policy: (optional)
 pinned_model: string (optional; requires pin_reason)
 pin_reason: string (required when pinned_model is set)
 ```
+
+### Compatibility Taxonomy
+
+Skill compatibility declares the platforms and execution contexts where the skill is designed to operate. Use the canonical values listed below; no other values are permitted.
+
+#### Canonical Values
+
+| Value | Platform | Semantics |
+|---|---|---|
+| `copilot-chat` | GitHub Copilot Chat (VSCode, GitHub web) | Skill is compatible with Copilot Chat interface (multi-turn conversational) |
+| `copilot-coding-agent` | GitHub Copilot Coding Agent | Skill is compatible with autonomous agent workflows; may require file I/O or environment setup |
+| `github-copilot-cli` | GitHub Copilot CLI / Copilot in Terminal | Skill is compatible with terminal execution; suitable for automation and scripting |
+| `vscode-chat` | VSCode Copilot Chat | Skill is compatible with VSCode Chat UI specifically |
+| `mcp` | Model Context Protocol / MCP servers | Skill is compatible with MCP tool protocol; typically used in orchestration or integration layers |
+| `github-actions` | GitHub Actions workflows | Skill is compatible with GitHub Actions context (CI/CD, scheduled jobs) |
+
+#### Format & Validation
+
+- Use list format: `compatibility: [copilot-chat, copilot-coding-agent, github-copilot-cli]`
+- Each skill must list **all platforms it supports**; omitting a platform means the skill is not designed for that context
+- Invalid values trigger CI validation failure
+- Duplicate values or empty lists are rejected by audit
+- Legacy value `GHCP` is deprecated; migrate all skills to `github-copilot-cli`
+
+#### Decision Guidance
+
+Choose compatibility values based on the skill's design, dependencies, and tested execution contexts:
+
+- **copilot-chat**: Interactive, user-driven workflows (e.g., code review guidance, architecture Q&A)
+- **copilot-coding-agent**: Autonomous, self-driven workflows (e.g., file transformations, multi-step refactoring, CI remediation)
+- **github-copilot-cli**: Terminal/script-based execution (e.g., auditing, analysis, report generation)
+- **vscode-chat**: VSCode-specific chat features (subset of copilot-chat; use when VSCode-only features are required)
+- **mcp**: Backend/orchestration integration (e.g., tool definitions for MCP servers)
+- **github-actions**: CI/CD workflow automation (e.g., scheduled audits, deployment validation)
+
+A skill may support multiple platforms if it is tested and functional in all declared contexts.
 
 ## Evaluation Coverage
 

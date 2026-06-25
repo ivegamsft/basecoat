@@ -1,8 +1,7 @@
 ---
 name: task-decomposition
+compatibility: [github-copilot-cli]
 description: "Use when breaking complex tasks into sub-agent-friendly chunks, validating automation fitness, and composing multi-step prompts. USE FOR: split large tasks into smaller async work items, decide if work is automatable vs research vs deferred, validate sub-agent prompts for clarity, design task decomposition workflows. DO NOT USE FOR: single-step code changes, immediate sync problem-solving, architectural design starting from scratch."
-compatibility:
-  - GHCP
 ---
 # Task Decomposition Skill
 
@@ -39,3 +38,5 @@ See `examples/` folder for good vs bad task framing with side-by-side comparison
 ## Agent Pairing
 
 Use with specialized agents (`backend-dev`, `frontend-dev`, `code-review`, etc.) as the primary execution path. Pair with planning agents when the decomposition strategy itself is the blocker.
+
+

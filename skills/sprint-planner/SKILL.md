@@ -1,8 +1,7 @@
 ---
 name: sprint-planner
+compatibility: [github-copilot-cli]
 description: "Compatibility routing skill for sprint planning requests that resolve to skill(sprint-planner). USE FOR: sprint goal decomposition, wave/dependency planning, issue breakdown planning, and next-sprint commitment shaping. DO NOT USE FOR: implementing product code changes, CI/build remediation, or production incident response."
-compatibility:
-  - GHCP
 ---
 # Sprint Planner Skill
 
@@ -39,3 +38,5 @@ Use this skill when requests include sprint planning goals such as:
 - Agent: `agents/basecoat-10-core-sprint-planner.agent.md`
 - Skill: `skills/sprint-management/SKILL.md`
 - Instruction: `instructions/basecoat-10-core-intent-routing.instructions.md`
+
+

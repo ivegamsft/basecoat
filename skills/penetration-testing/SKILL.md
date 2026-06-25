@@ -1,9 +1,8 @@
 ---
 name: penetration-testing
+compatibility: [github-copilot-cli]
 title: Penetration Testing & Vulnerability Discovery Patterns
 description: "Use when executing authorized penetration tests, validating OWASP risks, or producing exploit-backed findings. USE FOR: test for SQL injection or SSRF, run OWASP Top 10 web assessment, validate broken access control, reproduce API auth bypass, write penetration test findings report. DO NOT USE FOR: testing without authorization, destructive load testing in production."
-compatibility:
-  - GHCP
 ---
 # Penetration Testing Skill
 
@@ -34,3 +33,5 @@ reconnaissance, vulnerability discovery, exploitation, and reporting.
 - Never test without written authorization
 - Stop and escalate immediately if RCE or credential dump is found
 - Do not exfiltrate real user data — stop at proof-of-concept level
+
+

@@ -1,8 +1,8 @@
 ---
 name: onboarding-telemetry
+compatibility: [github-copilot-cli]
 description: "Configure App Insights connection surfaces, wire adoption metrics, and emit a telemetry readiness checklist for a newly onboarded BaseCoat repo. USE FOR: set up APPLICATIONINSIGHTS_CONNECTION_STRING and COPILOT_METRICS_TOKEN for an onboarded repo, configure the adoption-metrics weekly cadence, review the telemetry readiness scorecard, add goal-based loop metrics to a repo dashboard. DO NOT USE FOR: general observability instrumentation, OpenTelemetry SDK setup, production APM configuration."
-compatibility:
-  - GHCP
+
 visibility: public
 capabilities:
   reasoning_depth: low
@@ -42,3 +42,5 @@ for a newly onboarded BaseCoat repo.
 
 - **Input**: onboarding profile, target repo slug, secret/variable state
 - **Output**: readiness summary with missing dependencies and resolution steps
+
+

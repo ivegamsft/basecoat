@@ -1,9 +1,8 @@
 ---
 name: security-operations
+compatibility: [github-copilot-cli]
 title: Security Operations & Threat Detection
 description: "Use when implementing threat detection, audit logging, secret rotation, or incident response automation. USE FOR: write SIEM or KQL detection rules, automate secret rotation workflow, centralize security audit logs, build security alert triage playbook, monitor cloud or Kubernetes threats. DO NOT USE FOR: one-time app pentest reports, feature UX design."
-compatibility:
-  - GHCP
 ---
 # Security Operations Skill
 
@@ -19,3 +18,5 @@ Patterns for threat detection, secrets management, audit logging, and incident r
 | [`references/incident-response-automation.md`](references/incident-response-automation.md) | Alert triage, false positive detection, threat correlation, escalation workflows |
 | [`references/monitoring-metrics.md`](references/monitoring-metrics.md) | Key security metrics, alert configuration, dashboarding strategies |
 | [`references/security-operations-playbooks.md`](references/security-operations-playbooks.md) | Incident runbooks, escalation procedures, post-incident analysis templates |
+
+

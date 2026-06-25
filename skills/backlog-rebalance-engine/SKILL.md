@@ -1,8 +1,8 @@
 ---
 name: backlog-rebalance-engine
+compatibility: [github-copilot-cli]
 description: "Use when syncing rebalanced backlog items into GitHub Project views with deterministic status/metadata updates. USE FOR: idempotent project item add-or-update, status alignment, priority/sprint/wave mutation with policy checks, and rollback/change-log artifact generation. DO NOT USE FOR: implementation coding, sprint retrospectives, or initial issue triage."
-compatibility:
-  - GHCP
+
 capabilities:
   reasoning_depth: low
   tool_use: required
@@ -69,3 +69,5 @@ Sync complete: added=<n> updated=<n> skipped=<n>
 ## Idempotency Contract
 
 A second run on unchanged data must report `added=0 updated=0`.
+
+

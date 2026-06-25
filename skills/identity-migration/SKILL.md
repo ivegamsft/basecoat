@@ -1,9 +1,8 @@
 ---
 name: identity-migration
+compatibility: [github-copilot-cli]
 title: Identity Migration to ASP.NET Core & Entra ID
 description: "Use when migrating legacy authentication to ASP.NET Core Identity with Entra ID, claims transformation, password hash compatibility, and hybrid auth flows. USE FOR: migrate ASP.NET Membership users, preserve legacy password verification, integrate Entra ID OIDC with Identity, convert roles to claims, plan hybrid local and Entra authentication. DO NOT USE FOR: non-.NET identity stacks, frontend-only login widgets, generic network access control."
-compatibility:
-  - GHCP
 ---
 # Identity Migration Skill
 
@@ -25,3 +24,5 @@ role migration, OIDC setup, and hybrid local + Entra ID scenarios.
 - **IClaimsTransformation** — converts Identity roles to claims on each request
 - **Hybrid auth** — `AddCookie` + `AddMicrosoftIdentityWebApp` for local + Entra ID
 - **Never store secrets** in `appsettings.json` — use Key Vault or environment variables
+
+

@@ -1,10 +1,9 @@
 ---
 name: bom-schema
-description: "Use when defining or validating BOM schemas, resource ID formats, required cells, or naming conventions. USE FOR: JSON schema for BOM validation, required-field checks, and template creation. DO NOT USE FOR: unrelated app schemas or general data-model design."
 compatibility: [github-copilot-cli]
+description: "Use when defining or validating BOM schemas, resource ID formats, required cells, or naming conventions. USE FOR: JSON schema for BOM validation, required-field checks, and template creation. DO NOT USE FOR: unrelated app schemas or general data-model design."
+
 visibility: "internal"
-compatibility:
-  - GHCP
 ---
 # BOM Schema Skill
 
@@ -26,3 +25,5 @@ Define and validate bill-of-materials schemas with stable field names and predic
 ## Agent Pairing
 
 Use with agents that ingest BOMs, validate structured inventory data, or generate machine-readable contract files.
+
+

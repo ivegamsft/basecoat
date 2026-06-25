@@ -1,8 +1,7 @@
 ---
 name: azure-landing-zone
+compatibility: [github-copilot-cli]
 description: "Use when designing Azure enterprise-scale landing zones aligned to the Cloud Adoption Framework. USE FOR: design an Azure landing zone, scaffold a management group hierarchy, create a hub networking platform subscription, assign a regulatory policy initiative, vend a new application landing zone. DO NOT USE FOR: single-resource app deployment, AWS organization design, application code generation."
-compatibility:
-  - GHCP
 ---
 # Azure Landing Zone Skill
 
@@ -27,3 +26,5 @@ Use with `azure-landing-zone` agent. Cross-cutting: `solution-architect` (ADRs),
 
 - [Azure Landing Zones](https://aka.ms/alz)
 - [ALZ-Bicep](https://github.com/Azure/ALZ-Bicep)
+
+

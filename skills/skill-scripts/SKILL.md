@@ -1,8 +1,7 @@
 ---
 name: skill-scripts
+compatibility: [github-copilot-cli]
 description: "Use when a skill needs executable multi-step workflows where each script produces structured JSON that is passed to the next step, enabling composable assessment, planning, validation, and execution with clear contracts."
-compatibility:
-  - GHCP
 ---
 # Skill Scripts
 
@@ -46,3 +45,5 @@ Run one step:
 2. Prefer JSON output for all steps.
 3. Treat previous-step output as input contract, not free-form text.
 4. Keep entrypoints inside the skill directory.
+
+

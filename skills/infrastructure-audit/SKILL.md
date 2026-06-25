@@ -1,8 +1,7 @@
 ---
 name: infrastructure-audit
+compatibility: [github-copilot-cli]
 description: "Audits Infrastructure-as-Code (Bicep/Terraform), resource configurations, and networking. USE FOR: reviewing IaC code quality, validating resource configurations, assessing networking architecture, identifying security misconfigurations, analyzing cost optimization opportunities. DO NOT USE FOR: writing IaC from scratch, provisioning infrastructure, network architecture design, application development, DevOps workflow creation."
-compatibility:
-  - GHCP
 ---
 # Infrastructure Audit Skill
 
@@ -48,3 +47,5 @@ Comprehensive auditing of Infrastructure-as-Code implementations, resource confi
 - `terraform` — Terraform-specific development (if available)
 - `devops-audit` — CI/CD pipeline and deployment process audit
 - `security` — Security vulnerability assessment
+
+

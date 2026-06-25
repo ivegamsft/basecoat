@@ -1,8 +1,8 @@
 ---
 name: session-optimization
+compatibility: [github-copilot-cli]
 description: "Use when reducing token spend, event count, or context bloat in long-running Copilot CLI sessions. USE FOR: apply phase-boundary compaction, enforce file-reference discipline, configure model routing for routine loops, track session efficiency metrics, detect expensive session antipatterns. DO NOT USE FOR: product feature implementation, infrastructure deployment, direct code changes."
-compatibility:
-  - GHCP
+
 category: workflow
 visibility: public
 metadata:
@@ -80,3 +80,5 @@ Track per session:
 - Session efficiency score
 - Recommended action (compact, new, downshift, file reference)
 - Projected token savings
+
+

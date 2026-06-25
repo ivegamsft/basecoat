@@ -1,10 +1,9 @@
 ---
 name: s4-rollback-testing
-description: "Designs and runs S4 rollback drills and recovery tests. USE FOR: building repeatable rollback rehearsal workflows, verifying rollback activation after soak windows, sequencing deploy/wait/rollback/verify/smoke-test steps, documenting drill outcomes for readiness checks. DO NOT USE FOR: skipping rollback verification, treating deploy success as rollback proof, implementing application features, drafting unrelated communications."
 compatibility: [github-copilot-cli]
+description: "Designs and runs S4 rollback drills and recovery tests. USE FOR: building repeatable rollback rehearsal workflows, verifying rollback activation after soak windows, sequencing deploy/wait/rollback/verify/smoke-test steps, documenting drill outcomes for readiness checks. DO NOT USE FOR: skipping rollback verification, treating deploy success as rollback proof, implementing application features, drafting unrelated communications."
+
 visibility: "internal"
-compatibility:
-  - GHCP
 ---
 # S4 Rollback Testing Skill
 
@@ -22,3 +21,5 @@ Use this skill to make rollback a practiced, repeatable S4 habit instead of a on
 
 - Do not skip the rollback step.
 - Do not treat a successful deploy as proof that rollback works.
+
+

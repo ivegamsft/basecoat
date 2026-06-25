@@ -1,8 +1,7 @@
 ---
 name: dev-containers
+compatibility: [github-copilot-cli]
 description: "VS Code Dev Containers and GitHub Codespaces guidance for reproducible development environments and team onboarding. USE FOR: create devcontainer.json for this repo, set up Codespaces for contributors, containerize local dev toolchain, add VS Code extensions inside container, make development setup reproducible across machines. DO NOT USE FOR: production container deployment, Kubernetes runtime troubleshooting, packaging a desktop application."
-compatibility:
-  - GHCP
 ---
 # VS Code Dev Containers
 
@@ -33,3 +32,5 @@ Eliminates "works on my machine" by bundling runtimes, tools, and extensions in 
 - Pin feature and image versions — avoid `latest`
 - Never embed credentials in `Dockerfile` or `devcontainer.json`
 - Use `postCreateCommand` scripts for idempotent setup
+
+

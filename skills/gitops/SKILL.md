@@ -1,8 +1,7 @@
 ---
 name: gitops
+compatibility: [github-copilot-cli]
 description: "Use when designing or reviewing GitOps workflows with Flux or ArgoCD, declarative delivery, drift reconciliation, and secrets management across clusters. USE FOR: set up Flux or ArgoCD workflow, structure multi-environment cluster config, handle Kubernetes drift reconciliation, choose GitOps secrets pattern, review pull-based deployment practices. DO NOT USE FOR: manual kubectl runbooks, non-Kubernetes CI pipelines, imperative server configuration."
-compatibility:
-  - GHCP
 ---
 # GitOps
 
@@ -29,3 +28,5 @@ The operator continuously reconciles actual cluster state with declared desired 
 - Pin explicit image versions — never use `latest`
 - Require PR approval before merging cluster config changes
 - Never run `kubectl apply` manually — commit and let the operator apply
+
+

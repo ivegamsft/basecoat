@@ -1,10 +1,8 @@
 ---
 name: flow-audit
+compatibility: [github-copilot-cli]
 description: "Use when auditing PR/merge/CI delivery flow for bottlenecks and governance drift. USE FOR: merge queue bottleneck scans, stale PR analysis, CI waste detection, throughput baseline creation, and severity-ranked findings. DO NOT USE FOR: implementing product features, force-merging changes, or direct workflow mutation without review."
-compatibility:
-  - GHCP
-  - agent:flow-auditor
-  - agent:flow-tracker
+
 metadata:
   category: flow-governance
   domain: flow-governance
@@ -61,3 +59,5 @@ Every flow audit must include exported evidence for:
 - `agents/flow-auditor.agent.md`
 - `agents/flow-tracker.agent.md`
 - `skills/flow-track/SKILL.md`
+
+

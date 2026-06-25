@@ -1,7 +1,8 @@
 ---
 name: sdlc-content-pack
+compatibility: [github-copilot-cli]
 description: "USE FOR: generating SDLC-aligned content bundles (diagrams, click-through scripts, video scripts, decks) for workflows, skills, agents, and loops across SDLC phases. DO NOT USE FOR: code generation, PR reviews, deployment automation."
-compatibility: ">=1.0"
+
 visibility: public
 category: workflow
 metadata:
@@ -30,3 +31,5 @@ Keep terms, ordered steps, and handoff points consistent across all artifacts.
 - Use the same bundle identifier, SDLC phase, and audience labels everywhere.
 - Surface handoff points and approval gates explicitly.
 - Prefer markdown-first outputs for versioned review.
+
+

@@ -107,21 +107,18 @@ foreach ($set in $assetSets) {
                 $present++
             }
 
-            foreach ($file in $set.Files) {
-                $frontmatter = Get-Frontmatter -FilePath $file.FullName
-                if (-not $frontmatter -or -not (Test-Field -Frontmatter $frontmatter -Field 'compatibility')) {
-                    continue
-                }
+            if (-not $frontmatter -or -not (Test-Field -Frontmatter $frontmatter -Field 'compatibility')) {
+                continue
+            }
 
-                $values = Get-CompatibilityValues -Frontmatter $frontmatter
-                foreach ($value in $values) {
-                    if ($allowedCompatibility -notcontains $value) {
-                        $compatibilityViolations.Add([pscustomobject]@{
-                            category = $set.Category
-                            file = $file.FullName.Replace($repoRoot + [IO.Path]::DirectorySeparatorChar, '')
-                            value = $value
-                        })
-                    }
+            $values = Get-CompatibilityValues -Frontmatter $frontmatter
+            foreach ($value in $values) {
+                if ($allowedCompatibility -notcontains $value) {
+                    $compatibilityViolations.Add([pscustomobject]@{
+                        category = $set.Category
+                        file = $file.FullName.Replace($repoRoot + [IO.Path]::DirectorySeparatorChar, '')
+                        value = $value
+                    })
                 }
             }
         }

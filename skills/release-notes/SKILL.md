@@ -1,8 +1,7 @@
 ---
 name: release-notes
+compatibility: [github-copilot-cli]
 description: "Use when drafting or updating release notes from commits, pull requests, tags, waves, or sprints. USE FOR: create release notes for a version, summarize changes since a tag, generate notes by wave/sprint labels, produce internal or customer-facing changelog drafts, and structure upgrade notes with traceability. DO NOT USE FOR: release readiness audits, deployment execution, rollback operations, or post-release production incident troubleshooting."
-compatibility:
-  - GHCP
 ---
 # Release Notes Skill
 
@@ -57,3 +56,5 @@ Each item should include traceability (PR number, commit SHA, or issue link).
 - [`references/templates/internal.md`](references/templates/internal.md)
 - [`references/templates/external.md`](references/templates/external.md)
 - `scripts/validate-release-notes.ps1` writes validation reports to `reports/release-notes/`
+
+

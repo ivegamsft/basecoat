@@ -1,8 +1,8 @@
 ---
 name: basecoat
+compatibility: [github-copilot-cli]
 description: "Use when you need to discover the right BaseCoat agent or route a request to the correct discipline. USE FOR: find the right BaseCoat agent, browse the BaseCoat agent catalog, route a prompt to backend-dev, discover which agent handles code review, delegate a task to the right discipline. DO NOT USE FOR: implementing the task directly, editing skill internals, general package installation guidance."
-compatibility:
-  - GHCP
+
 allowed-tools: []
 metadata:
   category: framework
@@ -43,3 +43,5 @@ The front door to the BaseCoat framework. Routes requests to the right agent acr
 | DevOps | `@devops-engineer`, `@release-manager`, `@rollout-basecoat` |
 | Process | `@sprint-planner`, `@product-manager`, `@issue-triage`, `@retro-facilitator` |
 | Meta | `@agent-designer`, `@prompt-engineer`, `@mcp-developer`, `@tech-writer` |
+
+

@@ -1,8 +1,7 @@
 ---
 name: documentation
+compatibility: [github-copilot-cli]
 description: "Use when writing or improving technical documentation such as READMEs, ADRs, runbooks, and reference guides. USE FOR: write a project README, record an architecture decision, create an operational runbook, review docs for accuracy and gaps, establish docs-as-code standards. DO NOT USE FOR: implementing application features, generating code-only refactors, designing infrastructure topology diagrams from scratch."
-compatibility:
-  - GHCP
 ---
 # Documentation Skill
 
@@ -41,3 +40,5 @@ This skill is designed to be used alongside the following agents:
 - **product-manager** — Provides feature context for user-facing documentation
 
 For code-level documentation (inline comments, docstrings), coordinate with the `backend-dev` or `frontend-dev` agents.
+
+

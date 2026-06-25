@@ -1,8 +1,8 @@
 ---
 name: workflow-parallelization
+compatibility: [github-copilot-cli]
 description: "Use when designing or optimizing multi-job CI pipelines, agent fan-out patterns, or multi-session sprint execution for maximum parallel throughput. USE FOR: identify parallelizable CI jobs, design parallel agent dispatch, configure fan-out/fan-in workflow patterns, enforce serialized merge pacing after parallel execution. DO NOT USE FOR: bypassing required sequential gates, implementing infrastructure, direct code changes."
-compatibility:
-  - GHCP
+
 category: workflow
 visibility: public
 metadata:
@@ -75,3 +75,5 @@ Two jobs can run in parallel when:
 - Recommended job group layout with estimated time savings
 - Fan-out dispatch plan for multi-agent or multi-session execution
 - Merge serialization queue with conflict risk annotations
+
+

@@ -1,8 +1,7 @@
 ---
 name: performance-profiling
+compatibility: [github-copilot-cli]
 description: "Use when code is slow, latency regressed, or throughput dropped and you need measurements before fixing it. USE FOR: profile hot path in service, compare baseline vs optimized runtime, find CPU or memory bottleneck, investigate slow database or I/O path, verify performance regression fix. DO NOT USE FOR: guessing at optimizations without data, feature prioritization only."
-compatibility:
-  - GHCP
 ---
 # Performance Profiling
 
@@ -24,3 +23,5 @@ Use this skill when a user asks why code is slow, where latency comes from, or h
 - Change made
 - Post-change measurement
 - Remaining risks or follow-ups
+
+

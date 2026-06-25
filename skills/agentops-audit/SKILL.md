@@ -1,9 +1,8 @@
 ---
 name: agentops-audit
+compatibility: [github-copilot-cli]
 description: "Audits and improves agent/skill specs with a scored rubric and routing rationale. USE FOR: scoring spec quality, identifying concrete fixes, producing revised specs, validating cost/latency fit, generating routing profiles. DO NOT USE FOR: implementing product features, unrelated code review, infrastructure deployment."
-compatibility:
-  - GHCP
-  - agent:agent-designer
+
 metadata:
   category: agent-development
   domain: agent-development
@@ -75,3 +74,5 @@ Always include:
 ## Related Skills
 
 - `agent-design` — authoring and scaffolding agent/skill assets
+
+

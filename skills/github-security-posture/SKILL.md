@@ -1,8 +1,7 @@
 ---
 name: github-security-posture
+compatibility: [github-copilot-cli]
 description: "Use when auditing GitHub organization or repository security settings with traffic-light scoring and remediation guidance. USE FOR: review branch protection and rulesets, check secret scanning and push protection, triage Dependabot or code scanning alerts, assess CODEOWNERS coverage, produce GitHub security posture report. DO NOT USE FOR: fixing application code vulnerabilities, cloud IAM auditing, incident response for active breaches."
-compatibility:
-  - GHCP
 ---
 # GitHub Security Posture Skill
 
@@ -28,3 +27,5 @@ Dependabot alerts, branch protection, and CODEOWNERS.
 | Template | Purpose |
 |---|---|
 | `posture-report-template.md` | Traffic-light posture report with org checks, repo checks, scorecard, and remediation commands |
+
+

@@ -1,10 +1,8 @@
 ---
 name: flow-admission-control
+compatibility: [github-copilot-cli]
 description: "Use when defining capacity-aware intake and merge-queue admission rules to prevent queue overload. USE FOR: WIP limit policy, merge-ready admission criteria, stale PR expiration rules, and load-shedding strategy. DO NOT USE FOR: manual override of required checks, arbitrary PR closure without policy, or unrelated feature planning."
-compatibility:
-  - GHCP
-  - agent:flow-admission-controller
-  - agent:flow-optimizer
+
 metadata:
   category: flow-governance
   domain: flow-governance
@@ -49,3 +47,5 @@ review and merge paths relative to available capacity.
 - `agents/flow-admission-controller.agent.md`
 - `skills/flow-optimize/SKILL.md`
 - `skills/flow-track/SKILL.md`
+
+

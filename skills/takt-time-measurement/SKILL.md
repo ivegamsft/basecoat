@@ -1,10 +1,9 @@
 ---
 name: takt-time-measurement
-description: "Use when measuring takt time, exporting throughput metrics, or building a GitHub Actions workflow that captures timing data. USE FOR: workflow templates, takt calculations, and metric export guidance. DO NOT USE FOR: general project management or unrelated observability tasks."
 compatibility: [github-copilot-cli]
+description: "Use when measuring takt time, exporting throughput metrics, or building a GitHub Actions workflow that captures timing data. USE FOR: workflow templates, takt calculations, and metric export guidance. DO NOT USE FOR: general project management or unrelated observability tasks."
+
 visibility: "internal"
-compatibility:
-  - GHCP
 ---
 # Takt Time Measurement Skill
 
@@ -28,3 +27,5 @@ Create workflow templates that measure takt time and publish the resulting metri
 Use with DevOps or analytics agents that need to turn workflow timing into usable throughput signals.
 
 - `station-bottleneck-analyzer` for queue length, throughput, and weekly bottleneck report issues.
+
+

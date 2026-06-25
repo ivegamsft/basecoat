@@ -1,10 +1,9 @@
 ---
 name: escalation-routing
-description: "Use when routing high-risk decisions to the right human approver with a PR-comment approval trail. USE FOR: release signoff, irreversible changes, compliance gates. DO NOT USE FOR: routine automation."
 compatibility: [github-copilot-cli]
+description: "Use when routing high-risk decisions to the right human approver with a PR-comment approval trail. USE FOR: release signoff, irreversible changes, compliance gates. DO NOT USE FOR: routine automation."
+
 visibility: "internal"
-compatibility:
-  - GHCP
 ---
 # Escalation Routing Skill
 
@@ -36,3 +35,5 @@ Return two artifacts:
 
 - `skills/human-in-the-loop` — explicit human judgment and approval gates
 - `skills/decision-log-capture` — durable decision records with rationale and follow-up actions
+
+

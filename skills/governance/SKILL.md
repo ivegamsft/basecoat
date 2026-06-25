@@ -1,10 +1,8 @@
 ---
 name: governance
+compatibility: [github-copilot-cli]
 description: "Use when defining the shared governance layer, separating common from repo-specific rules, or revising canonical metadata. USE FOR: common-vs-specific policy docs, canonical label contracts, migration maps, template guidance, and governance issue planning. DO NOT USE FOR: application implementation, one-off issue cleanup, or release operations."
-compatibility:
-  - GHCP
-  - agent:governance-author
-  - agent:governance-auditor
+
 metadata:
   category: governance
   domain: governance
@@ -52,3 +50,5 @@ rules separate from repo-specific rules.
 - `docs/reference/governance-contract.md`
 - `docs/reference/label-taxonomy.md`
 - `docs/operations/label-cleanup-plan.md`
+
+

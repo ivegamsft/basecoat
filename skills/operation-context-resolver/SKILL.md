@@ -1,8 +1,8 @@
 ---
 name: operation-context-resolver
+compatibility: [github-copilot-cli]
 description: "Resolve deterministic environment context for branch, label, and incident driven workflows using environment-map.yml, returning target environment, operation mode, and action permissions. USE FOR: resolving preview/dev/staging/prod target before troubleshooting or deployment, enforcing allowed and blocked action checks, applying incident-readonly routing, validating human approval requirements for risky actions. DO NOT USE FOR: direct infrastructure mutation without policy checks, replacing platform branch protection controls, or bypassing environment-map validation."
-compatibility:
-  - GHCP
+
 metadata:
   category: platform-governance
   domain: platform-governance
@@ -71,3 +71,5 @@ const isActionAllowed =
 - Template: `templates/environment-map.yml`
 - Guide: `README.md`
 - Types: `src/types.ts`
+
+

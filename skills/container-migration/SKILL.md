@@ -1,8 +1,7 @@
 ---
 name: container-migration
+compatibility: [github-copilot-cli]
 description: "Scaffold containerization of a legacy app for Azure Container Apps or Kubernetes with Dockerfile, health probes, and deployment assets. USE FOR: containerize this legacy app, create a Dockerfile for production, migrate app to Azure Container Apps, add Kubernetes manifests and health checks, set up ACR build and push workflow. DO NOT USE FOR: simple VM deployment without containers, tuning application business logic, non-container desktop packaging."
-compatibility:
-  - GHCP
 ---
 # Container Migration
 
@@ -26,3 +25,5 @@ Azure Kubernetes Service (AKS), or an ACR-only workflow.
 | java | `eclipse-temurin:21-jre-alpine` |
 | node | `node:20-slim` |
 | ruby | `ruby:3.3-slim` |
+
+

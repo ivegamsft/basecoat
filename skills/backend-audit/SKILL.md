@@ -1,8 +1,7 @@
 ---
 name: backend-audit
+compatibility: [github-copilot-cli]
 description: "Audits generated or implemented backend code output. Evaluates code quality, testing coverage, performance, security, and maintainability. USE FOR: reviewing backend implementations, analyzing code quality, assessing test coverage, identifying performance bottlenecks, security vulnerabilities, structural debt. DO NOT USE FOR: writing backend code from scratch, database schema design, API contract design, frontend code review, infrastructure provisioning."
-compatibility:
-  - GHCP
 ---
 # Backend Audit Skill
 
@@ -46,3 +45,5 @@ Comprehensive auditing of backend implementations, including code quality, testi
 - `api-audit` — API endpoint and contract auditing
 - `backend-dev` — Backend development and implementation
 - `security` — Security vulnerability assessment
+
+

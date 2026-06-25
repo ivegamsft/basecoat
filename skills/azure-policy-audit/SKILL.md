@@ -1,8 +1,7 @@
 ---
 name: azure-policy-audit
+compatibility: [github-copilot-cli]
 description: "Use when reviewing Azure Policy definitions, initiatives, exemptions, remediation tasks, or compliance reporting. USE FOR: audit policy coverage, remediation completeness, exemption hygiene, policy drift, compliance reporting. DO NOT USE FOR: app business logic, RBAC-only questions, generic troubleshooting."
-compatibility:
-  - GHCP
 ---
 # Azure Policy Audit Skill
 
@@ -42,3 +41,5 @@ Return:
 ## Related Agent
 
 Use with `policy-as-code-compliance` agent.
+
+

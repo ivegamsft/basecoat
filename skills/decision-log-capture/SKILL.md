@@ -1,8 +1,8 @@
 ---
 name: decision-log-capture
+compatibility: [github-copilot-cli]
 description: "Use when capturing ceremony outcomes into durable decision records. USE FOR: document decision, rationale, options considered, owner, and follow-up actions from standup, sprint, and release ceremonies. DO NOT USE FOR: writing implementation code, replacing full ADR workflows, or generating marketing content."
-compatibility:
-  - GHCP
+
 invocation_rules:
   - "Use when meeting or ceremony outcomes must be persisted with explicit ownership."
 visibility: "internal"
@@ -23,3 +23,5 @@ Use this skill to create consistent, auditable decision records from ceremonies.
 - `release-readiness-chair`
 - `daily-standup-facilitator`
 - `sprint-closeout-auditor`
+
+

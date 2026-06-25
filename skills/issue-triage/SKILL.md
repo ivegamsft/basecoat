@@ -1,8 +1,7 @@
 ---
 name: issue-triage
+compatibility: [github-copilot-cli]
 description: "Audits GitHub issues for quality, validity, duplicates, labels, and priority. USE FOR: backlog hygiene and duplicate detection, validating closed issues have resolution evidence, enforcing label/type/priority conventions, auditing titles and relationships. DO NOT USE FOR: implementing product features, writing deployment pipelines, editing application runtime code, running non-triage project planning."
-compatibility:
-  - GHCP
 ---
 # Issue Triage Skill
 
@@ -53,3 +52,5 @@ Canonical priorities are `priority:critical`, `priority:high`, `priority:medium`
 - `backlog-burndown` for sprint velocity and scope tracking.
 - `sprint-planner` for placing triaged issues into sprint commitments.
 - `escalation-router` for issues requiring human sign-off before action.
+
+

@@ -1,8 +1,7 @@
 ---
 name: azure-identity-audit
+compatibility: [github-copilot-cli]
 description: "Use when reviewing Azure identity and access designs across RBAC, managed identities, Entra ID, and federation. USE FOR: audit RBAC assignments, managed identity scope, app registration permissions, OIDC federation, least privilege. DO NOT USE FOR: network topology design, app feature code, non-Azure IAM platforms."
-compatibility:
-  - GHCP
 ---
 # Azure Identity Audit Skill
 
@@ -42,3 +41,5 @@ Return:
 ## Related Agent
 
 Use with `identity-architect` agent.
+
+

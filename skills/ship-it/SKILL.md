@@ -1,8 +1,8 @@
 ---
 name: ship-it
+compatibility: [github-copilot-cli]
 description: "Use when converting a delivery intent (`ship-it`, `spec-2-prod`, or `onboarding-conductor`) into a governed execution plan with live issue side effects. USE FOR: dispatching ship-it intents, creating tracked phase/sprint issue bundles, enforcing risk-band governance checklists, and handing intent execution to orchestration agents. DO NOT USE FOR: direct production deployment without gates, ad hoc one-off bugfixes, or bypassing approval policies."
-compatibility:
-  - GHCP
+
 category: workflow
 visibility: public
 metadata:
@@ -60,3 +60,5 @@ turn it into a governed, trackable execution bundle.
 - Promotion evidence bundle (`promotion-evidence-bundle.json` and `promotion-evidence-bundle.md`) with immutable references and gate decisions
 - Artifact completeness scorecard with risk/change-band matrix enforcement
 - Spec drift findings with remediation suggestions and goal-ID linked runbook/release-note deltas
+
+

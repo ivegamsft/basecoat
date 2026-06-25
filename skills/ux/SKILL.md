@@ -1,8 +1,7 @@
 ---
 name: ux
+compatibility: [github-copilot-cli]
 description: "Use when defining user journeys, wireframes, component behavior, or accessibility expectations for a product experience. USE FOR: map end-to-end user journey, create wireframe spec for new screen, review component states and interactions, run WCAG accessibility audit, evaluate usability of a workflow. DO NOT USE FOR: backend infrastructure design, low-level API performance tuning."
-compatibility:
-  - GHCP
 ---
 # UX Design Skill
 
@@ -20,3 +19,5 @@ Design user experiences, map user journeys, specify UI wireframes and components
 ## Agent Pairing
 
 Use with `ux-designer` agent. Specs produced here are consumed by `frontend-dev`; route accessibility violations back to `ux-designer` then to `frontend-dev` for fixes.
+
+

@@ -1,15 +1,14 @@
 ---
 name: container-build-assessment
-description: "Assess Docker build readiness with composable scripts that analyze Dockerfile structure, inspect dependency footprint, estimate image size, and report security posture in structured JSON suitable for automation and remediation planning."
 compatibility: [github-copilot-cli]
+description: "Assess Docker build readiness with composable scripts that analyze Dockerfile structure, inspect dependency footprint, estimate image size, and report security posture in structured JSON suitable for automation and remediation planning."
+
 scripts:
   - name: analyze-dockerfile
     description: "Parse Dockerfile structure and detect common build issues."
     entrypoint: scripts/analyze-dockerfile.ps1
     inputs:
       - name: DockerfilePath
-compatibility:
-  - GHCP
 ---
 # Container Build Assessment
 
@@ -38,3 +37,5 @@ Run one step:
 ## Output
 
 The orchestrator returns step-by-step JSON plus a final consolidated result.
+
+

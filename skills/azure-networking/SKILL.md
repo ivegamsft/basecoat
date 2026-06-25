@@ -1,8 +1,7 @@
 ---
 name: azure-networking
+compatibility: [github-copilot-cli]
 description: "Use when designing Azure network topology, private connectivity, and traffic control patterns. USE FOR: design a hub-spoke VNet topology, set up private endpoints and Private DNS zones, author an NSG rule matrix, create forced-tunneling route tables, review hybrid connectivity on Azure. DO NOT USE FOR: identity role assignments, Kubernetes app manifests, non-Azure CDN setup."
-compatibility:
-  - GHCP
 ---
 # Azure Networking Skill
 
@@ -19,3 +18,5 @@ NSG rules, Azure Firewall policies, and forced-tunneling route tables.
 | [`templates/cidr-allocation.md`](templates/cidr-allocation.md) | CIDR allocation table for hub, spokes, and subnets |
 | [`templates/private-endpoint-dns-zones.md`](templates/private-endpoint-dns-zones.md) | PaaS service → private endpoint → DNS zone mapping |
 | [`templates/nsg-rule-matrix.md`](templates/nsg-rule-matrix.md) | NSG inbound/outbound rule matrix per subnet tier |
+
+

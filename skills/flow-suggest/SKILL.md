@@ -1,10 +1,8 @@
 ---
 name: flow-suggest
+compatibility: [github-copilot-cli]
 description: "Use when translating flow-audit findings into prioritized fixes and issue-ready recommendations. USE FOR: remediation prioritization, high-confidence auto-issue creation, issue drafting, acceptance-criteria definition, and execution-wave planning. DO NOT USE FOR: direct code implementation, unreviewed governance enforcement, or broad roadmap planning without audit input."
-compatibility:
-  - GHCP
-  - agent:flow-suggester
-  - agent:flow-optimizer
+
 metadata:
   category: flow-governance
   domain: flow-governance
@@ -50,3 +48,5 @@ clear implementation targets.
 - `agents/flow-suggester.agent.md`
 - `skills/flow-audit/SKILL.md`
 - `skills/flow-optimize/SKILL.md`
+
+
