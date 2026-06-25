@@ -334,6 +334,22 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running agent-merge eval policy tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'agent-merge-eval-policy-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Agent-merge eval policy tests failed' -ForegroundColor Red
+    Write-FailureLog 'agent-merge-eval-policy-tests'
+    exit 1
+}
+
+Write-Host 'Running generate agent eval stubs tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'generate-agent-eval-stubs-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Generate agent eval stubs tests failed' -ForegroundColor Red
+    Write-FailureLog 'generate-agent-eval-stubs-tests'
+    exit 1
+}
+
 Write-Host 'Running extension intent routing eval tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'extension-intent-routing-eval-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

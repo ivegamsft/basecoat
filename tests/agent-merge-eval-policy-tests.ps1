@@ -75,9 +75,10 @@ Test-Result 'Eval step validates .agent.eval.yaml companions' `
     'Eval step must reference .agent.eval.yaml pattern'
 
 # ── Eval step checks for skill eval files ─────────────────────────────────────
+# The workflow Python code spans multiple lines, so check both tokens independently.
 Test-Result 'Eval step validates skill eval.yaml companions' `
-    ($wf -match 'skills.*eval\.yaml|eval\.yaml.*skills') `
-    'Eval step must reference skill eval.yaml pattern'
+    ($wf -match 'skills/\*/SKILL\.md' -and $wf -match '"eval\.yaml"') `
+    'Eval step must reference skills/*/SKILL.md glob and eval.yaml companion lookup'
 
 # ── Eval step exits non-zero on failure (bypass protection) ───────────────────
 Test-Result 'Eval step calls sys.exit(1) on missing companions' `
