@@ -59,6 +59,56 @@ if (-not (Test-Path $workflowPath)) {
 
 $wf = Get-Content $workflowPath -Raw
 
+# ── Duplicate-name guardrail step exists ────────────────────────────────────────
+Test-Result "Workflow contains 'Validate duplicate agent names and tool conflicts' step" `
+    ($wf -match "name:\s*Validate duplicate agent names and tool conflicts") `
+    'Workflow must validate duplicate agent names before merge'
+
+# ── Duplicate-name guardrail emits expected failure signal ─────────────────────
+Test-Result "Duplicate-name guardrail emits 'duplicate agent name' failure" `
+    ($wf -match "duplicate agent name") `
+    'Guardrail must emit a deterministic duplicate-name failure message'
+
+# ── Repository currently has no duplicate agent frontmatter names ──────────────
+$agentFiles = Get-ChildItem -Path (Join-Path $repoRoot 'agents') -Filter '*.agent.md' -File
+$agentNameMap = @{}
+$agentParseFailures = @()
+foreach ($agentFile in $agentFiles) {
+    $content = Get-Content $agentFile.FullName -Raw
+    $frontmatterMatch = [regex]::Match($content, '^---\r?\n(.*?)\r?\n---\r?\n', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+    if (-not $frontmatterMatch.Success) {
+        $agentParseFailures += "$($agentFile.Name): missing YAML frontmatter"
+        continue
+    }
+
+    $nameMatch = [regex]::Match($frontmatterMatch.Groups[1].Value, '(?m)^name:\s*(.+)$')
+    if (-not $nameMatch.Success) {
+        $agentParseFailures += "$($agentFile.Name): missing name in frontmatter"
+        continue
+    }
+
+    $rawName = $nameMatch.Groups[1].Value.Trim().Trim('"').Trim("'")
+    $normalized = $rawName.ToLowerInvariant()
+    if (-not $agentNameMap.ContainsKey($normalized)) {
+        $agentNameMap[$normalized] = @()
+    }
+    $agentNameMap[$normalized] += $agentFile.Name
+}
+
+$duplicateNames = @($agentNameMap.GetEnumerator() | Where-Object { $_.Value.Count -gt 1 })
+$duplicateDetails = ''
+if ($duplicateNames.Count -gt 0) {
+    $duplicateDetails = ($duplicateNames | ForEach-Object { "'$($_.Key)' => $($_.Value -join ', ')" }) -join '; '
+}
+Test-Result 'Repository has no duplicate agent frontmatter names' `
+    ($duplicateNames.Count -eq 0) `
+    $duplicateDetails
+
+$parseFailureDetails = ($agentParseFailures -join '; ')
+Test-Result 'Repository agent files have valid frontmatter names' `
+    ($agentParseFailures.Count -eq 0) `
+    $parseFailureDetails
+
 # ── Job name matches required status check prefix ──────────────────────────────
 Test-Result "Job display name is 'Agent merge guardrails'" `
     ($wf -match "name:\s*Agent merge guardrails") `

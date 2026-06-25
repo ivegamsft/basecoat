@@ -269,7 +269,15 @@ if ($LASTEXITCODE -ne 0) {
     Write-FailureLog 'aidl-portfolio-rollup-kpi-publisher-tests'
     exit 1
 }
-
+ 
+Write-Host 'Running Keep/Fix/Throttle weekly scorecard tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'keep-fix-throttle-weekly-scorecard-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Keep/Fix/Throttle weekly scorecard tests failed' -ForegroundColor Red
+    Write-FailureLog 'keep-fix-throttle-weekly-scorecard-tests'
+    exit 1
+}
+ 
 Write-Host 'Running AIDL learning-to-memory promotion pipeline tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'aidl-learning-memory-promotion-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

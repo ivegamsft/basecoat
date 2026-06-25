@@ -69,6 +69,24 @@ Use these defaults unless task complexity requires escalation:
 3. Audit each tool call for overhead: prefer direct file tools for local repo work and reserve remote/MCP calls for data not available in-repo.
 4. Apply output-token shape defaults: lead with outcome, prefer bullets/tables over long prose, and provide deep explanation only when needed for risk or decision quality.
 
+## Keep Defaults (Issue #2046)
+
+The following proven patterns are now default operating behavior:
+
+1. Compact at semantic phase boundaries (`triage -> implementation -> merge waiting`).
+2. Use file references instead of large pasted instruction or artifact blocks.
+3. Prefer one kickoff and `/tasks`-based monitoring over repeated orchestration restarts.
+
+Runbooks:
+
+- `docs/guides/kept-patterns/phase-boundary-compaction.md`
+- `docs/guides/kept-patterns/file-reference-only-context.md`
+- `docs/guides/kept-patterns/single-kickoff-tasks-monitoring.md`
+
+For promoting future candidates, use:
+
+- `docs/guides/keep-candidate-acceptance-checklist.md`
+
 ## Triggering the Copilot Coding Agent
 
 Post `/approve` as an issue comment to trigger the Copilot coding agent workflow
