@@ -35,12 +35,16 @@ foreach ($snippet in $requiredScriptSnippets) {
 }
 
 $requiredWorkflowSnippets = @(
+    'pull_request_target:',
+    'types:',
+    '- closed',
     'schedule:',
     'workflow_dispatch:',
     'apply_changes',
     'stale_days',
     'contents: write',
     'timeout-minutes: 20',
+    "if: github.event_name != 'pull_request_target' || (github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main')",
     'group: ${{ github.workflow }}-${{ github.ref }}',
     'scripts/cleanup-branches.ps1'
 )

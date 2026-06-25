@@ -1,6 +1,9 @@
 name: "BaseCoat - Sprint Closeout Branch Audit"
 
 on:
+  pull_request_target:
+    types:
+      - closed
   schedule:
     - cron: "0 2 * * 0"
   workflow_dispatch:
@@ -26,6 +29,7 @@ concurrency:
 
 jobs:
   branch-audit:
+    if: github.event_name != 'pull_request_target' || (github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -47,6 +51,8 @@ jobs:
 
           $applyChanges = if ("${{ github.event_name }}" -eq "workflow_dispatch") {
             "${{ inputs.apply_changes }}" -eq "true"
+          } elseif ("${{ github.event_name }}" -eq "pull_request_target") {
+            "${{ github.event.pull_request.merged }}" -eq "true"
           } else {
             $false
           }
@@ -62,4 +68,3 @@ jobs:
           }
 
           pwsh ./scripts/cleanup-branches.ps1 @params
-

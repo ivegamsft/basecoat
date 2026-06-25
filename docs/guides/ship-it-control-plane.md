@@ -20,6 +20,7 @@ into governed SDLC execution artifacts with live GitHub side effects.
 4. **Automation-ready outputs**
    - JSON summary: `test-results\ship-it\summary.json`
    - Markdown summary: `test-results\ship-it\summary.md`
+   - Stage artifacts per sprint/phase (branch name, PR title/query, merge policy, cleanup policy)
 
 ## How to Use
 
@@ -68,6 +69,7 @@ issues instead of creating duplicates.
 2. Keep merge operations serialized for release-affecting work.
 3. Record rollout and rollback evidence links in sprint issues.
 4. Capture post-release learnings before closeout.
+5. Run branch cleanup audit after merged PRs on `main` (workflow trigger) and review audit logs.
 
 ## Learning Log (Implementation)
 

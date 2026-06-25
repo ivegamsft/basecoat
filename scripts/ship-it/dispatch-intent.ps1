@@ -229,6 +229,55 @@ function Get-DesiredStateDiff {
   )
 }
 
+function Get-StageArtifact {
+  param(
+    [Parameter(Mandatory)]
+    [string]$IntentName,
+    [Parameter(Mandatory)]
+    [string]$RepoShortName,
+    [Parameter(Mandatory)]
+    [string]$GoalText,
+    [Parameter(Mandatory)]
+    [int]$StageIndex,
+    [Parameter(Mandatory)]
+    [string]$StageSlug,
+    [Parameter(Mandatory)]
+    [string]$RunHash
+  )
+
+  $safeGoalSlug = ($GoalText.ToLowerInvariant() -replace "[^a-z0-9]+", "-").Trim("-")
+  if ($safeGoalSlug.Length -gt 24) {
+    $safeGoalSlug = $safeGoalSlug.Substring(0, 24).Trim("-")
+  }
+  if ([string]::IsNullOrWhiteSpace($safeGoalSlug)) {
+    $safeGoalSlug = "goal"
+  }
+
+  $hashSegment = $RunHash.Substring(0, [Math]::Min(8, $RunHash.Length))
+  $branchName = "intent/$IntentName/$hashSegment/s$StageIndex-$StageSlug-$safeGoalSlug"
+  $prTitlePrefix = if ($IntentName -eq "onboarding-conductor") { "Phase" } else { "Sprint" }
+
+  return [ordered]@{
+    stage = $StageIndex
+    branch_name = $branchName
+    pr_title = "[Intent][$IntentName][$prTitlePrefix $StageIndex][$RepoShortName] $GoalText"
+    pr_search_query = "is:pr is:open head:$branchName"
+    merge_policy = [ordered]@{
+      sequencing = "serial"
+      required_checks = @(
+        "BaseCoat - PR Flow Hygiene / PR readiness routing and weekly hygiene report",
+        "BaseCoat - Sprint Closeout Branch Audit / branch-audit"
+      )
+      merge_ready_condition = "all_required_checks_green"
+    }
+    cleanup_policy = [ordered]@{
+      workflow = ".github/workflows/sprint-closeout-branch-audit.yml"
+      script = "scripts/cleanup-branches.ps1"
+      audit_log = "GITHUB_STEP_SUMMARY"
+    }
+  }
+}
+
 function Get-ContentHash {
   param(
     [Parameter(Mandatory)]
@@ -416,12 +465,21 @@ if ($DryRun) {
   $summary.parent_issue_number = "0000"
   for ($i = 0; $i -lt $sprints.Count; $i++) {
     $phaseName = [string]$sprints[$i].Name
+    $phaseSlug = ($phaseName.ToLowerInvariant() -replace "[^a-z0-9]+", "-").Trim("-")
+    $stageArtifact = Get-StageArtifact `
+      -IntentName $Intent `
+      -RepoShortName $repoName `
+      -GoalText $trimmedGoal `
+      -StageIndex ($i + 1) `
+      -StageSlug $phaseSlug `
+      -RunHash $runKeyHash
     $summary.child_issues += [ordered]@{
       sprint = $phaseName
       phase = $phaseName
       url = "https://github.com/$TargetRepo/issues/000$($i + 1)"
       number = "000$($i + 1)"
       reused = $false
+      stage_artifact = $stageArtifact
     }
   }
 } else {
@@ -485,6 +543,13 @@ if ($DryRun) {
     $phaseName = [string]$sprint.Name
     $phaseSlug = ($phaseName.ToLowerInvariant() -replace "[^a-z0-9]+", "-").Trim("-")
     $phaseMarker = "<!-- basecoat-intent-child:${runKeyHash}:${phaseSlug} -->"
+    $stageArtifact = Get-StageArtifact `
+      -IntentName $Intent `
+      -RepoShortName $repoName `
+      -GoalText $trimmedGoal `
+      -StageIndex $index `
+      -StageSlug $phaseSlug `
+      -RunHash $runKeyHash
     $sprintTitlePrefix = if ($Intent -eq "onboarding-conductor") { "Phase" } else { "Sprint" }
     $sprintTitle = "[Intent][$Intent][$sprintTitlePrefix $index][$repoName] $trimmedGoal"
     $exitCriteria = $sprint.ExitCriteria | ForEach-Object { "- [ ] $_" } | Out-String
@@ -508,6 +573,28 @@ $exitCriteria
 - [ ] Validation run links
 - [ ] Release notes (if applicable)
 - [ ] Learning log update
+
+## PR Artifacts
+
+- Planned branch: `$($stageArtifact.branch_name)`
+- Planned PR title: $($stageArtifact.pr_title)
+- Planned PR search: `$($stageArtifact.pr_search_query)`
+- [ ] Linked PR created or updated for this stage
+
+## Merge Sequencing Guardrail
+
+- Policy: `$($stageArtifact.merge_policy.sequencing)`
+- Required checks before merge:
+  - `$($stageArtifact.merge_policy.required_checks[0])`
+  - `$($stageArtifact.merge_policy.required_checks[1])`
+- [ ] Merge this stage only after prior stage closure and all required checks are green
+
+## Branch Cleanup and Audit
+
+- Cleanup workflow: `$($stageArtifact.cleanup_policy.workflow)`
+- Cleanup script: `$($stageArtifact.cleanup_policy.script)`
+- Audit output: `$($stageArtifact.cleanup_policy.audit_log)`
+- [ ] Post-merge cleanup audit reviewed
 
 $phaseMarker
 "@
@@ -553,6 +640,7 @@ $phaseMarker
       url = $sprintUrl
       number = $childIssueNumber
       reused = ($null -ne $existingChild)
+      stage_artifact = $stageArtifact
     }
 
     Remove-Item -Path $sprintBodyPath -Force
