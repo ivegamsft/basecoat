@@ -116,6 +116,10 @@ Recurring failures are elevated to first-class product work with owners and meas
 4. **Validation**: Zero recurrence over ≥2 weeks; update runbook and guard rails
 5. **Archive**: Documented in `docs/operations/failure-archive.md` with resolution details
 
+For issue #2047 execution, enforce minimum-slice acceptance fields in
+`docs/operations/failure-pattern-run-contract.md` (`top3_failures`,
+`mttr_improvement_pct`, `recurrence_rate_2w_pct`).
+
 ### SLO Targets
 
 | Metric | Target | Measurement |
