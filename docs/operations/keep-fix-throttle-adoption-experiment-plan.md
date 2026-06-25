@@ -35,18 +35,21 @@ Captured before rollout of workstreams 1–4; used as the experiment start point
 ## Experiment Phases
 
 ### Phase 1: Prepare (Week 0)
+
 - Finalize experiment plan and baseline metrics (this document)
 - Publish adoption experiment plan artifact
 - Configure weekly scorecard workflow ([#2050](https://github.com/IBuySpy-Shared/basecoat/issues/2050))
 - Complete workstreams 1–4 rollout
 
 ### Phase 2: Run (Weeks 1–5)
+
 - Execute workstreams 1–4 changes in production
 - Collect weekly scorecards with trend tracking
 - Respond to any P0/P1 incidents immediately
 - Record observational notes about adoption friction
 
 ### Phase 3: Readout (Week 6)
+
 - Compile final metric summary
 - Compare end-of-experiment metrics to baseline
 - Document go/no-go decision: "Keep," "Fix and retry," or "Throttle"
@@ -72,12 +75,14 @@ Captured before rollout of workstreams 1–4; used as the experiment start point
 ## Scope
 
 ### Included (Rollout Scope)
+
 - Workstream 1: Standardize proven patterns as defaults
 - Workstream 2: Reliability debt program for recurring failures
 - Workstream 3: Tooling routing matrix (local/background/cloud/manual)
 - Workstream 4: Risk-tier autonomy policy enforcement
 
 ### Excluded
+
 - Workstreams 5–6 (scorecard and this experiment plan)
 - Unrelated feature development
 - Emergency hotfixes (continue as-is)
@@ -87,6 +92,7 @@ Captured before rollout of workstreams 1–4; used as the experiment start point
 Weekly readout target: [Issue #2050](https://github.com/IBuySpy-Shared/basecoat/issues/2050)
 
 Each readout includes:
+
 - Metric snapshot (throughput, failure rate, MTTR, manual intervention)
 - Trend classification (improving/stable/regressing)
 - Remediation links for regressions
