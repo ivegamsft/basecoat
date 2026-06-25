@@ -25,5 +25,3 @@ Define and validate bill-of-materials schemas with stable field names and predic
 ## Agent Pairing
 
 Use with agents that ingest BOMs, validate structured inventory data, or generate machine-readable contract files.
-
-

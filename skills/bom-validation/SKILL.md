@@ -21,5 +21,3 @@ Use this skill to validate that a workcell BOM is complete and safe before downs
 
 - Do not infer missing resources.
 - Do not approve a BOM that fails schema or naming checks.
-
-

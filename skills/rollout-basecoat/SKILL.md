@@ -45,5 +45,3 @@ pwsh .\sync.ps1
 BASECOAT_REPO=https://github.com/IBuySpy-Shared/basecoat.git \
 BASECOAT_REF=main ./sync.sh
 ```
-
-

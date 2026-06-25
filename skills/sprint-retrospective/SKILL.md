@@ -21,5 +21,3 @@ Knowledge pack for the `@sprint-retrospective` agent — templates, metrics form
 | Parallel dispatch ratio | `max concurrent open PRs / total PRs` |
 | Velocity | `issues closed / calendar days` |
 | Churn rate | `lines removed / lines added` — high churn signals rework |
-
-

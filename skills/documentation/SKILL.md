@@ -40,5 +40,3 @@ This skill is designed to be used alongside the following agents:
 - **product-manager** — Provides feature context for user-facing documentation
 
 For code-level documentation (inline comments, docstrings), coordinate with the `backend-dev` or `frontend-dev` agents.
-
-

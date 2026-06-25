@@ -19,5 +19,3 @@ Design new API contracts, review spec changes for breaking changes, choose versi
 ## Agent Pairing
 
 Use with `api-designer` agent. For implementation hand off to `backend-dev`; for data models coordinate with `data-tier`; share the spec with `frontend-dev` for consumer integration.
-
-

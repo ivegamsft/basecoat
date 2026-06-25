@@ -43,5 +43,3 @@ The front door to the BaseCoat framework. Routes requests to the right agent acr
 | DevOps | `@devops-engineer`, `@release-manager`, `@rollout-basecoat` |
 | Process | `@sprint-planner`, `@product-manager`, `@issue-triage`, `@retro-facilitator` |
 | Meta | `@agent-designer`, `@prompt-engineer`, `@mcp-developer`, `@tech-writer` |
-
-

@@ -26,5 +26,3 @@ Model and validate factory state transitions for orchestration workflows.
 ## Agent Pairing
 
 Use with factory orchestration agents that read `.github/factory-state.json` and trigger Workcell workflows.
-
-

@@ -21,5 +21,3 @@ Deploy and operate containerized workloads on ACA with Dapr, revision management
 | [health-probes.md](references/health-probes.md) | Liveness, readiness, startup probes (CLI/YAML/Bicep) |
 | [container-apps-jobs.md](references/container-apps-jobs.md) | Scheduled and event-driven jobs, job scaling |
 | [multi-container-environments.md](references/multi-container-environments.md) | Environment setup, internal service communication |
-
-

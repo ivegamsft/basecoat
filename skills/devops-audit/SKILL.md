@@ -46,5 +46,3 @@ Comprehensive auditing of CI/CD pipelines, deployment configurations, environmen
 - `devops` — DevOps engineering and CI/CD implementation
 - `infrastructure-audit` — Infrastructure and IaC assessment
 - `ci-audit` — Organization-level CI/CD configuration audit
-
-

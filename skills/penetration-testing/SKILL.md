@@ -33,5 +33,3 @@ reconnaissance, vulnerability discovery, exploitation, and reporting.
 - Never test without written authorization
 - Stop and escalate immediately if RCE or credential dump is found
 - Do not exfiltrate real user data — stop at proof-of-concept level
-
-

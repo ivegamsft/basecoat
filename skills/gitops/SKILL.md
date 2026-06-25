@@ -28,5 +28,3 @@ The operator continuously reconciles actual cluster state with declared desired 
 - Pin explicit image versions — never use `latest`
 - Require PR approval before merging cluster config changes
 - Never run `kubectl apply` manually — commit and let the operator apply
-
-

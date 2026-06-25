@@ -50,5 +50,3 @@ Use this skill to run a fast unblock lane when older PRs or issues are breaking 
 - Critical-path output for `rebalance` mode
 - Gated items requiring tests or explicit check-in
 - Verification summary and handoff back to regular queue order
-
-

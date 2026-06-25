@@ -26,5 +26,3 @@ Use this skill when you need a repeatable sprint shutdown process that leaves cl
 - `release-manager` for release-note and deployment context.
 - `sprint-planner` for carry-forward and next-sprint setup.
 - `git-worktrees` for isolated workspace cleanup and pruning.
-
-

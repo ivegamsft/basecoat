@@ -67,5 +67,3 @@ Required outputs:
 - `failure-pattern-process`
 - `rca`
 - `incident-responder`
-
-

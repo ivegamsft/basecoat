@@ -33,5 +33,3 @@ paired cloud break-fix worker.
 - `merge-coordinator`
 - `broken-build-troubleshooter`
 - `ci-failure-escalation`
-
-

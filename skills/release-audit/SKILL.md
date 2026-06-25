@@ -50,5 +50,3 @@ Return:
 ## Related Agent
 
 Use with `release-manager` agent.
-
-

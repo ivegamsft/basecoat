@@ -24,5 +24,3 @@ Evaluate launch safety through PRR gate checklists, DR planning, and incident re
 | Performance | Load test at 2×peak, query perf validated, auto-scaling configured |
 | Observability | Centralized logs, dashboards, alerting, distributed tracing enabled |
 | Incident | On-call rotation, runbooks, escalation procedures, post-mortem process |
-
-

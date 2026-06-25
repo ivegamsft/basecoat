@@ -28,5 +28,3 @@ Secure IPC design, preload APIs, packaging, and release automation for productio
 | State (multi-window) | `ipcMain` broadcast from main process |
 | Secrets | `process.env` in main only — never in renderer or source |
 | Packaging | Sign installers, notarize macOS, verify auto-update metadata |
-
-

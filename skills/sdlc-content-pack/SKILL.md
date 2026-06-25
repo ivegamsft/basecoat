@@ -31,5 +31,3 @@ Keep terms, ordered steps, and handoff points consistent across all artifacts.
 - Use the same bundle identifier, SDLC phase, and audience labels everywhere.
 - Surface handoff points and approval gates explicitly.
 - Prefer markdown-first outputs for versioned review.
-
-

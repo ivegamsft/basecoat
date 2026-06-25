@@ -31,5 +31,3 @@ Migrate enterprise messaging from MSMQ to Azure Service Bus using phased cutover
 - Classify errors: transient (retry) vs permanent (dead-letter)
 - Use feature flags for staged routing transitions
 - Preserve correlation IDs through all serialization conversions
-
-

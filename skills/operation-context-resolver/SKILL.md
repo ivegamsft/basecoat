@@ -71,5 +71,3 @@ const isActionAllowed =
 - Template: `templates/environment-map.yml`
 - Guide: `README.md`
 - Types: `src/types.ts`
-
-

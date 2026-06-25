@@ -41,5 +41,3 @@ Return:
 ## Related Agent
 
 Use with `azure-landing-zone` agent.
-
-

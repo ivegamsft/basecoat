@@ -19,5 +19,3 @@ Schema design, database migrations, query review, indexing strategy, and data ac
 ## Agent Pairing
 
 Use with `data-tier` agent. Schema changes require coordination with `backend-dev` to keep repository patterns aligned.
-
-

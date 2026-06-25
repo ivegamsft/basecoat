@@ -18,5 +18,3 @@ Design and enforce CI/CD boundaries so different layers can evolve and release i
 ## Agent Pairing
 
 Use with `change-isolation-architect` agent. For implementation details pair with `devops-engineer`; for schema change lanes pair with `data-tier`; for app/UI lanes pair with `frontend-dev`.
-
-

@@ -28,5 +28,3 @@ User → Command → Handler → Event Store → Events → Event Bus
 
 Use when an audit trail, independent read/write scaling, or multiple read-optimized views are
 needed. Avoid for simple CRUD with uniform load.
-
-

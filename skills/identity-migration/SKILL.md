@@ -24,5 +24,3 @@ role migration, OIDC setup, and hybrid local + Entra ID scenarios.
 - **IClaimsTransformation** — converts Identity roles to claims on each request
 - **Hybrid auth** — `AddCookie` + `AddMicrosoftIdentityWebApp` for local + Entra ID
 - **Never store secrets** in `appsettings.json` — use Key Vault or environment variables
-
-

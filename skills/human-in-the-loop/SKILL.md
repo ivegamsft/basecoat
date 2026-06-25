@@ -23,5 +23,3 @@ Patterns for agent workflows that require explicit human judgment before taking 
 | Low confidence | Escalate: delegate to more capable agent or human |
 | Error threshold exceeded | Escalate: 3+ failures on same task |
 | Token budget near limit | Escalate: hand off to fresh session or human |
-
-

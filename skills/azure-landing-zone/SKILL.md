@@ -26,5 +26,3 @@ Use with `azure-landing-zone` agent. Cross-cutting: `solution-architect` (ADRs),
 
 - [Azure Landing Zones](https://aka.ms/alz)
 - [ALZ-Bicep](https://github.com/Azure/ALZ-Bicep)
-
-

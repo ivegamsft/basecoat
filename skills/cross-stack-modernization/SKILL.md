@@ -22,5 +22,3 @@ anti-corruption layer (ACL), risk scoring, and dependency extraction sequencing.
 | Test coverage | > 60 % | 30–60 % | < 30 % |
 | Time horizon | Weeks | Months | Quarters |
 | Risk tolerance | Low | Medium | High |
-
-

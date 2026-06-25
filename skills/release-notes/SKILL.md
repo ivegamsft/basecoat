@@ -56,5 +56,3 @@ Each item should include traceability (PR number, commit SHA, or issue link).
 - [`references/templates/internal.md`](references/templates/internal.md)
 - [`references/templates/external.md`](references/templates/external.md)
 - `scripts/validate-release-notes.ps1` writes validation reports to `reports/release-notes/`
-
-

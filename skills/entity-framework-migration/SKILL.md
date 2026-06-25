@@ -33,5 +33,3 @@ Use this skill when modernizing data layers from Entity Framework 6 or older pat
 - EF migration approach and risk summary
 - Mapping and query refactor checklist
 - Validation strategy for correctness and performance
-
-

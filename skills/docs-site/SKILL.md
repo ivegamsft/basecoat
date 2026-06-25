@@ -21,5 +21,3 @@ optional Mermaid architecture diagrams — all ready to publish to GitHub Pages.
 
 Generates: `mkdocs.yml`, `docs/index.md`, `docs/getting-started.md`,
 `.github/workflows/docs.yml`, and optional `docs/reference/asset-catalog.md`.
-
-

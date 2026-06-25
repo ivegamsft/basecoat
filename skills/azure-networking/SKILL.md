@@ -18,5 +18,3 @@ NSG rules, Azure Firewall policies, and forced-tunneling route tables.
 | [`templates/cidr-allocation.md`](templates/cidr-allocation.md) | CIDR allocation table for hub, spokes, and subnets |
 | [`templates/private-endpoint-dns-zones.md`](templates/private-endpoint-dns-zones.md) | PaaS service → private endpoint → DNS zone mapping |
 | [`templates/nsg-rule-matrix.md`](templates/nsg-rule-matrix.md) | NSG inbound/outbound rule matrix per subnet tier |
-
-

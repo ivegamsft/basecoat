@@ -38,5 +38,3 @@ Use this skill when requests include sprint planning goals such as:
 - Agent: `agents/basecoat-10-core-sprint-planner.agent.md`
 - Skill: `skills/sprint-management/SKILL.md`
 - Instruction: `instructions/basecoat-10-core-intent-routing.instructions.md`
-
-

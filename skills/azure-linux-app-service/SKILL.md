@@ -24,5 +24,3 @@ log streaming, and failure patterns.
 | Python | `PYTHON\|3.11` |
 | Ruby | `RUBY\|3.2` |
 | Node.js | `NODE\|20-lts` |
-
-

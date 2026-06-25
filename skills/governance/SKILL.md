@@ -50,5 +50,3 @@ rules separate from repo-specific rules.
 - `docs/reference/governance-contract.md`
 - `docs/reference/label-taxonomy.md`
 - `docs/operations/label-cleanup-plan.md`
-
-

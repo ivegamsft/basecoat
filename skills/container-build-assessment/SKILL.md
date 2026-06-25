@@ -37,5 +37,3 @@ Run one step:
 ## Output
 
 The orchestrator returns step-by-step JSON plus a final consolidated result.
-
-

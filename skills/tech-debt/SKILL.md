@@ -28,5 +28,3 @@ Inventory, score, budget, and reduce technical debt using RICE prioritization an
 - Adding debt requires tech lead approval and a remediation plan
 - Never let debt backlog exceed 6 months of capacity
 - No new features on top of P1 debt
-
-

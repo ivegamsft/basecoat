@@ -23,5 +23,3 @@ produce prioritized remediation guidance with Bicep/Terraform templates.
 - Rank by impact × effort matrix — surface quick wins first
 - Never emit secrets or credentials in generated IaC
 - Pair with `solution-architect` (full assessment) and `devops-engineer` (IaC remediation)
-
-

@@ -30,5 +30,3 @@ Use this skill when the task is to review code rather than write it.
 ## Related Guardrails
 
 - [Code Review Escalation](../../docs/guardrails/code-review-escalation.md) — When and how to escalate findings to blocking issues vs inline comments
-
-

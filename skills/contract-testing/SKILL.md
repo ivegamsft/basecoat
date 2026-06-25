@@ -31,5 +31,3 @@ Consumer-driven contract tests, Pact broker workflows, provider verification, an
 | Provider states | `/provider-states` endpoint seeds DB before each interaction |
 | Mutation gate | >85% mutation score required before merging |
 | Deployment gate | BLOCKED if any contract fails verification |
-
-

@@ -55,5 +55,3 @@ gh pr list --state merged --limit 200 --json number,title,author,labels \
 - `backlog-burndown`
 - `issue-triage`
 - `sprint-planner`
-
-

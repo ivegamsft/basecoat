@@ -23,5 +23,3 @@ Use this skill to standardize stale PR cleanup and keep merge queues actionable.
 - `orphaned-pr-cleanup`
 - `issue-triage`
 - `merge-coordinator`
-
-

@@ -38,5 +38,3 @@ See `examples/` folder for good vs bad task framing with side-by-side comparison
 ## Agent Pairing
 
 Use with specialized agents (`backend-dev`, `frontend-dev`, `code-review`, etc.) as the primary execution path. Pair with planning agents when the decomposition strategy itself is the blocker.
-
-

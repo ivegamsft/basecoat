@@ -18,5 +18,3 @@ remediation automation, and compliance reporting.
 | [`initiative-definition-template.md`](initiative-definition-template.md) | Policy initiative (set) definition |
 | [`remediation-task-template.md`](remediation-task-template.md) | DeployIfNotExists remediation task |
 | [`compliance-report-template.md`](compliance-report-template.md) | Azure Resource Graph and KQL compliance queries |
-
-

@@ -25,5 +25,3 @@ Use this skill when adding a new `*.instructions.md` file to the shared standard
 ## Starter Assets
 
 - Template: `templates/instruction.template.md`
-
-

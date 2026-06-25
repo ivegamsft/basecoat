@@ -49,5 +49,3 @@ pwsh skills/config-secrets-audit/scripts/audit-config-secrets.ps1 -RootPath . -C
 
 - For Azure policy and compliance rollups, forward SARIF + summary output into your policy reporting pipeline.
 - Use with `github-security-posture`, `security-analyst`, or `devops-audit` for remediation planning.
-
-

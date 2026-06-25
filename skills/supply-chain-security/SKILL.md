@@ -25,5 +25,3 @@ Secure software supply chains through artifact signing, SBOM generation, and SLS
 | pip-audit | Python dependency vulnerability scanning |
 | Trivy | Container and filesystem scanning |
 | SLSA Generator | Add SLSA Level 3 build provenance to releases |
-
-

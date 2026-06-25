@@ -19,5 +19,3 @@ A good handoff captures both layers:
 | Template | Purpose |
 |---|---|
 | `handoff-template.md` | Session handoff covering status, completed work, failed approaches, decisions, dependencies, files modified, and commands run |
-
-

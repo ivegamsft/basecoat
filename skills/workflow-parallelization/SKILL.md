@@ -75,5 +75,3 @@ Two jobs can run in parallel when:
 - Recommended job group layout with estimated time savings
 - Fan-out dispatch plan for multi-agent or multi-session execution
 - Merge serialization queue with conflict risk annotations
-
-

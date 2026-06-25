@@ -25,5 +25,3 @@ Prepare a cutover checklist that makes rollout readiness, shadow-mode proof, rol
 ## Agent Pairing
 
 Use with deployment and release-management agents that need a concrete cutover checklist rather than broad release advice.
-
-

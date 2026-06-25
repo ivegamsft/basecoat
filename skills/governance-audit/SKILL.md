@@ -62,5 +62,3 @@ Every governance audit must include exported evidence for:
 - `docs/reference/label-taxonomy.md`
 - `docs/operations/label-cleanup-plan.md`
 - `skills/issue-triage/SKILL.md`
-
-

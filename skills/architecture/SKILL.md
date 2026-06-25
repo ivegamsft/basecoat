@@ -19,5 +19,3 @@ System design, architecture documentation, technology evaluation, and risk asses
 ## Agent Pairing
 
 Use with `solution-architect` agent. Hand off to `backend-dev` for API/service design, `frontend-dev` for UI architecture, `data-tier` for database and storage design.
-
-

@@ -28,5 +28,3 @@ without creating brittle suites.
 | **Best for** | Cross-browser, multi-language | JS-first teams, quick setup |
 
 See [`references/ci-integration.md`](references/ci-integration.md) for core principles, CI matrix patterns, and flakiness prevention.
-
-

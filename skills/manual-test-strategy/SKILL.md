@@ -21,5 +21,3 @@ Structure decisions about what stays manual, what gets automated, and how eviden
 | `charter-template.md` | Structure a time-boxed exploratory session |
 | `checklist-template.md` | Build a repeatable manual regression checklist |
 | `defect-template.md` | Capture defect evidence for filing, triage, or automation handoff |
-
-

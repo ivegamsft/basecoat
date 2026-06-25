@@ -58,5 +58,3 @@ gh run list --branch main --status action_required --limit 5
 ## Reference
 
 - [`references/checklist-template.md`](references/checklist-template.md)
-
-

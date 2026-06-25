@@ -22,5 +22,3 @@ Use this skill to transform standup chatter into execution-ready actions.
 
 - `daily-standup-facilitator`
 - `issue-triage`
-
-

@@ -23,5 +23,3 @@ Use this skill to create a repeatable triage flow for broken builds and avoid ra
 - `broken-build-troubleshooter`
 - `self-healing-ci`
 - `devops-engineer`
-
-

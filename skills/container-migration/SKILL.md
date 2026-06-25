@@ -25,5 +25,3 @@ Azure Kubernetes Service (AKS), or an ACR-only workflow.
 | java | `eclipse-temurin:21-jre-alpine` |
 | node | `node:20-slim` |
 | ruby | `ruby:3.3-slim` |
-
-

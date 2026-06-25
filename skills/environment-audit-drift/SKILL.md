@@ -54,5 +54,3 @@ if (driftIsCritical(report)) {
 - Workflow template: `templates/audit-environment-drift.yml`
 - Integration guide: `README.md`
 - Types: `src/types.ts`
-
-

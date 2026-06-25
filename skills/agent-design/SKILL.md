@@ -37,5 +37,3 @@ Design, scaffold, or author Copilot agent definitions, skill folders, and instru
 ## Agent Pairing
 
 Use with `agent-designer` agent (primary consumer). `prompt-engineer` agent optimizes instruction text.
-
-

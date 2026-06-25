@@ -39,5 +39,3 @@ Use this skill when evaluating, planning, or executing migration from legacy .NE
 ## References
 
 - ./references/breaking-changes.md
-
-

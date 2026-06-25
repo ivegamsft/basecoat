@@ -35,5 +35,3 @@ Return two artifacts:
 
 - `skills/human-in-the-loop` — explicit human judgment and approval gates
 - `skills/decision-log-capture` — durable decision records with rationale and follow-up actions
-
-

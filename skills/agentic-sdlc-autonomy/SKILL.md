@@ -61,5 +61,3 @@ For output templates see `references/report_templates.md`.
 - `skill:flow-audit`
 - `skill:flow-admission-control`
 - `skill:human-in-the-loop`
-
-

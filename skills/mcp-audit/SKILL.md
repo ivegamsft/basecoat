@@ -46,5 +46,3 @@ Comprehensive auditing of Model Context Protocol (MCP) server implementations, t
 - `mcp-development` — MCP server development and implementation
 - `backend-audit` — Backend code quality assessment
 - `api-audit` — API contract and error handling audit
-
-

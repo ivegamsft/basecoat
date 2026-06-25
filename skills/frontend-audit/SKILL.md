@@ -41,5 +41,3 @@ Return:
 ## Related Agent
 
 Use with `frontend-dev` agent.
-
-

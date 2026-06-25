@@ -30,5 +30,3 @@ The 12-Factor App methodology for building modern, scalable, cloud-native applic
 | 10 | Dev/Prod parity | Keep environments identical |
 | 11 | Logs | Treat logs as event streams (stdout) |
 | 12 | Admin tasks | Run in same environment as app |
-
-

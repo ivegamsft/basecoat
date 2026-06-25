@@ -28,5 +28,3 @@ Use this skill when the goal is to improve code structure, readability, or maint
 - Safety checks used
 - Main refactors applied
 - Residual risks or deferred cleanup
-
-

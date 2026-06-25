@@ -49,5 +49,3 @@ applies them. It is intentionally conservative: if the policy is unclear, escala
 - `agents/basecoat-10-core-merge-coordinator.agent.md`
 - `agents/basecoat-60-workflow-release-freeze-enforcer.agent.md`
 - `skills/orphaned-pr-triage/SKILL.md`
-
-

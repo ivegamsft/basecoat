@@ -19,5 +19,3 @@ Design and implement backend services, REST or GraphQL APIs, business logic laye
 ## Agent Pairing
 
 Use with `backend-dev` agent. For full-stack features, backend contracts are consumed by `frontend-dev`; route data persistence to `data-tier` agent.
-
-

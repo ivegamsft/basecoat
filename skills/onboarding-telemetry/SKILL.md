@@ -42,5 +42,3 @@ for a newly onboarded BaseCoat repo.
 
 - **Input**: onboarding profile, target repo slug, secret/variable state
 - **Output**: readiness summary with missing dependencies and resolution steps
-
-

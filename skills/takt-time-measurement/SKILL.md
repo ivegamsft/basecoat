@@ -27,5 +27,3 @@ Create workflow templates that measure takt time and publish the resulting metri
 Use with DevOps or analytics agents that need to turn workflow timing into usable throughput signals.
 
 - `station-bottleneck-analyzer` for queue length, throughput, and weekly bottleneck report issues.
-
-

@@ -19,5 +19,3 @@ Design user experiences, map user journeys, specify UI wireframes and components
 ## Agent Pairing
 
 Use with `ux-designer` agent. Specs produced here are consumed by `frontend-dev`; route accessibility violations back to `ux-designer` then to `frontend-dev` for fixes.
-
-

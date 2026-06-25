@@ -25,5 +25,3 @@ CI/CD pipeline design, infrastructure as code, deployment workflows, rollback pl
 ## Agent Pairing
 
 Use with `devops-engineer` agent. For app concerns pair with `backend-dev` or `frontend-dev`; route database migrations to `data-tier` agent.
-
-

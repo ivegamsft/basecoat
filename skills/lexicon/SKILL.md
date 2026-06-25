@@ -28,5 +28,3 @@ or **audit mode** (detect drift). Output is written to `.lexicon.md` in the proj
 | [`references/agent-pairing.md`](references/agent-pairing.md) | Agent pairing guide and BaseCoat reference lexicon entries |
 | [`lexicon-template.md`](lexicon-template.md) | Canonical `.lexicon.md` structure — vocabulary, taxonomy, ontology, vibe |
 | [`audit-checklist.md`](audit-checklist.md) | Structured audit checklist with severity definitions and output format |
-
-

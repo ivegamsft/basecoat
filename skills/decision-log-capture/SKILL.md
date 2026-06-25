@@ -23,5 +23,3 @@ Use this skill to create consistent, auditable decision records from ceremonies.
 - `release-readiness-chair`
 - `daily-standup-facilitator`
 - `sprint-closeout-auditor`
-
-

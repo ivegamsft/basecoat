@@ -41,5 +41,3 @@ On recovery, add a short closure comment, then close the issue after the health 
 - Dependency impact map
 - Open or closed blocker issues
 - Short recovery summary
-
-

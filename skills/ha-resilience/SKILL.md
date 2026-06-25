@@ -32,5 +32,3 @@ Design and test fault-tolerant systems using retries, circuit breakers, multi-re
 | 99.9% | 43.8 min |
 | 99.95% | 21.9 min |
 | 99.99% | 4.4 min |
-
-

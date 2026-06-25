@@ -60,5 +60,3 @@ turn it into a governed, trackable execution bundle.
 - Promotion evidence bundle (`promotion-evidence-bundle.json` and `promotion-evidence-bundle.md`) with immutable references and gate decisions
 - Artifact completeness scorecard with risk/change-band matrix enforcement
 - Spec drift findings with remediation suggestions and goal-ID linked runbook/release-note deltas
-
-

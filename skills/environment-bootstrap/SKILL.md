@@ -21,5 +21,3 @@ Complete setup for secure Azure environments: federated identity, state backends
 | [workload-identity-federation.md](references/workload-identity-federation.md) | AKS pod federated creds, service account config |
 | [fabric-workspace-access.md](references/fabric-workspace-access.md) | Fabric service principals, workspace roles via REST |
 | [troubleshooting.md](references/troubleshooting.md) | OIDC, state storage, Key Vault errors, diagnostics |
-
-

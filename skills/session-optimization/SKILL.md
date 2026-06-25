@@ -80,5 +80,3 @@ Track per session:
 - Session efficiency score
 - Recommended action (compact, new, downshift, file reference)
 - Projected token savings
-
-

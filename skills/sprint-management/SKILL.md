@@ -49,5 +49,3 @@ This skill is designed to be used alongside the following agents:
 - **git-worktrees** — Handles isolated worktrees and cleanup for parallel sprint work
 
 For release-level coordination, pair with the `release-manager` agent.
-
-

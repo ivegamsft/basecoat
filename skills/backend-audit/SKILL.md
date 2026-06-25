@@ -45,5 +45,3 @@ Comprehensive auditing of backend implementations, including code quality, testi
 - `api-audit` — API endpoint and contract auditing
 - `backend-dev` — Backend development and implementation
 - `security` — Security vulnerability assessment
-
-

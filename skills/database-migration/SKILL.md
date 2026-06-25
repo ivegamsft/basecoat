@@ -25,5 +25,3 @@ Zero-downtime schema migration, versioning, and rollback for production database
 | Dual-write | Write to both DBs; read from primary; zero data loss rollback |
 | Flyway undo | `U{version}__rollback.sql` paired with every `V{version}__migrate.sql` |
 | Validate first | Run `flyway validate` in CI before every `flyway migrate` |
-
-

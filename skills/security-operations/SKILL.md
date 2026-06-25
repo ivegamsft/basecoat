@@ -18,5 +18,3 @@ Patterns for threat detection, secrets management, audit logging, and incident r
 | [`references/incident-response-automation.md`](references/incident-response-automation.md) | Alert triage, false positive detection, threat correlation, escalation workflows |
 | [`references/monitoring-metrics.md`](references/monitoring-metrics.md) | Key security metrics, alert configuration, dashboarding strategies |
 | [`references/security-operations-playbooks.md`](references/security-operations-playbooks.md) | Incident runbooks, escalation procedures, post-incident analysis templates |
-
-

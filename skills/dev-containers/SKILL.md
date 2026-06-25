@@ -32,5 +32,3 @@ Eliminates "works on my machine" by bundling runtimes, tools, and extensions in 
 - Pin feature and image versions — avoid `latest`
 - Never embed credentials in `Dockerfile` or `devcontainer.json`
 - Use `postCreateCommand` scripts for idempotent setup
-
-

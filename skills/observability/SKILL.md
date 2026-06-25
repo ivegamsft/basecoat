@@ -25,5 +25,3 @@ Instrument services with structured logs, metrics, and distributed traces to ena
 
 - **Input**: incident symptoms, service diagrams, existing logger/metrics code, telemetry backend
 - **Output**: instrumentation plans, naming conventions, example code, alert recommendations
-
-

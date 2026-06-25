@@ -18,5 +18,3 @@ Build UI components, implement responsive designs, audit accessibility complianc
 ## Agent Pairing
 
 Use with `frontend-dev` agent. Components consume API contracts from `backend-dev`; route data schema questions to `data-tier` agent.
-
-

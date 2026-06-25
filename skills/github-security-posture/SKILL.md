@@ -27,5 +27,3 @@ Dependabot alerts, branch protection, and CODEOWNERS.
 | Template | Purpose |
 |---|---|
 | `posture-report-template.md` | Traffic-light posture report with org checks, repo checks, scorecard, and remediation commands |
-
-

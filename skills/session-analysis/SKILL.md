@@ -70,5 +70,3 @@ Analyze a Copilot CLI session to answer operational questions about tool usage, 
 - Model timeline with mid-session change points
 - Turn metrics (including average turns)
 - Prioritized optimization actions mapped to paired skills
-
-

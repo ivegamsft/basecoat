@@ -28,5 +28,3 @@ Analyze takt-time exports to identify the stations that are backing up flow.
 
 - `takt-time-tracker` for upstream dwell-time exports.
 - `issue-triage` for report follow-up and labeling after filing.
-
-

@@ -30,5 +30,3 @@ Production patterns for DDD, CQRS, Event Sourcing, and Saga implementation.
 - [Domain-Driven Design](https://www.domainlanguage.com/ddd/)
 - [CQRS Pattern](https://martinfowler.com/bliki/CQRS.html)
 - [Event Sourcing](https://martinfowler.com/eaaDev/EventSourcing.html)
-
-

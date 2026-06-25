@@ -20,5 +20,3 @@ Design and implement Azure identity and access management — RBAC hierarchies, 
 ## Agent Pairing
 
 Use with `identity-architect` agent. For IaC provisioning pair with `devops-engineer`; for app auth pair with `backend-dev` or `frontend-dev`; for threat modeling pair with `security-analyst`.
-
-

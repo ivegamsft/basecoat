@@ -64,5 +64,3 @@ and the canonical AIDL guardrail baseline.
 - `scripts/project-rules-baseline.json`
 - `.github/workflows/project-rules-drift-audit.yml`
 - `docs/reference/project-rules-drift-auditor.md`
-
-

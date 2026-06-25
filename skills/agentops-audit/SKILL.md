@@ -74,5 +74,3 @@ Always include:
 ## Related Skills
 
 - `agent-design` — authoring and scaffolding agent/skill assets
-
-

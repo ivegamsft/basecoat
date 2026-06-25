@@ -30,5 +30,3 @@ Use this skill when the goal is to add a new `SKILL.md` to a shared customizatio
 
 - Template: `templates/SKILL.template.md`
 - Consider adding `examples/` or `templates/` only when they reduce repeated work
-
-

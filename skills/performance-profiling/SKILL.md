@@ -23,5 +23,3 @@ Use this skill when a user asks why code is slow, where latency comes from, or h
 - Change made
 - Post-change measurement
 - Remaining risks or follow-ups
-
-

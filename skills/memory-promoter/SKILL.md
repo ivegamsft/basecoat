@@ -17,5 +17,3 @@ Extract repeatable engineering patterns from session artifacts and format them i
 ## Agent Pairing
 
 Use with `memory-promoter` agent. For data quality checks before submission, pair with `guidance-reviewer`.
-
-

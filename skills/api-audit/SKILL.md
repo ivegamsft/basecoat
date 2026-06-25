@@ -47,5 +47,3 @@ Comprehensive auditing of API designs, contracts, error handling strategies, ver
 - `backend-audit` — Reviewing backend implementation quality
 - `api-security` — Security-focused API assessment
 - `contract-testing` — Contract testing and verification
-
-

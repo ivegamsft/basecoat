@@ -41,5 +41,3 @@ Use this skill to convert internal material into a reusable public artifact with
 - `instructions/basecoat-10-core-public-guidance.instructions.md`
 - `docs/guides/public-guidance-workflow.md`
 - `agents/basecoat-30-ai-guardrail.agent.md`
-
-

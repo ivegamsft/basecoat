@@ -21,5 +21,3 @@ Use this skill to make rollback a practiced, repeatable S4 habit instead of a on
 
 - Do not skip the rollback step.
 - Do not treat a successful deploy as proof that rollback works.
-
-

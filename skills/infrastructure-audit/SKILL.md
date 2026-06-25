@@ -47,5 +47,3 @@ Comprehensive auditing of Infrastructure-as-Code implementations, resource confi
 - `terraform` — Terraform-specific development (if available)
 - `devops-audit` — CI/CD pipeline and deployment process audit
 - `security` — Security vulnerability assessment
-
-

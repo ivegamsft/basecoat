@@ -18,5 +18,3 @@ Design, scaffold, and implement MCP (Model Context Protocol) servers, tool defin
 ## Agent Pairing
 
 Use with `mcp-developer` agent. For MCP servers exposing API backends pair with `backend-dev`; for deployment and CI/CD pair with `devops-engineer`.
-
-

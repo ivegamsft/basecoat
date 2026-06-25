@@ -27,5 +27,3 @@ patterns, and document which GitHub Copilot usage APIs exist.
 ## Pairing
 
 Pair with `session-analysis` when a user asks for session metrics (top tools, assistant message volume, model changes, average turns). Use this skill to translate those findings into cost estimates, expensive-dispatch ranking, and routing ROI.
-
-

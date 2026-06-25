@@ -34,5 +34,3 @@ Example:
 - Run `git worktree list` before creating new ones.
 - Each worktree must be on a unique branch.
 - Prefix worktree paths as `<repo>-wt-<issue-or-pr>` for discoverability and cleanup.
-
-

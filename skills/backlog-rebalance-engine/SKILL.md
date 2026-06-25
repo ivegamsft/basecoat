@@ -69,5 +69,3 @@ Sync complete: added=<n> updated=<n> skipped=<n>
 ## Idempotency Contract
 
 A second run on unchanged data must report `added=0 updated=0`.
-
-

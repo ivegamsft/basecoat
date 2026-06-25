@@ -39,5 +39,3 @@ Always use `api-version=7.1`. PAT expiry ≤ 90 days; store in Key Vault.
 - WIQL: max 20,000 work item IDs
 - Batch get: max 200 IDs per request
 - Default page size: ~200 items (use `$top`)
-
-

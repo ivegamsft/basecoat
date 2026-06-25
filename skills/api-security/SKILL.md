@@ -36,5 +36,3 @@ Never log passwords or tokens.
 
 - [OWASP API Security Top 10](https://owasp.org/www-project-api-security/)
 - [OWASP Top 10 2021](https://owasp.org/Top10/)
-
-

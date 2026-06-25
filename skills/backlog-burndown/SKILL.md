@@ -25,5 +25,3 @@ Use this skill when you need a structured way to track backlog completion pace, 
 - `sprint-planner` for commitment and capacity context.
 - `issue-triage` for blocker and priority updates.
 - `product-manager` for scope trade-off decisions.
-
-

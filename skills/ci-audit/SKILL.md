@@ -53,5 +53,3 @@ Produce markdown only:
 3. Gap matrix: policy expectation vs live setting
 4. Prioritized remediation recommendations
 5. Appendix with commands/endpoints used
-
-
