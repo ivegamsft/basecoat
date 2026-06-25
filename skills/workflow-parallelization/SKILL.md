@@ -31,19 +31,14 @@ model_policy:
 
 # Workflow Parallelization Skill
 
-Design and optimize parallel execution patterns for CI pipelines, multi-agent task fan-out, and multi-session sprint delivery.
+Design parallel execution for CI, agent fan-out, and multi-session delivery.
 
 ## Shortcut Phrases
 
 - parallelize workflow
-- fan out tasks
 - run in parallel
-- identify parallel jobs
-- multi-session sprint
 
 ## CI Job Parallelization
-
-### Dependency Analysis
 
 Two jobs can run in parallel when:
 
@@ -55,34 +50,9 @@ Two jobs can run in parallel when:
 
 | Pattern | When to use | Example |
 |---|---|---|
-| Full parallel fan-out | All jobs are independent | lint, typecheck, unit-test running simultaneously |
-| Staged parallel | Jobs depend on a shared setup step | setup → [lint, test, build] in parallel |
-| Pipeline with merge | Parallel jobs feed a final aggregation | [test-unit, test-integration] → coverage-report |
-| Conditional parallel | Branch on change type | [docs-check] OR [build, test] based on changed files |
-
-### GitHub Actions Parallel Job Template
-
-```yaml
-jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps: [...]
-
-  typecheck:
-    runs-on: ubuntu-latest
-    steps: [...]
-
-  unit-tests:
-    runs-on: ubuntu-latest
-    steps: [...]
-
-  # Aggregation step waits for all parallel jobs
-  ci-complete:
-    needs: [lint, typecheck, unit-tests]
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "All parallel checks passed"
-```
+| Full fan-out | All jobs are independent | lint, typecheck, unit-test together |
+| Staged parallel | Jobs depend on shared setup | setup → [lint, test, build] |
+| Pipeline with merge | Parallel jobs feed a final step | [unit, integration] → coverage |
 
 ## Agent Fan-Out Pattern
 
