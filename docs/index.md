@@ -70,6 +70,7 @@ flowchart LR
 - [reference/quick-reference.md](reference/quick-reference.md) — Quick reference card
 - [reference/guidance-vocabulary-syntax-guide.md](reference/guidance-vocabulary-syntax-guide.md) — Canonical vocabulary, taxonomy, ontology, and prompt syntax
 - [reference/treatment-matrix.md](reference/treatment-matrix.md) — Issue treatment matrix
+- [reference/fleet-loop-adoption-scorecard.md](reference/fleet-loop-adoption-scorecard.md) — Fleet audit findings: policy vs implementation vs live behavior across consumer repos
 - [reference/guardrails/](reference/guardrails/) — Guardrail configuration files
 
 ## Guides (`docs/guides/`)
