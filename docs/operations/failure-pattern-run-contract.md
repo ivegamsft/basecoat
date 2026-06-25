@@ -23,6 +23,36 @@ Provide a concise, scriptable contract for running the failure pattern process f
 - `D2-early-detection-gates`
 - `run-summary` (gate results and next-action handoff)
 
+## Workstream 2 Minimum Reliability Slice (#2047)
+
+For the smallest viable implementation of the reliability-debt program under
+epic [#1452](https://github.com/IBuySpy-Shared/basecoat/issues/1452), each run
+must explicitly satisfy the [#2047](https://github.com/IBuySpy-Shared/basecoat/issues/2047)
+outcome contract:
+
+1. **Top 3 recurring failure modes triaged** with owner, RCA record, and fix
+   plan link.
+2. **MTTR baseline captured** and current trend computed against baseline.
+3. **Recurrence rate measured** for fixed failure classes over a 2-week window.
+
+Required `run-summary` fields (must be present and non-empty):
+
+- `top3_failures`: array of exactly 3 records
+  - `failure_mode`
+  - `owner`
+  - `rca_link`
+  - `fix_plan_link`
+- `mttr_baseline_hours`
+- `mttr_current_hours`
+- `mttr_improvement_pct`
+- `recurrence_rate_2w_pct`
+- `meets_issue_2047_targets` (boolean)
+
+Target thresholds for `meets_issue_2047_targets=true`:
+
+- `mttr_improvement_pct >= 20`
+- `recurrence_rate_2w_pct <= 10`
+
 ## Canonical Stage Model
 
 `queued -> mining -> raw_logged -> triaged -> planned -> completed`
@@ -84,6 +114,8 @@ Failure state:
 - Gate 2 enforces raw-log integrity and no-pruning policy.
 - Gate 3 enforces evidence-backed classification.
 - Gate 4 enforces prioritized planning plus early-detection gate definitions.
+- Gate 4 also enforces the Workstream 2 minimum-slice fields when the run is
+  tied to issue #2047.
 
 ## Non-Goals
 
