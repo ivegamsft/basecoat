@@ -64,6 +64,18 @@ if ($summary.desired_state_diff.Count -lt 5) {
 if ($summary.remediation_tasks.Count -lt 1) {
   throw "Expected at least one remediation task in summary output."
 }
+if ($summary.child_issues[0].stage_artifact.branch_name -notmatch '^intent/') {
+  throw "Expected stage artifact branch_name to use intent/* naming."
+}
+if ([string]::IsNullOrWhiteSpace($summary.child_issues[0].stage_artifact.pr_title)) {
+  throw "Expected stage artifact pr_title to be present."
+}
+if ($summary.child_issues[0].stage_artifact.merge_policy.sequencing -ne "serial") {
+  throw "Expected merge_policy.sequencing=serial in stage artifact."
+}
+if ([string]::IsNullOrWhiteSpace($summary.child_issues[0].stage_artifact.cleanup_policy.workflow)) {
+  throw "Expected cleanup workflow path in stage artifact."
+}
 
 $workflowContent = Get-Content -Raw -Path $workflowFile
 if ($workflowContent -notmatch "workflow_dispatch:") {
