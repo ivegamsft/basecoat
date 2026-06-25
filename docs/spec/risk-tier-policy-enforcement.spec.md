@@ -33,7 +33,7 @@ This spec defines the technical implementation of risk-tier governance enforceme
 
 Each workflow must be classified into exactly one tier:
 
-```
+```text
 Inputs:
 - Workflow name
 - Workflow description (from .md file or YAML comments)
@@ -61,7 +61,7 @@ examples:
   - <action 1>
   - <action 2>
 approval_required: <true|false>
-timeout_hours: <none|8|4|sync>
+approval_timeout_policy: <none|8h|4h|sync>
 audit_required: <true|false>
 rollback_procedure: <link to runbook or "N/A">
 ```
@@ -70,9 +70,9 @@ rollback_procedure: <link to runbook or "N/A">
 
 #### 2.1 Label Schema
 
-All in-scope workflows must carry exactly one label from this set:
+All in-scope workflow changes must carry exactly one label from this set:
 
-```
+```text
 risk-tier:1  (Tier 1: Read-only, auto-execute)
 risk-tier:2  (Tier 2: Feature branch, PR review)
 risk-tier:3  (Tier 3: Production, explicit approval)
@@ -80,7 +80,8 @@ risk-tier:4  (Tier 4: Critical, two-person rule)
 ```
 
 Applied to:
-- GitHub workflow files (`.github/workflows/*.yml`)
+
+- PRs and issues that modify GitHub workflow files (`.github/workflows/*.yml`)
 - Agents and skills that perform actions
 - Issues requesting risky operations
 - PRs that contain risky changes
@@ -89,7 +90,7 @@ Applied to:
 
 Enforce via GitHub issue templates and PR templates:
 
-```
+```text
 - [ ] Assign a single risk-tier label (risk-tier:1/2/3/4)
 - [ ] If Tier 3+, provide PRD and spec links
 - [ ] If Tier 4, confirm on-call coverage
@@ -98,17 +99,20 @@ Enforce via GitHub issue templates and PR templates:
 ### 3. Approval Gating
 
 #### 3.1 Tier 1 Gating
+
 - **Gate**: None (auto-execute)
 - **Action**: Workflow runs immediately on trigger
 - **Log**: Record execution in audit log
 
 #### 3.2 Tier 2 Gating
+
 - **Gate**: PR review required (1 approval)
 - **Action**: PR cannot merge without approval
 - **Timeout**: Alert if pending >8 hours
 - **Implementation**: GitHub branch protection rule
 
 #### 3.3 Tier 3 Gating
+
 - **Gate**: Explicit approval required
 - **Prerequisites**:
   - PRD and spec links in PR description (prd-spec-gate.yml)
@@ -119,6 +123,7 @@ Enforce via GitHub issue templates and PR templates:
 - **Implementation**: GitHub PR approval + custom workflow check
 
 #### 3.4 Tier 4 Gating
+
 - **Gate**: Two-person rule (admin + on-call)
 - **Prerequisites**:
   - Emergency ticket or incident linked
@@ -204,27 +209,32 @@ Create `docs/operations/risk-tier-workflow-mapping.md` with:
 ## Implementation Phases
 
 ### Phase 1: Documentation & Classification (Week 1)
+
 - [ ] Publish `docs/reference/risk-tier-policy.md` (governance matrix)
 - [ ] Publish `docs/spec/risk-tier-policy-enforcement.spec.md` (this spec)
 - [ ] Create `docs/operations/risk-tier-workflow-mapping.md` (workflow classification)
 
 ### Phase 2: Label Enforcement (Week 2)
+
 - [ ] Add `risk-tier:N` labels to all GitHub workflows
 - [ ] Update issue templates to include tier label selection
 - [ ] Update PR template to require PRD/spec for Tier 3+
 
 ### Phase 3: Approval Gating (Week 3)
+
 - [ ] Implement Tier 2 PR review gate (branch protection rule)
 - [ ] Implement Tier 3 approval gate (workflow + GitHub checks)
 - [ ] Implement Tier 4 two-person approval gate
 - [ ] Wire prd-spec-gate.yml to tier labels
 
 ### Phase 4: Timeout Enforcement (Week 4)
+
 - [ ] Implement Tier 2 timeout alerts (8 hours)
 - [ ] Implement Tier 3 timeout alerts (4 hours)
 - [ ] Wire to Slack notifications and escalation playbook
 
 ### Phase 5: Audit Logging (Week 5)
+
 - [ ] Implement Tier 3–4 audit trail logging
 - [ ] Create audit log viewer dashboard
 - [ ] Wire to compliance and RCA workflows
@@ -232,20 +242,24 @@ Create `docs/operations/risk-tier-workflow-mapping.md` with:
 ## Rollback Procedures by Tier
 
 ### Tier 1 Rollback
+
 No rollback needed (read-only, no state change).
 
 ### Tier 2 Rollback
+
 1. Author or code owner initiates revert: `git revert <commit>`
 2. PR review required for revert (same as original change)
 3. Merge revert to feature branch
 
 ### Tier 3 Rollback
+
 1. On-call engineer receives alert
 2. Execute rollback runbook: `./rollback.sh --version <prior-version>`
 3. Verify rollback via smoke tests
 4. Document in runbook why rollback occurred
 
 ### Tier 4 Rollback
+
 1. On-call engineer + admin execute together (two-person rule)
 2. Execute custom rollback procedure for emergency (e.g., restore from backup)
 3. Archive full audit trail of actions taken
@@ -254,16 +268,19 @@ No rollback needed (read-only, no state change).
 ## Monitoring and Metrics
 
 ### Weekly Metrics
+
 - Total workflows by tier (trend)
 - Approval rate by tier (% requiring approval that completed on time)
 - Timeout incidents by tier
 
 ### Monthly Metrics
+
 - Incident rate for Tier 3–4 actions (target: ≤15% reduction)
 - Rollback count by tier (trend, target: <5% for Tier 2–3)
 - MTTR by tier (mean time to repair; target: <24 hours for Tier 3)
 
 ### Compliance Metrics
+
 - Workflow tier label coverage (target: 100%)
 - PRD/spec gate pass rate (target: 100% for Tier 3+)
 - Audit trail completeness for Tier 4 (target: 100%)
@@ -271,17 +288,20 @@ No rollback needed (read-only, no state change).
 ## Testing Strategy
 
 ### Unit Tests
+
 - [ ] Tier classification logic (decision tree)
 - [ ] Label validation (exactly one tier label)
 - [ ] Timeout calculation (pending time > threshold)
 
 ### Integration Tests
+
 - [ ] PR gate blocks merge on missing approval
 - [ ] Timeout alert fires after threshold
 - [ ] Audit log entry created for Tier 3+ action
 - [ ] Tier 4 requires both approvals before proceeding
 
 ### E2E Tests
+
 - [ ] Tier 1 workflow executes without approval
 - [ ] Tier 2 workflow requires PR review; blocks without it
 - [ ] Tier 3 workflow requires explicit approval + PRD/spec
