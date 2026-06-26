@@ -206,6 +206,7 @@ PR submitted → Status checks run → PR enters merge queue
 - **Governance Contract:** `docs/reference/governance-contract.md`
 - **CI/CD Workflows:** `.github/workflows/validate-basecoat.yml`
 - **GitHub Merge Queues API:** [GitHub Docs](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/managing-a-merge-queue)
+- **Loop architecture diagram:** [`docs/diagrams/workflow-loop-architecture-and-control-points.md`](../diagrams/workflow-loop-architecture-and-control-points.md) — merge/queue loop with full timeout and retry boundaries
 
 ---
 

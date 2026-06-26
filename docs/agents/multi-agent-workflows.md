@@ -245,6 +245,7 @@ done
 - `instructions/basecoat-20-lang-governance.instructions.md` — governance rules (priority:1)
 - `docs/CONFIG_PATTERN.md` — local config pattern to avoid committing secrets
 - Issue #51 — merge-coordinator origin story (parallel 5-agent sprint, rebase hang)
+- [`docs/diagrams/workflow-loop-architecture-and-control-points.md`](../diagrams/workflow-loop-architecture-and-control-points.md) — primary loop map, escalation loop, and merge/queue loop with control points and timeout boundaries
 
 ---
 
