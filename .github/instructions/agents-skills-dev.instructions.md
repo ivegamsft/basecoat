@@ -33,6 +33,12 @@ model_policy: (recommended when model behavior matters)
   cost_tracking: # optional, recommended for production workflows
     budget_tier: low|standard|high
     chargeback_tag: string
+context_policy: (optional)
+  load_scope: minimal|standard|full   # context to load on activation
+  retention: none|turn|session        # what may persist after each turn
+  unload_on_exit: [list]              # context items to drop on agent exit
+  handoff_schema: [list]              # required fields in the handoff summary
+  max_context_budget: positive integer # approximate input token budget (tokens)
 pinned_model: string (optional; only for justified pinning)
 pin_reason: string (required when pinned_model is set)
 model: string (legacy compatibility; allowed during migration)
@@ -59,6 +65,46 @@ model: string (legacy compatibility; allowed during migration)
 - `visibility: advanced` — Complex orchestration (escalation-router, orchestrator)
 - `visibility: internal` — MCP/infrastructure only (mcp-developer, agentops)
 
+### Context Policy
+
+`context_policy` is an optional block that standardizes load/unload lifecycle behavior for agents operating in soft-fork or multi-agent orchestration contexts. All subfields are optional; omit the block entirely for agents that do not require explicit lifecycle control.
+
+#### Field Reference
+
+| Field | Type | Values | Purpose |
+|---|---|---|---|
+| `load_scope` | enum | `minimal`, `standard`, `full` | Context loaded on activation. `minimal` = task inputs only; `standard` = task inputs + agent instructions; `full` = all relevant repo context |
+| `retention` | enum | `none`, `turn`, `session` | What may persist after each turn. `none` = stateless; `turn` = retain within turn only; `session` = retain for the session lifetime |
+| `unload_on_exit` | list | string items | Named context items to drop when the agent exits or hands off. Use dot-notation for nested keys (e.g., `scratch.working_notes`) |
+| `handoff_schema` | list | string items | Required fields in the handoff summary when handing off to another agent or skill. Enforced at runtime by orchestrators that support this contract |
+| `max_context_budget` | integer | > 0 | Approximate upper bound on input tokens consumed by this agent per invocation. Used for cost estimation and scheduling |
+
+#### Agent Example
+
+```yaml
+name: sprint-closeout-auditor
+description: "Audits sprint closeout state. USE FOR: verifying branch hygiene, labeling, carryover tracking. DO NOT USE FOR: feature implementation, infrastructure changes."
+visibility: specialized
+context_policy:
+  load_scope: standard
+  retention: turn
+  unload_on_exit:
+    - scratch.branch_list
+    - scratch.audit_intermediate
+  handoff_schema:
+    - sprint_id
+    - open_issues_count
+    - carryover_issue_urls
+  max_context_budget: 8000
+```
+
+#### Backward Compatibility
+
+Existing agents that lack `context_policy` remain valid. The block is strictly additive:
+
+- Validators treat its absence as equivalent to `load_scope: standard`, `retention: none`, and no handoff contract.
+- No bulk rewrites are required; add `context_policy` only when integrating an agent into an orchestrated or multi-agent workflow that enforces lifecycle contracts.
+
 ## Skill Frontmatter
 
 All skills require:
@@ -80,6 +126,12 @@ model_policy: (optional)
   cost_tracking:
     budget_tier: low|standard|high
     chargeback_tag: string
+context_policy: (optional)
+  load_scope: minimal|standard|full   # context to load on skill activation
+  retention: none|turn                # skills do not retain beyond a turn
+  unload_on_exit: [list]              # context items to drop on skill exit
+  handoff_schema: [list]              # required fields in the handoff summary
+  max_context_budget: positive integer # approximate input token budget (tokens)
 pinned_model: string (optional; requires pin_reason)
 pin_reason: string (required when pinned_model is set)
 ```
@@ -119,6 +171,31 @@ Choose compatibility values based on the skill's design, dependencies, and teste
 - **github-actions**: CI/CD workflow automation (e.g., scheduled audits, deployment validation)
 
 A skill may support multiple platforms if it is tested and functional in all declared contexts.
+
+### Context Policy
+
+Skills support the same `context_policy` block as agents, with one constraint: `retention` is limited to `none` or `turn`. Skills are subtask-scoped and must not retain state across turns; session-lifetime retention is reserved for agents.
+
+#### Skill Example
+
+```yaml
+name: agentops-audit
+compatibility: [github-copilot-cli]
+description: "Audits agent/skill specs. USE FOR: scoring spec quality, routing profile validation. DO NOT USE FOR: product feature coding, infrastructure deployment."
+context_policy:
+  load_scope: minimal
+  retention: none
+  unload_on_exit:
+    - scratch.rubric_scores
+  handoff_schema:
+    - overall_score
+    - blocking_issues
+  max_context_budget: 4000
+```
+
+#### Backward Compatibility
+
+Skills that lack `context_policy` are valid. The block is strictly additive; no rewrites are required for existing skills.
 
 ## Evaluation Coverage
 

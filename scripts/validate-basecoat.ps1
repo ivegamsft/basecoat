@@ -318,6 +318,60 @@ foreach ($file in $files) {
                 $errors++
             }
         }
+
+        # Validate context_policy subfields when present (issue #2008)
+        $fmMatch = [regex]::Match($content, '(?ms)^---[ \t]*\r?\n(.*?)\r?\n^[ \t]*---[ \t]*(?:\r?\n|$)')
+        $hasContextPolicy = $lines | Select-String -Pattern '^context_policy:\s*' -Quiet
+        if ($hasContextPolicy) {
+            if (-not $fmMatch.Success) {
+                Write-Host "ERROR: $($file.FullName) contains 'context_policy:' but frontmatter could not be parsed" -ForegroundColor Red
+                $errors++
+            } else {
+                # Extract only the lines belonging to the context_policy block (indented lines
+                # immediately following the context_policy: key) to avoid matching same-named
+                # keys that appear elsewhere in the frontmatter.
+                $cpBlockMatch = [regex]::Match(
+                    $fmMatch.Groups[1].Value,
+                    '(?m)^context_policy:\s*\r?\n((?:[ \t]+[^\r\n]*(?:\r?\n|$))+)'
+                )
+                if (-not $cpBlockMatch.Success) {
+                    Write-Host "ERROR: $($file.FullName) context_policy must be a YAML block mapping" -ForegroundColor Red
+                    $errors++
+                } else {
+                    $cpBlock = $cpBlockMatch.Groups[1].Value
+
+                    $lsMatch = [regex]::Match($cpBlock, '(?m)^[ \t]+load_scope:\s*([^#\r\n]*)')
+                    if ($lsMatch.Success) {
+                        $lsVal = $lsMatch.Groups[1].Value.Trim().Trim('"').Trim("'")
+                        if ($lsVal -notmatch '^(minimal|standard|full)$') {
+                            Write-Host "ERROR: $($file.FullName) context_policy.load_scope '$lsVal' is invalid (expected: minimal|standard|full)" -ForegroundColor Red
+                            $errors++
+                        }
+                    }
+
+                    $rtMatch = [regex]::Match($cpBlock, '(?m)^[ \t]+retention:\s*([^#\r\n]*)')
+                    if ($rtMatch.Success) {
+                        $rtVal = $rtMatch.Groups[1].Value.Trim().Trim('"').Trim("'")
+                        $rtPattern = if ($file.Name -eq 'SKILL.md') { '^(none|turn)$' } else { '^(none|turn|session)$' }
+                        $rtValid = if ($file.Name -eq 'SKILL.md') { 'none|turn' } else { 'none|turn|session' }
+                        if ($rtVal -notmatch $rtPattern) {
+                            Write-Host "ERROR: $($file.FullName) context_policy.retention '$rtVal' is invalid (expected: $rtValid)" -ForegroundColor Red
+                            $errors++
+                        }
+                    }
+
+                    $mbMatch = [regex]::Match($cpBlock, '(?m)^[ \t]+max_context_budget:\s*([^#\r\n]*)')
+                    if ($mbMatch.Success) {
+                        $mbVal = $mbMatch.Groups[1].Value.Trim().Trim('"').Trim("'")
+                        $maxBudget = 0L
+                        if (-not [System.Int64]::TryParse($mbVal, [ref]$maxBudget) -or $maxBudget -le 0) {
+                            Write-Host "ERROR: $($file.FullName) context_policy.max_context_budget '$mbVal' must be a positive integer" -ForegroundColor Red
+                            $errors++
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
