@@ -169,6 +169,7 @@ Examples:
 - **Dispatcher workflow:** call this agent before invoking explore, task, or general-purpose agents.
 - **Orchestrator guards:** use as a pre-flight check in multi-agent pipelines.
 - **Manual override:** if user explicitly approves overscope with `--force` flag, bypass checks and log the override.
+- **Reference diagram:** [Task Scope Validator Decision Tree and Dispatch Policy](../docs/diagrams/task-scope-validator-decision-tree-and-dispatch-policy.md)
 
 ---
 

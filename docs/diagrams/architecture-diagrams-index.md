@@ -56,6 +56,12 @@ If you only need the gist, read these three first:
 | [orchestrator-dispatch-fan-in-conflict-resolution.md](orchestrator-dispatch-fan-in-conflict-resolution.md) | Orchestrator dispatch sequence, branch status lifecycle (`in_progress`, `blocked`, retry, `resolved`), and conflict tie-break decision flow |
 | [copilot-extension-oauth-and-tool-invocation-flow.md](copilot-extension-oauth-and-tool-invocation-flow.md) | OAuth callback middleware path, tool invocation status branches, and health/ping observability flow for `mcp/basecoat-extension/src/app.ts` |
 
+## Dispatch Validation
+
+| Diagram | Description |
+|---|---|
+| [task-scope-validator-decision-tree-and-dispatch-policy.excalidraw](task-scope-validator-decision-tree-and-dispatch-policy.excalidraw) | Task Scope Validator pre-dispatch checks, confidence bands, and routing policy ([notes](task-scope-validator-decision-tree-and-dispatch-policy.md)) |
+
 ## Validation & Testing
 
 | Diagram | Description |
