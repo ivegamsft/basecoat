@@ -32,7 +32,7 @@ Execute these in order to reduce input-token bloat first, then optimize routing:
 7. At events >= 300 or ratio >= 300x, run the context-rot triage checklist in
    `docs/operations/context-rot-runbook.md` before continuing.
 8. After each `/compact`, scan the first three post-compact turns for restatement signals;
-   if any appear, escalate to soft-fork (Step 3 in the runbook).
+   if any appear, escalate to soft-fork (see `docs/operations/soft-fork-subtask-isolation.md`; Step 3 in the runbook).
 9. **Token economics check:** Before large prompts, audit fresh input (highest cost lever). See `docs/guides/token-optimization.md` §11 for pricing tiers and optimization priority.
 
 ### Token Economics at a Glance (Operator Patterns)
