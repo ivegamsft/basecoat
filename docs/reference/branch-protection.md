@@ -10,7 +10,7 @@ Establish a consistent, auditable baseline for main branch protection that preve
 
 ### 1. Required Pull Request Reviews
 
-- **Minimum reviewers**: 1
+- **Minimum reviewers**: per active governance profile baseline (max required approvals across risk tiers in `.github/governance/policy-packs.json`; `solo-dev` = 0, `team-dev` = 1, `regulated-team` = 2)
 - **Dismissal of stale reviews**: Enabled
 - **Require code owner reviews**: Disabled (repo has no CODEOWNERS enforcement requirement)
 - **Restrict who can dismiss reviews**: Admins only
@@ -64,7 +64,7 @@ To apply branch protection via GitHub UI:
 3. Pattern: `main`
 4. Enable:
    - ✓ Require a pull request before merging
-   - ✓ Require approvals (1)
+   - ✓ Require approvals (0 for `solo-dev`, 1 for `team-dev`, 2 for `regulated-team` — see `.github/governance/policy-packs.json`)
    - ✓ Dismiss stale pull request approvals when new commits are pushed
    - ✓ Require status checks to pass before merging
    - ✓ Require branches to be up to date before merging

@@ -64,6 +64,14 @@ jobs:
             jq -r --arg p "${SELECTED_PACK}" '.profiles[$p].cloud_agent.required_status_checks[]' "${POLICY_FILE}"
           )
 
+          PROFILE_REVIEW_BASELINE="$(jq -r --arg p "${SELECTED_PACK}" \
+            '[.profiles[$p].main.required_approvals_by_risk_tier | to_entries[].value] | max // 0' \
+            "${POLICY_FILE}" 2>/dev/null || echo '')"
+          if ! [[ "${PROFILE_REVIEW_BASELINE}" =~ ^[0-9]+$ ]]; then
+            echo "::error::Unable to resolve numeric profile review baseline for '${SELECTED_PACK}'."
+            exit 1
+          fi
+
           if [[ ${#cloud_agent_checks[@]} -gt 0 ]]; then
             printf 'Cloud-agent guardrails for %s: %s\n' "${SELECTED_PACK}" "${cloud_agent_checks[*]}"
           fi
@@ -90,8 +98,8 @@ jobs:
             echo "::warning::Include administrators is not enabled. Enabling it is recommended."
           fi
 
-          if [[ "${REVIEW_COUNT}" -lt 1 ]]; then
-            echo "::error::Main protection baseline requires at least 1 required approving review."
+          if [[ "${REVIEW_COUNT}" -lt "${PROFILE_REVIEW_BASELINE}" ]]; then
+            echo "::error::Profile '${SELECTED_PACK}' requires a baseline of ${PROFILE_REVIEW_BASELINE} approving review(s), but branch protection is set to ${REVIEW_COUNT}."
             exit 1
           fi
 

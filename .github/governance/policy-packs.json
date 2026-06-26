@@ -1,5 +1,5 @@
 {
-  "default_profile": "team-dev",
+  "default_profile": "solo-dev",
   "profiles": {
     "solo-dev": {
       "description": "Single maintainer optimization with strict checks and low-risk autonomy.",

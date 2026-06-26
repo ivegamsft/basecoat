@@ -59,6 +59,65 @@ as a readiness comment so the blocker is visible without manual API inspection.
 
 ---
 
+### Solo-Dev Branch Protection Drift Loop (Review Count Reapplied)
+
+**Status:** ACTIVE PATTERN (discovered 2026-06-26, issue #1763)
+
+**Symptom:** `required_approving_review_count` on `main` repeatedly returns to `1` after being set
+to `0` for solo-maintainer operation, causing solo authors to be blocked by approval gates they
+cannot satisfy.
+
+**Root Cause:**
+
+- Policy profile and enforcement logic drifted:
+  - `.github/governance/policy-packs.json` had `solo-dev` controls but defaulted to `team-dev`
+  - `.github/workflows/pr-validation.yml` enforced `required_approving_review_count >= 1`
+  - `.github/workflows/branch-protection-enforce.yml` enforced `required_approving_review_count >= 1`
+- The hardcoded `>= 1` checks overrode valid solo-dev settings and recreated the block after each run.
+
+**How to Detect:**
+
+1. Confirm live branch protection review count:
+
+```bash
+gh api repos/IBuySpy-Shared/basecoat/branches/main/protection --jq '.required_pull_request_reviews.required_approving_review_count'
+```
+
+1. Confirm active governance profile:
+
+```bash
+jq -r '.default_profile' .github/governance/policy-packs.json
+```
+
+1. Compare with profile baseline (max approvals across risk tiers):
+
+```bash
+jq -r --arg p "$(jq -r '.default_profile' .github/governance/policy-packs.json)" \
+  '[.profiles[$p].main.required_approvals_by_risk_tier | to_entries[].value] | max // 0' \
+  .github/governance/policy-packs.json
+```
+
+If live review count is greater than profile baseline, drift is present.
+
+**Resolution:**
+
+1. Align profile selection and enforcement logic:
+   - set `default_profile` appropriately in `.github/governance/policy-packs.json`
+   - enforce review-count baseline from policy profile, not a hardcoded constant
+2. Re-apply branch protection with the correct review count for the active profile.
+3. Re-run PR validation and branch-protection drift workflows to confirm no reapplication.
+
+**Prevention Controls:**
+
+1. Never hardcode review minimums in enforcement workflows; derive from policy profile.
+2. Treat policy pack (`policy-packs.json`) as the source of truth for review requirements.
+3. Keep docs aligned with profile-driven configuration (avoid "minimum reviewers: 1" unless profile requires it).
+4. During RCA closure, verify:
+   - live settings match active profile baseline
+   - no workflow contains `REVIEW_COUNT < 1` hardcoded logic
+
+---
+
 ## Blocked by External Constraints
 
 ### SHA Pin Scanner False Positives from Synced BaseCoat Templates

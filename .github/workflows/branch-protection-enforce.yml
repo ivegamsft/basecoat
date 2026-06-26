@@ -94,13 +94,36 @@ jobs:
           FORCE_PUSH="$(echo "$PROTECTION" | jq -r '.allow_force_pushes.enabled // true')"
           DELETIONS="$(echo "$PROTECTION" | jq -r '.allow_deletions.enabled // true')"
 
+          POLICY_FILE=".github/governance/policy-packs.json"
+          SELECTED_PACK="team-dev"
+          PROFILE_REVIEW_BASELINE="1"
+          if [[ -f "${POLICY_FILE}" ]]; then
+            SELECTED_PACK="$(jq -r '.default_profile' "${POLICY_FILE}" 2>/dev/null || echo 'team-dev')"
+            if [[ -z "${SELECTED_PACK}" || "${SELECTED_PACK}" == "null" ]]; then
+              SELECTED_PACK="team-dev"
+            fi
+            if ! jq -e --arg p "${SELECTED_PACK}" '.profiles[$p]' "${POLICY_FILE}" >/dev/null 2>&1; then
+              echo "::warning::Unknown default_profile '${SELECTED_PACK}' in ${POLICY_FILE}; falling back to team-dev."
+              SELECTED_PACK="team-dev"
+            fi
+            PROFILE_REVIEW_BASELINE="$(jq -r --arg p "${SELECTED_PACK}" \
+              '[.profiles[$p].main.required_approvals_by_risk_tier | to_entries[].value] | max // 0' \
+              "${POLICY_FILE}" 2>/dev/null || echo '1')"
+          else
+            echo "::warning::Missing ${POLICY_FILE}; using fallback profile 'team-dev' with baseline 1."
+          fi
+          if ! [[ "${PROFILE_REVIEW_BASELINE}" =~ ^[0-9]+$ ]]; then
+            echo "::warning::Invalid profile review baseline '${PROFILE_REVIEW_BASELINE}' for profile '${SELECTED_PACK}'; falling back to 1."
+            PROFILE_REVIEW_BASELINE="1"
+          fi
+
           if [[ "$STRICT" != "true" ]]; then
             echo "::error::Branch protection drift: required_status_checks.strict must be true."
             exit 1
           fi
 
-          if [[ "${REVIEW_COUNT}" -lt 1 ]]; then
-            echo "::error::Branch protection drift: required_approving_review_count must be at least 1."
+          if [[ "${REVIEW_COUNT}" -lt "${PROFILE_REVIEW_BASELINE}" ]]; then
+            echo "::error::Branch protection drift: required_approving_review_count must be at least ${PROFILE_REVIEW_BASELINE} (active profile: '${SELECTED_PACK}')."
             exit 1
           fi
 
@@ -119,5 +142,5 @@ jobs:
             exit 1
           fi
 
-          echo "Branch protection audit passed: strict checks, >=1 required approval, conversation resolution enabled, no force pushes, no deletions." >> "$GITHUB_STEP_SUMMARY"
+          echo "Branch protection audit passed: strict checks, >=${PROFILE_REVIEW_BASELINE} required approval(s) for profile '${SELECTED_PACK}', conversation resolution enabled, no force pushes, no deletions." >> "$GITHUB_STEP_SUMMARY"
           echo "Branch protection audit complete."
