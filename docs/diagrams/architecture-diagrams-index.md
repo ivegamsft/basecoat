@@ -2,9 +2,11 @@
 
 Visual reference for BaseCoat's architecture, memory model, and process flows.
 
-All diagrams are authored in [Excalidraw](https://aka.ms/excalidraw) — an open-source
-whiteboarding tool. Open any `.excalidraw` file directly at
+Most whiteboard-style diagrams are authored in
+[Excalidraw](https://aka.ms/excalidraw). Open any `.excalidraw` file directly at
 [**aka.ms/excalidraw**](https://aka.ms/excalidraw) (drag-and-drop or use File → Open).
+The Markdown pages in this index use live Mermaid blocks and render directly in the
+docs site.
 
 ## Start here
 
@@ -25,6 +27,14 @@ If you only need the gist, read these three first:
 | [execution-hierarchy.excalidraw](execution-hierarchy.excalidraw) | 5-layer execution stack from user intent to output |
 | [multi-agent-orchestration.excalidraw](multi-agent-orchestration.excalidraw) | LangGraph StateGraph fan-out/fan-in pattern |
 | [asset-taxonomy.excalidraw](asset-taxonomy.excalidraw) | Four primitive asset types: agents, skills, instructions, prompts |
+
+## MCP & Integration Surfaces
+
+| Diagram | Description |
+|---|---|
+| [basecoat-mcp-topology-and-extension-surface.md](basecoat-mcp-topology-and-extension-surface.md) | Component view of the read-only BaseCoat MCP server, the transport-flexible metrics MCP server, and the separate Copilot Extension HTTP surface |
+| [basecoat-mcp-and-metrics-data-flow.md](basecoat-mcp-and-metrics-data-flow.md) | End-to-end read paths for inventory/search/read plus the metrics fetch path and local override behavior |
+| [mcp-metrics-build-and-deploy-flow.md](mcp-metrics-build-and-deploy-flow.md) | PR validation, GHCR publish, Azure Container Apps deploy, and health verification for the metrics MCP service |
 
 ## Memory Model
 
@@ -58,8 +68,8 @@ If you only need the gist, read these three first:
     Excalidraw files open natively in VS Code with the
     [Excalidraw extension](https://marketplace.visualstudio.com/items?itemName=pomdtr.excalidraw-editor),
     or in the browser at [aka.ms/excalidraw](https://aka.ms/excalidraw).
-    To embed a diagram in a doc, export it as SVG from Excalidraw and place the file
-    in `docs/diagrams/`, then reference it with standard Markdown image syntax.
+    Mermaid-based `.md` diagram pages render inline in the docs site and can be read
+    directly in GitHub or VS Code without exporting assets.
 
 !!! note "Inline architecture diagrams"
     The [Architecture Overview](../architecture/overview.md) page contains live

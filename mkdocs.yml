@@ -109,7 +109,11 @@ nav:
     - Process: memory/process.md
   - Architecture:
     - Overview: architecture/overview.md
-    - Diagrams: diagrams/architecture-diagrams-index.md
+    - Diagrams:
+      - Index: diagrams/architecture-diagrams-index.md
+      - MCP Topology and Extension Surface: diagrams/basecoat-mcp-topology-and-extension-surface.md
+      - MCP and Metrics Data Flow: diagrams/basecoat-mcp-and-metrics-data-flow.md
+      - MCP Metrics Build and Deploy Flow: diagrams/mcp-metrics-build-and-deploy-flow.md
     - ADR-001 Naming Convention: architecture/decisions/adr-001-naming-convention.md
     - ADR-002 Agent Model Shifting and Cost Governance: architecture/decisions/adr-002-agent-model-shifting-and-cost-governance.md
     - Multi-Agent Patterns: architecture/multi-agent-orchestration-patterns.md
