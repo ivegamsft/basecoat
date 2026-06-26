@@ -131,6 +131,14 @@ $workflowMap = @(
         Class = 'reusable'
     }
     [pscustomobject]@{
+        Source = 'prd-spec-gate.yml'
+        Destination = 'basecoat-prd-spec-gate.yml'
+        LegacyDestinations = @()
+        Name = 'BaseCoat Reusable - PRD and Spec Gate'
+        Supported = $true
+        Class = 'reusable'
+    }
+    [pscustomobject]@{
         Source = 'dependency-update-advisor.yml'
         Destination = 'basecoat-dependency-update-advisor.yml'
         LegacyDestinations = @('bc-dependency-update-advisor.yml')

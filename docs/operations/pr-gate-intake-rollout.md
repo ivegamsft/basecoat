@@ -1,6 +1,7 @@
 # PR Gate Intake Rollout Runbook
 
-> **Related issue:** #1815
+> **Related issue:** #1812
+> **Pilot results:** See [intake-pilot-wawkr-results.md](intake-pilot-wawkr-results.md)
 
 ## Objective
 
@@ -17,13 +18,15 @@ Make intake-time metadata explicit so authors know when PRD/spec links are expec
 
 | Step | Command / Action | Evidence |
 |---|---|---|
-| Validate repo changes | `pwsh scripts/validate-basecoat.ps1` | Validation passes |
+| Validate BaseCoat changes | `pwsh scripts/validate-basecoat.ps1` | Validation passes |
 | Run repo tests | `pwsh tests/run-tests.ps1` | Test suite passes |
 | Build docs | `python -m mkdocs build --strict` | MkDocs completes cleanly |
 | Confirm PR template parity | Check `.github/PULL_REQUEST_TEMPLATE.md` and `docs/templates/pr-template.md` | Sections match |
 | Confirm issue template parity | Check `.github/ISSUE_TEMPLATE/*.md` and `docs/templates/issue-template.md` | Intake fields match |
+| Validate consumer repo intake surfaces | `pwsh scripts/validate-intake-contract.ps1 -Repo <owner>/<repo> -CheckWorkflows` | All required checks pass |
 | Publish the release | Follow the normal BaseCoat release flow | New tag or synced release is available |
 | Sync the consumer repo | Use the supported BaseCoat sync path | Consumer repo reports the new release version |
+| Install gate workflows in consumer repo | Run `pwsh scripts/configure-downstream-workflows.ps1` in the consumer repo | `basecoat-prd-spec-gate.yml` and `basecoat-intake-contract-check.yml` appear in `.github/workflows/` |
 
 ## Pilot Protocol
 
