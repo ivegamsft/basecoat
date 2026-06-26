@@ -33,6 +33,54 @@ Execute these in order to reduce input-token bloat first, then optimize routing:
    `docs/operations/context-rot-runbook.md` before continuing.
 8. After each `/compact`, scan the first three post-compact turns for restatement signals;
    if any appear, escalate to soft-fork (Step 3 in the runbook).
+9. **Token economics check:** Before large prompts, audit fresh input (highest cost lever). See `docs/guides/token-optimization.md` §11 for pricing tiers and optimization priority.
+
+### Token Economics at a Glance (Operator Patterns)
+
+From `docs/guides/token-optimization.md` §11:
+
+| Pricing Tier | Relative Cost | When to Optimize |
+|---|---|---|
+| Cached input | ~0.1–0.2x fresh | Only if repeated calls with same prefix (rare in CLI) |
+| **Fresh input** | **1.0x baseline** | **Typically — highest ROI when input volume exceeds output** |
+| Output | 2–3x fresh input | Second priority after fresh input |
+
+**Observed heuristic (input-heavy workloads):** When input tokens greatly exceed output tokens — typical in agentic sessions — reducing fresh input often saves more in total cost than cutting output verbosity in half. At providers where output rates are 4–5x input rates, confirm your token mix before assuming this holds.
+
+**Operator do/don't patterns:**
+
+| Do | Don't |
+|---|---|
+| Load only files needed for this task (use glob patterns) | Load "whole context" upfront |
+| Summarize repetitive logs/docs once, reference by path | Paste same excerpt across multiple turns |
+| Compress multi-file context into 1–2K-token handoff | Pass raw output between agents |
+| Use canonical templates (sprint structure, audit reports) | Re-create summaries per agent |
+| Set output targets ("≤500 words"; structured not prose) | Allow unlimited output generation |
+| Reference source files >5KB by path/line-range | Inline full file contents |
+| Skip recap: "Reference prior turn 3 if needed" | Restate full context every turn |
+
+**Quick decision tree:**
+
+```text
+Large prompt needed?
+  → Scan your context for files >5KB
+    → Replace with: "See: path/file.md (lines X–Y)"
+  → Count repeated elements
+    → Replace with: "Previously shown (turn N); reference if needed"
+  → Any handoff from prior agent?
+    → Create: 1–2K compressed summary, pass that
+  → Output constraint set?
+    → Add: "Limit output to <500 words"
+```
+
+**Cost savings checklist:**
+
+- [ ] Fresh input audit: Any files the agent doesn't need? Remove.
+- [ ] Handoff opportunity: Is this agent #2 or #3 seeing similar context? Summarize to 1–2K.
+- [ ] Summarization opportunity: Any >10KB logs/docs? Compress; reference by path.
+- [ ] Output constraint: Word limit or format specified? If not, add one.
+
+For detailed guidance, examples, and provider-specific rates, see `docs/guides/token-optimization.md` §11.
 
 ### Keep-pattern defaults (workstream #2046)
 

@@ -10,6 +10,7 @@ For an operator-first rollout checklist that maps token controls to scoped instr
 > model names, tier pricing, and rate limits will differ. See [Adapting for Other Providers](#adapting-for-other-providers).
 
 Start with mode selection before loading context: [Ask mode vs Agent mode decision table](#ask-mode-vs-agent-mode-decision-table).
+
 ---
 
 ## Ask mode vs Agent mode decision table
@@ -551,10 +552,238 @@ On success (within budget + tests pass):
 
 ---
 
-## 11. From the Field: BaseCoat Sprint Experience
+## 11. Token Economics Policy: Fresh Input vs Cached Input vs Output
+
+This section establishes a canonical framework for understanding token pricing tiers and their implications for prompt design, context optimization, and cost attribution.
+
+### Pricing Tier Overview (Provider-Agnostic)
+
+Most major LLM providers use some form of tiered pricing. While exact rates and cached-input support vary by provider and model, the relative cost shape is broadly consistent where caching is available:
+
+| Token Type | Relative Cost | Caveats |
+|---|---|---|
+| **Cached Input** | ~0.1–0.2x fresh input | Requires provider support; cache miss resets benefit; cache window (usually 5–15 min) |
+| **Fresh Input** | 1.0x baseline | Billed at full rate; no discounts |
+| **Output** | 2–3x fresh input | Higher cost encourages concise output targets |
+
+**Provider-specific rates** (as of June 2026):
+
+| Provider | Fresh Input (per M tokens) | Output (per M tokens) | Cache Support |
+|---|---|---|---|
+| Anthropic | $3 (Claude Sonnet) | $15 | Yes — prompt caching (10% cost) |
+| OpenAI | $2.50 (GPT-4o) | $10 | Varies — check provider docs |
+| Google | $1.25 (Gemini) | $5 | Yes — semantic caching (varies) |
+| Azure OpenAI | Varies (map to standard OpenAI) | Varies | Depends on base provider |
+
+> **Important caveat:** Rates change quarterly. Always consult provider pricing pages before making production decisions. The framework below applies regardless of exact rates.
+
+### Optimization Priority (General Rule)
+
+Given cached input costs **10–20%** of fresh input and output costs **2–3x** fresh input:
+
+```text
+Typical priority for input-heavy agentic workloads (input token volume >> output volume):
+  1. Reduce fresh input tokens (input usually dominates total cost by volume)
+  2. Reduce output tokens (per-token cost is higher, but output volume is typically smaller)
+  3. Increase cache hit rate (each cached token saves 80-90% vs fresh input cost; total-session impact is typically 10-20% since only stable prefix tokens are cacheable — pursue opportunistically)
+```
+
+Note: when output volume is comparable to input volume, or per-token output rates are very high relative to input (e.g., 5x+), output reduction may have greater total-cost impact. Measure your workload's token mix before assuming priority order.
+
+**Illustrative example (notional rates: $3/M input, $6/M output, $0.30/M cached input — output is ~2x input cost):**
+
+| Scenario | Fresh Input | Output | Cached | **Total Cost** | Savings vs. Baseline |
+|---|---|---|---|---|---|
+| **Baseline:** No optimization | 60M | 10M | 0 | $240 | — |
+| **Output reduction:** Half output verbosity | 60M | 5M | 0 | $210 | $30 (12.5%) |
+| **Fresh input reduction:** 30% fewer inputs (better compression) | 42M | 10M | 0 | $186 | $54 (22.5%) |
+| **Cache + compression:** 30% fewer inputs + 5M cache hits | 37M | 10M | 5M (cached) | $173 | $67 (28%) |
+
+**Lesson:** At these notional rates (output ~2x input cost), fresh input reduction saves roughly 1.8x more than halving output verbosity ($54 vs $30). At providers where output costs 4–5x input (common today), optimize output aggressively when output volume is significant.
+
+### Operator Heuristics: When to Optimize What
+
+Use this decision tree to prioritize optimization effort:
+
+#### Rule 1: Fresh Input Reduction (Do First)
+
+In agentic workloads where input token volume greatly exceeds output, fresh input typically represents the majority of costs. Optimize this first when that pattern holds.
+
+| Do | Avoid |
+|---|---|
+| Load only files needed for this specific task (use glob patterns to filter) | Load "whole repo context" to be safe |
+| Summarize repetitive content once, reference by path | Paste the same log/doc excerpt multiple turns |
+| Use pointer-based references (file names, line ranges) | Inline full file contents >5KB |
+| Create handoff documents that compress multi-file context into 1–2K tokens | Pass raw output from one agent to the next |
+| Use canonical summary artifacts (e.g., sprint template, audit report) that persist across calls | Re-generate summaries per agent |
+
+##### Example: Cost of a naive summary approach
+
+```text
+Agent 1 reads 50 files to write a summary: ~30K tokens, 1 hour
+Agent 2 receives the 50 files again to verify: ~30K tokens, 1 hour
+Agent 3 reads the same 50 files for a different angle: ~30K tokens, 1 hour
+
+Total: 90K tokens.
+
+Better approach:
+Agent 1 summarizes (30K), produces 1.5K-token summary
+Agent 2 reads 1.5K summary, reads only changed files (5K): 6.5K total
+Agent 3 reads 1.5K summary, cross-references one file (3K): 4.5K total
+
+Total: 41K tokens (54% savings).
+```
+
+#### Rule 2: Output Conciseness (Do Second)
+
+Output costs 2–3x fresh input. Encourage concise outputs without sacrificing clarity.
+
+| Do | Avoid |
+|---|---|
+| Set output targets: "Respond in <=500 words" | Allow unconstrained output generation |
+| Use structured output (bullet lists, tables) over prose | Request narrative prose when tables would suffice |
+| Skip redundancy: "If you covered this in the prior turn, reference it instead of repeating" | Restate context in every turn |
+| Use "Next steps" sections instead of full summaries | End with "Here's everything we did" recap |
+| Prefer JSON/structured output for automation | Ask for prose that will need parsing later |
+
+**Example output targets by task:**
+
+| Task | Output Target | Reasoning |
+|---|---|---|
+| Code review | ≤1,500 words | Specific comments only; don't recap the code |
+| Architecture review | ≤800 words | Decision rationale + constraints; skip implementation details |
+| Triage/routing | ≤300 words | Structured classification; no explanation unless ambiguous |
+| Report generation | ≤2,000 words | Summary findings + key metrics; defer deep analysis to on-demand follow-ups |
+| Incident resolution | ≤500 words | Action items + root cause; don't document entire investigation |
+
+#### Rule 3: Cache Hits (Do Opportunistically)
+
+Prompt caching requires:
+
+- Stable prefixes (governance rules, system instructions, role definitions)
+- Repeated calls with identical prefixes
+- 5–15 minute window (depends on provider)
+
+Only optimize for caching if both conditions hold:
+
+| Scenario | Cache Worth It? | Reasoning |
+|---|---|---|
+| Governance instructions (every agent call) | Yes | 3K tokens x 100 calls/month = 300K billable; cache saves 90% |
+| Task-specific instructions (varies per task) | No | New prefix every time; no cache hits |
+| One-off analysis (single call) | No | Only benefit from cache within same call; minimal savings |
+| Batch processing (same context, multiple questions) | Yes | E.g., "audit 20 files against same policy" — cache the policy |
+
+**Cache-friendly pattern:**
+
+```text
+[STATIC — cached once]
+  System governance (1.5K tokens)
+  Agent role definition (0.8K tokens)
+  Policy checklist (1.2K tokens)
+  Subtotal: 3.5K tokens
+
+[VARIABLE — fresh per call]
+  Task-specific instructions (0.5K tokens)
+  Input context (varies)
+  Subtotal: 0.5K + input tokens
+
+On call 1: Full cost = 4K + input tokens
+On calls 2–100 (within cache window): Cost = (4K × 0.1) + input tokens
+Savings: ~3.6K tokens per call × 99 calls = 356K tokens/month
+```
+
+### Cost Scenarios and Decision Trees
+
+#### Scenario A: Planning a Sprint
+
+**Input:** Backlog of 40 issues; prior sprint structure known
+**Goal:** Generate prioritized sprint backlog in 1 turn
+
+**Naive approach (70K tokens):**
+
+- Paste full issue descriptions (1): 50K tokens
+- Paste prior sprint structure (1): 15K tokens
+- Paste model instructions (1): 5K tokens
+- Total input: 70K tokens
+
+**Optimized approach (3.7K tokens):**
+
+- Reference template path: `docs/templates/sprint-structure.md` (agent loads ~3K)
+- Delta from prior sprint: "Moved in: #1234, #5678. Moved out: #9999" (~0.5K)
+- New priority flag: "#1234 is now P1 blocker" (~0.2K)
+- Total input: 3.7K tokens
+
+**Impact:** 95% input reduction. At $3/M tokens, saves ~$0.20 per call. Over 12 sprints/year, saves ~$2.40. More importantly, the session completes faster and stays more coherent.
+
+#### Scenario B: Code Review across 5 PRs
+
+**Input:** 5 PRs, each with 3–5 file changes and test results
+**Goal:** Structured review comments for each PR
+
+**Naive approach (105K tokens per call):**
+
+- Full source files for context (1): 60K tokens per call
+- Full diff for each change (1): 30K tokens per call
+- Full test output (1): 15K tokens per call
+- Total per call: 105K tokens × 5 = 525K tokens
+
+**Optimized approach (10K tokens per call):**
+
+- Summarized diff (key changes only): 5K tokens per call
+- Test result summary (pass/fail + relevant output): 2K tokens per call
+- Source context (only relevant functions): 3K tokens per call
+- Total per call: 10K tokens × 5 = 50K tokens
+
+**Impact:** 90% reduction per call. At $2.50/M tokens, saves ~$0.24 per call ($1.19 total across 5 PRs). More importantly, reviews are faster and focus on substantive issues, not file context.
+
+#### Scenario C: Incident Investigation (Parallel Agents)
+
+**Input:** 50 log files; need root cause + action items
+**Goal:** Diagnostic report in 2 hours
+
+**Naive approach (1.2M tokens in one Sonnet session):**
+
+- Fast agent reads all logs (1): 400K tokens
+- Patterns aggregated into hand-off (1): 50K tokens
+- Reasoning agent processes all findings (1): 300K tokens
+- Multiple follow-up rounds: 400K tokens
+- Total: ~1.15M tokens
+
+**Optimized approach (300K tokens in parallel agents):**
+
+- Fast agents (Haiku) scan logs in parallel; each reports findings (4 calls): 150K total
+- Main agent aggregates reports (1): 20K tokens (compressed findings)
+- Reasoning for root cause + action (1): 80K tokens (findings only, no raw logs)
+- Follow-up clarification (2 calls): 50K tokens
+- Total: ~300K tokens
+
+**Impact:** 74% cost reduction. Parallelization also reduces wall time (2 hours → 45 min).
+
+### Implementation Checklist
+
+Before every large session or agent invocation, ask:
+
+- [ ] **Fresh input audit:** Are there files in my prompt that the agent doesn't need for this specific task? Remove them.
+- [ ] **Output constraint:** Have I set a word limit or output format target? If not, add one.
+- [ ] **Handoff opportunity:** Is this the second or third agent to see similar context? Create a 1–2K-token summary and pass that instead.
+- [ ] **Cache eligibility:** Do I have a stable prefix (system instructions, role, policy) that will repeat in the next call? If yes, structure it separately.
+- [ ] **Reference-by-pointer:** Are there files >5KB in my prompt? Replace with a pointer: "See: `path/file.md` (lines 50–100) for the schema."
+
+### Related Patterns
+
+See also:
+
+- §3 (Prompt Compression Techniques) — practical strategies for fresh input reduction
+- §4 (Context Handoff Between Agents) — patterns for passing compressed context
+- §5 (Caching Strategies) — depth on prompt caching implementation
+- [`.github/instructions/cost-optimization.instructions.md`](/.github/instructions/cost-optimization.instructions.md) — operator defaults and fleet patterns
+
+---
+
+## 12. From the Field: BaseCoat Sprint Experience
 
 These examples come from BaseCoat's own development sprints. They illustrate how
-the strategies in §1–9 play out in practice.
+the strategies in §1–11 play out in practice.
 
 ### Context Loading: The Cost of Speculative Reads
 
@@ -655,7 +884,7 @@ limits. For UBB cost estimation and monitoring guidance, see
 
 ---
 
-## 12. Sprint Planning & Re-Planning Cost Reduction
+## 13. Sprint Planning & Re-Planning Cost Reduction
 
 ### The Problem: Planning Sessions Are Expensive
 
@@ -754,7 +983,7 @@ Based on measured BaseCoat sprints:
 
 ---
 
-## 13. Agent Model Recommendations (Updated Sprint 31)
+## 14. Agent Model Recommendations (Updated Sprint 31)
 
 ### Routine Agents Downshifted to gpt-5.4-mini (Cost: ~$50–100/mo savings)
 
@@ -777,7 +1006,7 @@ Based on Sprint 31 empirical testing, the following agent categories are safe to
 
 ---
 
-## 14. Context-Rot Detection
+## 15. Context-Rot Detection
 
 Context rot is the condition in which accumulated session history actively degrades
 response quality and inflates token cost, even when the individual turns are short.
