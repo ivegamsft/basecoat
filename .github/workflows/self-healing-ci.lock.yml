@@ -66,13 +66,14 @@ on:
     types:
     - completed
     workflows:
-    - CI
+    - "BaseCoat - CI"
+    - "BaseCoat - Validate BaseCoat"
 
 permissions: {}
 
 concurrency:
   cancel-in-progress: true
-  group: gh-aw-${{ github.workflow }}-${{ github.event.workflow_run.head_sha || github.event.workflow_run.id || inputs.run_id || github.run_id }}
+  group: gh-aw-${{ github.workflow }}-${{ github.event.workflow_run.id || github.event.workflow_run.head_sha || inputs.run_id || github.run_id }}
 
 run-name: Self-Healing CI — run ${{ github.event.workflow_run.id || inputs.run_id || github.run_id }}
 
@@ -198,6 +199,7 @@ jobs:
           GH_AW_GITHUB_EVENT_WORKFLOW_RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
           GH_AW_GITHUB_EVENT_WORKFLOW_RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
           GH_AW_GITHUB_EVENT_WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id }}
+          GH_AW_GITHUB_EVENT_WORKFLOW_RUN_NAME: ${{ github.event.workflow_run.name }}
           GH_AW_GITHUB_REPOSITORY: ${{ github.repository }}
           GH_AW_GITHUB_RUN_ID: ${{ github.run_id }}
           GH_AW_GITHUB_WORKSPACE: ${{ github.workspace }}
@@ -262,6 +264,7 @@ jobs:
           GH_AW_GITHUB_EVENT_WORKFLOW_RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
           GH_AW_GITHUB_EVENT_WORKFLOW_RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
           GH_AW_GITHUB_EVENT_WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id }}
+          GH_AW_GITHUB_EVENT_WORKFLOW_RUN_NAME: ${{ github.event.workflow_run.name }}
           GH_AW_GITHUB_REPOSITORY: ${{ github.repository }}
         with:
           script: |
@@ -281,6 +284,7 @@ jobs:
           GH_AW_GITHUB_EVENT_WORKFLOW_RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
           GH_AW_GITHUB_EVENT_WORKFLOW_RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
           GH_AW_GITHUB_EVENT_WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id }}
+          GH_AW_GITHUB_EVENT_WORKFLOW_RUN_NAME: ${{ github.event.workflow_run.name }}
           GH_AW_GITHUB_REPOSITORY: ${{ github.repository }}
           GH_AW_GITHUB_RUN_ID: ${{ github.run_id }}
           GH_AW_GITHUB_WORKSPACE: ${{ github.workspace }}
@@ -305,6 +309,7 @@ jobs:
                 GH_AW_GITHUB_EVENT_WORKFLOW_RUN_CONCLUSION: process.env.GH_AW_GITHUB_EVENT_WORKFLOW_RUN_CONCLUSION,
                 GH_AW_GITHUB_EVENT_WORKFLOW_RUN_HEAD_SHA: process.env.GH_AW_GITHUB_EVENT_WORKFLOW_RUN_HEAD_SHA,
                 GH_AW_GITHUB_EVENT_WORKFLOW_RUN_ID: process.env.GH_AW_GITHUB_EVENT_WORKFLOW_RUN_ID,
+                GH_AW_GITHUB_EVENT_WORKFLOW_RUN_NAME: process.env.GH_AW_GITHUB_EVENT_WORKFLOW_RUN_NAME,
                 GH_AW_GITHUB_REPOSITORY: process.env.GH_AW_GITHUB_REPOSITORY,
                 GH_AW_GITHUB_RUN_ID: process.env.GH_AW_GITHUB_RUN_ID,
                 GH_AW_GITHUB_WORKSPACE: process.env.GH_AW_GITHUB_WORKSPACE,
@@ -1445,4 +1450,3 @@ jobs:
             /tmp/gh-aw/safe-output-items.jsonl
             /tmp/gh-aw/temporary-id-map.json
           if-no-files-found: ignore
-

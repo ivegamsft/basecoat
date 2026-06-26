@@ -2,7 +2,8 @@
 on:
   workflow_run:
     workflows:
-      - CI
+      - "BaseCoat - CI"
+      - "BaseCoat - Validate BaseCoat"
     branches: [main]
     types: [completed]
   workflow_dispatch:
@@ -23,7 +24,7 @@ safe-outputs:
     max: 1
     close-older-issues: true
 concurrency:
-  group: "gh-aw-${{ github.workflow }}-${{ github.event.workflow_run.head_sha || github.event.workflow_run.id || inputs.run_id || github.run_id }}"
+  group: "gh-aw-${{ github.workflow }}-${{ github.event.workflow_run.id || github.event.workflow_run.head_sha || inputs.run_id || github.run_id }}"
   cancel-in-progress: true
 engine: copilot
 timeout-minutes: 20
@@ -38,10 +39,11 @@ diagnosis and remediation guidance.
 ## Context
 
 - **Failed workflow run ID**: `${{ github.event.workflow_run.id }}`
+- **Triggering workflow name**: `${{ github.event.workflow_run.name }}`
 - **Commit SHA**: `${{ github.event.workflow_run.head_sha }}`
 - **Conclusion**: `${{ github.event.workflow_run.conclusion }}`
 - **Repository**: `${{ github.repository }}`
-- **Watched workflow**: `CI` on `main` only (to avoid redundant workflow_run fan-out)
+- **Watched workflows**: `BaseCoat - CI` and `BaseCoat - Validate BaseCoat` on `main` (covers the primary failure hotspots)
 - **Auto mode guard**: automatic `workflow_run` handling is gated by repo variable `SELF_HEALING_CI_AUTO=true` (disabled by default when unset).
 
 Fetch full workflow run details using:
@@ -79,33 +81,48 @@ Determine the root cause category:
 | **Transient / flaky** | Network errors, rate limits, `503`, `ECONNRESET` |
 | **Infrastructure** | Runner provisioning failures, Docker pull errors |
 
+Also note which watched workflow triggered this run:
+
+- `BaseCoat - CI` — covers lint, YAML validation, CATALOG references, and PowerShell tests.
+- `BaseCoat - Validate BaseCoat` — covers workflow syntax lint (actionlint), commit-message scanning, bash validation, and Windows PowerShell tests.
+
 ### Step 3 — Identify Root Cause
 
 Extract the specific error message, file, and line number where the failure occurred.
 Look for patterns in recent similar failures using:
 
 ```bash
-gh run list --workflow="${{ github.event.workflow_run.id }}" --limit 10 --json conclusion,createdAt,headBranch
+gh run list --repo ${{ github.repository }} --workflow "<workflow-name-from-run-details>" --branch "<head-branch-from-run-details>" --limit 10 --json conclusion,createdAt,headBranch,url
 ```
 
-### Step 4 — Assess Impact
+### Step 4 — Assess Impact and Failure Nature
 
 - Is this on `main` or a feature branch?
 - Is this blocking a release or PR merge?
-- Has this failure pattern appeared before in the last 10 runs (flaky)?
+- Has this failure pattern appeared before in the last 10 runs?
+
+**Classify as one of the following:**
+
+| Nature | Criteria | Action |
+|---|---|---|
+| **Transient / flaky** | Network error, rate-limit, runner flap, or ≥2 prior occurrences that self-healed | Note it; suggest manual re-run; do not file an issue |
+| **Code regression** | Deterministic failure tied to a specific file or test assertion, first seen at the current SHA | File a tracking issue with root cause and fix recommendation |
+| **Environment drift** | Passes locally, fails on runner due to dependency version mismatch or tooling change | File a tracking issue; flag for dependency update |
 
 ### Step 5 — Post Diagnosis Comment
 
-If the failure is on a PR, comment on the PR. Otherwise, create an issue.
+If the failure is on a PR, comment on the PR. Otherwise, create a single tracking issue on `main`
+(the `close-older-issues: true` safe-output setting de-duplicates repeated failures automatically).
 Use this structure:
 
 ```markdown
-## CI Failure Diagnosis
+## Workflow Failure Diagnosis — [workflow name, e.g. BaseCoat - CI or BaseCoat - Validate BaseCoat]
 
 **Workflow**: [name]
 **Run**: [run-id]
 **Branch**: [branch]
 **Failure Category**: [category from Step 2]
+**Failure Nature**: [Transient/Flaky | Code Regression | Environment Drift]
 
 ### Root Cause
 [Specific error message and location]
