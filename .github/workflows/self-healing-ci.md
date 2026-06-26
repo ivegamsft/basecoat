@@ -3,6 +3,7 @@ on:
   workflow_run:
     workflows:
       - "BaseCoat - CI"
+      - CI
       - "BaseCoat - Validate BaseCoat"
     branches: [main]
     types: [completed]
@@ -22,9 +23,9 @@ safe-outputs:
     hide-older-comments: true
   create-issue:
     max: 1
-    close-older-issues: true
+    close-older-issues: false
 concurrency:
-  group: "gh-aw-${{ github.workflow }}-${{ github.event.workflow_run.id || github.event.workflow_run.head_sha || inputs.run_id || github.run_id }}"
+  group: "gh-aw-${{ github.workflow }}-${{ github.event.workflow_run.name || 'manual' }}-${{ github.event.workflow_run.id || github.event.workflow_run.head_sha || inputs.run_id || github.run_id }}"
   cancel-in-progress: true
 engine: copilot
 timeout-minutes: 20
@@ -43,19 +44,20 @@ diagnosis and remediation guidance.
 - **Commit SHA**: `${{ github.event.workflow_run.head_sha }}`
 - **Conclusion**: `${{ github.event.workflow_run.conclusion }}`
 - **Repository**: `${{ github.repository }}`
-- **Watched workflows**: `BaseCoat - CI` and `BaseCoat - Validate BaseCoat` on `main` (covers the primary failure hotspots)
+- **Watched workflows**: `BaseCoat - CI` (or `CI`) and `BaseCoat - Validate BaseCoat` on `main` (covers the primary failure hotspots)
 - **Auto mode guard**: automatic `workflow_run` handling is gated by repo variable `SELF_HEALING_CI_AUTO=true` (disabled by default when unset).
 
 Fetch full workflow run details using:
 
 ```bash
-gh run view ${{ github.event.workflow_run.id }} --repo ${{ github.repository }} --json name,headBranch,conclusion,status,jobs
+gh run view ${{ github.event.workflow_run.id }} --repo ${{ github.repository }} --json name,headBranch,conclusion,status,jobs,pullRequests,url,event
 ```
 
 ## What to Do
 
 Only act if the conclusion from the run details is `failure` or `timed_out`.
 If the conclusion is `success`, `cancelled`, or `skipped`, post nothing and exit.
+Treat `name` from run details as the canonical workflow identity.
 
 ### Step 1 — Fetch Failed Job Logs
 
@@ -119,8 +121,9 @@ Use this structure:
 ## Workflow Failure Diagnosis — [workflow name, e.g. BaseCoat - CI or BaseCoat - Validate BaseCoat]
 
 **Workflow**: [name]
-**Run**: [run-id]
+**Run**: [run-id + URL]
 **Branch**: [branch]
+**Failure Class**: [Transient / flaky | Code regression]
 **Failure Category**: [category from Step 2]
 **Failure Nature**: [Transient/Flaky | Code Regression | Environment Drift]
 
@@ -139,7 +142,11 @@ Use this structure:
 
 ### Flaky?
 [Yes — seen N times in last 10 runs | No — first occurrence]
+
+### Owner Action Recommendation
+[Who should act next, and the first concrete action]
 ```
 
 Keep the diagnosis concise and actionable. If the failure is clearly transient
-(network, rate limit), note it and suggest a manual re-run rather than filing an issue.
+(network, rate limit), note that a manual re-run is the first action while still
+preserving the deduplicated tracker/comment surface defined above.
