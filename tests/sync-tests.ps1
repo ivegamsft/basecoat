@@ -385,7 +385,7 @@ try {
 
     $docsTargetDir = Join-Path $consumer '.github/base-coat/docs'
 
-    foreach ($required in @('reference', 'guides')) {
+    foreach ($required in @('reference', 'guides', 'diagrams')) {
         $testCount++
         Assert-SyncPathExists -Path (Join-Path $docsTargetDir $required) `
             -Message "Sync test failed: required docs subtree '$required' missing from overlay"
@@ -395,7 +395,7 @@ try {
     Assert-SyncPathExists -Path (Join-Path $docsTargetDir 'agents/AGENTS.md') `
         -Message 'Sync test failed: docs/agents/agents.md missing from overlay'
 
-    foreach ($excludedDocsSubtree in @('archive', 'architecture', 'diagrams', 'examples', 'memory', 'operations', 'research', 'templates')) {
+    foreach ($excludedDocsSubtree in @('archive', 'architecture', 'examples', 'memory', 'operations', 'research', 'templates')) {
         $testCount++
         Assert-SyncPathNotExists -Path (Join-Path $docsTargetDir $excludedDocsSubtree) `
             -Message "Sync test failed: excluded docs subtree '$excludedDocsSubtree' should not be synced"
@@ -406,7 +406,7 @@ try {
         -Message 'Sync test failed: docs/index.md should not be synced'
 
     $topLevelDocsEntries = @(Get-ChildItem -Path $docsTargetDir -Force | ForEach-Object { $_.Name })
-    $unexpectedDocsEntries = $topLevelDocsEntries | Where-Object { $_ -notin @('reference', 'guides', 'agents') }
+    $unexpectedDocsEntries = $topLevelDocsEntries | Where-Object { $_ -notin @('reference', 'guides', 'agents', 'diagrams') }
     $testCount++
     if ($unexpectedDocsEntries.Count -gt 0) {
         $unexpected = ($unexpectedDocsEntries | Sort-Object) -join ', '

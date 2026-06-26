@@ -13,7 +13,7 @@ if (-not $repoRoot) {
     throw 'Run this inside a git repository'
 }
 
-$allowedDocsTopLevelEntries = @('reference', 'guides', 'agents')
+$allowedDocsTopLevelEntries = @('reference', 'guides', 'agents', 'diagrams')
 $supportedAgentFrontmatterKeys = @('name', 'description', 'tools', 'mcp-servers')
 
 function Convert-AgentToCliCompatibleContent {
@@ -244,7 +244,7 @@ try {
     }
     New-Item -ItemType Directory -Force -Path $docsDest | Out-Null
 
-    foreach ($docSubdir in @('reference', 'guides')) {
+    foreach ($docSubdir in @('reference', 'guides', 'diagrams')) {
         $src = Join-Path $sourcePath "docs/$docSubdir"
         if (Test-Path $src) {
             Copy-Item -Path $src -Destination (Join-Path $docsDest $docSubdir) -Recurse -Force

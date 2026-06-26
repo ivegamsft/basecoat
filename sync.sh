@@ -5,7 +5,7 @@ set -euo pipefail
 SOURCE_REPO="${BASECOAT_REPO:-https://github.com/YOUR-ORG/basecoat.git}"
 SOURCE_REF="${BASECOAT_REF:-main}"
 TARGET_DIR="${BASECOAT_TARGET_DIR:-.github/base-coat}"
-ALLOWED_DOCS_TOP_LEVEL=("reference" "guides" "agents")
+ALLOWED_DOCS_TOP_LEVEL=("reference" "guides" "agents" "diagrams")
 
 if ! command -v git >/dev/null 2>&1; then
   echo "git is required" >&2
@@ -147,9 +147,11 @@ rm -f "$REPO_ROOT/$TARGET_DIR/basecoat-metadata.json"
 # Copy only basic documentation (not full docs tree)
 rm -rf "$REPO_ROOT/$TARGET_DIR/docs"
 mkdir -p "$REPO_ROOT/$TARGET_DIR/docs"
-for doc_subdir in reference guides; do
-  if [[ -d "$TMP_DIR/source/docs/$doc_subdir" ]]; then
-    cp -R "$TMP_DIR/source/docs/$doc_subdir" "$REPO_ROOT/$TARGET_DIR/docs/$doc_subdir"
+for doc_subdir in reference guides diagrams; do
+  src_path="$TMP_DIR/source/docs/$doc_subdir"
+  tgt_path="$REPO_ROOT/$TARGET_DIR/docs/$doc_subdir"
+  if [[ -d "$src_path" ]]; then
+    cp -R "$src_path" "$tgt_path"
   fi
 done
 if [[ -f "$TMP_DIR/source/docs/agents/AGENTS.md" ]]; then
