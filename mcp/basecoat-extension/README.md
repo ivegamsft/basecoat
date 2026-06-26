@@ -277,6 +277,7 @@ Return blocked-by-#1073 callback payload for follow-up validation
 - Error Handling: Detailed error responses for invalid state, expired sessions, API failures
 
 **Full specification:** `docs/operations/COPILOT_EXTENSION_OAUTH_FLOW.md`
+**Request-flow diagram:** [docs/diagrams/copilot-extension-oauth-and-tool-invocation-flow.md](../../docs/diagrams/copilot-extension-oauth-and-tool-invocation-flow.md)
 
 ### 2. App Token — Service Account
 
@@ -348,6 +349,7 @@ Live OAuth token exchange (GitHub code→token call, org membership check, and s
 - `GET /api/copilot/ping` — checks Copilot SDK connectivity
 - `POST /api/copilot/chat` — placeholder (501) until session wiring is implemented
 - `POST /api/copilot/tools/:toolName` — extension write tooling endpoint
+- Request flow reference (OAuth + tools + health/ping): [docs/diagrams/copilot-extension-oauth-and-tool-invocation-flow.md](../../docs/diagrams/copilot-extension-oauth-and-tool-invocation-flow.md)
 
 ## Deployment
 
