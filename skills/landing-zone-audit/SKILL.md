@@ -2,6 +2,7 @@
 name: landing-zone-audit
 compatibility: [github-copilot-cli]
 description: "Use when reviewing Azure landing zone designs, management group hierarchies, hub/spoke patterns, policy baselines, or vending completeness. USE FOR: audit landing zone designs, verify hierarchy and platform subscriptions, check policy baseline coverage, review vending readiness. DO NOT USE FOR: single-resource deployment, AWS org design, application code generation."
+category: operations
 ---
 # Landing Zone Audit Skill
 

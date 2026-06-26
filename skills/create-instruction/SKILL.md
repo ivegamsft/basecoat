@@ -2,6 +2,7 @@
 name: create-instruction
 compatibility: [github-copilot-cli]
 description: "Use when creating a new instruction file for a domain, language, or workflow in a customization repo. USE FOR: create a new instructions file, choose applyTo glob for an instruction, write guardrails for a coding workflow, add repository standards for a language, draft instruction frontmatter and naming. DO NOT USE FOR: creating a reusable skill, writing end-user product docs, editing unrelated source code."
+category: development
 ---
 # Create An Instruction
 

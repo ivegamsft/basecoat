@@ -2,6 +2,7 @@
 name: tech-debt
 compatibility: [github-copilot-cli]
 description: "Use when inventorying, scoring, budgeting, or reducing technical debt across a repo or team. USE FOR: build technical debt register, rank cleanup work with RICE, reserve sprint capacity for remediation, compare debt items by impact and effort, track debt amortization over time. DO NOT USE FOR: implementing feature work directly, emergency production incident response."
+category: development
 ---
 # Technical Debt Management
 

@@ -2,6 +2,7 @@
 name: devops-audit
 compatibility: [github-copilot-cli]
 description: "Audits CI/CD pipelines, deployment configurations, and environment management. USE FOR: reviewing GitHub Actions workflows, analyzing deployment processes, validating environment configurations, assessing automation completeness, identifying workflow bottlenecks. DO NOT USE FOR: implementing CI/CD workflows from scratch, infrastructure provisioning, application code development, database administration."
+category: operations
 ---
 # DevOps Audit Skill
 

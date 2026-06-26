@@ -2,6 +2,7 @@
 name: refactoring
 compatibility: [github-copilot-cli]
 description: "Use when improving code structure while keeping behavior stable and risk controlled. USE FOR: extract large method safely, remove duplication without changing outputs, split module responsibilities, rename confusing abstractions with tests, plan incremental cleanup of legacy code. DO NOT USE FOR: broad rewrites from scratch, intentional feature changes mixed into refactor."
+category: development
 ---
 # Refactoring
 

@@ -2,6 +2,7 @@
 name: api-audit
 compatibility: [github-copilot-cli]
 description: "Audits API endpoint designs, contracts, versioning strategies, and error handling. USE FOR: reviewing API endpoint definitions, validating request/response contracts, assessing error handling patterns, evaluating versioning strategies, analyzing documentation completeness. DO NOT USE FOR: implementing API endpoints, writing backend code, database design, frontend development, infrastructure setup."
+category: operations
 ---
 # API Audit Skill
 

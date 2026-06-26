@@ -2,6 +2,7 @@
 name: frontend-audit
 compatibility: [github-copilot-cli]
 description: "Use when reviewing frontend implementations, component output, responsive behavior, accessibility states, or UI consistency. USE FOR: audit generated UI, review a PR for WCAG or responsive issues, verify interaction states and copy consistency, check performance-sensitive patterns. DO NOT USE FOR: building UI features from scratch, backend API design, database schema modeling."
+category: operations
 ---
 # Frontend Audit Skill
 

@@ -2,6 +2,7 @@
 name: architecture
 compatibility: [github-copilot-cli]
 description: "Use when shaping system architecture, documenting decisions, and evaluating cross-cutting tradeoffs. USE FOR: design a system architecture, create a C4 diagram, write an ADR for a platform choice, compare technology options with a matrix, assess architectural risks and mitigations. DO NOT USE FOR: implementing endpoints, fixing CI failures, pixel-perfect UI design."
+category: architecture
 ---
 # Architecture Skill
 

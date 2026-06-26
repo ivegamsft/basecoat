@@ -2,6 +2,7 @@
 name: dependency-blocker-monitoring
 compatibility: [github-copilot-cli]
 description: "Use when monitoring workcell BOM dependencies and cell health so blocker issues are opened when a cell fails and resolved when it recovers. USE FOR: dependency maps, cell health checks, blocker issue creation, and recovery closures. DO NOT USE FOR: general project tracking or unrelated CI triage."
+category: operations
 
 visibility: "internal"
 ---

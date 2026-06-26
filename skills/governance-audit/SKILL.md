@@ -2,6 +2,7 @@
 name: governance-audit
 compatibility: [github-copilot-cli]
 description: "Use when auditing repo metadata, label drift, template gaps, and workflow enforcement coverage. USE FOR: issue and PR metadata audits, canonical-label drift checks, missing governance doc detection, and follow-up issue planning. DO NOT USE FOR: writing app code, changing labels without evidence, or release coordination."
+category: governance
 
 metadata:
   category: governance

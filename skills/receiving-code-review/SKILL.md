@@ -2,6 +2,7 @@
 name: receiving-code-review
 compatibility: [github-copilot-cli]
 description: "Use when responding to pull request review feedback. Covers acknowledging comments, categorizing severity, addressing changes, and re-requesting review. USE FOR: address PR review comments, respond to code review feedback, categorize review items, re-request review after changes, resolve review threads. DO NOT USE FOR: performing initial code review, writing review comments on others' PRs, general PR creation."
+category: development
 ---
 # Receiving Code Review — Response Protocol
 

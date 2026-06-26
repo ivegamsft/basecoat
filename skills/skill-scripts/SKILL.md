@@ -1,7 +1,8 @@
 ---
 name: skill-scripts
 compatibility: [github-copilot-cli]
-description: "Use when a skill needs executable multi-step workflows where each script produces structured JSON that is passed to the next step, enabling composable assessment, planning, validation, and execution with clear contracts."
+description: "Use when a skill needs executable multi-step workflows where each script produces structured JSON that is passed to the next step, enabling composable assessment, planning, validation, and execution with clear contracts. USE FOR: splitting large skills into deterministic script stages, chaining assessment and planning outputs, defining executable skill contracts, and building reusable automation pipelines inside a skill. DO NOT USE FOR: single-step prompt-only skills, ad hoc shell snippets without contracts, or replacing repo-wide workflow orchestration."
+category: development
 ---
 # Skill Scripts
 

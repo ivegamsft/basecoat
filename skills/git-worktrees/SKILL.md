@@ -2,6 +2,7 @@
 name: git-worktrees
 compatibility: [github-copilot-cli]
 description: "Use when isolating parallel tasks, experiments, or hotfixes into separate working directories. USE FOR: create isolated workspace for feature branch, run parallel tasks without stashing, set up clean environment for risky experiment, manage multiple branches simultaneously, clean up stale worktrees. DO NOT USE FOR: simple branch switching, single-task linear workflows, repos with submodule-heavy setups that complicate worktrees."
+category: infrastructure
 ---
 # Git Worktrees — Isolated Parallel Workspaces
 

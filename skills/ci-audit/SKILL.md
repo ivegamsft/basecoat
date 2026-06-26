@@ -2,6 +2,7 @@
 name: ci-audit
 compatibility: [github-copilot-cli]
 description: "Audits live GitHub repository governance controls and produces a markdown evidence pack. USE FOR: exporting branch protection and required checks, verifying merge queue and environment protections, auditing runners and security gates, and reporting policy-vs-live gaps. DO NOT USE FOR: writing application code, creating workflows, infrastructure implementation, or making repo-setting changes."
+category: operations
 ---
 # CI/CD Audit Skill
 

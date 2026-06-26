@@ -2,6 +2,7 @@
 name: flow-admission-control
 compatibility: [github-copilot-cli]
 description: "Use when defining capacity-aware intake and merge-queue admission rules to prevent queue overload. USE FOR: WIP limit policy, merge-ready admission criteria, stale PR expiration rules, and load-shedding strategy. DO NOT USE FOR: manual override of required checks, arbitrary PR closure without policy, or unrelated feature planning."
+category: flow-governance
 
 metadata:
   category: flow-governance

@@ -2,6 +2,7 @@
 name: sprint-project-mapper
 compatibility: [github-copilot-cli]
 description: "Use when mapping issue/PR items into meaningful sprint or project groups. USE FOR: clustering by sprint/wave/project tags, split-vs-merge debate, and release-note metric rollups. DO NOT USE FOR: code implementation, issue-by-issue triage cleanup, or deployment execution."
+category: operations
 ---
 # Sprint/Project Mapper Skill
 

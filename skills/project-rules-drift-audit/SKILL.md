@@ -2,6 +2,7 @@
 name: project-rules-drift-audit
 compatibility: [github-copilot-cli]
 description: "Audits GitHub Project automation rules against the canonical AIDL guardrail baseline. USE FOR: comparing live project rule configuration to a baseline manifest, classifying drift by severity, producing issue-ready remediation output, and running in advisory or enforce mode. DO NOT USE FOR: writing application code, direct project configuration changes, or replacing policy engines that manage approvals."
+category: governance
 
 metadata:
   category: governance
