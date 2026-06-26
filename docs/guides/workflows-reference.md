@@ -148,12 +148,14 @@ inputs:
 **What It Does:**
 
 - Calculates high-change thresholds from the PR payload:
-  - `changed_files >= 12` or
+  - `changed_files >= 12` and
   - `additions + deletions >= 500`
 - Detects risky path changes (`instructions/`, `skills/`, `agents/`, `scripts/`, `.github/workflows/`)
 - Requires both PRD and spec references for high-change PRs
 - Emits advisory warning (non-blocking) for risky-path-only PRs when no PRD/spec reference is present
 - Accepts links in markdown or structured lines (`PRD: <link>`, `Spec: <link>`)
+- Auto-passes merge queue checks (`merge_group`) when no pull request payload is available
+- Bypasses bot/agent-authored PRs (`ibuyspy` or GitHub Bot accounts)
 
 **Configuration:**
 

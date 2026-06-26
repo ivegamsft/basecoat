@@ -41,9 +41,11 @@ the `publish` job runs.
 
 The `prd-spec-gate.yml` workflow blocks PRs with:
 
-- ≥ 500 line churn **OR** ≥ 12 files that lack PRD and spec links
+- ≥ 500 line churn **AND** ≥ 12 files that lack PRD and spec links
 - PRs touching risky paths (`skills/`, `agents/`, `instructions/`, `scripts/`, `.github/workflows/`) get advisory warning below threshold
 - Add the `skip-prd-spec-check` label to bypass
+- Merge queue (`merge_group`) checks pass when no pull request payload exists
+- Bot/agent-authored PRs (`ibuyspy` or GitHub Bot accounts) bypass the gate
 
 Contributor guideline: Keep PRs within 15 files or fewer and 300 changed lines or fewer
 unless the PR is a justified mechanical change.

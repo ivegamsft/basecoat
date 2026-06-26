@@ -573,8 +573,16 @@ else {
         $prdSpecWorkflowIssues += 'prd-spec-gate.yml (missing merge_group no-PR payload guard)'
     }
 
-    if ($prdSpecWorkflow -notmatch 'changedFiles\s*>=\s*12\s*\|\|\s*churn\s*>=\s*500') {
+    # Policy: require BOTH criteria (AND) to avoid false-positives on pure-additive docs PRs.
+    # Changed from OR to AND: see issue #1763 RCA.
+    if ($prdSpecWorkflow -notmatch 'changedFiles\s*>=\s*12\s*&&\s*churn\s*>=\s*500') {
         $prdSpecWorkflowIssues += 'prd-spec-gate.yml (missing high-change threshold semantics)'
+    }
+
+    if ($prdSpecWorkflow -notmatch "pr\.user\.type\s*===\s*'Bot'" -or
+        $prdSpecWorkflow -notmatch "pr\.user\.login\s*===\s*'ibuyspy'" -or
+        $prdSpecWorkflow -notmatch 'Skipping PRD/spec gate for bot/agent-authored PR') {
+        $prdSpecWorkflowIssues += 'prd-spec-gate.yml (missing bot/agent bypass semantics)'
     }
 
     if ($prdSpecWorkflow -notmatch '\^\\\.github\\/workflows\\/' -or $prdSpecWorkflow -notmatch 'hasPrd\s*&&\s*hasSpec') {

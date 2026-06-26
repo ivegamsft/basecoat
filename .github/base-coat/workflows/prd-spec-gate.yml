@@ -10,6 +10,9 @@ on:
       - ready_for_review
       - labeled
       - unlabeled
+  merge_group:
+    types:
+      - checks_requested
 
 permissions:
   contents: read
@@ -28,6 +31,11 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
+            if (!context.payload.pull_request) {
+              core.notice('Merge queue event detected (no PR payload). Passing PRD/spec gate because PR-specific checks are not applicable.');
+              return;
+            }
+
             const pr = context.payload.pull_request;
             const labels = (pr.labels || []).map(l => l.name);
 
@@ -36,16 +44,17 @@ jobs:
               return;
             }
 
+            // Bypass for bot/agent-authored PRs — they don't produce PRD/spec artifacts
+            if (pr.user && (pr.user.type === 'Bot' || pr.user.login === 'ibuyspy')) {
+              core.notice('Skipping PRD/spec gate for bot/agent-authored PR.');
+              return;
+            }
+
             const changedFiles = pr.changed_files || 0;
             const churn = (pr.additions || 0) + (pr.deletions || 0);
-            const highChange = changedFiles >= 12 || churn >= 500;
-
-            const files = await github.paginate(github.rest.pulls.listFiles, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: pr.number,
-              per_page: 100,
-            });
+            // Require BOTH criteria: large file count AND large churn.
+            // Using AND prevents pure-additive docs PRs from being flagged.
+            const highChange = changedFiles >= 12 && churn >= 500;
 
             const riskyPathPatterns = [
               /^instructions\//,
@@ -55,13 +64,23 @@ jobs:
               /^\.github\/workflows\//,
             ];
 
-            const riskyPathTouched = files.some(file =>
-              riskyPathPatterns.some(pattern => pattern.test(file.filename))
-            );
+            let riskyPathTouched = false;
+            if (!highChange) {
+              const files = await github.paginate(github.rest.pulls.listFiles, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                per_page: 100,
+              });
 
-            if (!highChange && !riskyPathTouched) {
-              core.notice('PRD/spec links not required: change is below size and risk thresholds.');
-              return;
+              riskyPathTouched = files.some(file =>
+                riskyPathPatterns.some(pattern => pattern.test(file.filename))
+              );
+
+              if (!riskyPathTouched) {
+                core.notice('PRD/spec links not required: change is below size and risk thresholds.');
+                return;
+              }
             }
 
             const body = (pr.body || '');
