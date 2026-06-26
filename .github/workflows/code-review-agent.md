@@ -1,4 +1,17 @@
 ---
+name: code-review-agent
+description: "Automated PR code review for bugs, security vulnerabilities, and logic errors. USE FOR: finding correctness issues, security vulnerabilities, data loss risks, logic errors. DO NOT USE FOR: style/formatting feedback, refactoring suggestions, pre-existing issues unrelated to the PR."
+visibility: basic
+capabilities:
+  reasoning_depth: high
+  tool_use: required
+  context_window: large
+  latency_profile: interactive
+  cost_tier: medium
+  safety_level: standard
+model_policy:
+  fallback: false
+  preferred_families: [gpt]
 on:
   pull_request:
     types: [opened, synchronize]
