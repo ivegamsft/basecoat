@@ -76,10 +76,14 @@ function Invoke-GhJson {
     }
 
     if ([string]::IsNullOrWhiteSpace($output)) {
-        return $null
+        return @()
     }
 
-    return ($output | ConvertFrom-Json -Depth 100)
+    $parsed = $output | ConvertFrom-Json -Depth 100
+    if ($null -eq $parsed) {
+        return @()
+    }
+    return $parsed
 }
 
 function Get-PagedResults {
@@ -95,6 +99,7 @@ function Get-PagedResults {
         $paged = "${Endpoint}${connector}per_page=100&page=$page"
         $items = @(Invoke-GhJson -Arguments @("api", $paged))
         foreach ($item in $items) {
+            if ($null -eq $item) { continue }
             $all.Add($item)
         }
         $page++
@@ -118,6 +123,7 @@ function Get-ClosedPullsUpdatedSince {
         $endpoint = "/repos/$Repository/pulls?state=closed&sort=updated&direction=desc&per_page=100&page=$page"
         $items = @(Invoke-GhJson -Arguments @("api", $endpoint))
         foreach ($item in $items) {
+            if ($null -eq $item) { continue }
             $updatedAt = ([datetime]$item.updated_at).ToUniversalTime()
             if ($updatedAt -lt $SinceUtc) {
                 $continuePaging = $false
@@ -145,6 +151,7 @@ function Get-IssueCommentsPaged {
 function Get-LabelNames($Item) {
     $labels = [System.Collections.Generic.List[string]]::new()
     foreach ($label in @($Item.labels)) {
+        if ($null -eq $label) { continue }
         if ($label.PSObject.Properties.Name -contains "name") {
             $name = [string]$label.name
             if (-not [string]::IsNullOrWhiteSpace($name)) {
@@ -543,6 +550,7 @@ function Publish-ReportComment {
     $comments = @(Get-IssueCommentsPaged -Repo $Repo -IssueNumber $IssueNumber)
     $existing = $null
     foreach ($comment in $comments) {
+        if ($null -eq $comment) { continue }
         if ($null -ne $comment.body -and [string]$comment.body -like "*$marker*") {
             $existing = $comment
             break
