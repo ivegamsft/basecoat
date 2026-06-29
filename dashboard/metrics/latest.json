@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-06-22T14:22:55.882390+00:00",
+  "collected_at": "2026-06-29T12:55:16.267514+00:00",
   "organization": "ivegamsft",
   "copilot": {
     "available": false
@@ -12,11 +12,11 @@
         "cycle_time_p95_hours": 74.8
       },
       "ci": {
-        "success_rate": 69.8,
-        "pass_rate": 69.8,
+        "success_rate": 61.0,
+        "pass_rate": 61.0,
         "ci_pass_rate_last_20_runs": 55.0,
-        "ci_pass_rate_last_100_runs": 69.8,
-        "total_runs_sampled": 96,
+        "ci_pass_rate_last_100_runs": 61.0,
+        "total_runs_sampled": 100,
         "runs_sampled_last_20": 20,
         "successful_runs_last_20": 11
       },

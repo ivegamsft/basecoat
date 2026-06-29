@@ -1,6 +1,6 @@
 # Adoption Metrics Summary
 
-Collected: 2026-06-22
+Collected: 2026-06-29
 
 ## Copilot Usage
 
@@ -10,5 +10,5 @@ Collected: 2026-06-22
 
 | Repo | PRs Merged | Cycle Time | CI Success (100 runs) | CI Pass Rate (20 runs) | Coverage |
 |------|-----------|------------|-----------------------|------------------------|----------|
-| basecoat | 24 | 0.1h | 69.8% | 55.0% (11/20) | 8.5% |
+| basecoat | 24 | 0.1h | 61.0% | 55.0% (11/20) | 8.5% |
 
