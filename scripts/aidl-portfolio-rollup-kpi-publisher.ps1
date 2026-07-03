@@ -588,7 +588,7 @@ if (-not ($resolvedOutputDir.StartsWith($repoRoot, [System.StringComparison]::Or
     throw "OutputDir must resolve inside repository root. Resolved path: $resolvedOutputDir"
 }
 
-$repoList = Resolve-RepositoryList -InputRepos $Repositories
+$repoList = @(Resolve-RepositoryList -InputRepos $Repositories)
 $sinceUtc = (Get-Date).ToUniversalTime().AddDays(-$LookbackDays)
 
 if ($PublishIssueNumber -gt 0 -and [string]::IsNullOrWhiteSpace($PublishIssueRepo)) {

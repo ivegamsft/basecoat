@@ -21,6 +21,7 @@ New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
 try {
     $snapshotPath = Join-Path $tempDir 'snapshot.json'
     $outputDir = Join-Path $tempDir 'artifacts'
+    $singleOutputDir = Join-Path $tempDir 'single-artifacts'
 
     @'
 [
@@ -221,6 +222,30 @@ try {
     }
     if ($workflowContent -notmatch 'Upload rollup artifacts') {
         throw 'Workflow must upload rollup artifacts.'
+    }
+
+    & $scriptPath `
+        -Repositories @('IBuySpy-Shared/basecoat') `
+        -LookbackDays 14 `
+        -SnapshotPath $snapshotPath `
+        -DryRun `
+        -OutputDir $singleOutputDir
+
+    if (-not $?) {
+        throw 'Single-repository rollup script execution failed.'
+    }
+
+    $singleResultPath = Join-Path $singleOutputDir 'portfolio-kpi-rollup.json'
+    if (-not (Test-Path $singleResultPath)) {
+        throw "Expected single-repository artifact missing: $singleResultPath"
+    }
+
+    $singleResult = Get-Content -Path $singleResultPath -Raw | ConvertFrom-Json -Depth 100
+    if (@($singleResult.repositories).Count -ne 1) {
+        throw "Expected single-repository aggregation across 1 repository, got $(@($singleResult.repositories).Count)."
+    }
+    if ($singleResult.portfolio.repository_count -ne 1) {
+        throw "Expected portfolio.repository_count of 1, got $($singleResult.portfolio.repository_count)."
     }
 }
 finally {
