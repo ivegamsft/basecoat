@@ -20,8 +20,8 @@ window:
 - Schedule: daily at 06:00 UTC.
 - Manual trigger: `workflow_dispatch` with optional `lookback_days` and
   `queue_warn_seconds`.
-- Runner lane: `${{ vars.RUNNER_RELEASE || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}`
-  so reporting follows release/deploy isolation.
+- Runner lane: `ubuntu-latest` to ensure PowerShell (`pwsh`) is available for
+  report generation on every run.
 
 ## Outputs
 

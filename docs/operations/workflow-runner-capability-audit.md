@@ -88,7 +88,7 @@
 | release.yml | release | deployment-credentials, private-network, public-internet | self-hosted-linux | configurable-release | conditional |
 | repo-health-check.yml | health | public-internet | github-hosted-linux | github-hosted-linux | aligned |
 | reviewer-autoassign.yml | assign | public-internet | github-hosted-linux | github-hosted-linux | aligned |
-| runner-health-observability.yml | runner-health | public-internet | github-hosted-linux | configurable-release | mismatch |
+| runner-health-observability.yml | runner-health | public-internet | github-hosted-linux | github-hosted-linux | aligned |
 | secret-scan.yml | gitleaks | public-internet | github-hosted-linux | github-hosted-linux | aligned |
 | ship-it-intent-dispatch.yml | resolve-intent | public-internet | github-hosted-linux | github-hosted-linux | aligned |
 | ship-it-intent-dispatch.yml | dispatch-intent | public-internet | github-hosted-linux | github-hosted-linux | aligned |
@@ -120,4 +120,3 @@
 |---|---|---|---|---|---|
 | audit-environment-drift.yml | audit | managed-identity, public-internet | self-hosted-linux | github-hosted-linux | ubuntu-latest |
 | docs.yml | deploy | deployment-credentials, private-network, public-internet | self-hosted-linux | github-hosted-linux | ubuntu-latest |
-| runner-health-observability.yml | runner-health | public-internet | github-hosted-linux | configurable-release | ${{ vars.RUNNER_RELEASE \|\| vars.RUNNER_DEPLOY \|\| 'ubuntu-latest' }} |
