@@ -97,15 +97,15 @@ jobs:
         env:
           GH_AW_SETUP_WORKFLOW_NAME: "Issue Triage Agent"
           GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/issue-triage.lock.yml@${{ github.ref }}
-          GH_AW_INFO_VERSION: "1.0.40"
+          GH_AW_INFO_VERSION: "1.0.60"
       - name: Generate agentic run info
         id: generate_aw_info
         env:
           GH_AW_INFO_ENGINE_ID: "copilot"
           GH_AW_INFO_ENGINE_NAME: "GitHub Copilot CLI"
           GH_AW_INFO_MODEL: "gpt-5.3-codex"
-          GH_AW_INFO_VERSION: "1.0.40"
-          GH_AW_INFO_AGENT_VERSION: "1.0.40"
+          GH_AW_INFO_VERSION: "1.0.60"
+          GH_AW_INFO_AGENT_VERSION: "1.0.60"
           GH_AW_INFO_CLI_VERSION: "v0.71.5"
           GH_AW_INFO_WORKFLOW_NAME: "Issue Triage Agent"
           GH_AW_INFO_EXPERIMENTAL: "false"
@@ -363,7 +363,7 @@ jobs:
         env:
           GH_AW_SETUP_WORKFLOW_NAME: "Issue Triage Agent"
           GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/issue-triage.lock.yml@${{ github.ref }}
-          GH_AW_INFO_VERSION: "1.0.40"
+          GH_AW_INFO_VERSION: "1.0.60"
       - name: Set runtime paths
         id: set-runtime-paths
         run: |
@@ -947,7 +947,7 @@ jobs:
         env:
           GH_AW_SETUP_WORKFLOW_NAME: "Issue Triage Agent"
           GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/issue-triage.lock.yml@${{ github.ref }}
-          GH_AW_INFO_VERSION: "1.0.40"
+          GH_AW_INFO_VERSION: "1.0.60"
       - name: Download agent output artifact
         id: download-agent-output
         continue-on-error: true
@@ -1081,7 +1081,7 @@ jobs:
         env:
           GH_AW_SETUP_WORKFLOW_NAME: "Issue Triage Agent"
           GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/issue-triage.lock.yml@${{ github.ref }}
-          GH_AW_INFO_VERSION: "1.0.40"
+          GH_AW_INFO_VERSION: "1.0.60"
       - name: Download agent output artifact
         id: download-agent-output
         continue-on-error: true
@@ -1262,7 +1262,7 @@ jobs:
         env:
           GH_AW_SETUP_WORKFLOW_NAME: "Issue Triage Agent"
           GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/issue-triage.lock.yml@${{ github.ref }}
-          GH_AW_INFO_VERSION: "1.0.40"
+          GH_AW_INFO_VERSION: "1.0.60"
       - name: Check team membership for workflow
         id: check_membership
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
@@ -1319,7 +1319,7 @@ jobs:
         env:
           GH_AW_SETUP_WORKFLOW_NAME: "Issue Triage Agent"
           GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/issue-triage.lock.yml@${{ github.ref }}
-          GH_AW_INFO_VERSION: "1.0.40"
+          GH_AW_INFO_VERSION: "1.0.60"
       - name: Download agent output artifact
         id: download-agent-output
         continue-on-error: true
