@@ -4,6 +4,8 @@ All notable changes to this repository should be recorded in this file.
 
 ## Unreleased
 
+## 3.33.0 - 2026-06-26
+
 ### Added
 
 - Added local-vs-cloud test gating design with tiered gate model, conditional cloud routing, and environment parity strategy (`docs/design/local-cloud-testing-workflows.md`). (#1665)
