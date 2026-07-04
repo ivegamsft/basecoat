@@ -74,7 +74,7 @@ permissions: {}
 
 concurrency:
   cancel-in-progress: true
-  group: gh-aw-${{ github.workflow }}-${{ github.event.workflow_run.name || 'manual' }}-${{ github.event.workflow_run.id || github.event.workflow_run.head_sha || inputs.run_id || github.run_id }}
+  group: gh-aw-${{ github.workflow }}-${{ github.event.workflow_run.id || github.event.workflow_run.head_sha || inputs.run_id || github.run_id }}
 
 run-name: Self-Healing CI — run ${{ github.event.workflow_run.id || inputs.run_id || github.run_id }}
 

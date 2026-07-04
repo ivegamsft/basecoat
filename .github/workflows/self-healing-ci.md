@@ -25,7 +25,7 @@ safe-outputs:
     max: 1
     close-older-issues: false
 concurrency:
-  group: "gh-aw-${{ github.workflow }}-${{ github.event.workflow_run.name || 'manual' }}-${{ github.event.workflow_run.id || github.event.workflow_run.head_sha || inputs.run_id || github.run_id }}"
+  group: "gh-aw-${{ github.workflow }}-${{ github.event.workflow_run.id || github.event.workflow_run.head_sha || inputs.run_id || github.run_id }}"
   cancel-in-progress: true
 engine: copilot
 timeout-minutes: 20
@@ -39,10 +39,9 @@ diagnosis and remediation guidance.
 
 ## Context
 
-- **Failed workflow run ID**: `${{ github.event.workflow_run.id }}`
-- **Triggering workflow name**: `${{ github.event.workflow_run.name }}`
-- **Commit SHA**: `${{ github.event.workflow_run.head_sha }}`
-- **Conclusion**: `${{ github.event.workflow_run.conclusion }}`
+- **Failed workflow run ID**: `${{ github.event.workflow_run.id || inputs.run_id }}` (required — if blank, stop and report that no run ID was provided)
+- **Commit SHA**: `${{ github.event.workflow_run.head_sha }}` (fetch from `gh run view` when blank — e.g. manual dispatch)
+- **Conclusion**: `${{ github.event.workflow_run.conclusion }}` (fetch from `gh run view` when blank — e.g. manual dispatch)
 - **Repository**: `${{ github.repository }}`
 - **Watched workflows**: `BaseCoat - CI` (or `CI`) and `BaseCoat - Validate BaseCoat` on `main` (covers the primary failure hotspots)
 - **Auto mode guard**: automatic `workflow_run` handling is gated by repo variable `SELF_HEALING_CI_AUTO=true` (disabled by default when unset).
@@ -50,7 +49,7 @@ diagnosis and remediation guidance.
 Fetch full workflow run details using:
 
 ```bash
-gh run view ${{ github.event.workflow_run.id }} --repo ${{ github.repository }} --json name,headBranch,conclusion,status,jobs,pullRequests,url,event
+gh run view ${{ github.event.workflow_run.id || inputs.run_id }} --repo ${{ github.repository }} --json name,headBranch,conclusion,status,jobs,pullRequests,url,event
 ```
 
 ## What to Do
@@ -63,10 +62,10 @@ Treat `name` from run details as the canonical workflow identity.
 
 ```bash
 # Get all jobs for this run
-gh run view ${{ github.event.workflow_run.id }} --json jobs --jq '.jobs[] | select(.conclusion == "failure") | {id: .databaseId, name: .name, conclusion: .conclusion}'
+gh run view ${{ github.event.workflow_run.id || inputs.run_id }} --json jobs --jq '.jobs[] | select(.conclusion == "failure") | {id: .databaseId, name: .name, conclusion: .conclusion}'
 
 # Get logs for each failed job
-gh run view --log-failed ${{ github.event.workflow_run.id }} 2>&1 | head -500
+gh run view --log-failed ${{ github.event.workflow_run.id || inputs.run_id }} 2>&1 | head -500
 ```
 
 ### Step 2 — Classify the Failure
