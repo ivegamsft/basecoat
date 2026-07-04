@@ -48,11 +48,17 @@ jobs:
           from datetime import datetime, timezone
 
           url_pattern = re.compile(r'https?://[^\s<>()"''`]+')
-          docs_files = sorted(Path('docs').rglob('*.md'))
+          archive_root = Path('docs/archive')
+          docs_files = sorted(
+              md for md in Path('docs').rglob('*.md')
+              if archive_root not in md.parents
+          )
 
           discovered = {}
           for md in docs_files:
               text = md.read_text(encoding='utf-8', errors='ignore')
+              # Skip URLs inside fenced code blocks (example commands, config snippets, etc.)
+              text = re.sub(r'```.*?```', '', text, flags=re.DOTALL)
               for raw_url in url_pattern.findall(text):
                   url = raw_url.rstrip('.,);]')
                   if 'localhost' in url or '127.0.0.1' in url:
