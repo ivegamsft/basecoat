@@ -398,6 +398,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running token-cost-compare tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'token-cost-compare-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Token-cost-compare tests failed' -ForegroundColor Red
+    Write-FailureLog 'token-cost-compare-tests'
+    exit 1
+}
+
 Write-Host 'Running generate registry tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'generate-registry-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

@@ -325,6 +325,35 @@ Set thresholds to catch runaway usage:
 - Agent role exceeds 2× its average daily usage → investigate
 - Sprint total exceeds budget by 20% → pause and review
 
+### Token Cost Comparison Harness
+
+Use the built-in script to compare token count and estimated cost across scenarios:
+
+```powershell
+pwsh scripts/token-cost-compare.ps1 -InputFile .\scenarios.json -Json
+```
+
+Expected input shape:
+
+```json
+{
+  "scenarios": [
+    { "name": "baseline", "inputTokens": 3000000, "cachedInputTokens": 0, "outputTokens": 500000 },
+    { "name": "candidate", "inputTokens": 1000000, "cachedInputTokens": 2000000, "outputTokens": 500000 }
+  ]
+}
+```
+
+Defaults assume a pricing shape where cached input is cheaper than fresh input and
+output is most expensive. Override rates with `-FreshInputCostPer1M`,
+`-CachedInputCostPer1M`, and `-OutputCostPer1M`.
+
+Validation coverage:
+
+```powershell
+pwsh tests/token-cost-compare-tests.ps1
+```
+
 ---
 
 ## 7. MCP Server Audit for Token Overhead Control

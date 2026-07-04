@@ -71,6 +71,34 @@ Disallowed:
 - No execution session spans unrelated issues.
 - Token-expensive runs (high event count or repeated context replay) decline after adoption.
 
+## Learning Update (2026-06-24)
+
+Recent token-usage review showed a branch/session churn pattern where many tasks
+start in fresh sessions and pay setup cost repeatedly instead of reusing warmed
+context for related work.
+
+### Learning
+
+- High churn increases repeated repo priming, repeated requirement restatement,
+  and continuity loss.
+- For related work in the same repo/theme, session reuse plus periodic compact
+  checkpoints is typically lower-cost than starting new sessions.
+- New sessions still matter, but primarily for isolation boundaries.
+
+### Operating rule
+
+**Compact before you fork; fork for isolation, not cleanup.**
+
+### Decision matrix
+
+| Situation | Best move |
+|---|---|
+| Same repo, same goal, context is long/noisy | Compact current conversation |
+| Same repo, follow-on work within the same issue scope | Stay in the current session |
+| Different repo or truly independent workstream | Start a new session |
+| Conversation has irrelevant history but task is still related | Compact first; switch only if signal stays poor |
+| Clean audit/isolation is required for deliverable risk | Start a new session/branch |
+
 ## Related
 
 - Issue: [#1667](https://github.com/IBuySpy-Shared/basecoat/issues/1667)
