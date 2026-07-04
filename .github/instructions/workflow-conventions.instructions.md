@@ -93,6 +93,25 @@ Post `/approve` as an issue comment to trigger the Copilot coding agent workflow
 (`issue-approve.yml`). This adds `approved` + `copilot-agent` labels and assigns
 the issue to Copilot. The `@copilot` mention does **not** trigger the agent.
 
+## Worktree Sync Enforcement
+
+**Mandatory before any code edits in a worktree lane:**
+
+1. `git fetch origin`
+2. `git rebase origin/main` (or `git merge origin/main` for merge-style lanes)
+3. Confirm: branch includes latest `origin/main @ <sha>` before starting work
+
+**Mandatory before every push/merge attempt:**
+
+1. Re-sync: `git fetch origin && git rebase origin/main`
+2. Verify: `git log --oneline origin/main..HEAD` shows only your commits
+3. Confirm branch is not `BEHIND` before pushing
+
+**Orchestrator policy**: When promoting a lane to active head, require explicit confirmation:
+> "Synced to main @ $(git rev-parse --short origin/main)"
+
+**Flag stale branches**: Any branch more than 50 commits behind `origin/main` must re-sync before CI fan-out.
+
 ## Worktrees
 
 When creating worktrees, use naming pattern: `../<repo>-wt-<issue-or-pr>` (e.g., `../basecoat-wt-1334`).

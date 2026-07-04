@@ -107,6 +107,8 @@ Fleet dispatch is appropriate when **all** of these are true:
 □ No dependencies: Agents do not read each other's output?
 □ Scope pre-validated: Problem is understood; dispatch is not exploration?
 □ Fallback defined: If N% of agents fail, what's the recovery plan?
+□ Branch synced: git rev-list --count HEAD..origin/main == 0 for all active lanes?
+  (Branches >= 50 commits behind origin/main must re-sync before CI fan-out)
 
 → If ANY box is unchecked, defer dispatch.
 ```
