@@ -105,6 +105,8 @@ Existing agents that lack `context_policy` remain valid. The block is strictly a
 - Validators treat its absence as equivalent to `load_scope: standard`, `retention: none`, and no handoff contract.
 - No bulk rewrites are required; add `context_policy` only when integrating an agent into an orchestrated or multi-agent workflow that enforces lifecycle contracts.
 
+**Validation Note**: The `scripts/validate-basecoat.ps1` script currently does NOT validate `context_policy` fields; schema enforcement is not automated. Reviewers should manually verify `context_policy` semantics match the intended asset behavior and multi-asset orchestration patterns.
+
 ## Skill Frontmatter
 
 All skills require:
@@ -196,6 +198,8 @@ context_policy:
 #### Backward Compatibility
 
 Skills that lack `context_policy` are valid. The block is strictly additive; no rewrites are required for existing skills.
+
+**Validation Note**: The `scripts/validate-basecoat.ps1` script currently does NOT validate `context_policy` fields; schema enforcement is not automated. Reviewers should manually verify `context_policy` semantics align with skill behavior and orchestration requirements.
 
 ## Evaluation Coverage
 
