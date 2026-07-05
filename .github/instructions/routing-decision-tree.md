@@ -47,6 +47,17 @@ Find your intent below and call the listed skill or agent directly.
 | Analyze lint or type-check failures | `/build-failure-triage` |
 | Trace root cause of broken deploy | `/build-failure-triage` |
 
+## CI/CD Diagnostics (Data Only)
+
+| Intent | Direct Call |
+|---|---|
+| Produce raw CI/CD metrics snapshot only (no recommendations) | `/ci-cd-diagnostics` |
+| Return diagnostics with explicit `BLOCKED: [reason]` values for unavailable metrics | `/ci-cd-diagnostics` |
+| Inventory PR lifecycle timing, merge-queue wait/requeue rates, and backlog deltas with command-backed sources | `/ci-cd-diagnostics` |
+
+Use `ci-audit` for governance policy-vs-live gap analysis, and `devops-audit`
+for broader remediation-oriented pipeline/process auditing.
+
 ## Branch and Git Hygiene
 
 | Intent | Direct Call |
