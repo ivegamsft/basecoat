@@ -103,6 +103,12 @@ Promotion and future-candidate review must follow:
 
 - `docs/guides/keep-candidate-acceptance-checklist.md`
 
+Branch/session churn guardrails:
+
+- Treat frequent "new branch per small related ask" as a cost smell.
+- Reuse warmed context for related work; do not restart only to clean up noise.
+- Apply the rule: **compact before you fork; fork for isolation, not cleanup**.
+
 ### 1. Compact at phase transitions (not just time)
 
 Invoke `/compact` when switching between semantic phases:
