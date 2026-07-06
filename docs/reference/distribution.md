@@ -154,7 +154,7 @@ Base Coat includes a `version.json` file containing build metadata and version i
   "version": "1.0.0",
   "buildDate": "2024-01-15T10:30:00Z",
   "repository": "https://github.com/IBuySpy-Shared/basecoat",
-  "changelogUrl": "https://github.com/IBuySpy-Shared/basecoat/blob/main/CHANGELOG.md"
+  "changelogUrl": "../CHANGELOG.md"
 }
 ```
 

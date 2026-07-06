@@ -171,6 +171,6 @@ When GitHub releases per-model billing API:
 
 ## Links
 
-- [GitHub Copilot Billing REST API docs](https://docs.github.com/en/rest/copilot/copilot-billing)
+- [GitHub Copilot Billing REST API docs](https://docs.github.com/en/rest/copilot)
 - [GitHub Copilot Usage Metrics API](https://docs.github.com/en/rest/copilot/copilot-metrics)
 - [GitHub API Changelog](https://github.blog/changelog/)

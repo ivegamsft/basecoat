@@ -368,7 +368,7 @@ To update this index:
 4. Run `pwsh scripts/validate-basecoat.ps1` to verify
 5. Update the [AIDL Portfolio Routing](#aidl-portfolio-routing) section when adding agents that overlap with existing AIDL portfolio agents
 
-See [CONTRIBUTING.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/CONTRIBUTING.md) for detailed guidelines.
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) for detailed guidelines.
 
 ---
 

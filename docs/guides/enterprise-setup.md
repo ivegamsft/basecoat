@@ -174,10 +174,10 @@ All customizations follow the same governance model:
 
 - **Issue-first**: Log a GitHub issue before creating or modifying any asset.
 - **PR review**: All changes go through pull requests. Self-approval is permitted for low-risk changes.
-- **Naming conventions**: Follow the patterns in [`instructions/basecoat-10-core-naming.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/basecoat-10-core-naming.instructions.md).
+- **Naming conventions**: Follow the patterns in [`instructions/basecoat-10-core-naming.instructions.md`](../../instructions/basecoat-10-core-naming.instructions.md).
 - **Quality gates**: CI validates structure and naming on every PR.
 
-See [`docs/reference/governance-contract.md`](../reference/governance-contract.md) and [`CONTRIBUTING.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/CONTRIBUTING.md) for full details.
+See [`docs/reference/governance-contract.md`](../reference/governance-contract.md) and [`CONTRIBUTING.md`](../../CONTRIBUTING.md) for full details.
 
 ---
 

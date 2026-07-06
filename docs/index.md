@@ -4,9 +4,9 @@
 
 BaseCoat gives your organization one place to manage agents, skills, instructions, and prompts. Sync it into each team repo with a single command so standards stay consistent and reusable instead of being rewritten in every codebase.
 
-- [README.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/README.md) — Getting started, installation, and overview
-- [CHANGELOG.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/CHANGELOG.md) — Release history
-- [CONTRIBUTING.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/CONTRIBUTING.md) — Contribution guide
+- [README.md](../README.md) — Getting started, installation, and overview
+- [CHANGELOG.md](../CHANGELOG.md) — Release history
+- [CONTRIBUTING.md](../CONTRIBUTING.md) — Contribution guide
 - [philosophy.md](philosophy.md) — Design philosophy and principles
 
 ---

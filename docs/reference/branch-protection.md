@@ -108,6 +108,6 @@ If validation fails:
 ## References
 
 - [GitHub Branch Protection API](https://docs.github.com/en/rest/branches/branch-protection)
-- [Repository Settings](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/managing-a-branch-protection-rule)
+- [Repository Settings](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches)
 - Governance Contract: `docs/reference/governance-contract.md`
 - Governance Audit: `.github/workflows/governance-audit.yml`

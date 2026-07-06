@@ -310,6 +310,6 @@ Version labels (e.g., `v1.0.0`, `v2.0.0`) are used to track which version an iss
 ## References
 
 - **Governance Framework:** [`docs/reference/governance-contract.md`](governance-contract.md)
-- **Contributing Guide:** [`CONTRIBUTING.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/CONTRIBUTING.md)
+- **Contributing Guide:** [`CONTRIBUTING.md`](../../CONTRIBUTING.md)
 - **Issue Templates:** [`.github/ISSUE_TEMPLATE/`](../.github/ISSUE_TEMPLATE/)
-- **Issue Triage Agent:** [`agents/basecoat-10-core-issue-triage.agent.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-issue-triage.agent.md)
+- **Issue Triage Agent:** [`agents/basecoat-10-core-issue-triage.agent.md`](../../agents/basecoat-10-core-issue-triage.agent.md)

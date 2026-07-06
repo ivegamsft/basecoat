@@ -24,6 +24,7 @@ app.get("/api/github/oauth/callback", (req, res) => {
 ```
 
 The placeholder:
+
 - ✅ Validates state (CSRF protection)
 - ✅ Creates session record
 - ❌ **Does NOT** exchange authorization code for access token
@@ -35,7 +36,7 @@ The placeholder:
 
 The extension deployment is fully automated:
 
-```
+```text
 Org-Admin: Creates & installs GitHub App (#1073)
   ↓
 Platform Engineer: Runs bootstrap-credentials.ps1 (stores credentials in GitHub Secrets + KV)
@@ -120,7 +121,7 @@ export class GitHubTokenManager {
   ): Promise<OAuthTokenResponse> {
     try {
       // Exchange code for access token
-      // Documentation: https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps-for-user-to-server-requests
+      // Documentation: https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/authenticating-as-a-github-app-user
       const tokenResponse = await this.app.oauth.createToken({
         code: request.code,
         redirectUrl: request.redirectUri,
@@ -352,6 +353,7 @@ npm test -- --testPathPattern="github-token-manager|session"
 ```
 
 Test coverage should include:
+
 - Token exchange with valid code
 - Token exchange with invalid code (error handling)
 - Org membership check (member / non-member)
@@ -367,7 +369,7 @@ Test coverage should include:
 ## References
 
 - [@octokit/app documentation](https://github.com/octokit/app.js)
-- [GitHub OAuth documentation](https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps-for-user-to-server-requests)
+- [GitHub OAuth documentation](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/authenticating-as-a-github-app-user)
 - [GitHub organization membership API](https://docs.github.com/en/rest/orgs/members?apiVersion=2022-11-28#check-organization-membership-for-a-user)
 - Issue #1114 (GitHub token exchange implementation)
 - Sprint 32 planning
