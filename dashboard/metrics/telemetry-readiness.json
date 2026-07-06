@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "collected_at": "2026-07-06T12:34:25.849123Z",
+  "readiness": {
+    "overall": "not-ready",
+    "missing_dependencies": [
+      "APPLICATIONINSIGHTS_CONNECTION_STRING not set \u2014 App Insights emission disabled",
+      "COPILOT_METRICS_TOKEN not set \u2014 reviewer_closure and intake_completeness metrics unavailable"
+    ],
+    "warnings": []
+  }
+}
