@@ -91,6 +91,47 @@ jobs:
             };
             const hasReleaseLabel = labels => normalizeLabels(labels).some(isReleaseLabel);
             const isHotfixBranch = ref => /^hotfix\//i.test(String(ref || ''));
+            const getReviewerCount = async (prNumber, prAuthor) => {
+              const { data: submittedReviews } = await github.rest.pulls.listReviews({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+              const submittedReviewerCount = new Set(
+                submittedReviews
+                  .filter(r => r.state !== 'DISMISSED' && r.user?.login !== prAuthor)
+                  .map(r => r.user?.login)
+              ).size;
+              return submittedReviewerCount;
+            };
+            const evaluateReadiness = ({ pr, labels, assigneeCount, reviewerCount, ageDays, draftDriftDays }) => {
+              const reasons = [];
+              const hotfixFastPath = !pr.draft && isHotfixBranch(pr.head?.ref);
+              let mode = 'ready-routing';
+
+              if (pr.draft) {
+                mode = 'draft-drift';
+                if (ageDays >= draftDriftDays) {
+                  reasons.push(`Draft age is ${ageDays} days (threshold: ${draftDriftDays}).`);
+                }
+                return { reasons, mode, hotfixFastPath };
+              }
+
+              if (!hotfixFastPath && reviewerCount === 0) {
+                reasons.push('No requested reviewer or reviewer team is set.');
+              }
+              if (!hotfixFastPath && assigneeCount === 0) {
+                reasons.push('No assignee is set for ownership handoff.');
+              }
+              if (!hasReleaseLabel(labels)) {
+                reasons.push('Missing release/planning label (wave:* or sprint:* policy).');
+              }
+              if (String(pr.mergeable_state || '').toLowerCase() === 'behind') {
+                reasons.push('PR mergeable_state is BEHIND; branch needs update before review can complete.');
+              }
+
+              return { reasons, mode, hotfixFastPath };
+            };
 
             const upsertBotComment = async ({ issueNumber, marker, body }) => {
               const comments = await github.paginate(github.rest.issues.listComments, {
@@ -196,47 +237,19 @@ jobs:
               const labels = normalizeLabels(pr.labels || []);
               const assigneeCount = pr.assignees?.length || 0;
               const requestedReviewerCount = (pr.requested_reviewers?.length || 0) + (pr.requested_teams?.length || 0);
-
-              // Also count submitted reviews (including bot reviews) so single-person repos
-              // and Copilot-reviewed PRs are not blocked for missing a requested reviewer.
-              const { data: submittedReviews } = await github.rest.pulls.listReviews({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: prNumber
-              });
-              const submittedReviewerCount = new Set(
-                submittedReviews
-                  .filter(r => r.state !== 'DISMISSED' && r.user?.login !== pr.user?.login)
-                  .map(r => r.user?.login)
-              ).size;
-              const reviewerCount = requestedReviewerCount + submittedReviewerCount;
+              const reviewerCount = requestedReviewerCount + (await getReviewerCount(prNumber, pr.user?.login));
 
               const ageDays = daysBetween(now, new Date(pr.created_at));
-              const idleDays = daysBetween(now, new Date(pr.updated_at));
-              const reasons = [];
-              const hotfixFastPath = !pr.draft && isHotfixBranch(pr.head?.ref);
-
-              if (pr.draft) {
-                if (ageDays >= draftDriftDays) {
-                  reasons.push(`Draft age is ${ageDays} days (threshold: ${draftDriftDays}).`);
-                }
-              } else {
-                if (!hotfixFastPath && reviewerCount === 0) {
-                  reasons.push('No requested reviewer or reviewer team is set.');
-                }
-                if (!hotfixFastPath && assigneeCount === 0) {
-                  reasons.push('No assignee is set for ownership handoff.');
-                }
-                if (!hasReleaseLabel(labels)) {
-                  reasons.push('Missing release/planning label (wave:* or sprint:* policy).');
-                }
-                if (String(pr.mergeable_state || '').toLowerCase() === 'behind') {
-                  reasons.push('PR mergeable_state is BEHIND; branch needs update before review can complete.');
-                }
-              }
+              const { reasons, mode, hotfixFastPath } = evaluateReadiness({
+                pr,
+                labels,
+                assigneeCount,
+                reviewerCount,
+                ageDays,
+                draftDriftDays
+              });
 
               if (reasons.length > 0) {
-                const mode = pr.draft ? 'draft-drift' : 'ready-routing';
                 const body = [
                   eventMarker,
                   '## PR readiness routing nudge',
@@ -302,31 +315,54 @@ jobs:
             const readyStale = [];
             const readyNoOwner = [];
             const readyNoReviewer = [];
+            const actionMap = new Map();
+            const addReason = (pr, reason) => {
+              if (!actionMap.has(pr.number)) {
+                actionMap.set(pr.number, { ...pr, reasons: [] });
+              }
+              actionMap.get(pr.number).reasons.push(reason);
+            };
 
             let openCount = 0;
             let draftCount = 0;
             let readyCount = 0;
 
             for (const pr of scanned) {
+              const { data: prDetails } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number
+              });
               openCount += 1;
-              const createdAt = new Date(pr.created_at);
-              const updatedAt = new Date(pr.updated_at);
+              const createdAt = new Date(prDetails.created_at);
+              const updatedAt = new Date(prDetails.updated_at);
               const ageDays = daysBetween(now, createdAt);
               const idleDays = daysBetween(now, updatedAt);
-              const assigneeCount = pr.assignees?.length || 0;
-              const reviewerCount = (pr.requested_reviewers?.length || 0) + (pr.requested_teams?.length || 0);
-              const hotfixFastPath = isHotfixBranch(pr.head?.ref);
+              const assigneeCount = prDetails.assignees?.length || 0;
+              const requestedReviewerCount = (prDetails.requested_reviewers?.length || 0) + (prDetails.requested_teams?.length || 0);
+              const reviewerCount = requestedReviewerCount + (await getReviewerCount(pr.number, prDetails.user?.login));
+              const labels = normalizeLabels(prDetails.labels || []);
+              const { reasons, hotfixFastPath } = evaluateReadiness({
+                pr: prDetails,
+                labels,
+                assigneeCount,
+                reviewerCount,
+                ageDays,
+                draftDriftDays
+              });
               const detail = {
                 number: pr.number,
-                title: pr.title,
-                htmlUrl: pr.html_url,
+                title: prDetails.title,
+                htmlUrl: prDetails.html_url,
                 ageDays,
                 idleDays,
                 assigneeCount,
                 reviewerCount,
-                draft: Boolean(pr.draft),
+                draft: Boolean(prDetails.draft),
                 hotfixFastPath
               };
+              await setBlockedLabel(pr.number, reasons.length > 0);
+              reasons.forEach(reason => addReason(detail, reason));
 
               if (detail.draft) {
                 draftCount += 1;
@@ -348,25 +384,8 @@ jobs:
               }
             }
 
-            const actionMap = new Map();
-            const addReason = (pr, reason) => {
-              if (!actionMap.has(pr.number)) {
-                actionMap.set(pr.number, { ...pr, reasons: [] });
-              }
-              actionMap.get(pr.number).reasons.push(reason);
-            };
-
-            for (const pr of draftDrift) {
-              addReason(pr, `Draft age is ${pr.ageDays} days (threshold: ${draftDriftDays}).`);
-            }
             for (const pr of readyStale) {
               addReason(pr, `No activity for ${pr.idleDays} days while ready for review (threshold: ${readyStaleDays}).`);
-            }
-            for (const pr of readyNoOwner) {
-              addReason(pr, 'No assignee is set for ownership handoff.');
-            }
-            for (const pr of readyNoReviewer) {
-              addReason(pr, 'No requested reviewer/team found.');
             }
 
             const actionCandidates = Array.from(actionMap.values())
@@ -436,7 +455,7 @@ jobs:
               '',
               '## Fixed-cadence triage outcomes',
               '',
-              '- Event-driven readiness checks run on pull_request_target transitions; this weekly report is summary/audit only.',
+              '- Event-driven readiness checks run on pull_request_target transitions; weekly runs also reconcile `pr-readiness-blocked` state against current readiness reasons.',
               `- Nudge comments upserted this run: ${nudgeCommentsUpserted}`,
               `- Candidate PRs triaged this run: ${actionCandidates.length}`,
               `- Remaining WIP items needing explicit owner, reviewer, merge, or cleanup follow-up: ${remainingWipCount}`,

@@ -25,7 +25,8 @@ flowchart TD
 
   L[Scheduled weekly run] --> M[Scan open PR set]
   M --> N[Compute drift and stale queues]
-  N --> O[Upsert weekly hygiene report issue]
+  N --> O[Reconcile pr-readiness-blocked labels]
+  O --> P[Upsert weekly hygiene report issue]
 ```
 
 ## Entrance
@@ -43,7 +44,7 @@ flowchart TD
 | Path | Exit condition |
 |---|---|
 | Event-driven readiness mode | Label/comment updated to match current readiness evaluation |
-| Weekly hygiene mode | Weekly report issue created or updated |
+| Weekly hygiene mode | Weekly report issue created or updated and `pr-readiness-blocked` labels reconciled |
 | Fail | Cannot resolve target PR in event/manual mode, or API call failures |
 
 ## Inputs

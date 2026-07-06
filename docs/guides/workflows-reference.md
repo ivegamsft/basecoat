@@ -356,7 +356,7 @@ inputs:
 **Trigger:**
 
 - Event-driven: `pull_request_target` on `ready_for_review`, `synchronize`, `reopened`, reviewer/assignee transitions, and label changes
-- Cron: Every Monday at 1pm UTC (summary / audit)
+- Cron: Every Monday at 1pm UTC (reconciliation + summary / audit)
 - Manual: `gh workflow run pr-flow-hygiene.yml`
 
 **What It Does:**
@@ -368,7 +368,7 @@ inputs:
   - `BEHIND` mergeability nudge
 - Applies deterministic escalation label (`pr-readiness-blocked`) and upserts routing comments when metadata is incomplete
 - Removes `pr-readiness-blocked` automatically once the PR passes readiness checks
-- Scans open PRs and publishes a weekly `PR Flow Hygiene Report` issue
+- Scans open PRs, reconciles `pr-readiness-blocked` label state, and publishes a weekly `PR Flow Hygiene Report` issue
 - Treats the flagged PR set as the remaining WIP follow-up queue for the full lifecycle
 - Evaluates guardrails with configurable thresholds:
   - WIP limit for ready-for-review PRs (default: 20)

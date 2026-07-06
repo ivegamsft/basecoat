@@ -38,7 +38,7 @@ $requiredSnippets = @(
     'pr-readiness-blocked',
     'const isHotfixBranch = ref => /^hotfix\//i.test(String(ref || ''''))',
     'Hotfix fast path',
-    'Event-driven readiness checks run on pull_request_target transitions; this weekly report is summary/audit only.',
+    'Event-driven readiness checks run on pull_request_target transitions; weekly runs also reconcile `pr-readiness-blocked` state against current readiness reasons.',
     'PR Lifecycle Hygiene Report - Week of',
     'PR lifecycle hygiene nudge'
 )

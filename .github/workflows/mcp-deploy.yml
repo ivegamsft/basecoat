@@ -205,8 +205,11 @@ jobs:
           fi
 
           if [[ "${APPROVAL_REQUIRED}" == "true" ]]; then
-            echo "::error::Resolver policy requires human approval for ${TARGET_CONTEXT_ENV} (${MODE}); automated deploy is blocked."
-            exit 1
+            if [[ "${GITHUB_ENVIRONMENT}" != "production" ]]; then
+              echo "::error::Resolver policy requires human approval for ${TARGET_CONTEXT_ENV} (${MODE}), but workflow is not using protected production environment."
+              exit 1
+            fi
+            echo "::notice::Resolver requires human approval for ${TARGET_CONTEXT_ENV} (${MODE}); continue via protected production environment gate."
           fi
 
           {
