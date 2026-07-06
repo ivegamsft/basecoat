@@ -30,6 +30,9 @@ jobs:
     runs-on: ${{ vars.RUNNER_RELEASE || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
     timeout-minutes: 10
     environment: production
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Fetch repository for tag resolution
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
