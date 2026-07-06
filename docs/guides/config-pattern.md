@@ -26,7 +26,7 @@ The following categories of values must **never** appear in a committed file:
 - **Connection strings** — database URIs, storage account connection strings, Redis URLs with credentials
 - **Personal aliases** — developer usernames, email addresses, UPNs in any config field
 - **GUIDs tied to specific environments** — resource IDs, subscription IDs, object IDs of real Azure resources
-- **URLs with embedded credentials** — `https://user:password@host/path`
+- **URLs with embedded credentials** — `<REDACTED_URL_WITH_CREDENTIALS>`
 - **Aliases arrays** — lists of UPNs or email addresses used for routing or notifications
 - **Passwords and secrets of any kind** — including test/dev passwords
 
@@ -45,7 +45,7 @@ cp config/settings.template.json config/settings.json
 
 # 3. Optionally create a local override
 cp config/settings.json config/settings.local.json
-```text
+```
 
 Your application should load in priority order:
 
@@ -84,7 +84,7 @@ Every config file with real values must have a committed `.template` sibling. Th
     "smtpHost": "<SMTP_HOST>"
   }
 }
-```text
+```
 
 Non-secret defaults (numbers, booleans, feature flags with safe defaults) **may** have real values in the template.
 
@@ -97,7 +97,7 @@ Non-secret defaults (numbers, booleans, feature flags with safe defaults) **may*
 ```powershell
 $settings = Get-Content config/settings.json | ConvertFrom-Json
 $tenantId = $settings.azure.tenantId
-```text
+```
 
 ### Node.js
 
@@ -107,7 +107,7 @@ const settings = JSON.parse(readFileSync('config/settings.json', 'utf-8'));
 // Or use dotenv for .env files:
 import 'dotenv/config';
 const tenantId = process.env.AZURE_TENANT_ID;
-```text
+```
 
 ### Python
 
@@ -122,7 +122,7 @@ with open('config/settings.json') as f:
     settings = json.load(f)
 
 tenant_id = os.getenv('AZURE_TENANT_ID', settings['azure']['tenantId'])
-```text
+```
 
 ---
 
@@ -137,7 +137,7 @@ In pipelines, inject secrets via environment variables from a secrets store (e.g
     AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
     AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
     AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-```text
+```
 
 ---
 
@@ -146,7 +146,7 @@ In pipelines, inject secrets via environment variables from a secrets store (e.g
 - `.gitignore` must cover `config/settings.json`, `config/settings.local.json`, `.env`, `.env.local`, and `*.local.json`.
 - The `config-auditor` agent (`agents/basecoat-50-security-config-auditor.agent.md`) can scan a repo for violations.
 - The pre-commit hook (`scripts/install-git-hooks.sh`) blocks common secret patterns.
-- See `docs/templates/GITIGNORE_TEMPLATE.md` for the standard gitignore entries.
+- See `docs/templates/gitignore-template.md` for the standard gitignore entries.
 
 ---
 
@@ -154,5 +154,5 @@ In pipelines, inject secrets via environment variables from a secrets store (e.g
 
 - `instructions/basecoat-10-core-config.instructions.md` — agent instructions for config file handling
 - `agents/basecoat-50-security-config-auditor.agent.md` — automated config secret scanner
-- `docs/templates/GITIGNORE_TEMPLATE.md` — standard gitignore entries
+- `docs/templates/gitignore-template.md` — standard gitignore entries
 - `instructions/basecoat-50-security-security.instructions.md` — broader security standards
