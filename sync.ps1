@@ -108,12 +108,19 @@ function Remove-PathWithRetry {
         [int]$DelayMilliseconds = 200
     )
 
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return
+    }
+
     for ($attempt = 1; $attempt -le $MaxAttempts; $attempt++) {
         try {
-            Remove-Item -Path $Path -Recurse -Force -ErrorAction Stop
+            Remove-Item -LiteralPath $Path -Recurse -Force -ErrorAction Stop
             return
         }
         catch {
+            if (-not (Test-Path -LiteralPath $Path)) {
+                return
+            }
             if ($attempt -eq $MaxAttempts) {
                 throw "Failed to remove temporary path '$Path' after $MaxAttempts attempts: $($_.Exception.Message)"
             }
@@ -410,7 +417,12 @@ try {
     Write-Host "Base Coat synced into $targetDir"
 }
 finally {
-    if (Test-Path $tempRoot) {
-        Remove-PathWithRetry -Path $tempRoot
+    if (Test-Path -LiteralPath $tempRoot) {
+        try {
+            Remove-PathWithRetry -Path $tempRoot
+        }
+        catch {
+            Write-Warning "Cleanup warning: $($_.Exception.Message)"
+        }
     }
 }
