@@ -3,6 +3,9 @@ $ErrorActionPreference = 'Stop'
 $sourceRepo = if ($env:BASECOAT_REPO) { $env:BASECOAT_REPO } else { 'https://github.com/YOUR-ORG/basecoat.git' }
 $sourceRef = if ($env:BASECOAT_REF) { $env:BASECOAT_REF } else { 'main' }
 $targetDir = if ($env:BASECOAT_TARGET_DIR) { $env:BASECOAT_TARGET_DIR } else { '.github/base-coat' }
+$knownBadRefRedirects = @{
+    'v3.30.4' = 'v3.30.5'
+}
 
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
     throw 'git is required'
@@ -203,6 +206,12 @@ function Assert-SafeWorkflowDirectory {
         $details = ($issues | ForEach-Object { " - $_" }) -join "`n"
         throw "Workflow validation failed before sync. Invalid workflow definitions detected:`n$details"
     }
+}
+
+if ($knownBadRefRedirects.ContainsKey($sourceRef)) {
+    $requestedRef = $sourceRef
+    $sourceRef = $knownBadRefRedirects[$requestedRef]
+    Write-Warning "Requested ref '$requestedRef' is a known-bad release tag (version drift). Auto-upgrading sync source to '$sourceRef'. Update your .basecoat.yml pin to '$sourceRef' or newer."
 }
 
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString())

@@ -4,6 +4,14 @@ All notable changes to this repository should be recorded in this file.
 
 ## Unreleased
 
+## 3.33.2 - 2026-07-07
+
+### Fixed
+
+- Added known-bad tag auto-remap in `sync.ps1` and `sync.sh` so pinned drifted
+  releases (for example `v3.30.4`) are redirected to the first corrected tag
+  before sync.
+
 ## 3.33.0 - 2026-06-26
 
 ### Added

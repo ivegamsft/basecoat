@@ -7,6 +7,13 @@ SOURCE_REF="${BASECOAT_REF:-main}"
 TARGET_DIR="${BASECOAT_TARGET_DIR:-.github/base-coat}"
 ALLOWED_DOCS_TOP_LEVEL=("reference" "guides" "agents" "diagrams")
 
+case "$SOURCE_REF" in
+  v3.30.4)
+    echo "WARNING: Requested ref '$SOURCE_REF' is a known-bad release tag (version drift). Auto-upgrading sync source to 'v3.30.5'. Update your .basecoat.yml pin to 'v3.30.5' or newer." >&2
+    SOURCE_REF="v3.30.5"
+    ;;
+esac
+
 if ! command -v git >/dev/null 2>&1; then
   echo "git is required" >&2
   exit 1

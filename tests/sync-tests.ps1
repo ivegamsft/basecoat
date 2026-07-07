@@ -551,6 +551,67 @@ finally {
 }
 
 # ============================================================================
+# Test 10: Sync auto-remaps known bad tags
+# ============================================================================
+Write-Host "`nTest 10: Sync auto-remaps known bad tags to corrected releases" -ForegroundColor Yellow
+
+$consumer = $null
+$sourceRepo = $null
+try {
+    $consumer = New-ConsumerRepo -WithGitHubDir
+    $sourceRepo = Join-Path ([System.IO.Path]::GetTempPath()) ("basecoat-sync-source-remap-test-" + [System.Guid]::NewGuid().ToString())
+    New-Item -ItemType Directory -Path $sourceRepo | Out-Null
+
+    Push-Location $sourceRepo
+    try {
+        git init | Out-Null
+        git config user.name 'basecoat-test'
+        git config user.email 'basecoat-test@example.com'
+
+        New-Item -ItemType Directory -Force -Path 'agents', 'instructions', 'skills/example-skill', 'prompts', 'docs/reference', 'docs/guides' | Out-Null
+        Set-Content -Path 'README.md' -Value '# Source Repo' -Encoding UTF8
+        Set-Content -Path 'CHANGELOG.md' -Value '# Changelog' -Encoding UTF8
+        Set-Content -Path 'version.json' -Value '{ "version": "3.30.5", "releaseDate": "2026-06-06" }' -Encoding UTF8
+        Set-Content -Path 'asset-manifest.json' -Value '{ "schemaVersion": "1", "assets": [] }' -Encoding UTF8
+        Set-Content -Path 'agents/example.agent.md' -Value "---`nname: example`ndescription: example`n---`n" -Encoding UTF8
+        Set-Content -Path 'instructions/example.instructions.md' -Value "---`ndescription: example`napplyTo: ""**/*""`n---`n" -Encoding UTF8
+        Set-Content -Path 'prompts/example.prompt.md' -Value "---`nname: example`ndescription: example`n---`n" -Encoding UTF8
+        Set-Content -Path 'skills/example-skill/SKILL.md' -Value "---`nname: example`ndescription: example`ncompatibility: GHCP`n---`n" -Encoding UTF8
+        Set-Content -Path 'docs/reference/README.md' -Value '# Reference' -Encoding UTF8
+        Set-Content -Path 'docs/guides/README.md' -Value '# Guides' -Encoding UTF8
+
+        git add .
+        git commit -m 'seed source' | Out-Null
+        git tag 'v3.30.5'
+        git tag 'v3.30.4'
+    }
+    finally {
+        Pop-Location
+    }
+
+    Invoke-SyncToConsumerWithSource -ConsumerPath $consumer -SourceRepo "file://$sourceRepo" -SourceRef 'v3.30.4'
+
+    $testCount++
+    $installedVersion = (Get-Content -Path (Join-Path $consumer '.github/base-coat/version.json') -Raw | ConvertFrom-Json).version
+    if ($installedVersion -ne '3.30.5') {
+        throw "Sync remap test failed: expected installed version 3.30.5, got $installedVersion"
+    }
+
+    Write-Host '  Passed: known-bad tag was auto-remapped to corrected release' -ForegroundColor Green
+}
+catch {
+    $failures += $_.Exception.Message
+}
+finally {
+    if ($consumer -and (Test-Path $consumer)) {
+        Remove-Item -Path $consumer -Recurse -Force
+    }
+    if ($sourceRepo -and (Test-Path $sourceRepo)) {
+        Remove-Item -Path $sourceRepo -Recurse -Force
+    }
+}
+
+# ============================================================================
 # Summary
 # ============================================================================
 Write-Host "`n================================================" -ForegroundColor Cyan
