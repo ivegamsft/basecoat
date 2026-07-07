@@ -81,6 +81,26 @@ function Invoke-SyncToConsumer {
     }
 }
 
+function Invoke-SyncToConsumerWithSource {
+    param(
+        [string]$ConsumerPath,
+        [string]$SourceRepo,
+        [string]$SourceRef
+    )
+
+    Push-Location $ConsumerPath
+    try {
+        $env:BASECOAT_REPO = $SourceRepo
+        $env:BASECOAT_REF = $SourceRef
+        & pwsh -NoProfile -File (Join-Path $repoRoot 'sync.ps1')
+    }
+    finally {
+        Remove-Item Env:\BASECOAT_REPO -ErrorAction SilentlyContinue
+        Remove-Item Env:\BASECOAT_REF -ErrorAction SilentlyContinue
+        Pop-Location
+    }
+}
+
 function Get-FileSha256 {
     param([string]$Path)
     return (Get-FileHash -Path $Path -Algorithm SHA256).Hash.ToLower()

@@ -100,6 +100,28 @@ function Convert-AgentToCliCompatibleContent {
     return "---`n$newFrontmatter`n---`n`n$body"
 }
 
+function Remove-PathWithRetry {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path,
+        [int]$MaxAttempts = 5,
+        [int]$DelayMilliseconds = 200
+    )
+
+    for ($attempt = 1; $attempt -le $MaxAttempts; $attempt++) {
+        try {
+            Remove-Item -Path $Path -Recurse -Force -ErrorAction Stop
+            return
+        }
+        catch {
+            if ($attempt -eq $MaxAttempts) {
+                throw "Failed to remove temporary path '$Path' after $MaxAttempts attempts: $($_.Exception.Message)"
+            }
+            Start-Sleep -Milliseconds $DelayMilliseconds
+        }
+    }
+}
+
 function Assert-MinimalDocsScope {
     param(
         [string]$DocsPath
@@ -372,6 +394,6 @@ try {
 }
 finally {
     if (Test-Path $tempRoot) {
-        Remove-Item -Path $tempRoot -Recurse -Force
+        Remove-PathWithRetry -Path $tempRoot
     }
 }
