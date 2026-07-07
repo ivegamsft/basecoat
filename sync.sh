@@ -7,12 +7,16 @@ SOURCE_REF="${BASECOAT_REF:-main}"
 TARGET_DIR="${BASECOAT_TARGET_DIR:-.github/base-coat}"
 ALLOWED_DOCS_TOP_LEVEL=("reference" "guides" "agents" "diagrams")
 
+TARGET_REF=""
 case "$SOURCE_REF" in
   v3.30.4)
-    echo "WARNING: Requested ref '$SOURCE_REF' is a known-bad release tag (version drift). Auto-upgrading sync source to 'v3.30.5'. Update your .basecoat.yml pin to 'v3.30.5' or newer." >&2
-    SOURCE_REF="v3.30.5"
+    TARGET_REF="v3.30.5"
     ;;
 esac
+if [[ -n "$TARGET_REF" ]]; then
+  echo "WARNING: Requested ref '$SOURCE_REF' is a known-bad release tag (version drift). Auto-upgrading sync source to '$TARGET_REF'. Update your .basecoat.yml pin to '$TARGET_REF' or newer." >&2
+  SOURCE_REF="$TARGET_REF"
+fi
 
 if ! command -v git >/dev/null 2>&1; then
   echo "git is required" >&2
@@ -269,6 +273,27 @@ if [[ -x "$REPO_ROOT/scripts/cleanup-basecoat-upgrade.sh" ]]; then
   "$REPO_ROOT/scripts/cleanup-basecoat-upgrade.sh" "$TARGET_DIR"
 elif [[ -f "$REPO_ROOT/scripts/cleanup-basecoat-upgrade.sh" ]]; then
   bash "$REPO_ROOT/scripts/cleanup-basecoat-upgrade.sh" "$TARGET_DIR"
+fi
+
+if [[ "$SOURCE_REF" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+  expected_version="${BASH_REMATCH[1]}"
+  version_file="$REPO_ROOT/$TARGET_DIR/version.json"
+
+  if [[ ! -f "$version_file" ]]; then
+    echo "BaseCoat ref/version provenance check failed: '$SOURCE_REF' requires version.json but the file is missing." >&2
+    exit 1
+  fi
+
+  synced_version="$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$version_file" | head -n 1)"
+  if [[ -z "$synced_version" ]]; then
+    echo "BaseCoat ref/version provenance check failed: '$version_file' does not contain a version field." >&2
+    exit 1
+  fi
+
+  if [[ "$synced_version" != "$expected_version" ]]; then
+    echo "BaseCoat ref/version provenance check failed: requested '$SOURCE_REF' expects version '$expected_version' but synced payload reports '$synced_version'." >&2
+    exit 1
+  fi
 fi
 
 echo "Base Coat synced into $TARGET_DIR"

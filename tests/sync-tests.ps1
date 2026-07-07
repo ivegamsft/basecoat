@@ -596,7 +596,7 @@ try {
         Set-Content -Path 'agents/example.agent.md' -Value "---`nname: example`ndescription: example`n---`n" -Encoding UTF8
         Set-Content -Path 'instructions/example.instructions.md' -Value "---`ndescription: example`napplyTo: ""**/*""`n---`n" -Encoding UTF8
         Set-Content -Path 'prompts/example.prompt.md' -Value "---`nname: example`ndescription: example`n---`n" -Encoding UTF8
-        Set-Content -Path 'skills/example-skill/SKILL.md' -Value "---`nname: example`ndescription: example`ncompatibility: GHCP`n---`n" -Encoding UTF8
+        Set-Content -Path 'skills/example-skill/SKILL.md' -Value "---`nname: example`ndescription: example`ncompatibility: [github-copilot-cli]`n---`n" -Encoding UTF8
         Set-Content -Path 'docs/reference/README.md' -Value '# Reference' -Encoding UTF8
         Set-Content -Path 'docs/guides/README.md' -Value '# Guides' -Encoding UTF8
 
@@ -618,6 +618,81 @@ try {
     }
 
     Write-Host '  Passed: known-bad tag was auto-remapped to corrected release' -ForegroundColor Green
+}
+catch {
+    $failures += $_.Exception.Message
+}
+finally {
+    if ($consumer -and (Test-Path $consumer)) {
+        Remove-Item -Path $consumer -Recurse -Force
+    }
+    if ($sourceRepo -and (Test-Path $sourceRepo)) {
+        Remove-Item -Path $sourceRepo -Recurse -Force
+    }
+}
+
+# ============================================================================
+# Test 11: Sync rejects semver tags whose payload version drifts
+# ============================================================================
+Write-Host "`nTest 11: Sync rejects semver tags whose payload version drifts" -ForegroundColor Yellow
+
+$consumer = $null
+$sourceRepo = $null
+try {
+    $consumer = New-ConsumerRepo -WithGitHubDir
+    $sourceRepo = Join-Path ([System.IO.Path]::GetTempPath()) ("basecoat-sync-source-drift-test-" + [System.Guid]::NewGuid().ToString())
+    New-Item -ItemType Directory -Path $sourceRepo | Out-Null
+
+    Push-Location $sourceRepo
+    try {
+        git init | Out-Null
+        git config user.name 'basecoat-test'
+        git config user.email 'basecoat-test@example.com'
+
+        New-Item -ItemType Directory -Force -Path 'agents', 'instructions', 'skills/example-skill', 'prompts', 'docs/reference', 'docs/guides' | Out-Null
+        Set-Content -Path 'README.md' -Value '# Source Repo' -Encoding UTF8
+        Set-Content -Path 'CHANGELOG.md' -Value '# Changelog' -Encoding UTF8
+        Set-Content -Path 'version.json' -Value '{ "version": "9.9.9", "releaseDate": "2026-06-06" }' -Encoding UTF8
+        Set-Content -Path 'asset-manifest.json' -Value '{ "schemaVersion": "1", "assets": [] }' -Encoding UTF8
+        Set-Content -Path 'agents/example.agent.md' -Value "---`nname: example`ndescription: example`n---`n" -Encoding UTF8
+        Set-Content -Path 'instructions/example.instructions.md' -Value "---`ndescription: example`napplyTo: ""**/*""`n---`n" -Encoding UTF8
+        Set-Content -Path 'prompts/example.prompt.md' -Value "---`nname: example`ndescription: example`n---`n" -Encoding UTF8
+        Set-Content -Path 'skills/example-skill/SKILL.md' -Value "---`nname: example`ndescription: example`ncompatibility: [github-copilot-cli]`n---`n" -Encoding UTF8
+        Set-Content -Path 'docs/reference/README.md' -Value '# Reference' -Encoding UTF8
+        Set-Content -Path 'docs/guides/README.md' -Value '# Guides' -Encoding UTF8
+
+        git add .
+        git commit -m 'seed drift source' | Out-Null
+        git tag 'v1.2.3'
+    }
+    finally {
+        Pop-Location
+    }
+
+    Push-Location $consumer
+    try {
+        $env:BASECOAT_REPO = "file://$sourceRepo"
+        $env:BASECOAT_REF = 'v1.2.3'
+        $output = & pwsh -NoProfile -File (Join-Path $repoRoot 'sync.ps1') 2>&1 | Out-String
+        $exitCode = $LASTEXITCODE
+    }
+    finally {
+        Remove-Item Env:\BASECOAT_REPO -ErrorAction SilentlyContinue
+        Remove-Item Env:\BASECOAT_REF -ErrorAction SilentlyContinue
+        Pop-Location
+    }
+
+    $testCount++
+    if ($exitCode -eq 0) {
+        throw 'Sync provenance test failed: sync.ps1 should fail when semver tag payload version drifts'
+    }
+
+    $testCount++
+    if ($output -notmatch 'BaseCoat ref/version provenance check failed') {
+        throw "Sync provenance test failed: expected provenance failure message, got: $output"
+    }
+
+    Write-Host '  Passed: semver tag/version drift is rejected by sync provenance checks' -ForegroundColor Green
 }
 catch {
     $failures += $_.Exception.Message

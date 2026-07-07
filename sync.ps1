@@ -390,6 +390,23 @@ try {
         & $cleanupScript -TargetDir $targetDir -ProtectCustomized -SetArchiveReadOnly
     }
 
+    if ($sourceRef -match '^v(?<version>\d+\.\d+\.\d+)$') {
+        $expectedVersion = $Matches['version']
+        $versionFile = Join-Path $fullTargetDir 'version.json'
+        if (-not (Test-Path $versionFile)) {
+            throw "BaseCoat ref/version provenance check failed: '$sourceRef' requires version.json but the file is missing."
+        }
+
+        $parsedVersion = (Get-Content -Path $versionFile -Raw | ConvertFrom-Json).version
+        if (-not $parsedVersion) {
+            throw "BaseCoat ref/version provenance check failed: '$versionFile' does not contain a version field."
+        }
+
+        if ($parsedVersion -ne $expectedVersion) {
+            throw "BaseCoat ref/version provenance check failed: requested '$sourceRef' expects version '$expectedVersion' but synced payload reports '$parsedVersion'."
+        }
+    }
+
     Write-Host "Base Coat synced into $targetDir"
 }
 finally {
