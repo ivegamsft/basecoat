@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "3.33.0",
-  "releaseDate": "2026-06-26",
-  "notes": "Release: local-vs-cloud test gating design and PR gate intake rollout runbook additions"
+  "version": "3.33.2",
+  "releaseDate": "2026-07-07",
+  "notes": "Release: auto-remap known bad release pins during sync"
 }

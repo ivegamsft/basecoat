@@ -3,6 +3,9 @@ $ErrorActionPreference = 'Stop'
 $sourceRepo = if ($env:BASECOAT_REPO) { $env:BASECOAT_REPO } else { 'https://github.com/YOUR-ORG/basecoat.git' }
 $sourceRef = if ($env:BASECOAT_REF) { $env:BASECOAT_REF } else { 'main' }
 $targetDir = if ($env:BASECOAT_TARGET_DIR) { $env:BASECOAT_TARGET_DIR } else { '.github/base-coat' }
+$knownBadRefRedirects = @{
+    'v3.30.4' = 'v3.30.5'
+}
 
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
     throw 'git is required'
@@ -95,6 +98,35 @@ function Convert-AgentToCliCompatibleContent {
     $newFrontmatter = ($newFrontmatterLines -join "`n").TrimEnd()
 
     return "---`n$newFrontmatter`n---`n`n$body"
+}
+
+function Remove-PathWithRetry {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path,
+        [int]$MaxAttempts = 5,
+        [int]$DelayMilliseconds = 200
+    )
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return
+    }
+
+    for ($attempt = 1; $attempt -le $MaxAttempts; $attempt++) {
+        try {
+            Remove-Item -LiteralPath $Path -Recurse -Force -ErrorAction Stop
+            return
+        }
+        catch {
+            if (-not (Test-Path -LiteralPath $Path)) {
+                return
+            }
+            if ($attempt -eq $MaxAttempts) {
+                throw "Failed to remove temporary path '$Path' after $MaxAttempts attempts: $($_.Exception.Message)"
+            }
+            Start-Sleep -Milliseconds $DelayMilliseconds
+        }
+    }
 }
 
 function Assert-MinimalDocsScope {
@@ -203,6 +235,12 @@ function Assert-SafeWorkflowDirectory {
         $details = ($issues | ForEach-Object { " - $_" }) -join "`n"
         throw "Workflow validation failed before sync. Invalid workflow definitions detected:`n$details"
     }
+}
+
+if ($knownBadRefRedirects.ContainsKey($sourceRef)) {
+    $requestedRef = $sourceRef
+    $sourceRef = $knownBadRefRedirects[$requestedRef]
+    Write-Warning "Requested ref '$requestedRef' is a known-bad release tag (version drift). Auto-upgrading sync source to '$sourceRef'. Update your .basecoat.yml pin to '$sourceRef' or newer."
 }
 
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString())
@@ -359,10 +397,32 @@ try {
         & $cleanupScript -TargetDir $targetDir -ProtectCustomized -SetArchiveReadOnly
     }
 
+    if ($sourceRef -match '^v(?<version>\d+\.\d+\.\d+)$') {
+        $expectedVersion = $Matches['version']
+        $versionFile = Join-Path $fullTargetDir 'version.json'
+        if (-not (Test-Path $versionFile)) {
+            throw "BaseCoat ref/version provenance check failed: '$sourceRef' requires version.json but the file is missing."
+        }
+
+        $parsedVersion = (Get-Content -Path $versionFile -Raw | ConvertFrom-Json).version
+        if (-not $parsedVersion) {
+            throw "BaseCoat ref/version provenance check failed: '$versionFile' does not contain a version field."
+        }
+
+        if ($parsedVersion -ne $expectedVersion) {
+            throw "BaseCoat ref/version provenance check failed: requested '$sourceRef' expects version '$expectedVersion' but synced payload reports '$parsedVersion'."
+        }
+    }
+
     Write-Host "Base Coat synced into $targetDir"
 }
 finally {
-    if (Test-Path $tempRoot) {
-        Remove-Item -Path $tempRoot -Recurse -Force
+    if (Test-Path -LiteralPath $tempRoot) {
+        try {
+            Remove-PathWithRetry -Path $tempRoot
+        }
+        catch {
+            Write-Warning "Cleanup warning: $($_.Exception.Message)"
+        }
     }
 }

@@ -25,6 +25,10 @@ a pinned BaseCoat release.
    - Windows: `pwsh sync.ps1`
    - Linux or macOS: `./sync.sh`
 3. Verify `.github/base-coat/version.json` in the consumer repo.
+   - When `ref` is pinned to a semver tag (for example `v3.33.0`), sync now
+     enforces provenance and fails if `version.json` does not match the tag.
+   - Known-bad tags with confirmed payload drift are auto-remapped to the first
+     corrected release, with a warning to update the consumer pin.
 4. Compare installed version with latest upstream release:
    `gh release list --repo IBuySpy-Shared/basecoat --limit 1`.
 5. Report exactly what changed and any follow-up steps.
