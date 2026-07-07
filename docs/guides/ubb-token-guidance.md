@@ -230,4 +230,4 @@ the provider's cost management console and adjust rate-limit constants in
 - [Token Optimization](token-optimization.md) -- Context window management, budget allocation, compression
 - [Rate Limit Guidance](rate-limit-guidance.md) -- Concurrency limits, retry strategy, wave patterns
 - [Agent Tier Selection](agent-tier-selection.md) -- Matching agent roles to model tiers
-- Issue [#720](https://github.com/IBuySpy-Shared/basecoat/issues/720) -- Tracking issue for UBB guidance
+- Issue [#720](https://github.com/ivegamsft/basecoat/issues/720) -- Tracking issue for UBB guidance

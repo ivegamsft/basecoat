@@ -4,7 +4,7 @@
 
 Workstream 3 of epic #1452 requires deterministic execution-mode routing across local, background, cloud, and manual paths.
 
-Related issue: [#2048](https://github.com/IBuySpy-Shared/basecoat/issues/2048)
+Related issue: [#2048](https://github.com/ivegamsft/basecoat/issues/2048)
 
 ## Scope
 

@@ -118,7 +118,7 @@ pwsh scripts/validate-basecoat.ps1
 
 ## Support & Feedback
 
-- **Issues**: [GitHub Issues](https://github.com/IBuySpy-Shared/basecoat/issues)
+- **Issues**: [GitHub Issues](https://github.com/ivegamsft/basecoat/issues)
 - **Documentation**: [Docs Directory](./docs/)
 - **Contributing**: [CONTRIBUTING.md](./CONTRIBUTING.md)
 

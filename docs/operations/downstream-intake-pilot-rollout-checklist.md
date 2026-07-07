@@ -54,9 +54,9 @@ surfaces and the reusable `intake-contract-check.yml` workflow.
 If any of the above are missing, run the sync first:
 
 ```bash
-BASECOAT_REPO=https://github.com/IBuySpy-Shared/basecoat.git ./sync.sh
+BASECOAT_REPO=https://github.com/ivegamsft/basecoat.git ./sync.sh
 # or on Windows:
-$env:BASECOAT_REPO = 'https://github.com/IBuySpy-Shared/basecoat.git'
+$env:BASECOAT_REPO = 'https://github.com/ivegamsft/basecoat.git'
 .\sync.ps1
 ```
 

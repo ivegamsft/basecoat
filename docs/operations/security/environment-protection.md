@@ -1,6 +1,6 @@
 # Environment Protection and Production Approvals Implementation
 
-> **Issue:** [#1547](https://github.com/IBuySpy-Shared/basecoat/issues/1547)  
+> **Issue:** [#1547](https://github.com/ivegamsft/basecoat/issues/1547)  
 > **Sprint:** Sprint 36  
 > **Component:** Production governance and deployment safety
 

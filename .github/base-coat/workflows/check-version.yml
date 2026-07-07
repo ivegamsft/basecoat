@@ -88,7 +88,7 @@ jobs:
           else
             gh issue create --repo "$GITHUB_REPOSITORY" \
               --title "$TITLE" \
-              --body "## BaseCoat Upgrade Available\n\nThis repo's BaseCoat assets are out of date.\n\n| | Version |\n|---|---|\n| **Current** | v${CONSUMER} |\n| **Latest** | v${LATEST} |\n| **Versions behind** | ${{ steps.compare.outputs.drift }} |\n\n## How to upgrade\n\nAlways use the sync script — do not manually copy or PR in agent files, as this bypasses the clean-replace step that removes stale assets.\n\n\`\`\`bash\ncurl -fsSL https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/sync.sh | bash\n\`\`\`\n\nOr on Windows: download the [latest release](https://github.com/IBuySpy-Shared/basecoat/releases/latest) and run \`sync.ps1\`.\n\n---\n*Opened automatically by the BaseCoat version drift detector.*" \
+              --body "## BaseCoat Upgrade Available\n\nThis repo's BaseCoat assets are out of date.\n\n| | Version |\n|---|---|\n| **Current** | v${CONSUMER} |\n| **Latest** | v${LATEST} |\n| **Versions behind** | ${{ steps.compare.outputs.drift }} |\n\n## How to upgrade\n\nAlways use the sync script — do not manually copy or PR in agent files, as this bypasses the clean-replace step that removes stale assets.\n\n\`\`\`bash\ncurl -fsSL https://raw.githubusercontent.com/ivegamsft/basecoat/main/sync.sh | bash\n\`\`\`\n\nOr on Windows: download the [latest release](https://github.com/ivegamsft/basecoat/releases/latest) and run \`sync.ps1\`.\n\n---\n*Opened automatically by the BaseCoat version drift detector.*" \
               --label "maintenance"
           fi
         env:
@@ -115,7 +115,7 @@ jobs:
             if [ -z "$EXISTING" ]; then
               gh issue create --repo "$GITHUB_REPOSITORY" \
                 --title "$TITLE" \
-                --body "## Mixed BaseCoat Agent State\n\nBoth old flat-name agents and new \`basecoat-\`-prefixed agents were found in \`$AGENTS_DIR\`.\n\n| | Count |\n|---|---|\n| Prefixed (\`basecoat-*\`) | $PREFIXED |\n| Non-prefixed (stale) | $NON_PREFIXED |\n\nThis typically happens when an upgrade PR manually added new agents without removing old ones. The sync script prevents this by replacing the entire agents directory.\n\n## How to fix\n\n\`\`\`bash\ncurl -fsSL https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/sync.sh | bash\n\`\`\`\n\nOr on Windows: download the [latest release](https://github.com/IBuySpy-Shared/basecoat/releases/latest) and run \`sync.ps1\`.\n\n---\n*Opened automatically by the BaseCoat version check.*" \
+                --body "## Mixed BaseCoat Agent State\n\nBoth old flat-name agents and new \`basecoat-\`-prefixed agents were found in \`$AGENTS_DIR\`.\n\n| | Count |\n|---|---|\n| Prefixed (\`basecoat-*\`) | $PREFIXED |\n| Non-prefixed (stale) | $NON_PREFIXED |\n\nThis typically happens when an upgrade PR manually added new agents without removing old ones. The sync script prevents this by replacing the entire agents directory.\n\n## How to fix\n\n\`\`\`bash\ncurl -fsSL https://raw.githubusercontent.com/ivegamsft/basecoat/main/sync.sh | bash\n\`\`\`\n\nOr on Windows: download the [latest release](https://github.com/ivegamsft/basecoat/releases/latest) and run \`sync.ps1\`.\n\n---\n*Opened automatically by the BaseCoat version check.*" \
                 --label "maintenance"
             else
               echo "Mixed-state issue #$EXISTING already open."

@@ -1,7 +1,7 @@
 # Keep/Fix/Throttle Weekly Scorecard
 
 This runbook defines the weekly scorecard/readout path for workstream 5 of epic
-[#1452](https://github.com/IBuySpy-Shared/basecoat/issues/1452).
+[#1452](https://github.com/ivegamsft/basecoat/issues/1452).
 
 ## Objective
 
@@ -23,7 +23,7 @@ and links to remediation issues when regressions appear.
    - `keep-fix-throttle-weekly-scorecard.json`
    - `keep-fix-throttle-weekly-scorecard.md`
 4. Weekly readout comment target: issue
-   [#2050](https://github.com/IBuySpy-Shared/basecoat/issues/2050)
+   [#2050](https://github.com/ivegamsft/basecoat/issues/2050)
 
 ## Local Run
 

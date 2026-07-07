@@ -123,7 +123,7 @@ TOP 3 NEXT STEPS
 
 ## The prompt file
 
-The prompt is located at [`prompts/integrate.prompt.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/prompts/integrate.prompt.md)
+The prompt is located at [`prompts/integrate.prompt.md`](https://github.com/ivegamsft/basecoat/blob/main/prompts/integrate.prompt.md)
 in the BaseCoat repository. After running sync, it lands in your repo at
 `.github/prompts/integrate.prompt.md` and is immediately available in VS Code's
 prompt picker.

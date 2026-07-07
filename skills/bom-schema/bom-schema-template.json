@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ibuyspy-shared.github.io/basecoat/skills/bom-schema/bom-schema-template.json",
+  "$id": "https://ivegamsft.github.io/basecoat/skills/bom-schema/bom-schema-template.json",
   "title": "BOM Schema",
   "type": "object",
   "required": ["bomId", "items"],

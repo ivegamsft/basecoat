@@ -93,7 +93,7 @@ Apply these settings to your Base Coat fork:
 4. **Template repositories**: Configure Base Coat as a template source for new repositories.
     See [`docs/repo-template-standard.md`](repo-template-standard.md)
 
-5. **Copilot Space bootstrap**: Use [`scripts/bootstrap-copilot-space.ps1`](https://github.com/IBuySpy-Shared/basecoat/blob/main/scripts/bootstrap-copilot-space.ps1) to create the org-owned `base-coat` Space and attach the curated BaseCoat docs.
+5. **Copilot Space bootstrap**: Use [`scripts/bootstrap-copilot-space.ps1`](https://github.com/ivegamsft/basecoat/blob/main/scripts/bootstrap-copilot-space.ps1) to create the org-owned `base-coat` Space and attach the curated BaseCoat docs.
 
 ### Copilot Space reference for consumer repos
 
@@ -154,7 +154,7 @@ The profile contract in `docs/reference/onboarding-profile-contract.v1.md` is th
    ---
    ```
 
-4. Reference existing skills and instructions as needed. See [`CATALOG.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/CATALOG.md) for the full registry.
+4. Reference existing skills and instructions as needed. See [`CATALOG.md`](https://github.com/ivegamsft/basecoat/blob/main/CATALOG.md) for the full registry.
 
 ### Creating a New Skill
 
@@ -199,7 +199,7 @@ See [`docs/reference/governance-contract.md`](../reference/governance-contract.m
 ### Agent Trust Boundaries
 
 - Agents and skills execute in the context of the developer's Copilot session. They do not have independent access to systems.
-- MCP integrations must follow the trust-boundary rules in [`instructions/basecoat-10-core-mcp.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/basecoat-10-core-mcp.instructions.md).
+- MCP integrations must follow the trust-boundary rules in [`instructions/basecoat-10-core-mcp.instructions.md`](https://github.com/ivegamsft/basecoat/blob/main/instructions/basecoat-10-core-mcp.instructions.md).
 - Review [`docs/../reference/guardrails/oidc-federation.md`](../reference/guardrails/oidc-federation.md) before configuring any GitHub Actions to Azure authentication.
 
 ### Supply Chain Security
@@ -305,7 +305,7 @@ See [`docs/enterprise-rollout.md`](enterprise-rollout.md) for detailed rollout g
 
 - Run `CATALOG.md` validation to check all cross-references.
 - Ensure the skill directory exists and contains a `SKILL.md` file.
-- Check [`CATALOG.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/CATALOG.md) for the authoritative list of available assets.
+- Check [`CATALOG.md`](https://github.com/ivegamsft/basecoat/blob/main/CATALOG.md) for the authoritative list of available assets.
 
 ### Release artifacts fail checksum verification
 

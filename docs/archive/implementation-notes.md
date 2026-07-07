@@ -778,5 +778,5 @@ LOG_FORMAT=json
 
 - **OpenAPI Spec:** See `PORTAL_API_v1.0.yml`
 - **API Documentation:** See `API_DOCUMENTATION.md`
-- **GitHub Issues:** https://github.com/IBuySpy-Shared/basecoat/issues
+- **GitHub Issues:** https://github.com/ivegamsft/basecoat/issues
 - **Contact:** api-support@basecoat.dev

@@ -53,37 +53,37 @@ try {
       "blocked": [
         {
           "title": "Blocked issue A",
-          "url": "https://github.com/IBuySpy-Shared/basecoat/issues/1001"
+          "url": "https://github.com/ivegamsft/basecoat/issues/1001"
         }
       ],
       "risk_high": [
         {
           "title": "Risk issue A",
-          "url": "https://github.com/IBuySpy-Shared/basecoat/issues/1002"
+          "url": "https://github.com/ivegamsft/basecoat/issues/1002"
         }
       ],
       "incidents_open": [
         {
           "title": "Incident issue A",
-          "url": "https://github.com/IBuySpy-Shared/basecoat/issues/1003"
+          "url": "https://github.com/ivegamsft/basecoat/issues/1003"
         }
       ],
       "review_queue": [
         {
           "title": "PR A",
-          "url": "https://github.com/IBuySpy-Shared/basecoat/pull/2001"
+          "url": "https://github.com/ivegamsft/basecoat/pull/2001"
         }
       ],
       "merged_prs": [
         {
           "title": "Merged PR A",
-          "url": "https://github.com/IBuySpy-Shared/basecoat/pull/2002"
+          "url": "https://github.com/ivegamsft/basecoat/pull/2002"
         }
       ],
       "recently_closed_issues": [
         {
           "title": "Closed issue A",
-          "url": "https://github.com/IBuySpy-Shared/basecoat/issues/1004"
+          "url": "https://github.com/ivegamsft/basecoat/issues/1004"
         }
       ]
     },

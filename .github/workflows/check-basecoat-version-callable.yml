@@ -88,7 +88,7 @@ jobs:
           else
             gh issue create --repo "$GITHUB_REPOSITORY" \
               --title "$TITLE" \
-              --body "## BaseCoat Upgrade Available\n\nThis repo's BaseCoat assets are out of date.\n\n| | Version |\n|---|---|\n| **Current** | v${CONSUMER} |\n| **Latest** | v${LATEST} |\n| **Versions behind** | ${{ steps.compare.outputs.drift }} |\n\n## How to upgrade\n\n\`\`\`bash\ncurl -fsSL https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/scripts/sync.sh | bash\n\`\`\`\n\nOr manually: download the [latest release](https://github.com/IBuySpy-Shared/basecoat/releases/latest) and run \`sync.ps1\` / \`sync.sh\`.\n\n---\n*Opened automatically by the BaseCoat version drift detector.*" \
+              --body "## BaseCoat Upgrade Available\n\nThis repo's BaseCoat assets are out of date.\n\n| | Version |\n|---|---|\n| **Current** | v${CONSUMER} |\n| **Latest** | v${LATEST} |\n| **Versions behind** | ${{ steps.compare.outputs.drift }} |\n\n## How to upgrade\n\n\`\`\`bash\ncurl -fsSL https://raw.githubusercontent.com/ivegamsft/basecoat/main/scripts/sync.sh | bash\n\`\`\`\n\nOr manually: download the [latest release](https://github.com/ivegamsft/basecoat/releases/latest) and run \`sync.ps1\` / \`sync.sh\`.\n\n---\n*Opened automatically by the BaseCoat version drift detector.*" \
               --label "maintenance"
           fi
         env:

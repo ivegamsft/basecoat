@@ -40,13 +40,13 @@ commands instead of stopping:
 
 ```powershell
 # PowerShell fallback (from consumer repo root)
-$env:BASECOAT_REPO = 'https://github.com/IBuySpy-Shared/basecoat.git'
+$env:BASECOAT_REPO = 'https://github.com/ivegamsft/basecoat.git'
 $env:BASECOAT_REF  = 'main'  # or vX.Y.Z
 pwsh .\sync.ps1
 ```
 
 ```bash
 # Bash fallback (from consumer repo root)
-BASECOAT_REPO=https://github.com/IBuySpy-Shared/basecoat.git \
+BASECOAT_REPO=https://github.com/ivegamsft/basecoat.git \
 BASECOAT_REF=main ./sync.sh
 ```

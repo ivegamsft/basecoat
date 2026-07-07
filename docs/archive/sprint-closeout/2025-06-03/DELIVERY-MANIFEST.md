@@ -131,7 +131,7 @@
 
 **Quick Reference:**
 ```
-Dashboard: https://ibuyspy-shared.github.io/basecoat/
+Dashboard: https://ivegamsft.github.io/basecoat/
 Workflow: .github/workflows/adoption-metrics.yml
 MCP Server: mcp/basecoat-metrics/
 Next Run: 2025-06-08 08:00 UTC
@@ -208,7 +208,7 @@ Next Run: 2025-06-08 08:00 UTC
 
 ### GitHub Pages Deployment ✅
 
-- **URL:** https://ibuyspy-shared.github.io/basecoat/
+- **URL:** https://ivegamsft.github.io/basecoat/
 - **Branch:** `gh-pages` (auto-created by workflow)
 - **Last Update:** 2025-06-03 08:15 UTC
 - **Status:** ✅ Live and current
@@ -316,7 +316,7 @@ cd mcp/basecoat-metrics && npm install && npm run build
 A: Every Sunday at 08:00 UTC (automated). Can be run manually anytime.
 
 **Q: Where is the dashboard?**  
-A: https://ibuyspy-shared.github.io/basecoat/
+A: https://ivegamsft.github.io/basecoat/
 
 **Q: How do I trigger the workflow manually?**  
 A: `gh workflow run adoption-metrics.yml`

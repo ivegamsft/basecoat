@@ -15,7 +15,7 @@ Run the sync script in your repo root:
 
     ```powershell
     $tag = (gh release list --repo IBuySpy-Shared/basecoat --limit 1 --json tagName -q '.[0].tagName')
-    $url = "https://github.com/IBuySpy-Shared/basecoat/releases/download/$tag/base-coat-$tag.zip"
+    $url = "https://github.com/ivegamsft/basecoat/releases/download/$tag/base-coat-$tag.zip"
     Invoke-WebRequest $url -OutFile base-coat.zip
     Expand-Archive base-coat.zip -DestinationPath .github/base-coat -Force
     Remove-Item base-coat.zip
@@ -24,14 +24,14 @@ Run the sync script in your repo root:
 === "Shell (Linux/macOS)"
 
     ```bash
-    curl -fsSL https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/scripts/sync.sh | bash
+    curl -fsSL https://raw.githubusercontent.com/ivegamsft/basecoat/main/scripts/sync.sh | bash
     ```
 
 After syncing, your repo will have a `.github/base-coat/` directory containing all BaseCoat assets.
 
 ## Option 2: Manual setup
 
-1. Go to the [latest release](https://github.com/IBuySpy-Shared/basecoat/releases/latest)
+1. Go to the [latest release](https://github.com/ivegamsft/basecoat/releases/latest)
 2. Download `base-coat-<version>.zip`
 3. Extract to `.github/base-coat/` in your repo
 4. Commit the result

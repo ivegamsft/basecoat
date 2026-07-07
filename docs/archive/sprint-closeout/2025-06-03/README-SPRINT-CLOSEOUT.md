@@ -82,7 +82,7 @@ All workflows validated and passing ✅
 
 The adoption metrics dashboard is deployed and live:
 
-- **URL:** `https://ibuyspy-shared.github.io/basecoat/`
+- **URL:** `https://ivegamsft.github.io/basecoat/`
 - **Last Updated:** 2025-06-03 08:15 UTC
 - **Status:** ✅ All metrics current
 
@@ -305,7 +305,7 @@ npm install && npm run build
 
 ## 🔗 Quick Links
 
-- **Dashboard:** https://ibuyspy-shared.github.io/basecoat/
+- **Dashboard:** https://ivegamsft.github.io/basecoat/
 - **Workflow:** `.github/workflows/adoption-metrics.yml`
 - **Metrics:** `sprint-metrics-summary.md`
 - **Validation:** `WORKFLOW-VALIDATION.md`

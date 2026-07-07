@@ -380,7 +380,7 @@ curl -X POST https://api.basecoat.dev/v1/repositories \
   -H "Content-Type: application/json" \
   -d '{
     "name": "basecoat",
-    "url": "https://github.com/IBuySpy-Shared/basecoat",
+    "url": "https://github.com/ivegamsft/basecoat",
     "teamId": "team-uuid-1",
     "complianceLevel": "level3"
   }'
@@ -391,7 +391,7 @@ curl -X POST https://api.basecoat.dev/v1/repositories \
 {
   "id": "repo-uuid-1",
   "name": "basecoat",
-  "url": "https://github.com/IBuySpy-Shared/basecoat",
+  "url": "https://github.com/ivegamsft/basecoat",
   "team": "team-uuid-1",
   "isPrivate": true,
   "language": "PowerShell",
@@ -700,4 +700,4 @@ Future releases will support webhook notifications for audit completion and poli
 For API issues or questions:
 - **Documentation:** https://basecoat.dev/docs
 - **Email:** api-support@basecoat.dev
-- **Issues:** https://github.com/IBuySpy-Shared/basecoat/issues
+- **Issues:** https://github.com/ivegamsft/basecoat/issues

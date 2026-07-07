@@ -1,6 +1,6 @@
 # Issue #1661 Design Spec: Merge Bottleneck — Per-Agent Lanes
 
-- **Issue:** [#1661](https://github.com/IBuySpy-Shared/basecoat/issues/1661)
+- **Issue:** [#1661](https://github.com/ivegamsft/basecoat/issues/1661)
 - **Related findings:** `docs/audit/ci-cd-findings-2026-06-14.md` (Learning 1)
 - **Status:** Design phase (Sprint 36)
 - **Target implementation window:** Sprint 37+

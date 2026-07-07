@@ -41,7 +41,7 @@ Sprint 39 is a **stabilization & optimization sprint** with 16 issues grouped in
 
 ### Feature #1768: CI/CD Infrastructure Stabilization (Wave 1-2)
 
-**Priority:** CRITICAL | **Points:** ~21 | **Status:** COMPLETED | **URL:** <https://github.com/IBuySpy-Shared/basecoat/issues/1768>
+**Priority:** CRITICAL | **Points:** ~21 | **Status:** COMPLETED | **URL:** <https://github.com/ivegamsft/basecoat/issues/1768>
 
 ```text
 Wave 1 (Days 1-3):
@@ -87,7 +87,7 @@ Feature tracker #1768 status on closeout date:
 
 ### Feature #1770: Agent Design & Workflow Optimization (Wave 2-3)
 
-**Priority:** MEDIUM | **Points:** ~19 | **Status:** READY | **URL:** <https://github.com/IBuySpy-Shared/basecoat/issues/1770>
+**Priority:** MEDIUM | **Points:** ~19 | **Status:** READY | **URL:** <https://github.com/ivegamsft/basecoat/issues/1770>
 
 ```text
 Wave 2 (Days 5-9):
@@ -114,7 +114,7 @@ Wave 3 (Days 10-13):
 ```text
 ### Feature #1771: Security & Traceability (Wave 1)
 
-**Priority:** HIGH | **Points:** ~8 | **Status:** READY | **URL:** <https://github.com/IBuySpy-Shared/basecoat/issues/1771>
+**Priority:** HIGH | **Points:** ~8 | **Status:** READY | **URL:** <https://github.com/ivegamsft/basecoat/issues/1771>
 
 ```text
 Wave 1 (Days 1-2):

@@ -2,7 +2,7 @@
 
 Defines a centralized, versioned registry for prompts used across Base Coat agents and skills. The registry standardizes prompt discovery, rollout, deprecation, rollback, and auditability without forcing prompt text to live inline inside runtime code.
 
-> **Tracking:** Issue [#116](https://github.com/IBuySpy-Shared/basecoat/issues/116)
+> **Tracking:** Issue [#116](https://github.com/ivegamsft/basecoat/issues/116)
 
 ---
 
@@ -384,4 +384,4 @@ A robust implementation should follow these defaults:
 - [`docs/HOOKS.md`](hooks.md) — lifecycle patterns for agent execution
 - [`docs/../architecture/multi-agent-orchestration-patterns.md`](../architecture/multi-agent-orchestration-patterns.md) — agent orchestration and coordination patterns
 - [`docs/../guides/model-optimization.md`](../guides/model-optimization.md) — model selection and compatibility considerations
-- Issue [#116](https://github.com/IBuySpy-Shared/basecoat/issues/116) — tracking issue for prompt registry specification
+- Issue [#116](https://github.com/ivegamsft/basecoat/issues/116) — tracking issue for prompt registry specification

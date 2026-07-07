@@ -5,7 +5,7 @@ import { findAgent } from './registry/index';
 import { delegate } from './delegation/index';
 
 const DEFAULT_CONFIG: PluginConfig = {
-  registryUrl: 'https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/registry.json',
+  registryUrl: 'https://raw.githubusercontent.com/ivegamsft/basecoat/main/registry.json',
   cacheTtlMs: 300_000,
   timeoutMs: 30_000,
   maxConcurrency: 4,

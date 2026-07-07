@@ -115,7 +115,7 @@ gh secret set PRODUCTION_REPO_TOKEN --repo IBuySpy-Shared/basecoat
 
 Alternatively, using the GitHub UI:
 
-1. Go to `https://github.com/IBuySpy-Shared/basecoat`
+1. Go to `https://github.com/ivegamsft/basecoat`
 2. Settings → Secrets and variables → Actions
 3. Click **New repository secret**
 4. Name: `PRODUCTION_REPO_TOKEN`
@@ -134,7 +134,7 @@ gh workflow run publish-to-production.yml --repo IBuySpy-Shared/basecoat --ref v
 
 **From GitHub UI:**
 
-1. Go to `https://github.com/IBuySpy-Shared/basecoat/actions`
+1. Go to `https://github.com/ivegamsft/basecoat/actions`
 2. Find **BaseCoat - Publish to Production**
 3. Click **Run workflow** → Select branch/tag and run
 

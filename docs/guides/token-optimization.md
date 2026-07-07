@@ -4,7 +4,7 @@ Strategies for managing token budgets, compressing context, and handing off stat
 
 For an operator-first rollout checklist that maps token controls to scoped instruction policy, see [`../reference/scoped-instructions.md#token-optimization-quick-start-for-instruction-operators`](../reference/scoped-instructions.md#token-optimization-quick-start-for-instruction-operators).
 
-> **Tracking:** Issue [#42](https://github.com/IBuySpy-Shared/basecoat/issues/42)
+> **Tracking:** Issue [#42](https://github.com/ivegamsft/basecoat/issues/42)
 > **GHCP-specific:** This guidance was developed and tested against GitHub Copilot (GHCP).
 > If you are using Azure OpenAI, Anthropic API, AWS Bedrock, or another provider,
 > model names, tier pricing, and rate limits will differ. See [Adapting for Other Providers](#adapting-for-other-providers).
@@ -1118,8 +1118,8 @@ see [`../operations/context-rot-runbook.md`](../operations/context-rot-runbook.m
 - [`../reference/scoped-instructions.md`](../reference/scoped-instructions.md) — Scope patterns that prevent universal instruction bloat
 - [`../templates/sprint-structure.md`](../templates/sprint-structure.md) — Reusable sprint planning template (reduces re-planning cost 62%)
 - [`../reference/BACKLOG_SESSION_SCORECARD.md`](../reference/BACKLOG_SESSION_SCORECARD.md) — Latest 5-session scorecard for the 35-45M backlog target
-- Issue [#42](https://github.com/IBuySpy-Shared/basecoat/issues/42) — Tracking issue for token optimization
-- Issue [#44](https://github.com/IBuySpy-Shared/basecoat/issues/44) — Token budget and cost attribution
-- Issue [#1361](https://github.com/IBuySpy-Shared/basecoat/issues/1361) — Efficiency target: reduce backlog runs 68→35-45M tokens
-- Issue [#1362](https://github.com/IBuySpy-Shared/basecoat/issues/1362) — Sprint template to eliminate re-planning cost
+- Issue [#42](https://github.com/ivegamsft/basecoat/issues/42) — Tracking issue for token optimization
+- Issue [#44](https://github.com/ivegamsft/basecoat/issues/44) — Token budget and cost attribution
+- Issue [#1361](https://github.com/ivegamsft/basecoat/issues/1361) — Efficiency target: reduce backlog runs 68→35-45M tokens
+- Issue [#1362](https://github.com/ivegamsft/basecoat/issues/1362) — Sprint template to eliminate re-planning cost
 - [`ubb-token-guidance.md`](ubb-token-guidance.md) -- UBB billing model, cost estimation, monitoring

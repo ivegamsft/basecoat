@@ -195,7 +195,7 @@ function Build-Scorecard {
             unit = "merged_prs_per_week"
             higherIsBetter = $true
             threshold = 1.0
-            remediation = "https://github.com/IBuySpy-Shared/basecoat/issues/2046"
+            remediation = "https://github.com/ivegamsft/basecoat/issues/2046"
         },
         @{
             name = "failure_rate"
@@ -203,7 +203,7 @@ function Build-Scorecard {
             unit = "ratio"
             higherIsBetter = $false
             threshold = 0.02
-            remediation = "https://github.com/IBuySpy-Shared/basecoat/issues/2047"
+            remediation = "https://github.com/ivegamsft/basecoat/issues/2047"
         },
         @{
             name = "mttr_hours"
@@ -211,7 +211,7 @@ function Build-Scorecard {
             unit = "hours"
             higherIsBetter = $false
             threshold = 4.0
-            remediation = "https://github.com/IBuySpy-Shared/basecoat/issues/2047"
+            remediation = "https://github.com/ivegamsft/basecoat/issues/2047"
         },
         @{
             name = "manual_intervention_rate"
@@ -219,7 +219,7 @@ function Build-Scorecard {
             unit = "ratio"
             higherIsBetter = $false
             threshold = 0.05
-            remediation = "https://github.com/IBuySpy-Shared/basecoat/issues/2049"
+            remediation = "https://github.com/ivegamsft/basecoat/issues/2049"
         }
     )
 

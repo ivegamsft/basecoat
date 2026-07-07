@@ -171,4 +171,4 @@ Is the output deterministic (same input → same output)?
 - `docs/architecture/multi-agent-orchestration-patterns.md` — implementation patterns
 - `docs/multi-agent-bmc.md` — Business Model Canvas for the system
 - `docs/memory/PROCESS.md` — memory lifecycle
-- Issue [#613](https://github.com/IBuySpy-Shared/basecoat/issues/613) — parent investigation
+- Issue [#613](https://github.com/ivegamsft/basecoat/issues/613) — parent investigation

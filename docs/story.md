@@ -191,7 +191,7 @@ coexist — a question that came up in every consumer onboarding conversation.
 
 The full changelog is at [Changelog](changelog.md).
 The detailed narrative through v2.1.0 is preserved in the
-[project archive](https://github.com/IBuySpy-Shared/basecoat/blob/main/docs/archive/repo_history/2026-05-01-story-of-basecoat.md).
+[project archive](https://github.com/ivegamsft/basecoat/blob/main/docs/archive/repo_history/2026-05-01-story-of-basecoat.md).
 
 ---
 

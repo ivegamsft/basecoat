@@ -201,7 +201,7 @@ Quality Score: 95% (0 issues reopened)
 
 | Component | Status | Last Updated | URL |
 |-----------|--------|---------------|-----|
-| Adoption Metrics Dashboard | ✅ Live | 2025-06-03 08:15 UTC | `https://ibuyspy-shared.github.io/basecoat/` |
+| Adoption Metrics Dashboard | ✅ Live | 2025-06-03 08:15 UTC | `https://ivegamsft.github.io/basecoat/` |
 | Metrics Data | ✅ Current | 2025-06-03 08:00 UTC | `dashboard/metrics/current.json` |
 | Historical Trends | ✅ Archived | 2025-06-03 08:15 UTC | `dashboard/metrics/history/` |
 | MCP Server | ✅ Running | 2025-06-03 07:45 UTC | localhost:3000 (dev) |

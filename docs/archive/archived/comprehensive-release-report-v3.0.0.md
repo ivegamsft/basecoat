@@ -226,7 +226,7 @@ All gates passed. Ready for production deployment.
 ### Quick Start
 ```bash
 # Clone or update repository
-git clone https://github.com/IBuySpy-Shared/basecoat.git
+git clone https://github.com/ivegamsft/basecoat.git
 cd basecoat
 git checkout v3.0.0
 
@@ -315,7 +315,7 @@ cat docs/AGENT_SKILL_MAP.md
 
 ### Downloads
 - `basecoat-v3.0.0.zip` (1.07 MB)
-- GitHub Release: https://github.com/IBuySpy-Shared/basecoat/releases/tag/v3.0.0
+- GitHub Release: https://github.com/ivegamsft/basecoat/releases/tag/v3.0.0
 
 ### Commit
 - Commit SHA: 65ef389

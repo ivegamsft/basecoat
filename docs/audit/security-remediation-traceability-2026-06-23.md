@@ -1,7 +1,7 @@
 # Security Remediation Traceability Record
 
 **Date:** 2026-06-23  
-**Issue linkage:** [#1771](https://github.com/IBuySpy-Shared/basecoat/issues/1771), [#1657](https://github.com/IBuySpy-Shared/basecoat/issues/1657)
+**Issue linkage:** [#1771](https://github.com/ivegamsft/basecoat/issues/1771), [#1657](https://github.com/ivegamsft/basecoat/issues/1657)
 
 ## Purpose
 
@@ -13,10 +13,10 @@ and closure rationale.
 
 | Security item | Category | Owner | Due date | Implementation evidence | Closure type | Verification evidence |
 |---|---|---|---|---|---|---|
-| [#1556](https://github.com/IBuySpy-Shared/basecoat/issues/1556) Define and enforce main branch protection baseline | Code and branch governance remediation | `@ibuyspy` | 2026-06-17 | [PR #1600](https://github.com/IBuySpy-Shared/basecoat/pull/1600), commit `de3568f04e1cda57dbffe5a781e781e548ab1643` (`Closes #1556`) | Fixed | Branch protection policy docs and enforcement workflow landed (`docs/reference/branch-protection.md`, `.github/workflows/branch-protection-enforce.yml`) |
-| [#1558](https://github.com/IBuySpy-Shared/basecoat/issues/1558) Triage and remediate open security alerts backlog | Security backlog closure evidence and operating policy | `@ibuyspy` | 2026-06-15 | [PR #1610](https://github.com/IBuySpy-Shared/basecoat/pull/1610), commit `d1ee8bdd5926edee64d0966d39e75cc4e2013a36` (`Fixes #1558`) | Fixed with documented closure policy | Security remediation plan captured and linked closure requirements documented in commit and issue close event |
-| [#1154](https://github.com/IBuySpy-Shared/basecoat/issues/1154) Merge pending Dependabot security PRs before production cut | Dependency-remediation execution | `@ibuyspy` | 2026-05-25 | [#1138](https://github.com/IBuySpy-Shared/basecoat/pull/1138), [#1140](https://github.com/IBuySpy-Shared/basecoat/pull/1140), [#1145](https://github.com/IBuySpy-Shared/basecoat/pull/1145), [#1146](https://github.com/IBuySpy-Shared/basecoat/pull/1146), [#1147](https://github.com/IBuySpy-Shared/basecoat/pull/1147) | Fixed | All listed Dependabot security PRs merged on 2026-05-23 and tracked as closure evidence in issue #1154 |
-| Security secret-scanning false-positive control hardening | Secret-remediation workflow hardening | `@ibuyspy` | 2026-04-30 | [PR #303](https://github.com/IBuySpy-Shared/basecoat/pull/303) `fix(security): narrow gitleaks allowlist scope` | Fixed | Gitleaks allowlist scope narrowed to reduce false-positive suppression risk |
+| [#1556](https://github.com/ivegamsft/basecoat/issues/1556) Define and enforce main branch protection baseline | Code and branch governance remediation | `@ibuyspy` | 2026-06-17 | [PR #1600](https://github.com/ivegamsft/basecoat/pull/1600), commit `de3568f04e1cda57dbffe5a781e781e548ab1643` (`Closes #1556`) | Fixed | Branch protection policy docs and enforcement workflow landed (`docs/reference/branch-protection.md`, `.github/workflows/branch-protection-enforce.yml`) |
+| [#1558](https://github.com/ivegamsft/basecoat/issues/1558) Triage and remediate open security alerts backlog | Security backlog closure evidence and operating policy | `@ibuyspy` | 2026-06-15 | [PR #1610](https://github.com/ivegamsft/basecoat/pull/1610), commit `d1ee8bdd5926edee64d0966d39e75cc4e2013a36` (`Fixes #1558`) | Fixed with documented closure policy | Security remediation plan captured and linked closure requirements documented in commit and issue close event |
+| [#1154](https://github.com/ivegamsft/basecoat/issues/1154) Merge pending Dependabot security PRs before production cut | Dependency-remediation execution | `@ibuyspy` | 2026-05-25 | [#1138](https://github.com/ivegamsft/basecoat/pull/1138), [#1140](https://github.com/ivegamsft/basecoat/pull/1140), [#1145](https://github.com/ivegamsft/basecoat/pull/1145), [#1146](https://github.com/ivegamsft/basecoat/pull/1146), [#1147](https://github.com/ivegamsft/basecoat/pull/1147) | Fixed | All listed Dependabot security PRs merged on 2026-05-23 and tracked as closure evidence in issue #1154 |
+| Security secret-scanning false-positive control hardening | Secret-remediation workflow hardening | `@ibuyspy` | 2026-04-30 | [PR #303](https://github.com/ivegamsft/basecoat/pull/303) `fix(security): narrow gitleaks allowlist scope` | Fixed | Gitleaks allowlist scope narrowed to reduce false-positive suppression risk |
 
 ## Risk Acceptance Register
 

@@ -224,7 +224,7 @@ Submitted by **$Source** via \`submit-learning.ps1\`.
 - [ ] Delete the candidate entry from \`sweep-candidates/\`
 
 ---
-*Submitted by $Source — see [CONTRIBUTING.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/docs/memory/CONTRIBUTING.md)*" 2>&1
+*Submitted by $Source — see [CONTRIBUTING.md](https://github.com/ivegamsft/basecoat/blob/main/docs/memory/CONTRIBUTING.md)*" 2>&1
 
         Write-Host "🔗 PR opened: $prUrl"
     } else {

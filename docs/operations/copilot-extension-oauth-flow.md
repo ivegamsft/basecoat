@@ -635,7 +635,7 @@ traces
 
 ## References
 
-- Issue: [#1112 — OAuth and session flow documentation](https://github.com/IBuySpy-Shared/basecoat/issues/1112)
+- Issue: [#1112 — OAuth and session flow documentation](https://github.com/ivegamsft/basecoat/issues/1112)
 - GitHub App Registration Runbook: `docs/operations/COPILOT_EXTENSION_GITHUB_APP_REGISTRATION.md`
 - Copilot Extension PRD: `docs/design/copilot-extension-prd.md`
 - Extension Backend README: `mcp/basecoat-extension/README.md`

@@ -2,7 +2,7 @@
 ## CI Fast Guardrails Design (Issue #1666)
 
 - **Status:** Design complete (ready for implementation in Sprint 39)
-- **Issue:** <https://github.com/IBuySpy-Shared/basecoat/issues/1666>
+- **Issue:** <https://github.com/ivegamsft/basecoat/issues/1666>
 - **Related finding:** `docs/audit/ci-cd-findings-2026-06-14.md`
 
 ---
