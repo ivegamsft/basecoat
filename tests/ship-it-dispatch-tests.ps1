@@ -152,6 +152,12 @@ if ($workflowContent -notmatch "pilot-wawkr") {
 if ($workflowContent -notmatch "pilot-work-tracker") {
   throw "Ship-it workflow must expose pilot-work-tracker profile option."
 }
+if ($workflowContent -notmatch "/spec-2-prod") {
+  throw "Ship-it workflow must detect /spec-2-prod comment command."
+}
+if ($workflowContent -notmatch 'result\.intent\b[^=]*=\s*.*"spec-2-prod"') {
+  throw "Ship-it workflow must assign spec-2-prod as an intent result value in the resolver."
+}
 
 $wawkrOutputJson = Join-Path $outputDirectory "summary-pilot-wawkr.json"
 & $dispatchScript `
@@ -215,6 +221,40 @@ if ($workTrackerSummary.child_issues[3].stage_artifact.execution_lane -ne "pilot
 }
 if ($workTrackerSummary.release_gate_contract.lane_profiles.'pilot-work-tracker'.required_artifacts.Count -lt 5) {
   throw "Expected work-tracker lane profile to include strict required artifact policy."
+}
+
+$shipItOutputJson = Join-Path $outputDirectory "summary-ship-it.json"
+& $dispatchScript `
+  -Intent "ship-it" `
+  -Goal "Validate ship-it dispatch path" `
+  -TargetRepo "IBuySpy-Shared/basecoat" `
+  -SpecRef "https://example.com/specs/ship-it" `
+  -RiskBand "medium" `
+  -DryRun `
+  -OutputPath $shipItOutputJson
+
+if (-not (Test-Path $shipItOutputJson)) {
+  throw "Ship-it dispatch summary JSON was not created: $shipItOutputJson"
+}
+
+$shipItSummary = Get-Content -Raw -Path $shipItOutputJson | ConvertFrom-Json
+if ($shipItSummary.intent -ne "ship-it") {
+  throw "Expected intent ship-it but found '$($shipItSummary.intent)'"
+}
+if (-not $shipItSummary.dry_run) {
+  throw "Dry-run summary should report dry_run=true."
+}
+if ($shipItSummary.child_issues.Count -ne 3) {
+  throw "Expected 3 child sprint issues for ship-it but found $($shipItSummary.child_issues.Count)"
+}
+if ($shipItSummary.child_issues[2].stage_artifact.merge_policy.required_checks -notcontains "Ship-it Release Gate / enforce-release-gate") {
+  throw "Expected Sprint 3 merge policy to require Ship-it Release Gate."
+}
+if ($shipItSummary.child_issues[0].stage_artifact.branch_name -notmatch '^intent/ship-it/') {
+  throw "Expected stage artifact branch to use intent/ship-it/* naming."
+}
+if ([string]::IsNullOrWhiteSpace($shipItSummary.release_gate_contract.workflow)) {
+  throw "Expected release_gate_contract workflow to be present for ship-it."
 }
 
 Write-Host "Ship-it dispatch tests passed."

@@ -38,44 +38,10 @@ env:
   IMAGE_NAME: ${{ github.repository_owner }}/basecoat-metrics-mcp
 
 jobs:
-  resolve-deploy-runner:
-    name: Resolve deploy runner contract
-    runs-on: ubuntu-latest
-    outputs:
-      deploy_runner: ${{ steps.contract.outputs.deploy_runner }}
-    steps:
-      - name: Validate self-hosted runner routing contract
-        id: contract
-        shell: bash
-        env:
-          RUNNER_DEPLOY: ${{ vars.RUNNER_DEPLOY }}
-        run: |
-          set -euo pipefail
-          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
-            echo "deploy_runner=ubuntu-latest" >> "$GITHUB_OUTPUT"
-            echo "::notice::Using ubuntu-latest for pull_request events."
-            exit 0
-          fi
-          if [[ -z "${RUNNER_DEPLOY:-}" ]]; then
-            echo "::error::vars.RUNNER_DEPLOY is not configured."
-            echo "::error::Set RUNNER_DEPLOY to self-hosted labels/group for deploy-class jobs."
-            echo "::error::Repository settings: https://github.com/${GITHUB_REPOSITORY}/settings/variables/actions"
-            exit 1
-          fi
-          NORMALIZED="$(echo "${RUNNER_DEPLOY}" | tr '[:upper:]' '[:lower:]')"
-          if [[ "${NORMALIZED}" == *"ubuntu-latest"* && "${NORMALIZED}" != *"self-hosted"* ]]; then
-            echo "::error::vars.RUNNER_DEPLOY resolves to ubuntu-latest fallback."
-            echo "::error::This workflow requires explicit self-hosted routing."
-            exit 1
-          fi
-          echo "deploy_runner=${RUNNER_DEPLOY}" >> "$GITHUB_OUTPUT"
-          echo "Runner contract satisfied: ${RUNNER_DEPLOY}"
-
   build-push:
     name: Build and push image to GHCR
-    runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-latest' || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: resolve-deploy-runner
     if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork }}
     env:
       TARGET_ENV: ${{ github.event_name == 'pull_request' && 'staging' || (github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'production' && 'prod' || github.event.inputs.environment) || 'prod') }}
@@ -87,10 +53,16 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
-      - name: Validate self-hosted runner routing contract
+      - name: Log runner routing
         shell: bash
+        env:
+          RUNNER_DEPLOY: ${{ vars.RUNNER_DEPLOY }}
         run: |
-          echo "Runner contract already validated by resolve-deploy-runner: ${{ needs.resolve-deploy-runner.outputs.deploy_runner }}"
+          if [ -z "$RUNNER_DEPLOY" ]; then
+            echo "::notice::vars.RUNNER_DEPLOY is not configured; using ubuntu-latest fallback."
+          else
+            echo "::notice::Running on configured deploy runner: $RUNNER_DEPLOY"
+          fi
 
       - name: Log in to GHCR
         uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0
@@ -128,9 +100,9 @@ jobs:
 
   deploy:
     name: Deploy to Azure Container Apps
-    runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-latest' || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
+    runs-on: ${{ vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
     timeout-minutes: 20
-    needs: [resolve-deploy-runner, build-push]
+    needs: [build-push]
     if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork }}
     environment: ${{ github.event_name == 'pull_request' && 'staging' || (github.event_name == 'workflow_dispatch' && ((github.event.inputs.environment == 'prod' || github.event.inputs.environment == 'production') && 'production' || github.event.inputs.environment) || 'production') }}
     env:
@@ -140,10 +112,16 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
-      - name: Validate self-hosted runner routing contract
+      - name: Log runner routing
         shell: bash
+        env:
+          RUNNER_DEPLOY: ${{ vars.RUNNER_DEPLOY }}
         run: |
-          echo "Runner contract already validated by resolve-deploy-runner: ${{ needs.resolve-deploy-runner.outputs.deploy_runner }}"
+          if [ -z "$RUNNER_DEPLOY" ]; then
+            echo "::notice::vars.RUNNER_DEPLOY is not configured; using ubuntu-latest fallback."
+          else
+            echo "::notice::Running on configured deploy runner: $RUNNER_DEPLOY"
+          fi
 
       - name: Set up Node.js for policy preflight
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4

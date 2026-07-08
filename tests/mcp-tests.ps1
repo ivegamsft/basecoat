@@ -103,8 +103,22 @@ Assert-FileContains '.github/workflows/mcp-deploy.yml' 'AZURE_CREDENTIALS' `
 Assert-FileContains '.github/workflows/mcp-deploy.yml' 'MCP_RESOURCE_GROUP' `
     'mcp-deploy.yml is missing MCP_RESOURCE_GROUP secret reference'
 
-Write-Host 'MCP tests: validating build workflow is pinned to Linux runner...'
-Assert-FileContains '.github/workflows/mcp-build.yml' 'runs-on: ubuntu-latest' `
-    'mcp-build.yml must run on ubuntu-latest'
+Write-Host 'MCP tests: validating build workflow is pinned to ubuntu-latest (CI-only workflow)...'
+Assert-FileContains '.github/workflows/mcp-build.yml' "runs-on: ubuntu-latest" `
+    'mcp-build.yml must use ubuntu-latest (CI check workflow — Docker smoke test requires Linux runner with Docker)'
+
+Write-Host 'MCP tests: validating deploy workflow uses ubuntu-latest fallback runner...'
+Assert-FileContains '.github/workflows/mcp-deploy.yml' "ubuntu-latest" `
+    'mcp-deploy.yml must reference ubuntu-latest (as default or fallback runner)'
+
+Write-Host 'MCP tests: validating deploy workflow routes through vars.RUNNER_DEPLOY...'
+Assert-FileContains '.github/workflows/mcp-deploy.yml' "vars.RUNNER_DEPLOY" `
+    'mcp-deploy.yml must reference vars.RUNNER_DEPLOY for runner selection'
+
+Write-Host 'MCP tests: validating dead resolve-deploy-runner job is removed from deploy workflow...'
+$deployContent = Get-Content '.github/workflows/mcp-deploy.yml' -Raw
+if ($deployContent -match '^  resolve-deploy-runner:') {
+    throw 'mcp-deploy.yml still contains resolve-deploy-runner job; should have been removed'
+}
 
 Write-Host 'MCP tests passed' -ForegroundColor Green

@@ -128,7 +128,8 @@ jobs:
               const isPullRequestComment = !!issue.pull_request;
               const shipItMatch = comment.match(/^\/ship-it(?:\s+(.+))?$/im);
               const onboardingMatch = comment.match(/^\/onboarding(?:\s+(.+))?$/im);
-              const commandMatch = shipItMatch || onboardingMatch;
+              const specToProdMatch = comment.match(/^\/spec-2-prod(?:\s+(.+))?$/im);
+              const commandMatch = shipItMatch || onboardingMatch || specToProdMatch;
               if (isPullRequestComment || !commandMatch) {
                 core.setOutput("should_run", "false");
                 return;
@@ -141,12 +142,12 @@ jobs:
               });
               const allowed = ["admin", "maintain", "write"].includes(perm.data.permission);
               if (!allowed) {
-                core.setFailed(`@${context.actor} does not have write permission for intent commands (/ship-it, /onboarding).`);
+                core.setFailed(`@${context.actor} does not have write permission for intent commands (/ship-it, /onboarding, /spec-2-prod).`);
                 return;
               }
 
               result.should_run = "true";
-              result.intent = onboardingMatch ? "onboarding-conductor" : "ship-it";
+              result.intent = onboardingMatch ? "onboarding-conductor" : specToProdMatch ? "spec-2-prod" : "ship-it";
               result.goal = commandMatch[1]?.trim() || issue.title;
               result.source_issue_number = `${issue.number}`;
               const issueBody = issue.body || "";
