@@ -23,6 +23,10 @@ Triggered by posting `/approve` on a GitHub issue. Runs asynchronously in a clou
 workspace with full repository access. Always produces a pull request — a human
 must merge it.
 
+Issue assignment uses the Copilot cloud-agent API flow: the approval workflow
+checks `suggestedActors(capabilities: [CAN_BE_ASSIGNED])` for `copilot-swe-agent`
+and assigns the issue with `copilot-swe-agent[bot]` plus `agent_assignment`.
+
 | Attribute | Detail |
 |---|---|
 | Invocation | GitHub issue comment: `/approve` |

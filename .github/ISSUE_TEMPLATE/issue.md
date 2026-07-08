@@ -65,6 +65,9 @@ Please apply **at least one label from each category below:**
 - `chore` — Maintenance or tech debt
 - `security` — Security concern or vulnerability
 
+The triage workflow mirrors the selected type label into the native issue `Type`
+field and the selected priority label into the native `Priority` field.
+
 **Priority** (recommended):
 
 - `priority:critical` — Service down, data loss, active security breach, CVE
@@ -75,7 +78,7 @@ Please apply **at least one label from each category below:**
 **Sprint** (required):
 
 - `sprint-YYYY-MM` (for example, `sprint-2026-05`)
-- Use `needs-triage` only if a target sprint cannot be assigned yet.
+- Use `needs-triage` and `needs-info` only if a target sprint cannot be assigned yet.
 
 **Technology** (optional):
 

@@ -119,3 +119,16 @@ The following remain on GitHub-hosted runners by design:
 - `validate-basecoat.yml`, `ci.yml`, and `pr-validation.yml` for fast, deterministic PR feedback.
 - `docs.yml` for standard public tooling (MkDocs + GitHub Pages) with no private network requirement.
 - Matrix jobs pinned to platform images (for example, `windows-latest` in `validate-basecoat.yml` and OS matrix jobs in `smoke-test.yml` and `sync-test.yml`) to preserve cross-platform coverage.
+
+## Recent audit gaps
+
+Recent workflow audits found repeated cases where runner choice was still being
+handled ad hoc in MCP, deploy, and release lanes. Keep the routing contract
+explicit so future changes do not regress back to hard-coded assumptions:
+
+- Prefer `vars.RUNNER_DEPLOY` and `vars.RUNNER_RELEASE` over hard-coded runner
+  groups when a workflow needs a migration-safe fallback.
+- Add a resolver or preflight job on `ubuntu-latest` when a deploy path must
+  fail early with guidance instead of silently falling back.
+- Keep PR validation and other fast gates on GitHub-hosted runners unless a
+  private network or managed identity is required.

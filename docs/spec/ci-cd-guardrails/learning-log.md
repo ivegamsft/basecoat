@@ -31,3 +31,9 @@
 1. Keep branch protection required-check documentation synchronized with actual configured contexts.
 2. Retain the branch protection API audit step in scheduled runs as a drift detector.
 3. Continue using explicit sprint closeout artifacts to capture operational lessons and reduce repeated triage.
+
+## July 2026 Runner Routing Audit
+
+1. Prefer `vars.RUNNER_DEPLOY` and `vars.RUNNER_RELEASE` over hard-coded runner groups when a workflow needs a migration-safe fallback.
+2. Use a resolver or preflight job on `ubuntu-latest` when deploy lanes must fail early with guidance instead of silently falling back.
+3. Keep PR validation and other fast gates on GitHub-hosted runners unless a private network or managed identity is required.

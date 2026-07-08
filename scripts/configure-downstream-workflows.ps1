@@ -151,6 +151,7 @@ $workflowMap = @(
         Destination = 'basecoat-issue-approve.yml'
         LegacyDestinations = @()
         Name = 'BaseCoat Template - Issue Approve'
+        # Uses Copilot cloud-agent assignment flow: suggestedActors -> copilot-swe-agent[bot] + agent_assignment.
         Supported = $true
         Class = 'templates'
     }

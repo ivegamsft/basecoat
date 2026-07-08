@@ -153,7 +153,7 @@ gh issue view $N --json labels --jq '.labels[].name'
 gh issue edit $N --add-label "bug,priority:high"
 
 # Flag for manual triage
-gh issue edit $N --add-label "needs-triage"
+gh issue edit $N --add-label "needs-triage,needs-info"
 gh issue comment $N --body "This issue is missing required labels:\n- [ ] Type: bug / enhancement / documentation / chore / security / question\n- [ ] Priority: priority:critical / priority:high / priority:medium / priority:low\n- [ ] Sprint: sprint:<number> (for example, sprint:35)"
 ```
 

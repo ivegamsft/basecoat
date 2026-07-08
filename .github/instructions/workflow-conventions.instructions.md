@@ -90,8 +90,11 @@ For promoting future candidates, use:
 ## Triggering the Copilot Coding Agent
 
 Post `/approve` as an issue comment to trigger the Copilot coding agent workflow
-(`issue-approve.yml`). This adds `approved` + `copilot-agent` labels and assigns
-the issue to Copilot. The `@copilot` mention does **not** trigger the agent.
+(`issue-approve.yml`). The workflow adds `approved` + `copilot-agent` labels,
+checks `suggestedActors(capabilities: [CAN_BE_ASSIGNED])` for `copilot-swe-agent`,
+and assigns the issue with the documented Copilot cloud-agent payload
+(`copilot-swe-agent[bot]` + `agent_assignment`). The `@copilot` mention does
+**not** trigger the agent.
 
 ## Worktree Sync Enforcement
 
