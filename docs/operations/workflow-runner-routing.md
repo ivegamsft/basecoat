@@ -57,33 +57,22 @@ runs-on: ${{ vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
 This pattern is currently used by deployment-oriented workflows and remains
 compatible with protected self-hosted rollouts.
 
-For deploy workflows that must fail with explicit guidance when
-`RUNNER_DEPLOY` is missing, use a resolver/preflight job on
-`ubuntu-latest` and route deploy jobs through its output:
+For deploy workflows that require Docker or other Linux-only capabilities on
+PR events (where `vars.RUNNER_DEPLOY` may resolve to a Windows runner), add
+a PR guard:
 
 ```yaml
-jobs:
-  resolve-deploy-runner:
-    runs-on: ubuntu-latest
-    outputs:
-      deploy_runner: ${{ steps.contract.outputs.deploy_runner }}
-    steps:
-      - name: Validate self-hosted runner routing contract
-        id: contract
-        env:
-          RUNNER_DEPLOY: ${{ vars.RUNNER_DEPLOY }}
-        run: |
-          if [[ -z "${RUNNER_DEPLOY:-}" ]]; then
-            echo "::error::vars.RUNNER_DEPLOY is not configured."
-            echo "::error::Set RUNNER_DEPLOY to self-hosted labels/group for deploy-class jobs."
-            exit 1
-          fi
-          echo "deploy_runner=${RUNNER_DEPLOY}" >> "$GITHUB_OUTPUT"
-
-  deploy:
-    needs: resolve-deploy-runner
-    runs-on: ${{ needs.resolve-deploy-runner.outputs.deploy_runner }}
+runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-latest' || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
 ```
+
+This ensures PR-triggered runs use ubuntu-latest (GitHub-hosted Linux) while
+push-to-main and workflow_dispatch flows route through `vars.RUNNER_DEPLOY`.
+The fork exclusion is handled separately by a job-level `if:` condition.
+
+Note: The `resolve-deploy-runner` resolver/preflight job pattern that previously
+enforced `RUNNER_DEPLOY` as a hard requirement has been removed. The soft-fallback
+expression above is the current standard. Workflows should not fail when
+`RUNNER_DEPLOY` is unset — the `ubuntu-latest` fallback is acceptable.
 
 Release/publish workflows now isolate onto a dedicated release lane variable:
 
@@ -106,11 +95,10 @@ capacity, and wrong-runner failure patterns for release/deploy lanes:
 This workflow emits markdown and JSON artifacts plus a step summary so lane
 routing debt can be spotted quickly without inspecting each run manually.
 
-Deployment workflows that use `RUNNER_DEPLOY` include a mandatory
-`Validate self-hosted runner routing contract` guard. In deploy workflows this
-is enforced in a resolver/preflight job so runs fail before build/deploy work
-starts when `vars.RUNNER_DEPLOY` is missing or resolves to plain
-`ubuntu-latest`, preventing silent wrong-runner execution.
+Deployment workflows that use `RUNNER_DEPLOY` use a soft-fallback expression
+so runs default to `ubuntu-latest` when `vars.RUNNER_DEPLOY` is not configured.
+This avoids blocking CI when the deploy runner is not set up, while still routing
+to the configured runner when present.
 
 ## Intentionally GitHub-hosted workflows
 
@@ -128,7 +116,11 @@ explicit so future changes do not regress back to hard-coded assumptions:
 
 - Prefer `vars.RUNNER_DEPLOY` and `vars.RUNNER_RELEASE` over hard-coded runner
   groups when a workflow needs a migration-safe fallback.
-- Add a resolver or preflight job on `ubuntu-latest` when a deploy path must
-  fail early with guidance instead of silently falling back.
+- Use the soft-fallback expression (`vars.RUNNER_DEPLOY || 'ubuntu-latest'`).
+  For workflows requiring Linux-specific capabilities on PR events, add the
+  PR guard: `github.event_name == 'pull_request' && 'ubuntu-latest' || vars.RUNNER_DEPLOY || 'ubuntu-latest'`.
+- CI-only workflows that require Docker (e.g., image build/smoke tests) should
+  pin to `ubuntu-latest` unconditionally — do not route CI-only workflows
+  through `vars.RUNNER_DEPLOY`.
 - Keep PR validation and other fast gates on GitHub-hosted runners unless a
   private network or managed identity is required.

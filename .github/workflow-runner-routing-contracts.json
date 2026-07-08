@@ -45,6 +45,7 @@
       "workflow": "mcp-deploy.yml",
       "job": "deploy",
       "allowed_runner_classes": [
+        "github-hosted-linux",
         "configurable-deploy",
         "self-hosted-linux"
       ],

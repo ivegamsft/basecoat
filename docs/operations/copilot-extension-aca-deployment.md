@@ -16,12 +16,24 @@ This runbook covers repository-owned deployment steps for the BaseCoat extension
 - Param template: `infra/extension/main.bicepparam`
 - Container image: `mcp/basecoat-extension/Dockerfile`
 
-## Required Secrets
+## Required Variables and Secrets
 
-| Secret | Description |
-|---|---|
-| `AZURE_CREDENTIALS` | Service principal credentials for ARM deployment |
-| `EXTENSION_RESOURCE_GROUP` | Azure resource group containing extension resources |
+Extension deploy authenticates with Azure using the `AZURE_CREDENTIALS` client-secret JSON secret.
+
+| Variable / Secret | Type | Description |
+|---|---|---|
+| `EXTENSION_AZURE_LOCATION` | repo variable (optional) | Azure region for resource deployment (defaults to `eastus`) |
+| `EXTENSION_RESOURCE_GROUP` | secret | Azure resource group containing extension resources (pre-provisioned) |
+| `AZURE_CREDENTIALS` | secret | Client-secret JSON credential used by `azure/login` action |
+
+### Required Azure RBAC
+
+The service principal in `AZURE_CREDENTIALS` needs two roles at subscription scope:
+
+| Role | Scope | Purpose |
+|---|---|---|
+| `Contributor` | `/subscriptions/{id}` | Deploy and update ACA resources via Bicep |
+| `User Access Administrator` | `/subscriptions/{id}` | Allow Bicep IaC to create role assignments (e.g. AcrPull for managed identity) |
 
 ## Deploy Paths
 
