@@ -9,6 +9,9 @@ version: 1.0.0
 category: data
 metadata:
   category: data
+  maturity: stable
+  audience:
+    - developer
 tags: [dotnet, entity-framework, ef-core, migration]
 allowed-tools: []
 ---

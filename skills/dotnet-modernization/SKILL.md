@@ -9,6 +9,9 @@ version: 1.0.0
 category: modernization
 metadata:
   category: modernization
+  maturity: stable
+  audience:
+    - developer
 tags: [dotnet, modernization, migration, upgrade]
 allowed-tools: []
 ---
