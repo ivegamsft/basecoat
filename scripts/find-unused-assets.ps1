@@ -29,6 +29,7 @@
     pwsh scripts/find-unused-assets.ps1
     pwsh scripts/find-unused-assets.ps1 -ThresholdDays 60 -Format json
     pwsh scripts/find-unused-assets.ps1 -Category skills
+    pwsh scripts/find-unused-assets.ps1 -ShowAll
 #>
 [CmdletBinding()]
 param(
