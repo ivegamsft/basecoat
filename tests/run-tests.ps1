@@ -246,6 +246,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running triage-field-sync contract tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'workflow-triage-field-sync-contract.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Triage-field-sync contract tests failed' -ForegroundColor Red
+    Write-FailureLog 'workflow-triage-field-sync-contract'
+    exit 1
+}
+
 Write-Host 'Running hook pack contract tests...'
 & pwsh -NoProfile -File (Join-Path $repoRoot 'scripts' 'validate-hook-packs.ps1')
 if ($LASTEXITCODE -ne 0) {
