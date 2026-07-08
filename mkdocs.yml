@@ -48,6 +48,9 @@ exclude_docs: archive/**
 extra_css:
   - stylesheets/extra.css
 
+extra_javascript:
+  - javascripts/external-links.js
+
 markdown_extensions:
   - pymdownx.superfences:
       custom_fences:
