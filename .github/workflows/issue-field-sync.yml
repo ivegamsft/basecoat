@@ -30,6 +30,9 @@ jobs:
       - name: Sync issue type and priority fields
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
+          # GH_AW_GITHUB_TOKEN is a PAT with read:org scope required by GET /orgs/{org}/issue-fields.
+          # GITHUB_TOKEN is used as fallback for repos that have not configured the PAT yet.
+          github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             const issueNumber = context.payload.issue?.number ?? Number(context.payload.inputs?.issue_number);
             if (!Number.isInteger(issueNumber) || issueNumber <= 0) {
