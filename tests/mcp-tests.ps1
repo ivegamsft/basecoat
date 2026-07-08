@@ -103,4 +103,8 @@ Assert-FileContains '.github/workflows/mcp-deploy.yml' 'AZURE_CREDENTIALS' `
 Assert-FileContains '.github/workflows/mcp-deploy.yml' 'MCP_RESOURCE_GROUP' `
     'mcp-deploy.yml is missing MCP_RESOURCE_GROUP secret reference'
 
+Write-Host 'MCP tests: validating build workflow is pinned to Linux runner...'
+Assert-FileContains '.github/workflows/mcp-build.yml' 'runs-on: ubuntu-latest' `
+    'mcp-build.yml must run on ubuntu-latest'
+
 Write-Host 'MCP tests passed' -ForegroundColor Green
