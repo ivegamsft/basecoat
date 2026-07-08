@@ -208,12 +208,12 @@ function Get-RepoMetricsFromLiveData {
 
     $openIssues = @(
         @(Get-PagedResults -Endpoint $openIssuesEndpoint) |
-            Where-Object { $null -eq $_.pull_request }
+            Where-Object { -not $_.PSObject.Properties['pull_request'] }
     )
     $closedIssuesInWindow = @(
         @(Get-PagedResults -Endpoint $closedIssuesEndpoint) |
             Where-Object {
-                $null -eq $_.pull_request -and
+                -not $_.PSObject.Properties['pull_request'] -and
                 $null -ne $_.closed_at -and
                 ([datetime]$_.closed_at).ToUniversalTime() -ge $SinceUtc
             }
