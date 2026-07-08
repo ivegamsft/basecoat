@@ -14,6 +14,14 @@ capabilities:
 model_policy:
   fallback: true
   preferred_families: [claude-sonnet, gpt-5.4]
+compatibility: []
+metadata:
+  category: workflow
+  maturity: production
+  audience:
+    - developer
+    - lead
+allowed-tools: []
 ---
 
 # Backlog Rebalancer Agent
