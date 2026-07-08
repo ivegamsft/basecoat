@@ -638,5 +638,5 @@ For issues, questions, or capacity requests:
 
 - **Infrastructure Team:** #infrastructure-support (Slack)
 - **GitHub Actions Docs:** <https://docs.github.com/en/actions>
-- **Enterprise Runner Status:** <https://runner-status.internal>
+- **Enterprise Runner Status:** `runner-status.internal`
 - **Capacity Planning:** Submit request via infrastructure portal

@@ -93,7 +93,7 @@ Apply these settings to your Base Coat fork:
 4. **Template repositories**: Configure Base Coat as a template source for new repositories.
     See [`docs/repo-template-standard.md`](repo-template-standard.md)
 
-5. **Copilot Space bootstrap**: Use [`scripts/bootstrap-copilot-space.ps1`](https://github.com/IBuySpy-Shared/basecoat/blob/main/scripts/bootstrap-copilot-space.ps1) to create the org-owned `base-coat` Space and attach the curated BaseCoat docs.
+5. **Copilot Space bootstrap**: Use `scripts/bootstrap-copilot-space.ps1` to create the org-owned `base-coat` Space and attach the curated BaseCoat docs.
 
 ### Copilot Space reference for consumer repos
 

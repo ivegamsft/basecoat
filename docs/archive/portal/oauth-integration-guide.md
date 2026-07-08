@@ -1,4 +1,5 @@
 # GitHub OAuth 2.0 Integration Guide
+<!-- markdownlint-disable -->
 
 Complete implementation guide for GitHub OAuth 2.0 authentication in Basecoat Portal.
 
@@ -15,8 +16,8 @@ Fill in the following fields:
 | Field | Value |
 |-------|-------|
 | **Application name** | Basecoat Portal |
-| **Homepage URL** | https://portal.basecoat.dev |
-| **Authorization callback URL** | https://portal.basecoat.dev/auth/callback |
+| **Homepage URL** | `https://<portal-host>` |
+| **Authorization callback URL** | `https://<portal-host>/auth/callback` |
 | **Application description** | Governance and security audit platform |
 
 ### Step 2: Store Credentials in Azure Key Vault
@@ -47,7 +48,7 @@ When user clicks "Sign in with GitHub", redirect to:
 ```
 GET https://github.com/login/oauth/authorize
   ?client_id={CLIENT_ID}
-  &redirect_uri=https://portal.basecoat.dev/auth/callback
+  &redirect_uri=https://<portal-host>/auth/callback
   &scope=user:email,read:org,read:user
   &state={RANDOM_STATE}
 ```
@@ -63,7 +64,7 @@ GET https://github.com/login/oauth/authorize
 User approves access. GitHub redirects to:
 
 ```
-GET https://portal.basecoat.dev/auth/callback?code=xxx&state=yyy
+GET https://<portal-host>/auth/callback?code=xxx&state=yyy
 ```
 
 Your backend exchanges the code:
@@ -74,7 +75,7 @@ POST https://github.com/login/oauth/access_token
   -d "client_id={CLIENT_ID}"
   -d "client_secret={CLIENT_SECRET}"
   -d "code={AUTHORIZATION_CODE}"
-  -d "redirect_uri=https://portal.basecoat.dev/auth/callback"
+  -d "redirect_uri=https://<portal-host>/auth/callback"
 ```
 
 GitHub responds:
@@ -224,7 +225,7 @@ const jwtPayload = {
   github_login: user.login,
   iat: Math.floor(Date.now() / 1000),
   exp: Math.floor(Date.now() / 1000) + (15 * 60), // 15 minutes
-  iss: "https://portal.basecoat.dev",
+  iss: "https://<portal-host>",
   aud: "basecoat-portal"
 };
 
@@ -340,7 +341,7 @@ Limit OAuth callback handler to prevent brute force:
 
 ### Manual Testing
 
-1. Navigate to `https://portal.basecoat.dev/auth/login`
+1. Navigate to `https://<portal-host>/auth/login`
 2. Click "Sign in with GitHub"
 3. Approve scopes
 4. Verify redirect to callback URL
