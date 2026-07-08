@@ -3,6 +3,12 @@ name: cross-stack-modernization
 compatibility: [github-copilot-cli]
 description: "Language-agnostic modernization guidance for incrementally replacing legacy applications using strangler fig, ACLs, and risk scoring. USE FOR: plan legacy app modernization strategy, choose rewrite versus refactor versus replace, design strangler fig migration, sequence service extraction by dependency risk, decide database-first or UI-first migration. DO NOT USE FOR: greenfield system design, minor bug fixes in one service, container-only deployment setup."
 category: modernization
+metadata:
+  category: modernization
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Cross-Stack Modernization
 

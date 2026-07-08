@@ -5,6 +5,12 @@ description: "Use when defining or operating a build-master control plane that k
 category: operations
 
 visibility: "internal"
+metadata:
+  category: operations
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Build Master Control Plane Skill
 

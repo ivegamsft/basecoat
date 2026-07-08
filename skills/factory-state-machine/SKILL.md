@@ -5,6 +5,12 @@ description: "Use when defining factory state transitions, reading or writing .g
 category: architecture
 
 visibility: "internal"
+metadata:
+  category: architecture
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Factory State Machine Skill
 

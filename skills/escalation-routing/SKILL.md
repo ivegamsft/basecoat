@@ -5,6 +5,12 @@ description: "Use when routing high-risk decisions to the right human approver w
 category: operations
 
 visibility: "internal"
+metadata:
+  category: operations
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Escalation Routing Skill
 

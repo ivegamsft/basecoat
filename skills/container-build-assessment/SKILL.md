@@ -10,6 +10,12 @@ scripts:
     entrypoint: scripts/analyze-dockerfile.ps1
     inputs:
       - name: DockerfilePath
+metadata:
+  category: infrastructure
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Container Build Assessment
 

@@ -5,6 +5,12 @@ description: "Validates Workcell BOMs against plant registry and CAF naming rule
 category: data
 
 visibility: "internal"
+metadata:
+  category: data
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # BOM Validation Skill
 

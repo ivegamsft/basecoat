@@ -4,6 +4,12 @@ compatibility: [github-copilot-cli]
 title: Penetration Testing & Vulnerability Discovery Patterns
 description: "Use when executing authorized penetration tests, validating OWASP risks, or producing exploit-backed findings. USE FOR: test for SQL injection or SSRF, run OWASP Top 10 web assessment, validate broken access control, reproduce API auth bypass, write penetration test findings report. DO NOT USE FOR: testing without authorization, destructive load testing in production."
 category: security
+metadata:
+  category: security
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Penetration Testing Skill
 

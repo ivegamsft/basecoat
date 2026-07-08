@@ -5,6 +5,12 @@ description: "Use when isolating flaky CI tests with evidence-based quarantine w
 category: testing
 
 visibility: "internal"
+metadata:
+  category: testing
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # CI Flake Quarantine Skill
 

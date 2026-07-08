@@ -5,6 +5,12 @@ description: "Use when building automations that call Azure DevOps REST APIs for
 category: infrastructure
 
 context: fork
+metadata:
+  category: infrastructure
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Azure DevOps REST API Skill
 

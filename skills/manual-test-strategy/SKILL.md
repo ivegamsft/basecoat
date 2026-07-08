@@ -3,6 +3,12 @@ name: manual-test-strategy
 compatibility: [github-copilot-cli]
 description: "Use when deciding what should stay manual, what should become automated, and how exploratory testing, checklists, and defect evidence are captured. USE FOR: classify manual versus automated coverage, create exploratory test charter, build repeatable manual regression checklist, capture defect evidence for triage, identify automation candidates from manual testing. DO NOT USE FOR: writing automated test code, performance benchmarking, production incident response."
 category: testing
+metadata:
+  category: testing
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Manual Test Strategy
 

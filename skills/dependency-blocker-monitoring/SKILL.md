@@ -5,6 +5,12 @@ description: "Use when monitoring workcell BOM dependencies and cell health so b
 category: operations
 
 visibility: "internal"
+metadata:
+  category: operations
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Dependency Blocker Monitoring Skill
 

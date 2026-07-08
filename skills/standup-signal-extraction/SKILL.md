@@ -7,6 +7,12 @@ invocation_rules:
   - "Use during daily standups to convert updates into concrete actions."
 visibility: "internal"
 category: operations
+metadata:
+  category: operations
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Standup Signal Extraction Skill
 

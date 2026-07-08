@@ -5,6 +5,12 @@ description: "Use when bootstrapping secure Azure delivery environments with OID
 category: infrastructure
 
 context: fork
+metadata:
+  category: infrastructure
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Environment Bootstrap Skill
 

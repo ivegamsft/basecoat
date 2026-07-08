@@ -10,6 +10,7 @@ category: data
 metadata:
   category: data
 tags: [dotnet, entity-framework, ef-core, migration]
+allowed-tools: []
 ---
 ## Entity Framework Migration
 

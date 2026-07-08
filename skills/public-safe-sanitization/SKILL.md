@@ -5,6 +5,12 @@ description: "Converts internal material to public-safe artifacts. USE FOR: sani
 category: security
 
 visibility: "internal"
+metadata:
+  category: security
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Public Safe Sanitization Skill
 

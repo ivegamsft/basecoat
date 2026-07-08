@@ -5,6 +5,12 @@ description: "Use when analyzing takt-time JSON to calculate queue length and th
 category: operations
 
 visibility: "internal"
+metadata:
+  category: operations
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Station Bottleneck Analyzer Skill
 

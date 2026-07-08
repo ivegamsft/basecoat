@@ -4,6 +4,12 @@ compatibility: [github-copilot-cli]
 title: Domain-Driven Design & CQRS Patterns
 description: "Domain-driven design guidance covering bounded contexts, aggregates, event sourcing, CQRS, and saga coordination in complex domains. USE FOR: model bounded contexts and aggregates, design domain events and invariants, apply DDD to microservice boundaries, implement saga orchestration for business workflows, combine DDD with CQRS patterns. DO NOT USE FOR: simple CRUD scaffolding, basic SQL report queries, generic UI styling tasks."
 category: architecture
+metadata:
+  category: architecture
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Domain-Driven Design Skill
 

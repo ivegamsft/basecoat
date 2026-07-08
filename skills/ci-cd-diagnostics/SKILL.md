@@ -4,6 +4,12 @@ description: "Use when producing a raw CI/CD diagnostics snapshot with measured 
 compatibility: [github-copilot-cli]
 category: operations
 visibility: public
+metadata:
+  category: operations
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 
 # CI/CD Diagnostics Skill

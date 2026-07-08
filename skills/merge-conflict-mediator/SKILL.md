@@ -5,6 +5,12 @@ description: "Use when a merge conflict needs a deterministic playbook for docs,
 category: development
 
 visibility: "internal"
+metadata:
+  category: development
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Merge Conflict Mediator Skill
 

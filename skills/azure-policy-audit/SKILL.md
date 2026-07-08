@@ -3,6 +3,12 @@ name: azure-policy-audit
 compatibility: [github-copilot-cli]
 description: "Use when reviewing Azure Policy definitions, initiatives, exemptions, remediation tasks, or compliance reporting. USE FOR: audit policy coverage, remediation completeness, exemption hygiene, policy drift, compliance reporting. DO NOT USE FOR: app business logic, RBAC-only questions, generic troubleshooting."
 category: operations
+metadata:
+  category: operations
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Azure Policy Audit Skill
 

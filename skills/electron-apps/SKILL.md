@@ -5,6 +5,12 @@ description: "Use when building secure, production-ready Electron desktop apps w
 category: infrastructure
 
 applyTo: agent-electron-developer, agent-desktop-engineer
+metadata:
+  category: infrastructure
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Electron Application Development
 

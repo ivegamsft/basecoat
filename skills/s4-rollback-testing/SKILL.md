@@ -5,6 +5,12 @@ description: "Designs and runs S4 rollback drills and recovery tests. USE FOR: b
 category: operations
 
 visibility: "internal"
+metadata:
+  category: operations
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # S4 Rollback Testing Skill
 

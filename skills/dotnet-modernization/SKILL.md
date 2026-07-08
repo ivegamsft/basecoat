@@ -10,6 +10,7 @@ category: modernization
 metadata:
   category: modernization
 tags: [dotnet, modernization, migration, upgrade]
+allowed-tools: []
 ---
 ## .NET Modernization
 
