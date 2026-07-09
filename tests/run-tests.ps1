@@ -198,6 +198,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running delivery-autopilot tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'delivery-autopilot-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Delivery-autopilot tests failed' -ForegroundColor Red
+    Write-FailureLog 'delivery-autopilot-tests'
+    exit 1
+}
+
 Write-Host 'Running ship-it intent dispatch tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'ship-it-dispatch-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

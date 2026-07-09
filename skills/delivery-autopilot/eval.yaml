@@ -1,0 +1,13 @@
+name: "delivery-autopilot-skill-routing"
+description: "Skill routing evaluation for approve-once delivery-autopilot orchestration."
+skill: "skills/delivery-autopilot/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Run delivery-autopilot for approved issue to merge with deterministic dry-run first."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Evaluate status, execute merge, and generate escalation payload for blocked stage using delivery-autopilot."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Implement a new frontend dashboard feature from scratch."
+    expect_activation: false
