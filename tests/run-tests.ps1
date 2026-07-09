@@ -174,6 +174,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running automation stuck-state watchdog tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'automation-stuck-state-watchdog-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Automation stuck-state watchdog tests failed' -ForegroundColor Red
+    Write-FailureLog 'automation-stuck-state-watchdog-tests'
+    exit 1
+}
+
 Write-Host 'Running ship-it intent dispatch tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'ship-it-dispatch-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
