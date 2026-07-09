@@ -182,6 +182,22 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running issue-triage lock refresh tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'issue-triage-lock-refresh-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Issue-triage lock refresh tests failed' -ForegroundColor Red
+    Write-FailureLog 'issue-triage-lock-refresh-tests'
+    exit 1
+}
+
+Write-Host 'Running post-merge release chain workflow tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'post-merge-release-chain-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Post-merge release chain workflow tests failed' -ForegroundColor Red
+    Write-FailureLog 'post-merge-release-chain-tests'
+    exit 1
+}
+
 Write-Host 'Running ship-it intent dispatch tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'ship-it-dispatch-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
