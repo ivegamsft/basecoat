@@ -30,6 +30,9 @@ if ($workflow -notmatch '(?m)types:\s*\r?\n\s*-\s*closed') {
 if ($workflow -notmatch '(?m)workflow_dispatch:') {
     throw 'Workflow must support manual replay via workflow_dispatch.'
 }
+if ($workflow -notmatch '(?m)^permissions:\s*\r?\n\s*actions:\s*write\s*\r?\n\s*checks:\s*read\s*\r?\n\s*contents:\s*read\s*\r?\n\s*issues:\s*write\s*\r?\n\s*pull-requests:\s*write\s*\r?\n\s*statuses:\s*read') {
+    throw 'Workflow permissions must include actions/contents/issues/pull-requests plus checks/statuses read.'
+}
 if ($workflow -notmatch 'ship-it-release-gate\.yml') {
     throw 'Workflow must dispatch ship-it-release-gate.yml after merge.'
 }

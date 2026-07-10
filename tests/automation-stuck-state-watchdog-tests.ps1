@@ -35,6 +35,9 @@ if ($workflow -notmatch '(?ms)schedule:\s*\r?\n\s*-\s*cron:\s*"15 \* \* \* \*"')
 if ($workflow -notmatch '(?m)workflow_dispatch:') {
     throw 'Workflow must support manual dispatch.'
 }
+if ($workflow -notmatch '(?m)^permissions:\s*\r?\n\s*checks:\s*read\s*\r?\n\s*contents:\s*read\s*\r?\n\s*issues:\s*write\s*\r?\n\s*pull-requests:\s*write\s*\r?\n\s*statuses:\s*read') {
+    throw 'Workflow permissions must include contents/issues/pull-requests plus checks/statuses read.'
+}
 if ($workflow -notmatch '(?m)timeout-minutes:\s*20') {
     throw 'Workflow job must set timeout-minutes to 20.'
 }
@@ -55,6 +58,15 @@ if ($workflow -notmatch '(?m)watchdog:ignore' -or $workflow -notmatch '(?m)sla:e
 }
 if ($workflow -notmatch '(?m)\[Watchdog\]\[') {
     throw 'Workflow must open stage-specific remediation issues.'
+}
+if ($workflow -notmatch 'issues\.listForRepo') {
+    throw 'Workflow must load open remediation issues once with issues.listForRepo for escalation dedupe.'
+}
+if ($workflow -match 'upsertEscalation[\s\S]*search\.issuesAndPullRequests') {
+    throw 'upsertEscalation must not use per-finding search.issuesAndPullRequests lookups.'
+}
+if ($workflow -notmatch 'secondary rate limit') {
+    throw 'Workflow must explicitly detect/report secondary rate limit handling.'
 }
 if ($workflow -notmatch '(?m)\*\*Owner\*\*' -or $workflow -notmatch '(?m)\*\*Next action\*\*' -or $workflow -notmatch '(?m)\*\*Evidence\*\*') {
     throw 'Escalation records must include owner, next action, and evidence.'

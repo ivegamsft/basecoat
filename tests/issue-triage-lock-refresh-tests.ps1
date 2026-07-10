@@ -49,5 +49,11 @@ if ($workflow -notmatch 'GH_AW_INFO_CLI_VERSION: "v0\.74\.4"') {
 if ($workflow -notmatch 'ghcr\.io/github/gh-aw-mcpg:v0\.3\.9@sha256:64828b42a4482f58fab16509d7f8f495a6d97c972a98a68aff20543531ac0388') {
     throw 'issue-triage lock must pin gh-aw-mcpg v0.3.9 to sha256:64828b42...'
 }
+if ($workflow -notmatch 'COPILOT_GITHUB_TOKEN:\s*\$\{\{\s*secrets\.COPILOT_GITHUB_TOKEN\s*\}\}') {
+    throw 'issue-triage lock must pass the real Copilot token to the agent phase.'
+}
+if ($workflow -notmatch 'COPILOT_GITHUB_TOKEN:\s*placeholder-token-for-credential-isolation') {
+    throw 'issue-triage lock must pass placeholder token value to the detection phase for credential isolation.'
+}
 
 Write-Host 'Issue triage lock refresh tests passed.'

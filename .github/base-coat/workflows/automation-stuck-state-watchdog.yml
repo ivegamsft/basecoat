@@ -32,9 +32,11 @@ on:
         type: string
 
 permissions:
+  checks: read
   contents: read
   issues: write
   pull-requests: write
+  statuses: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -66,6 +68,8 @@ jobs:
             const releaseChainMarker = 'post-merge-release-chain:v1';
             const remediationLabels = ['remediation', 'escalated', 'automation'];
             const now = new Date();
+            const isSecondaryRateLimit = err =>
+              (err?.status === 403 || err?.status === 429) && /secondary rate limit/i.test(String(err?.message || ''));
             const toInt = (value, fallback) => {
               const parsed = Number(value);
               return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
@@ -76,6 +80,31 @@ jobs:
                 .map(label => (typeof label === 'string' ? label : label?.name || ''))
                 .map(name => String(name).toLowerCase())
                 .filter(Boolean);
+            const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+            const retryAfterMs = error => {
+              const header = error?.response?.headers?.['retry-after'] || error?.response?.headers?.['Retry-After'];
+              const parsed = Number(header);
+              return Number.isFinite(parsed) && parsed > 0 ? Math.min(Math.ceil(parsed * 1000), 60000) : null;
+            };
+            const withSecondaryRateLimitRetry = async (operation, description) => {
+              const maxAttempts = 3;
+              for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+                try {
+                  return await operation();
+                } catch (error) {
+                  if (!isSecondaryRateLimit(error) || attempt === maxAttempts) {
+                    throw error;
+                  }
+
+                  const delayMs = retryAfterMs(error) ?? Math.min(2000 * attempt, 10000);
+                  core.warning(
+                    `${description} hit a secondary rate limit; retrying in ${Math.ceil(delayMs / 1000)}s ` +
+                    `(attempt ${attempt + 1}/${maxAttempts})`
+                  );
+                  await sleep(delayMs);
+                }
+              }
+            };
 
             const configPath = process.env.SLA_CONFIG_PATH || '.github/governance/automation-stage-slas.json';
             const config = fs.existsSync(configPath)
@@ -191,13 +220,30 @@ jobs:
               });
             }
 
+            let openRemediationIssues = [];
+            let snapshotLoadFailed = false;
+            try {
+              openRemediationIssues = await withSecondaryRateLimitRetry(() =>
+                github.paginate(github.rest.issues.listForRepo, {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  state: 'open',
+                  labels: remediationLabels.join(','),
+                  per_page: 100
+                }),
+                'load remediation snapshot'
+              );
+            } catch (error) {
+              snapshotLoadFailed = true;
+              core.warning(
+                `Unable to load remediation snapshot after retries; escalating findings will be skipped for this run: ` +
+                String(error?.message || error)
+              );
+            }
+
             const upsertEscalation = async finding => {
               const fingerprint = `${finding.stage}:${finding.entityType}:${finding.entityNumber}`;
               const fingerprintMarker = `<!-- automation-watchdog:fingerprint:${fingerprint} -->`;
-              const searchResults = await github.paginate(github.rest.search.issuesAndPullRequests, {
-                q: `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open label:remediation label:escalated "${fingerprintMarker}"`,
-                per_page: 20
-              });
               const issueBody = [
                 marker,
                 fingerprintMarker,
@@ -211,30 +257,59 @@ jobs:
                 `- **Next action**: ${finding.nextAction}`
               ].join('\n');
 
-              if (searchResults.length > 0) {
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: searchResults[0].number,
-                  body: issueBody
-                });
-                return { action: 'updated', url: searchResults[0].html_url };
+              const existingEscalation = openRemediationIssues.find(item =>
+                typeof item.body === 'string' && item.body.includes(fingerprintMarker)
+              );
+              if (existingEscalation) {
+                await withSecondaryRateLimitRetry(() =>
+                  github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: existingEscalation.number,
+                    body: issueBody
+                  }),
+                `update remediation issue #${existingEscalation.number}`);
+                return { action: 'updated', url: existingEscalation.html_url };
               }
 
-              const created = await github.rest.issues.create({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                title: `[Watchdog][${finding.stage}] ${finding.entityType.toUpperCase()} #${finding.entityNumber} exceeded SLA`,
-                body: issueBody,
-                labels: remediationLabels
-              });
+              const created = await withSecondaryRateLimitRetry(() =>
+                github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: `[Watchdog][${finding.stage}] ${finding.entityType.toUpperCase()} #${finding.entityNumber} exceeded SLA`,
+                  body: issueBody,
+                  labels: remediationLabels
+                }),
+              `create remediation issue for ${finding.entityType} #${finding.entityNumber}`);
+              openRemediationIssues.push(created.data);
               return { action: 'created', url: created.data.html_url };
             };
 
             const escalations = [];
-            for (const finding of findings) {
-              const escalation = await upsertEscalation(finding);
-              escalations.push({ ...finding, ...escalation });
+            const escalationFailures = snapshotLoadFailed ? [{
+              stage: 'snapshot',
+              entityType: 'issue',
+              entityNumber: 0,
+              message: 'Remediation snapshot could not be loaded after retries.'
+            }] : [];
+            if (!snapshotLoadFailed) {
+              for (const finding of findings) {
+                try {
+                  const escalation = await upsertEscalation(finding);
+                  escalations.push({ ...finding, ...escalation });
+                } catch (error) {
+                  escalationFailures.push({
+                    stage: finding.stage,
+                    entityType: finding.entityType,
+                    entityNumber: finding.entityNumber,
+                    message: String(error?.message || error)
+                  });
+                  core.warning(
+                    `Failed to escalate ${finding.entityType} #${finding.entityNumber}; ` +
+                    'continuing with remaining findings.'
+                  );
+                }
+              }
             }
 
             const stageCounts = findings.reduce((acc, finding) => {
@@ -251,5 +326,7 @@ jobs:
                 ['merge_to_release', String(stageCounts.merge_to_release || 0)]
               ])
               .addRaw(`\nSuppression labels: ${Array.from(suppressionLabels).join(', ')}\n`)
+              .addRaw(`Snapshot load: ${snapshotLoadFailed ? 'failed' : 'ok'}\n`)
               .addRaw(`\nEscalations: ${escalations.length}\n`)
+              .addRaw(`Escalation failures: ${escalationFailures.length}\n`)
               .write();
