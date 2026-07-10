@@ -16,7 +16,7 @@ The operating model combines **Guardrails** (BaseCoat assets and standards) with
 
 ```bash
 # Download latest release
-curl -L https://github.com/IBuySpy-Shared/basecoat/releases/latest/download/basecoat-ghcp.zip -o basecoat.zip
+curl -L https://github.com/ivegamsft/basecoat/releases/latest/download/basecoat-ghcp.zip -o basecoat.zip
 unzip basecoat.zip -d .github/base-coat/
 
 # Copy Copilot-discoverable files
@@ -30,21 +30,21 @@ cp -r .github/base-coat/prompts .github/prompts
 **macOS / Linux:**
 
 ```bash
-BASECOAT_REPO=https://github.com/IBuySpy-Shared/basecoat.git ./sync.sh
+BASECOAT_REPO=https://github.com/ivegamsft/basecoat.git ./sync.sh
 ```
 
 **Windows PowerShell:**
 
 ```powershell
-$env:BASECOAT_REPO = 'https://github.com/IBuySpy-Shared/basecoat.git'; .\sync.ps1
+$env:BASECOAT_REPO = 'https://github.com/ivegamsft/basecoat.git'; .\sync.ps1
 ```
 
 **Pin to a release tag (recommended for production):**
 
 ```powershell
-$env:BASECOAT_REPO = 'https://github.com/IBuySpy-Shared/basecoat.git'
+$env:BASECOAT_REPO = 'https://github.com/ivegamsft/basecoat.git'
 $env:BASECOAT_REF  = 'v1.0.0'
-irm https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/$env:BASECOAT_REF/sync.ps1 | iex
+irm https://raw.githubusercontent.com/ivegamsft/basecoat/$env:BASECOAT_REF/sync.ps1 | iex
 ```
 
 The sync script clones BaseCoat, copies the standard assets into `.github/base-coat/`, then copies agents, instructions, and prompts to `.github/agents/`, `.github/instructions/`, and `.github/prompts/` so that GitHub Copilot auto-discovers them. The whole process takes under a minute.

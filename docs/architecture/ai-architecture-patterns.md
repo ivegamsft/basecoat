@@ -2,7 +2,7 @@
 
 Architecture Decision Record templates and decision frameworks for AI-augmented systems, with practical patterns for routing, orchestration, resilience, and human oversight.
 
-> **Tracking:** Issue [#126](https://github.com/IBuySpy-Shared/basecoat/issues/126)
+> **Tracking:** Issue [#126](https://github.com/ivegamsft/basecoat/issues/126)
 
 ---
 

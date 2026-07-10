@@ -269,4 +269,4 @@ Context-Rot Quick Check
 - `docs/operations/session-per-task.md` — session lifecycle and cross-session handoff
   artifacts
 - `docs/guides/token-optimization.md` — token budget management and event/ratio tracking
-- Issue: [#2010](https://github.com/IBuySpy-Shared/basecoat/issues/2010)
+- Issue: [#2010](https://github.com/ivegamsft/basecoat/issues/2010)

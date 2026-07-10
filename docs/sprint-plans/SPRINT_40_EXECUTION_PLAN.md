@@ -342,8 +342,8 @@ Wave 3 (Sept 12–15): Optimization [PENDING scope reconciliation]
 ## Related References
 
 - **Feature Trackers:** #1772 (PR Lifecycle), #1773 (Portfolio Governance), #1774 (Architecture & Reliability Audit)
-- **Sprint Milestone:** [Sprint 40](https://github.com/IBuySpy-Shared/basecoat/milestone/8)
-- **Project Board:** [Project 7 - Architecture & Reliability](https://github.com/IBuySpy-Shared/basecoat/projects/7)
+- **Sprint Milestone:** [Sprint 40](https://github.com/ivegamsft/basecoat/milestone/8)
+- **Project Board:** [Project 7 - Architecture & Reliability](https://github.com/ivegamsft/basecoat/projects/7)
 - **Prior Sprint Plans:** [Sprint 39 Plan](./SPRINT_39_EXECUTION_PLAN.md) | [Sprint 38 Plan](./SPRINT_38_EXECUTION_PLAN.md)
 - **Process Documentation:** [Issue & PR Workflow](/instructions/references/process/issue-and-pr-workflow.md)
 

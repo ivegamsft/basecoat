@@ -1,7 +1,7 @@
 # CI Remediation Traceability Record
 
 **Date:** 2026-06-21  
-**Issue linkage:** [#1659](https://github.com/IBuySpy-Shared/basecoat/issues/1659), [#1554](https://github.com/IBuySpy-Shared/basecoat/issues/1554)
+**Issue linkage:** [#1659](https://github.com/ivegamsft/basecoat/issues/1659), [#1554](https://github.com/ivegamsft/basecoat/issues/1554)
 
 ## Purpose
 
@@ -12,9 +12,9 @@ implemented remediation PRs, and measurable reliability outcomes.
 
 | Skill-aligned track | Remediation PRs | Scope | Status |
 |---|---|---|---|
-| `ci-audit` | [#1602](https://github.com/IBuySpy-Shared/basecoat/pull/1602), [#1651](https://github.com/IBuySpy-Shared/basecoat/pull/1651) | Added retry/timeouts for transient network operations and enforced required CI status coverage. | Landed |
-| `ci-flake-quarantine` | [#1602](https://github.com/IBuySpy-Shared/basecoat/pull/1602) | Added containment retry/backoff behavior to reduce transient flakes without suppressing failing signals. | Landed |
-| `build-master-control-plane` | [#1642](https://github.com/IBuySpy-Shared/basecoat/pull/1642), [#1649](https://github.com/IBuySpy-Shared/basecoat/pull/1649), [#1677](https://github.com/IBuySpy-Shared/basecoat/pull/1677) | Standardized workflow-file evaluation path for publish pipeline and moved parse-fragile inline logic into script-based control. | Partially landed (recurrence still present) |
+| `ci-audit` | [#1602](https://github.com/ivegamsft/basecoat/pull/1602), [#1651](https://github.com/ivegamsft/basecoat/pull/1651) | Added retry/timeouts for transient network operations and enforced required CI status coverage. | Landed |
+| `ci-flake-quarantine` | [#1602](https://github.com/ivegamsft/basecoat/pull/1602) | Added containment retry/backoff behavior to reduce transient flakes without suppressing failing signals. | Landed |
+| `build-master-control-plane` | [#1642](https://github.com/ivegamsft/basecoat/pull/1642), [#1649](https://github.com/ivegamsft/basecoat/pull/1649), [#1677](https://github.com/ivegamsft/basecoat/pull/1677) | Standardized workflow-file evaluation path for publish pipeline and moved parse-fragile inline logic into script-based control. | Partially landed (recurrence still present) |
 
 ## Failure-Class Register (Owner + Remediation State)
 

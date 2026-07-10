@@ -1,6 +1,6 @@
 # Keep/Fix/Throttle Tooling Routing Matrix
 
-This runbook defines default execution-mode routing for issue [#2048](https://github.com/IBuySpy-Shared/basecoat/issues/2048) (workstream 3 of epic #1452).
+This runbook defines default execution-mode routing for issue [#2048](https://github.com/ivegamsft/basecoat/issues/2048) (workstream 3 of epic #1452).
 
 ## Routing matrix by execution mode
 

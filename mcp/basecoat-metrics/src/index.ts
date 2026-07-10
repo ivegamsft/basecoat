@@ -27,7 +27,7 @@ import { z } from "zod";
 
 const PAGES_BASE =
   process.env.METRICS_BASE_URL ??
-  "https://ibuyspy-shared.github.io/basecoat/metrics";
+  "https://ivegamsft.github.io/basecoat/metrics";
 
 const METRICS_DIR = process.env.METRICS_DIR ?? null;
 

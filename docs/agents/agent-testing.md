@@ -127,7 +127,7 @@ This staged model keeps routine validation fast while reserving the most expensi
 
 ## Waza CLI — Known Protocol Mismatch
 
-**Issue:** [#823](https://github.com/IBuySpy-Shared/basecoat/issues/823)
+**Issue:** [#823](https://github.com/ivegamsft/basecoat/issues/823)
 
 When running `azd waza run` or invoking the waza CLI tool against skills locally, you may encounter:
 

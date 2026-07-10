@@ -6,7 +6,7 @@
 # all active push paths immediately.
 #
 # Usage:
-#   bash <(curl -fsSL https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/scripts/onboard-basecoat.sh) \
+#   bash <(curl -fsSL https://raw.githubusercontent.com/ivegamsft/basecoat/main/scripts/onboard-basecoat.sh) \
 #     --repo YOUR_ORG/YOUR_REPO
 #
 # Prerequisites:
@@ -116,13 +116,13 @@ echo "            → picked up automatically every Monday"
 echo ""
 echo "  Active:   Submit a learning immediately:"
 echo "    Via issue form (no tooling):"
-echo "    https://github.com/IBuySpy-Shared/basecoat/issues/new?template=memory-contribution.yml"
+echo "    https://github.com/ivegamsft/basecoat/issues/new?template=memory-contribution.yml"
 echo ""
 echo "    Via callable workflow (add to your .github/workflows/):"
 echo "    uses: IBuySpy-Shared/basecoat/.github/workflows/submit-learning-callable.yml@main"
 echo ""
 echo "    Via bash script:"
-echo "    bash <(curl -fsSL https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/scripts/submit-learning.sh) --help"
+echo "    bash <(curl -fsSL https://raw.githubusercontent.com/ivegamsft/basecoat/main/scripts/submit-learning.sh) --help"
 echo ""
 echo "  Internal org members: see docs/memory/SETUP-INTERNAL.md"
 echo "  External org members: see docs/memory/SETUP-EXTERNAL.md"

@@ -28,14 +28,14 @@ No configuration file required.
 
 ```bash
 # macOS / Linux
-export BASECOAT_REPO='https://github.com/IBuySpy-Shared/basecoat.git'
-curl -fsSL https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/sync.sh | bash
+export BASECOAT_REPO='https://github.com/ivegamsft/basecoat.git'
+curl -fsSL https://raw.githubusercontent.com/ivegamsft/basecoat/main/sync.sh | bash
 ```text
 
 ```powershell
 # Windows PowerShell
-$env:BASECOAT_REPO = 'https://github.com/IBuySpy-Shared/basecoat.git'
-irm https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/sync.ps1 | iex
+$env:BASECOAT_REPO = 'https://github.com/ivegamsft/basecoat.git'
+irm https://raw.githubusercontent.com/ivegamsft/basecoat/main/sync.ps1 | iex
 ```text
 
 What you get: all agents, skills, instructions, and prompts overlaid into `.github/`.
@@ -51,7 +51,7 @@ and how. The sync script reads it automatically on the next run.
 
 ```yaml
 # .basecoat.yml
-source: https://github.com/IBuySpy-Shared/basecoat.git
+source: https://github.com/ivegamsft/basecoat.git
 ref: v3.25.0   # pin to a release tag for stability
 
 # Only sync agents relevant to your stack
@@ -137,7 +137,7 @@ available to all your consumer repos.
 gh repo fork IBuySpy-Shared/basecoat --org YOUR-ORG --clone
 
 # Or: mirror to your org
-git clone https://github.com/IBuySpy-Shared/basecoat.git
+git clone https://github.com/ivegamsft/basecoat.git
 cd basecoat
 git remote rename origin upstream
 git remote add origin https://github.com/YOUR-ORG/basecoat.git
@@ -170,7 +170,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Fetch upstream
         run: |
-          git remote add upstream https://github.com/IBuySpy-Shared/basecoat.git
+          git remote add upstream https://github.com/ivegamsft/basecoat.git
           git fetch upstream
           git merge upstream/main --no-edit || echo "Conflicts need manual resolution"
       - name: Open PR if changes

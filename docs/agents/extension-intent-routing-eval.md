@@ -11,7 +11,7 @@ This document defines the prompt-to-tool routing eval baseline for the BaseCoat 
 
 ## Current dependency gap
 
-Issue [#1075](https://github.com/IBuySpy-Shared/basecoat/issues/1075) (extension scaffold with `@github/copilot-sdk`) is still open.
+Issue [#1075](https://github.com/ivegamsft/basecoat/issues/1075) (extension scaffold with `@github/copilot-sdk`) is still open.
 Until that project exists, this suite runs in baseline mode and validates eval assets plus routing expectations.
 Once #1075 lands, connect runtime routing outputs to `-PredictionsFile` to enforce pass-rate gates in CI.
 

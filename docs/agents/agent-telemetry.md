@@ -2,7 +2,7 @@
 
 Defines an observability framework for Base Coat agent operations so teams can debug failures, tune performance, manage spend, and satisfy audit expectations without rebuilding telemetry from scratch for every workflow.
 
-> **Tracking:** Issue [#115](https://github.com/IBuySpy-Shared/basecoat/issues/115)
+> **Tracking:** Issue [#115](https://github.com/ivegamsft/basecoat/issues/115)
 
 ---
 

@@ -27,7 +27,7 @@ jobs:
 
   publish:
     needs: preflight-token-check
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER_RELEASE || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
     timeout-minutes: 10
     environment: production
     defaults:
@@ -64,60 +64,6 @@ jobs:
           ref: refs/tags/${{ steps.resolve_tag.outputs.tag }}
           fetch-depth: 0
           persist-credentials: false
-
-      - name: Remove internal-only content before publish
-        env:
-          TAG: ${{ steps.resolve_tag.outputs.tag }}
-        run: |
-          set -euo pipefail
-
-          # Remove files that must not appear in the public mirror.
-          # sprint-plans and sprint summaries contain internal operational detail.
-          # docs/audit contains internal audit reports.
-          INTERNAL_PATTERNS=(
-            'SPRINT-*-EXECUTION-SUMMARY.md'
-            'docs/sprint-plans/*.md'
-            'docs/audit/*.md'
-            'docs/archive/sprint-closeout/**'
-          )
-
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config user.name "github-actions[bot]"
-
-          REMOVED=0
-          for pat in "${INTERNAL_PATTERNS[@]}"; do
-            # Use git ls-files with glob; suppress errors for missing patterns
-            MATCHES=$(git ls-files -- "$pat" 2>/dev/null || true)
-            if [ -n "$MATCHES" ]; then
-              echo "$MATCHES" | xargs git rm -f --cached --ignore-unmatch 2>/dev/null || true
-              echo "$MATCHES" | xargs rm -f 2>/dev/null || true
-              REMOVED=$((REMOVED + $(echo "$MATCHES" | wc -l)))
-            fi
-          done
-
-          if [ "$REMOVED" -gt 0 ]; then
-            git diff --cached --quiet || git commit -m "chore(publish): remove internal-only content for ${TAG}"
-            echo "Removed ${REMOVED} internal file(s) from publish payload."
-          else
-            echo "No internal-only files found — nothing to remove."
-          fi
-
-      - name: Stamp published version
-        env:
-          TAG: ${{ steps.resolve_tag.outputs.tag }}
-        run: |
-          set -euo pipefail
-
-          # Write a VERSION file from the canonical version.json so published consumers
-          # can confirm the exact build version. Reuse version.json format (no v-prefix).
-          VERSION=$(jq -r '.version' version.json 2>/dev/null || echo "${TAG#v}")
-          echo "${VERSION}" > VERSION
-
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config user.name "github-actions[bot]"
-          git add VERSION
-          git diff --cached --quiet || git commit -m "chore(publish): stamp build version ${TAG}"
-          echo "Published version stamped: ${VERSION}"
 
       - name: Rewrite internal repo links for production
         env:
@@ -131,9 +77,9 @@ jobs:
           # files so consumers never encounter links they cannot access.
           #
           # Patterns replaced:
-          #   github.com/IBuySpy-Shared/basecoat         ->  github.com/ivegamsft/basecoat
-          #   raw.githubusercontent.com/IBuySpy-Shared/basecoat  ->  raw.githubusercontent.com/ivegamsft/basecoat
-          #   ibuyspy-shared.github.io/basecoat           ->  ivegamsft.github.io/basecoat
+          #   github.com/ivegamsft/basecoat         ->  github.com/ivegamsft/basecoat
+          #   raw.githubusercontent.com/ivegamsft/basecoat  ->  raw.githubusercontent.com/ivegamsft/basecoat
+          #   ivegamsft.github.io/basecoat           ->  ivegamsft.github.io/basecoat
           #
           # Binary files are skipped automatically via grep -I (--binary-files=without-match).
 
@@ -216,11 +162,8 @@ jobs:
           # Push the main branch (force is required to mirror rewritten release content)
           git push "${PRODUCTION_REMOTE}" HEAD:refs/heads/main --force
 
-          # Re-tag on the cleaned HEAD so the published tag/release archive does not
-          # contain internal-only content (the checkout was at the original tagged commit
-          # but cleanup/rewrite steps have since committed on top of it).
-          git tag -f "${TAG}" HEAD
-          git push "${PRODUCTION_REMOTE}" "refs/tags/${TAG}" --force
+          # Push the tag
+          git push "${PRODUCTION_REMOTE}" "refs/tags/${TAG}"
 
           echo "Pushed ${TAG} to ivegamsft/basecoat"
 

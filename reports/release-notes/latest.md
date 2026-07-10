@@ -1,7 +1,7 @@
 # Release Notes Validation Report
 
 Generated: 2026-05-31 19:58:46-04:00
-Repository: https://ibuyspy@github.com/IBuySpy-Shared/basecoat
+Repository: https://ibuyspy@github.com/ivegamsft/basecoat
 
 ## v3.30.0 (v3.29.0..v3.30.0)
 

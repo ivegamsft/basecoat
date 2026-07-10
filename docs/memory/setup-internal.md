@@ -41,7 +41,7 @@ That's it. Every org repo now has `MEMORY_REPO_TOKEN` available in Actions
 
 ```sh
 bash <(curl -fsSL \
-  https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/scripts/onboard-basecoat.sh) \
+  https://raw.githubusercontent.com/ivegamsft/basecoat/main/scripts/onboard-basecoat.sh) \
   --repo IBuySpy-Shared/my-repo
 ```
 
@@ -116,7 +116,7 @@ Click it, fill in the form, run — done.
 export MEMORY_REPO_TOKEN=${{ secrets.MEMORY_REPO_TOKEN }}  # already in CI env
 
 bash <(curl -fsSL \
-  https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/scripts/submit-learning.sh) \
+  https://raw.githubusercontent.com/ivegamsft/basecoat/main/scripts/submit-learning.sh) \
   --subject  "ci:my-finding" \
   --fact     "One-sentence generic pattern." \
   --evidence "https://github.com/IBuySpy-Shared/my-repo/pull/42" \
@@ -127,7 +127,7 @@ bash <(curl -fsSL \
 
 ### GitHub issue form (no tooling at all)
 
-Open <https://github.com/IBuySpy-Shared/basecoat/issues/new/choose> and select
+Open <https://github.com/ivegamsft/basecoat/issues/new/choose> and select
 **💡 Submit a Memory Contribution**. Works from any browser.
 
 ## Token Rotation

@@ -436,7 +436,7 @@ module "aws_compute" {
 
 3. **Clone Repository**:
    ```bash
-   git clone https://github.com/IBuySpy-Shared/basecoat.git
+   git clone https://github.com/ivegamsft/basecoat.git
    cd basecoat/terraform
    ```
 

@@ -23,10 +23,6 @@ Triggered by posting `/approve` on a GitHub issue. Runs asynchronously in a clou
 workspace with full repository access. Always produces a pull request — a human
 must merge it.
 
-Issue assignment uses the Copilot cloud-agent API flow: the approval workflow
-checks `suggestedActors(capabilities: [CAN_BE_ASSIGNED])` for `copilot-swe-agent`
-and assigns the issue with `copilot-swe-agent[bot]` plus `agent_assignment`.
-
 | Attribute | Detail |
 |---|---|
 | Invocation | GitHub issue comment: `/approve` |
@@ -154,7 +150,7 @@ defaults. The schema has three sections:
 
 ## Related Guidance
 
-- `instructions/basecoat-10-core-agent-routing.instructions.md` — machine-readable routing rules for Copilot
-- `instructions/basecoat-10-core-model-routing.instructions.md` — which LLM tier (Opus / Sonnet / Haiku) within a tier
+- [Agent Routing Instructions](https://github.com/ivegamsft/basecoat/blob/main/instructions/basecoat-10-core-agent-routing.instructions.md) — machine-readable routing rules for Copilot
+- [Model Routing](https://github.com/ivegamsft/basecoat/blob/main/instructions/basecoat-10-core-model-routing.instructions.md) — which LLM tier (Opus / Sonnet / Haiku) within a tier
 - [Runner Routing](../reference/guardrails/runner-routing.md) — which CI runner for GitHub Actions jobs
-- `instructions/references/token-economics/context-routing.md` — which context tiers to load
+- [Context Routing](https://github.com/ivegamsft/basecoat/blob/main/instructions/references/token-economics/context-routing.md) — which context tiers to load

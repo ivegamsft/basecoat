@@ -68,5 +68,5 @@ Operators get one table-based default map, explicit escalation triggers, and a c
 
 ## References
 
-- Issue: [#2048](https://github.com/IBuySpy-Shared/basecoat/issues/2048)
-- Epic: [#1452](https://github.com/IBuySpy-Shared/basecoat/issues/1452)
+- Issue: [#2048](https://github.com/ivegamsft/basecoat/issues/2048)
+- Epic: [#1452](https://github.com/ivegamsft/basecoat/issues/1452)

@@ -41,7 +41,7 @@ Sprint 38 is a **growth sprint** with 21 issues grouped into 3 feature trackers 
 
 ### Feature #1759: Portfolio Management & Governance (Wave 2-3)
 
-**Priority:** HIGH | **Points:** ~21 | **Status:** READY | **URL:** <https://github.com/IBuySpy-Shared/basecoat/issues/1759>
+**Priority:** HIGH | **Points:** ~21 | **Status:** READY | **URL:** <https://github.com/ivegamsft/basecoat/issues/1759>
 
 ```text
 Wave 2 (Days 5-8):
@@ -78,7 +78,7 @@ Wave 3 (Days 10-14):
 ```text
 ### Feature #1761: PR Lifecycle & Quality Gates (Wave 2)
 
-**Priority:** MEDIUM | **Points:** ~13 | **Status:** READY | **URL:** <https://github.com/IBuySpy-Shared/basecoat/issues/1761>
+**Priority:** MEDIUM | **Points:** ~13 | **Status:** READY | **URL:** <https://github.com/ivegamsft/basecoat/issues/1761>
 
 ```text
 Wave 2 (Days 5-8):
@@ -102,7 +102,7 @@ Wave 2 (Days 5-8):
 ```text
 ### Feature #1762: Architecture & Reliability Audit (Wave 1-3)
 
-**Priority:** CRITICAL | **Points:** ~31 | **Status:** READY | **URL:** <https://github.com/IBuySpy-Shared/basecoat/issues/1762>
+**Priority:** CRITICAL | **Points:** ~31 | **Status:** READY | **URL:** <https://github.com/ivegamsft/basecoat/issues/1762>
 
 ```text
 Wave 1 (Days 1-5):

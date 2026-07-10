@@ -1,7 +1,7 @@
 # Kept Patterns Registry
 
 This registry tracks patterns promoted to **Keep** status for workstream 1 in
-issue [#2046](https://github.com/IBuySpy-Shared/basecoat/issues/2046).
+issue [#2046](https://github.com/ivegamsft/basecoat/issues/2046).
 
 ## Promotion Criteria
 

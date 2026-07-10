@@ -169,7 +169,7 @@ Fill in the form with:
 | Field | Value |
 |-------|-------|
 | GitHub App name | `BaseCoat Copilot Extension` |
-| Homepage URL | `https://github.com/IBuySpy-Shared/basecoat` |
+| Homepage URL | `https://github.com/ivegamsft/basecoat` |
 | **User authorization callback URL** | `https://extension.basecoat.dev/api/github/oauth/callback` |
 | Webhook → Active | ✅ Check this |
 | **Webhook URL** | `https://extension.basecoat.dev/api/github/webhook` |

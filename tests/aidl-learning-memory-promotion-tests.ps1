@@ -28,8 +28,8 @@ try {
     "resolution": "Apply bounded retries and circuit-breaker defaults in shared service templates.",
     "outcome": "Incident count dropped after mitigation rollout.",
     "evidence": [
-      "https://github.com/IBuySpy-Shared/basecoat/issues/1701",
-      "https://github.com/IBuySpy-Shared/basecoat/pull/1705"
+      "https://github.com/ivegamsft/basecoat/issues/1701",
+      "https://github.com/ivegamsft/basecoat/pull/1705"
     ],
     "recurrence": 4,
     "impact": 5,
@@ -44,7 +44,7 @@ try {
     "resolution": "Fix the typo directly in the template.",
     "outcome": "No recurrence observed.",
     "evidence": [
-      "https://github.com/IBuySpy-Shared/basecoat/pull/1709"
+      "https://github.com/ivegamsft/basecoat/pull/1709"
     ],
     "recurrence": 1,
     "impact": 2,
@@ -59,7 +59,7 @@ try {
     "resolution": "Redact sensitive values and rotate credentials before publishing artifacts.",
     "outcome": "Artifact was sanitized before archival.",
     "evidence": [
-      "https://github.com/IBuySpy-Shared/basecoat/issues/1712"
+      "https://github.com/ivegamsft/basecoat/issues/1712"
     ],
     "recurrence": 3,
     "impact": 4,
@@ -74,8 +74,8 @@ try {
     "resolution": "Publish and adopt one shared checklist sequence for review workflows.",
     "outcome": "Review cycle time trend improved but needs another sprint to confirm durability.",
     "evidence": [
-      "https://github.com/IBuySpy-Shared/basecoat/issues/1715",
-      "https://github.com/IBuySpy-Shared/basecoat/issues/1717"
+      "https://github.com/ivegamsft/basecoat/issues/1715",
+      "https://github.com/ivegamsft/basecoat/issues/1717"
     ],
     "recurrence": 2,
     "impact": 3,

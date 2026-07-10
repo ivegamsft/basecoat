@@ -83,7 +83,7 @@ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
 
 ### ✅ GitHub Release Created
 - **Title**: v2.3.0: FINAL RELEASE - Complete - All Issues Resolved
-- **URL**: https://github.com/IBuySpy-Shared/basecoat/releases/tag/v2.3.0
+- **URL**: https://github.com/ivegamsft/basecoat/releases/tag/v2.3.0
 - **Status**: Marked as latest release
 - **Release Notes**: Comprehensive 4,260+ character summary included
 
