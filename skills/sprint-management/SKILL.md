@@ -3,6 +3,12 @@ name: sprint-management
 compatibility: [github-copilot-cli]
 description: "Use when planning or running sprint ceremonies, backlog refinement, and commitment tracking. USE FOR: plan sprint capacity and goals, run backlog grooming session, prepare sprint review agenda, track velocity against commitments, facilitate sprint ceremony workflow. DO NOT USE FOR: writing implementation code, annual roadmap strategy only."
 category: operations
+metadata:
+  category: operations
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Sprint Management Skill
 

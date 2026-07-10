@@ -5,6 +5,12 @@ description: "Use when defining or validating BOM schemas, resource ID formats, 
 category: data
 
 visibility: "internal"
+metadata:
+  category: data
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # BOM Schema Skill
 

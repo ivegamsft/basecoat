@@ -3,6 +3,12 @@ name: twelve-factor
 compatibility: [github-copilot-cli]
 description: "Use when auditing or redesigning an app for cloud-native 12-Factor practices. USE FOR: move config from code to environment, check stateless process design, separate build release and run stages, verify logs go to stdout, assess dev and prod parity. DO NOT USE FOR: pixel-level UI design, vendor-specific service pricing comparisons."
 category: architecture
+metadata:
+  category: architecture
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # 12-Factor App Methodology
 

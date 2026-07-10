@@ -1,4 +1,5 @@
 # Basecoat Portal Frontend Implementation Guide
+<!-- markdownlint-disable -->
 
 ## Executive Summary
 
@@ -452,7 +453,7 @@ pnpm lighthouse:desktop
 - **Auth**: GitHub OAuth (staging app)
 
 #### Production
-- **URL**: https://portal.basecoat.dev
+- **URL**: `https://<portal-host>`
 - **API Backend**: https://api.basecoat.dev
 - **Database**: Production DB (backups, encryption)
 - **Auth**: GitHub OAuth (production app, enterprise SSO fallback)
@@ -639,4 +640,3 @@ env:
 **Last Updated**: May 2024  
 **Status**: Ready for Development  
 **Owner**: Frontend-Dev Agent, Basecoat Team
-

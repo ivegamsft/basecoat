@@ -1,4 +1,5 @@
 # Azure Active Directory Integration Guide
+<!-- markdownlint-disable -->
 
 Enterprise authentication setup for Basecoat Portal with Azure AD.
 
@@ -13,7 +14,7 @@ Navigate to: **Azure Portal → Azure Active Directory → App registrations →
 Fill in:
 - **Name**: Basecoat Portal
 - **Supported account types**: Accounts in this organizational directory (Single tenant)
-- **Redirect URI**: Web → `https://portal.basecoat.dev/auth/aad-callback`
+- **Redirect URI**: Web → `https://<portal-host>/auth/aad-callback`
 
 ### Step 2: Configure Certificates & Secrets
 
@@ -71,21 +72,21 @@ This returns:
    GET https://login.microsoftonline.com/{TENANT_ID}/oauth2/v2.0/authorize
      ?client_id={CLIENT_ID}
      &response_type=code
-     &redirect_uri=https://portal.basecoat.dev/auth/aad-callback
+     &redirect_uri=https://<portal-host>/auth/aad-callback
      &scope=openid profile email
      &state={RANDOM_STATE}
 
 2. User authenticates with Azure AD
 
 3. AAD redirects back:
-   GET https://portal.basecoat.dev/auth/aad-callback?code=xxx&state=yyy
+   GET https://<portal-host>/auth/aad-callback?code=xxx&state=yyy
 
 4. Exchange code for token:
    POST https://login.microsoftonline.com/{TENANT_ID}/oauth2/v2.0/token
      client_id={CLIENT_ID}
      &client_secret={CLIENT_SECRET}
      &code={CODE}
-     &redirect_uri=https://portal.basecoat.dev/auth/aad-callback
+     &redirect_uri=https://<portal-host>/auth/aad-callback
      &grant_type=authorization_code
 
 5. AAD responds with ID token (JWT) containing user info
@@ -125,11 +126,11 @@ Configure:
 
 | Field | Value |
 |-------|-------|
-| **Entity ID** | `https://portal.basecoat.dev/saml/metadata` |
-| **Reply URL (Assertion Consumer Service URL)** | `https://portal.basecoat.dev/auth/saml-callback` |
-| **Sign On URL** | `https://portal.basecoat.dev/auth/login` |
-| **Sign On URL** | `https://portal.basecoat.dev` |
-| **Logout URL** | `https://portal.basecoat.dev/auth/logout` |
+| **Entity ID** | `https://<portal-host>/saml/metadata` |
+| **Reply URL (Assertion Consumer Service URL)** | `https://<portal-host>/auth/saml-callback` |
+| **Sign On URL** | `https://<portal-host>/auth/login` |
+| **Sign On URL** | `https://<portal-host>` |
+| **Logout URL** | `https://<portal-host>/auth/logout` |
 
 ### 3.2 SAML Assertion Example
 
@@ -268,7 +269,7 @@ async function initializeOIDC() {
   client = new issuer.Client({
     client_id: process.env.AZURE_CLIENT_ID,
     client_secret: process.env.AZURE_CLIENT_SECRET,
-    redirect_uris: ['https://portal.basecoat.dev/auth/aad-callback'],
+    redirect_uris: ['https://<portal-host>/auth/aad-callback'],
     response_types: ['code']
   });
 }
@@ -301,7 +302,7 @@ app.get('/auth/aad-callback', async (req, res) => {
   try {
     // Exchange code for token
     const tokenSet = await client.callback(
-      'https://portal.basecoat.dev/auth/aad-callback',
+      'https://<portal-host>/auth/aad-callback',
       { code, state }
     );
 

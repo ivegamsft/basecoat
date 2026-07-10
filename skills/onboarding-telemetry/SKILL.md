@@ -17,6 +17,12 @@ model_policy:
   preferred_families:
     - claude-haiku
     - gpt-5-mini
+metadata:
+  category: operations
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 
 # Onboarding Telemetry Skill

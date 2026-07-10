@@ -3,6 +3,12 @@ name: github-security-posture
 compatibility: [github-copilot-cli]
 description: "Use when auditing GitHub organization or repository security settings with traffic-light scoring and remediation guidance. USE FOR: review branch protection and rulesets, check secret scanning and push protection, triage Dependabot or code scanning alerts, assess CODEOWNERS coverage, produce GitHub security posture report. DO NOT USE FOR: fixing application code vulnerabilities, cloud IAM auditing, incident response for active breaches."
 category: security
+metadata:
+  category: security
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # GitHub Security Posture Skill
 

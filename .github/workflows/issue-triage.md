@@ -63,7 +63,7 @@ Before classifying, perform a minimum-bar quality check per `skills/issue-triage
 - For bugs: expected vs actual behavior or error message is present.
 - For enhancements: a problem statement or user story is present.
 
-If the issue fails the minimum-bar quality check, add `needs-triage` and comment listing what is missing.
+If the issue fails the minimum-bar quality check, add `needs-triage` and `needs-info`, then comment listing what is missing.
 
 ### Step 2 — Classify the Issue Type
 
@@ -108,6 +108,9 @@ if the issue is well-scoped and approachable for new contributors.
 
 If legacy priority labels are present, normalize them to canonical `priority:*` labels.
 
+The canonical labels are mirrored into the native issue `Type` field and `Priority`
+issue field by `.github/workflows/issue-field-sync.yml`.
+
 ### Step 6 — Record Relationships
 
 If the issue body references other issues, add relationship comments using explicit markers:
@@ -132,7 +135,8 @@ defined in `prd-spec-gate.yml`:
 If EITHER link is missing:
 
 1. Apply the `needs-prd` label via `safeoutputs.add-labels`.
-2. Post an advisory comment via `safeoutputs.add-comment` explaining that any PR
+2. Apply the `needs-info` label via `safeoutputs.add-labels`.
+3. Post an advisory comment via `safeoutputs.add-comment` explaining that any PR
    for this issue will be blocked by the PRD/spec gate, and providing the standard
    format to add to both the issue and the eventual PR description:
 

@@ -235,6 +235,44 @@ try {
         throw 'Single-repository rollup script execution failed.'
     }
 
+    # Strict-mode regression test: PSObject.Properties guard for PR filtering
+    # Validates that the filter predicate used in the script does not throw
+    # under Set-StrictMode -Version Latest when objects lack the pull_request key
+    Write-Host 'Strict-mode PR filter regression test...'
+    & {
+        Set-StrictMode -Version Latest
+        $mixedItems = @(
+            [PSCustomObject]@{ number = 1; title = 'issue A'; state = 'open' },
+            [PSCustomObject]@{ number = 2; title = 'pr B'; state = 'open'; pull_request = @{ url = 'https://api.github.com/repos/owner/repo/pulls/2' } }
+        )
+        $issuesOnly = @($mixedItems | Where-Object { -not $_.PSObject.Properties['pull_request'] })
+        if ($issuesOnly.Count -ne 1) {
+            throw "Strict-mode PR filter (open issues): expected 1 issue, got $($issuesOnly.Count)"
+        }
+        if ($issuesOnly[0].number -ne 1) {
+            throw "Strict-mode PR filter (open issues): expected issue #1, got #$($issuesOnly[0].number)"
+        }
+
+        $closedAt = (Get-Date).ToUniversalTime().AddDays(-1).ToString('o')
+        $sinceUtc = (Get-Date).ToUniversalTime().AddDays(-7)
+        $closedMixed = @(
+            [PSCustomObject]@{ number = 3; title = 'closed issue'; state = 'closed'; closed_at = $closedAt },
+            [PSCustomObject]@{ number = 4; title = 'closed pr'; state = 'closed'; closed_at = $closedAt; pull_request = @{ url = 'https://api.github.com/repos/owner/repo/pulls/4' } }
+        )
+        $closedIssuesOnly = @($closedMixed | Where-Object {
+            -not $_.PSObject.Properties['pull_request'] -and
+            $null -ne $_.closed_at -and
+            ([datetime]$_.closed_at).ToUniversalTime() -ge $sinceUtc
+        })
+        if ($closedIssuesOnly.Count -ne 1) {
+            throw "Strict-mode PR filter (closed issues): expected 1 issue, got $($closedIssuesOnly.Count)"
+        }
+        if ($closedIssuesOnly[0].number -ne 3) {
+            throw "Strict-mode PR filter (closed issues): expected issue #3, got #$($closedIssuesOnly[0].number)"
+        }
+    }
+    Write-Host '  Strict-mode PR filter regression tests passed.' -ForegroundColor Green
+
     $singleResultPath = Join-Path $singleOutputDir 'portfolio-kpi-rollup.json'
     if (-not (Test-Path $singleResultPath)) {
         throw "Expected single-repository artifact missing: $singleResultPath"

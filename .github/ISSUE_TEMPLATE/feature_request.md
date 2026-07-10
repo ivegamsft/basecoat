@@ -69,6 +69,9 @@ Please ensure the following labels are applied:
 - **Issue Type**: `enhancement` (already set)
 - **Asset Type** (if applicable): `agent`, `skill`, `instruction`, or `prompt`
 
+The triage workflow mirrors the selected type label into the native issue `Type`
+field and the selected priority label into the native `Priority` field.
+
 **Recommended:**
 
 - `priority:critical` if this is a launch blocker
@@ -76,5 +79,6 @@ Please ensure the following labels are applied:
 - `priority:medium` if moderate impact
 - `priority:low` if nice-to-have
 - Sprint label: `sprint-YYYY-MM` (for example, `sprint-2026-05`)
+- Use `needs-triage` and `needs-info` only if a sprint cannot be assigned yet.
 
 See [`docs/GOVERNANCE.md`](../../docs/GOVERNANCE.md#canonical-label-set-for-new-work) for canonical labels and migration guidance.

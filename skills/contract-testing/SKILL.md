@@ -4,6 +4,12 @@ compatibility: [github-copilot-cli]
 title: Contract Testing & Integration Patterns
 description: "Use when implementing consumer-driven contracts, Pact verification, provider states, or integration test orchestration across services. USE FOR: add Pact contract tests between services, verify provider won't break consumers, set up Pact Broker in CI, orchestrate multi-service integration tests with Docker Compose, add mutation testing gate for APIs. DO NOT USE FOR: unit testing a single function, load testing production traffic, frontend visual regression testing."
 category: testing
+metadata:
+  category: testing
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Contract Testing Skill
 

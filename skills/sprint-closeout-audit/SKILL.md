@@ -8,6 +8,12 @@ invocation_rules:
   - "Require all five checklist questions with evidence links in output."
 visibility: "internal"
 category: operations
+metadata:
+  category: operations
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Sprint Closeout Audit Skill
 

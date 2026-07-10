@@ -1,4 +1,4 @@
-name: "BaseCoat - Asset Health Report"
+﻿name: "BaseCoat - Asset Health Report"
 
 on:
   schedule:
@@ -111,6 +111,7 @@ jobs:
 
       - name: Detect unused assets (non-blocking)
         shell: pwsh
+        continue-on-error: true
         run: |
           $report = pwsh scripts/find-unused-assets.ps1 -Format markdown -ThresholdDays 90 2>&1
           $reportText = ($report | Out-String)

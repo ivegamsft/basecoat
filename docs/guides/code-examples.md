@@ -25,7 +25,7 @@ function verifyJWT(token) {
   try {
     const decoded = jwt.verify(token, publicKey, {
       algorithms: ['RS256'],
-      issuer: 'https://portal.basecoat.dev',
+      issuer: 'https://<portal-host>',
       audience: 'basecoat-portal'
     });
     return decoded;
@@ -188,7 +188,7 @@ app.get('/auth/callback', async (req, res) => {
         client_id: process.env.GITHUB_CLIENT_ID,
         client_secret: process.env.GITHUB_CLIENT_SECRET,
         code: code,
-        redirect_uri: 'https://portal.basecoat.dev/auth/callback'
+        redirect_uri: 'https://<portal-host>/auth/callback'
       },
       { headers: { Accept: 'application/json' } }
     );

@@ -5,73 +5,61 @@
       "workflow": "extension-deploy.yml",
       "job": "build-push",
       "allowed_runner_classes": [
+        "github-hosted-linux",
         "configurable-deploy",
         "self-hosted-linux"
       ],
-      "max_timeout_minutes": 20,
-      "required_job_markers": [
-        "Validate self-hosted runner routing contract"
-      ]
+      "max_timeout_minutes": 20
     },
     {
       "workflow": "extension-deploy.yml",
       "job": "deploy",
       "allowed_runner_classes": [
+        "github-hosted-linux",
         "configurable-deploy",
         "self-hosted-linux"
       ],
-      "max_timeout_minutes": 20,
-      "required_job_markers": [
-        "Validate self-hosted runner routing contract"
-      ]
+      "max_timeout_minutes": 20
     },
     {
       "workflow": "mcp-build.yml",
       "job": "build",
       "allowed_runner_classes": [
+        "github-hosted-linux",
         "configurable-deploy",
         "self-hosted-linux"
       ],
-      "max_timeout_minutes": 20,
-      "required_job_markers": [
-        "Validate self-hosted runner routing contract"
-      ]
+      "max_timeout_minutes": 20
     },
     {
       "workflow": "mcp-deploy.yml",
       "job": "build-push",
       "allowed_runner_classes": [
+        "github-hosted-linux",
         "configurable-deploy",
         "self-hosted-linux"
       ],
-      "max_timeout_minutes": 20,
-      "required_job_markers": [
-        "Validate self-hosted runner routing contract"
-      ]
+      "max_timeout_minutes": 20
     },
     {
       "workflow": "mcp-deploy.yml",
       "job": "deploy",
       "allowed_runner_classes": [
+        "github-hosted-linux",
         "configurable-deploy",
         "self-hosted-linux"
       ],
-      "max_timeout_minutes": 20,
-      "required_job_markers": [
-        "Validate self-hosted runner routing contract"
-      ]
+      "max_timeout_minutes": 20
     },
     {
       "workflow": "portal-deploy.yml",
       "job": "deploy",
       "allowed_runner_classes": [
+        "github-hosted-linux",
         "configurable-deploy",
         "self-hosted-linux"
       ],
-      "max_timeout_minutes": 20,
-      "required_job_markers": [
-        "Validate self-hosted runner routing contract"
-      ]
+      "max_timeout_minutes": 20
     }
   ]
 }

@@ -3,6 +3,12 @@ name: security
 compatibility: [github-copilot-cli]
 description: "Use when auditing code, modeling threats, or reviewing dependencies for exploitable weaknesses. USE FOR: run OWASP security review, create STRIDE threat model, scan for hardcoded secrets, audit dependencies for CVEs, write structured vulnerability report. DO NOT USE FOR: live incident response handling, general performance tuning."
 category: security
+metadata:
+  category: security
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Security Skill
 

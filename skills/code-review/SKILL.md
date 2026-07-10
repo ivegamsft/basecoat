@@ -3,6 +3,12 @@ name: code-review
 compatibility: [github-copilot-cli]
 description: "Use when reviewing code, pull requests, or diffs for bugs and regressions. USE FOR: review pull request for bugs, inspect diff for regression risk, identify missing test coverage, rank review findings by severity, review refactor for edge cases. DO NOT USE FOR: writing new features, restyling code for preference, making architecture decisions."
 category: development
+metadata:
+  category: development
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Code Review
 

@@ -1,0 +1,15 @@
+{
+  "thresholds": {
+    "issue_to_pr_hours": 24,
+    "ready_to_merge_hours": 12,
+    "merge_to_release_hours": 2
+  },
+  "scan": {
+    "lookback_days": 7,
+    "max_items": 200
+  },
+  "suppression_labels": [
+    "watchdog:ignore",
+    "sla:exempt"
+  ]
+}

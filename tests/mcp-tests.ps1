@@ -23,6 +23,135 @@ function Assert-FileContains {
     if ($content -notmatch $Pattern) { throw $Message }
 }
 
+function Get-YamlScalarValue {
+    param([string]$Value)
+
+    return (($Value -replace '\s*#.*$', '').Trim())
+}
+
+function Get-WorkflowJobs {
+    param([string]$Path)
+
+    # Parse the workflow shapes used in this repository: top-level jobs with
+    # scalar or list-style runs-on values, including GitHub expression scalars.
+    $lines = Get-Content $Path
+    $jobs = @{}
+    $inJobsBlock = $false
+    $jobIndent = $null
+    $currentJob = $null
+    $capturingRunsOnList = $false
+    $runsOnIndent = $null
+
+    foreach ($line in $lines) {
+        if ($line -match '^jobs:\s*$') {
+            $inJobsBlock = $true
+            # Reset parser state explicitly whenever a jobs block starts so test
+            # fixtures cannot accidentally leak indentation or runner state.
+            $jobIndent = $null
+            $currentJob = $null
+            $capturingRunsOnList = $false
+            $runsOnIndent = $null
+            continue
+        }
+
+        if (-not $inJobsBlock) {
+            continue
+        }
+
+        if ($line -match '^\S' -and $line -notmatch '^jobs:\s*$') {
+            break
+        }
+
+        if ($line -match '^(\s+)([^\s:#]+):\s*$') {
+            $candidateIndent = $Matches[1]
+            if (-not $jobIndent) {
+                $jobIndent = $candidateIndent
+            }
+
+            if ($candidateIndent -eq $jobIndent) {
+                $currentJob = $Matches[2]
+                $jobs[$currentJob] = @{ runsOn = @() }
+                $capturingRunsOnList = $false
+                $runsOnIndent = $null
+                continue
+            }
+        }
+
+        if (-not $currentJob) {
+            continue
+        }
+
+        if ($line -match '^(\s+)runs-on:\s*(.+)\s*$') {
+            if ($Matches[1].Length -gt $jobIndent.Length) {
+                $jobs[$currentJob]['runsOn'] = @(Get-YamlScalarValue $Matches[2])
+                $capturingRunsOnList = $false
+                $runsOnIndent = $Matches[1]
+                continue
+            }
+        }
+
+        if ($line -match '^(\s+)runs-on:\s*$') {
+            if ($Matches[1].Length -gt $jobIndent.Length) {
+                $jobs[$currentJob]['runsOn'] = @()
+                $capturingRunsOnList = $true
+                $runsOnIndent = $Matches[1]
+                continue
+            }
+        }
+
+        if ($capturingRunsOnList) {
+            # Sequence items nested under runs-on: must be indented deeper than
+            # the runs-on key itself to remain part of that YAML list.
+            if ($line -match '^(\s+)-\s*(.+)\s*$') {
+                $itemIndent = $Matches[1].Length
+                if ($itemIndent -gt $runsOnIndent.Length) {
+                    $jobs[$currentJob]['runsOn'] += Get-YamlScalarValue $Matches[2]
+                    continue
+                }
+            }
+
+            $capturingRunsOnList = $false
+            $runsOnIndent = $null
+        }
+    }
+
+    return $jobs
+}
+
+function Assert-WorkflowJobRunsOn {
+    param([string]$Path, [string]$JobName, [string]$ExpectedRunner, [string]$Message)
+
+    $jobs = Get-WorkflowJobs $Path
+    if (-not $jobs.ContainsKey($JobName)) {
+        throw "$Path is missing the '$JobName' job"
+    }
+
+    $runsOn = @($jobs[$JobName].runsOn)
+    $foundRunsOn = if ($runsOn.Count -eq 0) { '<none>' } else { $runsOn -join ', ' }
+    if ($runsOn.Count -eq 0) {
+        throw "$Path job '$JobName' is missing runs-on (found: $foundRunsOn)"
+    }
+
+    if ($runsOn.Count -ne 1 -or $runsOn[0] -ne $ExpectedRunner) {
+        throw "$Message (found: $foundRunsOn)"
+    }
+}
+
+function Assert-WorkflowJobDoesNotUseRunner {
+    param([string]$Path, [string]$JobName, [string]$DisallowedRunner, [string]$Message)
+
+    $jobs = Get-WorkflowJobs $Path
+    if (-not $jobs.ContainsKey($JobName)) {
+        throw "$Path is missing the '$JobName' job"
+    }
+
+    $runsOn = @($jobs[$JobName].runsOn)
+    $foundRunsOn = if ($runsOn.Count -eq 0) { '<none>' } else { $runsOn -join ', ' }
+    if ($runsOn -contains $DisallowedRunner) {
+        throw "$Message (found: $foundRunsOn)"
+    }
+}
+
 Write-Host 'MCP tests: checking required files...'
 
 # Source files
@@ -102,5 +231,33 @@ Assert-FileContains '.github/workflows/mcp-deploy.yml' 'AZURE_CREDENTIALS' `
     'mcp-deploy.yml is missing AZURE_CREDENTIALS secret reference'
 Assert-FileContains '.github/workflows/mcp-deploy.yml' 'MCP_RESOURCE_GROUP' `
     'mcp-deploy.yml is missing MCP_RESOURCE_GROUP secret reference'
+
+Write-Host 'MCP tests: validating workflow runner structure...'
+Assert-WorkflowJobRunsOn '.github/workflows/mcp-build.yml' 'build' 'ubuntu-latest' `
+    'mcp-build.yml build job must run on ubuntu-latest'
+Assert-WorkflowJobDoesNotUseRunner '.github/workflows/mcp-build.yml' 'build' 'self-hosted' `
+    'mcp-build.yml build job must not use self-hosted runner selection'
+Assert-WorkflowJobRunsOn '.github/workflows/mcp-deploy.yml' 'build-push' 'ubuntu-latest' `
+    'mcp-deploy.yml build-push job must run on ubuntu-latest'
+Assert-WorkflowJobDoesNotUseRunner '.github/workflows/mcp-deploy.yml' 'build-push' 'self-hosted' `
+    'mcp-deploy.yml build-push job must not use self-hosted runner selection'
+
+Write-Host 'MCP tests: validating build workflow is pinned to ubuntu-latest (CI-only workflow)...'
+Assert-FileContains '.github/workflows/mcp-build.yml' "runs-on: ubuntu-latest" `
+    'mcp-build.yml must use ubuntu-latest (CI check workflow — Docker smoke test requires Linux runner with Docker)'
+
+Write-Host 'MCP tests: validating deploy workflow uses vars.RUNNER_DEPLOY for deploy job...'
+$deployContent = Get-Content '.github/workflows/mcp-deploy.yml' -Raw
+if ($deployContent -notmatch '(?m)^\s+runs-on:\s.*vars\.RUNNER_DEPLOY') {
+    throw "mcp-deploy.yml deploy job must route runs-on through vars.RUNNER_DEPLOY"
+}
+if ($deployContent -notmatch "(?m)^\s+runs-on:\s.*ubuntu-latest") {
+    throw "mcp-deploy.yml must include ubuntu-latest as fallback in runs-on expressions"
+}
+
+Write-Host 'MCP tests: validating dead resolve-deploy-runner job is removed from deploy workflow...'
+if ($deployContent -match '(?m)^  resolve-deploy-runner:') {
+    throw 'mcp-deploy.yml still contains resolve-deploy-runner job; should have been removed'
+}
 
 Write-Host 'MCP tests passed' -ForegroundColor Green

@@ -3,6 +3,12 @@ name: create-skill
 compatibility: [github-copilot-cli]
 description: "Use when creating a new reusable skill with clear triggers, workflow steps, and starter assets in a customization repository. USE FOR: add a new SKILL.md file, design skill trigger phrases, decide if work belongs in a skill, scaffold skill folder with templates, write discovery-focused skill frontmatter. DO NOT USE FOR: creating a file instruction only, writing application business logic, generating a one-off prompt response."
 category: development
+metadata:
+  category: development
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Create A Skill
 

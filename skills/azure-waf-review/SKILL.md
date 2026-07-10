@@ -5,6 +5,12 @@ description: "Use when assessing an Azure workload against the Well-Architected 
 category: infrastructure
 
 context: fork
+metadata:
+  category: infrastructure
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Azure Well-Architected Framework Review Skill
 

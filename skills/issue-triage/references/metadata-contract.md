@@ -34,6 +34,15 @@ An issue may receive the `copilot-agent` label **only if** ALL of the following 
 
 ---
 
+## Copilot assignment flow
+
+Approval automation assigns Copilot through the cloud-agent issue API, not by
+mentioning `@Copilot`. The workflow first checks `suggestedActors` for
+`copilot-swe-agent`, then assigns the issue with `copilot-swe-agent[bot]` and
+`agent_assignment` so the agent starts with the correct repository context.
+
+---
+
 ## Rejection behavior
 
 When an issue fails the contract, the approval workflow must:

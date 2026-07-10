@@ -157,7 +157,7 @@ These labels indicate blocking conditions or special handling requirements.
 
 1. Issue is triaged and labeled with type, priority, and asset type
 2. Issue is reviewed and approved (add `approved` label)
-3. Issue is assigned to an agent (add `copilot-agent` label)
+3. Issue is assigned to an agent (add `copilot-agent` label and use the cloud-agent issue API with `copilot-swe-agent[bot]`)
 4. Agent works on the issue and references it in commits/PRs
 5. Upon completion, labels remain for historical tracking
 

@@ -1,4 +1,5 @@
 # Basecoat Portal Identity & Access Control Design v1.0
+<!-- markdownlint-disable -->
 
 **Status**: Draft | **Version**: 1.0 | **Last Updated**: 2025 | **Due**: May 5
 
@@ -100,14 +101,14 @@ User Browser                Portal Backend                GitHub
 
 1. **Register OAuth Application** (GitHub Settings → Developer settings → OAuth Apps)
    - Application name: Basecoat Portal
-   - Authorization callback URL: `https://portal.basecoat.dev/auth/callback`
+   - Authorization callback URL: `https://<portal-host>/auth/callback`
    - Client ID & Secret: Store in Azure Key Vault
 
 2. **Initiate Login**
    ```
    GET https://github.com/login/oauth/authorize
    ?client_id={CLIENT_ID}
-   &redirect_uri=https://portal.basecoat.dev/auth/callback
+   &redirect_uri=https://<portal-host>/auth/callback
    &scope=user:email,read:org
    &state={RANDOM_STATE}
    ```
@@ -118,7 +119,7 @@ User Browser                Portal Backend                GitHub
    client_id={CLIENT_ID}
    &client_secret={CLIENT_SECRET}
    &code={AUTHORIZATION_CODE}
-   &redirect_uri=https://portal.basecoat.dev/auth/callback
+   &redirect_uri=https://<portal-host>/auth/callback
    ```
 
 4. **Fetch User Profile**
@@ -171,7 +172,7 @@ WHERE org_id = $1  -- From JWT claims
   "permissions": ["read:audits", "write:issues"],
   "exp": 1234567890,
   "iat": 1234567200,
-  "iss": "https://portal.basecoat.dev",
+  "iss": "https://<portal-host>",
   "aud": "basecoat-portal"
 }
 ```
@@ -246,12 +247,12 @@ Example: bcp_org_12345_4x7q9wK2nL8mP5vR3sT6uJ1yZ0bC9dF2gH4jK5lM6n
 ### 8.1 OIDC / SAML Configuration
 
 **OpenID Connect (Recommended)**
-- Redirect URI: `https://portal.basecoat.dev/auth/aad-callback`
+- Redirect URI: `https://<portal-host>/auth/aad-callback`
 - Scopes: `openid profile email`
 
 **SAML 2.0 (Alternative)**
-- Entity ID: `https://portal.basecoat.dev/saml/metadata`
-- ACS URL: `https://portal.basecoat.dev/auth/saml-callback`
+- Entity ID: `https://<portal-host>/saml/metadata`
+- ACS URL: `https://<portal-host>/auth/saml-callback`
 
 ### 8.2 Group Mapping
 

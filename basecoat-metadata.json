@@ -1,7 +1,7 @@
 {
   "$schema": "basecoat-metadata-schema",
   "version": "3.27.0",
-  "generated": "2026-06-24",
+  "generated": "2026-07-09",
   "categories": {
     "AI & Development": {
       "label": "AI & Development",
@@ -2336,6 +2336,17 @@
       "pairedSkill": "",
       "file": "agents/basecoat-50-security-project-rules-drift-auditor.agent.md",
       "model": "gpt-5.4-mini",
+      "argumentHint": ""
+    },
+    {
+      "name": "basecoat-60-workflow-delivery-autopilot",
+      "description": "Approve-once delivery orchestrator that evaluates readiness, executes merge policy, and escalates deterministic remediation payloads. USE FOR: running end-to-end approved issue -> PR -> release automation, driving merge and escalation decisions from policy-backed status signals, and generating deterministic dry-run execution plans for audit and rehearsal. DO NOT USE FOR: bypassing required checks or human approval boundaries, implementing feature code directly, or performing ad hoc manual release actions outside the governed workflow chain.",
+      "category": "Meta",
+      "keywords": [],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/basecoat-60-workflow-delivery-autopilot.agent.md",
+      "model": "gpt-5.3-codex",
       "argumentHint": ""
     }
   ]

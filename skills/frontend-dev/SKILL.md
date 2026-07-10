@@ -3,6 +3,12 @@ name: frontend-dev
 compatibility: [github-copilot-cli]
 description: "Use when building frontend components, responsive layouts, accessibility audits, or client-side state patterns with templates and review checklists. USE FOR: scaffold accessible UI component, review page for WCAG issues, design frontend state management, implement responsive layout behavior, audit frontend performance and correctness. DO NOT USE FOR: backend API design, database schema modeling, infrastructure provisioning."
 category: development
+metadata:
+  category: development
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Frontend Development Skill
 

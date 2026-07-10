@@ -450,17 +450,17 @@ jobs:
               exit 1
             fi
 
-            if ! grep -Eq '^## Inputs$' "$file"; then
+            if ! grep -Eq '^##+ Inputs$' "$file"; then
               echo "Missing required section '## Inputs' in $file" >&2
               exit 1
             fi
 
-            if ! grep -Eq '^## (Process|Workflow)$' "$file"; then
+            if ! grep -Eq '^##+ (Process|Workflow)$' "$file"; then
               echo "Missing required section '## Process' or '## Workflow' in $file" >&2
               exit 1
             fi
 
-            if ! grep -Eq '^## .*(Output|Report)\b' "$file"; then
+            if ! grep -Eq '^##+ .*(Output|Report)\b' "$file"; then
               echo "Missing required output/report section in $file." >&2
               exit 1
             fi

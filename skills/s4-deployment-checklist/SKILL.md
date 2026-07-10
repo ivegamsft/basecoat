@@ -5,6 +5,12 @@ description: "Use when preparing an S4 cutover, shadow-mode soak, rollback valid
 category: operations
 
 visibility: "internal"
+metadata:
+  category: operations
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # S4 Deployment Checklist Skill
 

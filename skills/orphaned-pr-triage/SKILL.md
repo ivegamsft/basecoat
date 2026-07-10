@@ -7,6 +7,12 @@ invocation_rules:
   - "Use when PR queue hygiene, stale PR cleanup, or review ownership drift is requested."
 visibility: "internal"
 category: operations
+metadata:
+  category: operations
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Orphaned PR Triage Skill
 

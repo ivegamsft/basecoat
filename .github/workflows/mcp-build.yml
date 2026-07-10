@@ -19,35 +19,12 @@ permissions:
 jobs:
   build:
     name: Build, lint, and validate MCP server
-    runs-on: ${{ vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
-
-      - name: Validate self-hosted runner routing contract
-        shell: bash
-        env:
-          RUNNER_DEPLOY: ${{ vars.RUNNER_DEPLOY }}
-        run: |
-          set -euo pipefail
-          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
-            echo "::notice::Skipping strict self-hosted contract enforcement on pull_request events."
-            exit 0
-          fi
-          if [[ -z "${RUNNER_DEPLOY:-}" ]]; then
-            echo "::error::vars.RUNNER_DEPLOY is not configured."
-            echo "::error::Set RUNNER_DEPLOY to self-hosted labels/group for deploy-class jobs."
-            exit 1
-          fi
-          NORMALIZED="$(echo "${RUNNER_DEPLOY}" | tr '[:upper:]' '[:lower:]')"
-          if [[ "${NORMALIZED}" == *"ubuntu-latest"* && "${NORMALIZED}" != *"self-hosted"* ]]; then
-            echo "::error::vars.RUNNER_DEPLOY resolves to ubuntu-latest fallback."
-            echo "::error::This workflow requires explicit self-hosted routing."
-            exit 1
-          fi
-          echo "Runner contract satisfied: ${RUNNER_DEPLOY}"
 
       - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
@@ -65,7 +42,7 @@ jobs:
         run: npm run build
 
       - name: Docker build smoke test
-        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
         with:
           context: mcp/basecoat-metrics
           push: false

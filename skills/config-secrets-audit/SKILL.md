@@ -3,6 +3,12 @@ name: config-secrets-audit
 compatibility: [github-copilot-cli]
 description: "Config and secret exposure audit skill for repository and IaC config files. USE FOR: scanning Azure Key Vault references, hardcoded connection strings, GitHub Actions env secrets, .env/YAML/Bicep/Terraform parameter secrets, severity scoring, and SARIF output generation. DO NOT USE FOR: runtime penetration testing, live incident response, or deploying remediation changes."
 category: security
+metadata:
+  category: security
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Config Secrets Audit Skill
 

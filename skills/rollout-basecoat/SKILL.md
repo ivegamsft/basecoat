@@ -5,6 +5,12 @@ description: "Use when refreshing a consumer repository to the latest BaseCoat b
 category: operations
 
 visibility: public
+metadata:
+  category: operations
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Rollout BaseCoat Skill
 

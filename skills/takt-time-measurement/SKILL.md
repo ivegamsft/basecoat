@@ -5,6 +5,12 @@ description: "Use when measuring takt time, exporting throughput metrics, or bui
 category: operations
 
 visibility: "internal"
+metadata:
+  category: operations
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Takt Time Measurement Skill
 

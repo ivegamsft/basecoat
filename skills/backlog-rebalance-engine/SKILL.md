@@ -22,6 +22,12 @@ model_policy:
   cost_tracking:
     budget_tier: low
     chargeback_tag: backlog-rebalance-engine
+metadata:
+  category: workflow
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 
 # Backlog Rebalance Engine — Project Sync Skill

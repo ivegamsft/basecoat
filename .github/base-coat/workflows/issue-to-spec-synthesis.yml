@@ -1,0 +1,192 @@
+name: "BaseCoat - Issue to Spec Synthesis"
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  synthesize-spec:
+    name: Synthesize spec from approved issue
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Trigger only when the 'approved' label is added to a copilot-agent issue
+    if: |
+      github.event.label.name == 'approved' &&
+      contains(github.event.issue.labels.*.name, 'copilot-agent')
+
+    steps:
+      - name: Synthesize spec and open PR
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v7.0.1
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const issueNum = issue.number;
+            const title = issue.title;
+            const body = issue.body || '';
+            const labels = issue.labels.map(l => l.name);
+            const author = issue.user.login;
+
+            // Derive slug from issue title; fall back to 'untitled' if title is all punctuation/emoji
+            const slug = (title
+              .toLowerCase()
+              .replace(/[^a-z0-9\s-]/g, '')
+              .trim()
+              .replace(/\s+/g, '-')
+              .replace(/-+/g, '-')
+              .slice(0, 60)) || 'untitled';
+
+            const specPath = `docs/spec/synthesized/issue-${issueNum}-${slug}.spec.md`;
+            const branchName = `spec/issue-${issueNum}-${slug}`;
+
+            // Extract sections from issue body
+            const problemMatch = body.match(/##\s*Problem(?:\s+Statement)?\s*\n([\s\S]*?)(?=##|$)/i);
+            const scopeMatch   = body.match(/##\s*(?:Suggested\s+)?[Ss]cope\s*\n([\s\S]*?)(?=##|$)/i);
+            const whyMatch     = body.match(/##\s*Why\s+this\s+matters\s*\n([\s\S]*?)(?=##|$)/i);
+            const refsMatch    = body.match(/##\s*References?\s*\n([\s\S]*?)(?=##|$)/i);
+
+            const problem = problemMatch ? problemMatch[1].trim() : body.trim().split('\n').slice(0, 8).join('\n');
+            const scope   = scopeMatch   ? scopeMatch[1].trim()   : '_Not specified._';
+            const why     = whyMatch     ? whyMatch[1].trim()     : '_Not specified._';
+            const refs    = refsMatch    ? refsMatch[1].trim()    : `- Refs #${issueNum}`;
+            const now     = new Date().toISOString().split('T')[0];
+
+            const specContent = [
+              '---',
+              `issue: ${issueNum}`,
+              `title: ${JSON.stringify(title)}`,
+              `status: draft`,
+              `author: ${author}`,
+              `created: ${now}`,
+              `labels: [${labels.map(l => `"${l}"`).join(', ')}]`,
+              '---',
+              '',
+              `# Spec: ${title}`,
+              '',
+              '## Problem Statement',
+              '',
+              problem,
+              '',
+              '## Why This Matters',
+              '',
+              why,
+              '',
+              '## Scope',
+              '',
+              scope,
+              '',
+              '## Acceptance Criteria',
+              '',
+              '- [ ] Implementation matches the scope defined above.',
+              '- [ ] Validation commands pass with no errors.',
+              '- [ ] PR references this spec.',
+              '',
+              '## References',
+              '',
+              refs,
+              `- Issue: https://github.com/${context.repo.owner}/${context.repo.repo}/issues/${issueNum}`,
+              '',
+            ].join('\n');
+
+            // Get default branch SHA
+            const { data: ref } = await github.rest.git.getRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'heads/main',
+            });
+            const baseSha = ref.object.sha;
+
+            // Create branch (idempotent: if it already exists, find any existing PR and comment back)
+            try {
+              await github.rest.git.createRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `refs/heads/${branchName}`,
+                sha: baseSha,
+              });
+            } catch (err) {
+              if (err.status === 422) {
+                // Branch already exists — search all states to find any prior PR
+                const existing = await github.rest.pulls.list({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  head: `${context.repo.owner}:${branchName}`,
+                  state: 'all',
+                });
+                const existingPr = existing.data[0];
+                const prLink = existingPr ? existingPr.html_url : `branch \`${branchName}\` (no PR found)`;
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNum,
+                  body: `A spec branch already exists for this issue: ${prLink}`,
+                });
+                core.notice(`Spec branch already exists: ${prLink}`);
+                return;
+              }
+              throw err;
+            }
+
+            // Ensure parent directory exists by creating the file directly
+            await github.rest.repos.createOrUpdateFileContents({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: specPath,
+              message: `spec(synthesized): generate spec for issue #${issueNum}\n\nAuto-generated by issue-to-spec-synthesis.yml\n\nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>`,
+              content: Buffer.from(specContent).toString('base64'),
+              branch: branchName,
+            });
+
+            // Open PR
+            const { data: pr } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `spec: synthesize spec for issue #${issueNum} — ${title}`,
+              body: [
+                `Auto-generated spec from approved issue #${issueNum}.`,
+                '',
+                `**Source issue:** #${issueNum}`,
+                `**Spec path:** \`${specPath}\``,
+                '',
+                'Review and edit the spec before merging. Implementation PRs should reference this spec.',
+                '',
+                `Refs #${issueNum}`,
+              ].join('\n'),
+              head: branchName,
+              base: 'main',
+              draft: true,
+            });
+
+            // Add sprint label if present on issue
+            const sprintLabel = labels.find(l => /^sprint:/.test(l));
+            const prLabels = ['documentation', 'spec'];
+            if (sprintLabel) prLabels.push(sprintLabel);
+            // Add labels (degrade to warning if any label doesn't exist)
+            try {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: prLabels,
+              });
+            } catch (err) {
+              core.warning(`Could not add labels ${prLabels.join(', ')} to PR #${pr.number}: ${err.message}`);
+            }
+
+            // Comment on original issue
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNum,
+              body: `Spec synthesized from this issue. Draft PR: ${pr.html_url}\n\nSpec path: \`${specPath}\``,
+            });
+
+            core.notice(`Spec PR opened: ${pr.html_url}`);
