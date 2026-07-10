@@ -14,14 +14,49 @@
 #>
 
 param(
-    [string]$OutputPath = (Join-Path $PSScriptRoot ".." "plugins" "copilot-cli-plugin" "schema" "basecoat-registry.json")
+    [string]$OutputPath = (Join-Path $PSScriptRoot ".." "plugins" "copilot-cli-plugin" "schema" "basecoat-registry.json"),
+    [string]$AgentsPath = (Join-Path (Split-Path -Parent $PSScriptRoot) "agents")
 )
 
-$repoRoot = Split-Path -Parent $PSScriptRoot
-$agentsDir = Join-Path $repoRoot "agents"
 $agents = @{}
+$allowedModels = @(
+    'gpt-5.4-mini',
+    'gpt-5.3-codex',
+    'claude-sonnet-4.5',
+    'claude-haiku-4.5'
+)
+$fallbackModel = 'gpt-5.4-mini'
+$fallbackMap = @{
+    'claude-sonnet-4.6' = 'claude-sonnet-4.5'
+    'claude-sonnet-4.7' = 'claude-sonnet-4.5'
+    'claude-opus-4.6'   = 'claude-sonnet-4.5'
+    'claude-opus-4.7'   = 'claude-sonnet-4.5'
+    'claude-opus-4.8'   = 'claude-sonnet-4.5'
+    'gpt-5.5'           = 'gpt-5.3-codex'
+    'gpt-5.4'           = 'gpt-5.3-codex'
+}
+$modelSubstitutions = New-Object System.Collections.Generic.List[string]
 
-Get-ChildItem $agentsDir -Filter "*.agent.md" | ForEach-Object {
+function Resolve-AgentModel {
+    param([string]$RequestedModel)
+
+    $trimmed = ($RequestedModel ?? '').Trim().Trim('"').Trim("'")
+    if ([string]::IsNullOrWhiteSpace($trimmed)) {
+        return $fallbackModel
+    }
+
+    if ($allowedModels -contains $trimmed) {
+        return $trimmed
+    }
+
+    if ($fallbackMap.ContainsKey($trimmed) -and $allowedModels -contains $fallbackMap[$trimmed]) {
+        return $fallbackMap[$trimmed]
+    }
+
+    return $fallbackModel
+}
+
+Get-ChildItem $AgentsPath -Filter "*.agent.md" | ForEach-Object {
     $file = $_.FullName
     $content = Get-Content $file -Raw
     $relativePath = "agents/$($_.Name)"
@@ -31,9 +66,15 @@ Get-ChildItem $agentsDir -Filter "*.agent.md" | ForEach-Object {
         $frontmatter = $Matches[1]
 
         $id = $_.Name -replace "\.agent\.md$", ""
+        # Extract short agent name from new naming convention
+        $id = $id -replace '^basecoat-\d+-\w+-', ''
         $name = if ($frontmatter -match "^name:\s*(.+)$") { $Matches[1].Trim().Trim('"') } else { $id }
         $description = if ($frontmatter -match "^description:\s*(.+)$") { $Matches[1].Trim().Trim('"') } else { "No description" }
-        $model = if ($frontmatter -match "^model:\s*(.+)$") { $Matches[1].Trim() } else { "claude-sonnet-4.6" }
+        $requestedModel = if ($frontmatter -match "(?m)^model:\s*(.+)$") { $Matches[1].Trim() } else { $fallbackModel }
+        $model = Resolve-AgentModel -RequestedModel $requestedModel
+        if ($requestedModel.Trim('"').Trim("'") -ne $model) {
+            $modelSubstitutions.Add("${id}: $requestedModel -> $model") | Out-Null
+        }
         $maturity = if ($frontmatter -match "maturity:\s*[""']?(\w+)[""']?") { $Matches[1].Trim() } else { "production" }
         $category = if ($frontmatter -match "category:\s*[""']?([^""'\n]+)[""']?") { $Matches[1].Trim() } else { "General" }
 
@@ -80,3 +121,7 @@ Set-Content $OutputPath $json -Encoding UTF8
 
 Write-Host "Registry written: $OutputPath"
 Write-Host "Agents indexed: $($agents.Count)"
+if ($modelSubstitutions.Count -gt 0) {
+    Write-Host "Model substitutions applied: $($modelSubstitutions.Count)"
+    $modelSubstitutions | ForEach-Object { Write-Host "  - $_" }
+}

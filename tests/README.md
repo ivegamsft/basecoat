@@ -8,8 +8,13 @@ This directory contains smoke tests for the scaffolding repository.
 - Verify packaging scripts create release artifacts
 - Verify git hook installation script configures `.githooks`
 - Verify commit message scanner detects and rejects sensitive commit messages
+- Verify token cost observability thresholds and auto-compact signals
+- Verify model-inventory generation applies shared model fallback policy
+- Verify registry generation resolves unsupported/missing models with safe defaults
 - **NEW:** Adoption scanner parameter parsing and output formats (table, json, markdown)
 - **NEW:** Workflow guardrails validation (timeout-minutes, concurrency, SHA pinning)
+- **NEW:** PR flow hygiene workflow guardrails (weekly report + draft-drift nudges)
+- **NEW:** Ship-it build-break detector classification and bounded retry/escalation behavior
 
 ## Run Tests
 
@@ -62,3 +67,22 @@ Tests for workflow compliance in `.github/workflows/*.yml` covering:
 - **checkout pinning**: Checkout actions pinned to specific versions
 - **matrix bounds**: Matrix strategies have reasonable parallelism
 - **job naming**: Jobs have descriptive names
+
+### `pr-flow-hygiene-tests.ps1`
+
+Tests for `.github/workflows/pr-flow-hygiene.yml` covering:
+
+- Presence of weekly schedule + manual trigger inputs
+- Required policy thresholds (WIP, draft drift, ready stale)
+- Required permissions (`issues: write`, `pull-requests: write`)
+- Required pinned action reference and concurrency pattern
+- Required report and triage nudge markers
+
+### `token-status-tests.ps1`
+
+Tests for `scripts/token-status.ps1` covering:
+
+- JSON contract fields for session token/event status
+- Auto-compact trigger thresholds (400 events or 50M input tokens)
+- Warning marker thresholds (ratio >= 300x, events >= 500, input tokens >= 50M)
+- Input file parsing for reusable session metric snapshots

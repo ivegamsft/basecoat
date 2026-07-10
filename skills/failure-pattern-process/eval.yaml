@@ -1,0 +1,20 @@
+name: "failure-pattern-process-routing"
+description: "Routing evaluation for failure-pattern process execution."
+skill: "skills/failure-pattern-process/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Mine CI, issue, and incident evidence and build the full A1 to D2 failure-pattern artifacts."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Create an append-only raw findings log, triage common versus repo-specific patterns, and produce a prioritized enhancement plan."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Run the failure pattern process contract with gate checks and stage transitions to completed."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Implement a new React feature and update the dashboard UI."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Patch production immediately to hotfix a live outage."
+    expect_activation: false
+

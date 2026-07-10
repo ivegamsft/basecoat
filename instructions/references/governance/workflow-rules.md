@@ -27,6 +27,8 @@ Run this sequence for every sprint closeout batch:
    - Merge only verified PRs using squash merge per repo policy.
 3. **Prune branches/worktrees**
    - Delete merged local/remote branches and stale worktree registrations.
+   - Run automated branch audit in dry-run first; enable deletions only after review.
+   - Prefer `scripts/cleanup-branches.ps1` for stale branch/orphan cleanup and `skills/git-worktrees/SKILL.md` for parallel worktree hygiene.
 4. **Close/report**
    - Close completed issues and post a concise sprint close summary with outcomes and carry-forward items.
 
@@ -53,6 +55,10 @@ gh pr checks <pr-number>
 gh pr merge <pr-number> --squash --delete-branch
 
 # 3) Prune branches/worktrees
+gh workflow run sprint-closeout-branch-audit.yml -f stale_days=30 -f apply_changes=false
+gh run watch
+gh workflow run sprint-closeout-branch-audit.yml -f stale_days=30 -f apply_changes=true
+gh run watch
 git branch --merged main
 git branch -d <local-branch>
 git push origin --delete <remote-branch>
@@ -70,6 +76,15 @@ gh issue comment <meta-issue-number> --body "Sprint close report: merged PRs ...
 ```text
 <type>/<issue-number>-<short-description>
 ```
+
+## Worktree Naming
+
+```text
+../<repo>-wt-<issue-or-pr>
+```
+
+Use a repo-prefixed worktree path so parallel work is easy to identify and clean up.
+Examples: `../basecoat-wt-1306`, `../basecoat-wt-pr1310`.
 
 | Type | Use For |
 |---|---|

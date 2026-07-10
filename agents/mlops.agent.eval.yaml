@@ -1,6 +1,6 @@
 name: "mlops-routing"
 description: "Routing evaluation — validates trigger activation for the mlops agent."
-skill: "agents/mlops.agent.md"
+skill: "agents/basecoat-30-ai-mlops.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with operationalizing ML systems."

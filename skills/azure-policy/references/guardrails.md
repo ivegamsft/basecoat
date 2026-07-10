@@ -25,4 +25,4 @@ authoring standards.
 
 For IaC-level enforcement, pair with the `devops-engineer` agent using `skills/devops/`
 templates to integrate policy assignments into CI/CD pipelines. For Bicep-authored
-assignments, refer to `instructions/bicep.instructions.md`.
+assignments, refer to `instructions/basecoat-10-core-bicep.instructions.md`.

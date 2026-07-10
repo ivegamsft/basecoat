@@ -1,0 +1,20 @@
+name: "config-secrets-audit-routing"
+description: "Routing evaluation — validates trigger activation for config and secret scanning with severity and SARIF output."
+skill: "skills/config-secrets-audit/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Scan this repo for hardcoded connection strings and secrets in appsettings and yaml files."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Audit GitHub Actions env blocks and output findings as SARIF."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Run a config secret audit with severity levels and custom regex patterns."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Deploy this service to production and rotate traffic."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Design a new React dashboard for release metrics."
+    expect_activation: false
+

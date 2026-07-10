@@ -1,4 +1,6 @@
-# Contributing to basecoat
+<!-- markdownlint-disable MD009 MD012 MD022 MD031 MD032 MD036 MD040 MD041 -->
+
+# Contributing to BaseCoat
 
 basecoat is a GitHub Enterprise template for agentic development shops. It must follow its own advice.
 This document is the canonical reference for how changes are made — by humans and AI agents alike.
@@ -61,8 +63,9 @@ No direct commits to `main`. Ever.
 
 - Prefer one issue per PR.
 - Batch only tightly related changes that can be reviewed together.
-- Keep batch PRs to **15 files or fewer** and **300 changed lines or fewer** (additions + deletions).
-- If you must exceed either limit, split the work or explain the mechanical reason in the PR description.
+- Keep batch PRs to **12 files or fewer** and **400 changed lines or fewer** (additions + deletions) to stay below the PRD/spec gate threshold.
+  - The gate policy (see table below) requires both PRD and spec references for high-change PRs (`>=12 files` or `>=500 churn`). For details, see [PRD And Spec Guidance](./docs/guides/prd-and-spec-guidance.md).
+- If you must exceed these limits, split the work or explain the mechanical reason in the PR description and include the required PRD and spec references.
 - Large mechanical batches should include a validation summary and rollback note.
 
 **PR Title Format:**
@@ -177,7 +180,7 @@ Every issue should include:
 
 ### Label Taxonomy Reference
 
-Complete reference: [`docs/LABEL_TAXONOMY.md`](../docs/LABEL_TAXONOMY.md)
+Complete reference: [`docs/LABEL_taxonomy.md`](../docs/LABEL_taxonomy.md)
 
 GitHub search examples:
 
@@ -195,6 +198,20 @@ GitHub search examples:
 - **Templates** go in `docs/templates/`.
 
 All new agents, skills, and instructions require an issue before implementation.
+
+### Internal Operational Workflows
+
+These workflows are **not intended for distribution or consumer use**:
+
+- `memory-audit.yml`: Quarterly audit of memory file freshness and validity
+- `memory-contribute.yml`: Dispatch workflow for storing learned facts in memory repo
+- `adoption-metrics.yml`: Collect and publish adoption metrics dashboard
+- `fork-import.yml`: Import issues from development forks
+- `memory-sweep.yml`: Enterprise memory sweep for learning signals (Phase 2 candidate)
+
+**Rationale**: These workflows are tightly coupled to BaseCoat's internal infrastructure (basecoat-memory repository, metrics collection infrastructure, fork maintenance workflow). Consumer value is lower than agentic workflows, and dependency on BaseCoat-specific infrastructure makes them less portable.
+
+See `docs/design/memory-workflow-distribution.md` for detailed design rationale and Phase-based distribution strategy.
 
 ### Agent Frontmatter Schema
 
@@ -267,7 +284,7 @@ Every PR targeting `main` must pass **all** of the following checks before it ca
 | `Validate agent file structure` | `pr-validation.yml` | Verifies agents have required frontmatter and sections |
 | `Sync script dry-run` | `pr-validation.yml` | Validates sync.sh runs cleanly against a temp consumer repo |
 | `version-consistency` | `version-check.yml` | Ensures version.json and latest CHANGELOG.md entry match |
-| `prd-spec-gate` | `prd-spec-gate.yml` | Requires PRD/spec links for high-change or risky PRs |
+| `prd-spec-gate` | `prd-spec-gate.yml` | Intake contract gate: high-change PRs (`>=12` files or `>=500` churn) **require** both PRD+Spec refs (blocking); risky-path-only PRs get advisory warning (non-blocking) |
 | `validate-commit-messages` | `validate-basecoat.yml` | Scans commit messages for secrets and PII patterns |
 | `validate-unix` | `validate-basecoat.yml` | Runs full validation suite on Ubuntu |
 | `validate-windows` | `validate-basecoat.yml` | Runs full validation suite on Windows |
@@ -429,11 +446,11 @@ python scripts/metrics/collect-metrics.py
 
 ### 3. Tracking Inventory
 
-The `INVENTORY.md` and `CATALOG.md` files document all available assets (agents, skills, instructions, prompts) with descriptions, keywords, and use cases. Keep these updated when adding or removing assets.
+The `inventory.md` and `CATALOG.md` files document all available assets (agents, skills, instructions, prompts) with descriptions, keywords, and use cases. Keep these updated when adding or removing assets.
 
 **When to update:**
 
-- Add new agent, skill, or instruction file → add entry to `INVENTORY.md` and `CATALOG.md`
+- Add new agent, skill, or instruction file → add entry to `inventory.md` and `CATALOG.md`
 - Remove deprecated asset → remove from both files
 - Change description or functionality → update both files
 
@@ -570,11 +587,11 @@ Sync scripts (`sync.ps1`, `sync.sh`) skip any instruction file containing
 
 Files currently marked `distribute: false`:
 
-- `instructions/governance.instructions.md` — BaseCoat repo-governance rules
-- `instructions/enterprise-configuration.instructions.md` — enterprise setup guidance
-- `instructions/hrm-execution.instructions.md` — internal execution hierarchy
-- `instructions/token-economics.instructions.md` — cost-routing rules for this repo
-- `instructions/memory-index.instructions.md` — hot-cache memory index
+- `instructions/basecoat-20-lang-governance.instructions.md` — BaseCoat repo-governance rules
+- `instructions/basecoat-10-core-enterprise-configuration.instructions.md` — enterprise setup guidance
+- `instructions/basecoat-10-core-hrm-execution.instructions.md` — internal execution hierarchy
+- `instructions/basecoat-50-security-token-economics.instructions.md` — cost-routing rules for this repo
+- `instructions/basecoat-10-core-memory-index.instructions.md` — hot-cache memory index
 
 When adding a new instruction, ask: "Should downstream repos receive this?" If the
 answer is no (it references BaseCoat tooling, sprints, or internal conventions), add
@@ -585,3 +602,5 @@ answer is no (it references BaseCoat tooling, sprints, or internal conventions),
 ## Questions
 
 Open an issue with the `question` label. Do not DM maintainers for things that belong in the open.
+
+<!-- markdownlint-enable MD009 MD012 MD022 MD031 MD032 MD036 MD040 MD041 -->

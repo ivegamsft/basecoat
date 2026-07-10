@@ -1,0 +1,57 @@
+name: "issue-triage-skill-routing"
+description: "Skill routing evaluation for issue triage quality checks and issue hygiene operations."
+skill: "skills/issue-triage/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Run a full issue triage pass: validate, dedupe, and set priority labels."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Review recently closed issues and reopen any that were closed without real fixes."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Find low-quality issue titles and suggest better replacements."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Build a new React component for the dashboard."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Deploy the application to production."
+    expect_activation: false
+
+  # Step 7 — PRD/spec pre-flight (Check 10 in triage-workflow.md)
+  - id: "prd-preflight-pos-1"
+    description: "Enhancement touching risky path with no PRD/spec link → needs-prd label + advisory comment"
+    input: |
+      Triage issue #42: title='Add retry logic to skills/memory-sweep agent', body='We need to add retry
+      handling to the memory sweep skill so it recovers from transient GitHub API errors. No PRD or spec
+      link is provided.'
+    expect_activation: true
+    expect:
+      labels:
+        - "needs-prd"
+      comment_contains:
+        - "PRD/Spec Pre-flight"
+        - "PRD:"
+        - "Spec:"
+        - "prd-spec-gate"
+
+  - id: "prd-preflight-pos-2"
+    description: "Enhancement with PRD and spec links present → no needs-prd label applied"
+    input: |
+      Triage issue #43: title='Add retry logic to skills/memory-sweep agent', body='We need to add retry
+      handling. PRD: https://example.com/prd-retry. Spec: https://example.com/spec-retry.'
+    expect_activation: true
+    expect:
+      labels_not:
+        - "needs-prd"
+
+  - id: "prd-preflight-neg-1"
+    description: "Bug issue (not enhancement) with no PRD/spec → needs-prd should NOT be applied"
+    input: |
+      Triage issue #44: title='Memory sweep crashes on empty repo list', body='Steps to reproduce:
+      1. Run memory sweep on a repo with no issues. Expected: graceful exit. Actual: unhandled exception.'
+    expect_activation: true
+    expect:
+      labels_not:
+        - "needs-prd"
+

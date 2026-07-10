@@ -1,0 +1,22 @@
+name: "sprint-planner-routing"
+description: "Routing evaluation — validates trigger activation for the sprint-planner skill."
+skill: "skills/sprint-planner/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Use sprint-planner to break our sprint goal into issues and dependency waves."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Plan next sprint commitments and acceptance criteria from this backlog."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Map sprint work into sequenced waves with blockers and owners."
+    expect_activation: true
+  - id: "pos-4"
+    input: "Set up a sprint GitHub Project and milestone, then add all generated sprint issues to both."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Implement the API endpoint and write production code."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Rotate secrets and investigate security alert triage."
+    expect_activation: false

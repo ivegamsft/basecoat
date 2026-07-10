@@ -1,6 +1,6 @@
 name: "ci-failure-escalation-routing"
 description: "Routing evaluation — validates trigger activation for the ci-failure-escalation agent."
-skill: "agents/ci-failure-escalation.agent.md"
+skill: "agents/basecoat-60-workflow-ci-failure-escalation.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with gate deploys on CI failures."

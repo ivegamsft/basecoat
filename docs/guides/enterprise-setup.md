@@ -83,17 +83,17 @@ Apply these settings to your Base Coat fork:
    - Require pull request reviews (1+ approvals)
    - Require status checks to pass (CI validation)
    - Restrict who can push to `main`
-   - See [`docs/../operations/security/BRANCH_PROTECTION.md`](../operations/security/BRANCH_PROTECTION.md)
+   - See [`docs/../operations/security/BRANCH_PROTECTION.md`](../operations/security/branch-protection.md)
 
 2. **Secret scanning**: Enable GitHub secret scanning and push protection.
-   See [`docs/../operations/security/SECRET_SCANNING.md`](../operations/security/SECRET_SCANNING.md)
+   See [`docs/../operations/security/SECRET_SCANNING.md`](../operations/security/secret-scanning.md)
 
 3. **Copilot policy**: Enable Copilot for the organization and allow custom instructions from repositories.
 
 4. **Template repositories**: Configure Base Coat as a template source for new repositories.
     See [`docs/repo-template-standard.md`](repo-template-standard.md)
 
-5. **Copilot Space bootstrap**: Use [`scripts/bootstrap-copilot-space.ps1`](https://github.com/IBuySpy-Shared/basecoat/blob/main/scripts/bootstrap-copilot-space.ps1) to create the org-owned `base-coat` Space and attach the curated BaseCoat docs.
+5. **Copilot Space bootstrap**: Use `scripts/bootstrap-copilot-space.ps1` to create the org-owned `base-coat` Space and attach the curated BaseCoat docs.
 
 ### Copilot Space reference for consumer repos
 
@@ -105,13 +105,17 @@ Consumer repositories should reference the shared BaseCoat Copilot Space using:
 Use this exact owner/name pair when invoking Copilot Space context retrieval from consumers.
 Do not point consumers at repo-local or personal spaces for BaseCoat canonical guidance.
 
+For onboarding posture selection, use the versioned profile contract in `docs/reference/onboarding-profile-contract.v1.md`.
+
 ### CI/CD Pipeline
 
 Base Coat includes validation workflows. Ensure these run on your fork:
 
 - **`validate-basecoat.yml`** — Validates file structure, naming conventions, and commit message security
-- **`prd-spec-gate.yml`** — Enforces PRD/spec references on high-change pull requests
+- **`prd-spec-gate.yml`** — Intake gate: high-change PRs (`>=12` files or `>=500` churn) require both PRD+spec refs; risky-path-only PRs (`instructions/`, `skills/`, `agents/`, `scripts/`, `.github/workflows/`) get advisory warning when missing refs
 - **`validate-repo-template-sample.yml`** — Validates sample repo template assets
+
+For merge-queue runs (`merge_group`), the gate passes with a notice because PR body context is unavailable in the merge group payload.
 
 ### Distribution Channels
 
@@ -121,6 +125,10 @@ Base Coat includes validation workflows. Ensure these run on your fork:
 | Release artifacts | Strict change control | Use `scripts/package-basecoat.ps1` or `.sh` to build, publish via GitHub Releases |
 | Git submodule | Explicit version pinning | `git submodule add` pointing at your fork |
 | Artifact mirror | Air-gapped environments | Download release assets, host on internal artifact server |
+
+### Onboarding profile contract
+
+The profile contract in `docs/reference/onboarding-profile-contract.v1.md` is the canonical place to choose between `solo-dev`, `team-dev`, and `regulated-team` without editing each consumer repo by hand.
 
 ---
 
@@ -166,10 +174,10 @@ All customizations follow the same governance model:
 
 - **Issue-first**: Log a GitHub issue before creating or modifying any asset.
 - **PR review**: All changes go through pull requests. Self-approval is permitted for low-risk changes.
-- **Naming conventions**: Follow the patterns in [`instructions/naming.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/naming.instructions.md).
+- **Naming conventions**: Follow the patterns in [`instructions/basecoat-10-core-naming.instructions.md`](../../instructions/basecoat-10-core-naming.instructions.md).
 - **Quality gates**: CI validates structure and naming on every PR.
 
-See [`docs/GOVERNANCE.md`](../reference/GOVERNANCE.md) and [`CONTRIBUTING.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/CONTRIBUTING.md) for full details.
+See [`docs/reference/governance-contract.md`](../reference/governance-contract.md) and [`CONTRIBUTING.md`](../../CONTRIBUTING.md) for full details.
 
 ---
 
@@ -191,7 +199,7 @@ See [`docs/GOVERNANCE.md`](../reference/GOVERNANCE.md) and [`CONTRIBUTING.md`](h
 ### Agent Trust Boundaries
 
 - Agents and skills execute in the context of the developer's Copilot session. They do not have independent access to systems.
-- MCP integrations must follow the trust-boundary rules in [`instructions/mcp.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/mcp.instructions.md).
+- MCP integrations must follow the trust-boundary rules in [`instructions/basecoat-10-core-mcp.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/basecoat-10-core-mcp.instructions.md).
 - Review [`docs/../reference/guardrails/oidc-federation.md`](../reference/guardrails/oidc-federation.md) before configuring any GitHub Actions to Azure authentication.
 
 ### Supply Chain Security
@@ -244,7 +252,7 @@ curl -fsSL https://raw.githubusercontent.com/YOUR-ORG/basecoat/v1.1.0/sync.sh | 
 5. Create a GitHub Release with packaged artifacts using `scripts/package-basecoat.ps1` or `.sh`.
 6. Publish checksums alongside the release assets.
 
-See [`docs/RELEASE_PROCESS.md`](../operations/RELEASE_PROCESS.md) for the full release workflow.
+See [`docs/release-process.md`](../operations/release-process.md) for the full release workflow.
 
 ### Rollout Strategy
 

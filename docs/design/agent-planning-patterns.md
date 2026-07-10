@@ -115,9 +115,9 @@ This enables TDD-style stop conditions for agent loops.
 
 ## First agents to adopt explicit state behavior
 
-1. `agents/sprint-planner.agent.md` (goal decomposition and dependency transitions)
-2. `agents/issue-triage.agent.md` (classification states and SLA escalation guards)
-3. `agents/merge-coordinator.agent.md` (merge attempt/retry/escalation transitions)
+1. `agents/basecoat-10-core-sprint-planner.agent.md` (goal decomposition and dependency transitions)
+2. `agents/basecoat-10-core-issue-triage.agent.md` (classification states and SLA escalation guards)
+3. `agents/basecoat-10-core-merge-coordinator.agent.md` (merge attempt/retry/escalation transitions)
 
 ## Rollout
 

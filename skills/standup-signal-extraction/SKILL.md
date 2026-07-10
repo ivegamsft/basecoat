@@ -1,22 +1,19 @@
 ---
 name: standup-signal-extraction
+compatibility: [github-copilot-cli]
 description: "Use when extracting actionable standup signals from team updates. USE FOR: convert updates into blockers/actions/dependencies, prioritize escalations, and produce owner-based daily execution plans. DO NOT USE FOR: feature implementation, deep architecture design, or retrospective trend analysis."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Project Management"
-  tags: ["standup", "agile", "signals", "blockers", "coordination"]
-  maturity: "beta"
-  audience: ["developers", "tech-leads", "engineering-managers"]
-allowed-tools: ["bash", "git", "gh", "grep"]
+
 invocation_rules:
   - "Use during daily standups to convert updates into concrete actions."
 visibility: "internal"
+category: operations
+metadata:
+  category: operations
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
-
 # Standup Signal Extraction Skill
 
 Use this skill to transform standup chatter into execution-ready actions.

@@ -33,7 +33,7 @@ select Retire, Rehost, Replatform, Refactor, Rebuild, or Replace.
 
 - `docs/app-inventory.md` — conceptual guide and parameter reference
 - `docs/treatment-matrix.md` — decision framework for app disposition
-- `agents/legacy-modernization.agent.md` — executes the strangler-fig pattern
-- `agents/dependency-lifecycle.agent.md` — manages discovered dependency upgrades
+- `agents/basecoat-10-core-legacy-modernization.agent.md` — executes the strangler-fig pattern
+- `agents/basecoat-10-core-dependency-lifecycle.agent.md` — manages discovered dependency upgrades
 - `skills/service-bus-migration/SKILL.md` — messaging migration patterns
 - `skills/identity-migration/SKILL.md` — authentication migration patterns

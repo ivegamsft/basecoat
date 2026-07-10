@@ -46,7 +46,7 @@ Collect the following from the past 7 days using `gh` CLI:
 
 ### Step 2 — Synthesize the Retrospective
 
-Analyze the data and produce a retrospective using the **Went Well / Improve / Action Items** format.
+Analyze the data and produce a retrospective using the **Went Well / Improve / Learnings / Backlog Items** format.
 
 #### Went Well
 
@@ -63,11 +63,17 @@ Analyze the data and produce a retrospective using the **Went Well / Improve / A
 - Flag PRs that took a long time or had many review cycles
 - Highlight any process friction
 
-#### Action Items
+#### Learnings
 
-- Convert "Improve" observations into concrete, time-boxed actions
+- Distill key lessons from "Improve" into concise, reusable takeaways
+- Keep learnings process-focused and broadly applicable to BaseCoat workflows
+
+#### Backlog Items (Bugs/Features)
+
+- Convert "Improve" observations into concrete backlog items
+- Classify each backlog item as **Bug**, **Feature**, or **Chore**
 - Frame generically (applicable to the BaseCoat framework, not one-off project complaints)
-- Each action item should include: **what**, **why**, **owner** (role, not name), **priority**
+- Each backlog item should include: **type**, **what**, **why**, **owner** (role, not name), **priority**
 
 ### Step 3 — Metrics Summary
 
@@ -97,10 +103,14 @@ Create a GitHub issue with the retrospective content. Use this structure:
 ### 🔧 Improve
 [bullet list]
 
-### 📋 Action Items
-| Action | Why | Owner | Priority |
-|---|---|---|---|
-| ... | ... | ... | P1/P2/P3 |
+### 📚 Learnings
+- [learning 1]
+- [learning 2]
+
+### 📌 Backlog Items (Bugs/Features)
+| Type | Item | Why | Owner | Priority |
+|---|---|---|---|---|
+| Bug/Feature/Chore | ... | ... | ... | P1/P2/P3 |
 
 ### 🔍 Notes
 [any additional context]

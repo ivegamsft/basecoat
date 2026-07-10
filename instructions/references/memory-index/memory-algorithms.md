@@ -44,7 +44,7 @@ Receiving layer responds with a `GuidanceSignal`:
 `STAY_FAST_PATH` | `EXPAND_CONTEXT` | `ELEVATE_TO_L3` | `ELEVATE_TO_L4` |
 `TURN_BUDGET_AT_RISK` | `ESCALATE_SCOPE` | `CONFIDENCE_DRIFT`
 
-See `instructions/hrm-execution.instructions.md` for signal definitions.
+See `instructions/basecoat-10-core-hrm-execution.instructions.md` for signal definitions.
 
 ## Pattern Bundle Confidence Update Formula
 

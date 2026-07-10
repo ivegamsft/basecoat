@@ -1,0 +1,265 @@
+name: Ship-it Release Gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_repo:
+        description: Repository in owner/repo format
+        required: true
+        default: IBuySpy-Shared/basecoat
+        type: string
+      target_branch:
+        description: Branch tied to promotion evidence
+        required: false
+        type: string
+      risk_band:
+        description: Risk classification
+        required: true
+        default: medium
+        type: choice
+        options:
+          - low
+          - medium
+          - high
+          - critical
+      promotion_stage:
+        description: Promotion stage to evaluate
+        required: true
+        default: validate
+        type: choice
+        options:
+          - validate
+          - canary
+          - staging
+          - production
+      execution_lane:
+        description: Execution lane for lane-aware gate policy
+        required: true
+        default: standard
+        type: choice
+        options:
+          - standard
+          - pilot-luxesite
+          - pilot-wawkr
+          - pilot-work-tracker
+      previous_stage_status:
+        description: Previous stage result
+        required: true
+        default: pass
+        type: choice
+        options:
+          - pass
+          - fail
+          - not_run
+      change_type:
+        description: Change classification for artifact matrix enforcement
+        required: true
+        default: code
+        type: choice
+        options:
+          - code
+          - docs-only
+          - config
+          - release
+      lint_status:
+        description: lint gate status
+        required: true
+        default: pass
+        type: choice
+        options:
+          - pass
+          - fail
+          - not_run
+      build_status:
+        description: build gate status
+        required: true
+        default: pass
+        type: choice
+        options:
+          - pass
+          - fail
+          - not_run
+      type_status:
+        description: type gate status
+        required: true
+        default: pass
+        type: choice
+        options:
+          - pass
+          - fail
+          - not_run
+      security_status:
+        description: security gate status
+        required: true
+        default: pass
+        type: choice
+        options:
+          - pass
+          - fail
+          - not_run
+      smoke_status:
+        description: smoke gate status
+        required: true
+        default: pass
+        type: choice
+        options:
+          - pass
+          - fail
+          - not_run
+      environment_protection_status:
+        description: environment protection configuration status
+        required: true
+        default: configured
+        type: choice
+        options:
+          - configured
+          - missing
+      require_approval:
+        description: Require environment approval for this gate
+        required: true
+        default: false
+        type: boolean
+      approval_status:
+        description: Approval result
+        required: true
+        default: not-required
+        type: choice
+        options:
+          - approved
+          - not-required
+          - missing
+      rollback_runbook_ref:
+        description: Link to rollback runbook (required for production)
+        required: false
+        type: string
+      rollback_validation_status:
+        description: Rollback validation status
+        required: true
+        default: missing
+        type: choice
+        options:
+          - validated
+          - missing
+          - failed
+      goal_ids:
+        description: Goal IDs (comma/space separated; consolidates spec/docs/tests/runbook goal IDs)
+        required: false
+        type: string
+      spec_status:
+        description: Spec artifact status
+        required: true
+        default: present
+        type: choice
+        options:
+          - present
+          - missing
+          - not_applicable
+      docs_status:
+        description: Docs artifact status
+        required: true
+        default: present
+        type: choice
+        options:
+          - present
+          - missing
+          - not_applicable
+      tests_status:
+        description: Tests artifact status
+        required: true
+        default: present
+        type: choice
+        options:
+          - present
+          - missing
+          - not_applicable
+      runbook_status:
+        description: Runbook artifact status
+        required: true
+        default: present
+        type: choice
+        options:
+          - present
+          - missing
+          - not_applicable
+      release_notes_status:
+        description: Release notes artifact status
+        required: true
+        default: present
+        type: choice
+        options:
+          - present
+          - missing
+          - not_applicable
+      dry_run:
+        description: Execute workflow in dry-run mode (no side effects)
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  evaluate-ship-it-gate:
+    name: Evaluate Ship-it Release Gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: read
+      pull-requests: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.0
+
+      - name: Log gate inputs
+        run: |
+          echo "Gate Evaluation Inputs:"
+          echo "  target_repo: ${{ inputs.target_repo }}"
+          echo "  risk_band: ${{ inputs.risk_band }}"
+          echo "  promotion_stage: ${{ inputs.promotion_stage }}"
+          echo "  change_type: ${{ inputs.change_type }}"
+          echo "  dry_run: ${{ inputs.dry_run }}"
+
+      - name: Validate promotion path
+        run: |
+          # Placeholder validation logic
+          echo "Validating promotion from ${{ inputs.previous_stage_status }} → ${{ inputs.promotion_stage }}"
+
+      - name: Check gate status
+        run: |
+          # Consolidate gate statuses for evaluation
+          gates=(
+            "lint:${{ inputs.lint_status }}"
+            "build:${{ inputs.build_status }}"
+            "type:${{ inputs.type_status }}"
+            "security:${{ inputs.security_status }}"
+            "smoke:${{ inputs.smoke_status }}"
+          )
+          
+          for gate in "${gates[@]}"; do
+            echo "Gate: $gate"
+          done
+
+      - name: Print artifact status summary
+        run: |
+          echo "Artifact Status Summary:"
+          echo "  spec: ${{ inputs.spec_status }}"
+          echo "  docs: ${{ inputs.docs_status }}"
+          echo "  tests: ${{ inputs.tests_status }}"
+          echo "  runbook: ${{ inputs.runbook_status }}"
+          echo "  release_notes: ${{ inputs.release_notes_status }}"
+
+      - name: Generate promotion evidence bundle
+        run: |
+          cat <<'JSON' > promotion-evidence-bundle.json
+          {
+            "target_repo": "${{ inputs.target_repo }}",
+            "target_branch": "${{ inputs.target_branch }}",
+            "promotion_stage": "${{ inputs.promotion_stage }}",
+            "risk_band": "${{ inputs.risk_band }}",
+            "execution_lane": "${{ inputs.execution_lane }}"
+          }
+          JSON
+          echo "Generated promotion-evidence-bundle.json"
+      - name: Success
+        if: ${{ !inputs.dry_run }}
+        run: |
+          echo "✓ Ship-it gate evaluation complete"

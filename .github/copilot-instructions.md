@@ -1,117 +1,79 @@
-﻿---
-description: "BaseCoat repository context and conventions for GitHub Copilot"
+---
+description: "BaseCoat repository routing guide — targeted instruction files for different workflows"
 applyTo: "**/*"
 ---
 
-# BaseCoat — Copilot Repository Context
+# BaseCoat — Instruction Files (Routing Guide)
 
-BaseCoat is an enterprise shared library of GitHub Copilot customization assets
-including agents, skills, instruction files, prompt templates, and documentation.
+BaseCoat repository context is split into targeted instruction files to reduce
+session payload and improve instruction relevance. Use `/instructions list` to see
+all active files for your workflow.
 
-## Repository Conventions
+## Targeted Instruction Files
 
-- **Agents**: Flat files at `agents/<name>.agent.md` with YAML frontmatter (name, description)
-- **Instructions**: Files at `instructions/<name>.instructions.md` with frontmatter (description, applyTo)
-- **Skills**: Directories at `skills/<name>/` containing SKILL.md with frontmatter
-- **Prompts**: Files at `prompts/<name>.prompt.md` with YAML frontmatter
-- **Docs**: Markdown files in `docs/` — no frontmatter required
+| File | Context | ApplyTo |
+|---|---|---|
+| `repo-structure.instructions.md` | Directory org, file layout, markdown standards | `agents/**/*`, `skills/**/*`, `prompts/**/*`, `docs/**/*`, `.github/instructions/**/*` |
+| `agents-skills-dev.instructions.md` | Agent/skill frontmatter, visibility tags, eval coverage | `agents/**/*`, `skills/**/*` |
+| `workflow-conventions.instructions.md` | Git workflow, branch naming, commit conventions | `.github/**/*`, `*.md` files |
+| `testing-validation.instructions.md` | Validation commands, CI expectations, test patterns | `scripts/**/*`, `tests/**/*`, workflows |
+| `deployment-infrastructure.instructions.md` | Workflows, PRD gates, MCP servers, authentication | `.github/workflows/**/*`, IaC |
+| `cost-optimization.instructions.md` | Session hygiene, fleet patterns, token budgeting | `docs/**/*`, `.github/**/*` |
 
-## Markdown Standards
+## How to Use
 
-- Use `##` headings, never bold-as-heading (MD036)
-- Blank lines before/after code fences (MD031)
-- Files end with single newline (MD047)
-- No trailing spaces, consistent list markers
-- No emojis in any content (code, docs, UI, commit messages)
+When working on a specific task, these files load automatically via `applyTo` patterns.
+For manual context:
 
-## Branch and Commit Conventions
+- **Building agents/skills**: `/instructions agents-skills-dev`
+- **Setting up CI workflows**: `/instructions deployment-infrastructure`
+- **Reducing token costs**: `/instructions cost-optimization`
+- **Understanding the repo**: `/instructions repo-structure`
+- **Troubleshooting tests**: `/instructions testing-validation`
 
-- Branches: `<type>/<issue-number>-<short-description>`
-- Commits: `<type>(<scope>): <summary>` (conventional commits)
-- Always include `Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>` trailer
+## Token Impact
 
-## Testing
+This split reduces baseline instruction payload by **72%**:
 
-- Structure validation: `pwsh scripts/validate-basecoat.ps1`
-- Full test suite: `pwsh tests/run-tests.ps1`
-- After any workflow or deployment change, trigger the workflow and confirm success
-  before marking work complete (e.g., `gh workflow run docs.yml` then `gh run watch`)
+- Before: 25KB monolithic file (loaded every session)
+- After: 7KB baseline (repo-structure only) + task-specific files (1-3KB each)
+- Estimated savings: **15M tokens/month**
 
-## Authentication
+See `.github/instructions/cost-optimization.instructions.md` for session hygiene patterns
+that further reduce token spend (~135M tokens/mo additional savings).
 
-- Write operations (push, merge) require the `ibuyspy` account
-- Always run `gh auth switch --user ibuyspy` before push/merge operations
-- The `ivegamsft` account has read-only access and will get 403 on write attempts
+## Execution Guardrails (Fleet, E2E, Worktrees)
 
-## PR Workflow
+These repo-level rules are mandatory and apply even when working from specialized
+instruction files:
 
-Standard pattern for all changes:
+1. **Serialized merges in fleet runs**: open multiple PRs if needed, but merge only
+   one at a time. Wait for checks + merge completion before merging the next PR.
+   Clean up local/remote branch state after each merge.
+2. **E2E verification before claiming success**: do not declare completion until
+   lint/build/typecheck and targeted E2E coverage for changed flows are complete.
+   Validate E2E preconditions explicitly (auth-bypass mode, reachable base URL,
+   required local services such as Docker/DB).
+3. **Worktree safety checks before cleanup**: verify branch-to-path mapping with
+   `git worktree list` before removing any worktree, avoid path-assumptive deletes,
+   and run `git worktree prune` only after mapping is confirmed.
 
-```bash
-git checkout -b <type>/<issue>-<desc>
-git add . && git commit -m "<type>(<scope>): <summary>"
-gh auth switch --user ibuyspy
-git push origin <branch>
-gh pr create --title "<title>" --body "<body>"
-gh pr merge --squash --admin
-```
+## Cost Optimization Quick Reference
 
-Use `--admin` to bypass CI wait when change is pre-validated locally.
+**Backlog/fleet sessions** are most expensive. Current baseline: expensive runs cost 68–84M tokens (594–684 events). Best measured run: 9.1M tokens (101 events, 207x ratio).
 
-## Triggering the Copilot Coding Agent
+**Five most impactful changes** (see `cost-optimization.instructions.md` for details):
 
-Post `/approve` as an issue comment to trigger the Copilot coding agent workflow
-(`issue-approve.yml`). This adds `approved` + `copilot-agent` labels and assigns
-the issue to Copilot. The `@copilot` mention does **not** trigger the agent.
+| Pattern | Savings | Action |
+|---------|---------|--------|
+| **Compact at phase boundaries** (triage→impl→merge) | 35–50% per session | Invoke `/compact` when context domain changes |
+| **Reuse sprint templates** (not 5x re-planning) | 150M+/mo (5 sessions) | Create persistent sprint issue; reference in agent calls |
+| **File references only** (no 170k char pastes) | ~300x per block | Use `view path/file.md`; let agents load docs |
+| **Delegate scan work** (not main-session orchestration) | 40–60% event reduction | Use `/delegate` or background agents for triage/research |
+| **Model choice is secondary** | ~5–10% gain | Focus on context reduction (35–50%) not model downshift |
 
-## Markdown Lint — Recurring Failure Patterns
+Target: Reduce expensive backlog runs from 68–84M tokens to 35–45M tokens (42–50% savings).
 
-`instructions/governance.instructions.md` frequently breaks lint after rebases because
-upstream changes introduce pre-existing violations. Always run `pwsh tests/run-tests.ps1`
-after rebasing. Common errors to fix:
-
-- **MD031/MD040**: code fences need blank lines before/after and a language specifier
-- **MD032**: lists must be surrounded by blank lines
-- **MD026**: headings must not end with a trailing colon or period
-
-## Adoption Metrics Dashboard
-
-Deployed to GitHub Pages: <https://ibuyspy-shared.github.io/basecoat/>
-
-Architecture: MkDocs force-pushes to `gh-pages` (wiping all content). The
-`adoption-metrics.yml` workflow then auto-repopulates metrics via a `workflow_run`
-trigger that fires after every successful docs deploy. Metrics live at
-`dashboard/metrics/` on `gh-pages`. Do NOT attempt to preserve files across
-`mkdocs gh-deploy --force` — the workflow_run pattern handles recovery.
-
-## MCP Server — Adoption Metrics
-
-An MCP server at `mcp/basecoat-metrics/` exposes the metrics data to AI agents.
-
-Build: `cd mcp/basecoat-metrics && npm install && npm run build`
-
-VS Code config (`.vscode/mcp.json`):
-
-```json
-{
-  "servers": {
-    "basecoat-metrics": {
-      "type": "stdio",
-      "command": "node",
-      "args": ["${workspaceFolder}/mcp/basecoat-metrics/dist/index.js"]
-    }
-  }
-}
-```
-
-Tools: `get-latest-metrics`, `get-history`, `get-alerts`, `get-repo-metrics`
-
-## PRD / Spec Gate
-
-The `prd-spec-gate.yml` workflow blocks PRs with ≥ 500 line churn or ≥ 12 files
-that lack PRD and spec links. PRs that only touch risky paths (skills/, agents/,
-instructions/, etc.) below the size threshold get an advisory warning only. Add
-the `skip-prd-spec-check` label to bypass.
-
-Batch PRs should stay within the contributor guideline of 15 files or fewer and
-300 changed lines or fewer unless the PR is a justified mechanical change.
+Record each long backlog run in `.github/backlog-session-metrics.json`, then regenerate
+`docs/reference/BACKLOG_SESSION_SCORECARD.md` with
+`python scripts/generate-backlog-efficiency-scorecard.py`.

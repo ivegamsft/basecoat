@@ -1,6 +1,6 @@
 name: "guidance-author-routing"
 description: "Routing evaluation — validates trigger activation for the guidance-author agent."
-skill: "agents/guidance-author.agent.md"
+skill: "agents/basecoat-50-security-guidance-author.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with drafting new BaseCoat guidance assets (instruction files, skill SKILL.md, agent files, prompt templates) from a description or requirement. Produces a structured draft ready for guidance-reviewer validation."

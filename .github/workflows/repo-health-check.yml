@@ -1,0 +1,50 @@
+name: "BaseCoat - Repo Health Check"
+
+on:
+  schedule:
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  health:
+    name: Lint, validate, and test repository health
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Run repository validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/validate-basecoat.sh
+
+      - name: Run full Bash test suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash tests/run-tests.sh
+
+      - name: Publish health summary
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          badge_url="https://github.com/${GITHUB_REPOSITORY}/actions/workflows/repo-health-check.yml/badge.svg"
+          {
+            echo "## Repository Health Check"
+            echo ""
+            echo "- Workflow badge: ![repo-health-check](${badge_url})"
+            echo "- Trigger: \`${GITHUB_EVENT_NAME}\`"
+            echo "- Commit: \`${GITHUB_SHA}\`"
+            echo ""
+            echo "Health check includes lint, validation, and test coverage gates."
+          } >> "$GITHUB_STEP_SUMMARY"

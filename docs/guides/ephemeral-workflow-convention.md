@@ -119,4 +119,4 @@ Avoid the following when working with ephemeral workflows:
 ## Related
 
 - [`docs/reference/guardrails/runner-routing.md`](../reference/guardrails/runner-routing.md) — CI runner selection
-- [`instructions/workflow-integrity.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/workflow-integrity.instructions.md) — workflow integrity rules
+- `instructions/basecoat-60-workflow-workflow-integrity.instructions.md` — workflow integrity rules

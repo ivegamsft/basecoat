@@ -1,0 +1,64 @@
+---
+description: "Use when defining repository, file, type, variable, test, infrastructure, or Azure resource names. Covers consistent naming conventions across code and platform assets."
+applyTo: "**/*.{md,json,yml,yaml,ts,tsx,js,jsx,py,cs,java,go,tf,bicep,ps1,sh}"
+---
+
+# Naming Standards
+
+Use this instruction when a change introduces new files, modules, packages, classes, functions, resources, or environments.
+
+## General Conventions
+
+- Repositories, folders, and reusable package names: `kebab-case`
+- Markdown, YAML, JSON, shell, and script files: `kebab-case`
+- Types, classes, and exported models: `PascalCase`
+- Variables, functions, and parameters: `camelCase`
+- Constants: follow language conventions, but keep names descriptive rather than abbreviated
+- Test names: describe behavior and expected outcome, not only the method under test
+
+## Infrastructure Conventions
+
+- Environment markers should be explicit: `dev`, `test`, `stage`, `prod`
+- Azure resource names should be deterministic, policy-compliant, and as short as practical
+- Prefer a stable pattern such as `<org>-<workload>-<env>-<region>-<suffix>` where the platform allows it
+- Keep tags aligned with naming so ownership and cost reporting stay consistent
+
+## BaseCoat Asset Naming
+
+- New agent and instruction files use a stable prefix: `basecoat-<band>-<area>-<topic>.agent.md` and `basecoat-<band>-<area>-<topic>.instructions.md`
+- `band` is a two-digit grouping prefix, `area` is the taxonomy token, and `topic` is the kebab-case slug
+- Keep the filename, catalog entry, and documentation reference aligned in the same change
+- During migration, preserve compatibility by updating aliases, references, and scripts together; do not leave mixed old/new names in active catalogs
+- For existing assets, prefer a staged rename with a compatibility note rather than a partial rename that breaks discoverability
+
+## Workflow Naming Conventions
+
+- Workflow filenames remain stable in `kebab-case` with optional `.lock` suffix: `<workflow>.yml` or `<workflow>.lock.yml`
+- Workflow display names in YAML must start with `BaseCoat -` to make ownership explicit in GitHub Actions views
+- Use pattern: `name: "BaseCoat - <workflow purpose>"`
+- Apply this convention to new and existing workflows without renaming files unless a migration plan explicitly requires it
+
+## Instruction Alias Exceptions
+
+- Canonical instruction files must use `basecoat-<band>-<area>-<topic>.instructions.md`.
+- Non-prefixed instruction filenames are allowed only as legacy compatibility aliases.
+- Compatibility alias files must include:
+  - `compatibilityAlias: true`
+  - `canonicalInstruction: "<basecoat-...instructions.md>"`
+  - A description starting with `BaseCoat compatibility alias`.
+- Approved legacy alias filenames:
+  - `architecture.instructions.md`
+  - `documentation.instructions.md`
+  - `observability.instructions.md`
+  - `security.instructions.md`
+  - `ux.instructions.md`
+  - `intent-routing.instructions.md`
+  - `plan-first.instructions.md`
+  - `ci-firewall.instructions.md`
+  - `rbac-authentication.instructions.md`
+
+## Review Lens
+
+- Does the new name convey purpose without local tribal knowledge?
+- Is the name consistent with adjacent code and infrastructure?
+- Will the name age well as the component grows beyond its first use case?

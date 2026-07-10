@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "3.26.0",
-  "releaseDate": "2026-05-11",
-  "notes": "Quality uplift sprint: raised 8 red-scored assets to green, refreshed registry metadata to 82 agents, fixed all validation warnings, added missing frontmatter fields"
+  "version": "3.33.2",
+  "releaseDate": "2026-07-07",
+  "notes": "Release: auto-remap known bad release pins during sync"
 }

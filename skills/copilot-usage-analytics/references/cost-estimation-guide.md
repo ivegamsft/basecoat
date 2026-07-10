@@ -24,9 +24,9 @@
 
 ## Agent Pairing
 
-- **agentops agent** (`agents/agentops.agent.md`) — monitors agent lifecycle health and can
+- **agentops agent** (`agents/basecoat-10-core-agentops.agent.md`) — monitors agent lifecycle health and can
   incorporate cost signals into rollback and routing decisions.
-- **performance-analyst agent** (`agents/performance-analyst.agent.md`) — pairs token-cost data
+- **performance-analyst agent** (`agents/basecoat-10-core-performance-analyst.agent.md`) — pairs token-cost data
   with latency and throughput metrics for a full efficiency picture.
-- **sprint-planner agent** (`agents/sprint-planner.agent.md`) — uses ROI estimates to prioritize
+- **sprint-planner agent** (`agents/basecoat-10-core-sprint-planner.agent.md`) — uses ROI estimates to prioritize
   automation investments.

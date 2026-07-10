@@ -69,7 +69,11 @@ export class AuditService {
   async getAudit(id: string) {
     const audit = await this.auditRepository.findOne({
       where: { id },
-      relations: ['repository', 'createdBy', 'findings'],
+      relations: {
+        repository: true,
+        createdBy: true,
+        findings: true,
+      },
     });
 
     if (!audit) {

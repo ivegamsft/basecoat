@@ -1,4 +1,4 @@
-name: Approve Issue for Copilot Agent
+name: "BaseCoat - Approve Issue for Copilot Agent"
 
 on:
   issue_comment:
@@ -24,7 +24,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Verify commenter has write access
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         id: check-access
         with:
           script: |
@@ -39,9 +39,127 @@ jobs:
             }
             return allowed;
 
-      - name: Assign to Copilot and update labels
+      - name: Validate metadata contract
         if: steps.check-access.outputs.result == 'true'
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        id: validate-metadata
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const labels = issue.labels.map(l => l.name);
+
+            const TYPE_LABELS = ['bug', 'enhancement', 'documentation', 'chore', 'security', 'question'];
+            const PRIORITY_LABELS = ['priority:critical', 'priority:high', 'priority:medium', 'priority:low'];
+            const BLOCKING_LABELS = ['duplicate', 'invalid', 'wontfix'];
+            const DEPENDENCY_REGEX = /(?:^|\n)\s*(Blocked by|Depends on)\s+(?:#(\d+)|https?:\/\/github\.com\/[^/\s]+\/[^/\s]+\/(?:issues|pull)\/(\d+))/gim;
+
+            const missing = [];
+
+            const hasType = TYPE_LABELS.some(l => labels.includes(l));
+            if (!hasType) missing.push('**Type label** — add one of: `bug`, `enhancement`, `documentation`, `chore`, `security`, `question`');
+
+            const hasPriority = PRIORITY_LABELS.some(l => labels.includes(l));
+            if (!hasPriority) missing.push('**Priority label** — add one of: `priority:critical`, `priority:high`, `priority:medium`, `priority:low`');
+
+            const hasBlocker = BLOCKING_LABELS.some(l => labels.includes(l));
+            if (hasBlocker) {
+              const blocker = BLOCKING_LABELS.find(l => labels.includes(l));
+              missing.push(`**Blocking label present** — remove \`${blocker}\` before approving, or close the issue instead`);
+            }
+
+            const dependencyRefs = new Set();
+            const collectRefs = text => {
+              if (!text || typeof text !== 'string') {
+                return;
+              }
+              DEPENDENCY_REGEX.lastIndex = 0;
+              let match;
+              while ((match = DEPENDENCY_REGEX.exec(text)) !== null) {
+                const ref = Number(match[2] || match[3]);
+                if (Number.isInteger(ref) && ref > 0) {
+                  dependencyRefs.add(ref);
+                }
+              }
+            };
+
+            collectRefs(issue.body || '');
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              per_page: 100
+            });
+            for (const comment of comments) {
+              collectRefs(comment.body || '');
+            }
+
+            const unresolvedDependencies = [];
+            for (const ref of dependencyRefs) {
+              const { data: linked } = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: ref
+              });
+              let resolved = linked.state === 'closed';
+              let status = linked.state;
+              if (linked.pull_request) {
+                const { data: linkedPr } = await github.rest.pulls.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: ref
+                });
+                resolved = Boolean(linkedPr.merged);
+                status = linkedPr.merged ? 'merged' : linkedPr.state;
+              }
+              if (!resolved) {
+                unresolvedDependencies.push(`#${ref} (${status})`);
+              }
+            }
+
+            if (unresolvedDependencies.length > 0) {
+              missing.push(`**Unresolved dependencies** — resolve ${unresolvedDependencies.join(', ')} before approving`);
+            }
+
+            if (missing.length > 0) {
+              // Add a human-waiting label to surface for cleanup
+              try {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  labels: ['needs-triage', 'needs-info']
+                });
+              } catch (e) {
+                core.warning(`Could not add waiting labels: ${e.message}`);
+              }
+
+              const checklist = missing.map(m => `- [ ] ${m}`).join('\n');
+              const body = [
+                '⛔ **Approval blocked — incomplete metadata**',
+                '',
+                'This issue cannot be approved until the following required metadata is complete:',
+                '',
+                checklist,
+                '',
+                'Once the missing information is added, comment `/approve` again to retry.',
+              ].join('\n');
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body
+              });
+
+              core.setFailed(`Metadata contract not satisfied: ${missing.length} requirement(s) missing.`);
+              return false;
+            }
+
+            return true;
+
+      - name: Assign to Copilot and update labels
+        if: steps.check-access.outputs.result == 'true' && steps.validate-metadata.outputs.result == 'true'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
             const issue = context.payload.issue;
@@ -65,25 +183,74 @@ jobs:
               labels: ['approved', 'copilot-agent']
             });
 
-            // Assign to Copilot coding agent (requires Copilot coding agent enabled for repo)
+            // Pre-flight: check whether Copilot cloud agent is available for this repo.
+            // suggestedActors returns copilot-swe-agent when the agent can be assigned.
+            let copilotActor;
             let assigned = false;
+            let preflightErrorMessage = null;
+            let assignmentErrorMessage = null;
             try {
-              await github.rest.issues.addAssignees({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issue.number,
-                assignees: ['Copilot']
-              });
-              // Verify assignment actually stuck
-              const { data: updated } = await github.rest.issues.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issue.number
-              });
-              assigned = updated.assignees.some(a => a.login.toLowerCase() === 'copilot');
+              const { repository } = await github.graphql(
+                `
+                query($owner: String!, $repo: String!) {
+                  repository(owner: $owner, name: $repo) {
+                    suggestedActors(capabilities: [CAN_BE_ASSIGNED], first: 100) {
+                      nodes {
+                        login
+                        ... on Bot { id }
+                      }
+                    }
+                  }
+                }
+                `,
+                {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                }
+              );
+
+              copilotActor = repository?.suggestedActors?.nodes?.find(actor =>
+                actor?.login === 'copilot-swe-agent'
+              );
             } catch (e) {
-              core.warning(`Could not assign to Copilot: ${e.message}`);
+              preflightErrorMessage = e.message;
+              core.warning(`Could not query Copilot suggestedActors: ${e.message}`);
             }
+
+            // Assign to Copilot cloud agent when the actor is available.
+            if (copilotActor) {
+              try {
+                await github.request('POST /repos/{owner}/{repo}/issues/{issue_number}/assignees', {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  assignees: ['copilot-swe-agent[bot]'],
+                  agent_assignment: {
+                    target_repo: `${context.repo.owner}/${context.repo.repo}`,
+                    base_branch: 'main',
+                    custom_instructions: "Fix the issue using the repository's existing conventions.",
+                    custom_agent: '',
+                    model: '',
+                  },
+                });
+                const { data: updated } = await github.rest.issues.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number
+                });
+                assigned = updated.assignees.some(a => a.login === 'copilot-swe-agent[bot]' || a.login === 'copilot-swe-agent');
+                if (!assigned) {
+                  assignmentErrorMessage = 'GitHub did not persist the Copilot assignee after the assignment request.';
+                }
+              } catch (e) {
+                assignmentErrorMessage = e.message;
+                core.warning(`Could not assign to Copilot cloud agent: ${e.message}`);
+              }
+            }
+
+            // Org-level settings URL for enabling Copilot cloud agent (Business/Enterprise default: off)
+            const orgSettingsUrl = `https://github.com/organizations/${context.repo.owner}/settings/copilot`;
+            const enableDocsUrl = 'https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-for-organization/add-copilot-cloud-agent';
 
             // Acknowledge with honest status
             const body = assigned
@@ -93,13 +260,32 @@ jobs:
                   'Copilot will analyze this issue and open a draft PR with the implementation.',
                   'Review the PR when ready and merge after CI passes.',
                 ].join('\n')
+              : preflightErrorMessage
+              ? [
+                  '✅ **Approved** — Labels `approved` + `copilot-agent` applied.',
+                  '',
+                  `⚠️ **Agent pre-flight failed.** ${preflightErrorMessage}`,
+                  '',
+                  'Retry the workflow after confirming GitHub is healthy and the workflow token still has the required access.',
+                ].join('\n')
+              : assignmentErrorMessage
+              ? [
+                  '✅ **Approved** — Labels `approved` + `copilot-agent` applied.',
+                  '',
+                  `⚠️ **Agent assignment failed after pre-flight succeeded.** ${assignmentErrorMessage}`,
+                  '',
+                  'Retry the workflow after confirming GitHub is healthy, or assign this issue to **@Copilot** manually once the service is available.',
+                ].join('\n')
               : [
                   '✅ **Approved** — Labels `approved` + `copilot-agent` applied.',
                   '',
-                  '⚠️ **Agent assignment failed.** The Copilot coding agent could not be automatically',
-                  'assigned (it may not be enabled for this repository).',
+                  '⚠️ **Agent assignment failed.** `@Copilot` is not a valid assignee for this repository.',
                   '',
-                  'To trigger the agent manually, assign this issue to **@Copilot** in the sidebar,',
+                  'The **Copilot cloud agent** (Copilot Business/Enterprise) is disabled by default and must',
+                  `be enabled by an org admin at [Organization Settings > Copilot](${orgSettingsUrl}).`,
+                  `See the [enablement guide](${enableDocsUrl}) for step-by-step instructions.`,
+                  '',
+                  'Once enabled, assign this issue to **@Copilot** in the sidebar to trigger the agent,',
                   'or implement the changes manually following the triage plan above.',
                 ].join('\n');
 
@@ -109,3 +295,11 @@ jobs:
               issue_number: issue.number,
               body
             });
+
+            if (preflightErrorMessage) {
+              core.setFailed(`Copilot suggestedActors pre-flight failed: ${preflightErrorMessage}`);
+            }
+
+            if (assignmentErrorMessage) {
+              core.setFailed(`Copilot cloud agent assignment failed: ${assignmentErrorMessage}`);
+            }

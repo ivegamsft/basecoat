@@ -1,6 +1,6 @@
 name: "security-operations-routing"
 description: "Routing evaluation — validates trigger activation for the security-operations agent."
-skill: "agents/security-operations.agent.md"
+skill: "agents/basecoat-50-security-security-operations.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with run SOC incident response playbook."

@@ -1,24 +1,24 @@
 ---
 name: e2e-testing
+compatibility: [github-copilot-cli]
 title: E2E Testing - Playwright, Cypress, and Cross-Browser Patterns
 description: "Use when designing or hardening production E2E tests with Playwright or Cypress, including flake reduction, CI strategy, and browser coverage. USE FOR: choose between Playwright and Cypress, reduce flaky browser tests, test login or checkout journeys, set up cross-browser CI coverage, plan E2E fixtures and mocks. DO NOT USE FOR: unit test design, API-only load testing, visual brand design."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
+category: testing
 metadata:
-  domain: testing
-  maturity: production
-  audience: [qa-engineer, developer, test-automation-engineer]
-allowed-tools: [bash, node, python, docker]
+  category: testing
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
-
 # E2E Testing Skill
 
 Design reliable, maintainable end-to-end coverage for critical user journeys. Choose the right
 framework, define resilient selectors and waits, and connect browser tests to CI pipelines
 without creating brittle suites.
+
+**See also:** [E2E Validation Lifecycle diagrams](../../docs/diagrams/e2e-validation-lifecycle.md)
+for visual guidance on gate preconditions, pass/fail branching, and test scope decisions.
 
 ## Reference Files
 

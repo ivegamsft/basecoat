@@ -1,6 +1,6 @@
 name: "security-monitor-routing"
 description: "Routing evaluation — validates trigger activation for the security-monitor agent."
-skill: "agents/security-monitor.agent.md"
+skill: "agents/basecoat-50-security-security-monitor.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with detection engineering or SIEM configuration that maps MITRE ATT&CK tactics to rules and alert baselines. USE FOR: build ATT&CK-mapped detection rules, calibrate SIEM alert thresholds, and map compliance to detection coverage. DO NOT USE FOR: live incident response, secrets rotation."

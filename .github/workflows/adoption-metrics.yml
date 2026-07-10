@@ -1,4 +1,5 @@
-name: Adoption Metrics
+name: "BaseCoat - Adoption Metrics"
+# [Internal-only] Memory workflow - BaseCoat operational use
 
 on:
   schedule:
@@ -23,9 +24,9 @@ jobs:
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: '3.11'
 
@@ -36,7 +37,16 @@ jobs:
           DASHBOARD_ORG: ${{ secrets.DASHBOARD_ORG || github.repository_owner }}
           DASHBOARD_REPOS: ${{ secrets.DASHBOARD_REPOS || format('["{0}"]', github.repository) }}
           OUTPUT_DIR: dashboard/metrics
+          # App Insights telemetry (onboarding telemetry pack — see docs/operations/onboarding-telemetry-readiness.md)
+          APPLICATIONINSIGHTS_CONNECTION_STRING: ${{ secrets.APPLICATIONINSIGHTS_CONNECTION_STRING }}
         run: python scripts/metrics/collect-metrics.py
+
+      - name: Emit telemetry readiness check
+        env:
+          APPLICATIONINSIGHTS_CONNECTION_STRING: ${{ secrets.APPLICATIONINSIGHTS_CONNECTION_STRING }}
+          COPILOT_METRICS_TOKEN: ${{ secrets.COPILOT_METRICS_TOKEN }}
+          DASHBOARD_REPOS: ${{ secrets.DASHBOARD_REPOS || format('["{0}"]', github.repository) }}
+        run: python scripts/metrics/emit-telemetry-readiness.py
 
       - name: Deploy to gh-pages
         run: |
@@ -92,13 +102,14 @@ jobs:
           alerts = json.load(open('$ALERTS_FILE'))
           lines = ['# Degradation Alerts\n']
           for a in alerts:
-              icon = '⚠️' if a['severity'] == 'warning' else 'ℹ️'
+              icon = '(warning)' if a['severity'] == 'warning' else '(info)'
               lines.append(f\"- {icon} **{a['type']}**: {a['message']}\")
           print('\n'.join(lines))
           ")
             gh issue create \
               --repo ${{ github.repository }} \
-              --title "⚠️ Metrics Degradation Alert — $(date +%Y-%m-%d)" \
+              --title "Metrics Degradation Alert (${ALERT_COUNT}) -- $(date +%Y-%m-%d)" \
               --body "$ALERT_BODY" \
               --label "metrics,degradation"
           fi
+

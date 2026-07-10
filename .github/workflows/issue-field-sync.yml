@@ -1,0 +1,163 @@
+name: "BaseCoat - Sync issue fields from triage labels"
+
+on:
+  issues:
+    types:
+      - opened
+      - reopened
+      - labeled
+      - unlabeled
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: "Issue number to resync"
+        required: true
+        type: string
+
+permissions:
+  issues: write
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number || inputs.issue_number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  sync-fields:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Sync issue type and priority fields
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        with:
+          # GH_AW_GITHUB_TOKEN is a PAT with read:org scope required by GET /orgs/{org}/issue-fields.
+          # GITHUB_TOKEN is used as fallback for repos that have not configured the PAT yet.
+          github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const issueNumber = context.payload.issue?.number ?? Number(context.payload.inputs?.issue_number);
+            if (!Number.isInteger(issueNumber) || issueNumber <= 0) {
+              core.setFailed('Missing or invalid issue number.');
+              return;
+            }
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const { data: issue } = await github.request('GET /repos/{owner}/{repo}/issues/{issue_number}', {
+              owner,
+              repo,
+              issue_number: issueNumber,
+            });
+
+            if (issue.pull_request) {
+              core.info(`Skipping PR #${issueNumber}.`);
+              return;
+            }
+
+            const labels = new Set((issue.labels || []).map(label => label.name));
+            const typeLabel =
+              ['bug', 'enhancement', 'documentation', 'chore', 'security', 'question']
+                .find(label => labels.has(label)) || null;
+            const priorityLabel =
+              ['priority:critical', 'priority:high', 'priority:medium', 'priority:low']
+                .find(label => labels.has(label)) || null;
+
+            const desiredIssueType = typeLabel === 'enhancement'
+              ? 'Feature'
+              : typeLabel === 'bug' || typeLabel === 'security'
+                ? 'Bug'
+                : typeLabel
+                  ? 'Task'
+                  : null;
+
+            // Sync issue type — wrap in try/catch so preview API errors degrade to a warning.
+            let typeSynced = false;
+            if (desiredIssueType && issue.type?.name !== desiredIssueType) {
+              try {
+                await github.request('PATCH /repos/{owner}/{repo}/issues/{issue_number}', {
+                  owner,
+                  repo,
+                  issue_number: issueNumber,
+                  type: desiredIssueType,
+                });
+                typeSynced = true;
+              } catch (e) {
+                if (e.status === 403 || e.status === 404) {
+                  core.warning(`Could not set issue type to '${desiredIssueType}' for #${issueNumber} (preview API): ${e.message}`);
+                } else {
+                  throw e;
+                }
+              }
+            } else if (issue.type?.name === desiredIssueType) {
+              typeSynced = true; // already correct
+            }
+
+            if (!priorityLabel) {
+              core.info(`Issue #${issueNumber} has no canonical priority label; leaving field unchanged.`);
+              return;
+            }
+
+            const priorityValueMap = {
+              'priority:critical': 'Urgent',
+              'priority:high': 'High',
+              'priority:medium': 'Medium',
+              'priority:low': 'Low',
+            };
+
+            // Sync priority via org issue-fields API — wrap every call so 403/404 from
+            // preview endpoints never fail unrelated label events.
+            try {
+              const { data: fields } = await github.request('GET /orgs/{org}/issue-fields', {
+                org: owner,
+              });
+
+              const priorityField = fields.find(field => field.name.toLowerCase() === 'priority');
+              if (!priorityField) {
+                core.warning('Priority issue field not found in organization; skipping priority sync.');
+                return;
+              }
+
+              const desiredPriority = priorityValueMap[priorityLabel];
+              const { data: currentValues } = await github.request(
+                'GET /repos/{owner}/{repo}/issues/{issue_number}/issue-field-values',
+                {
+                  owner,
+                  repo,
+                  issue_number: issueNumber,
+                }
+              );
+
+              const currentPriority = currentValues.find(value => value.issue_field_id === priorityField.id);
+              const currentValue = currentPriority?.single_select_option?.name ?? null;
+              if (currentValue === desiredPriority) {
+                core.info(`Issue #${issueNumber} priority is already ${desiredPriority}.`);
+                return;
+              }
+
+              await github.request('PUT /repos/{owner}/{repo}/issues/{issue_number}/issue-field-values', {
+                owner,
+                repo,
+                issue_number: issueNumber,
+                issue_field_values: [
+                  {
+                    field_id: priorityField.id,
+                    value: desiredPriority,
+                  },
+                ],
+              });
+
+              core.summary.addHeading('Issue field sync', 2);
+              core.summary.addRaw(`\nSynced issue #${issueNumber} fields from labels.\n`);
+              const typeStatus = desiredIssueType
+                ? (typeSynced ? desiredIssueType : `${desiredIssueType} (sync failed — see warnings)`)
+                : 'unchanged';
+              core.summary.addRaw(`\n- **Type**: ${typeStatus}\n`);
+              core.summary.addRaw(`- **Priority**: ${desiredPriority}\n`);
+              await core.summary.write();
+            } catch (e) {
+              if (e.status === 403 || e.status === 404) {
+                core.warning(`Priority field sync skipped for #${issueNumber} (preview API): ${e.message}`);
+              } else {
+                throw e;
+              }
+            }

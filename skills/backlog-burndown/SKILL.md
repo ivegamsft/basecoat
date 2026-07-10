@@ -1,19 +1,15 @@
 ---
 name: backlog-burndown
+compatibility: [github-copilot-cli]
 description: "Use when managing backlog burn-down and flow health across a sprint window or milestone. USE FOR: build burn-down tables from issue state changes, detect spillover risk from velocity and remaining scope, prioritize blockers to protect sprint goals, and produce daily backlog status updates with explicit actions. DO NOT USE FOR: writing implementation code, replacing sprint retrospective analysis, or setting annual portfolio strategy."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
+category: operations
 metadata:
-  category: "Project Management"
-  tags: ["agile", "sprint", "backlog", "burndown", "delivery"]
-  maturity: "beta"
-  audience: ["developers", "tech-leads", "engineering-managers"]
-allowed-tools: ["bash", "git", "grep", "find"]
+  category: operations
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
-
 # Backlog Burndown Skill
 
 Use this skill when you need a structured way to track backlog completion pace, scope drift, and risk to sprint commitments.

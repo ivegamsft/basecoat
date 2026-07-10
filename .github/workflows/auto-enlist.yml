@@ -1,4 +1,4 @@
-name: Auto-Enlist Repos in Basecoat
+name: "BaseCoat - Auto-Enlist Repos in Basecoat"
 
 # Admin workflow: bulk-enlist one or more org repos in the basecoat memory sweep.
 # Adds the basecoat-enabled topic and creates learning labels in each repo.
@@ -36,7 +36,7 @@ jobs:
 
     steps:
       - name: Check out basecoat scripts
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 1
 
@@ -79,8 +79,6 @@ jobs:
 
           SUCCEEDED=0
           FAILED=0
-          SKIPPED=0
-
           while IFS= read -r repo; do
             [[ -z "$repo" ]] && continue
             echo "──────────────────────────────────────────"

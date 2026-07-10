@@ -1,6 +1,6 @@
 name: "takt-time-tracker-routing"
 description: "Routing evaluation — validates trigger activation for the takt-time-tracker agent."
-skill: "agents/takt-time-tracker.agent.md"
+skill: "agents/basecoat-10-core-takt-time-tracker.agent.md"
 scenarios:
   - id: "pos-1"
     input: "Measure dwell time at each station and compute takt time."

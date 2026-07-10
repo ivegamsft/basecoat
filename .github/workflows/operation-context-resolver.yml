@@ -1,0 +1,134 @@
+name: "BaseCoat - Operation Context Resolver"
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/operation-context-resolver.yml"
+      - ".github/environment-map.yml"
+      - "skills/operation-context-resolver/**"
+  workflow_dispatch:
+    inputs:
+      github_ref:
+        description: "Optional ref override for context resolution"
+        required: false
+        default: ""
+      user_intent:
+        description: "Optional operator intent to feed into the resolver"
+        required: false
+        default: ""
+      workflow_environment:
+        description: "Optional explicit environment override"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-and-report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "skills/operation-context-resolver/package-lock.json"
+
+      - name: Ensure environment map exists
+        shell: bash
+        run: |
+          if [ ! -f .github/environment-map.yml ]; then
+            cp skills/operation-context-resolver/templates/environment-map.yml .github/environment-map.yml
+          fi
+
+      - name: Install dependencies
+        working-directory: skills/operation-context-resolver
+        run: npm ci --no-audit --prefer-offline
+
+      - name: Build resolver package
+        working-directory: skills/operation-context-resolver
+        run: npm run build
+
+      - name: Run resolver tests with coverage
+        working-directory: skills/operation-context-resolver
+        run: npm test -- --coverage --runInBand
+
+      - name: Validate environment map
+        working-directory: skills/operation-context-resolver
+        run: node dist/cli.js validate --repo-root "${GITHUB_WORKSPACE}"
+
+      - name: Resolve operation context
+        working-directory: skills/operation-context-resolver
+        env:
+          DISPATCH_GITHUB_REF: ${{ inputs.github_ref }}
+          DISPATCH_USER_INTENT: ${{ inputs.user_intent }}
+          DISPATCH_WORKFLOW_ENVIRONMENT: ${{ inputs.workflow_environment }}
+        shell: bash
+        run: |
+          resolved_ref="${GITHUB_REF}"
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ] && [ -n "${DISPATCH_GITHUB_REF}" ]; then
+            resolved_ref="${DISPATCH_GITHUB_REF}"
+          fi
+
+          args=(
+            resolve
+            --repo-root "${GITHUB_WORKSPACE}"
+            --output "${RUNNER_TEMP}/operation-context.json"
+            --github-ref "${resolved_ref}"
+            --github-event-name "${GITHUB_EVENT_NAME}"
+          )
+
+          if [ -n "${DISPATCH_USER_INTENT}" ]; then
+            args+=(--user-intent "${DISPATCH_USER_INTENT}")
+          fi
+
+          if [ -n "${DISPATCH_WORKFLOW_ENVIRONMENT}" ]; then
+            args+=(--workflow-environment "${DISPATCH_WORKFLOW_ENVIRONMENT}")
+          fi
+
+          node dist/cli.js "${args[@]}"
+
+      - name: Publish step summary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          context_path = Path(os.environ["RUNNER_TEMP"]) / "operation-context.json"
+          data = json.loads(context_path.read_text(encoding="utf-8"))
+
+          summary_lines = [
+              "## Operation context",
+              "",
+              f"- Target environment: `{data['target_environment']}`",
+              f"- Mode: `{data['mode']}`",
+              f"- Risk level: `{data['risk_level']}`",
+              f"- Human approval required: `{data['human_approval_required']}`",
+              f"- Incident mode: `{data['incident_mode']}`",
+              f"- Artifact: `{context_path}`",
+              "",
+          ]
+
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as handle:
+              handle.write("\n".join(summary_lines))
+          PY
+
+      - name: Upload operation context artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: operation-context
+          path: ${{ runner.temp }}/operation-context.json
+          if-no-files-found: error
+          retention-days: 7

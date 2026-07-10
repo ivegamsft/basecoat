@@ -1,6 +1,6 @@
 name: "release-freeze-enforcer-routing"
 description: "Routing evaluation — validates trigger activation for the release-freeze-enforcer agent."
-skill: "agents/release-freeze-enforcer.agent.md"
+skill: "agents/basecoat-60-workflow-release-freeze-enforcer.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help enforcing release freeze windows and routing exception requests."

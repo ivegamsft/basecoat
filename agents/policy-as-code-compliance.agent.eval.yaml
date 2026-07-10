@@ -1,6 +1,6 @@
 name: "policy-as-code-compliance-routing"
 description: "Routing evaluation — validates trigger activation for the policy-as-code-compliance agent."
-skill: "agents/policy-as-code-compliance.agent.md"
+skill: "agents/basecoat-50-security-policy-as-code-compliance.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with validate Terraform against OPA policies."

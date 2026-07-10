@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "defaultProfile": "standard",
+  "profiles": {
+    "none": {
+      "description": "Disable BaseCoat hook packs.",
+      "enabledHookPacks": []
+    },
+    "memory": {
+      "description": "Enable only session start and stop continuity stubs.",
+      "enabledHookPacks": [
+        "10-session-memory"
+      ]
+    },
+    "guardrails": {
+      "description": "Enable tool guardrails plus error and budget handling stubs.",
+      "enabledHookPacks": [
+        "20-tool-guardrails",
+        "30-error-and-budget"
+      ]
+    },
+    "standard": {
+      "description": "Recommended. Enable memory, tool guardrails, and error and budget handling.",
+      "enabledHookPacks": [
+        "10-session-memory",
+        "20-tool-guardrails",
+        "30-error-and-budget"
+      ]
+    }
+  },
+  "packs": {
+    "10-session-memory": {
+      "path": ".github/hooks/10-session-memory.json",
+      "description": "SessionStart and Stop stubs for session continuity.",
+      "platformSupport": {
+        "vsCode": true,
+        "copilotCli": true,
+        "copilotCloudAgent": true,
+        "notes": [
+          "Cloud Agent runs only bash handlers."
+        ]
+      }
+    },
+    "20-tool-guardrails": {
+      "path": ".github/hooks/20-tool-guardrails.json",
+      "description": "PreToolUse and PostToolUse guardrail stubs.",
+      "platformSupport": {
+        "vsCode": true,
+        "copilotCli": true,
+        "copilotCloudAgent": true,
+        "notes": [
+          "Cloud Agent runs only bash handlers."
+        ]
+      }
+    },
+    "30-error-and-budget": {
+      "path": ".github/hooks/30-error-and-budget.json",
+      "description": "errorOccurred and budget-threshold stubs mapped to native runtime events.",
+      "platformSupport": {
+        "vsCode": true,
+        "copilotCli": true,
+        "copilotCloudAgent": true,
+        "notes": [
+          "Budget threshold handling is implemented through postToolUse because there is no native OnBudgetExceeded event."
+        ]
+      }
+    }
+  }
+}

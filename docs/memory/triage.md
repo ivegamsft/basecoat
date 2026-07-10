@@ -23,7 +23,7 @@ If maybe: it needs evidence from more than one source before promotion.
 
 ## The Decision Tree
 
-```
+```text
 Is the learning free of product names, internal system names, and org-specific tooling?
 │
 ├─ No  → App-specific. Keep in repo memory. Do not submit.
@@ -62,21 +62,21 @@ All four must be **yes** for promotion.
 
 ### ✅ Promoted to shared memory
 
-**"Enterprise Copilot fleet limit: max 3 concurrent background agents is safe."**
+> "Enterprise Copilot fleet limit: max 3 concurrent background agents is safe."
 
 - Generic: yes — no org names, no internal systems
 - Broadly applicable: yes — any team using fleet dispatch hits this
 - Durable: yes — hit consistently across Sprint 24, confirmed in multiple orgs
 - Actionable: yes — teams immediately changed wave sizes
 
-**"Copilot agent PRs have `action_required` CI until a maintainer pushes an empty commit."**
+> "Copilot agent PRs have `action_required` CI until a maintainer pushes an empty commit."
 
 - Generic: yes — it's a GitHub platform behavior, not org-specific
 - Broadly applicable: yes — any org using GitHub Copilot coding agent faces this
 - Durable: yes — consistent across multiple repos over multiple months
 - Actionable: yes — add empty-commit step to unblock PRs
 
-**"Instructions provide uniform enforcement across all agents; per-agent rule duplication is the anti-pattern."**
+> "Instructions provide uniform enforcement across all agents; per-agent rule duplication is the anti-pattern."
 
 - Generic: yes — describes how the BaseCoat instruction layer works
 - Broadly applicable: yes — foundational to any BaseCoat adoption
@@ -87,23 +87,23 @@ All four must be **yes** for promotion.
 
 ### ❌ Declined (app-specific)
 
-**"Always use TypeScript strict mode for this project."**
+> "Always use TypeScript strict mode for this project."
 
 - Broadly applicable: ❌ — only relevant to one codebase's conventions
 - **Decision:** Keep in repo's `.github/copilot-instructions.md`. Do not submit.
 
-**"Deploy to the AKS cluster named prod-aks-we-01."**
+> "Deploy to the AKS cluster named prod-aks-we-01."
 
 - Generic: ❌ — internal system name
 - **Decision:** Repo-local memory only.
 
-**"The sprint velocity for Team Infra is 28 points."**
+> "The sprint velocity for Team Infra is 28 points."
 
 - Generic: ❌ — team-specific metric
 - Broadly applicable: ❌ — meaningless to other teams
 - **Decision:** Not a memory candidate at all. Close the issue.
 
-**"Rate limit recovery: wait 90 seconds after a 429."**
+> "Rate limit recovery: wait 90 seconds after a 429."
 
 *Wait — is this universal or app-specific?*
 
@@ -176,7 +176,7 @@ get a submission declined.
 
 ## References
 
-- [Contributing Learnings](CONTRIBUTING.md) — the five submission paths
-- [Memory Process](PROCESS.md) — end-to-end lifecycle
-- [Memory Design](MEMORY_DESIGN.md) — the five-layer hierarchy
-- [Shared Memory Guide](SHARED_MEMORY_GUIDE.md) — org-level setup
+- [Contributing Learnings](contributing.md) — the five submission paths
+- [Memory Process](process.md) — end-to-end lifecycle
+- [Memory Design](memory-design.md) — the five-layer hierarchy
+- [Shared Memory Guide](shared-memory-guide.md) — org-level setup

@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "hooks": {
+    "errorOccurred": [
+      {
+        "type": "command",
+        "bash": "./scripts/hooks/error-occurred.sh",
+        "powershell": "./scripts/hooks/error-occurred.ps1",
+        "timeoutSec": 5
+      }
+    ],
+    "postToolUse": [
+      {
+        "type": "command",
+        "bash": "./scripts/hooks/budget-threshold.sh",
+        "powershell": "./scripts/hooks/budget-threshold.ps1",
+        "timeoutSec": 3
+      }
+    ]
+  }
+}

@@ -1,6 +1,6 @@
 name: "escalation-router-routing"
 description: "Routing evaluation — validates trigger activation for the escalation-router agent."
-skill: "agents/escalation-router.agent.md"
+skill: "agents/basecoat-10-core-escalation-router.agent.md"
 scenarios:
   - id: "pos-1"
     input: "Route this high-risk decision to a human approver with structured approval data."

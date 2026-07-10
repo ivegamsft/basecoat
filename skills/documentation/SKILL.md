@@ -1,20 +1,15 @@
 ---
-
 name: documentation
+compatibility: [github-copilot-cli]
 description: "Use when writing or improving technical documentation such as READMEs, ADRs, runbooks, and reference guides. USE FOR: write a project README, record an architecture decision, create an operational runbook, review docs for accuracy and gaps, establish docs-as-code standards. DO NOT USE FOR: implementing application features, generating code-only refactors, designing infrastructure topology diagrams from scratch."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
+category: development
 metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
+  category: development
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
-
 # Documentation Skill
 
 Use this skill when the task involves creating, updating, or reviewing technical documentation of any kind.

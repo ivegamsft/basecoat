@@ -1,18 +1,16 @@
 ---
 name: factory-state-machine
+compatibility: [github-copilot-cli]
 description: "Use when defining factory state transitions, reading or writing .github/factory-state.json, or orchestrating workcell workflow gates. USE FOR: intake/complete/pending transitions, auto-proceed rules, escalation checks, and state validation. DO NOT USE FOR: general app state management or unrelated workflow docs."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
+category: architecture
+
 visibility: "internal"
+metadata:
+  category: architecture
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Factory State Machine Skill
 

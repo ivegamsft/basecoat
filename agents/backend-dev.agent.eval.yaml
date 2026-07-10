@@ -1,6 +1,6 @@
 name: "backend-dev-routing"
 description: "Routing evaluation — validates trigger activation for the backend-dev agent."
-skill: "agents/backend-dev.agent.md"
+skill: "agents/basecoat-10-core-backend-dev.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with designing or implementing REST/GraphQL APIs, service layers, and data access patterns."

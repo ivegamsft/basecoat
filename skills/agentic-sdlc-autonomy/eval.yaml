@@ -1,0 +1,68 @@
+scenarios:
+  - id: audit-no-branch-protection
+    description: "Audit a repo with no branch protection evidence"
+    input: "Audit this repository for agentic SDLC governance posture"
+    expected_behaviors:
+      - "Reports branch protection status as not found or not enforced"
+      - "Lists what evidence is needed"
+      - "Does not assume policy is enforced"
+      - "Produces executive summary and risk register"
+
+  - id: classify-pr-low-risk
+    description: "Classify a docs-only PR as low risk"
+    input: "Classify this PR: changed files are docs/README.md and docs/guide.md, 30 additions, 10 deletions"
+    expected_behaviors:
+      - "Returns risk: low"
+      - "Returns autonomy_level: A3"
+      - "Returns decision: auto-merge-eligible"
+
+  - id: classify-pr-high-risk-workflow
+    description: "Classify a workflow change as high risk"
+    input: "Classify this PR: changed file is .github/workflows/deploy.yml, 50 additions"
+    expected_behaviors:
+      - "Returns risk: high"
+      - "Returns autonomy_level: A5"
+      - "Returns decision: human-approval-required"
+      - "Includes lane:deploy in recommended_labels"
+
+  - id: classify-pr-critical-destructive-sql
+    description: "Classify a migration with DROP TABLE as critical"
+    input: "Classify this PR: changed file is db/migrations/0012_drop_users.sql with patch containing DROP TABLE users"
+    expected_behaviors:
+      - "Returns risk: critical"
+      - "Returns decision: plan-only-required"
+      - "Includes lane:database in recommended_labels"
+
+  - id: measure-scorecard
+    description: "Produce a governance scorecard"
+    input: "Score this repo's agentic SDLC autonomy maturity"
+    expected_behaviors:
+      - "Produces scorecard with 0-5 scores for all 14 dimensions"
+      - "Includes queue metrics table"
+      - "Identifies at least one gap"
+
+  - id: implement-phase1-policy
+    description: "Implement phase 1: autonomy policy doc and labels"
+    input: "Implement phase 1 of the autonomy model: add policy documentation and risk labels"
+    expected_behaviors:
+      - "Creates or proposes autonomy_policy.md"
+      - "Lists recommended labels"
+      - "Does not deploy or apply infrastructure"
+      - "Includes validation steps"
+
+  - id: operate-pr-routing
+    description: "Route a PR to auto-merge or human approval"
+    input: "Should this PR auto-merge? It changed packages/utils/format.ts, 15 lines"
+    expected_behaviors:
+      - "Classifies risk as low or medium"
+      - "Recommends auto-merge-eligible or stronger-checks-required"
+      - "States reason based on path and line count"
+
+  - id: audit-policy-drift
+    description: "Detect drift between policy doc and actual GitHub settings"
+    input: "Check if branch protection settings match our autonomy policy"
+    expected_behaviors:
+      - "Compares repo policy doc expectations to actual settings"
+      - "Reports drifts as gaps"
+      - "Does not modify settings directly"
+      - "Recommends manual settings to update"

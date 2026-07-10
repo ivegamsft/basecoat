@@ -1,0 +1,42 @@
+[
+  {
+    "sessionId": "2026-06-01-backlog-1",
+    "inputTokens": 40250000,
+    "phaseCompactionApplied": true,
+    "sprintTemplateUsed": true,
+    "fileReferencesOnly": true,
+    "delegatedScanOrTriage": true
+  },
+  {
+    "sessionId": "2026-06-03-backlog-2",
+    "inputTokens": 38700000,
+    "phaseCompactionApplied": true,
+    "sprintTemplateUsed": true,
+    "fileReferencesOnly": true,
+    "delegatedScanOrTriage": true
+  },
+  {
+    "sessionId": "2026-06-05-backlog-3",
+    "inputTokens": 43100000,
+    "phaseCompactionApplied": true,
+    "sprintTemplateUsed": true,
+    "fileReferencesOnly": true,
+    "delegatedScanOrTriage": true
+  },
+  {
+    "sessionId": "2026-06-07-backlog-4",
+    "inputTokens": 39600000,
+    "phaseCompactionApplied": true,
+    "sprintTemplateUsed": true,
+    "fileReferencesOnly": true,
+    "delegatedScanOrTriage": true
+  },
+  {
+    "sessionId": "2026-06-09-backlog-5",
+    "inputTokens": 40800000,
+    "phaseCompactionApplied": true,
+    "sprintTemplateUsed": true,
+    "fileReferencesOnly": true,
+    "delegatedScanOrTriage": true
+  }
+]

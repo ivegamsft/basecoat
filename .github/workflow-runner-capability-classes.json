@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "classes": [
+    {
+      "runner_class": "github-hosted-linux",
+      "runs_on": "ubuntu-latest",
+      "use_for": [
+        "lint",
+        "unit-test",
+        "docs",
+        "repository-validation",
+        "public-ci"
+      ],
+      "required_capabilities": [
+        "public-internet"
+      ]
+    },
+    {
+      "runner_class": "github-hosted-windows",
+      "runs_on": "windows-latest",
+      "use_for": [
+        "windows-validation",
+        "cross-platform-compatibility"
+      ],
+      "required_capabilities": [
+        "windows-runtime",
+        "public-internet"
+      ]
+    },
+    {
+      "runner_class": "github-hosted-macos",
+      "runs_on": "macos-latest",
+      "use_for": [
+        "macos-validation",
+        "cross-platform-compatibility"
+      ],
+      "required_capabilities": [
+        "macos-runtime",
+        "public-internet"
+      ]
+    },
+    {
+      "runner_class": "self-hosted-linux",
+      "runs_on": "group + self-hosted labels",
+      "use_for": [
+        "deploy",
+        "release",
+        "private-network",
+        "managed-identity"
+      ],
+      "required_capabilities": [
+        "private-network",
+        "managed-identity",
+        "deployment-credentials"
+      ]
+    },
+    {
+      "runner_class": "configurable-deploy",
+      "runs_on": "${{ vars.RUNNER_DEPLOY || 'ubuntu-latest' }}",
+      "use_for": [
+        "transition-state routing",
+        "deploy workflows with safe fallback"
+      ],
+      "required_capabilities": [
+        "private-network",
+        "deployment-credentials"
+      ]
+    },
+    {
+      "runner_class": "configurable-release",
+      "runs_on": "${{ vars.RUNNER_RELEASE || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}",
+      "use_for": [
+        "release and publish workflows with a dedicated lane override"
+      ],
+      "required_capabilities": [
+        "private-network",
+        "deployment-credentials"
+      ]
+    },
+    {
+      "runner_class": "github-hosted-matrix",
+      "runs_on": "${{ matrix.os }}",
+      "use_for": [
+        "multi-os validation matrices"
+      ],
+      "required_capabilities": [
+        "multi-os-matrix",
+        "public-internet"
+      ]
+    },
+    {
+      "runner_class": "reusable-workflow",
+      "runs_on": "job-level uses: ./.github/workflows/<reusable>.yml",
+      "use_for": [
+        "delegated runner selection through reusable workflows"
+      ],
+      "required_capabilities": [
+        "delegated-runner"
+      ]
+    }
+  ]
+}

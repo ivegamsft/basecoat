@@ -22,13 +22,14 @@
 .PARAMETER Category
     Limit scan to one category: all (default), agents, skills, instructions, prompts.
 
-.PARAMETER Verbose
+.PARAMETER ShowAll
     Show all assets including those with references (for debugging).
 
 .EXAMPLE
     pwsh scripts/find-unused-assets.ps1
     pwsh scripts/find-unused-assets.ps1 -ThresholdDays 60 -Format json
     pwsh scripts/find-unused-assets.ps1 -Category skills
+    pwsh scripts/find-unused-assets.ps1 -ShowAll
 #>
 [CmdletBinding()]
 param(
@@ -40,7 +41,7 @@ param(
     [ValidateSet('all', 'agents', 'skills', 'instructions', 'prompts')]
     [string]$Category = 'all',
 
-    [switch]$Verbose
+    [switch]$ShowAll
 )
 
 Set-StrictMode -Version 3.0
@@ -152,7 +153,7 @@ foreach ($asset in $assets) {
 
 # ── Filter output ─────────────────────────────────────────────────────────────
 
-$display = if ($Verbose) { $results } else { $results | Where-Object { $_.unused } }
+$display = if ($ShowAll) { $results } else { $results | Where-Object { $_.unused } }
 $staleCount  = ($results | Where-Object { $_.stale }).Count
 $unusedCount = ($results | Where-Object { $_.unused }).Count
 $total       = $results.Count

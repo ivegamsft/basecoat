@@ -1,4 +1,17 @@
 ---
+name: code-review-agent
+description: "Automated PR code review for bugs, security vulnerabilities, and logic errors. USE FOR: finding correctness issues, security vulnerabilities, data loss risks, logic errors. DO NOT USE FOR: style/formatting feedback, refactoring suggestions, pre-existing issues unrelated to the PR."
+visibility: basic
+capabilities:
+  reasoning_depth: high
+  tool_use: required
+  context_window: large
+  latency_profile: interactive
+  cost_tier: medium
+  safety_level: standard
+model_policy:
+  fallback: false
+  preferred_families: [gpt]
 on:
   pull_request:
     types: [opened, synchronize]
@@ -8,6 +21,7 @@ permissions:
   issues: read
   pull-requests: read
 safe-outputs:
+  report-failure-as-issue: false
   add-comment:
     hide-older-comments: true
   noop:
@@ -29,11 +43,21 @@ with high signal-to-noise ratio. Do not comment on style or formatting.
 - **PR title**: `${{ github.event.pull_request.title }}`
 - **Repository**: `${{ github.repository }}`
 
-Fetch the PR diff and file list:
-```bash
-gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }}
-gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json files,additions,deletions,changedFiles,baseRefName
-```
+Fetch the PR diff and file list using GitHub MCP tools. The repository
+`${{ github.repository }}` is in `owner/repo` format — split on `/` to get
+owner and repo name:
+
+- Call `get_pull_request` with `pullNumber: ${{ github.event.pull_request.number }}` to get PR metadata (additions, deletions, changedFiles, baseRefName)
+- Call `get_pull_request_files` to get the list of changed files
+- Call `get_pull_request_diff` to get the full diff
+
+If MCP file or diff calls are unavailable or return empty output, use CLI
+fallback immediately:
+
+- Run `gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json files` for changed files
+- Run `gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }}` for full diff
+- Continue review using fallback output as the source of truth
+- If both MCP and CLI fallback fail to provide a usable diff, report `missing_data` with the failing command/tool names and outputs
 
 ## What to Do
 
@@ -47,18 +71,21 @@ for issues.
 Analyze each changed file for:
 
 #### 🔴 Critical (must fix before merge)
+
 - Security vulnerabilities (injection, auth bypass, secret exposure, XSS)
 - Data loss bugs (missing null checks causing crashes, incorrect destructive operations)
 - Logic errors that change observable behavior in a clearly wrong way
 - Missing error handling on critical paths
 
 #### 🟡 Warning (should fix, but not blocking)
+
 - Unhandled edge cases that could cause silent failures
 - Missing input validation on public-facing APIs
 - Resource leaks (unclosed handles, missing cleanup)
 - Race conditions or concurrency issues
 
 #### 🔵 Info (consider for improvement)
+
 - Missing test coverage for new logic
 - Inconsistency with existing codebase patterns
 - Unnecessary complexity that could be simplified
@@ -66,6 +93,7 @@ Analyze each changed file for:
 ### Step 3 — Filter Noise
 
 **Do NOT comment on:**
+
 - Code style, formatting, or naming conventions (leave to linters)
 - Missing comments or documentation (unless it's a public API)
 - Personal preference differences
@@ -77,7 +105,8 @@ If you find issues, post a structured comment. If no issues are found, post a
 brief passing summary.
 
 **When issues are found:**
-```markdown
+
+````markdown
 ## Code Review
 
 ### 🔴 Critical Issues
@@ -98,9 +127,10 @@ brief passing summary.
 
 ---
 *This review was generated automatically. Human reviewers should verify critical findings.*
-```
+````
 
 **When no issues found:**
+
 ```markdown
 ## Code Review
 

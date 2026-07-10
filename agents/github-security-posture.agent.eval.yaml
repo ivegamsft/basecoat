@@ -1,6 +1,6 @@
 name: "github-security-posture-routing"
 description: "Routing evaluation — validates trigger activation for the github-security-posture agent."
-skill: "agents/github-security-posture.agent.md"
+skill: "agents/basecoat-50-security-github-security-posture.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with auditing GitHub organization code security configurations, repository rulesets, secret scanning alerts, Dependabot configuration, or branch protection rules."

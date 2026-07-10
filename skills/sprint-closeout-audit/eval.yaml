@@ -9,7 +9,10 @@ scenarios:
     input: "Run an end-of-sprint audit before planning next sprint and produce carry-forward actions."
     expect_activation: true
   - id: "pos-3"
-    input: "Validate sprint closeout readiness using a formal five-point checklist."
+    input: "Validate sprint closeout readiness using a formal checklist including latest-main CI health."
+    expect_activation: true
+  - id: "pos-4"
+    input: "Before we close the sprint, verify merged PRs have sprint or wave labels for release notes."
     expect_activation: true
   - id: "neg-1"
     input: "Implement pagination in the user API."

@@ -9,6 +9,7 @@
 | Backlog Refinement | Wednesday, Week 1 | 60 min | Estimate, clarify, and split upcoming stories |
 | Sprint Review | Last Friday, afternoon | 60 min | Demo completed work to stakeholders, collect feedback |
 | Sprint Retrospective | Last Friday, after review | 45 min | Identify process improvements, assign action items |
+| Sprint Closeout / Branch Cleanup | Last Friday, after retrospective | 30 min | Verify merged work, prune stale branches/worktrees, and publish closeout evidence |
 
 ## Sprint Planning (90 min)
 
@@ -90,3 +91,18 @@ We will know we succeeded when [acceptance criteria Z].
 - Retro without action items — always produce filed issues.
 - Blaming individuals — focus on systems and processes.
 - Repeating the same action items — if unresolved, escalate or close as won't-fix.
+
+## Sprint Closeout / Branch Cleanup (30 min)
+
+### Closeout Agenda
+
+1. **Verify merged work** — confirm PRs, CI, and issue links are complete.
+2. **Prune branches/worktrees** — run the audit-first cleanup flow and review the dry-run before deletions.
+3. **Publish handoff** — capture carry-forward items, risk notes, and closeout evidence.
+
+### Cleanup Guidance
+
+- Use `instructions/references/governance/workflow-rules.md` for the canonical verify → merge → prune → close/report sequence.
+- Use `scripts/cleanup-branches.ps1` to audit stale branches and orphaned local branches.
+- Use `skills/git-worktrees/SKILL.md` when the sprint used parallel worktrees.
+- Prefer deleting only merged branches with no open PRs.

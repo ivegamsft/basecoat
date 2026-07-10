@@ -33,7 +33,7 @@ If the L2 pattern bundle matches with confidence ≥ 0.80:
 
 If confidence < 0.80 after TRM Pass 2:
 
-- Emit an `EscalationQuery` to L3 (see `instructions/memory-index.instructions.md`)
+- Emit an `EscalationQuery` to L3 (see `instructions/basecoat-10-core-memory-index.instructions.md`)
 - If L3 has no coverage, proceed to L4 — read reference docs targeted to the task
 - If L4 has no coverage, this is a Novel task — state it, estimate turn budget, proceed
 

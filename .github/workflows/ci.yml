@@ -1,4 +1,4 @@
-name: CI
+name: "BaseCoat - CI"
 
 on:
   workflow_call:
@@ -19,7 +19,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
       - name: Lint — YAML frontmatter in .agent.md files
         run: |
@@ -74,7 +74,7 @@ jobs:
           status=0
 
           # Extract all backtick-quoted file/dir paths from CATALOG.md
-          refs=$(grep -oP '`(agents|skills|instructions|prompts|docs)/[^`]+`' CATALOG.md | tr -d '`' | sort -u)
+          refs=$(grep -oP "\`(agents|skills|instructions|prompts|docs)/[^\`]+\`" CATALOG.md | tr -d "\`" | sort -u)
 
           for ref in $refs; do
             # Skill directory references end with /
@@ -98,9 +98,13 @@ jobs:
         shell: pwsh
         run: pwsh tests/workflow-guardrails-tests.ps1
 
+      - name: Validate — token status observability thresholds
+        shell: pwsh
+        run: pwsh tests/token-status-tests.ps1
+
       - name: Upload test results on failure
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: test-results
           path: test-results/
@@ -112,15 +116,17 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
       - name: Run PowerShell test suite
         shell: pwsh
-        run: pwsh tests/run-tests.ps1
+        run: |
+          $failOnGuidanceAuditErrors = '${{ github.event_name }}' -ne 'pull_request'
+          pwsh tests/run-tests.ps1 -GuidanceAuditFailOnError:$failOnGuidanceAuditErrors
 
       - name: Upload test results on failure
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: test-results-ps
           path: test-results/

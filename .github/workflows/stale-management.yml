@@ -1,0 +1,157 @@
+name: "BaseCoat - Stale Issue/PR Management"
+
+on:
+  schedule:
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+    inputs:
+      stale_days:
+        description: "Days of inactivity before marking stale"
+        type: number
+        default: 30
+      close_days:
+        description: "Additional stale days before auto-closing"
+        type: number
+        default: 14
+      max_items:
+        description: "Maximum issues and PRs to evaluate per run"
+        type: number
+        default: 200
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  stale-sweep:
+    name: Mark and close stale issues and PRs
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Apply stale policy
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        env:
+          STALE_DAYS: ${{ inputs.stale_days || 30 }}
+          CLOSE_DAYS: ${{ inputs.close_days || 14 }}
+          MAX_ITEMS: ${{ inputs.max_items || 200 }}
+        with:
+          script: |
+            const staleDays = Number(process.env.STALE_DAYS || '30');
+            const closeDays = Number(process.env.CLOSE_DAYS || '14');
+            const maxItems = Number(process.env.MAX_ITEMS || '200');
+            const staleLabel = 'stale';
+            const exemptLabels = new Set(['pinned', 'security', 'do-not-close']);
+            const now = new Date();
+            const staleCutoff = new Date(now.getTime() - staleDays * 24 * 60 * 60 * 1000);
+            const closeCutoff = new Date(now.getTime() - (staleDays + closeDays) * 24 * 60 * 60 * 1000);
+            const staleDate = staleCutoff.toISOString().slice(0, 10);
+
+            const queries = [
+              { type: 'issue', query: `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open updated:<${staleDate} sort:updated-asc` },
+              { type: 'pr', query: `repo:${context.repo.owner}/${context.repo.repo} is:pr is:open updated:<${staleDate} sort:updated-asc` }
+            ];
+
+            const counters = { marked: 0, closedIssues: 0, closedPrs: 0, skipped: 0 };
+
+            const hasExemptLabel = labels => labels.some(label => exemptLabels.has(label.name.toLowerCase()));
+            const hasStaleLabel = labels => labels.some(label => label.name.toLowerCase() === staleLabel);
+
+            for (const entry of queries) {
+              const results = await github.paginate(github.rest.search.issuesAndPullRequests, {
+                q: entry.query,
+                per_page: 100
+              });
+
+              for (const item of results.slice(0, maxItems)) {
+                const issue = await github.rest.issues.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: item.number
+                });
+                const labels = issue.data.labels.map(label => ({ name: typeof label === 'string' ? label : label.name }));
+                if (hasExemptLabel(labels)) {
+                  counters.skipped += 1;
+                  continue;
+                }
+
+                const updatedAt = new Date(issue.data.updated_at);
+                const staleAlready = hasStaleLabel(labels);
+                const shouldClose = staleAlready && updatedAt < closeCutoff;
+
+                if (shouldClose) {
+                  const closeMessage = [
+                    'Closing this item automatically because it has remained stale past the configured close window.',
+                    '',
+                    'If this is still relevant, reopen with updated context.'
+                  ].join('\n');
+
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: item.number,
+                    body: closeMessage
+                  });
+
+                  if (entry.type === 'pr') {
+                    await github.rest.pulls.update({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      pull_number: item.number,
+                      state: 'closed'
+                    });
+                    counters.closedPrs += 1;
+                  } else {
+                    await github.rest.issues.update({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: item.number,
+                      state: 'closed',
+                      state_reason: 'not_planned'
+                    });
+                    counters.closedIssues += 1;
+                  }
+                  continue;
+                }
+
+                if (!staleAlready) {
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: item.number,
+                    labels: [staleLabel]
+                  });
+
+                  const staleMessage = [
+                    `Marking this as \`${staleLabel}\` after ${staleDays} days of inactivity.`,
+                    `This item will auto-close after an additional ${closeDays} days without activity.`,
+                    '',
+                    'Comment or update to keep it open.'
+                  ].join('\n');
+
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: item.number,
+                    body: staleMessage
+                  });
+                  counters.marked += 1;
+                }
+              }
+            }
+
+            core.summary
+              .addHeading('Stale management summary')
+              .addTable([
+                [{ data: 'Marked stale', header: true }, String(counters.marked)],
+                [{ data: 'Closed issues', header: true }, String(counters.closedIssues)],
+                [{ data: 'Closed PRs', header: true }, String(counters.closedPrs)],
+                [{ data: 'Skipped (exempt labels)', header: true }, String(counters.skipped)]
+              ])
+              .addRaw(`\nPolicy: stale after ${staleDays} days, close after ${closeDays} additional days.\n`)
+              .write();
+

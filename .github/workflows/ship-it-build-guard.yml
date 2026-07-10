@@ -1,0 +1,187 @@
+name: Ship-it Build Guard
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_repo:
+        description: Repository in owner/repo format
+        required: true
+        default: IBuySpy-Shared/basecoat
+        type: string
+      target_branch:
+        description: Branch to monitor (optional)
+        required: false
+        type: string
+      workflow_name:
+        description: Workflow display name to monitor (optional)
+        required: false
+        type: string
+      source_run_id:
+        description: Optional run id to prioritize
+        required: false
+        type: string
+      max_auto_retries:
+        description: Maximum automated retries for recoverable failures
+        required: true
+        default: "2"
+        type: string
+      current_retry_count:
+        description: Retries already consumed for this incident
+        required: true
+        default: "0"
+        type: string
+      dry_run:
+        description: Skip live side effects (rerun/escalation issue)
+        required: true
+        default: false
+        type: boolean
+  workflow_run:
+    workflows:
+      - Ship-it Intent Dispatch
+      - BaseCoat - PR Validation
+    types: [completed]
+
+permissions:
+  actions: write
+  contents: read
+  issues: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  resolve-inputs:
+    name: Resolve build-guard inputs
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      should_run: ${{ steps.resolve.outputs.should_run }}
+      target_repo: ${{ steps.resolve.outputs.target_repo }}
+      target_branch: ${{ steps.resolve.outputs.target_branch }}
+      workflow_name: ${{ steps.resolve.outputs.workflow_name }}
+      source_run_id: ${{ steps.resolve.outputs.source_run_id }}
+      max_auto_retries: ${{ steps.resolve.outputs.max_auto_retries }}
+      current_retry_count: ${{ steps.resolve.outputs.current_retry_count }}
+      dry_run: ${{ steps.resolve.outputs.dry_run }}
+    steps:
+      - name: Resolve event inputs
+        id: resolve
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const eventName = context.eventName;
+            const result = {
+              should_run: "false",
+              target_repo: `${context.repo.owner}/${context.repo.repo}`,
+              target_branch: "",
+              workflow_name: "",
+              source_run_id: "",
+              max_auto_retries: "2",
+              current_retry_count: "0",
+              dry_run: "false"
+            };
+
+            if (eventName === "workflow_dispatch") {
+              const inputs = context.payload.inputs || {};
+              result.should_run = "true";
+              result.target_repo = inputs.target_repo || result.target_repo;
+              result.target_branch = inputs.target_branch || "";
+              result.workflow_name = inputs.workflow_name || "";
+              result.source_run_id = inputs.source_run_id || "";
+              result.max_auto_retries = inputs.max_auto_retries || "2";
+              result.current_retry_count = inputs.current_retry_count || "0";
+              result.dry_run = `${inputs.dry_run === true || `${inputs.dry_run}`.toLowerCase() === "true"}`;
+            } else {
+              const run = context.payload.workflow_run;
+              if (!run || run.conclusion !== "failure") {
+                core.setOutput("should_run", "false");
+                return;
+              }
+
+              result.should_run = "true";
+              result.target_repo = run.repository.full_name;
+              result.target_branch = run.head_branch || "";
+              result.workflow_name = run.name || "";
+              result.source_run_id = `${run.id}`;
+              result.max_auto_retries = "2";
+              result.current_retry_count = "0";
+              result.dry_run = "false";
+            }
+
+            for (const [key, value] of Object.entries(result)) {
+              core.setOutput(key, value);
+            }
+
+  detect-and-recover:
+    name: Detect and recover build breaks
+    runs-on: ubuntu-latest
+    needs: resolve-inputs
+    if: needs.resolve-inputs.outputs.should_run == 'true'
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v4.1.7
+
+      - name: Run build-break detector
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_REPO: ${{ needs.resolve-inputs.outputs.target_repo }}
+          TARGET_BRANCH: ${{ needs.resolve-inputs.outputs.target_branch }}
+          WORKFLOW_NAME: ${{ needs.resolve-inputs.outputs.workflow_name }}
+          SOURCE_RUN_ID: ${{ needs.resolve-inputs.outputs.source_run_id }}
+          MAX_AUTO_RETRIES: ${{ needs.resolve-inputs.outputs.max_auto_retries }}
+          CURRENT_RETRY_COUNT: ${{ needs.resolve-inputs.outputs.current_retry_count }}
+          DRY_RUN: ${{ needs.resolve-inputs.outputs.dry_run }}
+        run: |
+          $params = @{
+            TargetRepo = $env:TARGET_REPO
+            MaxAutoRetries = [int]$env:MAX_AUTO_RETRIES
+            CurrentRetryCount = [int]$env:CURRENT_RETRY_COUNT
+            OutputPath = 'test-results\ship-it\build-break-summary.json'
+          }
+
+          if (-not [string]::IsNullOrWhiteSpace($env:TARGET_BRANCH)) {
+            $params.TargetBranch = $env:TARGET_BRANCH
+          }
+          if (-not [string]::IsNullOrWhiteSpace($env:WORKFLOW_NAME)) {
+            $params.WorkflowName = $env:WORKFLOW_NAME
+          }
+          if (-not [string]::IsNullOrWhiteSpace($env:SOURCE_RUN_ID)) {
+            $params.SourceRunId = [long]$env:SOURCE_RUN_ID
+          }
+          if ($env:DRY_RUN -eq 'true') {
+            $params.DryRun = $true
+          }
+
+          .\scripts\ship-it\build-break-detector.ps1 @params
+
+      - name: Export detector action
+        id: detector
+        shell: pwsh
+        run: |
+          $summary = Get-Content -Raw -Path 'test-results\ship-it\build-break-summary.json' | ConvertFrom-Json
+          "action=$($summary.action)" >> $env:GITHUB_OUTPUT
+          "status=$($summary.status)" >> $env:GITHUB_OUTPUT
+          if (-not [string]::IsNullOrWhiteSpace($summary.escalation_issue_url)) {
+            "escalation_issue_url=$($summary.escalation_issue_url)" >> $env:GITHUB_OUTPUT
+          }
+
+      - name: Append workflow summary
+        shell: pwsh
+        run: |
+          Get-Content -Raw -Path 'test-results\ship-it\build-break-summary.md' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+
+      - name: Upload build-break artifacts
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        with:
+          name: ship-it-build-break
+          path: test-results/ship-it/build-break-summary.*
+          retention-days: 14
+
+      - name: Mark escalation in run logs
+        if: steps.detector.outputs.action == 'escalate'
+        run: |
+          echo "Build-break escalation triggered: ${{ steps.detector.outputs.escalation_issue_url }}"
+

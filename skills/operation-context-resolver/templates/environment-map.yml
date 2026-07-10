@@ -1,0 +1,204 @@
+# Environment map for operation context resolver
+# Copy this to .github/environment-map.yml and customize for your repo
+
+environments:
+  preview:
+    github_environment: preview
+    autonomy_level: A4  # 0=human-only, 1=approval, 2=staged, 3=auto, 4=full autonomous
+    production: false
+    azure_subscription: YOUR_DEV_SUBSCRIPTION_ID
+    resource_group: rg-app-preview
+    container_apps_environment: cae-app-preview
+    log_analytics_workspace: law-app-preview
+    app_config: appcs-app-preview
+    key_vault: kv-app-preview
+    front_door_profile: null
+    tags:
+      Environment: Preview
+      App: app-name
+      ManagedBy: bicep
+      ReleaseId: rel-preview-current
+    allowed_branch_patterns:
+      - feature/*
+      - agent/*
+      - fix/*
+    allowed_workflows:
+      - ci.yml
+      - deploy-preview.yml
+    approval_required:
+      read_only: false
+      branch_deploy: false
+      incident_readonly: false
+    allowed_actions:
+      read_only: [read_logs, read_deployments, read_infra_state]
+      branch_deploy: [read_logs, read_deployments, deploy_app, run_tests]
+      incident_readonly: [read_logs, read_deployments, read_infra_state, read_db]
+    blocked_actions:
+      read_only: [deploy, migrate_db, apply_iac, rollback]
+      branch_deploy: [migrate_db, apply_iac, delete_resources]
+      incident_readonly: [deploy, migrate_db, apply_iac, rollback]
+
+  dev:
+    github_environment: dev
+    autonomy_level: A4
+    production: false
+    azure_subscription: YOUR_DEV_SUBSCRIPTION_ID
+    resource_group: rg-app-dev
+    container_apps_environment: cae-app-dev
+    log_analytics_workspace: law-app-dev
+    app_config: appcs-app-dev
+    key_vault: kv-app-dev
+    front_door_profile: null
+    tags:
+      Environment: Dev
+      App: app-name
+      ManagedBy: bicep
+      ReleaseId: rel-dev-current
+    allowed_branch_patterns:
+      - dev
+      - dev/*
+    allowed_workflows:
+      - ci.yml
+      - deploy-dev.yml
+    approval_required:
+      read_only: false
+      branch_deploy: false
+      incident_readonly: false
+    allowed_actions:
+      read_only: [read_logs, read_deployments, read_infra_state]
+      branch_deploy: [read_logs, read_deployments, deploy_app, run_tests]
+      incident_readonly: [read_logs, read_deployments, read_infra_state, read_db]
+    blocked_actions:
+      read_only: [deploy, migrate_db, apply_iac, rollback]
+      branch_deploy: [apply_iac, delete_resources]
+      incident_readonly: [deploy, migrate_db, apply_iac, rollback]
+
+  staging:
+    github_environment: staging
+    autonomy_level: A3
+    production: false
+    azure_subscription: YOUR_PROD_SUBSCRIPTION_ID
+    resource_group: rg-app-staging
+    container_apps_environment: cae-app-staging
+    log_analytics_workspace: law-app-staging
+    app_config: appcs-app-staging
+    key_vault: kv-app-staging
+    front_door_profile: fd-app-staging
+    tags:
+      Environment: Staging
+      App: app-name
+      ManagedBy: bicep
+      ReleaseId: rel-staging-current
+    allowed_branch_patterns:
+      - staging
+      - release/*
+    allowed_workflows:
+      - ci.yml
+      - deploy-staging.yml
+    approval_required:
+      read_only: false
+      branch_deploy: false
+      incident_readonly: false
+    allowed_actions:
+      read_only: [read_logs, read_deployments, read_infra_state]
+      branch_deploy: [read_logs, read_deployments, deploy_app, validate_db_migration]
+      incident_readonly: [read_logs, read_deployments, read_infra_state, read_db]
+    blocked_actions:
+      read_only: [deploy, migrate_db, apply_iac]
+      branch_deploy: [apply_iac, delete_resources, scale_down]
+      incident_readonly: [deploy, migrate_db, apply_iac, rollback]
+
+  prod:
+    github_environment: production
+    autonomy_level: A2  # More human gatekeeping
+    production: true
+    azure_subscription: YOUR_PROD_SUBSCRIPTION_ID
+    resource_group: rg-app-prod
+    container_apps_environment: cae-app-prod
+    log_analytics_workspace: law-app-prod
+    app_config: appcs-app-prod
+    key_vault: kv-app-prod
+    front_door_profile: fd-app-prod
+    tags:
+      Environment: Production
+      App: app-name
+      ManagedBy: bicep
+      ReleaseId: rel-prod-current
+    allowed_branch_patterns:
+      - main
+      - hotfix/*
+    allowed_workflows:
+      - ci.yml
+      - deploy-prod.yml
+    approval_required:
+      read_only: false
+      branch_deploy: true
+      incident_readonly: true
+    allowed_actions:
+      read_only: [read_logs, read_deployments, read_infra_state]
+      branch_deploy: [read_logs, read_deployments, deploy_app, validate_db_migration]
+      incident_readonly: [read_logs, read_deployments, read_infra_state, read_db]
+    blocked_actions:
+      read_only: [deploy, migrate_db, apply_iac]
+      branch_deploy: [apply_iac, delete_resources, scale_down, migrate_db]
+      incident_readonly: [deploy, migrate_db, apply_iac, rollback]
+
+# Decision rules applied in order
+rules:
+  - name: incident_override
+    match:
+      user_intent_contains:
+        - site is down
+        - production is down
+        - customers cannot access
+    context:
+      target_environment: prod
+      mode: incident_readonly
+      risk_level: critical
+      human_approval_required: true
+
+  - name: explicit_label_prod
+    match:
+      pr_labels:
+        - env:prod
+    context:
+      target_environment: prod
+      mode: branch_deploy
+      risk_level: high
+
+  - name: explicit_label_staging
+    match:
+      pr_labels:
+        - env:staging
+    context:
+      target_environment: staging
+      mode: branch_deploy
+
+  - name: branch_hotfix
+    match:
+      source_branch: hotfix/*
+    context:
+      target_environment: staging
+      mode: read_only
+      human_approval_required: true
+
+  - name: branch_main
+    match:
+      source_branch: main
+    context:
+      target_environment: staging
+      mode: branch_deploy
+
+  - name: branch_dev
+    match:
+      source_branch: dev
+    context:
+      target_environment: dev
+      mode: branch_deploy
+
+  - name: default_safe
+    match: '*'
+    context:
+      target_environment: dev
+      mode: read_only
+      risk_level: low

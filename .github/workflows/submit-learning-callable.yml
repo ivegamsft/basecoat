@@ -1,4 +1,4 @@
-name: Submit Learning (Callable)
+name: "BaseCoat - Submit Learning (Callable)"
 
 # Reusable workflow — consumer repos call this to submit a learning without
 # running any scripts locally.
@@ -120,7 +120,7 @@ jobs:
 
     steps:
       - name: Check out basecoat scripts
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 1
 
@@ -139,11 +139,15 @@ jobs:
             team=$(echo "$item" | jq -r '.team // ""')
             opr=$(echo "$item"  | jq -r '.open_pr // "true"')
 
-            OPEN_PR_FLAG=""
-            if [[ "$opr" == "true" ]]; then OPEN_PR_FLAG="--open-pr"; fi
+            OPEN_PR_ARGS=()
+            if [[ "$opr" == "true" ]]; then
+              OPEN_PR_ARGS+=(--open-pr)
+            fi
 
-            TEAM_FLAG=""
-            if [[ -n "$team" ]]; then TEAM_FLAG="--team '$team'"; fi
+            TEAM_ARGS=()
+            if [[ -n "$team" ]]; then
+              TEAM_ARGS+=(--team "$team")
+            fi
 
             bash scripts/submit-learning.sh \
               --subject  "$subj" \
@@ -151,8 +155,8 @@ jobs:
               --evidence "$evid" \
               --domain   "$dom" \
               --source   "$src" \
-              $TEAM_FLAG \
-              $OPEN_PR_FLAG
+              "${TEAM_ARGS[@]}" \
+              "${OPEN_PR_ARGS[@]}"
           done
 
       - name: Submit learning
@@ -160,14 +164,14 @@ jobs:
         env:
           MEMORY_REPO_TOKEN: ${{ secrets.memory_repo_token || secrets.MEMORY_REPO_TOKEN }}
         run: |
-          OPEN_PR_FLAG=""
+          OPEN_PR_ARGS=()
           if [[ "${{ inputs.open_pr }}" == "true" ]]; then
-            OPEN_PR_FLAG="--open-pr"
+            OPEN_PR_ARGS+=(--open-pr)
           fi
 
-          TEAM_FLAG=""
+          TEAM_ARGS=()
           if [[ -n "${{ inputs.team }}" ]]; then
-            TEAM_FLAG="--team '${{ inputs.team }}'"
+            TEAM_ARGS+=(--team "${{ inputs.team }}")
           fi
 
           bash scripts/submit-learning.sh \
@@ -176,5 +180,5 @@ jobs:
             --evidence "${{ inputs.evidence }}" \
             --domain   "${{ inputs.domain }}" \
             --source   "${{ inputs.source }}" \
-            $TEAM_FLAG \
-            $OPEN_PR_FLAG
+            "${TEAM_ARGS[@]}" \
+            "${OPEN_PR_ARGS[@]}"

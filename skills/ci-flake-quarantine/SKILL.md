@@ -1,18 +1,16 @@
 ---
 name: ci-flake-quarantine
+compatibility: [github-copilot-cli]
 description: "Use when isolating flaky CI tests with evidence-based quarantine windows and expiry policy. USE FOR: confirm flakiness, quarantine only after repeat evidence, and produce owner/expiry tracking. DO NOT USE FOR: hiding failures, permanently disabling tests, or replacing root-cause remediation."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "CI/CD & Automation"
-  tags: ["ci", "flaky", "quarantine", "tests", "expiry"]
-  maturity: "beta"
-  audience: ["developers", "devops-engineers", "platform-teams"]
-allowed-tools: ["bash", "git", "gh", "grep"]
+category: testing
+
 visibility: "internal"
+metadata:
+  category: testing
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # CI Flake Quarantine Skill
 
@@ -59,6 +57,6 @@ with `issue-triage` for tracking ownership.
 
 ## Related Assets
 
-- `agents/self-healing-ci.agent.md`
-- `agents/issue-triage.agent.md`
+- `agents/basecoat-60-workflow-self-healing-ci.agent.md`
+- `agents/basecoat-10-core-issue-triage.agent.md`
 - `skills/build-failure-triage/SKILL.md`

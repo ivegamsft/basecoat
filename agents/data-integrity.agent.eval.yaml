@@ -1,6 +1,6 @@
 name: "data-integrity-routing"
 description: "Routing evaluation — validates trigger activation for the data-integrity agent."
-skill: "agents/data-integrity.agent.md"
+skill: "agents/basecoat-80-data-data-integrity.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with distributed data integrity guidance for consistency, conflict resolution, backup verification, and recovery procedures. USE FOR: design eventual consistency strategies, establish conflict resolution patterns, review ACID compliance, and plan backup recovery workflows. DO NOT USE FOR: single-database schema design, general app feature work, or routine debugging."

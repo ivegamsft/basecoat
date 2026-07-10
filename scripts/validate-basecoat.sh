@@ -4,6 +4,7 @@ set -euo pipefail
 
 ROOT_DIR="${1:-$(pwd)}"
 FAIL_ON_WARNING=0
+warning_count=0
 if [[ ${2:-} == "--fail-on-warning" ]]; then
   FAIL_ON_WARNING=1
 fi
@@ -17,8 +18,8 @@ for item in "${required[@]}"; do
   fi
 done
 
-# INVENTORY.md moved to docs/reference/ in v3.11.0 — accept either location
-if [[ ! -e "INVENTORY.md" && ! -e "docs/reference/INVENTORY.md" ]]; then
+# INVENTORY.md moved to docs/reference/ in v3.11.0 — accept either location (lowercase after Phase 3+4)
+if [[ ! -e "INVENTORY.md" && ! -e "docs/reference/INVENTORY.md" && ! -e "docs/reference/inventory.md" ]]; then
   echo "Missing required path: INVENTORY.md" >&2
   exit 1
 fi
@@ -32,6 +33,28 @@ while IFS= read -r file; do
   if ! sed -n '1,20p' "$file" | grep -qi '^description:'; then
     echo "Missing description in frontmatter for $file" >&2
     exit 1
+  fi
+
+  if [[ "$(basename "$file")" == *.agent.md ]]; then
+    if ! sed -n '2,30p' "$file" | grep -qxF -- '---'; then
+      echo "Missing YAML frontmatter closing '---' within first 30 lines in $file" >&2
+      exit 1
+    fi
+
+    if ! grep -Eq '^## Inputs$' "$file"; then
+      echo "Missing required section '## Inputs' in $file" >&2
+      exit 1
+    fi
+
+    if ! grep -Eq '^## (Process|Workflow)$' "$file"; then
+      echo "Missing required section '## Process' or '## Workflow' in $file" >&2
+      exit 1
+    fi
+
+    if ! grep -Eiq '^##.*(output|report|results)' "$file"; then
+      echo "Missing required output/report/results section in $file" >&2
+      exit 1
+    fi
   fi
 
   if [[ "$(basename "$file")" == "SKILL.md" ]]; then

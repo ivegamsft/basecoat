@@ -1,6 +1,6 @@
 name: "station-bottleneck-analyzer-routing"
 description: "Routing evaluation — validates trigger activation for the station-bottleneck-analyzer agent."
-skill: "agents/station-bottleneck-analyzer.agent.md"
+skill: "agents/basecoat-10-core-station-bottleneck-analyzer.agent.md"
 scenarios:
   - id: "pos-1"
     input: "Analyze this week's takt-time JSON and identify station bottlenecks."

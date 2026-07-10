@@ -72,6 +72,8 @@ foreach ($agentFile in $agentFiles) {
     }
 
     $fileSlug = $agentFile.BaseName -replace '\.agent$', ''
+    # Extract short agent name from new naming convention: basecoat-XX-category-agent-name -> agent-name
+    $shortFileSlug = $fileSlug -replace '^basecoat-\d+-\w+-', ''
     $nameValue = ''
     if ($frontmatter -match '(?m)^name:\s*"([^"]+)"') {
         $nameValue = $Matches[1].Trim()
@@ -86,10 +88,15 @@ foreach ($agentFile in $agentFiles) {
         $descriptionValue = $Matches[1].Trim().Trim("'").Trim('"')
     }
 
+    $categoryValue = ''
+    if ($frontmatter -match '(?m)^\s*category:\s*["'']?([^"''\r\n]+)["'']?\s*$') {
+        $categoryValue = $Matches[1].Trim()
+    }
+
     if (-not $nameValue) {
         $errors.Add('missing field: name')
-    } elseif ($nameValue -ne $fileSlug) {
-        $warnings.Add("name '$nameValue' does not match filename slug '$fileSlug'")
+    } elseif ($nameValue -ne $shortFileSlug) {
+        $warnings.Add("name '$nameValue' does not match filename slug '$shortFileSlug'")
     }
 
     if (-not $descriptionValue) {
@@ -106,6 +113,10 @@ foreach ($agentFile in $agentFiles) {
         }
     }
 
+    if ($categoryValue -and $categoryValue -match '(?i)^uncategorized$') {
+        $warnings.Add("metadata.category uses placeholder value '$categoryValue'")
+    }
+
     if ($frontmatter -notmatch '(?m)^model:\s*') {
         $warnings.Add('missing model field')
     }
@@ -120,6 +131,12 @@ foreach ($agentFile in $agentFiles) {
     }
     if ($frontmatter -notmatch '(?m)^handoffs:\s*') {
         $warnings.Add('missing handoffs field')
+    }
+    if ($frontmatter -match '(?m)^category:\s*(.+)$') {
+        $categoryValue = $Matches[1].Trim().Trim("'").Trim('"')
+        if ($categoryValue -eq 'Uncategorized') {
+            $warnings.Add('category is Uncategorized')
+        }
     }
 
     if ($body -notmatch '(?im)^##\s+inputs\b') {
@@ -146,12 +163,25 @@ foreach ($agentFile in $agentFiles) {
 
     if ($errCount -gt 0) {
         $detail = ($errors | ForEach-Object { $_ }) -join '; '
-        Add-Line "[FAIL] $fileSlug — $errCount error$(if ($errCount -ne 1) {'s'}): $detail"
+        Add-Line "[FAIL] $shortFileSlug — $errCount error$(if ($errCount -ne 1) {'s'}): $detail"
     } elseif ($warnCount -gt 0) {
         $detail = ($warnings | ForEach-Object { $_ }) -join '; '
-        Add-Line "[WARN] $fileSlug — 0 errors, $warnCount warning$(if ($warnCount -ne 1) {'s'}): $detail"
+        Add-Line "[WARN] $shortFileSlug — 0 errors, $warnCount warning$(if ($warnCount -ne 1) {'s'}): $detail"
     } else {
-        Add-Line "[PASS] $fileSlug — 0 errors, 0 warnings"
+        Add-Line "[PASS] $shortFileSlug — 0 errors, 0 warnings"
+    }
+}
+
+$metadataPath = Join-Path (Get-Location) 'basecoat-metadata.json'
+if (Test-Path $metadataPath) {
+    $metadata = Get-Content $metadataPath -Raw | ConvertFrom-Json
+    $uncategorized = @($metadata.categories.PSObject.Properties | Where-Object { $_.Name -eq 'Uncategorized' -or $_.Value.label -eq 'Uncategorized' })
+    foreach ($bucket in $uncategorized) {
+        $agentList = @($bucket.Value.agents)
+        if ($agentList.Count -gt 0) {
+            Add-Line "[WARN] metadata — Uncategorized category still contains $($agentList.Count) agent(s): $($agentList -join ', ')"
+            $totalWarnings++
+        }
     }
 }
 

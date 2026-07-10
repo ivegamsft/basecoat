@@ -1,0 +1,16 @@
+name: task-scope-validator
+description: Task scope validator for sub-agent dispatch. Analyzes task prompts to detect overscope, ambiguity, and risk before forwarding to explore, task, or general-purpose agents.
+category: Agent Operations & Governance
+tags:
+  - scope-validation
+  - task-classification
+  - agent-dispatch
+  - guardrails
+  - governance
+maturity: production
+audience:
+  - platform-teams
+  - agents
+  - engineering-managers
+evaluation_status: requires_phase_1
+test_cases: []

@@ -1,0 +1,55 @@
+name: "BaseCoat - Validate Operation Context"
+
+on:
+  pull_request:
+    paths:
+      - '.github/environment-map.yml'
+      - 'skills/operation-context-resolver/**'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/environment-map.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ format('{0}-{1}', github.workflow, github.ref) }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: skills/operation-context-resolver/package-lock.json
+
+      - name: Install dependencies
+        working-directory: skills/operation-context-resolver
+        run: npm ci
+
+      - name: Build resolver
+        working-directory: skills/operation-context-resolver
+        run: npm run build
+
+      - name: Validate environment-map.yml
+        working-directory: skills/operation-context-resolver
+        run: |
+          node dist/cli.js validate --repo-root "$GITHUB_WORKSPACE"
+
+      - name: Emit summary
+        if: success()
+        run: |
+          echo "### Operation Context Validation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "environment-map.yml validated successfully." >> $GITHUB_STEP_SUMMARY

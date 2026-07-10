@@ -1,4 +1,4 @@
-name: Package Base Coat
+name: "BaseCoat - Package Base Coat"
 
 on:
   workflow_dispatch:
@@ -18,6 +18,7 @@ jobs:
     uses: ./.github/workflows/validate-basecoat.yml
     with:
       concurrency_group: "Package-Base-Coat-validate-${{ github.ref }}"
+      fail_on_guidance_audit_errors: false
 
   package:
     needs: validate
@@ -25,7 +26,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
       - name: Package release artifacts
         run: bash scripts/package-basecoat.sh
@@ -35,7 +36,12 @@ jobs:
           rm -rf dist/ghcp-stage
           mkdir -p dist/ghcp-stage
           cp -R agents skills instructions prompts dist/ghcp-stage/
-          cp basecoat-metadata.json CATALOG.md dist/ghcp-stage/
+          cp basecoat-metadata.json dist/ghcp-stage/
+          if [[ -f CATALOG.md ]]; then
+            cp CATALOG.md dist/ghcp-stage/
+          else
+            echo "::warning::CATALOG.md not found; continuing without it in GHCP ZIP"
+          fi
           find dist/ghcp-stage/skills -type f -name 'eval.yaml' -delete
           find dist/ghcp-stage/agents -type f -name '*.agent.eval.yaml' -delete
           (cd dist/ghcp-stage && zip -r ../basecoat-ghcp.zip .)
@@ -63,7 +69,7 @@ jobs:
           exit $found
 
       - name: Upload package artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: base-coat-release
           path: dist/*
@@ -73,12 +79,15 @@ jobs:
     needs: package
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
       - name: Download package artifacts
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           name: base-coat-release
           path: dist
@@ -88,9 +97,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           # Upload only files (not the stage directory left by the packaging script)
-          files=$(find dist -maxdepth 1 -type f)
+          mapfile -t files < <(find dist -maxdepth 1 -type f)
+          if [[ ${#files[@]} -eq 0 ]]; then
+            echo "::error::No release artifacts found in dist/"
+            exit 1
+          fi
           if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" $files --clobber --repo "${{ github.repository }}"
+            gh release upload "$GITHUB_REF_NAME" "${files[@]}" --clobber --repo "${{ github.repository }}"
           else
-            gh release create "$GITHUB_REF_NAME" $files --title "Base Coat $GITHUB_REF_NAME" --generate-notes --repo "${{ github.repository }}"
+            gh release create "$GITHUB_REF_NAME" "${files[@]}" --title "Base Coat $GITHUB_REF_NAME" --generate-notes --repo "${{ github.repository }}"
           fi

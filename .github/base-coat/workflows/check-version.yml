@@ -1,0 +1,128 @@
+name: "BaseCoat - Check BaseCoat Version"
+
+on:
+  workflow_call:
+    inputs:
+      stage_path:
+        description: Path to synced BaseCoat assets
+        type: string
+        default: .github/base-coat
+      alert_threshold:
+        description: Number of minor versions behind before alerting
+        type: number
+        default: 1
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Read consumer version
+        id: consumer
+        run: |
+          VERSION_FILE="${{ inputs.stage_path }}/version.json"
+          if [ ! -f "$VERSION_FILE" ]; then
+            echo "No version.json found at $VERSION_FILE"
+            echo "version=0.0.0" >> $GITHUB_OUTPUT
+            echo "found=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          VERSION=$(jq -r '.version' "$VERSION_FILE")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "found=true" >> $GITHUB_OUTPUT
+          echo "Consumer BaseCoat version: $VERSION"
+
+      - name: Get latest BaseCoat release
+        id: latest
+        run: |
+          LATEST=$(gh release list --repo IBuySpy-Shared/basecoat --limit 1 --json tagName -q '.[0].tagName' | sed 's/^v//')
+          echo "version=$LATEST" >> $GITHUB_OUTPUT
+          echo "Latest BaseCoat version: $LATEST"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Compare versions
+        id: compare
+        run: |
+          CONSUMER="${{ steps.consumer.outputs.version }}"
+          LATEST="${{ steps.latest.outputs.version }}"
+          THRESHOLD="${{ inputs.alert_threshold }}"
+
+          # Extract minor version numbers
+          CONSUMER_MINOR=$(echo "$CONSUMER" | cut -d. -f2)
+          LATEST_MINOR=$(echo "$LATEST" | cut -d. -f2)
+          CONSUMER_MAJOR=$(echo "$CONSUMER" | cut -d. -f1)
+          LATEST_MAJOR=$(echo "$LATEST" | cut -d. -f1)
+
+          DRIFT=0
+          if [ "$LATEST_MAJOR" -gt "$CONSUMER_MAJOR" ]; then
+            DRIFT=$(( (LATEST_MAJOR - CONSUMER_MAJOR) * 100 + LATEST_MINOR ))
+          elif [ "$LATEST_MAJOR" -eq "$CONSUMER_MAJOR" ]; then
+            DRIFT=$(( LATEST_MINOR - CONSUMER_MINOR ))
+          fi
+
+          echo "drift=$DRIFT" >> $GITHUB_OUTPUT
+          echo "needs_alert=$([ $DRIFT -ge $THRESHOLD ] && echo true || echo false)" >> $GITHUB_OUTPUT
+          echo "consumer_version=$CONSUMER" >> $GITHUB_OUTPUT
+          echo "latest_version=$LATEST" >> $GITHUB_OUTPUT
+          echo "Version drift: $DRIFT minor versions"
+
+      - name: Open or update drift issue
+        if: steps.compare.outputs.needs_alert == 'true'
+        run: |
+          CONSUMER="${{ steps.compare.outputs.consumer_version }}"
+          LATEST="${{ steps.compare.outputs.latest_version }}"
+          DRIFT="${{ steps.compare.outputs.drift }}"
+          TITLE="chore: BaseCoat upgrade available (v${CONSUMER} → v${LATEST})"
+
+          # Check for existing open issue (idempotent)
+          EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "$TITLE" --json number -q '.[0].number' 2>/dev/null || echo "")
+
+          if [ -n "$EXISTING" ]; then
+            echo "Existing issue #$EXISTING found, updating comment"
+            gh issue comment "$EXISTING" --repo "$GITHUB_REPOSITORY" --body "Re-checked on $(date -u '+%Y-%m-%d'): still $DRIFT versions behind. Latest: v${LATEST}, current: v${CONSUMER}."
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" \
+              --title "$TITLE" \
+              --body "## BaseCoat Upgrade Available\n\nThis repo's BaseCoat assets are out of date.\n\n| | Version |\n|---|---|\n| **Current** | v${CONSUMER} |\n| **Latest** | v${LATEST} |\n| **Versions behind** | ${{ steps.compare.outputs.drift }} |\n\n## How to upgrade\n\nAlways use the sync script — do not manually copy or PR in agent files, as this bypasses the clean-replace step that removes stale assets.\n\n\`\`\`bash\ncurl -fsSL https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/sync.sh | bash\n\`\`\`\n\nOr on Windows: download the [latest release](https://github.com/IBuySpy-Shared/basecoat/releases/latest) and run \`sync.ps1\`.\n\n---\n*Opened automatically by the BaseCoat version drift detector.*" \
+              --label "maintenance"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Detect mixed agent naming state
+        run: |
+          AGENTS_DIR="${{ inputs.stage_path }}/agents"
+          if [ ! -d "$AGENTS_DIR" ]; then
+            echo "No agents directory found at $AGENTS_DIR; skipping mixed-state check."
+            exit 0
+          fi
+
+          PREFIXED=$(find "$AGENTS_DIR" -maxdepth 1 -name 'basecoat-*.agent.md' | wc -l | tr -d ' ')
+          NON_PREFIXED=$(find "$AGENTS_DIR" -maxdepth 1 -name '*.agent.md' ! -name 'basecoat-*.agent.md' ! -name 'orchestrator.agent.md' | wc -l | tr -d ' ')
+
+          echo "Prefixed agents (basecoat-*): $PREFIXED"
+          echo "Non-prefixed agents: $NON_PREFIXED"
+
+          if [ "$PREFIXED" -gt 0 ] && [ "$NON_PREFIXED" -gt 0 ]; then
+            echo "::warning::Mixed agent naming detected: $PREFIXED basecoat-* agents and $NON_PREFIXED non-prefixed agents coexist. This indicates an incomplete manual upgrade. Run the sync script to restore a clean state."
+            TITLE="chore: BaseCoat mixed agent state detected — manual upgrade incomplete"
+            EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "$TITLE" --json number -q '.[0].number' 2>/dev/null || echo "")
+            if [ -z "$EXISTING" ]; then
+              gh issue create --repo "$GITHUB_REPOSITORY" \
+                --title "$TITLE" \
+                --body "## Mixed BaseCoat Agent State\n\nBoth old flat-name agents and new \`basecoat-\`-prefixed agents were found in \`$AGENTS_DIR\`.\n\n| | Count |\n|---|---|\n| Prefixed (\`basecoat-*\`) | $PREFIXED |\n| Non-prefixed (stale) | $NON_PREFIXED |\n\nThis typically happens when an upgrade PR manually added new agents without removing old ones. The sync script prevents this by replacing the entire agents directory.\n\n## How to fix\n\n\`\`\`bash\ncurl -fsSL https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/sync.sh | bash\n\`\`\`\n\nOr on Windows: download the [latest release](https://github.com/IBuySpy-Shared/basecoat/releases/latest) and run \`sync.ps1\`.\n\n---\n*Opened automatically by the BaseCoat version check.*" \
+                --label "maintenance"
+            else
+              echo "Mixed-state issue #$EXISTING already open."
+            fi
+          else
+            echo "Agent naming state is consistent."
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+

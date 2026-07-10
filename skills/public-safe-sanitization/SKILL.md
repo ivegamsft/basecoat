@@ -1,18 +1,16 @@
 ---
 name: public-safe-sanitization
-description: "Use when turning internal roadmap notes, issue details, or feedback into public-safe guidance; strip internal-specific content before external publication."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Security & Compliance"
-  tags: ["sanitization", "redaction", "guardrails", "publication", "public-safe"]
-  maturity: "production"
-  audience: ["tech-writers", "platform-teams", "developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
+compatibility: [github-copilot-cli]
+description: "Converts internal material to public-safe artifacts. USE FOR: sanitizing roadmap/issue notes for sharing, redacting private URLs/customer names/IDs, producing public-safe summaries with redaction ledger, rewriting internal details into generic guidance. DO NOT USE FOR: publishing raw internal notes, preserving sensitive identifiers, generating legal/compliance determinations, creating unrelated product plans."
+category: security
+
 visibility: "internal"
+metadata:
+  category: security
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Public Safe Sanitization Skill
 
@@ -30,7 +28,7 @@ Use this skill to convert internal material into a reusable public artifact with
 2. Remove repo names, ticket numbers, customer names, private URLs, hostnames, incident IDs, secrets, and unshipped commitments.
 3. Rewrite the remaining content in generic terms that preserve the lesson.
 4. Produce a redaction ledger listing what changed and why.
-5. Validate the draft with `agents/guardrail.agent.md` before publication.
+5. Validate the draft with `agents/basecoat-30-ai-guardrail.agent.md` before publication.
 6. Publish only the sanitized artifact; keep source notes internal.
 
 ## Output
@@ -47,6 +45,6 @@ Use this skill to convert internal material into a reusable public artifact with
 
 ## Related Assets
 
-- `instructions/public-guidance.instructions.md`
+- `instructions/basecoat-10-core-public-guidance.instructions.md`
 - `docs/guides/public-guidance-workflow.md`
-- `agents/guardrail.agent.md`
+- `agents/basecoat-30-ai-guardrail.agent.md`

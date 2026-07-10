@@ -11,6 +11,24 @@
 | **In Review** | Open, linked PR | PR passes CI, reviewer assigned | PR approved and merged |
 | **Done** | Closed | PR merged, deployment verified | Issue auto-closed or manually closed |
 
+## PR Lifecycle Definitions
+
+| Stage | GitHub State | Criteria to Enter | Criteria to Exit |
+|---|---|---|---|
+| **Intake** | PR open, draft or ready | PR opened and linked to issue/work item | Classified in remaining WIP log |
+| **Remaining WIP Logged** | PR open | Owner, state, and next action recorded | Routed to revive, merge-ready, blocked, close, or cleanup-only |
+| **Ready for Review** | PR open, non-draft | Required reviewers assigned and active work complete | CI passes and approval path is clear |
+| **Merge Ready** | PR open, mergeable | Required checks green, approvals satisfied, no unresolved blockers | Merged or explicitly deferred with reason |
+| **Closed / Revive** | PR closed or draft | Work paused, superseded, or needs reopen decision | Follow-up issue/PR or closure note captured |
+| **Branch Hygiene** | Branch post-merge/post-close | PR state settled and cleanup guardrails satisfied | Safe branch deletion or explicit retention logged |
+
+## Active Project and Feature Links
+
+- **Sprint 37 - CI/CD Guardrails**: <https://github.com/orgs/IBuySpy-Shared/projects/7>
+- **CI/CD Remaining Gaps (legacy/backlog board)**: <https://github.com/orgs/IBuySpy-Shared/projects/5>
+- **Feature tracker — Publish and environment-guardrail stabilization**: <https://github.com/IBuySpy-Shared/basecoat/issues/1719>
+- **Feature tracker — Deployment pipeline recovery (portal, extension, terraform)**: <https://github.com/IBuySpy-Shared/basecoat/issues/1720>
+
 ## Branch Naming
 
 Pattern: `<type>/<issue-number>-<short-description>`
@@ -55,8 +73,25 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 - **Squash merge** for all feature and fix branches — keeps `main` history linear.
 - **Merge commit** only for long-lived integration branches needing preserved commit history.
-- Delete the source branch after merge.
+- Delete the source branch after merge unless it is intentionally retained as `preserved/`, `backup/`, or `wip/` with a recorded owner and next action.
 - Every merge to `main` must pass all CI checks. No force-pushes to `main`.
+
+## Remaining WIP Logging
+
+Use `pr-lifecycle=full` when you need the whole PR lifecycle managed as a
+single flow.
+
+| WIP class | Meaning | Required next step |
+|---|---|---|
+| `merge-ready` | Ready to merge once ordering is clear | Coordinate merge window and land it |
+| `blocked` | Waiting on build, review, dependency, or conflict | Attach blocker evidence and owner |
+| `revive` | Still valuable but stale | Reconfirm owner, branch viability, and next review date |
+| `close` | Superseded, abandoned, or no longer needed | Close PR/branch with replacement or rationale |
+| `cleanup-only` | No code intent left; only artifacts or stale refs remain | Remove artifacts, then run safe branch hygiene |
+
+- Every logged item must record an owner and the next review or cleanup date.
+- Do not move into branch cleanup while a PR is still open, unreviewed, or red.
+- Treat preserved snapshots as retained WIP, not deletion candidates.
 
 ## Label Taxonomy
 

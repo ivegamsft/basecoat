@@ -1,4 +1,4 @@
-name: Token Context Inventory
+name: "BaseCoat - Token Context Inventory"
 
 on:
   push:
@@ -25,12 +25,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out main
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           ref: main
 
       - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: '3.11'
 
@@ -40,7 +40,7 @@ jobs:
       - name: Detect inventory changes
         id: changes
         run: |
-          if git diff --quiet -- docs/reference/TOKEN_CONTEXT_INVENTORY.md; then
+          if git diff --quiet -- docs/reference/token-context-inventory.md; then
             echo "No inventory changes detected."
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
@@ -55,9 +55,16 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -B "${BRANCH}"
-          git add docs/reference/TOKEN_CONTEXT_INVENTORY.md
+          git add docs/reference/token-context-inventory.md
           git commit -m "chore(docs): auto-update token context inventory [skip ci]"
-          git push origin "${BRANCH}" --force-with-lease
+          REMOTE_SHA="$(git ls-remote --heads origin "${BRANCH}" | awk '{print $1}')"
+          if [ -n "${REMOTE_SHA}" ]; then
+            git fetch --no-tags origin "${BRANCH}"
+            LEASE_ARG="--force-with-lease=refs/heads/${BRANCH}:${REMOTE_SHA}"
+          else
+            LEASE_ARG="--force-with-lease=refs/heads/${BRANCH}:"
+          fi
+          git push origin "HEAD:refs/heads/${BRANCH}" ${LEASE_ARG}
 
       - name: Open or update pull request
         if: steps.changes.outputs.changed == 'true'
@@ -76,11 +83,45 @@ jobs:
           EOF
           )"
 
+          # Enterprise policies can block GitHub Actions from creating or editing PRs.
+          # Keep inventory regeneration successful and provide manual next-step guidance
+          # when policy restrictions are detected, but fail normally for other errors.
+          run_pr_command() {
+            local action="$1"
+            shift
+            local output=""
+            if output="$("$@" 2>&1)"; then
+              echo "${output}"
+              return 0
+            fi
+
+            echo "${output}"
+            if echo "${output}" | grep -Eqi 'createPullRequest|not permitted|is not allowed|Resource not accessible by integration'; then
+              {
+                echo "## Token inventory PR automation blocked by policy"
+                echo
+                echo "GitHub Actions updated branch \`${BRANCH}\`, but enterprise policy blocked automated PR create/edit."
+                echo
+                echo "- Branch: \`${BRANCH}\`"
+                echo "- Attempted action: \`${action}\`"
+                echo
+                echo "Manual follow-up:"
+                echo "1. Open a PR from \`${BRANCH}\` to \`main\`."
+                echo "2. Use title: \`${PR_TITLE}\`."
+                echo "3. Use the standard token inventory PR body from this workflow."
+              } >> "$GITHUB_STEP_SUMMARY"
+              echo "WARNING: Enterprise policy blocked PR ${action}; continuing with manual PR instructions."
+              return 0
+            fi
+
+            return 1
+          }
+
           EXISTING_PR="$(gh pr list --base main --head "${BRANCH}" --state open --json number --jq '.[0].number')"
           if [ -n "${EXISTING_PR}" ]; then
             echo "Updating existing PR #${EXISTING_PR}"
-            gh pr edit "${EXISTING_PR}" --title "${PR_TITLE}" --body "${PR_BODY}"
+            run_pr_command "edit" gh pr edit "${EXISTING_PR}" --title "${PR_TITLE}" --body "${PR_BODY}"
           else
             echo "Creating a new PR from ${BRANCH} to main"
-            gh pr create --base main --head "${BRANCH}" --title "${PR_TITLE}" --body "${PR_BODY}"
+            run_pr_command "create" gh pr create --base main --head "${BRANCH}" --title "${PR_TITLE}" --body "${PR_BODY}"
           fi

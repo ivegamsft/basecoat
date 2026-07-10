@@ -1,181 +1,83 @@
 ---
-description: "Intent prefix routing — interprets user-defined prefixes to determine urgency, timing, and which agents/skills to invoke. Applies to all conversations."
+description: "BaseCoat compatibility alias for intent prefix routing. Preserves the legacy filename while the prefixed BaseCoat instruction is the canonical source."
 applyTo: "**/*"
+compatibilityAlias: true
+canonicalInstruction: "basecoat-10-core-intent-routing.instructions.md"
 ---
 
 # Intent Prefix Routing
 
-The user communicates intent through structured prefixes in their messages.
-Always read the prefix before deciding what to do. Prefix + syntax determines
-both the type of work and **when** to do it.
+This legacy alias mirrors `basecoat-10-core-intent-routing.instructions.md`.
+Keep it in sync so older references still receive the full routing guidance.
 
----
+## Enforcement Contract
+
+Prefix parsing is a hard contract, not a soft hint. When a recognized prefix
+appears at the start of a message, it must be interpreted as an authoritative
+routing signal before any plain-text interpretation occurs.
+
+1. `bug:` routes immediately to the defect workflow.
+2. `feature:` routes immediately to the implementation/design workflow.
 
 ## Prefix Vocabulary
 
 | Prefix | Intent | Default timing | Primary agents |
 |---|---|---|---|
-| `bug:` | Defect, regression, broken behavior | **Now** — fix immediately | `@code-review`, `@self-healing-ci`, `@config-auditor` |
-| `feature:` | New capability or enhancement | **Later** — log for backlog | `@sprint-planner`, `@solution-architect` |
-| `audit:` | Review, assess, validate — no changes | **Now** — analysis only, no edits | `@security-analyst`, `@config-auditor`, `@github-security-posture` |
-| `plan:` | Sprint or project planning | **Now** — planning mode, no implementation | `@sprint-planner`, `@product-manager` |
-| `spike:` | Time-boxed investigation, no deliverable | **Now** — research only, produce findings | `@solution-architect` |
-| `chore:` | Maintenance, cleanup, non-functional work | **Soon** — defer if sprint is full | `@devops-engineer`, `@release-manager` |
-| `security:` | Security concern or vulnerability | **Now, high priority** — escalate | `@security-analyst`, `@guardrail` |
-| `perf:` | Performance degradation or concern | **Now** — measure before changing | `@performance-analyst` |
-| `outage:` | Service outage, broken or dead system, site down | **Now, high priority** — route to RCA | `@rca` |
-| `docs:` | Documentation only | **Soon** — low urgency unless broken | `@tech-writer` |
-| `test:` | Test coverage gap or test failure | **Now** — coverage gaps block releases | `@manual-test-strategy`, `@strategy-to-automation` |
-| `refactor:` | Structural improvement, no behavior change | **Later** — batch with related work | `@code-review`, `@performance-analyst` |
-| `ux:` | User experience or design concern | **Soon** | `@ux-designer`, `@frontend-dev` |
+| `feature:` | New capability or enhancement | Later | `@sprint-planner`, `@solution-architect` |
+| `refactor:` | Structural improvement, no behavior change | Later | `@code-review`, `@performance-analyst` |
+| `architect:` | Architecture design or system-design decision | Later | `@solution-architect` |
+| `workflow:` | GitHub Actions/workflow failure triage and repair | Now | `@broken-build-troubleshooter`, `@self-healing-ci`, `@devops-engineer` |
+| `actions:` | GitHub Actions configuration, runs, and policy checks | Now | `@self-healing-ci`, `@ci-failure-escalation`, `@devops-engineer` |
+| `pr:` | Pull request triage, mergeability, or stale PR cleanup | Now | `@orphaned-pr-cleanup`, `@merge-coordinator`, `@code-review` |
+| `issue:` | GitHub issue triage, labeling, and backlog hygiene | Now | `@issue-triage`, `@sprint-planner` |
+| `portfolio:` | Project audit for issue/PR dedupe, categorization, dependency mapping, feature grouping, and project linkage | Now | `@issue-triage`, `@orphaned-pr-cleanup`, `@sprint-project-mapper`, `@sprint-planner`, `@governance-auditor` |
+| `release:` | Release planning, version bumping, and publication | Now | `@release-manager`, `@release-readiness-chair`, `@release-impact-advisor` |
+| `version:` | BaseCoat version inspection and drift check | Now | `@release-manager`, `@devops-engineer` |
+| `azure:` | Azure-scoped operation | Now | `@devops-engineer`, `@solution-architect` |
+| `infra:` | Infrastructure change | Now | `@devops-engineer`, `@solution-architect` |
 
----
+## GitHub-Native Routing
 
-## Syntax Determines Timing
+`workflow:`, `actions:`, `pr:`, `issue:`, `portfolio:`, and `release:` are deterministic
+GitHub-scoped routes and should not trigger extra disambiguation turns.
 
-The same prefix has different timing implications depending on its syntactic context.
+## PR Lifecycle Modifier
 
-### Standalone message — act now
+`pr-lifecycle=<none|standard|full>` is supported for `feature:` and `pr:`.
 
-When a prefix appears as the first word of a standalone message, treat it as
-immediate work:
+Execution contract:
 
-```text
-bug: the sync script exits with code 1 on Windows when BASECOAT_REPO is unset
-```
+1. Keep a single authoritative prefix (`feature:` or `pr:`).
+2. Parse `pr-lifecycle` when present and validate enum values.
+3. Reject dual-prefix combinations such as `feature: pr:`.
+4. For `feature:` requests with PR language but no modifier, default to
+   `pr-lifecycle=standard`.
+5. In `pr-lifecycle=full`, require required-check readiness before closeout,
+   keep cleanup after merge or explicit close, and block completion while WIP
+   or uncommitted state remains.
 
-→ Investigate and fix now.
+## Version Routing
 
-```text
-audit: run a say-vs-do check against the CI workflows
-```
+`version:` inspects downstream installed BaseCoat version and, when the install
+source is published BaseCoat, compares against latest published release.
 
-→ Run the audit now. Return findings. Do not make changes.
+## Plan-First Enforcement
 
----
+For any implementation intent that touches multiple files or requires design
+decisions, planning is required before execution begins.
 
-### Bulleted list — triage and log, not implement
+Affected prefixes: `feature:`, `refactor:`, `architect:`
 
-When prefixes appear as items in a bulleted list within a message, they are
-**triage items**, not immediate work orders. Log them (as issues, todos, or
-plan notes) and confirm receipt. Do not implement.
+## Sprint-Style Request Nudge
 
-```text
-- bug: metrics dashboard is broken on mobile
-- feature: add a prompt for getting started
-- audit: run impeccable against the GH Pages output
-- chore: clean up stale branches
-```
+When the user asks to plan and execute the next sprint or use similar
+sprint-planning language, route to `@sprint-planner` first and wait for
+confirmation before execution.
 
-→ Log each item appropriately (GitHub issue, plan note, backlog entry).
-   Report what was logged. Ask which item to start with, if any.
-   Do not begin implementation until explicitly directed.
+## Azure Preflight Guardrail
 
-**The most common mistake:** treating a bulleted `feature:` item as an immediate
-implementation request. A bulleted `feature:` means *"add this to the backlog."*
+For `azure:` and `infra:` work, review these compatibility aliases before
+proceeding:
 
----
-
-### Mixed message — respect both
-
-A message can contain both a preamble action and a bulleted list. The preamble
-may be immediate; the list items are still triage:
-
-```text
-run an audit against the CI workflows — log issues
-
-- feature: add retry logic to sync.sh
-- bug: secret-scan.yml always exits 0
-- chore: remove dead workflow stubs
-```
-
-→ Run the audit now. Log the bulleted items as issues. Return the audit findings
-   and the list of what was logged.
-
----
-
-## Timing Modifiers
-
-These words in the user's message override the default timing of a prefix:
-
-| Modifier | Effect |
-|---|---|
-| `now`, `immediately`, `urgent` | Promote any prefix to immediate action |
-| `later`, `backlog`, `next sprint` | Defer any prefix, even `bug:` |
-| `no changes`, `read-only`, `analysis only` | Suppress implementation even for `bug:` |
-| `log it`, `file an issue` | Log only; do not implement |
-| `just document` | Documentation output only; no code changes |
-
----
-
-## Audit Mode (`audit:`)
-
-`audit:` is always read-only unless the user explicitly says "and fix" or "resolve."
-
-When `audit:` fires:
-
-1. Run the analysis
-2. Return findings with severity (`🔴 Critical / 🟠 High / 🟡 Medium / ⚪ Low`)
-3. Log as GitHub issues if the user says "log issues"
-4. Wait for explicit instruction before making any changes
-
----
-
-## Feature Routing
-
-`feature:` in a bullet list means: **plan it, don't build it.**
-
-When a bulleted `feature:` item is logged, the appropriate output is:
-
-- A GitHub issue with the feature description, or
-- An entry in the plan/backlog, or
-- A note in the session plan
-
-The appropriate agent is `@sprint-planner` for prioritization or
-`@solution-architect` for design — not an implementation agent.
-
----
-
-## Outage Routing
-
-When a user describes a system being broken, dead, down, or not responding,
-normalize the request to `outage:` and route it to the RCA agent.
-
-| Alias | Normalized intent |
-|---|---|
-| `broken` | `outage:` |
-| `broke` | `outage:` |
-| `dead` | `outage:` |
-| `site down` | `outage:` |
-| `down` | `outage:` |
-| `not responding` | `outage:` |
-| `incident` | `outage:` |
-| `it's broken` | `outage:` |
-| `nothing works` | `outage:` |
-
-Use `@rca` for deep-dive analysis once the active incident is stabilized.
-
----
-
-## Prefix-to-Skill Routing
-
-| Prefix | Skills to consult |
-|---|---|
-| `bug:` | `code-review`, `error-kb` |
-| `feature:` | `architecture`, `agent-design` (for new agents/skills) |
-| `audit:` | `security`, `code-review`, `github-security-posture` |
-| `plan:` | `architecture`, `documentation` |
-| `security:` | `security`, `github-security-posture` |
-| `perf:` | `performance-profiling` |
-| `docs:` | `documentation` |
-| `test:` | `manual-test-strategy` |
-
----
-
-## Unknown or Missing Prefix
-
-If a message has no prefix and is not clearly one intent type, ask before
-acting. Ambiguous work done in the wrong mode wastes turns.
-
-If the prefix is not in the vocabulary above, treat it as a custom label and
-ask what it means before routing.
+- `instructions/basecoat-60-workflow-ci-firewall.instructions.md`
+- `instructions/basecoat-50-security-rbac-authentication.instructions.md`

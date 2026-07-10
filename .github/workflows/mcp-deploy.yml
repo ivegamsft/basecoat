@@ -1,4 +1,4 @@
-name: MCP Deploy
+name: "BaseCoat - MCP Deploy"
 
 on:
   push:
@@ -24,9 +24,9 @@ on:
       environment:
         description: "Target environment"
         required: false
-        default: "prod"
+        default: "production"
         type: choice
-        options: ["prod", "staging"]
+        options: ["production", "prod", "staging"]
 
 permissions:
   contents: read
@@ -40,21 +40,21 @@ env:
 jobs:
   build-push:
     name: Build and push image to GHCR
-    runs-on: ${{ vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork }}
     env:
-      TARGET_ENV: ${{ github.event_name == 'pull_request' && 'staging' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'prod') }}
+      TARGET_ENV: ${{ github.event_name == 'pull_request' && 'staging' || (github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'production' && 'prod' || github.event.inputs.environment) || 'prod') }}
     outputs:
       image_tag: ${{ steps.meta.outputs.version }}
       image_ref: ${{ env.REGISTRY }}/${{ steps.owner.outputs.lc }}/basecoat-metrics-mcp:${{ steps.meta.outputs.version }}
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
       - name: Log in to GHCR
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v3
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -66,7 +66,7 @@ jobs:
 
       - name: Extract image metadata
         id: meta
-        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v6.0.0
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302
         with:
           images: ${{ env.REGISTRY }}/${{ steps.owner.outputs.lc }}/basecoat-metrics-mcp
           tags: |
@@ -75,10 +75,10 @@ jobs:
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v3
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c
 
       - name: Build and push
-        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v6
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
         with:
           context: mcp/basecoat-metrics
           push: true
@@ -89,22 +89,159 @@ jobs:
 
   deploy:
     name: Deploy to Azure Container Apps
-    runs-on: ${{ vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
+    runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-latest' || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
     timeout-minutes: 20
-    needs: build-push
+    needs: [build-push]
     if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork }}
-    environment: ${{ github.event_name == 'pull_request' && 'staging' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'prod') }}
+    environment: ${{ github.event_name == 'pull_request' && 'staging' || (github.event_name == 'workflow_dispatch' && ((github.event.inputs.environment == 'prod' || github.event.inputs.environment == 'production') && 'production' || github.event.inputs.environment) || 'production') }}
     env:
-      TARGET_ENV: ${{ github.event_name == 'pull_request' && 'staging' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'prod') }}
+      TARGET_ENV: ${{ github.event_name == 'pull_request' && 'staging' || (github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'production' && 'prod' || github.event.inputs.environment) || 'prod') }}
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Set up Node.js for policy preflight
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '20'
+
+      - name: Build operation context resolver
+        working-directory: skills/operation-context-resolver
+        run: |
+          npm ci --no-audit --prefer-offline
+          npm run build
+
+      - name: Resolve operation context
+        id: op-context
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          node skills/operation-context-resolver/dist/cli.js resolve \
+            --repo-root "${GITHUB_WORKSPACE}" \
+            --github-ref "${GITHUB_REF}" \
+            --github-event-name "${GITHUB_EVENT_NAME}" \
+            --workflow-environment "${TARGET_ENV}" \
+            --user-intent "deploy mcp metrics service to ${TARGET_ENV}" \
+            --output "${RUNNER_TEMP}/operation-context.json"
+
+          echo "context_path=${RUNNER_TEMP}/operation-context.json" >> "$GITHUB_OUTPUT"
+
+      - name: Enforce operation context policy
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          CONTEXT_PATH="${{ steps.op-context.outputs.context_path }}"
+          TARGET_CONTEXT_ENV="$(jq -r '.target_environment' "${CONTEXT_PATH}")"
+          MODE="$(jq -r '.mode' "${CONTEXT_PATH}")"
+          GITHUB_ENVIRONMENT="$(jq -r '.github_environment' "${CONTEXT_PATH}")"
+          APPROVAL_REQUIRED="$(jq -r '.human_approval_required' "${CONTEXT_PATH}")"
+
+          if jq -e '.errors and (.errors | length > 0)' "${CONTEXT_PATH}" >/dev/null; then
+            echo "::error::operation-context-resolver returned errors."
+            jq -r '.errors[]' "${CONTEXT_PATH}" | sed 's/^/::error::/'
+            exit 1
+          fi
+
+          if ! jq -e '.allowed_actions | index("deploy_app")' "${CONTEXT_PATH}" >/dev/null; then
+            echo "::error::deploy_app is not allowed for ${TARGET_CONTEXT_ENV} (${MODE})."
+            exit 1
+          fi
+
+          if jq -e '.blocked_actions | index("deploy_app")' "${CONTEXT_PATH}" >/dev/null; then
+            echo "::error::deploy_app is blocked for ${TARGET_CONTEXT_ENV} (${MODE})."
+            exit 1
+          fi
+
+          if [[ "${TARGET_CONTEXT_ENV}" != "${TARGET_ENV}" ]]; then
+            echo "::error::Resolver target environment (${TARGET_CONTEXT_ENV}) does not match workflow target (${TARGET_ENV})."
+            exit 1
+          fi
+
+          if [[ "${APPROVAL_REQUIRED}" == "true" ]]; then
+            if [[ "${GITHUB_ENVIRONMENT}" != "production" ]]; then
+              echo "::error::Resolver policy requires human approval for ${TARGET_CONTEXT_ENV} (${MODE}), but workflow is not using protected production environment."
+              exit 1
+            fi
+            echo "::notice::Resolver requires human approval for ${TARGET_CONTEXT_ENV} (${MODE}); continue via protected production environment gate."
+          fi
+
+          {
+            echo "### Operation context preflight"
+            echo ""
+            echo "| Key | Value |"
+            echo "|---|---|"
+            echo "| Target environment | \`${TARGET_CONTEXT_ENV}\` |"
+            echo "| Mode | \`${MODE}\` |"
+            echo "| GitHub environment | \`${GITHUB_ENVIRONMENT}\` |"
+            echo "| Human approval required | \`${APPROVAL_REQUIRED}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Azure login
-        uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
+        uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Build environment drift auditor
+        working-directory: skills/environment-audit-drift
+        run: |
+          npm ci --no-audit --prefer-offline
+          npm run build
+
+      - name: Environment drift preflight (gating)
+        id: drift-preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
+          node skills/environment-audit-drift/dist/cli.js \
+            --config .github/environment-map.yml \
+            --subscription "${SUBSCRIPTION_ID}" \
+            --github-token "${{ secrets.GITHUB_TOKEN }}" \
+            --output "${RUNNER_TEMP}/drift-report.json"
+
+          TARGET_CRITICAL=$(jq --arg env "${TARGET_ENV}" '[.findings[] | select(.environment == $env and .severity == "critical")] | length' "${RUNNER_TEMP}/drift-report.json")
+          TARGET_HIGH=$(jq --arg env "${TARGET_ENV}" '[.findings[] | select(.environment == $env and .severity == "high")] | length' "${RUNNER_TEMP}/drift-report.json")
+          TARGET_TOTAL=$(jq --arg env "${TARGET_ENV}" '[.findings[] | select(.environment == $env)] | length' "${RUNNER_TEMP}/drift-report.json")
+
+          {
+            echo "target_critical=${TARGET_CRITICAL}"
+            echo "target_high=${TARGET_HIGH}"
+            echo "target_total=${TARGET_TOTAL}"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### Environment drift preflight (gating)"
+            echo ""
+            echo "| Target | Critical | High | Findings |"
+            echo "|---|---:|---:|---:|"
+            echo "| \`${TARGET_ENV}\` | ${TARGET_CRITICAL} | ${TARGET_HIGH} | ${TARGET_TOTAL} |"
+            echo ""
+            echo "> Critical findings block deployment for the target environment."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Enforce target-environment drift gate
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TARGET_CRITICAL="${{ steps.drift-preflight.outputs.target_critical }}"
+          if [[ "${TARGET_CRITICAL}" -gt 0 ]]; then
+            echo "::error::Critical environment drift detected for ${TARGET_ENV} (${TARGET_CRITICAL} finding(s)); see drift-report.json artifact and step summary for details."
+            exit 1
+          fi
+
+      - name: Upload drift preflight report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: mcp-drift-preflight-${{ github.run_id }}
+          path: ${{ runner.temp }}/drift-report.json
+          if-no-files-found: ignore
+          retention-days: 14
 
       - name: Lowercase owner
         id: owner
@@ -133,7 +270,7 @@ jobs:
             --no-pretty-print
 
       - name: Deploy / update Bicep infrastructure
-        uses: azure/arm-deploy@a1361c2c2cd398621955b16ca32e01c65ea340f5 # v2
+        uses: azure/arm-deploy@a1361c2c2cd398621955b16ca32e01c65ea340f5
         id: infra
         with:
           resourceGroupName: ${{ secrets.MCP_RESOURCE_GROUP }}
@@ -199,11 +336,13 @@ jobs:
 
       - name: Output deployed endpoint
         run: |
-          echo "### MCP Deployed ✅" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "| | |" >> "$GITHUB_STEP_SUMMARY"
-          echo "|---|---|" >> "$GITHUB_STEP_SUMMARY"
-          echo "| **Image** | \`${{ needs.build-push.outputs.image_ref }}\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| **Environment** | \`${{ env.TARGET_ENV }}\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| **Health** | \`https://${{ steps.infra.outputs.fqdn }}/health\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| **MCP endpoint** | \`https://${{ steps.infra.outputs.fqdn }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "### MCP Deployed ✅"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| **Image** | \`${{ needs.build-push.outputs.image_ref }}\` |"
+            echo "| **Environment** | \`${{ env.TARGET_ENV }}\` |"
+            echo "| **Health** | \`https://${{ steps.infra.outputs.fqdn }}/health\` |"
+            echo "| **MCP endpoint** | \`https://${{ steps.infra.outputs.fqdn }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"

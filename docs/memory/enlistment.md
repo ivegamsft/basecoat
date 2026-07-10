@@ -12,7 +12,7 @@ The sweep uses **GitHub Topics** as the primary enlistment signal. Any repo with
 the `basecoat-enabled` topic is discovered automatically via the GitHub Search API.
 No central registry to maintain, no pull requests to basecoat itself.
 
-```
+```text
 repo adds topic: basecoat-enabled
          ↓
 sweep-enterprise-memory.yml discovers it
@@ -22,7 +22,7 @@ signals extracted (PRs, issues, CHANGELOG)
 PR opened to {org}/basecoat-memory with candidates
          ↓
 memory-curator reviews → merged → available to all teams
-```
+```text
 
 ---
 
@@ -38,7 +38,7 @@ Or via CLI:
 
 ```bash
 gh api repos/{org}/{repo}/topics --method PUT --field names[]="basecoat-enabled"
-```
+```text
 
 That's the minimum required for the sweep to discover the repo.
 
@@ -79,7 +79,7 @@ memory:
 
   # How many days back to look (overrides workflow default of 30)
   # days_back: 30
-```
+```text
 
 If `.basecoat.yml` is absent the sweep uses defaults (all signals, 30 days back,
 no domain filter).
@@ -121,6 +121,7 @@ The sweep workflow writes to `{org}/basecoat-memory` using a PAT stored as
 `MEMORY_REPO_TOKEN` in the basecoat repo secrets.
 
 Create a fine-grained PAT with:
+
 - **Resource owner:** your org
 - **Repository access:** `{org}/basecoat-memory` only
 - **Permissions:** Contents (R/W), Pull requests (R/W)
@@ -128,7 +129,7 @@ Create a fine-grained PAT with:
 
 ```bash
 gh secret set MEMORY_REPO_TOKEN --repo IBuySpy-Shared/basecoat
-```
+```text
 
 ---
 
@@ -155,7 +156,7 @@ Check that your repo is visible to the sweep:
 ```bash
 gh api "search/repositories?q=topic:basecoat-enabled+org:{YOUR_ORG}" \
   --jq '.items[].full_name'
-```
+```text
 
 Your repo should appear in the list within minutes of adding the topic.
 
@@ -174,4 +175,4 @@ the repo on the next run. No other changes are needed.
 - `scripts/sweep-enterprise-memory.ps1` — the sweep script
 - `scripts/sync-shared-memory.ps1` — pull shared memory to your local session
 - `.github/workflows/memory-sweep.yml` — the scheduled sweep workflow
-- `agents/memory-curator.agent.md` — curation and review process
+- `agents/basecoat-10-core-memory-curator.agent.md` — curation and review process

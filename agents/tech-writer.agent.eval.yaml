@@ -1,6 +1,6 @@
 name: "tech-writer-routing"
 description: "Routing evaluation — validates trigger activation for the tech-writer agent."
-skill: "agents/tech-writer.agent.md"
+skill: "agents/basecoat-10-core-tech-writer.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with creating or improving technical documentation, API docs, runbooks, tutorials, ADRs, changelogs, or implementing docs-as-code workflows."

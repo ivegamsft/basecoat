@@ -1,6 +1,6 @@
 name: "rca-routing"
 description: "Routing evaluation — validates trigger activation for the rca agent."
-skill: "agents/rca.agent.md"
+skill: "agents/basecoat-10-core-rca.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with run post-incident root cause analysis."

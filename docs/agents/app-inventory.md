@@ -153,8 +153,8 @@ upgrade-path plans for outdated or vulnerable packages.
 
 | Asset | Purpose |
 |-------|---------|
-| `agents/app-inventory.agent.md` | Agent definition and detailed workflow |
-| `agents/legacy-modernization.agent.md` | Executes strangler-fig migration once inventory is done |
-| `agents/dependency-lifecycle.agent.md` | Plans dependency upgrades found during inventory |
+| `agents/basecoat-10-core-app-inventory.agent.md` | Agent definition and detailed workflow |
+| `agents/basecoat-10-core-legacy-modernization.agent.md` | Executes strangler-fig migration once inventory is done |
+| `agents/basecoat-10-core-dependency-lifecycle.agent.md` | Plans dependency upgrades found during inventory |
 | `skills/app-inventory/SKILL.md` | Reusable templates: report, complexity scoring |
 | `docs/treatment-matrix.md` | Decision framework for app disposition |

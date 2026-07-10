@@ -1,0 +1,104 @@
+name: AIDL Portfolio Rollup and KPI Publisher
+
+on:
+  workflow_dispatch:
+    inputs:
+      repositories:
+        description: Comma or newline separated owner/repo entries
+        required: false
+        default: IBuySpy-Shared/basecoat
+        type: string
+      lookback_days:
+        description: Trailing days used for lagging indicators
+        required: false
+        default: "14"
+        type: string
+      publish_issue_repo:
+        description: Issue repository for publishing the KPI report
+        required: false
+        default: IBuySpy-Shared/basecoat
+        type: string
+      publish_issue_number:
+        description: Issue number to receive KPI report comments
+        required: false
+        default: "1744"
+        type: string
+      dry_run:
+        description: Skip live API writes and publish behavior
+        required: false
+        default: false
+        type: boolean
+      snapshot_path:
+        description: Optional repository-relative snapshot JSON for deterministic runs
+        required: false
+        type: string
+  schedule:
+    - cron: "23 13 * * 1-5"
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  rollup:
+    name: Roll up portfolio KPIs
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ secrets.PORTFOLIO_ROLLUP_TOKEN || github.token }}
+      DEFAULT_REPOSITORIES: ${{ vars.AIDL_PORTFOLIO_ROLLUP_REPOS || github.repository }}
+      DEFAULT_LOOKBACK_DAYS: ${{ vars.AIDL_PORTFOLIO_ROLLUP_LOOKBACK_DAYS || '14' }}
+      DEFAULT_PUBLISH_REPO: ${{ vars.AIDL_PORTFOLIO_PUBLISH_REPO || github.repository }}
+      DEFAULT_PUBLISH_ISSUE: ${{ vars.AIDL_PORTFOLIO_PUBLISH_ISSUE || '1744' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v4.1.7
+
+      - name: Generate rollup artifacts
+        shell: pwsh
+        run: |
+          $isDispatch = "${{ github.event_name }}" -eq "workflow_dispatch"
+          $repoInput = if ($isDispatch) { "${{ inputs.repositories }}" } else { $env:DEFAULT_REPOSITORIES }
+          $lookbackInput = if ($isDispatch) { "${{ inputs.lookback_days }}" } else { $env:DEFAULT_LOOKBACK_DAYS }
+          $publishRepo = if ($isDispatch) { "${{ inputs.publish_issue_repo }}" } else { $env:DEFAULT_PUBLISH_REPO }
+          $publishIssueRaw = if ($isDispatch) { "${{ inputs.publish_issue_number }}" } else { $env:DEFAULT_PUBLISH_ISSUE }
+          $snapshotPath = if ($isDispatch) { "${{ inputs.snapshot_path }}" } else { "" }
+          $dryRun = if ($isDispatch) { "${{ inputs.dry_run }}" -eq "true" } else { $false }
+
+          if ([string]::IsNullOrWhiteSpace($repoInput)) {
+            throw "No repositories provided. Set workflow input or AIDL_PORTFOLIO_ROLLUP_REPOS variable."
+          }
+
+          $repoList = @($repoInput -split "[,\r\n]" | ForEach-Object { $_.Trim() } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+          $lookbackDays = [int]$lookbackInput
+          $publishIssueNumber = 0
+          if (-not [string]::IsNullOrWhiteSpace($publishIssueRaw)) {
+            $publishIssueNumber = [int]$publishIssueRaw
+          }
+
+          $params = @{
+            Repositories = $repoList
+            LookbackDays = $lookbackDays
+            OutputDir = "artifacts\aidl-portfolio-rollup"
+            PublishIssueRepo = $publishRepo
+            PublishIssueNumber = $publishIssueNumber
+          }
+          if ($dryRun) {
+            $params.DryRun = $true
+          }
+          if (-not [string]::IsNullOrWhiteSpace($snapshotPath)) {
+            $params.SnapshotPath = $snapshotPath
+          }
+
+          .\scripts\aidl-portfolio-rollup-kpi-publisher.ps1 @params
+
+      - name: Upload rollup artifacts
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        with:
+          name: aidl-portfolio-rollup
+          path: artifacts/aidl-portfolio-rollup
+          retention-days: 14

@@ -14,6 +14,10 @@ permissions:
 safe-outputs:
   add-comment:
     hide-older-comments: true
+  missing-tool:
+    create-issue: false
+  report-incomplete:
+    create-issue: false
   noop:
     report-as-issue: false
 engine: copilot
@@ -34,14 +38,20 @@ the code reaches production.
 - **Repository**: `${{ github.repository }}`
 - **Base branch**: `${{ github.event.pull_request.base.sha }}`
 
-Fetch the PR diff and changed files:
+Fetch the PR diff and changed files using GitHub MCP tools. The repository
+`${{ github.repository }}` is in `owner/repo` format — split on `/` to get
+owner and repo name:
 
-```bash
-gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} \
-  --json number,title,body,additions,deletions,changedFiles
+- Call `get_pull_request` with `pullNumber: ${{ github.event.pull_request.number }}` to get PR metadata (number, title, body, additions, deletions, changedFiles)
+- Call `get_pull_request_diff` to get the full diff
 
-gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }}
-```
+If MCP diff retrieval is unavailable or returns empty output, use CLI fallback
+before reporting failure:
+
+- Run `gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json files`
+- Run `gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }}`
+- Continue security analysis using the fallback diff
+- If MCP and CLI both fail to produce a usable diff, report `missing_data` with exact failing command/tool details
 
 ## What to Do
 
@@ -50,6 +60,7 @@ Only post a comment if you find security issues. If the diff is clean, post noth
 ### Step 1 — Scope the Changed Surface
 
 Identify which of the following are touched by this PR:
+
 - Authentication or authorization logic
 - Input handling, parsing, or validation
 - Data access or query construction
@@ -76,6 +87,7 @@ For each changed area, check the most relevant OWASP categories:
 ### Step 3 — Secret Scan
 
 Scan the diff for patterns that suggest hardcoded secrets:
+
 - API keys, tokens, passwords in string literals
 - Base64-encoded values that decode to credentials
 - Private key headers (`-----BEGIN`)
@@ -85,13 +97,11 @@ If any are found, classify as **Critical** and flag immediately.
 
 ### Step 4 — Dependency Risk (if dependencies changed)
 
-```bash
-# Check for known vulnerabilities in changed dependencies
-gh pr diff ${{ github.event.pull_request.number }} -- '**/package.json' '**/requirements.txt' \
-  '**/go.mod' '**/*.csproj' 2>/dev/null | head -200
-```
+Use `get_pull_request_diff` and filter the result to lines matching dependency
+manifest paths (`package.json`, `requirements.txt`, `go.mod`, `*.csproj`).
 
 Note any new dependency that:
+
 - Has not been updated in 12+ months
 - Has a known CVE in the added version range
 - Adds significant transitive dependencies

@@ -1,6 +1,6 @@
 name: "ux-designer-routing"
 description: "Routing evaluation — validates trigger activation for the ux-designer agent."
-skill: "agents/ux-designer.agent.md"
+skill: "agents/basecoat-10-core-ux-designer.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with designing user experiences, evaluating usability, or auditing interfaces for WCAG compliance."

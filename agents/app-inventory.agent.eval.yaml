@@ -1,6 +1,6 @@
 name: "app-inventory-routing"
 description: "Routing evaluation — validates trigger activation for the app-inventory agent."
-skill: "agents/app-inventory.agent.md"
+skill: "agents/basecoat-10-core-app-inventory.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with scan legacy app tech stack."

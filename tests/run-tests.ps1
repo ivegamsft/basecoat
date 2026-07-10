@@ -1,3 +1,7 @@
+param(
+    [bool]$GuidanceAuditFailOnError = $true
+)
+
 $ErrorActionPreference = 'Stop'
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
@@ -62,7 +66,15 @@ if ($missingEval.Count -gt 0) {
 Write-Host "  eval.yaml CI gate passed: all $((Get-ChildItem $skillsDir -Directory).Count) skills have eval.yaml" -ForegroundColor Green
 
 Write-Host 'Running organized guidance audits...'
-& pwsh -NoProfile -File (Join-Path $repoRoot 'scripts' 'run-guidance-audits.ps1') -FailOnError
+$guidanceAuditArgs = @(
+    '-NoProfile',
+    '-File',
+    (Join-Path $repoRoot 'scripts' 'run-guidance-audits.ps1')
+)
+if ($GuidanceAuditFailOnError) {
+    $guidanceAuditArgs += '-FailOnError'
+}
+& pwsh @guidanceAuditArgs
 if ($LASTEXITCODE -ne 0) {
     Write-Host 'Guidance audit run failed' -ForegroundColor Red
     Write-FailureLog 'run-guidance-audits'
@@ -138,6 +150,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running model inventory tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'model-inventory-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Model inventory tests failed' -ForegroundColor Red
+    Write-FailureLog 'model-inventory-tests'
+    exit 1
+}
+
 Write-Host 'Running A/B experiment harness tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'ab-experiment-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
@@ -154,11 +174,171 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running automation stuck-state watchdog tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'automation-stuck-state-watchdog-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Automation stuck-state watchdog tests failed' -ForegroundColor Red
+    Write-FailureLog 'automation-stuck-state-watchdog-tests'
+    exit 1
+}
+
+Write-Host 'Running issue-triage lock refresh tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'issue-triage-lock-refresh-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Issue-triage lock refresh tests failed' -ForegroundColor Red
+    Write-FailureLog 'issue-triage-lock-refresh-tests'
+    exit 1
+}
+
+Write-Host 'Running post-merge release chain workflow tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'post-merge-release-chain-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Post-merge release chain workflow tests failed' -ForegroundColor Red
+    Write-FailureLog 'post-merge-release-chain-tests'
+    exit 1
+}
+
+Write-Host 'Running delivery-autopilot tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'delivery-autopilot-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Delivery-autopilot tests failed' -ForegroundColor Red
+    Write-FailureLog 'delivery-autopilot-tests'
+    exit 1
+}
+
+Write-Host 'Running ship-it intent dispatch tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'ship-it-dispatch-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Ship-it intent dispatch tests failed' -ForegroundColor Red
+    Write-FailureLog 'ship-it-dispatch-tests'
+    exit 1
+}
+
+Write-Host 'Running ship-it build-break detector tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'ship-it-build-break-detector-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Ship-it build-break detector tests failed' -ForegroundColor Red
+    Write-FailureLog 'ship-it-build-break-detector-tests'
+    exit 1
+}
+
+Write-Host 'Running ship-it release gate enforcer tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'ship-it-release-gate-enforcer-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Ship-it release gate enforcer tests failed' -ForegroundColor Red
+    Write-FailureLog 'ship-it-release-gate-enforcer-tests'
+    exit 1
+}
+
+Write-Host 'Running workflow enhancements (#1389) tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'workflow-enhancements-1389-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Workflow enhancements (#1389) tests failed' -ForegroundColor Red
+    Write-FailureLog 'workflow-enhancements-1389-tests'
+    exit 1
+}
+
+Write-Host 'Running reviewer autoassign collaborator eligibility tests (#1575)...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'reviewer-autoassign-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Reviewer autoassign tests failed' -ForegroundColor Red
+    Write-FailureLog 'reviewer-autoassign-tests'
+    exit 1
+}
+
+Write-Host 'Running routing guardrail tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'routing-guardrail-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Routing guardrail tests failed' -ForegroundColor Red
+    Write-FailureLog 'routing-guardrail-tests'
+    exit 1
+}
+
+Write-Host 'Running pr-lifecycle routing coverage tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'pr-lifecycle-routing-coverage-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'pr-lifecycle routing coverage tests failed' -ForegroundColor Red
+    Write-FailureLog 'pr-lifecycle-routing-coverage-tests'
+    exit 1
+}
+
+Write-Host 'Running cleanup branch automation tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'cleanup-branches-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Cleanup branch automation tests failed' -ForegroundColor Red
+    Write-FailureLog 'cleanup-branches-tests'
+    exit 1
+}
+
+Write-Host 'Running issue triage script tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'issue-triage-script-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Issue triage script tests failed' -ForegroundColor Red
+    Write-FailureLog 'issue-triage-script-tests'
+    exit 1
+}
+
+Write-Host 'Running triage-field-sync contract tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'workflow-triage-field-sync-contract.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Triage-field-sync contract tests failed' -ForegroundColor Red
+    Write-FailureLog 'workflow-triage-field-sync-contract'
+    exit 1
+}
+
+Write-Host 'Running hook pack contract tests...'
+& pwsh -NoProfile -File (Join-Path $repoRoot 'scripts' 'validate-hook-packs.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Hook pack contract tests failed' -ForegroundColor Red
+    Write-FailureLog 'validate-hook-packs'
+    exit 1
+}
+
+Write-Host 'Running generate registry tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'generate-registry-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Generate registry tests failed' -ForegroundColor Red
+    Write-FailureLog 'generate-registry-tests'
+    exit 1
+}
+
 Write-Host 'Running data workload tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'data-workload-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
     Write-Host 'Data workload tests failed' -ForegroundColor Red
     Write-FailureLog 'data-workload-tests'
+    exit 1
+}
+
+Write-Host 'Running AIDL portfolio project bootstrap tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'aidl-portfolio-project-bootstrap-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'AIDL portfolio project bootstrap tests failed' -ForegroundColor Red
+    Write-FailureLog 'aidl-portfolio-project-bootstrap-tests'
+    exit 1
+}
+
+Write-Host 'Running AIDL portfolio rollup and KPI publisher tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'aidl-portfolio-rollup-kpi-publisher-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'AIDL portfolio rollup and KPI publisher tests failed' -ForegroundColor Red
+    Write-FailureLog 'aidl-portfolio-rollup-kpi-publisher-tests'
+    exit 1
+}
+ 
+Write-Host 'Running Keep/Fix/Throttle weekly scorecard tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'keep-fix-throttle-weekly-scorecard-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Keep/Fix/Throttle weekly scorecard tests failed' -ForegroundColor Red
+    Write-FailureLog 'keep-fix-throttle-weekly-scorecard-tests'
+    exit 1
+}
+ 
+Write-Host 'Running AIDL learning-to-memory promotion pipeline tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'aidl-learning-memory-promotion-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'AIDL learning-to-memory promotion pipeline tests failed' -ForegroundColor Red
+    Write-FailureLog 'aidl-learning-memory-promotion-tests'
     exit 1
 }
 
@@ -218,6 +398,22 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running agent-merge eval policy tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'agent-merge-eval-policy-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Agent-merge eval policy tests failed' -ForegroundColor Red
+    Write-FailureLog 'agent-merge-eval-policy-tests'
+    exit 1
+}
+
+Write-Host 'Running generate agent eval stubs tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'generate-agent-eval-stubs-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Generate agent eval stubs tests failed' -ForegroundColor Red
+    Write-FailureLog 'generate-agent-eval-stubs-tests'
+    exit 1
+}
+
 Write-Host 'Running extension intent routing eval tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'extension-intent-routing-eval-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
@@ -231,6 +427,38 @@ Write-Host 'Running show-context tests...'
 if ($LASTEXITCODE -ne 0) {
     Write-Host 'Show-context tests failed' -ForegroundColor Red
     Write-FailureLog 'show-context-tests'
+    exit 1
+}
+
+Write-Host 'Running token-status tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'token-status-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Token-status tests failed' -ForegroundColor Red
+    Write-FailureLog 'token-status-tests'
+    exit 1
+}
+
+Write-Host 'Running token-cost-compare tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'token-cost-compare-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Token-cost-compare tests failed' -ForegroundColor Red
+    Write-FailureLog 'token-cost-compare-tests'
+    exit 1
+}
+
+Write-Host 'Running generate registry tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'generate-registry-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Generate registry tests failed' -ForegroundColor Red
+    Write-FailureLog 'generate-registry-tests'
+    exit 1
+}
+
+Write-Host 'Running publish-to-production dispatch tag tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'publish-to-production-dispatch-tag-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Publish-to-production dispatch tag tests failed' -ForegroundColor Red
+    Write-FailureLog 'publish-to-production-dispatch-tag-tests'
     exit 1
 }
 

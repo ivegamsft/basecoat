@@ -1,19 +1,15 @@
 ---
 name: azure-linux-app-service
+compatibility: [github-copilot-cli]
 description: "Use when deploying or operating Python, Ruby, or Node.js apps on Azure App Service Linux. USE FOR: deploy a Flask or FastAPI app to App Service Linux, configure a startup command for a Node app, set up a deployment slot swap, stream Azure App Service logs, choose between code deploy and container deploy. DO NOT USE FOR: Windows App Service configuration, AKS ingress tuning, desktop app packaging."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
+category: infrastructure
 metadata:
   category: infrastructure
-  keywords: "azure, app-service, linux, python, ruby, nodejs, paas, deployment"
-  maturity: production
-  audience: [backend-engineer, devops-engineer, platform-engineer]
-allowed-tools: [bash, azure-cli, git]
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
-
 # Azure Linux App Service
 
 Deploy and operate Python, Ruby, and Node.js web applications on Azure App Service Linux.

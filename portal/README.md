@@ -97,6 +97,7 @@ Deployment notes:
 
 - The deploy workflow targets staging only.
 - It requires `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, and `AZURE_SUBSCRIPTION_ID` as repo variables. GHCR image pulls use the workflow's built-in `GITHUB_TOKEN`.
+- It now fails fast when Azure context is misconfigured (wrong subscription) or when RBAC is missing for resource-group creation and deployment validation (`resourcegroups/write`, `deployments/validate/action`).
 - PostgreSQL admin password can be generated directly by `portal/app/iac/main.bicep` (secret override is optional).
 - `portal/app/iac/README.md` documents the Bicep boundary and required inputs.
 

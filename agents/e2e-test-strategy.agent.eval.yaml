@@ -1,6 +1,6 @@
 name: "e2e-test-strategy-routing"
 description: "Routing evaluation — validates trigger activation for the e2e-test-strategy agent."
-skill: "agents/e2e-test-strategy.agent.md"
+skill: "agents/basecoat-90-quality-e2e-test-strategy.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with design E2E suite."

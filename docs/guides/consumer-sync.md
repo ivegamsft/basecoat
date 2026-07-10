@@ -12,7 +12,7 @@ The sync script copies all distributable assets to `.github/base-coat/` in your 
 - `prompts/` — prompt templates
 - `version.json` — version metadata
 
-Files that are **not** synced: test scripts, CI workflows, internal tooling, `docs/`.
+Files that are **not** synced: `basecoat-metadata.json` (internal portal index), test scripts, CI workflows, and internal tooling. Selected documentation content is synced under `.github/base-coat/docs/`, but not the full source `docs/` tree.
 
 ## Sync commands
 
@@ -49,11 +49,102 @@ Files that are **not** synced: test scripts, CI workflows, internal tooling, `do
     BASECOAT_TARGET_DIR=.github/my-basecoat ./sync.sh
     ```
 
+## Scoped sync patterns
+
+For consumers that only need part of BaseCoat, use `.basecoat.yml` allow-lists
+instead of syncing the full catalog.
+
+```yaml
+# .basecoat.yml
+source: https://github.com/IBuySpy-Shared/basecoat.git
+ref: v3.25.0
+
+agents:
+  - code-review
+  - security-review
+
+skills:
+  - harden
+  - azure-diagnostics
+
+instructions:
+  - governance
+  - security-baseline
+
+sync:
+  exclude:
+    - archive/
+```
+
+This keeps updates scoped and auditable because every synced category is declared
+in source control. For full key reference and more examples, see
+[BaseCoat Config (.basecoat.yml)](basecoat-yml.md).
+
+## Quick refresh shortcut
+
+In Copilot-enabled environments, use the phrase `refresh basecoat` to trigger
+the rollout workflow.
+
+If your environment reports `Skill not found: rollout-basecoat`, run sync
+directly from the consumer repo root:
+
+=== "PowerShell fallback"
+
+    ```powershell
+    $env:BASECOAT_REPO = 'https://github.com/IBuySpy-Shared/basecoat.git'
+    $env:BASECOAT_REF  = 'main'  # or vX.Y.Z
+    .\sync.ps1
+    ```
+
+=== "Shell fallback"
+
+    ```bash
+    BASECOAT_REPO=https://github.com/IBuySpy-Shared/basecoat.git \
+    BASECOAT_REF=main ./sync.sh
+    ```
+
 ## Checking your version
 
 ```bash
 cat .github/base-coat/version.json
 ```
+
+## Auditability: capture a sync trail
+
+Record before/after evidence in each consumer upgrade PR so overrides and drift
+are reviewable.
+
+=== "PowerShell"
+
+    ```powershell
+    # 1) Record current synced version
+    Get-Content .github/base-coat/version.json
+
+    # 2) Run scoped sync (uses .basecoat.yml allow-lists when present)
+    $env:BASECOAT_REPO = 'https://github.com/IBuySpy-Shared/basecoat.git'
+    .\sync.ps1
+
+    # 3) Save an auditable patch for reviewer traceability
+    New-Item -ItemType Directory -Force -Path .github\base-coat-audit | Out-Null
+    git --no-pager diff -- .github/base-coat |
+      Set-Content ".github\base-coat-audit\sync-$((Get-Date).ToString('yyyy-MM-dd')).diff"
+    git --no-pager diff --stat -- .github/base-coat
+    ```
+
+=== "Shell"
+
+    ```bash
+    # 1) Record current synced version
+    cat .github/base-coat/version.json
+
+    # 2) Run scoped sync (uses .basecoat.yml allow-lists when present)
+    BASECOAT_REPO=https://github.com/IBuySpy-Shared/basecoat.git ./sync.sh
+
+    # 3) Save an auditable patch for reviewer traceability
+    mkdir -p .github/base-coat-audit
+    git --no-pager diff -- .github/base-coat > ".github/base-coat-audit/sync-$(date +%F).diff"
+    git --no-pager diff --stat -- .github/base-coat
+    ```
 
 ## Automating upgrades
 
@@ -73,4 +164,5 @@ See [ADR-001](../architecture/decisions/adr-001-naming-convention.md) for full d
 ## See also
 
 - [BaseCoat Config (.basecoat.yml)](basecoat-yml.md) — full field reference for sync and memory sweep configuration
+- [Version Drift Detection](version-drift.md) — N-version alerting policy and automated drift issues
 - [Make It Your Own](customization.md) — customization levels from zero-config to full fork

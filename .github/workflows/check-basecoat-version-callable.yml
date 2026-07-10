@@ -1,4 +1,4 @@
-name: Check BaseCoat Version
+name: "BaseCoat - Check BaseCoat Version"
 
 on:
   workflow_call:
@@ -19,7 +19,7 @@ jobs:
       issues: write
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
       - name: Read consumer version
         id: consumer
@@ -93,3 +93,4 @@ jobs:
           fi
         env:
           GH_TOKEN: ${{ github.token }}
+

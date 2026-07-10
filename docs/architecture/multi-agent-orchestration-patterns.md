@@ -56,9 +56,10 @@ class AgentState(TypedDict):
 
 def merge_dicts(a, b) -> dict:
     return {**a, **b}
-```
+```text
 
 **Benefits**:
+
 - Immutable state transitions (functional programming)
 - Type-safe state evolution
 - Built-in composition for parallel workflows
@@ -89,9 +90,10 @@ def portfolio_management_agent(state: AgentState) -> AgentState:
         name=agent_id
     )
     return {"messages": state["messages"] + [message], "data": state["data"]}
-```
+```text
 
 **Benefits**:
+
 - Runtime agent selection (`--agents agent1,agent2`)
 - Clear contracts enable testing and versioning
 - JSON serialization enables API exposure
@@ -121,9 +123,10 @@ for analyst_key in selected_analysts:
 # Aggregator 2: Portfolio manager final decision
 workflow.add_edge("risk_management_agent", "portfolio_manager")
 workflow.add_edge("portfolio_manager", END)
-```
+```text
 
 **Benefits**:
+
 - Parallel specialist execution (no blocking on individual agents)
 - Multi-layer aggregation enables nuanced decision-making
 - Composable decision pipeline
@@ -135,6 +138,7 @@ workflow.add_edge("portfolio_manager", END)
 **Pattern**: All agents return Pydantic models with clear fields and types.
 
 **Benefits**:
+
 - Machine-readable, parseable decisions
 - Type validation at runtime
 - API-ready (JSON serialization)
@@ -151,9 +155,10 @@ workflow.add_edge("portfolio_manager", END)
 prices = get_prices(ticker, start_date, end_date, api_key)  # Tool call
 prices_df = prices_to_df(prices)                             # Data transformation
 volatility_metrics = calculate_volatility_metrics(prices_df) # Analysis
-```
+```text
 
 **Benefits**:
+
 - Agents focus on logic, not data fetching
 - Easy to swap providers (mock for testing, real for production)
 - Clear separation of concerns
@@ -163,6 +168,7 @@ volatility_metrics = calculate_volatility_metrics(prices_df) # Analysis
 #### 6. Dual UI Paradigm (CLI + Web Portal on Shared Backend)
 
 **Pattern**: Single backend logic, multiple frontends:
+
 - CLI: `poetry run python src/main.py --ticker AAPL,MSFT --selected-analysts aswath_damodaran,warren_buffett`
 - Web: FastAPI backend + Streamlit frontend with visual workflow builder
 
@@ -201,7 +207,7 @@ class SecurityAnalysiResult(BaseModel):
     risk_score: float
     remediation_steps: list[str]
     approved: bool
-```
+```text
 
 **Impact**: Machine-readable decisions enable routing logic, parallelization, and API exposure.
 
@@ -219,7 +225,7 @@ gh copilot run "issue-#450" --agents code-review,security-analyst,solution-archi
 
 # Or with explicit skills
 gh copilot run "issue-#450" --agents security-analyst --skills vulnerability-scanner,threat-model
-```
+```text
 
 **Impact**: Enable power users to compose workflows without code changes.
 
@@ -232,6 +238,7 @@ gh copilot run "issue-#450" --agents security-analyst --skills vulnerability-sca
 **Pattern**: Extend BaseCoat CLI with web interface showing agent execution timelines.
 
 **Features**:
+
 - Real-time agent execution graph
 - Visual fan-out/fan-in aggregation
 - Agent signal aggregation heatmap
@@ -244,6 +251,7 @@ gh copilot run "issue-#450" --agents security-analyst --skills vulnerability-sca
 **Pattern**: No-code interface to compose agents into workflows (like ai-hedge-fund's web app).
 
 **Features**:
+
 - Drag-drop agent selection
 - Routing rules (conditional edges based on decision fields)
 - Output schema visualization
@@ -266,6 +274,7 @@ gh copilot run "issue-#450" --agents security-analyst --skills vulnerability-sca
 ### Scenario
 
 A user opens Issue #500: "SQL Injection vulnerability in authentication handler." We want to orchestrate:
+
 1. **Security Analyst** → Identifies vulnerability class, severity, root cause
 2. **Vulnerability Scorer** → Calculates CVSS score, assigns priority
 3. **Risk Manager** → Assesses blast radius, mitigation complexity
@@ -274,7 +283,7 @@ A user opens Issue #500: "SQL Injection vulnerability in authentication handler.
 
 ### LangGraph Workflow Sketch
 
-```
+```text
 ┌─────────────┐
 │ Start Node  │
 │ (parse PR)  │
@@ -311,7 +320,7 @@ A user opens Issue #500: "SQL Injection vulnerability in authentication handler.
                        │
                        ▼
                     [END]
-```
+```text
 
 ### State Progression
 
@@ -355,13 +364,14 @@ state["data"]["decision"] = {
     "sla": "4_hours",
     "assign_to": "security_team",
 }
-```
+```text
 
 ## PoC Sketch: 3-Agent Orchestration Workflow
 
 ### Scenario: Code Quality Review Workflow
 
 Orchestrate three agents for a pull request:
+
 1. **Code Review Agent** → Analyzes code structure and design
 2. **Performance Analyst** → Measures efficiency metrics
 3. **Decision Maker** → Synthesizes into approval/rejection
@@ -412,7 +422,7 @@ class ApprovalDecision(BaseModel):
     primary_concern: str | None
     required_fixes: list[str]
     approved_by: str
-```
+```text
 
 ### Agent Node Definitions
 
@@ -481,7 +491,7 @@ def decision_maker_agent(state: CodeQualityState) -> CodeQualityState:
         "analysis": {**state["analysis"], "decision": decision.model_dump()},
         "metadata": state["metadata"],
     }
-```
+```text
 
 ### Workflow Graph Construction
 
@@ -536,7 +546,7 @@ print(result["analysis"]["decision"])
 #   "required_fixes": [],
 #   "approved_by": "decision_maker"
 # }
-```
+```text
 
 ### Key Points
 
@@ -554,6 +564,7 @@ print(result["analysis"]["decision"])
 ### Problem Statement
 
 Currently, BaseCoat agents are invoked individually with manual approval routing. As the agent library grows, there's no systematic way to:
+
 - Compose agents into workflows
 - Parallelize independent analyses
 - Aggregate decisions from multiple perspectives
@@ -570,6 +581,7 @@ Adopt LangGraph StateGraph for deterministic multi-agent orchestration, followin
 #### Option A: Multi-Agent Orchestration (LangGraph)
 
 **Pros**:
+
 - Deterministic, debuggable workflows (functional state machine)
 - Parallel agent execution (fan-out/fan-in)
 - Type-safe decision aggregation (Pydantic)
@@ -579,12 +591,14 @@ Adopt LangGraph StateGraph for deterministic multi-agent orchestration, followin
 - API-ready (JSON serializable decisions)
 
 **Cons**:
+
 - New dependency (langgraph, ~50KB)
 - Learning curve for agent developers
 - Debugging multi-agent workflows is harder than single-agent
 - Potential for exponential state space in complex graphs
 
-**Effort Estimate**: 
+**Effort Estimate**:
+
 - Phase 1 (Core): 2 sprints (LangGraph integration, agent refactor to Pydantic models)
 - Phase 2 (CLI): 1 sprint (--agents flag, workflow composition)
 - Phase 3 (Portal): 6-8 sprints (web dashboard, visual builder)
@@ -592,12 +606,14 @@ Adopt LangGraph StateGraph for deterministic multi-agent orchestration, followin
 #### Option B: Single-Agent CLI Extensibility (Status Quo Evolution)
 
 **Pros**:
+
 - Simpler mental model
 - Agents remain independent
 - No new dependencies
 - Lower maintenance burden
 
 **Cons**:
+
 - No parallelization benefit
 - Manual composition required
 - Difficult to aggregate decisions from multiple agents
@@ -608,6 +624,7 @@ Adopt LangGraph StateGraph for deterministic multi-agent orchestration, followin
 ### Recommendation
 
 **Adopt Option A (Multi-Agent Orchestration)** with phased rollout:
+
 1. **Sprint 1-2**: Core LangGraph integration, Pydantic schemas (related to #448)
 2. **Sprint 3**: CLI `--agents` flag for workflow composition
 3. **Sprint 4+**: Portal (visual builder, dashboard)
@@ -634,7 +651,7 @@ parallel_agents = RunnableParallel({
 state = parallel_agents.invoke(state)
 state = risk_manager_agent(state)
 state = decision_maker_agent(state)
-```
+```text
 
 **Queue Manager Role**: Track in-flight workflows, implement backpressure, manage resource limits.
 
@@ -659,7 +676,7 @@ class WorkflowQueueManager:
             self.in_flight[item["id"]] = {"status": "complete", "result": result}
         except Exception as e:
             self.in_flight[item["id"]] = {"status": "failed", "error": str(e)}
-```
+```text
 
 **Related Issues**: #451 (concurrency), #450 (this issue).
 
@@ -729,7 +746,7 @@ class WorkflowQueueManager:
 
 ### BaseCoat Repository
 
-- `agents/agent-designer.agent.md`: Agent authoring patterns
+- `agents/basecoat-10-core-agent-designer.agent.md`: Agent authoring patterns
 - `mcp/basecoat-metrics/`: MCP server pattern (tool abstraction)
 - `agents/*.agent.md`: Current agent implementations (to refactor)
 - `scripts/validate-basecoat.ps1`: Validation script
@@ -781,7 +798,7 @@ Use Creator-Verifier when:
 
 ### BaseCoat Application: Guidance Authoring
 
-```
+```text
 User describes need
       │
       ▼
@@ -807,7 +824,7 @@ Human review gate                               │
       │                                          │
       ▼                               ◄──────────┘
   Committed                        (max 3 iterations)
-```
+```text
 
 ### LangGraph Implementation
 
@@ -858,7 +875,7 @@ workflow.add_conditional_edges("reviewer", should_continue, {"retry": "author", 
 workflow.add_edge("author", "reviewer")
 workflow.set_entry_point("author")
 graph = workflow.compile()
-```
+```text
 
 ### Key Design Points
 
@@ -900,7 +917,7 @@ confidence: 0.95
 promoted_by: memory-steward
 timestamp: "2026-05-09T09:00:00Z"
 source_repo: IBuySpy-Shared/basecoat
-```
+```text
 
 ### Publisher
 
@@ -942,7 +959,7 @@ jobs:
                 timestamp: new Date().toISOString(),
               }
             });
-```
+```text
 
 ### Subscribers
 
@@ -975,7 +992,7 @@ jobs:
             -Subject "${{ github.event.client_payload.subject }}"
         env:
           MEMORY_REPO_TOKEN: ${{ secrets.MEMORY_REPO_TOKEN }}
-```
+```text
 
 ### Key Design Points
 
@@ -994,7 +1011,7 @@ jobs:
 
 In the full guidance lifecycle, the two patterns compose:
 
-```
+```text
 guidance-author ──► guidance-reviewer ──► (PASS) ──► PR merge
                                                          │
                                                memory.promoted dispatch
@@ -1003,7 +1020,7 @@ guidance-author ──► guidance-reviewer ──► (PASS) ──► PR merge
                                          ▼               ▼               ▼
                                    sync-memory      validate-memory  notify-steward
                                    (pull to .memory/shared/)
-```
+```text
 
 The Creator-Verifier loop produces the validated guidance; the Pub-Sub broadcast propagates
 it to all consumers once merged.

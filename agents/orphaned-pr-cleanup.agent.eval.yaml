@@ -1,6 +1,6 @@
 name: "orphaned-pr-cleanup-routing"
 description: "Routing evaluation — validates trigger activation for the orphaned-pr-cleanup agent."
-skill: "agents/orphaned-pr-cleanup.agent.md"
+skill: "agents/basecoat-10-core-orphaned-pr-cleanup.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with identifying and resolving stale or orphaned pull requests that have no active owner, blocked reviews, or outdated mergeability status. USE FOR: detect PRs without recent activity, classify close/revive/merge candidates, request ownership reassignment, and produce cleanup actions with SLA windows. DO NOT USE FOR: code implementation work, deep architecture design, or replacing release governance decisions."

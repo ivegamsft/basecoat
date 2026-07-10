@@ -1,20 +1,15 @@
 ---
-
 name: code-review
+compatibility: [github-copilot-cli]
 description: "Use when reviewing code, pull requests, or diffs for bugs and regressions. USE FOR: review pull request for bugs, inspect diff for regression risk, identify missing test coverage, rank review findings by severity, review refactor for edge cases. DO NOT USE FOR: writing new features, restyling code for preference, making architecture decisions."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
+category: development
 metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
+  category: development
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
-
 # Code Review
 
 Use this skill when the task is to review code rather than write it.

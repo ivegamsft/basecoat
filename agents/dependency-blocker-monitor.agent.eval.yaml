@@ -1,6 +1,6 @@
 name: "dependency-blocker-monitor-routing"
 description: "Routing evaluation — validates trigger activation for the dependency-blocker-monitor agent."
-skill: "agents/dependency-blocker-monitor.agent.md"
+skill: "agents/basecoat-10-core-dependency-blocker-monitor.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with monitoring workcell BOM dependencies and cell health to open or resolve blocker issues when a cell fails or recovers."

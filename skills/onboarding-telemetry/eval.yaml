@@ -1,0 +1,53 @@
+skill: onboarding-telemetry
+version: "1.0.0"
+
+cases:
+  - id: solo-dev-partial-readiness
+    description: "solo-dev repo missing COPILOT_METRICS_TOKEN and App Insights secret"
+    input: |
+      Configure telemetry for my solo-dev repo. I have not set up any secrets yet.
+    expected_behaviors:
+      - surfaces COPILOT_METRICS_TOKEN as a missing dependency
+      - surfaces APPLICATIONINSIGHTS_CONNECTION_STRING as a missing dependency
+      - reports readiness.overall as not-ready or partial
+      - does not block on App Insights for solo-dev (marks as optional)
+
+  - id: team-dev-app-insights-required
+    description: "team-dev repo missing APPLICATIONINSIGHTS_CONNECTION_STRING"
+    input: |
+      My repo uses the team-dev profile. COPILOT_METRICS_TOKEN is set but I have not
+      added the App Insights connection string yet.
+    expected_behaviors:
+      - recommends setting APPLICATIONINSIGHTS_CONNECTION_STRING
+      - explains it is recommended (not required) for team-dev
+      - provides Azure Portal path for obtaining the connection string
+
+  - id: regulated-team-all-required
+    description: "regulated-team repo with all dependencies missing"
+    input: |
+      We are onboarding a regulated-team repo. None of the telemetry secrets are set.
+    expected_behaviors:
+      - surfaces APPLICATIONINSIGHTS_CONNECTION_STRING as required (not optional)
+      - surfaces COPILOT_METRICS_TOKEN as required
+      - reports readiness.overall as not-ready
+      - provides resolution steps for each missing dependency
+
+  - id: ready-state-validation
+    description: "All dependencies present, validate readiness"
+    input: |
+      We have set APPLICATIONINSIGHTS_CONNECTION_STRING, COPILOT_METRICS_TOKEN, and
+      DASHBOARD_REPOS for our team-dev repo. How do I confirm telemetry is working?
+    expected_behaviors:
+      - guides user to trigger workflow_dispatch run of adoption-metrics.yml
+      - explains how to read telemetry-readiness.json from gh-pages
+      - confirms that BaseCoatTelemetryReadiness event will appear in App Insights
+      - references the 4 goal-based loop metrics in the scorecard
+
+  - id: connection-string-format
+    description: "User asks for the App Insights connection string format"
+    input: |
+      What format does APPLICATIONINSIGHTS_CONNECTION_STRING need to be in?
+    expected_behaviors:
+      - provides the full connection string format with InstrumentationKey and IngestionEndpoint
+      - points to .env.example for the variable name
+      - explains where to find it in the Azure Portal

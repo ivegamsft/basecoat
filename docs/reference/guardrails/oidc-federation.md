@@ -16,7 +16,7 @@ Stored service principal credentials (client secrets, client certificates stored
 
 ## How OIDC Works with GitHub Actions + Azure
 
-1. **GitHub mints a short-lived OIDC token** for each workflow run, signed by GitHub's OIDC provider (`token.actions.githubusercontent.com`).
+1. **GitHub mints a short-lived OIDC token** for each workflow run, signed by GitHub's OIDC provider (`token.actions.githubusercontent.com` or enterprise-scoped issuer such as `token.actions.githubusercontent.com/<enterprise-slug>`).
 2. **Azure Entra ID validates the token** against a federated credential configured on an app registration (or managed identity). It checks the `issuer`, `subject`, and `audience` claims.
 3. **Azure issues a short-lived access token** scoped to the permissions granted to the app registration — no long-lived secret is ever stored or transmitted.
 
@@ -53,13 +53,21 @@ az role assignment create \
 
 ### 4. Add Federated Credentials
 
-Create one federated credential per branch or environment that needs access:
+Create one federated credential per branch or environment that needs access.
+
+Set an issuer variable first so the credential matches your runtime token:
 
 ```bash
+# Default issuer:
+GITHUB_OIDC_ISSUER="https://token.actions.githubusercontent.com"
+
+# Enterprise-scoped issuer (if enterprise custom issuer policy is enabled):
+# GITHUB_OIDC_ISSUER="https://token.actions.githubusercontent.com/<enterprise-slug>"
+
 # For the main branch
 az ad app federated-credential create --id <appId> --parameters '{
   "name": "main-branch",
-  "issuer": "https://token.actions.githubusercontent.com",
+  "issuer": "'$GITHUB_OIDC_ISSUER'",
   "subject": "repo:IBuySpy-Shared/basecoat:ref:refs/heads/main",
   "audiences": ["api://AzureADTokenExchange"]
 }'
@@ -67,7 +75,7 @@ az ad app federated-credential create --id <appId> --parameters '{
 # For pull requests
 az ad app federated-credential create --id <appId> --parameters '{
   "name": "pull-requests",
-  "issuer": "https://token.actions.githubusercontent.com",
+  "issuer": "'$GITHUB_OIDC_ISSUER'",
   "subject": "repo:IBuySpy-Shared/basecoat:pull_request",
   "audiences": ["api://AzureADTokenExchange"]
 }'
@@ -75,7 +83,7 @@ az ad app federated-credential create --id <appId> --parameters '{
 # For a specific environment
 az ad app federated-credential create --id <appId> --parameters '{
   "name": "production-env",
-  "issuer": "https://token.actions.githubusercontent.com",
+  "issuer": "'$GITHUB_OIDC_ISSUER'",
   "subject": "repo:IBuySpy-Shared/basecoat:environment:production",
   "audiences": ["api://AzureADTokenExchange"]
 }'

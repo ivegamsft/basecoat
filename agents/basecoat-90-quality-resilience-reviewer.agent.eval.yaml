@@ -1,0 +1,17 @@
+name: 'basecoat-90-quality-resilience-reviewer-routing'
+description: 'Routing evaluation - validates trigger activation for the Resilience Reviewer agent.'
+skill: 'agents/basecoat-90-quality-resilience-reviewer.agent.md'
+scenarios:
+  - id: 'pos-1'
+    input: 'Use the Resilience Reviewer agent to handle its documented responsibilities.'
+    expect_activation: true
+  - id: 'pos-2'
+    input: 'Please route this task to the Resilience Reviewer agent.'
+    expect_activation: true
+  - id: 'neg-1'
+    input: 'Write a haiku about programming.'
+    expect_activation: false
+  - id: 'neg-2'
+    input: 'Give me a recipe for chocolate chip cookies.'
+    expect_activation: false
+

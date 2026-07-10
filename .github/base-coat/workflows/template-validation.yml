@@ -1,0 +1,71 @@
+name: "BaseCoat - Validate Repo Template Sample"
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-sample-template:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Validate sample template structure and lock contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('.github/template-repos/repo-template')
+          required_paths = [
+              root / 'sample-repo-template.md',
+              root / '.github/base-coat.lock.json',
+              root / '.github/workflows/bootstrap-basecoat-template.yml',
+              root / '.github/workflows/enforce-basecoat-template.yml',
+          ]
+
+          missing = [str(p) for p in required_paths if not p.exists()]
+          if missing:
+              raise SystemExit('Missing required sample template files:\n' + '\n'.join(missing))
+
+          lock = json.loads((root / '.github/base-coat.lock.json').read_text(encoding='utf-8'))
+          required_keys = {'baseCoatRepo', 'version', 'installPath', 'checksumRequired'}
+          missing_keys = sorted(required_keys - set(lock.keys()))
+          if missing_keys:
+              raise SystemExit('Lock file missing keys: ' + ', '.join(missing_keys))
+
+          if not str(lock['version']).startswith('v'):
+              raise SystemExit('Lock file version must start with v, for example v0.3.0')
+
+          if lock['installPath'] != '.github/base-coat':
+              raise SystemExit('Lock file installPath must be .github/base-coat for this sample template')
+
+          print('Sample template file and lock contract checks passed')
+          PY
+
+      - name: Validate sample workflow contents
+        run: |
+          bootstrap=".github/template-repos/repo-template/.github/workflows/bootstrap-basecoat-template.yml"
+          enforce=".github/template-repos/repo-template/.github/workflows/enforce-basecoat-template.yml"
+
+          grep -q "base-coat.lock.json" "$bootstrap"
+          grep -q "gh release download" "$bootstrap"
+          grep -q "sha256sum -c" "$bootstrap"
+
+          grep -q "base-coat.lock.json" "$enforce"
+          grep -q "Installed Base Coat version" "$enforce"
+          grep -q "Base Coat template enforcement passed" "$enforce"
+
+          echo "Sample template workflow content checks passed"

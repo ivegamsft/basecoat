@@ -1,20 +1,15 @@
 ---
-
 name: api-design
+compatibility: [github-copilot-cli]
 description: "Use when designing or reviewing API contracts, versioning decisions, and governance standards. USE FOR: design a REST API contract, review an OpenAPI diff for breaking changes, choose an API versioning strategy, draft GraphQL schema changes, create a deprecation or sunset plan. DO NOT USE FOR: implementing request handlers, tuning database indexes, penetration testing an API."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
+category: architecture
 metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
+  category: architecture
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
-
 # API Design Skill
 
 Design new API contracts, review spec changes for breaking changes, choose versioning strategies, and enforce API governance standards.

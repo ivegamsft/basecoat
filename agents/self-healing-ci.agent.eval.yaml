@@ -1,6 +1,6 @@
 name: "self-healing-ci-routing"
 description: "Routing evaluation — validates trigger activation for the self-healing-ci agent."
-skill: "agents/self-healing-ci.agent.md"
+skill: "agents/basecoat-60-workflow-self-healing-ci.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with auto-remediate CI failures."

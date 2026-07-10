@@ -1,0 +1,66 @@
+skill: ship-it
+tests:
+  - id: ship-it-positive
+    description: Routes intent language to the ship-it skill
+    messages:
+      - role: user
+        content: "Ship this spec to prod with full governance checks."
+    expect:
+      decision: trigger
+      confidence: 0.9
+  - id: onboarding-conductor-positive
+    description: Routes onboarding conductor language to the ship-it skill
+    messages:
+      - role: user
+        content: "Run onboarding conductor in dry-run mode for a regulated-team profile."
+    expect:
+      decision: trigger
+      confidence: 0.9
+  - id: ship-it-negative
+    description: Does not trigger for unrelated coding requests
+    messages:
+      - role: user
+        content: "Fix this one typo in the README."
+    expect:
+      decision: no_trigger
+      confidence: 0.9
+  - id: pr-lifecycle-none-routing
+    description: Routes feature intent with explicit pr-lifecycle=none modifier
+    messages:
+      - role: user
+        content: "feature: add release dashboard filters with pr-lifecycle=none and keep this local."
+    expect:
+      decision: trigger
+      confidence: 0.9
+  - id: pr-lifecycle-standard-routing
+    description: Routes feature intent with explicit pr-lifecycle=standard modifier
+    messages:
+      - role: user
+        content: "feature: add deployment summary cards and use pr-lifecycle=standard."
+    expect:
+      decision: trigger
+      confidence: 0.9
+  - id: pr-lifecycle-full-routing
+    description: Routes feature intent with explicit pr-lifecycle=full modifier
+    messages:
+      - role: user
+        content: "feature: roll out closeout automation with pr-lifecycle=full and full governance."
+    expect:
+      decision: trigger
+      confidence: 0.9
+  - id: pr-lifecycle-dual-prefix-negative
+    description: Rejects dual-prefix feature and pr combination as invalid routing input
+    messages:
+      - role: user
+        content: "feature: pr: implement merge queue updates with pr-lifecycle=full."
+    expect:
+      decision: no_trigger
+      confidence: 0.9
+  - id: pr-lifecycle-invalid-enum-negative
+    description: Rejects invalid pr-lifecycle enum values
+    messages:
+      - role: user
+        content: "feature: add release notes aggregation with pr-lifecycle=fast."
+    expect:
+      decision: no_trigger
+      confidence: 0.9

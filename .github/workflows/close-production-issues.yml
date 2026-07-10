@@ -1,0 +1,165 @@
+name: "BaseCoat - Close Production Issues"
+
+# Closes migrated issues on ivegamsft/basecoat using PRODUCTION_REPO_TOKEN.
+# Run once after migrating issues to IBuySpy-Shared/basecoat.
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (list issues without closing)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+permissions:
+  contents: read
+
+jobs:
+  close-issues:
+    name: Close migrated issues on production repo
+    runs-on: ${{ vars.RUNNER_RELEASE || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
+    environment: production
+    env:
+      PROD_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
+      PROD_REPO: ivegamsft/basecoat
+      DRY_RUN: ${{ inputs.dry_run }}
+
+    steps:
+      - name: Validate token
+        run: |
+          if [ -z "$PROD_TOKEN" ]; then
+            echo "::error::PRODUCTION_REPO_TOKEN is not set"
+            exit 1
+          fi
+          echo "Token present, proceeding"
+
+      - name: Close Dependabot PRs
+        run: |
+          COMMENT="Closing: ivegamsft/basecoat is a production mirror of IBuySpy-Shared/basecoat. \
+          Dependency updates must be made in the source repo and will be reflected here on the next publish. \
+          Any direct changes to this repo will be overwritten by the next release publish."
+
+          for PR in 154 192; do
+            echo "Processing PR #$PR..."
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "[DRY RUN] Would close PR #$PR"
+              continue
+            fi
+            # Add comment then close
+            gh pr comment "$PR" --repo "$PROD_REPO" --body "$COMMENT" || true
+            gh pr close "$PR" --repo "$PROD_REPO" || echo "Warning: could not close PR #$PR (may already be closed)"
+          done
+        env:
+          GH_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
+
+      - name: Close individual migrated issues
+        run: |
+          # Map: production issue number -> source repo issue number
+          declare -A MIGRATIONS=(
+            [153]=1383
+            [162]=1384
+            [163]=1385
+            [164]=1386
+            [165]=1387
+          )
+
+          for PROD_NUM in "${!MIGRATIONS[@]}"; do
+            SRC_NUM="${MIGRATIONS[$PROD_NUM]}"
+            COMMENT="Closing: this issue has been migrated to the source repository as IBuySpy-Shared/basecoat#${SRC_NUM}. \
+          All development happens in IBuySpy-Shared/basecoat — changes will appear in this production mirror on the next release."
+
+            echo "Closing production #$PROD_NUM -> source #$SRC_NUM"
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "[DRY RUN] Would close issue #$PROD_NUM"
+              continue
+            fi
+            gh issue comment "$PROD_NUM" --repo "$PROD_REPO" --body "$COMMENT" || true
+            gh issue close "$PROD_NUM" --repo "$PROD_REPO" || echo "Warning: could not close issue #$PROD_NUM"
+          done
+        env:
+          GH_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
+
+      - name: Close config-secrets-audit cluster (166-180)
+        run: |
+          SRC_NUM=1388
+          COMMENT="Closing: this issue has been consolidated into IBuySpy-Shared/basecoat#${SRC_NUM} \
+          (feat: config-secrets-audit skill consolidated tracking). \
+          Development happens in IBuySpy-Shared/basecoat — changes appear in this production mirror on the next release."
+
+          for NUM in $(seq 166 180); do
+            echo "Closing production #$NUM -> source #$SRC_NUM"
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "[DRY RUN] Would close issue #$NUM"
+              continue
+            fi
+            gh issue comment "$NUM" --repo "$PROD_REPO" --body "$COMMENT" || true
+            gh issue close "$NUM" --repo "$PROD_REPO" || echo "Warning: could not close issue #$NUM"
+          done
+        env:
+          GH_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
+
+      - name: Close workflow features cluster (181-190)
+        run: |
+          SRC_NUM=1389
+          COMMENT="Closing: this issue has been consolidated into IBuySpy-Shared/basecoat#${SRC_NUM} \
+          (feat: workflow enhancements consolidated tracking). \
+          Development happens in IBuySpy-Shared/basecoat — changes appear in this production mirror on the next release."
+
+          for NUM in $(seq 181 190); do
+            echo "Closing production #$NUM -> source #$SRC_NUM"
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "[DRY RUN] Would close issue #$NUM"
+              continue
+            fi
+            gh issue comment "$NUM" --repo "$PROD_REPO" --body "$COMMENT" || true
+            gh issue close "$NUM" --repo "$PROD_REPO" || echo "Warning: could not close issue #$NUM"
+          done
+        env:
+          GH_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
+
+      - name: Close agent-merge cluster (193-197)
+        run: |
+          SRC_NUM=1390
+          COMMENT="Closing: this issue has been consolidated into IBuySpy-Shared/basecoat#${SRC_NUM} \
+          (feat: agent-merge automation consolidated tracking). \
+          Development happens in IBuySpy-Shared/basecoat — changes appear in this production mirror on the next release."
+
+          for NUM in $(seq 193 197); do
+            echo "Closing production #$NUM -> source #$SRC_NUM"
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "[DRY RUN] Would close issue #$NUM"
+              continue
+            fi
+            gh issue comment "$NUM" --repo "$PROD_REPO" --body "$COMMENT" || true
+            gh issue close "$NUM" --repo "$PROD_REPO" || echo "Warning: could not close issue #$NUM"
+          done
+        env:
+          GH_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## Production Issue Cleanup Summary"
+            echo ""
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "> Dry run mode - no issues were actually closed"
+            else
+              echo "Closed/commented on the following production issues:"
+            fi
+            echo ""
+            echo "| Production | Action | Source Issue |"
+            echo "|-----------|--------|--------------|"
+            echo "| PR #154, #192 | Close - mirror repo, deps managed in source | N/A |"
+            echo "| #153 | Migrate | IBuySpy-Shared/basecoat#1383 |"
+            echo "| #162 | Migrate | IBuySpy-Shared/basecoat#1384 |"
+            echo "| #163 | Migrate | IBuySpy-Shared/basecoat#1385 |"
+            echo "| #164 | Migrate | IBuySpy-Shared/basecoat#1386 |"
+            echo "| #165 | Migrate | IBuySpy-Shared/basecoat#1387 |"
+            echo "| #166-#180 (15 issues) | Consolidate | IBuySpy-Shared/basecoat#1388 |"
+            echo "| #181-#190 (10 issues) | Consolidate | IBuySpy-Shared/basecoat#1389 |"
+            echo "| #193-#197 (5 issues) | Consolidate | IBuySpy-Shared/basecoat#1390 |"
+          } >> "$GITHUB_STEP_SUMMARY"

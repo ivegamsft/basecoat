@@ -1,0 +1,146 @@
+name: BaseCoat - Branch Protection Drift Gate
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 3 * * 1"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "docs/reference/branch-protection.md"
+      - "docs/operations/branch-protection-enforcement.md"
+      - ".github/workflows/branch-protection-enforce.yml"
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  enforce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Validate branch protection policy exists
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ ! -f docs/reference/branch-protection.md ]]; then
+            echo "❌ Branch protection policy not found at docs/reference/branch-protection.md"
+            exit 1
+          fi
+
+          if [[ ! -f docs/operations/branch-protection-enforcement.md ]]; then
+            echo "❌ Enforcement procedures not found at docs/operations/branch-protection-enforcement.md"
+            exit 1
+          fi
+
+          echo "✓ Branch protection policy and procedures documented"
+          grep -q "Main Branch Protection Policy" docs/reference/branch-protection.md
+          grep -q "Required Pull Request Reviews" docs/reference/branch-protection.md
+          grep -q "Required Status Checks Before Merge" docs/reference/branch-protection.md
+          grep -q "Restricted Direct Pushes" docs/reference/branch-protection.md
+
+          echo "✓ All baseline controls documented"
+
+      - name: Verify required status checks are defined
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "Checking required status checks..."
+          grep -q "lint-and-validate" docs/reference/branch-protection.md || {
+            echo "lint-and-validate check not documented"
+            exit 1
+          }
+          grep -q "validate-unix" docs/reference/branch-protection.md || {
+            echo "validate-unix check not documented"
+            exit 1
+          }
+          grep -q "validate-windows" docs/reference/branch-protection.md || {
+            echo "validate-windows check not documented"
+            exit 1
+          }
+
+          echo "All required status checks are documented"
+
+      - name: Audit branch protection API settings
+        if: ${{ github.event_name != 'pull_request' }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          PROTECTION="$(gh api "repos/${REPOSITORY}/branches/main/protection" 2>/dev/null || echo '')"
+
+          if [[ -z "$PROTECTION" ]]; then
+            echo "::error::main branch has no protection rules configured (GET /branches/main/protection returned empty)."
+            exit 1
+          fi
+
+          STRICT="$(echo "$PROTECTION" | jq -r '.required_status_checks.strict // false')"
+          REVIEW_COUNT="$(echo "$PROTECTION" | jq -r '.required_pull_request_reviews.required_approving_review_count // 0')"
+          CONVERSATION_RESOLUTION="$(echo "$PROTECTION" | jq -r '.required_conversation_resolution.enabled // false')"
+          FORCE_PUSH="$(echo "$PROTECTION" | jq -r '.allow_force_pushes.enabled // true')"
+          DELETIONS="$(echo "$PROTECTION" | jq -r '.allow_deletions.enabled // true')"
+
+          POLICY_FILE=".github/governance/policy-packs.json"
+          SELECTED_PACK="team-dev"
+          PROFILE_REVIEW_BASELINE="1"
+          if [[ -f "${POLICY_FILE}" ]]; then
+            SELECTED_PACK="$(jq -r '.default_profile' "${POLICY_FILE}" 2>/dev/null || echo 'team-dev')"
+            if [[ -z "${SELECTED_PACK}" || "${SELECTED_PACK}" == "null" ]]; then
+              SELECTED_PACK="team-dev"
+            fi
+            if ! jq -e --arg p "${SELECTED_PACK}" '.profiles[$p]' "${POLICY_FILE}" >/dev/null 2>&1; then
+              echo "::warning::Unknown default_profile '${SELECTED_PACK}' in ${POLICY_FILE}; falling back to team-dev."
+              SELECTED_PACK="team-dev"
+            fi
+            PROFILE_REVIEW_BASELINE="$(jq -r --arg p "${SELECTED_PACK}" \
+              '[.profiles[$p].main.required_approvals_by_risk_tier | to_entries[].value] | max // 0' \
+              "${POLICY_FILE}" 2>/dev/null || echo '1')"
+          else
+            echo "::warning::Missing ${POLICY_FILE}; using fallback profile 'team-dev' with baseline 1."
+          fi
+          if ! [[ "${PROFILE_REVIEW_BASELINE}" =~ ^[0-9]+$ ]]; then
+            echo "::warning::Invalid profile review baseline '${PROFILE_REVIEW_BASELINE}' for profile '${SELECTED_PACK}'; falling back to 1."
+            PROFILE_REVIEW_BASELINE="1"
+          fi
+
+          if [[ "$STRICT" != "true" ]]; then
+            echo "::error::Branch protection drift: required_status_checks.strict must be true."
+            exit 1
+          fi
+
+          if [[ "${REVIEW_COUNT}" -lt "${PROFILE_REVIEW_BASELINE}" ]]; then
+            echo "::error::Branch protection drift: required_approving_review_count must be at least ${PROFILE_REVIEW_BASELINE} (active profile: '${SELECTED_PACK}')."
+            exit 1
+          fi
+
+          if [[ "${CONVERSATION_RESOLUTION}" != "true" ]]; then
+            echo "::error::Branch protection drift: required_conversation_resolution must be enabled."
+            exit 1
+          fi
+
+          if [[ "$FORCE_PUSH" != "false" ]]; then
+            echo "::error::Branch protection drift: allow_force_pushes must be disabled."
+            exit 1
+          fi
+
+          if [[ "$DELETIONS" != "false" ]]; then
+            echo "::error::Branch protection drift: allow_deletions must be disabled."
+            exit 1
+          fi
+
+          echo "Branch protection audit passed: strict checks, >=${PROFILE_REVIEW_BASELINE} required approval(s) for profile '${SELECTED_PACK}', conversation resolution enabled, no force pushes, no deletions." >> "$GITHUB_STEP_SUMMARY"
+          echo "Branch protection audit complete."

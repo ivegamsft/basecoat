@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 <#
 .SYNOPSIS
-    Regenerates docs/agents/AGENTS.md from agents/*.agent.md frontmatter.
+    Regenerates docs/agents/agents.md from agents/*.agent.md frontmatter.
 
 .DESCRIPTION
     Reads all agent files, extracts frontmatter name and description, then writes

@@ -66,4 +66,4 @@ If a database migration is interrupted (cancelled, timed out, or crashed), follo
 ## References
 
 - [GitHub Actions concurrency documentation](https://docs.github.com/en/actions/using-jobs/using-concurrency)
-- Governance: [`instructions/governance.instructions.md`](/instructions/governance.instructions.md)
+- Governance: [`instructions/basecoat-20-lang-governance.instructions.md`](/instructions/basecoat-20-lang-governance.instructions.md)

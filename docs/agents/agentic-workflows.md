@@ -27,21 +27,34 @@ the Copilot agent:
    - Name: `COPILOT_GITHUB_TOKEN`
    - Value: the token you generated
 
+## Model Compatibility Guardrail
+
+Some repositories or enterprise tenants do not expose every Copilot model. If a
+run fails with `400 The requested model is not supported`, set a supported model
+in the workflow lock file fallback (for example `gpt-5-mini`) and/or configure a
+repository variable override:
+
+- `GH_AW_MODEL_AGENT_COPILOT`
+- `GH_AW_MODEL_DETECTION_COPILOT`
+
+Prefer explicit `gpt-5-mini` defaults for portability unless a workflow requires
+a different model tier.
+
 ## Active Workflows
 
 | Workflow | Trigger | What It Does |
 |---|---|---|
-| [`issue-triage.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/.github/workflows/issue-triage.yml) | Issue opened | Classifies issue, applies priority labels, posts triage summary |
-| [`retro-facilitator.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/.github/workflows/retro-facilitator.lock.yml) | Weekly schedule | Analyzes past week's activity, creates sprint retrospective issue |
-| [`self-healing-ci.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/.github/workflows/self-healing-ci.lock.yml) | Workflow run failed | Fetches failed job logs, posts root-cause diagnosis |
-| [`release-impact-advisor.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/.github/workflows/release-impact-advisor.lock.yml) | PR opened | Assesses blast radius, rollback complexity, and risks |
-| [`code-review-agent.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/.github/workflows/code-review-agent.lock.yml) | PR opened / synchronized | Reviews diff for bugs, security issues, and logic errors |
+| [`issue-triage.md`](../../.github/workflows/issue-triage.md) | Issue opened | Classifies issue, applies priority labels, posts triage summary |
+| [`retro-facilitator.md`](../../.github/workflows/retro-facilitator.md) | Weekly schedule | Analyzes past week's activity, creates sprint retrospective issue |
+| [`self-healing-ci.md`](../../.github/workflows/self-healing-ci.md) | Workflow run failed | Fetches failed job logs, posts root-cause diagnosis |
+| [`release-impact-advisor.md`](../../.github/workflows/release-impact-advisor.md) | PR opened | Assesses blast radius, rollback complexity, and risks |
+| [`code-review-agent.md`](../../.github/workflows/code-review-agent.md) | PR opened / synchronized | Reviews diff for bugs, security issues, and logic errors |
 
 ## Workflow Authoring
 
 Each workflow has two files that must be committed together:
 
-```
+```text
 .github/workflows/
   issue-triage.md          ← human-editable source (Markdown + YAML frontmatter)
   issue-triage.lock.yml    ← compiled GitHub Actions YAML (do not edit)
@@ -85,6 +98,26 @@ Agentic workflows use a defense-in-depth model:
 Never add write permissions directly in the `permissions:` block. All writes
 must go through `safe-outputs:`.
 
+## Model Compatibility Guardrails
+
+Issue triage failures can present as:
+
+```text
+400 The requested model is not supported.
+```
+
+To reduce this risk in BaseCoat, the compiled issue-triage workflow defaults both
+agent and detection phases to `gpt-5-mini` when no repository variable override
+is set.
+
+If you need an override, use repository variables (not prompt text):
+
+- `GH_AW_MODEL_AGENT_COPILOT`
+- `GH_AW_MODEL_DETECTION_COPILOT`
+
+Set each variable to a model confirmed as supported by your Copilot plan/tier.
+Unsupported values fail fast during `Execute GitHub Copilot CLI`.
+
 ## Allowed Expressions
 
 The `gh aw` compiler enforces a strict allowlist of `${{ }}` expressions for
@@ -101,5 +134,5 @@ agent to fetch data using `gh` CLI commands in the workflow body.
 ## Reference
 
 - [Agentic Workflows Workshop](https://copilot-academy.github.io/workshops/copilot-customization/agentic_workflows)
-- [gh-aw reference](https://github.github.com/gh-aw/reference/)
+- [gh-aw reference](https://github.com/github/gh-aw/tree/main/docs/reference)
 - Issue #560 — parent tracking issue for this feature

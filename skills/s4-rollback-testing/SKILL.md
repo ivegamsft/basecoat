@@ -1,18 +1,16 @@
 ---
 name: s4-rollback-testing
-description: "Use when designing or running S4 rollback drills, rollback verification, or recovery smoke tests. This skill makes rollback a practiced S4 habit by sequencing deploy, wait, rollback, verify, and smoke-test steps."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "DevOps"
-  tags: ["s4", "rollback", "testing", "smoke", "recovery"]
-  maturity: "beta"
-  audience: ["developers", "project-managers", "tech-leads"]
-allowed-tools: ["bash", "git", "grep", "find"]
+compatibility: [github-copilot-cli]
+description: "Designs and runs S4 rollback drills and recovery tests. USE FOR: building repeatable rollback rehearsal workflows, verifying rollback activation after soak windows, sequencing deploy/wait/rollback/verify/smoke-test steps, documenting drill outcomes for readiness checks. DO NOT USE FOR: skipping rollback verification, treating deploy success as rollback proof, implementing application features, drafting unrelated communications."
+category: operations
+
 visibility: "internal"
+metadata:
+  category: operations
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # S4 Rollback Testing Skill
 

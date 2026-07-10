@@ -1,0 +1,48 @@
+{
+  "name": "@basecoat/environment-audit-drift",
+  "version": "1.0.0",
+  "description": "Audit environment-map.yml against actual infrastructure (Azure, GitHub) to detect drift",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "audit": "node -r ts-node/register src/cli.ts"
+  },
+  "bin": {
+    "environment-audit-drift": "dist/cli.js"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.0.0",
+    "eslint": "^8.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.8"
+  },
+  "files": [
+    "dist/**/*",
+    "templates/**/*",
+    "examples/**/*",
+    "README.md"
+  ],
+  "keywords": [
+    "basecoat",
+    "environment",
+    "drift-detection",
+    "audit",
+    "infrastructure",
+    "azure",
+    "github",
+    "governance"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

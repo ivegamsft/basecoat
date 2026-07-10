@@ -1,19 +1,15 @@
 ---
 name: cqrs-event-sourcing
+compatibility: [github-copilot-cli]
 description: "CQRS and Event Sourcing patterns for scalable, auditable distributed systems with command models, event stores, and read projections. USE FOR: design CQRS architecture for a service, implement event sourcing for audit history, separate command and query models, plan read model projections and replay, add saga orchestration for eventual consistency. DO NOT USE FOR: simple CRUD app design, single-table admin tools, basic ORM mapping questions."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
+category: architecture
 metadata:
-  category: "Architecture & Design"
-  tags: ["cqrs", "event-sourcing", "event-driven", "distributed-systems", "data-persistence"]
-  maturity: "production"
-  audience: ["backend-developers", "architects", "platform-teams"]
-allowed-tools: ["csharp", "sql", "bash", "git"]
+  category: architecture
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
-
 # CQRS & Event Sourcing Patterns
 
 Patterns for implementing CQRS and Event Sourcing in distributed systems.

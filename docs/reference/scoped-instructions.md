@@ -1,0 +1,235 @@
+# Scoped Instructions Guide
+
+How to use `applyTo` patterns so instruction files activate in the right places, compose cleanly, and avoid wasting context.
+
+---
+
+## What Is Scoping?
+
+Instruction scoping lets you target guidance to specific file types, directories, or working contexts.
+
+The `applyTo` field uses glob patterns to decide which files an instruction applies to.
+
+Good scoping keeps guidance precise and context-appropriate without adding noise to unrelated work.
+
+See also:
+
+- `.github/instructions/cost-optimization.instructions.md` for token-optimization quick-start policy
+- `.github/instructions/workflow-conventions.instructions.md` for mode and workflow conventions
+
+---
+
+## Why Scoping Matters
+
+- Broad instructions are useful for universal rules such as safety, ethics, and response format.
+- Narrow instructions are useful for language, framework, directory, or workflow-specific expectations.
+- A good scope reduces false activations and helps the right guidance appear at the right time.
+
+## Token-Efficient Scoping Pattern
+
+Scope design is a token-cost control, not just an organization preference:
+
+1. Keep universal (`**/*`) files to invariant rules only.
+2. Move workflow-specific guidance into bounded patterns (for example: `agents/**`, `skills/**`, `tests/**`).
+3. Link to canonical docs instead of duplicating long guidance blocks across multiple instruction files.
+
+Recommended companion references:
+
+- `.github/instructions/workflow-conventions.instructions.md`
+- `.github/instructions/cost-optimization.instructions.md`
+- `docs/guides/token-optimization.md`
+
+---
+
+## Token Optimization Quick Start for Instruction Operators
+
+Use this checklist when enabling or auditing scoped instruction stacks for cost-efficient operation.
+
+### Quick-Start Checklist
+
+1. **Default output constraint policy**: keep responses terse by default, and use code-only output for implementation-focused requests.
+2. **Ask-vs-Agent mode selection**: run Ask mode for focused single-scope work; use Agent mode only when work spans multiple files, broad scans, or long-running command loops.
+3. **Auto model baseline policy**: start in Auto/default model routing and upshift only for architecture, security, or high-ambiguity reasoning segments.
+4. **MCP server audit policy**: keep active MCP servers minimal; disable unused servers and prefer local file tools for repo-local data.
+5. **Rich-file normalization policy**: convert rich files (PDF, DOCX, PPTX, screenshots) to Markdown summaries before AI execution so downstream turns reuse compact context.
+
+### Rollout Plan
+
+1. **Phase 1 (baseline, week 1)**: enforce output constraints, Ask-vs-Agent routing, and Auto/default model baseline in active instruction files.
+2. **Phase 2 (tooling hygiene, week 2)**: add MCP server audit steps to runbooks and disable unused servers in team configs.
+3. **Phase 3 (artifact hygiene, week 3)**: require rich-file to Markdown conversion in attachment-heavy workflows and validate summary-path reuse during PR review.
+
+### Related BaseCoat References
+
+- `/.github/instructions/workflow-conventions.instructions.md` — execution defaults and mode-routing policy
+- `/.github/instructions/cost-optimization.instructions.md` — session hygiene and MCP overhead guidance
+- `docs/guides/token-optimization.md` — token budgeting and context compression patterns
+
+---
+
+## `applyTo` Pattern Reference
+
+| Pattern | Matches | Use Case |
+|---------|---------|----------|
+| `**/*` | All files | Universal guidance (style, safety) |
+| `**/*.ts` | TypeScript files | Language-specific patterns |
+| `src/api/**` | API directory | Service-specific rules |
+| `tests/**` | Test files | Testing conventions |
+| `*.{ts,js}` | TS and JS | JavaScript ecosystem |
+| `!**/vendor/**` | Exclude vendor | Skip third-party code |
+
+### Pattern Notes
+
+- Use `**/*` sparingly and only for truly universal guidance.
+- Use file-extension patterns for language rules.
+- Use directory patterns for bounded contexts such as services or domains.
+- Use exclusions to keep instructions away from generated or third-party code.
+
+---
+
+## Layering Strategy
+
+Think about instruction scope as a stack, from broadest to most specific.
+
+### Layer 0 — Universal
+
+Use `applyTo: "**/*"` for rules that should always be present.
+
+Examples:
+
+- Safety
+- Ethics
+- Output format
+
+### Layer 1 — Language
+
+Use language-level patterns such as `applyTo: "**/*.py"` or `applyTo: "**/*.{ts,js}"`.
+
+Examples:
+
+- Coding standards
+- Naming conventions
+- Language idioms
+
+### Layer 2 — Domain
+
+Use directory-level patterns such as `applyTo: "src/billing/**"`.
+
+Examples:
+
+- Business rules
+- Domain terminology
+- Integration constraints
+
+### Layer 3 — Task
+
+Use workflow-specific patterns such as `applyTo: "tests/**"`.
+
+Examples:
+
+- Test-writing guidance
+- Fixture conventions
+- Verification expectations
+
+---
+
+## Composition Rules
+
+- Multiple instructions can match the same file, and they compose additively.
+- More specific patterns should win when guidance conflicts with a broader instruction.
+- Keep instructions atomic so each file covers one concern cleanly.
+- Name instruction files descriptively using `{concern}.instructions.md`.
+
+A file such as `src/billing/invoice.test.ts` may legitimately activate:
+
+- a universal instruction
+- a TypeScript instruction
+- a billing-domain instruction
+- a testing instruction
+
+That is a feature, not a problem, as long as each instruction has a clear concern.
+
+---
+
+## Anti-Patterns
+
+- Do not use `**/*` for language-specific guidance.
+- Do not create overly narrow patterns that almost never match.
+- Do not duplicate the same guidance across multiple scope levels.
+- Do not use `applyTo` to gate safety rules that should always be universal.
+
+A common failure mode is putting TypeScript rules in a universal instruction file. That wastes context tokens and adds irrelevant guidance for non-TypeScript work.
+
+---
+
+## Testing Your Patterns
+
+Use the validation script to confirm frontmatter is valid.
+
+```powershell
+pwsh scripts/validate-basecoat.ps1
+```
+
+Then manually test the mental model:
+
+- If I open file X, which instructions activate?
+- Is any guidance missing?
+- Is any guidance firing where it should not?
+
+Keep a mental model of the instruction stack for common file types and directories.
+
+## Operator Quick-Start (Token-Aware)
+
+When running long AI workflows:
+
+1. Use Ask mode for simple lookups; switch to Agent mode only for multi-step/tool tasks.
+2. Keep instruction scope narrow (`applyTo`) to avoid broad irrelevant context.
+3. Prefer concise text/Markdown artifacts over rich binaries for repeated handoffs.
+4. Reuse canonical summary files by path instead of re-pasting content.
+
+---
+
+## Migration Guide
+
+If you already have many broad instruction files, narrow them gradually.
+
+1. Audit existing `applyTo: "**/*"` instructions.
+2. Identify files that are activating guidance unnecessarily.
+3. Start broad when introducing a new rule, then narrow once false activations become clear.
+4. Document important scope decisions in the instruction file itself so future maintainers understand why the pattern exists.
+
+Prefer iterative refinement over inventing highly complex patterns up front.
+
+---
+
+## Example Instruction Stack
+
+```yaml
+---
+description: "Universal guardrails"
+applyTo: "**/*"
+---
+```
+
+```yaml
+---
+description: "TypeScript guidance"
+applyTo: "**/*.ts"
+---
+```
+
+```yaml
+---
+description: "Billing domain rules"
+applyTo: "src/billing/**"
+---
+```
+
+```yaml
+---
+description: "Test conventions"
+applyTo: "tests/**"
+---
+```
+
+A file should receive only the guidance that is relevant to its actual location, language, and task context.

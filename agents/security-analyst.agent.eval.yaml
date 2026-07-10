@@ -1,6 +1,6 @@
 name: "security-analyst-routing"
 description: "Routing evaluation — validates trigger activation for the security-analyst agent."
-skill: "agents/security-analyst.agent.md"
+skill: "agents/basecoat-50-security-security-analyst.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with auditing code for security issues, performing threat analysis, or reviewing dependencies for known vulnerabilities."

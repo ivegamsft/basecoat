@@ -1,6 +1,6 @@
 name: "dependency-update-advisor-routing"
 description: "Routing evaluation — validates trigger activation for the dependency-update-advisor agent."
-skill: "agents/dependency-update-advisor.agent.md"
+skill: "agents/basecoat-10-core-dependency-update-advisor.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with assess Dependabot PR risk."

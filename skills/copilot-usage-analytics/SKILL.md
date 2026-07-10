@@ -1,20 +1,15 @@
 ---
-
 name: copilot-usage-analytics
+compatibility: [github-copilot-cli]
 description: "Use when estimating Copilot CLI session cost, analyzing model routing efficiency, or mapping available usage APIs. USE FOR: estimate Copilot session cost, analyze expensive agent dispatches, recommend cheaper model routing, audit Copilot workflow token usage, document GitHub Copilot usage APIs. DO NOT USE FOR: general product analytics dashboards, application performance monitoring, non-Copilot billing disputes."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
+category: operations
 metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
+  category: operations
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
-
 # Copilot Usage Analytics Skill
 
 Estimate per-session Copilot CLI cost, analyze model-routing efficiency, track agent dispatch
@@ -35,3 +30,7 @@ patterns, and document which GitHub Copilot usage APIs exist.
 | `templates/model-routing-recommendation-template.md` | Recommendations for right-sizing model selection per task type |
 | `templates/api-landscape.md` | Reference map of GitHub Copilot usage APIs — what exists, what is missing, and workarounds |
 | `templates/usage-report.md` | Automated-style usage report with Handlebars placeholders for tooling integration |
+
+## Pairing
+
+Pair with `session-analysis` when a user asks for session metrics (top tools, assistant message volume, model changes, average turns). Use this skill to translate those findings into cost estimates, expensive-dispatch ranking, and routing ROI.

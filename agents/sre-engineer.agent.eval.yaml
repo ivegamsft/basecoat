@@ -1,6 +1,6 @@
 name: "sre-engineer-routing"
 description: "Routing evaluation — validates trigger activation for the sre-engineer agent."
-skill: "agents/sre-engineer.agent.md"
+skill: "agents/basecoat-10-core-sre-engineer.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with improving service reliability and resilience."

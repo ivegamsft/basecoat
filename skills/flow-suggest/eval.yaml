@@ -1,0 +1,19 @@
+name: "flow-suggest-skill-routing"
+description: "Routing evaluation — validates trigger activation for the flow-suggest skill."
+skill: "skills/flow-suggest/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Use this audit to suggest prioritized issues for queue and CI bottlenecks."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Turn flow findings into issue-ready fixes, auto-create high-confidence issues, and add acceptance criteria."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Recommend the next remediation wave based on the latest flow audit."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Patch this SQL query performance bug."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Create a visual identity board."
+    expect_activation: false

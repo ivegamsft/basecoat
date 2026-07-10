@@ -1,0 +1,390 @@
+name: Agent Merge
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      rollback_ref:
+        description: "Commit SHA to generate rollback patch for"
+        required: false
+        type: string
+      rollback_apply:
+        description: "Apply the rollback patch for rollback_ref (true/false)"
+        required: false
+        default: "false"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  guardrails:
+    name: Agent merge guardrails
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          fetch-depth: 0
+
+      - name: Detect agent/skill changes
+        id: changed-assets
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${GITHUB_EVENT_NAME}" != "pull_request" ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          CHANGED_ASSETS=$(git diff --name-only "${BASE_SHA}" "${HEAD_SHA}" -- agents skills || true)
+
+          if [[ -n "${CHANGED_ASSETS}" ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "changed=false" >> "$GITHUB_OUTPUT"
+          echo "No agent/skill changes detected; guardrail validations skipped."
+
+      - name: Set up Python
+        if: ${{ steps.changed-assets.outputs.changed == 'true' }}
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.11"
+
+      - name: Validate duplicate agent names and tool conflicts
+        if: ${{ steps.changed-assets.outputs.changed == 'true' }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import ast
+          import pathlib
+          import re
+          import sys
+
+          FRONTMATTER_PATTERN = re.compile(r"^---\r?\n(.*?)\r?\n---\r?\n", re.S)
+
+          def parse_inline_array(value: str):
+              text = value.strip()
+              if not text.startswith("["):
+                  return []
+              try:
+                  parsed = ast.literal_eval(text)
+              except (SyntaxError, ValueError):
+                  return []
+              if not isinstance(parsed, (list, tuple)):
+                  return []
+              normalized = []
+              for item in parsed:
+                  if isinstance(item, str):
+                      candidate = item.strip()
+                      if candidate:
+                          normalized.append(candidate)
+              return normalized
+
+          def parse_yaml_list(frontmatter: str, key: str):
+              items = []
+              key_match = re.search(rf"(?m)^{re.escape(key)}:\s*(.*)$", frontmatter)
+              if not key_match:
+                  return tuple()
+
+              inline_value = key_match.group(1).strip()
+              if inline_value:
+                  items.extend(parse_inline_array(inline_value))
+
+              block_match = re.search(
+                  rf"(?ms)^{re.escape(key)}:\s*\r?\n((?:^[ \t]+-.*(?:\r?\n|$))+)",
+                  frontmatter,
+              )
+              if block_match:
+                  for line in block_match.group(1).splitlines():
+                      bullet_match = re.match(r"^\s*-\s*(.+?)\s*$", line)
+                      if not bullet_match:
+                          continue
+                      candidate = bullet_match.group(1).strip().strip("'").strip('"')
+                      if candidate:
+                          items.append(candidate)
+
+              return tuple(sorted(set(items)))
+
+          root = pathlib.Path(".")
+          agent_files = sorted(root.glob("agents/*.agent.md"))
+          by_name = {}
+          failures = []
+
+          for path in agent_files:
+              text = path.read_text(encoding="utf-8")
+              match = FRONTMATTER_PATTERN.search(text)
+              if not match:
+                  failures.append(f"{path}: missing YAML frontmatter")
+                  continue
+
+              frontmatter = match.group(1)
+              name_match = re.search(r"(?m)^name:\s*(.+)$", frontmatter)
+              if not name_match:
+                  failures.append(f"{path}: missing name in frontmatter")
+                  continue
+
+              raw_name = name_match.group(1).strip().strip('"').strip("'")
+              normalized_name = raw_name.casefold()
+              allowed_skills = parse_yaml_list(frontmatter, "allowed_skills")
+              tools = set()
+              for key in ("tools", "allowed-tools", "allowed_tools"):
+                  tools.update(parse_yaml_list(frontmatter, key))
+              normalized_tools = tuple(sorted(tools))
+
+              by_name.setdefault(normalized_name, []).append(
+                  {
+                      "display_name": raw_name,
+                      "path": str(path),
+                      "skills": allowed_skills,
+                      "tools": normalized_tools,
+                  }
+              )
+
+          for normalized_name, entries in by_name.items():
+              if len(entries) <= 1:
+                  continue
+
+              display_name = entries[0]["display_name"]
+              paths = ", ".join(entry["path"] for entry in entries)
+              failures.append(f"duplicate agent name '{display_name}' in: {paths}")
+
+              skill_sets = {entry["skills"] for entry in entries}
+              if len(skill_sets) > 1:
+                  details = "; ".join(
+                      f"{entry['path']} -> allowed_skills={list(entry['skills'])}" for entry in entries
+                  )
+                  failures.append(
+                      f"conflicting allowed_skills for duplicated agent '{display_name}': {details}"
+                  )
+
+              tool_sets = {entry["tools"] for entry in entries}
+              if len(tool_sets) > 1:
+                  details = "; ".join(
+                      f"{entry['path']} -> tools={list(entry['tools'])}" for entry in entries
+                  )
+                  failures.append(
+                      f"conflicting tool permissions for duplicated agent '{display_name}': {details}"
+                  )
+
+          if failures:
+              print("Agent merge guardrail failures:")
+              for failure in failures:
+                  print(f"- {failure}")
+              sys.exit(1)
+
+          print(
+              "Agent guardrails passed: no duplicate names or conflicting "
+              "allowed_skills/tool permissions detected."
+          )
+          PY
+
+      - name: Validate eval companions
+        if: ${{ steps.changed-assets.outputs.changed == 'true' }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import pathlib
+          import sys
+
+          root = pathlib.Path(".")
+          missing = []
+
+          for agent in root.glob("agents/*.agent.md"):
+              eval_file = agent.with_name(agent.name.replace(".agent.md", ".agent.eval.yaml"))
+              if not eval_file.exists():
+                  missing.append(f"{agent} -> missing {eval_file.name}")
+
+          for skill in root.glob("skills/*/SKILL.md"):
+              eval_file = skill.with_name("eval.yaml")
+              if not eval_file.exists():
+                  missing.append(f"{skill} -> missing eval.yaml")
+
+          if missing:
+              print("Missing eval companions:")
+              for item in missing:
+                  print(f"- {item}")
+              sys.exit(1)
+
+          print("Eval companion validation passed.")
+          PY
+
+      - name: Generate frontmatter changelog
+        if: ${{ steps.changed-assets.outputs.changed == 'true' }}
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [ -z "${BASE_SHA}" ]; then
+            {
+              echo "# Agent Merge Changelog"
+              echo
+              echo "No pull request base SHA available. Changelog generation is skipped for workflow_dispatch runs."
+            } > agent-merge-changelog.md
+            exit 0
+          fi
+
+          RANGE="${BASE_SHA}...HEAD"
+          {
+            echo "# Agent Merge Changelog"
+            echo
+            echo "Diff range: ${RANGE}"
+            echo
+            echo "## Frontmatter changes"
+            echo
+            git diff --unified=0 "${RANGE}" -- agents skills \
+              | awk '/^diff --git / || /^@@/ || /^[+-](name|description|visibility|model|metadata|allowed_skills):/'
+          } > agent-merge-changelog.md
+
+      - name: Upload changelog artifact
+        if: ${{ steps.changed-assets.outputs.changed == 'true' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: agent-merge-changelog
+          path: agent-merge-changelog.md
+          retention-days: 7
+
+  rollback-plan:
+    name: Agent merge rollback plan
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rollback_ref != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          fetch-depth: 0
+
+      - name: Validate rollback target commit metadata
+        shell: bash
+        env:
+          ROLLBACK_REF: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rollback_ref || '' }}
+        run: |
+          set -euo pipefail
+
+          if ! git cat-file -e "${ROLLBACK_REF}^{commit}" 2>/dev/null; then
+            echo "::error::Rollback ref '${ROLLBACK_REF}' is not a valid commit in this repository."
+            exit 1
+          fi
+
+          COMMIT_SUBJECT="$(git log -1 --pretty=%s "${ROLLBACK_REF}")"
+          COMMIT_DATE="$(git log -1 --pretty=%ci "${ROLLBACK_REF}")"
+          COMMIT_AUTHOR="$(git log -1 --pretty=%an "${ROLLBACK_REF}")"
+          echo "Rollback target validated:"
+          echo "  SHA:     ${ROLLBACK_REF}"
+          echo "  Subject: ${COMMIT_SUBJECT}"
+          echo "  Date:    ${COMMIT_DATE}"
+          echo "  Author:  ${COMMIT_AUTHOR}"
+
+      - name: Generate rollback patch
+        shell: bash
+        env:
+          ROLLBACK_REF: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rollback_ref || '' }}
+        run: |
+          set -euo pipefail
+          git revert --no-commit "${ROLLBACK_REF}"
+          git diff --cached > agent-merge-rollback.patch
+          git reset --hard
+
+      - name: Upload rollback patch artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: agent-merge-rollback-patch
+          path: agent-merge-rollback.patch
+          retention-days: 7
+
+  rollback-apply:
+    name: Agent merge rollback apply
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rollback_ref != '' && github.event.inputs.rollback_apply == 'true' }}
+    needs: rollback-plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download rollback patch artifact
+        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935
+        with:
+          name: agent-merge-rollback-patch
+
+      - name: Validate patch is non-empty
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! -s agent-merge-rollback.patch ]]; then
+            echo "::error::Rollback patch is empty — nothing to revert for ref ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rollback_ref || '' }}."
+            exit 1
+          fi
+          echo "Patch size: $(wc -c < agent-merge-rollback.patch) bytes"
+
+      - name: Apply rollback patch
+        id: apply
+        shell: bash
+        env:
+          ROLLBACK_REF: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rollback_ref || '' }}
+        run: |
+          set -euo pipefail
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git apply --index agent-merge-rollback.patch
+
+          REVERTED_FILES="$(git diff --cached --name-only | tr '\n' ',')"
+          echo "reverted_files=${REVERTED_FILES}" >> "${GITHUB_OUTPUT}"
+
+          git commit -m "revert(agents): rollback apply for ${ROLLBACK_REF}
+
+          Automated rollback applied via agent-merge workflow.
+          Reverted files: ${REVERTED_FILES}
+
+          Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+          APPLIED_SHA="$(git rev-parse HEAD)"
+          echo "applied_sha=${APPLIED_SHA}" >> "${GITHUB_OUTPUT}"
+          git push origin HEAD
+
+      - name: Emit rollback execution summary
+        if: always()
+        shell: bash
+        env:
+          ROLLBACK_REF: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.rollback_ref || '' }}
+          REVERTED_FILES: ${{ steps.apply.outputs.reverted_files }}
+          APPLIED_SHA: ${{ steps.apply.outputs.applied_sha }}
+          APPLY_OUTCOME: ${{ steps.apply.outcome }}
+        run: |
+          {
+            echo "# Agent Merge Rollback Execution Summary"
+            echo
+            echo "| Field | Value |"
+            echo "|-------|-------|"
+            echo "| Rollback target | \`${ROLLBACK_REF}\` |"
+            echo "| Status | ${APPLY_OUTCOME} |"
+            echo "| Applied commit | \`${APPLIED_SHA:-N/A}\` |"
+            echo "| Reverted files | ${REVERTED_FILES:-none} |"
+            echo "| Timestamp | $(date -u '+%Y-%m-%dT%H:%M:%SZ') |"
+          } > agent-merge-rollback-summary.md
+          cat agent-merge-rollback-summary.md
+
+      - name: Upload rollback summary artifact
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: agent-merge-rollback-summary
+          path: agent-merge-rollback-summary.md
+          retention-days: 14

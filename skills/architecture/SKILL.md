@@ -1,20 +1,15 @@
 ---
-
 name: architecture
+compatibility: [github-copilot-cli]
 description: "Use when shaping system architecture, documenting decisions, and evaluating cross-cutting tradeoffs. USE FOR: design a system architecture, create a C4 diagram, write an ADR for a platform choice, compare technology options with a matrix, assess architectural risks and mitigations. DO NOT USE FOR: implementing endpoints, fixing CI failures, pixel-perfect UI design."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
+category: architecture
 metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
+  category: architecture
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
-
 # Architecture Skill
 
 System design, architecture documentation, technology evaluation, and risk assessment at the architecture level.

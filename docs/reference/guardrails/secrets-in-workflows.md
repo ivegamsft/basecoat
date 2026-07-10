@@ -61,16 +61,19 @@ env:
 ## How to Audit Existing Workflows
 
 1. **Search for literal strings in env blocks:**
+
    ```bash
    grep -rn 'env:' .github/workflows/ -A 10 | grep -vE '\$\{\{.*secrets\.' | grep -E ':\s*".+"'
    ```
 
 2. **Look for `with:` parameters that don't use secrets context:**
+
    ```bash
    grep -rn 'with:' .github/workflows/ -A 10 | grep -vE '\$\{\{.*secrets\.' | grep -iE '(password|secret|token|key|credential|connection).*:\s*".+"'
    ```
 
 3. **Review `run:` blocks for inline credentials:**
+
    ```bash
    grep -rn 'run:' .github/workflows/ -A 5 | grep -iE '(password|secret|token|api.key)='
    ```
@@ -95,5 +98,5 @@ If a hardcoded secret is found in a workflow file:
 - [Using secrets in GitHub Actions](https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions)
 - [Encrypted secrets](https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository)
 - [Secret scanning](https://docs.github.com/en/code-security/secret-scanning/about-secret-scanning)
-- Governance policy: [governance.instructions.md](/instructions/governance.instructions.md) § 2 — No Secrets
-- Security standards: [security.instructions.md](/instructions/security.instructions.md)
+- Governance policy: [governance.instructions.md](/instructions/basecoat-20-lang-governance.instructions.md) § 2 — No Secrets
+- Security standards: [security.instructions.md](/instructions/basecoat-50-security-security.instructions.md)

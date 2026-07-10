@@ -1,18 +1,16 @@
 ---
 name: takt-time-measurement
+compatibility: [github-copilot-cli]
 description: "Use when measuring takt time, exporting throughput metrics, or building a GitHub Actions workflow that captures timing data. USE FOR: workflow templates, takt calculations, and metric export guidance. DO NOT USE FOR: general project management or unrelated observability tasks."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
+category: operations
+
 visibility: "internal"
+metadata:
+  category: operations
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Takt Time Measurement Skill
 

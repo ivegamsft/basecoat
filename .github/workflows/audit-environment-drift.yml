@@ -1,0 +1,152 @@
+name: "BaseCoat - Audit Environment Drift"
+
+on:
+  schedule:
+    # Run daily at 6:00 AM UTC
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      strict_mode:
+        description: 'Fail if any drift detected'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+      skip_tag_check:
+        description: 'Skip Azure resource tag validation'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+  push:
+    paths:
+      - '.github/environment-map.yml'
+      - '.release/manifest.json'
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      drift_status: ${{ steps.audit.outputs.drift_status }}
+      findings_count: ${{ steps.audit.outputs.findings_count }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '18'
+
+      - name: Verify local environment drift CLI source
+        run: |
+          if [ ! -f skills/environment-audit-drift/package.json ]; then
+            echo "::error::Local environment drift CLI source is missing: skills/environment-audit-drift/package.json"
+            echo "::error::Do not use npm registry fallback for @basecoat/environment-audit-drift in this workflow."
+            exit 1
+          fi
+
+          if ! grep -q '"name": "@basecoat/environment-audit-drift"' skills/environment-audit-drift/package.json; then
+            echo "::error::Local CLI manifest does not match @basecoat/environment-audit-drift."
+            exit 1
+          fi
+
+      - name: Install local environment drift CLI dependencies
+        run: npm ci --prefix skills/environment-audit-drift
+
+      - name: Build local environment drift CLI
+        run: npm run --prefix skills/environment-audit-drift build
+
+      - name: Audit environment drift
+        id: audit
+        env:
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          STRICT_MODE="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.strict_mode || 'false' }}"
+          SKIP_TAG="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.skip_tag_check || 'false' }}"
+
+          extra_args=()
+          if [ "$SKIP_TAG" = "true" ]; then extra_args+=("--skip-tag-check"); fi
+          if [ "$STRICT_MODE" = "true" ]; then extra_args+=("--strict"); fi
+
+          node skills/environment-audit-drift/dist/cli.js \
+            --config .github/environment-map.yml \
+            --subscription "$AZURE_SUBSCRIPTION_ID" \
+            --github-token "${{ secrets.GITHUB_TOKEN }}" \
+            --output drift-report.json \
+            "${extra_args[@]}"
+
+          DRIFT_STATUS=$(jq -r '.severity_summary | if .critical > 0 then "critical" elif .high > 0 then "high" elif .medium > 0 then "medium" else "clean" end' drift-report.json)
+          FINDINGS=$(jq '.total_drifts' drift-report.json)
+
+          echo "drift_status=${DRIFT_STATUS}" >> "$GITHUB_OUTPUT"
+          echo "findings_count=${FINDINGS}" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### Environment Drift Report"
+            echo ""
+            echo "**Status:** \`${DRIFT_STATUS}\`"
+            echo "**Findings:** ${FINDINGS}"
+            echo ""
+            jq -r '.findings[] | "- [\(.severity | ascii_upcase)] **\(.environment)**: \(.finding)"' drift-report.json || echo "No findings."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload drift report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: drift-report
+          path: drift-report.json
+          retention-days: 30
+
+      - name: Open issue on critical drift
+        if: steps.audit.outputs.drift_status == 'critical'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('drift-report.json', 'utf-8'));
+            const findings = report.findings
+              .filter(f => f.severity === 'critical')
+              .map(f => `- **${f.environment}**: ${f.finding}\n  Remediation: ${f.remediation}`)
+              .join('\n');
+            const body = [
+              '## Critical Environment Drift Detected',
+              '',
+              findings,
+              '',
+              `**Audit run:** ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              '',
+              '_Review and resolve critical drifts before the next deployment._',
+            ].join('\n');
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'environment-drift',
+              state: 'open',
+            });
+            if (issues.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: 'Critical environment drift detected',
+                body,
+                labels: ['environment-drift', 'P1'],
+              });
+            }
+
+      - name: Fail on critical drift in strict mode
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.strict_mode == 'true' && steps.audit.outputs.drift_status == 'critical' }}
+        run: |
+          echo "Critical drift detected in strict mode."
+          exit 1

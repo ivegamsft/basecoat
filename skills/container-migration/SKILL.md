@@ -1,19 +1,15 @@
 ---
 name: container-migration
+compatibility: [github-copilot-cli]
 description: "Scaffold containerization of a legacy app for Azure Container Apps or Kubernetes with Dockerfile, health probes, and deployment assets. USE FOR: containerize this legacy app, create a Dockerfile for production, migrate app to Azure Container Apps, add Kubernetes manifests and health checks, set up ACR build and push workflow. DO NOT USE FOR: simple VM deployment without containers, tuning application business logic, non-container desktop packaging."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
+category: infrastructure
 metadata:
   category: infrastructure
-  keywords: "docker, containers, azure-container-apps, aks, kubernetes, acr, dockerfile, health-check, bicep"
-  maturity: production
-  audience: [backend-engineer, devops-engineer, platform-engineer]
-allowed-tools: [bash, azure-cli, git, bicep]
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
-
 # Container Migration
 
 Scaffold containerization of a legacy application targeting Azure Container Apps (ACA),

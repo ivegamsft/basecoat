@@ -1,6 +1,6 @@
 name: "data-architect-routing"
 description: "Routing evaluation — validates trigger activation for the data-architect agent."
-skill: "agents/data-architect.agent.md"
+skill: "agents/basecoat-80-data-data-architect.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with planning data warehouses, data lakes, ETL/ELT pipelines, or data mesh frameworks."

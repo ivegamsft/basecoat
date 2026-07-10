@@ -1,24 +1,24 @@
 # BaseCoat
 
-**Enterprise-grade GitHub Copilot customization framework.**
+**Versioned GitHub Copilot customization library for enterprise repos.**
 
-BaseCoat gives your organization a curated, version-controlled library of agents, skills, instructions, and prompts — synced into every team repo with a single command. Instead of every team writing Copilot customizations from scratch, you get production-ready assets that enforce consistent standards across your entire GitHub Enterprise org.
+BaseCoat gives your organization one place to manage agents, skills, instructions, and prompts. Sync it into each team repo with a single command so standards stay consistent and reusable instead of being rewritten in every codebase.
 
-- [README.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/README.md) — Getting started, installation, and overview
-- [CHANGELOG.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/CHANGELOG.md) — Release history
-- [CONTRIBUTING.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/CONTRIBUTING.md) — Contribution guide
-- [PHILOSOPHY.md](PHILOSOPHY.md) — Design philosophy and principles
+- [README.md](../README.md) — Getting started, installation, and overview
+- [CHANGELOG.md](../CHANGELOG.md) — Release history
+- [CONTRIBUTING.md](../CONTRIBUTING.md) — Contribution guide
+- [philosophy.md](philosophy.md) — Design philosophy and principles
 
 ---
 
-## What's in the box
+## What's included
 
 | Asset type | Count | What it does |
 |---|---|---|
-| **Agents** | 79 | End-to-end task executors — sprint planners, code reviewers, security analysts, and more |
-| **Skills** | 57 | Reusable domain capabilities invoked by agents |
-| **Instructions** | 64 | Copilot behavior rules scoped by file path pattern |
-| **Prompts** | 3 | Structured templates for repeatable tasks |
+| **Agents** | 126 | End-to-end task executors — sprint planners, code reviewers, security analysts, and more |
+| **Skills** | 130 | Reusable domain capabilities invoked by agents |
+| **Instructions** | 91 | Copilot behavior rules scoped by file path pattern |
+| **Prompts** | 6 | Structured templates for repeatable tasks |
 
 ---
 
@@ -31,9 +31,9 @@ flowchart LR
     CP -->|guided by| DEV[Your Developers]
 ```
 
-1. **Sync** — run one script to pull the latest BaseCoat release into `.github/base-coat/`
+1. **Sync** — pull the latest BaseCoat release into `.github/base-coat/`
 2. **Use** — Copilot auto-discovers agents, instructions, and prompts from `.github/`
-3. **Contribute** — open a PR to share patterns back with every team in the org
+3. **Contribute** — open a PR to share patterns back with the org
 
 ---
 
@@ -42,50 +42,72 @@ flowchart LR
 - [integrations/mcp-deployment.md](integrations/mcp-deployment.md) — Deploying the Base Coat MCP server
 - [integrations/pydantic-mcp-integration.md](integrations/pydantic-mcp-integration.md) — Pydantic + MCP integration
 - [integrations/pydantic-typescript-client-generation.md](integrations/pydantic-typescript-client-generation.md) — TypeScript client generation
-- [integrations/AZURE_AD_INTEGRATION_GUIDE.md](integrations/AZURE_AD_INTEGRATION_GUIDE.md) — Azure AD integration
-- [integrations/AZURE_SQL_MIGRATION_GUIDANCE.md](integrations/AZURE_SQL_MIGRATION_GUIDANCE.md) — Azure SQL migration
-- [integrations/ENTERPRISE_IDENTITY_ACCESS.md](integrations/ENTERPRISE_IDENTITY_ACCESS.md) — Identity & access patterns
-- [integrations/ENTERPRISE_KUBERNETES_PATTERNS.md](integrations/ENTERPRISE_KUBERNETES_PATTERNS.md) — AKS / K8s guidance
-- [integrations/APPLICATION_GATEWAY_ROUTING_GUIDANCE.md](integrations/APPLICATION_GATEWAY_ROUTING_GUIDANCE.md) — App Gateway routing
-- [integrations/RBAC_ONLY_AUTHENTICATION_PATTERNS.md](integrations/RBAC_ONLY_AUTHENTICATION_PATTERNS.md) — RBAC auth patterns
+- [integrations/azure-ad-integration-guide.md](integrations/azure-ad-integration-guide.md) — Azure AD integration
+- [integrations/azure-sql-migration-guidance.md](integrations/azure-sql-migration-guidance.md) — Azure SQL migration
+- [integrations/enterprise-identity-access.md](integrations/enterprise-identity-access.md) — Identity & access patterns
+- [integrations/enterprise-kubernetes-patterns.md](integrations/enterprise-kubernetes-patterns.md) — AKS / K8s guidance
+- [integrations/application-gateway-routing-guidance.md](integrations/application-gateway-routing-guidance.md) — App Gateway routing
+- [integrations/rbac-only-authentication-patterns.md](integrations/rbac-only-authentication-patterns.md) — RBAC auth patterns
 - [integrations/untools-integration.md](integrations/untools-integration.md) — UnTools integration guide
 
 ## Reference (`docs/reference/`)
 
-- [reference/INVENTORY.md](reference/INVENTORY.md) — Full asset listing (agents, skills, instructions, prompts)
-- [reference/GOVERNANCE.md](reference/GOVERNANCE.md) — Contribution policies and review standards
-- [reference/DISTRIBUTION.md](reference/DISTRIBUTION.md) — Sync mechanism for consumer repos
-- [reference/HOOKS.md](reference/HOOKS.md) — Git hooks and pre-commit validation
-- [reference/GOALS.md](reference/GOALS.md) — Project goals and OKRs
-- [reference/SCOPED_INSTRUCTIONS.md](reference/SCOPED_INSTRUCTIONS.md) — Scoped instruction authoring guide
-- [reference/LABEL_TAXONOMY.md](reference/LABEL_TAXONOMY.md) — GitHub label taxonomy
-- [reference/PROMPT_REGISTRY.md](reference/PROMPT_REGISTRY.md) — Prompt catalog and registry
-- [reference/ASSET_REGISTRY.md](reference/ASSET_REGISTRY.md) — Asset registry metadata
-- [reference/CLI_COMMAND_REFERENCE.md](reference/CLI_COMMAND_REFERENCE.md) — CLI command reference
-- [reference/COMPONENT_LIBRARY.md](reference/COMPONENT_LIBRARY.md) — Component library reference
-- [reference/PRODUCT.md](reference/PRODUCT.md) — Product vision and roadmap
-- [reference/QUICK_REFERENCE.md](reference/QUICK_REFERENCE.md) — Quick reference card
+- [GOVERNANCE.md](GOVERNANCE.md) — Canonical governance landing page for shared vs repo-specific rules
+- [reference/governance-contract.md](reference/governance-contract.md) — Canonical common-vs-specific governance guide
+- [reference/inventory.md](reference/inventory.md) — Full asset listing (agents, skills, instructions, prompts)
+- [reference/governance.md](reference/governance.md) — Contribution policies and review standards
+- [reference/distribution.md](reference/distribution.md) — Sync mechanism for consumer repos
+- [reference/hooks.md](reference/hooks.md) — Git hooks and pre-commit validation
+- [reference/goals.md](reference/goals.md) — Project goals and OKRs
+- [reference/ai-sdlc-operating-model.md](reference/ai-sdlc-operating-model.md) — Canonical Guardrails vs Visibility operating model
+- [reference/scoped-instructions.md](reference/scoped-instructions.md) — Scoped instruction authoring guide
+- [reference/label-taxonomy.md](reference/label-taxonomy.md) — GitHub label taxonomy
+- [reference/prompt-registry.md](reference/prompt-registry.md) — Prompt catalog and registry
+- [reference/asset-registry.md](reference/asset-registry.md) — Asset registry metadata
+- [reference/cli-command-reference.md](reference/cli-command-reference.md) — CLI command reference
+- [reference/component-library.md](reference/component-library.md) — Component library reference
+- [reference/product.md](reference/product.md) — Product vision and roadmap
+- [reference/quick-reference.md](reference/quick-reference.md) — Quick reference card
+- [reference/guidance-vocabulary-syntax-guide.md](reference/guidance-vocabulary-syntax-guide.md) — Canonical vocabulary, taxonomy, ontology, and prompt syntax
 - [reference/treatment-matrix.md](reference/treatment-matrix.md) — Issue treatment matrix
+- [reference/fleet-loop-adoption-scorecard.md](reference/fleet-loop-adoption-scorecard.md) — Fleet audit findings: policy vs implementation vs live behavior across consumer repos
 - [reference/guardrails/](reference/guardrails/) — Guardrail configuration files
+- [diagrams/architecture-diagrams-index.md](diagrams/architecture-diagrams-index.md) — Visual reference index for architecture, dispatch, and validation flows
+
+## Guides (`docs/guides/`)
+
+- [guides/intent-prefixes.md](guides/intent-prefixes.md) — Intent vocabulary, routing behavior, and prompt templates
+- [guides/token-optimization.md](guides/token-optimization.md) — Operator token-efficiency checklist, model/mode defaults, and context normalization patterns
+- [agents/taxonomy.md](agents/taxonomy.md) — Agent and skill taxonomy with chain archetypes
 
 ## Operations (`docs/operations/`)
 
-- [operations/RELEASE_PROCESS.md](operations/RELEASE_PROCESS.md) — How releases are cut and published
-- [operations/RELEASE_METRICS.md](operations/RELEASE_METRICS.md) — Release metrics and KPIs
-- [operations/OPERATIONAL_RUNBOOK.md](operations/OPERATIONAL_RUNBOOK.md) — Runbook for common operations
-- [operations/DISASTER_RECOVERY.md](operations/DISASTER_RECOVERY.md) — DR procedures
-- [operations/COST_OPTIMIZATION.md](operations/COST_OPTIMIZATION.md) — Cost analysis and optimization
-- [operations/ENTERPRISE_RUNNERS.md](operations/ENTERPRISE_RUNNERS.md) — Self-hosted runner setup
-- [operations/ENTERPRISE_SECURITY_HARDENING.md](operations/ENTERPRISE_SECURITY_HARDENING.md) — Security hardening guide
-- [operations/BLOCKED_ISSUES.md](operations/BLOCKED_ISSUES.md) — Blocked issues tracking
-- [operations/TELEMETRY_ADOPTION.md](operations/TELEMETRY_ADOPTION.md) — Adoption telemetry guide
-- [operations/GITHUB_SECRETS.md](operations/GITHUB_SECRETS.md) — Repository secrets setup and rotation guide
-- [operations/COPILOT_EXTENSION_GITHUB_APP_REGISTRATION.md](operations/COPILOT_EXTENSION_GITHUB_APP_REGISTRATION.md) — GitHub App registration runbook for BaseCoat Copilot Extension
+- [operations/fleet-dispatch-policy.md](operations/fleet-dispatch-policy.md) — Guardrails and checklist for parallel sub-agent dispatch in fleet mode
+- [operations/session-per-task.md](operations/session-per-task.md) — Policy for issue-scoped dedicated sessions and cross-session handoffs
+- [operations/label-cleanup-plan.md](operations/label-cleanup-plan.md) — Safe label normalization plan that preserves repo-specific labels
+- [operations/hybrid-branching-policy-contract.md](operations/hybrid-branching-policy-contract.md) — Hybrid branch taxonomy, transition matrix, agent lane contract, and rollout scorecard guardrails
+- [operations/release-process.md](operations/release-process.md) — How releases are cut and published
+- [operations/release-metrics.md](operations/release-metrics.md) — Release metrics and KPIs
+- [operations/operational-runbook.md](operations/operational-runbook.md) — Runbook for common operations
+- [operations/disaster-recovery.md](operations/disaster-recovery.md) — DR procedures
+- [operations/cost-optimization.md](operations/cost-optimization.md) — Cost analysis and optimization
+- [operations/enterprise-runners.md](operations/enterprise-runners.md) — Self-hosted runner setup
+- [operations/enterprise-security-hardening.md](operations/enterprise-security-hardening.md) — Security hardening guide
+- [operations/blocked-issues.md](operations/blocked-issues.md) — Blocked issues tracking
+- [operations/telemetry-adoption.md](operations/telemetry-adoption.md) — Adoption telemetry guide
+- [operations/github-secrets.md](operations/github-secrets.md) — Repository secrets setup and rotation guide
+- [operations/copilot-extension-github-app-registration.md](operations/copilot-extension-github-app-registration.md) — GitHub App registration runbook for BaseCoat Copilot Extension
+- [operations/build-master-control-plane.md](operations/build-master-control-plane.md) — Build master architecture, policy matrix, and runbook for lane-aware continuous merge with cloud break-fix
+- [operations/security/remediation-traceability-workflow.md](operations/security/remediation-traceability-workflow.md) — Canonical implementation-linked closure workflow for security remediation
 - [operations/security/](operations/security/) — Security policies and audit docs
 
 ## Templates (`docs/templates/`)
 
-- [templates/](templates/) — Reusable file and directory templates (shared memory, repo scaffold, etc.)
+- [templates/](templates/) — File templates and scaffold taxonomy guidance
+
+## Examples (`docs/examples/`)
+
+- [examples/](examples/) — Read-only examples and starter references
 
 ## Archive
 

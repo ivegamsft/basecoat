@@ -1,4 +1,4 @@
-name: MCP Build
+name: "BaseCoat - MCP Build"
 
 on:
   push:
@@ -19,15 +19,15 @@ permissions:
 jobs:
   build:
     name: Build, lint, and validate MCP server
-    runs-on: ${{ vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
       - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "22"
           cache: "npm"
@@ -42,7 +42,7 @@ jobs:
         run: npm run build
 
       - name: Docker build smoke test
-        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v6
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
         with:
           context: mcp/basecoat-metrics
           push: false

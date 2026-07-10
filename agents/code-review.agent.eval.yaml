@@ -1,6 +1,6 @@
 name: "code-review-routing"
 description: "Routing evaluation — validates trigger activation for the code-review agent."
-skill: "agents/code-review.agent.md"
+skill: "agents/basecoat-90-quality-code-review.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with a structured, multi-step code review workflow with findings prioritized by severity and file references."

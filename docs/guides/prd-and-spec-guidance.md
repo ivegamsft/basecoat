@@ -116,11 +116,15 @@ This repository includes a PR gate in `.github/workflows/prd-spec-gate.yml`.
 
 Policy:
 
-- For high-change pull requests, include both PRD and spec references.
-- For risky-path pull requests, include at least one PRD or spec reference.
+- **High-change PRs** (`changed_files >= 12` **and** `additions + deletions >= 500`): **Must** include both PRD and spec references to pass the gate. This is a blocking requirement.
+- **Risky-path PRs** (`instructions/`, `skills/`, `agents/`, `scripts/`, `.github/workflows/`): Receive an advisory warning if missing PRD or spec references, but this does not block the PR. Aim to include at least one reference when possible.
+- **Merge queue events**: Pass automatically because merge queue payloads do not include pull request body metadata.
+- **Bot/agent-authored PRs** (`ibuyspy` or GitHub Bot accounts): Bypass the gate because they do not originate PRD/spec artifacts.
+- If a reference is not needed, use `N/A` and add a short rationale.
 - You can provide references as markdown links or explicit lines:
-  - `PRD: <link>`
-  - `Spec: <link>`
+  - `PRD: <link or N/A + rationale>`
+  - `Spec: <link or N/A + rationale>`
+- The `skip-prd-spec-check` label bypasses the gate when explicitly approved by repository maintainers.
 
 Recommended practice:
 

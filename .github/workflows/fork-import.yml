@@ -1,4 +1,5 @@
-name: Fork Issue Import
+name: "BaseCoat - Fork Issue Import"
+# [Internal-only] Memory workflow - BaseCoat operational use
 
 on:
   workflow_dispatch:
@@ -40,7 +41,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
       - name: Import issues from fork
         id: import
@@ -69,3 +70,4 @@ jobs:
           echo "| Source repo | \`${{ inputs.source_repo }}\` |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Source state | \`${{ inputs.source_state }}\` |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Dry run | \`${{ inputs.dry_run }}\` |" >> "$GITHUB_STEP_SUMMARY"
+

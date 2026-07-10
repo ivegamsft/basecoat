@@ -1,6 +1,6 @@
 name: "api-security-routing"
 description: "Routing evaluation — validates trigger activation for the api-security agent."
-skill: "agents/api-security.agent.md"
+skill: "agents/basecoat-50-security-api-security.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with run OWASP API Top 10 assessment."

@@ -1,19 +1,15 @@
 ---
 name: observability
+compatibility: [github-copilot-cli]
 description: "Use when adding logs, metrics, traces, or alertable telemetry to apps, services, and distributed systems. USE FOR: instrument service with OpenTelemetry, add structured logging and trace IDs, define SLI or latency metrics, trace requests across queues and APIs, improve incident debugging telemetry. DO NOT USE FOR: pure UI redesign, business analytics reporting."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
+category: operations
 metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
+  category: operations
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
-
 # Observability Skill
 
 Instrument services with structured logs, metrics, and distributed traces to enable alerting and fast incident triage.

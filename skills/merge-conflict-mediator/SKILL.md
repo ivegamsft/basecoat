@@ -1,18 +1,16 @@
 ---
 name: merge-conflict-mediator
+compatibility: [github-copilot-cli]
 description: "Use when a merge conflict needs a deterministic playbook for docs, config, manifests, or release artifacts. USE FOR: classify conflict types, choose a merge policy, and hand a resolution plan to merge-coordinator. DO NOT USE FOR: auto-resolving source code conflicts, silently dropping dependency changes, or bypassing human review."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
-metadata:
-  category: "CI/CD & Automation"
-  tags: ["git", "merge", "conflict", "deterministic", "playbook"]
-  maturity: "beta"
-  audience: ["developers", "devops-engineers", "maintainers"]
-allowed-tools: ["bash", "git", "grep"]
+category: development
+
 visibility: "internal"
+metadata:
+  category: development
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
 # Merge Conflict Mediator Skill
 
@@ -55,6 +53,6 @@ applies them. It is intentionally conservative: if the policy is unclear, escala
 
 ## Related Assets
 
-- `agents/merge-coordinator.agent.md`
-- `agents/release-freeze-enforcer.agent.md`
+- `agents/basecoat-10-core-merge-coordinator.agent.md`
+- `agents/basecoat-60-workflow-release-freeze-enforcer.agent.md`
 - `skills/orphaned-pr-triage/SKILL.md`

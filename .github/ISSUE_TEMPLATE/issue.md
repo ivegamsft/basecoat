@@ -9,6 +9,34 @@ labels: ""
 
 <!-- Describe the issue, enhancement, or task -->
 
+## Intake Contract
+
+### RCA
+
+<!-- Root cause or failure mode that justifies the work. If not applicable, write N/A and why. -->
+
+### Design
+
+<!-- Proposed design or implementation shape. If not applicable, write N/A and why. -->
+
+### Debate
+
+<!-- Alternatives considered and why this approach wins. If not applicable, write N/A and why. -->
+
+### PRD and Spec References
+
+- PRD: <link or N/A with rationale>
+- Spec: <link or N/A with rationale>
+
+### Planning Metadata
+
+| Field | Value |
+|---|---|
+| Target sprint | |
+| Priority | |
+| Expected change size | small / medium / large |
+| Risky-path indicator | yes / no |
+
 ## Context
 
 <!-- Add relevant context:
@@ -37,18 +65,23 @@ Please apply **at least one label from each category below:**
 - `chore` — Maintenance or tech debt
 - `security` — Security concern or vulnerability
 
+The triage workflow mirrors the selected type label into the native issue `Type`
+field and the selected priority label into the native `Priority` field.
+
 **Priority** (recommended):
 
-- `priority:high` — Urgent (1 hour SLA)
-- `priority:medium` — Important (4 hour SLA)
-- `priority:low` — Nice-to-have (1 week SLA)
+- `priority:critical` — Service down, data loss, active security breach, CVE
+- `priority:high` — Blocking work or major user impact
+- `priority:medium` — Moderate user impact
+- `priority:low` — Nice-to-have or cosmetic
 
-**Sprint** (if assigned):
+**Sprint** (required):
 
-- `sprint-1`, `sprint-2`, `sprint-3`, `sprint-4`
+- `sprint-YYYY-MM` (for example, `sprint-2026-05`)
+- Use `needs-triage` and `needs-info` only if a target sprint cannot be assigned yet.
 
 **Technology** (optional):
 
 - `azure`, `dotnet`, `kubernetes`, `python`, `terraform`, etc.
 
-See [`GOVERNANCE.md`](../../docs/GOVERNANCE.md#labels) for complete label taxonomy.
+See [`docs/reference/governance-contract.md`](../../docs/reference/governance-contract.md) and [`docs/GOVERNANCE.md`](../../docs/GOVERNANCE.md#canonical-label-set-for-new-work) for canonical labels and migration guidance.

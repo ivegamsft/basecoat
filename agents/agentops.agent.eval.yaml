@@ -1,6 +1,6 @@
 name: "agentops-routing"
 description: "Routing evaluation — validates trigger activation for the agentops agent."
-skill: "agents/agentops.agent.md"
+skill: "agents/basecoat-10-core-agentops.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with deploying, canarying, or retiring agent versions."

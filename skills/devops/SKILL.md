@@ -1,20 +1,15 @@
 ---
-
 name: devops
+compatibility: [github-copilot-cli]
 description: "Use when designing CI/CD pipelines, infrastructure as code, deployment workflows, rollback plans, or observability setup. USE FOR: create GitHub Actions pipeline, review Bicep or Terraform deployment templates, define release promotion gates, write rollback runbook for a service, add monitoring and health checks for deployment. DO NOT USE FOR: writing application feature code, database schema modeling, drafting product marketing copy."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
+category: development
 metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
+  category: development
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
-
 # DevOps Skill
 
 CI/CD pipeline design, infrastructure as code, deployment workflows, rollback planning, and observability configuration.

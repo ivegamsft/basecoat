@@ -39,7 +39,8 @@ $workflowDir = '.github/workflows'
 $workflowFiles = Get-ChildItem "$workflowDir/*.yml" -File | Where-Object { $_.Name -notmatch 'README|\.lock\.yml$' }
 $guardrailFailures = @()
 $directMainPushAllowList = @(
-    'publish-to-production.yml'
+    'publish-to-production.yml',
+    'release.yml'
 )
 $nonDispatchTriggers = @(
     'push',
@@ -423,6 +424,395 @@ if ($directMainPushViolations.Count -eq 0) {
 else {
     Write-Host "    ✗ Disallowed direct push-to-main patterns found in: $($directMainPushViolations -join ', ')" -ForegroundColor Red
     $guardrailFailures += 'protected-branch-push-pattern'
+}
+
+# Test 13: Publish workflow tag selection must be event-safe for push-triggered runs
+Write-Host '  Test 13: Validate publish workflow tag resolution is event-safe...'
+$publishWorkflowPath = Join-Path $workflowDir 'publish-to-production.yml'
+$publishWorkflow = Get-Content $publishWorkflowPath -Raw
+$unsafePublishTagExpressions = [regex]::Matches($publishWorkflow, 'github\.event\.inputs\.tag')
+$hasResolverStep = $publishWorkflow -match 'name:\s*Resolve publish tag' -and $publishWorkflow -match 'id:\s*resolve_tag'
+$usesResolvedTagOutput = $publishWorkflow -match 'steps\.resolve_tag\.outputs\.tag'
+
+if ($unsafePublishTagExpressions.Count -eq 0 -and $hasResolverStep -and $usesResolvedTagOutput) {
+    Write-Host '    ✓ Publish workflow uses dispatch-guarded tag resolution'
+}
+else {
+    Write-Host '    ✗ Publish workflow tag resolution is not safe for push-triggered runs' -ForegroundColor Red
+    $guardrailFailures += 'publish-tag-resolution'
+}
+
+# Test 14: Agent merge eval validation must be wired as a required status check
+Write-Host '  Test 14: Validate agent-merge eval policy wiring...'
+$agentMergeWorkflowPath = Join-Path $workflowDir 'agent-merge.yml'
+$agentMergeWorkflow = Get-Content $agentMergeWorkflowPath -Raw
+$mergeQueuePsPath = 'scripts/deploy-merge-queue.ps1'
+$mergeQueueShPath = 'scripts/deploy-merge-queue.sh'
+$branchProtectionDocPath = 'docs/operations/security/branch-protection.md'
+$requiredAgentMergeContext = 'Agent Merge / Agent merge guardrails'
+
+$agentMergeHasGlobalPrTrigger = $agentMergeWorkflow -notmatch '(?ms)pull_request:\s*\r?\n\s+paths:'
+$agentMergeHasEvalStep = $agentMergeWorkflow -match '(?m)^\s+- name:\s+Validate eval companions\s*$'
+$rulesetPsWired = (Get-Content $mergeQueuePsPath -Raw) -match [regex]::Escape($requiredAgentMergeContext)
+$rulesetShWired = (Get-Content $mergeQueueShPath -Raw) -match [regex]::Escape($requiredAgentMergeContext)
+$branchProtectionDocWired = (Get-Content $branchProtectionDocPath -Raw) -match [regex]::Escape($requiredAgentMergeContext)
+
+if ($agentMergeHasGlobalPrTrigger -and $agentMergeHasEvalStep -and $rulesetPsWired -and $rulesetShWired -and $branchProtectionDocWired) {
+    Write-Host '    ✓ Agent merge eval validation is wired into required-check policy'
+}
+else {
+    if (-not $agentMergeHasGlobalPrTrigger) {
+        Write-Host '    ✗ agent-merge.yml still path-filters pull_request; required status may not publish on every PR.' -ForegroundColor Red
+    }
+    if (-not $agentMergeHasEvalStep) {
+        Write-Host '    ✗ agent-merge.yml is missing the eval validation step.' -ForegroundColor Red
+    }
+    if (-not $rulesetPsWired) {
+        Write-Host '    ✗ deploy-merge-queue.ps1 is missing required Agent Merge status context.' -ForegroundColor Red
+    }
+    if (-not $rulesetShWired) {
+        Write-Host '    ✗ deploy-merge-queue.sh is missing required Agent Merge status context.' -ForegroundColor Red
+    }
+    if (-not $branchProtectionDocWired) {
+        Write-Host '    ✗ branch-protection.md is missing required Agent Merge status context documentation.' -ForegroundColor Red
+    }
+    $guardrailFailures += 'agent-merge-required-status'
+}
+
+# Test 15: Agent merge changelog generation must stay structured for policy parsing
+Write-Host '  Test 15: Validate agent-merge structured changelog generation...'
+$agentMergeChangelogChecks = @(
+    '(?m)^\s+- name:\s+Generate frontmatter changelog\s*$',
+    '# Agent Merge Changelog',
+    '## Frontmatter changes',
+    'git diff --unified=0 "\$\{RANGE\}" -- agents skills',
+    'name:\s*agent-merge-changelog',
+    'path:\s*agent-merge-changelog\.md'
+)
+$agentMergeChangelogIssues = @()
+
+foreach ($requiredPattern in $agentMergeChangelogChecks) {
+    if ($agentMergeWorkflow -notmatch $requiredPattern) {
+        $agentMergeChangelogIssues += $requiredPattern
+    }
+}
+
+if ($agentMergeChangelogIssues.Count -eq 0) {
+    Write-Host '    PASS Agent merge workflow emits structured changelog artifact'
+}
+else {
+    Write-Host '    FAIL agent-merge.yml is missing structured changelog requirements:' -ForegroundColor Red
+    foreach ($issue in $agentMergeChangelogIssues) {
+        Write-Host "      - missing pattern: $issue" -ForegroundColor Red
+    }
+    $guardrailFailures += 'agent-merge-structured-changelog'
+}
+
+# Test 16: Required-check workflows must support merge queue and prd-spec-gate semantics
+Write-Host '  Test 16: Validate required-check workflows and prd-spec-gate semantics...'
+$mergeQueueWorkflowRequirements = @(
+    '.github/workflows/validate-basecoat.yml',
+    '.github/workflows/prd-spec-gate.yml'
+)
+$mergeQueueTriggerViolations = @()
+
+foreach ($workflowPath in $mergeQueueWorkflowRequirements) {
+    if (-not (Test-Path $workflowPath)) {
+        $mergeQueueTriggerViolations += "$workflowPath (missing file)"
+        continue
+    }
+
+    $workflowContent = Get-Content $workflowPath -Raw
+    if ($workflowContent -notmatch '(?m)^\s+merge_group:\s*$') {
+        $mergeQueueTriggerViolations += "$workflowPath (missing merge_group trigger)"
+    }
+}
+
+if ($mergeQueueTriggerViolations.Count -eq 0) {
+    Write-Host '    ✓ Required-check workflows include merge_group triggers'
+}
+else {
+    Write-Host "    ✗ Missing merge_group support in: $($mergeQueueTriggerViolations -join ', ')" -ForegroundColor Red
+    $guardrailFailures += 'merge-queue-trigger-missing'
+}
+
+$prdSpecWorkflowPath = Join-Path $workflowDir 'prd-spec-gate.yml'
+$prdSpecDocPath = 'docs/operations/security/branch-protection.md'
+$mergeQueueDocPath = 'docs/operations/merge-queue-enforcement.md'
+$prdSpecWorkflowIssues = @()
+
+if (-not (Test-Path $prdSpecWorkflowPath)) {
+    $prdSpecWorkflowIssues += 'prd-spec-gate.yml (missing file)'
+}
+else {
+    $prdSpecWorkflow = Get-Content $prdSpecWorkflowPath -Raw
+
+    if ($prdSpecWorkflow -notmatch '(?m)^\s{2}prd-spec-gate:\s*$') {
+        $prdSpecWorkflowIssues += 'prd-spec-gate.yml (missing prd-spec-gate job)'
+    }
+
+    if ($prdSpecWorkflow -notmatch '(?m)^\s+merge_group:\s*$') {
+        $prdSpecWorkflowIssues += 'prd-spec-gate.yml (missing merge_group trigger)'
+    }
+
+    if ($prdSpecWorkflow -notmatch '(?m)^\s+-\s+checks_requested\s*$') {
+        $prdSpecWorkflowIssues += 'prd-spec-gate.yml (missing merge_group checks_requested type)'
+    }
+
+    foreach ($requiredType in @('opened', 'edited', 'synchronize', 'reopened', 'ready_for_review', 'labeled', 'unlabeled')) {
+        if ($prdSpecWorkflow -notmatch "(?m)^\s+-\s+$requiredType\s*$") {
+            $prdSpecWorkflowIssues += "prd-spec-gate.yml (missing pull_request type: $requiredType)"
+        }
+    }
+
+    if ($prdSpecWorkflow -notmatch 'skip-prd-spec-check') {
+        $prdSpecWorkflowIssues += 'prd-spec-gate.yml (missing skip-prd-spec-check label handling)'
+    }
+
+    if ($prdSpecWorkflow -notmatch 'if\s*\(\s*!context\.payload\.pull_request\s*\)' -or $prdSpecWorkflow -notmatch 'return;') {
+        $prdSpecWorkflowIssues += 'prd-spec-gate.yml (missing merge_group no-PR payload guard)'
+    }
+
+    # Policy: require BOTH criteria (AND) to avoid false-positives on pure-additive docs PRs.
+    # Changed from OR to AND: see issue #1763 RCA.
+    if ($prdSpecWorkflow -notmatch 'changedFiles\s*>=\s*12\s*&&\s*churn\s*>=\s*500') {
+        $prdSpecWorkflowIssues += 'prd-spec-gate.yml (missing high-change threshold semantics)'
+    }
+
+    if ($prdSpecWorkflow -notmatch "pr\.user\.type\s*===\s*'Bot'" -or
+        $prdSpecWorkflow -notmatch "pr\.user\.login\s*===\s*'ibuyspy'" -or
+        $prdSpecWorkflow -notmatch 'Skipping PRD/spec gate for bot/agent-authored PR') {
+        $prdSpecWorkflowIssues += 'prd-spec-gate.yml (missing bot/agent bypass semantics)'
+    }
+
+    if ($prdSpecWorkflow -notmatch '\^\\\.github\\/workflows\\/' -or $prdSpecWorkflow -notmatch 'hasPrd\s*&&\s*hasSpec') {
+        $prdSpecWorkflowIssues += 'prd-spec-gate.yml (missing risky-path or PRD/spec requirement semantics)'
+    }
+}
+
+$contractDocIssues = @()
+foreach ($docPath in @($prdSpecDocPath, $mergeQueueDocPath)) {
+    if (-not (Test-Path $docPath)) {
+        $contractDocIssues += "$docPath (missing file)"
+        continue
+    }
+
+    $docContent = Get-Content $docPath -Raw
+    if ($docContent -notmatch 'prd-spec-gate' -or $docContent -notmatch 'prd-spec-gate\.yml') {
+        $contractDocIssues += "$docPath (missing prd-spec-gate contract reference)"
+    }
+}
+
+if ($prdSpecWorkflowIssues.Count -eq 0 -and $contractDocIssues.Count -eq 0) {
+    Write-Host '    ✓ prd-spec-gate workflow semantics and required-check docs are aligned'
+}
+else {
+    foreach ($issue in $prdSpecWorkflowIssues) {
+        Write-Host "    ✗ $issue" -ForegroundColor Red
+    }
+    foreach ($issue in $contractDocIssues) {
+        Write-Host "    ✗ $issue" -ForegroundColor Red
+    }
+    $guardrailFailures += 'prd-spec-gate-contract'
+}
+
+# Test 17: Production workflows must route through the protected production environment
+Write-Host '  Test 17: Validate production environment approval gates...'
+$productionEnvironmentRules = @(
+    @{
+        file = 'publish-to-production.yml'
+        pattern = '(?m)^\s+environment:\s+production\s*$'
+    },
+    @{
+        file = 'docs-production.yml'
+        pattern = '(?m)^\s+environment:\s+production\s*$'
+    },
+    @{
+        file = 'close-production-issues.yml'
+        pattern = '(?m)^\s+environment:\s+production\s*$'
+    },
+    @{
+        file = 'mcp-deploy.yml'
+        pattern = '(?m)^\s+environment:\s+\$\{\{[^\r\n]*\|\|\s*''production''\)\s*\}\}\s*$'
+    },
+    @{
+        file = 'extension-deploy.yml'
+        pattern = '(?m)^\s+environment:\s+\$\{\{[^\r\n]*\|\|\s*''production''\s*\}\}\s*$'
+    }
+)
+$productionEnvironmentViolations = @()
+
+foreach ($rule in $productionEnvironmentRules) {
+    $workflowPath = Join-Path $workflowDir $rule.file
+    if (-not (Test-Path $workflowPath)) {
+        $productionEnvironmentViolations += "$($rule.file) (missing file)"
+        continue
+    }
+
+    $workflowContent = Get-Content $workflowPath -Raw
+    if ($workflowContent -notmatch $rule.pattern) {
+        $productionEnvironmentViolations += "$($rule.file) (missing production environment gate)"
+    }
+}
+
+if ($productionEnvironmentViolations.Count -eq 0) {
+    Write-Host '    ✓ Production workflows route through protected production environment'
+}
+else {
+    Write-Host "    ✗ Production environment gate issues found in: $($productionEnvironmentViolations -join ', ')" -ForegroundColor Red
+    $guardrailFailures += 'production-environment-gate'
+}
+
+# Test 18: CI stabilization regressions for Sprint 36 workflows
+Write-Host '  Test 18: Validate Sprint 36 CI stabilization workflow safeguards...'
+$stabilizationGuardrailIssues = @()
+
+$auditEnvironmentPath = Join-Path $workflowDir 'audit-environment-drift.yml'
+if (-not (Test-Path $auditEnvironmentPath)) {
+    $stabilizationGuardrailIssues += 'audit-environment-drift.yml (missing file)'
+}
+else {
+    $auditEnvironmentWorkflow = Get-Content $auditEnvironmentPath -Raw
+
+    if ($auditEnvironmentWorkflow -match 'npx\s+(--yes\s+)?@basecoat/environment-audit-drift') {
+        $stabilizationGuardrailIssues += 'audit-environment-drift.yml (still depends on unpublished npm package via npx)'
+    }
+
+    if ($auditEnvironmentWorkflow -notmatch 'npm ci --prefix skills/environment-audit-drift' -or
+        $auditEnvironmentWorkflow -notmatch 'node skills/environment-audit-drift/dist/cli\.js') {
+        $stabilizationGuardrailIssues += 'audit-environment-drift.yml (missing local CLI install/build execution path)'
+    }
+
+    if ($auditEnvironmentWorkflow -notmatch 'Do not use npm registry fallback for @basecoat/environment-audit-drift') {
+        $stabilizationGuardrailIssues += 'audit-environment-drift.yml (missing explicit npm-registry fallback guardrail for local CLI source)'
+    }
+}
+
+$auditTemplatePath = 'skills/environment-audit-drift/templates/audit-environment-drift.yml'
+if (-not (Test-Path $auditTemplatePath)) {
+    $stabilizationGuardrailIssues += 'skills/environment-audit-drift/templates/audit-environment-drift.yml (missing file)'
+}
+else {
+    $auditTemplateWorkflow = Get-Content $auditTemplatePath -Raw
+    $templateLines = $auditTemplateWorkflow -split "`n"
+    $templateLineNum = 0
+    foreach ($templateLine in $templateLines) {
+        $templateLineNum++
+        if ($templateLine -match 'uses:\s*(.+)') {
+            $templateUses = $matches[1].Trim()
+            if ($templateUses -notmatch '@[a-f0-9]{40}$') {
+                $stabilizationGuardrailIssues += "skills/environment-audit-drift/templates/audit-environment-drift.yml:$templateLineNum (action reference must be pinned to a full-length SHA: $templateUses)"
+            }
+        }
+    }
+}
+
+$dependencyGraphWorkflowPath = Join-Path $workflowDir 'dependency-graph-pages.yml'
+if (-not (Test-Path $dependencyGraphWorkflowPath)) {
+    $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (missing file)'
+}
+else {
+    $dependencyGraphWorkflow = Get-Content $dependencyGraphWorkflowPath -Raw
+
+    if ($dependencyGraphWorkflow -notmatch 'Add-Content -Path \$env:GITHUB_OUTPUT -Value "should_open_pr=true"' -or
+        $dependencyGraphWorkflow -notmatch 'Add-Content -Path \$env:GITHUB_OUTPUT -Value "should_open_pr=false"' -or
+        $dependencyGraphWorkflow -notmatch 'Add-Content -Path \$env:GITHUB_OUTPUT -Value "branch_name=\$branch"' -or
+        $dependencyGraphWorkflow -notmatch 'Add-Content -Path \$env:GITHUB_OUTPUT -Value "branch_name="') {
+        $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (missing guarded branch output assignments to GITHUB_OUTPUT)'
+    }
+
+    if ($dependencyGraphWorkflow -match '"- Source workflow: `\.github/workflows/dependency-graph-pages\.yml`"') {
+        $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (uses markdown backticks in a PowerShell double-quoted string, which can escape the terminator and break parsing)'
+    }
+
+    if ($dependencyGraphWorkflow -notmatch '''- Source workflow: \.github/workflows/dependency-graph-pages\.yml''') {
+        $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (missing parser-safe source workflow metadata line in dependency graph report content)'
+    }
+}
+
+$assetHealthWorkflowPath = Join-Path $workflowDir 'asset-health.yml'
+if (-not (Test-Path $assetHealthWorkflowPath)) {
+    $stabilizationGuardrailIssues += 'asset-health.yml (missing file)'
+}
+else {
+    $assetHealthWorkflow = Get-Content $assetHealthWorkflowPath -Raw
+
+    $orphanGuardIndex = $assetHealthWorkflow.IndexOf('Orphaned nodes \((\d+)')
+    $regexMatchIndex = $assetHealthWorkflow.IndexOf('[regex]::Match($graphText')
+    $groupValueIndex = $assetHealthWorkflow.IndexOf('$orphanMatch.Groups[1].Value')
+    $legacyMatchesIndex = $assetHealthWorkflow.IndexOf('$Matches[1]')
+
+    if ($orphanGuardIndex -lt 0 -or
+        $regexMatchIndex -lt 0 -or
+        $groupValueIndex -lt 0 -or
+        $groupValueIndex -lt $regexMatchIndex -or
+        $legacyMatchesIndex -ge 0) {
+        $stabilizationGuardrailIssues += 'asset-health.yml (orphan count parsing is not guarded via [regex]::Match before capture-group read)'
+    }
+}
+
+$docsWorkflowPath = Join-Path $workflowDir 'docs.yml'
+if (-not (Test-Path $docsWorkflowPath)) {
+    $stabilizationGuardrailIssues += 'docs.yml (missing file)'
+}
+else {
+    $docsWorkflow = Get-Content $docsWorkflowPath -Raw
+
+    if ($docsWorkflow -notmatch 'verify-github-pages-environment' -or
+        $docsWorkflow -notmatch 'github-pages environment policy permits deployments from main') {
+        $stabilizationGuardrailIssues += 'docs.yml (missing github-pages environment preflight gate for main branch deployments)'
+    }
+}
+
+if ($stabilizationGuardrailIssues.Count -eq 0) {
+    Write-Host '    ✓ Sprint 36 CI stabilization safeguards are present in workflow definitions'
+}
+else {
+    Write-Host "    ✗ Sprint 36 stabilization guardrail issues found in: $($stabilizationGuardrailIssues -join ', ')" -ForegroundColor Red
+    $guardrailFailures += 'sprint-36-ci-stabilization'
+}
+
+# Test 19: Runner capability audit must classify every workflow job
+Write-Host '  Test 19: Validate runner capability classification coverage...'
+$runnerCapabilityIssues = @()
+$runnerAuditScriptPath = Join-Path $repoRoot 'scripts\audit-workflow-runner-capabilities.ps1'
+$runnerClassPolicyPath = Join-Path $repoRoot '.github\workflow-runner-capability-classes.json'
+$runnerContractPolicyPath = Join-Path $repoRoot '.github\workflow-runner-routing-contracts.json'
+
+if (-not (Test-Path $runnerAuditScriptPath)) {
+    $runnerCapabilityIssues += 'scripts/audit-workflow-runner-capabilities.ps1 (missing file)'
+}
+
+if (-not (Test-Path $runnerClassPolicyPath)) {
+    $runnerCapabilityIssues += '.github/workflow-runner-capability-classes.json (missing file)'
+}
+
+if (-not (Test-Path $runnerContractPolicyPath)) {
+    $runnerCapabilityIssues += '.github/workflow-runner-routing-contracts.json (missing file)'
+}
+
+if ($runnerCapabilityIssues.Count -eq 0) {
+    $auditJson = & pwsh -NoProfile -File $runnerAuditScriptPath -OutputFormat json | ConvertFrom-Json
+    if ($auditJson.summary.unclassified_jobs -gt 0) {
+        $runnerCapabilityIssues += "audit-workflow-runner-capabilities (found $($auditJson.summary.unclassified_jobs) unclassified jobs)"
+    }
+    if ($auditJson.summary.total_jobs -le 0) {
+        $runnerCapabilityIssues += 'audit-workflow-runner-capabilities (no workflow jobs classified)'
+    }
+    if ($auditJson.summary.contract_violations -gt 0) {
+        $runnerCapabilityIssues += "audit-workflow-runner-capabilities (found $($auditJson.summary.contract_violations) runner contract violations)"
+    }
+    if ($auditJson.summary.contracted_jobs -le 0) {
+        $runnerCapabilityIssues += 'audit-workflow-runner-capabilities (no runner contracts evaluated)'
+    }
+}
+
+if ($runnerCapabilityIssues.Count -eq 0) {
+    Write-Host '    ✓ Runner capability audit classifies all workflow jobs'
+}
+else {
+    Write-Host "    ✗ Runner capability audit issues found in: $($runnerCapabilityIssues -join ', ')" -ForegroundColor Red
+    $guardrailFailures += 'runner-capability-classification'
 }
 
 if ($guardrailFailures.Count -gt 0) {

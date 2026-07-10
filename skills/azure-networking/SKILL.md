@@ -1,19 +1,15 @@
 ---
 name: azure-networking
+compatibility: [github-copilot-cli]
 description: "Use when designing Azure network topology, private connectivity, and traffic control patterns. USE FOR: design a hub-spoke VNet topology, set up private endpoints and Private DNS zones, author an NSG rule matrix, create forced-tunneling route tables, review hybrid connectivity on Azure. DO NOT USE FOR: identity role assignments, Kubernetes app manifests, non-Azure CDN setup."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
+category: infrastructure
 metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
+  category: infrastructure
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
-
 # Azure Networking Skill
 
 Design Azure network architectures: hub-spoke topologies, private endpoints, DNS zones,

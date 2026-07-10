@@ -62,7 +62,7 @@
         },
         "model": {
           "type": "string",
-          "description": "Recommended model for this agent",
+          "description": "Resolved model key after allowlist/default fallback policy is applied",
           "examples": ["claude-sonnet-4.6", "claude-haiku-4.5", "claude-opus-4.5"]
         },
         "maturity": {

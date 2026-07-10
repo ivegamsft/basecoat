@@ -1,6 +1,6 @@
 name: "s4-shadow-mode-validator-routing"
 description: "Routing evaluation — validates trigger activation for the s4-shadow-mode-validator agent."
-skill: "agents/s4-shadow-mode-validator.agent.md"
+skill: "agents/basecoat-10-core-s4-shadow-mode-validator.agent.md"
 scenarios:
   - id: "pos-1"
     input: "Compare shadow-mode error rate and latency before S4 cutover."

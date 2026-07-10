@@ -1,6 +1,6 @@
 name: "data-tier-routing"
 description: "Routing evaluation — validates trigger activation for the data-tier agent."
-skill: "agents/data-tier.agent.md"
+skill: "agents/basecoat-80-data-data-tier.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with designing schemas, writing migrations, reviewing queries, or establishing repository patterns."

@@ -1,0 +1,30 @@
+[
+  {
+    "week_start": "2026-06-02",
+    "throughput": 8,
+    "failure_rate": 0.12,
+    "mttr_hours": 42.0,
+    "manual_intervention_rate": 0.64
+  },
+  {
+    "week_start": "2026-06-09",
+    "throughput": 10,
+    "failure_rate": 0.09,
+    "mttr_hours": 37.5,
+    "manual_intervention_rate": 0.58
+  },
+  {
+    "week_start": "2026-06-16",
+    "throughput": 11,
+    "failure_rate": 0.08,
+    "mttr_hours": 34.0,
+    "manual_intervention_rate": 0.55
+  },
+  {
+    "week_start": "2026-06-23",
+    "throughput": 13,
+    "failure_rate": 0.06,
+    "mttr_hours": 29.5,
+    "manual_intervention_rate": 0.50
+  }
+]

@@ -1,6 +1,6 @@
 name: "middleware-dev-routing"
 description: "Routing evaluation — validates trigger activation for the middleware-dev agent."
-skill: "agents/middleware-dev.agent.md"
+skill: "agents/basecoat-10-core-middleware-dev.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with designing API gateways, message-passing systems, event-driven integrations, or adapter layers between services."

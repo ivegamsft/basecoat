@@ -1,6 +1,6 @@
 name: "infrastructure-deploy-routing"
 description: "Routing evaluation — validates trigger activation for the infrastructure-deploy agent."
-skill: "agents/infrastructure-deploy.agent.md"
+skill: "agents/basecoat-60-workflow-infrastructure-deploy.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with deploy Azure Bicep templates."

@@ -1,0 +1,265 @@
+name: "BaseCoat - Post Merge Release Chain"
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "Merged PR number to process"
+        required: true
+        type: string
+
+permissions:
+  actions: write
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  chain:
+    name: Chain merged PR into release gate
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true) ||
+      github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Resolve gate inputs and dispatch release gate
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        env:
+          POLICY_PACK: ${{ vars.BASECOAT_POLICY_PACK }}
+          PR_NUMBER_INPUT: ${{ inputs.pr_number || '' }}
+        with:
+          script: |
+            const fs = require('fs');
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const workflowRunUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
+            const marker = '<!-- post-merge-release-chain:v1 -->';
+
+            const resolvePrNumber = () => {
+              if (context.payload.pull_request?.number) return Number(context.payload.pull_request.number);
+              const fromInput = Number(process.env.PR_NUMBER_INPUT || 0);
+              return Number.isInteger(fromInput) && fromInput > 0 ? fromInput : 0;
+            };
+
+            const prNumber = resolvePrNumber();
+            if (!prNumber) {
+              core.setFailed('Unable to resolve merged pull request number.');
+              return;
+            }
+
+            const { data: pr } = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: prNumber
+            });
+            if (!pr.merged) {
+              core.setFailed(`PR #${prNumber} is not merged; post-merge chain cannot proceed.`);
+              return;
+            }
+
+            const policyPath = '.github/governance/policy-packs.json';
+            if (!fs.existsSync(policyPath)) {
+              core.setFailed(`Missing governance policy file: ${policyPath}`);
+              return;
+            }
+
+            const policy = JSON.parse(fs.readFileSync(policyPath, 'utf8'));
+            const selectedPack = (process.env.POLICY_PACK && policy.profiles?.[process.env.POLICY_PACK])
+              ? process.env.POLICY_PACK
+              : policy.default_profile;
+            if (!policy.profiles?.[selectedPack]) {
+              core.setFailed(`Unable to resolve policy profile '${selectedPack}'.`);
+              return;
+            }
+
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner,
+              repo,
+              pull_number: prNumber,
+              per_page: 100
+            });
+            const changed = files.map(f => f.filename);
+
+            const labels = (pr.labels || []).map(l => l.name || '');
+            const normalize = v => String(v || '').toLowerCase();
+            const riskBand = (() => {
+              if (labels.some(l => ['risk:critical', 'risk-critical', 'priority:critical'].includes(normalize(l)))) return 'critical';
+              if (labels.some(l => ['risk:high', 'risk-high', 'priority:high'].includes(normalize(l)))) return 'high';
+              if (labels.some(l => ['risk:low', 'risk-low', 'priority:low'].includes(normalize(l)))) return 'low';
+              return 'medium';
+            })();
+
+            const docsOnly = changed.length > 0 && changed.every(path =>
+              path.startsWith('docs/') || path.endsWith('.md')
+            );
+            const changeType = docsOnly ? 'docs-only' : 'code';
+
+            const requiredChecks = policy.profiles[selectedPack].main?.required_checks || [];
+            const approvalsByRisk = policy.profiles[selectedPack].main?.required_approvals_by_risk_tier || {};
+            const requiredApprovals = Number(approvalsByRisk[riskBand] || 0);
+            const validatedSha = pr.head.sha;
+
+            const { data: combined } = await github.rest.repos.getCombinedStatusForRef({ owner, repo, ref: validatedSha });
+            const statusByContext = new Map();
+            for (const status of combined.statuses || []) {
+              if (!status?.context) continue;
+              statusByContext.set(status.context, String(status.state || '').toLowerCase());
+            }
+
+            const checkRuns = await github.paginate(github.rest.checks.listForRef, {
+              owner,
+              repo,
+              ref: validatedSha,
+              per_page: 100
+            });
+            const checkRunByName = new Map();
+            for (const page of checkRuns) {
+              const runs = page?.check_runs || [];
+              for (const run of runs) {
+                if (!run?.name) continue;
+                checkRunByName.set(run.name, String(run.conclusion || '').toLowerCase());
+              }
+            }
+
+            const isRequiredCheckPassing = checkName => {
+              const runConclusion = checkRunByName.get(checkName);
+              if (runConclusion) return runConclusion === 'success';
+              const statusState = statusByContext.get(checkName);
+              return statusState === 'success';
+            };
+            const allRequiredChecksPass = requiredChecks.every(isRequiredCheckPassing);
+
+            const defaultGate = allRequiredChecksPass ? 'pass' : 'fail';
+            const releaseNotesStatus = docsOnly ? 'present' : 'not_applicable';
+            const requireApproval = requiredApprovals > 0 ? 'true' : 'false';
+
+            const inputs = {
+              target_repo: `${owner}/${repo}`,
+              target_branch: pr.base.ref || 'main',
+              risk_band: riskBand,
+              promotion_stage: 'validate',
+              execution_lane: 'standard',
+              previous_stage_status: 'pass',
+              change_type: changeType,
+              lint_status: defaultGate,
+              build_status: defaultGate,
+              type_status: defaultGate,
+              security_status: defaultGate,
+              smoke_status: allRequiredChecksPass ? 'pass' : 'not_run',
+              environment_protection_status: 'configured',
+              require_approval: requireApproval,
+              approval_status: requireApproval === 'true' ? 'missing' : 'not-required',
+              rollback_validation_status: 'missing',
+              goal_ids: `${prNumber}`,
+              spec_status: 'not_applicable',
+              docs_status: docsOnly ? 'present' : 'not_applicable',
+              tests_status: 'not_applicable',
+              runbook_status: 'not_applicable',
+              release_notes_status: releaseNotesStatus,
+              dry_run: 'false'
+            };
+
+            let dispatchError = null;
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner,
+                repo,
+                workflow_id: 'ship-it-release-gate.yml',
+                ref: 'main',
+                inputs
+              });
+              await github.rest.actions.createWorkflowDispatch({
+                owner,
+                repo,
+                workflow_id: 'package-basecoat.yml',
+                ref: 'main'
+              });
+            } catch (err) {
+              dispatchError = err;
+            }
+
+            const prCommentBody = dispatchError
+              ? [
+                  marker,
+                  '## Post-merge release chain status',
+                  '',
+                  `FAILED: dispatch \`ship-it-release-gate.yml\` for merged PR #${prNumber}.`,
+                  `Error: ${dispatchError.message}`,
+                  '',
+                  `Run: ${workflowRunUrl}`
+                ].join('\n')
+              : [
+                  marker,
+                  '## Post-merge release chain status',
+                  '',
+                  `OK: dispatched \`ship-it-release-gate.yml\` for merged PR #${prNumber}.`,
+                  '- Follow-up dispatch: `package-basecoat.yml`',
+                  `- Risk band: \`${riskBand}\``,
+                  `- Change type: \`${changeType}\``,
+                  `- Required checks pass: \`${allRequiredChecksPass}\``,
+                  '',
+                  `Run: ${workflowRunUrl}`
+                ].join('\n');
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number: prNumber,
+              per_page: 100
+            });
+            const existing = comments.find(comment =>
+              comment.user?.login === 'github-actions[bot]' &&
+              typeof comment.body === 'string' &&
+              comment.body.includes(marker)
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body: prCommentBody
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body: prCommentBody
+              });
+            }
+
+            if (dispatchError) {
+              const issueBody = [
+                `${marker}`,
+                `Post-merge release chaining failed for PR #${prNumber}.`,
+                '',
+                `- Error: ${dispatchError.message}`,
+                `- Workflow run: ${workflowRunUrl}`,
+                '',
+                'Action: investigate release gate dispatch permissions and workflow input contract.'
+              ].join('\n');
+              const remediation = await github.rest.issues.create({
+                owner,
+                repo,
+                title: `[Post-Merge Chain][dispatch-failure][PR #${prNumber}] ship-it-release-gate dispatch failed`,
+                body: issueBody,
+                labels: ['remediation', 'escalated', 'automation', 'ship-it']
+              });
+              core.setFailed(
+                `Release gate dispatch failed for PR #${prNumber}; remediation issue opened: ${remediation.data.html_url}`
+              );
+            }

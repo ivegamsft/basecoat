@@ -1,0 +1,13 @@
+name: "basecoat-60-workflow-delivery-autopilot-routing"
+description: "Routing evaluation - validates trigger activation for the delivery-autopilot agent."
+skill: "agents/basecoat-60-workflow-delivery-autopilot.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "Use delivery-autopilot to run approve-once flow from approved issue through merge and release-chain."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Run deterministic dry-run merge and escalation rehearsal with delivery-autopilot."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Write new product feature code and redesign the UI."
+    expect_activation: false

@@ -194,7 +194,7 @@ Group by severity:
 | # | Severity | Dimension | Finding | Recommended fix |
 |---|---|---|---|---|
 | 1 | 🔴 Critical | Instruction | Global instruction file is 4.8KB — adds ~4,800 tokens to every session | Split into scoped instructions by file pattern |
-| 2 | 🟠 High | Agent | No agent matches the detected Python stack | Add `agents/code-review.agent.md` or a custom Python agent |
+| 2 | 🟠 High | Agent | No agent matches the detected Python stack | Add `agents/basecoat-90-quality-code-review.agent.md` or a custom Python agent |
 | 3 | 🟡 Medium | CI | No version drift detection workflow | Add `check-basecoat-version-callable.yml` call to CI |
 | … | | | | |
 

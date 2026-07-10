@@ -1,6 +1,6 @@
 name: "memory-promoter-routing"
 description: "Routing evaluation — validates trigger activation for the memory-promoter agent."
-skill: "agents/memory-promoter.agent.md"
+skill: "agents/basecoat-10-core-memory-promoter.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with extract reusable patterns from session transcripts."

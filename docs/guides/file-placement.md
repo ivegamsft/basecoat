@@ -29,6 +29,7 @@ Only these file types live at the repo root:
 **Never commit to root:**
 
 - AI-generated summary or status `.txt` files (`*_COMPLETION_SUMMARY.txt`, `WAVE*_DAY*_*.txt`)
+- Agent scratch/session files (for example `base.txt`, `blocked-issues.json`, `labels.txt`, `issue-*.json`)
 - API specs (→ `docs/reference/api/`)
 - Sprint output directories (→ `docs/archive/` if worth keeping)
 - One-off tracking files (→ `docs/operations/`)
@@ -100,17 +101,18 @@ Meta-docs about the agent system (taxonomy, model routing) go in `docs/agents/` 
 
 ---
 
-## templates/ — repo templates
+## .github/template-repos/ — project scaffolds
 
-Consumer repo templates (not document templates) live at `templates/` at the repo root:
+Clone-ready project scaffolds (not document templates) live at `.github/template-repos/`:
 
 ```text
-templates/
-└── basecoat-memory/    ← Starter repo for the shared memory store
-    └── .github/workflows/validate-memory.yml
+.github/template-repos/
+├── basecoat-memory/    ← Starter repo for the shared memory store
+└── repo-template/      ← Starter repo template with lock + enforcement workflows
 ```
 
 Document templates (PRD, issue, gitignore) stay in `docs/templates/`.
+Read-only examples stay in `docs/examples/`.
 
 ---
 

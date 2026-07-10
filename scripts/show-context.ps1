@@ -319,12 +319,19 @@ if (Test-Path $instructionsDir) {
 # --- Layer 3: Agent definition ------------------------------------------------
 
 if ($Agent) {
-    $agentFile = Join-Path $RepoRoot "agents" "$Agent.agent.md"
-    if (-not (Test-Path $agentFile)) {
-        Write-Warning "Agent file not found: $agentFile"
+    # Find agent file matching the short name (may have prefix in new naming convention)
+    $agentDir = Join-Path $RepoRoot "agents"
+    $agentFile = Get-ChildItem -Path $agentDir -Filter "*$Agent.agent.md" -File | Where-Object {
+        $baseName = $_.BaseName -replace '\.agent$', ''
+        $shortName = $baseName -replace '^basecoat-\d+-\w+-', ''
+        $shortName -eq $Agent
+    } | Select-Object -First 1
+    
+    if (-not $agentFile) {
+        Write-Warning "Agent file not found: $Agent.agent.md (or with naming prefix)"
     }
     else {
-        $parsed = Parse-Frontmatter -FilePath $agentFile
+        $parsed = Parse-Frontmatter -FilePath $agentFile.FullName
         $tokens = Estimate-Tokens -Content $parsed.Content -Ratio $TokenRatio
         [void]$ContextItems.Add(@{
             Order    = 3
@@ -334,7 +341,7 @@ if ($Agent) {
             ApplyTo  = "(agent mode)"
             Tokens   = $tokens
             Chars    = $parsed.Content.Length
-            FilePath = $agentFile
+            FilePath = $agentFile.FullName
             Internal = $false
         })
 
@@ -358,6 +365,25 @@ if ($Agent) {
                     $_.Trim().Trim('"', "'", " ")
                 } | Where-Object { $_ }
             }
+
+            # Fallback for current agent format: parse markdown "## Allowed Skills" bullet list
+            if ((@($referencedSkills)).Count -eq 0) {
+                $allowedSkillsMatch = [regex]::Match(
+                    $agentContent,
+                    "(?ms)^##\s+Allowed Skills\s*$\s*(.+?)(?=^##\s+|\z)"
+                )
+                if ($allowedSkillsMatch.Success) {
+                    $referencedSkills = @(
+                        $allowedSkillsMatch.Groups[1].Value -split "`n" | ForEach-Object {
+                            if ($_ -match "^\s*-\s+([A-Za-z0-9._-]+)\b.*$") {
+                                $Matches[1]
+                            }
+                        } | Where-Object { $_ }
+                    )
+                }
+            }
+
+            $referencedSkills = @($referencedSkills | Select-Object -Unique)
 
             foreach ($skillName in $referencedSkills) {
                 $skillPath = Join-Path $skillsDir $skillName

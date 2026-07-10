@@ -4,6 +4,9 @@ BaseCoat sessions use a structured prefix convention to communicate intent.
 Every message prefix tells the AI three things at once: **what kind of work**,
 **how urgent**, and **which agents to involve**.
 
+Prefix prompts should use native SDLC nouns (workflow run, job, PR, issue,
+release, version drift) to reduce routing ambiguity.
+
 ---
 
 ## The prefix vocabulary
@@ -16,13 +19,43 @@ Every message prefix tells the AI three things at once: **what kind of work**,
 | `plan:` | Sprint or project planning | **Now, no implementation** | `@sprint-planner`, `@product-manager` |
 | `spike:` | Time-boxed investigation, no deliverable | **Now, research only** | `@solution-architect` |
 | `chore:` | Maintenance, cleanup, non-functional | **Soon** | `@devops-engineer`, `@release-manager` |
+| `pr:` | Pull request lifecycle handling: remaining WIP logging, merge readiness, build-gated closeout, and branch hygiene. Use `pr-lifecycle=full` when you want the whole chain kept together. | **Now** | `@orphaned-pr-cleanup`, `@merge-coordinator`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
+| `fleet:` | Close previous sprint, plan and execute the next sprint, triage oldest issues, audit PRs/builds, clean branches | **Now** | `@sprint-closeout-auditor`, `@sprint-planner`, `@issue-triage`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
+| `workflow:` | GitHub Actions workflow failure triage and repair | **Now** | `@broken-build-troubleshooter`, `@self-healing-ci`, `@devops-engineer` |
+| `actions:` | GitHub Actions configuration, runs, and policy checks | **Now** | `@self-healing-ci`, `@ci-failure-escalation`, `@devops-engineer` |
+| `issue:` | GitHub issue triage, labeling, and backlog hygiene | **Now** | `@issue-triage`, `@sprint-planner` |
+| `portfolio:` | Project audit across issues and PRs: dedupe, categorization, dependency wiring, feature grouping, and project linking | **Now** | `@issue-triage`, `@orphaned-pr-cleanup`, `@sprint-project-mapper`, `@sprint-planner`, `@governance-auditor` |
+| `release:` | Release planning, version bumping, and publication | **Now** | `@release-manager`, `@release-readiness-chair`, `@release-impact-advisor` |
+| `version:` | BaseCoat version inspection and drift check | **Now** | `@release-manager`, `@devops-engineer` |
 | `security:` | Security concern or vulnerability | **Now, high priority** | `@security-analyst`, `@guardrail` |
 | `perf:` | Performance degradation | **Now, measure first** | `@performance-analyst` |
 | `outage:` | Service outage, broken or dead system, site down | **Now, high priority** | `@rca` |
+| `rca:` | Root-cause analysis of a known failure — execution suspended | **Now, read-only** | `@rca`, `@config-auditor` |
+| `deploy:` | Staged infrastructure deployment — azure-prepare, azure-validate, azure-deploy in sequence | **Now, staged** | `@devops-engineer` |
+| `azure:` | Azure-scoped operation (auth, infra, SDK, provisioning) | **Now** — preflight first, then staged sequence | `@devops-engineer`, `@solution-architect` |
+| `infra:` | Infrastructure change (IaC, networking, firewall, RBAC) | **Now** — preflight first, then staged sequence | `@devops-engineer`, `@solution-architect` |
+| `architect:` | Architecture design or system-design decision | **Later** — plan before any implementation | `@solution-architect` |
 | `docs:` | Documentation only | **Soon** | `@tech-writer` |
 | `test:` | Test coverage gap or test failure | **Now** | `@manual-test-strategy` |
 | `refactor:` | Structural improvement, no behavior change | **Later, batch** | `@code-review` |
 | `ux:` | User experience or design | **Soon** | `@ux-designer` |
+
+---
+
+## Intent families
+
+Each prefix belongs to an intent family. Families are useful for routing and
+for selecting chain patterns.
+
+| Family | Prefixes | Default output type |
+|---|---|---|
+| Delivery | `feature:`, `refactor:`, `deploy:`, `architect:` | implementation plan, code changes, or staged deployment |
+| Reliability | `bug:`, `perf:`, `outage:`, `rca:` | fix, mitigation, incident analysis, or root-cause report |
+| Governance | `audit:`, `security:`, `chore:` | findings, policy action, risk controls |
+| GitHub Operations | `workflow:`, `actions:`, `pr:`, `issue:`, `portfolio:`, `release:`, `version:` | run triage, repo hygiene, release/version decisions |
+| Planning | `plan:`, `spike:` | prioritized backlog, design notes, decision doc |
+| Quality | `test:`, `docs:`, `ux:` | tests, documentation, or design artifacts |
+| Infrastructure | `azure:`, `infra:`, `deploy:` | preflight advisory, IaC changes, staged deployment |
 
 ---
 
@@ -83,6 +116,54 @@ These words in a message override the default timing of any prefix:
 
 ---
 
+## Plan-first enforcement
+
+For `feature:`, `refactor:`, and `architect:` prefixes, a planning step is
+required before implementation begins whenever the work spans multiple files
+or involves design decisions.
+
+The expected flow:
+
+1. Emit a plan (scope, approach, risks, verification criteria).
+2. Present it and wait for confirmation.
+3. Implement only after the plan is confirmed.
+
+The user can waive planning explicitly ("no plan needed", "skip planning",
+"implement directly"). Record the waiver so downstream agents respect it.
+
+### Sprint-style request nudge
+
+When the user asks to "plan and execute the next sprint" or similar:
+
+1. Route to `@sprint-planner` first.
+2. Present the sprint plan and wait for confirmation.
+3. Only then begin execution with the oldest actionable item.
+
+---
+
+## Azure preflight
+
+Before any `azure:`, `infra:`, or `deploy:` operation, emit this advisory:
+
+```text
+Azure preflight: ci-firewall and rbac-authentication checks apply.
+See instructions/basecoat-60-workflow-ci-firewall.instructions.md and instructions/basecoat-50-security-rbac-authentication.instructions.md.
+```
+
+Then verify:
+
+- **CI Firewall** — workflow accesses firewalled Azure resources? Confirm the
+  single-job runner IP pattern (`instructions/basecoat-60-workflow-ci-firewall.instructions.md`)
+  is in place before deploying.
+- **RBAC Authentication** — change provisions or configures Azure resources?
+  Confirm RBAC-only auth (`instructions/basecoat-50-security-rbac-authentication.instructions.md`)
+  before proceeding.
+
+The advisory is non-blocking unless a firewall or RBAC gap is found, in which
+case surface the finding and wait for explicit user confirmation.
+
+---
+
 ## Audit mode is always read-only
 
 `audit:` never makes changes unless the user adds "and fix" or "resolve."
@@ -136,10 +217,127 @@ Use `@rca` for the deep-dive investigation after the active incident is stable.
 
 ---
 
+## RCA routing
+
+`rca:` suspends all execution. Use it when you want to diagnose before retrying.
+
+| Alias | Normalized intent |
+|---|---|
+| `stop and rca` | `rca:` |
+| `why is it failing` | `rca:` |
+| `same error` (after a prior failure) | `rca:` |
+| `still broken` (after a retry) | `rca:` |
+| deployment retried 3 or more times | `rca:` (hard block) |
+
+To resume execution after RCA, re-issue a `deploy:` or `outage:` intent explicitly
+once the root cause is confirmed.
+
+---
+
+## Deployment routing
+
+`deploy:` enforces the staged deployment sequence and prevents skipping validation.
+
+**Required chain:**
+
+1. `azure-prepare` — scaffold IaC and validate configuration
+2. `azure-validate` — pre-deployment checks, no resource changes
+3. `azure-deploy` — provision and deploy
+
+If the same deployment step fails twice, the session automatically enters RCA mode.
+
+Example prompt:
+
+```text
+deploy: follow azure-prepare -> azure-validate -> azure-deploy exactly; do not deploy until validated
+```
+
+See [`docs/reference/guardrails/deployment-rca.md`](../reference/guardrails/deployment-rca.md)
+for retry caps, path lock, and bootstrap immutability rules.
+
+---
+
+## PR routing
+
+`pr:` is the direct intent for PR lifecycle execution.
+
+`pr-lifecycle` is an optional modifier for `pr:` requests. Supported values are
+`none`, `standard` (default), and `full`. Keep `pr:` as the prefix and append
+the modifier only when the default behavior needs to change:
+
+- `pr-lifecycle=none` — skip lifecycle steps; operate on a single PR without
+  triage, branch hygiene, or cleanup passes.
+- `pr-lifecycle=standard` — default; merge-ready validation, required-CI check,
+  and branch cleanup for the affected PR only.
+- `pr-lifecycle=full` — end-to-end across triage, merge, broken-build recovery,
+  and cleanup for all open PRs in scope.
+
+Use one authoritative prefix per request. Inputs that combine prefixes (for
+example `feature: pr:`) are invalid and should be rejected with guidance to
+choose either `feature:` or `pr:`.
+
+### Default sequence
+
+1. Log remaining WIP and triage stale or blocked pull requests with `@orphaned-pr-cleanup`.
+2. Validate merge readiness and ordering with `@merge-coordinator`.
+3. Verify required CI status before closure; if builds are red, route to `@broken-build-troubleshooter`.
+4. Run `@branch-hygiene-sweeper` after merge/close actions to prune only safe branches.
+
+### Guardrails
+
+- Do not close or mark complete while required builds are still pending.
+- If required builds fail, keep the PR open and attach failure evidence.
+- Only run branch cleanup for branches tied to merged/closed PRs with required builds passing.
+- Do not mark a full lifecycle request complete while WIP tasks or uncommitted changes remain.
+- Do not auto-prune `preserved/`, `backup/`, or `wip/` branches; log them as retained WIP with an owner and next action.
+- Prefer serial merges for overlapping branches to reduce conflict churn.
+
+---
+
+## Fleet routing
+
+`fleet:` is the shortcut intent for a sprint-execution batch that combines closeout, planning, oldest-first issue triage, PR/build auditing, and branch cleanup.
+
+### Normalized examples
+
+| User phrasing | Normalized intent |
+|---|---|
+| `Fleet deployed: use basecoat...` | `fleet:` |
+| `fleet: plan and execute the sprint` | `fleet:` |
+| `use basecoat for fleet mode` | `fleet:` |
+
+### Fleet chain
+
+- `@sprint-closeout-auditor`
+- `@issue-triage`
+- `@broken-build-troubleshooter`
+- `@sprint-planner`
+- `@branch-hygiene-sweeper`
+
+---
+
+## GitHub-native deterministic routing
+
+`workflow:`, `actions:`, `pr:`, `issue:`, `release:`, and `version:` are
+deterministic routes. If the prefix is present, do not ask a follow-up
+disambiguation question before first evidence collection.
+
+### Contract
+
+1. `workflow:` / `actions:`: fetch failing run and job evidence first, then fix,
+   then rerun affected scope.
+2. `pr:`: inspect PR state first (mergeability, checks, review blockers), then act.
+3. `issue:`: inspect issue state first (labels, stale status, ownership), then act.
+4. `release:`: start from release/version source-of-truth, then perform release steps.
+5. `version:`: read installed downstream version first; compare to latest published
+   release only when install origin is published BaseCoat.
+
+---
+
 ## The instruction file
 
 This convention is codified in
-[`instructions/intent-routing.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/intent-routing.instructions.md).
+[`instructions/basecoat-10-core-intent-routing.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/basecoat-10-core-intent-routing.instructions.md).
 
 When BaseCoat is synced to your repo, this instruction is loaded by Copilot
 automatically and applies to all conversations. You can adopt this prefix
@@ -173,8 +371,8 @@ AI logs three backlog items and reports what was filed.
 - feature: add a getting-started prompt
 ```
 
-❌ Wrong response: "Here is the getting-started prompt I just created..."
-✅ Correct response: "Logged as a backlog item. Should I add it to the current sprint?"
+Wrong response: "Here is the getting-started prompt I just created..."
+Correct response: "Logged as a backlog item. Should I add it to the current sprint?"
 
 ### Combine audit and fix explicitly
 
@@ -183,3 +381,83 @@ audit: check all agent files for missing Workflow sections, log issues, fix them
 ```
 
 AI audits → logs → fixes in one pass because "fix them" was explicit.
+
+---
+
+## Prompting with proper vocabulary
+
+Use a compact, deterministic shape when writing prompts:
+
+```text
+<prefix>: <objective>
+scope: <in/out boundaries>
+constraints: <non-negotiables>
+deliverable: <artifact to return>
+evidence: <what to prove>
+next-hop: <agent name or none>
+```
+
+### Delivery example
+
+```text
+feature: add plan-first lint checks for new agent files
+scope: instructions/basecoat-10-core-agents.instructions.md and tests only
+constraints: no workflow changes
+deliverable: updated instruction rule plus test case
+evidence: failing then passing test output
+next-hop: code-review
+```
+
+### Governance example
+
+```text
+audit: evaluate all skills for missing USE FOR / DO NOT USE FOR sections
+scope: skills/**/SKILL.md
+constraints: read-only; log issues but do not edit files
+deliverable: severity-ranked findings table
+evidence: file paths and missing-section counts
+next-hop: none
+```
+
+---
+
+## Chain recipes by intent
+
+Use these default chains unless there is a task-specific reason to override.
+
+| Intent | Chain | Outcome |
+|---|---|---|
+| `feature:` | `plan: -> solution-architect -> backend-dev/frontend-dev -> code-review` | plan-first, then design to implementation with review |
+| `refactor:` | `plan: -> code-review -> performance-analyst` | plan-first, then structural improvement |
+| `architect:` | `plan: -> solution-architect` | plan-first, then design decision |
+| `bug:` | `code-review -> self-healing-ci -> guardrail` | defect isolation and safe fix |
+| `outage:` | `rca -> incident-responder -> sre-engineer` | triage, containment, and reliability follow-up |
+| `rca:` | `rca -> config-auditor` | root-cause diagnosis, execution suspended |
+| `azure:` | `azure-preflight -> azure-prepare -> azure-validate -> azure-deploy` | preflight advisory, then staged deployment |
+| `infra:` | `azure-preflight -> azure-prepare -> azure-validate -> azure-deploy` | preflight advisory, then staged deployment |
+| `deploy:` | `azure-prepare -> azure-validate -> azure-deploy` | staged deployment with pre-flight validation |
+| `security:` | `security-analyst -> policy-as-code-compliance -> guardrail` | remediation and policy validation |
+| `plan:` | `product-manager -> sprint-planner` | scoped sprint-ready backlog |
+| `test:` | `manual-test-strategy -> strategy-to-automation` | test strategy and automation candidates |
+| `portfolio:` | `issue-triage -> orphaned-pr-cleanup -> sprint-project-mapper -> sprint-planner -> governance-auditor` | end-to-end project hygiene with dedupe, grouping, dependency traceability, and governance checks |
+
+When chaining, each handoff prompt should include:
+
+1. Intent statement.
+2. What is done.
+3. What remains.
+4. Constraints that must carry forward.
+5. Expected output contract.
+
+---
+
+## Design notes
+
+These conventions intentionally prefer:
+
+- **Intent-first routing** over asking users to pick an agent manually.
+- **Canonical verbs** (`triage`, `classify`, `validate`, `escalate`, `handoff`)
+  over ambiguous verbs.
+- **Standard chains** over ad hoc sequencing.
+
+This keeps prompting predictable and improves routing eval reliability.

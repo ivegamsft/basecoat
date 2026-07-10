@@ -1,20 +1,15 @@
 ---
-
 name: ux
+compatibility: [github-copilot-cli]
 description: "Use when defining user journeys, wireframes, component behavior, or accessibility expectations for a product experience. USE FOR: map end-to-end user journey, create wireframe spec for new screen, review component states and interactions, run WCAG accessibility audit, evaluate usability of a workflow. DO NOT USE FOR: backend infrastructure design, low-level API performance tuning."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
+category: development
 metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
+  category: development
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
-
 # UX Design Skill
 
 Design user experiences, map user journeys, specify UI wireframes and components, and audit designs for accessibility and usability.

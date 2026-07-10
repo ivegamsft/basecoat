@@ -1,0 +1,20 @@
+name: "flow-track-skill-routing"
+description: "Routing evaluation — validates trigger activation for the flow-track skill."
+skill: "skills/flow-track/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Track merge queue depth and PR age each week and suggest fixes when they worsen."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Build a trend scorecard for CI waste and approval-to-merge latency."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Monitor flow KPIs and alert when they cross target thresholds."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Create a backend endpoint to export invoices."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Generate a conference abstract."
+    expect_activation: false
+

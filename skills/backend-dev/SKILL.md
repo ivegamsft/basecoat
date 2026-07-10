@@ -1,20 +1,15 @@
 ---
-
 name: backend-dev
+compatibility: [github-copilot-cli]
 description: "Use when implementing backend APIs, business logic, service layers, or repository-based data access. USE FOR: implement a REST endpoint, scaffold a service layer, define an error response catalog, add repository pattern data access, review backend logic for correctness. DO NOT USE FOR: frontend component styling, infrastructure provisioning, enterprise architecture strategy."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
+category: development
 metadata:
-  category: "Uncategorized"
-  tags: ["uncategorized"]
-  maturity: "beta"
-  audience: ["developers"]
-allowed-tools: ["bash", "git", "grep", "find"]
+  category: development
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
-
 # Backend Development Skill
 
 Design and implement backend services, REST or GraphQL APIs, business logic layers, and database access patterns.

@@ -1,0 +1,19 @@
+name: "operation-context-resolver-routing"
+description: "Routing evaluation for operation-context-resolver skill activation and suppression."
+skill: "skills/operation-context-resolver/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Resolve the target environment and allowed actions for this feature branch deployment."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Site is down in prod; determine incident-readonly context before troubleshooting."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Use PR labels env:staging to route this operation and check if deploy is allowed."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Create a Kubernetes ingress and update TLS certificates."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Design a relational schema for order and invoice tables."
+    expect_activation: false

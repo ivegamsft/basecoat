@@ -1,6 +1,6 @@
 name: "incident-responder-routing"
 description: "Routing evaluation — validates trigger activation for the incident-responder agent."
-skill: "agents/incident-responder.agent.md"
+skill: "agents/basecoat-60-workflow-incident-responder.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with classify and triage active production incidents."

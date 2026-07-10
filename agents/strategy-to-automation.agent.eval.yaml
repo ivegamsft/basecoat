@@ -1,6 +1,6 @@
 name: "strategy-to-automation-routing"
 description: "Routing evaluation — validates trigger activation for the strategy-to-automation agent."
-skill: "agents/strategy-to-automation.agent.md"
+skill: "agents/basecoat-10-core-strategy-to-automation.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with converting manual test paths into automation candidates. Maps paths to smoke tests, regression tiers, or agent specs. ALWAYS files a GitHub Issue for every automation candidate identified."

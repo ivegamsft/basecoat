@@ -1,0 +1,17 @@
+name: 'basecoat-10-core-backend-dev-routing'
+description: 'Routing evaluation - validates trigger activation for the backend-dev agent.'
+skill: 'agents/basecoat-10-core-backend-dev.agent.md'
+scenarios:
+  - id: 'pos-1'
+    input: 'Use the backend-dev agent to handle its documented responsibilities.'
+    expect_activation: true
+  - id: 'pos-2'
+    input: 'Please route this task to the backend-dev agent.'
+    expect_activation: true
+  - id: 'neg-1'
+    input: 'Write a haiku about programming.'
+    expect_activation: false
+  - id: 'neg-2'
+    input: 'Give me a recipe for chocolate chip cookies.'
+    expect_activation: false
+

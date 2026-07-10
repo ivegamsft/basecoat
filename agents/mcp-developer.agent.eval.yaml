@@ -1,6 +1,6 @@
 name: "mcp-developer-routing"
 description: "Routing evaluation — validates trigger activation for the mcp-developer agent."
-skill: "agents/mcp-developer.agent.md"
+skill: "agents/basecoat-10-core-mcp-developer.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with designing, implementing, or reviewing MCP servers, tool definitions, transport configurations, and client integrations."

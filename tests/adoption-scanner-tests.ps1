@@ -21,23 +21,36 @@ Write-Host 'Running adoption scanner tests...'
 
 # Test 1: Parameter validation - OutputFormat must be one of: table, json, markdown
 Write-Host '  Test 1: Validate OutputFormat parameter constraints...'
-try {
-    # This should fail due to invalid format
-    $result = & pwsh -NoProfile -Command {
-        $script = @'
-[CmdletBinding()]
-param(
-    [ValidateSet("table", "json", "markdown")]
-    [string]$OutputFormat = "invalid"
-)
-'@
-        $script | Out-Null
-        Write-Host "ERROR: Should have failed with invalid OutputFormat"
-        exit 1
-    } 2>&1
+
+$scannerScript = Join-Path (Join-Path $repoRoot 'scripts') 'adoption/detect-basecoat.ps1'
+if (-not (Test-Path $scannerScript)) {
+    throw "OutputFormat validation failed: scanner script path missing ($scannerScript)"
 }
-catch {
-    # Expected to fail during parameter binding
+$stdoutPath = Join-Path ([System.IO.Path]::GetTempPath()) ("adoption-scanner-outputformat-stdout-" + [System.Guid]::NewGuid().ToString() + ".log")
+$stderrPath = Join-Path ([System.IO.Path]::GetTempPath()) ("adoption-scanner-outputformat-stderr-" + [System.Guid]::NewGuid().ToString() + ".log")
+$stderrContent = ''
+
+try {
+    $process = Start-Process -FilePath 'pwsh' -ArgumentList @(
+        '-NoProfile',
+        '-File',
+        $scannerScript,
+        '-OutputFormat',
+        'invalid'
+    ) -NoNewWindow -Wait -PassThru -RedirectStandardOutput $stdoutPath -RedirectStandardError $stderrPath
+    if (Test-Path $stderrPath) {
+        $stderrContent = Get-Content -Path $stderrPath -Raw -ErrorAction SilentlyContinue
+    }
+}
+finally {
+    Remove-Item -Path $stdoutPath, $stderrPath -Force -ErrorAction SilentlyContinue
+}
+
+if ($process.ExitCode -eq 0) {
+    throw "OutputFormat validation failed: invalid value was accepted"
+}
+if ($stderrContent -notmatch 'OutputFormat') {
+    throw "OutputFormat validation failed: expected invalid OutputFormat error details"
 }
 Write-Host '    ✓ OutputFormat validation works'
 

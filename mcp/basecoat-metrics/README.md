@@ -8,13 +8,13 @@ GitHub Pages endpoint or a local directory override.
 
 | Tool | Description |
 |---|---|
-| `get-latest-metrics` | Current snapshot — Copilot usage, PR cycle times, CI rates, coverage |
-| `get-history` | Historical snapshots for the last N weeks |
-| `get-alerts` | Active degradation alerts (CI drops, cycle time spikes) |
+| `get-latest-metrics` | Current snapshot (latest/now/refresh snapshot) — Copilot usage, PR cycle times, CI rates, coverage |
+| `get-history` | Historical snapshots for the last N weeks (trend/over-time analysis) |
+| `get-alerts` | Active degradation alerts only (warnings, regressions, incidents) |
 | `get-repo-metrics` | Detailed metrics + trend for a single repository |
-| `search-skills` | Fuzzy search Base Coat skills by name or description keyword |
-| `search-agents` | Fuzzy search Base Coat agents by name or description keyword |
-| `get-asset-details` | Return full content of a skill or agent file by relative path |
+| `search-skills` | Find/list skills by name or description keyword |
+| `search-agents` | Find/list agents by name or description keyword |
+| `get-asset-details` | Return full content of a skill or agent file by relative path (explicit full-file reads) |
 
 > `search-skills`, `search-agents`, and `get-asset-details` require `REPO_DIR` to be set.
 
@@ -80,6 +80,7 @@ docker run -p 8080:8080 basecoat-metrics-mcp
 See [`infra/mcp/README.md`](../../infra/mcp/README.md) for full provisioning steps.
 
 CI/CD:
+
 - **`mcp-build.yml`** — builds and Docker smoke-tests on every PR touching `mcp/**`
 - **`mcp-deploy.yml`** — pushes to GHCR and deploys to Azure Container Apps on merge to `main`
 

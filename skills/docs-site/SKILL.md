@@ -1,19 +1,15 @@
 ---
 name: docs-site
+compatibility: [github-copilot-cli]
 description: "Scaffold a MkDocs Material documentation site with GitHub Pages deployment, navigation, and starter content for a repository. USE FOR: create a docs site for this repo, set up MkDocs Material, publish documentation to GitHub Pages, generate getting-started docs with diagrams, add docs CI workflow. DO NOT USE FOR: writing a single inline code comment, building an app frontend, creating product marketing landing pages."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
+category: infrastructure
 metadata:
-  category: "Documentation"
-  tags: ["mkdocs", "documentation", "github-pages", "mermaid"]
-  maturity: "production"
-  audience: ["developers", "tech-writers"]
-allowed-tools: ["bash", "git", "grep", "find"]
+  category: infrastructure
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
-
 # Docs Site
 
 Scaffold a MkDocs Material documentation site for any GitHub repository. Generates

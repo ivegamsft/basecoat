@@ -1,6 +1,6 @@
 name: "azure-landing-zone-routing"
 description: "Routing evaluation — validates trigger activation for the azure-landing-zone agent."
-skill: "agents/azure-landing-zone.agent.md"
+skill: "agents/basecoat-40-azure-azure-landing-zone.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with designing management group hierarchies, platform subscriptions, hub networking, policy baselines, or landing zone vending templates."

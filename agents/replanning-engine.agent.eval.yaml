@@ -1,6 +1,6 @@
 name: "replanning-engine-routing"
 description: "Routing evaluation — validates trigger activation for the replanning-engine agent."
-skill: "agents/replanning-engine.agent.md"
+skill: "agents/basecoat-10-core-replanning-engine.agent.md"
 scenarios:
   - id: "pos-1"
     input: "The S2 assessment is 5x bigger than expected, so we need replanning."

@@ -25,7 +25,7 @@ The design goal: **answer 80% of questions from L0–L2 without touching L3–L4
 L3 and L4 are powerful but expensive — reserve them for Novel tasks and
 cross-session knowledge transfer.
 
-See [Memory Design](MEMORY_DESIGN.md) for the full architectural specification.
+See [Memory Design](memory-design.md) for the full architectural specification.
 
 ---
 
@@ -34,7 +34,7 @@ See [Memory Design](MEMORY_DESIGN.md) for the full architectural specification.
 | Memory type | Layer | Example |
 |---|---|---|
 | Role definition, agent purpose | L0 — agent frontmatter | "You are a security reviewer. Always run SAST first." |
-| Universal coding rules | L1 — instructions | `instructions/governance.instructions.md` |
+| Universal coding rules | L1 — instructions | `instructions/basecoat-20-lang-governance.instructions.md` |
 | Hot facts for this repo | L2 — hot-index | "This repo uses OIDC for Azure auth, not client secrets" |
 | Sprint history, session patterns | L3 — DuckDB | Prior session summaries, turn history |
 | Reusable patterns across sessions | L4 — store_memory | "check-coherence.ps1 exits 0 unless -Strict is passed" |
@@ -55,7 +55,7 @@ Five paths are available — choose based on your setup and urgency:
 | Run `submit-learning.ps1` | Org secret or PAT | Windows/PowerShell |
 | Run `submit-learning.sh` | Org secret or PAT | Linux/macOS/WSL |
 
-See [Contributing Learnings](CONTRIBUTING.md) for the full guide with examples
+See [Contributing Learnings](contributing.md) for the full guide with examples
 for each path.
 
 ---
@@ -103,16 +103,16 @@ memories/{domain}/{subject}.md      ← promoted to shared memory
 Weekly sync → hot-index.md          ← distributed to all consumers
 ```
 
-See [Memory Process](PROCESS.md) for the end-to-end lifecycle with timing,
+See [Memory Process](process.md) for the end-to-end lifecycle with timing,
 review criteria, and rollback guidance.
 
 ---
 
 ## Setting Up Memory in Your Repo
 
-- **IBuySpy-Shared org members:** See [Internal Setup](SETUP-INTERNAL.md) —
+- **IBuySpy-Shared org members:** See [Internal Setup](setup-internal.md) —
   one admin secret, then a single onboarding command per repo.
-- **External orgs:** See [External Setup](SETUP-EXTERNAL.md) —
+- **External orgs:** See [External Setup](setup-external.md) —
   fine-grained PAT, then one onboarding command.
 - **Enlisting a repo for passive sweep:** See [Enlistment](enlistment.md).
 
@@ -122,9 +122,9 @@ review criteria, and rollback guidance.
 
 | Doc | What it covers |
 |---|---|
-| [Memory Design](MEMORY_DESIGN.md) | Five-layer architecture, schema, cache TTL |
-| [Learning Model](LEARNING_MODEL.md) | How memories flow from session to shared |
-| [Contributing](CONTRIBUTING.md) | Five submission paths with examples |
-| [Process](PROCESS.md) | Lifecycle, review criteria, timing |
+| [Memory Design](memory-design.md) | Five-layer architecture, schema, cache TTL |
+| [Learning Model](learning-model.md) | How memories flow from session to shared |
+| [Contributing](contributing.md) | Five submission paths with examples |
+| [Process](process.md) | Lifecycle, review criteria, timing |
 | [Triage Guide](triage.md) | Universal vs app-specific decision guide |
-| [Shared Memory Guide](SHARED_MEMORY_GUIDE.md) | Org-level setup and management |
+| [Shared Memory Guide](shared-memory-guide.md) | Org-level setup and management |

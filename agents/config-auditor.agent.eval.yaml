@@ -1,6 +1,6 @@
 name: "config-auditor-routing"
 description: "Routing evaluation — validates trigger activation for the config-auditor agent."
-skill: "agents/config-auditor.agent.md"
+skill: "agents/basecoat-50-security-config-auditor.agent.md"
 scenarios:
   - id: "pos-1"
     input: "I need help with scan a repository for committed or unprotected configuration files that contain secrets, credentials, or sensitive environment-specific values. Produces a findings report with remediation steps."

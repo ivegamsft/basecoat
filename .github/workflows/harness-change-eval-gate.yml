@@ -1,4 +1,4 @@
-name: Harness Change Eval Gate
+name: "BaseCoat - Harness Change Eval Gate"
 
 on:
   pull_request:
@@ -28,7 +28,7 @@ jobs:
     steps:
       - name: Detect harness-critical changes and sync eval label
         id: detect
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
             const pr = context.payload.pull_request;
@@ -103,7 +103,7 @@ jobs:
     if: needs.harness-change-eval-gate.outputs.harness_changed == 'true' && needs.harness-change-eval-gate.outputs.skip_gate != 'true'
     steps:
       - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
       - name: Run behavioral harness smoke eval
         id: eval
@@ -138,7 +138,7 @@ jobs:
 
       - name: Upload harness eval artifacts
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: harness-eval-results
           path: |
@@ -149,7 +149,7 @@ jobs:
 
       - name: Post eval evidence to PR
         if: always()
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         env:
           AVG_SCORE: ${{ steps.eval.outputs.avg_score }}
           CASE_COUNT: ${{ steps.eval.outputs.case_count }}
@@ -200,3 +200,4 @@ jobs:
                 body,
               });
             }
+

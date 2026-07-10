@@ -1,19 +1,16 @@
 ---
 name: supply-chain-security
+compatibility: [github-copilot-cli]
 title: Supply Chain Security - SLSA, SBOM, Sigstore
 description: "Use when securing build and release pipelines with signing, SBOMs, provenance, and dependency scanning. USE FOR: sign container image with Cosign, generate CycloneDX or SPDX SBOM, add SLSA provenance to GitHub Actions, scan dependencies and images for vulnerabilities, verify release artifact integrity. DO NOT USE FOR: application authorization logic, runtime incident triage only."
-compatibility:
-  editors:
-    - vscode
-  platforms:
-    - github
+category: security
 metadata:
-  domain: security
-  maturity: production
-  audience: [devops-engineer, security-engineer, release-manager]
-allowed-tools: [bash, python, docker, kubernetes]
+  category: security
+  maturity: stable
+  audience:
+    - developer
+allowed-tools: []
 ---
-
 # Supply Chain Security Skill
 
 Secure software supply chains through artifact signing, SBOM generation, and SLSA provenance.

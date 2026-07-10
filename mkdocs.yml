@@ -48,6 +48,9 @@ exclude_docs: archive/**
 extra_css:
   - stylesheets/extra.css
 
+extra_javascript:
+  - javascripts/external-links.js
+
 markdown_extensions:
   - pymdownx.superfences:
       custom_fences:
@@ -75,35 +78,50 @@ nav:
     - Enterprise Setup: guides/enterprise-setup.md
     - Consumer Sync Guide: guides/consumer-sync.md
   - Asset Reference:
-    - Overview: reference/QUICK_REFERENCE.md
-    - Inventory: reference/INVENTORY.md
-    - Token Context Inventory: reference/TOKEN_CONTEXT_INVENTORY.md
-    - Agents: reference/ASSET_REGISTRY.md
-    - Governance: reference/GOVERNANCE.md
+    - Overview: reference/quick-reference.md
+    - Inventory: reference/inventory.md
+    - Model Inventory: reference/model-inventory.md
+    - Token Context Inventory: reference/token-context-inventory.md
+    - Onboarding Profile Contract: reference/onboarding-profile-contract.v1.md
+    - Agents: reference/asset-registry.md
+    - Workflow Control Plane:
+      - Overview: reference/workflows/index.md
+      - PR Validation: reference/workflows/pr-validation.md
+      - PR Flow Hygiene: reference/workflows/pr-flow-hygiene.md
+      - PR Size and Sprint Labeler: reference/workflows/pr-size-labeler.md
+      - Reviewer Auto-Assign: reference/workflows/reviewer-autoassign.md
+    - Governance Landing: GOVERNANCE.md
+    - Governance: reference/governance.md
   - How-To Guides:
     - Intent Prefixes: guides/intent-prefixes.md
     - Get Started (integrate prompt): guides/integrate-prompt.md
     - Make It Your Own: guides/customization.md
+    - Create a Custom Agent: guides/custom-agent-authoring.md
     - Agent Examples: guides/agent-examples.md
     - Contributing: guides/contributing.md
     - Version Drift Detection: guides/version-drift.md
-    - Model Optimization: guides/MODEL_OPTIMIZATION.md
+    - Model Optimization: guides/model-optimization.md
     - Token Optimization: guides/token-optimization.md
     - BaseCoat Config (.basecoat.yml): guides/basecoat-yml.md
     - UBB Token Guidance: guides/ubb-token-guidance.md
   - Memory System:
     - Overview: memory/index.md
-    - Learning Model: memory/LEARNING_MODEL.md
+    - Learning Model: memory/learning-model.md
     - Triage Guide: memory/triage.md
-    - Contributing Learnings: memory/CONTRIBUTING.md
-    - Process: memory/PROCESS.md
+    - Contributing Learnings: memory/contributing.md
+    - Process: memory/process.md
   - Architecture:
     - Overview: architecture/overview.md
-    - Diagrams: diagrams/README.md
+    - Diagrams:
+      - Index: diagrams/architecture-diagrams-index.md
+      - MCP Topology and Extension Surface: diagrams/basecoat-mcp-topology-and-extension-surface.md
+      - MCP and Metrics Data Flow: diagrams/basecoat-mcp-and-metrics-data-flow.md
+      - MCP Metrics Build and Deploy Flow: diagrams/mcp-metrics-build-and-deploy-flow.md
     - ADR-001 Naming Convention: architecture/decisions/adr-001-naming-convention.md
+    - ADR-002 Agent Model Shifting and Cost Governance: architecture/decisions/adr-002-agent-model-shifting-and-cost-governance.md
     - Multi-Agent Patterns: architecture/multi-agent-orchestration-patterns.md
   - About:
-    - Philosophy: PHILOSOPHY.md
+    - Philosophy: philosophy.md
     - The Story: story.md
     - Metrics: metrics.md
     - Dashboard Metrics Schema and Glossary: reference/metrics-schema-glossary.md

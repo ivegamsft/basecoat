@@ -50,6 +50,27 @@ jobs:
 | `stage_path` | `.github/base-coat` | Path to synced BaseCoat assets |
 | `alert_threshold` | `1` | Versions behind before alerting |
 
+## Choosing an alert threshold (N versions)
+
+Set `alert_threshold` to match your upgrade policy:
+
+| Policy | `alert_threshold` | Expected behavior |
+|---|---:|---|
+| Strict | `0` | Alert as soon as any version drift is detected |
+| Recommended | `1` | Alert when at least one version behind |
+| Relaxed | `2` | Alert only when two or more versions behind |
+
+Example (recommended baseline):
+
+```yaml
+jobs:
+  check:
+    uses: IBuySpy-Shared/basecoat/.github/workflows/check-basecoat-version-callable.yml@main
+    with:
+      stage_path: .github/base-coat
+      alert_threshold: 1
+```
+
 ## What the issue looks like
 
 When drift is detected, an issue is opened in the consumer repo titled:
@@ -57,6 +78,21 @@ When drift is detected, an issue is opened in the consumer repo titled:
 > `chore: BaseCoat upgrade available (v3.23.0 → v3.25.0)`
 
 The issue includes the current version, latest version, and upgrade instructions. If the issue already exists, a comment is added instead (idempotent).
+
+## Auditability and evidence
+
+For an auditable version-alignment trail in consumer repos:
+
+1. Keep the callable workflow on a schedule (weekly is a common baseline).
+2. Preserve the generated drift issue(s) instead of deleting/recreating them.
+3. Link each upgrade PR to the corresponding drift issue.
+
+You can trace drift checks with:
+
+```bash
+gh run list --workflow check-basecoat-version.yml --limit 10
+gh issue list --search "BaseCoat upgrade available" --state all
+```
 
 ## Asset-level drift (optional)
 

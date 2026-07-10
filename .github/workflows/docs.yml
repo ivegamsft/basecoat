@@ -1,4 +1,4 @@
-name: Deploy Docs
+name: "BaseCoat - Deploy Docs"
 
 on:
   push:
@@ -7,26 +7,31 @@ on:
     paths:
       - 'docs/**'
       - 'scripts/generate-token-context-inventory.py'
+      - 'scripts/generate-backlog-efficiency-scorecard.py'
+      - '.github/backlog-session-metrics.json'
       - 'mkdocs.yml'
       - '.github/workflows/docs.yml'
   pull_request:
     paths:
       - 'docs/**'
       - 'scripts/generate-token-context-inventory.py'
+      - 'scripts/generate-backlog-efficiency-scorecard.py'
+      - '.github/backlog-session-metrics.json'
       - 'mkdocs.yml'
   workflow_dispatch:
 
 permissions:
   contents: write
   pages: write
+  id-token: write
 
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: '3.x'
 
@@ -39,19 +44,78 @@ jobs:
       - name: Generate token context inventory
         run: python scripts/generate-token-context-inventory.py
 
-      - name: Validate docs (strict)
-        run: python -m mkdocs build --strict
+      - name: Generate backlog efficiency scorecard
+        run: python scripts/generate-backlog-efficiency-scorecard.py
 
-  deploy:
+      - name: Validate docs
+        run: |
+          python -m mkdocs build
+
+  verify-github-pages-environment:
     if: github.event_name != 'pull_request'
     needs: validate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - name: Verify github-pages environment allows this deployment branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          DEPLOY_BRANCH="${{ github.ref_name }}"
+          DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
+
+          ENV_PAYLOAD="$(gh api "repos/${{ github.repository }}/environments/github-pages" 2>/dev/null || true)"
+          if [[ -z "$ENV_PAYLOAD" ]]; then
+            echo "::notice::Environment 'github-pages' is not yet configured. GitHub may create it automatically on first deployment."
+            exit 0
+          fi
+
+          CUSTOM_POLICY="$(echo "$ENV_PAYLOAD" | jq -r '.deployment_branch_policy.custom_branch_policies // false')"
+          PROTECTED_ONLY="$(echo "$ENV_PAYLOAD" | jq -r '.deployment_branch_policy.protected_branches // false')"
+
+          if [[ "$CUSTOM_POLICY" == "true" ]]; then
+            BRANCHES="$(gh api "repos/${{ github.repository }}/environments/github-pages/deployment-branch-policies" --jq '.branch_policies[].name' 2>/dev/null || true)"
+            if ! echo "$BRANCHES" | grep -Fqx "$DEPLOY_BRANCH"; then
+              echo "::error::Environment 'github-pages' allows selected branches, but '${DEPLOY_BRANCH}' is not included."
+              echo "Update Settings → Environments → github-pages → Deployment branches and add '${DEPLOY_BRANCH}', or switch to protected branches only."
+              if [[ "$DEPLOY_BRANCH" != "$DEFAULT_BRANCH" ]]; then
+                echo "The default branch remains '${DEFAULT_BRANCH}'. Keep deploys on '${DEFAULT_BRANCH}' unless a documented exception approves another branch."
+              fi
+              exit 1
+            fi
+          elif [[ "$PROTECTED_ONLY" != "true" ]]; then
+            echo "::notice::Environment 'github-pages' does not enforce branch restrictions. This does not block deploy, but branch policy is recommended."
+          else
+            ENCODED_DEPLOY_BRANCH="$(jq -rn --arg value "$DEPLOY_BRANCH" '$value|@uri')"
+            BRANCH_PROTECTED="$(gh api "repos/${{ github.repository }}/branches/${ENCODED_DEPLOY_BRANCH}" --jq '.protected' 2>/dev/null || echo false)"
+            if [[ "$BRANCH_PROTECTED" != "true" ]]; then
+              echo "::error::Environment 'github-pages' only allows protected branches, but '${DEPLOY_BRANCH}' is not protected."
+              if [[ "$DEPLOY_BRANCH" != "$DEFAULT_BRANCH" ]]; then
+                echo "Run Deploy Docs from the protected default branch '${DEFAULT_BRANCH}', or protect '${DEPLOY_BRANCH}' before retrying."
+              fi
+              exit 1
+            fi
+          fi
+
+          if [[ "$DEFAULT_BRANCH" == "main" ]]; then
+            echo "github-pages environment policy permits deployments from main."
+          fi
+          echo "github-pages environment policy permits deployments from ${DEPLOY_BRANCH}."
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: [validate, verify-github-pages-environment]
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: '3.x'
 
@@ -63,6 +127,9 @@ jobs:
 
       - name: Generate token context inventory
         run: python scripts/generate-token-context-inventory.py
+
+      - name: Generate backlog efficiency scorecard
+        run: python scripts/generate-backlog-efficiency-scorecard.py
 
       - name: Configure site URLs for this repository
         run: |
@@ -75,17 +142,21 @@ jobs:
           sed -i "s|https://github.com/IBuySpy-Shared/basecoat|${REPO_URL}|gI" mkdocs.yml
           sed -i "s|IBuySpy-Shared/basecoat|${{ github.repository }}|g" mkdocs.yml
 
-      - name: Enable GitHub Pages (first run)
+      - name: Build docs
+        run: mkdocs build
+
+      - name: Update repository homepage URL
         run: |
-          gh api --method POST "repos/${{ github.repository }}/pages" \
-            --field 'source[branch]=gh-pages' \
-            --field 'source[path]=/' 2>/dev/null || true
           gh api --method PATCH "repos/${{ github.repository }}" \
             --field "homepage=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" 2>/dev/null || true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@98ef48e41587a300b82de4cf298aa98b57b2faae
+        with:
+          path: site/
+
       - name: Deploy to GitHub Pages
-        run: mkdocs gh-deploy --force --no-history
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128
