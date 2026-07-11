@@ -1,0 +1,40 @@
+{
+  "default_profile": "solo-dev",
+  "always_human_required": [
+    "production_environment_approval",
+    "policy_exception_override",
+    "security_incident_override"
+  ],
+  "profiles": {
+    "solo-dev": {
+      "issue_approval_signal_required": true,
+      "pr_approval_required_by_risk": {
+        "low": false,
+        "medium": false,
+        "high": false,
+        "critical": true
+      },
+      "production_release_approval_required": true
+    },
+    "team-dev": {
+      "issue_approval_signal_required": true,
+      "pr_approval_required_by_risk": {
+        "low": false,
+        "medium": true,
+        "high": true,
+        "critical": true
+      },
+      "production_release_approval_required": true
+    },
+    "regulated-team": {
+      "issue_approval_signal_required": true,
+      "pr_approval_required_by_risk": {
+        "low": true,
+        "medium": true,
+        "high": true,
+        "critical": true
+      },
+      "production_release_approval_required": true
+    }
+  }
+}

@@ -12,7 +12,7 @@ Supported distributable workflows by class:
 | Class | Installed by default | Workflows |
 |----------|---------|---------|
 | **Reusable** | Yes | `basecoat-upstream-version-drift.yml`, `basecoat-version-check.yml`, `basecoat-secret-scan.yml` |
-| **Templates** | No (`-IncludeTemplates`) | `basecoat-dependency-update-advisor.yml`, `basecoat-issue-approve.yml`, `basecoat-sprint-closeout-branch-audit.yml`, `basecoat-token-inventory.yml` |
+| **Templates** | No (`-IncludeTemplates`) | `basecoat-dependency-update-advisor.yml`, `basecoat-issue-approve.yml`, `basecoat-pr-auto-merge-executor.yml`, `basecoat-sprint-closeout-branch-audit.yml`, `basecoat-token-inventory.yml` |
 | **Internal** | No (`-IncludeInternal`) | Internal-only automation workflows (unsupported in downstream consumer repos) |
 
 ## Installation
@@ -36,6 +36,11 @@ To include template workflows:
 ```bash
 pwsh scripts/configure-downstream-workflows.ps1 -IncludeTemplates
 ```
+
+This also installs the companion governance policy files used by template workflows:
+
+- `.github/governance/policy-packs.json`
+- `.github/governance/human-approval-boundaries.json`
 
 To include internal workflows as well (internal workflows are marked unsupported,
 so include both flags):

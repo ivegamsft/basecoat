@@ -206,6 +206,30 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running PR auto-merge executor workflow tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'pr-auto-merge-executor-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'PR auto-merge executor workflow tests failed' -ForegroundColor Red
+    Write-FailureLog 'pr-auto-merge-executor-tests'
+    exit 1
+}
+
+Write-Host 'Running issue-approve routing workflow tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'workflow-issue-approve-routing-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Issue-approve routing workflow tests failed' -ForegroundColor Red
+    Write-FailureLog 'workflow-issue-approve-routing-tests'
+    exit 1
+}
+
+Write-Host 'Running human approval boundaries policy tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'human-approval-boundaries-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Human approval boundaries policy tests failed' -ForegroundColor Red
+    Write-FailureLog 'human-approval-boundaries-tests'
+    exit 1
+}
+
 Write-Host 'Running ship-it intent dispatch tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'ship-it-dispatch-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

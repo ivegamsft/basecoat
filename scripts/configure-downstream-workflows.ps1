@@ -50,6 +50,8 @@
 param(
     [string]$SourceDir = '.github/base-coat/workflows',
     [string]$DestinationDir = '.github/workflows',
+    [string]$GovernanceSourceDir = '.github/base-coat/governance',
+    [string]$GovernanceDestinationDir = '.github/governance',
     [switch]$IncludeUnsupported,
     [switch]$IncludeTemplates,
     [switch]$IncludeInternal,
@@ -83,6 +85,16 @@ $resolvedDest = if ([System.IO.Path]::IsPathRooted($DestinationDir)) {
 } else {
     Join-Path $repoRoot $DestinationDir
 }
+$resolvedGovernanceSource = if ([System.IO.Path]::IsPathRooted($GovernanceSourceDir)) {
+    $GovernanceSourceDir
+} else {
+    Join-Path $repoRoot $GovernanceSourceDir
+}
+$resolvedGovernanceDest = if ([System.IO.Path]::IsPathRooted($GovernanceDestinationDir)) {
+    $GovernanceDestinationDir
+} else {
+    Join-Path $repoRoot $GovernanceDestinationDir
+}
 
 if (-not (Test-Path -Path $resolvedSource -PathType Container)) {
     throw "Source workflow directory not found: $resolvedSource"
@@ -94,6 +106,15 @@ if (-not (Test-Path -Path $resolvedDest -PathType Container)) {
     } else {
         New-Item -Path $resolvedDest -ItemType Directory -Force | Out-Null
         Write-Ok "Created destination directory: $DestinationDir"
+    }
+}
+
+if (-not (Test-Path -Path $resolvedGovernanceDest -PathType Container)) {
+    if ($DryRun) {
+        Write-Info "Would create governance destination directory: $GovernanceDestinationDir"
+    } else {
+        New-Item -Path $resolvedGovernanceDest -ItemType Directory -Force | Out-Null
+        Write-Ok "Created governance destination directory: $GovernanceDestinationDir"
     }
 }
 
@@ -152,6 +173,14 @@ $workflowMap = @(
         LegacyDestinations = @()
         Name = 'BaseCoat Template - Issue Approve'
         # Uses Copilot cloud-agent assignment flow: suggestedActors -> copilot-swe-agent[bot] + agent_assignment.
+        Supported = $true
+        Class = 'templates'
+    }
+    [pscustomobject]@{
+        Source = 'pr-auto-merge-executor.yml'
+        Destination = 'basecoat-pr-auto-merge-executor.yml'
+        LegacyDestinations = @()
+        Name = 'BaseCoat Template - PR Auto Merge Executor'
         Supported = $true
         Class = 'templates'
     }
@@ -300,6 +329,7 @@ foreach ($workflow in $workflowMap) {
             break
         }
     }
+
     if (-not $nameUpdated) {
         $lines = @("name: `"$($workflow.Name)`"") + $lines
     }
@@ -326,6 +356,27 @@ foreach ($workflow in $workflowMap) {
                 Write-Ok "Removed legacy workflow filename: $legacyName"
             }
             $removed++
+        }
+    }
+
+    if ($installClasses.Contains('templates')) {
+        foreach ($governanceFile in @('policy-packs.json', 'human-approval-boundaries.json')) {
+            $governanceSourceFile = Join-Path $resolvedGovernanceSource $governanceFile
+            $governanceDestFile = Join-Path $resolvedGovernanceDest $governanceFile
+
+            if (-not (Test-Path -Path $governanceSourceFile -PathType Leaf)) {
+                Write-Warn "Source governance file missing in '$GovernanceSourceDir', skipping: $governanceFile"
+                $skipped++
+                continue
+            }
+
+            if ($DryRun) {
+                Write-Info "Would copy governance file $governanceFile -> $GovernanceDestinationDir"
+            } else {
+                Set-Content -Path $governanceDestFile -Value (Get-Content -Path $governanceSourceFile -Raw) -Encoding UTF8 -NoNewline
+                Write-Ok "Installed governance file: $governanceFile"
+            }
+            $copied++
         }
     }
 }

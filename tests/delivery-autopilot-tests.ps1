@@ -12,8 +12,9 @@ $statusScript = Join-Path $repoRoot "scripts\delivery-autopilot\evaluate-status.
 $mergeScript = Join-Path $repoRoot "scripts\delivery-autopilot\execute-merge.ps1"
 $escalationScript = Join-Path $repoRoot "scripts\delivery-autopilot\build-escalation-payload.ps1"
 $docPath = Join-Path $repoRoot "docs\guides\delivery-autopilot-integration.md"
+$workflowsGuidePath = Join-Path $repoRoot "docs\guides\workflows-getting-started.md"
 
-foreach ($path in @($agentPath, $agentEvalPath, $skillPath, $skillEvalPath, $statusScript, $mergeScript, $escalationScript, $docPath)) {
+foreach ($path in @($agentPath, $agentEvalPath, $skillPath, $skillEvalPath, $statusScript, $mergeScript, $escalationScript, $docPath, $workflowsGuidePath)) {
   if (-not (Test-Path $path)) {
     throw "Missing required delivery-autopilot asset: $path"
   }
@@ -82,6 +83,31 @@ if ($doc -notmatch 'post-merge-release-chain\.yml') {
 }
 if ($doc -notmatch 'automation-stuck-state-watchdog\.yml') {
   throw "Integration guide must reference automation-stuck-state-watchdog.yml."
+}
+
+$workflowsGuide = Get-Content -Raw -Path $workflowsGuidePath
+if ($workflowsGuide -notmatch 'basecoat-pr-auto-merge-executor\.yml') {
+  throw "Workflow getting-started guide must list basecoat-pr-auto-merge-executor.yml."
+}
+if ($workflowsGuide -notmatch 'policy-packs\.json') {
+  throw "Workflow getting-started guide must mention policy-packs.json for template installs."
+}
+if ($workflowsGuide -notmatch 'human-approval-boundaries\.json') {
+  throw "Workflow getting-started guide must mention human-approval-boundaries.json for template installs."
+}
+
+$installer = Get-Content -Raw -Path (Join-Path $repoRoot 'scripts\configure-downstream-workflows.ps1')
+if ($installer -notmatch 'pr-auto-merge-executor\.yml') {
+  throw "Downstream workflow installer must register pr-auto-merge-executor.yml."
+}
+if ($installer -notmatch 'basecoat-pr-auto-merge-executor\.yml') {
+  throw "Downstream workflow installer must map pr-auto-merge-executor.yml to basecoat-pr-auto-merge-executor.yml."
+}
+if ($installer -notmatch 'policy-packs\.json') {
+  throw "Downstream workflow installer must copy policy-packs.json when template workflows are included."
+}
+if ($installer -notmatch 'human-approval-boundaries\.json') {
+  throw "Downstream workflow installer must copy human-approval-boundaries.json when template workflows are included."
 }
 
 Write-Host "Delivery-autopilot tests passed."
