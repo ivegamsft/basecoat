@@ -28,6 +28,8 @@ param(
     [string]$SnapshotPath = ""
 )
 
+. "$PSScriptRoot\aidl-portfolio-rollup-kpi-helpers.ps1"
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
@@ -208,12 +210,12 @@ function Get-RepoMetricsFromLiveData {
 
     $openIssues = @(
         @(Get-PagedResults -Endpoint $openIssuesEndpoint) |
-            Where-Object { -not $_.PSObject.Properties['pull_request'] }
+            Where-Object { -not (Test-IsPullRequestItem -Item $_) }
     )
     $closedIssuesInWindow = @(
         @(Get-PagedResults -Endpoint $closedIssuesEndpoint) |
             Where-Object {
-                -not $_.PSObject.Properties['pull_request'] -and
+                -not (Test-IsPullRequestItem -Item $_) -and
                 $null -ne $_.closed_at -and
                 ([datetime]$_.closed_at).ToUniversalTime() -ge $SinceUtc
             }

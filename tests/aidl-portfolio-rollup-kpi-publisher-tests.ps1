@@ -6,10 +6,11 @@ Set-Location $repoRoot
 Write-Host 'Running AIDL portfolio rollup and KPI publisher tests...'
 
 $scriptPath = Join-Path $repoRoot 'scripts\aidl-portfolio-rollup-kpi-publisher.ps1'
+$helpersPath = Join-Path $repoRoot 'scripts\aidl-portfolio-rollup-kpi-helpers.ps1'
 $workflowPath = Join-Path $repoRoot '.github\workflows\aidl-portfolio-rollup-kpi-publisher.yml'
 $guidePath = Join-Path $repoRoot 'docs\guides\aidl-portfolio-rollup-kpi-publisher.md'
 
-foreach ($requiredPath in @($scriptPath, $workflowPath, $guidePath)) {
+foreach ($requiredPath in @($scriptPath, $helpersPath, $workflowPath, $guidePath)) {
     if (-not (Test-Path $requiredPath)) {
         throw "Missing required artifact: $requiredPath"
     }
@@ -241,11 +242,12 @@ try {
     Write-Host 'Strict-mode PR filter regression test...'
     & {
         Set-StrictMode -Version Latest
+        . $helpersPath
         $mixedItems = @(
             [PSCustomObject]@{ number = 1; title = 'issue A'; state = 'open' },
             [PSCustomObject]@{ number = 2; title = 'pr B'; state = 'open'; pull_request = @{ url = 'https://api.github.com/repos/owner/repo/pulls/2' } }
         )
-        $issuesOnly = @($mixedItems | Where-Object { -not $_.PSObject.Properties['pull_request'] })
+        $issuesOnly = @($mixedItems | Where-Object { -not (Test-IsPullRequestItem -Item $_) })
         if ($issuesOnly.Count -ne 1) {
             throw "Strict-mode PR filter (open issues): expected 1 issue, got $($issuesOnly.Count)"
         }
@@ -260,7 +262,7 @@ try {
             [PSCustomObject]@{ number = 4; title = 'closed pr'; state = 'closed'; closed_at = $closedAt; pull_request = @{ url = 'https://api.github.com/repos/owner/repo/pulls/4' } }
         )
         $closedIssuesOnly = @($closedMixed | Where-Object {
-            -not $_.PSObject.Properties['pull_request'] -and
+            -not (Test-IsPullRequestItem -Item $_) -and
             $null -ne $_.closed_at -and
             ([datetime]$_.closed_at).ToUniversalTime() -ge $sinceUtc
         })
