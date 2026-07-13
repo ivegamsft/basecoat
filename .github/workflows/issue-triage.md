@@ -10,7 +10,7 @@ permissions:
 safe-outputs:
   add-labels:
   add-comment:
-    hide_older_comments: true
+    hide-older-comments: true
 engine: copilot
 timeout-minutes: 20
 run-name: "Issue Triage — #${{ github.event.issue.number }}"
