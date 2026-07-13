@@ -350,6 +350,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running AIDL portfolio rollup helper tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'aidl-portfolio-rollup-kpi-helpers-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'AIDL portfolio rollup helper tests failed' -ForegroundColor Red
+    Write-FailureLog 'aidl-portfolio-rollup-kpi-helpers-tests'
+    exit 1
+}
+
 Write-Host 'Running project rules drift audit tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'project-rules-drift-audit-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

@@ -150,38 +150,6 @@ function Get-IssueCommentsPaged {
     return @(Get-PagedResults -Endpoint "/repos/$Repo/issues/$IssueNumber/comments")
 }
 
-function Get-LabelNames($Item) {
-    $labels = [System.Collections.Generic.List[string]]::new()
-    foreach ($label in @($Item.labels)) {
-        if ($null -eq $label) { continue }
-        if ($label.PSObject.Properties.Name -contains "name") {
-            $name = [string]$label.name
-            if (-not [string]::IsNullOrWhiteSpace($name)) {
-                $labels.Add($name.ToLowerInvariant())
-            }
-        }
-    }
-    return [string[]]$labels.ToArray()
-}
-
-function Test-AnyLabelMatch {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string[]]$Labels,
-        [Parameter(Mandatory = $true)]
-        [string[]]$Patterns
-    )
-
-    foreach ($label in $Labels) {
-        foreach ($pattern in $Patterns) {
-            if ($label -match $pattern) {
-                return $true
-            }
-        }
-    }
-    return $false
-}
-
 function New-LinkTuple([string]$Title, [string]$Url) {
     return [ordered]@{
         title = $Title
