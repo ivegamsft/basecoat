@@ -30,6 +30,7 @@ permissions:
   contents: read
   issues: write
   actions: read
+  pull-requests: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -46,6 +47,8 @@ jobs:
       - name: Generate weekly scorecard
         id: scorecard
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           $repo = "${{ github.repository }}"
           $lookback = 7

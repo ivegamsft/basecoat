@@ -25,44 +25,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-function Invoke-GhJson {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string[]]$Arguments
-    )
-
-    $output = & gh @Arguments
-    if ($LASTEXITCODE -ne 0) {
-        throw "gh command failed: gh $($Arguments -join ' ')"
-    }
-
-    if ([string]::IsNullOrWhiteSpace($output)) {
-        return $null
-    }
-
-    return ($output | ConvertFrom-Json -Depth 100)
-}
-
-function Get-PagedResults {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string]$Endpoint
-    )
-
-    $all = [System.Collections.Generic.List[object]]::new()
-    $page = 1
-    do {
-        $connector = if ($Endpoint.Contains("?")) { "&" } else { "?" }
-        $paged = "${Endpoint}${connector}per_page=100&page=$page"
-        $items = @(Invoke-GhJson -Arguments @("api", $paged))
-        foreach ($item in $items) {
-            $all.Add($item)
-        }
-        $page++
-    } while ($items.Count -eq 100)
-
-    return @($all)
-}
+. "$PSScriptRoot\keep-fix-throttle-helpers.ps1"
 
 function Get-LiveSnapshot {
     param(
@@ -75,9 +38,9 @@ function Get-LiveSnapshot {
     )
 
     $runs = @(
-        Get-PagedResults -Endpoint "/repos/$Repo/actions/runs?status=completed&created=>=$($SinceUtc.ToString('o'))"
+        Get-PagedResults -Endpoint "/repos/$Repo/actions/runs?status=completed&created=%3E%3D$($SinceUtc.ToString('yyyy-MM-ddTHH:mm:ssZ'))"
     ) | Where-Object {
-        $_.created_at -and ([datetime]$_.created_at).ToUniversalTime() -ge $SinceUtc -and ([datetime]$_.created_at).ToUniversalTime() -le $UntilUtc
+        $_.PSObject.Properties.Name -contains 'created_at' -and $_.created_at -and ([datetime]$_.created_at).ToUniversalTime() -ge $SinceUtc -and ([datetime]$_.created_at).ToUniversalTime() -le $UntilUtc
     }
     $runCount = @($runs).Count
     $failedRuns = @($runs | Where-Object { $_.conclusion -eq "failure" -or $_.conclusion -eq "timed_out" -or $_.conclusion -eq "cancelled" }).Count
@@ -230,13 +193,13 @@ function Build-Scorecard {
     foreach ($def in $defs) {
         $name = [string]$def.name
         $currentValue = [double]$current.$name
-        $baselineValue = if ($history.Count -gt 0) {
+        $baselineValue = if (@($history).Count -gt 0) {
             [math]::Round((@($history | Measure-Object -Property $name -Average).Average), 4)
         } else {
             $currentValue
         }
 
-        $trendInfo = if ($history.Count -gt 0) {
+        $trendInfo = if (@($history).Count -gt 0) {
             Classify-Trend -Current $currentValue -Baseline $baselineValue -HigherIsBetter ([bool]$def.higherIsBetter) -Threshold ([double]$def.threshold)
         } else {
             @{ trend = "insufficient-data"; delta = 0.0 }

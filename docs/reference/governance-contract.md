@@ -31,10 +31,15 @@ BaseCoat runs a fleet audit loop to detect reviewer-routing failures across cons
 Repositories are considered opted in when listed in the target registry with `"enabled": true`.
 The audit classifies each repo into exactly one routing state:
 
-1. `no reviewer-routing automation installed`
-2. `automation installed but not configured`
-3. `automation configured but ineffective in live PRs`
-4. `healthy`
+1. `downstream repo inaccessible (audit could not be evaluated)`
+2. `no reviewer-routing automation installed`
+3. `automation installed but not configured`
+4. `automation configured but ineffective in live PRs`
+5. `healthy`
+
+The `downstream repo inaccessible` state is reported when the audit cannot list the
+repository's open pull requests (missing access or an API error), so its routing health
+could not be evaluated; it is not a claim that automation is absent.
 
 ## Label namespaces
 

@@ -137,14 +137,29 @@ jobs:
                 continue;
               }
 
-              const pullRequests = await github.paginate(github.rest.pulls.list, {
-                owner,
-                repo,
-                state: 'open',
-                per_page: 100,
-                sort: 'updated',
-                direction: 'desc'
-              });
+              let pullRequests;
+              try {
+                pullRequests = await github.paginate(github.rest.pulls.list, {
+                  owner,
+                  repo,
+                  state: 'open',
+                  per_page: 100,
+                  sort: 'updated',
+                  direction: 'desc'
+                });
+              } catch (error) {
+                core.warning(`Unable to audit ${repoFullName}: ${error.message}`);
+                scoreRows.push({
+                  repo: `${owner}/${repo}`,
+                  state: 'downstream repo inaccessible (audit could not be evaluated)',
+                  readyOpenPrs: 0,
+                  readyWithoutReview: 0,
+                  behindOrDirtyNoReview: 0,
+                  runsLast30Days: 0,
+                  workflowsDetected: []
+                });
+                continue;
+              }
 
               const readyPullRequests = pullRequests
                 .filter(pr => !pr.draft)
@@ -217,6 +232,7 @@ jobs:
 
             scoreRows.sort((a, b) => {
               const severityOrder = {
+                'downstream repo inaccessible (audit could not be evaluated)': -1,
                 'automation configured but ineffective in live PRs': 0,
                 'automation installed but not configured': 1,
                 'no reviewer-routing automation installed': 2,
@@ -247,9 +263,12 @@ jobs:
               '',
               '## Escalation policy',
               '',
-              '1. `no reviewer-routing automation installed`',
-              '2. `automation installed but not configured`',
-              '3. `automation configured but ineffective in live PRs`',
+              '1. `downstream repo inaccessible (audit could not be evaluated)`',
+              '2. `no reviewer-routing automation installed`',
+              '3. `automation installed but not configured`',
+              '4. `automation configured but ineffective in live PRs`',
+              '',
+              'A `downstream repo inaccessible` result means open pull requests could not be listed (missing access or an API error); confirm the audit token can read the repository, then re-run.',
               '',
               'Remediation guide: `docs/guides/downstream-reviewer-routing-audit.md`'
             ].join('\n');

@@ -10,10 +10,11 @@ This guide covers the fleet loop for detecting reviewer-routing failures across 
 
 For each opted-in repo, the audit evaluates non-draft open PRs and classifies routing health into one of these states:
 
-1. `no reviewer-routing automation installed`
-2. `automation installed but not configured`
-3. `automation configured but ineffective in live PRs`
-4. `healthy`
+1. `downstream repo inaccessible (audit could not be evaluated)`
+2. `no reviewer-routing automation installed`
+3. `automation installed but not configured`
+4. `automation configured but ineffective in live PRs`
+5. `healthy`
 
 The audit scorecard also reports:
 
@@ -54,6 +55,12 @@ gh workflow run downstream-reviewer-routing-audit.yml \
 ```
 
 ## Remediation playbook by state
+
+### downstream repo inaccessible (audit could not be evaluated)
+
+1. Confirm the audit token can read the repository (open pull requests could not be listed).
+2. Check for a transient GitHub API error or rate limiting and re-run.
+3. If the repo was removed or made private, update the target registry.
 
 ### no reviewer-routing automation installed
 

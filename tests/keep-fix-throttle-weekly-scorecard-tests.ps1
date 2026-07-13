@@ -90,6 +90,30 @@ try {
     if ($workflow -notmatch "Post weekly readout comment") {
         throw "Workflow must post weekly readout comment."
     }
+
+    # Single-snapshot run: exercises the empty-history path that failed under StrictMode.
+    $singlePath = Join-Path $tempDir "single-snapshot.json"
+    '[{"week_start":"2026-06-23","throughput":13,"failure_rate":0.06,"mttr_hours":29.5,"manual_intervention_rate":0.50}]' |
+        Set-Content -Path $singlePath -Encoding UTF8
+    $singleOut = Join-Path $tempDir "single"
+    & $scriptPath `
+        -Repository "IBuySpy-Shared/basecoat" `
+        -SnapshotPath $singlePath `
+        -TrendWindowWeeks 4 `
+        -DryRun `
+        -OutputDir $singleOut
+    if (-not $?) {
+        throw "Single-snapshot scorecard run failed (empty-history path)."
+    }
+    $singleResult = Get-Content -Raw -Path (Join-Path $singleOut "keep-fix-throttle-weekly-scorecard.json") | ConvertFrom-Json -Depth 100
+    if ($singleResult.samples_analyzed -ne 1) {
+        throw "Expected samples_analyzed = 1 for a single snapshot, got $($singleResult.samples_analyzed)."
+    }
+    foreach ($metricName in @('throughput', 'failure_rate', 'mttr_hours', 'manual_intervention_rate')) {
+        if ($singleResult.metrics.$metricName.trend -ne 'insufficient-data') {
+            throw "Expected $metricName trend insufficient-data for a single snapshot, got $($singleResult.metrics.$metricName.trend)."
+        }
+    }
 }
 finally {
     if (Test-Path $tempDir) {
