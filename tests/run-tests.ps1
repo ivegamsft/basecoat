@@ -349,7 +349,15 @@ if ($LASTEXITCODE -ne 0) {
     Write-FailureLog 'aidl-portfolio-rollup-kpi-publisher-tests'
     exit 1
 }
- 
+
+Write-Host 'Running project rules drift audit tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'project-rules-drift-audit-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Project rules drift audit tests failed' -ForegroundColor Red
+    Write-FailureLog 'project-rules-drift-audit-tests'
+    exit 1
+}
+
 Write-Host 'Running Keep/Fix/Throttle weekly scorecard tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'keep-fix-throttle-weekly-scorecard-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

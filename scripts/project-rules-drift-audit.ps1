@@ -60,6 +60,8 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+. "$PSScriptRoot\project-rules-drift-audit-helpers.ps1"
+
 $SeverityOrder = @{ critical = 0; high = 1; medium = 2; low = 3 }
 
 function Write-AuditLog {
@@ -157,91 +159,6 @@ query {
         Write-AuditLog WARN "GraphQL errors encountered: $($result.errors | ConvertTo-Json -Compress)"
     }
     return $result.data.node
-}
-
-function Compare-Rules {
-    param(
-        [array]$BaselineRules,
-        [object]$LiveProject
-    )
-
-    $findings = [System.Collections.Generic.List[PSCustomObject]]::new()
-    $liveWorkflows = if ($LiveProject.workflows.nodes) { $LiveProject.workflows.nodes } else { @() }
-
-    foreach ($rule in $BaselineRules) {
-        $matched = $liveWorkflows | Where-Object { $_.name -ieq $rule.name } | Select-Object -First 1
-
-        if (-not $matched) {
-            $findings.Add([PSCustomObject]@{
-                finding_id     = "$($rule.rule_id)-missing"
-                rule_id        = $rule.rule_id
-                rule_name      = $rule.name
-                drift_type     = 'missing'
-                severity       = $rule.severity_if_missing
-                baseline_value = @{
-                    enabled   = $rule.enabled
-                    condition = $rule.condition
-                    action    = $rule.action
-                }
-                live_value     = $null
-                remediation    = "Add automation rule '$($rule.name)'. Condition: $($rule.condition | ConvertTo-Json -Compress). Action: $($rule.action | ConvertTo-Json -Compress)."
-                effort         = 'minutes'
-                rationale      = $rule.rationale
-            })
-            continue
-        }
-
-        # Check enabled state drift — use severity_if_missing when a required rule is disabled
-        if ($rule.enabled -ne $matched.enabled) {
-            $enabledSeverity = if ($rule.enabled -and -not $matched.enabled) {
-                $rule.severity_if_missing
-            } else {
-                'medium'
-            }
-            $findings.Add([PSCustomObject]@{
-                finding_id     = "$($rule.rule_id)-modified-enabled"
-                rule_id        = $rule.rule_id
-                rule_name      = $rule.name
-                drift_type     = 'modified'
-                severity       = $enabledSeverity
-                baseline_value = @{ enabled = $rule.enabled }
-                live_value     = @{ enabled = $matched.enabled }
-                remediation    = "Set rule '$($rule.name)' enabled=$($rule.enabled)."
-                effort         = 'minutes'
-                rationale      = $rule.rationale
-            })
-        }
-
-        # Note: condition/action drift detection is deferred.
-        # The GraphQL response shape (triggers[]/actions[]) differs from the baseline manifest
-        # shape (condition{}/action{}), so a raw JSON comparison produces false positives on
-        # every rule. Deep normalization is tracked as a future enhancement.
-    }
-
-    # Report extra rules not in baseline — use unique rule_id per extra rule for determinism
-    foreach ($liveRule in $liveWorkflows) {
-        $inBaseline = $BaselineRules | Where-Object { $_.name -ieq $liveRule.name }
-        if (-not $inBaseline) {
-            $safeRuleId = "EXTRA-$($liveRule.name -replace '[^a-zA-Z0-9]', '-')"
-            $findings.Add([PSCustomObject]@{
-                finding_id     = "$safeRuleId-extra"
-                rule_id        = $safeRuleId
-                rule_name      = $liveRule.name
-                drift_type     = 'extra'
-                severity       = 'low'
-                baseline_value = $null
-                live_value     = @{
-                    enabled = $liveRule.enabled
-                    name    = $liveRule.name
-                }
-                remediation    = "Rule '$($liveRule.name)' is not in the baseline. Review and either add it to the baseline or remove it from the project."
-                effort         = 'minutes'
-                rationale      = 'Extra rules outside the guardrail baseline may introduce unintended board behavior.'
-            })
-        }
-    }
-
-    return $findings
 }
 
 function Get-SeveritySummary {
@@ -384,11 +301,7 @@ $report = [PSCustomObject]@{
     summary          = [PSCustomObject]@{
         total_findings = $filteredFindings.Count
         by_severity    = [PSCustomObject]$summary
-        by_drift_type  = [PSCustomObject]@{
-            missing  = ($filteredFindings | Where-Object drift_type -eq 'missing').Count
-            modified = ($filteredFindings | Where-Object drift_type -eq 'modified').Count
-            extra    = ($filteredFindings | Where-Object drift_type -eq 'extra').Count
-        }
+        by_drift_type  = [PSCustomObject](Get-DriftTypeSummary -Findings $filteredFindings)
     }
 }
 
@@ -397,9 +310,10 @@ $report | ConvertTo-Json -Depth 10 | Set-Content -Path $OutputPath -Encoding utf
 Write-AuditLog INFO "JSON report written to $OutputPath"
 
 # Write Markdown summary
+$projectIdDisplay = if ($projId) { $projId } else { '(baseline-only)' }
 $markdown = Format-MarkdownSummary `
     -RepoName $repoName `
-    -ProjId (if ($projId) { $projId } else { '(baseline-only)' }) `
+    -ProjId $projectIdDisplay `
     -Baseline $baseline `
     -AuditMode $Mode `
     -Findings $filteredFindings `
@@ -411,7 +325,7 @@ Write-Host ""
 
 # Open issues in enforce mode
 if ($Mode -eq 'enforce') {
-    $actionableFindings = $filteredFindings | Where-Object { $SeverityOrder[$_.severity] -le $SeverityOrder[$SeverityThreshold] }
+    $actionableFindings = @($filteredFindings | Where-Object { $SeverityOrder[$_.severity] -le $SeverityOrder[$SeverityThreshold] })
     if ($actionableFindings.Count -eq 0) {
         Write-AuditLog INFO "Enforce mode: no findings at or above '$SeverityThreshold'. No issues opened."
     } else {
