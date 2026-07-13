@@ -1,6 +1,6 @@
 [
   {
-    "collected_at": "2026-07-06T12:34:19.332159+00:00",
+    "collected_at": "2026-07-13T11:49:15.215762+00:00",
     "organization": "ivegamsft",
     "copilot": {
       "available": false
@@ -8,22 +8,22 @@
     "repos": {
       "ivegamsft/basecoat": {
         "pull_requests": {
-          "prs_merged_28d": 24,
+          "prs_merged_28d": 29,
           "cycle_time_median_hours": 0.1,
-          "cycle_time_p95_hours": 74.8
+          "cycle_time_p95_hours": 1189.5
         },
         "ci": {
-          "success_rate": 82.6,
-          "pass_rate": 82.6,
-          "ci_pass_rate_last_20_runs": 65.0,
-          "ci_pass_rate_last_100_runs": 82.6,
-          "total_runs_sampled": 92,
+          "success_rate": 92.9,
+          "pass_rate": 92.9,
+          "ci_pass_rate_last_20_runs": 95.0,
+          "ci_pass_rate_last_100_runs": 92.9,
+          "total_runs_sampled": 84,
           "runs_sampled_last_20": 20,
-          "successful_runs_last_20": 13
+          "successful_runs_last_20": 19
         },
         "issues": {
-          "issues_closed_28d": 0,
-          "resolution_time_median_hours": 0
+          "issues_closed_28d": 7,
+          "resolution_time_median_hours": 431.6
         },
         "basecoat_coverage": {
           "agents": 0,
