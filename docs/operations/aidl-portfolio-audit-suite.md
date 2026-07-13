@@ -92,6 +92,19 @@ pwsh -File scripts/aidl-portfolio-project-bootstrap.ps1 `
 - [ ] Incident -> remediation -> verification linkage exists
 - [ ] Repeat incidents are flagged with references
 
+Runbook command for this check:
+
+```powershell
+pwsh -File scripts/aidl-incident-routing-verification.ps1 `
+  -InputPath <incident-routing-export.json> `
+  -OutputDir artifacts/aidl-incident-routing-verification
+```
+
+The input export format is defined in
+[`docs/specs/aidl-portfolio/incident-routing-verification-input-contract.md`](../specs/aidl-portfolio/incident-routing-verification-input-contract.md).
+Pass `-AreaTaxonomyPath <file>` (a JSON array of allowed portfolio areas) to also validate
+`affected_service` against the portfolio area taxonomy.
+
 ## 6) Learning and memory quality audit
 
 - [ ] Candidate extraction is evidence-backed
