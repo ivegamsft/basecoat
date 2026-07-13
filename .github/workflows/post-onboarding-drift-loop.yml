@@ -84,10 +84,10 @@ jobs:
                 const response = await github.rest.repos.getContent({ owner, repo, path });
                 return !Array.isArray(response.data) && response.data.type === 'file';
               } catch (error) {
-                if (error.status === 404) {
-                  return false;
+                if (error.status !== 404) {
+                  core.warning(`Unable to check ${owner}/${repo}:${path}: ${error.message}`);
                 }
-                throw error;
+                return false;
               }
             };
 
@@ -292,14 +292,21 @@ jobs:
                 }
               }
 
-              const pullRequests = await github.paginate(github.rest.pulls.list, {
-                owner,
-                repo,
-                state: 'open',
-                per_page: 100,
-                sort: 'updated',
-                direction: 'desc'
-              });
+              let pullRequests = [];
+              let pullDataUnavailable = false;
+              try {
+                pullRequests = await github.paginate(github.rest.pulls.list, {
+                  owner,
+                  repo,
+                  state: 'open',
+                  per_page: 100,
+                  sort: 'updated',
+                  direction: 'desc'
+                });
+              } catch (error) {
+                pullDataUnavailable = true;
+                core.warning(`Unable to list pull requests for ${repoFullName}: ${error.message}`);
+              }
 
               const readyPullRequests = pullRequests.filter(pr => !pr.draft).slice(0, 100);
               let readyWithoutReview = 0;
@@ -321,11 +328,15 @@ jobs:
                   ? readyPullRequests.length > 0
                   : readyWithoutReview >= reviewerGapThreshold;
 
+              // If PR data could not be retrieved, the reviewer-routing surface is unknown; report it
+              // as drift rather than a false 'ok' so an inaccessible repo does not hide real gaps.
               const reviewerRoutingSurface = {
-                status: reviewerRoutingDrift ? 'drift' : 'ok',
-                detail: reviewerWorkflows.length === 0
-                  ? `no reviewer-routing workflow detected; ready_prs=${readyPullRequests.length}`
-                  : `workflows=${reviewerWorkflows.join(', ')}; ready_no_review=${readyWithoutReview}; behind_or_dirty_no_review=${behindOrDirtyNoReview}; threshold=${reviewerGapThreshold}`
+                status: pullDataUnavailable ? 'drift' : (reviewerRoutingDrift ? 'drift' : 'ok'),
+                detail: pullDataUnavailable
+                  ? 'pull request data unavailable (repo inaccessible or API error); reviewer-routing status could not be evaluated'
+                  : (reviewerWorkflows.length === 0
+                    ? `no reviewer-routing workflow detected; ready_prs=${readyPullRequests.length}`
+                    : `workflows=${reviewerWorkflows.join(', ')}; ready_no_review=${readyWithoutReview}; behind_or_dirty_no_review=${behindOrDirtyNoReview}; threshold=${reviewerGapThreshold}`)
               };
 
               const metadataMissing = [];
