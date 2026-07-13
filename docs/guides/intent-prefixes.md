@@ -20,7 +20,7 @@ release, version drift) to reduce routing ambiguity.
 | `spike:` | Time-boxed investigation, no deliverable | **Now, research only** | `@solution-architect` |
 | `chore:` | Maintenance, cleanup, non-functional | **Soon** | `@devops-engineer`, `@release-manager` |
 | `pr:` | Pull request lifecycle handling: remaining WIP logging, merge readiness, build-gated closeout, and branch hygiene. Use `pr-lifecycle=full` when you want the whole chain kept together. | **Now** | `@orphaned-pr-cleanup`, `@merge-coordinator`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
-| `fleet:` | Close previous sprint, plan and execute the next sprint, triage oldest issues, audit PRs/builds, clean branches | **Now** | `@sprint-closeout-auditor`, `@sprint-planner`, `@issue-triage`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
+| `fleet:` | Close previous sprint, plan and execute the next sprint, triage oldest issues, audit PRs/builds, clean branches | **Now** | `@parallel-session-coordinator`, `@sprint-closeout-auditor`, `@sprint-planner`, `@issue-triage`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
 | `workflow:` | GitHub Actions workflow failure triage and repair | **Now** | `@broken-build-troubleshooter`, `@self-healing-ci`, `@devops-engineer` |
 | `actions:` | GitHub Actions configuration, runs, and policy checks | **Now** | `@self-healing-ci`, `@ci-failure-escalation`, `@devops-engineer` |
 | `issue:` | GitHub issue triage, labeling, and backlog hygiene | **Now** | `@issue-triage`, `@sprint-planner` |
@@ -296,7 +296,7 @@ choose either `feature:` or `pr:`.
 
 ## Fleet routing
 
-`fleet:` is the shortcut intent for a sprint-execution batch that combines closeout, planning, oldest-first issue triage, PR/build auditing, and branch cleanup.
+`fleet:` is the shortcut intent for a sprint-execution batch that combines closeout, planning, oldest-first issue triage, PR/build auditing, and branch cleanup. It must start with the parallel-session coordinator and a latest-main sync preflight before fan-out.
 
 ### Normalized examples
 
@@ -308,6 +308,7 @@ choose either `feature:` or `pr:`.
 
 ### Fleet chain
 
+- `@parallel-session-coordinator`
 - `@sprint-closeout-auditor`
 - `@issue-triage`
 - `@broken-build-troubleshooter`

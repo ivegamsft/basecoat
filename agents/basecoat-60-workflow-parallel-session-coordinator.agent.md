@@ -24,6 +24,10 @@ model_policy:
 
 Purpose: orchestrate a fleet of concurrent Copilot worktree sessions executing independent sprint issues in parallel, while enforcing serialized merge pacing, preventing merge conflicts, and tracking cross-session state.
 
+## Preflight
+
+Before dispatching write operations or activating new lanes, complete checks from `.github/agent-templates/preflight-block.md` and `docs/guides/worktree-sync-enforcement.md`.
+
 ## Inputs
 
 - List of issue numbers and their assigned worktree session paths

@@ -347,7 +347,8 @@ function Get-StageArtifact {
     [Parameter(Mandatory)]
     [string]$RunHash,
     [Parameter(Mandatory)]
-    [string]$ExecutionLane
+    [string]$ExecutionLane,
+    [string]$PreviousStageIssueUrl = ""
   )
 
   $safeGoalSlug = ($GoalText.ToLowerInvariant() -replace "[^a-z0-9]+", "-").Trim("-")
@@ -376,17 +377,21 @@ function Get-StageArtifact {
     branch_name = $branchName
     pr_title = "[Intent][$IntentName][$prTitlePrefix $StageIndex][$RepoShortName] $GoalText"
     pr_search_query = "is:pr is:open head:$branchName"
+    previous_stage_issue_url = $PreviousStageIssueUrl
     merge_policy = [ordered]@{
       sequencing = "serial"
       required_checks = $requiredChecks
       merge_ready_condition = "all_required_checks_green"
+      sync_with_latest_main = $true
+      wait_for_previous_stage = -not [string]::IsNullOrWhiteSpace($PreviousStageIssueUrl)
+      rebase_before_merge = $true
     }
-  cleanup_policy = [ordered]@{
-    workflow = ".github/workflows/sprint-closeout-branch-audit.yml"
-    script = "scripts/cleanup-branches.ps1"
-    audit_log = "GITHUB_STEP_SUMMARY"
+    cleanup_policy = [ordered]@{
+      workflow = ".github/workflows/sprint-closeout-branch-audit.yml"
+      script = "scripts/cleanup-branches.ps1"
+      audit_log = "GITHUB_STEP_SUMMARY"
+    }
   }
-}
 }
 
 function Get-ReleaseGateContract {
@@ -580,11 +585,11 @@ $specLine = if ([string]::IsNullOrWhiteSpace($SpecRef)) { "_Not provided_" } els
 $parentBody = @"
 ## Intent Contract
 
-- Intent: `$Intent`
+- Intent: ``$Intent``
 - Goal: $trimmedGoal
 - Repository: $TargetRepo
-- Risk band: `$RiskBand`
-- Profile: `$Profile`
+- Risk band: ``$RiskBand``
+- Profile: ``$Profile``
 - Spec reference: $specLine
 - Started: $timestamp
 
@@ -596,6 +601,8 @@ $parentBody = @"
 - [ ] Rollout strategy documented
 - [ ] Rollback strategy documented
 - [ ] Documentation updates identified
+- [ ] Child stages sync from the latest ``main`` before work starts
+- [ ] Child stages wait for the previous stage to close before starting
 
 ## Execution Model
 
@@ -608,16 +615,16 @@ The flow below emits actionable desired-state changes.
 "@
 
 foreach ($diff in $desiredStateDiff) {
-  $parentBody += "`n- `$($diff.surface)`: current=`$($diff.current_state)` -> desired=`$($diff.desired_state)` (`$($diff.action)`)"
+  $parentBody += "`n- ``$($diff.surface)``: current=``$($diff.current_state)`` -> desired=``$($diff.desired_state)`` (``$($diff.action)``)"
 }
 
 $parentBody += @"
 
 ## Staged Promotion Contract
 
-- Release gate workflow: `$($releaseGateContract.workflow)`
-- Promotion order: `$($releaseGateContract.promotion_order -join " -> ")`
-- Evidence bundle output: `$($releaseGateContract.evidence_bundle_output)`
+- Release gate workflow: ``$($releaseGateContract.workflow)``
+- Promotion order: ``$($releaseGateContract.promotion_order -join " -> ")``
+- Evidence bundle output: ``$($releaseGateContract.evidence_bundle_output)``
 - [ ] Production cutover uses validated rollback evidence
 
 $parentMarker
@@ -652,6 +659,7 @@ $summary = [ordered]@{
 if ($DryRun) {
   $summary.parent_issue_url = "https://github.com/$TargetRepo/issues/0000"
   $summary.parent_issue_number = "0000"
+  $previousStageIssueUrl = ""
   for ($i = 0; $i -lt $sprints.Count; $i++) {
     $phaseName = [string]$sprints[$i].Name
     $phaseSlug = ($phaseName.ToLowerInvariant() -replace "[^a-z0-9]+", "-").Trim("-")
@@ -663,7 +671,8 @@ if ($DryRun) {
       -StageIndex ($i + 1) `
       -StageSlug $phaseSlug `
       -RunHash $runKeyHash `
-      -ExecutionLane $executionLane
+      -ExecutionLane $executionLane `
+      -PreviousStageIssueUrl $previousStageIssueUrl
     $summary.child_issues += [ordered]@{
       sprint = $phaseName
       phase = $phaseName
@@ -672,6 +681,7 @@ if ($DryRun) {
       reused = $false
       stage_artifact = $stageArtifact
     }
+    $previousStageIssueUrl = "https://github.com/$TargetRepo/issues/000$($i + 1)"
   }
 } else {
   $tempRoot = [System.IO.Path]::GetTempPath()
@@ -727,6 +737,7 @@ if ($DryRun) {
     throw "Unable to parse parent issue number from: $parentUrl"
   }
   $summary.parent_issue_number = $Matches[1]
+  $previousStageIssueUrl = ""
 
   for ($i = 0; $i -lt $sprints.Count; $i++) {
     $sprint = $sprints[$i]
@@ -742,10 +753,36 @@ if ($DryRun) {
       -StageIndex $index `
       -StageSlug $phaseSlug `
       -RunHash $runKeyHash `
-      -ExecutionLane $executionLane
+      -ExecutionLane $executionLane `
+      -PreviousStageIssueUrl $previousStageIssueUrl
     $sprintTitlePrefix = if ($Intent -eq "onboarding-conductor") { "Phase" } else { "Sprint" }
     $sprintTitle = "[Intent][$Intent][$sprintTitlePrefix $index][$repoName] $trimmedGoal"
     $exitCriteria = $sprint.ExitCriteria | ForEach-Object { "- [ ] $_" } | Out-String
+    $hasPreviousStage = -not [string]::IsNullOrWhiteSpace($previousStageIssueUrl)
+    $syncGuardrail = @(
+      "## Sync and Wait Guardrail",
+      "",
+      "- [ ] Fetch and rebase from the latest ``main`` before starting work.",
+      "- [ ] Re-sync with the latest ``main`` before opening or updating the PR."
+    )
+    if ($hasPreviousStage) {
+      $syncGuardrail += "- [ ] Do not start this stage until the previous stage is closed."
+      $syncGuardrail += ""
+      $syncGuardrail += "- Previous stage issue: $previousStageIssueUrl"
+    }
+
+    $mergeSequencingChecklist = @(
+      "- [ ] Rebase the PR branch after the latest ``main`` changes land"
+    )
+    if ($hasPreviousStage) {
+      $mergeSequencingChecklist = @(
+        "- [ ] Merge this stage only after prior stage closure and all required checks are green"
+      ) + $mergeSequencingChecklist + @(
+        "- [ ] Wait for the previous stage issue before starting implementation"
+      )
+    } else {
+      $mergeSequencingChecklist += "- [ ] Merge this stage only after all required checks are green"
+    }
 
     $sprintBody = @"
 ## Sprint Objective
@@ -769,30 +806,32 @@ $exitCriteria
 
 ## PR Artifacts
 
-- Planned branch: `$($stageArtifact.branch_name)`
+- Planned branch: ``$($stageArtifact.branch_name)``
 - Planned PR title: $($stageArtifact.pr_title)
-- Planned PR search: `$($stageArtifact.pr_search_query)`
-- Execution lane: `$($stageArtifact.execution_lane)`
+- Planned PR search: ``$($stageArtifact.pr_search_query)``
+- Execution lane: ``$($stageArtifact.execution_lane)``
 - [ ] Linked PR created or updated for this stage
+
+$(($syncGuardrail -join "`n"))
 
 ## Merge Sequencing Guardrail
 
-- Policy: `$($stageArtifact.merge_policy.sequencing)`
+- Policy: ``$($stageArtifact.merge_policy.sequencing)``
 - Required checks before merge:
-  - `$($stageArtifact.merge_policy.required_checks[0])`
-  - `$($stageArtifact.merge_policy.required_checks[1])`
-- [ ] Merge this stage only after prior stage closure and all required checks are green
+  - ``$($stageArtifact.merge_policy.required_checks[0])``
+  - ``$($stageArtifact.merge_policy.required_checks[1])``
+$(($mergeSequencingChecklist -join "`n"))
 
 ## Release Gate Enforcement
 
-- Release gate workflow: `$($releaseGateContract.workflow)`
-- Promotion order: `$($releaseGateContract.promotion_order -join " -> ")`
-- Release gate lane input: `$($stageArtifact.execution_lane)`
+- Release gate workflow: ``$($releaseGateContract.workflow)``
+- Promotion order: ``$($releaseGateContract.promotion_order -join " -> ")``
+- Release gate lane input: ``$($stageArtifact.execution_lane)``
 - Lane strict profile for pilot-luxesite:
-  - Required gates: `lint, build, type, e2e, security, smoke`
-  - Required artifacts: `spec, docs, tests, runbook, release_notes`
-- [ ] Evidence bundle attached for this stage (`promotion-evidence-bundle.json`)
-- [ ] Promotion blocked when any required gate fails for `risk-$RiskBand`
+  - Required gates: ``lint, build, type, e2e, security, smoke``
+  - Required artifacts: ``spec, docs, tests, runbook, release_notes``
+- [ ] Evidence bundle attached for this stage (``promotion-evidence-bundle.json``)
+- [ ] Promotion blocked when any required gate fails for ``risk-$RiskBand``
 - [ ] Rollback validation evidence captured before production cutover
 - [ ] Runbook delta mapped to goal IDs
 - [ ] Release-note delta mapped to goal IDs
@@ -800,9 +839,9 @@ $exitCriteria
 
 ## Branch Cleanup and Audit
 
-- Cleanup workflow: `$($stageArtifact.cleanup_policy.workflow)`
-- Cleanup script: `$($stageArtifact.cleanup_policy.script)`
-- Audit output: `$($stageArtifact.cleanup_policy.audit_log)`
+- Cleanup workflow: ``$($stageArtifact.cleanup_policy.workflow)``
+- Cleanup script: ``$($stageArtifact.cleanup_policy.script)``
+- Audit output: ``$($stageArtifact.cleanup_policy.audit_log)``
 - [ ] Post-merge cleanup audit reviewed
 
 $phaseMarker
@@ -851,6 +890,7 @@ $phaseMarker
       reused = ($null -ne $existingChild)
       stage_artifact = $stageArtifact
     }
+    $previousStageIssueUrl = $sprintUrl
 
     Remove-Item -Path $sprintBodyPath -Force
   }
@@ -885,14 +925,14 @@ $markdownPath = [System.IO.Path]::ChangeExtension($OutputPath, ".md")
 $markdown = @"
 # Ship-it Intent Dispatch Summary
 
-- Intent: `$($summary.intent)`
+- Intent: ``$($summary.intent)``
 - Goal: $($summary.goal)
 - Repository: $($summary.target_repo)
-- Risk band: `$($summary.risk_band)`
-- Profile: `$($summary.profile)`
-- Dry run: `$($summary.dry_run)`
+- Risk band: ``$($summary.risk_band)``
+- Profile: ``$($summary.profile)``
+- Dry run: ``$($summary.dry_run)``
 - Parent issue: $($summary.parent_issue_url)
-- Parent issue reused: `$($summary.parent_issue_reused)`
+- Parent issue reused: ``$($summary.parent_issue_reused)``
 
 ## Desired-State Diff
 "@

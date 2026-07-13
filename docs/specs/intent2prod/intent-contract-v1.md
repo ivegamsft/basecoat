@@ -126,7 +126,7 @@ Each dispatch produces:
 | Machine-readable summary | `test-results/ship-it/summary.json` | JSON |
 | Human-readable summary | `test-results/ship-it/summary.md` | Markdown |
 | Parent intent issue | GitHub Issues | Issue body with governance checklist |
-| Sprint child issues (3) | GitHub Issues | One per sprint phase |
+| Sprint child issues (3) | GitHub Issues | One per sprint phase with latest-main sync and predecessor-wait guardrails |
 
 ## Non-Goals
 

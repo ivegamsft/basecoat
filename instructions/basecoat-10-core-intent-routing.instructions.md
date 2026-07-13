@@ -36,7 +36,7 @@ Rules:
 | `plan:` | Sprint or project planning | Now | `@sprint-planner`, `@product-manager` |
 | `spike:` | Time-boxed investigation, no deliverable | Now | `@solution-architect` |
 | `chore:` | Maintenance, cleanup, non-functional work | Soon | `@devops-engineer`, `@release-manager` |
-| `fleet:` | Close the sprint, plan the next one, triage oldest issues, and clean branches | Now | `@sprint-closeout-auditor`, `@sprint-planner`, `@issue-triage`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
+| `fleet:` | Close the sprint, plan the next one, triage oldest issues, and clean branches | Now | `@parallel-session-coordinator`, `@sprint-closeout-auditor`, `@sprint-planner`, `@issue-triage`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
 | `workflow:` | GitHub Actions/workflow failure triage and repair | Now | `@broken-build-troubleshooter`, `@self-healing-ci`, `@devops-engineer` |
 | `actions:` | GitHub Actions configuration, runs, and policy checks | Now | `@self-healing-ci`, `@ci-failure-escalation`, `@devops-engineer` |
 | `pr:` | Pull request lifecycle execution: remaining WIP logging, mergeability, broken-build recovery, and safe cleanup | Now | `@orphaned-pr-cleanup`, `@merge-coordinator`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
@@ -95,8 +95,17 @@ These words override the default timing of a prefix:
 
 ## Fleet Routing
 
-`fleet:` is the shortcut intent for sprint execution, backlog triage, and
-branch cleanup.
+`fleet:` is the shortcut intent for a sprint-execution batch that combines
+closeout, planning, oldest-first issue triage, PR/build auditing, and branch
+cleanup. It must start with the parallel-session coordinator and a latest-main
+sync preflight before fan-out.
+
+Execution contract:
+
+1. Start with `@parallel-session-coordinator`.
+2. Confirm latest-main sync before any write-capable lane starts.
+3. Fan out to the sprint closeout, triage, build audit, planning, and hygiene
+   agents only after preflight is recorded.
 
 ## GitHub-Native Routing
 

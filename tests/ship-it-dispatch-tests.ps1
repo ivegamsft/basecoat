@@ -42,6 +42,18 @@ if (-not (Test-Path $outputJson)) {
   throw "Dispatch summary JSON was not created: $outputJson"
 }
 
+$outputMarkdown = [System.IO.Path]::ChangeExtension($outputJson, ".md")
+if (-not (Test-Path $outputMarkdown)) {
+  throw "Dispatch summary Markdown was not created: $outputMarkdown"
+}
+$summaryMarkdown = Get-Content -Raw -Path $outputMarkdown
+if ($summaryMarkdown -notmatch [regex]::Escape('- Intent: `onboarding-conductor`')) {
+  throw "Summary Markdown should render the intent as a backtick code span with the expanded value."
+}
+if ($summaryMarkdown -match '\$\(') {
+  throw "Summary Markdown must not contain literal PowerShell subexpressions (broken backtick escaping)."
+}
+
 $summary = Get-Content -Raw -Path $outputJson | ConvertFrom-Json
 if ($summary.intent -ne "onboarding-conductor") {
   throw "Expected intent onboarding-conductor but found '$($summary.intent)'"
@@ -246,6 +258,21 @@ if (-not $shipItSummary.dry_run) {
 }
 if ($shipItSummary.child_issues.Count -ne 3) {
   throw "Expected 3 child sprint issues for ship-it but found $($shipItSummary.child_issues.Count)"
+}
+if (-not $shipItSummary.child_issues[0].stage_artifact.merge_policy.sync_with_latest_main) {
+  throw "Expected Sprint 1 merge policy to require latest-main sync."
+}
+if ($shipItSummary.child_issues[0].stage_artifact.merge_policy.wait_for_previous_stage) {
+  throw "Sprint 1 should not wait for a previous stage."
+}
+if (-not $shipItSummary.child_issues[1].stage_artifact.merge_policy.wait_for_previous_stage) {
+  throw "Sprint 2 should wait for the previous stage to close."
+}
+if ($shipItSummary.child_issues[1].stage_artifact.previous_stage_issue_url -ne $shipItSummary.child_issues[0].url) {
+  throw "Sprint 2 should reference Sprint 1 as its previous stage issue."
+}
+if ($shipItSummary.child_issues[2].stage_artifact.previous_stage_issue_url -ne $shipItSummary.child_issues[1].url) {
+  throw "Sprint 3 should reference Sprint 2 as its previous stage issue."
 }
 if ($shipItSummary.child_issues[2].stage_artifact.merge_policy.required_checks -notcontains "Ship-it Release Gate / enforce-release-gate") {
   throw "Expected Sprint 3 merge policy to require Ship-it Release Gate."

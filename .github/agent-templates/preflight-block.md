@@ -19,6 +19,15 @@ PREFLIGHT_CHECKS:
   - verify: git remote -v
     expect: origin points to IBuySpy-Shared/basecoat
     on_fail: ABORT — wrong repo remote
+  - verify: git fetch origin
+    expect: latest origin/main is available before starting work
+    on_fail: ABORT — fetch before coding or fan-out
+  - verify: (write ops only) git rebase origin/main
+    expect: write-capable lanes are synced to origin/main before write work; read-only lanes skip rebase
+    on_fail: ABORT — rebase before pushing, merging, or fanning out write work
+  - verify: git worktree list
+    expect: branch-to-worktree mapping is known before cleanup or merge
+    on_fail: ABORT — confirm worktree ownership first
 ```
 
 ## Usage

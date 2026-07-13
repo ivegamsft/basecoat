@@ -21,6 +21,7 @@ into governed SDLC execution artifacts with live GitHub side effects.
    - JSON summary: `test-results\ship-it\summary.json`
    - Markdown summary: `test-results\ship-it\summary.md`
    - Stage artifacts per sprint/phase (branch name, PR title/query, merge policy, cleanup policy)
+   - Latest-main sync and predecessor-wait guardrails for each child stage
 5. **Build-break detection and bounded recovery**
    - Workflow: `.github/workflows/ship-it-build-guard.yml`
    - Detector: `scripts/ship-it/build-break-detector.ps1`
@@ -96,6 +97,8 @@ For `profile=pilot-wawkr`, phase artifacts carry canary-specific lane metadata:
 
 1. Do not bypass required checks for risky goals.
 2. Keep merge operations serialized for release-affecting work.
+   Child stages must sync from the latest `main` before they start and wait for the
+   prior stage to close before opening or updating a PR.
 3. Record rollout and rollback evidence links in sprint issues.
 4. Capture post-release learnings before closeout.
 5. Run branch cleanup audit after merged PRs on `main` (workflow trigger) and review audit logs.
