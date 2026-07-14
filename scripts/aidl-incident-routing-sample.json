@@ -1,0 +1,58 @@
+[
+  {
+    "incident_id": "INC-1001",
+    "severity": "SEV1",
+    "status": "closed",
+    "detected_at": "2026-01-05T09:00:00Z",
+    "remediation_created_at": "2026-01-05T13:00:00Z",
+    "owner": "oncall-payments",
+    "affected_service": "payments-api",
+    "customer_impact": "Checkout unavailable for all customers.",
+    "root_cause_summary": "Connection pool exhaustion under peak load.",
+    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/1001",
+    "remediation_priority": "critical",
+    "verification_artifact_url": "https://github.com/IBuySpy-Shared/basecoat/commit/1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b",
+    "repeat_without_prior_verification": false
+  },
+  {
+    "incident_id": "INC-1002",
+    "severity": "SEV2",
+    "status": "resolved",
+    "detected_at": "2026-01-06T10:00:00Z",
+    "remediation_created_at": "2026-01-06T14:00:00Z",
+    "owner": "oncall-identity",
+    "affected_service": "identity-service",
+    "customer_impact": "Intermittent login failures for a subset of users.",
+    "root_cause_summary": "Token cache eviction misconfiguration.",
+    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/pull/1002",
+    "remediation_priority": "high",
+    "verification_artifact_url": "https://github.com/IBuySpy-Shared/basecoat/commit/2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c",
+    "repeat_without_prior_verification": false
+  },
+  {
+    "incident_id": "INC-1003",
+    "severity": "SEV3",
+    "status": "mitigated",
+    "detected_at": "2026-01-07T08:00:00Z",
+    "remediation_created_at": "2026-01-07T12:00:00Z",
+    "owner": "oncall-catalog",
+    "affected_service": "catalog-service",
+    "customer_impact": "Slow product search responses in one region.",
+    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/1003",
+    "remediation_priority": "medium",
+    "repeat_without_prior_verification": false
+  },
+  {
+    "incident_id": "INC-1004",
+    "severity": "SEV4",
+    "status": "monitoring",
+    "detected_at": "2026-01-08T09:00:00Z",
+    "remediation_created_at": "2026-01-08T11:00:00Z",
+    "owner": "oncall-notifications",
+    "affected_service": "notifications-service",
+    "customer_impact": "Delayed delivery of non-critical email notifications.",
+    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/1004",
+    "remediation_priority": "low",
+    "repeat_without_prior_verification": false
+  }
+]

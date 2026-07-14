@@ -398,6 +398,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running AIDL incident-to-backlog router tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'aidl-incident-to-backlog-router-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'AIDL incident-to-backlog router tests failed' -ForegroundColor Red
+    Write-FailureLog 'aidl-incident-to-backlog-router-tests'
+    exit 1
+}
+
 Write-Host 'Running MCP tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'mcp-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

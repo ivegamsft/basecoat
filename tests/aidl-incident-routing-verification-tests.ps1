@@ -683,6 +683,17 @@ try {
     $prefixBypassDir = $repoRootTrimmed + "-outside" + [System.IO.Path]::DirectorySeparatorChar + "out"
     & pwsh -NoProfile -File $scriptPath -InputPath $guardInput -OutputDir $prefixBypassDir 2>$null
     if ($LASTEXITCODE -eq 0) { throw 'Case 19: sibling OutputDir sharing the repo-root prefix must be rejected.' }
+
+    # --- Case 20: shipped default sample dataset must verify as pass. ---
+    # This is the default input for the aidl-incident-routing-verification workflow, so a drift
+    # in the sample or the verifier that flips it away from pass would make scheduled runs fail.
+    $samplePath = Join-Path $repoRoot 'scripts\aidl-incident-routing-sample.json'
+    if (-not (Test-Path $samplePath)) { throw 'Case 20: shipped sample dataset is missing.' }
+    $sampleOut = Join-Path $tempDir 'output-sample'
+    & pwsh -NoProfile -File $scriptPath -InputPath $samplePath -OutputDir $sampleOut 2>$null
+    if ($LASTEXITCODE -ne 0) { throw 'Case 20: shipped sample verification run failed.' }
+    $sampleJson = Get-Content (Join-Path $sampleOut 'incident-routing-verification.json') -Raw | ConvertFrom-Json
+    if ($sampleJson.status -ne 'pass') { throw "Case 20: shipped sample must verify as pass, got $($sampleJson.status)." }
 }
 finally {
     if (Test-Path $tempDir) {

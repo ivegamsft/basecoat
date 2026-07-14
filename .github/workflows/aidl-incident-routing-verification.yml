@@ -1,0 +1,372 @@
+name: "BaseCoat - AIDL Incident Routing and Verification"
+
+on:
+  schedule:
+    # Run weekly on Monday at 07:30 AM UTC (offset from the drift audit at 07:00).
+    - cron: '30 7 * * 1'
+  workflow_dispatch:
+    inputs:
+      input_path:
+        description: 'Repository-relative path to the incident routing export JSON'
+        required: false
+        default: ''
+        type: string
+      area_taxonomy_path:
+        description: 'Optional repository-relative path to an allowed portfolio-area JSON array'
+        required: false
+        default: ''
+        type: string
+      dry_run:
+        description: 'Produce the routing plan without creating or updating backlog issues'
+        required: false
+        default: true
+        type: boolean
+  push:
+    paths:
+      - 'scripts/aidl-incident-routing-sample.json'
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  incident-routing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      verification_status: ${{ steps.run.outputs.verification_status }}
+      input_count: ${{ steps.run.outputs.input_count }}
+      dry_run: ${{ steps.params.outputs.dry_run }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v4.1.7
+
+      - name: Resolve parameters
+        id: params
+        # All dispatch- and variable-derived values enter through env (never interpolated into
+        # the script body) and are validated as repository-relative paths before use downstream.
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_INPUT_PATH: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.input_path || '' }}
+          DISPATCH_AREA_PATH: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.area_taxonomy_path || '' }}
+          DISPATCH_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run || '' }}
+          VAR_EXPORT_PATH: ${{ vars.AIDL_INCIDENT_ROUTING_EXPORT }}
+        run: |
+          set -euo pipefail
+          DEFAULT_SAMPLE="scripts/aidl-incident-routing-sample.json"
+
+          # Data source precedence: dispatch input, then the repository variable (production
+          # export produced by the upstream collector), then the shipped demo sample.
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -n "${DISPATCH_INPUT_PATH:-}" ]; then
+            INPUT_PATH="$DISPATCH_INPUT_PATH"
+          elif [ -n "${VAR_EXPORT_PATH:-}" ]; then
+            INPUT_PATH="$VAR_EXPORT_PATH"
+          else
+            INPUT_PATH="$DEFAULT_SAMPLE"
+          fi
+
+          AREA_PATH=""
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            AREA_PATH="${DISPATCH_AREA_PATH:-}"
+          fi
+
+          # Trusted automatic triggers (schedule) drive routing end to end; manual dispatch
+          # defaults to plan-only unless explicitly opted out; sample pushes never write.
+          if [ "$EVENT_NAME" = "schedule" ]; then
+            DRY_RUN="false"
+          elif [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            DRY_RUN="true"
+            if [ "${DISPATCH_DRY_RUN:-}" = "false" ]; then
+              DRY_RUN="false"
+            fi
+          else
+            DRY_RUN="true"
+          fi
+
+          validate_rel() {
+            value="$1"; name="$2"
+            case "$value" in
+              /*) echo "ERROR: $name must be repository-relative (absolute paths are rejected): $value"; exit 1 ;;
+            esac
+            case "$value" in
+              *..*) echo "ERROR: $name must not contain '..': $value"; exit 1 ;;
+            esac
+            case "$value" in
+              *$'\n'*) echo "ERROR: $name must not contain newlines."; exit 1 ;;
+            esac
+          }
+          validate_rel "$INPUT_PATH" "input_path"
+          if [ -n "$AREA_PATH" ]; then validate_rel "$AREA_PATH" "area_taxonomy_path"; fi
+
+          {
+            echo "input_path=$INPUT_PATH"
+            echo "area_taxonomy_path=$AREA_PATH"
+            echo "dry_run=$DRY_RUN"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Validate incident export
+        env:
+          INPUT_PATH: ${{ steps.params.outputs.input_path }}
+        run: |
+          set -euo pipefail
+          if [ ! -f "$INPUT_PATH" ]; then
+            echo "ERROR: incident export not found at $INPUT_PATH"
+            exit 1
+          fi
+          # Pass the path as an argument; never generate Python source from untrusted input.
+          python3 -c 'import json,sys; json.load(open(sys.argv[1])); print("Incident export is valid JSON.")' "$INPUT_PATH"
+
+      - name: Route incidents and verify linkage
+        id: run
+        shell: pwsh
+        env:
+          INPUT_PATH: ${{ steps.params.outputs.input_path }}
+          AREA_PATH: ${{ steps.params.outputs.area_taxonomy_path }}
+          TARGET_REPO: ${{ github.repository }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $inputPath = $env:INPUT_PATH
+          $areaPath = $env:AREA_PATH
+
+          # 1. Router: deterministic per-incident backlog routing plan (SEV-to-priority map,
+          #    owner and verification links preserved). Creates no issues by itself. A throw
+          #    here (for example malformed input) fails the step under ErrorActionPreference Stop.
+          $rparams = @{
+            InputPath = $inputPath
+            OutputDir = 'artifacts/aidl-incident-to-backlog-router'
+            Repo = $env:TARGET_REPO
+          }
+          if (-not [string]::IsNullOrWhiteSpace($areaPath)) {
+            $rparams.AreaTaxonomyPath = $areaPath
+          }
+          .\scripts\aidl-incident-to-backlog-router.ps1 @rparams
+
+          # 2. Verifier: incident-to-remediation-to-verification linkage scorecard.
+          $vparams = @{
+            InputPath = $inputPath
+            OutputDir = 'artifacts/aidl-incident-routing-verification'
+          }
+          if (-not [string]::IsNullOrWhiteSpace($areaPath)) {
+            $vparams.AreaTaxonomyPath = $areaPath
+          }
+
+          # The verifier is a pure PowerShell script that ends without setting $LASTEXITCODE, so
+          # reaching the next statement means success; rely on catch to detect verifier failure.
+          $verifierFailed = $false
+          try {
+            .\scripts\aidl-incident-routing-verification.ps1 @vparams
+          } catch {
+            Write-Host "Verifier error: $_"
+            $verifierFailed = $true
+          }
+
+          $jsonPath = 'artifacts/aidl-incident-routing-verification/incident-routing-verification.json'
+          if ($verifierFailed -or -not (Test-Path $jsonPath)) {
+            echo "verification_status=error" >> $env:GITHUB_OUTPUT
+            echo "input_count=0" >> $env:GITHUB_OUTPUT
+            "### AIDL Incident Routing and Verification" >> $env:GITHUB_STEP_SUMMARY
+            "" >> $env:GITHUB_STEP_SUMMARY
+            "**Verification status:** error" >> $env:GITHUB_STEP_SUMMARY
+            exit 1
+          }
+
+          $report = Get-Content $jsonPath -Raw | ConvertFrom-Json
+          $status = [string]$report.status
+          $count = [int]$report.input_count
+          echo "verification_status=$status" >> $env:GITHUB_OUTPUT
+          echo "input_count=$count" >> $env:GITHUB_OUTPUT
+
+          $planPath = 'artifacts/aidl-incident-to-backlog-router/incident-routing-plan.json'
+          $plan = Get-Content $planPath -Raw | ConvertFrom-Json
+          $m = $report.metrics
+          "### AIDL Incident Routing and Verification" >> $env:GITHUB_STEP_SUMMARY
+          "" >> $env:GITHUB_STEP_SUMMARY
+          "**Verification status:** $status" >> $env:GITHUB_STEP_SUMMARY
+          "**Incident records:** $count" >> $env:GITHUB_STEP_SUMMARY
+          "**Routing plan:** create $($plan.summary.create), skip $($plan.summary.skip), invalid $($plan.summary.invalid)" >> $env:GITHUB_STEP_SUMMARY
+          "" >> $env:GITHUB_STEP_SUMMARY
+          "| Metric | Value | Status |" >> $env:GITHUB_STEP_SUMMARY
+          "|---|---:|---|" >> $env:GITHUB_STEP_SUMMARY
+          "| Routed incidents with remediation link (%) | $($m.routed_incidents_with_remediation_link.value_pct) | $($m.routed_incidents_with_remediation_link.status) |" >> $env:GITHUB_STEP_SUMMARY
+          "| Verified closures SEV1/SEV2 (%) | $($m.verified_closures_high_critical.value_pct) | $($m.verified_closures_high_critical.status) |" >> $env:GITHUB_STEP_SUMMARY
+          "| Median incident-to-remediation latency (business days) | $($m.median_incident_to_remediation_creation_latency_business_days.value) | $($m.median_incident_to_remediation_creation_latency_business_days.status) |" >> $env:GITHUB_STEP_SUMMARY
+          "| Repeat incidents without prior verification | $($m.repeat_incidents_without_prior_verification.value) | $($m.repeat_incidents_without_prior_verification.status) |" >> $env:GITHUB_STEP_SUMMARY
+
+          # The verifier always exits 0; the failing scorecard is surfaced as a workflow signal below.
+          exit 0
+
+      - name: Upload routing plan and scorecard
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: aidl-incident-routing
+          path: artifacts
+          retention-days: 90
+
+      - name: Execute routing plan
+        if: steps.params.outputs.dry_run != 'true'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const fs = require('fs');
+            const planPath = 'artifacts/aidl-incident-to-backlog-router/incident-routing-plan.json';
+            if (!fs.existsSync(planPath)) return;
+            const plan = JSON.parse(fs.readFileSync(planPath, 'utf-8'));
+            const creates = (plan.items || []).filter(i => i.action === 'create' && i.eligible === true);
+            if (creates.length === 0) {
+              core.info('Routing plan has no eligible incidents requiring backlog creation.');
+              return;
+            }
+
+            // Provision any labels the plan references that do not yet exist, so issue creation
+            // and label reconciliation do not fail on an unknown label.
+            const neededLabels = [...new Set(creates.flatMap(i => i.labels || []))];
+            for (const name of neededLabels) {
+              try {
+                await github.rest.issues.getLabel({ owner: context.repo.owner, repo: context.repo.repo, name });
+              } catch (e) {
+                if (e.status === 404) {
+                  await github.rest.issues.createLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name,
+                    color: 'ededed',
+                    description: 'Auto-provisioned by the incident-to-backlog router.',
+                  });
+                  core.info(`Provisioned missing label: ${name}`);
+                } else {
+                  throw e;
+                }
+              }
+            }
+
+            // Load existing issues in every state and index by the persisted incident-ID marker
+            // so a corrected/reopened/closed prior remediation issue is not duplicated.
+            const existing = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+              per_page: 100,
+            });
+            const findByMarker = (marker) =>
+              existing.find(i => typeof i.body === 'string' && i.body.includes(`<!-- ${marker} -->`));
+
+            for (const item of creates) {
+              const match = findByMarker(item.marker);
+              if (match) {
+                // Reconcile priority labels so a severity change (e.g. SEV3 -> SEV1) updates the
+                // mapping while preserving unrelated labels.
+                const desiredPriority = (item.labels || []).find(l => l.startsWith('priority:'));
+                const current = (match.labels || []).map(l => (typeof l === 'string' ? l : l.name));
+                for (const lbl of current) {
+                  if (lbl && lbl.startsWith('priority:') && lbl !== desiredPriority) {
+                    try {
+                      await github.rest.issues.removeLabel({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        issue_number: match.number,
+                        name: lbl,
+                      });
+                    } catch (e) {
+                      core.info(`Could not remove stale label ${lbl}: ${e.message}`);
+                    }
+                  }
+                }
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: match.number,
+                  labels: item.labels,
+                });
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: match.number,
+                  body: `Incident routing re-evaluated for \`${item.incident_id}\`.\n\n${item.body_markdown}`,
+                });
+                core.info(`Updated existing remediation issue #${match.number} for ${item.incident_id}.`);
+              } else {
+                const created = await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: item.title,
+                  body: item.body_markdown,
+                  labels: item.labels,
+                });
+                core.info(`Created remediation issue #${created.data.number} for ${item.incident_id}.`);
+              }
+            }
+
+      - name: Alert on failing verification scorecard
+        if: steps.run.outputs.verification_status == 'fail'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const fs = require('fs');
+            const jsonPath = 'artifacts/aidl-incident-routing-verification/incident-routing-verification.json';
+            if (!fs.existsSync(jsonPath)) return;
+            const report = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
+            const m = report.metrics;
+            const attempt = process.env.GITHUB_RUN_ATTEMPT || '1';
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}/attempts/${attempt}`;
+
+            const row = (label, value, status) => `| ${label} | ${value} | ${status} |`;
+            const rows = [
+              row('Routed incidents with remediation link (%)', m.routed_incidents_with_remediation_link.value_pct, m.routed_incidents_with_remediation_link.status),
+              row('Verified closures SEV1/SEV2 (%)', m.verified_closures_high_critical.value_pct, m.verified_closures_high_critical.status),
+              row('Median incident-to-remediation latency (business days)', m.median_incident_to_remediation_creation_latency_business_days.value, m.median_incident_to_remediation_creation_latency_business_days.status),
+              row('Repeat incidents without prior verification', m.repeat_incidents_without_prior_verification.value, m.repeat_incidents_without_prior_verification.status),
+            ].join('\n');
+
+            const body = [
+              '## AIDL Incident Routing Verification Failing',
+              '',
+              `**Overall status:** ${report.status}`,
+              `**Incident records:** ${report.input_count}`,
+              `**Run (immutable attempt):** ${runUrl}`,
+              '',
+              '| Metric | Value | Status |',
+              '|---|---:|---|',
+              rows,
+              '',
+              '_Resolve the failing metrics so incident routing, remediation, and closeout evidence stay deterministic._',
+            ].join('\n');
+
+            const title = 'AIDL incident routing verification failing';
+            const existing = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'governance',
+              state: 'open',
+              per_page: 100,
+            });
+
+            const match = existing.find(i => i.title === title);
+            if (match) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: match.number,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['governance', 'priority:high'],
+              });
+            }
+
+      - name: Fail on failing verification
+        if: steps.run.outputs.verification_status == 'fail' || steps.run.outputs.verification_status == 'error'
+        env:
+          VERIFICATION_STATUS: ${{ steps.run.outputs.verification_status }}
+        run: |
+          echo "Incident routing verification did not pass (status: $VERIFICATION_STATUS)."
+          exit 1
