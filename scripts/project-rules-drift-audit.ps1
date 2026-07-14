@@ -300,6 +300,7 @@ $report = [PSCustomObject]@{
     findings         = @($filteredFindings | Sort-Object { $SeverityOrder[$_.severity] }, rule_id)
     summary          = [PSCustomObject]@{
         total_findings = $filteredFindings.Count
+        outcome        = Get-DriftOutcome -Summary $summary
         by_severity    = [PSCustomObject]$summary
         by_drift_type  = [PSCustomObject](Get-DriftTypeSummary -Findings $filteredFindings)
     }
@@ -345,11 +346,13 @@ if ($Mode -eq 'enforce') {
 
 # Write step summary for CI (guarded — $env:GITHUB_STEP_SUMMARY is unset in local runs)
 if ($env:GITHUB_STEP_SUMMARY) {
-    $driftStatus = if ($summary.critical -gt 0) { 'critical' } elseif ($summary.high -gt 0) { 'high' } elseif ($summary.medium -gt 0) { 'medium' } else { 'clean' }
+    $driftStatus = if ($summary.critical -gt 0) { 'critical' } elseif ($summary.high -gt 0) { 'high' } elseif ($summary.medium -gt 0) { 'medium' } elseif ($summary.low -gt 0) { 'low' } else { 'clean' }
+    $driftOutcome = Get-DriftOutcome -Summary $summary
     $summaryLines = @(
         "### Drift Audit Summary",
         "",
-        "**Status:** $driftStatus",
+        "**Outcome:** $driftOutcome",
+        "**Severity status:** $driftStatus",
         "**Findings:** $($filteredFindings.Count) (critical: $($summary.critical), high: $($summary.high), medium: $($summary.medium), low: $($summary.low))",
         "**Mode:** $Mode",
         "**Baseline:** v$($baseline.version)"

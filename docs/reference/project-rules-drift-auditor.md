@@ -81,8 +81,11 @@ The scheduled workflow at `.github/workflows/project-rules-drift-audit.yml` runs
 - On any push that modifies `scripts/project-rules-baseline.json`
 - On demand via `workflow_dispatch` with configurable mode and threshold
 
-The workflow uploads a `drift-report.json` artifact and opens a critical issue
-when critical drift is detected.
+The workflow uploads a `drift-report.json` artifact (which includes a machine-readable
+`summary.outcome` of `pass`/`warn`/`fail`). When the outcome is `fail` (any critical or high
+finding, per the audit outcome mapping), the workflow opens or updates a deduplicated
+`governance` tracking issue listing the critical/high findings and fails the run so operators
+are alerted. A `warn` outcome (medium/low findings only) is reported but does not fail the run.
 
 ### Triggering manually
 

@@ -47,6 +47,7 @@ jobs:
     timeout-minutes: 15
     outputs:
       drift_status: ${{ steps.audit.outputs.drift_status }}
+      drift_outcome: ${{ steps.audit.outputs.drift_outcome }}
       findings_count: ${{ steps.audit.outputs.findings_count }}
     steps:
       - name: Check out repository
@@ -117,25 +118,31 @@ jobs:
             $critical = $report.summary.by_severity.critical
             $high     = $report.summary.by_severity.high
             $medium   = $report.summary.by_severity.medium
+            $low      = $report.summary.by_severity.low
             $total    = $report.summary.total_findings
+            $outcome  = $report.summary.outcome
 
             $status = if ($critical -gt 0) { 'critical' } `
                       elseif ($high -gt 0) { 'high' } `
                       elseif ($medium -gt 0) { 'medium' } `
+                      elseif ($low -gt 0) { 'low' } `
                       else { 'clean' }
 
             echo "drift_status=$status" >> $env:GITHUB_OUTPUT
+            echo "drift_outcome=$outcome" >> $env:GITHUB_OUTPUT
             echo "findings_count=$total" >> $env:GITHUB_OUTPUT
 
             # Write step summary
             "### Project Rules Drift Audit" >> $env:GITHUB_STEP_SUMMARY
             "" >> $env:GITHUB_STEP_SUMMARY
+            "**Outcome:** $outcome" >> $env:GITHUB_STEP_SUMMARY
             "**Status:** $status" >> $env:GITHUB_STEP_SUMMARY
-            "**Findings:** $total (critical: $critical, high: $high, medium: $medium)" >> $env:GITHUB_STEP_SUMMARY
+            "**Findings:** $total (critical: $critical, high: $high, medium: $medium, low: $low)" >> $env:GITHUB_STEP_SUMMARY
             "**Mode:** $($report.mode)" >> $env:GITHUB_STEP_SUMMARY
             "**Baseline:** v$($report.baseline_version)" >> $env:GITHUB_STEP_SUMMARY
           } else {
             echo "drift_status=unknown" >> $env:GITHUB_OUTPUT
+            echo "drift_outcome=unknown" >> $env:GITHUB_OUTPUT
             echo "findings_count=0" >> $env:GITHUB_OUTPUT
           }
 
@@ -156,56 +163,105 @@ jobs:
           path: drift-report.json
           retention-days: 90
 
-      - name: Open issue on critical drift
-        if: steps.audit.outputs.drift_status == 'critical'
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v7
+      - name: Open issue on failing drift outcome
+        # Runs even when the audit step exits non-zero on critical drift (implicit success()
+        # would otherwise skip issue creation); the drift_outcome output is written before exit.
+        if: ${{ !cancelled() && steps.audit.outputs.drift_outcome == 'fail' }}
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const fs = require('fs');
             if (!fs.existsSync('drift-report.json')) return;
             const report = JSON.parse(fs.readFileSync('drift-report.json', 'utf-8'));
-            const criticalFindings = report.findings.filter(f => f.severity === 'critical');
-            if (criticalFindings.length === 0) return;
+            // Fail-level findings per the contract outcome mapping: critical or high.
+            const failFindings = report.findings.filter(f => f.severity === 'critical' || f.severity === 'high');
+            if (failFindings.length === 0) return;
 
-            const rows = criticalFindings
-              .map(f => `| \`${f.finding_id}\` | ${f.rule_name} | ${f.drift_type} | ${f.remediation} |`)
+            const rows = failFindings
+              .map(f => `| \`${f.finding_id}\` | ${f.severity} | ${f.rule_name} | ${f.drift_type} | ${f.remediation} |`)
               .join('\n');
 
+            const attempt = process.env.GITHUB_RUN_ATTEMPT || '1';
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}/attempts/${attempt}`;
             const body = [
-              '## Critical Project Rules Drift Detected',
+              '## Project Rules Drift Audit Failing',
               '',
+              `**Outcome:** ${report.summary.outcome}`,
               `**Audit ID:** ${report.audit_id}`,
               `**Baseline version:** ${report.baseline_version}`,
-              `**Run:** ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              `**Run (immutable attempt):** ${runUrl}`,
               '',
-              '| Finding ID | Rule | Drift Type | Remediation |',
-              '|---|---|---|---|',
+              '| Finding ID | Severity | Rule | Drift Type | Remediation |',
+              '|---|---|---|---|---|',
               rows,
               '',
-              '_Resolve critical findings immediately to restore AIDL guardrail compliance._',
+              '_Resolve critical/high findings to restore AIDL guardrail compliance._',
             ].join('\n');
 
-            const { data: existing } = await github.rest.issues.listForRepo({
+            const title = 'Project rules drift audit failing';
+            const legacyTitle = 'Critical project rules drift detected';
+            // A fail driven only by high findings should be priority:high, not priority:critical.
+            const hasCritical = failFindings.some(f => f.severity === 'critical');
+            const priorityLabel = hasCritical ? 'priority:critical' : 'priority:high';
+            const existing = await github.paginate(github.rest.issues.listForRepo, {
               owner: context.repo.owner,
               repo: context.repo.repo,
               labels: 'governance',
               state: 'open',
-              per_page: 50,
+              per_page: 100,
             });
 
-            const title = 'Critical project rules drift detected';
-            if (!existing.some(i => i.title === title)) {
+            const match = existing.find(i => i.title === title || i.title === legacyTitle);
+            if (match) {
+              // Migrate a legacy critical-drift issue to the current title so it is not duplicated.
+              if (match.title === legacyTitle) {
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: match.number,
+                  title,
+                });
+              }
+              // Reconcile the priority label so an escalation/de-escalation is reflected.
+              const current = (match.labels || []).map(l => (typeof l === 'string' ? l : l.name));
+              for (const lbl of current) {
+                if (lbl && lbl.startsWith('priority:') && lbl !== priorityLabel) {
+                  try {
+                    await github.rest.issues.removeLabel({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: match.number,
+                      name: lbl,
+                    });
+                  } catch (e) {
+                    core.info(`Could not remove stale label ${lbl}: ${e.message}`);
+                  }
+                }
+              }
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: match.number,
+                labels: ['governance', priorityLabel],
+              });
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: match.number,
+                body,
+              });
+            } else {
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 title,
                 body,
-                labels: ['governance', 'priority:critical'],
+                labels: ['governance', priorityLabel],
               });
             }
 
-      - name: Fail on critical drift
-        if: steps.audit.outputs.drift_status == 'critical'
+      - name: Fail on failing drift outcome
+        if: steps.audit.outputs.drift_outcome == 'fail'
         run: |
-          echo "Critical project rules drift detected. Review the drift report and resolve before the next sprint."
+          echo "Project rules drift audit outcome is fail (critical/high drift). Review the drift report and resolve before the next sprint."
           exit 1

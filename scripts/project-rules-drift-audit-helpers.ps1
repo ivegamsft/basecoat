@@ -9,6 +9,24 @@ function Get-DriftTypeSummary {
     }
 }
 
+function Get-DriftOutcome {
+    # Maps per-severity finding counts to the overall audit outcome defined in
+    # docs/specs/aidl-portfolio/sprint-41/portfolio-drift-detection-rules.md section 2a:
+    #   any critical or high finding -> fail
+    #   any medium or low finding (no critical/high) -> warn
+    #   no findings -> pass
+    param([hashtable]$Summary)
+
+    $critical = if ($Summary.ContainsKey('critical')) { [int]$Summary['critical'] } else { 0 }
+    $high = if ($Summary.ContainsKey('high')) { [int]$Summary['high'] } else { 0 }
+    $medium = if ($Summary.ContainsKey('medium')) { [int]$Summary['medium'] } else { 0 }
+    $low = if ($Summary.ContainsKey('low')) { [int]$Summary['low'] } else { 0 }
+
+    if ($critical -gt 0 -or $high -gt 0) { return 'fail' }
+    if ($medium -gt 0 -or $low -gt 0) { return 'warn' }
+    return 'pass'
+}
+
 function Compare-Rules {
     param(
         [array]$BaselineRules,

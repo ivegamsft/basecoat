@@ -110,5 +110,12 @@ if ($twoSummary.missing -ne 0 -or $twoSummary.modified -ne 1 -or $twoSummary.ext
 }
 Set-StrictMode -Off
 
+# Get-DriftOutcome maps per-severity counts to the contract section 2a outcome.
+if ((Get-DriftOutcome -Summary @{ critical = 1; high = 0; medium = 0; low = 0 }) -ne 'fail') { throw 'Get-DriftOutcome: any critical must be fail.' }
+if ((Get-DriftOutcome -Summary @{ critical = 0; high = 1; medium = 0; low = 0 }) -ne 'fail') { throw 'Get-DriftOutcome: any high must be fail.' }
+if ((Get-DriftOutcome -Summary @{ critical = 0; high = 0; medium = 2; low = 0 }) -ne 'warn') { throw 'Get-DriftOutcome: medium-only must be warn.' }
+if ((Get-DriftOutcome -Summary @{ critical = 0; high = 0; medium = 0; low = 3 }) -ne 'warn') { throw 'Get-DriftOutcome: low-only must be warn.' }
+if ((Get-DriftOutcome -Summary @{ critical = 0; high = 0; medium = 0; low = 0 }) -ne 'pass') { throw 'Get-DriftOutcome: no findings must be pass.' }
+
 Write-Host 'Project rules drift audit tests passed' -ForegroundColor Green
 exit 0

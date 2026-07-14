@@ -45,13 +45,12 @@ audit outcome:
 
 Enforce mode opens remediation issues (labelled `project-rules-drift` + `governance`) for
 findings at or above the configurable `SeverityThreshold` (whose default is `low`, so all
-findings are actionable unless the threshold is narrowed). Consumers derive the overall
-Fail/Warn/Pass outcome from the per-severity counts emitted in `drift-report.json`
-(`critical`/`high`/`medium`/`low`) using the mapping above. Current-versus-target: the report
-schema today publishes only these counts (the step summary separately renders
-`critical`/`high`/`medium`/`clean`, classifying low-only drift as `clean`), so emitting a
-single named machine-readable `outcome` field in `drift-report.json` is the required Wave 2
-enhancement that lets alerting and downstream consumers gate deterministically.
+findings are actionable unless the threshold is narrowed). The report emits a single named
+machine-readable `outcome` field at `summary.outcome` in `drift-report.json` (`pass`/`warn`/
+`fail`) computed from the mapping above, so alerting and downstream consumers gate on it
+directly rather than re-deriving from the per-severity counts (which remain available at
+`summary.by_severity`). The drift workflow surfaces the same `outcome` in its step summary and
+opens/updates a `governance` tracking issue and fails the run when `outcome` is `fail`.
 
 ## 3. Ownership and response expectations
 
@@ -68,8 +67,9 @@ Named, scoped artifacts. In `advisory`/`enforce` runs the findings are first fil
 `SeverityThreshold`, and both outputs below reflect that filtered set:
 
 - `drift-report.json` (the `-OutputPath` value, default `drift-report.json`) - the persisted
-  machine-readable report of record: `summary.total_findings`, `summary.by_severity`,
-  `summary.by_drift_type`, and per-finding remediation/effort/rationale.
+  machine-readable report of record: `summary.outcome` (`pass`/`warn`/`fail`),
+  `summary.total_findings`, `summary.by_severity`, `summary.by_drift_type`, and per-finding
+  remediation/effort/rationale.
 - A human-readable Markdown scorecard of the same (filtered) findings is rendered to stdout
   for the run log; the JSON is the persisted artifact.
 - In enforce mode, the remediation issues described in section 2a are the actionable output.
