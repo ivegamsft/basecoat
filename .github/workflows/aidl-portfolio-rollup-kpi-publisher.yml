@@ -97,9 +97,38 @@ jobs:
 
           .\scripts\aidl-portfolio-rollup-kpi-publisher.ps1 @params
 
+      - name: Generate delivery-flow scorecard
+        shell: pwsh
+        run: |
+          $rollupJson = 'artifacts/aidl-portfolio-rollup/portfolio-kpi-rollup.json'
+          if (-not (Test-Path $rollupJson)) {
+            throw "Rollup JSON not found at $rollupJson"
+          }
+          $attempt = if ($env:GITHUB_RUN_ATTEMPT) { $env:GITHUB_RUN_ATTEMPT } else { '1' }
+          $runUrl = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID/attempts/$attempt"
+          .\scripts\aidl-portfolio-rollup-scorecard.ps1 -RollupPath $rollupJson -OutputDir 'artifacts/aidl-portfolio-rollup-scorecard' -RunUrl $runUrl
+
+          $card = Get-Content 'artifacts/aidl-portfolio-rollup-scorecard/portfolio-rollup-scorecard.json' -Raw | ConvertFrom-Json
+          "### AIDL Portfolio Delivery-Flow Scorecard" >> $env:GITHUB_STEP_SUMMARY
+          "" >> $env:GITHUB_STEP_SUMMARY
+          "**Overall outcome:** $($card.overall_outcome)" >> $env:GITHUB_STEP_SUMMARY
+          "" >> $env:GITHUB_STEP_SUMMARY
+          "| Metric | Value | Status |" >> $env:GITHUB_STEP_SUMMARY
+          "|---|---:|---|" >> $env:GITHUB_STEP_SUMMARY
+          foreach ($m in $card.metrics) {
+            "| $($m.label) | $($m.value) | $($m.status) |" >> $env:GITHUB_STEP_SUMMARY
+          }
+
       - name: Upload rollup artifacts
         uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
           name: aidl-portfolio-rollup
           path: artifacts/aidl-portfolio-rollup
+          retention-days: 14
+
+      - name: Upload delivery-flow scorecard
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        with:
+          name: aidl-portfolio-rollup-scorecard
+          path: artifacts/aidl-portfolio-rollup-scorecard
           retention-days: 14

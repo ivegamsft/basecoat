@@ -86,6 +86,39 @@ fresh `generated_at_utc`, per section 4):
   accepted input), `dry-run-skipped` when a positive `PublishIssueNumber` is combined with
   `-DryRun`, and otherwise the result of the publish attempt. Callers must not expect a
   published comment merely because a run is not a dry run.
+- A **delivery-flow scorecard** derived from the rollup by
+  `scripts/aidl-portfolio-rollup-scorecard.ps1`: `portfolio-rollup-scorecard.json` (and a
+  markdown companion) grading the portfolio aggregate's delivery-flow indicators
+  (`sprint_completion_pct`, `blocked_open_issues`, `open_incidents`, `open_risk_high_issues`,
+  `incident_median_resolution_hours`, `average_pr_lead_time_hours`) against configurable
+  targets into a per-metric `pass`/`warn`/`fail` and a worst-wins `overall_outcome`. Targets
+  default to the documented values below and are overridable via `-ThresholdsPath`; inverted
+  threshold pairs (a lower-is-better `pass` above its `warn`, or a higher-is-better `pass` below
+  its `warn`) are rejected. Metrics that use a sentinel `0` for "no samples" grade as `no-data`
+  (not a healthy `pass`) when their sample count is zero: `incident_median_resolution_hours`
+  (via `closed_incidents`), `average_pr_lead_time_hours` (via `merged_prs`), and
+  `sprint_completion_pct` (via `sprint_open_items + sprint_closed_items`); any `no-data` metric
+  forces the overall outcome to at least `warn`. The scorecard is deterministic: its
+  `generated_at_utc` is the source rollup's timestamp (not wall-clock), so identical rollups
+  produce byte-identical scorecards. The `evidence` block links the source rollup
+  (`rollup_source`, and a required, valid `rollup_generated_at_utc`) and the producing run
+  (`run_url`, a required non-blank input so every scorecard is auditable). The scorecard emits a
+  normalized 0-100 `maturity_score` (mean of per-metric scores: pass 100, warn 70, no-data 60,
+  fail 30) and a `maturity_tier` per `audit-framework.md`, so it feeds the weighted portfolio
+  composite. `overall_outcome` is derived from the score band (pass `>= 85`, warn `60-84`, fail
+  `< 60`) so status and score never disagree, using worst-status-in-band capping: a blocking
+  `fail` caps the score in the fail band and any `warn` or missing-evidence (`no-data`) metric
+  caps it in the warn band, so a single degraded control cannot yield a passing tier. Unknown
+  threshold-override keys are rejected. The graded output is a reusable, auditable artifact.
+
+  | Metric | Direction | Default pass | Default warn |
+  |---|---|---|---|
+  | `sprint_completion_pct` | higher-is-better | `>= 80` | `>= 60` |
+  | `blocked_open_issues` | lower-is-better | `<= 0` | `<= 3` |
+  | `open_incidents` | lower-is-better | `<= 0` | `<= 2` |
+  | `open_risk_high_issues` | lower-is-better | `<= 0` | `<= 2` |
+  | `incident_median_resolution_hours` | lower-is-better | `<= 24` | `<= 72` |
+  | `average_pr_lead_time_hours` | lower-is-better | `<= 48` | `<= 96` |
 
 ## 4. Evidence link requirements
 
