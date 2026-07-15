@@ -398,6 +398,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running AIDL memory hygiene sweep tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'aidl-memory-hygiene-sweep-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'AIDL memory hygiene sweep tests failed' -ForegroundColor Red
+    Write-FailureLog 'aidl-memory-hygiene-sweep-tests'
+    exit 1
+}
+
 Write-Host 'Running AIDL incident routing verification tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'aidl-incident-routing-verification-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

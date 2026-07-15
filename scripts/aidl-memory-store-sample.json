@@ -1,0 +1,20 @@
+[
+  {
+    "id": "mem-testing-pester",
+    "subject": "testing practices",
+    "fact": "Repository PowerShell tests live under tests/ and are registered in tests/run-tests.ps1.",
+    "status": "promote",
+    "decided_at": "2026-02-20T00:00:00Z",
+    "evidence_recorded_at": "2026-02-20T00:00:00Z",
+    "citations": ["tests/run-tests.ps1:1"]
+  },
+  {
+    "id": "mem-drift-outcome",
+    "subject": "drift detection",
+    "fact": "The project-rules drift audit emits summary.outcome (pass/warn/fail) in drift-report.json.",
+    "status": "promote",
+    "decided_at": "2026-02-25T00:00:00Z",
+    "evidence_recorded_at": "2026-02-25T00:00:00Z",
+    "citations": ["scripts/project-rules-drift-audit-helpers.ps1:11"]
+  }
+]

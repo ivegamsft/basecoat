@@ -82,16 +82,27 @@ default thresholds above.
 
 ## 4. Cleanup rules for stale items
 
+These rules are implemented by the memory hygiene sweep (`scripts/aidl-memory-hygiene-sweep.ps1`,
+run by `.github/workflows/aidl-memory-hygiene-sweep.yml`), which scans a memory-store export and
+flags each cleanup action with a rationale. The sweep consumes the durable memory-store export
+(a JSON array of memory entries), not the promotion pipeline's transient packets directly. Each
+entry provides `id`, `subject`, `fact`, `status`, `citations`, `decided_at`, and
+`evidence_recorded_at`; to interoperate with the learning promotion pipeline it also accepts the
+aliases `candidate_id` (for `id`), `decision`/`recommendation` (for `status`), and
+`audited_at_utc` (for `decided_at`). An entry missing any of `id`, `subject`, `fact`, or `status`
+is flagged `invalid-entry` rather than silently passing.
+
 - Candidates in `hold` past their re-review date with no new evidence are rejected. The
-  re-review date is defined as the evaluation timestamp plus a fixed 30-day interval (the same
-  interval as the adoption checkpoint in section 3). The current pipeline does not yet emit a
-  re-review date on `hold` recommendations, so populating this derived field is a Wave 2 target
-  required to make this stale-item rule deterministically testable.
+  re-review date is the decision timestamp (`decided_at`) plus a fixed interval (default 30 days,
+  the same interval as the adoption checkpoint in section 3). The sweep derives this date and
+  clears the flag when a newer `evidence_recorded_at` is present, so the rule is deterministically
+  testable via a fixed `-AsOf` evaluation time.
 - Memory entries whose citations no longer resolve (dead PR/file references) are flagged for
-  removal. A stale or superseded pattern is deprecated with a replacement link (per
-  `audit-learning-memory.md`) rather than deleted outright, preserving the migration path; an
-  entry is not removed without either a recorded replacement or an explicit no-replacement
-  rationale.
+  removal. The sweep resolves repository file citations against the working tree and reports URL
+  citations as requiring online verification. A stale or superseded pattern is deprecated with a
+  replacement link (per `audit-learning-memory.md`) rather than deleted outright, preserving the
+  migration path; an entry is not removed without either a recorded replacement (`replaced_by`)
+  or an explicit `no_replacement_rationale`.
 - Superseded or duplicate memory entries are consolidated; the retained entry is the one with
   the most recent `evidence_recorded_at` (ISO-8601 UTC) among the evidence-backed matches. When
   that field is absent or tied, the sole deterministic tie-break is the lexicographically
