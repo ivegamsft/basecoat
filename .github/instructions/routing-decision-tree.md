@@ -42,10 +42,17 @@ Find your intent below and call the listed skill or agent directly.
 
 | Intent | Direct Call |
 |---|---|
-| Diagnose failing CI workflow | `/build-failure-triage` |
-| Debug flaky tests | `/build-failure-triage` |
-| Analyze lint or type-check failures | `/build-failure-triage` |
-| Trace root cause of broken deploy | `/build-failure-triage` |
+| Diagnose failing CI workflow | `@broken-build-troubleshooter` |
+| Debug flaky tests | `@broken-build-troubleshooter` |
+| Analyze lint or type-check failures | `@broken-build-troubleshooter` |
+| Trace root cause of broken deploy | `@broken-build-troubleshooter` |
+
+## Incident RCA
+
+| Intent | Direct Call |
+|---|---|
+| Run root-cause analysis on a known failure | `@rca` |
+| Investigate outage after stabilization | `@rca` |
 
 ## CI/CD Diagnostics (Data Only)
 
@@ -82,7 +89,7 @@ for broader remediation-oriented pipeline/process auditing.
 | Intent | Direct Call |
 |---|---|
 | Write or update a doc file | `/code-review` then direct edit |
-| Audit docs for broken links or duplication | `/build-failure-triage` |
+| Audit docs for broken links or duplication | `@broken-build-troubleshooter` |
 | Update mkdocs.yml nav | direct edit |
 
 ## Infrastructure and Security

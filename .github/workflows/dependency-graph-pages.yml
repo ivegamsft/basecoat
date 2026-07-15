@@ -78,7 +78,7 @@ jobs:
       - name: Open pull request for docs publication
         if: steps.prepare.outputs.should_open_pr == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GH_AW_GITHUB_TOKEN || github.token }}
         shell: bash
         run: |
           set -euo pipefail

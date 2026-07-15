@@ -46,12 +46,10 @@ Every incident record must populate:
   type only.
 - The chain is: incident record -> remediation issue/PR references the incident -> verification
   artifact confirms the fix -> closure references the verification artifact.
-- The offline verifier validates URL **shape and type only** (that the links are GitHub
-  issue/PR/run/commit/release URLs); it does not verify that a linked resource is immutable or
-  unaltered. Confirming that the remediation actually references the incident ID and that
-  closure references the verification artifact requires the online linkage mode tracked in
-  #2507; until then, that cross-reference is asserted by the upstream collector, not
-  re-verified offline.
+- Default mode validates URL **shape and type only** (that the links are GitHub
+  issue/PR/run/commit/blob/check-run/release URLs). With `-EnableOnlineVerification`, the verifier
+  additionally checks that remediation evidence text references the incident ID and, for closures,
+  that remediation evidence text references the provided verification artifact URL.
 
 ## 4. Priority mapping (severity alignment)
 
@@ -72,32 +70,22 @@ A routed incident with a missing or mismatched priority fails priority alignment
 ## 5. Closeout evidence requirements
 
 - Every **closure** (`resolved`/`closed`) requires a valid `verification_artifact_url`;
-  a closed record without one fails verification. To satisfy the immutable-evidence requirement
-  in `audit-framework.md`, passing verification evidence must be an immutable reference. A
-  commit SHA is unambiguously immutable; a workflow run reference must be attempt-specific
-  (`actions/runs/<id>/attempts/<k>`) because a bare run id is shared across reruns; a release/tag
-  reference qualifies only when immutable-release protection or an artifact digest is verified,
-  since tags can move and release assets can be replaced. Current-versus-target: the
-  verifier's `Test-GitHubArtifactUrl` today accepts issue and PR URLs by shape and marks such a
-  closure `pass`, so editable references pass shape validation now but must not satisfy the
-  immutable-evidence gate; tightening the verifier to warn or fail on editable references until
-  an immutable one is supplied is the required Wave 2 change. URL shape alone never establishes
-  that a fix was verified.
+  a closed record without one fails verification. In online mode, passing verification evidence
+  must be immutable (`commit/<sha>`, `blob/<sha>/...`, `actions/runs/<id>/attempts/<k>`,
+  `checks/runs/<id>`, or release URL forms) and must be associated from remediation evidence.
+  Editable references (issue/PR) therefore fail closure verification in online mode. URL shape
+  alone never establishes that a fix was verified.
 - `root_cause_summary` is required for all SEV1/SEV2 (high/critical) incidents, open or
   closed (per `audit-reliability.md` and the input contract), not only at closure.
 - `detected_at` must be present and valid for every record; `remediation_created_at` is
   required only when a remediation link is present and must then be chronologically valid
   (`remediation_created_at >= detected_at`).
 - Per `audit-reliability.md`, a record with `status = mitigated` requires a mitigation
-  timestamp. The current verifier only validates `remediation_created_at` when a remediation
-  link exists, so a mitigated record without a link has no mitigation-time check; adding an
-  explicit mitigation-timestamp field and validating it for `status = mitigated` is the
-  required Wave 2 hardening.
+  timestamp. The verifier enforces this by requiring a valid `remediation_created_at` whenever
+  `status = mitigated`, even when no remediation link is present.
 - Repeat incidents without prior verification are flagged. The offline verifier can only flag
-  repeats when the producer supplies `repeat_without_prior_verification`; that field is
-  currently optional and a missing value is treated as `false`, which passes. To honor the
-  fails-closed guarantee, Wave 2 must require an explicit boolean with defined provenance for
-  every record, or derive repeat history rather than trusting a defaulted value.
+  repeats when the producer supplies `repeat_without_prior_verification`; this field is now
+  required and missing/blank values fail closed.
 
 ## 6. Scoring thresholds
 
@@ -108,12 +96,8 @@ A routed incident with a missing or mismatched priority fails priority alignment
 | Median incident-to-remediation latency | <= 1 business day | Warn > 1 day, Fail > 2 days |
 | Repeat incidents without prior verification | 0 | Warn > 0, Fail >= 2 |
 
-Deterministic, fails-closed scoring is the Wave 2 target: malformed, duplicate, or unverifiable
-records should produce fail findings rather than passing. The current verifier does not yet
-enforce this unconditionally; the documented current-versus-target exceptions above (editable
-issue/PR evidence passing closure verification, a missing `repeat_without_prior_verification`
-flag defaulting to `false`/pass, and mitigated records without remediation links skipping
-mitigation-time validation) are the gaps Wave 2 must close to reach a fully fails-closed model.
+Deterministic, fails-closed scoring is enforced: malformed, duplicate, missing, or unverifiable
+records produce fail findings rather than passing.
 
 **Overall status precedence**: per-record findings and per-metric statuses roll up into a
 single overall status using worst-wins precedence over all statuses combined: the overall

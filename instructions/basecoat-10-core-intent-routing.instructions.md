@@ -111,6 +111,7 @@ Execution contract:
 
 GitHub-native prefixes are deterministic and should avoid extra disambiguation
 turns when the request already names a GitHub artifact.
+Deterministic guardrail order: `workflow:` `actions:` `pr:` `issue:` `portfolio:` `release:`.
 
 Execution contracts:
 

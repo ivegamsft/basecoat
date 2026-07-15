@@ -18,7 +18,9 @@ param(
 
     [string]$OutputDir = [System.IO.Path]::Combine("artifacts", "aidl-incident-routing-verification"),
 
-    [string]$AreaTaxonomyPath = ""
+    [string]$AreaTaxonomyPath = "",
+
+    [switch]$EnableOnlineVerification
 )
 
 Set-StrictMode -Version Latest
@@ -47,17 +49,17 @@ function Get-Prop {
 function Get-SafeBoolResult {
     param([object]$Value)
 
-    # Returns the parsed boolean plus a validity flag: an absent or blank value defaults to
-    # $false and is valid, but a non-empty unrecognized value is invalid (fail closed).
+    # Returns the parsed boolean plus a validity flag. Fail closed for absent/blank or
+    # unrecognized values so repeat-history provenance must be explicit on every record.
     if ($null -eq $Value) {
-        return [pscustomobject]@{ Value = $false; Valid = $true }
+        return [pscustomobject]@{ Value = $false; Valid = $false }
     }
     if ($Value -is [bool]) {
         return [pscustomobject]@{ Value = [bool]$Value; Valid = $true }
     }
     $text = ([string]$Value).Trim()
     if ([string]::IsNullOrWhiteSpace($text)) {
-        return [pscustomobject]@{ Value = $false; Valid = $true }
+        return [pscustomobject]@{ Value = $false; Valid = $false }
     }
     switch ($text.ToLowerInvariant()) {
         'true'  { return [pscustomobject]@{ Value = $true;  Valid = $true } }
@@ -127,10 +129,97 @@ function Test-GitHubArtifactUrl {
     if ($trimmed -match '^https://github\.com/[\w.-]+/[\w.-]+/commit/[0-9a-fA-F]{7,40}(?:[/#?].*)?$') {
         return $true
     }
+    if ($trimmed -match '^https://github\.com/[\w.-]+/[\w.-]+/blob/[0-9a-fA-F]{7,40}/[^?\s#]+(?:[?#].*)?$') {
+        return $true
+    }
+    if ($trimmed -match '^https://github\.com/[\w.-]+/[\w.-]+/checks/runs/\d+(?:[/#?].*)?$') {
+        return $true
+    }
     if ($trimmed -match '^https://github\.com/[\w.-]+/[\w.-]+/releases/(tag|download)/[^/\s]+(?:/.*)?$') {
         return $true
     }
     return $false
+}
+
+function Parse-GitHubIssueOrPrUrl {
+    param([string]$Url)
+
+    if ([string]::IsNullOrWhiteSpace($Url)) {
+        return $null
+    }
+    $trimmed = $Url.Trim()
+    if ($trimmed -match '^https://github\.com/([\w.-]+)/([\w.-]+)/(issues|pull)/(\d+)(?:[/#?].*)?$') {
+        return [pscustomobject]@{
+            repo   = "$($Matches[1])/$($Matches[2])"
+            kind   = $Matches[3]
+            number = [int]$Matches[4]
+        }
+    }
+    return $null
+}
+
+function Test-ImmutableVerificationArtifactUrl {
+    param([string]$Url)
+
+    if ([string]::IsNullOrWhiteSpace($Url)) {
+        return $false
+    }
+    $trimmed = $Url.Trim()
+    if ($trimmed -match '^https://github\.com/[\w.-]+/[\w.-]+/actions/runs/\d+/attempts/\d+(?:[/#?].*)?$') {
+        return $true
+    }
+    if ($trimmed -match '^https://github\.com/[\w.-]+/[\w.-]+/checks/runs/\d+(?:[/#?].*)?$') {
+        return $true
+    }
+    if ($trimmed -match '^https://github\.com/[\w.-]+/[\w.-]+/commit/[0-9a-fA-F]{7,40}(?:[/#?].*)?$') {
+        return $true
+    }
+    if ($trimmed -match '^https://github\.com/[\w.-]+/[\w.-]+/blob/[0-9a-fA-F]{7,40}/[^?\s#]+(?:[?#].*)?$') {
+        return $true
+    }
+    if ($trimmed -match '^https://github\.com/[\w.-]+/[\w.-]+/releases/(tag|download)/[^/\s]+(?:/.*)?$') {
+        return $true
+    }
+    return $false
+}
+
+function Invoke-GhJson {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Endpoint
+    )
+
+    $output = & gh api $Endpoint 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        throw "gh api failed for endpoint: $Endpoint"
+    }
+    return ($output | ConvertFrom-Json -Depth 100)
+}
+
+function Get-IssueOrPrEvidenceText {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Repo,
+        [Parameter(Mandatory = $true)]
+        [int]$Number
+    )
+
+    $issue = Invoke-GhJson -Endpoint "/repos/$Repo/issues/$Number"
+    $comments = @(Invoke-GhJson -Endpoint "/repos/$Repo/issues/$Number/comments?per_page=100")
+
+    $parts = [System.Collections.Generic.List[string]]::new()
+    foreach ($value in @($issue.title, $issue.body)) {
+        if (-not [string]::IsNullOrWhiteSpace([string]$value)) {
+            $parts.Add([string]$value)
+        }
+    }
+    foreach ($comment in $comments) {
+        $body = [string](Get-Prop -Object $comment -Name 'body')
+        if (-not [string]::IsNullOrWhiteSpace($body)) {
+            $parts.Add($body)
+        }
+    }
+    return ($parts -join "`n")
 }
 
 function Get-ExpectedPriority {
@@ -298,6 +387,17 @@ if ($incidents.Count -eq 0) {
     throw "Input must contain at least one incident record."
 }
 
+$issueTextCache = @{}
+if ($EnableOnlineVerification) {
+    if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
+        throw "EnableOnlineVerification requires gh CLI."
+    }
+    & gh auth status 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        throw "EnableOnlineVerification requires authenticated gh CLI access."
+    }
+}
+
 # Optional portfolio-area taxonomy: when supplied, affected_service must match a known area.
 $areaTaxonomy = $null
 if (-not [string]::IsNullOrWhiteSpace($AreaTaxonomyPath)) {
@@ -367,7 +467,7 @@ for ($index = 0; $index -lt $incidents.Count; $index++) {
     $repeatNoVerification = $repeatResult.Value
     $repeatFlagValid = $repeatResult.Valid
 
-    # Only an immutable GitHub issue/PR counts as a remediation link.
+    # Remediation linkage must point to a GitHub issue/PR.
     $hasRemediationLink = Test-GitHubIssueOrPrUrl -Url $remediationLink
     if ($hasRemediationLink) {
         $linkedCount++
@@ -410,6 +510,45 @@ for ($index = 0; $index -lt $incidents.Count; $index++) {
         $timestampReversed = $true
     }
 
+    $onlineLinkageStatus = "not-run"
+    $onlineRemediationMentionsIncident = $false
+    $onlineVerificationAssociated = $false
+    $verificationImmutable = Test-ImmutableVerificationArtifactUrl -Url $verificationLink
+    if ($EnableOnlineVerification -and $hasRemediationLink) {
+        $remediationRef = Parse-GitHubIssueOrPrUrl -Url $remediationLink
+        if ($null -eq $remediationRef) {
+            $onlineLinkageStatus = "fail"
+        } else {
+            try {
+                $cacheKey = "$($remediationRef.repo)#$($remediationRef.number)"
+                if (-not $issueTextCache.ContainsKey($cacheKey)) {
+                    $issueTextCache[$cacheKey] = Get-IssueOrPrEvidenceText -Repo $remediationRef.repo -Number $remediationRef.number
+                }
+                $remediationEvidenceText = [string]$issueTextCache[$cacheKey]
+                if (-not [string]::IsNullOrWhiteSpace($incidentId)) {
+                    $onlineRemediationMentionsIncident = $remediationEvidenceText.IndexOf($incidentId, [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+                }
+
+                if ($isClosed) {
+                    if ($verificationImmutable -and -not [string]::IsNullOrWhiteSpace($verificationLink)) {
+                        $onlineVerificationAssociated = $remediationEvidenceText.IndexOf($verificationLink.Trim(), [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+                    } else {
+                        $onlineVerificationAssociated = $false
+                    }
+                    if ($onlineRemediationMentionsIncident -and $verificationImmutable -and $onlineVerificationAssociated) {
+                        $onlineLinkageStatus = "pass"
+                    } else {
+                        $onlineLinkageStatus = "fail"
+                    }
+                } else {
+                    $onlineLinkageStatus = if ($onlineRemediationMentionsIncident) { "pass" } else { "fail" }
+                }
+            } catch {
+                $onlineLinkageStatus = "fail"
+            }
+        }
+    }
+
     # A verification artifact is required for every closure, not only high/critical.
     $hasVerificationArtifact = Test-GitHubArtifactUrl -Url $verificationLink
     if ($isClosed) {
@@ -418,9 +557,12 @@ for ($index = 0; $index -lt $incidents.Count; $index++) {
         } else {
             $verificationStatus = "fail"
         }
+        if ($EnableOnlineVerification -and $onlineLinkageStatus -eq "fail") {
+            $verificationStatus = "fail"
+        }
         if ($isCriticalHigh) {
             $criticalHighClosedCount++
-            if ($hasVerificationArtifact) {
+            if ($verificationStatus -eq "pass") {
                 $criticalHighClosedVerifiedCount++
             }
         }
@@ -440,6 +582,14 @@ for ($index = 0; $index -lt $incidents.Count; $index++) {
             $mitigationTimestampMissing = $true
         }
     }
+    if ($statusValue -eq "mitigated") {
+        if (-not $detectionValid -or $null -eq $remediationCreatedAt -or $timestampReversed) {
+            $mitigationTimestampMissing = $true
+        }
+    }
+
+    $mitigationTimestampRequired = $hasRemediationLink -or ($statusValue -eq "mitigated")
+    $mitigationTimestampValid = if ($mitigationTimestampRequired) { -not $mitigationTimestampMissing } else { $true }
 
     $findingStatus = "pass"
     if ($idMissing -or
@@ -452,6 +602,7 @@ for ($index = 0; $index -lt $incidents.Count; $index++) {
         $mitigationTimestampMissing -or
         -not $hasRequiredCoreMetadata -or
         -not $areaValid -or
+        ($EnableOnlineVerification -and $onlineLinkageStatus -eq "fail") -or
         $rootCauseStatus -eq "fail" -or
         $priorityStatus -eq "fail" -or
         $verificationStatus -eq "fail") {
@@ -472,7 +623,7 @@ for ($index = 0; $index -lt $incidents.Count; $index++) {
             severity_valid = (-not $severityUnknown)
             detection_timestamp_valid = $detectionValid
             timestamp_chronological = (-not $timestampReversed)
-            mitigation_timestamp_valid = ($hasRemediationLink -and -not $mitigationTimestampMissing)
+            mitigation_timestamp_valid = $mitigationTimestampValid
             metadata_complete = $hasRequiredCoreMetadata
             area_valid = $areaValid
             remediation_linked = $hasRemediationLink
@@ -482,6 +633,10 @@ for ($index = 0; $index -lt $incidents.Count; $index++) {
             priority_status = $priorityStatus
             verification_status = $verificationStatus
             verification_reference = $verificationLink
+            verification_immutable = $verificationImmutable
+            online_linkage_status = $onlineLinkageStatus
+            online_remediation_mentions_incident = $onlineRemediationMentionsIncident
+            online_verification_associated = $onlineVerificationAssociated
             root_cause_status = $rootCauseStatus
             repeat_without_prior_verification = $repeatNoVerification
             repeat_flag_valid = $repeatFlagValid

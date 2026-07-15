@@ -180,7 +180,7 @@ Measured problem: Long backlog runs had 70–90 report_intent calls with heavy s
 
 - PR triage and review (use `/delegate` or background `/code-review`)
 - File scanning and pattern matching (use background `/explore` agent)
-- Dependency audits and CI analysis (use background `/build-failure-triage`)
+- Dependency audits and CI analysis (use background `@broken-build-troubleshooter`)
 
 Expected savings: Reduce main-session event count by 40–60%; cut orchestration overhead by 35–50%.
 
@@ -218,7 +218,7 @@ See `.github/instructions/routing-decision-tree.md` for the full intent → skil
 |---|---|
 | Triage issues | `/issue-triage` |
 | Plan sprint | `/sprint-planner` |
-| Fix build failure | `/build-failure-triage` |
+| Fix build failure | `@broken-build-troubleshooter` |
 | Clean branches | `/branch-hygiene-sweeper` |
 | Review code | `/code-review` |
 

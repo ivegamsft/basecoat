@@ -2,8 +2,9 @@
 
 Input contract for `scripts/aidl-incident-routing-verification.ps1`. The script consumes a
 JSON export (`incident-routing-export.json`) and scores it against the reliability audit
-contract in [`audit-reliability.md`](audit-reliability.md). Scoring is offline and
-deterministic; the script performs no network calls.
+contract in [`audit-reliability.md`](audit-reliability.md). Scoring is deterministic. By
+default it runs offline; with `-EnableOnlineVerification` it also performs `gh` API checks
+to verify remediation/verification linkage for each incident.
 
 ## Top-level shape
 
@@ -26,18 +27,22 @@ A JSON array of incident record objects. The array must contain at least one rec
 | `affected_service` | string | Yes | Non-blank. When `-AreaTaxonomyPath` is supplied it must match a known portfolio area. |
 | `customer_impact` | string | Yes | Non-blank impact statement. |
 | `detected_at` | ISO-8601 timestamp | Yes | Present and parseable; treated as UTC. |
-| `remediation_created_at` | ISO-8601 timestamp | For routed incidents | Required when a remediation link is present; must be chronologically at or after `detected_at`. |
-| `remediation_issue_url` | string (URL) | Yes for routed incidents | Immutable GitHub issue or PR URL: `https://github.com/<owner>/<repo>/(issues\|pull)/<n>`. Placeholders (for example `n/a`) do not count as linked. |
+| `remediation_created_at` | ISO-8601 timestamp | For routed incidents and `status = mitigated` | Required when a remediation link is present, and also required for `status = mitigated`; must be chronologically at or after `detected_at`. |
+| `remediation_issue_url` | string (URL) | Yes for routed incidents | GitHub issue or PR URL: `https://github.com/<owner>/<repo>/(issues\|pull)/<n>`. Placeholders (for example `n/a`) do not count as linked. |
 | `remediation_priority` | string | Yes for routed incidents | Must match the canonical severity map exactly: SEV1 `critical`, SEV2 `high`, SEV3 `medium`, SEV4/SEV5 `low`. A `priority:` prefix is accepted. |
-| `verification_artifact_url` | string (URL) | Yes for closures | Immutable GitHub artifact: issue/PR, `actions/runs/<n>`, `commit/<sha>`, or `releases/(tag\|download)/<ref>`. Required for every closure. |
+| `verification_artifact_url` | string (URL) | Yes for closures | GitHub artifact URL accepted by offline shape checks: issue/PR, `actions/runs/<n>`, `commit/<sha>`, `blob/<sha>/<path>`, `checks/runs/<n>`, or `releases/(tag\|download)/<ref>`. In online mode, closure verification only passes with immutable evidence (`commit/<sha>`, `blob/<sha>/...`, `actions/runs/<n>/attempts/<k>`, `checks/runs/<n>`, or `releases/(tag\|download)/<ref>`) that is associated from remediation evidence text. |
 | `root_cause_summary` | string | For SEV1/SEV2 | Required for high/critical incidents. |
-| `repeat_without_prior_verification` | boolean | No | Accepts JSON booleans and the strings `true`/`false`/`1`/`0`/`yes`/`no`. Any other non-empty value fails the record. |
+| `repeat_without_prior_verification` | boolean | Yes | Accepts JSON booleans and the strings `true`/`false`/`1`/`0`/`yes`/`no`. Missing, blank, or any other value fails the record (fails closed). |
 
 ## Accepted URL forms
 
 - Remediation link: `https://github.com/<owner>/<repo>/issues/<n>` or `.../pull/<n>`.
 - Verification artifact: the remediation forms plus `.../actions/runs/<n>`,
-  `.../commit/<sha>`, `.../releases/tag/<ref>`, `.../releases/download/<ref>`.
+  `.../commit/<sha>`, `.../blob/<sha>/<path>`, `.../checks/runs/<n>`,
+  `.../releases/tag/<ref>`, `.../releases/download/<ref>`.
+- Online immutable verification forms (for closed incidents with `-EnableOnlineVerification`):
+  `.../commit/<sha>`, `.../blob/<sha>/<path>`, `.../actions/runs/<n>/attempts/<k>`,
+  `.../checks/runs/<n>`, `.../releases/tag/<ref>`, `.../releases/download/<ref>`.
 
 ## Example record
 

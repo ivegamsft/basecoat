@@ -16,7 +16,9 @@ New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
 $caseIndex = 0
 function Invoke-Audit {
     param(
-        [string]$InputJson
+        [string]$InputJson,
+        [hashtable]$ExtraParameters = @{},
+        [switch]$UseInProcess
     )
 
     $script:caseIndex++
@@ -24,10 +26,22 @@ function Invoke-Audit {
     $outputDir = Join-Path $tempDir ("output-$script:caseIndex")
     Set-Content -Path $inputPath -Value $InputJson -Encoding UTF8
 
-    & pwsh -NoProfile -File $scriptPath -InputPath $inputPath -OutputDir $outputDir 2>$null
+    $global:LASTEXITCODE = 0
+    $scriptOutput = ""
+    if ($UseInProcess) {
+        try {
+            & $scriptPath -InputPath $inputPath -OutputDir $outputDir @ExtraParameters 2>&1 | Out-Null
+        } catch {
+            $scriptOutput = $_.Exception.Message
+            $global:LASTEXITCODE = 1
+        }
+    } else {
+        $scriptOutput = (& pwsh -NoProfile -File $scriptPath -InputPath $inputPath -OutputDir $outputDir @ExtraParameters 2>&1 | Out-String)
+    }
     $exit = $LASTEXITCODE
     if ($exit -ne 0) {
-        throw "Case $script:caseIndex script run failed (exit $exit)."
+        $snippet = if ([string]::IsNullOrWhiteSpace($scriptOutput)) { "(no output)" } else { $scriptOutput.Trim() }
+        throw "Case $script:caseIndex script run failed (exit $exit): $snippet"
     }
 
     $jsonPath = Join-Path $outputDir 'incident-routing-verification.json'
@@ -387,6 +401,248 @@ try {
     $r = Invoke-Audit -InputJson $badBool
     if ($r.Json.incidents[0].repeat_flag_valid -ne $false) { throw 'Case 15: malformed repeat flag should be flagged invalid.' }
     if ($r.Json.incidents[0].status -ne 'fail') { throw 'Case 15: malformed repeat flag should fail the incident.' }
+
+    # --- Case 15b: missing repeat flag must fail closed (no implicit false default). ---
+    $missingRepeat = @'
+[
+  {
+    "incident_id": "INC-1502",
+    "severity": "SEV3",
+    "status": "open",
+    "detected_at": "2026-01-05T09:00:00Z",
+    "remediation_created_at": "2026-01-05T10:00:00Z",
+    "owner": "o",
+    "affected_service": "s",
+    "customer_impact": "c",
+    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/171"
+  }
+]
+'@
+    $r = Invoke-Audit -InputJson $missingRepeat
+    if ($r.Json.incidents[0].repeat_flag_valid -ne $false) { throw 'Case 15b: missing repeat flag should be invalid.' }
+    if ($r.Json.incidents[0].status -ne 'fail') { throw 'Case 15b: missing repeat flag should fail the incident.' }
+
+    # --- Case 15c: status=mitigated requires a valid mitigation timestamp. ---
+    $mitigatedNoTimestamp = @'
+[
+  {
+    "incident_id": "INC-1503",
+    "severity": "SEV3",
+    "status": "mitigated",
+    "detected_at": "2026-01-05T09:00:00Z",
+    "owner": "o",
+    "affected_service": "s",
+    "customer_impact": "c",
+    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/172",
+    "repeat_without_prior_verification": false
+  }
+]
+'@
+    $r = Invoke-Audit -InputJson $mitigatedNoTimestamp
+    if ($r.Json.incidents[0].mitigation_timestamp_valid -ne $false) { throw 'Case 15c: mitigated incident without timestamp should be invalid.' }
+    if ($r.Json.incidents[0].status -ne 'fail') { throw 'Case 15c: mitigated incident without timestamp should fail.' }
+
+    # --- Case 15d: online mode validates remediation incident linkage and immutable verification association. ---
+    function global:gh {
+        param(
+            [Parameter(ValueFromRemainingArguments = $true)]
+            [string[]]$Arguments
+        )
+
+        $global:LASTEXITCODE = 0
+        if ($Arguments[0] -eq 'auth' -and $Arguments[1] -eq 'status') {
+            return
+        }
+        if ($Arguments[0] -eq 'api') {
+            $endpoint = [string]$Arguments[1]
+            switch -Regex ($endpoint) {
+                '^/repos/IBuySpy-Shared/basecoat/issues/101$' {
+                    return '{"title":"Remediation for INC-ONLINE-1","body":"Verified by https://github.com/IBuySpy-Shared/basecoat/commit/1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b"}'
+                }
+                '^/repos/IBuySpy-Shared/basecoat/issues/101/comments\?per_page=100$' {
+                    return '[]'
+                }
+                '^/repos/IBuySpy-Shared/basecoat/issues/102$' {
+                    return '{"title":"Remediation without incident reference","body":"Verified by https://github.com/IBuySpy-Shared/basecoat/commit/1111111111111111111111111111111111111111"}'
+                }
+                '^/repos/IBuySpy-Shared/basecoat/issues/102/comments\?per_page=100$' {
+                    return '[]'
+                }
+                '^/repos/IBuySpy-Shared/basecoat/issues/103$' {
+                    return '{"title":"Remediation for INC-ONLINE-3","body":"Incident INC-ONLINE-3 verification: https://github.com/IBuySpy-Shared/basecoat/issues/333"}'
+                }
+                '^/repos/IBuySpy-Shared/basecoat/issues/103/comments\?per_page=100$' {
+                    return '[]'
+                }
+                '^/repos/IBuySpy-Shared/basecoat/issues/104$' {
+                    return '{"title":"Remediation for INC-ONLINE-4","body":"Incident INC-ONLINE-4 evidence: https://github.com/IBuySpy-Shared/basecoat/blob/1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b/docs/spec.md"}'
+                }
+                '^/repos/IBuySpy-Shared/basecoat/issues/104/comments\?per_page=100$' {
+                    return '[]'
+                }
+                '^/repos/IBuySpy-Shared/basecoat/issues/105$' {
+                    return '{"title":"Remediation for INC-ONLINE-5","body":"Incident INC-ONLINE-5 check: https://github.com/IBuySpy-Shared/basecoat/checks/runs/987654321"}'
+                }
+                '^/repos/IBuySpy-Shared/basecoat/issues/105/comments\?per_page=100$' {
+                    return '[]'
+                }
+                '^/repos/IBuySpy-Shared/basecoat/issues/106$' {
+                    return '{"title":"Remediation for INC-ONLINE-6","body":"Incident INC-ONLINE-6 run: https://github.com/IBuySpy-Shared/basecoat/actions/runs/123456789"}'
+                }
+                '^/repos/IBuySpy-Shared/basecoat/issues/106/comments\?per_page=100$' {
+                    return '[]'
+                }
+                default {
+                    $global:LASTEXITCODE = 1
+                    return ''
+                }
+            }
+        }
+        $global:LASTEXITCODE = 1
+        return ''
+    }
+    try {
+        $onlinePass = @'
+[
+  {
+    "incident_id": "INC-ONLINE-1",
+    "severity": "SEV2",
+    "status": "closed",
+    "detected_at": "2026-01-05T09:00:00Z",
+    "remediation_created_at": "2026-01-05T11:00:00Z",
+    "owner": "o",
+    "affected_service": "s",
+    "customer_impact": "c",
+    "root_cause_summary": "rc",
+    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/101",
+    "remediation_priority": "high",
+    "verification_artifact_url": "https://github.com/IBuySpy-Shared/basecoat/commit/1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b",
+    "repeat_without_prior_verification": false
+  }
+]
+'@
+        $r = Invoke-Audit -InputJson $onlinePass -UseInProcess -ExtraParameters @{ EnableOnlineVerification = $true }
+        if ($r.Json.incidents[0].online_linkage_status -ne 'pass') { throw 'Case 15d: online linkage should pass when remediation references incident and immutable verification.' }
+        if ($r.Json.incidents[0].verification_status -ne 'pass') { throw 'Case 15d: verification should pass in online mode for immutable associated evidence.' }
+
+        $onlineMissingIncident = @'
+[
+  {
+    "incident_id": "INC-ONLINE-2",
+    "severity": "SEV2",
+    "status": "closed",
+    "detected_at": "2026-01-05T09:00:00Z",
+    "remediation_created_at": "2026-01-05T11:00:00Z",
+    "owner": "o",
+    "affected_service": "s",
+    "customer_impact": "c",
+    "root_cause_summary": "rc",
+    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/102",
+    "remediation_priority": "high",
+    "verification_artifact_url": "https://github.com/IBuySpy-Shared/basecoat/commit/1111111111111111111111111111111111111111",
+    "repeat_without_prior_verification": false
+  }
+]
+'@
+        $r = Invoke-Audit -InputJson $onlineMissingIncident -UseInProcess -ExtraParameters @{ EnableOnlineVerification = $true }
+        if ($r.Json.incidents[0].online_linkage_status -ne 'fail') { throw 'Case 15d: missing incident reference in remediation should fail online linkage.' }
+        if ($r.Json.incidents[0].status -ne 'fail') { throw 'Case 15d: online linkage failure should fail the incident.' }
+
+        $onlineEditableVerification = @'
+[
+  {
+    "incident_id": "INC-ONLINE-3",
+    "severity": "SEV2",
+    "status": "closed",
+    "detected_at": "2026-01-05T09:00:00Z",
+    "remediation_created_at": "2026-01-05T11:00:00Z",
+    "owner": "o",
+    "affected_service": "s",
+    "customer_impact": "c",
+    "root_cause_summary": "rc",
+    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/103",
+    "remediation_priority": "high",
+    "verification_artifact_url": "https://github.com/IBuySpy-Shared/basecoat/issues/333",
+    "repeat_without_prior_verification": false
+  }
+]
+'@
+        $r = Invoke-Audit -InputJson $onlineEditableVerification -UseInProcess -ExtraParameters @{ EnableOnlineVerification = $true }
+        if ($r.Json.incidents[0].verification_immutable -ne $false) { throw 'Case 15d: issue/PR verification reference should not be treated as immutable.' }
+        if ($r.Json.incidents[0].verification_status -ne 'fail') { throw 'Case 15d: editable verification reference should fail in online mode.' }
+
+        $onlineBlobVerification = @'
+[
+  {
+    "incident_id": "INC-ONLINE-4",
+    "severity": "SEV2",
+    "status": "closed",
+    "detected_at": "2026-01-05T09:00:00Z",
+    "remediation_created_at": "2026-01-05T11:00:00Z",
+    "owner": "o",
+    "affected_service": "s",
+    "customer_impact": "c",
+    "root_cause_summary": "rc",
+    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/104",
+    "remediation_priority": "high",
+    "verification_artifact_url": "https://github.com/IBuySpy-Shared/basecoat/blob/1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b/docs/spec.md",
+    "repeat_without_prior_verification": false
+  }
+]
+'@
+        $r = Invoke-Audit -InputJson $onlineBlobVerification -UseInProcess -ExtraParameters @{ EnableOnlineVerification = $true }
+        if ($r.Json.incidents[0].verification_immutable -ne $true) { throw 'Case 15d: blob SHA verification should be treated as immutable in online mode.' }
+        if ($r.Json.incidents[0].verification_status -ne 'pass') { throw 'Case 15d: blob SHA verification should pass in online mode when associated.' }
+
+        $onlineChecksRunVerification = @'
+[
+  {
+    "incident_id": "INC-ONLINE-5",
+    "severity": "SEV2",
+    "status": "closed",
+    "detected_at": "2026-01-05T09:00:00Z",
+    "remediation_created_at": "2026-01-05T11:00:00Z",
+    "owner": "o",
+    "affected_service": "s",
+    "customer_impact": "c",
+    "root_cause_summary": "rc",
+    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/105",
+    "remediation_priority": "high",
+    "verification_artifact_url": "https://github.com/IBuySpy-Shared/basecoat/checks/runs/987654321",
+    "repeat_without_prior_verification": false
+  }
+]
+'@
+        $r = Invoke-Audit -InputJson $onlineChecksRunVerification -UseInProcess -ExtraParameters @{ EnableOnlineVerification = $true }
+        if ($r.Json.incidents[0].verification_immutable -ne $true) { throw 'Case 15d: checks run verification should be treated as immutable in online mode.' }
+        if ($r.Json.incidents[0].verification_status -ne 'pass') { throw 'Case 15d: checks run verification should pass in online mode when associated.' }
+
+        $onlineNonAttemptRunVerification = @'
+[
+  {
+    "incident_id": "INC-ONLINE-6",
+    "severity": "SEV2",
+    "status": "closed",
+    "detected_at": "2026-01-05T09:00:00Z",
+    "remediation_created_at": "2026-01-05T11:00:00Z",
+    "owner": "o",
+    "affected_service": "s",
+    "customer_impact": "c",
+    "root_cause_summary": "rc",
+    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/106",
+    "remediation_priority": "high",
+    "verification_artifact_url": "https://github.com/IBuySpy-Shared/basecoat/actions/runs/123456789",
+    "repeat_without_prior_verification": false
+  }
+]
+'@
+        $r = Invoke-Audit -InputJson $onlineNonAttemptRunVerification -UseInProcess -ExtraParameters @{ EnableOnlineVerification = $true }
+        if ($r.Json.incidents[0].verification_immutable -ne $false) { throw 'Case 15d: non-attempt workflow run URL should not be treated as immutable in online mode.' }
+        if ($r.Json.incidents[0].verification_status -ne 'fail') { throw 'Case 15d: non-attempt workflow run URL should fail online verification.' }
+    }
+    finally {
+        Remove-Item Function:gh -ErrorAction SilentlyContinue
+    }
 
     # --- Case 16: a lone carriage return in a cell must be collapsed (no injected row). ---
     $crInject = @'
