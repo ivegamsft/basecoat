@@ -246,14 +246,14 @@ Write-Host 'MCP tests: validating build workflow is pinned to ubuntu-latest (CI-
 Assert-FileContains '.github/workflows/mcp-build.yml' "runs-on: ubuntu-latest" `
     'mcp-build.yml must use ubuntu-latest (CI check workflow — Docker smoke test requires Linux runner with Docker)'
 
-Write-Host 'MCP tests: validating deploy workflow uses vars.RUNNER_DEPLOY for deploy job...'
+Write-Host 'MCP tests: validating deploy workflow is pinned to linux for bash-dependent steps...'
 $deployContent = Get-Content '.github/workflows/mcp-deploy.yml' -Raw
-if ($deployContent -notmatch '(?m)^\s+runs-on:\s.*vars\.RUNNER_DEPLOY') {
-    throw "mcp-deploy.yml deploy job must route runs-on through vars.RUNNER_DEPLOY"
-}
-if ($deployContent -notmatch "(?m)^\s+runs-on:\s.*ubuntu-latest") {
-    throw "mcp-deploy.yml must include ubuntu-latest as fallback in runs-on expressions"
-}
+Assert-WorkflowJobRunsOn '.github/workflows/mcp-deploy.yml' 'deploy' 'ubuntu-latest' `
+    'mcp-deploy.yml deploy job must run on ubuntu-latest'
+Assert-WorkflowJobDoesNotUseRunner '.github/workflows/mcp-deploy.yml' 'deploy' '${{ github.event_name == ''pull_request'' && ''ubuntu-latest'' || vars.RUNNER_DEPLOY || ''ubuntu-latest'' }}' `
+    'mcp-deploy.yml deploy job must not use the legacy vars.RUNNER_DEPLOY expression'
+Assert-WorkflowJobDoesNotUseRunner '.github/workflows/mcp-deploy.yml' 'deploy' 'self-hosted' `
+    'mcp-deploy.yml deploy job must not route to self-hosted runners while deploy steps require bash'
 
 Write-Host 'MCP tests: validating dead resolve-deploy-runner job is removed from deploy workflow...'
 if ($deployContent -match '(?m)^  resolve-deploy-runner:') {

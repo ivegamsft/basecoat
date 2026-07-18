@@ -89,7 +89,7 @@ jobs:
 
   deploy:
     name: Deploy to Azure Container Apps
-    runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-latest' || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: [build-push]
     if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork }}
