@@ -235,6 +235,14 @@ if ($workTrackerSummary.release_gate_contract.lane_profiles.'pilot-work-tracker'
   throw "Expected work-tracker lane profile to include strict required artifact policy."
 }
 
+$dispatchScriptContent = Get-Content -Raw -Path $dispatchScript
+if ($dispatchScriptContent -notmatch 'return\s+,\$issues') {
+  throw "Get-OpenIntentIssues must return a wrapped array so empty issue sets do not collapse to null."
+}
+if ($dispatchScriptContent -notmatch '\[array\]\$Issues\s*=\s*@\(\)') {
+  throw "Find-ExistingIssueByMarker must accept empty issue collections without mandatory-array binding failures."
+}
+
 $shipItOutputJson = Join-Path $outputDirectory "summary-ship-it.json"
 & $dispatchScript `
   -Intent "ship-it" `

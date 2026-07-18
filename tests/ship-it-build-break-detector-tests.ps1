@@ -137,4 +137,9 @@ if ($workflowContent -notmatch "ship-it-build-summary.json|build-break-summary.j
   throw "Build guard workflow should emit build-break summary artifacts."
 }
 
+$detectorContent = Get-Content -Raw -Path $detectorScript
+if ($detectorContent -notmatch '\[AllowEmptyCollection\(\)\]\s*\r?\n\s*\[array\]\$FailureTrend') {
+  throw "Build-break detector escalation must allow empty FailureTrend collections."
+}
+
 Write-Host "Ship-it build-break detector tests passed."

@@ -55,5 +55,8 @@ if ($workflow -notmatch 'COPILOT_GITHUB_TOKEN:\s*\$\{\{\s*secrets\.COPILOT_GITHU
 if ($workflow -notmatch 'COPILOT_GITHUB_TOKEN:\s*placeholder-token-for-credential-isolation') {
     throw 'issue-triage lock must pass placeholder token value to the detection phase for credential isolation.'
 }
+if ($workflow -match 'placeholder-token-for-credential-isolation -E awf[^\r\n]*--exclude-env COPILOT_GITHUB_TOKEN') {
+    throw 'issue-triage lock must not exclude COPILOT_GITHUB_TOKEN when explicitly injecting placeholder-token-for-credential-isolation.'
+}
 
 Write-Host 'Issue triage lock refresh tests passed.'

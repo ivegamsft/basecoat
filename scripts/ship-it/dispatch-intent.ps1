@@ -509,18 +509,17 @@ function Get-OpenIntentIssues {
     $page++
   } while ($parsed.Count -eq 100)
 
-  return $issues
+  return ,$issues
 }
 
 function Find-ExistingIssueByMarker {
   param(
-    [Parameter(Mandatory)]
-    [array]$Issues,
+    [array]$Issues = @(),
     [Parameter(Mandatory)]
     [string]$Marker
   )
 
-  foreach ($issue in $Issues) {
+  foreach ($issue in @($Issues)) {
     if (-not [string]::IsNullOrWhiteSpace($issue.body) -and $issue.body.Contains($Marker)) {
       return $issue
     }

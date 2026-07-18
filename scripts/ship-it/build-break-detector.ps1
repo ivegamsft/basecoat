@@ -294,6 +294,7 @@ function Open-OrUpdateEscalationIssue {
     [Parameter(Mandatory)]
     [hashtable]$Classification,
     [Parameter(Mandatory)]
+    [AllowEmptyCollection()]
     [array]$FailureTrend,
     [Parameter(Mandatory)]
     [string]$Reason
@@ -305,7 +306,7 @@ function Open-OrUpdateEscalationIssue {
   $title = "[Intent][build-break][$($Summary.target_branch)] $($Summary.workflow_name)"
 
   $timeline = ""
-  foreach ($entry in $FailureTrend) {
+  foreach ($entry in @($FailureTrend)) {
     $timeline += "`n| $($entry.run_id) | $($entry.created_at) | $($entry.conclusion) | $($entry.url) |"
   }
 
