@@ -33,7 +33,7 @@ After syncing, your repo will have a `.github/base-coat/` directory containing a
 
 ## Option 2: Manual setup
 
-1. Go to the latest release page for your source repository (`https://github.com/YOUR-ORG/basecoat/releases/latest`)
+1. Go to the latest release page for your source repository
 2. Download `base-coat-<version>.zip`
 3. Extract to `.github/base-coat/` in your repo
 4. Commit the result

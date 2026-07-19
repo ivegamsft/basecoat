@@ -2,24 +2,24 @@
 
 ## Overview
 
-This document explores production-grade multi-agent orchestration patterns from the [ai-hedge-fund](https://github.com/virattt/ai-hedge-fund) project and documents their applicability to BaseCoat. The ai-hedge-fund project is a sophisticated proof-of-concept for AI-powered trading systems that orchestrates 19+ specialized agents (investment specialists, analysts, risk managers, portfolio managers) using LangGraph state-machine workflows.
+This document captures production-grade multi-agent orchestration patterns and adapts them for BaseCoat CI/CD and governance workflows. The focus is deterministic orchestration of specialized engineering agents (triage, review, security, compliance, release) using LangGraph state-machine workflows.
 
-**Key Context**: ai-hedge-fund runs as both CLI and web application, using LangGraph StateGraph for deterministic workflow routing, Pydantic models for structured outputs, and a fan-out/fan-in pattern where parallel specialist agents feed into aggregator nodes.
+**Key Context**: The reference pattern supports both CLI and web experiences, uses LangGraph StateGraph for deterministic workflow routing, Pydantic models for structured outputs, and fan-out/fan-in where parallel specialist agents feed aggregator nodes.
 
-## AI-Hedge-Fund Architecture
+## Reference Architecture for CI/CD Governance
 
 ### High-Level System Design
 
-The ai-hedge-fund system employs a layered multi-agent architecture:
+The reference system employs a layered multi-agent architecture:
 
-1. **Specialist Agents** (19 agents)
-   - 13 investment personality agents (Warren Buffett, Cathie Wood, Michael Burry, etc.)
-   - 4 analytical agents (Valuation, Sentiment, Fundamentals, Technicals)
-   - 1 news sentiment agent
+1. **Specialist Agents**
+   - CI signal agents (build health, test stability, dependency risk, release readiness)
+   - Governance agents (security posture, policy compliance, documentation quality)
+   - Routing agents (issue triage, incident classification, remediation planning)
 
-2. **Aggregator Agents** (2 agents)
-   - Risk Management Agent: Aggregates analyst signals, calculates volatility-adjusted position limits
-   - Portfolio Management Agent: Final decision maker, synthesizes all signals into trading orders
+2. **Aggregator Agents**
+   - Risk Aggregation Agent: Aggregates engineering and governance signals, computes risk severity
+   - Decision Agent: Final decision maker, synthesizes all signals into ship/hold/remediate decisions
 
 3. **State Management**
    - `AgentState` TypedDict with messages, data, and metadata
@@ -27,10 +27,10 @@ The ai-hedge-fund system employs a layered multi-agent architecture:
    - JSON-serializable decision outputs
 
 4. **Execution Flow**
-   - Start node → Parallel specialist agents → Risk manager → Portfolio manager → End
-   - Specialist agents write signals to `analyst_signals` dict
-   - Risk manager aggregates volatility/correlation analysis
-   - Portfolio manager performs final decision synthesis
+   - Start node -> Parallel specialist agents -> Risk aggregator -> Decision agent -> End
+   - Specialist agents write signals to `analysis_signals` dict
+   - Risk aggregator merges severity, policy, and reliability analysis
+   - Decision agent performs final release/governance synthesis
 
 ### Core Technical Stack
 
@@ -38,7 +38,7 @@ The ai-hedge-fund system employs a layered multi-agent architecture:
 - **LangChain**: LLM calls, message handling, prompt templates
 - **Pydantic**: Structured, JSON-serializable decision models
 - **Python async**: Potential for parallel agent execution
-- **CLI + Web**: Dual UI paradigm (argparse CLI, FastAPI backend with Streamlit frontend)
+- **CLI + Web**: Dual UI paradigm (CLI entrypoint, API backend, optional dashboard frontend)
 - **Docker**: Containerization for reproducibility
 
 ### Key Design Patterns
@@ -56,7 +56,7 @@ class AgentState(TypedDict):
 
 def merge_dicts(a, b) -> dict:
     return {**a, **b}
-```text
+```
 
 **Benefits**:
 
@@ -102,7 +102,7 @@ def portfolio_management_agent(state: AgentState) -> AgentState:
 
 #### 3. Decision Aggregation (Fan-Out/Fan-In Pattern)
 
-**Pattern**: Start node → Parallel specialist agents → Aggregator (risk manager) → Final aggregator (portfolio manager).
+**Pattern**: Start node -> Parallel specialist agents -> Aggregator (risk manager) -> Final aggregator (decision manager).
 
 ```python
 # From src/main.py create_workflow()
@@ -120,9 +120,10 @@ for analyst_key in selected_analysts:
     node_name = analyst_nodes[analyst_key][0]
     workflow.add_edge(node_name, "risk_management_agent")
 
-# Aggregator 2: Portfolio manager final decision
-workflow.add_edge("risk_management_agent", "portfolio_manager")
-workflow.add_edge("portfolio_manager", END)
+# Aggregator 2: Decision manager final decision
+workflow.add_node("decision_manager", decision_manager_agent)
+workflow.add_edge("risk_management_agent", "decision_manager")
+workflow.add_edge("decision_manager", END)
 ```text
 
 **Benefits**:
@@ -148,13 +149,13 @@ workflow.add_edge("portfolio_manager", END)
 
 #### 5. Tool Abstraction Layer (Pluggable Tool Providers)
 
-**Pattern**: Tools (like `get_prices`, `calculate_volatility`) are registered separately from agent logic.
+**Pattern**: Tools (like `collect_ci_metrics`, `calculate_risk_score`) are registered separately from agent logic.
 
 ```python
 # From src/agents/risk_manager.py
-prices = get_prices(ticker, start_date, end_date, api_key)  # Tool call
-prices_df = prices_to_df(prices)                             # Data transformation
-volatility_metrics = calculate_volatility_metrics(prices_df) # Analysis
+ci_metrics = collect_ci_metrics(repo, workflow_window, token)  # Tool call
+normalized = normalize_metrics(ci_metrics)                      # Data transformation
+risk_score = calculate_risk_score(normalized)                   # Analysis
 ```text
 
 **Benefits**:
@@ -169,7 +170,7 @@ volatility_metrics = calculate_volatility_metrics(prices_df) # Analysis
 
 **Pattern**: Single backend logic, multiple frontends:
 
-- CLI: `poetry run python src/main.py --ticker AAPL,MSFT --selected-analysts aswath_damodaran,warren_buffett`
+- CLI: `poetry run python src/main.py --repo IBuySpy-Shared/basecoat --selected-agents issue-triage,security-analyst`
 - Web: FastAPI backend + Streamlit frontend with visual workflow builder
 
 **BaseCoat Applicability**: High (future). CLI now, web portal roadmap for visual agent builder and execution dashboard.
@@ -248,7 +249,7 @@ gh copilot run "issue-#450" --agents security-analyst --skills vulnerability-sca
 
 #### Visual Agent Builder
 
-**Pattern**: No-code interface to compose agents into workflows (like ai-hedge-fund's web app).
+**Pattern**: No-code interface to compose agents into workflows from reusable CI/CD and governance building blocks.
 
 **Features**:
 
@@ -263,7 +264,7 @@ gh copilot run "issue-#450" --agents security-analyst --skills vulnerability-sca
 
 #### Domain-Specific Agent Personalities
 
-**Pattern**: Extend ai-hedge-fund's "personality agents" (Warren Buffett, Cathie Wood) to software domain (e.g., "Security Officer", "Product Manager", "DevOps Engineer").
+**Pattern**: Extend role-based specialist agents (for example, "Security Officer", "Product Manager", "DevOps Engineer") to cover deeper governance domains.
 
 **Rationale**: Different roles bring different perspectives; orchestrating them surfaces more nuanced recommendations.
 
@@ -320,7 +321,8 @@ A user opens Issue #500: "SQL Injection vulnerability in authentication handler.
                        │
                        ▼
                     [END]
-```text
+
+```
 
 ### State Progression
 
@@ -422,7 +424,7 @@ class ApprovalDecision(BaseModel):
     primary_concern: str | None
     required_fixes: list[str]
     approved_by: str
-```text
+```
 
 ### Agent Node Definitions
 
@@ -491,7 +493,7 @@ def decision_maker_agent(state: CodeQualityState) -> CodeQualityState:
         "analysis": {**state["analysis"], "decision": decision.model_dump()},
         "metadata": state["metadata"],
     }
-```text
+```
 
 ### Workflow Graph Construction
 
@@ -546,7 +548,7 @@ print(result["analysis"]["decision"])
 #   "required_fixes": [],
 #   "approved_by": "decision_maker"
 # }
-```text
+```
 
 ### Key Points
 
@@ -574,7 +576,7 @@ This limits scalability and creates friction for power users.
 
 ### Proposed Solution
 
-Adopt LangGraph StateGraph for deterministic multi-agent orchestration, following ai-hedge-fund patterns. Enable users to compose agents with a simple CLI flag: `--agents agent1,agent2 --skills skill1,skill2`.
+Adopt LangGraph StateGraph for deterministic multi-agent orchestration, following the CI/CD governance reference patterns in this document. Enable users to compose agents with a simple CLI flag: `--agents agent1,agent2 --skills skill1,skill2`.
 
 ### Trade-Offs Analysis
 
@@ -586,7 +588,7 @@ Adopt LangGraph StateGraph for deterministic multi-agent orchestration, followin
 - Parallel agent execution (fan-out/fan-in)
 - Type-safe decision aggregation (Pydantic)
 - Scalable decision routing (graph-based instead of label-based)
-- Production-proven pattern (ai-hedge-fund, LangChain ecosystem)
+- Production-proven pattern (LangGraph/LangChain ecosystem)
 - Easy to version and test workflows
 - API-ready (JSON serializable decisions)
 
@@ -629,7 +631,7 @@ Adopt LangGraph StateGraph for deterministic multi-agent orchestration, followin
 2. **Sprint 3**: CLI `--agents` flag for workflow composition
 3. **Sprint 4+**: Portal (visual builder, dashboard)
 
-**Rationale**: ai-hedge-fund demonstrates production readiness; LangGraph is adoption-proven in LLM ecosystem; parallelization and decision aggregation are high-value capabilities.
+**Rationale**: The pattern is production-ready for CI/CD governance workflows; LangGraph is adoption-proven in the LLM ecosystem; parallelization and decision aggregation are high-value capabilities.
 
 ### Queue-Manager Agent Design (Issue #451 Context)
 
@@ -651,7 +653,7 @@ parallel_agents = RunnableParallel({
 state = parallel_agents.invoke(state)
 state = risk_manager_agent(state)
 state = decision_maker_agent(state)
-```text
+```
 
 **Queue Manager Role**: Track in-flight workflows, implement backpressure, manage resource limits.
 
@@ -676,7 +678,7 @@ class WorkflowQueueManager:
             self.in_flight[item["id"]] = {"status": "complete", "result": result}
         except Exception as e:
             self.in_flight[item["id"]] = {"status": "failed", "error": str(e)}
-```text
+```
 
 **Related Issues**: #451 (concurrency), #450 (this issue).
 
@@ -735,13 +737,13 @@ class WorkflowQueueManager:
 
 ## Key Files to Study
 
-### AI-Hedge-Fund Repository
+### Proposed Reference Architecture Inputs
 
 - `src/main.py`: Entry point, workflow composition, CLI argument parsing
 - `src/graph/state.py`: AgentState definition, merge operators
-- `src/agents/risk_manager.py`: Example aggregator agent (consumes analyst signals)
-- `src/agents/portfolio_manager.py`: Example final aggregator (decision synthesis)
-- `src/utils/analysts.py`: Agent registry, configuration
+- `src/agents/risk_manager.py`: Example aggregator agent (consumes specialist signals)
+- `src/agents/decision_manager.py`: Example final aggregator (release/governance synthesis)
+- `src/utils/agents.py`: Agent registry, configuration
 - `src/agents/*.py`: Individual specialist agent implementations
 
 ### BaseCoat Repository
@@ -763,7 +765,7 @@ class WorkflowQueueManager:
 
 ## Conclusion
 
-Multi-agent orchestration via LangGraph represents a significant upgrade to BaseCoat's capabilities, enabling parallel execution, decision aggregation, and composable workflows. The ai-hedge-fund project demonstrates production readiness. Implementation follows a phased approach with clear blocking dependencies (#448). Adoption roadmap emphasizes backward compatibility and opt-in migration.
+Multi-agent orchestration via LangGraph represents a significant upgrade to BaseCoat's capabilities, enabling parallel execution, decision aggregation, and composable workflows. This CI/CD governance reference architecture demonstrates production readiness. Implementation follows a phased approach with clear blocking dependencies (#448). Adoption roadmap emphasizes backward compatibility and opt-in migration.
 
 ---
 
@@ -824,7 +826,8 @@ Human review gate                               │
       │                                          │
       ▼                               ◄──────────┘
   Committed                        (max 3 iterations)
-```text
+
+```
 
 ### LangGraph Implementation
 
@@ -875,7 +878,7 @@ workflow.add_conditional_edges("reviewer", should_continue, {"retry": "author", 
 workflow.add_edge("author", "reviewer")
 workflow.set_entry_point("author")
 graph = workflow.compile()
-```text
+```
 
 ### Key Design Points
 
@@ -917,7 +920,7 @@ confidence: 0.95
 promoted_by: memory-steward
 timestamp: "2026-05-09T09:00:00Z"
 source_repo: IBuySpy-Shared/basecoat
-```text
+```
 
 ### Publisher
 
@@ -959,7 +962,7 @@ jobs:
                 timestamp: new Date().toISOString(),
               }
             });
-```text
+```
 
 ### Subscribers
 
@@ -992,7 +995,7 @@ jobs:
             -Subject "${{ github.event.client_payload.subject }}"
         env:
           MEMORY_REPO_TOKEN: ${{ secrets.MEMORY_REPO_TOKEN }}
-```text
+```
 
 ### Key Design Points
 
@@ -1020,7 +1023,8 @@ guidance-author ──► guidance-reviewer ──► (PASS) ──► PR merge
                                          ▼               ▼               ▼
                                    sync-memory      validate-memory  notify-steward
                                    (pull to .memory/shared/)
-```text
+
+```
 
 The Creator-Verifier loop produces the validated guidance; the Pub-Sub broadcast propagates
 it to all consumers once merged.

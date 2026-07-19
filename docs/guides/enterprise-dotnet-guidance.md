@@ -37,7 +37,7 @@ Use strangler fig pattern to incrementally migrate from Framework to .NET Core:
 
 Use EF Core for data access with strongly-typed DbContext:
 
-`csharp
+```csharp
 public class AppDbContext : DbContext
 {
     public DbSet<Order> Orders { get; set; }
@@ -47,7 +47,7 @@ public class AppDbContext : DbContext
 // Migrations maintain schema as code
 dotnet ef migrations add AddOrders
 dotnet ef database update
-`
+```
 
 ## Base Coat Assets
 
@@ -56,5 +56,5 @@ dotnet ef database update
 
 ## References
 
-- [.NET Support Policy](https://dotnet.microsoft.com/support/policy)
+- [.NET Support Policy](https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core)
 - [Entity Framework Core](https://docs.microsoft.com/ef/core/)

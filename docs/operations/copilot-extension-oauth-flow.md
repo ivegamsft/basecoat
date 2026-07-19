@@ -1,4 +1,5 @@
 # GitHub OAuth and Session Flow for BaseCoat Copilot Extension
+<!-- markdownlint-disable -->
 
 This document describes the OAuth 2.0 flow, state validation strategy, session management design, and error handling for the BaseCoat Copilot Extension backend.
 

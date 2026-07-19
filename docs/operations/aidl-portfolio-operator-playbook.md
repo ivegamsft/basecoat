@@ -228,7 +228,7 @@ Audit triggers playbook updates when:
 
 All playbook terminology aligns with the BaseCoat canonical lexicon and AIDL framing:
 
-- **Guardrail State**: Control compliance status (Pass, Warn, Block, Waived). Drives escalation triggers. Tracked in [Guardrail GitHub Project](https://github.com/orgs/IBuySpy-Shared/projects/7).
+- **Guardrail State**: Control compliance status (Pass, Warn, Block, Waived). Drives escalation triggers. Tracked in the Guardrail project board.
 - **Risk**: Business risk classification (Critical, High, Medium, Low). Informs triage priority and SRE allocation.
 - **SRE Impact**: Operational blast radius (None, Latency, Availability, Error Rate, Capacity). Filters on-call routing.
 - **Iteration**: Sprint or release cycle. Drives planning cadence and board filtering.

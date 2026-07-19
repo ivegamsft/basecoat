@@ -377,7 +377,7 @@ Configuration SecurityBaseline {
 ## References
 
 - [Azure Windows VM Documentation](https://docs.microsoft.com/azure/virtual-machines/windows/)
-- [Windows Server on Azure Marketplace](https://azuremarketplace.microsoft.com/marketplace/apps?filters=windows-server)
+- [Windows Server image selection on Azure virtual machines](https://learn.microsoft.com/en-us/azure/virtual-machines/windows/cli-ps-findimage)
 - [PowerShell Desired State Configuration](https://docs.microsoft.com/powershell/dsc/overview)
 - [Azure Bastion Documentation](https://docs.microsoft.com/azure/bastion/)
 - [Windows Security Baselines](https://docs.microsoft.com/windows/security/threat-protection/windows-security-baselines)

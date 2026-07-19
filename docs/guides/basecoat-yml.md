@@ -23,8 +23,9 @@ Both sections are optional. Omit any key to accept the default.
 | **Required** | No |
 | **Default** | `https://github.com/YOUR-ORG/basecoat.git` |
 
-The upstream BaseCoat repository URL to clone assets from. Override this when
-your organisation maintains a private fork.
+The upstream BaseCoat repository URL to clone assets from. This ships as a
+placeholder and must be overridden for real use. Replace it when your
+organisation maintains a private fork.
 
 ```yaml
 source: https://github.com/YOUR-ORG/basecoat.git

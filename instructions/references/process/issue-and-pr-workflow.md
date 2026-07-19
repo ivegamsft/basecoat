@@ -24,7 +24,7 @@
 
 ## Active Project and Feature Links
 
-- **Sprint 37 - CI/CD Guardrails**: <https://github.com/orgs/IBuySpy-Shared/projects/7>
+- **Sprint 37 - CI/CD Guardrails**: tracked in the active backlog board
 - **CI/CD Remaining Gaps (legacy/backlog board)**: <https://github.com/orgs/IBuySpy-Shared/projects/5>
 - **Feature tracker — Publish and environment-guardrail stabilization**: <https://github.com/IBuySpy-Shared/basecoat/issues/1719>
 - **Feature tracker — Deployment pipeline recovery (portal, extension, terraform)**: <https://github.com/IBuySpy-Shared/basecoat/issues/1720>

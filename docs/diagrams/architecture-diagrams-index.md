@@ -72,8 +72,7 @@ If you only need the gist, read these three first:
 ---
 
 !!! tip "Viewing diagrams"
-    Excalidraw files open natively in VS Code with the
-    [Excalidraw extension](https://marketplace.visualstudio.com/items?itemName=pomdtr.excalidraw-editor),
+    Excalidraw files open natively in VS Code with the Excalidraw extension,
     or in the browser at [aka.ms/excalidraw](https://aka.ms/excalidraw).
     Mermaid-based `.md` diagram pages render inline in the docs site and can be read
     directly in GitHub or VS Code without exporting assets.

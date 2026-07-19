@@ -134,5 +134,5 @@ agent to fetch data using `gh` CLI commands in the workflow body.
 ## Reference
 
 - [Agentic Workflows Workshop](https://copilot-academy.github.io/workshops/copilot-customization/agentic_workflows)
-- [gh-aw reference](https://github.com/github/gh-aw/tree/main/docs/reference)
+- [gh-aw reference](https://github.com/github/gh-aw)
 - Issue #560 — parent tracking issue for this feature

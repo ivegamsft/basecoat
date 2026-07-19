@@ -121,7 +121,7 @@ export class GitHubTokenManager {
   ): Promise<OAuthTokenResponse> {
     try {
       // Exchange code for access token
-      // Documentation: https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/authenticating-as-a-github-app-user
+      // Documentation: https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/authenticating-with-a-github-app-on-behalf-of-a-user
       const tokenResponse = await this.app.oauth.createToken({
         code: request.code,
         redirectUrl: request.redirectUri,
@@ -369,7 +369,7 @@ Test coverage should include:
 ## References
 
 - [@octokit/app documentation](https://github.com/octokit/app.js)
-- [GitHub OAuth documentation](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/authenticating-as-a-github-app-user)
+- [GitHub OAuth documentation](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/authenticating-with-a-github-app-on-behalf-of-a-user)
 - [GitHub organization membership API](https://docs.github.com/en/rest/orgs/members?apiVersion=2022-11-28#check-organization-membership-for-a-user)
 - Issue #1114 (GitHub token exchange implementation)
 - Sprint 32 planning

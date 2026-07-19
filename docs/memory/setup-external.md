@@ -44,8 +44,7 @@ gh secret set MEMORY_REPO_TOKEN \
   --body "ghp_..."
 ```
 
-Or via the GitHub UI:
-`https://github.com/organizations/YOUR_ORG/settings/secrets/actions`
+Or via the GitHub UI: open your organization's Actions secrets page.
 
 ### Option B — Per-repo secret
 
@@ -57,8 +56,7 @@ gh secret set MEMORY_REPO_TOKEN \
   --body "ghp_..."
 ```
 
-Or via the GitHub UI:
-`https://github.com/YOUR_ORG/YOUR_REPO/settings/secrets/actions`
+Or via the GitHub UI: open your repository's Actions secrets page.
 
 ## Step 3 — Enlist Your Repo
 
