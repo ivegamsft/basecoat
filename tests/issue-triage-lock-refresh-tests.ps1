@@ -55,10 +55,10 @@ if ($workflow -notmatch 'COPILOT_GITHUB_TOKEN:\s*\$\{\{\s*secrets\.COPILOT_GITHU
 if ($workflow -notmatch 'COPILOT_GITHUB_TOKEN:\s*placeholder-token-for-credential-isolation') {
     throw 'issue-triage lock must pass placeholder token value to the detection phase for credential isolation.'
 }
-$awfInvocationPattern = '(?m)^\s*sudo -E COPILOT_GITHUB_TOKEN=placeholder-token-for-credential-isolation awf '
+$awfInvocationPattern = '(?m)^\s*COPILOT_GITHUB_TOKEN=placeholder-token-for-credential-isolation sudo -E awf '
 $awfInvocationCount = [regex]::Matches($workflow, $awfInvocationPattern).Count
 if ($awfInvocationCount -ne 2) {
-    throw "issue-triage lock must use 'sudo -E COPILOT_GITHUB_TOKEN=placeholder-token-for-credential-isolation awf' in both invocations (found $awfInvocationCount)."
+    throw "issue-triage lock must use 'COPILOT_GITHUB_TOKEN=placeholder-token-for-credential-isolation sudo -E awf' in both invocations (found $awfInvocationCount)."
 }
 
 Write-Host 'Issue triage lock refresh tests passed.'
