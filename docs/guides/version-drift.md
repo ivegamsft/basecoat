@@ -34,10 +34,11 @@ on:
   workflow_dispatch:
 jobs:
   check:
-    uses: IBuySpy-Shared/basecoat/.github/workflows/check-basecoat-version-callable.yml@main
+    uses: YOUR-ORG/basecoat/.github/workflows/check-basecoat-version-callable.yml@main
     with:
       stage_path: .github/base-coat
       alert_threshold: 1
+      source_repo: YOUR-ORG/basecoat
     permissions:
       issues: write
       contents: read
@@ -49,6 +50,7 @@ jobs:
 |---|---|---|
 | `stage_path` | `.github/base-coat` | Path to synced BaseCoat assets |
 | `alert_threshold` | `1` | Versions behind before alerting |
+| `source_repo` | Required | Source BaseCoat repository in `owner/repo` format |
 
 ## Choosing an alert threshold (N versions)
 
@@ -65,10 +67,11 @@ Example (recommended baseline):
 ```yaml
 jobs:
   check:
-    uses: IBuySpy-Shared/basecoat/.github/workflows/check-basecoat-version-callable.yml@main
+    uses: YOUR-ORG/basecoat/.github/workflows/check-basecoat-version-callable.yml@main
     with:
       stage_path: .github/base-coat
       alert_threshold: 1
+      source_repo: YOUR-ORG/basecoat
 ```
 
 ## What the issue looks like
@@ -99,7 +102,7 @@ gh issue list --search "BaseCoat upgrade available" --state all
 To evaluate per-asset version/SHA drift across consumer repos:
 
 ```powershell
-pwsh scripts/adoption/detect-basecoat.ps1 -Org IBuySpy-Shared -OutputFormat markdown -AssetDetail
+pwsh scripts/adoption/detect-basecoat.ps1 -Org YOUR-ORG -OutputFormat markdown -AssetDetail
 ```
 
 When a source asset has frontmatter `version`, the scanner compares source vs consumer version.

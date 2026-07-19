@@ -21,7 +21,7 @@ Both sections are optional. Omit any key to accept the default.
 |---|---|
 | **Type** | string (URL) |
 | **Required** | No |
-| **Default** | `https://github.com/IBuySpy-Shared/basecoat.git` |
+| **Default** | `https://github.com/YOUR-ORG/basecoat.git` |
 
 The upstream BaseCoat repository URL to clone assets from. Override this when
 your organisation maintains a private fork.
@@ -30,7 +30,7 @@ your organisation maintains a private fork.
 source: https://github.com/YOUR-ORG/basecoat.git
 ```
 
-### ef
+### ref
 
 | | |
 |---|---|
@@ -46,7 +46,7 @@ leave as `main` to always pull the latest.
 ref: v3.25.0
 ```
 
-### gents
+### agents
 
 | | |
 |---|---|
@@ -179,7 +179,7 @@ already seen.
 days_back: 30
 ```
 
-### 	eam
+### team
 
 | | |
 |---|---|
@@ -225,7 +225,7 @@ during steward review.
 domain: infra
 ```
 
-### uto_pr
+### auto_pr
 
 | | |
 |---|---|
@@ -296,7 +296,7 @@ include lists means all agents, skills, and instructions are synced.
 
 ```yaml
 # .basecoat.yml
-source: https://github.com/IBuySpy-Shared/basecoat.git
+source: https://github.com/YOUR-ORG/basecoat.git
 ref: main
 ```
 
@@ -307,7 +307,7 @@ release does not change agent behaviour unexpectedly.
 
 ```yaml
 # .basecoat.yml
-source: https://github.com/IBuySpy-Shared/basecoat.git
+source: https://github.com/YOUR-ORG/basecoat.git
 ref: v3.25.0   # pinned --- update deliberately after reviewing the changelog
 
 agents:
@@ -374,7 +374,7 @@ skills, and instructions are synced; everything else is excluded.
 
 ```yaml
 # .basecoat.yml
-source: https://github.com/IBuySpy-Shared/basecoat.git
+source: https://github.com/YOUR-ORG/basecoat.git
 ref: v3.25.0
 
 agents:

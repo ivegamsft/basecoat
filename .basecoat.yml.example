@@ -6,15 +6,15 @@
 #
 # All keys are optional. Remove any key to accept the default.
 #
-# Full reference: https://github.com/IBuySpy-Shared/basecoat/blob/main/docs/guides/basecoat-yml.md
+# Full reference: https://github.com/YOUR-ORG/basecoat/blob/main/docs/guides/basecoat-yml.md
 
 
 # -- Sync configuration --------------------------------------------------------
 
 # source: the upstream BaseCoat repo to clone assets from.
 # Override when your org maintains a private fork.
-# Default: https://github.com/IBuySpy-Shared/basecoat.git
-source: https://github.com/IBuySpy-Shared/basecoat.git
+# Default: https://github.com/YOUR-ORG/basecoat.git
+source: https://github.com/YOUR-ORG/basecoat.git
 
 # ref: branch or tag to sync from.
 # Pin to a release tag (e.g. v3.25.0) for production stability.

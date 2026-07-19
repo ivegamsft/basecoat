@@ -99,7 +99,7 @@ Apply these settings to your Base Coat fork:
 
 Consumer repositories should reference the shared BaseCoat Copilot Space using:
 
-- **Owner**: `IBuySpy-Shared`
+- **Owner**: `YOUR-ORG`
 - **Space name**: `base-coat`
 
 Use this exact owner/name pair when invoking Copilot Space context retrieval from consumers.
@@ -154,7 +154,7 @@ The profile contract in `docs/reference/onboarding-profile-contract.v1.md` is th
    ---
    ```
 
-4. Reference existing skills and instructions as needed. See [`CATALOG.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/CATALOG.md) for the full registry.
+4. Reference existing skills and instructions as needed. See [Inventory](../reference/inventory.md) for the full registry.
 
 ### Creating a New Skill
 
@@ -199,7 +199,7 @@ See [`docs/reference/governance-contract.md`](../reference/governance-contract.m
 ### Agent Trust Boundaries
 
 - Agents and skills execute in the context of the developer's Copilot session. They do not have independent access to systems.
-- MCP integrations must follow the trust-boundary rules in [`instructions/basecoat-10-core-mcp.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/basecoat-10-core-mcp.instructions.md).
+- MCP integrations must follow the trust-boundary and tool-approval guardrails in [`tool-confirmation-policy.md`](../reference/guardrails/tool-confirmation-policy.md).
 - Review [`docs/../reference/guardrails/oidc-federation.md`](../reference/guardrails/oidc-federation.md) before configuring any GitHub Actions to Azure authentication.
 
 ### Supply Chain Security
@@ -305,7 +305,7 @@ See [`docs/enterprise-rollout.md`](enterprise-rollout.md) for detailed rollout g
 
 - Run `CATALOG.md` validation to check all cross-references.
 - Ensure the skill directory exists and contains a `SKILL.md` file.
-- Check [`CATALOG.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/CATALOG.md) for the authoritative list of available assets.
+- Check [Inventory](../reference/inventory.md) for the authoritative list of available assets.
 
 ### Release artifacts fail checksum verification
 

@@ -28,14 +28,14 @@ No configuration file required.
 
 ```bash
 # macOS / Linux
-export BASECOAT_REPO='https://github.com/IBuySpy-Shared/basecoat.git'
-curl -fsSL https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/sync.sh | bash
+export BASECOAT_REPO='https://github.com/YOUR-ORG/basecoat.git'
+curl -fsSL https://raw.githubusercontent.com/YOUR-ORG/basecoat/main/sync.sh | bash
 ```text
 
 ```powershell
 # Windows PowerShell
-$env:BASECOAT_REPO = 'https://github.com/IBuySpy-Shared/basecoat.git'
-irm https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/sync.ps1 | iex
+$env:BASECOAT_REPO = 'https://github.com/YOUR-ORG/basecoat.git'
+irm https://raw.githubusercontent.com/YOUR-ORG/basecoat/main/sync.ps1 | iex
 ```text
 
 What you get: all agents, skills, instructions, and prompts overlaid into `.github/`.
@@ -51,7 +51,7 @@ and how. The sync script reads it automatically on the next run.
 
 ```yaml
 # .basecoat.yml
-source: https://github.com/IBuySpy-Shared/basecoat.git
+source: https://github.com/YOUR-ORG/basecoat.git
 ref: v3.25.0   # pin to a release tag for stability
 
 # Only sync agents relevant to your stack
@@ -134,10 +134,10 @@ available to all your consumer repos.
 
 ```bash
 # Fork via GitHub CLI
-gh repo fork IBuySpy-Shared/basecoat --org YOUR-ORG --clone
+gh repo fork SOURCE-ORG/basecoat --org YOUR-ORG --clone
 
 # Or: mirror to your org
-git clone https://github.com/IBuySpy-Shared/basecoat.git
+git clone https://github.com/SOURCE-ORG/basecoat.git
 cd basecoat
 git remote rename origin upstream
 git remote add origin https://github.com/YOUR-ORG/basecoat.git
@@ -170,7 +170,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Fetch upstream
         run: |
-          git remote add upstream https://github.com/IBuySpy-Shared/basecoat.git
+          git remote add upstream https://github.com/SOURCE-ORG/basecoat.git
           git fetch upstream
           git merge upstream/main --no-edit || echo "Conflicts need manual resolution"
       - name: Open PR if changes
@@ -191,7 +191,7 @@ your version takes precedence after the next sync. Downstream consumers get
 your version, not the upstream original.
 
 ```text
-IBuySpy-Shared/basecoat
+SOURCE-ORG/basecoat
   └── agents/basecoat-90-quality-code-review.agent.md   ← upstream original
 
 YOUR-ORG/basecoat (fork)

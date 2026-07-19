@@ -91,7 +91,7 @@ Without this secret the agentic lock-file workflows will fail to start.
 7. Run bootstrap script:
 
 ```powershell
-pwsh scripts/bootstrap-copilot-github-token.ps1 -Repo IBuySpy-Shared/basecoat
+pwsh scripts/bootstrap-copilot-github-token.ps1 -Repo YOUR-ORG/basecoat
 ```
 
 If you prefer manual UI setup, add the value as repository secret
@@ -203,16 +203,16 @@ This is deployment/runtime specific (not just build-time): `GITHUB_TOKEN` can pu
 `.github/workflows/docs-production.yml`, `.github/workflows/close-production-issues.yml`
 
 **Purpose:** Authorizes the publish-to-production workflow to push release
-tags and the `main` branch from the internal repository (`IBuySpy-Shared/basecoat`)
-to the public production repository (`ivegamsft/basecoat`). Without this secret
+tags and the `main` branch from the source repository (`YOUR-ORG/basecoat`)
+to the production repository (`PRODUCTION-ORG/basecoat`). Without this secret
 the workflow fails immediately on any version tag push or manual dispatch.
 
 **How to create:**
 
-1. Sign in to <https://github.com> as the `ivegamsft` account owner
+1. Sign in to <https://github.com> as the production repository owner account
 2. Go to **Settings → Developer settings → Fine-grained tokens → Generate new token**
-3. Set **Resource owner** to `ivegamsft`
-4. Set **Repository access** to `Only select repositories` → `ivegamsft/basecoat`
+3. Set **Resource owner** to `PRODUCTION-ORG`
+4. Set **Repository access** to `Only select repositories` → `PRODUCTION-ORG/basecoat`
 5. Under **Repository permissions**, grant:
    - **Contents**: Read and write
    - **Administration**: Read and write
@@ -221,20 +221,20 @@ the workflow fails immediately on any version tag push or manual dispatch.
 7. Add it as a secret on the internal repository:
 
 ```powershell
-gh secret set PRODUCTION_REPO_TOKEN --repo IBuySpy-Shared/basecoat
+gh secret set PRODUCTION_REPO_TOKEN --repo YOUR-ORG/basecoat
 ```
 
 **Verification:**
 
 ```bash
-gh secret list --repo IBuySpy-Shared/basecoat | grep PRODUCTION_REPO_TOKEN
+gh secret list --repo YOUR-ORG/basecoat | grep PRODUCTION_REPO_TOKEN
 ```
 
 **Bootstrap check:** Run `pwsh scripts/bootstrap.ps1` — Phase 3 surfaces a
 missing token with exact remediation steps. In `-Silent` (CI) mode, the check
 emits a warning and skips interactive prompting.
 
-**Rotation schedule:** Rotate when the `ivegamsft` PAT expiration approaches.
+**Rotation schedule:** Rotate when the production PAT expiration approaches.
 Set a calendar reminder matching the PAT expiration date. Generate a replacement
 token before the old one expires, update the secret, then revoke the old token.
 
@@ -278,7 +278,7 @@ workflow fails with `400 The requested model is not supported`.
 After setting all secrets, trigger a manual workflow run to confirm:
 
 ```bash
-gh workflow run issue-triage.lock.yml --repo IBuySpy-Shared/basecoat
+gh workflow run issue-triage.lock.yml --repo YOUR-ORG/basecoat
 ```
 
 Check the Actions tab for green status on the `triage` job. If it fails with

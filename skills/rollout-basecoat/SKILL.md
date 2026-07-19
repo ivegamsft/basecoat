@@ -36,7 +36,7 @@ a pinned BaseCoat release.
    - Known-bad tags with confirmed payload drift are auto-remapped to the first
      corrected release, with a warning to update the consumer pin.
 4. Compare installed version with latest upstream release:
-   `gh release list --repo IBuySpy-Shared/basecoat --limit 1`.
+   `gh release list --repo SOURCE-ORG/basecoat --limit 1`.
 5. Report exactly what changed and any follow-up steps.
 
 ## Fallback When Skill Routing Fails
@@ -46,13 +46,13 @@ commands instead of stopping:
 
 ```powershell
 # PowerShell fallback (from consumer repo root)
-$env:BASECOAT_REPO = 'https://github.com/IBuySpy-Shared/basecoat.git'
+$env:BASECOAT_REPO = 'https://github.com/SOURCE-ORG/basecoat.git'
 $env:BASECOAT_REF  = 'main'  # or vX.Y.Z
 pwsh .\sync.ps1
 ```
 
 ```bash
 # Bash fallback (from consumer repo root)
-BASECOAT_REPO=https://github.com/IBuySpy-Shared/basecoat.git \
+BASECOAT_REPO=https://github.com/SOURCE-ORG/basecoat.git \
 BASECOAT_REF=main ./sync.sh
 ```

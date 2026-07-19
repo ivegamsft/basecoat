@@ -11,6 +11,10 @@ on:
         description: Number of minor versions behind before alerting
         type: number
         default: 1
+      source_repo:
+        description: Source BaseCoat repository in owner/repo format
+        type: string
+        required: true
 
 jobs:
   check-version:
@@ -39,7 +43,9 @@ jobs:
       - name: Get latest BaseCoat release
         id: latest
         run: |
-          LATEST=$(gh release list --repo IBuySpy-Shared/basecoat --limit 1 --json tagName -q '.[0].tagName' | sed 's/^v//')
+          SOURCE_REPO="${{ inputs.source_repo }}"
+          LATEST=$(gh release list --repo "$SOURCE_REPO" --limit 1 --json tagName -q '.[0].tagName' | sed 's/^v//')
+          echo "source_repo=$SOURCE_REPO" >> $GITHUB_OUTPUT
           echo "version=$LATEST" >> $GITHUB_OUTPUT
           echo "Latest BaseCoat version: $LATEST"
         env:
@@ -88,7 +94,7 @@ jobs:
           else
             gh issue create --repo "$GITHUB_REPOSITORY" \
               --title "$TITLE" \
-              --body "## BaseCoat Upgrade Available\n\nThis repo's BaseCoat assets are out of date.\n\n| | Version |\n|---|---|\n| **Current** | v${CONSUMER} |\n| **Latest** | v${LATEST} |\n| **Versions behind** | ${{ steps.compare.outputs.drift }} |\n\n## How to upgrade\n\nAlways use the sync script — do not manually copy or PR in agent files, as this bypasses the clean-replace step that removes stale assets.\n\n\`\`\`bash\ncurl -fsSL https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/sync.sh | bash\n\`\`\`\n\nOr on Windows: download the [latest release](https://github.com/IBuySpy-Shared/basecoat/releases/latest) and run \`sync.ps1\`.\n\n---\n*Opened automatically by the BaseCoat version drift detector.*" \
+              --body "## BaseCoat Upgrade Available\n\nThis repo's BaseCoat assets are out of date.\n\n| | Version |\n|---|---|\n| **Current** | v${CONSUMER} |\n| **Latest** | v${LATEST} |\n| **Versions behind** | ${{ steps.compare.outputs.drift }} |\n\n## How to upgrade\n\nAlways use the sync script — do not manually copy or PR in agent files, as this bypasses the clean-replace step that removes stale assets.\n\n\`\`\`bash\ncurl -fsSL https://raw.githubusercontent.com/${{ steps.latest.outputs.source_repo }}/main/sync.sh | bash\n\`\`\`\n\nOr on Windows: download the [latest release](https://github.com/${{ steps.latest.outputs.source_repo }}/releases/latest) and run \`sync.ps1\`.\n\n---\n*Opened automatically by the BaseCoat version drift detector.*" \
               --label "maintenance"
           fi
         env:
@@ -115,7 +121,7 @@ jobs:
             if [ -z "$EXISTING" ]; then
               gh issue create --repo "$GITHUB_REPOSITORY" \
                 --title "$TITLE" \
-                --body "## Mixed BaseCoat Agent State\n\nBoth old flat-name agents and new \`basecoat-\`-prefixed agents were found in \`$AGENTS_DIR\`.\n\n| | Count |\n|---|---|\n| Prefixed (\`basecoat-*\`) | $PREFIXED |\n| Non-prefixed (stale) | $NON_PREFIXED |\n\nThis typically happens when an upgrade PR manually added new agents without removing old ones. The sync script prevents this by replacing the entire agents directory.\n\n## How to fix\n\n\`\`\`bash\ncurl -fsSL https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/sync.sh | bash\n\`\`\`\n\nOr on Windows: download the [latest release](https://github.com/IBuySpy-Shared/basecoat/releases/latest) and run \`sync.ps1\`.\n\n---\n*Opened automatically by the BaseCoat version check.*" \
+                --body "## Mixed BaseCoat Agent State\n\nBoth old flat-name agents and new \`basecoat-\`-prefixed agents were found in \`$AGENTS_DIR\`.\n\n| | Count |\n|---|---|\n| Prefixed (\`basecoat-*\`) | $PREFIXED |\n| Non-prefixed (stale) | $NON_PREFIXED |\n\nThis typically happens when an upgrade PR manually added new agents without removing old ones. The sync script prevents this by replacing the entire agents directory.\n\n## How to fix\n\n\`\`\`bash\ncurl -fsSL https://raw.githubusercontent.com/${{ steps.latest.outputs.source_repo }}/main/sync.sh | bash\n\`\`\`\n\nOr on Windows: download the [latest release](https://github.com/${{ steps.latest.outputs.source_repo }}/releases/latest) and run \`sync.ps1\`.\n\n---\n*Opened automatically by the BaseCoat version check.*" \
                 --label "maintenance"
             else
               echo "Mixed-state issue #$EXISTING already open."
@@ -125,4 +131,3 @@ jobs:
           fi
         env:
           GH_TOKEN: ${{ github.token }}
-

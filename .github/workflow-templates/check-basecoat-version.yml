@@ -7,10 +7,11 @@ on:
 
 jobs:
   check:
-    uses: IBuySpy-Shared/basecoat/.github/workflows/check-basecoat-version-callable.yml@main
+    uses: YOUR-ORG/basecoat/.github/workflows/check-basecoat-version-callable.yml@main
     with:
       stage_path: .github/base-coat
       alert_threshold: 1
+      source_repo: YOUR-ORG/basecoat
     permissions:
       issues: write
       contents: read

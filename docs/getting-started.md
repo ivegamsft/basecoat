@@ -14,8 +14,10 @@ Run the sync script in your repo root:
 === "PowerShell (Windows)"
 
     ```powershell
-    $tag = (gh release list --repo IBuySpy-Shared/basecoat --limit 1 --json tagName -q '.[0].tagName')
-    $url = "https://github.com/IBuySpy-Shared/basecoat/releases/download/$tag/base-coat-$tag.zip"
+    $sourceRepo = "YOUR-ORG/basecoat"
+    $tag = (gh release list --repo $sourceRepo --limit 1 --json tagName -q '.[0].tagName')
+    $version = $tag.TrimStart('v')
+    $url = "https://github.com/$sourceRepo/releases/download/$tag/base-coat-$version.zip"
     Invoke-WebRequest $url -OutFile base-coat.zip
     Expand-Archive base-coat.zip -DestinationPath .github/base-coat -Force
     Remove-Item base-coat.zip
@@ -24,14 +26,14 @@ Run the sync script in your repo root:
 === "Shell (Linux/macOS)"
 
     ```bash
-    curl -fsSL https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/scripts/sync.sh | bash
+    curl -fsSL https://raw.githubusercontent.com/YOUR-ORG/basecoat/main/sync.sh | bash
     ```
 
 After syncing, your repo will have a `.github/base-coat/` directory containing all BaseCoat assets.
 
 ## Option 2: Manual setup
 
-1. Go to the [latest release](https://github.com/IBuySpy-Shared/basecoat/releases/latest)
+1. Go to the latest release page for your source repository (`https://github.com/YOUR-ORG/basecoat/releases/latest`)
 2. Download `base-coat-<version>.zip`
 3. Extract to `.github/base-coat/` in your repo
 4. Commit the result
@@ -57,10 +59,11 @@ on:
   workflow_dispatch:
 jobs:
   check:
-    uses: IBuySpy-Shared/basecoat/.github/workflows/check-basecoat-version-callable.yml@main
+    uses: YOUR-ORG/basecoat/.github/workflows/check-basecoat-version-callable.yml@main
     with:
       stage_path: .github/base-coat
       alert_threshold: 1
+      source_repo: YOUR-ORG/basecoat
     permissions:
       issues: write
       contents: read
@@ -68,7 +71,7 @@ jobs:
 
 ## Next steps
 
-- [Enterprise setup](guides/enterprise-setup.md) — reduced-friction setup for IBuySpy-Shared org members
+- [Enterprise setup](guides/enterprise-setup.md) — reduced-friction setup for organization members
 - [Onboarding profile contract](reference/onboarding-profile-contract.v1.md) — versioned profile posture and migration rules
 - [Asset reference](reference/quick-reference.md) — browse all available agents, skills, and instructions
 - [Contributing](guides/contributing.md) — add your own patterns back to BaseCoat

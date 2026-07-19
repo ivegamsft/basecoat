@@ -20,16 +20,16 @@ Files that are **not** synced: `basecoat-metadata.json` (internal portal index),
 
     ```powershell
     # Sync latest release (from main)
-    $env:BASECOAT_REPO = 'https://github.com/IBuySpy-Shared/basecoat.git'
+    $env:BASECOAT_REPO = 'https://github.com/YOUR-ORG/basecoat.git'
     .\sync.ps1
 
     # Sync a specific version tag
-    $env:BASECOAT_REPO = 'https://github.com/IBuySpy-Shared/basecoat.git'
+    $env:BASECOAT_REPO = 'https://github.com/YOUR-ORG/basecoat.git'
     $env:BASECOAT_REF  = 'v3.25.0'
     .\sync.ps1
 
     # Sync to a custom target directory
-    $env:BASECOAT_REPO       = 'https://github.com/IBuySpy-Shared/basecoat.git'
+    $env:BASECOAT_REPO       = 'https://github.com/YOUR-ORG/basecoat.git'
     $env:BASECOAT_TARGET_DIR = '.github/my-basecoat'
     .\sync.ps1
     ```
@@ -38,14 +38,14 @@ Files that are **not** synced: `basecoat-metadata.json` (internal portal index),
 
     ```bash
     # Sync latest release (from main)
-    BASECOAT_REPO=https://github.com/IBuySpy-Shared/basecoat.git ./sync.sh
+    BASECOAT_REPO=https://github.com/YOUR-ORG/basecoat.git ./sync.sh
 
     # Sync a specific version tag
-    BASECOAT_REPO=https://github.com/IBuySpy-Shared/basecoat.git \
+    BASECOAT_REPO=https://github.com/YOUR-ORG/basecoat.git \
     BASECOAT_REF=v3.25.0 ./sync.sh
 
     # Sync to a custom target directory
-    BASECOAT_REPO=https://github.com/IBuySpy-Shared/basecoat.git \
+    BASECOAT_REPO=https://github.com/YOUR-ORG/basecoat.git \
     BASECOAT_TARGET_DIR=.github/my-basecoat ./sync.sh
     ```
 
@@ -56,7 +56,7 @@ instead of syncing the full catalog.
 
 ```yaml
 # .basecoat.yml
-source: https://github.com/IBuySpy-Shared/basecoat.git
+source: https://github.com/YOUR-ORG/basecoat.git
 ref: v3.25.0
 
 agents:
@@ -91,7 +91,7 @@ directly from the consumer repo root:
 === "PowerShell fallback"
 
     ```powershell
-    $env:BASECOAT_REPO = 'https://github.com/IBuySpy-Shared/basecoat.git'
+    $env:BASECOAT_REPO = 'https://github.com/YOUR-ORG/basecoat.git'
     $env:BASECOAT_REF  = 'main'  # or vX.Y.Z
     .\sync.ps1
     ```
@@ -99,7 +99,7 @@ directly from the consumer repo root:
 === "Shell fallback"
 
     ```bash
-    BASECOAT_REPO=https://github.com/IBuySpy-Shared/basecoat.git \
+    BASECOAT_REPO=https://github.com/YOUR-ORG/basecoat.git \
     BASECOAT_REF=main ./sync.sh
     ```
 
@@ -121,7 +121,7 @@ are reviewable.
     Get-Content .github/base-coat/version.json
 
     # 2) Run scoped sync (uses .basecoat.yml allow-lists when present)
-    $env:BASECOAT_REPO = 'https://github.com/IBuySpy-Shared/basecoat.git'
+    $env:BASECOAT_REPO = 'https://github.com/YOUR-ORG/basecoat.git'
     .\sync.ps1
 
     # 3) Save an auditable patch for reviewer traceability
@@ -138,7 +138,7 @@ are reviewable.
     cat .github/base-coat/version.json
 
     # 2) Run scoped sync (uses .basecoat.yml allow-lists when present)
-    BASECOAT_REPO=https://github.com/IBuySpy-Shared/basecoat.git ./sync.sh
+    BASECOAT_REPO=https://github.com/YOUR-ORG/basecoat.git ./sync.sh
 
     # 3) Save an auditable patch for reviewer traceability
     mkdir -p .github/base-coat-audit
