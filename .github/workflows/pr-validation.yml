@@ -275,12 +275,15 @@ jobs:
           fi
 
           has_release_label=0
-          has_skip_label=0
+          bypass_reason=""
           for label in "${labels[@]}"; do
-            if [[ "$(tr '[:upper:]' '[:lower:]' <<<"$label")" == "skip-release-label-gate" ]]; then
-              has_skip_label=1
-            fi
-
+            normalized_label="$(tr '[:upper:]' '[:lower:]' <<<"$label")"
+            # skip-release-label-gate takes priority; dependencies is a secondary bypass for automated PRs.
+            case "$normalized_label" in
+              skip-release-label-gate) bypass_reason="skip-release-label-gate label" ;;
+              dependencies) [[ -z "$bypass_reason" ]] && bypass_reason="automated dependency update (dependencies label)" ;;
+              *) ;;
+            esac
             if is_release_label "$label"; then
               has_release_label=1
             fi
@@ -291,8 +294,8 @@ jobs:
             exit 0
           fi
 
-          if [[ "$has_skip_label" -eq 1 ]]; then
-            echo "::warning::Release label gate bypassed by skip-release-label-gate."
+          if [[ -n "$bypass_reason" ]]; then
+            echo "::warning::Release label gate bypassed: $bypass_reason."
             exit 0
           fi
 
