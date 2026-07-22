@@ -49,16 +49,23 @@ if ($workflow -notmatch 'GH_AW_INFO_CLI_VERSION: "v0\.74\.4"') {
 if ($workflow -notmatch 'ghcr\.io/github/gh-aw-mcpg:v0\.3\.9@sha256:64828b42a4482f58fab16509d7f8f495a6d97c972a98a68aff20543531ac0388') {
     throw 'issue-triage lock must pin gh-aw-mcpg v0.3.9 to sha256:64828b42...'
 }
-if ($workflow -notmatch 'COPILOT_GITHUB_TOKEN:\s*\$\{\{\s*secrets\.COPILOT_GITHUB_TOKEN\s*\}\}') {
-    throw 'issue-triage lock must pass the real Copilot token to the agent phase.'
+if ($workflow -notmatch '(?m)^\s*COPILOT_GITHUB_TOKEN:\s*\$\{\{\s*secrets\.COPILOT_GITHUB_TOKEN\s*\}\}\s*$') {
+    throw 'issue-triage lock must reference secrets.COPILOT_GITHUB_TOKEN in workflow env bindings.'
 }
-if ($workflow -notmatch 'COPILOT_GITHUB_TOKEN:\s*placeholder-token-for-credential-isolation') {
-    throw 'issue-triage lock must pass placeholder token value to the detection phase for credential isolation.'
+$placeholderExportPattern = '(?m)^\s*export COPILOT_GITHUB_TOKEN=placeholder-token-for-credential-isolation\s*$'
+$placeholderExportCount = [regex]::Matches($workflow, $placeholderExportPattern).Count
+if ($placeholderExportCount -ne 2) {
+    throw "issue-triage lock must export placeholder COPILOT_GITHUB_TOKEN in both AWF phases (found $placeholderExportCount)."
 }
-$awfInvocationPattern = '(?m)^\s*COPILOT_GITHUB_TOKEN=placeholder-token-for-credential-isolation sudo -E awf '
+$awfInvocationPattern = '(?m)^\s*sudo -E awf '
 $awfInvocationCount = [regex]::Matches($workflow, $awfInvocationPattern).Count
 if ($awfInvocationCount -ne 2) {
-    throw "issue-triage lock must use 'COPILOT_GITHUB_TOKEN=placeholder-token-for-credential-isolation sudo -E awf' in both invocations (found $awfInvocationCount)."
+    throw "issue-triage lock must invoke 'sudo -E awf' in both AWF phases (found $awfInvocationCount)."
+}
+$excludeCopilotPattern = '--exclude-env COPILOT_GITHUB_TOKEN'
+$excludeCopilotCount = [regex]::Matches($workflow, $excludeCopilotPattern).Count
+if ($excludeCopilotCount -ne 2) {
+    throw "issue-triage lock must exclude COPILOT_GITHUB_TOKEN from env-all passthrough in both AWF phases (found $excludeCopilotCount)."
 }
 
 Write-Host 'Issue triage lock refresh tests passed.'
