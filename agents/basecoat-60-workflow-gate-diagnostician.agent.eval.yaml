@@ -1,0 +1,26 @@
+agent: workflow-gate-diagnostician
+tests:
+  - id: classifies-approval-gate
+    description: Identifies approval blockers and avoids bypass language
+    input: "Diagnose this workflow run blocked on environment approval and propose the smallest safe unblock action."
+    expect:
+      contains:
+        - "approval"
+        - "smallest-safe"
+        - "rerun"
+  - id: captures-before-after-evidence
+    description: Produces deterministic gate evidence contract
+    input: "Diagnose a branch-policy gate failure and provide state before/after with rerun validation evidence."
+    expect:
+      contains:
+        - "state_before"
+        - "state_after"
+        - "evidence"
+  - id: respects-dry-run
+    description: Supports advisory-only diagnostics without side effects
+    input: "Run workflow gate diagnosis in dry run mode and show proposed actions only."
+    expect:
+      contains:
+        - "dry-run"
+        - "proposed"
+        - "actions"

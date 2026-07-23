@@ -406,6 +406,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running chronicle-to-story export tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'chronicle-to-story-export-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'chronicle-to-story export tests failed' -ForegroundColor Red
+    Write-FailureLog 'chronicle-to-story-export-tests'
+    exit 1
+}
+
 Write-Host 'Running AIDL incident routing verification tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'aidl-incident-routing-verification-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

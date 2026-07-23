@@ -21,14 +21,14 @@ Both sections are optional. Omit any key to accept the default.
 |---|---|
 | **Type** | string (URL) |
 | **Required** | No |
-| **Default** | `https://github.com/YOUR-ORG/basecoat.git` |
+| **Default** | `https://github.com/IBuySpy-Shared/basecoat.git` |
 
 The upstream BaseCoat repository URL to clone assets from. This ships as a
 placeholder and must be overridden for real use. Replace it when your
 organisation maintains a private fork.
 
 ```yaml
-source: https://github.com/YOUR-ORG/basecoat.git
+source: https://github.com/IBuySpy-Shared/basecoat.git
 ```
 
 ### ref
@@ -297,7 +297,7 @@ include lists means all agents, skills, and instructions are synced.
 
 ```yaml
 # .basecoat.yml
-source: https://github.com/YOUR-ORG/basecoat.git
+source: https://github.com/IBuySpy-Shared/basecoat.git
 ref: main
 ```
 
@@ -308,7 +308,7 @@ release does not change agent behaviour unexpectedly.
 
 ```yaml
 # .basecoat.yml
-source: https://github.com/YOUR-ORG/basecoat.git
+source: https://github.com/IBuySpy-Shared/basecoat.git
 ref: v3.25.0   # pinned --- update deliberately after reviewing the changelog
 
 agents:
@@ -348,7 +348,7 @@ organisation's curated asset set.
 
 ```yaml
 # .basecoat.yml
-source: https://github.com/YOUR-ORG/basecoat.git
+source: https://github.com/IBuySpy-Shared/basecoat.git
 ref: main   # or a tag from the private fork
 
 sync:
@@ -375,7 +375,7 @@ skills, and instructions are synced; everything else is excluded.
 
 ```yaml
 # .basecoat.yml
-source: https://github.com/YOUR-ORG/basecoat.git
+source: https://github.com/IBuySpy-Shared/basecoat.git
 ref: v3.25.0
 
 agents:

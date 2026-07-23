@@ -26,6 +26,7 @@ jobs:
   dispatch-production-docs:
     name: Trigger docs build on production repo
     runs-on: ${{ vars.RUNNER_RELEASE || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
+    timeout-minutes: 10
     environment: production
     # Only run after a successful publish (skip on failure/cancellation)
     # workflow_dispatch always runs (user explicitly triggered)

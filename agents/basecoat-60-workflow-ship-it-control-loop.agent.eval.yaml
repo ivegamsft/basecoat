@@ -1,0 +1,26 @@
+agent: ship-it-control-loop
+tests:
+  - id: emits-cycle-summary
+    description: Produces per-cycle status summary with explicit loop state
+    input: "Run one ship-it control-loop cycle and report task, PR, and required-check status."
+    expect:
+      contains:
+        - "cycle"
+        - "tasks"
+        - "PR"
+        - "required checks"
+  - id: enforces-stop-conditions
+    description: Stops when completion condition is met
+    input: "All in-scope PRs are merged and checks are green; evaluate stop condition."
+    expect:
+      contains:
+        - "stop_condition_status"
+        - "complete"
+  - id: retries-then-escalates
+    description: Applies bounded retries and escalates when exhausted
+    input: "A transient validation subtask failed repeatedly past max_retries."
+    expect:
+      contains:
+        - "retry"
+        - "max_retries"
+        - "escalate"

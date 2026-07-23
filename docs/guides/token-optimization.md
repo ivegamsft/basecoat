@@ -44,6 +44,8 @@ See also:
 
 - [`.github/instructions/cost-optimization.instructions.md`](/.github/instructions/cost-optimization.instructions.md)
 - [`.github/instructions/workflow-conventions.instructions.md`](/.github/instructions/workflow-conventions.instructions.md)
+- [`cost-aware-prompting-playbook.md`](cost-aware-prompting-playbook.md)
+- [`phase-boundary-session-checklist.md`](phase-boundary-session-checklist.md)
 - [`../reference/scoped-instructions.md`](../reference/scoped-instructions.md)
 
 ---

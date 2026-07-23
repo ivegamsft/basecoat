@@ -200,6 +200,7 @@ jobs:
   evaluate-ship-it-gate:
     name: Evaluate Ship-it Release Gate
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
       deployments: read

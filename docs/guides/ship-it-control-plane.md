@@ -40,6 +40,25 @@ into governed SDLC execution artifacts with live GitHub side effects.
 
 ## How to Use
 
+### Persistent Control-Loop Mode
+
+Use the dedicated control-loop assets when you need bounded, repeatable wave
+execution without reissuing the full ship-it prompt each cycle:
+
+1. Agent: `agents/basecoat-60-workflow-ship-it-control-loop.agent.md`
+2. Skill: `skills/ship-it-control-loop/SKILL.md`
+
+Required control-loop inputs:
+
+- `goal`
+- `target_repo`
+- `max_cycles`
+- `max_retries`
+- `dry_run`
+
+Cycle output must always include: phase, task/PR/check status snapshot, retry
+state, next action, and stop-condition status (`continue|complete|blocked|max_cycles|manual_stop`).
+
 ### Workflow Dispatch
 
 Run **Ship-it Intent Dispatch** with:

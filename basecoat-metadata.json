@@ -1,7 +1,7 @@
 {
   "$schema": "basecoat-metadata-schema",
   "version": "3.27.0",
-  "generated": "2026-07-09",
+  "generated": "2026-07-22",
   "categories": {
     "AI & Development": {
       "label": "AI & Development",
@@ -2346,6 +2346,28 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-delivery-autopilot.agent.md",
+      "model": "gpt-5.3-codex",
+      "argumentHint": ""
+    },
+    {
+      "name": "basecoat-60-workflow-gate-diagnostician",
+      "description": "Diagnoses policy and environment gate blockers in delivery workflows and produces minimal-safe unblock actions with deterministic evidence artifacts. USE FOR: environment approval deadlocks, permissions and branch-policy gate failures, Pages/deployment gate state diagnostics, and workflow-blocker RCA with validation reruns. DO NOT USE FOR: broad feature implementation, bypassing required approvals, or editing unrelated application logic.",
+      "category": "Meta",
+      "keywords": [],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/basecoat-60-workflow-gate-diagnostician.agent.md",
+      "model": "gpt-5.3-codex",
+      "argumentHint": ""
+    },
+    {
+      "name": "basecoat-60-workflow-ship-it-control-loop",
+      "description": "Persistent fleet delivery loop coordinator for ship-it sessions. USE FOR: bounded wave execution across tasks/PRs/checks, cycle status summaries with explicit stop conditions, transient retry handling with escalation after retry exhaustion, and dry-run planning of loop actions before side effects. DO NOT USE FOR: bypassing required checks, direct production deployment without governance evidence, or unmanaged infinite orchestration loops.",
+      "category": "Meta",
+      "keywords": [],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/basecoat-60-workflow-ship-it-control-loop.agent.md",
       "model": "gpt-5.3-codex",
       "argumentHint": ""
     }

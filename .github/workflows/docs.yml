@@ -28,6 +28,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
@@ -55,6 +56,7 @@ jobs:
     if: github.event_name != 'pull_request'
     needs: validate
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Verify github-pages environment allows this deployment branch
         env:
@@ -107,6 +109,7 @@ jobs:
     if: github.event_name != 'pull_request'
     needs: [validate, verify-github-pages-environment]
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

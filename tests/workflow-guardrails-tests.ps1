@@ -108,8 +108,14 @@ foreach ($file in $workflowFiles) {
     $content = Get-Content $file.FullName -Raw
     
     if ($content -match 'concurrency:') {
-        # Check for proper group definition
-        if ($content -notmatch 'group:\s*\$\{\{\s*github\.workflow.*?\}\}') {
+        # Accept: ${{ github.workflow }}-${{ github.ref }}, format() variants, entity-scoped patterns,
+        # and intentional static singleton groups (e.g. publish-production, cloud-agent-execution)
+        $hasValidGroup = $content -match 'group:\s*\$\{\{\s*github\.workflow' -or
+                         $content -match '(?m)group:\s*\$\{\{[^}]*format\([^)]*github\.workflow' -or
+                         $content -match 'group:\s*\$\{\{\s*inputs\.' -or
+                         $content -match '(?m)group:\s*[a-zA-Z0-9][a-zA-Z0-9_-]*\s*[\r\n]' -or
+                         $content -match 'group:\s*[a-zA-Z0-9_-]+-\$\{\{'
+        if (-not $hasValidGroup) {
             $invalidConcurrency += @{ file = $file.Name; issue = 'missing or invalid group' }
         }
     }
@@ -137,8 +143,8 @@ foreach ($file in $workflowFiles) {
     foreach ($line in $lines) {
         $lineNum++
         
-        # Match 'uses:' statements
-        if ($line -match 'uses:\s*(.+)') {
+        # Match 'uses:' statements — skip comment lines
+        if ($line -notmatch '^\s*#' -and $line -match 'uses:\s*(.+)') {
             $uses = $matches[1].Trim()
             
             # Should be in format: org/repo@<sha-hash> (e.g., actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5)
@@ -277,7 +283,7 @@ foreach ($file in $workflowFiles) {
     $content = Get-Content $file.FullName -Raw
     
     if ($content -match 'uses:\s*actions/checkout@(.+)') {
-        $version = $matches[1]
+        $version = $matches[1].Trim().TrimEnd("`r") -replace '\s*#.*$', ''  # strip CRLF and inline comments
         # Should be a SHA, not a version tag
         if ($version -notmatch '^[a-f0-9]+$') {
             $checkoutIssues += @{ file = $file.Name; version = $version }

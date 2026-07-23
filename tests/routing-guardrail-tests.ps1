@@ -1,12 +1,13 @@
 #!/usr/bin/env pwsh
 <#
 .SYNOPSIS
-    Tests for plan-first and Azure preflight routing guardrails.
+    Tests for routing guardrails including plan-first, Azure preflight,
+    and fleet control-loop contracts.
 
 .DESCRIPTION
     Validates that intent-routing instruction and guardrail files contain
-    the required plan-first and Azure preflight rules, and that referenced
-    instruction files exist.
+    the required plan-first/Azure preflight rules, fleet control-loop
+    routing contracts, and that referenced instruction files exist.
 #>
 
 param()
@@ -98,8 +99,8 @@ if (Test-Path $routingFile) {
     }
 }
 
-# Test 5: intent-routing includes portfolio:, azure:, and infra: in prefix vocabulary
-Write-Host '  Test 5: Validate portfolio:, azure:, and infra: prefixes are in intent-routing vocabulary...'
+# Test 5: intent-routing includes key prefixes in vocabulary
+Write-Host '  Test 5: Validate portfolio:, azure:, infra:, optimize:, and chronicle: prefixes are in intent-routing vocabulary...'
 if (Test-Path $routingFile) {
     $content = Get-Content $routingFile -Raw
     $missingPrefixes = @()
@@ -107,12 +108,14 @@ if (Test-Path $routingFile) {
     if ($content -notmatch '`azure:`') { $missingPrefixes += 'azure:' }
     if ($content -notmatch '`infra:`') { $missingPrefixes += 'infra:' }
     if ($content -notmatch '`architect:`') { $missingPrefixes += 'architect:' }
+    if ($content -notmatch '`optimize:`') { $missingPrefixes += 'optimize:' }
+    if ($content -notmatch '`chronicle:`') { $missingPrefixes += 'chronicle:' }
     if ($missingPrefixes.Count -gt 0) {
         $failures += 'new-prefixes-missing'
         Write-Host "    ✗ Prefix vocabulary missing: $($missingPrefixes -join ', ')" -ForegroundColor Red
     }
     else {
-        Write-Host '    ✓ portfolio:, azure:, infra:, and architect: prefixes present'
+        Write-Host '    ✓ portfolio:, azure:, infra:, optimize:, chronicle:, and architect: prefixes present'
     }
 }
 
@@ -161,8 +164,8 @@ foreach ($ref in $referencedFiles) {
     }
 }
 
-# Test 9: intent-prefixes guide includes portfolio:, azure:, and infra:
-Write-Host '  Test 9: Validate intent-prefixes guide includes portfolio:, azure:, and infra: prefixes...'
+# Test 9: intent-prefixes guide includes key prefixes
+Write-Host '  Test 9: Validate intent-prefixes guide includes portfolio:, azure:, infra:, optimize:, and chronicle: prefixes...'
 $prefixGuide = Join-Path $repoRoot 'docs\guides\intent-prefixes.md'
 if (Test-Path $prefixGuide) {
     $content = Get-Content $prefixGuide -Raw
@@ -170,12 +173,14 @@ if (Test-Path $prefixGuide) {
     if ($content -notmatch '`portfolio:`') { $missingPrefixes += 'portfolio:' }
     if ($content -notmatch '`azure:`') { $missingPrefixes += 'azure:' }
     if ($content -notmatch '`infra:`') { $missingPrefixes += 'infra:' }
+    if ($content -notmatch '`optimize:`') { $missingPrefixes += 'optimize:' }
+    if ($content -notmatch '`chronicle:`') { $missingPrefixes += 'chronicle:' }
     if ($missingPrefixes.Count -gt 0) {
         $failures += 'guide-prefixes-missing'
         Write-Host "    ✗ intent-prefixes guide missing: $($missingPrefixes -join ', ')" -ForegroundColor Red
     }
     else {
-        Write-Host '    ✓ portfolio:, azure:, and infra: prefixes in intent-prefixes guide'
+        Write-Host '    ✓ portfolio:, azure:, infra:, optimize:, and chronicle: prefixes in intent-prefixes guide'
     }
 }
 else {
@@ -264,6 +269,68 @@ if ($broadApplyToFiles.Count -gt 0) {
 }
 else {
     Write-Host '    ✓ All non-guide routing instruction files use scoped applyTo patterns'
+}
+
+# Test 14: intent-routing includes fleet persistent control-loop mode contract
+Write-Host '  Test 14: Validate fleet persistent control-loop mode contract in intent-routing...'
+if (Test-Path $routingFile) {
+    $content = Get-Content $routingFile -Raw
+    $missingContract = @()
+    if ($content -notmatch 'Fleet Persistent Control-Loop Mode') { $missingContract += 'section heading' }
+    if ($content -notmatch 'ship-it-control-loop') { $missingContract += 'ship-it-control-loop reference' }
+    if ($content -notmatch '/tasks') { $missingContract += '/tasks checkpoint reference' }
+    if ($content -notmatch 'max_cycles') { $missingContract += 'max_cycles contract' }
+    if ($content -notmatch 'max_retries') { $missingContract += 'max_retries contract' }
+    if ($missingContract.Count -gt 0) {
+        $failures += 'fleet-control-loop-contract-missing'
+        Write-Host "    ✗ Missing fleet control-loop contract elements: $($missingContract -join ', ')" -ForegroundColor Red
+    }
+    else {
+        Write-Host '    ✓ Fleet persistent control-loop contract present'
+    }
+}
+
+# Test 15: intent-prefixes guide includes persistent next-wave loop mode
+Write-Host '  Test 15: Validate persistent next-wave loop guidance in intent-prefixes guide...'
+if (Test-Path $prefixGuide) {
+    $content = Get-Content $prefixGuide -Raw
+    $missingGuide = @()
+    if ($content -notmatch 'Persistent next-wave loop mode') { $missingGuide += 'section heading' }
+    if ($content -notmatch 'plan and execute the next wave') { $missingGuide += 'next-wave phrase example' }
+    if ($content -notmatch 'ship-it-control-loop') { $missingGuide += 'control-loop route reference' }
+    if ($content -notmatch '/tasks') { $missingGuide += '/tasks checkpoint reference' }
+    if ($missingGuide.Count -gt 0) {
+        $failures += 'guide-next-wave-loop-missing'
+        Write-Host "    ✗ Missing guide next-wave loop elements: $($missingGuide -join ', ')" -ForegroundColor Red
+    }
+    else {
+        Write-Host '    ✓ Persistent next-wave loop guidance present in intent-prefixes guide'
+    }
+}
+
+# Test 16: phase-boundary checklist exists and covers required pivots
+Write-Host '  Test 16: Validate phase-boundary session checklist coverage...'
+$phaseChecklist = Join-Path $repoRoot 'docs\guides\phase-boundary-session-checklist.md'
+if (-not (Test-Path $phaseChecklist)) {
+    $failures += 'phase-boundary-checklist-missing'
+    Write-Host '    ✗ docs/guides/phase-boundary-session-checklist.md not found' -ForegroundColor Red
+}
+else {
+    $content = Get-Content $phaseChecklist -Raw
+    $missingCoverage = @()
+    if ($content -notmatch '/compact') { $missingCoverage += '/compact guidance' }
+    if ($content -notmatch '/new') { $missingCoverage += '/new guidance' }
+    if ($content -notmatch '(?i)\bcleanup\b') { $missingCoverage += 'cleanup phase coverage' }
+    if ($content -notmatch '(?i)\bimplementation\b') { $missingCoverage += 'implementation phase coverage' }
+    if ($content -notmatch '(?i)\bRCA\b') { $missingCoverage += 'RCA phase coverage' }
+    if ($content -notmatch '(?i)\bdocs\b') { $missingCoverage += 'docs phase coverage' }
+    if ($missingCoverage.Count -gt 0) {
+        $failures += 'phase-boundary-checklist-coverage-missing'
+        Write-Host "    ✗ Missing phase checklist coverage: $($missingCoverage -join ', ')" -ForegroundColor Red
+    }
+    else {
+        Write-Host '    ✓ Phase-boundary checklist covers cleanup/implementation/RCA/docs pivots'
+    }
 }
 
 if ($failures.Count -gt 0) {

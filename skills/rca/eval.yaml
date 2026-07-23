@@ -14,6 +14,9 @@ scenarios:
   - id: "pos-4"
     input: "Trace the contributing factors to the deploy failure and generate prevention recommendations."
     expect_activation: true
+  - id: "pos-5"
+    input: "rca: capture failing run URL, first failed step, error block, and classify dependency/toolchain/test/env/config before proposing fixes."
+    expect_activation: true
   - id: "neg-1"
     input: "Plan the sprint backlog for next quarter."
     expect_activation: false

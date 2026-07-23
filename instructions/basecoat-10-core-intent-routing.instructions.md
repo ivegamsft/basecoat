@@ -34,6 +34,7 @@ Rules:
 | `feature:` | New capability or enhancement | Later | `@sprint-planner`, `@solution-architect` |
 | `audit:` | Review, assess, validate — no changes | Now | `@security-analyst`, `@config-auditor`, `@github-security-posture` |
 | `plan:` | Sprint or project planning | Now | `@sprint-planner`, `@product-manager` |
+| `optimize:` | Convert high-entropy requests into normalized execution packets before action | Now | `@task-scope-validator`, `@orchestrator`, `@prompt-coach` |
 | `spike:` | Time-boxed investigation, no deliverable | Now | `@solution-architect` |
 | `chore:` | Maintenance, cleanup, non-functional work | Soon | `@devops-engineer`, `@release-manager` |
 | `fleet:` | Close the sprint, plan the next one, triage oldest issues, and clean branches | Now | `@parallel-session-coordinator`, `@sprint-closeout-auditor`, `@sprint-planner`, `@issue-triage`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
@@ -52,6 +53,7 @@ Rules:
 | `infra:` | Infrastructure change | Now | `@devops-engineer`, `@solution-architect` |
 | `architect:` | Architecture design or system-design decision | Later | `@solution-architect` |
 | `docs:` | Documentation only | Soon | `@tech-writer` |
+| `chronicle:` | Export session/worktree learnings into durable story artifacts and follow-up issue packets | Soon | `@memory-promoter`, `@tech-writer` |
 | `version:` | BaseCoat version inspection and drift check | Now | `@release-manager`, `@devops-engineer` |
 | `test:` | Test coverage gap or test failure | Now | `@manual-test-strategy`, `@strategy-to-automation` |
 | `refactor:` | Structural improvement, no behavior change | Later | `@code-review`, `@performance-analyst` |
@@ -88,6 +90,25 @@ These words override the default timing of a prefix:
 | `log it`, `file an issue` | Log only; do not implement |
 | `just document` | Documentation output only; no code changes |
 
+## Optimize Routing (`optimize:`)
+
+`optimize:` is an advisory-first prefix that packetizes a composite request into a
+bounded execution contract before running side effects.
+
+Execution contract:
+
+1. Parse scope into one or more explicit objectives.
+2. Emit a normalized execution packet with:
+   - scope boundaries
+   - stop conditions
+   - measurable done criteria
+   - validation clauses
+   - routing hints (agent/skill or direct workflow path)
+3. If `advisory-only` is present, stop after emitting the packet.
+4. If execution is requested, run the packet in order and report cycle summaries.
+5. When `optimize:` wraps `ship-it` or `rca`, preserve those governance gates and
+   do not downgrade required checks.
+
 ## Audit Mode (`audit:`)
 
 `audit:` is always read-only unless the user explicitly says "and fix" or
@@ -106,6 +127,25 @@ Execution contract:
 2. Confirm latest-main sync before any write-capable lane starts.
 3. Fan out to the sprint closeout, triage, build audit, planning, and hygiene
    agents only after preflight is recorded.
+
+## Fleet Persistent Control-Loop Mode
+
+When a user repeats wave-continuation phrasing (for example, "plan and execute
+the next wave", "execute the next wave", or "continue the ship-it loop"),
+route the execution step to the persistent control-loop contract instead of
+restarting broad sprint planning each turn.
+
+Execution contract:
+
+1. Normalize to `fleet:` intent and start from `@parallel-session-coordinator`
+   preflight.
+2. Run bounded cycle execution with `ship-it-control-loop` semantics
+   (`max_cycles`, `max_retries`, `dry_run`).
+3. Emit a cycle checkpoint from active `/tasks`, in-scope PR state, and
+   required-check status each cycle.
+4. Continue only while stop conditions are not met and convergence is viable.
+5. Stop on completion, blocking dependency/policy gate, max-cycle exhaustion,
+   or explicit manual stop.
 
 ## GitHub-Native Routing
 
@@ -212,3 +252,14 @@ files remain the canonical source.
   changes.
 - Keep the canonical prefixed files and the compatibility aliases in sync during
   migration.
+
+## Chronicle Routing (`chronicle:`)
+
+`chronicle:` is for converting execution history into durable narrative artifacts.
+
+Execution contract:
+
+1. Generate a markdown story/update packet from session history references.
+2. Support append and update behavior for target story documents.
+3. Emit issue-ready learnings for follow-up tracking.
+4. When requested, produce memory-promotion suggestions with dedupe checks.

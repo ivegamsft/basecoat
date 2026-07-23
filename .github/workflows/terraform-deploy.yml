@@ -23,6 +23,7 @@ jobs:
   validate:
     name: Validate Terraform
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       matrix:
         working-directory:
@@ -60,6 +61,7 @@ jobs:
   plan-dev:
     name: Plan Dev Deployment
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: validate
     if: github.event_name == 'pull_request'
 
@@ -83,6 +85,7 @@ jobs:
   plan-prod:
     name: Plan Production Deployment
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: validate
     if: github.ref == 'refs/heads/main'
 

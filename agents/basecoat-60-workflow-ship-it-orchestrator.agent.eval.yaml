@@ -50,3 +50,38 @@ tests:
         - "VS Code"
         - "cloud"
         - "fallback"
+  - id: persistent-loop-cycle-summary
+    description: Requires cycle summaries with actionable loop state
+    input: "Run ship-it as a persistent loop and show one cycle update."
+    expect:
+      contains:
+        - "cycle"
+        - "phase"
+        - "blocker"
+        - "next action"
+  - id: persistent-loop-stop-condition
+    description: Stops when required checks are still pending and reports blocked closeout
+    input: "Keep running and close out now even though required checks are still pending."
+    expect:
+      contains:
+        - "required checks"
+        - "pending"
+        - "cannot complete"
+        - "stop condition"
+  - id: persistent-loop-status-summary
+    description: Includes cycle status summary from tasks, PRs, and checks
+    input: "Run one ship-it loop cycle and show current task/PR/check status before next action."
+    expect:
+      contains:
+        - "tasks"
+        - "PR"
+        - "checks"
+        - "next action"
+  - id: persistent-loop-retry-and-escalation
+    description: Applies bounded retry policy and escalates after retry budget
+    input: "A transient subtask failed twice; retry within budget then escalate if it fails again."
+    expect:
+      contains:
+        - "retry"
+        - "max_retries"
+        - "escalate"

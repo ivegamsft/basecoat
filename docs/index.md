@@ -15,8 +15,8 @@ BaseCoat gives your organization one place to manage agents, skills, instruction
 
 | Asset type | Count | What it does |
 |---|---|---|
-| **Agents** | 126 | End-to-end task executors — sprint planners, code reviewers, security analysts, and more |
-| **Skills** | 130 | Reusable domain capabilities invoked by agents |
+| **Agents** | 128 | End-to-end task executors — sprint planners, code reviewers, security analysts, and more |
+| **Skills** | 131 | Reusable domain capabilities invoked by agents |
 | **Instructions** | 91 | Copilot behavior rules scoped by file path pattern |
 | **Prompts** | 6 | Structured templates for repeatable tasks |
 
@@ -78,6 +78,8 @@ flowchart LR
 
 - [guides/intent-prefixes.md](guides/intent-prefixes.md) — Intent vocabulary, routing behavior, and prompt templates
 - [guides/token-optimization.md](guides/token-optimization.md) — Operator token-efficiency checklist, model/mode defaults, and context normalization patterns
+- [guides/cost-aware-prompting-playbook.md](guides/cost-aware-prompting-playbook.md) — Tactical model/session/delegation rules for long-running advanced CLI workflows
+- [guides/phase-boundary-session-checklist.md](guides/phase-boundary-session-checklist.md) — Command-level `/compact` vs `/new` checklist across cleanup, implementation, RCA, and docs pivots
 - [agents/taxonomy.md](agents/taxonomy.md) — Agent and skill taxonomy with chain archetypes
 
 ## Operations (`docs/operations/`)
@@ -95,6 +97,7 @@ flowchart LR
 - [operations/enterprise-security-hardening.md](operations/enterprise-security-hardening.md) — Security hardening guide
 - [operations/blocked-issues.md](operations/blocked-issues.md) — Blocked issues tracking
 - [operations/telemetry-adoption.md](operations/telemetry-adoption.md) — Adoption telemetry guide
+- [operations/repo-story.md](operations/repo-story.md) — Durable chronicle of execution learnings and cycle updates
 - [operations/github-secrets.md](operations/github-secrets.md) — Repository secrets setup and rotation guide
 - [operations/copilot-extension-github-app-registration.md](operations/copilot-extension-github-app-registration.md) — GitHub App registration runbook for BaseCoat Copilot Extension
 - [operations/build-master-control-plane.md](operations/build-master-control-plane.md) — Build master architecture, policy matrix, and runbook for lane-aware continuous merge with cloud break-fix

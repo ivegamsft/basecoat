@@ -102,6 +102,7 @@ nav:
     - Version Drift Detection: guides/version-drift.md
     - Model Optimization: guides/model-optimization.md
     - Token Optimization: guides/token-optimization.md
+    - Cost-Aware Prompting Playbook: guides/cost-aware-prompting-playbook.md
     - BaseCoat Config (.basecoat.yml): guides/basecoat-yml.md
     - UBB Token Guidance: guides/ubb-token-guidance.md
   - Memory System:

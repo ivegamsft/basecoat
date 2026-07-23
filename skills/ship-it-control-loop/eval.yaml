@@ -1,0 +1,22 @@
+skill: ship-it-control-loop
+tests:
+  - id: control-loop-cycle-summary
+    prompt: "Continue ship-it loop for the next wave and summarize current cycle state."
+    expect:
+      contains:
+        - "cycle"
+        - "status"
+        - "next action"
+  - id: bounded-retry-policy
+    prompt: "A transient check failed repeatedly. Apply max_retries policy and report outcome."
+    expect:
+      contains:
+        - "retry"
+        - "max_retries"
+        - "escalate"
+  - id: stop-when-complete
+    prompt: "All target tasks are done, PRs are merged, and required checks are green."
+    expect:
+      contains:
+        - "stop"
+        - "complete"

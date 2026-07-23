@@ -64,8 +64,8 @@ if ($awfInvocationCount -ne 2) {
 }
 $excludeCopilotPattern = '--exclude-env COPILOT_GITHUB_TOKEN'
 $excludeCopilotCount = [regex]::Matches($workflow, $excludeCopilotPattern).Count
-if ($excludeCopilotCount -ne 2) {
-    throw "issue-triage lock must exclude COPILOT_GITHUB_TOKEN from env-all passthrough in both AWF phases (found $excludeCopilotCount)."
+if ($excludeCopilotCount -ne 0) {
+    throw "issue-triage lock must NOT exclude COPILOT_GITHUB_TOKEN from env-all passthrough when placeholder isolation is exported (found $excludeCopilotCount)."
 }
 
 Write-Host 'Issue triage lock refresh tests passed.'

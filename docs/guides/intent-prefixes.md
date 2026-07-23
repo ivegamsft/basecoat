@@ -17,6 +17,7 @@ release, version drift) to reduce routing ambiguity.
 | `feature:` | New capability or enhancement | **Backlog** | `@sprint-planner`, `@solution-architect` |
 | `audit:` | Review, assess, validate — no changes | **Now, read-only** | `@security-analyst`, `@config-auditor` |
 | `plan:` | Sprint or project planning | **Now, no implementation** | `@sprint-planner`, `@product-manager` |
+| `optimize:` | Normalize composite prompts into an execution packet with scope, stop rules, validation clauses, and routing hints before execution | **Now, advisory-first** | `@task-scope-validator`, `@orchestrator`, `@prompt-coach` |
 | `spike:` | Time-boxed investigation, no deliverable | **Now, research only** | `@solution-architect` |
 | `chore:` | Maintenance, cleanup, non-functional | **Soon** | `@devops-engineer`, `@release-manager` |
 | `pr:` | Pull request lifecycle handling: remaining WIP logging, merge readiness, build-gated closeout, and branch hygiene. Use `pr-lifecycle=full` when you want the whole chain kept together. | **Now** | `@orphaned-pr-cleanup`, `@merge-coordinator`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
@@ -36,6 +37,7 @@ release, version drift) to reduce routing ambiguity.
 | `infra:` | Infrastructure change (IaC, networking, firewall, RBAC) | **Now** — preflight first, then staged sequence | `@devops-engineer`, `@solution-architect` |
 | `architect:` | Architecture design or system-design decision | **Later** — plan before any implementation | `@solution-architect` |
 | `docs:` | Documentation only | **Soon** | `@tech-writer` |
+| `chronicle:` | Export session/worktree learnings into durable story updates and issue-ready follow-up packets | **Soon** | `@memory-promoter`, `@tech-writer` |
 | `test:` | Test coverage gap or test failure | **Now** | `@manual-test-strategy` |
 | `refactor:` | Structural improvement, no behavior change | **Later, batch** | `@code-review` |
 | `ux:` | User experience or design | **Soon** | `@ux-designer` |
@@ -54,7 +56,9 @@ for selecting chain patterns.
 | Governance | `audit:`, `security:`, `chore:` | findings, policy action, risk controls |
 | GitHub Operations | `workflow:`, `actions:`, `pr:`, `issue:`, `portfolio:`, `release:`, `version:` | run triage, repo hygiene, release/version decisions |
 | Planning | `plan:`, `spike:` | prioritized backlog, design notes, decision doc |
+| Packetization | `optimize:` | normalized execution packet and optional execution chain |
 | Quality | `test:`, `docs:`, `ux:` | tests, documentation, or design artifacts |
+| Knowledge capture | `chronicle:` | story/update packet, follow-up issue bundle, optional memory suggestions |
 | Infrastructure | `azure:`, `infra:`, `deploy:` | preflight advisory, IaC changes, staged deployment |
 
 ---
@@ -113,6 +117,34 @@ These words in a message override the default timing of any prefix:
 | `no changes`, `read-only` | Analysis only, suppress all implementation |
 | `log it`, `file an issue` | Log and stop; do not implement |
 | `just document` | Documentation output only; no code changes |
+
+---
+
+## Optimize routing
+
+Use `optimize:` when the request bundles multiple intents (for example, plan +
+execute + triage + RCA) and needs a bounded execution packet before action.
+
+### Packet contract
+
+`optimize:` should produce:
+
+1. **Objectives** — explicit, ordered objectives.
+2. **Scope boundaries** — what is included and excluded.
+3. **Stop conditions** — done, blocked, and manual-stop conditions.
+4. **Validation clauses** — what must pass before closure.
+5. **Routing hints** — direct agent/skill/workflow path per objective.
+
+### Advisory-only mode
+
+If the prompt contains `advisory-only`, emit the packet and stop without side
+effects.
+
+### Compatibility with `ship-it` and `rca`
+
+When `optimize:` wraps `ship-it` or `rca`, keep existing governance and safety
+rules intact; packetization must not bypass required checks or RCA evidence
+capture.
 
 ---
 
@@ -232,6 +264,23 @@ Use `@rca` for the deep-dive investigation after the active incident is stable.
 To resume execution after RCA, re-issue a `deploy:` or `outage:` intent explicitly
 once the root cause is confirmed.
 
+For broken build RCA intake, use
+[`docs/templates/rca-broken-build-intake.md`](../templates/rca-broken-build-intake.md)
+to capture required evidence fields consistently.
+
+---
+
+## Chronicle routing
+
+Use `chronicle:` to convert execution history into durable repo artifacts.
+
+Expected outputs:
+
+1. Markdown story/update packet from session/worktree references.
+2. Append or update mode for target story docs.
+3. Issue-ready learnings list for follow-up tracking.
+4. Optional memory-promotion suggestions with dedupe checks.
+
 ---
 
 ## Deployment routing
@@ -314,6 +363,28 @@ choose either `feature:` or `pr:`.
 - `@broken-build-troubleshooter`
 - `@sprint-planner`
 - `@branch-hygiene-sweeper`
+
+### Persistent next-wave loop mode
+
+When prompts repeat "plan and execute the next wave" (or equivalent continuation
+language), keep fleet execution in a bounded control loop instead of re-running
+full planning on every turn.
+
+Contract:
+
+1. Keep authoritative routing as `fleet:` with latest-main preflight first.
+2. Execute continuation cycles using `ship-it-control-loop` semantics.
+3. Emit a checkpoint each cycle from `/tasks`, in-scope PRs, and required checks.
+4. Apply bounded retries for transient failures and escalate when retries are exhausted.
+5. Stop on completion, blocking gate, max-cycle cap, or manual stop.
+
+Normalized examples:
+
+| User phrasing | Normalized execution path |
+|---|---|
+| `plan and execute the next wave` | `fleet:` + persistent `ship-it-control-loop` cycle |
+| `execute the next wave` | `fleet:` + persistent `ship-it-control-loop` cycle |
+| `continue ship-it loop` | `fleet:` + persistent `ship-it-control-loop` cycle |
 
 ---
 

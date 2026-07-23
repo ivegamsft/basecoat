@@ -1,10 +1,9 @@
 ---
 name: sprint-closeout-auditor
-description: "Use when closing a sprint and validating completion evidence before planning the next sprint. USE FOR: verify merged PR coverage, confirm CI health, identify unresolved errors and open issues, check test evidence, and produce carry-forward actions with owners. DO NOT USE FOR: writing feature code, replacing incident postmortems, or long-term roadmap prioritization."
+description: "Sprint closeout validation specialist. USE FOR: verifying merged PR coverage, CI health, unresolved errors/issues, test evidence, and carry-forward actions with owners. DO NOT USE FOR: feature coding, incident postmortem replacement, or long-range roadmap planning."
 visibility: specialized
 model: gpt-5.4-mini
 invocation_rules: ["Invoke when user asks to close a sprint, perform sprint burn-down closeout, or validate sprint completion readiness.", "Use checklist-first flow and require explicit evidence for merge, CI, errors, issues, and test status."]
-visibility: "internal"
 compatibility: []
 metadata:
   category: security

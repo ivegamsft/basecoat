@@ -18,6 +18,7 @@ jobs:
   bootstrap-prod-environment:
     name: "Bootstrap prod environment"
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       bootstrap_mode: ${{ steps.bootstrap.outputs.bootstrap_mode }}
     steps:
@@ -138,6 +139,7 @@ jobs:
     name: "Verify production environment protection"
     needs: [bootstrap-prod-environment]
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
@@ -182,6 +184,7 @@ jobs:
     name: "Verify staging environment protection"
     needs: [bootstrap-prod-environment]
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
@@ -208,6 +211,7 @@ jobs:
   summary:
     name: "Environment protection enforcement summary"
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs:
       - bootstrap-prod-environment
       - verify-prod-environment-protection
