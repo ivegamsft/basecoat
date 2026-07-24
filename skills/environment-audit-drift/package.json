@@ -16,12 +16,12 @@
     "environment-audit-drift": "dist/cli.js"
   },
   "dependencies": {
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^5.2.1"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^20.0.0",
-    "eslint": "^8.0.0",
+    "eslint": "^10.7.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.0.0",
     "vitest": "^4.1.8"
