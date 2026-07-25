@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { validateEnvironmentMap } from '../validator';
+import { validateEnvironmentMap } from '../validator.js';
 
 function createRepoRoot(fileContent?: string): string {
   const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'operation-context-validator-'));

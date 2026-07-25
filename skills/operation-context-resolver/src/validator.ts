@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
-import { EnvironmentMap, ValidationResult, Environment } from './types';
+import { EnvironmentMap, ValidationResult, Environment } from './types.js';
 
 export async function validateEnvironmentMap(repoRoot: string): Promise<ValidationResult> {
   const mapPath = path.join(repoRoot, '.github', 'environment-map.yml');

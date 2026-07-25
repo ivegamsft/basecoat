@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { OperationContextResolver, resolveOperationContext } from '../resolver';
-import { EnvironmentMap } from '../types';
+import { OperationContextResolver, resolveOperationContext } from '../resolver.js';
+import { EnvironmentMap } from '../types.js';
 
 describe('OperationContextResolver', () => {
   const mockEnvironmentMap: EnvironmentMap = {

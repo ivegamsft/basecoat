@@ -9,7 +9,7 @@ import {
   Environment,
   OperationMode,
   ResolverRule,
-} from './types';
+} from './types.js';
 
 const RESOLVER_VERSION = '1.0.0';
 const DEFAULT_SAFE_ENV: Environment = 'dev';

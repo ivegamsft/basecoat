@@ -1,8 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { OperationContextResolver } from './resolver';
-import { ResolverInput } from './types';
-import { validateEnvironmentMap } from './validator';
+import { fileURLToPath } from 'url';
+import { OperationContextResolver } from './resolver.js';
+import { ResolverInput } from './types.js';
+import { validateEnvironmentMap } from './validator.js';
 
 interface CliLogger {
   log: (message?: unknown) => void;
@@ -219,7 +220,11 @@ export async function main(
   }
 }
 
-if (require.main === module) {
+const isMainModule =
+  process.argv[1] !== undefined &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isMainModule) {
   void main().then(code => {
     process.exit(code);
   });

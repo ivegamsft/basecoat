@@ -1,16 +1,17 @@
 {
   "name": "@basecoat/operation-context-resolver",
   "version": "1.0.0",
+  "type": "module",
   "description": "Deterministic environment routing for agentic troubleshooting and deployment workflows",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "validate": "ts-node src/cli.ts validate",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
+    "validate": "node --loader ts-node/esm src/cli.ts validate",
     "lint": "eslint src --ext .ts",
-    "cli": "ts-node src/cli.ts"
+    "cli": "node --loader ts-node/esm src/cli.ts"
   },
   "bin": {
     "operation-context-resolver": "dist/cli.js"
@@ -26,7 +27,7 @@
   "license": "MIT",
   "dependencies": {
     "js-yaml": "^4.1.0",
-    "uuid": "^9.0.0"
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@types/jest": "^29.0.0",
