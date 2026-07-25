@@ -333,6 +333,121 @@ else {
     }
 }
 
+# Test 17: new design/sprint/wave prefixes present in canonical, alias, and guide
+Write-Host '  Test 17: Validate ui:, ux:, ia:, sprint:, wave: map to expected route targets...'
+$canonicalFile = Join-Path $repoRoot 'instructions\basecoat-10-core-intent-routing.instructions.md'
+$newPrefixTargets = @{
+    'canonical (basecoat-10-core-intent-routing)' = $canonicalFile
+    'alias (intent-routing)'                       = $routingFile
+    'guide (intent-prefixes)'                      = $prefixGuide
+}
+foreach ($label in $newPrefixTargets.Keys) {
+    $path = $newPrefixTargets[$label]
+    if (-not (Test-Path $path)) {
+        $failures += "new-prefix-file-missing-$label"
+        Write-Host "    FAIL $label file not found" -ForegroundColor Red
+        continue
+    }
+    $content = Get-Content $path -Raw
+    $routeExpectations = [ordered]@{
+        'ui:'     = '@frontend-dev'
+        'ux:'     = '@ux-designer'
+        'ia:'     = '@tech-writer'
+        'sprint:' = '@sprint-closeout-auditor'
+        'wave:'   = '@parallel-session-coordinator'
+    }
+    $missing = @()
+    foreach ($p in $routeExpectations.Keys) {
+        $agent = $routeExpectations[$p]
+        $rowPattern = '(?m)^\|[^\r\n]*`' + $p + '`[^\r\n]*' + [regex]::Escape($agent)
+        if ($content -notmatch $rowPattern) { $missing += "$p->$agent" }
+    }
+    if ($missing.Count -gt 0) {
+        $failures += "new-prefix-routes-missing-$label"
+        Write-Host "    FAIL $label missing route targets: $($missing -join ', ')" -ForegroundColor Red
+    }
+    else {
+        Write-Host "    PASS $label binds ui:/ux:/ia:/sprint:/wave: to distinct route targets"
+    }
+}
+
+# Test 18: Term Disambiguation section and UI/UX/IA distinction with ambiguity guidance
+Write-Host '  Test 18: Validate Term Disambiguation section and disambiguation-question guidance...'
+foreach ($label in @('canonical (basecoat-10-core-intent-routing)', 'alias (intent-routing)')) {
+    $path = $newPrefixTargets[$label]
+    if (-not (Test-Path $path)) { continue }
+    $content = Get-Content $path -Raw
+    $missing = @()
+    if ($content -notmatch 'Term Disambiguation and Aliases') { $missing += 'disambiguation section' }
+    if ($content -notmatch 'must not collapse to one route') { $missing += 'UI/UX/IA distinction' }
+    if ($content -notmatch 'ask one disambiguation question') { $missing += 'ambiguity guidance' }
+    if ($missing.Count -gt 0) {
+        $failures += "disambiguation-missing-$label"
+        Write-Host "    FAIL $label missing: $($missing -join ', ')" -ForegroundColor Red
+    }
+    else {
+        Write-Host "    PASS $label has disambiguation section, UI/UX/IA distinction, and ambiguity guidance"
+    }
+}
+
+# Test 19: canonical/alias/guide route synchronization for corrected routes
+Write-Host '  Test 19: Validate outage/worktree/burndown routes are synchronized and actionable...'
+foreach ($label in $newPrefixTargets.Keys) {
+    $path = $newPrefixTargets[$label]
+    if (-not (Test-Path $path)) { continue }
+    $content = Get-Content $path -Raw
+    $missing = @()
+    if ($content -notmatch 'outage:.*@incident-responder') { $missing += 'outage:->@incident-responder' }
+    if ($content -notmatch 'prune worktrees.*git-worktrees') { $missing += 'worktree cleanup->git-worktrees skill' }
+    if ($content -notmatch 'clean up work trees') { $missing += 'two-word work-trees alias' }
+    if ($content -notmatch 'burndown.*@orphaned-pr-cleanup') { $missing += 'burndown->@orphaned-pr-cleanup' }
+    if ($missing.Count -gt 0) {
+        $failures += "route-sync-missing-$label"
+        Write-Host "    FAIL $label missing route sync: $($missing -join ', ')" -ForegroundColor Red
+    }
+    else {
+        Write-Host "    PASS $label routes outage/worktree/burndown to correct assets"
+    }
+}
+
+# Test 20: backlog-burndown skill ingests open PRs (skill + eval coverage)
+Write-Host '  Test 20: Validate backlog-burndown skill covers open PRs...'
+$burndownSkill = Join-Path $repoRoot 'skills\backlog-burndown\SKILL.md'
+$burndownEval = Join-Path $repoRoot 'skills\backlog-burndown\eval.yaml'
+$burndownRef = Join-Path $repoRoot 'skills\backlog-burndown\references\burndown-workflow.md'
+$burndownMissing = @()
+if (-not (Test-Path $burndownSkill)) {
+    $burndownMissing += 'SKILL.md missing'
+}
+else {
+    $skillContent = Get-Content $burndownSkill -Raw
+    if ($skillContent -notmatch '(?i)\bPRs?\b|pull request') { $burndownMissing += 'SKILL.md does not mention PRs' }
+    if ($skillContent -notmatch 'orphaned-pr-cleanup') { $burndownMissing += 'SKILL.md missing orphaned-pr-cleanup pairing' }
+}
+if (-not (Test-Path $burndownEval)) {
+    $burndownMissing += 'eval.yaml missing'
+}
+else {
+    $evalContent = Get-Content $burndownEval -Raw
+    if ($evalContent -notmatch '(?i)open PRs|pull request') { $burndownMissing += 'eval.yaml missing PR scenario' }
+}
+if (-not (Test-Path $burndownRef)) {
+    $burndownMissing += 'burndown-workflow.md missing'
+}
+else {
+    $refContent = Get-Content $burndownRef -Raw
+    if ($refContent -notmatch '(?i)draft/open') { $burndownMissing += 'workflow missing open-PR (In Progress) classification' }
+    if ($refContent -notmatch '(?i)merged to Done') { $burndownMissing += 'workflow missing merged-to-Done classification' }
+    if ($refContent -notmatch '(?i)closed-unmerged') { $burndownMissing += 'workflow missing closed-unmerged classification' }
+}
+if ($burndownMissing.Count -gt 0) {
+    $failures += 'burndown-pr-coverage-missing'
+    Write-Host "    FAIL backlog-burndown PR coverage gaps: $($burndownMissing -join ', ')" -ForegroundColor Red
+}
+else {
+    Write-Host '    PASS backlog-burndown skill and eval cover open PRs'
+}
+
 if ($failures.Count -gt 0) {
     Write-Host "Routing guardrail tests FAILED: $($failures -join ', ')" -ForegroundColor Red
     exit 1

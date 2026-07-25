@@ -39,5 +39,10 @@ Example:
 - Always verify a clean test baseline before starting work.
 - Never delete a worktree directory manually — use `git worktree remove`.
 - Run `git worktree list` before creating new ones.
+- Before removing a worktree, run `git worktree list` and confirm the exact
+  branch-to-path mapping — never remove by assumed path.
+- Do not remove a worktree still in use by an active agent or one with
+  uncommitted changes; confirm the working tree is clean first.
+- Run `git worktree prune` only after confirmed removals.
 - Each worktree must be on a unique branch.
 - Prefix worktree paths as `<repo>-wt-<issue-or-pr>` for discoverability and cleanup.

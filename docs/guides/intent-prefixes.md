@@ -30,7 +30,7 @@ release, version drift) to reduce routing ambiguity.
 | `version:` | BaseCoat version inspection and drift check | **Now** | `@release-manager`, `@devops-engineer` |
 | `security:` | Security concern or vulnerability | **Now, high priority** | `@security-analyst`, `@guardrail` |
 | `perf:` | Performance degradation | **Now, measure first** | `@performance-analyst` |
-| `outage:` | Service outage, broken or dead system, site down | **Now, high priority** | `@rca` |
+| `outage:` | Service outage, broken or dead system, site down | **Now, high priority** | `@rca`, `@incident-responder` |
 | `rca:` | Root-cause analysis of a known failure — execution suspended | **Now, read-only** | `@rca`, `@config-auditor` |
 | `deploy:` | Staged infrastructure deployment — azure-prepare, azure-validate, azure-deploy in sequence | **Now, staged** | `@devops-engineer` |
 | `azure:` | Azure-scoped operation (auth, infra, SDK, provisioning) | **Now** — preflight first, then staged sequence | `@devops-engineer`, `@solution-architect` |
@@ -40,7 +40,11 @@ release, version drift) to reduce routing ambiguity.
 | `chronicle:` | Export session/worktree learnings into durable story updates and issue-ready follow-up packets | **Soon** | `@memory-promoter`, `@tech-writer` |
 | `test:` | Test coverage gap or test failure | **Now** | `@manual-test-strategy` |
 | `refactor:` | Structural improvement, no behavior change | **Later, batch** | `@code-review` |
-| `ux:` | User experience or design | **Soon** | `@ux-designer` |
+| `ui:` | User interface: components, layout, visual and interaction implementation | **Soon** | `@frontend-dev`, `@ux-designer` |
+| `ux:` | User experience: flows, usability, journeys, interaction design | **Soon** | `@ux-designer`, `@frontend-dev` |
+| `ia:` | Information architecture: content structure, navigation, taxonomy, sitemap | **Soon** | `@ux-designer`, `@tech-writer` |
+| `sprint:` | Sprint planning, execution, or closeout | **Now** | `@sprint-planner`, `@sprint-closeout-auditor` |
+| `wave:` | Dependency-ordered batch within a sprint (issues and PRs) | **Now** | `@sprint-planner`, `@parallel-session-coordinator` |
 
 ---
 
@@ -55,9 +59,9 @@ for selecting chain patterns.
 | Reliability | `bug:`, `perf:`, `outage:`, `rca:` | fix, mitigation, incident analysis, or root-cause report |
 | Governance | `audit:`, `security:`, `chore:` | findings, policy action, risk controls |
 | GitHub Operations | `workflow:`, `actions:`, `pr:`, `issue:`, `portfolio:`, `release:`, `version:` | run triage, repo hygiene, release/version decisions |
-| Planning | `plan:`, `spike:` | prioritized backlog, design notes, decision doc |
+| Planning | `plan:`, `spike:`, `sprint:`, `wave:` | prioritized backlog, design notes, decision doc |
 | Packetization | `optimize:` | normalized execution packet and optional execution chain |
-| Quality | `test:`, `docs:`, `ux:` | tests, documentation, or design artifacts |
+| Quality | `test:`, `docs:`, `ui:`, `ux:`, `ia:` | tests, documentation, or design artifacts |
 | Knowledge capture | `chronicle:` | story/update packet, follow-up issue bundle, optional memory suggestions |
 | Infrastructure | `azure:`, `infra:`, `deploy:` | preflight advisory, IaC changes, staged deployment |
 
@@ -267,6 +271,66 @@ once the root cause is confirmed.
 For broken build RCA intake, use
 [`docs/templates/rca-broken-build-intake.md`](../templates/rca-broken-build-intake.md)
 to capture required evidence fields consistently.
+
+---
+
+## Term disambiguation and aliases
+
+Normalize these bare terms and phrases to an intent before plain-text
+interpretation.
+
+### Design terms: UI vs UX vs IA
+
+`ui`, `ux`, and `ia` are distinct disciplines and must not collapse to one route.
+
+| Term | Discipline | Normalized intent | Routes to |
+|---|---|---|---|
+| `ui` | User interface — components, layout, visual and interaction implementation | `ui:` | `@frontend-dev`, `@ux-designer` |
+| `ux` | User experience — flows, usability, journeys, interaction design | `ux:` | `@ux-designer`, `@frontend-dev` |
+| `ia` | Information architecture — content structure, navigation, taxonomy, sitemap | `ia:` | `@ux-designer`, `@tech-writer` |
+
+### Error and failure: route on the subject noun
+
+`error`, `fail`, and `failing` are overloaded. Route on what is failing, not on
+the word. `broken`, `broke`, `down`, `dead`, `site down`, and `not responding`
+normalize to `outage:` only when the subject is a running service, site, or app
+(see Outage routing); application code or test defects route to `bug:` and
+GitHub Actions workflow/CI failures route to `workflow:`.
+
+| Subject of the error/failure | Normalized intent | Routes to |
+|---|---|---|
+| A running service, site, or app is down | `outage:` | `@rca`, `@incident-responder` |
+| A GitHub Actions workflow run, job, or CI step | `workflow:` | `@broken-build-troubleshooter`, `@self-healing-ci` |
+| Application code or a test defect | `bug:` | `@code-review`, `@self-healing-ci` |
+| Repeated or unknown failure needing diagnosis first | `rca:` | `@rca`, `@config-auditor` |
+
+When the subject noun is absent or ambiguous, ask one disambiguation question
+before acting.
+
+### Work-in-progress and cleanup
+
+| Term or phrase | Normalized intent | Routes to |
+|---|---|---|
+| `wip` | `pr:` (remaining WIP logging) | `@orphaned-pr-cleanup` |
+| `backlog wip` | `issue:` (backlog WIP triage) | `@issue-triage` |
+| `clean up branches` / `stale branches` | `chore:` | `@branch-hygiene-sweeper` |
+| `clean up worktrees` / `clean up work trees` / `prune worktrees` | `chore:` | `@branch-hygiene-sweeper` + `git-worktrees` skill |
+
+`wip/`, `preserved/`, and `backup/` branches are retained (never auto-pruned) and
+logged with an owner and next action. Never remove a worktree with uncommitted
+changes or one an active agent is using.
+
+### Backlog and sprint execution
+
+| Phrase | Normalized intent | Routes to |
+|---|---|---|
+| `burn down the backlog` / `backlog burndown` / `burndown` | backlog-burndown skill | `@issue-triage`, `@orphaned-pr-cleanup`, `@sprint-planner` |
+| `plan sprint` / `execute sprint` / `sprint` | `sprint:` | `@sprint-planner` |
+| `close sprint` / `sprint closeout` / `sprint retro` | `sprint:` | `@sprint-closeout-auditor` |
+| `wave` | `wave:` | `@sprint-planner`, `@parallel-session-coordinator` |
+
+Burn-down and wave execution include open PRs, not just issues. Decomposition
+hierarchy: **sprint -> wave -> issue -> task**.
 
 ---
 

@@ -11,6 +11,9 @@ scenarios:
   - id: "pos-3"
     input: "Generate a daily backlog health report with blockers, velocity trend, and recommended triage actions."
     expect_activation: true
+  - id: "pos-4"
+    input: "Burn down the backlog for this sprint including open PRs, and flag stale pull requests that put the sprint goal at risk."
+    expect_activation: true
   - id: "neg-1"
     input: "Write a React component for the dashboard sidebar."
     expect_activation: false

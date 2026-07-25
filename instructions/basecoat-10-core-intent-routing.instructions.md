@@ -46,7 +46,7 @@ Rules:
 | `release:` | Release planning, version bumping, and publication | Now | `@release-manager`, `@release-readiness-chair`, `@release-impact-advisor` |
 | `security:` | Security concern or vulnerability | Now | `@security-analyst`, `@guardrail` |
 | `perf:` | Performance degradation or concern | Now | `@performance-analyst` |
-| `outage:` | Service outage, broken or dead system, site down | Now | `@rca` |
+| `outage:` | Service outage, broken or dead system, site down | Now | `@rca`, `@incident-responder` |
 | `rca:` | Root-cause analysis of a known failure | Now | `@rca`, `@config-auditor` |
 | `deploy:` | Staged infrastructure deployment | Now | `@devops-engineer` |
 | `azure:` | Azure-scoped operation | Now | `@devops-engineer`, `@solution-architect` |
@@ -57,7 +57,11 @@ Rules:
 | `version:` | BaseCoat version inspection and drift check | Now | `@release-manager`, `@devops-engineer` |
 | `test:` | Test coverage gap or test failure | Now | `@manual-test-strategy`, `@strategy-to-automation` |
 | `refactor:` | Structural improvement, no behavior change | Later | `@code-review`, `@performance-analyst` |
-| `ux:` | User experience or design concern | Soon | `@ux-designer`, `@frontend-dev` |
+| `ui:` | User interface: components, layout, visual and interaction implementation | Soon | `@frontend-dev`, `@ux-designer` |
+| `ux:` | User experience: user flows, usability, journeys, interaction design | Soon | `@ux-designer`, `@frontend-dev` |
+| `ia:` | Information architecture: content structure, navigation, taxonomy, sitemap | Soon | `@ux-designer`, `@tech-writer` |
+| `sprint:` | Sprint planning, execution, or closeout | Now | `@sprint-planner`, `@sprint-closeout-auditor` |
+| `wave:` | Dependency-ordered batch within a sprint (issues and PRs) | Now | `@sprint-planner`, `@parallel-session-coordinator` |
 
 ## Syntax Determines Timing
 
@@ -243,6 +247,68 @@ proceeding:
 
 These files preserve the legacy names while the prefixed BaseCoat instruction
 files remain the canonical source.
+
+## Term Disambiguation and Aliases
+
+Normalize these bare terms and phrases to an intent before plain-text
+interpretation.
+
+### Design terms (UI vs UX vs IA)
+
+`ui`, `ux`, and `ia` are distinct disciplines and must not collapse to one route.
+
+| Term | Discipline | Normalized intent | Route to |
+|---|---|---|---|
+| `ui` | User interface — components, layout, visual and interaction implementation | `ui:` | `@frontend-dev`, `@ux-designer` |
+| `ux` | User experience — flows, usability, journeys, interaction design | `ux:` | `@ux-designer`, `@frontend-dev` |
+| `ia` | Information architecture — content structure, navigation, taxonomy, sitemap | `ia:` | `@ux-designer`, `@tech-writer` |
+
+### Error and failure terms (noun-keyed)
+
+`error`, `fail`, and `failing` are overloaded. Route on the subject noun, not
+the word itself.
+
+| Subject of the error/failure | Normalized intent | Route to |
+|---|---|---|
+| A running service, site, or app is down | `outage:` | `@rca`, `@incident-responder` |
+| A GitHub Actions workflow run, job, or CI step | `workflow:` | `@broken-build-troubleshooter`, `@self-healing-ci` |
+| Application code or a test defect | `bug:` | `@code-review`, `@self-healing-ci` |
+| Repeated or unknown failure needing diagnosis first | `rca:` | `@rca`, `@config-auditor` |
+
+When the subject noun is absent or ambiguous, ask one disambiguation question
+before acting. The `outage:` aliases (`broke`, `broken`, `down`, `dead`,
+`site down`, `not responding`, `incident`) apply only when the subject is a
+running service, site, or app; application code or test defects route to `bug:`
+and GitHub Actions workflow/CI failures route to `workflow:`.
+
+### Work-in-progress and cleanup
+
+| Term or phrase | Normalized intent | Route to |
+|---|---|---|
+| `wip` | `pr:` (remaining WIP logging / merge-readiness) | `@orphaned-pr-cleanup` |
+| `backlog wip` | `issue:` (backlog WIP triage) | `@issue-triage` |
+| `clean up branches` / `stale branches` | `chore:` | `@branch-hygiene-sweeper` |
+| `clean up worktrees` / `clean up work trees` / `prune worktrees` | `chore:` | `@branch-hygiene-sweeper` + `git-worktrees` skill |
+
+Branch cleanup routes to `@branch-hygiene-sweeper`; worktree cleanup additionally
+uses the `git-worktrees` skill (`skills/git-worktrees/SKILL.md`), which owns the
+stale-worktree pruning workflow and its safety checks.
+
+`wip/`, `preserved/`, and `backup/` branches are retained (never auto-pruned)
+and logged with an owner and next action. Never remove a worktree that has
+uncommitted changes or one an active agent is using.
+
+### Backlog and sprint execution
+
+| Phrase | Normalized intent | Route to |
+|---|---|---|
+| `burn down the backlog` / `backlog burndown` / `burndown` | backlog-burndown skill | `@issue-triage`, `@orphaned-pr-cleanup`, `@sprint-planner` |
+| `plan sprint` / `execute sprint` / `sprint` | `sprint:` | `@sprint-planner` |
+| `close sprint` / `sprint closeout` / `sprint retro` | `sprint:` | `@sprint-closeout-auditor` |
+| `wave` | `wave:` | `@sprint-planner`, `@parallel-session-coordinator` |
+
+Burn-down and wave execution include open PRs, not just issues. Decomposition
+hierarchy: **sprint -> wave -> issue -> task**.
 
 ## Routing Notes
 
