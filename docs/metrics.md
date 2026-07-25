@@ -3,7 +3,7 @@
 Live weekly snapshot of BaseCoat adoption across consumer repositories — asset
 coverage, version currency, and onboarding trends.
 
-[Open Dashboard :material-open-in-new:](dashboard/metrics/){ .md-button .md-button--primary target=_blank }
+[Open Dashboard :material-open-in-new:](../dashboard/){ .md-button .md-button--primary target=_blank }
 
 ---
 
