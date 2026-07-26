@@ -18,22 +18,21 @@ allowed-tools: []
 ---
 # RCA Skill
 
-Structured root cause analysis workflow for incidents, pipeline failures, and unexpected behavior.
+Root cause analysis for incidents, pipeline failures, and unexpected behavior.
 
 ## Workflow
 
-1. **Symptom triage** — clarify blast radius, customer impact, and observable symptoms.
-2. **Timeline reconstruction** — map events leading up to the failure and identify inflection points.
-3. **Theory generation** — propose at least three plausible root-cause hypotheses, ranked by likelihood.
-4. **Evidence gathering** — list what confirms or refutes each theory; call out missing evidence.
-5. **Root cause determination** — converge on the most likely cause with supporting evidence.
-6. **Fix proposals** — suggest immediate mitigations and longer-term preventive fixes.
+1. **Symptom triage** — clarify blast radius, customer impact, and symptoms.
+2. **Timeline reconstruction** — map events before the failure and identify inflection points.
+3. **Theory generation** — propose at least three ranked root-cause hypotheses.
+4. **Evidence gathering** — list what confirms or refutes each theory; flag missing evidence.
+5. **Root cause determination** — converge on the most likely cause with evidence.
+6. **Fix proposals** — suggest immediate mitigations and preventive fixes.
 7. **Learnings capture** — identify updates for runbooks, guardrails, automation, and follow-up issues.
 
 ## Structured Build-Failure Intake
 
-When the request is build/pipeline failure RCA, collect these required fields
-before diagnosis:
+For build/pipeline failure RCA, collect these required fields before diagnosis:
 
 1. Failing run URL
 2. First failed job and step
@@ -41,12 +40,11 @@ before diagnosis:
 4. Classification (`dependency`, `toolchain`, `test`, `env`, `config`)
 5. Minimal rerun scope (targeted stage first, then full pipeline)
 
-If required fields are missing, return an intake checklist and ask for only the
-missing fields.
+If required fields are missing, return an intake checklist requesting only those.
 
 Known-signature handling:
 
-1. Check for a known signature match using repository error KB patterns.
+1. Check for a known signature using repository error KB patterns.
 2. If matched, include prior fix references and confidence.
 3. If unmatched, classify as novel and record pattern-candidate metadata for follow-up.
 
