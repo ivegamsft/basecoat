@@ -1,7 +1,7 @@
 {
   "appName": "BaseCoat Copilot Extension",
   "owner": "IBuySpy-Shared",
-  "homepageUrl": "https://github.com/IBuySpy-Shared/basecoat",
+  "homepageUrl": "https://github.com/ivegamsft/basecoat",
   "extensionBackendBaseUrl": "https://<aca-app>.<region>.azurecontainerapps.io",
   "callbackUrl": "https://<aca-app>.<region>.azurecontainerapps.io/api/github/oauth/callback",
   "setupUrl": "https://<aca-app>.<region>.azurecontainerapps.io/api/github/setup",

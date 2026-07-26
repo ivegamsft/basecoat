@@ -190,4 +190,4 @@ Secondary jobs:
 
 - `docs/research/multi-agent-strategy-matrix.md` — Eisenhower×Cynefin task mapping
 - `docs/architecture/multi-agent-orchestration-patterns.md` — implementation patterns
-- Issue [#613](https://github.com/IBuySpy-Shared/basecoat/issues/613) — parent investigation
+- Issue [#613](https://github.com/ivegamsft/basecoat/issues/613) — parent investigation

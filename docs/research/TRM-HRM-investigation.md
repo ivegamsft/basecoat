@@ -1,6 +1,6 @@
 # TRM + HRM Investigation
 
-Issue: [#574](https://github.com/IBuySpy-Shared/basecoat/issues/574)
+Issue: [#574](https://github.com/ivegamsft/basecoat/issues/574)
 
 ## Executive Summary
 

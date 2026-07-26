@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ibuyspy-shared.github.io/basecoat/skills/factory-state-machine/factory-state-template.json",
+  "$id": "https://ivegamsft.github.io/basecoat/skills/factory-state-machine/factory-state-template.json",
   "title": "Factory State",
   "type": "object",
   "required": ["version", "currentState", "states", "transitions"],

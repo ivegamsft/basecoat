@@ -46,7 +46,7 @@ if ($LASTEXITCODE -ne 0) {
   -EntityType "pr" `
   -EntityNumber 2299 `
   -Owner "ibuyspy" `
-  -EvidenceUrl "https://github.com/IBuySpy-Shared/basecoat/pull/2299" `
+  -EvidenceUrl "https://github.com/ivegamsft/basecoat/pull/2299" `
   -NextAction "Merge after required checks complete." `
   -DryRun `
   -OutputPath $escalationOut

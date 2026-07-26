@@ -1,6 +1,6 @@
 # Security Remediation Traceability Workflow
 
-> **Issue linkage:** [#1771](https://github.com/IBuySpy-Shared/basecoat/issues/1771), [#1657](https://github.com/IBuySpy-Shared/basecoat/issues/1657)
+> **Issue linkage:** [#1771](https://github.com/ivegamsft/basecoat/issues/1771), [#1657](https://github.com/ivegamsft/basecoat/issues/1657)
 
 ## Objective
 

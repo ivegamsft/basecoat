@@ -70,7 +70,7 @@ gh label create decision      --color d93f0b --description "Architecture or proc
 Open an issue on the basecoat repo using the **Memory Contribution** template.
 No CLI, no PAT, no PowerShell required — just a GitHub account.
 
-1. Go to: <https://github.com/IBuySpy-Shared/basecoat/issues/new/choose>
+1. Go to: <https://github.com/ivegamsft/basecoat/issues/new/choose>
 2. Select **💡 Submit a Memory Contribution**
 3. Fill in the structured form
 4. Submit — the bot validates and queues the candidate automatically
@@ -130,7 +130,7 @@ gh workflow run submit-learning.yml \
 ```sh
 export MEMORY_REPO_TOKEN=ghp_...
 
-curl -fsSL https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/scripts/submit-learning.sh \
+curl -fsSL https://raw.githubusercontent.com/ivegamsft/basecoat/main/scripts/submit-learning.sh \
   -o submit-learning.sh
 
 bash submit-learning.sh \
@@ -176,7 +176,7 @@ Place a `.basecoat.yml` at your repo root to customize sweep behavior.
 Copy `.basecoat.yml.example` from the basecoat repo as a starting point:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/.basecoat.yml.example \
+curl -fsSL https://raw.githubusercontent.com/ivegamsft/basecoat/main/.basecoat.yml.example \
   -o .basecoat.yml
 ```
 

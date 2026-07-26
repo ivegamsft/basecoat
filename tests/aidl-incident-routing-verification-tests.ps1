@@ -71,9 +71,9 @@ try {
     "affected_service": "payments-api",
     "customer_impact": "checkout unavailable",
     "root_cause_summary": "connection pool exhaustion",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/1",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/1",
     "remediation_priority": "critical",
-    "verification_artifact_url": "https://github.com/IBuySpy-Shared/basecoat/actions/runs/10",
+    "verification_artifact_url": "https://github.com/ivegamsft/basecoat/actions/runs/10",
     "repeat_without_prior_verification": false
   }
 ]
@@ -88,8 +88,8 @@ try {
     if ($r.Json.incidents[0].affected_service -ne 'payments-api') { throw 'Case 1: affected_service should be retained in the finding.' }
     if ($r.Json.incidents[0].recommended_priority -ne 'critical') { throw 'Case 1: recommended_priority for SEV1 should be critical.' }
     if ($r.Markdown -notmatch 'Service/Area') { throw 'Case 1: markdown findings table should include a Service/Area column.' }
-    if ($r.Json.incidents[0].remediation_reference -ne 'https://github.com/IBuySpy-Shared/basecoat/issues/1') { throw 'Case 1: remediation reference should be retained in the finding.' }
-    if ($r.Json.incidents[0].verification_reference -ne 'https://github.com/IBuySpy-Shared/basecoat/actions/runs/10') { throw 'Case 1: verification reference should be retained in the finding.' }
+    if ($r.Json.incidents[0].remediation_reference -ne 'https://github.com/ivegamsft/basecoat/issues/1') { throw 'Case 1: remediation reference should be retained in the finding.' }
+    if ($r.Json.incidents[0].verification_reference -ne 'https://github.com/ivegamsft/basecoat/actions/runs/10') { throw 'Case 1: verification reference should be retained in the finding.' }
 
     # --- Case 2: placeholder remediation link ("n/a") is not a valid GitHub issue/PR. ---
     $placeholder = @'
@@ -127,7 +127,7 @@ try {
     "owner": "o",
     "affected_service": "s",
     "customer_impact": "c",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/2",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/2",
     "repeat_without_prior_verification": false
   },
   {
@@ -139,7 +139,7 @@ try {
     "owner": "o",
     "affected_service": "s",
     "customer_impact": "c",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/3",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/3",
     "repeat_without_prior_verification": false
   }
 ]
@@ -160,7 +160,7 @@ try {
     "owner": "o",
     "affected_service": "s",
     "customer_impact": "c",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/4",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/4",
     "repeat_without_prior_verification": false
   }
 ]
@@ -183,7 +183,7 @@ try {
     "owner": "o",
     "affected_service": "s",
     "customer_impact": "c",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/5",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/5",
     "repeat_without_prior_verification": false
   }
 ]
@@ -204,7 +204,7 @@ try {
     "owner": "o",
     "affected_service": "s",
     "customer_impact": "c",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/6",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/6",
     "repeat_without_prior_verification": false
   }
 ]
@@ -226,7 +226,7 @@ try {
     "owner": "o",
     "affected_service": "s",
     "customer_impact": "c",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/7",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/7",
     "verification_artifact_url": "unknown",
     "repeat_without_prior_verification": false
   }
@@ -248,7 +248,7 @@ try {
     "owner": "o",
     "affected_service": "s",
     "customer_impact": "c",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/8",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/8",
     "repeat_without_prior_verification": false
   }
 ]
@@ -271,7 +271,7 @@ try {
     "owner": "o",
     "affected_service": "s",
     "customer_impact": "c",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/9",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/9",
     "repeat_without_prior_verification": false
   }
 ]
@@ -292,7 +292,7 @@ try {
     "owner": "o",
     "affected_service": "s",
     "customer_impact": "c",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/12",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/12",
     "repeat_without_prior_verification": "false"
   }
 ]
@@ -318,7 +318,7 @@ try {
     "owner": "o",
     "affected_service": "s",
     "customer_impact": "c",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/13",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/13",
     "repeat_without_prior_verification": false
   }
 ]
@@ -339,7 +339,7 @@ try {
     "owner": "o",
     "affected_service": "s",
     "customer_impact": "c",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/14",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/14",
     "repeat_without_prior_verification": false
   },
   {
@@ -350,7 +350,7 @@ try {
     "owner": "o",
     "affected_service": "s",
     "customer_impact": "c",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/15",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/15",
     "repeat_without_prior_verification": false
   }
 ]
@@ -372,7 +372,7 @@ try {
     "owner": "o",
     "affected_service": "s",
     "customer_impact": "c",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/16",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/16",
     "repeat_without_prior_verification": false
   }
 ]
@@ -393,7 +393,7 @@ try {
     "owner": "o",
     "affected_service": "s",
     "customer_impact": "c",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/17",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/17",
     "repeat_without_prior_verification": "maybe"
   }
 ]
@@ -414,7 +414,7 @@ try {
     "owner": "o",
     "affected_service": "s",
     "customer_impact": "c",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/171"
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/171"
   }
 ]
 '@
@@ -433,7 +433,7 @@ try {
     "owner": "o",
     "affected_service": "s",
     "customer_impact": "c",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/172",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/172",
     "repeat_without_prior_verification": false
   }
 ]
@@ -457,37 +457,37 @@ try {
             $endpoint = [string]$Arguments[1]
             switch -Regex ($endpoint) {
                 '^/repos/IBuySpy-Shared/basecoat/issues/101$' {
-                    return '{"title":"Remediation for INC-ONLINE-1","body":"Verified by https://github.com/IBuySpy-Shared/basecoat/commit/1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b"}'
+                    return '{"title":"Remediation for INC-ONLINE-1","body":"Verified by https://github.com/ivegamsft/basecoat/commit/1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b"}'
                 }
                 '^/repos/IBuySpy-Shared/basecoat/issues/101/comments\?per_page=100$' {
                     return '[]'
                 }
                 '^/repos/IBuySpy-Shared/basecoat/issues/102$' {
-                    return '{"title":"Remediation without incident reference","body":"Verified by https://github.com/IBuySpy-Shared/basecoat/commit/1111111111111111111111111111111111111111"}'
+                    return '{"title":"Remediation without incident reference","body":"Verified by https://github.com/ivegamsft/basecoat/commit/1111111111111111111111111111111111111111"}'
                 }
                 '^/repos/IBuySpy-Shared/basecoat/issues/102/comments\?per_page=100$' {
                     return '[]'
                 }
                 '^/repos/IBuySpy-Shared/basecoat/issues/103$' {
-                    return '{"title":"Remediation for INC-ONLINE-3","body":"Incident INC-ONLINE-3 verification: https://github.com/IBuySpy-Shared/basecoat/issues/333"}'
+                    return '{"title":"Remediation for INC-ONLINE-3","body":"Incident INC-ONLINE-3 verification: https://github.com/ivegamsft/basecoat/issues/333"}'
                 }
                 '^/repos/IBuySpy-Shared/basecoat/issues/103/comments\?per_page=100$' {
                     return '[]'
                 }
                 '^/repos/IBuySpy-Shared/basecoat/issues/104$' {
-                    return '{"title":"Remediation for INC-ONLINE-4","body":"Incident INC-ONLINE-4 evidence: https://github.com/IBuySpy-Shared/basecoat/blob/1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b/docs/spec.md"}'
+                    return '{"title":"Remediation for INC-ONLINE-4","body":"Incident INC-ONLINE-4 evidence: https://github.com/ivegamsft/basecoat/blob/1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b/docs/spec.md"}'
                 }
                 '^/repos/IBuySpy-Shared/basecoat/issues/104/comments\?per_page=100$' {
                     return '[]'
                 }
                 '^/repos/IBuySpy-Shared/basecoat/issues/105$' {
-                    return '{"title":"Remediation for INC-ONLINE-5","body":"Incident INC-ONLINE-5 check: https://github.com/IBuySpy-Shared/basecoat/checks/runs/987654321"}'
+                    return '{"title":"Remediation for INC-ONLINE-5","body":"Incident INC-ONLINE-5 check: https://github.com/ivegamsft/basecoat/checks/runs/987654321"}'
                 }
                 '^/repos/IBuySpy-Shared/basecoat/issues/105/comments\?per_page=100$' {
                     return '[]'
                 }
                 '^/repos/IBuySpy-Shared/basecoat/issues/106$' {
-                    return '{"title":"Remediation for INC-ONLINE-6","body":"Incident INC-ONLINE-6 run: https://github.com/IBuySpy-Shared/basecoat/actions/runs/123456789"}'
+                    return '{"title":"Remediation for INC-ONLINE-6","body":"Incident INC-ONLINE-6 run: https://github.com/ivegamsft/basecoat/actions/runs/123456789"}'
                 }
                 '^/repos/IBuySpy-Shared/basecoat/issues/106/comments\?per_page=100$' {
                     return '[]'
@@ -514,9 +514,9 @@ try {
     "affected_service": "s",
     "customer_impact": "c",
     "root_cause_summary": "rc",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/101",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/101",
     "remediation_priority": "high",
-    "verification_artifact_url": "https://github.com/IBuySpy-Shared/basecoat/commit/1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b",
+    "verification_artifact_url": "https://github.com/ivegamsft/basecoat/commit/1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b",
     "repeat_without_prior_verification": false
   }
 ]
@@ -537,9 +537,9 @@ try {
     "affected_service": "s",
     "customer_impact": "c",
     "root_cause_summary": "rc",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/102",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/102",
     "remediation_priority": "high",
-    "verification_artifact_url": "https://github.com/IBuySpy-Shared/basecoat/commit/1111111111111111111111111111111111111111",
+    "verification_artifact_url": "https://github.com/ivegamsft/basecoat/commit/1111111111111111111111111111111111111111",
     "repeat_without_prior_verification": false
   }
 ]
@@ -560,9 +560,9 @@ try {
     "affected_service": "s",
     "customer_impact": "c",
     "root_cause_summary": "rc",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/103",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/103",
     "remediation_priority": "high",
-    "verification_artifact_url": "https://github.com/IBuySpy-Shared/basecoat/issues/333",
+    "verification_artifact_url": "https://github.com/ivegamsft/basecoat/issues/333",
     "repeat_without_prior_verification": false
   }
 ]
@@ -583,9 +583,9 @@ try {
     "affected_service": "s",
     "customer_impact": "c",
     "root_cause_summary": "rc",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/104",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/104",
     "remediation_priority": "high",
-    "verification_artifact_url": "https://github.com/IBuySpy-Shared/basecoat/blob/1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b/docs/spec.md",
+    "verification_artifact_url": "https://github.com/ivegamsft/basecoat/blob/1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b/docs/spec.md",
     "repeat_without_prior_verification": false
   }
 ]
@@ -606,9 +606,9 @@ try {
     "affected_service": "s",
     "customer_impact": "c",
     "root_cause_summary": "rc",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/105",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/105",
     "remediation_priority": "high",
-    "verification_artifact_url": "https://github.com/IBuySpy-Shared/basecoat/checks/runs/987654321",
+    "verification_artifact_url": "https://github.com/ivegamsft/basecoat/checks/runs/987654321",
     "repeat_without_prior_verification": false
   }
 ]
@@ -629,9 +629,9 @@ try {
     "affected_service": "s",
     "customer_impact": "c",
     "root_cause_summary": "rc",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/106",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/106",
     "remediation_priority": "high",
-    "verification_artifact_url": "https://github.com/IBuySpy-Shared/basecoat/actions/runs/123456789",
+    "verification_artifact_url": "https://github.com/ivegamsft/basecoat/actions/runs/123456789",
     "repeat_without_prior_verification": false
   }
 ]
@@ -656,7 +656,7 @@ try {
     "owner": "o",
     "affected_service": "s",
     "customer_impact": "c",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/18",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/18",
     "repeat_without_prior_verification": false
   }
 ]
@@ -680,7 +680,7 @@ try {
     "affected_service": "s",
     "customer_impact": "c",
     "root_cause_summary": "rc",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/19",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/19",
     "remediation_priority": "low",
     "repeat_without_prior_verification": false
   }
@@ -702,7 +702,7 @@ try {
     "owner": "o",
     "affected_service": "s",
     "customer_impact": "c",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/20",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/20",
     "repeat_without_prior_verification": false
   }
 ]
@@ -724,7 +724,7 @@ try {
     "affected_service": "s",
     "customer_impact": "c",
     "root_cause_summary": "rc",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/21",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/21",
     "remediation_priority": "critical",
     "repeat_without_prior_verification": false
   }
@@ -744,7 +744,7 @@ try {
     "affected_service": "s",
     "customer_impact": "c",
     "root_cause_summary": "rc",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/22",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/22",
     "remediation_priority": "priority:high",
     "repeat_without_prior_verification": false
   }
@@ -833,7 +833,7 @@ try {
     "owner": "o",
     "affected_service": "s",
     "customer_impact": "c",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/23",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/23",
     "remediation_priority": "medium",
     "repeat_without_prior_verification": false
   }
@@ -862,7 +862,7 @@ try {
     "owner": "o",
     "affected_service": "payments-api",
     "customer_impact": "c",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/24",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/24",
     "remediation_priority": "medium",
     "repeat_without_prior_verification": false
   },
@@ -875,7 +875,7 @@ try {
     "owner": "o",
     "affected_service": "not-a-real-area",
     "customer_impact": "c",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/25",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/25",
     "remediation_priority": "medium",
     "repeat_without_prior_verification": false
   }
@@ -902,7 +902,7 @@ try {
             owner = "o"
             affected_service = "s"
             customer_impact = "c"
-            remediation_issue_url = "https://github.com/IBuySpy-Shared/basecoat/issues/$(100 + $i)"
+            remediation_issue_url = "https://github.com/ivegamsft/basecoat/issues/$(100 + $i)"
             remediation_priority = "medium"
             repeat_without_prior_verification = $false
         }

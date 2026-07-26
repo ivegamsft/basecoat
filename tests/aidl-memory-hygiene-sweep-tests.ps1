@@ -59,7 +59,7 @@ try {
     if ($r.Report.summary.dead_citation -ne 0 -or $r.Report.flagged_count -ne 0) { throw 'Case 5: a resolvable file citation must not be flagged.' }
 
     # --- Case 6: a URL citation is not treated as a dead file reference (online verification). ---
-    $r = Invoke-Sweep -InputJson '[{ "id": "m6", "subject": "auth", "fact": "use jwt", "status": "promote", "citations": ["https://github.com/IBuySpy-Shared/basecoat/pull/1"] }]'
+    $r = Invoke-Sweep -InputJson '[{ "id": "m6", "subject": "auth", "fact": "use jwt", "status": "promote", "citations": ["https://github.com/ivegamsft/basecoat/pull/1"] }]'
     if ($r.Report.flagged_count -ne 0) { throw 'Case 6: a URL citation must not be flagged as a dead file reference.' }
 
     # --- Case 7: a dead-citation entry with no replacement/rationale needs a replacement or rationale. ---
@@ -140,7 +140,7 @@ try {
     if ($null -eq (Get-Flagged -Report $r.Report -Id 'm19b')) { throw 'Case 19: a directory citation must not resolve as a live file.' }
 
     # --- Case 20: URL citations are reported as pending online verification, not silently dropped. ---
-    $r = Invoke-Sweep -InputJson '[{ "id": "m20", "subject": "a", "fact": "b", "status": "promote", "citations": ["https://github.com/IBuySpy-Shared/basecoat/pull/1"] }]'
+    $r = Invoke-Sweep -InputJson '[{ "id": "m20", "subject": "a", "fact": "b", "status": "promote", "citations": ["https://github.com/ivegamsft/basecoat/pull/1"] }]'
     if ($r.Report.url_citations_pending_online_check -ne 1) { throw 'Case 20: URL citations must be counted as pending online verification.' }
     if (@($r.Report.online_check_entries | Where-Object { $_.id -eq 'm20' }).Count -ne 1) { throw 'Case 20: URL citations must be surfaced per entry.' }
 

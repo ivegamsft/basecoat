@@ -6,7 +6,7 @@ Workstream 5 of epic #1452 requires a weekly scorecard/readout that tracks
 throughput, failure rate, MTTR, and manual intervention metrics with trend
 classification and linked remediation actions.
 
-Related issue: [#2050](https://github.com/IBuySpy-Shared/basecoat/issues/2050)
+Related issue: [#2050](https://github.com/ivegamsft/basecoat/issues/2050)
 
 ## Functional Requirements
 

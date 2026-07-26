@@ -5,7 +5,7 @@ name: Submit Learning to Basecoat Memory
 #
 # Prerequisites (one-time admin setup):
 #   MEMORY_REPO_TOKEN set as an org-level Actions secret in IBuySpy-Shared.
-#   See: https://github.com/IBuySpy-Shared/basecoat/blob/main/docs/memory/SETUP-INTERNAL.md
+#   See: https://github.com/ivegamsft/basecoat/blob/main/docs/memory/SETUP-INTERNAL.md
 
 on:
   workflow_dispatch:

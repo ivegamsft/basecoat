@@ -434,8 +434,8 @@ git push origin main
 - [MCP Developer Agent](../agents/basecoat-10-core-mcp-developer.agent.md)
 
 ### Related Issues
-- [#1304: Memory Workflows Distribution](https://github.com/IBuySpy-Shared/basecoat/issues/1304)
-- [#1303: CI/CD Templatization](https://github.com/IBuySpy-Shared/basecoat/issues/1303)
+- [#1304: Memory Workflows Distribution](https://github.com/ivegamsft/basecoat/issues/1304)
+- [#1303: CI/CD Templatization](https://github.com/ivegamsft/basecoat/issues/1303)
 
 ---
 

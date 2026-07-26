@@ -473,7 +473,7 @@ disambiguation question before first evidence collection.
 ## The instruction file
 
 This convention is codified in
-[`instructions/basecoat-10-core-intent-routing.instructions.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/basecoat-10-core-intent-routing.instructions.md).
+[`instructions/basecoat-10-core-intent-routing.instructions.md`](https://github.com/ivegamsft/basecoat/blob/main/instructions/basecoat-10-core-intent-routing.instructions.md).
 
 When BaseCoat is synced to your repo, this instruction is loaded by Copilot
 automatically and applies to all conversations. You can adopt this prefix

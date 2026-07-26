@@ -1,6 +1,6 @@
 # Copilot Extension GitHub App Registration Runbook
 
-This runbook tracks issue [#1073](https://github.com/IBuySpy-Shared/basecoat/issues/1073) and follow-up execution issue [#1127](https://github.com/IBuySpy-Shared/basecoat/issues/1127), and captures the exact handoff needed to register the BaseCoat Copilot Extension GitHub App.
+This runbook tracks issue [#1073](https://github.com/ivegamsft/basecoat/issues/1073) and follow-up execution issue [#1127](https://github.com/ivegamsft/basecoat/issues/1127), and captures the exact handoff needed to register the BaseCoat Copilot Extension GitHub App.
 
 ## Scope
 
@@ -15,7 +15,7 @@ Use these baseline settings when creating the App:
 |---|---|
 | App name | `BaseCoat Copilot Extension` |
 | Description | `Org-scoped Copilot Extension backend for BaseCoat assets and workflows.` |
-| Homepage URL | `https://github.com/IBuySpy-Shared/basecoat` |
+| Homepage URL | `https://github.com/ivegamsft/basecoat` |
 | Callback URL | `<ACA_BASE_URL>/api/github/oauth/callback` |
 | Setup URL | `<ACA_BASE_URL>/api/github/setup` |
 | Webhook URL | `<ACA_BASE_URL>/api/github/webhook` |
@@ -83,4 +83,4 @@ Issue #1073 remains blocked until issue #1127 is completed with org-admin App cr
 - Design: `docs/design/copilot-extension-prd.md`
 - Blocked issues log: `docs/operations/BLOCKED_ISSUES.md`
 - Config scaffold: `docs/templates/copilot-extension/github-app-registration.template.json`
-- Follow-up tracker: `https://github.com/IBuySpy-Shared/basecoat/issues/1127`
+- Follow-up tracker: `https://github.com/ivegamsft/basecoat/issues/1127`

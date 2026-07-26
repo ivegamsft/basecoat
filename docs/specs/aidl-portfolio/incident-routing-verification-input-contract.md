@@ -57,9 +57,9 @@ A JSON array of incident record objects. The array must contain at least one rec
   "affected_service": "payments-api",
   "customer_impact": "checkout unavailable",
   "root_cause_summary": "connection pool exhaustion",
-  "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/1",
+  "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/1",
   "remediation_priority": "critical",
-  "verification_artifact_url": "https://github.com/IBuySpy-Shared/basecoat/actions/runs/10",
+  "verification_artifact_url": "https://github.com/ivegamsft/basecoat/actions/runs/10",
   "repeat_without_prior_verification": false
 }
 ```

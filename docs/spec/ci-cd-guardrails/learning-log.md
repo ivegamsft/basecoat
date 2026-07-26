@@ -1,7 +1,7 @@
 # CI/CD Guardrails Learning Log
 
-**Control Plane Issue**: [#1890](https://github.com/IBuySpy-Shared/basecoat/issues/1890)  
-**Sprint Closeout Issue**: [#1893](https://github.com/IBuySpy-Shared/basecoat/issues/1893)
+**Control Plane Issue**: [#1890](https://github.com/ivegamsft/basecoat/issues/1890)  
+**Sprint Closeout Issue**: [#1893](https://github.com/ivegamsft/basecoat/issues/1893)
 
 ## Run Summary
 

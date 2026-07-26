@@ -1,7 +1,7 @@
 # Risk-Tier Policy Enforcement — Technical Specification
 
 **Feature**: Risk-Tier Autonomy Policy (Epic #1452, Workstream 4)  
-**Issue**: [#2049](https://github.com/IBuySpy-Shared/basecoat/issues/2049)  
+**Issue**: [#2049](https://github.com/ivegamsft/basecoat/issues/2049)  
 **Scope**: Enforcement guardrails, workflow classification, and approval gating for Tier 1–4 actions  
 **Status**: Design  
 **Created**: 2026-06-25
@@ -331,7 +331,7 @@ No rollback needed (read-only, no state change).
 
 ## References
 
-- [Epic #1452: Keep/Fix/Throttle Operating Model](https://github.com/IBuySpy-Shared/basecoat/issues/1452)
-- [Issue #2049: Workstream 4 — Enforce Risk-Tier Autonomy Policy](https://github.com/IBuySpy-Shared/basecoat/issues/2049)
+- [Epic #1452: Keep/Fix/Throttle Operating Model](https://github.com/ivegamsft/basecoat/issues/1452)
+- [Issue #2049: Workstream 4 — Enforce Risk-Tier Autonomy Policy](https://github.com/ivegamsft/basecoat/issues/2049)
 - [docs/operations/keep-fix-throttle-model.md](../operations/keep-fix-throttle-model.md)
 - [.github/workflows/prd-spec-gate.yml](../../.github/workflows/prd-spec-gate.yml)

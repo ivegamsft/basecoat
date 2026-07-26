@@ -52,7 +52,7 @@ unless the PR is a justified mechanical change.
 
 ## Adoption Metrics Dashboard
 
-Deployed to GitHub Pages: <https://ibuyspy-shared.github.io/basecoat/>
+Deployed to GitHub Pages: <https://ivegamsft.github.io/basecoat/>
 
 Architecture: MkDocs force-pushes to `gh-pages` (wiping all content). The
 `adoption-metrics.yml` workflow then auto-repopulates metrics via a `workflow_run`

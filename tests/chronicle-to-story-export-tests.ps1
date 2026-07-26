@@ -27,7 +27,7 @@ try {
     "session://def"
   ],
   "references": [
-    "https://github.com/IBuySpy-Shared/basecoat/issues/2621"
+    "https://github.com/ivegamsft/basecoat/issues/2621"
   ],
   "timeline": [
     {

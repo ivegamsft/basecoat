@@ -222,7 +222,7 @@ basecoat-portal/
 ### Initial Setup
 ```bash
 # Clone repository
-git clone https://github.com/IBuySpy-Shared/basecoat-portal.git
+git clone https://github.com/ivegamsft/basecoat-portal.git
 cd basecoat-portal
 
 # Install dependencies

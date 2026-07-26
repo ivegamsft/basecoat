@@ -64,7 +64,7 @@ jobs:
                   if 'localhost' in url or '127.0.0.1' in url:
                       continue
                   # Skip self-references to this private repo (always 404 to unauthenticated checker)
-                  if 'github.com/IBuySpy-Shared/basecoat' in url:
+                  if 'github.com/ivegamsft/basecoat' in url:
                       continue
                   # Skip placeholder/non-existent API domains
                   if 'api.basecoat.dev' in url:

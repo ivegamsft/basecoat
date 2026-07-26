@@ -62,7 +62,7 @@ Or via the GitHub UI: open your repository's Actions secrets page.
 
 ```sh
 bash <(curl -fsSL \
-  https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/scripts/onboard-basecoat.sh) \
+  https://raw.githubusercontent.com/ivegamsft/basecoat/main/scripts/onboard-basecoat.sh) \
   --repo YOUR_ORG/YOUR_REPO
 ```
 
@@ -128,7 +128,7 @@ gh workflow run submit-learning.yml \
 export MEMORY_REPO_TOKEN="ghp_..."
 
 bash <(curl -fsSL \
-  https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/scripts/submit-learning.sh) \
+  https://raw.githubusercontent.com/ivegamsft/basecoat/main/scripts/submit-learning.sh) \
   --subject  "ci:my-finding" \
   --fact     "One-sentence generic pattern." \
   --evidence "https://github.com/YOUR_ORG/YOUR_REPO/pull/42" \
@@ -139,7 +139,7 @@ bash <(curl -fsSL \
 
 ### GitHub issue form (no tooling)
 
-Open <https://github.com/IBuySpy-Shared/basecoat/issues/new/choose> and
+Open <https://github.com/ivegamsft/basecoat/issues/new/choose> and
 select **💡 Submit a Memory Contribution**. Works from any browser.
 No PAT, no CLI, no secret required.
 
@@ -168,7 +168,7 @@ To rotate:
 
 ## Getting Help
 
-- Open an issue on <https://github.com/IBuySpy-Shared/basecoat/issues>
+- Open an issue on <https://github.com/ivegamsft/basecoat/issues>
 - Tag it `question` + `memory`
 - Or use the **💡 Submit a Memory Contribution** issue form (no PAT needed)
 

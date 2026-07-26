@@ -117,4 +117,4 @@ flowchart LR
 > Historical Wave 3 staging deliverables, portal design docs, wireframes, and cleanup reports.
 > These are preserved for reference but are not part of the active framework.
 
-- [View archive on GitHub](https://github.com/IBuySpy-Shared/basecoat/tree/main/docs/archive) — All archived Wave 3, portal, design, and audit documents
+- [View archive on GitHub](https://github.com/ivegamsft/basecoat/tree/main/docs/archive) — All archived Wave 3, portal, design, and audit documents

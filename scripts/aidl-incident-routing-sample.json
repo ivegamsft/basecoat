@@ -9,9 +9,9 @@
     "affected_service": "payments-api",
     "customer_impact": "Checkout unavailable for all customers.",
     "root_cause_summary": "Connection pool exhaustion under peak load.",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/1001",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/1001",
     "remediation_priority": "critical",
-    "verification_artifact_url": "https://github.com/IBuySpy-Shared/basecoat/commit/1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b",
+    "verification_artifact_url": "https://github.com/ivegamsft/basecoat/commit/1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b",
     "repeat_without_prior_verification": false
   },
   {
@@ -24,9 +24,9 @@
     "affected_service": "identity-service",
     "customer_impact": "Intermittent login failures for a subset of users.",
     "root_cause_summary": "Token cache eviction misconfiguration.",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/pull/1002",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/pull/1002",
     "remediation_priority": "high",
-    "verification_artifact_url": "https://github.com/IBuySpy-Shared/basecoat/commit/2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c",
+    "verification_artifact_url": "https://github.com/ivegamsft/basecoat/commit/2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c",
     "repeat_without_prior_verification": false
   },
   {
@@ -38,7 +38,7 @@
     "owner": "oncall-catalog",
     "affected_service": "catalog-service",
     "customer_impact": "Slow product search responses in one region.",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/1003",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/1003",
     "remediation_priority": "medium",
     "repeat_without_prior_verification": false
   },
@@ -51,7 +51,7 @@
     "owner": "oncall-notifications",
     "affected_service": "notifications-service",
     "customer_impact": "Delayed delivery of non-critical email notifications.",
-    "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/1004",
+    "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/1004",
     "remediation_priority": "low",
     "repeat_without_prior_verification": false
   }

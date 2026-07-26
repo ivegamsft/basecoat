@@ -52,11 +52,11 @@ try {
     }
 
     # --- Case 2: already-routed incident is skipped and its link is preserved. ---
-    $routed = '[{ "incident_id": "INC-3001", "severity": "SEV1", "status": "closed", "owner": "o", "affected_service": "s", "customer_impact": "i", "detected_at": "2026-01-05T09:00:00Z", "root_cause_summary": "rca", "verification_artifact_url": "https://github.com/IBuySpy-Shared/basecoat/commit/abc1234", "remediation_issue_url": "https://github.com/IBuySpy-Shared/basecoat/issues/42" }]'
+    $routed = '[{ "incident_id": "INC-3001", "severity": "SEV1", "status": "closed", "owner": "o", "affected_service": "s", "customer_impact": "i", "detected_at": "2026-01-05T09:00:00Z", "root_cause_summary": "rca", "verification_artifact_url": "https://github.com/ivegamsft/basecoat/commit/abc1234", "remediation_issue_url": "https://github.com/ivegamsft/basecoat/issues/42" }]'
     $plan = Invoke-Router -InputJson $routed
     if ($plan.summary.skip -ne 1 -or $plan.summary.create -ne 0) { throw 'Case 2: routed incident must be skipped, not created.' }
     if ($plan.items[0].reason -ne 'already-routed') { throw 'Case 2: reason should be already-routed.' }
-    if ($plan.items[0].remediation_issue_url -ne 'https://github.com/IBuySpy-Shared/basecoat/issues/42') { throw 'Case 2: existing remediation link must be preserved.' }
+    if ($plan.items[0].remediation_issue_url -ne 'https://github.com/ivegamsft/basecoat/issues/42') { throw 'Case 2: existing remediation link must be preserved.' }
 
     # --- Case 3: placeholder remediation URL is treated as unrouted (create). ---
     $placeholder = '[{ "incident_id": "INC-3002", "severity": "SEV3", "status": "open", "owner": "o", "affected_service": "s", "customer_impact": "i", "detected_at": "2026-01-05T09:00:00Z", "remediation_issue_url": "n/a" }]'
@@ -71,7 +71,7 @@ try {
     if ($plan.items[0].reason -ne 'invalid-or-missing-severity') { throw 'Case 4: reason should flag invalid severity.' }
 
     # --- Case 5: owner and verification artifact are preserved in the create body. ---
-    $withVerification = '[{ "incident_id": "INC-3004", "severity": "SEV2", "status": "open", "owner": "oncall-team-b", "affected_service": "billing", "customer_impact": "billing delayed", "detected_at": "2026-01-05T09:00:00Z", "root_cause_summary": "rca", "verification_artifact_url": "https://github.com/IBuySpy-Shared/basecoat/commit/abc1234" }]'
+    $withVerification = '[{ "incident_id": "INC-3004", "severity": "SEV2", "status": "open", "owner": "oncall-team-b", "affected_service": "billing", "customer_impact": "billing delayed", "detected_at": "2026-01-05T09:00:00Z", "root_cause_summary": "rca", "verification_artifact_url": "https://github.com/ivegamsft/basecoat/commit/abc1234" }]'
     $plan = Invoke-Router -InputJson $withVerification
     $body = $plan.items[0].body_markdown
     if ($body -notmatch 'oncall-team-b') { throw 'Case 5: owner (DRI) must be preserved in the body.' }
@@ -158,7 +158,7 @@ try {
     if ($plan.items[0].reason -notmatch 'closure-missing-verification-artifact') { throw 'Case 16: reason should flag missing closure verification.' }
 
     # --- Case 17: closure with a valid immutable verification artifact is eligible. ---
-    $goodClosure = '[{ "incident_id": "INC-GOODCLOSE", "severity": "SEV3", "status": "resolved", "owner": "o", "affected_service": "s", "customer_impact": "i", "detected_at": "2026-01-05T09:00:00Z", "verification_artifact_url": "https://github.com/IBuySpy-Shared/basecoat/commit/abcdef1" }]'
+    $goodClosure = '[{ "incident_id": "INC-GOODCLOSE", "severity": "SEV3", "status": "resolved", "owner": "o", "affected_service": "s", "customer_impact": "i", "detected_at": "2026-01-05T09:00:00Z", "verification_artifact_url": "https://github.com/ivegamsft/basecoat/commit/abcdef1" }]'
     $plan = Invoke-Router -InputJson $goodClosure
     if ($plan.summary.create -ne 1) { throw 'Case 17: valid closure evidence with an unrouted incident must route.' }
 }

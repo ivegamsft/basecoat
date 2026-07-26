@@ -141,8 +141,8 @@ jobs:
           SITE_URL="https://${OWNER}.github.io/${REPO}/"
           REPO_URL="https://github.com/${{ github.repository }}"
           # Substitute any source-repo URLs with this fork's URLs
-          sed -i "s|https://ibuyspy-shared.github.io/basecoat/|${SITE_URL}|gI" mkdocs.yml
-          sed -i "s|https://github.com/IBuySpy-Shared/basecoat|${REPO_URL}|gI" mkdocs.yml
+          sed -i "s|https://ivegamsft.github.io/basecoat/|${SITE_URL}|gI" mkdocs.yml
+          sed -i "s|https://github.com/ivegamsft/basecoat|${REPO_URL}|gI" mkdocs.yml
           sed -i "s|IBuySpy-Shared/basecoat|${{ github.repository }}|g" mkdocs.yml
 
       - name: Build docs

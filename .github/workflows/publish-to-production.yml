@@ -131,9 +131,9 @@ jobs:
           # files so consumers never encounter links they cannot access.
           #
           # Patterns replaced:
-          #   github.com/IBuySpy-Shared/basecoat         ->  github.com/ivegamsft/basecoat
-          #   raw.githubusercontent.com/IBuySpy-Shared/basecoat  ->  raw.githubusercontent.com/ivegamsft/basecoat
-          #   ibuyspy-shared.github.io/basecoat           ->  ivegamsft.github.io/basecoat
+          #   github.com/ivegamsft/basecoat         ->  github.com/ivegamsft/basecoat
+          #   raw.githubusercontent.com/ivegamsft/basecoat  ->  raw.githubusercontent.com/ivegamsft/basecoat
+          #   ivegamsft.github.io/basecoat           ->  ivegamsft.github.io/basecoat
           #
           # Binary files are skipped automatically via grep -I (--binary-files=without-match).
 

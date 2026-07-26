@@ -377,7 +377,7 @@ Minimum frequency: 2 occurrences. Filter out anything repo-specific.
 pwsh scripts/submit-learning.ps1 `
   -Subject "ci:check-coherence-default-exit" `
   -Fact "check-coherence.ps1 exits 0 unless -Strict is passed. CI is non-blocking without it." `
-  -Evidence "https://github.com/IBuySpy-Shared/basecoat/issues/709" `
+  -Evidence "https://github.com/ivegamsft/basecoat/issues/709" `
   -Domain "ci" `
   -Source "IBuySpy-Shared/basecoat" `
   -OpenPR

@@ -81,7 +81,7 @@ function New-Run {
     headBranch = "intent/ship-it/demo"
     conclusion = $Conclusion
     createdAt = $now.AddMinutes(-1 * $MinutesAgo).ToString("yyyy-MM-ddTHH:mm:ssZ")
-    url = "https://github.com/IBuySpy-Shared/basecoat/actions/runs/$RunId"
+    url = "https://github.com/ivegamsft/basecoat/actions/runs/$RunId"
     log_excerpt = $LogExcerpt
   }
 }

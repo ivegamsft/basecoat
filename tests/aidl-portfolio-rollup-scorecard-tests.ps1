@@ -57,7 +57,7 @@ function New-Rollup {
 }
 
 function Invoke-Scorecard {
-    param([string]$RollupJson, [string]$ThresholdsPath = '', [string]$RunUrl = 'https://github.com/IBuySpy-Shared/basecoat/actions/runs/1/attempts/1')
+    param([string]$RollupJson, [string]$ThresholdsPath = '', [string]$RunUrl = 'https://github.com/ivegamsft/basecoat/actions/runs/1/attempts/1')
 
     $script:caseIndex++
     $rollupPath = Join-Path $tempDir ("rollup-$script:caseIndex.json")
@@ -111,7 +111,7 @@ try {
     if ((Get-MetricStatus -Card $card -Metric 'open_incidents') -ne 'pass') { throw 'Case 5: override should let 5 incidents pass.' }
 
     # --- Case 6: evidence links are attached. ---
-    $runUrl = 'https://github.com/IBuySpy-Shared/basecoat/actions/runs/10/attempts/1'
+    $runUrl = 'https://github.com/ivegamsft/basecoat/actions/runs/10/attempts/1'
     $card = Invoke-Scorecard -RollupJson (New-Rollup) -RunUrl $runUrl
     if ($card.evidence.run_url -ne $runUrl) { throw 'Case 6: run_url evidence must be attached.' }
     if ([string]::IsNullOrWhiteSpace($card.evidence.rollup_source)) { throw 'Case 6: rollup_source evidence must be attached.' }
