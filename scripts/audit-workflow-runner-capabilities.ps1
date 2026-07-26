@@ -183,8 +183,22 @@ function Get-RequiredCapabilities {
         'release'
     )
 
-    if ($deployWorkflowAllowList -contains $WorkflowName.ToLowerInvariant() -or
-        $deployJobAllowList -contains $JobName.ToLowerInvariant()) {
+    # Public-API-only dispatch jobs: these only call the public GitHub REST API
+    # (api.github.com) to trigger workflows on the production mirror. They use a
+    # token secret but require no private network or self-hosted runtime, so they
+    # run safely on github-hosted-linux. Exempt them from the self-hosted-forcing
+    # deployment-credentials/private-network capabilities. Keyed by workflow AND
+    # job so a future deployment job added to either file is NOT auto-exempted.
+    $publicApiDispatchAllowList = @(
+        'close-production-issues.yml|close-issues',
+        'docs-production.yml|dispatch-production-docs'
+    )
+    $publicApiDispatchKey = "$($WorkflowName.ToLowerInvariant())|$($JobName.ToLowerInvariant())"
+    $isPublicApiDispatch = $publicApiDispatchAllowList -contains $publicApiDispatchKey
+
+    if (-not $isPublicApiDispatch -and
+        ($deployWorkflowAllowList -contains $WorkflowName.ToLowerInvariant() -or
+        $deployJobAllowList -contains $JobName.ToLowerInvariant())) {
         [void]$caps.Add('deployment-credentials')
         [void]$caps.Add('private-network')
     }
@@ -194,9 +208,13 @@ function Get-RequiredCapabilities {
         [void]$caps.Add('private-network')
     }
 
-    if ($JobContent -match 'environment:\s*production') {
+    if (-not $isPublicApiDispatch -and $JobContent -match 'environment:\s*production') {
         [void]$caps.Add('deployment-credentials')
         [void]$caps.Add('private-network')
+    }
+
+    if ($isPublicApiDispatch) {
+        [void]$caps.Add('public-api-dispatch')
     }
 
     if ($JobContent -match 'uses:\s*[^\s]+/\.github/workflows/') {

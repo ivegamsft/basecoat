@@ -25,9 +25,18 @@ permissions:
 jobs:
   dispatch-production-docs:
     name: Trigger docs build on production repo
-    runs-on: ${{ vars.RUNNER_RELEASE || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
+    # Pinned to ubuntu-latest: this job only calls the public GitHub REST API and
+    # its steps are POSIX shell. Routing it to a Windows deploy runner via
+    # RUNNER_DEPLOY made the bash steps fail under PowerShell (and leaked the token
+    # through the parse error). shell: bash is set as defense-in-depth.
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     environment: production
+    defaults:
+      run:
+        shell: bash
+    env:
+      PROD_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
     # Only run after a successful publish (skip on failure/cancellation)
     # workflow_dispatch always runs (user explicitly triggered)
     if: |
@@ -37,7 +46,7 @@ jobs:
     steps:
       - name: Validate token
         run: |
-          if [ -z "${{ secrets.PRODUCTION_REPO_TOKEN }}" ]; then
+          if [ -z "$PROD_TOKEN" ]; then
             echo "::error::PRODUCTION_REPO_TOKEN is not set — cannot dispatch docs build"
             exit 1
           fi
@@ -49,7 +58,7 @@ jobs:
           HTTP_STATUS=$(curl -s -o /tmp/dispatch_response.json -w "%{http_code}" \
             -X POST \
             -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.PRODUCTION_REPO_TOKEN }}" \
+            -H "Authorization: Bearer $PROD_TOKEN" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "https://api.github.com/repos/ivegamsft/basecoat/actions/workflows/docs.yml/dispatches" \
             -d '{"ref":"main"}')

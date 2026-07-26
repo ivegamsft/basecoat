@@ -821,6 +821,105 @@ else {
     $guardrailFailures += 'runner-capability-classification'
 }
 
+# Test 20: Incident regression — production dispatch jobs must stay on Ubuntu/bash
+# and must never inline PRODUCTION_REPO_TOKEN into run: bodies (RCA: run 30214820425).
+# The runner/shell checks are scoped to the specific named dispatch job block so an
+# unrelated Ubuntu/bash job added later cannot mask a regression on the dispatch job.
+# The token check parses run: block boundaries so a secret interpolated inside a
+# run: body is rejected even if the line resembles an env: assignment.
+Write-Host '  Test 20: Validate production dispatch jobs (runner/shell/token exposure)...'
+$dispatchRegressionTargets = @(
+    @{ File = 'docs-production.yml'; Job = 'dispatch-production-docs' },
+    @{ File = 'close-production-issues.yml'; Job = 'close-issues' }
+)
+$dispatchRegressionViolations = @()
+$tokenEnvAssignmentPattern = '^\s*[A-Za-z_][A-Za-z0-9_]*:\s*\$\{\{\s*secrets\.PRODUCTION_REPO_TOKEN\s*\}\}\s*$'
+
+# Extract a single job block (from "  <job>:" until the next line indented <= 2 spaces).
+function Get-WorkflowJobBlock {
+    param([string[]] $Lines, [string] $JobName)
+    $start = -1
+    for ($i = 0; $i -lt $Lines.Count; $i++) {
+        if ($Lines[$i] -match "^\s{2}$([regex]::Escape($JobName)):\s*$") { $start = $i; break }
+    }
+    if ($start -lt 0) { return $null }
+    $block = @()
+    for ($i = $start + 1; $i -lt $Lines.Count; $i++) {
+        $line = $Lines[$i]
+        if ($line.Trim().Length -gt 0 -and $line -notmatch '^\s{3,}') { break }
+        $block += $line
+    }
+    return , $block
+}
+
+foreach ($target in $dispatchRegressionTargets) {
+    $file = $target.File
+    $job = $target.Job
+    $workflowPath = Join-Path $workflowDir $file
+    if (-not (Test-Path $workflowPath)) {
+        $dispatchRegressionViolations += "$file (missing file)"
+        continue
+    }
+
+    $lines = Get-Content $workflowPath
+    $jobBlock = Get-WorkflowJobBlock -Lines $lines -JobName $job
+    if ($null -eq $jobBlock -or $jobBlock.Count -eq 0) {
+        $dispatchRegressionViolations += "$file (job '$job' not found)"
+        continue
+    }
+
+    if (-not ($jobBlock | Where-Object { $_ -match '^\s+runs-on:\s+ubuntu-latest\s*$' })) {
+        $dispatchRegressionViolations += "$file/$job (not pinned to ubuntu-latest)"
+    }
+    if (-not ($jobBlock | Where-Object { $_ -match '^\s+shell:\s+bash\s*$' })) {
+        $dispatchRegressionViolations += "$file/$job (missing shell: bash default)"
+    }
+
+    # Walk the whole file tracking run: block boundaries. PRODUCTION_REPO_TOKEN may
+    # only appear as a top-level env: assignment — never inside a run: body, and
+    # never on a non-env line elsewhere.
+    $inRunBlock = $false
+    $runBlockIndent = 0
+    foreach ($line in $lines) {
+        $hasToken = $line -match 'secrets\.PRODUCTION_REPO_TOKEN'
+        $indent = ($line -replace '\S.*$', '').Length
+
+        if ($inRunBlock) {
+            if ($line.Trim().Length -gt 0 -and $indent -le $runBlockIndent) {
+                $inRunBlock = $false
+            }
+            elseif ($hasToken) {
+                $dispatchRegressionViolations += "$file (PRODUCTION_REPO_TOKEN inside run: body — leak risk)"
+                continue
+            }
+            else {
+                continue
+            }
+        }
+
+        if ($line -match '^(\s*)run:\s*[|>]') {
+            $inRunBlock = $true
+            $runBlockIndent = $matches[1].Length
+            continue
+        }
+        if ($line -match '^\s*run:\s*\S' -and $hasToken) {
+            $dispatchRegressionViolations += "$file (PRODUCTION_REPO_TOKEN inlined in run: line — leak risk)"
+            continue
+        }
+        if ($hasToken -and $line -notmatch $tokenEnvAssignmentPattern) {
+            $dispatchRegressionViolations += "$file (PRODUCTION_REPO_TOKEN referenced outside env: assignment — leak risk)"
+        }
+    }
+}
+
+if ($dispatchRegressionViolations.Count -eq 0) {
+    Write-Host '    PASS Production dispatch jobs are Ubuntu/bash and never inline PRODUCTION_REPO_TOKEN'
+}
+else {
+    Write-Host "    FAIL Production dispatch regression issues found in: $($dispatchRegressionViolations -join ', ')" -ForegroundColor Red
+    $guardrailFailures += 'production-dispatch-runner-token-regression'
+}
+
 if ($guardrailFailures.Count -gt 0) {
     Write-Host "Workflow guardrails failed: $($guardrailFailures -join ', ')" -ForegroundColor Red
     exit 1

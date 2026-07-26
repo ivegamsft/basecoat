@@ -20,9 +20,14 @@ permissions:
 jobs:
   close-issues:
     name: Close migrated issues on production repo
-    runs-on: ${{ vars.RUNNER_RELEASE || vars.RUNNER_DEPLOY || 'ubuntu-latest' }}
+    # Pinned to ubuntu-latest with shell: bash — these POSIX-shell steps failed
+    # under PowerShell when RUNNER_DEPLOY routed the job to a Windows deploy runner.
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     environment: production
+    defaults:
+      run:
+        shell: bash
     env:
       PROD_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
       PROD_REPO: ivegamsft/basecoat

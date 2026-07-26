@@ -58,6 +58,22 @@
         "self-hosted-linux"
       ],
       "max_timeout_minutes": 20
+    },
+    {
+      "workflow": "docs-production.yml",
+      "job": "dispatch-production-docs",
+      "allowed_runner_classes": [
+        "github-hosted-linux"
+      ],
+      "max_timeout_minutes": 10
+    },
+    {
+      "workflow": "close-production-issues.yml",
+      "job": "close-issues",
+      "allowed_runner_classes": [
+        "github-hosted-linux"
+      ],
+      "max_timeout_minutes": 10
     }
   ]
 }
