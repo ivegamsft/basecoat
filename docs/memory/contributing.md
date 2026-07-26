@@ -5,7 +5,7 @@ learnings back for the steward team to review and promote into shared memory.
 
 ## First-Time Setup
 
-> **IBuySpy-Shared org members (internal):** See `docs/memory/setup-internal.md`.
+> **YOUR-ORG org members (internal):** See `docs/memory/setup-internal.md`.
 > After a one-time admin secret, onboarding a repo takes a single command.
 >
 > **External orgs:** See `docs/memory/setup-external.md`.
@@ -70,7 +70,7 @@ gh label create decision      --color d93f0b --description "Architecture or proc
 Open an issue on the basecoat repo using the **Memory Contribution** template.
 No CLI, no PAT, no PowerShell required — just a GitHub account.
 
-1. Go to: <https://github.com/IBuySpy-Shared/basecoat/issues/new/choose>
+1. Go to: <https://github.com/YOUR-ORG/basecoat/issues/new/choose>
 2. Select **💡 Submit a Memory Contribution**
 3. Fill in the structured form
 4. Submit — the bot validates and queues the candidate automatically
@@ -102,13 +102,14 @@ on:
 
 jobs:
   submit:
-    uses: IBuySpy-Shared/basecoat/.github/workflows/submit-learning-callable.yml@main
+    uses: YOUR-ORG/basecoat/.github/workflows/submit-learning-callable.yml@main
     with:
       subject:  ${{ inputs.subject }}
       fact:     ${{ inputs.fact }}
       evidence: ${{ inputs.evidence }}
       domain:   ${{ inputs.domain }}
       source:   ${{ inputs.source || github.repository }}
+      memory_repo: YOUR-ORG/basecoat-memory
     secrets:
       memory_repo_token: ${{ secrets.MEMORY_REPO_TOKEN }}
 ```
@@ -130,7 +131,7 @@ gh workflow run submit-learning.yml \
 ```sh
 export MEMORY_REPO_TOKEN=ghp_...
 
-curl -fsSL https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/scripts/submit-learning.sh \
+curl -fsSL https://raw.githubusercontent.com/YOUR-ORG/basecoat/main/scripts/submit-learning.sh \
   -o submit-learning.sh
 
 bash submit-learning.sh \
@@ -139,6 +140,7 @@ bash submit-learning.sh \
   --evidence "https://github.com/myorg/myrepo/pull/42" \
   --domain   "ci" \
   --source   "myorg/myrepo" \
+  --memory-repo "YOUR-ORG/basecoat-memory" \
   --open-pr
 ```
 
@@ -155,6 +157,7 @@ pwsh scripts/submit-learning.ps1 `
   -Evidence "https://github.com/myorg/myrepo/pull/42" `
   -Domain   "ci" `
   -Source   "myorg/myrepo" `
+  -MemoryRepo "YOUR-ORG/basecoat-memory" `
   -OpenPR
 ```
 
@@ -176,7 +179,7 @@ Place a `.basecoat.yml` at your repo root to customize sweep behavior.
 Copy `.basecoat.yml.example` from the basecoat repo as a starting point:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/.basecoat.yml.example \
+curl -fsSL https://raw.githubusercontent.com/YOUR-ORG/basecoat/main/.basecoat.yml.example \
   -o .basecoat.yml
 ```
 

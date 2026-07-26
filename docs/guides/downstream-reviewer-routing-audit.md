@@ -34,7 +34,7 @@ Example:
 
 ```json
 {
-  "repo": "IBuySpy-Dev/example-repo",
+  "repo": "YOUR-ORG/example-repo",
   "enabled": true
 }
 ```
@@ -50,7 +50,7 @@ Optional: override targets at dispatch time:
 
 ```bash
 gh workflow run downstream-reviewer-routing-audit.yml \
-  --field repositories="IBuySpy-Dev/work-tracker,IBuySpy-Dev/luxesite" \
+  --field repositories="YOUR-ORG/work-tracker,YOUR-ORG/luxesite" \
   --field ineffective_threshold=5
 ```
 

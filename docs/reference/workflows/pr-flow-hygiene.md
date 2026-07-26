@@ -95,7 +95,7 @@ branch protection.
 **Diagnose:**
 
 ```bash
-gh api graphql -f query='{ repository(owner: "IBuySpy-Shared", name: "basecoat") {
+gh api graphql -f query='{ repository(owner: "YOUR-ORG", name: "basecoat") {
   pullRequest(number: <N>) {
     reviewThreads(first: 50) { nodes { id isResolved } }
   }

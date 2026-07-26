@@ -46,11 +46,11 @@ The workflow runs on weekdays and publishes rollup artifacts each run.
 ```powershell
 pwsh -File scripts/aidl-portfolio-rollup-kpi-publisher.ps1 `
   -Repositories @(
-    "IBuySpy-Shared/basecoat",
-    "IBuySpy-Shared/consumer-a"
+    "YOUR-ORG/basecoat",
+    "YOUR-ORG/consumer-a"
   ) `
   -LookbackDays 14 `
-  -PublishIssueRepo "IBuySpy-Shared/basecoat" `
+  -PublishIssueRepo "YOUR-ORG/basecoat" `
   -PublishIssueNumber 1744
 ```
 
@@ -58,7 +58,7 @@ pwsh -File scripts/aidl-portfolio-rollup-kpi-publisher.ps1 `
 
 ```powershell
 pwsh -File scripts/aidl-portfolio-rollup-kpi-publisher.ps1 `
-  -Repositories @("IBuySpy-Shared/basecoat","IBuySpy-Shared/consumer-a") `
+  -Repositories @("YOUR-ORG/basecoat","YOUR-ORG/consumer-a") `
   -SnapshotPath .\tmp\rollup-snapshot.json `
   -DryRun
 ```

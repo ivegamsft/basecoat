@@ -1,6 +1,6 @@
-# Setting Up Basecoat Memory Contributions — Internal (IBuySpy-Shared)
+# Setting Up Basecoat Memory Contributions — Internal (YOUR-ORG)
 
-For repos inside the **IBuySpy-Shared** GitHub org, an admin only needs to
+For repos inside the **YOUR-ORG** GitHub org, an admin only needs to
 configure the org-level secret **once**. After that, every org repo can
 contribute learnings with zero per-repo setup.
 
@@ -9,7 +9,7 @@ contribute learnings with zero per-repo setup.
 ```text
 Admin (one time)
   └─ Sets MEMORY_REPO_TOKEN as an org-level Actions secret
-        └─ All IBuySpy-Shared repos inherit it automatically
+        └─ All YOUR-ORG repos inherit it automatically
 
 Any internal repo
   └─ Run: bash <(curl -fsSL .../onboard-basecoat.sh) --repo org/repo
@@ -22,13 +22,13 @@ Any internal repo
 
 1. Create a fine-grained PAT:
    - Go to <https://github.com/settings/personal-access-tokens/new>
-   - Resource owner: **IBuySpy-Shared**
-   - Repository access: **Only select repositories** → `IBuySpy-Shared/basecoat-memory`
+   - Resource owner: **YOUR-ORG**
+   - Repository access: **Only select repositories** → `YOUR-ORG/basecoat-memory`
    - Permissions: **Contents** (R/W), **Pull requests** (R/W), **Metadata** (R)
    - Set PAT expiry to **30 days or less** (calendar reminder to rotate)
 
 2. Store it as an **org-level secret**:
-   - Go to <https://github.com/organizations/IBuySpy-Shared/settings/secrets/actions>
+   - Go to <https://github.com/organizations/YOUR-ORG/settings/secrets/actions>
    - Click **New organization secret**
    - Name: `MEMORY_REPO_TOKEN`
    - Access: **All repositories** (or select the repos you want to enlist)
@@ -41,8 +41,8 @@ That's it. Every org repo now has `MEMORY_REPO_TOKEN` available in Actions
 
 ```sh
 bash <(curl -fsSL \
-  https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/scripts/onboard-basecoat.sh) \
-  --repo IBuySpy-Shared/my-repo
+  https://raw.githubusercontent.com/YOUR-ORG/basecoat/main/scripts/onboard-basecoat.sh) \
+  --repo YOUR-ORG/my-repo
 ```
 
 This adds the `basecoat-enabled` topic and creates the three learning labels.
@@ -64,15 +64,15 @@ Run the sweep against just your repo to confirm it's discoverable:
 
 ```sh
 gh workflow run memory-sweep.yml \
-  --repo IBuySpy-Shared/basecoat \
-  -f org=IBuySpy-Shared \
+  --repo YOUR-ORG/basecoat \
+  -f org=YOUR-ORG \
   -f days_back=7
 ```
 
 Or check that your repo appears in the search:
 
 ```sh
-gh api "search/repositories?q=topic:basecoat-enabled+org:IBuySpy-Shared" \
+gh api "search/repositories?q=topic:basecoat-enabled+org:YOUR-ORG" \
   --jq '.items[].full_name'
 ```
 
@@ -93,13 +93,14 @@ needed when calling from another org repo:
 ```yaml
 jobs:
   submit:
-    uses: IBuySpy-Shared/basecoat/.github/workflows/submit-learning-callable.yml@main
+    uses: YOUR-ORG/basecoat/.github/workflows/submit-learning-callable.yml@main
     with:
       subject:  "ci:my-finding"
       fact:     "One-sentence generic pattern."
-      evidence: "https://github.com/IBuySpy-Shared/my-repo/pull/42"
+      evidence: "https://github.com/YOUR-ORG/my-repo/pull/42"
       domain:   "ci"
       source:   ${{ github.repository }}
+      memory_repo: YOUR-ORG/basecoat-memory
     secrets:
       memory_repo_token: ${{ secrets.MEMORY_REPO_TOKEN }}
 ```
@@ -107,7 +108,7 @@ jobs:
 ### Starter workflow (no copy-paste)
 
 The **Submit Learning** starter workflow appears in the
-**Actions → New workflow** UI for all `IBuySpy-Shared` repos automatically.
+**Actions → New workflow** UI for all `YOUR-ORG` repos automatically.
 Click it, fill in the form, run — done.
 
 ### Bash script
@@ -116,18 +117,19 @@ Click it, fill in the form, run — done.
 export MEMORY_REPO_TOKEN=${{ secrets.MEMORY_REPO_TOKEN }}  # already in CI env
 
 bash <(curl -fsSL \
-  https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/scripts/submit-learning.sh) \
+  https://raw.githubusercontent.com/YOUR-ORG/basecoat/main/scripts/submit-learning.sh) \
   --subject  "ci:my-finding" \
   --fact     "One-sentence generic pattern." \
-  --evidence "https://github.com/IBuySpy-Shared/my-repo/pull/42" \
+  --evidence "https://github.com/YOUR-ORG/my-repo/pull/42" \
   --domain   "ci" \
   --source   "$GITHUB_REPOSITORY" \
+  --memory-repo "YOUR-ORG/basecoat-memory" \
   --open-pr
 ```
 
 ### GitHub issue form (no tooling at all)
 
-Open <https://github.com/IBuySpy-Shared/basecoat/issues/new/choose> and select
+Open <https://github.com/YOUR-ORG/basecoat/issues/new/choose> and select
 **💡 Submit a Memory Contribution**. Works from any browser.
 
 ## Token Rotation
@@ -136,7 +138,7 @@ The org-level PAT should be rotated every 30 days.
 
 1. Create a new fine-grained PAT with the same permissions
 2. Update the org secret at:
-   <https://github.com/organizations/IBuySpy-Shared/settings/secrets/actions>
+   <https://github.com/organizations/YOUR-ORG/settings/secrets/actions>
 3. All repos pick it up immediately — no per-repo changes
 
 ## Auto-Enlistment (Admins)
@@ -145,13 +147,13 @@ To enlist many repos at once, trigger the auto-enlist workflow:
 
 ```sh
 gh workflow run auto-enlist.yml \
-  --repo IBuySpy-Shared/basecoat \
-  -f repos="IBuySpy-Shared/repo1,IBuySpy-Shared/repo2,IBuySpy-Shared/repo3"
+  --repo YOUR-ORG/basecoat \
+  -f repos="YOUR-ORG/repo1,YOUR-ORG/repo2,YOUR-ORG/repo3"
 ```
 
 ## See Also
 
-- `docs/memory/setup-external.md` — guide for teams outside IBuySpy-Shared
+- `docs/memory/setup-external.md` — guide for teams outside YOUR-ORG
 - `docs/memory/contributing.md` — all five contribution paths explained
 - `scripts/onboard-basecoat.sh` — enlistment script
 - `.github/workflows/auto-enlist.yml` — bulk enlistment for admins

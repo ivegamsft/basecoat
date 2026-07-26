@@ -110,7 +110,7 @@ review criteria, and rollback guidance.
 
 ## Setting Up Memory in Your Repo
 
-- **IBuySpy-Shared org members:** See [Internal Setup](setup-internal.md) —
+- **YOUR-ORG org members:** See [Internal Setup](setup-internal.md) —
   one admin secret, then a single onboarding command per repo.
 - **External orgs:** See [External Setup](setup-external.md) —
   fine-grained PAT, then one onboarding command.

@@ -96,7 +96,7 @@ GitHub Merge Queues are configured via Repository Rulesets API. This is the reco
 #!/bin/bash
 set -euo pipefail
 
-OWNER="IBuySpy-Shared"
+OWNER="YOUR-ORG"
 REPO="basecoat"
 
 # Create merge queue ruleset

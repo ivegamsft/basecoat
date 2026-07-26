@@ -1,6 +1,6 @@
 # Setting Up Basecoat Memory Contributions — External Orgs
 
-This guide is for teams **outside the IBuySpy-Shared org** who want to
+This guide is for teams **outside the YOUR-ORG org** who want to
 contribute learnings to basecoat memory from their own organization's repos.
 
 ## Overview
@@ -14,16 +14,16 @@ External contributors need to:
 
 ## Prerequisites
 
-- A GitHub account with access to the `IBuySpy-Shared` org
-  (contact an IBuySpy-Shared admin if you need access)
+- A GitHub account with access to the `YOUR-ORG` org
+  (contact a YOUR-ORG admin if you need access)
 - The `gh` CLI installed, or access to GitHub's web UI
 
 ## Step 1 — Create a PAT
 
 1. Go to <https://github.com/settings/personal-access-tokens/new>
-2. Set **Resource owner** to **IBuySpy-Shared**
-   *(requires org membership — ask an IBuySpy-Shared admin if needed)*
-3. **Repository access**: Only select repositories → `IBuySpy-Shared/basecoat-memory`
+2. Set **Resource owner** to **YOUR-ORG**
+   *(requires org membership — ask a YOUR-ORG admin if needed)*
+3. **Repository access**: Only select repositories → `YOUR-ORG/basecoat-memory`
 4. **Permissions**:
    - Contents: **Read and Write**
    - Pull requests: **Read and Write**
@@ -62,7 +62,7 @@ Or via the GitHub UI: open your repository's Actions secrets page.
 
 ```sh
 bash <(curl -fsSL \
-  https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/scripts/onboard-basecoat.sh) \
+  https://raw.githubusercontent.com/YOUR-ORG/basecoat/main/scripts/onboard-basecoat.sh) \
   --repo YOUR_ORG/YOUR_REPO
 ```
 
@@ -101,13 +101,14 @@ on:
 
 jobs:
   submit:
-    uses: IBuySpy-Shared/basecoat/.github/workflows/submit-learning-callable.yml@main
+    uses: YOUR-ORG/basecoat/.github/workflows/submit-learning-callable.yml@main
     with:
       subject:  ${{ inputs.subject }}
       fact:     ${{ inputs.fact }}
       evidence: ${{ inputs.evidence }}
       domain:   ${{ inputs.domain }}
       source:   ${{ github.repository }}
+      memory_repo: YOUR-ORG/basecoat-memory
     secrets:
       memory_repo_token: ${{ secrets.MEMORY_REPO_TOKEN }}
 ```
@@ -128,18 +129,19 @@ gh workflow run submit-learning.yml \
 export MEMORY_REPO_TOKEN="ghp_..."
 
 bash <(curl -fsSL \
-  https://raw.githubusercontent.com/IBuySpy-Shared/basecoat/main/scripts/submit-learning.sh) \
+  https://raw.githubusercontent.com/YOUR-ORG/basecoat/main/scripts/submit-learning.sh) \
   --subject  "ci:my-finding" \
   --fact     "One-sentence generic pattern." \
   --evidence "https://github.com/YOUR_ORG/YOUR_REPO/pull/42" \
   --domain   "ci" \
   --source   "YOUR_ORG/YOUR_REPO" \
+  --memory-repo "YOUR-ORG/basecoat-memory" \
   --open-pr
 ```
 
 ### GitHub issue form (no tooling)
 
-Open <https://github.com/IBuySpy-Shared/basecoat/issues/new/choose> and
+Open <https://github.com/YOUR-ORG/basecoat/issues/new/choose> and
 select **💡 Submit a Memory Contribution**. Works from any browser.
 No PAT, no CLI, no secret required.
 
@@ -164,16 +166,16 @@ To rotate:
 | Workflow fails: `MEMORY_REPO_TOKEN not set` | Secret not configured | Add org or repo secret (Step 2) |
 | Workflow fails: `403` | PAT lacks permissions or expired | Recreate PAT (Step 1) |
 | Repo not swept | Missing `basecoat-enabled` topic | Re-run `onboard-basecoat.sh` |
-| PAT creation fails: "Resource owner not available" | Not an org member | Ask IBuySpy-Shared admin to add you |
+| PAT creation fails: "Resource owner not available" | Not an org member | Ask YOUR-ORG admin to add you |
 
 ## Getting Help
 
-- Open an issue on <https://github.com/IBuySpy-Shared/basecoat/issues>
+- Open an issue on <https://github.com/YOUR-ORG/basecoat/issues>
 - Tag it `question` + `memory`
 - Or use the **💡 Submit a Memory Contribution** issue form (no PAT needed)
 
 ## See Also
 
-- `docs/memory/setup-internal.md` — guide for IBuySpy-Shared org members
+- `docs/memory/setup-internal.md` — guide for YOUR-ORG org members
 - `docs/memory/contributing.md` — all five contribution paths explained
 - `scripts/onboard-basecoat.sh` — enlistment script

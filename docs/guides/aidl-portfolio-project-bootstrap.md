@@ -43,7 +43,7 @@ pwsh -File scripts/aidl-portfolio-project-bootstrap.ps1 `
 pwsh -File scripts/aidl-portfolio-project-bootstrap.ps1 `
   -ManifestPath docs/specs/aidl-portfolio/project-bootstrap-manifest.json `
   -Mode apply `
-  -Owner IBuySpy-Shared `
+  -Owner YOUR-ORG `
   -ProjectNumber 1
 ```
 
