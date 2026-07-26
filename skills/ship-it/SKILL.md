@@ -46,7 +46,7 @@ Turn a delivery goal into a governed execution bundle.
 Operate as bounded cycles with state carry-forward:
 
 1. Record `cycle_id`, `phase`, `objective`, `stop_condition`, and `max_cycles`.
-2. Emit a per-cycle summary: phase/objective, completed actions, status snapshot (tasks, open PRs, required checks), retry state, gate/evidence status, blockers, next action or stop reason.
+2. Emit a per-cycle summary — completed actions, status snapshot, retry state, gate/evidence status, blockers, and next action or stop reason (full structure in References).
 3. Continue only while the stop condition is unmet and convergence remains viable.
 4. Stop and escalate when blocked or `max_cycles` is reached.
 
@@ -64,10 +64,12 @@ Retry policy: retry only transient failures; escalate after `max_retries`; in `d
 
 ## Output
 
-- Parent goal and child phase/sprint issue URLs.
-- JSON summary for automation, desired-state diff, and remediation.
-- Lane-aware stage artifacts for pilot onboarding (e.g., `pilot-luxesite-*`).
-- Build-break (`build-break-summary.*`) and promotion-evidence (`promotion-evidence-bundle.*`) bundles with gate decisions.
-- Completeness scorecard with risk/change-band enforcement.
-- Spec drift findings with remediation suggestions and goal-ID linked runbook/release-note deltas.
-- Per-cycle summaries with stop-condition status.
+Emits parent/child issue URLs, intent-dispatch and build-break JSON summaries, a
+promotion-evidence bundle, lane-aware pilot artifacts, a completeness scorecard,
+spec-drift findings, and per-cycle summaries.
+
+## References
+
+| File | Contents |
+|---|---|
+| [`references/output-contract.md`](references/output-contract.md) | Output contract: per-producer output schemas, evidence-bundle fields, scorecard and spec-drift shapes, per-cycle summary structure |
