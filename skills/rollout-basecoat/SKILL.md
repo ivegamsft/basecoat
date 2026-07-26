@@ -14,8 +14,7 @@ allowed-tools: []
 ---
 # Rollout BaseCoat Skill
 
-Use this skill to refresh a consumer repository to the latest BaseCoat build or to
-a pinned BaseCoat release.
+Refresh a consumer repository to the latest BaseCoat build or a pinned release.
 
 ## Shortcut Phrases
 
@@ -26,33 +25,24 @@ a pinned BaseCoat release.
 
 ## Workflow
 
+Run the upgrade inside an **isolated worktree** and always finish the delivery
+lifecycle. Never leave the sync uncommitted — an upgrade that stops at "here is
+what changed" is an incomplete run.
+
 1. Read `.basecoat.yml` (if present) for `source` and `ref`.
-2. Run sync using the platform script:
-   - Windows: `pwsh sync.ps1`
-   - Linux or macOS: `./sync.sh`
-3. Verify `.github/base-coat/version.json` in the consumer repo.
-   - When `ref` is pinned to a semver tag (for example `v3.33.0`), sync now
-     enforces provenance and fails if `version.json` does not match the tag.
-   - Known-bad tags with confirmed payload drift are auto-remapped to the first
-     corrected release, with a warning to update the consumer pin.
-4. Compare installed version with latest upstream release:
+2. Create an isolated worktree on a fresh, uniquely-named
+   `chore/basecoat-upgrade-<ref>-<timestamp>` branch from the consumer's default
+   branch (resolve it — it is not always `main`) so the primary tree stays
+   untouched and re-runs for a moving ref never collide.
+3. Run sync **inside the worktree**: `pwsh sync.ps1` (Windows) or `./sync.sh`.
+4. Verify `.github/base-coat/version.json`. When `ref` is a semver tag, sync
+   enforces provenance and fails on mismatch; known-bad tags auto-remap to the
+   first corrected release with a warning to update the pin.
+5. Compare with the latest release:
    `gh release list --repo SOURCE-ORG/basecoat --limit 1`.
-5. Report exactly what changed and any follow-up steps.
+6. Commit, push, open a PR, then remove the worktree and prune. If the sync
+   produced no changes, skip the PR and report "already up to date."
+7. Report what changed, the PR URL, and any follow-up steps.
 
-## Fallback When Skill Routing Fails
-
-If the environment reports `Skill not found: rollout-basecoat`, run direct sync
-commands instead of stopping:
-
-```powershell
-# PowerShell fallback (from consumer repo root)
-$env:BASECOAT_REPO = 'https://github.com/SOURCE-ORG/basecoat.git'
-$env:BASECOAT_REF  = 'main'  # or vX.Y.Z
-pwsh .\sync.ps1
-```
-
-```bash
-# Bash fallback (from consumer repo root)
-BASECOAT_REPO=https://github.com/SOURCE-ORG/basecoat.git \
-BASECOAT_REF=main ./sync.sh
-```
+See [`references/delivery-lifecycle.md`](references/delivery-lifecycle.md) for the
+exact worktree, commit, push, PR, cleanup, and fallback commands and safety rules.

@@ -85,6 +85,12 @@ in source control. For full key reference and more examples, see
 In Copilot-enabled environments, use the phrase `refresh basecoat` to trigger
 the rollout workflow.
 
+The rollout runs the sync inside an isolated worktree and completes the full
+delivery lifecycle — branch, sync, commit, push, PR, then worktree cleanup — so
+the upgrade never lands as uncommitted changes in your primary working tree. See
+[Auditability: capture a sync trail](#auditability-capture-a-sync-trail) for the
+before/after evidence to include in the PR.
+
 If your environment reports `Skill not found: rollout-basecoat`, run sync
 directly from the consumer repo root:
 
@@ -102,6 +108,12 @@ directly from the consumer repo root:
     BASECOAT_REPO=https://github.com/YOUR-ORG/basecoat.git \
     BASECOAT_REF=main ./sync.sh
     ```
+
+Even in the fallback path, run the sync inside an isolated worktree and complete
+the same commit → push → PR → cleanup lifecycle so the primary working tree is
+never left dirty. The `refresh basecoat` skill automates this; when running sync
+by hand, follow the [auditability trail](#auditability-capture-a-sync-trail) and
+open a PR from a dedicated branch.
 
 ## Checking your version
 

@@ -27,9 +27,18 @@ Purpose: onboard a repository or portfolio to BaseCoat using safe, repeatable re
 
 1. Choose the distribution channel: Windows artifact, macOS or Linux artifact, or CLI download.
 2. Pin the release version instead of using a moving branch.
-3. Install BaseCoat into the target repository.
+3. Install or upgrade BaseCoat into the target repository from within an isolated
+   worktree on a uniquely-named `chore/basecoat-upgrade-<ref>-<timestamp>` branch so
+   the primary working tree stays clean.
 4. Validate that required files and bootstrap paths are present.
-5. Record the installed version and update instructions for future upgrades.
+5. Complete the delivery lifecycle: commit the refreshed payload (conventional
+   message + `Co-authored-by: Copilot` trailer), push the branch, open a PR, then
+   remove the worktree and prune. Never leave the upgrade uncommitted.
+   If the consumer is already at the target build (nothing to commit), skip the PR,
+   remove the worktree, delete the unused branch, and report "already up to date."
+   See `skills/rollout-basecoat/references/delivery-lifecycle.md` for the exact
+   change-path and no-change-path commands.
+6. Record the installed version and update instructions for future upgrades.
 
 ## Expected Output
 
