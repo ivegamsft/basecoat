@@ -4,6 +4,64 @@ All notable changes to this repository should be recorded in this file.
 
 ## Unreleased
 
+## 4.0.0 - 2026-07-26
+
+### Breaking Changes
+
+- Migrated the downstream-distributed `operation-context-resolver` skill to native ESM and bumped `uuid` 9 → 14, which requires **Node.js 20+** and drops Node 18/CommonJS support. Consumers on Node 18 or importing the resolver via CommonJS `require()` must upgrade to Node 20+ and use ESM `import`. (#2656)
+
+### Added
+
+- Added `delivery-autopilot` platform assets and Wave 1 delivery-autopilot execution controls for automated backlog delivery. (#2300, #2296)
+- Added `release-train` packaging orchestration workflow for coordinated multi-artifact releases. (#2281)
+- Added issue-to-spec synthesis workflow to convert triaged issues into structured specs. (#2280)
+- Added automation stuck-state watchdog with SLA escalation for unattended workflow runs. (#2299)
+- Added ship-it latest-main sync and predecessor-wait guardrails to prevent stale-base and out-of-order promotions. (#2501)
+- Added backlog burndown execution workflow plus ship-it control-loop hardening. (#2636)
+- Added incident routing verification workflow, AIDL audit script, and sample dataset. (#2526, #2505)
+- Added Sprint 41 portfolio delivery-flow scorecard generation. (#2528)
+- Added Sprint 41 named drift outcome field with fail-outcome alerting. (#2527)
+- Added Sprint 41 memory hygiene cleanup sweep. (#2530)
+- Added accurate SKILL.md token estimator (`words * 1.7`) with a warn tier ahead of the error budget in `audit-skills.ps1`, kept in sync with `validate-basecoat`. (#2689)
+- Added routing vocabulary for `ui`/`ux`/`ia` disambiguation plus `error`/`wip`/`worktree`/`burndown`/`wave`/`sprint` intents. (#2666)
+- Added `linkify-catalog-paths` script for catalog tables and `update-versioned-docs` script for release automation. (#2235, #2236)
+- Added MkDocs external-links JavaScript for improved accessibility. (#2234)
+
+### Changed
+
+- Moved the ship-it output contract into `skills/ship-it/references/` for progressive disclosure and trimmed the SKILL.md summary. (#2690)
+- Trimmed `ship-it` and `rca` SKILL.md files and oversized agent files under the 500-token budget. (#2687, #2283)
+- Refactored drift-audit to extract a `Compare-Rules` helper and fixed rendering bugs. (#2503)
+- Documented Wave 1 execution contracts and the Sprint 41 carryover execution plan. (#2525, #2508)
+- Renamed `-Verbose` to `-ShowAll` and made the unused-asset scan non-blocking. (#2269)
+- Refreshed the dependency graph report and updated the CI/CD learning log with the July 2026 runner-routing audit. (#2597, #2276)
+
+### Fixed
+
+- Hardened ship-it, issue-triage, and intent-routing failure paths and CI token isolation, including preserving the placeholder token through `sudo`. (#2616, #2587, #2584, #2574, #2531)
+- Repaired downstream-routing and keep/fix/throttle scheduled jobs and stopped scheduled drift-loop and rollup jobs from failing. (#2522, #2515)
+- Fixed portfolio KPI rollup handling of unlabeled issues and `pull_request` property access under strict mode. (#2520, #2268)
+- Corrected triage `hide-older-comments` frontmatter, realigned the lock hash, and stabilized the triage-field-sync contract test. (#2523, #2261)
+- Pinned checkout and deploy workflows to Linux runners and migrated extension-deploy and mcp-deploy to OIDC federated credentials. (#2369, #2262, #2257, #2260, #2230, #2211, #2580)
+- Unblocked broken automation workflows and refreshed the post-merge release chain and issue-triage lock. (#2344, #2298)
+- Added missing agent compatibility/metadata/allowed-tools frontmatter and skill maturity/audience metadata for catalog uniformity. (#2278, #2271, #2273)
+- Restored the missing `rca` skill and fixed the asset-health `CmdletBinding` conflict causing sustained workflow failures. (#2277, #2275)
+- Fixed broken documentation and external links, corrected the metrics dashboard link, clarified `basecoat.yml` wording, and added lockfile guidance. (#2589, #2223, #2279, #2668)
+- Sanitized source/production repository identifiers in consumer-facing docs. (#2581)
+- Strengthened MCP workflow runner guardrail coverage and soft-fallback routing. (#2249, #2260)
+- Hardened issue-field synchronization with try/catch around preview API calls and `GH_AW_GITHUB_TOKEN` for org issue-fields API access, and added a Copilot coding-agent pre-flight check in issue-approve. (#2254, #2255, #2251)
+
+### Dependencies
+
+- Bumped `uuid` 9.0.1 → 14.0.0 in `skills/operation-context-resolver` (breaking — see Breaking Changes above). (#2656)
+- Bumped `hono` 4.12.23 → 4.12.31 and `fast-uri` 3.1.2 → 3.1.4 in `mcp/basecoat-metrics`. (#2647, #2646)
+- Bumped `body-parser` in `mcp/basecoat-extension`. (#2645)
+- Bumped `tar` 7.5.16 → 7.5.21 in `portal/backend`, `js-yaml` 4.2.0 → 4.3.0 in `portal/ui`, and `react-router`/`react-router-dom` in `portal/frontend`. (#2652, #2653, #2643)
+- Bumped `postcss`, `js-yaml`, and `eslint` in `skills/environment-audit-drift`. (#2676, #2675, #2648)
+- Bumped `@opentelemetry/core` and `@azure/monitor-opentelemetry`. (#2657)
+- Refreshed the code-review automation lock to gh-aw setup v0.74.4 / Copilot CLI 1.0.60 and pinned the agent SDK dependency lock (`chalk` 5.3.0 → 4.1.2). (#2285)
+- Bumped GitHub Actions: `actions/setup-python` 6.3.0 → 7.0.0, `actions/checkout` 6.0.2 → 7.0.0, and the `docker/*` action suite. (#2606, #2511, #2205, #2204, #2203, #2202, #2201)
+
 ## 3.33.2 - 2026-07-07
 
 ### Fixed

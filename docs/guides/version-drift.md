@@ -78,7 +78,7 @@ jobs:
 
 When drift is detected, an issue is opened in the consumer repo titled:
 
-> `chore: BaseCoat upgrade available (v3.23.0 → v3.25.0)`
+> `chore: BaseCoat upgrade available (v3.33.2 → v4.0.0)`
 
 The issue includes the current version, latest version, and upgrade instructions. If the issue already exists, a comment is added instead (idempotent).
 

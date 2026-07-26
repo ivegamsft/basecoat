@@ -34,5 +34,5 @@ Use `BASECOAT_REF` to pin to a release tag:
 
 ```bash
 BASECOAT_REPO=https://github.com/YOUR-ORG/basecoat.git \
-BASECOAT_REF=v3.25.0 ./sync.sh
+BASECOAT_REF=v4.0.0 ./sync.sh
 ```

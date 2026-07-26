@@ -25,7 +25,7 @@ Files that are **not** synced: `basecoat-metadata.json` (internal portal index),
 
     # Sync a specific version tag
     $env:BASECOAT_REPO = 'https://github.com/YOUR-ORG/basecoat.git'
-    $env:BASECOAT_REF  = 'v3.25.0'
+    $env:BASECOAT_REF  = 'v4.0.0'
     .\sync.ps1
 
     # Sync to a custom target directory
@@ -42,7 +42,7 @@ Files that are **not** synced: `basecoat-metadata.json` (internal portal index),
 
     # Sync a specific version tag
     BASECOAT_REPO=https://github.com/YOUR-ORG/basecoat.git \
-    BASECOAT_REF=v3.25.0 ./sync.sh
+    BASECOAT_REF=v4.0.0 ./sync.sh
 
     # Sync to a custom target directory
     BASECOAT_REPO=https://github.com/YOUR-ORG/basecoat.git \
@@ -57,7 +57,7 @@ instead of syncing the full catalog.
 ```yaml
 # .basecoat.yml
 source: https://github.com/YOUR-ORG/basecoat.git
-ref: v3.25.0
+ref: v4.0.0
 
 agents:
   - code-review
