@@ -37,7 +37,10 @@ if (Test-Path '.agents/skills') {
 $errors = 0
 $warnings = 0
 $metadataStale = $false
-$tokenBudgetThreshold = 500
+# Token estimator/budget kept in sync with scripts/audit-skills.ps1:
+# words * 1.7 approximates cl100k_base tokens; 630 is the hard budget (~370 words).
+$tokenPerWord = 1.7
+$tokenBudgetThreshold = 630
 
 function Test-AgentMetadataFreshness {
     $agentFiles = @(Get-ChildItem 'agents' -Filter '*.agent.md' -File | Sort-Object Name)
@@ -301,9 +304,10 @@ foreach ($file in $files) {
             }
         }
 
-        # Check 1: Token budget — word count * 1.35 > 500 → warning
+        # Check 1: Token budget — word count * $tokenPerWord > threshold → warning.
+        # Estimator/threshold kept in sync with scripts/audit-skills.ps1.
         $wordCount = ($content -split '\s+' | Where-Object { $_ -ne '' }).Count
-        $approxTokens = [math]::Round($wordCount * 1.35)
+        $approxTokens = [math]::Round($wordCount * $tokenPerWord)
         if ($approxTokens -gt $tokenBudgetThreshold) {
             Write-Host "WARNING: $($file.FullName) exceeds approx $tokenBudgetThreshold-token budget target (approx $approxTokens tokens)" -ForegroundColor Yellow
             $warnings++

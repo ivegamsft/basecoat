@@ -39,6 +39,19 @@ if (-not (Test-Path $outputDir)) {
     New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
 }
 
+# Token budget thresholds for the always-loaded SKILL.md body.
+# The estimator uses words * $TokenPerWord as an offline proxy for the real
+# cl100k_base (tiktoken) token count. The 1.7 factor is calibrated against the
+# measured mean of 1.70 real tokens/word across all skills, so the reported
+# figure tracks actual model token cost far more closely than the previous 1.35.
+# Error boundary (630) preserves the historical effective budget of ~370 words
+# (370 * 1.7 ≈ 629), so this recalibration flips no currently-passing skill.
+# Warn tier (550 ≈ 324 words) gives authors early signal to apply progressive
+# disclosure (move detail into reference files) before they hit the hard limit.
+$TokenPerWord = 1.7
+$TokenBudgetError = 630
+$TokenBudgetWarn = 550
+
 $date = Get-Date -Format 'yyyy-MM-dd'
 $lines = [System.Collections.Generic.List[string]]::new()
 
@@ -146,11 +159,14 @@ foreach ($skillDir in $skillDirs) {
             $frontmatter = $Matches[1]
         }
 
-        # Check 1: Token budget — word count * 1.35 > 500 → ERROR
+        # Check 1: Token budget — approx tokens (words * $TokenPerWord).
+        # > $TokenBudgetError → ERROR; >= $TokenBudgetWarn → WARN (approaching limit).
         $wordCount = ($content -split '\s+' | Where-Object { $_ -ne '' }).Count
-        $approxTokens = [math]::Round($wordCount * 1.35)
-        if ($approxTokens -gt 500) {
-            $errors.Add("exceeds 500-token budget (approx $approxTokens tokens)")
+        $approxTokens = [math]::Round($wordCount * $TokenPerWord)
+        if ($approxTokens -gt $TokenBudgetError) {
+            $errors.Add("exceeds $TokenBudgetError-token budget (approx $approxTokens tokens)")
+        } elseif ($approxTokens -ge $TokenBudgetWarn) {
+            $warnings.Add("approaching token budget (approx $approxTokens tokens, limit $TokenBudgetError); consider splitting detail into a reference file")
         }
 
         # Check 2: Description length — extract description value

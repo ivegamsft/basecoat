@@ -67,12 +67,13 @@ while IFS= read -r file; do
 from pathlib import Path
 import re, sys
 text = Path(sys.argv[1]).read_text(encoding='utf-8')
-print(round(len(re.findall(r'\S+', text)) * 1.35))
+# words * 1.7 approximates cl100k_base tokens; kept in sync with scripts/audit-skills.ps1
+print(round(len(re.findall(r'\S+', text)) * 1.7))
 PY
 )
-    if (( token_count > 500 )); then
+    if (( token_count > 630 )); then
       warning_count=$((warning_count + 1))
-      echo "WARNING: $file exceeds approx 500-token budget target (approx $token_count tokens)" >&2
+      echo "WARNING: $file exceeds approx 630-token budget target (approx $token_count tokens)" >&2
     fi
   fi
 done < <(find instructions prompts agents skills -type f \( -name '*.instructions.md' -o -name '*.prompt.md' -o -name '*.agent.md' -o -name 'SKILL.md' \) | sort)
