@@ -64,4 +64,29 @@ if ($workflow -match '✅|❌') {
     throw 'Workflow comments must not include emoji.'
 }
 
+# The release-gate dispatch payload must use only the consolidated inputs that
+# ship-it-release-gate.yml declares (workflow_dispatch caps at 10 inputs). The
+# removed per-field scalar names would be rejected by GitHub at dispatch time.
+foreach ($groupedInput in @('gate_status:', 'artifact_status:', 'promotion_context:')) {
+    if ($workflow -notmatch [regex]::Escape($groupedInput)) {
+        throw "Workflow dispatch payload must construct grouped input '$groupedInput'."
+    }
+}
+$removedScalarInputs = @(
+    'lint_status:', 'build_status:', 'type_status:', 'security_status:',
+    'smoke_status:', 'previous_stage_status:', 'environment_protection_status:',
+    'approval_status:', 'rollback_validation_status:', 'spec_status:',
+    'docs_status:', 'tests_status:', 'runbook_status:', 'release_notes_status:'
+)
+foreach ($removed in $removedScalarInputs) {
+    if ($workflow -match [regex]::Escape($removed)) {
+        throw "Workflow must not send removed release-gate scalar input '$removed'."
+    }
+}
+# The post-merge gate is evidence-only: it must dispatch in dry-run mode so a
+# blocked gate does not fail every merge (packaging is dispatched regardless).
+if ($workflow -notmatch "dry_run:\s*'true'") {
+    throw 'Post-merge release-gate dispatch must run in dry-run (evidence-only) mode.'
+}
+
 Write-Host 'Post-merge release chain workflow tests passed.'

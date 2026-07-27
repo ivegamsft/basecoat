@@ -148,6 +148,40 @@ jobs:
             const defaultGate = allRequiredChecksPass ? 'pass' : 'fail';
             const releaseNotesStatus = docsOnly ? 'present' : 'not_applicable';
             const requireApproval = requiredApprovals > 0 ? 'true' : 'false';
+            const smokeStatus = allRequiredChecksPass ? 'pass' : 'not_run';
+            const approvalStatus = requireApproval === 'true' ? 'missing' : 'not-required';
+            const docsStatus = docsOnly ? 'present' : 'not_applicable';
+
+            // ship-it-release-gate.yml consolidates its dispatch surface into three
+            // grouped key=value string inputs (workflow_dispatch caps at 10 inputs).
+            const gateStatus = [
+              `lint=${defaultGate}`,
+              `build=${defaultGate}`,
+              `type=${defaultGate}`,
+              'e2e=not_run',
+              `security=${defaultGate}`,
+              `smoke=${smokeStatus}`
+            ].join(',');
+            const artifactStatus = [
+              'spec=not_applicable',
+              `docs=${docsStatus}`,
+              'tests=not_applicable',
+              'runbook=not_applicable',
+              `release_notes=${releaseNotesStatus}`
+            ].join(',');
+            // Pin evidence to the promoted commit so a later merge advancing
+            // main cannot make this gate's immutable sha identify another commit.
+            const promotedSha = pr.merge_commit_sha || validatedSha;
+            const promotionContext = [
+              'previous_stage=pass',
+              'environment_protection=configured',
+              `require_approval=${requireApproval}`,
+              `approval=${approvalStatus}`,
+              'rollback_validation=missing',
+              'rollback_runbook_ref=',
+              `goal_ids=${prNumber}`,
+              `source_sha=${promotedSha}`
+            ].join(',');
 
             const inputs = {
               target_repo: `${owner}/${repo}`,
@@ -155,24 +189,17 @@ jobs:
               risk_band: riskBand,
               promotion_stage: 'validate',
               execution_lane: 'standard',
-              previous_stage_status: 'pass',
               change_type: changeType,
-              lint_status: defaultGate,
-              build_status: defaultGate,
-              type_status: defaultGate,
-              security_status: defaultGate,
-              smoke_status: allRequiredChecksPass ? 'pass' : 'not_run',
-              environment_protection_status: 'configured',
-              require_approval: requireApproval,
-              approval_status: requireApproval === 'true' ? 'missing' : 'not-required',
-              rollback_validation_status: 'missing',
-              goal_ids: `${prNumber}`,
-              spec_status: 'not_applicable',
-              docs_status: docsOnly ? 'present' : 'not_applicable',
-              tests_status: 'not_applicable',
-              runbook_status: 'not_applicable',
-              release_notes_status: releaseNotesStatus,
-              dry_run: 'false'
+              gate_status: gateStatus,
+              artifact_status: artifactStatus,
+              promotion_context: promotionContext,
+              // Evidence-only: the post-merge release gate records the full
+              // governance bundle but must not fail the run. The merge already
+              // landed and packaging is dispatched unconditionally below, so a
+              // blocked gate here would only produce red noise. Spec/test
+              // evidence is not available in the post-merge context; a
+              // non-dry-run gate would therefore block every merge.
+              dry_run: 'true'
             };
 
             let dispatchError = null;

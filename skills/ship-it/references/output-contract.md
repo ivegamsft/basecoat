@@ -11,8 +11,7 @@ shapes — consult them when integrating, as fields may evolve.
 |---|---|
 | `ship-it-intent-dispatch.yml` → `scripts/ship-it/dispatch-intent.ps1` | Intent dispatch summary (issue graph, desired-state diff, promotion contract). |
 | `ship-it-build-guard.yml` → `scripts/ship-it/build-break-detector.ps1` | Build-break summary JSON + companion `.md` (`test-results/ship-it/build-break-summary.{json,md}`, artifact `ship-it-build-break`). |
-| `ship-it-release-gate.yml` (inline) | Root-level `promotion-evidence-bundle.json`. |
-| `scripts/ship-it/release-gate-enforcer.ps1` | Deeper release-gate enforcement (completeness scorecard + spec-drift). Test-covered; not wired to the release-gate workflow above. |
+| `ship-it-release-gate.yml` → `scripts/ship-it/invoke-release-gate.ps1` → `scripts/ship-it/release-gate-enforcer.ps1` | Full release-gate evidence bundle (`promotion_allowed`, blockers, completeness scorecard + spec-drift) at `test-results/ship-it/promotion-evidence-bundle.{json,md}`, surfaced in the job summary and uploaded as the `ship-it-release-gate` artifact. The `invoke-release-gate.ps1` wrapper parses the workflow's grouped `key=value` inputs (`gate_status`, `artifact_status`, `promotion_context`) into enforcer parameters. |
 
 ## Intent dispatch summary
 
@@ -55,14 +54,19 @@ rebase_before_merge }, cleanup_policy{ workflow, script, audit_log } }`.
 
 ## Release gate evidence
 
-The `ship-it-release-gate.yml` workflow writes a root-level
-`promotion-evidence-bundle.json` with five fields: `target_repo`,
-`target_branch`, `promotion_stage`, `risk_band`, `execution_lane`.
-
-The standalone `release-gate-enforcer.ps1` enforcer (`$summary`, lines 535-571)
-produces the richer governance record — `promotion_allowed`, `blockers[]`,
-`progressive_promotion`, `required_gates`/`failed_required_gates`, `lane_policy`,
-`environment_protection`, `rollback_contract`, `evidence_bundle`, plus:
+The `ship-it-release-gate.yml` workflow invokes
+`scripts/ship-it/release-gate-enforcer.ps1` (`$summary`, lines 535-571) through
+the `scripts/ship-it/invoke-release-gate.ps1` wrapper, which parses the grouped
+`key=value` dispatch inputs (`gate_status`, `artifact_status`,
+`promotion_context`) into enforcer parameters and fails closed on malformed,
+unknown, duplicate, or empty status tokens. The enforcer writes the full
+governance record to `test-results/ship-it/promotion-evidence-bundle.json`
+plus a companion `.md` (appended to the job summary and uploaded as the
+`ship-it-release-gate` artifact). Outside a dry run the gate fails (exit 1)
+when `promotion_allowed` is false. The record contains `promotion_allowed`,
+`blockers[]`, `progressive_promotion`, `required_gates`/`failed_required_gates`,
+`lane_policy`, `environment_protection`, `rollback_contract`, `evidence_bundle`,
+plus:
 
 - `artifact_completeness` — completeness scorecard:
   `{ change_type, required_artifacts, required_count, present_required_count,

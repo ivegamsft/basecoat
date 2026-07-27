@@ -555,20 +555,152 @@ if ($workflowContent -notmatch "workflow_dispatch:") {
 if ($workflowContent -notmatch "promotion_stage:") {
   throw "Ship-it release gate workflow must include promotion_stage input."
 }
-if ($workflowContent -notmatch "rollback_validation_status:") {
-  throw "Ship-it release gate workflow must include rollback_validation_status input."
-}
 if ($workflowContent -notmatch "change_type:") {
   throw "Ship-it release gate workflow must include change_type input."
 }
 if ($workflowContent -notmatch "execution_lane:") {
   throw "Ship-it release gate workflow must include execution_lane input."
 }
-if ($workflowContent -notmatch "goal_ids:") {
-  throw "Ship-it release gate workflow must include goal_ids input."
+# Inputs are consolidated (workflow_dispatch caps at 10) into grouped key=value
+# strings; the enforcer must still be invoked and emit the evidence bundle.
+foreach ($groupedInput in @("gate_status:", "artifact_status:", "promotion_context:")) {
+  if ($workflowContent -notmatch [regex]::Escape($groupedInput)) {
+    throw "Ship-it release gate workflow must include grouped input '$groupedInput'."
+  }
+}
+if ($workflowContent -notmatch "rollback_validation=") {
+  throw "Ship-it release gate workflow promotion_context must carry rollback_validation."
+}
+if ($workflowContent -notmatch "goal_ids=") {
+  throw "Ship-it release gate workflow promotion_context must carry goal_ids."
+}
+if ($workflowContent -notmatch "invoke-release-gate\.ps1") {
+  throw "Ship-it release gate workflow must invoke the shared invoke-release-gate script."
 }
 if ($workflowContent -notmatch "promotion-evidence-bundle.json") {
   throw "Ship-it release gate workflow must emit promotion evidence bundle."
+}
+
+# Integration coverage for the grouped-input parse/map seam that the workflow
+# uses (scripts/ship-it/invoke-release-gate.ps1). Guards the pass, block, URL,
+# and pipe-separated-goal cases against regression.
+$invokeScript = Join-Path $repoRoot "scripts\ship-it\invoke-release-gate.ps1"
+if (-not (Test-Path $invokeScript)) {
+  throw "Missing shared dispatch parser: $invokeScript"
+}
+$defaultGates = "lint=pass,build=pass,type=pass,e2e=not_run,security=pass,smoke=pass"
+$defaultArtifacts = "spec=present,docs=present,tests=present,runbook=present,release_notes=present"
+$defaultContext = "previous_stage=pass,environment_protection=configured,require_approval=false,approval=not-required,rollback_validation=missing,rollback_runbook_ref=,goal_ids="
+
+function Invoke-DispatchScenario {
+  param(
+    [string]$Name,
+    [string]$RiskBand,
+    [string]$PromotionStage,
+    [string]$GateStatus,
+    [string]$ArtifactStatus,
+    [string]$PromotionContext,
+    [switch]$DryRun,
+    [int]$ExpectedExit,
+    [string]$ExpectedRollbackRef,
+    [string[]]$ExpectedGoalIds
+  )
+  $outPath = Join-Path ([System.IO.Path]::GetTempPath()) ("dispatch-{0}.json" -f ([Guid]::NewGuid()))
+  try {
+    # Run in a child pwsh process: the enforcer calls `exit 1` on a blocked
+    # non-dry-run promotion, which would terminate this test runspace if invoked
+    # in-process. A subprocess captures the exit code safely.
+    $scriptArgs = @(
+      '-NoProfile', '-File', $invokeScript,
+      '-TargetRepo', 'octo/repo', '-TargetBranch', 'main', '-RiskBand', $RiskBand,
+      '-PromotionStage', $PromotionStage, '-ExecutionLane', 'standard', '-ChangeType', 'code',
+      '-GateStatus', $GateStatus, '-ArtifactStatus', $ArtifactStatus, '-PromotionContext', $PromotionContext,
+      '-OutputPath', $outPath
+    )
+    if ($DryRun) { $scriptArgs += '-DryRun' }
+    & pwsh @scriptArgs *> $null
+    $actualExit = $LASTEXITCODE
+    if ($actualExit -ne $ExpectedExit) {
+      throw "Dispatch scenario '$Name' expected exit $ExpectedExit but got $actualExit."
+    }
+    if (-not (Test-Path $outPath)) {
+      throw "Dispatch scenario '$Name' did not produce an evidence bundle."
+    }
+    $bundle = Get-Content -Raw -Path $outPath | ConvertFrom-Json
+    if ($PSBoundParameters.ContainsKey('ExpectedRollbackRef') -and $bundle.rollback_contract.runbook_ref -ne $ExpectedRollbackRef) {
+      throw "Dispatch scenario '$Name' rollback ref mismatch: got '$($bundle.rollback_contract.runbook_ref)'."
+    }
+    if ($PSBoundParameters.ContainsKey('ExpectedGoalIds')) {
+      $actualGoals = @($bundle.spec_drift.contract_goal_ids)
+      if (($actualGoals -join ',') -ne ($ExpectedGoalIds -join ',')) {
+        throw "Dispatch scenario '$Name' goal_ids mismatch: got '$($actualGoals -join ',')'."
+      }
+    }
+  } finally {
+    Remove-Item $outPath, ([System.IO.Path]::ChangeExtension($outPath, ".md")) -ErrorAction SilentlyContinue
+  }
+}
+
+# Pass: default validate promotion parses and allows promotion (exit 0).
+Invoke-DispatchScenario -Name "pass" -RiskBand "medium" -PromotionStage "validate" `
+  -GateStatus $defaultGates -ArtifactStatus $defaultArtifacts -PromotionContext $defaultContext `
+  -ExpectedExit 0
+
+# Block: a failing gate blocks promotion outside dry-run (exit 1).
+Invoke-DispatchScenario -Name "block" -RiskBand "high" -PromotionStage "production" `
+  -GateStatus "lint=fail,build=pass,type=pass,e2e=pass,security=pass,smoke=pass" `
+  -ArtifactStatus $defaultArtifacts -PromotionContext $defaultContext `
+  -ExpectedExit 1
+
+# Block dry-run: same failing gate but dry-run never fails the run (exit 0).
+Invoke-DispatchScenario -Name "block-dry-run" -RiskBand "high" -PromotionStage "production" `
+  -GateStatus "lint=fail,build=pass,type=pass,e2e=pass,security=pass,smoke=pass" `
+  -ArtifactStatus $defaultArtifacts -PromotionContext $defaultContext -DryRun `
+  -ExpectedExit 0
+
+# URL + pipe-separated goals: a rollback URL containing '=' and '&' and
+# pipe-delimited goal_ids must survive parsing intact.
+$urlContext = "previous_stage=pass,environment_protection=configured,require_approval=true,approval=approved,rollback_validation=validated,rollback_runbook_ref=https://runbooks.example.com/rb?id=42&env=prod,goal_ids=G1|G2|G3"
+Invoke-DispatchScenario -Name "url-and-pipe-goals" -RiskBand "high" -PromotionStage "production" `
+  -GateStatus $defaultGates -ArtifactStatus $defaultArtifacts -PromotionContext $urlContext -DryRun `
+  -ExpectedExit 0 -ExpectedRollbackRef "https://runbooks.example.com/rb?id=42&env=prod" `
+  -ExpectedGoalIds @("G1", "G2", "G3")
+
+# Per-artifact goal fallback: a high-risk production promotion supplying only
+# the contract-level goal_ids (no explicit per-artifact maps) must pass, because
+# the dispatch seam propagates goal_ids to every artifact goal map. (The
+# enforcer alone only falls back for spec, so this guards the seam's fallback.)
+$prodContext = "previous_stage=pass,environment_protection=configured,require_approval=true,approval=approved," +
+  "rollback_validation=validated,rollback_runbook_ref=https://rb.example/r,goal_ids=G1"
+Invoke-DispatchScenario -Name "goal-id-fallback" -RiskBand "high" -PromotionStage "production" `
+  -GateStatus "lint=pass,build=pass,type=pass,e2e=pass,security=pass,smoke=pass" `
+  -ArtifactStatus $defaultArtifacts -PromotionContext $prodContext -DryRun `
+  -ExpectedExit 0
+
+# Fail closed: a malformed grouped token (missing '=') must be rejected rather
+# than silently dropped, so bad dispatch input cannot yield a passing gate.
+# Also verify an unknown key (typo) is rejected instead of masking a real block.
+foreach ($badGroup in @(
+    @{ Name = "malformed"; Artifact = $defaultArtifacts; Context = $defaultContext; Gate = "lintpass,build=pass" },
+    @{ Name = "unknown-key"; Artifact = "doc=missing,docs=present,tests=present,runbook=present,release_notes=present"; Context = $defaultContext; Gate = $defaultGates },
+    @{ Name = "duplicate-key"; Artifact = "docs=present,docs=missing,spec=present,tests=present,runbook=present,release_notes=present"; Context = $defaultContext; Gate = $defaultGates },
+    @{ Name = "empty-status"; Artifact = "spec=,docs=present,tests=present,runbook=present,release_notes=present"; Context = $defaultContext; Gate = $defaultGates }
+  )) {
+  $badOut = Join-Path ([System.IO.Path]::GetTempPath()) ("dispatch-bad-{0}.json" -f ([Guid]::NewGuid()))
+  try {
+    & pwsh -NoProfile -File $invokeScript -TargetRepo "octo/repo" -TargetBranch "main" `
+      -RiskBand "medium" -PromotionStage "validate" -ExecutionLane "standard" -ChangeType "code" `
+      -GateStatus $badGroup.Gate -ArtifactStatus $badGroup.Artifact -PromotionContext $badGroup.Context `
+      -OutputPath $badOut -DryRun *> $null
+    if ($LASTEXITCODE -eq 0) {
+      throw "Grouped input case '$($badGroup.Name)' must fail closed but the dispatch succeeded."
+    }
+    if (Test-Path $badOut) {
+      throw "Grouped input case '$($badGroup.Name)' must not produce an evidence bundle."
+    }
+  } finally {
+    Remove-Item $badOut, ([System.IO.Path]::ChangeExtension($badOut, ".md")) -ErrorAction SilentlyContinue
+  }
 }
 
 Write-Host "Ship-it release-gate enforcer tests passed."
