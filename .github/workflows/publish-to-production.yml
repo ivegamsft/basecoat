@@ -127,8 +127,9 @@ jobs:
 
           # Rewrite every github.com and raw.githubusercontent.com URL that references
           # the private source repo (IBuySpy-Shared/basecoat) to point at the public
-          # production mirror (ivegamsft/basecoat). Applied across ALL tracked text
-          # files so consumers never encounter links they cannot access.
+          # production mirror (ivegamsft/basecoat). Applied across all tracked text
+          # files except tests/ (see exclusion note below) so consumers never encounter
+          # links they cannot access.
           #
           # Patterns replaced:
           #   github.com/IBuySpy-Shared/basecoat         ->  github.com/ivegamsft/basecoat
@@ -136,11 +137,17 @@ jobs:
           #   ibuyspy-shared.github.io/basecoat           ->  ivegamsft.github.io/basecoat
           #
           # Binary files are skipped automatically via grep -I (--binary-files=without-match).
+          #
+          # tests/ is EXCLUDED: test fixtures embed the literal internal repo URL as
+          # sample data and assert on it exactly. Rewriting those strings corrupts the
+          # mirror's CI (the incident-routing test's Case 18 exits non-zero), turning the
+          # public mirror red while internal main — which is never rewritten — stays green.
+          # Test URLs are fixtures, not user-facing links, so they must not be rewritten.
 
           TEXT_FILES=$(git ls-files -- \
             '*.md' '*.yml' '*.yaml' '*.json' '*.ps1' '*.sh' '*.txt' \
             '*.ts' '*.js' '*.py' \
-            | grep -v '^$' || true)
+            | grep -v '^$' | grep -v '^tests/' || true)
 
           if [ -z "$TEXT_FILES" ]; then
             echo "No text files to rewrite."

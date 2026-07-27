@@ -48,5 +48,11 @@ if ($content -notmatch 'TAG:\s*\$\{\{\s*steps\.resolve_tag\.outputs\.tag\s*\}\}'
     throw 'publish-to-production.yml does not propagate resolved tag into publish steps'
 }
 
+# Regression (#2713): the internal-link rewrite must exclude tests/, or test fixtures
+# that embed the internal repo URL get mutated and break the external mirror's CI.
+if ($content -notmatch "(?m)\|\s*grep -v '\^tests/'") {
+    throw 'publish-to-production.yml link-rewrite must exclude tests/ (grep -v ''^tests/'') to avoid mutating test fixtures'
+}
+
 Write-Host 'Publish-to-production dispatch tag tests passed' -ForegroundColor Green
 exit 0
