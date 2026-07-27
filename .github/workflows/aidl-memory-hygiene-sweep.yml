@@ -36,14 +36,14 @@ jobs:
       flagged_count: ${{ steps.sweep.outputs.flagged_count }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v4.1.7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4.1.7
 
       - name: Check out enterprise memory store
         # When configured, fetch the enterprise memory-store repository so scheduled runs inspect
         # the live queue. AIDL_MEMORY_STORE_EXPORT should then point inside this checkout
         # (for example memory-store/<file>.json).
         if: vars.AIDL_MEMORY_STORE_REPO != ''
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v4.1.7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4.1.7
         with:
           repository: ${{ vars.AIDL_MEMORY_STORE_REPO }}
           token: ${{ secrets.MEMORY_REPO_TOKEN || github.token }}
