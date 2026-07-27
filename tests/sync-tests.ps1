@@ -707,6 +707,154 @@ finally {
 }
 
 # ============================================================================
+# .basecoat.yml source/ref resolution (issue #2705)
+# ============================================================================
+Write-Host "`nTesting .basecoat.yml source/ref pinning..." -ForegroundColor Cyan
+
+function New-BasecoatSource {
+    param([string]$Marker)
+
+    $sourceRepo = Join-Path ([System.IO.Path]::GetTempPath()) ("basecoat-sync-pin-source-" + [System.Guid]::NewGuid().ToString())
+    New-Item -ItemType Directory -Path $sourceRepo | Out-Null
+
+    Push-Location $sourceRepo
+    try {
+        git init | Out-Null
+        git config user.name 'basecoat-test'
+        git config user.email 'basecoat-test@example.com'
+
+        New-Item -ItemType Directory -Force -Path 'agents', 'instructions', 'skills/example-skill', 'prompts', 'docs/reference', 'docs/guides' | Out-Null
+        Set-Content -Path 'README.md' -Value '# Source Repo' -Encoding UTF8
+        Set-Content -Path 'CHANGELOG.md' -Value '# Changelog' -Encoding UTF8
+        Set-Content -Path 'version.json' -Value '{ "version": "9.9.9", "releaseDate": "2026-06-06" }' -Encoding UTF8
+        Set-Content -Path 'asset-manifest.json' -Value '{ "schemaVersion": "1", "assets": [] }' -Encoding UTF8
+        Set-Content -Path 'agents/base.agent.md' -Value "---`nname: base`ndescription: base`n---`n" -Encoding UTF8
+        Set-Content -Path 'instructions/example.instructions.md' -Value "---`ndescription: example`napplyTo: ""**/*""`n---`n" -Encoding UTF8
+        Set-Content -Path 'prompts/example.prompt.md' -Value "---`nname: example`ndescription: example`n---`n" -Encoding UTF8
+        Set-Content -Path 'skills/example-skill/SKILL.md' -Value "---`nname: example`ndescription: example`ncompatibility: [github-copilot-cli]`n---`n" -Encoding UTF8
+        Set-Content -Path 'docs/reference/README.md' -Value '# Reference' -Encoding UTF8
+        Set-Content -Path 'docs/guides/README.md' -Value '# Guides' -Encoding UTF8
+
+        git add .
+        git commit -m 'seed pin source (default branch, no pin marker)' | Out-Null
+        $defaultBranch = (git rev-parse --abbrev-ref HEAD).Trim()
+
+        # Build the pinned release on a throwaway branch so its unique marker is
+        # reachable ONLY via the v9.9.9 tag, never from the default branch. The
+        # content assertion then fails if a sync clones the default branch instead
+        # of the pinned ref. The v9.9.9 tag also exercises the semver-provenance
+        # path (version.json already reports 9.9.9).
+        git checkout -q -b _pin-build | Out-Null
+        Set-Content -Path "agents/$Marker.agent.md" -Value "---`nname: $Marker`ndescription: $Marker`n---`n" -Encoding UTF8
+        git add "agents/$Marker.agent.md"
+        git commit -m 'pinned release marker' | Out-Null
+        git tag 'v9.9.9' | Out-Null
+        git checkout -q $defaultBranch | Out-Null
+        git branch -D _pin-build | Out-Null
+    }
+    finally {
+        Pop-Location
+    }
+
+    return $sourceRepo
+}
+
+$consumer = $null
+$sourceRepo = $null
+try {
+    $consumer = New-ConsumerRepo -WithGitHubDir
+    $sourceRepo = New-BasecoatSource -Marker 'pinmarker'
+
+    # Consumer pins source + ref via .basecoat.yml, with NO env overrides.
+    Set-Content -Path (Join-Path $consumer '.basecoat.yml') -Value @(
+        "source: file://$sourceRepo"
+        'ref: v9.9.9'
+    ) -Encoding UTF8
+
+    Push-Location $consumer
+    try {
+        Remove-Item Env:\BASECOAT_REPO -ErrorAction SilentlyContinue
+        Remove-Item Env:\BASECOAT_REF -ErrorAction SilentlyContinue
+        $output = & pwsh -NoProfile -File (Join-Path $repoRoot 'sync.ps1') 2>&1 | Out-String
+        $exitCode = $LASTEXITCODE
+    }
+    finally {
+        Pop-Location
+    }
+
+    $testCount++
+    if ($exitCode -ne 0) {
+        throw "Sync .basecoat.yml pin test failed: sync.ps1 exited $exitCode. Output: $output"
+    }
+
+    $testCount++
+    if ($output -notmatch "ref 'v9.9.9' \(from \.basecoat\.yml\)") {
+        throw "Sync .basecoat.yml pin test failed: expected ref resolved from .basecoat.yml, got: $output"
+    }
+
+    $testCount++
+    Assert-SyncPathExists (Join-Path $consumer '.github/agents/pinmarker.agent.md') 'Sync .basecoat.yml pin test failed: pinned-ref-only agent was not synced (clone did not follow the pinned tag)'
+
+    Write-Host '  Passed: .basecoat.yml source/ref is honored when env vars are unset' -ForegroundColor Green
+}
+catch {
+    $failures += $_.Exception.Message
+}
+finally {
+    if ($consumer -and (Test-Path $consumer)) { Remove-Item -Path $consumer -Recurse -Force }
+    if ($sourceRepo -and (Test-Path $sourceRepo)) { Remove-Item -Path $sourceRepo -Recurse -Force }
+}
+
+# Env vars must take precedence over .basecoat.yml.
+$consumer = $null
+$sourceRepo = $null
+try {
+    $consumer = New-ConsumerRepo -WithGitHubDir
+    $sourceRepo = New-BasecoatSource -Marker 'pinmarker'
+
+    # .basecoat.yml points at a non-existent ref; env override must win.
+    Set-Content -Path (Join-Path $consumer '.basecoat.yml') -Value @(
+        "source: file://$sourceRepo"
+        'ref: does-not-exist'
+    ) -Encoding UTF8
+
+    Push-Location $consumer
+    try {
+        $env:BASECOAT_REPO = "file://$sourceRepo"
+        $env:BASECOAT_REF = 'v9.9.9'
+        $output = & pwsh -NoProfile -File (Join-Path $repoRoot 'sync.ps1') 2>&1 | Out-String
+        $exitCode = $LASTEXITCODE
+    }
+    finally {
+        Remove-Item Env:\BASECOAT_REPO -ErrorAction SilentlyContinue
+        Remove-Item Env:\BASECOAT_REF -ErrorAction SilentlyContinue
+        Pop-Location
+    }
+
+    $testCount++
+    if ($exitCode -ne 0) {
+        throw "Sync env-precedence test failed: sync.ps1 exited $exitCode (env override should be used). Output: $output"
+    }
+
+    $testCount++
+    if ($output -notmatch "ref 'v9.9.9' \(from env\)") {
+        throw "Sync env-precedence test failed: expected ref resolved from env, got: $output"
+    }
+
+    $testCount++
+    Assert-SyncPathExists (Join-Path $consumer '.github/agents/pinmarker.agent.md') 'Sync env-precedence test failed: pinned-ref-only agent was not synced (clone did not follow the env ref)'
+
+    Write-Host '  Passed: BASECOAT_REF env var takes precedence over .basecoat.yml' -ForegroundColor Green
+}
+catch {
+    $failures += $_.Exception.Message
+}
+finally {
+    if ($consumer -and (Test-Path $consumer)) { Remove-Item -Path $consumer -Recurse -Force }
+    if ($sourceRepo -and (Test-Path $sourceRepo)) { Remove-Item -Path $sourceRepo -Recurse -Force }
+}
+
+# ============================================================================
 # Summary
 # ============================================================================
 Write-Host "`n================================================" -ForegroundColor Cyan

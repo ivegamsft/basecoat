@@ -88,6 +88,45 @@ jobs:
             exit 1
           fi
 
+      - name: Validate .basecoat.yml source/ref resolution (Linux)
+        if: matrix.script == 'sync.sh'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$CONSUMER_REPO"
+
+          # 1. Config-only pin: no env vars, source/ref come from .basecoat.yml.
+          cat > .basecoat.yml <<EOF
+          source: file://$SOURCE_REPO
+          ref: ci-ref
+          EOF
+
+          config_output="$(env -u BASECOAT_REPO -u BASECOAT_REF BASECOAT_TARGET_DIR="$TARGET_DIR" bash "$GITHUB_WORKSPACE/sync.sh" 2>&1)"
+          echo "$config_output"
+          if [[ "$config_output" != *"ref 'ci-ref' (from .basecoat.yml)"* ]]; then
+            echo "Expected ref to be resolved from .basecoat.yml" >&2
+            exit 1
+          fi
+          if [[ "$config_output" != *"Base Coat synced into $TARGET_DIR"* ]]; then
+            echo "Config-only sync did not complete" >&2
+            exit 1
+          fi
+
+          # 2. Env override wins over an invalid .basecoat.yml pin.
+          cat > .basecoat.yml <<EOF
+          source: file://$SOURCE_REPO
+          ref: does-not-exist
+          EOF
+
+          env_output="$(BASECOAT_REPO="$SOURCE_REPO" BASECOAT_REF="ci-ref" BASECOAT_TARGET_DIR="$TARGET_DIR" bash "$GITHUB_WORKSPACE/sync.sh" 2>&1)"
+          echo "$env_output"
+          if [[ "$env_output" != *"ref 'ci-ref' (from env)"* ]]; then
+            echo "Expected BASECOAT_REF env var to take precedence over .basecoat.yml" >&2
+            exit 1
+          fi
+
+          rm -f .basecoat.yml
+
       - name: Run sync.ps1 and validate output (Windows)
         if: matrix.script == 'sync.ps1'
         shell: pwsh

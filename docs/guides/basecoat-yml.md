@@ -48,6 +48,14 @@ leave as `main` to always pull the latest.
 ref: v4.0.0
 ```
 
+> **Resolution precedence.** `sync.sh` and `sync.ps1` resolve `source` and `ref`
+> in this order: the `BASECOAT_REPO` / `BASECOAT_REF` environment variables (when
+> set) take precedence, then the values in this `.basecoat.yml`, then the built-in
+> defaults (`https://github.com/YOUR-ORG/basecoat.git` and `main`). Each run logs
+> the resolved values and their origin (`env`, `.basecoat.yml`, `default`, or
+> `redirect`), so a pin here is honored automatically without exporting any
+> environment variables.
+
 ### agents
 
 | | |

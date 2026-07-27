@@ -1,7 +1,5 @@
 $ErrorActionPreference = 'Stop'
 
-$sourceRepo = if ($env:BASECOAT_REPO) { $env:BASECOAT_REPO } else { 'https://github.com/YOUR-ORG/basecoat.git' }
-$sourceRef = if ($env:BASECOAT_REF) { $env:BASECOAT_REF } else { 'main' }
 $targetDir = if ($env:BASECOAT_TARGET_DIR) { $env:BASECOAT_TARGET_DIR } else { '.github/base-coat' }
 $knownBadRefRedirects = @{
     'v3.30.4' = 'v3.30.5'
@@ -15,6 +13,82 @@ $repoRoot = git rev-parse --show-toplevel 2>$null
 if (-not $repoRoot) {
     throw 'Run this inside a git repository'
 }
+
+# Resolve the upstream source repo and ref.
+# Precedence: BASECOAT_REPO/BASECOAT_REF env vars > repo-root .basecoat.yml > built-in default.
+function Get-BasecoatYmlValue {
+    param(
+        [Parameter(Mandatory)][string]$Key,
+        [Parameter(Mandatory)][string]$RepoRoot
+    )
+
+    $config = Join-Path $RepoRoot '.basecoat.yml'
+    if (-not (Test-Path -LiteralPath $config)) { return $null }
+
+    foreach ($line in Get-Content -LiteralPath $config) {
+        # Match only top-level (unindented, non-comment) "key: value" entries.
+        if ($line -match "^$([regex]::Escape($Key)):\s*(.*)$") {
+            # A value that is empty or begins with '#' is a comment-only entry (null).
+            $value = ($Matches[1] -replace '^#.*$', '' -replace '\s+#.*$', '').Trim()
+            # Only strip quotes that form a matching surrounding pair (a lone
+            # trailing/leading quote is a legitimate part of a Git ref name).
+            if ($value -match '^"(.*)"$' -or $value -match "^'(.*)'$") {
+                $value = $Matches[1]
+            }
+            return $value
+        }
+    }
+
+    return $null
+}
+
+function Get-RedactedRepoUrl {
+    param([string]$Url)
+
+    if (-not $Url) { return $Url }
+    # Strip any "user[:password]@" userinfo and any "?query"/"#fragment" (which may
+    # carry a token) so credential-bearing clone URLs are never logged. Only the
+    # display value is sanitized; git clone still receives the original URL.
+    # Capture the scheme rather than using a lookbehind for broad regex portability.
+    # Match case-insensitively since URI schemes are case-insensitive.
+    $display = $Url -replace '(?i)^(https?://)[^/@]*@', '$1'
+    return ($display -replace '[?#].*$', '')
+}
+
+$sourceRepo = $env:BASECOAT_REPO
+$sourceRepoOrigin = 'env'
+if (-not $sourceRepo) {
+    $sourceRepo = Get-BasecoatYmlValue -Key 'source' -RepoRoot $repoRoot
+    if ($sourceRepo) {
+        $sourceRepoOrigin = '.basecoat.yml'
+    }
+    else {
+        $sourceRepo = 'https://github.com/YOUR-ORG/basecoat.git'
+        $sourceRepoOrigin = 'default'
+    }
+}
+
+$sourceRef = $env:BASECOAT_REF
+$sourceRefOrigin = 'env'
+if (-not $sourceRef) {
+    $sourceRef = Get-BasecoatYmlValue -Key 'ref' -RepoRoot $repoRoot
+    if ($sourceRef) {
+        $sourceRefOrigin = '.basecoat.yml'
+    }
+    else {
+        $sourceRef = 'main'
+        $sourceRefOrigin = 'default'
+    }
+}
+
+if ($knownBadRefRedirects.ContainsKey($sourceRef)) {
+    $requestedRef = $sourceRef
+    $sourceRef = $knownBadRefRedirects[$requestedRef]
+    $sourceRefOrigin = 'redirect'
+    Write-Warning "Requested ref '$requestedRef' is a known-bad release tag (version drift). Auto-upgrading sync source to '$sourceRef'. Update your .basecoat.yml pin to '$sourceRef' or newer."
+}
+
+Write-Host "Resolved BaseCoat source '$(Get-RedactedRepoUrl $sourceRepo)' (from $sourceRepoOrigin), ref '$sourceRef' (from $sourceRefOrigin)"
 
 $allowedDocsTopLevelEntries = @('reference', 'guides', 'agents', 'diagrams')
 $supportedAgentFrontmatterKeys = @('name', 'description', 'tools', 'mcp-servers')
@@ -235,12 +309,6 @@ function Assert-SafeWorkflowDirectory {
         $details = ($issues | ForEach-Object { " - $_" }) -join "`n"
         throw "Workflow validation failed before sync. Invalid workflow definitions detected:`n$details"
     }
-}
-
-if ($knownBadRefRedirects.ContainsKey($sourceRef)) {
-    $requestedRef = $sourceRef
-    $sourceRef = $knownBadRefRedirects[$requestedRef]
-    Write-Warning "Requested ref '$requestedRef' is a known-bad release tag (version drift). Auto-upgrading sync source to '$sourceRef'. Update your .basecoat.yml pin to '$sourceRef' or newer."
 }
 
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString())

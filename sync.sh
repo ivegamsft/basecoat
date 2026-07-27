@@ -2,21 +2,8 @@
 
 set -euo pipefail
 
-SOURCE_REPO="${BASECOAT_REPO:-https://github.com/YOUR-ORG/basecoat.git}"
-SOURCE_REF="${BASECOAT_REF:-main}"
 TARGET_DIR="${BASECOAT_TARGET_DIR:-.github/base-coat}"
 ALLOWED_DOCS_TOP_LEVEL=("reference" "guides" "agents" "diagrams")
-
-TARGET_REF=""
-case "$SOURCE_REF" in
-  v3.30.4)
-    TARGET_REF="v3.30.5"
-    ;;
-esac
-if [[ -n "$TARGET_REF" ]]; then
-  echo "WARNING: Requested ref '$SOURCE_REF' is a known-bad release tag (version drift). Auto-upgrading sync source to '$TARGET_REF'. Update your .basecoat.yml pin to '$TARGET_REF' or newer." >&2
-  SOURCE_REF="$TARGET_REF"
-fi
 
 if ! command -v git >/dev/null 2>&1; then
   echo "git is required" >&2
@@ -28,6 +15,76 @@ if [[ -z "$REPO_ROOT" ]]; then
   echo "Run this inside a git repository" >&2
   exit 1
 fi
+
+# Resolve the upstream source repo and ref.
+# Precedence: BASECOAT_REPO/BASECOAT_REF env vars > repo-root .basecoat.yml > built-in default.
+read_basecoat_yml_value() {
+  # $1 = top-level key. Emits its value from .basecoat.yml, ignoring comment
+  # lines, indented (nested) keys, inline "# ..." comments, and surrounding quotes.
+  # A genuine read/sed failure is propagated (non-zero return); a missing file or
+  # absent key yields empty output with success so callers fall through to defaults.
+  local key="$1"
+  local config="$REPO_ROOT/.basecoat.yml"
+  [[ -f "$config" ]] || return 0
+
+  local matches
+  # Strip a leading UTF-8 BOM on line 1 (Windows-authored configs) before matching.
+  local bom=$'\xEF\xBB\xBF'
+  matches="$(sed -n "1s/^${bom}//;s/^${key}:[[:space:]]*//p" "$config")" || return 1
+
+  local first="${matches%%$'\n'*}"
+  first="${first%$'\r'}"
+  printf '%s' "$first" \
+    | sed -e 's/^#.*$//' -e 's/[[:space:]]\{1,\}#.*$//' -e 's/[[:space:]]*$//' -e 's/^"\(.*\)"$/\1/' -e "s/^'\(.*\)'$/\1/"
+}
+
+redact_repo_url() {
+  # Strip any "user[:password]@" userinfo and any "?query"/"#fragment" (which may
+  # carry a token) from an http(s) URL so credential-bearing clone URLs are never
+  # logged. Only the display value is sanitized; git clone still uses the original.
+  # Scheme match is case-insensitive (URI schemes are case-insensitive) and portable.
+  printf '%s' "$1" \
+    | sed -E -e 's#([Hh][Tt][Tt][Pp][Ss]?://)[^/@]*@#\1#' -e 's|[?#].*$||'
+}
+
+SOURCE_REPO="${BASECOAT_REPO:-}"
+SOURCE_REPO_ORIGIN="env"
+if [[ -z "$SOURCE_REPO" ]]; then
+  SOURCE_REPO="$(read_basecoat_yml_value source)"
+  if [[ -n "$SOURCE_REPO" ]]; then
+    SOURCE_REPO_ORIGIN=".basecoat.yml"
+  else
+    SOURCE_REPO="https://github.com/YOUR-ORG/basecoat.git"
+    SOURCE_REPO_ORIGIN="default"
+  fi
+fi
+
+SOURCE_REF="${BASECOAT_REF:-}"
+SOURCE_REF_ORIGIN="env"
+if [[ -z "$SOURCE_REF" ]]; then
+  SOURCE_REF="$(read_basecoat_yml_value ref)"
+  if [[ -n "$SOURCE_REF" ]]; then
+    SOURCE_REF_ORIGIN=".basecoat.yml"
+  else
+    SOURCE_REF="main"
+    SOURCE_REF_ORIGIN="default"
+  fi
+fi
+
+# Known-bad release tag redirect (version drift guard).
+TARGET_REF=""
+case "$SOURCE_REF" in
+  v3.30.4)
+    TARGET_REF="v3.30.5"
+    ;;
+esac
+if [[ -n "$TARGET_REF" ]]; then
+  echo "WARNING: Requested ref '$SOURCE_REF' is a known-bad release tag (version drift). Auto-upgrading sync source to '$TARGET_REF'. Update your .basecoat.yml pin to '$TARGET_REF' or newer." >&2
+  SOURCE_REF="$TARGET_REF"
+  SOURCE_REF_ORIGIN="redirect"
+fi
+
+echo "Resolved BaseCoat source '$(redact_repo_url "$SOURCE_REPO")' (from $SOURCE_REPO_ORIGIN), ref '$SOURCE_REF' (from $SOURCE_REF_ORIGIN)"
 
 TMP_DIR="$(mktemp -d)"
 cleanup() {
@@ -118,7 +175,7 @@ validate_workflow_directory() {
   fi
 }
 
-echo "Cloning $SOURCE_REPO#$SOURCE_REF"
+echo "Cloning $(redact_repo_url "$SOURCE_REPO")#$SOURCE_REF"
 if ! git clone --depth 1 --branch "$SOURCE_REF" "$SOURCE_REPO" "$TMP_DIR/source" >/dev/null 2>&1; then
   # In CI for private GitHub repos, anonymous clone can fail. Retry with an auth
   # header when either GITHUB_TOKEN or GH_TOKEN is available.
@@ -127,11 +184,11 @@ if ! git clone --depth 1 --branch "$SOURCE_REF" "$SOURCE_REPO" "$TMP_DIR/source"
     auth_header="$(printf 'x-access-token:%s' "$token" | base64 | tr -d '\r\n')"
     if ! git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth_header" \
       clone --depth 1 --branch "$SOURCE_REF" "$SOURCE_REPO" "$TMP_DIR/source" >/dev/null 2>&1; then
-      echo "Failed to clone $SOURCE_REPO#$SOURCE_REF (anonymous and token-auth attempts failed)." >&2
+      echo "Failed to clone $(redact_repo_url "$SOURCE_REPO")#$SOURCE_REF (anonymous and token-auth attempts failed)." >&2
       exit 1
     fi
   else
-    echo "Failed to clone $SOURCE_REPO#$SOURCE_REF." >&2
+    echo "Failed to clone $(redact_repo_url "$SOURCE_REPO")#$SOURCE_REF." >&2
     exit 1
   fi
 fi

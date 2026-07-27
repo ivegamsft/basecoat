@@ -44,24 +44,28 @@ new branch.
 
 ## 2. Sync inside the worktree
 
-`sync.ps1`/`sync.sh` read the source and ref **only** from `BASECOAT_REPO` and
-`BASECOAT_REF`. Set both from the consumer's `.basecoat.yml` (`source`/`ref`) — or
-the pinned target — before invoking the script, otherwise a pinned consumer may
-clone the placeholder repo or silently sync `main`:
+`sync.ps1`/`sync.sh` resolve the source and ref with precedence
+`BASECOAT_REPO`/`BASECOAT_REF` env vars > the consumer's root `.basecoat.yml`
+(`source`/`ref`) > built-in defaults (`YOUR-ORG` placeholder / `main`). A pin in
+`.basecoat.yml` is therefore honored automatically. Set the env vars only to
+override a run (for example, to force a specific upgrade target); each run logs the
+resolved values and their origin (`env`, `.basecoat.yml`, `default`, or `redirect`):
 
 Windows (PowerShell):
 
 ```powershell
-$env:BASECOAT_REPO = '<source from .basecoat.yml>'
-$env:BASECOAT_REF  = '<ref from .basecoat.yml>'  # e.g. vX.Y.Z
+# Optional override — omit to use the consumer's .basecoat.yml pin.
+$env:BASECOAT_REPO = '<source override>'
+$env:BASECOAT_REF  = '<ref override>'  # e.g. vX.Y.Z
 pwsh sync.ps1
 ```
 
 Linux or macOS (Bash):
 
 ```bash
-BASECOAT_REPO='<source from .basecoat.yml>' \
-BASECOAT_REF='<ref from .basecoat.yml>' ./sync.sh
+# Optional override — omit to use the consumer's .basecoat.yml pin.
+BASECOAT_REPO='<source override>' \
+BASECOAT_REF='<ref override>' ./sync.sh
 ```
 
 Then verify `.github/base-coat/version.json` matches the pinned ref (sync enforces
