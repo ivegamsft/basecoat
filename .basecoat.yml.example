@@ -45,8 +45,15 @@ ref: main
 # Populated by the integrate prompt based on detected tech stack.
 # scoped_instructions: []
 
-# sync.exclude: paths to skip during sync (prefixes or globs).
+# sync: sync behaviour overrides (one mapping — combine the keys you need).
+#   script  --- path to the sync entrypoint, relative to repo root. Set this when
+#               your sync script is not the canonical root sync.ps1/sync.sh (e.g.
+#               you keep it under scripts/). The rollout-basecoat skill uses it
+#               directly instead of searching. Omit for root sync.ps1/sync.sh or
+#               auto-discovery.
+#   exclude --- paths to skip during sync (prefixes or globs).
 # sync:
+#   script: scripts/basecoat/sync-basecoat.ps1
 #   exclude:
 #     - archive/   # skip archived/deprecated assets
 

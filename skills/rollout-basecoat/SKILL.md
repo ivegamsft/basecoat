@@ -34,7 +34,9 @@ what changed" is an incomplete run.
    `chore/basecoat-upgrade-<ref>-<timestamp>` branch from the consumer's default
    branch (resolve it — it is not always `main`) so the primary tree stays
    untouched and re-runs for a moving ref never collide.
-3. Run sync **inside the worktree**: `pwsh sync.ps1` (Windows) or `./sync.sh`.
+3. Discover the sync entrypoint (`sync.script` from `.basecoat.yml`, else root
+   `sync.ps1`/`sync.sh`, else search — see reference) and run it **inside the
+   worktree**.
 4. Verify `.github/base-coat/version.json`. When `ref` is a semver tag, sync
    enforces provenance and fails on mismatch; known-bad tags auto-remap to the
    first corrected release with a warning to update the pin.

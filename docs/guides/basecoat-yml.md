@@ -128,6 +128,26 @@ pattern-specific instructions.
 scoped_instructions: []
 ```
 
+### sync.script
+
+| | |
+|---|---|
+| **Type** | string (path relative to repo root) |
+| **Required** | No |
+| **Default** | Auto-discovery (root `sync.ps1`/`sync.sh`, then common locations) |
+
+Explicit path to the sync entrypoint. Set this when your sync script is **not**
+the canonical root `sync.ps1`/`sync.sh` — for example, when your team vendors it
+under `scripts/`. The `rollout-basecoat` skill uses this path directly instead of
+searching. When omitted, the skill discovers the entrypoint: root
+`sync.ps1`/`sync.sh` first, then common locations such as
+`scripts/**/sync*basecoat*.{ps1,sh}` and `.github/base-coat/sync.{ps1,sh}`.
+
+```yaml
+sync:
+  script: scripts/basecoat/sync-basecoat.ps1
+```
+
 ### sync.exclude
 
 | | |

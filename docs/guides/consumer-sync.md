@@ -16,6 +16,14 @@ Files that are **not** synced: `basecoat-metadata.json` (internal portal index),
 
 ## Sync commands
 
+> **Where is the sync script?** The commands below assume the canonical
+> `sync.ps1`/`sync.sh` at the consumer repo root. If your team vendors it elsewhere
+> (e.g. `scripts/basecoat/sync-basecoat.ps1`), point `sync.script` in `.basecoat.yml`
+> at it so the `refresh basecoat` skill runs it directly, **and** substitute that
+> path — with its matching interpreter (`pwsh` for `.ps1`, `bash` for `.sh`) — for
+> `sync.ps1`/`sync.sh` in the manual commands on this page. See
+> [`sync.script`](basecoat-yml.md#syncscript).
+
 === "PowerShell"
 
     ```powershell

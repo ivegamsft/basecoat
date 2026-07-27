@@ -14,6 +14,9 @@ scenarios:
   - id: "pos-4"
     input: "Upgrade basecoat to the latest release, then commit, push and open a PR."
     expect_activation: true
+  - id: "pos-5"
+    input: "Our sync script lives at scripts/basecoat/sync-basecoat.ps1, not the repo root — refresh basecoat and open a PR."
+    expect_activation: true
   - id: "neg-1"
     input: "Write a new custom agent for threat modeling."
     expect_activation: false

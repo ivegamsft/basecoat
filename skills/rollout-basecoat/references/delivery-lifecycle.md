@@ -44,6 +44,67 @@ new branch.
 
 ## 2. Sync inside the worktree
 
+### Discover the sync entrypoint
+
+Do **not** assume a root `sync.ps1`/`sync.sh`. Real consumers vendor the script
+elsewhere (e.g. `scripts/basecoat/sync-basecoat.ps1`). Resolve the entrypoint in
+this order and fail with a clear message if none is found:
+
+1. **Configured path** — `sync.script` in the consumer's root `.basecoat.yml`
+   (relative to repo root). Use it directly if the file exists.
+2. **Canonical root** — root `sync.ps1` (Windows) or `sync.sh` (Linux/macOS).
+3. **Common locations** — first match of `scripts/**/sync*basecoat*.ps1`,
+   `scripts/**/sync*basecoat*.sh`, `.github/base-coat/sync.ps1`,
+   `.github/base-coat/sync.sh`.
+4. **Fail** — if nothing matches, stop and report every path checked so the user
+   can add `sync.script` to `.basecoat.yml`.
+
+Bash:
+
+```bash
+# Resolve the sync entrypoint: configured path > root > common locations.
+shopt -s globstar nullglob            # ** recurses; unmatched globs vanish
+# Read sync.script from .basecoat.yml, stripping inline comments and quotes.
+CONFIGURED=$(sed -n 's/^[[:space:]]\{1,\}script:[[:space:]]*//p' .basecoat.yml 2>/dev/null | head -n1)
+CONFIGURED=${CONFIGURED%%#*}
+CONFIGURED=$(printf '%s' "$CONFIGURED" | sed -e 's/[[:space:]]*$//' -e 's/^"\(.*\)"$/\1/' -e "s/^'\(.*\)'$/\1/")
+candidates=("$CONFIGURED" sync.sh sync.ps1 \
+  scripts/**/sync*basecoat*.sh scripts/**/sync*basecoat*.ps1 \
+  .github/base-coat/sync.sh .github/base-coat/sync.ps1)
+SYNC_SCRIPT=""
+for cand in "${candidates[@]}"; do
+  [ -n "$cand" ] && [ -f "$cand" ] && { SYNC_SCRIPT="$cand"; break; }
+done
+if [ -z "$SYNC_SCRIPT" ]; then
+  echo "No BaseCoat sync entrypoint found. Checked: sync.script='${CONFIGURED:-<unset>}', ./sync.sh, ./sync.ps1, scripts/**/sync*basecoat*.{sh,ps1}, .github/base-coat/sync.{sh,ps1}. Set sync.script in .basecoat.yml." >&2
+  exit 1
+fi
+echo "Using sync entrypoint: $SYNC_SCRIPT"
+```
+
+PowerShell:
+
+```powershell
+# Resolve the sync entrypoint: configured path > root > common locations.
+$Configured = (Select-String -Path .basecoat.yml -Pattern '^\s+script:\s*(.+?)\s*(?:#.*)?$' -ErrorAction SilentlyContinue |
+  Select-Object -First 1).Matches.Groups[1].Value
+if ($Configured) {
+  $Configured = $Configured.Trim()
+  if ($Configured -match '^"(.*)"$' -or $Configured -match "^'(.*)'$") { $Configured = $Matches[1] }
+}
+$Candidates = @($Configured, 'sync.ps1', 'sync.sh') +
+  (Get-ChildItem -Recurse -File -Path scripts -Include 'sync*basecoat*.ps1','sync*basecoat*.sh' -ErrorAction SilentlyContinue).FullName +
+  '.github/base-coat/sync.ps1', '.github/base-coat/sync.sh'
+$SyncScript = $Candidates | Where-Object { $_ -and (Test-Path -LiteralPath $_ -PathType Leaf) } | Select-Object -First 1
+if (-not $SyncScript) {
+  $cfg = if ($Configured) { "sync.script='$Configured'" } else { 'sync.script=<unset>' }
+  throw "No BaseCoat sync entrypoint found. Checked: $cfg, .\sync.ps1, .\sync.sh, scripts\**\sync*basecoat*.{ps1,sh}, .github/base-coat/sync.{ps1,sh}. Set sync.script in .basecoat.yml."
+}
+Write-Host "Using sync entrypoint: $SyncScript"
+```
+
+### Run the resolved entrypoint
+
 `sync.ps1`/`sync.sh` resolve the source and ref with precedence
 `BASECOAT_REPO`/`BASECOAT_REF` env vars > the consumer's root `.basecoat.yml`
 (`source`/`ref`) > built-in defaults (`YOUR-ORG` placeholder / `main`). A pin in
@@ -57,15 +118,18 @@ Windows (PowerShell):
 # Optional override — omit to use the consumer's .basecoat.yml pin.
 $env:BASECOAT_REPO = '<source override>'
 $env:BASECOAT_REF  = '<ref override>'  # e.g. vX.Y.Z
-pwsh sync.ps1
+if ($SyncScript -like '*.ps1') { pwsh $SyncScript } else { bash $SyncScript }
 ```
 
 Linux or macOS (Bash):
 
 ```bash
 # Optional override — omit to use the consumer's .basecoat.yml pin.
-BASECOAT_REPO='<source override>' \
-BASECOAT_REF='<ref override>' ./sync.sh
+# Dispatch .ps1 through pwsh; PowerShell scripts are not executable on Linux/macOS.
+case "$SYNC_SCRIPT" in
+  *.ps1) BASECOAT_REPO='<source override>' BASECOAT_REF='<ref override>' pwsh "$SYNC_SCRIPT" ;;
+  *)     BASECOAT_REPO='<source override>' BASECOAT_REF='<ref override>' bash "$SYNC_SCRIPT" ;;
+esac
 ```
 
 Then verify `.github/base-coat/version.json` matches the pinned ref (sync enforces
@@ -179,8 +243,10 @@ git branch -D $Branch
 If skill routing fails (`Skill not found: rollout-basecoat`), do not run sync in the
 primary tree. First create and enter the worktree (step 1), then run the commands
 below **inside that worktree** as the replacement for step 2, and finally continue
-with steps 3–5. `BASECOAT_REPO` / `BASECOAT_REF` point at the upstream BaseCoat
-source and ref.
+with steps 3–5. Resolve the entrypoint as in [Discover the sync
+entrypoint](#discover-the-sync-entrypoint) — the commands below assume the canonical
+root script; substitute the discovered path if the consumer vendors it elsewhere.
+`BASECOAT_REPO` / `BASECOAT_REF` point at the upstream BaseCoat source and ref.
 
 ```powershell
 # PowerShell — run from inside the worktree (step 1), replacing step 2
