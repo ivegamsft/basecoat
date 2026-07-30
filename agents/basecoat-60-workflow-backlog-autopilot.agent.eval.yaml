@@ -1,0 +1,19 @@
+name: "basecoat-60-workflow-backlog-autopilot-routing"
+description: "Routing evaluation - validates trigger activation for the backlog-autopilot agent."
+skill: "agents/basecoat-60-workflow-backlog-autopilot.agent.md"
+scenarios:
+  - id: "pos-1"
+    input: "autopilot: burn the backlog oldest to newest in dependency-ordered waves until stopped or blocked."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Run the continuous backlog delivery loop unattended as a fleet, landing PRs via the merge queue at a throttle-safe pace."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Work the backlog wave after wave with design, scope, positive and negative tests, then deploy each landed wave."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Write new product feature code and redesign the UI."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Explain what BaseCoat is and why we use it."
+    expect_activation: false

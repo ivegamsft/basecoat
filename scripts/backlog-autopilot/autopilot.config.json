@@ -1,0 +1,33 @@
+{
+  "$comment": "Backlog Autopilot lane configuration. Consumed by the backlog-autopilot agent, build-waves.ps1, and pace-gate.ps1. See docs/design/backlog-autopilot-intent.md.",
+  "version": 1,
+  "merge": {
+    "merge_queue_posture": "required",
+    "landing_mode": "serialized-native-merge-queue",
+    "prefer_native_merge_queue": true,
+    "serialize_merges": true,
+    "max_in_flight_merges": 1,
+    "require_green_checks": true
+  },
+  "pacing": {
+    "min_seconds_between_merges": 90,
+    "min_seconds_between_api_bursts": 2,
+    "backoff": {
+      "base_seconds": 5,
+      "factor": 2,
+      "max_seconds": 300,
+      "retry_on_status": [403, 429],
+      "retry_on_secondary_rate_limit": true
+    }
+  },
+  "selection": {
+    "order": "oldest-first",
+    "default_wave_size": 5,
+    "exclude_labels": ["blocked", "needs-info", "wontfix", "duplicate"]
+  },
+  "loop": {
+    "default_max_cycles": 25,
+    "default_max_retries": 3,
+    "default_concurrency": 1
+  }
+}

@@ -62,6 +62,7 @@ Rules:
 | `ia:` | Information architecture: content structure, navigation, taxonomy, sitemap | Soon | `@ux-designer`, `@tech-writer` |
 | `sprint:` | Sprint planning, execution, or closeout | Now | `@sprint-planner`, `@sprint-closeout-auditor` |
 | `wave:` | Dependency-ordered batch within a sprint (issues and PRs) | Now | `@sprint-planner`, `@parallel-session-coordinator` |
+| `autopilot:` | Continuous oldest-to-newest backlog burndown in dependency-ordered waves, unattended until stopped or blocked | Now | `@backlog-autopilot`, `@parallel-session-coordinator`, `@ship-it-control-loop`, `@delivery-autopilot` |
 
 ## Syntax Determines Timing
 
@@ -150,6 +151,49 @@ Execution contract:
 4. Continue only while stop conditions are not met and convergence is viable.
 5. Stop on completion, blocking dependency/policy gate, max-cycle exhaustion,
    or explicit manual stop.
+
+## Backlog Autopilot Routing (`autopilot:`)
+
+`autopilot:` is a continuous backlog-delivery intent. It burns the issue backlog
+oldest to newest in dependency-ordered waves and runs unattended until stopped
+or blocked. It is a thin orchestration layer over existing assets and must not
+reimplement their behavior. It runs standalone (`concurrency=1`) or as a fleet
+(`concurrency=N`). See `docs/design/backlog-autopilot-intent.md`.
+
+Relationship to neighboring intents:
+
+- `fleet:` is sprint-boundary scoped (closeout, plan, cleanup) and runs once.
+- `wave:` is a single dependency-ordered batch, with no continuing loop.
+- `autopilot:` is the continuing multi-wave loop that composes both, plus the
+  ship-it control loop and delivery-autopilot, plus deploy to final destination.
+
+Execution contract:
+
+1. Start with `@backlog-autopilot`. For fleet mode, start from
+   `@parallel-session-coordinator` preflight and confirm latest-main sync before
+   any write-capable lane starts.
+2. Select the oldest N open, actionable issues via `backlog-burndown` and
+   `@issue-triage`; exclude blocked or needs-info items. Build the next wave by
+   topological sort using `scripts/backlog-autopilot/build-waves.ps1`.
+3. For each item run the phase gates in order: design and debate
+   (`@solution-architect` plus the `design-debate` format), scope
+   (`@task-scope-validator`), positive-and-negative tests
+   (`@strategy-to-automation`), implement, commit, push, and PR.
+4. Land PRs via the GitHub-native merge queue. Autopilot lanes run under
+   `merge_queue_posture: required` so `pr-auto-merge-executor` defers to the
+   queue and merges stay serialized and conflict-free.
+5. Pace with `scripts/backlog-autopilot/pace-gate.ps1`: enforce a minimum
+   interval between merges and exponential backoff on `403`, `429`, and
+   secondary-rate-limit responses.
+6. Monitor for blocks and broken builds (`@self-healing-ci`,
+   `@broken-build-troubleshooter`, `automation-stuck-state-watchdog`); retry
+   within `max_retries`, else escalate and mark blocked.
+7. Deploy to final destination via `post-merge-release-chain` and
+   `publish-to-production`, gated by the ship-it release gate.
+8. Emit a per-cycle checkpoint using `ship-it-control-loop` semantics
+   (`max_cycles`, `max_retries`, `dry_run`, `stop_conditions`) and advance to
+   the next wave. Stop on empty backlog, blocking dependency or policy gate,
+   max-cycle exhaustion, repeated deploy-gate failure, or manual stop.
 
 ## GitHub-Native Routing
 
@@ -306,6 +350,7 @@ uncommitted changes or one an active agent is using.
 | `plan sprint` / `execute sprint` / `sprint` | `sprint:` | `@sprint-planner` |
 | `close sprint` / `sprint closeout` / `sprint retro` | `sprint:` | `@sprint-closeout-auditor` |
 | `wave` | `wave:` | `@sprint-planner`, `@parallel-session-coordinator` |
+| `burn the backlog` / `work the backlog` / `backlog autopilot` / `continuous delivery loop` | `autopilot:` | `@backlog-autopilot`, `@ship-it-control-loop`, `@delivery-autopilot` |
 
 Burn-down and wave execution include open PRs, not just issues. Decomposition
 hierarchy: **sprint -> wave -> issue -> task**.

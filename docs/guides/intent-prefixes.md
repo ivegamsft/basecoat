@@ -45,6 +45,7 @@ release, version drift) to reduce routing ambiguity.
 | `ia:` | Information architecture: content structure, navigation, taxonomy, sitemap | **Soon** | `@ux-designer`, `@tech-writer` |
 | `sprint:` | Sprint planning, execution, or closeout | **Now** | `@sprint-planner`, `@sprint-closeout-auditor` |
 | `wave:` | Dependency-ordered batch within a sprint (issues and PRs) | **Now** | `@sprint-planner`, `@parallel-session-coordinator` |
+| `autopilot:` | Continuous oldest-to-newest backlog burndown in dependency-ordered waves, unattended until stopped or blocked | **Now** | `@backlog-autopilot`, `@parallel-session-coordinator`, `@ship-it-control-loop`, `@delivery-autopilot` |
 
 ---
 
@@ -60,6 +61,7 @@ for selecting chain patterns.
 | Governance | `audit:`, `security:`, `chore:` | findings, policy action, risk controls |
 | GitHub Operations | `workflow:`, `actions:`, `pr:`, `issue:`, `portfolio:`, `release:`, `version:` | run triage, repo hygiene, release/version decisions |
 | Planning | `plan:`, `spike:`, `sprint:`, `wave:` | prioritized backlog, design notes, decision doc |
+| Continuous delivery | `autopilot:` | unattended multi-wave backlog burndown with merge-queue landing and deploy |
 | Packetization | `optimize:` | normalized execution packet and optional execution chain |
 | Quality | `test:`, `docs:`, `ui:`, `ux:`, `ia:` | tests, documentation, or design artifacts |
 | Knowledge capture | `chronicle:` | story/update packet, follow-up issue bundle, optional memory suggestions |
@@ -328,6 +330,7 @@ changes or one an active agent is using.
 | `plan sprint` / `execute sprint` / `sprint` | `sprint:` | `@sprint-planner` |
 | `close sprint` / `sprint closeout` / `sprint retro` | `sprint:` | `@sprint-closeout-auditor` |
 | `wave` | `wave:` | `@sprint-planner`, `@parallel-session-coordinator` |
+| `burn the backlog` / `work the backlog` / `backlog autopilot` / `continuous delivery loop` | `autopilot:` | `@backlog-autopilot`, `@ship-it-control-loop`, `@delivery-autopilot` |
 
 Burn-down and wave execution include open PRs, not just issues. Decomposition
 hierarchy: **sprint -> wave -> issue -> task**.
@@ -449,6 +452,7 @@ Normalized examples:
 | `plan and execute the next wave` | `fleet:` + persistent `ship-it-control-loop` cycle |
 | `execute the next wave` | `fleet:` + persistent `ship-it-control-loop` cycle |
 | `continue ship-it loop` | `fleet:` + persistent `ship-it-control-loop` cycle |
+| `burn the backlog until stopped` / `work the backlog in waves` | `autopilot:` + `@backlog-autopilot` multi-wave loop |
 
 ---
 

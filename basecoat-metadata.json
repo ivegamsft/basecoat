@@ -2094,6 +2094,22 @@
       "argumentHint": ""
     },
     {
+      "name": "basecoat-60-workflow-backlog-autopilot",
+      "description": "Continuous backlog-delivery conductor that burns the issue backlog oldest to newest in dependency-ordered waves, unattended until stopped or blocked. USE FOR: running the autopilot: intent as a persistent multi-wave delivery loop, composing oldest-first selection with design/scope/test/merge-queue/deploy gates, and driving standalone or fleet backlog burndown at a throttle-safe pace. DO NOT USE FOR: implementing feature code directly, bypassing required checks or human-approval boundaries, or one-off single-issue work that does not need a continuing loop.",
+      "category": "Meta",
+      "keywords": [
+        "backlog",
+        "autopilot",
+        "merge-queue",
+        "automation"
+      ],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/basecoat-60-workflow-backlog-autopilot.agent.md",
+      "model": "gpt-5.3-codex",
+      "argumentHint": ""
+    },
+    {
       "name": "basecoat-60-workflow-build-master",
       "description": "Background merge-control agent that keeps healthy lanes moving while isolating broken lanes and dispatching cloud break-fix PRs. USE FOR: lane-aware merge orchestration, CI break containment, cloud fix delegation, and safe resume after recovery. DO NOT USE FOR: bypassing branch protection, direct pushes to protected branches, or autonomous high-risk security/infra remediations.",
       "category": "Meta",

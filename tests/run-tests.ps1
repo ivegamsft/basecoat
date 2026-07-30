@@ -206,6 +206,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running backlog-autopilot tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'backlog-autopilot-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Backlog-autopilot tests failed' -ForegroundColor Red
+    Write-FailureLog 'backlog-autopilot-tests'
+    exit 1
+}
+
 Write-Host 'Running PR auto-merge executor workflow tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'pr-auto-merge-executor-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
