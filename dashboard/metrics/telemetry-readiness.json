@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "collected_at": "2026-07-27T12:08:57.756637Z",
+  "collected_at": "2026-08-03T12:10:31.493189Z",
   "readiness": {
     "overall": "not-ready",
     "missing_dependencies": [
