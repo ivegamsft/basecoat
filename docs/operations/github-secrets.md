@@ -207,6 +207,24 @@ tags and the `main` branch from the source repository (`YOUR-ORG/basecoat`)
 to the production repository (`PRODUCTION-ORG/basecoat`). Without this secret
 the workflow fails immediately on any version tag push or manual dispatch.
 
+The production hygiene workflow uses the same token for explicit mirror
+cleanup. It accepts comma-separated issue numbers, PR numbers, and exact
+branch names. Always preview the plan first; `dry_run` defaults to `true`.
+
+```bash
+gh workflow run close-production-issues.yml \
+  --repo YOUR-ORG/basecoat \
+  -f issue_numbers='221,220' \
+  -f pr_numbers='228,227' \
+  -f branch_names='automation/token-inventory' \
+  -f dry_run=true
+```
+
+After reviewing the dry-run log, repeat with `-f dry_run=false`. The workflow
+rejects malformed or duplicate numbers, wildcard or empty branch values,
+`refs/heads/*` inputs, and protected `main` or `gh-pages` branches. It comments
+before closing issues or automation PRs and deletes only explicitly named refs.
+
 **How to create:**
 
 1. Sign in to <https://github.com> as the production repository owner account
@@ -215,6 +233,8 @@ the workflow fails immediately on any version tag push or manual dispatch.
 4. Set **Repository access** to `Only select repositories` → `PRODUCTION-ORG/basecoat`
 5. Under **Repository permissions**, grant:
    - **Contents**: Read and write
+   - **Issues**: Read and write
+   - **Pull requests**: Read and write
    - **Administration**: Read and write
    - **Workflows**: Read and write
 6. Generate the token and copy it immediately

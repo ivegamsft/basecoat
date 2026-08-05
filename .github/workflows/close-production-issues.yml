@@ -1,27 +1,37 @@
-name: "BaseCoat - Close Production Issues"
+name: "BaseCoat - Production Hygiene"
 
-# Closes migrated issues on ivegamsft/basecoat using PRODUCTION_REPO_TOKEN.
-# Run once after migrating issues to IBuySpy-Shared/basecoat.
+# Applies an explicit, token-backed cleanup plan to the public production mirror.
+# All mutations require enumerated issue, pull request, or branch inputs.
 on:
   workflow_dispatch:
     inputs:
-      dry_run:
-        description: "Dry run (list issues without closing)"
+      issue_numbers:
+        description: "Comma-separated production issue numbers to comment on and close"
         required: false
-        default: "false"
-        type: choice
-        options:
-          - "false"
-          - "true"
+        default: ""
+        type: string
+      pr_numbers:
+        description: "Comma-separated Dependabot or mirror-noise PR numbers to comment on and close"
+        required: false
+        default: ""
+        type: string
+      branch_names:
+        description: "Comma-separated exact production branch names to delete"
+        required: false
+        default: ""
+        type: string
+      dry_run:
+        description: "Validate and preview the explicit cleanup plan without mutations"
+        required: false
+        default: true
+        type: boolean
 
 permissions:
   contents: read
 
 jobs:
   close-issues:
-    name: Close migrated issues on production repo
-    # Pinned to ubuntu-latest with shell: bash — these POSIX-shell steps failed
-    # under PowerShell when RUNNER_DEPLOY routed the job to a Windows deploy runner.
+    name: Apply explicit production hygiene plan
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment: production
@@ -29,143 +39,193 @@ jobs:
       run:
         shell: bash
     env:
-      PROD_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
+      GH_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
       PROD_REPO: ivegamsft/basecoat
+      ISSUE_NUMBERS: ${{ inputs.issue_numbers }}
+      PR_NUMBERS: ${{ inputs.pr_numbers }}
+      BRANCH_NAMES: ${{ inputs.branch_names }}
       DRY_RUN: ${{ inputs.dry_run }}
 
     steps:
-      - name: Validate token
+      - name: Validate and apply explicit hygiene plan
         run: |
-          if [ -z "$PROD_TOKEN" ]; then
-            echo "::error::PRODUCTION_REPO_TOKEN is not set"
+          set -euo pipefail
+
+          trim() {
+            local value="$1"
+            value="${value#"${value%%[![:space:]]*}"}"
+            value="${value%"${value##*[![:space:]]}"}"
+            printf '%s' "$value"
+          }
+
+          fail() {
+            echo "::error::$1"
             exit 1
+          }
+
+          parse_numbers() {
+            local raw="$1"
+            local label="$2"
+            local target_name="$3"
+            local -n target="$target_name"
+            local item value
+            local -a values=()
+            local -A seen=()
+            target=()
+
+            if [ -z "$(trim "$raw")" ]; then
+              return
+            fi
+            if [[ "$raw" =~ (^|,)[[:space:]]*(,|$) ]]; then
+              fail "$label list contains an empty value"
+            fi
+
+            IFS=',' read -ra values <<< "$raw"
+            for item in "${values[@]}"; do
+              value="$(trim "$item")"
+              [[ "$value" =~ ^[1-9][0-9]*$ ]] || fail "Invalid $label number: '$value'"
+              [ -z "${seen[$value]:-}" ] || fail "Duplicate $label number: '$value'"
+              seen[$value]=1
+              target+=("$value")
+            done
+          }
+
+          parse_branches() {
+            local raw="$1"
+            local item branch lower
+            local -a values=()
+            local -A seen=()
+            BRANCHES=()
+
+            if [ -z "$(trim "$raw")" ]; then
+              return
+            fi
+            if [[ "$raw" =~ (^|,)[[:space:]]*(,|$) ]]; then
+              fail "Branch list contains an empty value"
+            fi
+
+            IFS=',' read -ra values <<< "$raw"
+            for item in "${values[@]}"; do
+              branch="$(trim "$item")"
+              [ -n "$branch" ] || fail "Branch names must not be empty"
+              [[ "$branch" != refs/heads/* ]] || fail "Use an exact branch name, not a refs/heads path: '$branch'"
+              lower="${branch,,}"
+              [[ "$lower" != "main" && "$lower" != "gh-pages" ]] || fail "Protected branch deletion is forbidden: '$branch'"
+              if [[ "$branch" == *"*"* ||
+                    "$branch" == *"?"* ||
+                    "$branch" == *"["* ||
+                    "$branch" == *"]"* ||
+                    "$branch" == *"{"* ||
+                    "$branch" == *"}"* ]]; then
+                fail "Wildcard branch values are forbidden: '$branch'"
+              fi
+              git check-ref-format --branch "$branch" >/dev/null 2>&1 || fail "Invalid branch name: '$branch'"
+              [ -z "${seen[$branch]:-}" ] || fail "Duplicate branch name: '$branch'"
+              seen[$branch]=1
+              BRANCHES+=("$branch")
+            done
+          }
+
+          [[ "${DRY_RUN,,}" == "true" || "${DRY_RUN,,}" == "false" ]] \
+            || fail "dry_run must be true or false"
+
+          declare -a ISSUES PRS BRANCHES
+          parse_numbers "$ISSUE_NUMBERS" "issue" ISSUES
+          parse_numbers "$PR_NUMBERS" "pull request" PRS
+          parse_branches "$BRANCH_NAMES"
+
+          if [ "${#ISSUES[@]}" -eq 0 ] && [ "${#PRS[@]}" -eq 0 ] && [ "${#BRANCHES[@]}" -eq 0 ]; then
+            fail "No hygiene targets supplied; provide at least one explicit issue, PR, or branch"
           fi
-          echo "Token present, proceeding"
 
-      - name: Close Dependabot PRs
-        run: |
-          COMMENT="Closing: ivegamsft/basecoat is a production mirror of IBuySpy-Shared/basecoat. \
-          Dependency updates must be made in the source repo and will be reflected here on the next publish. \
-          Any direct changes to this repo will be overwritten by the next release publish."
+          [ -n "${GH_TOKEN:-}" ] || fail "PRODUCTION_REPO_TOKEN is not set"
+          gh api --silent "repos/$PROD_REPO" >/dev/null
 
-          for PR in 154 192; do
-            echo "Processing PR #$PR..."
-            if [ "$DRY_RUN" = "true" ]; then
-              echo "[DRY RUN] Would close PR #$PR"
+          PR_COMMENT="Closing this pull request because $PROD_REPO is a production mirror. \
+          Dependency and automation changes must be made in the source-of-truth repository \
+          and will arrive through the controlled publication process. Direct mirror changes \
+          are overwritten by the next publish."
+          ISSUE_COMMENT="Closing this issue because $PROD_REPO is a production mirror. \
+          Development and issue tracking belong in the source-of-truth repository; resolved \
+          changes are published here through the controlled release process."
+
+          for pr in "${PRS[@]}"; do
+            pr_data="$(gh api "repos/$PROD_REPO/pulls/$pr")"
+            state="$(jq -r '.state' <<< "$pr_data")"
+            author="$(jq -r '.user.login // ""' <<< "$pr_data")"
+            head_ref="$(jq -r '.head.ref // ""' <<< "$pr_data")"
+            labels="$(jq -r '[.labels[]?.name] | join(",")' <<< "$pr_data")"
+
+            if [ "$state" = "closed" ]; then
+              echo "PR #$pr is already closed; no action needed"
               continue
             fi
-            # Add comment then close
-            gh pr comment "$PR" --repo "$PROD_REPO" --body "$COMMENT" || true
-            gh pr close "$PR" --repo "$PROD_REPO" || echo "Warning: could not close PR #$PR (may already be closed)"
-          done
-        env:
-          GH_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
 
-      - name: Close individual migrated issues
-        run: |
-          # Map: production issue number -> source repo issue number
-          declare -A MIGRATIONS=(
-            [153]=1383
-            [162]=1384
-            [163]=1385
-            [164]=1386
-            [165]=1387
-          )
+            if [[ "$author" != "app/dependabot" &&
+                  "$author" != "dependabot[bot]" &&
+                  "$author" != "app/github-actions" &&
+                  "$author" != "github-actions[bot]" &&
+                  "$head_ref" != dependabot/* &&
+                  "$head_ref" != automation/* &&
+                  ",$labels," != *",dependencies,"* &&
+                  ",$labels," != *",automated-report,"* &&
+                  ",$labels," != *",automation,"* ]]; then
+              fail "PR #$pr is not recognized as Dependabot or mirror automation noise"
+            fi
 
-          for PROD_NUM in "${!MIGRATIONS[@]}"; do
-            SRC_NUM="${MIGRATIONS[$PROD_NUM]}"
-            COMMENT="Closing: this issue has been migrated to the source repository as IBuySpy-Shared/basecoat#${SRC_NUM}. \
-          All development happens in IBuySpy-Shared/basecoat — changes will appear in this production mirror on the next release."
-
-            echo "Closing production #$PROD_NUM -> source #$SRC_NUM"
-            if [ "$DRY_RUN" = "true" ]; then
-              echo "[DRY RUN] Would close issue #$PROD_NUM"
+            if [ "${DRY_RUN,,}" = "true" ]; then
+              echo "[DRY RUN] Would comment on and close PR #$pr ($head_ref)"
               continue
             fi
-            gh issue comment "$PROD_NUM" --repo "$PROD_REPO" --body "$COMMENT" || true
-            gh issue close "$PROD_NUM" --repo "$PROD_REPO" || echo "Warning: could not close issue #$PROD_NUM"
+
+            gh api --method POST "repos/$PROD_REPO/issues/$pr/comments" -f body="$PR_COMMENT" >/dev/null
+            gh api --method PATCH "repos/$PROD_REPO/pulls/$pr" -f state=closed >/dev/null
+            echo "Commented on and closed PR #$pr"
           done
-        env:
-          GH_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
 
-      - name: Close config-secrets-audit cluster (166-180)
-        run: |
-          SRC_NUM=1388
-          COMMENT="Closing: this issue has been consolidated into IBuySpy-Shared/basecoat#${SRC_NUM} \
-          (feat: config-secrets-audit skill consolidated tracking). \
-          Development happens in IBuySpy-Shared/basecoat — changes appear in this production mirror on the next release."
+          for issue in "${ISSUES[@]}"; do
+            issue_data="$(gh api "repos/$PROD_REPO/issues/$issue")"
+            if [ "$(jq -r 'has("pull_request")' <<< "$issue_data")" = "true" ]; then
+              fail "#$issue is a pull request; supply it through pr_numbers"
+            fi
+            state="$(jq -r '.state' <<< "$issue_data")"
 
-          for NUM in $(seq 166 180); do
-            echo "Closing production #$NUM -> source #$SRC_NUM"
-            if [ "$DRY_RUN" = "true" ]; then
-              echo "[DRY RUN] Would close issue #$NUM"
+            if [ "$state" = "closed" ]; then
+              echo "Issue #$issue is already closed; no action needed"
               continue
             fi
-            gh issue comment "$NUM" --repo "$PROD_REPO" --body "$COMMENT" || true
-            gh issue close "$NUM" --repo "$PROD_REPO" || echo "Warning: could not close issue #$NUM"
-          done
-        env:
-          GH_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
 
-      - name: Close workflow features cluster (181-190)
-        run: |
-          SRC_NUM=1389
-          COMMENT="Closing: this issue has been consolidated into IBuySpy-Shared/basecoat#${SRC_NUM} \
-          (feat: workflow enhancements consolidated tracking). \
-          Development happens in IBuySpy-Shared/basecoat — changes appear in this production mirror on the next release."
-
-          for NUM in $(seq 181 190); do
-            echo "Closing production #$NUM -> source #$SRC_NUM"
-            if [ "$DRY_RUN" = "true" ]; then
-              echo "[DRY RUN] Would close issue #$NUM"
+            if [ "${DRY_RUN,,}" = "true" ]; then
+              echo "[DRY RUN] Would comment on and close issue #$issue"
               continue
             fi
-            gh issue comment "$NUM" --repo "$PROD_REPO" --body "$COMMENT" || true
-            gh issue close "$NUM" --repo "$PROD_REPO" || echo "Warning: could not close issue #$NUM"
+
+            gh api --method POST "repos/$PROD_REPO/issues/$issue/comments" -f body="$ISSUE_COMMENT" >/dev/null
+            gh api --method PATCH "repos/$PROD_REPO/issues/$issue" -f state=closed >/dev/null
+            echo "Commented on and closed issue #$issue"
           done
-        env:
-          GH_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
 
-      - name: Close agent-merge cluster (193-197)
-        run: |
-          SRC_NUM=1390
-          COMMENT="Closing: this issue has been consolidated into IBuySpy-Shared/basecoat#${SRC_NUM} \
-          (feat: agent-merge automation consolidated tracking). \
-          Development happens in IBuySpy-Shared/basecoat — changes appear in this production mirror on the next release."
+          for branch in "${BRANCHES[@]}"; do
+            encoded_branch="$(jq -rn --arg value "$branch" '$value | @uri')"
+            ref_data="$(gh api "repos/$PROD_REPO/git/ref/heads/$encoded_branch")"
+            actual_ref="$(jq -r '.ref' <<< "$ref_data")"
+            [ "$actual_ref" = "refs/heads/$branch" ] \
+              || fail "Resolved ref does not exactly match requested branch '$branch'"
 
-          for NUM in $(seq 193 197); do
-            echo "Closing production #$NUM -> source #$SRC_NUM"
-            if [ "$DRY_RUN" = "true" ]; then
-              echo "[DRY RUN] Would close issue #$NUM"
+            if [ "${DRY_RUN,,}" = "true" ]; then
+              echo "[DRY RUN] Would delete exact branch '$branch'"
               continue
             fi
-            gh issue comment "$NUM" --repo "$PROD_REPO" --body "$COMMENT" || true
-            gh issue close "$NUM" --repo "$PROD_REPO" || echo "Warning: could not close issue #$NUM"
-          done
-        env:
-          GH_TOKEN: ${{ secrets.PRODUCTION_REPO_TOKEN }}
 
-      - name: Summary
-        if: always()
-        run: |
+            gh api --method DELETE "repos/$PROD_REPO/git/refs/heads/$encoded_branch"
+            echo "Deleted exact branch '$branch'"
+          done
+
           {
-            echo "## Production Issue Cleanup Summary"
+            echo "## Production Hygiene Summary"
             echo ""
-            if [ "$DRY_RUN" = "true" ]; then
-              echo "> Dry run mode - no issues were actually closed"
-            else
-              echo "Closed/commented on the following production issues:"
-            fi
-            echo ""
-            echo "| Production | Action | Source Issue |"
-            echo "|-----------|--------|--------------|"
-            echo "| PR #154, #192 | Close - mirror repo, deps managed in source | N/A |"
-            echo "| #153 | Migrate | IBuySpy-Shared/basecoat#1383 |"
-            echo "| #162 | Migrate | IBuySpy-Shared/basecoat#1384 |"
-            echo "| #163 | Migrate | IBuySpy-Shared/basecoat#1385 |"
-            echo "| #164 | Migrate | IBuySpy-Shared/basecoat#1386 |"
-            echo "| #165 | Migrate | IBuySpy-Shared/basecoat#1387 |"
-            echo "| #166-#180 (15 issues) | Consolidate | IBuySpy-Shared/basecoat#1388 |"
-            echo "| #181-#190 (10 issues) | Consolidate | IBuySpy-Shared/basecoat#1389 |"
-            echo "| #193-#197 (5 issues) | Consolidate | IBuySpy-Shared/basecoat#1390 |"
+            echo "- Mode: \`${DRY_RUN,,}\`"
+            echo "- Issues: ${#ISSUES[@]}"
+            echo "- Pull requests: ${#PRS[@]}"
+            echo "- Branches: ${#BRANCHES[@]}"
           } >> "$GITHUB_STEP_SUMMARY"

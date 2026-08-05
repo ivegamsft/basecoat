@@ -71,14 +71,45 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Remove files that must not appear in the public mirror.
-          # sprint-plans and sprint summaries contain internal operational detail.
-          # docs/audit contains internal audit reports.
+          # Remove source-repository operations, test evidence, and raw analysis that
+          # are not part of the supported public distribution.
+          # Only docs.yml is needed in the mirror; the source repository dispatches it
+          # after publishing. All other workflows and Dependabot are internal automation.
           INTERNAL_PATTERNS=(
             'SPRINT-*-EXECUTION-SUMMARY.md'
-            'docs/sprint-plans/*.md'
-            'docs/audit/*.md'
-            'docs/archive/sprint-closeout/**'
+            'tests/**'
+            ':(glob)**/tests/**'
+            ':(glob)**/*.test.*'
+            'analysis/**'
+            'reports/**'
+            'checks.json'
+            'docs/sprint-plans/**'
+            'docs/audit/**'
+            'docs/archive/**'
+            '.github/agent-templates/**'
+            '.github/dependabot.yml'
+            '.github/downstream-reviewer-routing-targets.json'
+            '.github/instructions/**'
+            '.github/workflow-templates/**'
+            'docs/design/copilot-extension-prd.md'
+            'docs/guides/PRODUCTION_TOKEN_SETUP.md'
+            'docs/operations/blocked-issues.md'
+            'docs/operations/copilot-extension-*.md'
+            'docs/operations/downstream-intake-pilot-rollout-checklist.md'
+            'docs/operations/github-secrets.md'
+            'docs/operations/intake-pilot-wawkr-results.md'
+            'docs/operations/pr-gate-intake-rollout.md'
+            'docs/reference/workflows/pr-flow-hygiene.md'
+            'docs/research/**'
+            'docs/templates/copilot-extension/**'
+            'instructions/references/process/issue-and-pr-workflow.md'
+            'scripts/deploy-merge-queue.ps1'
+            'scripts/deploy-merge-queue.sh'
+            'scripts/validate-production-token.ps1'
+            'scripts/validate-production-token.sh'
+          )
+          PUBLIC_WORKFLOWS=(
+            '.github/workflows/docs.yml'
           )
 
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -94,6 +125,26 @@ jobs:
               REMOVED=$((REMOVED + $(echo "$MATCHES" | wc -l)))
             fi
           done
+
+          is_public_workflow() {
+            local candidate="$1"
+            local allowed
+            for allowed in "${PUBLIC_WORKFLOWS[@]}"; do
+              if [[ "$candidate" == "$allowed" ]]; then
+                return 0
+              fi
+            done
+            return 1
+          }
+
+          while IFS= read -r workflow; do
+            if is_public_workflow "$workflow"; then
+              echo "Keeping public workflow: $workflow"
+              continue
+            fi
+            git rm -f -- "$workflow"
+            REMOVED=$((REMOVED + 1))
+          done < <(git ls-files -- ':(glob).github/workflows/**')
 
           if [ "$REMOVED" -gt 0 ]; then
             git diff --cached --quiet || git commit -m "chore(publish): remove internal-only content for ${TAG}"
@@ -119,69 +170,145 @@ jobs:
           git diff --cached --quiet || git commit -m "chore(publish): stamp build version ${TAG}"
           echo "Published version stamped: ${VERSION}"
 
-      - name: Rewrite internal repo links for production
+      - name: Sanitize internal identifiers for production
         env:
           TAG: ${{ steps.resolve_tag.outputs.tag }}
         run: |
           set -euo pipefail
 
-          # Rewrite every github.com and raw.githubusercontent.com URL that references
-          # the private source repo (IBuySpy-Shared/basecoat) to point at the public
-          # production mirror (ivegamsft/basecoat). Applied across all tracked text
-          # files except tests/ (see exclusion note below) so consumers never encounter
-          # links they cannot access.
+          # Exact source-repository references have a truthful public equivalent.
+          # Remaining organization examples are rewritten only in an explicit set of
+          # public templates, scripts, and docs where a neutral example is valid.
           #
           # Patterns replaced:
-          #   github.com/IBuySpy-Shared/basecoat         ->  github.com/ivegamsft/basecoat
+          #   IBuySpy-Shared/basecoat (repository boundary) -> ivegamsft/basecoat
           #   raw.githubusercontent.com/IBuySpy-Shared/basecoat  ->  raw.githubusercontent.com/ivegamsft/basecoat
           #   ibuyspy-shared.github.io/basecoat           ->  ivegamsft.github.io/basecoat
-          #
-          # Binary files are skipped automatically via grep -I (--binary-files=without-match).
-          #
-          # tests/ is EXCLUDED: test fixtures embed the literal internal repo URL as
-          # sample data and assert on it exactly. Rewriting those strings corrupts the
-          # mirror's CI (the incident-routing test's Case 18 exits non-zero), turning the
-          # public mirror red while internal main — which is never rewritten — stays green.
-          # Test URLs are fixtures, not user-facing links, so they must not be rewritten.
 
           TEXT_FILES=$(git ls-files -- \
             '*.md' '*.yml' '*.yaml' '*.json' '*.ps1' '*.sh' '*.txt' \
-            '*.ts' '*.js' '*.py' \
-            | grep -v '^$' | grep -v '^tests/' || true)
+            '*.ts' '*.js' '*.py' '*.html' \
+            | grep -v '^$' || true)
 
           if [ -z "$TEXT_FILES" ]; then
             echo "No text files to rewrite."
             exit 0
           fi
 
-          # grep -lI: list only files that contain the pattern and are text (not binary)
           TARGETS=$(echo "$TEXT_FILES" | xargs grep -lI \
-            -e 'github\.com/IBuySpy-Shared/basecoat' \
-            -e 'raw\.githubusercontent\.com/IBuySpy-Shared/basecoat' \
+            -e 'IBuySpy-Shared/basecoat' \
             -e 'ibuyspy-shared\.github\.io/basecoat' \
             2>/dev/null || true)
 
-          if [ -z "$TARGETS" ]; then
-            echo "No internal repo links found — nothing to rewrite."
-            exit 0
+          if [ -n "$TARGETS" ]; then
+            echo "$TARGETS" | while IFS= read -r f; do
+              perl -pi -e '
+                s{\QIBuySpy-Shared/basecoat.git\E}{ivegamsft/basecoat.git}g;
+                s{IBuySpy-Shared/basecoat\.(?![A-Za-z0-9_-])}{ivegamsft/basecoat.}g;
+                s{IBuySpy-Shared/basecoat(?![A-Za-z0-9_.-])}{ivegamsft/basecoat}g;
+                s{ibuyspy-shared\.github\.io/basecoat}{ivegamsft.github.io/basecoat}g;
+              ' -- "$f"
+            done
+          else
+            echo "No exact source-repository references found."
           fi
 
-          echo "$TARGETS" | while IFS= read -r f; do
-            sed -i \
-              -e 's|github\.com/IBuySpy-Shared/basecoat|github.com/ivegamsft/basecoat|g' \
-              -e 's|raw\.githubusercontent\.com/IBuySpy-Shared/basecoat|raw.githubusercontent.com/ivegamsft/basecoat|g' \
-              -e 's|ibuyspy-shared\.github\.io/basecoat|ivegamsft.github.io/basecoat|g' \
-              -- "$f"
+          NEUTRAL_ORG_FILES=(
+            'CONTRIBUTING.md'
+            'docs/architecture/multi-agent-orchestration-patterns.md'
+            'instructions/basecoat-20-lang-ruby-on-rails.instructions.md'
+            'mcp/basecoat-extension/README.md'
+            'mcp/basecoat-extension/scripts/bootstrap-credentials.ps1'
+            'scripts/adoption/detect-basecoat.ps1'
+            'scripts/bootstrap-copilot-space.ps1'
+            'scripts/sweep-enterprise-memory.ps1'
+            'scripts/validate-intake-contract.ps1'
+            'skills/environment-bootstrap/references/oidc-federation.md'
+          )
+
+          for f in "${NEUTRAL_ORG_FILES[@]}"; do
+            if git ls-files --error-unmatch "$f" >/dev/null 2>&1; then
+              sed -i \
+                -e 's|IBuySpy-Shared|example-org|g' \
+                -e 's|IBuySpy-Dev|example-org|g' \
+                -- "$f"
+            fi
           done
 
-          CHANGED=$(echo "$TARGETS" | wc -l)
-          echo "Internal links rewritten in $CHANGED file(s):"
-          echo "$TARGETS"
+          NEUTRAL_MEMORY_FILES=(
+            'CHANGELOG.md'
+            'docs/architecture/multi-agent-orchestration-patterns.md'
+            'docs/architecture/overview.md'
+            'docs/memory/learning-model.md'
+            'docs/memory/shared-memory-guide.md'
+          )
+          for f in "${NEUTRAL_MEMORY_FILES[@]}"; do
+            if git ls-files --error-unmatch "$f" >/dev/null 2>&1; then
+              sed -i 's|IBuySpy-Shared/basecoat-memory|example-org/basecoat-memory|g' "$f"
+            fi
+          done
+
+          if git ls-files --error-unmatch scripts/submit-learning.sh >/dev/null 2>&1; then
+            sed -i \
+              -e 's|default: IBuySpy-Shared/basecoat-memory|requires --memory-repo or BASECOAT_SHARED_MEMORY_REPO|g' \
+              -e 's|MEMORY_REPO="${BASECOAT_SHARED_MEMORY_REPO:-IBuySpy-Shared/basecoat-memory}"|MEMORY_REPO="${BASECOAT_SHARED_MEMORY_REPO:-}"|' \
+              -e '/^errors=()$/a [[ -z "$MEMORY_REPO" ]] \&\& errors+=("--memory-repo or BASECOAT_SHARED_MEMORY_REPO is required")' \
+              scripts/submit-learning.sh
+          fi
+          if git ls-files --error-unmatch scripts/submit-learning.ps1 >/dev/null 2>&1; then
+            sed -i \
+              -e 's|Target memory repository\. Default: env BASECOAT_SHARED_MEMORY_REPO or IBuySpy-Shared/basecoat-memory\.|Target memory repository. Provide explicitly or set env BASECOAT_SHARED_MEMORY_REPO.|' \
+              -e 's|\[string\]\$MemoryRepo = (\$env:BASECOAT_SHARED_MEMORY_REPO ?? "IBuySpy-Shared/basecoat-memory"),|[string]$MemoryRepo = $env:BASECOAT_SHARED_MEMORY_REPO,|' \
+              -e '/^\$errors = \[System.Collections.Generic.List\[string\]\]::new()$/a if ([string]::IsNullOrWhiteSpace($MemoryRepo)) { $errors.Add("MemoryRepo or BASECOAT_SHARED_MEMORY_REPO is required.") }' \
+              scripts/submit-learning.ps1
+          fi
+
+          if git ls-files --error-unmatch CHANGELOG.md >/dev/null 2>&1; then
+            sed -i 's|IBuySpy-Shared|source organization|g' CHANGELOG.md
+          fi
+          if git ls-files --error-unmatch docs/architecture/overview.md >/dev/null 2>&1; then
+            sed -i 's|BaseCoat (IBuySpy-Shared)|BaseCoat (public mirror)|g' docs/architecture/overview.md
+          fi
+          if git ls-files --error-unmatch docs/index.md >/dev/null 2>&1; then
+            sed -i \
+              -e '\|operations/blocked-issues\.md|d' \
+              -e '\|operations/copilot-extension-github-app-registration\.md|d' \
+              -e '\|operations/github-secrets\.md|d' \
+              -e '/^## Archive$/,$d' \
+              docs/index.md
+          fi
+          if git ls-files --error-unmatch mkdocs.yml >/dev/null 2>&1; then
+            sed -i \
+              -e 's|IBuySpy-Shared contributors|BaseCoat contributors|g' \
+              -e '\|PR Flow Hygiene: reference/workflows/pr-flow-hygiene\.md|d' \
+              mkdocs.yml
+          fi
+          for f in skills/dotnet-modernization/SKILL.md skills/entity-framework-migration/SKILL.md; do
+            if git ls-files --error-unmatch "$f" >/dev/null 2>&1; then
+              sed -i 's|author: IBuySpy-Shared|author: BaseCoat contributors|g' "$f"
+            fi
+          done
+
+          # LICENSE retains the legal copyright holder. It is the sole permitted
+          # occurrence; every other internal identifier fails the publication.
+          FORBIDDEN_MATCHES=$(git grep -inI -E 'ibuyspy-shared|ibuyspy-dev' -- . || true)
+          UNEXPECTED_MATCHES=$(printf '%s\n' "$FORBIDDEN_MATCHES" \
+            | grep -v -E '^LICENSE:3:Copyright \(c\) 2025 IBuySpy-Shared$' \
+            | grep -v '^$' || true)
+          if [ -n "$UNEXPECTED_MATCHES" ]; then
+            echo "::error::Forbidden internal identifiers remain in the public payload:"
+            echo "$UNEXPECTED_MATCHES"
+            exit 1
+          fi
+
+          if [ -n "$FORBIDDEN_MATCHES" ]; then
+            echo "Allowed legal attribution retained: LICENSE:3"
+          fi
 
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
           git add -u
-          git diff --cached --quiet || git commit -m "chore(publish): rewrite internal repo links for ${TAG}"
+          git diff --cached --quiet || git commit -m "chore(publish): sanitize public identifiers for ${TAG}"
 
       - name: Push to production repository
         id: push-production
