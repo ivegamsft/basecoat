@@ -41,8 +41,8 @@ param cpuCores string = '0.25'
 @description('Container memory in Gi.')
 param memoryGi string = '0.5'
 
-@description('Minimum replicas (0 = scale to zero).')
-param minReplicas int = 0
+@description('Minimum replicas (1 keeps environment active; set to 0 only for cost-saving dev environments that can tolerate archive/cold-start).')
+param minReplicas int = 1
 
 @description('Maximum replicas.')
 param maxReplicas int = 3

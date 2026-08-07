@@ -30,7 +30,8 @@ Azure Container Apps Environment  (bcmcp-env)
            └── get-repo-metrics
 ```
 
-Scales to zero between requests. Costs ~$0 at idle.
+Keeps one replica running at all times by default (`minReplicas = 1`).
+Azure archives Consumption-tier environments when all apps scale to zero and stay idle — setting `minReplicas = 0` in a long-running environment will eventually trigger archival and require full environment recreation to restore.
 
 ## One-Time Setup
 
@@ -97,7 +98,7 @@ az deployment group create \
 | `metricsBaseUrl` | *(required — no safe default)* | GitHub Pages metrics URL, e.g. `https://YOUR_ORG.github.io/basecoat/metrics` |
 | `cpuCores` | `0.25` | vCPU per replica |
 | `memoryGi` | `0.5` | Memory per replica |
-| `minReplicas` | `0` | Scale to zero when idle |
+| `minReplicas` | `1` | Minimum replicas; keep at `1` to prevent environment archival. Only set to `0` for disposable dev environments you can afford to recreate. |
 | `maxReplicas` | `3` | Max replicas under load |
 
 ## Outputs

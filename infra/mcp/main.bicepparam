@@ -15,5 +15,8 @@ param metricsBaseUrl = 'https://YOUR_ORG.github.io/basecoat/metrics'
 // param environment   = 'prod'
 // param cpuCores      = '0.25'
 // param memoryGi      = '0.5'
-// param minReplicas   = 0
 // param maxReplicas   = 3
+// ⚠️  minReplicas defaults to 1. Setting it to 0 enables scale-to-zero but risks
+//     Azure archiving the environment after extended idle periods, requiring full
+//     environment recreation. Only use 0 for disposable dev environments.
+// param minReplicas   = 1
