@@ -55,7 +55,7 @@ model: some-private-model
 
     $registry = Get-Content -Path $outputPath -Raw | ConvertFrom-Json -AsHashtable
     Assert-Equal -Actual $registry.agents['allowed-model-agent'].model -Expected 'gpt-5.4-mini' -Message 'Allowed model should remain unchanged'
-    Assert-Equal -Actual $registry.agents['mapped-model-agent'].model -Expected 'claude-sonnet-4.5' -Message 'Mapped model should resolve to allowed fallback'
+    Assert-Equal -Actual $registry.agents['mapped-model-agent'].model -Expected 'claude-sonnet-4.6' -Message 'CLI-supported model should remain unchanged'
     Assert-Equal -Actual $registry.agents['unknown-model-agent'].model -Expected 'gpt-5.4-mini' -Message 'Unknown model should resolve to default fallback'
 
     Write-Host 'generate-registry model fallback tests passed'

@@ -45,12 +45,6 @@ $tierByAgent = @{
     "ux-designer" = "balanced"
 }
 
-$modelByTier = @{
-    "fast" = "gpt-5.4-mini"
-    "balanced" = "gpt-5.3-codex"
-    "reasoning" = "gpt-5.3-codex"
-}
-
 function Get-AgentNameFromFile {
     param([string]$FileName)
     $base = $FileName -replace '\.agent\.md$', ''
@@ -102,7 +96,7 @@ Get-ChildItem -Path $AgentsPath -Filter "*.agent.md" -File | Sort-Object Name | 
     }
 
     $tier = $tierByAgent[$agentName]
-    $resolved = Resolve-FrontmatterModel -RequestedModel $modelByTier[$tier] -Tier $tier -Context $agentName
+    $resolved = Resolve-FrontmatterModel -RequestedModel (Get-TierDefaultFrontmatterModel -Tier $tier) -Tier $tier -Context $agentName
     $targetModel = $resolved.Model
     if ($resolved.Substituted) {
         Write-Warning "[$agentName] $($resolved.Reason): '$($resolved.Requested)' -> '$targetModel'"

@@ -3,7 +3,7 @@ name: run-history-cleanup
 description: "Cleans GitHub Actions workflow run history safely by deleting stale, completed runs according to retention policy while preserving evidence for active incidents and compliance windows. USE FOR: pruning old completed workflow runs, reducing run-history noise, enforcing run-retention policy, and producing a cleanup report. DO NOT USE FOR: deleting in-progress runs, deleting runs tied to active incidents, changing workflow YAML retention-days, or bypassing compliance retention rules."
 visibility: basic
 model: gpt-5.4-mini
-fallback_models: [claude-sonnet-4.5]
+fallback_models: [claude-sonnet-4.6]
 compatibility: []
 metadata:
   category: workflow

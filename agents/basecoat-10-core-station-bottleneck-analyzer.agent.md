@@ -4,7 +4,7 @@ description: "Use when analyzing takt-time JSON to compute queue length and thro
 visibility: basic
 tools: [read_file, run_terminal_command, create_github_issue]
 model: claude-sonnet-4.6
-fallback_models: [claude-sonnet-4.5]
+fallback_models: [gpt-5.3-codex]
 compatibility: []
 metadata:
   category: core

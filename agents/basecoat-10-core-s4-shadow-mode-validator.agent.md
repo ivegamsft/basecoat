@@ -3,7 +3,7 @@ name: s4-shadow-mode-validator
 description: "Use when comparing shadow-mode and live behavior during S4 soak before cutover. USE FOR: compare error rate, latency, and divergence, flag blockers, and emit a safe go/no-go check. DO NOT USE FOR: state curation or general monitoring."
 visibility: basic
 model: claude-sonnet-4.6
-fallback_models: [claude-sonnet-4.5]
+fallback_models: [gpt-5.3-codex]
 compatibility: []
 metadata:
   category: core

@@ -3,7 +3,7 @@ name: replanning-engine
 description: "Use when S2 assessment data shows the work is far larger than estimated and a replanning decision is needed. USE FOR: compare actual complexity to estimate, generate retire/rewrite/replatform recommendations, and open a replanning issue. DO NOT USE FOR: routine triage or deployment execution."
 visibility: basic
 model: claude-sonnet-4.6
-fallback_models: [claude-sonnet-4.5]
+fallback_models: [gpt-5.3-codex]
 compatibility: []
 metadata:
   category: core

@@ -5,8 +5,8 @@
 
 .DESCRIPTION
     Scans agents/*.agent.md for YAML frontmatter, then adds any agents not already
-    present in basecoat-metadata.json. Existing entries (with their curated keywords,
-    aliases, and argumentHints) are preserved unchanged.
+    present in basecoat-metadata.json. Existing entries preserve curated keywords,
+    aliases, and argumentHints while their model is synchronized from frontmatter.
 
     Newly discovered agents get minimal metadata extracted from frontmatter
     (name, description, category, keywords from tags, model). After running, review
@@ -121,6 +121,17 @@ foreach ($entry in @($meta.agents)) {
     }
 }
 $meta.agents = $dedupedAgents.ToArray()
+
+foreach ($entry in @($meta.agents)) {
+    $agentPath = Join-Path $repoRoot ([string]$entry.file)
+    if (-not (Test-Path -LiteralPath $agentPath)) {
+        continue
+    }
+
+    $content = Get-Content -LiteralPath $agentPath -Raw
+    $rawModel = if ($content -match '(?m)^model:\s*(\S+)') { $Matches[1] } else { "" }
+    $entry.model = (Resolve-FrontmatterModel -RequestedModel $rawModel -Tier "balanced" -Context ([string]$entry.name)).Model
+}
 
 $existingNames = $meta.agents | Select-Object -ExpandProperty name
 

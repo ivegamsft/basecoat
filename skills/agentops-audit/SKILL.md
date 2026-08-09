@@ -28,6 +28,7 @@ Audit agent or skill specifications and produce an actionable scorecard, risk li
 - Recommending concrete, prioritized fixes
 - Producing a revised spec with measurable success criteria
 - Generating routing rationale and estimated turn profile
+- Auditing model IDs and reasoning-effort compatibility against the generated capability catalog
 - Supporting `audit` and `create_and_audit` flows in `agent-designer`
 
 ## DO NOT USE FOR
@@ -71,6 +72,11 @@ Always include:
 - Do not assume model family names are portable across providers.
 - Prefer measurable success criteria over subjective language.
 - Escalate when constraints conflict (for example: fast + deep reasoning + lowest cost).
+- Read `docs/reference/model-capabilities.json` before recommending a model.
+- Treat `reasoning_depth` as task metadata; do not emit `reasoning_effort` unless
+  the selected model advertises configurable reasoning.
+- Report unknown model IDs and fixed-effort models separately. Effective
+  organization and user entitlement remains a runtime check.
 
 ## Related Skills
 

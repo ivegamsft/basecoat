@@ -3,7 +3,7 @@ name: issue-triage
 description: "Issue quality triage specialist. USE FOR: duplicate/invalid detection, closed-issue verification, label/type/priority enforcement, and issue/PR linkage checks. DO NOT USE FOR: implementation coding, unrelated PR management, or sprint capacity planning."
 visibility: basic
 model: gpt-5.4-mini
-fallback_models: [claude-sonnet-4.5]
+fallback_models: [claude-sonnet-4.6]
 compatibility: []
 metadata:
   category: core

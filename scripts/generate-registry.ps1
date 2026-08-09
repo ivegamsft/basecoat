@@ -19,42 +19,14 @@ param(
 )
 
 $agents = @{}
-$allowedModels = @(
-    'gpt-5.4-mini',
-    'gpt-5.3-codex',
-    'claude-sonnet-4.5',
-    'claude-haiku-4.5'
-)
-$fallbackModel = 'gpt-5.4-mini'
-$fallbackMap = @{
-    'claude-sonnet-4.6' = 'claude-sonnet-4.5'
-    'claude-sonnet-4.7' = 'claude-sonnet-4.5'
-    'claude-opus-4.6'   = 'claude-sonnet-4.5'
-    'claude-opus-4.7'   = 'claude-sonnet-4.5'
-    'claude-opus-4.8'   = 'claude-sonnet-4.5'
-    'gpt-5.5'           = 'gpt-5.3-codex'
-    'gpt-5.4'           = 'gpt-5.3-codex'
+$policyScriptPath = Join-Path $PSScriptRoot 'model-fallback-policy.ps1'
+if (-not (Test-Path -LiteralPath $policyScriptPath)) {
+    throw "Model fallback policy script not found: $policyScriptPath"
 }
+. $policyScriptPath
+
+$fallbackModel = Get-DefaultFrontmatterModel
 $modelSubstitutions = New-Object System.Collections.Generic.List[string]
-
-function Resolve-AgentModel {
-    param([string]$RequestedModel)
-
-    $trimmed = ($RequestedModel ?? '').Trim().Trim('"').Trim("'")
-    if ([string]::IsNullOrWhiteSpace($trimmed)) {
-        return $fallbackModel
-    }
-
-    if ($allowedModels -contains $trimmed) {
-        return $trimmed
-    }
-
-    if ($fallbackMap.ContainsKey($trimmed) -and $allowedModels -contains $fallbackMap[$trimmed]) {
-        return $fallbackMap[$trimmed]
-    }
-
-    return $fallbackModel
-}
 
 Get-ChildItem $AgentsPath -Filter "*.agent.md" | ForEach-Object {
     $file = $_.FullName
@@ -71,7 +43,7 @@ Get-ChildItem $AgentsPath -Filter "*.agent.md" | ForEach-Object {
         $name = if ($frontmatter -match "^name:\s*(.+)$") { $Matches[1].Trim().Trim('"') } else { $id }
         $description = if ($frontmatter -match "^description:\s*(.+)$") { $Matches[1].Trim().Trim('"') } else { "No description" }
         $requestedModel = if ($frontmatter -match "(?m)^model:\s*(.+)$") { $Matches[1].Trim() } else { $fallbackModel }
-        $model = Resolve-AgentModel -RequestedModel $requestedModel
+        $model = (Resolve-FrontmatterModel -RequestedModel $requestedModel -Context "generate-registry:$id").Model
         if ($requestedModel.Trim('"').Trim("'") -ne $model) {
             $modelSubstitutions.Add("${id}: $requestedModel -> $model") | Out-Null
         }
@@ -110,10 +82,15 @@ Get-ChildItem $AgentsPath -Filter "*.agent.md" | ForEach-Object {
     }
 }
 
+$orderedAgents = [ordered]@{}
+foreach ($agentId in ($agents.Keys | Sort-Object)) {
+    $orderedAgents[$agentId] = $agents[$agentId]
+}
+
 $registry = [ordered]@{
     version   = "1.0.0"
     generated = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
-    agents    = $agents
+    agents    = $orderedAgents
 }
 
 $json = $registry | ConvertTo-Json -Depth 10

@@ -47,7 +47,7 @@ Return severity, impact, actions, escalations, recovery evidence, and follow-up 
 
 **Recommended:** claude-sonnet-4.6
 **Rationale:** Incident response requires structured reasoning under uncertainty, concise communications, and disciplined recovery workflows across technical and organizational boundaries.
-**Minimum:** claude-haiku-4.5
+**Minimum:** gpt-5.3-codex
 
 ## Governance
 

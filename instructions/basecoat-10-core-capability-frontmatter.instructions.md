@@ -17,6 +17,10 @@ Use this instruction to prefer capability-based routing over hardcoded model nam
   - strict compatibility constraints
 - If `pinned_model` is present, `pin_reason` is required.
 - Include safe fallback policy for model selection.
+- Treat `reasoning_depth` only as task metadata. It must never be copied into the
+  provider `reasoning_effort` field.
+- Before emitting `reasoning_effort`, validate the selected model against
+  `docs/reference/model-capabilities.json`. Omit the field for fixed-effort models.
 
 ## Capability Fields
 
@@ -42,6 +46,8 @@ Use these normalized values:
 - Legacy `model` fields remain valid during migration.
 - For existing assets, add capabilities first; remove direct model pins only when behavior is verified.
 - Validation rollout should be staged: warn first, enforce later.
+- Public GitHub support does not prove organization or user entitlement. Runtime
+  routing must intersect the catalog with the authenticated Copilot model list.
 
 ## Canonical Example (Capability-First)
 

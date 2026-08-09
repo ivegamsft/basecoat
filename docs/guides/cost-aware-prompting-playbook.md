@@ -7,7 +7,7 @@ spend is driven more by context carryover than by output size.
 
 | Work shape | Session move | Model default | Execution style |
 |---|---|---|---|
-| Mechanical cleanup (branch/worktree hygiene, scans, formatting) | Stay in session; `/compact` at phase boundary | `claude-haiku-4.5` or `gpt-5.4-mini` | Interactive or delegated batch |
+| Mechanical cleanup (branch/worktree hygiene, scans, formatting) | Stay in session; `/compact` at phase boundary | `gpt-5.4-mini` with omitted `reasoning_effort` | Interactive or delegated batch |
 | Moderate reasoning (triage, planning, scoped reviews) | Stay in session if same objective; `/compact` on phase switch | `claude-sonnet-5` (or equivalent reasoning tier) | Delegate scan work, keep decisions in main thread |
 | Hard ambiguity (architecture, deep debugging, security tradeoffs) | Use a focused session if objective changes | `claude-opus-4.8` (or top-tier equivalent) | Time-boxed deep pass, then downshift |
 

@@ -99,6 +99,10 @@ Choose capabilities based on the agent's workload first, then pin only when just
 - If `pinned_model` is used, include `pin_reason` and document the compatibility/compliance dependency in the body.
 - Always include a fallback policy (`fallback: true`, `preferred_families`, optional `excluded_tiers`).
 - During migration, legacy `model` values are still permitted; do not churn stable assets only to replace model IDs.
+- Validate legacy and pinned model IDs against
+  [`docs/reference/model-capabilities.json`](../docs/reference/model-capabilities.json).
+- `capabilities.reasoning_depth` is not `reasoning_effort`. Omit provider effort
+  for models that do not advertise configurable reasoning.
 
 When pinning is required, add this block explicitly:
 
@@ -113,3 +117,4 @@ pin_reason: "Compatibility with an established evaluation baseline."
 |---|---|
 | [references/agents/skill-pairing.md](references/agents/skill-pairing.md) | Allowed Skills section format, agent-to-skill pairing, multi-agent coordination, token budget rules |
 | [references/agents/lifecycle.md](references/agents/lifecycle.md) | Validation checklist, versioning, deprecation, minimal agent skeleton |
+| [../docs/reference/model-capabilities.md](../docs/reference/model-capabilities.md) | GitHub-supported model capabilities, routing contract, and runtime entitlement caveat |

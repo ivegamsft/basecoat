@@ -83,7 +83,7 @@ After the session, produce a brief findings summary with filed GitHub Issues for
 
 **Recommended:** claude-sonnet-4.6
 **Rationale:** Structured thinking and edge case identification for exploratory testing sessions
-**Minimum:** claude-haiku-4.5
+**Minimum:** gpt-5.3-codex
 
 ## Governance
 

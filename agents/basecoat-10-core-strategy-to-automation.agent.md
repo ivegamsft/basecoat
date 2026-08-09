@@ -103,7 +103,7 @@ Produce a summary table at the end:
 
 **Recommended:** claude-sonnet-4.6
 **Rationale:** Converting manual paths to automation specs requires structured thinking and edge case analysis
-**Minimum:** claude-haiku-4.5
+**Minimum:** gpt-5.3-codex
 
 ## Output Format
 

@@ -25,11 +25,11 @@ for the 28-day window.
 
 | Task Complexity | Recommended Model | Rationale |
 |---|---|---|
-| Simple lookup, label assignment, short summarization | `claude-haiku-4.5` / `gpt-5.4-mini` | Low reasoning demand; high token efficiency |
-| Code generation, refactoring, structured output | `claude-sonnet-4.6` / `gpt-5.2` | Balanced quality-to-cost ratio |
+| Simple lookup, label assignment, short summarization | `gpt-5.4-mini` / `gpt-5-mini` | Low reasoning demand; high token efficiency; omit `reasoning_effort` |
+| Code generation, refactoring, structured output | `claude-sonnet-4.6` / `gpt-5.4` | Balanced quality-to-cost ratio |
 | Architecture design, multi-file reasoning, threat modeling | `claude-sonnet-4.6` / `gpt-5.4` | High accuracy required; cost justified by complexity |
 | Creative or exploratory research | `claude-opus-4.7` | Reserve for tasks where quality difference is measurable |
-| Code-specific tasks (generation, review, migration) | `gpt-5.3-codex` / `gpt-5.2-codex` | Specialized code model; outperforms general models on code tasks |
+| Code-specific tasks (generation, review, migration) | `gpt-5.3-codex` | Specialized code model; optimized for code tasks |
 
 Until GitHub exposes per-session usage data, session cost must be self-tracked using this
 skill's estimation workflow.

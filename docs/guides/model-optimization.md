@@ -21,7 +21,7 @@ Choosing the right LLM for each agent role is a cost-performance tradeoff. Defau
 | backend-dev / frontend-dev / middleware-dev / data-tier / code | gpt-5.3-codex | Code | Code-optimized model tuned for generation, refactoring, and debugging |
 | sprint-planner / release-manager / project-onboarding | claude-sonnet-4.6 | Reasoning | Planning and decomposition need good reasoning, not raw code output |
 | new-customization | claude-sonnet-4.6 | Reasoning | Deciding between customization types requires structured reasoning |
-| merge-coordinator / rollout-basecoat / config-auditor | claude-haiku-4.5 | Fast | Routine automation with well-defined steps — speed and cost matter most |
+| merge-coordinator / rollout-basecoat / config-auditor | gpt-5.3-codex | Code | Reliable automation that may inherit a runtime reasoning effort |
 | agent-watchdog / sprint-demo | gpt-5.4-mini | Fast | Simple automation tasks with minimal reasoning requirements |
 
 ---
@@ -32,7 +32,8 @@ Choosing the right LLM for each agent role is a cost-performance tradeoff. Defau
 
 Use for tasks where a mistake is expensive or irreversible: architecture decisions, security reviews, threat modeling, compliance analysis. These tasks require deep multi-step reasoning, weighing tradeoffs, and producing output that will be trusted without a second opinion.
 
-**Cost:** ~5× Sonnet. Use deliberately. Variants: `claude-opus-4.7-high` (extended chain-of-thought), `claude-opus-4.6` (proven fallback).
+**Cost:** ~5× Sonnet. Use deliberately. Apply a higher `reasoning_effort` only
+when the authenticated runtime reports that effort for the selected model.
 
 ### Reasoning — `claude-sonnet-4.6`
 
@@ -46,11 +47,13 @@ Use for code generation, refactoring, migration, and debugging. This model is sp
 
 **Cost:** Comparable to Sonnet. Value comes from code-specific optimization.
 
-### Fast — `claude-haiku-4.5` / `gpt-5.4-mini`
+### Fast — `gpt-5.4-mini` / `gpt-5-mini`
 
 Use for well-defined, repetitive tasks: file scanning, config auditing, branch operations, rollout scripts, simple automation. The task should have clear inputs, deterministic steps, and easily validated output. If the agent needs to "think," it probably needs a higher tier.
 
 **Cost:** ~10× cheaper than Sonnet. Use aggressively for routine work.
+These are fixed-effort routes in the public capability baseline; omit
+`reasoning_effort` rather than sending `none` or a default value.
 
 ---
 
@@ -61,9 +64,9 @@ Override the recommended model when:
 | Situation | Override Direction | Example |
 |-----------|-------------------|---------|
 | Task is unusually complex for the role | ↑ Upgrade one tier | A backend-dev task involving a complex distributed transaction → claude-sonnet-4.6 |
-| Task is unusually simple for the role | ↓ Downgrade one tier | A code-review of a single-line typo fix → claude-haiku-4.5 |
+| Task is unusually simple for the role | ↓ Downgrade one tier | A code-review of a single-line typo fix → gpt-5.4-mini with omitted effort |
 | Output will not be human-reviewed | ↑ Upgrade one tier | Automated security scan running unattended → claude-opus-4.7 |
-| Output will be heavily reviewed | ↓ Downgrade one tier | Draft PR description that a human will rewrite anyway → claude-haiku-4.5 |
+| Output will be heavily reviewed | ↓ Downgrade one tier | Draft PR description that a human will rewrite anyway → gpt-5.4-mini with omitted effort |
 | Budget is constrained | ↓ Use minimum viable tier | See the Minimum column in each agent's `## Model` section |
 | Task requires cross-domain reasoning | ↑ Upgrade one tier | A backend-dev task that also requires security analysis → claude-sonnet-4.6 |
 
@@ -104,11 +107,11 @@ Rough relative cost per million tokens (input + output blended):
 | claude-opus-4.7 | 5.0× | Architecture, security, high-stakes reasoning |
 | claude-sonnet-4.6 | 1.0× (baseline) | Analysis, review, planning, test strategy |
 | gpt-5.3-codex | ~1.0× | Code generation, refactoring, debugging |
-| claude-haiku-4.5 | 0.1× | Routine automation, scanning, simple tasks |
 | gpt-5.4-mini | 0.08× | Simple automation, monitoring, formatting |
-| gpt-4.1 | 0.05× | Binary checks, guardrails, cheapest |
+| gpt-5-mini | 0.1× | Routine automation, scanning, simple tasks |
 
-**Rule of thumb:** If 10 Haiku runs cost less than 1 Sonnet run _and_ the Haiku output is good enough, use Haiku. If a single Opus run saves you from a production incident, use Opus.
+**Rule of thumb:** Use the least expensive runtime-entitled model that passes the
+task evaluation. If a single Opus run saves you from a production incident, use Opus.
 
 ---
 
@@ -144,7 +147,7 @@ Each agent file includes a `## Model` section:
 ## Model
 **Recommended:** claude-sonnet-4.6
 **Rationale:** Analysis tasks need good reasoning depth
-**Minimum:** claude-haiku-4.5
+**Minimum:** gpt-5.3-codex
 ```
 
 - **Recommended** — use this model by default
@@ -173,7 +176,7 @@ env:
   AGENT_MODEL_BACKEND: gpt-5.3-codex
   AGENT_MODEL_REVIEW: claude-sonnet-4.6
   AGENT_MODEL_SECURITY: claude-opus-4.6
-  AGENT_MODEL_DEFAULT: claude-haiku-4.5
+  AGENT_MODEL_DEFAULT: gpt-5.3-codex
 ```
 
 ---
@@ -196,7 +199,7 @@ Choose the tier based on the cognitive demand of the agent's primary task:
 | Deep multi-step reasoning, high-stakes decisions | Premium | claude-opus-4.6 |
 | Analysis, structured thinking, planning | Reasoning | claude-sonnet-4.6 |
 | Code generation, refactoring, implementation | Code | gpt-5.3-codex |
-| Routine steps, scanning, simple automation | Fast | claude-haiku-4.5 or gpt-5.4-mini |
+| Routine steps, scanning, simple automation | Fast | gpt-5.4-mini with omitted `reasoning_effort` |
 
 ---
 

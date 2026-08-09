@@ -128,7 +128,7 @@ When updating `CHANGELOG.md`, follow [Keep a Changelog](https://keepachangelog.c
 
 **Recommended:** claude-sonnet-4.6
 **Rationale:** Documentation requires clear reasoning about structure and audience without premium cost
-**Minimum:** claude-haiku-4.5
+**Minimum:** gpt-5.3-codex
 
 ## Governance
 

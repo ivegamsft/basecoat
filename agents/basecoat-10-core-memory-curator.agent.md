@@ -60,7 +60,7 @@ Return retrieved, stored, merged, pruned, or rejected memory changes.
 
 **Recommended:** claude-sonnet-4.6
 **Rationale:** Strong at extracting durable knowledge from noisy session context, reconciling contradictions, and producing structured curation decisions without over-storing
-**Minimum:** claude-haiku-4.5
+**Minimum:** gpt-5.3-codex
 
 ## Governance
 

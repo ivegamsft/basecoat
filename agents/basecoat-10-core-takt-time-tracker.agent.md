@@ -4,7 +4,7 @@ description: "Use when measuring dwell time at each station and flagging SLA bre
 visibility: basic
 tools: [read_file, run_terminal_command]
 model: claude-sonnet-4.6
-fallback_models: [claude-sonnet-4.5]
+fallback_models: [gpt-5.3-codex]
 compatibility: []
 metadata:
   category: core

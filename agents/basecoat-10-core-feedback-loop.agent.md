@@ -64,7 +64,7 @@ Return trends, regressions, experiment results, and recommended changes.
 
 ## Model
 
-**Recommended:** claude-haiku-4.5
+**Recommended:** gpt-5.3-codex
 **Rationale:** Metric aggregation and feedback coordination are pattern-matching tasks suited to a lighter model
 **Minimum:** gpt-5.4-mini
 

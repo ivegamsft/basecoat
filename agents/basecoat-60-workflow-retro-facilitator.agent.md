@@ -25,7 +25,7 @@ Sprint scope, repo activity, spillover, and blocker or debt signals.
 
 Recommended: claude-sonnet-4.6
 Rationale: Retrospective synthesis needs cross-source pattern recognition.
-Minimum: claude-haiku-4.5
+Minimum: gpt-5.3-codex
 
 ## Process
 

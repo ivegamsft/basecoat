@@ -80,12 +80,17 @@ description: five
 
     $fallback = $map.models | Where-Object { $_.canonical -eq 'gpt-5.4-mini' }
     if (-not $fallback) { throw 'Expected fallback canonical key gpt-5.4-mini not found' }
-    if ($fallback.count -ne 4) { throw "Expected count 4 for gpt-5.4-mini, got $($fallback.count)" }
+    if ($fallback.count -ne 3) { throw "Expected count 3 for gpt-5.4-mini, got $($fallback.count)" }
     if (-not ($fallback.aliases -contains 'gpt-5.4-mini')) { throw 'Expected alias gpt-5.4-mini not found for missing-model fallback' }
     if ($fallback.aliases -contains 'internal-preview-model') { throw 'Unsupported model alias should not be persisted in model inventory output' }
-    if ($fallback.aliases -contains 'Claude Sonnet 4.6' -or $fallback.aliases -contains 'claude-sonnet-4.6') {
-        throw 'Unsupported model aliases should not be persisted in model inventory output'
+    if ($fallback.aliases -contains 'Claude Sonnet 4.6') {
+        throw 'Unsupported display-name alias should not be persisted in model inventory output'
     }
+
+    $sonnet = $map.models | Where-Object { $_.canonical -eq 'claude-sonnet-4.6' }
+    if (-not $sonnet) { throw 'Expected supported canonical key claude-sonnet-4.6 not found' }
+    if ($sonnet.count -ne 1) { throw "Expected count 1 for claude-sonnet-4.6, got $($sonnet.count)" }
+    if (-not ($sonnet.aliases -contains 'claude-sonnet-4.6')) { throw 'Expected supported Sonnet alias not found' }
 
     Write-Host 'Model inventory tests passed'
 }

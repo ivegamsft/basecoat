@@ -2,7 +2,7 @@
 name: merge-coordinator
 description: "Parallel branch merge coordinator. Use when multiple feature branches need to be merged into a target branch without interactive git editors hanging automated pipelines. Handles conflict detection, safe resolution, and ordered PR merging."
 visibility: basic
-model: claude-haiku-4.5
+model: gpt-5.3-codex
 compatibility: []
 metadata:
   category: core
@@ -88,7 +88,7 @@ Return branch-by-branch status, conflicts, actions taken, issues filed, skipped 
 
 ## Model
 
-**Recommended:** claude-haiku-4.5
+**Recommended:** gpt-5.3-codex
 **Rationale:** Routine branch operations with well-defined steps — speed and cost matter most
 **Minimum:** gpt-5.4-mini
 

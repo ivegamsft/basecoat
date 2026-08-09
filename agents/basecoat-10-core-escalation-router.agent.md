@@ -2,7 +2,7 @@
 name: escalation-router
 description: "Use when high-risk decisions need a human approver and a PR-comment approval trail. USE FOR: release signoff, irreversible changes, compliance gates. DO NOT USE FOR: routine automation."
 model: gpt-5.4-mini
-fallback_models: [claude-sonnet-4.5]
+fallback_models: [claude-sonnet-4.6]
 visibility: advanced
 compatibility: []
 metadata:

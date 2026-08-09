@@ -66,4 +66,4 @@ Return a structured RCA report with:
 
 **Recommended:** claude-sonnet-4.6
 **Rationale:** Root cause analysis needs disciplined hypothesis testing, evidence synthesis, and prevention-oriented follow-up.
-**Minimum:** claude-haiku-4.5
+**Minimum:** gpt-5.3-codex

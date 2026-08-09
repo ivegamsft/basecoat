@@ -158,6 +158,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running model capability tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'model-capability-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Model capability tests failed' -ForegroundColor Red
+    Write-FailureLog 'model-capability-tests'
+    exit 1
+}
+
 Write-Host 'Running A/B experiment harness tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'ab-experiment-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

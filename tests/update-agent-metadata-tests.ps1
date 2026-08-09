@@ -46,12 +46,12 @@ model: claude-sonnet-4.6
     }
 
     $apiDesigner = Get-Content -Path (Join-Path $agentsDir 'basecoat-10-core-api-designer.agent.md') -Raw
-    if ($apiDesigner -notmatch '(?m)^model:\s*gpt-5.3-codex\s*$') {
-        throw 'Expected api-designer model to be set to gpt-5.3-codex'
+    if ($apiDesigner -notmatch '(?m)^model:\s*gpt-5.4\s*$') {
+        throw 'Expected api-designer model to use the shared reasoning-tier default gpt-5.4'
     }
 
     if ($apiDesigner -match '(?m)^model:\s*claude-sonnet-4.6\s*$') {
-        throw 'Expected unsupported model to be rewritten via fallback policy'
+        throw 'Expected the tier updater to apply the shared reasoning policy'
     }
 
     Write-Host 'Update agent metadata tests passed'

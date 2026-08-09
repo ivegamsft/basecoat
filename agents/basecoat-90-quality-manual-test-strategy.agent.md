@@ -74,7 +74,7 @@ If a sprint label is applicable, append `--label "<sprint-label>"`.
 
 **Recommended:** claude-sonnet-4.6
 **Rationale:** Structured thinking for test strategy design, risk classification, and edge case identification
-**Minimum:** claude-haiku-4.5
+**Minimum:** gpt-5.3-codex
 
 ## Governance
 

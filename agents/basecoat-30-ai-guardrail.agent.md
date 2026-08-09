@@ -86,7 +86,7 @@ Escalate immediately when the output contains a likely secret, possible PII disc
 
 **Recommended:** claude-sonnet-4.6
 **Rationale:** Strong policy reasoning and nuanced validation across safety, quality, compliance, and formatting checks
-**Minimum:** claude-haiku-4.5
+**Minimum:** gpt-5.3-codex
 
 ## Output Format
 

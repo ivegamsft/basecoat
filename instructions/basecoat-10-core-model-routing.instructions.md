@@ -5,16 +5,18 @@ applyTo: "**/*"
 
 # Model Routing for Copilot CLI Fleet Mode
 
-Route tasks to the cheapest model that can handle them reliably.
+Route tasks to the cheapest model that can handle them reliably. Use
+[`docs/reference/model-capabilities.md`](../docs/reference/model-capabilities.md)
+as the generated source of truth for supported models and capabilities.
 
 ## Model Tier Map
 
 | Tier | Models | Cost | Best For |
 |------|--------|------|----------|
-| **Premium** | Claude Opus 4.7, Opus 4.7 High, Opus 4.7 XHigh, Opus 4.6 | $$$ | Complex reasoning, multi-step planning, security audits, ambiguous requirements |
-| **Standard** | Claude Sonnet 4.6, Sonnet 4.5, GPT-5.4, GPT-5.2 | $$ | Multi-file implementation, refactoring, code review, prose docs |
-| **Code** | GPT-5.3-Codex, GPT-5.2-Codex | $$ | Code generation, debugging, migration scripts, protocol implementation |
-| **Fast/Cheap** | Claude Haiku 4.5, GPT-5.4 mini, GPT-5 mini, GPT-4.1 | $ | Single-file edits, git ops, simple lookups, triage, binary checks |
+| **Premium** | Claude Opus family, GPT-5.4+ reasoning models | $$$ | Complex reasoning, multi-step planning, security audits, ambiguous requirements |
+| **Standard** | Claude Sonnet family, GPT-5.4 | $$ | Multi-file implementation, refactoring, code review, prose docs |
+| **Code** | GPT-5.3-Codex | $$ | Code generation, debugging, migration scripts, protocol implementation |
+| **Fast/Cheap** | GPT-5.4 mini, GPT-5 mini, MAI-Code-1-Flash | $ | Single-file edits, git ops, simple lookups, triage, binary checks |
 
 ## Task-to-Model Assignment
 
@@ -32,14 +34,14 @@ Route tasks to the cheapest model that can handle them reliably.
 - Refactoring across modules
 - Complex documentation with cross-references
 
-### Use Code (GPT-5.3-Codex / GPT-5.2-Codex) for
+### Use Code (GPT-5.3-Codex) for
 
 - Pure code generation tasks (APIs, components, scripts)
 - Debugging and root-cause analysis in code
 - Database schema design and migration scripts
 - Protocol implementation (MCP, REST, gRPC)
 
-### Use Fast/Cheap (Haiku) for
+### Use Fast/Cheap for
 
 - Single-file documentation
 - README updates
@@ -52,8 +54,8 @@ Route tasks to the cheapest model that can handle them reliably.
 
 ### Pattern 1: Override model for simple tasks
 
-```
-task(agent_type: "general-purpose", model: "claude-haiku-4.5", ...)
+```text
+task(agent_type: "general-purpose", model: "gpt-5.4-mini", ...)
 ```
 
 Use when the task is straightforward and doesn't need Sonnet-level reasoning.
@@ -62,17 +64,17 @@ Use when the task is straightforward and doesn't need Sonnet-level reasoning.
 
 Instead of running 4 `gh pr merge` commands from the main (Opus) conversation:
 
-```
+```text
 task(agent_type: "task", prompt: "Merge PRs #267, #268, #273, #274 with --squash --delete-branch")
 ```
 
-This costs 1 Haiku request instead of 4 Opus requests.
+This costs one fast-model request instead of four premium-model requests.
 
 ### Pattern 3: Pre-read files before dispatching
 
 Reading files in the main conversation (Opus) costs premium tokens. Instead:
 
-- Use explore agents (`claude-haiku-4.5` or `gpt-5.4-mini`) for research
+- Use explore agents (`gpt-5.4-mini` or another evaluated fast model) for research
 - Include key file content directly in sub-agent prompts
 - Let the sub-agent (Sonnet) do its own reading
 
@@ -101,5 +103,16 @@ A typical sprint session (11 issues, ~90 min):
 | Polling for PRs from main conversation | Each poll = 1 Opus request | Dispatch a task agent to poll |
 | Reading agent results then re-summarizing | Double-processing at Opus cost | Trust sub-agent summaries |
 | Running `gh pr merge` inline | Simple command wastes Opus | Batch into task agent |
-| Using general-purpose for doc creation | Sonnet for a README update | Use `model: "claude-haiku-4.5"` |
+| Using general-purpose for doc creation | Sonnet for a README update | Use `model: "gpt-5.4-mini"` |
 | Using Sonnet for pure code tasks | Code-optimized model underused | Use `model: "gpt-5.3-codex"` for implementation |
+
+## Reasoning-Effort Safety
+
+- `reasoning_depth` is a task-routing hint, not a provider request parameter.
+- Emit `reasoning_effort` only after `Test-ModelReasoningEffort` confirms compatibility
+  using the authenticated runtime's supported-effort list.
+- For fixed-effort models such as Claude Haiku 4.5 and GPT-5.4 mini, omit
+  `reasoning_effort`; never default it to `medium`.
+- Public support, Auto-selection eligibility, and effective account entitlement
+  are separate signals. Verify entitlement through the authenticated Copilot
+  runtime before dispatch.

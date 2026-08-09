@@ -1,0 +1,81 @@
+name: "BaseCoat - Refresh Model Capability Catalog"
+
+on:
+  schedule:
+    - cron: "17 8 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: model-capability-refresh
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    name: Refresh GitHub-supported model capabilities
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          fetch-depth: 0
+
+      - name: Refresh and validate catalog
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          pwsh scripts/sync-model-capabilities.ps1 -Refresh
+          pwsh tests/model-capability-tests.ps1
+
+      - name: Commit model catalog drift
+        id: drift
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $paths = @(
+            'docs/reference/model-capabilities.json',
+            'docs/reference/model-capabilities.md',
+            'docs/reference/model-assignment-audit.md'
+          )
+
+          if (git diff --quiet -- $paths) {
+            Add-Content -Path $env:GITHUB_OUTPUT -Value 'changed=false'
+            exit 0
+          }
+
+          $branch = 'automation/model-capability-refresh'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout -B $branch
+          git add -- $paths
+          git commit -m 'docs(models): refresh capability catalog'
+          git push --force-with-lease origin $branch
+
+          Add-Content -Path $env:GITHUB_OUTPUT -Value 'changed=true'
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "branch=$branch"
+
+      - name: Open or update review pull request
+        if: steps.drift.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GH_AW_GITHUB_TOKEN || github.token }}
+          BRANCH: ${{ steps.drift.outputs.branch }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          existing="$(gh pr list --state open --head "$BRANCH" --json number --jq '.[0].number')"
+          if [[ -n "$existing" ]]; then
+            echo "Updated existing model capability PR #$existing"
+            exit 0
+          fi
+
+          gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "docs(models): refresh capability catalog" \
+            --body "Refreshes the public GitHub Copilot model baseline, capability comparison, and BaseCoat assignment audit from canonical GitHub Docs sources. Effective organization and user entitlement still requires authenticated runtime verification. Review is required before merge."

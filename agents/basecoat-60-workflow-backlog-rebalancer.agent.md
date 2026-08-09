@@ -3,7 +3,7 @@ name: backlog-rebalancer
 description: "Unified backlog orchestration agent. USE FOR: priority reranking, sprint/wave reassignment with dependency checks, and capacity-aware portfolio balancing. DO NOT USE FOR: unsafeguarded mass reassignment, dependency-violating moves, or unreviewed metadata churn."
 visibility: specialized
 model: claude-sonnet-4.6
-fallback_models: [claude-sonnet-4.5, gpt-5.4]
+fallback_models: [gpt-5.4]
 capabilities:
   reasoning_depth: high
   tool_use: required

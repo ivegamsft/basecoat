@@ -60,7 +60,7 @@ File issues for unversioned prompts, weak gates, unsafe fallback, weak health ch
 
 **Recommended:** claude-sonnet-4.6
 **Rationale:** Strong operational reasoning for prompt release management, gateway policy design, and multi-signal inference monitoring
-**Minimum:** claude-haiku-4.5
+**Minimum:** gpt-5.3-codex
 
 ## Output Format
 

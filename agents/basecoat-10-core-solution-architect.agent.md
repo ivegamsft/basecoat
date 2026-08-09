@@ -2,7 +2,7 @@
 name: solution-architect
 description: "Solution architecture agent for system design, C4 diagrams, ADRs, technology selection, and cross-cutting concerns. Use when designing new systems, evaluating technology choices, or reviewing architecture for scalability and risk."
 visibility: basic
-model: claude-sonnet-4-5
+model: claude-sonnet-4.6
 tools: [read_file, write_file, list_dir, run_terminal_command, create_github_issue]
 compatibility: []
 metadata:
@@ -128,7 +128,7 @@ Trigger conditions:
 
 ## Model
 
-**Recommended:** claude-sonnet-4-5
+**Recommended:** claude-sonnet-4.6
 **Rationale:** Strong reasoning and long-context capabilities suited for architecture analysis, trade-off evaluation, and diagram generation
 **Minimum:** gpt-5.4-mini
 

@@ -80,9 +80,9 @@ lowest cost that satisfies the latency and security requirements.
 ### Pattern 1: Fan-out independent subtasks
 
 ```text
-task(agent_type: "general-purpose", model: "claude-haiku-4.5",
+task(agent_type: "general-purpose", model: "gpt-5.3-codex",
      prompt: "Implement <bounded subtask A> in <file>. Context: ...")
-task(agent_type: "general-purpose", model: "claude-haiku-4.5",
+task(agent_type: "general-purpose", model: "gpt-5.3-codex",
      prompt: "Implement <bounded subtask B> in <file>. Context: ...")
 ```
 

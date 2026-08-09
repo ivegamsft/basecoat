@@ -65,7 +65,7 @@ File issues for missing gates, lineage, retries, quarantine, or notebook hygiene
 
 **Recommended:** claude-sonnet-4.6
 **Rationale:** Reasoning-heavy model suited for data analysis, schema design, quality gate definition, and multi-step pipeline orchestration across medallion layers
-**Minimum:** claude-haiku-4.5
+**Minimum:** gpt-5.3-codex
 
 ## Output Format
 

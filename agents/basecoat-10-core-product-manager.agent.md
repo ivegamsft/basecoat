@@ -157,7 +157,7 @@ gh issue create \
 
 **Recommended:** claude-sonnet-4.6
 **Rationale:** Requirements analysis and prioritization need strong reasoning without premium-tier cost
-**Minimum:** claude-haiku-4.5
+**Minimum:** gpt-5.3-codex
 
 ## Governance
 

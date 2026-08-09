@@ -20,18 +20,29 @@ try {
     $testSuffix = [Guid]::NewGuid().ToString('N').Substring(0, 8)
 
     $metadataPath = Join-Path $tempRoot 'basecoat-metadata.json'
-    @'
-{
-  "version": "1.0.0",
-  "generated": "2026-01-01",
-  "categories": {},
-  "agents": []
-}
-'@ | Set-Content -Path $metadataPath -Encoding UTF8
-
     $alphaFileName = "basecoat-10-core-model-fallback-alpha-$testSuffix.agent.md"
     $betaFileName = "basecoat-10-core-model-fallback-beta-$testSuffix.agent.md"
     $gammaFileName = "basecoat-10-core-model-fallback-gamma-$testSuffix.agent.md"
+    $alphaName = $alphaFileName -replace '\.agent\.md$', ''
+
+    [ordered]@{
+        version = '1.0.0'
+        generated = '2026-01-01'
+        categories = [ordered]@{}
+        agents = @(
+            [ordered]@{
+                name = $alphaName
+                description = 'curated alpha'
+                category = 'Meta'
+                keywords = @('curated')
+                aliases = @()
+                pairedSkill = ''
+                file = "agents/$alphaFileName"
+                model = 'claude-haiku-4.5'
+                argumentHint = ''
+            }
+        )
+    } | ConvertTo-Json -Depth 10 | Set-Content -Path $metadataPath -Encoding UTF8
 
     @'
 ---
@@ -71,14 +82,16 @@ visibility: basic
     $updatedMetadataRaw = Get-Content -Path $metadataPath -Raw
     $updatedMetadata = $updatedMetadataRaw | ConvertFrom-Json
 
-    $alphaName = $alphaFileName -replace '\.agent\.md$', ''
     $betaName = $betaFileName -replace '\.agent\.md$', ''
     $gammaName = $gammaFileName -replace '\.agent\.md$', ''
 
     $alpha = $updatedMetadata.agents | Where-Object { $_.name -eq $alphaName }
     if (-not $alpha) { throw 'Expected alpha agent entry not found' }
-    if ($alpha.model -ne 'gpt-5.3-codex') {
-        throw "Expected fallback model gpt-5.3-codex for alpha, got '$($alpha.model)'"
+    if ($alpha.model -ne 'claude-sonnet-4.6') {
+        throw "Expected existing metadata model to synchronize to claude-sonnet-4.6, got '$($alpha.model)'"
+    }
+    if ('curated' -notin @($alpha.keywords)) {
+        throw 'Existing curated metadata fields must be preserved while synchronizing the model'
     }
 
     $beta = $updatedMetadata.agents | Where-Object { $_.name -eq $betaName }

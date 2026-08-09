@@ -86,12 +86,13 @@ First line ≤ 72 characters. Never include secrets or PII.
 
 ## Model and Token Guidance
 
-- **Premium** (`claude-opus-4.7`, `claude-opus-4.6`) — architecture, security, compliance
+- **Premium** (`claude-opus-5`, `claude-opus-4.8`, `claude-opus-4.7`) — architecture, security, compliance
 - **Reasoning/Standard** (`claude-sonnet-4.6`, `gpt-5.4`) — code review, planning, research
-- **Code** (`gpt-5.3-codex`, `gpt-5.2-codex`) — implementation, refactoring, generation
-- **Fast** (`claude-haiku-4.5`, `gpt-5.4-mini`) — scanning, formatting, simple automation
+- **Code** (`gpt-5.3-codex`) — implementation, refactoring, generation
+- **Fast** (`gpt-5.4-mini`, `gpt-5-mini`, `mai-code-1-flash-picker`) — scanning, formatting, simple automation
 
-See `docs/MODEL_OPTIMIZATION.md` for the full tier matrix. See `docs/token-optimization.md` for context loading strategies.
+See `docs/reference/model-capabilities.md` for the generated capability matrix. Omit
+`reasoning_effort` for fixed-effort models.
 
 ## Quick Reference Card
 

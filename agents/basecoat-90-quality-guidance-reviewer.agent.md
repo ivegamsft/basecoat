@@ -72,7 +72,7 @@ with `guidance-author`.
 
 4. **Validate BaseCoat conventions**
    - `##` headings only — no H1 except the file title, no H3+ without an H2 parent
-   - `model:` must be a supported value (claude-sonnet-4.6, claude-haiku-4.5, etc.)
+   - `model:` must be a supported value (claude-sonnet-4.6, gpt-5.3-codex, etc.)
    - `maturity:` must be one of: `alpha`, `experimental`, `beta`, `production` (prefer
      `experimental` for new assets — `alpha` is accepted for existing assets not yet migrated)
    - `allowed_skills` entries must reference existing `skills/<name>/` directories

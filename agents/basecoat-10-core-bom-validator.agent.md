@@ -3,7 +3,7 @@ name: bom-validator
 description: "Use when validating a Workcell BOM against the plant registry before S2 starts. USE FOR: schema validation, CAF naming checks, circular dependency detection, and GitHub check results. DO NOT USE FOR: runtime state merges or cutover decisions."
 visibility: basic
 model: claude-sonnet-4.6
-fallback_models: [claude-sonnet-4.5]
+fallback_models: [gpt-5.3-codex]
 compatibility: []
 metadata:
   category: core

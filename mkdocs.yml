@@ -81,6 +81,8 @@ nav:
     - Overview: reference/quick-reference.md
     - Inventory: reference/inventory.md
     - Model Inventory: reference/model-inventory.md
+    - Model Capabilities: reference/model-capabilities.md
+    - Model Assignment Audit: reference/model-assignment-audit.md
     - Token Context Inventory: reference/token-context-inventory.md
     - Onboarding Profile Contract: reference/onboarding-profile-contract.v1.md
     - Agents: reference/asset-registry.md

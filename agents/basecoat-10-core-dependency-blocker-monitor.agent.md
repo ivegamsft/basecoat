@@ -3,7 +3,7 @@ name: dependency-blocker-monitor
 description: "Use when monitoring workcell BOM dependencies and cell health to open or resolve blocker issues when a cell fails or recovers. USE FOR: read workcell BOM dependencies, monitor cell deployment status, create blocker issues, and resolve them on recovery. DO NOT USE FOR: general incident response, application code, or one-off issue triage."
 visibility: basic
 model: gpt-5.4-mini
-fallback_models: [gpt-5.4-mini]
+fallback_models: [claude-sonnet-4.6]
 compatibility: []
 metadata:
   category: core

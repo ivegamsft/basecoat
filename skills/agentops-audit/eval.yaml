@@ -17,6 +17,9 @@ scenarios:
   - id: "pos-5"
     input: "Produce audit_report artifacts with risks and measurable success criteria."
     expect_activation: true
+  - id: "pos-6"
+    input: "Audit these agent model assignments and flag unsupported reasoning-effort combinations."
+    expect_activation: true
   - id: "neg-1"
     input: "Help me write a new agent"
     expect_activation: false

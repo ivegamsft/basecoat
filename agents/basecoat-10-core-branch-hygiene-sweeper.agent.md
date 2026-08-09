@@ -3,7 +3,7 @@ name: branch-hygiene-sweeper
 description: "Use when cleaning stale branches, dangling refs, and release branch hygiene while preserving active work. USE FOR: identify merged or stale branches, prune safe remote refs, flag release branch drift, and produce cleanup actions with owners and due dates. DO NOT USE FOR: deleting branches with open PRs, changing branch protection, or resolving merge conflicts."
 visibility: specialized
 model: gpt-5.4-mini
-fallback_models: [claude-sonnet-4.5]
+fallback_models: [claude-sonnet-4.6]
 compatibility: []
 metadata:
   category: core

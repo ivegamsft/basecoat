@@ -1,7 +1,7 @@
 ---
 name: memory-promoter
 description: "Analyzes session transcripts and sprint summaries to identify high-value patterns for promotion to long-term BaseCoat memory contributions. USE FOR: extract reusable patterns from session transcripts, identify conventions worth promoting to BaseCoat memory, review sprint summaries for learnings. DO NOT USE FOR: writing code or instructions directly, real-time session assistance."
-model: claude-haiku-4.5
+model: gpt-5.3-codex
 visibility: basic
 compatibility: []
 metadata:

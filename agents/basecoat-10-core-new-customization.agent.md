@@ -41,7 +41,7 @@ Purpose: turn a broad customization request into the right asset with the right 
 
 **Recommended:** claude-sonnet-4.6
 **Rationale:** Choosing the right customization primitive requires structured reasoning about scope and reuse
-**Minimum:** claude-haiku-4.5
+**Minimum:** gpt-5.3-codex
 
 ## Customization Type Decision Tree
 

@@ -2,7 +2,7 @@
 name: mcp-developer
 description: "MCP (Model Context Protocol) development specialist. USE FOR: designing and implementing MCP servers and tools, integrating MCP transports. DO NOT USE FOR: direct model interactions, non-MCP tasks."
 visibility: internal
-model: claude-sonnet-4
+model: claude-sonnet-4.6
 compatibility: []
 metadata:
   category: core
