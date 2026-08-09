@@ -334,6 +334,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running prompt library tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'prompt-library-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Prompt library tests failed' -ForegroundColor Red
+    Write-FailureLog 'prompt-library-tests'
+    exit 1
+}
+
 Write-Host 'Running data workload tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'data-workload-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

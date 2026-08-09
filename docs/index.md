@@ -63,6 +63,7 @@ flowchart LR
 - [reference/scoped-instructions.md](reference/scoped-instructions.md) — Scoped instruction authoring guide
 - [reference/label-taxonomy.md](reference/label-taxonomy.md) — GitHub label taxonomy
 - [reference/prompt-registry.md](reference/prompt-registry.md) — Prompt catalog and registry
+- [reference/prompt-library.md](reference/prompt-library.md) — Generated examples for every intent, skill, and agent
 - [reference/asset-registry.md](reference/asset-registry.md) — Asset registry metadata
 - [reference/cli-command-reference.md](reference/cli-command-reference.md) — CLI command reference
 - [reference/component-library.md](reference/component-library.md) — Component library reference

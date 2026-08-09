@@ -4,6 +4,10 @@ All notable changes to this repository should be recorded in this file.
 
 ## Unreleased
 
+### Added
+
+- Added a generated prompt library with examples for every canonical intent, skill, and agent, including BaseCoat onboarding, refresh, and removal workflows. (#2774)
+
 ### Fixed
 
 - Exposed the documented `rca:` skill to downstream consumers. Re-run the BaseCoat refresh after upgrading to receive the corrected public skill metadata. (#2766)

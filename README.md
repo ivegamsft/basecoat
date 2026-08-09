@@ -191,6 +191,8 @@ BaseCoat is built on four GitHub Copilot customization primitives:
 | [ux-designer](agents/basecoat-10-core-ux-designer.agent.md) | Journey mapping, wireframes, and accessibility audits |
 
 > Full machine-readable catalog with skill pairings and model recommendations: [`docs/reference/asset-catalog.md`](docs/reference/asset-catalog.md)
+>
+> Copy-ready examples for every intent, skill, and agent: [`docs/reference/prompt-library.md`](docs/reference/prompt-library.md)
 
 ---
 
