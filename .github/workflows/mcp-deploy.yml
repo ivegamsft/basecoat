@@ -36,6 +36,8 @@ permissions:
 env:
   REGISTRY:   ghcr.io
   IMAGE_NAME: ${{ github.repository_owner }}/basecoat-metrics-mcp
+  NPM_CONFIG_REGISTRY: ${{ vars.NPM_REGISTRY }}
+  NPM_CONFIG_REPLACE_REGISTRY_HOST: npmjs
 
 jobs:
   build-push:
@@ -81,6 +83,8 @@ jobs:
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
         with:
           context: mcp/basecoat-metrics
+          build-args: |
+            NPM_REGISTRY=${{ vars.NPM_REGISTRY }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

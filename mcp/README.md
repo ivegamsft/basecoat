@@ -37,7 +37,11 @@ npm run self-test
 Build from the repository root:
 
 ```bash
-docker build -f mcp/Dockerfile -t basecoat-mcp .
+export NPM_REGISTRY="${NPM_REGISTRY:?Set NPM_REGISTRY to your npm registry}"
+docker build \
+  --build-arg NPM_REGISTRY="${NPM_REGISTRY}" \
+  -f mcp/Dockerfile \
+  -t basecoat-mcp .
 docker run --rm -i basecoat-mcp
 ```
 

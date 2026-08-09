@@ -39,7 +39,7 @@ jobs:
             const targets = [
               { id: 'portal-frontend', path: 'portal/frontend', lockfile: 'portal/frontend/package-lock.json', node: '20', canary: 'npm test' },
               { id: 'portal-backend', path: 'portal/backend', lockfile: 'portal/backend/package-lock.json', node: '20', canary: 'npm test' },
-              { id: 'portal-app-backend', path: 'portal/app/backend', lockfile: 'portal/app/backend/package-lock.json', node: '20', canary: 'npm run build' },
+              { id: 'portal-app-backend', path: 'portal/app/backend', lockfile: 'portal/app/backend/package-lock.json', node: '22', canary: 'npm run build' },
               { id: 'mcp-basecoat-metrics', path: 'mcp/basecoat-metrics', lockfile: 'mcp/basecoat-metrics/package-lock.json', node: '22', canary: 'npm run build' },
               { id: 'mcp-basecoat-extension', path: 'mcp/basecoat-extension', lockfile: 'mcp/basecoat-extension/package-lock.json', node: '22', canary: 'npm run typecheck' },
               { id: 'plugin-copilot-cli', path: 'plugins/copilot-cli-plugin', lockfile: 'plugins/copilot-cli-plugin/package-lock.json', node: '20', canary: 'npm run build' }
@@ -198,4 +198,3 @@ jobs:
             echo ""
             echo "Flaky containment policy: one retry allowed; repeated failures stay blocking and should be routed to quarantine workflow only after repeat evidence."
           } >> "$GITHUB_STEP_SUMMARY"
-

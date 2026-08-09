@@ -21,6 +21,9 @@ jobs:
     name: Build, lint, and validate MCP server
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      NPM_CONFIG_REGISTRY: ${{ vars.NPM_REGISTRY }}
+      NPM_CONFIG_REPLACE_REGISTRY_HOST: npmjs
 
     steps:
       - name: Check out repository
@@ -45,6 +48,8 @@ jobs:
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
         with:
           context: mcp/basecoat-metrics
+          build-args: |
+            NPM_REGISTRY=${{ vars.NPM_REGISTRY }}
           push: false
           tags: basecoat-metrics-mcp:pr-${{ github.event.number || 'local' }}
 

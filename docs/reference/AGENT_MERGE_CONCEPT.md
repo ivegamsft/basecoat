@@ -28,7 +28,7 @@ assets and supports manual rollback planning through `workflow_dispatch`.
 
 Branch-protection and merge-queue policies should require:
 
-- `Agent Merge / Agent merge guardrails`
+- `BaseCoat - Agent Merge / Agent merge guardrails`
 
 The workflow now runs on all pull requests so this context is consistently
 published. Guardrail validation still scopes heavy checks to agent/skill changes.

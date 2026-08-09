@@ -31,7 +31,7 @@ timeout-minutes: 20
 run-name: "Code Review — PR #${{ github.event.pull_request.number }}"
 ---
 
-# Code Review Agent
+# BaseCoat - Code Review Agent
 
 You are performing an automated code review on a pull request. Your goal is to
 surface genuine issues — bugs, security vulnerabilities, and logic errors —

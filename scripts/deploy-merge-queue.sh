@@ -135,7 +135,7 @@ deploy_merge_queue() {
             "integration_id": null
           },
           {
-            "context": "Agent Merge / Agent merge guardrails",
+            "context": "BaseCoat - Agent Merge / Agent merge guardrails",
             "integration_id": null
           }
         ]

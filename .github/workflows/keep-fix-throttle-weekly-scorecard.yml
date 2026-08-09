@@ -1,4 +1,4 @@
-name: "Keep/Fix/Throttle Weekly Scorecard"
+name: "BaseCoat - Keep/Fix/Throttle Weekly Scorecard"
 
 on:
   schedule:

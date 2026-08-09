@@ -70,7 +70,10 @@ The server supports two transports selected by environment variable:
 
 ```bash
 cd mcp/basecoat-metrics
-docker build -t basecoat-metrics-mcp .
+export NPM_REGISTRY="${NPM_REGISTRY:?Set NPM_REGISTRY to your npm registry}"
+docker build \
+  --build-arg NPM_REGISTRY="${NPM_REGISTRY}" \
+  -t basecoat-metrics-mcp .
 docker run -p 8080:8080 basecoat-metrics-mcp
 # GET http://localhost:8080/health → ok
 ```

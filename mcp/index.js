@@ -22,7 +22,6 @@ const allowedDirectories = new Set([
 const allowedFiles = new Set([
   "README.md",
   "CHANGELOG.md",
-  "INVENTORY.md",
   "version.json",
 ]);
 
@@ -121,9 +120,9 @@ function formatSearchResults(query, matches) {
 async function runSelfTest() {
   const requiredPaths = [
     "README.md",
-    "INVENTORY.md",
+    "docs/reference/inventory.md",
     "version.json",
-    "instructions/mcp.instructions.md",
+    "instructions/basecoat-10-core-mcp.instructions.md",
     "scripts/package-basecoat.sh",
     "scripts/package-basecoat.ps1",
   ];

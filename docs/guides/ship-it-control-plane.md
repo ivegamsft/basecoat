@@ -61,7 +61,7 @@ state, next action, and stop-condition status (`continue|complete|blocked|max_cy
 
 ### Workflow Dispatch
 
-Run **Ship-it Intent Dispatch** with:
+Run **BaseCoat - Ship-it Intent Dispatch** with:
 
 - `intent`: `ship-it`, `spec-2-prod`, or `onboarding-conductor`
 - `goal`: objective statement
@@ -129,7 +129,7 @@ For `profile=pilot-wawkr`, phase artifacts carry canary-specific lane metadata:
 
 The build guard can run two ways:
 
-1. `workflow_run` trigger after failed `Ship-it Intent Dispatch` or `BaseCoat - PR Validation` runs
+1. `workflow_run` trigger after failed `BaseCoat - Ship-it Intent Dispatch` or `BaseCoat - PR Validation` runs
 2. Manual `workflow_dispatch` with explicit retry counters and branch/workflow filters
 
 Detector outputs:

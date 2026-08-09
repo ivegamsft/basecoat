@@ -1,4 +1,4 @@
-name: "Workflow Runner Capability Audit"
+name: "BaseCoat - Workflow Runner Capability Audit"
 
 on:
   pull_request:

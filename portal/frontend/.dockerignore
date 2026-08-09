@@ -3,3 +3,4 @@ dist
 *.test.tsx
 *.test.ts
 coverage
+.npmrc

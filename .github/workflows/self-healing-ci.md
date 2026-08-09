@@ -32,7 +32,7 @@ timeout-minutes: 20
 run-name: "Self-Healing CI — run ${{ github.event.workflow_run.id || inputs.run_id || github.run_id }}"
 ---
 
-# Self-Healing CI — Automated Failure Diagnosis
+# BaseCoat - Self-Healing CI — Automated Failure Diagnosis
 
 You are analyzing a failed GitHub Actions workflow run and providing actionable
 diagnosis and remediation guidance.

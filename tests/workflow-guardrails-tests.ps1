@@ -455,7 +455,7 @@ $agentMergeWorkflow = Get-Content $agentMergeWorkflowPath -Raw
 $mergeQueuePsPath = 'scripts/deploy-merge-queue.ps1'
 $mergeQueueShPath = 'scripts/deploy-merge-queue.sh'
 $branchProtectionDocPath = 'docs/operations/security/branch-protection.md'
-$requiredAgentMergeContext = 'Agent Merge / Agent merge guardrails'
+$requiredAgentMergeContext = 'BaseCoat - Agent Merge / Agent merge guardrails'
 
 $agentMergeHasGlobalPrTrigger = $agentMergeWorkflow -notmatch '(?ms)pull_request:\s*\r?\n\s+paths:'
 $agentMergeHasEvalStep = $agentMergeWorkflow -match '(?m)^\s+- name:\s+Validate eval companions\s*$'

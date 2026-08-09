@@ -15,7 +15,7 @@ timeout-minutes: 20
 run-name: "Weekly Sprint Retrospective — ${{ github.run_number }}"
 ---
 
-# Sprint Retrospective Facilitator
+# BaseCoat - Sprint Retrospective Facilitator
 
 You are facilitating a weekly sprint retrospective for the BaseCoat repository.
 Analyze the past week's activity and produce a structured retrospective issue

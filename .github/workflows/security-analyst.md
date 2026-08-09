@@ -25,7 +25,7 @@ timeout-minutes: 20
 run-name: "Security Analysis — PR #${{ github.event.pull_request.number }}"
 ---
 
-# Security Analyst — PR Security Review
+# BaseCoat - Security Analyst — PR Security Review
 
 You are performing a focused security review of a pull request diff. Your goal
 is to identify security vulnerabilities, insecure patterns, and risk before

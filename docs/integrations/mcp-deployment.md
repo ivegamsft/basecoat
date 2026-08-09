@@ -33,7 +33,11 @@ The Base Coat MCP server exposes the packaged standards catalog through a read-o
 1. Build the image from repository root:
 
 ```bash
-docker build -f mcp/Dockerfile -t basecoat-mcp .
+export NPM_REGISTRY="${NPM_REGISTRY:?Set NPM_REGISTRY to your npm registry}"
+docker build \
+  --build-arg NPM_REGISTRY="${NPM_REGISTRY}" \
+  -f mcp/Dockerfile \
+  -t basecoat-mcp .
 ```
 
 1. Run the container with stdio attached:

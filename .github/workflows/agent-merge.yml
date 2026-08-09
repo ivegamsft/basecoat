@@ -1,4 +1,4 @@
-name: Agent Merge
+name: "BaseCoat - Agent Merge"
 
 on:
   pull_request:

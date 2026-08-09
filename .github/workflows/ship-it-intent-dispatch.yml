@@ -1,4 +1,4 @@
-name: Ship-it Intent Dispatch
+name: "BaseCoat - Ship-it Intent Dispatch"
 
 on:
   issue_comment:

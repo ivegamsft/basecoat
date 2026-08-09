@@ -257,6 +257,7 @@ jobs:
             --registry "${ACR_NAME}" \
             --image "${BACKEND_TAG}" \
             --file portal/app/backend/Dockerfile \
+            --build-arg NPM_REGISTRY="${NPM_REGISTRY}" \
             portal/app/backend
 
           az acr build \
@@ -269,6 +270,7 @@ jobs:
           echo "frontend_tag=${FRONTEND_TAG}" >> "$GITHUB_OUTPUT"
         env:
           ACR_NAME: ${{ vars.PORTAL_ACR_NAME || 'portalacrstaging' }}
+          NPM_REGISTRY: ${{ vars.NPM_REGISTRY }}
 
       - name: Deploy portal stack
         id: deploy

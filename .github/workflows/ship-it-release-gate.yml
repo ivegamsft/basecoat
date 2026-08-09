@@ -1,4 +1,4 @@
-name: Ship-it Release Gate
+name: "BaseCoat - Ship-it Release Gate"
 
 on:
   workflow_dispatch:

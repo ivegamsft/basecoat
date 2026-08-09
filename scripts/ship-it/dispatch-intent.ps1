@@ -368,7 +368,7 @@ function Get-StageArtifact {
     "BaseCoat - Sprint Closeout Branch Audit / branch-audit"
   )
   if ($StageIndex -eq 3) {
-    $requiredChecks += "Ship-it Release Gate / enforce-release-gate"
+    $requiredChecks += "BaseCoat - Ship-it Release Gate / Evaluate Ship-it Release Gate"
   }
 
   return [ordered]@{

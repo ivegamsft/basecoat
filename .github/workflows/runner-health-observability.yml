@@ -1,4 +1,4 @@
-name: "Runner Health Observability"
+name: "BaseCoat - Runner Health Observability"
 
 on:
   pull_request:

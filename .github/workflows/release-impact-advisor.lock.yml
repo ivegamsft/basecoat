@@ -46,7 +46,7 @@
 #   - ghcr.io/github/github-mcp-server:v1.0.4
 #   - node:lts-alpine@sha256:d1b3b4da11eefd5941e7f0b9cf17783fc99d9c6fc34884a665f40a06dbdfc94f
 
-name: "Release Impact Advisor"
+name: "BaseCoat - Release Impact Advisor"
 on:
   pull_request:
     types:
@@ -1411,4 +1411,3 @@ jobs:
             /tmp/gh-aw/safe-output-items.jsonl
             /tmp/gh-aw/temporary-id-map.json
           if-no-files-found: ignore
-

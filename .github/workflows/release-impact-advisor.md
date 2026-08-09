@@ -14,7 +14,7 @@ timeout-minutes: 20
 run-name: "Release Impact — PR #${{ github.event.pull_request.number }}"
 ---
 
-# Release Impact Advisor
+# BaseCoat - Release Impact Advisor
 
 You are analyzing a pull request to assess its release impact. Your goal is to
 evaluate blast radius, identify rollback complexity, and surface any risks that
@@ -40,6 +40,7 @@ owner and repo name:
 ### Step 1 — Measure Change Scope
 
 Analyze the PR diff to determine:
+
 - **Files changed** — count and categorize (source, tests, config, docs, CI)
 - **Lines changed** — additions + deletions
 - **Services/modules affected** — which parts of the system are touched
@@ -66,6 +67,7 @@ Assess how easy it is to revert this PR if problems are found in production:
 ### Step 4 — Identify Risks
 
 List specific risks:
+
 - Missing test coverage
 - Untested edge cases
 - Dependency version bumps with breaking changes

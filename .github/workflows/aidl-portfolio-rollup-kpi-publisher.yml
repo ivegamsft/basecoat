@@ -1,4 +1,4 @@
-name: AIDL Portfolio Rollup and KPI Publisher
+name: "BaseCoat - AIDL Portfolio Rollup and KPI Publisher"
 
 on:
   workflow_dispatch:

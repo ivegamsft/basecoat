@@ -282,8 +282,8 @@ if ($shipItSummary.child_issues[1].stage_artifact.previous_stage_issue_url -ne $
 if ($shipItSummary.child_issues[2].stage_artifact.previous_stage_issue_url -ne $shipItSummary.child_issues[1].url) {
   throw "Sprint 3 should reference Sprint 2 as its previous stage issue."
 }
-if ($shipItSummary.child_issues[2].stage_artifact.merge_policy.required_checks -notcontains "Ship-it Release Gate / enforce-release-gate") {
-  throw "Expected Sprint 3 merge policy to require Ship-it Release Gate."
+if ($shipItSummary.child_issues[2].stage_artifact.merge_policy.required_checks -notcontains "BaseCoat - Ship-it Release Gate / Evaluate Ship-it Release Gate") {
+  throw "Expected Sprint 3 merge policy to require the BaseCoat Ship-it Release Gate."
 }
 if ($shipItSummary.child_issues[0].stage_artifact.branch_name -notmatch '^intent/ship-it/') {
   throw "Expected stage artifact branch to use intent/ship-it/* naming."

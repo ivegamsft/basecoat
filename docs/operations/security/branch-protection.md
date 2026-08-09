@@ -87,7 +87,7 @@ These are the minimum checks required for readiness gating on `main`:
 | `validate-unix` | `validate-basecoat.yml` | Bash validation suite |
 | `validate-windows` | `validate-basecoat.yml` | PowerShell validation suite |
 | `release-label-gate` | `pr-validation.yml` | PR release-label readiness gate |
-| `Agent Merge / Agent merge guardrails` | `agent-merge.yml` | Optional additional governance guardrail |
+| `BaseCoat - Agent Merge / Agent merge guardrails` | `agent-merge.yml` | Optional additional governance guardrail |
 | `prd-spec-gate` | `prd-spec-gate.yml` | Intake gate: blocks only high-change PRs missing both PRD+Spec refs; warns for risky-path-only PRs |
 | `gitleaks` | `secret-scan.yml` | ⚠️ Warn-only — **do NOT add as required check** |
 
@@ -174,7 +174,7 @@ Save this as `branch-protection-ruleset.json` and import via CLI (see next secti
             "integration_id": null
           },
           {
-            "context": "Agent Merge / Agent merge guardrails",
+            "context": "BaseCoat - Agent Merge / Agent merge guardrails",
             "integration_id": null
           },
           {
@@ -241,7 +241,7 @@ gh api \
   --method PUT \
   -H "Accept: application/vnd.github+json" \
   /repos/{OWNER}/{REPO}/branches/main/protection \
-  --field required_status_checks='{"strict":true,"contexts":["validate-commit-messages","validate-unix","validate-windows","Agent Merge / Agent merge guardrails","prd-spec-gate"]}' \
+  --field required_status_checks='{"strict":true,"contexts":["validate-commit-messages","validate-unix","validate-windows","BaseCoat - Agent Merge / Agent merge guardrails","prd-spec-gate"]}' \
   --field enforce_admins=true \
   --field required_pull_request_reviews='{"required_approving_review_count":1,"dismiss_stale_reviews":true}' \
   --field restrictions=null \

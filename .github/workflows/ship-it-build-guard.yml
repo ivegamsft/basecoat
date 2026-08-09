@@ -1,4 +1,4 @@
-name: Ship-it Build Guard
+name: "BaseCoat - Ship-it Build Guard"
 
 on:
   workflow_dispatch:
@@ -37,7 +37,7 @@ on:
         type: boolean
   workflow_run:
     workflows:
-      - Ship-it Intent Dispatch
+      - BaseCoat - Ship-it Intent Dispatch
       - BaseCoat - PR Validation
     types: [completed]
 
@@ -184,4 +184,3 @@ jobs:
         if: steps.detector.outputs.action == 'escalate'
         run: |
           echo "Build-break escalation triggered: ${{ steps.detector.outputs.escalation_issue_url }}"
-
