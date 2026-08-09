@@ -2500,6 +2500,14 @@
       "versionSource": "library"
     },
     {
+      "path": "skills/rca/SKILL.md",
+      "type": "skill",
+      "sha": "a4c4f74ddabab4a82a10c68e15c1dd36e562109c",
+      "version": null,
+      "effectiveVersion": "3.32.0",
+      "versionSource": "library"
+    },
+    {
       "path": "skills/refactoring/SKILL.md",
       "type": "skill",
       "sha": "0509fad40bdb8b88b400607bf85101a790b0e540",

@@ -448,6 +448,26 @@ else {
     Write-Host '    PASS backlog-burndown skill and eval cover open PRs'
 }
 
+# Test 21: RCA prefix resolves to a distributable public skill.
+Write-Host '  Test 21: Validate rca prefix resolves to the public RCA skill...'
+$rcaSkill = Get-Content (Join-Path $repoRoot 'skills\rca\SKILL.md') -Raw
+$rcaEval = Get-Content (Join-Path $repoRoot 'skills\rca\eval.yaml') -Raw
+$rcaDocs = Get-Content (Join-Path $repoRoot 'docs\guides\intent-prefixes.md') -Raw
+$assetManifest = Get-Content (Join-Path $repoRoot 'asset-manifest.json') -Raw | ConvertFrom-Json
+$rcaMissing = @()
+if ($rcaSkill -notmatch '(?m)^visibility:\s*"?public"?\s*$') { $rcaMissing += 'public visibility' }
+if ($rcaSkill -notmatch "prefixes input with 'rca:'") { $rcaMissing += 'rca prefix invocation rule' }
+if ($rcaEval -notmatch '(?m)^\s*input:\s*"rca: api failure"\s*\r?\n\s*expect_activation:\s*true\s*$') { $rcaMissing += 'positive exact rca prefix eval' }
+if ($rcaDocs -notmatch 'public `rca` skill' -or $rcaDocs -notmatch '`@rca`') { $rcaMissing += 'skill/agent distinction in docs' }
+if (-not ($assetManifest.assets.path -contains 'skills/rca/SKILL.md')) { $rcaMissing += 'asset manifest entry' }
+if ($rcaMissing.Count -gt 0) {
+    $failures += 'rca-public-routing-missing'
+    Write-Host "    FAIL RCA public routing gaps: $($rcaMissing -join ', ')" -ForegroundColor Red
+}
+else {
+    Write-Host '    PASS rca prefix resolves to a documented public skill'
+}
+
 if ($failures.Count -gt 0) {
     Write-Host "Routing guardrail tests FAILED: $($failures -join ', ')" -ForegroundColor Red
     exit 1

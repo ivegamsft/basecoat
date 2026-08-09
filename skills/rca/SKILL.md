@@ -6,7 +6,7 @@ description: "Root cause analysis for incidents, failures, and unexpected behavi
 invocation_rules:
   - "Use when the user prefixes input with 'rca:' or asks to investigate why something failed."
   - "Use for structured post-incident analysis after the system is stabilized."
-visibility: "internal"
+visibility: "public"
 category: operations
 metadata:
   category: operations

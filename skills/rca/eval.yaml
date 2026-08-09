@@ -3,7 +3,7 @@ description: "Routing evaluation — validates trigger activation for rca skill.
 skill: "skills/rca/SKILL.md"
 scenarios:
   - id: "pos-1"
-    input: "rca: broken builds in CI pipeline"
+    input: "rca: api failure"
     expect_activation: true
   - id: "pos-2"
     input: "Run a root cause analysis on last night's production outage."

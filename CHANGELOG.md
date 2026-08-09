@@ -4,6 +4,10 @@ All notable changes to this repository should be recorded in this file.
 
 ## Unreleased
 
+### Fixed
+
+- Exposed the documented `rca:` skill to downstream consumers. Re-run the BaseCoat refresh after upgrading to receive the corrected public skill metadata. (#2766)
+
 ## 4.0.0 - 2026-07-26
 
 ### Breaking Changes

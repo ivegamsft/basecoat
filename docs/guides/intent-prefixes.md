@@ -258,6 +258,8 @@ Use `@rca` for the deep-dive investigation after the active incident is stable.
 ## RCA routing
 
 `rca:` suspends all execution. Use it when you want to diagnose before retrying.
+The prefix activates the public `rca` skill; use `@rca` when you want to invoke
+the deeper RCA agent explicitly.
 
 | Alias | Normalized intent |
 |---|---|
