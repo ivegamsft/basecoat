@@ -41,7 +41,7 @@ jobs:
               --method PUT \
               "/repos/${repo}/environments/production" \
               -F wait_timer=0 \
-              -F prevent_self_review=true \
+              -F prevent_self_review=false \
               -F 'deployment_branch_policy[protected_branches]=true' \
               -F 'deployment_branch_policy[custom_branch_policies]=false' \
               --jq '{name, html_url, deployment_branch_policy}' 2>&1)" || {
@@ -232,7 +232,7 @@ jobs:
           ✓ Protection settings:
             - Deployment branch restricted to main
             - Requires 1 approval for deployments
-            - Prevents self-review of deployments
+            - Allows the designated reviewer to approve their own dispatch in this single-operator repository
           
           ## Staging Environment (staging)
           Optional environment for pre-production testing

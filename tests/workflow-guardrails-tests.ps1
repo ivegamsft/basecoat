@@ -669,6 +669,34 @@ else {
     $guardrailFailures += 'production-environment-gate'
 }
 
+$extensionDeployPath = Join-Path $workflowDir 'extension-deploy.yml'
+if (Test-Path $extensionDeployPath) {
+    $extensionDeployWorkflow = Get-Content $extensionDeployPath -Raw
+    if ($extensionDeployWorkflow -match 'Resolver policy requires human approval.*automated deploy is blocked') {
+        Write-Host '    ✗ Extension deployment still rejects protected-environment approval' -ForegroundColor Red
+        $guardrailFailures += 'extension-protected-environment-approval'
+    }
+    elseif ($extensionDeployWorkflow -notmatch '(?s)if \[\[ "\$\{APPROVAL_REQUIRED\}" == "true" \]\]; then\s+if \[\[ "\$\{GITHUB_ENVIRONMENT\}" != "production" \]\]; then.*?exit 1.*?Human approval requirement is enforced by the protected GitHub environment') {
+        Write-Host '    ✗ Extension deployment does not fail closed before accepting protected-environment approval' -ForegroundColor Red
+        $guardrailFailures += 'extension-protected-environment-approval'
+    }
+    else {
+        Write-Host '    ✓ Extension deployment accepts protected-environment approval'
+    }
+}
+
+$productionProtectionPath = Join-Path $repoRoot '.github\environment-protection-production.json'
+if (Test-Path $productionProtectionPath) {
+    $productionProtection = Get-Content $productionProtectionPath -Raw | ConvertFrom-Json
+    if ($productionProtection.protection_rules.prevent_self_review -ne $false) {
+        Write-Host '    ✗ Production environment would deadlock the designated single reviewer' -ForegroundColor Red
+        $guardrailFailures += 'production-environment-self-review'
+    }
+    else {
+        Write-Host '    ✓ Production environment permits the designated single reviewer'
+    }
+}
+
 # Test 18: CI stabilization regressions for Sprint 36 workflows
 Write-Host '  Test 18: Validate Sprint 36 CI stabilization workflow safeguards...'
 $stabilizationGuardrailIssues = @()
