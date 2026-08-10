@@ -245,7 +245,7 @@ if ($SarifPath) {
                 tool = @{
                     driver = @{
                         name = "config-secrets-audit"
-                        informationUri = "https://github.com/IBuySpy-Shared/basecoat"
+                        informationUri = "https://github.com/ivegamsft/basecoat"
                         rules = $rules
                     }
                 }

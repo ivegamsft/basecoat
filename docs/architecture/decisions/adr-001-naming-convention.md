@@ -10,7 +10,7 @@
 
 The project uses two visually similar names that serve different roles:
 
-- **`basecoat`** — the GitHub repository name (`IBuySpy-Shared/basecoat`), the
+- **`basecoat`** — the GitHub repository name (`ivegamsft/basecoat`), the
   npm package identifier, release artifact names (`basecoat-ghcp.zip`), and all
   internal scripts and environment variable references (e.g., `BASECOAT_REPO`).
 - **`base-coat`** — the local installation directory inside consumer repositories

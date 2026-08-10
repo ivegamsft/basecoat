@@ -349,7 +349,7 @@ repository_dispatch wiring).
 ### Enterprise Onboarding (#623)
 
 Reduces internal friction to near-zero. After a one-time admin step, any
-IBuySpy-Shared repo can contribute learnings with a single command.
+source organization repo can contribute learnings with a single command.
 
 #### docs/memory/SETUP-INTERNAL.md
 
@@ -372,7 +372,7 @@ Idempotent - safe to re-run.
 #### .github/workflow-templates/submit-learning.yml
 
 Org starter workflow. Appears in the **Actions - New workflow** UI for all
-`IBuySpy-Shared` repos automatically. No file copy needed - fill form, run.
+`source organization` repos automatically. No file copy needed - fill form, run.
 
 #### .github/workflows/auto-enlist.yml
 
@@ -853,9 +853,9 @@ New `security-analyst.md` + compiled `security-analyst.lock.yml`:
 
 #### Shared Org Memory Repo
 
-- Created `IBuySpy-Shared/basecoat-memory` private repo — the shared L2s/L3s memory tier for the org
+- Created `example-org/basecoat-memory` private repo — the shared L2s/L3s memory tier for the org
 - Seeded from `docs/templates/basecoat-memory/`: README, CONTRIBUTING, hot-index, validate-memory CI workflow
-- Sync via `scripts/sync-shared-memory.ps1 -SharedMemoryRepo IBuySpy-Shared/basecoat-memory`
+- Sync via `scripts/sync-shared-memory.ps1 -SharedMemoryRepo example-org/basecoat-memory`
 
 ## 3.9.0 - 2026-05-07
 

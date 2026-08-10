@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-14  
 **Status:** Initial Triage & Remediation  
-**Issue:** [#1558 — Triage and remediate open security alerts backlog](https://github.com/IBuySpy-Shared/basecoat/issues/1558)
+**Issue:** [#1558 — Triage and remediate open security alerts backlog](https://github.com/ivegamsft/basecoat/issues/1558)
 
 ---
 

@@ -1,9 +1,9 @@
 site_name: BaseCoat
 site_description: Enterprise shared library of GitHub Copilot customization assets — agents, skills, instructions, and prompts.
 # URLs below are substituted automatically by .github/workflows/docs.yml for consumer forks.
-site_url: https://ibuyspy-shared.github.io/basecoat/
-repo_url: https://github.com/IBuySpy-Shared/basecoat
-repo_name: IBuySpy-Shared/basecoat
+site_url: https://ivegamsft.github.io/basecoat/
+repo_url: https://github.com/ivegamsft/basecoat
+repo_name: ivegamsft/basecoat
 edit_uri: edit/main/docs/
 
 # Exclude legacy archive files — links are historical and not maintained
@@ -89,7 +89,6 @@ nav:
     - Workflow Control Plane:
       - Overview: reference/workflows/index.md
       - PR Validation: reference/workflows/pr-validation.md
-      - PR Flow Hygiene: reference/workflows/pr-flow-hygiene.md
       - PR Size and Sprint Labeler: reference/workflows/pr-size-labeler.md
       - Reviewer Auto-Assign: reference/workflows/reviewer-autoassign.md
     - Governance Landing: GOVERNANCE.md
@@ -130,9 +129,9 @@ nav:
     - Dashboard Metrics Schema and Glossary: reference/metrics-schema-glossary.md
     - Changelog: changelog.md
 
-copyright: 'Copyright &copy; IBuySpy-Shared contributors. Licensed under MIT.'
+copyright: 'Copyright &copy; BaseCoat contributors. Licensed under MIT.'
 
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/IBuySpy-Shared/basecoat
+      link: https://github.com/ivegamsft/basecoat

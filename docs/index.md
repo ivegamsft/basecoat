@@ -96,11 +96,8 @@ flowchart LR
 - [operations/cost-optimization.md](operations/cost-optimization.md) — Cost analysis and optimization
 - [operations/enterprise-runners.md](operations/enterprise-runners.md) — Self-hosted runner setup
 - [operations/enterprise-security-hardening.md](operations/enterprise-security-hardening.md) — Security hardening guide
-- [operations/blocked-issues.md](operations/blocked-issues.md) — Blocked issues tracking
 - [operations/telemetry-adoption.md](operations/telemetry-adoption.md) — Adoption telemetry guide
 - [operations/repo-story.md](operations/repo-story.md) — Durable chronicle of execution learnings and cycle updates
-- [operations/github-secrets.md](operations/github-secrets.md) — Repository secrets setup and rotation guide
-- [operations/copilot-extension-github-app-registration.md](operations/copilot-extension-github-app-registration.md) — GitHub App registration runbook for BaseCoat Copilot Extension
 - [operations/build-master-control-plane.md](operations/build-master-control-plane.md) — Build master architecture, policy matrix, and runbook for lane-aware continuous merge with cloud break-fix
 - [operations/security/remediation-traceability-workflow.md](operations/security/remediation-traceability-workflow.md) — Canonical implementation-linked closure workflow for security remediation
 - [operations/security/](operations/security/) — Security policies and audit docs
@@ -113,9 +110,3 @@ flowchart LR
 
 - [examples/](examples/) — Read-only examples and starter references
 
-## Archive
-
-> Historical Wave 3 staging deliverables, portal design docs, wireframes, and cleanup reports.
-> These are preserved for reference but are not part of the active framework.
-
-- [View archive on GitHub](https://github.com/IBuySpy-Shared/basecoat/tree/main/docs/archive) — All archived Wave 3, portal, design, and audit documents

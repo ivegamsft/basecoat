@@ -389,7 +389,7 @@ Scans all repositories in your organization to detect which ones have synced Bas
 **Usage:**
 
 ```powershell
-# Scan default org (IBuySpy-Shared) and output as table
+# Scan default org (example-org) and output as table
 ./scripts/adoption/detect-basecoat.ps1
 
 # Scan specific org and output as JSON
@@ -421,7 +421,7 @@ Continuously collects and tracks metrics for Base Coat adoption alongside develo
 
 ```bash
 export GITHUB_TOKEN="<your-token>"
-export DASHBOARD_ORG="IBuySpy-Shared"
+export DASHBOARD_ORG="example-org"
 export DASHBOARD_REPOS='["org/repo1", "org/repo2"]'
 python scripts/metrics/collect-metrics.py
 ```

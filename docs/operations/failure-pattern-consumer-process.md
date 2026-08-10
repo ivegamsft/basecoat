@@ -72,7 +72,7 @@ A process run is complete only when all four gates pass and all required artifac
 ## #2047 Outcome Mapping (Smallest Viable Slice)
 
 When this process is used to execute workstream 2
-([#2047](https://github.com/IBuySpy-Shared/basecoat/issues/2047)), treat the
+([#2047](https://github.com/ivegamsft/basecoat/issues/2047)), treat the
 following as required completion mapping:
 
 | Issue #2047 outcome | Process artifact expectation |

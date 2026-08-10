@@ -101,7 +101,7 @@ Disallowed:
 
 ## Related
 
-- Issue: [#1667](https://github.com/IBuySpy-Shared/basecoat/issues/1667)
-- Parent feature: [#1738](https://github.com/IBuySpy-Shared/basecoat/issues/1738)
+- Issue: [#1667](https://github.com/ivegamsft/basecoat/issues/1667)
+- Parent feature: [#1738](https://github.com/ivegamsft/basecoat/issues/1738)
 - Audit context: [docs/audit/ci-cd-findings-2026-06-14.md](../audit/ci-cd-findings-2026-06-14.md)
 - Session hygiene policy: [.github/instructions/cost-optimization.instructions.md](../../.github/instructions/cost-optimization.instructions.md)

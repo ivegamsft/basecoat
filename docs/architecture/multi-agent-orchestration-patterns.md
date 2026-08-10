@@ -170,7 +170,7 @@ risk_score = calculate_risk_score(normalized)                   # Analysis
 
 **Pattern**: Single backend logic, multiple frontends:
 
-- CLI: `poetry run python src/main.py --repo IBuySpy-Shared/basecoat --selected-agents issue-triage,security-analyst`
+- CLI: `poetry run python src/main.py --repo ivegamsft/basecoat --selected-agents issue-triage,security-analyst`
 - Web: FastAPI backend + Streamlit frontend with visual workflow builder
 
 **BaseCoat Applicability**: High (future). CLI now, web portal roadmap for visual agent builder and execution dashboard.
@@ -902,7 +902,7 @@ graph = workflow.compile()
 
 The Pub-Sub (publish-subscribe) pattern decouples memory promotion events from the
 downstream workflows that react to them. A single `repository_dispatch` event on
-`IBuySpy-Shared/basecoat-memory` fans out to all subscriber workflows without the
+`example-org/basecoat-memory` fans out to all subscriber workflows without the
 publisher knowing who is listening.
 
 ### Event Schema
@@ -915,11 +915,11 @@ domain: ci                     # one of: ci, git, authoring, process, security,
                                # portal, testing, governance, memory, infra
 subject: ci:copilot-agent-pr
 fact: "Copilot agent PRs show action_required..."
-citations: "IBuySpy-Shared/basecoat PRs #312-314"
+citations: "ivegamsft/basecoat PRs #312-314"
 confidence: 0.95
 promoted_by: memory-steward
 timestamp: "2026-05-09T09:00:00Z"
-source_repo: IBuySpy-Shared/basecoat
+source_repo: ivegamsft/basecoat
 ```
 
 ### Publisher
@@ -953,7 +953,7 @@ jobs:
           github-token: ${{ secrets.MEMORY_REPO_TOKEN }}
           script: |
             await github.rest.repos.createDispatchEvent({
-              owner: 'IBuySpy-Shared',
+              owner: 'example-org',
               repo: 'basecoat',
               event_type: 'memory.promoted',
               client_payload: {
