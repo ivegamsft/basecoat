@@ -150,7 +150,7 @@ ignore:
 |---------|-----------|---------------|--------|
 | basecoat-copilot-extension | npm | @github/copilot-sdk | Review needed |
 | basecoat-extension | npm | @azure/monitor-opentelemetry, express | Review needed |
-| basecoat-metrics | npm | @modelcontextprotocol/sdk, zod | Review needed |
+| basecoat-metrics | npm | @modelcontextprotocol/server, zod | Audited — no findings |
 | portal-ui | npm | React stack | Review needed |
 | portal-backend | npm | Express, Azure SDKs | Review needed |
 

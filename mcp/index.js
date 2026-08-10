@@ -3,8 +3,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { McpServer } from "@modelcontextprotocol/server";
+import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
 import { z } from "zod";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -157,10 +157,13 @@ async function main() {
     version: version.version,
   });
 
-  server.tool(
+  server.registerTool(
     "basecoat_inventory",
-    "Return the Base Coat version and the list of packaged assets available to consumers.",
-    {},
+    {
+      description:
+        "Return the Base Coat version and the list of packaged assets available to consumers.",
+      inputSchema: {},
+    },
     async () => {
       const inventory = await buildInventory();
       return {
@@ -174,11 +177,14 @@ async function main() {
     },
   );
 
-  server.tool(
+  server.registerTool(
     "basecoat_read_asset",
-    "Read the contents of a specific packaged Base Coat asset by relative path.",
     {
-      path: z.string().min(1),
+      description:
+        "Read the contents of a specific packaged Base Coat asset by relative path.",
+      inputSchema: {
+        path: z.string().min(1),
+      },
     },
     async ({ path: assetPath }) => {
       const asset = await readTextFile(assetPath);
@@ -193,11 +199,14 @@ async function main() {
     },
   );
 
-  server.tool(
+  server.registerTool(
     "basecoat_search_assets",
-    "Search packaged Base Coat asset paths using a case-insensitive substring match.",
     {
-      query: z.string().min(1),
+      description:
+        "Search packaged Base Coat asset paths using a case-insensitive substring match.",
+      inputSchema: {
+        query: z.string().min(1),
+      },
     },
     async ({ query }) => {
       const inventory = await buildInventory();

@@ -174,11 +174,29 @@ Assert-PathExists '.vscode/mcp.json'  '.vscode/mcp.json is missing'
 
 Write-Host 'MCP tests: validating package.json...'
 $pkg = Get-Content 'mcp/basecoat-metrics/package.json' -Raw | ConvertFrom-Json
+$rootPkg = Get-Content 'mcp/package.json' -Raw | ConvertFrom-Json
 if (-not $pkg.scripts.build) { throw 'package.json is missing scripts.build' }
 if (-not $pkg.scripts.start) { throw 'package.json is missing scripts.start' }
 if (-not $pkg.scripts.test)  { throw 'package.json is missing scripts.test' }
-if ($pkg.dependencies.'@modelcontextprotocol/sdk' -eq $null) {
-    throw "package.json missing @modelcontextprotocol/sdk dependency"
+if ($pkg.dependencies.'@modelcontextprotocol/server' -eq $null) {
+    throw "package.json missing @modelcontextprotocol/server dependency"
+}
+if ($rootPkg.dependencies.'@modelcontextprotocol/server' -eq $null) {
+    throw "mcp/package.json missing @modelcontextprotocol/server dependency"
+}
+foreach ($dependency in @('@modelcontextprotocol/sdk', '@modelcontextprotocol/node', 'hono', '@hono/node-server')) {
+    if ($pkg.dependencies.$dependency -ne $null -or $rootPkg.dependencies.$dependency -ne $null) {
+        throw "MCP packages must not depend on $dependency"
+    }
+}
+foreach ($lockPath in @('mcp/package-lock.json', 'mcp/basecoat-metrics/package-lock.json')) {
+    $forbiddenPackagePaths = @(
+        '"node_modules/(?:[^"]+/node_modules/)*hono"\s*:',
+        '"node_modules/(?:[^"]+/node_modules/)*@hono/node-server"\s*:'
+    )
+    if (Select-String -Path $lockPath -Pattern $forbiddenPackagePaths -Quiet) {
+        throw "$lockPath contains an unnecessary Hono runtime package"
+    }
 }
 
 Write-Host 'MCP tests: validating JSON files...'
@@ -199,12 +217,14 @@ Assert-FileContains 'infra/mcp/main.bicep' 'output healthUrl' 'infra/mcp/main.bi
 Assert-FileContains 'infra/mcp/main.bicep' 'output mcpUrl'    'infra/mcp/main.bicep is missing mcpUrl output'
 
 Write-Host 'MCP tests: validating HTTP transport in src/index.ts...'
-Assert-FileContains 'mcp/basecoat-metrics/src/index.ts' 'StreamableHTTPServerTransport' `
-    'src/index.ts is missing StreamableHTTPServerTransport (HTTP transport not implemented)'
+Assert-FileContains 'mcp/basecoat-metrics/src/index.ts' 'WebStandardStreamableHTTPServerTransport' `
+    'src/index.ts is missing WebStandardStreamableHTTPServerTransport (HTTP transport not implemented)'
 Assert-FileContains 'mcp/basecoat-metrics/src/index.ts' '/health' `
     'src/index.ts is missing /health endpoint'
 Assert-FileContains 'mcp/basecoat-metrics/src/index.ts' 'MCP_TRANSPORT' `
     'src/index.ts is missing MCP_TRANSPORT env var switch'
+Assert-FileContains 'mcp/basecoat-metrics/src/index.ts' 'MAX_REQUEST_BODY_BYTES' `
+    'src/index.ts is missing an HTTP request body size limit'
 
 Write-Host 'MCP tests: validating asset search tools in src/index.ts...'
 Assert-FileContains 'mcp/basecoat-metrics/src/index.ts' 'search-skills' `

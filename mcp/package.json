@@ -13,10 +13,7 @@
         "inventory": "node index.js --inventory"
     },
     "dependencies": {
-        "@modelcontextprotocol/sdk": "1.30.0",
+        "@modelcontextprotocol/server": "2.0.0",
         "zod": "4.3.6"
-    },
-    "overrides": {
-        "@hono/node-server": "2.0.12"
     }
 }

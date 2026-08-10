@@ -12,9 +12,12 @@
  *   get-repo-metrics    — Detailed metrics for a single repo
  */
 
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import {
+  McpServer,
+  WebStandardStreamableHTTPServerTransport,
+} from "@modelcontextprotocol/server";
+import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
+import { once } from "node:events";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
@@ -30,6 +33,14 @@ const PAGES_BASE =
   "https://ibuyspy-shared.github.io/basecoat/metrics";
 
 const METRICS_DIR = process.env.METRICS_DIR ?? null;
+const MAX_REQUEST_BODY_BYTES = 1024 * 1024;
+
+class RequestBodyTooLargeError extends Error {
+  constructor() {
+    super(`Request body exceeds ${MAX_REQUEST_BODY_BYTES} bytes.`);
+    this.name = "RequestBodyTooLargeError";
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Data fetching helpers
@@ -95,22 +106,25 @@ const server = new McpServer({
 
 // ── Tool: get-latest-metrics ────────────────────────────────────────────────
 
-server.tool(
+server.registerTool(
   "get-latest-metrics",
-  "Returns the most recent Base Coat adoption metrics snapshot. " +
-    "Includes Copilot usage, PR cycle times, CI success rates, issue resolution times, " +
-    "and Base Coat coverage percentage for all monitored repositories. " +
-    "Use repo parameter to narrow to a single repository. " +
-    "Use for intents like 'latest', 'current', 'now', or 'refresh snapshot'. " +
-    "Do not use for historical trends over multiple weeks or alert-only requests.",
   {
-    repo: z
-      .string()
-      .optional()
-      .describe(
-        "Optional: filter to a single repo in 'org/repo' format. " +
-          "Returns all repos if omitted."
-      ),
+    description:
+      "Returns the most recent Base Coat adoption metrics snapshot. " +
+      "Includes Copilot usage, PR cycle times, CI success rates, issue resolution times, " +
+      "and Base Coat coverage percentage for all monitored repositories. " +
+      "Use repo parameter to narrow to a single repository. " +
+      "Use for intents like 'latest', 'current', 'now', or 'refresh snapshot'. " +
+      "Do not use for historical trends over multiple weeks or alert-only requests.",
+    inputSchema: {
+      repo: z
+        .string()
+        .optional()
+        .describe(
+          "Optional: filter to a single repo in 'org/repo' format. " +
+            "Returns all repos if omitted."
+        ),
+    },
   },
   async ({ repo }) => {
     const latest = await getLatest();
@@ -146,27 +160,30 @@ server.tool(
 
 // ── Tool: get-history ───────────────────────────────────────────────────────
 
-server.tool(
+server.registerTool(
   "get-history",
-  "Returns historical adoption metrics snapshots collected weekly. " +
-    "Use weeks parameter to control how many historical points to return (default 4, max 52). " +
-    "Useful for trend analysis and spotting regressions over time. " +
-    "Use for intents like 'history', 'trend', 'over time', 'week over week', or 'last N weeks'. " +
-    "Do not use for single-point current snapshot refreshes.",
   {
-    weeks: z
-      .number()
-      .int()
-      .min(1)
-      .max(52)
-      .default(4)
-      .describe("Number of historical weeks to return (1–52, default 4)."),
-    repo: z
-      .string()
-      .optional()
-      .describe(
-        "Optional: filter repo metrics in each snapshot to a single 'org/repo'."
-      ),
+    description:
+      "Returns historical adoption metrics snapshots collected weekly. " +
+      "Use weeks parameter to control how many historical points to return (default 4, max 52). " +
+      "Useful for trend analysis and spotting regressions over time. " +
+      "Use for intents like 'history', 'trend', 'over time', 'week over week', or 'last N weeks'. " +
+      "Do not use for single-point current snapshot refreshes.",
+    inputSchema: {
+      weeks: z
+        .number()
+        .int()
+        .min(1)
+        .max(52)
+        .default(4)
+        .describe("Number of historical weeks to return (1–52, default 4)."),
+      repo: z
+        .string()
+        .optional()
+        .describe(
+          "Optional: filter repo metrics in each snapshot to a single 'org/repo'."
+        ),
+    },
   },
   async ({ weeks, repo }) => {
     const history = await getHistory();
@@ -204,18 +221,21 @@ server.tool(
 
 // ── Tool: get-alerts ────────────────────────────────────────────────────────
 
-server.tool(
+server.registerTool(
   "get-alerts",
-  "Returns active degradation alerts detected in the latest metrics run. " +
-    "Alerts are generated when CI success rate drops >15%, PR cycle time increases >50%, " +
-    "or Copilot acceptance rate drops >10%. An empty array means no regressions detected. " +
-    "Use for intents mentioning alerts, warnings, incidents, degradations, or regressions. " +
-    "Do not use for general snapshot refreshes or trend history.",
   {
-    severity: z
-      .enum(["warning", "info", "all"])
-      .default("all")
-      .describe("Filter by severity: 'warning', 'info', or 'all' (default)."),
+    description:
+      "Returns active degradation alerts detected in the latest metrics run. " +
+      "Alerts are generated when CI success rate drops >15%, PR cycle time increases >50%, " +
+      "or Copilot acceptance rate drops >10%. An empty array means no regressions detected. " +
+      "Use for intents mentioning alerts, warnings, incidents, degradations, or regressions. " +
+      "Do not use for general snapshot refreshes or trend history.",
+    inputSchema: {
+      severity: z
+        .enum(["warning", "info", "all"])
+        .default("all")
+        .describe("Filter by severity: 'warning', 'info', or 'all' (default)."),
+    },
   },
   async ({ severity }) => {
     const alerts = await getAlerts();
@@ -242,23 +262,26 @@ server.tool(
 
 // ── Tool: get-repo-metrics ──────────────────────────────────────────────────
 
-server.tool(
+server.registerTool(
   "get-repo-metrics",
-  "Returns detailed metrics for a single repository including PR velocity, " +
-    "CI success rate, issue resolution time, and Base Coat asset coverage. " +
-    "Also includes trend data from the last N weeks to show direction of change. " +
-    "Use when the user targets one repository and wants both current metrics and trend context.",
   {
-    repo: z
-      .string()
-      .describe("Repository in 'org/repo' format (e.g. 'IBuySpy-Shared/basecoat')."),
-    trend_weeks: z
-      .number()
-      .int()
-      .min(1)
-      .max(12)
-      .default(4)
-      .describe("Number of historical weeks to include for trend analysis (default 4)."),
+    description:
+      "Returns detailed metrics for a single repository including PR velocity, " +
+      "CI success rate, issue resolution time, and Base Coat asset coverage. " +
+      "Also includes trend data from the last N weeks to show direction of change. " +
+      "Use when the user targets one repository and wants both current metrics and trend context.",
+    inputSchema: {
+      repo: z
+        .string()
+        .describe("Repository in 'org/repo' format (e.g. 'IBuySpy-Shared/basecoat')."),
+      trend_weeks: z
+        .number()
+        .int()
+        .min(1)
+        .max(12)
+        .default(4)
+        .describe("Number of historical weeks to include for trend analysis (default 4)."),
+    },
   },
   async ({ repo, trend_weeks }) => {
     const [latest, history] = await Promise.all([getLatest(), getHistory()]);
@@ -389,23 +412,26 @@ async function discoverAssets(): Promise<AssetFrontmatter[]> {
 
 // ── Tool: search-skills ─────────────────────────────────────────────────────
 
-server.tool(
+server.registerTool(
   "search-skills",
-  "Search Base Coat skills by name or description keyword. " +
-    "Returns matching skills with name, description, and relative path. " +
-    "Requires the server to be started with REPO_DIR set to the repository root. " +
-    "Use when the user asks to find/list skills. Do not use to read full file content.",
   {
-    query: z
-      .string()
-      .describe("Keyword to search for in skill name or description (case-insensitive)."),
-    limit: z
-      .number()
-      .int()
-      .min(1)
-      .max(50)
-      .default(10)
-      .describe("Maximum number of results to return (default 10)."),
+    description:
+      "Search Base Coat skills by name or description keyword. " +
+      "Returns matching skills with name, description, and relative path. " +
+      "Requires the server to be started with REPO_DIR set to the repository root. " +
+      "Use when the user asks to find/list skills. Do not use to read full file content.",
+    inputSchema: {
+      query: z
+        .string()
+        .describe("Keyword to search for in skill name or description (case-insensitive)."),
+      limit: z
+        .number()
+        .int()
+        .min(1)
+        .max(50)
+        .default(10)
+        .describe("Maximum number of results to return (default 10)."),
+    },
   },
   async ({ query, limit }) => {
     if (!REPO_DIR) {
@@ -446,23 +472,26 @@ server.tool(
 
 // ── Tool: search-agents ─────────────────────────────────────────────────────
 
-server.tool(
+server.registerTool(
   "search-agents",
-  "Search Base Coat agents by name or description keyword. " +
-    "Returns matching agents with name, description, and relative path. " +
-    "Requires the server to be started with REPO_DIR set to the repository root. " +
-    "Use when the user asks to find/list agents. Do not use to read full file content.",
   {
-    query: z
-      .string()
-      .describe("Keyword to search for in agent name or description (case-insensitive)."),
-    limit: z
-      .number()
-      .int()
-      .min(1)
-      .max(50)
-      .default(10)
-      .describe("Maximum number of results to return (default 10)."),
+    description:
+      "Search Base Coat agents by name or description keyword. " +
+      "Returns matching agents with name, description, and relative path. " +
+      "Requires the server to be started with REPO_DIR set to the repository root. " +
+      "Use when the user asks to find/list agents. Do not use to read full file content.",
+    inputSchema: {
+      query: z
+        .string()
+        .describe("Keyword to search for in agent name or description (case-insensitive)."),
+      limit: z
+        .number()
+        .int()
+        .min(1)
+        .max(50)
+        .default(10)
+        .describe("Maximum number of results to return (default 10)."),
+    },
   },
   async ({ query, limit }) => {
     if (!REPO_DIR) {
@@ -503,19 +532,22 @@ server.tool(
 
 // ── Tool: get-asset-details ─────────────────────────────────────────────────
 
-server.tool(
+server.registerTool(
   "get-asset-details",
-  "Return the full content of a Base Coat skill (SKILL.md) or agent (.agent.md) file. " +
-    "Use search-skills or search-agents first to discover the exact asset path. " +
-    "Requires the server to be started with REPO_DIR set to the repository root. " +
-    "Use when the user explicitly asks for complete/full file contents.",
   {
-    path: z
-      .string()
-      .describe(
-        "Relative path to the asset file from the repo root " +
-          "(e.g. 'skills/cqrs-event-sourcing/SKILL.md' or 'agents/security-analyst.agent.md')."
-      ),
+    description:
+      "Return the full content of a Base Coat skill (SKILL.md) or agent (.agent.md) file. " +
+      "Use search-skills or search-agents first to discover the exact asset path. " +
+      "Requires the server to be started with REPO_DIR set to the repository root. " +
+      "Use when the user explicitly asks for complete/full file contents.",
+    inputSchema: {
+      path: z
+        .string()
+        .describe(
+          "Relative path to the asset file from the repo root " +
+            "(e.g. 'skills/cqrs-event-sourcing/SKILL.md' or 'agents/security-analyst.agent.md')."
+        ),
+    },
   },
   async ({ path: assetPath }) => {
     if (!REPO_DIR) {
@@ -565,24 +597,121 @@ server.tool(
 // Start — stdio (local dev) or HTTP (deployed)
 // ---------------------------------------------------------------------------
 
+async function toWebRequest(req: IncomingMessage): Promise<Request> {
+  const headers = new Headers();
+  for (let index = 0; index < req.rawHeaders.length; index += 2) {
+    headers.append(req.rawHeaders[index], req.rawHeaders[index + 1]);
+  }
+
+  const method = req.method ?? "GET";
+  const chunks: Buffer[] = [];
+  if (method !== "GET" && method !== "HEAD") {
+    const contentLength = Number(req.headers["content-length"]);
+    if (
+      Number.isFinite(contentLength) &&
+      contentLength > MAX_REQUEST_BODY_BYTES
+    ) {
+      throw new RequestBodyTooLargeError();
+    }
+
+    let bodyLength = 0;
+    for await (const chunk of req) {
+      const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      bodyLength += buffer.length;
+      if (bodyLength > MAX_REQUEST_BODY_BYTES) {
+        throw new RequestBodyTooLargeError();
+      }
+      chunks.push(buffer);
+    }
+  }
+
+  const host = req.headers.host ?? "localhost";
+  const url = new URL(req.url ?? "/", `http://${host}`);
+  const body = chunks.length > 0 ? Buffer.concat(chunks) : undefined;
+
+  return new Request(url, {
+    method,
+    headers,
+    body,
+  });
+}
+
+async function writeWebResponse(
+  response: Response,
+  res: ServerResponse
+): Promise<void> {
+  response.headers.forEach((value, name) => {
+    res.setHeader(name, value);
+  });
+  res.writeHead(response.status);
+
+  if (response.body === null) {
+    res.end();
+    return;
+  }
+
+  const reader = response.body.getReader();
+  const cancelReader = (): void => {
+    void reader.cancel().catch((error: unknown) => {
+      const message = error instanceof Error ? error.message : String(error);
+      process.stderr.write(`Failed to cancel HTTP response stream: ${message}\n`);
+    });
+  };
+  res.once("close", cancelReader);
+
+  try {
+    while (!res.destroyed) {
+      const { done, value } = await reader.read();
+      if (done) {
+        res.end();
+        return;
+      }
+      if (!res.write(value)) {
+        await once(res, "drain");
+      }
+    }
+  } finally {
+    res.off("close", cancelReader);
+  }
+}
+
 async function startHttp(): Promise<void> {
   const port = parseInt(process.env.PORT ?? "8080", 10);
 
   // Stateless transport — each request is independent (no session affinity needed)
-  const transport = new StreamableHTTPServerTransport({
+  const transport = new WebStandardStreamableHTTPServerTransport({
     sessionIdGenerator: undefined,
   });
 
   await server.connect(transport);
 
   const httpServer = createServer(
-    async (req: IncomingMessage, res: ServerResponse) => {
-      if (req.url === "/health") {
-        res.writeHead(200, { "Content-Type": "text/plain" }).end("ok");
-        return;
-      }
-      // All MCP traffic routed through transport
-      await transport.handleRequest(req, res);
+    (req: IncomingMessage, res: ServerResponse) => {
+      const handleRequest = async (): Promise<void> => {
+        if (req.url === "/health") {
+          res.writeHead(200, { "Content-Type": "text/plain" }).end("ok");
+          return;
+        }
+        const request = await toWebRequest(req);
+        const response = await transport.handleRequest(request);
+        await writeWebResponse(response, res);
+      };
+
+      void handleRequest().catch((error: unknown) => {
+        const message = error instanceof Error ? error.message : String(error);
+        process.stderr.write(`HTTP request failed: ${message}\n`);
+        if (!res.headersSent) {
+          const statusCode =
+            error instanceof RequestBodyTooLargeError ? 413 : 500;
+          const responseMessage =
+            statusCode === 413 ? "Request body too large" : "Internal server error";
+          res
+            .writeHead(statusCode, { "Content-Type": "application/json" })
+            .end(JSON.stringify({ error: responseMessage }));
+        } else {
+          res.destroy(error instanceof Error ? error : new Error(message));
+        }
+      });
     }
   );
 
