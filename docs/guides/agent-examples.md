@@ -290,7 +290,7 @@ graceful degradation, health endpoint, runbook exists, rollback plan documented.
 **Agent:** `@rollout-basecoat`
 
 ```text
-@rollout-basecoat Onboard the repo myorg/payments-service to BaseCoat v4.0.0.
+@rollout-basecoat Onboard the repo myorg/payments-service to BaseCoat v4.1.0.
 Enterprise constraints: no direct internet access — must pull from our internal
 mirror at artifacts.myorg.internal/basecoat.
 ```
@@ -307,7 +307,7 @@ Or run the bootstrap script directly:
 ```powershell
 pwsh scripts/bootstrap-basecoat.ps1 `
   -BasecoatRepo https://artifacts.myorg.internal/basecoat.git `
-  -Ref v4.0.0
+  -Ref v4.1.0
 ```
 
 ---
@@ -336,10 +336,10 @@ and produce an upgrade sequence that minimizes CI failures.
 **Agent:** `@release-manager`
 
 ```text
-@release-manager Prepare the v4.0.0 release. Changes since v3.33.2:
-breaking operation-context-resolver ESM/Node 20 migration, delivery-autopilot
-and release-train workflows added, ship-it control-loop hardening, and
-dependency bumps. Validate tests pass, bump version.json,
+@release-manager Prepare the v4.1.0 release. Changes since v4.0.0:
+continuous backlog autopilot, generated prompt examples, capability-aware
+model routing, downstream refresh hardening, and removal of Hono from MCP.
+Validate tests pass, bump version.json,
 draft the CHANGELOG entry, and generate the release notes.
 ```
 

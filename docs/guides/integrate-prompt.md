@@ -96,7 +96,7 @@ Repo: https://github.com/acme/payments-api
 Tech stack: Python 3.12, FastAPI, PostgreSQL, GitHub Actions
 Sync method: Direct sync (solo team, public repo)
 Assets overlaid: 12 agents, 4 skills, 6 instructions
-BaseCoat version: v4.0.0
+BaseCoat version: v4.1.0
 
 AUDIT FINDINGS
 

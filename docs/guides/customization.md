@@ -52,7 +52,7 @@ and how. The sync script reads it automatically on the next run.
 ```yaml
 # .basecoat.yml
 source: https://github.com/YOUR-ORG/basecoat.git
-ref: v4.0.0   # pin to a release tag for stability
+ref: v4.1.0   # pin to a release tag for stability
 
 # Only sync agents relevant to your stack
 agents:

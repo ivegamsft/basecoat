@@ -39,13 +39,13 @@ source: https://github.com/YOUR-ORG/basecoat.git
 | **Type** | string |
 | **Required** | No |
 | **Default** | `main` |
-| **Valid values** | Any git branch name or release tag (e.g. `v4.0.0`) |
+| **Valid values** | Any git branch name or release tag (e.g. `v4.1.0`) |
 
 The branch or tag to sync from. Pin to a release tag for production stability;
 leave as `main` to always pull the latest.
 
 ```yaml
-ref: v4.0.0
+ref: v4.1.0
 ```
 
 > **Resolution precedence.** `sync.sh` and `sync.ps1` resolve `source` and `ref`
@@ -338,7 +338,7 @@ release does not change agent behaviour unexpectedly.
 ```yaml
 # .basecoat.yml
 source: https://github.com/YOUR-ORG/basecoat.git
-ref: v4.0.0   # pinned --- update deliberately after reviewing the changelog
+ref: v4.1.0   # pinned --- update deliberately after reviewing the changelog
 
 agents:
   - solution-architect
@@ -405,7 +405,7 @@ skills, and instructions are synced; everything else is excluded.
 ```yaml
 # .basecoat.yml
 source: https://github.com/YOUR-ORG/basecoat.git
-ref: v4.0.0
+ref: v4.1.0
 
 agents:
   - security-review

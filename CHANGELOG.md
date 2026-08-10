@@ -4,14 +4,32 @@ All notable changes to this repository should be recorded in this file.
 
 ## Unreleased
 
+## 4.1.0 - 2026-08-10
+
 ### Added
 
-- Added a generated prompt library with examples for every canonical intent, skill, and agent, including BaseCoat onboarding, refresh, and removal workflows. (#2774)
+- Added an `autopilot:` intent for continuous, oldest-first backlog burndown in controlled waves. (#2717)
+- Added a generated prompt library with examples for every canonical intent, skill, and agent, including BaseCoat onboarding, refresh, and removal workflows. (#2778)
+- Added a GitHub-sourced model capability framework, runtime reasoning-effort validation, capability-aware routing, and scheduled model-catalog drift review. (#2780)
+
+### Changed
+
+- Completed downstream upgrade lifecycle handling so refresh workflows honor `.basecoat.yml` source/ref pins, discover the available sync entrypoint, and carry changes through commit, push, PR, and cleanup. (#2700, #2706, #2707)
+- Made the submit-learning memory repository destination configurable and genericized internal organization references for downstream reuse. (#2702)
+- Branded BaseCoat workflows consistently and pinned development dependency resolution to the approved corporate package proxy. (#2758)
+- Hardened production publication sanitization so tests and internal mirror automation are excluded from consumer-facing rewrites and payloads. (#2714, #2741)
 
 ### Fixed
 
-- Exposed the documented `rca:` skill to downstream consumers. Re-run the BaseCoat refresh after upgrading to receive the corrected public skill metadata. (#2766)
-- Allowed approved extension production deployments to proceed after the protected GitHub environment review gate. (#2771)
+- Exposed the documented `rca:` skill to downstream consumers. Re-run the BaseCoat refresh after upgrading to receive the corrected public skill metadata. (#2767)
+- Allowed approved extension production deployments to proceed after the protected GitHub environment review gate. (#2773)
+- Wired the release-gate enforcer into ship-it execution. (#2708)
+- Prevented Azure Container App Environment archival by keeping production services warm with a minimum replica. (#2752)
+- Removed the monolithic MCP SDK, Hono core, and the Hono Node adapter from both MCP production graphs by migrating to the modular MCP v2 server package and a bounded Web Standard HTTP bridge. (#2782)
+
+### Dependencies
+
+- Updated approved workflow, portal, SDK, and skill dependencies, including Docker login, PostCSS, brace-expansion, `ip-address`, and `fast-uri`. (#2731, #2733, #2734, #2737, #2738, #2739)
 
 ## 4.0.0 - 2026-07-26
 

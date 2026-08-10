@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "4.0.0",
-  "releaseDate": "2026-07-26",
-  "notes": "Release: MAJOR bump for the operation-context-resolver Node 20/ESM migration (breaking); adds delivery-autopilot, release-train, issue-to-spec, and ship-it control-loop hardening plus token-budget and docs improvements"
+  "version": "4.1.0",
+  "releaseDate": "2026-08-10",
+  "notes": "Release: adds continuous backlog autopilot, a generated prompt library, capability-aware model routing, reliable downstream refresh flows, and an adapter-free MCP dependency graph"
 }
