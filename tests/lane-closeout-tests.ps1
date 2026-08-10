@@ -73,6 +73,13 @@ Assert-Match $bashHook 'if ! git status --porcelain=v1 -z' 'Bash hook must fail 
 if ($bashHook -match 'git status[^\r\n]*\|\| true') {
     throw 'Bash hook must not turn status inspection failures into a clean lane'
 }
+if ($bashHook -match 'git hash-object') {
+    throw 'Bash lane ledger keys must hash raw UTF-8 bytes, not Git object bytes'
+}
+foreach ($hashTool in @('sha256sum', 'shasum', 'openssl dgst -sha256')) {
+    Assert-Match $bashHook ([regex]::Escape($hashTool)) "Bash hook missing SHA-256 fallback: $hashTool"
+}
+Assert-Match $bashHook 'Unable to compute the required raw UTF-8 SHA-256 lane key' 'Bash hook must PARK explicitly when no SHA-256 tool is available'
 foreach ($hookContent in @((Get-Content $hookScriptPath -Raw), $bashHook)) {
     if ($hookContent -notmatch 'stash_before|stashBefore' -or $hookContent -notmatch 'stash_after|stashAfter') {
         throw 'Lane closeout hooks must verify that stash capture creates a new snapshot'
@@ -165,6 +172,11 @@ try {
     if (@(git status --porcelain=v1 --untracked-files=all).Count -ne 1) {
         throw 'Safe hook must restore the sensitive-path candidate to the working tree'
     }
+    $firstSensitiveLedger = Get-Content $ledgerPath.FullName -Raw | ConvertFrom-Json
+    if (-not $firstSensitiveLedger.restoreSucceeded -or $firstSensitiveLedger.pushSucceeded -or $firstSensitiveLedger.nextAction -notmatch 'sensitive-path') {
+        throw 'First sensitive capture must preserve the sensitive-review action after successful restore'
+    }
+    $firstSensitiveSnapshot = $firstSensitiveLedger.snapshot
 
     & pwsh -NoProfile -File $hookScriptPath
     if (@(git stash list).Count -ne 1) {
@@ -173,6 +185,9 @@ try {
     $sensitiveLedger = Get-Content $ledgerPath.FullName -Raw | ConvertFrom-Json
     if ($sensitiveLedger.pushSucceeded -or $sensitiveLedger.nextAction -notmatch 'sensitive-path') {
         throw 'Safe hook must record sensitive-directory review without publishing'
+    }
+    if ($sensitiveLedger.snapshot -ne $firstSensitiveSnapshot -or -not $sensitiveLedger.restoreSucceeded) {
+        throw 'Duplicate sensitive capture must retain the original snapshot and successful restore state'
     }
 }
 finally {
@@ -283,6 +298,260 @@ function Test-SubmoduleOnlyCapture {
 
 Test-SubmoduleOnlyCapture -HookKind PowerShell
 Test-SubmoduleOnlyCapture -HookKind Bash
+
+$restoreFailureRoot = Join-Path $repoRoot ('test-results\lane-closeout-restore-failure-' + [Guid]::NewGuid().ToString('N'))
+$restoreFailureRemote = Join-Path $restoreFailureRoot 'origin.git'
+$restoreFailureWork = Join-Path $restoreFailureRoot 'work'
+$restoreFailureFakeBin = Join-Path $restoreFailureRoot 'bin'
+$restoreFailureLocationPushed = $false
+$originalPath = $env:PATH
+$originalRealGit = $env:BASECOAT_REAL_GIT
+try {
+    New-Item -ItemType Directory -Path $restoreFailureRoot, $restoreFailureFakeBin -Force | Out-Null
+    $realGit = (Get-Command git).Source
+    @'
+param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Arguments)
+if ($Arguments.Count -ge 2 -and $Arguments[0] -eq 'stash' -and $Arguments[1] -eq 'apply') {
+    [Console]::Error.WriteLine('simulated stash apply failure')
+    exit 43
+}
+& $env:BASECOAT_REAL_GIT @Arguments
+exit $LASTEXITCODE
+'@ | Set-Content -Path (Join-Path $restoreFailureFakeBin 'fake-git.ps1')
+    Set-Content -Path (Join-Path $restoreFailureFakeBin 'git.cmd') -Value '@pwsh -NoProfile -File "%~dp0fake-git.ps1" %*'
+    @'
+#!/usr/bin/env bash
+if [[ "$1" == "stash" && "$2" == "apply" ]]; then
+  printf '%s\n' 'simulated stash apply failure' >&2
+  exit 43
+fi
+exec "$BASECOAT_REAL_GIT" "$@"
+'@ | Set-Content -Path (Join-Path $restoreFailureFakeBin 'git') -NoNewline
+    if (-not $IsWindows) {
+        chmod +x (Join-Path $restoreFailureFakeBin 'git')
+    }
+
+    git init --bare $restoreFailureRemote | Out-Null
+    git init $restoreFailureWork | Out-Null
+    Push-Location $restoreFailureWork
+    $restoreFailureLocationPushed = $true
+    git config user.name 'lane-closeout-restore-test'
+    git config user.email 'lane-closeout-restore-test@example.com'
+    Set-Content tracked.txt 'baseline'
+    git add tracked.txt
+    git commit -m 'test: establish restore fixture' | Out-Null
+    git branch -M feat/restore-failure
+    git remote add origin $restoreFailureRemote
+    git push --set-upstream origin feat/restore-failure | Out-Null
+    New-Item -ItemType Directory -Path secrets -Force | Out-Null
+    Set-Content secrets\token.txt 'synthetic-test-value'
+
+    $env:BASECOAT_REAL_GIT = $realGit
+    $env:PATH = "$restoreFailureFakeBin$([IO.Path]::PathSeparator)$originalPath"
+    & pwsh -NoProfile -File $hookScriptPath
+    $hookExitCode = $LASTEXITCODE
+    $env:PATH = $originalPath
+    if ($hookExitCode -ne 0) {
+        throw 'PowerShell hook returned non-zero for simulated restore failure'
+    }
+
+    $gitDir = (git rev-parse --absolute-git-dir).Trim()
+    $restoreFailureLedgerPath = Get-ChildItem (Join-Path $gitDir 'basecoat\lane-closeout') -Filter '*.json' | Select-Object -First 1
+    $restoreFailureLedger = Get-Content $restoreFailureLedgerPath.FullName -Raw | ConvertFrom-Json
+    if ($restoreFailureLedger.restoreSucceeded -or $restoreFailureLedger.nextAction -notmatch 'Restore the retained stash manually') {
+        throw 'Manual restore action must be emitted only when stash restore actually fails'
+    }
+    if (@(git stash list).Count -ne 1) {
+        throw 'Restore failure must retain the captured stash for manual recovery'
+    }
+}
+finally {
+    $env:PATH = $originalPath
+    $env:BASECOAT_REAL_GIT = $originalRealGit
+    if ($restoreFailureLocationPushed) {
+        Pop-Location
+    }
+    if (Test-Path $restoreFailureRoot) {
+        Remove-Item $restoreFailureRoot -Recurse -Force
+    }
+}
+
+function Get-ExpectedLaneLedgerName {
+    param([string]$Branch)
+
+    $prefix = ($Branch -replace '[^A-Za-z0-9._-]+', '-').Trim('-')
+    if (-not $prefix) {
+        $prefix = 'lane'
+    }
+    if ($prefix.Length -gt 60) {
+        $prefix = $prefix.Substring(0, 60).TrimEnd('-')
+    }
+    if (-not $prefix) {
+        $prefix = 'lane'
+    }
+    $digest = [Convert]::ToHexString(
+        [System.Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($Branch))
+    ).ToLowerInvariant()
+    return "$prefix-$($digest.Substring(0, 12)).json"
+}
+
+function Get-BashCommandPath {
+    param([string]$Command)
+
+    $resolved = (& $bashPath -c 'command -v "$1"' -- $Command).Trim()
+    if (-not $resolved) {
+        throw "Required Bash command is unavailable for fallback testing: $Command"
+    }
+    return $resolved
+}
+
+function New-RestrictedHashPath {
+    param(
+        [string]$Directory,
+        [ValidateSet('sha256sum', 'shasum', 'openssl', 'none')]
+        [string]$Mode
+    )
+
+    New-Item -ItemType Directory -Path $Directory -Force | Out-Null
+    $bashExecutable = Get-BashCommandPath -Command 'bash'
+    foreach ($command in @('bash', 'mkdir', 'sed', 'cut', 'awk', 'tr', 'cat', 'date', 'rm', 'grep')) {
+        $commandPath = Get-BashCommandPath -Command $command
+        $wrapper = "#!$bashExecutable`nexec '$commandPath' " + '"$@"' + "`n"
+        Set-Content -Path (Join-Path $Directory $command) -Value $wrapper -NoNewline
+    }
+    $gitPath = Get-BashCommandPath -Command 'git'
+    $gitWrapper = "#!$bashExecutable`nif [[ " + '"$1"' + " == 'push' ]]; then exit 1; fi`nexec '$gitPath' " + '"$@"' + "`n"
+    Set-Content -Path (Join-Path $Directory 'git') -Value $gitWrapper -NoNewline
+
+    $sha256Path = Get-BashCommandPath -Command 'sha256sum'
+    if ($Mode -eq 'sha256sum') {
+        $wrapper = "#!$bashExecutable`nexec '$sha256Path' " + '"$@"' + "`n"
+        Set-Content -Path (Join-Path $Directory 'sha256sum') -Value $wrapper -NoNewline
+    }
+    elseif ($Mode -eq 'shasum') {
+        $wrapper = "#!$bashExecutable`nif [[ " + '"$1"' + " == '-a' && " + '"$2"' + " == '256' ]]; then shift 2; fi`nexec '$sha256Path' " + '"$@"' + "`n"
+        Set-Content -Path (Join-Path $Directory 'shasum') -Value $wrapper -NoNewline
+    }
+    elseif ($Mode -eq 'openssl') {
+        $opensslPath = Get-BashCommandPath -Command 'openssl'
+        $wrapper = "#!$bashExecutable`nexec '$opensslPath' " + '"$@"' + "`n"
+        Set-Content -Path (Join-Path $Directory 'openssl') -Value $wrapper -NoNewline
+    }
+
+    $bashDirectory = if ($IsWindows) {
+        (& $bashPath -c 'cygpath -u "$1"' -- $Directory).Trim()
+    }
+    else {
+        $Directory
+    }
+    & $bashPath -c 'chmod +x "$1"/*' -- $bashDirectory
+    if ($LASTEXITCODE -ne 0) {
+        throw "Unable to prepare restricted Bash PATH for mode '$Mode'"
+    }
+    return $bashDirectory
+}
+
+$ledgerKeyRoot = Join-Path $repoRoot ('test-results\lane-closeout-ledger-keys-' + [Guid]::NewGuid().ToString('N'))
+$ledgerKeyRemote = Join-Path $ledgerKeyRoot 'origin.git'
+$ledgerKeyWork = Join-Path $ledgerKeyRoot 'work'
+$ledgerKeyLocationPushed = $false
+try {
+    New-Item -ItemType Directory -Path $ledgerKeyRoot -Force | Out-Null
+    git init --bare $ledgerKeyRemote | Out-Null
+    git init $ledgerKeyWork | Out-Null
+    Push-Location $ledgerKeyWork
+    $ledgerKeyLocationPushed = $true
+    git config user.name 'lane-closeout-ledger-key-test'
+    git config user.email 'lane-closeout-ledger-key-test@example.com'
+    Set-Content tracked.txt 'baseline'
+    git add tracked.txt
+    git commit -m 'test: establish ledger key fixture' | Out-Null
+    git branch -M main
+    git remote add origin $ledgerKeyRemote
+    git push --set-upstream origin main | Out-Null
+
+    $keyBranches = @('feat/ünicode', 'feat/a-b', 'feat/a/b')
+    $expectedNames = @{}
+    foreach ($branch in $keyBranches) {
+        $expectedNames[$branch] = Get-ExpectedLaneLedgerName -Branch $branch
+        git checkout -b $branch main | Out-Null
+        git push --set-upstream origin $branch | Out-Null
+        & pwsh -NoProfile -File $hookScriptPath
+        if ($LASTEXITCODE -ne 0) {
+            throw "PowerShell hook failed for ledger-key branch '$branch'"
+        }
+        $gitDir = (git rev-parse --absolute-git-dir).Trim()
+        if (-not (Test-Path (Join-Path $gitDir "basecoat\lane-closeout\$($expectedNames[$branch])"))) {
+            throw "PowerShell hook wrote the wrong raw UTF-8 SHA-256 ledger key for '$branch'"
+        }
+        git checkout main | Out-Null
+    }
+    if ($expectedNames['feat/a-b'] -eq $expectedNames['feat/a/b'] -or
+        $expectedNames['feat/a-b'] -notmatch '^feat-a-b-' -or
+        $expectedNames['feat/a/b'] -notmatch '^feat-a-b-') {
+        throw 'Slash/dash normalized-prefix collisions must be distinguished by raw branch SHA-256'
+    }
+
+    $ledgerDirectory = Join-Path $gitDir 'basecoat\lane-closeout'
+    Remove-Item (Join-Path $ledgerDirectory '*.json') -Force
+    foreach ($branch in $keyBranches) {
+        git checkout $branch | Out-Null
+        & $bashPath $bashHookScriptPath
+        if ($LASTEXITCODE -ne 0) {
+            throw "Bash hook failed for ledger-key branch '$branch'"
+        }
+        if (-not (Test-Path (Join-Path $ledgerDirectory $expectedNames[$branch]))) {
+            throw "Bash and PowerShell hooks disagree on the ledger key for '$branch'"
+        }
+        git checkout main | Out-Null
+    }
+    $actualBashNames = @(Get-ChildItem $ledgerDirectory -Filter '*.json' | Select-Object -ExpandProperty Name | Sort-Object)
+    $expectedBashNames = @($expectedNames.Values | Sort-Object)
+    if (($actualBashNames -join "`n") -ne ($expectedBashNames -join "`n")) {
+        throw 'Bash and PowerShell ledger key golden sets differ'
+    }
+
+    git checkout 'feat/ünicode' | Out-Null
+    $originalHashTestPath = $env:BASECOAT_HASH_TEST_PATH
+    try {
+        foreach ($mode in @('sha256sum', 'shasum', 'openssl', 'none')) {
+            Remove-Item (Join-Path $ledgerDirectory '*.json') -Force
+            $restrictedPath = New-RestrictedHashPath -Directory (Join-Path $ledgerKeyRoot "hash-$mode") -Mode $mode
+            $env:BASECOAT_HASH_TEST_PATH = $restrictedPath
+            & $bashPath -c 'export PATH="$BASECOAT_HASH_TEST_PATH"; bash "$1"' -- $bashHookScriptPath
+            if ($LASTEXITCODE -ne 0) {
+                throw "Bash hook failed for SHA-256 fallback mode '$mode'"
+            }
+
+            if ($mode -eq 'none') {
+                $unavailableLedgerPath = Get-ChildItem $ledgerDirectory -Filter '*-hash-unavailable.json' | Select-Object -First 1
+                if (-not $unavailableLedgerPath) {
+                    throw 'No-hash-tool mode must write an explicit fallback ledger'
+                }
+                $unavailableLedger = Get-Content $unavailableLedgerPath.FullName -Raw | ConvertFrom-Json
+                if ($unavailableLedger.terminalState -ne 'PARKED' -or
+                    $unavailableLedger.error -notmatch 'raw UTF-8 SHA-256 lane key') {
+                    throw 'No-hash-tool mode must PARK with an explicit hash-tool error'
+                }
+            }
+            elseif (-not (Test-Path (Join-Path $ledgerDirectory $expectedNames['feat/ünicode']))) {
+                throw "Bash SHA-256 fallback '$mode' disagrees with the PowerShell golden key"
+            }
+        }
+    }
+    finally {
+        $env:BASECOAT_HASH_TEST_PATH = $originalHashTestPath
+    }
+    git checkout main | Out-Null
+}
+finally {
+    if ($ledgerKeyLocationPushed) {
+        Pop-Location
+    }
+    if (Test-Path $ledgerKeyRoot) {
+        Remove-Item $ledgerKeyRoot -Recurse -Force
+    }
+}
 
 $bashTestRoot = Join-Path $repoRoot ('test-results\lane-closeout-bash-e2e-' + [Guid]::NewGuid().ToString('N'))
 $bashRemote = Join-Path $bashTestRoot 'origin.git'

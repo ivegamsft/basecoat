@@ -318,6 +318,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running orphaned-lane publisher tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'publish-orphaned-lane-ledger-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Orphaned-lane publisher tests failed' -ForegroundColor Red
+    Write-FailureLog 'publish-orphaned-lane-ledger-tests'
+    exit 1
+}
+
 Write-Host 'Running issue triage script tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'issue-triage-script-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

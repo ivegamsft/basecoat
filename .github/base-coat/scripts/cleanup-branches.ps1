@@ -84,6 +84,103 @@ function Test-ProtectedBranchPrefix {
     return $false
 }
 
+function Get-WorktreeBranchMap {
+    $branches = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
+    $worktreeOutput = git worktree list --porcelain
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Unable to map worktrees; branch audit stopped without deleting branches.'
+    }
+    foreach ($line in @($worktreeOutput)) {
+        if ($line -match '^branch refs/heads/(.+)$') {
+            [void]$branches.Add($Matches[1])
+        }
+    }
+    return ,$branches
+}
+
+function Get-PullRequestOwner {
+    param([object]$PullRequest)
+
+    if (@($PullRequest.assignees).Count -gt 0) {
+        return $PullRequest.assignees[0].login
+    }
+    if ($PullRequest.author -and $PullRequest.author.login) {
+        return $PullRequest.author.login
+    }
+    return 'unknown'
+}
+
+function Get-ExactHeadPrEvidence {
+    param(
+        [object[]]$PullRequests,
+        [string]$Branch,
+        [string]$AuditedObjectId,
+        [string]$DefaultBranch
+    )
+
+    $candidates = @($PullRequests | Where-Object { $_.headRefName -ceq $Branch })
+    $exactTip = @($candidates | Where-Object { $_.headRefOid -eq $AuditedObjectId })
+
+    if ($exactTip.Count -gt 1) {
+        return [pscustomobject]@{
+            Kind = 'ambiguous'
+            PullRequest = $null
+            Owner = 'unknown'
+        }
+    }
+
+    if ($exactTip.Count -eq 1) {
+        $pr = $exactTip[0]
+        $kind = if ($pr.mergedAt -or $pr.state -eq 'MERGED') {
+            if ($pr.baseRefName -ceq $DefaultBranch) {
+                'merged'
+            }
+            else {
+                'merged-non-default-base'
+            }
+        }
+        elseif ($pr.state -eq 'OPEN') {
+            'open'
+        }
+        else {
+            'closed-unmerged'
+        }
+        return [pscustomobject]@{
+            Kind = $kind
+            PullRequest = $pr
+            Owner = Get-PullRequestOwner -PullRequest $pr
+        }
+    }
+
+    if ($candidates.Count -gt 0) {
+        return [pscustomobject]@{
+            Kind = 'moved'
+            PullRequest = $candidates[0]
+            Owner = Get-PullRequestOwner -PullRequest $candidates[0]
+        }
+    }
+
+    return [pscustomobject]@{
+        Kind = 'none'
+        PullRequest = $null
+        Owner = 'unknown'
+    }
+}
+
+function Get-FreshExactHeadPullRequests {
+    param([string]$Branch)
+
+    $json = gh pr list --state all --head $Branch --limit 100 --json number,state,headRefName,headRefOid,baseRefName,mergedAt,closedAt,assignees,author,url
+    if ($LASTEXITCODE -ne 0) {
+        throw "Unable to refresh exact-head PR evidence for '$Branch'."
+    }
+    $pullRequests = @($json | ConvertFrom-Json)
+    if ($pullRequests.Count -ge 100) {
+        throw "Exact-head PR evidence for '$Branch' reached the query limit and is ambiguous."
+    }
+    return $pullRequests
+}
+
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
     throw 'git is required but was not found in PATH.'
 }
@@ -104,39 +201,15 @@ if ($LASTEXITCODE -ne 0) {
     throw 'Unable to refresh origin refs; branch audit stopped without deleting branches.'
 }
 
-$worktreeBranches = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
-$worktreeOutput = git worktree list --porcelain
-if ($LASTEXITCODE -ne 0) {
-    throw 'Unable to map worktrees; branch audit stopped without deleting branches.'
-}
-foreach ($line in @($worktreeOutput)) {
-    if ($line -match '^branch refs/heads/(.+)$') {
-        [void]$worktreeBranches.Add($Matches[1])
-    }
-}
+$worktreeBranches = Get-WorktreeBranchMap
 
-$openPrHeads = @{}
-$openPrJson = gh pr list --state open --limit 10000 --json number,headRefName,assignees,author
+$allPrJson = gh pr list --state all --limit 10000 --json number,state,headRefName,headRefOid,baseRefName,mergedAt,closedAt,assignees,author,url
 if ($LASTEXITCODE -ne 0) {
-    throw 'Unable to query open pull requests; branch audit stopped without deleting branches.'
+    throw 'Unable to query pull request evidence; branch audit stopped without deleting branches.'
 }
-$openPrs = $openPrJson | ConvertFrom-Json
-foreach ($pr in @($openPrs)) {
-    if (-not [string]::IsNullOrWhiteSpace($pr.headRefName)) {
-        $owner = if (@($pr.assignees).Count -gt 0) {
-            $pr.assignees[0].login
-        }
-        elseif ($pr.author.login) {
-            $pr.author.login
-        }
-        else {
-            'unknown'
-        }
-        $openPrHeads[$pr.headRefName] = [pscustomobject]@{
-            Number = [int]$pr.number
-            Owner  = $owner
-        }
-    }
+$allPrs = @($allPrJson | ConvertFrom-Json)
+if ($allPrs.Count -ge 10000) {
+    throw 'Pull request evidence reached the query limit; branch audit stopped without deleting branches.'
 }
 
 $mergedSet = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
@@ -186,10 +259,16 @@ foreach ($line in @($remoteRefs)) {
     $lastCommit = [DateTimeOffset]::FromUnixTimeSeconds($epoch).UtcDateTime
     $ageDays = [int][Math]::Floor(($nowUtc - [DateTimeOffset]::FromUnixTimeSeconds($epoch)).TotalDays)
     $isStale = $ageDays -ge $StaleDays
-    $isMerged = $mergedSet.Contains($branch)
-    $hasOpenPr = $openPrHeads.ContainsKey($branch)
+    $remoteObjectId = $parts[3].Trim()
+    $isMergedByTopology = $mergedSet.Contains($branch)
+    $prEvidence = Get-ExactHeadPrEvidence -PullRequests $allPrs -Branch $branch -AuditedObjectId $remoteObjectId -DefaultBranch $DefaultBranch
+    $isMergedByPr = $prEvidence.Kind -eq 'merged'
+    $hasOpenPr = $prEvidence.Kind -eq 'open'
+    $isMappedWorktree = $worktreeBranches.Contains($branch)
     $hasProtectedPrefix = Test-ProtectedBranchPrefix -Branch $branch -Prefixes $ProtectedBranchPrefixes
-    $safeToDelete = $isStale -and $isMerged -and -not $hasOpenPr -and -not $hasProtectedPrefix
+    $hasBlockingPrEvidence = $prEvidence.Kind -in @('ambiguous', 'closed-unmerged', 'merged-non-default-base', 'moved')
+    $isMerged = $isMergedByTopology -or $isMergedByPr
+    $safeToDelete = $isStale -and $isMerged -and -not $hasOpenPr -and -not $hasBlockingPrEvidence -and -not $hasProtectedPrefix -and -not $isMappedWorktree
 
     $state = if (-not $isStale) {
         'recent'
@@ -197,11 +276,31 @@ foreach ($line in @($remoteRefs)) {
     elseif ($hasProtectedPrefix) {
         'retained-protected-wip'
     }
-    elseif ($safeToDelete) {
-        'stale-merged'
+    elseif ($isMappedWorktree) {
+        'retained-worktree-owned'
+    }
+    elseif ($prEvidence.Kind -eq 'ambiguous') {
+        'stale-ambiguous-exact-head-prs'
+    }
+    elseif ($prEvidence.Kind -eq 'closed-unmerged') {
+        "stale-closed-unmerged-pr-#$($prEvidence.PullRequest.number)"
+    }
+    elseif ($prEvidence.Kind -eq 'merged-non-default-base') {
+        "stale-merged-pr-non-default-base-#$($prEvidence.PullRequest.number)"
+    }
+    elseif ($prEvidence.Kind -eq 'moved') {
+        'stale-pr-head-moved'
     }
     elseif ($hasOpenPr) {
-        "stale-open-pr-#$($openPrHeads[$branch].Number)"
+        "stale-open-pr-#$($prEvidence.PullRequest.number)"
+    }
+    elseif ($safeToDelete) {
+        if ($isMergedByPr -and -not $isMergedByTopology) {
+            "stale-squash-merged-pr-#$($prEvidence.PullRequest.number)"
+        }
+        else {
+            'stale-merged'
+        }
     }
     elseif (-not $isMerged) {
         'stale-unmerged'
@@ -216,10 +315,11 @@ foreach ($line in @($remoteRefs)) {
         LastCommitUtc = $lastCommit.ToString('yyyy-MM-dd HH:mm:ss')
         State         = $state
         TerminalState = if ($safeToDelete) { 'MERGED' } elseif ($hasOpenPr) { 'HANDED_OFF' } else { 'PARKED' }
-        PrNumber      = if ($hasOpenPr) { $openPrHeads[$branch].Number } else { $null }
-        Owner         = if ($hasOpenPr) { $openPrHeads[$branch].Owner } else { 'unknown' }
-        RemoteObjectId = $parts[3].Trim()
+        PrNumber      = if ($prEvidence.PullRequest) { [int]$prEvidence.PullRequest.number } else { $null }
+        Owner         = $prEvidence.Owner
+        RemoteObjectId = $remoteObjectId
         SafeToDelete  = $safeToDelete
+        MergedByTopology = $isMergedByTopology
     }
 }
 
@@ -263,23 +363,66 @@ foreach ($line in @($localRefs)) {
                 State         = 'orphaned-local-worktree-owned'
                 TerminalState = 'PARKED'
                 Owner         = 'unknown'
+                PrNumber      = $null
                 SafeToDelete  = $false
             }
             continue
         }
 
         git merge-base --is-ancestor $branch "origin/$DefaultBranch" 2>$null
-        $isMergedLocal = $LASTEXITCODE -eq 0
+        $isMergedLocalByTopology = $LASTEXITCODE -eq 0
+        $localObjectId = (git rev-parse $branch).Trim()
+        if ($LASTEXITCODE -ne 0) {
+            throw "Unable to inspect local branch tip '$branch'."
+        }
+        $localPrEvidence = Get-ExactHeadPrEvidence -PullRequests $allPrs -Branch $branch -AuditedObjectId $localObjectId -DefaultBranch $DefaultBranch
+        $isMergedLocal = $isMergedLocalByTopology -or $localPrEvidence.Kind -eq 'merged'
+        $hasBlockingLocalPrEvidence = $localPrEvidence.Kind -in @('ambiguous', 'closed-unmerged', 'merged-non-default-base', 'moved', 'open')
         $hasProtectedPrefix = Test-ProtectedBranchPrefix -Branch $branch -Prefixes $ProtectedBranchPrefixes
 
-        if ($hasProtectedPrefix -or -not $isMergedLocal) {
+        if ($hasProtectedPrefix -or $hasBlockingLocalPrEvidence -or -not $isMergedLocal) {
+            $localState = if ($hasProtectedPrefix) {
+                'orphaned-local-retained'
+            }
+            elseif ($localPrEvidence.Kind -eq 'ambiguous') {
+                'orphaned-local-ambiguous-exact-head-prs'
+            }
+            elseif ($localPrEvidence.Kind -eq 'closed-unmerged') {
+                "orphaned-local-closed-unmerged-pr-#$($localPrEvidence.PullRequest.number)"
+            }
+            elseif ($localPrEvidence.Kind -eq 'merged-non-default-base') {
+                "orphaned-local-merged-pr-non-default-base-#$($localPrEvidence.PullRequest.number)"
+            }
+            elseif ($localPrEvidence.Kind -eq 'moved') {
+                'orphaned-local-pr-head-moved'
+            }
+            elseif ($localPrEvidence.Kind -eq 'open') {
+                "orphaned-local-open-pr-#$($localPrEvidence.PullRequest.number)"
+            }
+            else {
+                'orphaned-local-unverified'
+            }
             $localRetained += [pscustomobject]@{
                 Branch        = $branch
                 AgeDays       = '-'
                 LastCommitUtc = '-'
-                State         = if ($hasProtectedPrefix) { 'orphaned-local-retained' } else { 'orphaned-local-unverified' }
+                State         = $localState
+                TerminalState = if ($localPrEvidence.Kind -eq 'open') { 'HANDED_OFF' } else { 'PARKED' }
+                Owner         = $localPrEvidence.Owner
+                PrNumber      = if ($localPrEvidence.PullRequest) { [int]$localPrEvidence.PullRequest.number } else { $null }
+                SafeToDelete  = $false
+            }
+            continue
+        }
+        if (-not $isMergedLocalByTopology -and $localPrEvidence.Kind -eq 'merged') {
+            $localRetained += [pscustomobject]@{
+                Branch        = $branch
+                AgeDays       = '-'
+                LastCommitUtc = '-'
+                State         = "orphaned-local-squash-merged-retained-pr-#$($localPrEvidence.PullRequest.number)"
                 TerminalState = 'PARKED'
-                Owner         = 'unknown'
+                Owner         = $localPrEvidence.Owner
+                PrNumber      = [int]$localPrEvidence.PullRequest.number
                 SafeToDelete  = $false
             }
             continue
@@ -290,7 +433,8 @@ foreach ($line in @($localRefs)) {
             LastCommitUtc = '-'
             State         = 'orphaned-local-merged'
             TerminalState = 'MERGED'
-            Owner         = 'unknown'
+            Owner         = $localPrEvidence.Owner
+            PrNumber      = if ($localPrEvidence.PullRequest) { [int]$localPrEvidence.PullRequest.number } else { $null }
             SafeToDelete  = $true
         }
     }
@@ -310,30 +454,87 @@ if ($ApplyChanges) {
     }
 
     foreach ($item in $deletableRemote) {
-        $exactPrJson = gh pr list --state open --head $item.Branch --limit 1 --json number,headRefName,assignees,author
-        if ($LASTEXITCODE -ne 0) {
-            $failedRemote += $item.Branch
-            Write-Warning "Skipped remote deletion for '$($item.Branch)': exact-head PR verification failed."
+        $freshWorktreeBranches = Get-WorktreeBranchMap
+        if ($freshWorktreeBranches.Contains($item.Branch)) {
+            $item.SafeToDelete = $false
+            $item.State = 'retained-worktree-owned'
+            $item.TerminalState = 'PARKED'
+            Write-Warning "Skipped remote deletion for '$($item.Branch)': the branch is mapped to a worktree."
             continue
         }
 
-        $exactOpenPr = @($exactPrJson | ConvertFrom-Json) | Select-Object -First 1
-        if ($exactOpenPr) {
-            $owner = if (@($exactOpenPr.assignees).Count -gt 0) {
-                $exactOpenPr.assignees[0].login
-            }
-            elseif ($exactOpenPr.author.login) {
-                $exactOpenPr.author.login
-            }
-            else {
-                'unknown'
-            }
+        $freshRemoteLine = @(git ls-remote --heads origin "refs/heads/$($item.Branch)")
+        if ($LASTEXITCODE -ne 0 -or $freshRemoteLine.Count -ne 1) {
+            $failedRemote += $item.Branch
             $item.SafeToDelete = $false
-            $item.State = "stale-open-pr-#$($exactOpenPr.number)"
+            $item.State = 'remote-tip-query-failed'
+            $item.TerminalState = 'PARKED'
+            Write-Warning "Skipped remote deletion for '$($item.Branch)': the exact remote tip could not be refreshed."
+            continue
+        }
+
+        $freshRemoteObjectId = ($freshRemoteLine[0] -split '\s+')[0]
+        if ($freshRemoteObjectId -ne $item.RemoteObjectId) {
+            $item.SafeToDelete = $false
+            $item.State = 'remote-tip-moved'
+            $item.TerminalState = 'PARKED'
+            Write-Warning "Skipped remote deletion for '$($item.Branch)': the remote tip moved after audit."
+            continue
+        }
+
+        try {
+            $freshPrs = Get-FreshExactHeadPullRequests -Branch $item.Branch
+        }
+        catch {
+            $failedRemote += $item.Branch
+            $item.SafeToDelete = $false
+            $item.State = 'pr-evidence-query-failed'
+            $item.TerminalState = 'PARKED'
+            Write-Warning "Skipped remote deletion for '$($item.Branch)': $($_.Exception.Message)"
+            continue
+        }
+
+        $freshPrEvidence = Get-ExactHeadPrEvidence -PullRequests $freshPrs -Branch $item.Branch -AuditedObjectId $item.RemoteObjectId -DefaultBranch $DefaultBranch
+        if ($freshPrEvidence.Kind -eq 'open') {
+            $item.SafeToDelete = $false
+            $item.State = "stale-open-pr-#$($freshPrEvidence.PullRequest.number)"
             $item.TerminalState = 'HANDED_OFF'
-            $item.PrNumber = [int]$exactOpenPr.number
-            $item.Owner = $owner
-            Write-Warning "Skipped remote deletion for '$($item.Branch)': open PR #$($exactOpenPr.number) was found during final verification."
+            $item.PrNumber = [int]$freshPrEvidence.PullRequest.number
+            $item.Owner = $freshPrEvidence.Owner
+            Write-Warning "Skipped remote deletion for '$($item.Branch)': open PR #$($freshPrEvidence.PullRequest.number) was found during final verification."
+            continue
+        }
+
+        if ($freshPrEvidence.Kind -in @('ambiguous', 'closed-unmerged', 'merged-non-default-base', 'moved')) {
+            $item.SafeToDelete = $false
+            $item.TerminalState = 'PARKED'
+            $item.State = switch ($freshPrEvidence.Kind) {
+                'ambiguous' { 'stale-ambiguous-exact-head-prs' }
+                'closed-unmerged' { "stale-closed-unmerged-pr-#$($freshPrEvidence.PullRequest.number)" }
+                'merged-non-default-base' { "stale-merged-pr-non-default-base-#$($freshPrEvidence.PullRequest.number)" }
+                'moved' { 'stale-pr-head-moved' }
+            }
+            Write-Warning "Skipped remote deletion for '$($item.Branch)': exact-head PR evidence is '$($freshPrEvidence.Kind)'."
+            continue
+        }
+
+        if ($freshPrEvidence.Kind -eq 'none') {
+            git merge-base --is-ancestor "origin/$($item.Branch)" "origin/$DefaultBranch" 2>$null
+            if ($LASTEXITCODE -ne 0) {
+                $item.SafeToDelete = $false
+                $item.State = 'stale-unmerged'
+                $item.TerminalState = 'PARKED'
+                Write-Warning "Skipped remote deletion for '$($item.Branch)': neither topology nor exact-head PR evidence proves it merged."
+                continue
+            }
+        }
+
+        $finalWorktreeBranches = Get-WorktreeBranchMap
+        if ($finalWorktreeBranches.Contains($item.Branch)) {
+            $item.SafeToDelete = $false
+            $item.State = 'retained-worktree-owned'
+            $item.TerminalState = 'PARKED'
+            Write-Warning "Skipped remote deletion for '$($item.Branch)': a worktree mapping appeared during final verification."
             continue
         }
 
@@ -371,18 +572,24 @@ foreach ($item in $staleRemote) {
         safeToDelete  = $item.SafeToDelete
         action        = if ($deletedRemote -contains $item.Branch) { 'deleted' } elseif ($failedRemote -contains $item.Branch) { 'delete-failed' } elseif ($item.SafeToDelete) { 'prune-candidate' } else { 'retained' }
         nextAction    = if ($failedRemote -contains $item.Branch) {
-            'Resolve remote protection or permissions, then retry verified branch deletion.'
+            if ($item.State -eq 'pr-evidence-query-failed') {
+                'Restore GitHub PR query access, verify exact-head evidence, then rerun branch cleanup.'
+            }
+            elseif ($item.State -eq 'remote-tip-query-failed') {
+                'Restore remote ref access, verify the exact branch tip, then rerun branch cleanup.'
+            }
+            else {
+                'Resolve remote protection or permissions, then retry verified branch deletion.'
+            }
         }
         elseif ($item.TerminalState -eq 'HANDED_OFF') {
             "Resolve PR #$($item.PrNumber) gates, then rerun lane-closeout."
         }
+        elseif ($item.State -eq 'retained-worktree-owned') {
+            'Verify the mapped worktree is inactive and clean, recover any WIP, then rerun branch cleanup.'
+        }
         elseif ($item.TerminalState -eq 'PARKED') {
-            if ($item.State -eq 'orphaned-local-worktree-owned') {
-                'Verify the mapped worktree is inactive and clean before retrying branch cleanup.'
-            }
-            else {
-                'Assign an owner, preserve WIP, and record the next recovery action.'
-            }
+            'Assign an owner, preserve WIP, and record the next recovery action.'
         }
         else {
             'Prune only after exact branch/worktree safety verification.'
@@ -395,7 +602,7 @@ foreach ($item in @($localOrphaned) + @($localRetained)) {
         source        = 'local'
         state         = $item.State
         terminalState = $item.TerminalState
-        prNumber      = $null
+        prNumber      = $item.PrNumber
         owner         = $item.Owner
         ageDays       = $null
         safeToDelete  = $item.SafeToDelete
@@ -404,7 +611,18 @@ foreach ($item in @($localOrphaned) + @($localRetained)) {
             'Verify worktree ownership and retry non-force local branch deletion.'
         }
         elseif ($item.TerminalState -eq 'PARKED') {
-            'Assign an owner, preserve WIP, and record the next recovery action.'
+            if ($item.State -eq 'orphaned-local-worktree-owned') {
+                'Verify the mapped worktree is inactive and clean, recover any WIP, then rerun branch cleanup.'
+            }
+            elseif ($item.State -like 'orphaned-local-squash-merged-retained-pr-*') {
+                'Retain the branch until an explicit reviewed cleanup verifies the squash-merged PR; non-force branch deletion cannot prove squash topology.'
+            }
+            else {
+                'Assign an owner, preserve WIP, and record the next recovery action.'
+            }
+        }
+        elseif ($item.TerminalState -eq 'HANDED_OFF') {
+            "Resolve PR #$($item.PrNumber) gates, then rerun lane-closeout."
         }
         else {
             'Prune only after exact branch/worktree safety verification.'

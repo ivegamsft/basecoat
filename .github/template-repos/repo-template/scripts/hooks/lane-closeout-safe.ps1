@@ -83,9 +83,15 @@ try {
     $gitDir = (git rev-parse --absolute-git-dir).Trim()
     $ledgerDir = Join-Path $gitDir 'basecoat\lane-closeout'
     New-Item -ItemType Directory -Path $ledgerDir -Force | Out-Null
-    $ledgerPrefix = ($branch -replace '[^A-Za-z0-9._-]', '-').Trim('-')
+    $ledgerPrefix = ($branch -replace '[^A-Za-z0-9._-]+', '-').Trim('-')
+    if (-not $ledgerPrefix) {
+        $ledgerPrefix = 'lane'
+    }
     if ($ledgerPrefix.Length -gt 60) {
         $ledgerPrefix = $ledgerPrefix.Substring(0, 60).TrimEnd('-')
+    }
+    if (-not $ledgerPrefix) {
+        $ledgerPrefix = 'lane'
     }
     $branchBytes = [Text.Encoding]::UTF8.GetBytes($branch)
     $branchHash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($branchBytes)).ToLowerInvariant().Substring(0, 12)
@@ -186,12 +192,14 @@ try {
 
     git stash apply --index $snapshot --quiet
     $record.restoreSucceeded = ($LASTEXITCODE -eq 0)
-    if ($record.restoreSucceeded -and ($duplicateSensitiveSnapshot -or -not $sensitivePath)) {
-        $currentStash = (git rev-parse 'stash@{0}' 2>$null)
-        if ($currentStash -and $currentStash.Trim() -eq $snapshot) {
-            git stash drop --quiet 'stash@{0}'
-            if ($duplicateSensitiveSnapshot) {
-                $record.snapshot = $previousSnapshot
+    if ($record.restoreSucceeded) {
+        if ($duplicateSensitiveSnapshot -or -not $sensitivePath) {
+            $currentStash = (git rev-parse 'stash@{0}' 2>$null)
+            if ($currentStash -and $currentStash.Trim() -eq $snapshot) {
+                git stash drop --quiet 'stash@{0}'
+                if ($duplicateSensitiveSnapshot) {
+                    $record.snapshot = $previousSnapshot
+                }
             }
         }
     }

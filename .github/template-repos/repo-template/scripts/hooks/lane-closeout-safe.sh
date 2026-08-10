@@ -12,13 +12,11 @@ git_dir="$(git rev-parse --absolute-git-dir 2>/dev/null || true)"
 [[ -n "$git_dir" ]] || exit 0
 ledger_dir="$git_dir/basecoat/lane-closeout"
 mkdir -p "$ledger_dir"
-ledger_prefix="$(printf '%s' "$branch" | sed -E 's/[^A-Za-z0-9._-]+/-/g; s/^-+//; s/-+$//' | cut -c1-60)"
-branch_hash="$(printf '%s' "$branch" | git hash-object --stdin | cut -c1-12)"
-ledger_name="${ledger_prefix}-${branch_hash}.json"
-ledger="$ledger_dir/$ledger_name"
-status_file="$ledger_dir/.${ledger_name}.status"
-status_error_file="$ledger_dir/.${ledger_name}.status-error"
-trap 'rm -f "$status_file" "$status_error_file"' EXIT
+ledger_prefix="$(printf '%s' "$branch" | LC_ALL=C sed -E 's/[^A-Za-z0-9._-]+/-/g; s/^-+//; s/-+$//' | cut -c1-60 | sed -E 's/-+$//')"
+[[ -n "$ledger_prefix" ]] || ledger_prefix="lane"
+ledger=""
+status_file=""
+status_error_file=""
 
 json_escape() {
   awk 'BEGIN { ORS="" }
@@ -60,6 +58,38 @@ write_ledger() {
 }
 EOF
 }
+
+sha256_utf8() {
+  local digest=""
+  if command -v sha256sum >/dev/null 2>&1; then
+    digest="$(printf '%s' "$branch" | sha256sum | awk '{print $1}')"
+  elif command -v shasum >/dev/null 2>&1; then
+    digest="$(printf '%s' "$branch" | shasum -a 256 | awk '{print $1}')"
+  elif command -v openssl >/dev/null 2>&1; then
+    digest="$(printf '%s' "$branch" | openssl dgst -sha256 | awk '{print $NF}')"
+  else
+    return 1
+  fi
+
+  digest="$(printf '%s' "$digest" | tr 'A-F' 'a-f')"
+  [[ "$digest" =~ ^[0-9a-f]{64}$ ]] || return 1
+  printf '%s' "$digest"
+}
+
+if ! branch_hash_full="$(sha256_utf8)"; then
+  ledger="$ledger_dir/${ledger_prefix}-hash-unavailable.json"
+  write_ledger "PARKED" "" "true" "" "" "false" "true" \
+    "Install sha256sum, shasum, or openssl, then rerun lane-closeout." \
+    "Unable to compute the required raw UTF-8 SHA-256 lane key."
+  exit 0
+fi
+
+branch_hash="${branch_hash_full:0:12}"
+ledger_name="${ledger_prefix}-${branch_hash}.json"
+ledger="$ledger_dir/$ledger_name"
+status_file="$ledger_dir/.${ledger_name}.status"
+status_error_file="$ledger_dir/.${ledger_name}.status-error"
+trap 'rm -f "$status_file" "$status_error_file"' EXIT
 
 stash_key() {
   local ref="$1" part
