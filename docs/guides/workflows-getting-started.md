@@ -42,6 +42,11 @@ This also installs the companion governance policy files used by template workfl
 - `.github/governance/policy-packs.json`
 - `.github/governance/human-approval-boundaries.json`
 
+For a single-maintainer repository, follow the
+[Solo-Developer Governance Profile](solo-dev-profile.md) before enabling
+`basecoat-pr-auto-merge-executor.yml`. The profile requires protected `main`,
+all policy-pack checks, an empty bypass list, and GitHub-native auto-merge.
+
 To include internal workflows as well (internal workflows are marked unsupported,
 so include both flags):
 

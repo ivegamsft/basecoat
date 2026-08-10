@@ -18,7 +18,8 @@ Branch protection enforcement is handled through three mechanisms:
 
 - Queries repository API for main branch protection settings
 - Enforces strict required status checks baseline
-- Enforces at least one required approving review
+- Enforces the active policy pack's approval baseline (`solo-dev` = 0,
+  `team-dev` = 1, `regulated-team` = 2)
 - Enforces required conversation resolution
 - Validates required check contexts from policy packs
 - Validates merge queue posture from policy packs (`required` vs `deferred`)
@@ -43,7 +44,7 @@ Branch protection enforcement is handled through three mechanisms:
 3. Audits live `main` branch protection via GitHub API
 4. Fails the run when any hard baseline control drifts:
    - strict status checks disabled
-   - required approving review count below 1
+   - required approving review count below the active profile baseline
    - required conversation resolution disabled
    - force pushes enabled
    - deletions enabled
@@ -71,13 +72,13 @@ Branch protection enforcement is handled through three mechanisms:
 
 ### Exception Handling
 
-**Temporary Bypass (Emergency)**:
+**Emergency handling**:
 
-- If admins need to bypass protection for emergency merge:
-  1. Document reason in issue or PR comment
-  2. Admin pushes directly to main (logged in audit trail)
-  3. Re-enable protection immediately after
-  4. Post-incident review to prevent recurrence
+- No onboarding profile, including `solo-dev`, authorizes administrator bypass.
+- Keep automation inside branch protection and rulesets.
+- If an exceptional Tier 4 incident requires a separately authorized manual
+  action, follow the risk-tier two-person approval and audit process. Do not
+  treat that incident path as solo-dev self-merge.
 
 **Status Check Removal**:
 

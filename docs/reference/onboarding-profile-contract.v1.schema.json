@@ -90,12 +90,12 @@
         "team-dev",
         "regulated-team"
       ],
-      "description": "Profile being migrated from on a rerun."
+      "description": "Current profile used by bootstrap to identify and validate a profile transition."
     },
     "allow_profile_downgrade": {
       "type": "boolean",
       "default": false,
-      "description": "Allow a weaker profile to replace a stronger one."
+      "description": "Allow a weaker target when migration_from identifies a stronger current profile."
     },
     "telemetry_scorecard_schema": {
       "type": "string",

@@ -32,6 +32,10 @@
     Workflow classes to install. Valid values: reusable, templates, internal.
     Defaults to reusable.
 
+.PARAMETER Workflow
+    Install only the named workflow source or destination files. Exact names are
+    required. Targeted installs preserve all non-selected and unknown workflows.
+
 .PARAMETER KeepUnknownBc
     Keep unknown managed workflow files already present in destination.
     Managed prefixes are bc-, basecoat-, basecoat-agent-, basecoat-internal-.
@@ -57,6 +61,7 @@ param(
     [switch]$IncludeInternal,
     [ValidateSet('reusable', 'templates', 'internal')]
     [string[]]$InstallClass = @('reusable'),
+    [string[]]$Workflow = @(),
     [switch]$KeepUnknownBc,
     [switch]$DryRun
 )
@@ -269,6 +274,32 @@ if ($IncludeInternal) {
     [void]$installClasses.Add('internal')
 }
 
+$workflowSelectors = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+foreach ($selector in $Workflow) {
+    if (-not [string]::IsNullOrWhiteSpace($selector)) {
+        [void]$workflowSelectors.Add($selector.Trim())
+    }
+}
+$targetedInstall = $workflowSelectors.Count -gt 0
+
+if ($targetedInstall) {
+    foreach ($selector in $workflowSelectors) {
+        $matched = @(
+            $workflowMap | Where-Object {
+                $_.Source -eq $selector -or $_.Destination -eq $selector
+            }
+        )
+        if ($matched.Count -eq 0) {
+            $validSelectors = @(
+                $workflowMap |
+                    ForEach-Object { @($_.Source, $_.Destination) } |
+                    Sort-Object -Unique
+            ) -join ', '
+            throw "Unknown workflow selector '$selector'. Valid source or destination names: $validSelectors"
+        }
+    }
+}
+
 $knownManagedFiles = @(
     $workflowMap |
         ForEach-Object { @($_.Destination) + @($_.LegacyDestinations) } |
@@ -285,34 +316,43 @@ $copied = 0
 $removed = 0
 $skipped = 0
 
-foreach ($workflow in $workflowMap) {
-    if (-not $installClasses.Contains($workflow.Class)) {
-        Write-Info "Skipping workflow outside selected classes ($($workflow.Class)): $($workflow.Source)"
+foreach ($workflowEntry in $workflowMap) {
+    $isTargetedWorkflow = $workflowSelectors.Contains($workflowEntry.Source) -or
+        $workflowSelectors.Contains($workflowEntry.Destination)
+
+    if ($targetedInstall -and -not $isTargetedWorkflow) {
+        Write-Info "Skipping non-selected workflow: $($workflowEntry.Source)"
         $skipped++
         continue
     }
 
-    $sourceFile = Join-Path $resolvedSource $workflow.Source
-    $destFile = Join-Path $resolvedDest $workflow.Destination
+    if (-not $targetedInstall -and -not $installClasses.Contains($workflowEntry.Class)) {
+        Write-Info "Skipping workflow outside selected classes ($($workflowEntry.Class)): $($workflowEntry.Source)"
+        $skipped++
+        continue
+    }
 
-    if (-not $workflow.Supported -and -not $IncludeUnsupported) {
+    $sourceFile = Join-Path $resolvedSource $workflowEntry.Source
+    $destFile = Join-Path $resolvedDest $workflowEntry.Destination
+
+    if (-not $workflowEntry.Supported -and -not $IncludeUnsupported) {
         if (Test-Path $destFile) {
             if ($DryRun) {
-                Write-Info "Would remove unsupported workflow: $($workflow.Destination)"
+                Write-Info "Would remove unsupported workflow: $($workflowEntry.Destination)"
             } else {
                 Remove-Item -Path $destFile -Force
-                Write-Ok "Removed unsupported workflow: $($workflow.Destination)"
+                Write-Ok "Removed unsupported workflow: $($workflowEntry.Destination)"
             }
             $removed++
         } else {
-            Write-Info "Skipping unsupported workflow: $($workflow.Destination)"
+            Write-Info "Skipping unsupported workflow: $($workflowEntry.Destination)"
             $skipped++
         }
         continue
     }
 
     if (-not (Test-Path -Path $sourceFile -PathType Leaf)) {
-        Write-Warn "Source workflow missing in '$SourceDir', skipping: $($workflow.Source)"
+        Write-Warn "Source workflow missing in '$SourceDir', skipping: $($workflowEntry.Source)"
         $skipped++
         continue
     }
@@ -324,27 +364,27 @@ foreach ($workflow in $workflowMap) {
     $nameUpdated = $false
     for ($i = 0; $i -lt $lines.Length; $i++) {
         if ($lines[$i] -match '^name:\s*".*"$') {
-            $lines[$i] = "name: `"$($workflow.Name)`""
+            $lines[$i] = "name: `"$($workflowEntry.Name)`""
             $nameUpdated = $true
             break
         }
     }
 
     if (-not $nameUpdated) {
-        $lines = @("name: `"$($workflow.Name)`"") + $lines
+        $lines = @("name: `"$($workflowEntry.Name)`"") + $lines
     }
     $content = [string]::Join("`n", $lines)
 
     if ($DryRun) {
-        Write-Info "Would copy $($workflow.Source) -> $($workflow.Destination)"
+        Write-Info "Would copy $($workflowEntry.Source) -> $($workflowEntry.Destination)"
     } else {
         Set-Content -Path $destFile -Value $content -Encoding UTF8
-        Write-Ok "Installed workflow: $($workflow.Destination)"
+        Write-Ok "Installed workflow: $($workflowEntry.Destination)"
     }
     $copied++
 
-    foreach ($legacyName in $workflow.LegacyDestinations) {
-        if ($legacyName -eq $workflow.Destination) {
+    foreach ($legacyName in $workflowEntry.LegacyDestinations) {
+        if ($legacyName -eq $workflowEntry.Destination) {
             continue
         }
         $legacyPath = Join-Path $resolvedDest $legacyName
@@ -359,13 +399,19 @@ foreach ($workflow in $workflowMap) {
         }
     }
 
-    if ($installClasses.Contains('templates')) {
+    if ($workflowEntry.Class -eq 'templates') {
         foreach ($governanceFile in @('policy-packs.json', 'human-approval-boundaries.json')) {
             $governanceSourceFile = Join-Path $resolvedGovernanceSource $governanceFile
             $governanceDestFile = Join-Path $resolvedGovernanceDest $governanceFile
 
             if (-not (Test-Path -Path $governanceSourceFile -PathType Leaf)) {
                 Write-Warn "Source governance file missing in '$GovernanceSourceDir', skipping: $governanceFile"
+                $skipped++
+                continue
+            }
+
+            if ($targetedInstall -and (Test-Path -Path $governanceDestFile -PathType Leaf)) {
+                Write-Info "Preserving consumer governance file during targeted install: $governanceFile"
                 $skipped++
                 continue
             }
@@ -381,7 +427,7 @@ foreach ($workflow in $workflowMap) {
     }
 }
 
-if (-not $KeepUnknownBc) {
+if (-not $KeepUnknownBc -and -not $targetedInstall) {
     $managedPrefixes = @('bc-', 'basecoat-', 'basecoat-agent-', 'basecoat-internal-')
     $unknownManagedFiles = Get-ChildItem -Path $resolvedDest -Filter '*.yml' -File -ErrorAction SilentlyContinue |
         Where-Object {
@@ -401,16 +447,18 @@ if (-not $KeepUnknownBc) {
     }
 }
 
-foreach ($factoryWorkflow in $factoryOnlyWorkflowFiles) {
-    $factoryPath = Join-Path $resolvedDest $factoryWorkflow
-    if (Test-Path -Path $factoryPath -PathType Leaf) {
-        if ($DryRun) {
-            Write-Info "Would remove factory-only workflow: $factoryWorkflow"
-        } else {
-            Remove-Item -Path $factoryPath -Force
-            Write-Ok "Removed factory-only workflow: $factoryWorkflow"
+if (-not $targetedInstall) {
+    foreach ($factoryWorkflow in $factoryOnlyWorkflowFiles) {
+        $factoryPath = Join-Path $resolvedDest $factoryWorkflow
+        if (Test-Path -Path $factoryPath -PathType Leaf) {
+            if ($DryRun) {
+                Write-Info "Would remove factory-only workflow: $factoryWorkflow"
+            } else {
+                Remove-Item -Path $factoryPath -Force
+                Write-Ok "Removed factory-only workflow: $factoryWorkflow"
+            }
+            $removed++
         }
-        $removed++
     }
 }
 

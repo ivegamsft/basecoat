@@ -1,8 +1,15 @@
 {
   "default_profile": "solo-dev",
+  "production_release_paths": [
+    ".github/workflows/close-production-issues.yml",
+    ".github/workflows/docs-production.yml",
+    ".github/workflows/extension-deploy.yml",
+    ".github/workflows/mcp-deploy.yml",
+    ".github/workflows/publish-to-production.yml"
+  ],
   "profiles": {
     "solo-dev": {
-      "description": "Single maintainer optimization with strict checks and low-risk autonomy.",
+      "description": "Single maintainer optimization with strict checks and independent review.",
       "main": {
         "required_checks": [
           "lint-and-validate",
@@ -14,10 +21,10 @@
         ],
         "merge_queue_posture": "deferred",
         "required_approvals_by_risk_tier": {
-          "low": 0,
-          "medium": 0,
-          "high": 0,
-          "critical": 0
+          "low": 1,
+          "medium": 1,
+          "high": 1,
+          "critical": 1
         }
       },
       "cloud_agent": {

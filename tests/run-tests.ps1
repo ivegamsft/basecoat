@@ -270,6 +270,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running solo-dev profile guidance tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'solo-dev-profile-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Solo-dev profile guidance tests failed' -ForegroundColor Red
+    Write-FailureLog 'solo-dev-profile-tests'
+    exit 1
+}
+
 Write-Host 'Running issue-approve routing workflow tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'workflow-issue-approve-routing-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

@@ -33,8 +33,8 @@ allow_profile_downgrade: false
 | `secrets_mode` | No | Derived from `profile` | Workflow secrets and `.env.example` guidance |
 | `hook_pack` | No | Derived from `profile` | `.githooks/`, `scripts/install-git-hooks.*`, `.github/basecoat-hook-profiles.json` |
 | `preserve_local_customizations` | No | `true` | Sync behavior for existing repo-specific files |
-| `migration_from` | No | Unset | Profile switch source used during reruns |
-| `allow_profile_downgrade` | No | `false` | Safety gate for weakening a profile on rerun |
+| `migration_from` | No | Unset | Current profile used to identify and validate a profile transition |
+| `allow_profile_downgrade` | No | `false` | Explicit override for a weaker target when `migration_from` is set |
 
 ## Default profile posture
 
@@ -43,6 +43,13 @@ allow_profile_downgrade: false
 | `solo-dev` | minimal | solo | solo | local | local | none |
 | `team-dev` | shared | team | team | shared | workflow-secrets | standard |
 | `regulated-team` | locked-down | regulated | regulated | org-managed | org-managed | guardrails |
+
+`minimal` means a protected pull-request-only branch with required checks, no
+force pushes, no deletions, and no administrator bypass. It does not mean an
+unprotected default branch. Use the
+[Solo-Developer Governance Profile](../guides/solo-dev-profile.md) for the
+selection rubric, ruleset configuration, workflow setup, self-merge policy,
+rollback, and migration procedure.
 
 ## Profile-to-surface mapping
 
@@ -65,13 +72,14 @@ Reruns are idempotent by default:
 1. Reapplying the same profile refreshes generated surfaces without removing repo-owned customizations.
 2. Added surfaces are merged in when missing.
 3. Existing consumer edits are preserved unless the contract explicitly says otherwise.
-4. A rerun must not weaken branch policy, secrets wiring, or hook coverage unless `allow_profile_downgrade` is explicitly enabled.
+4. When `migration_from` identifies the current profile, bootstrap rejects a weaker target unless `allow_profile_downgrade` is explicitly enabled.
 
 ## Migration rules
 
 ### `solo-dev` -> `team-dev`
 
 - upgrade branch policy from minimal to shared
+- require independent review according to the team policy pack
 - add the team workflow pack and team template pack
 - switch telemetry from local-only to shared reporting
 - enable standard hook pack behavior
@@ -87,7 +95,11 @@ Reruns are idempotent by default:
 
 ### Downgrades
 
-Downgrades are blocked by default. A weaker profile can only be applied when `allow_profile_downgrade: true` is present and the change is explicitly approved.
+Bootstrap ranks `solo-dev < team-dev < regulated-team`. When `migration_from`
+is present, a weaker target is blocked by default. It can only be selected when
+`allow_profile_downgrade: true` is present and the change is explicitly
+approved. Always provide `migration_from` for a migration; without the current
+profile, bootstrap cannot classify the transition as a downgrade.
 
 ## Versioning
 
@@ -96,6 +108,7 @@ Downgrades are blocked by default. A weaker profile can only be applied when `al
 ## Related files
 
 - `docs/reference/onboarding-profile-contract.v1.schema.json`
+- `docs/guides/solo-dev-profile.md`
 - `docs/reference/telemetry-scorecard-schema.v1.md`
 - `docs/reference/telemetry-scorecard-schema.v1.schema.json`
 - `docs/operations/onboarding-telemetry-readiness.md`

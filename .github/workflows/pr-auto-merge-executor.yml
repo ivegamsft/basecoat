@@ -15,9 +15,6 @@ on:
     types:
       - submitted
       - dismissed
-  check_suite:
-    types:
-      - completed
   workflow_dispatch:
     inputs:
       pr_number:
@@ -30,7 +27,7 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
-  statuses: read
+  statuses: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.pull_request_review.pull_request.number || inputs.pr_number || github.ref }}
@@ -40,7 +37,7 @@ jobs:
   evaluate:
     name: Evaluate merge eligibility
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     outputs:
       eligible: ${{ steps.policy.outputs.eligible }}
       pr_number: ${{ steps.policy.outputs.pr_number }}
@@ -57,6 +54,8 @@ jobs:
         with:
           script: |
             const marker = '<!-- pr-auto-merge-executor:v1 -->';
+            const eligibilityStatusContext = 'BaseCoat merge eligibility';
+            const githubActionsIntegrationId = 15368;
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const workflowUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
@@ -67,13 +66,6 @@ jobs:
               if (context.payload.pull_request_review?.pull_request?.number) {
                 return Number(context.payload.pull_request_review.pull_request.number);
               }
-              if (Array.isArray(context.payload.check_suite?.pull_requests) && context.payload.check_suite.pull_requests.length > 0) {
-                const fromCheckSuite = context.payload.check_suite.pull_requests.find(pr => pr?.base?.ref === 'main')
-                  || context.payload.check_suite.pull_requests[0];
-                if (fromCheckSuite?.number) {
-                  return Number(fromCheckSuite.number);
-                }
-              }
               const fromInput = Number(process.env.PR_NUMBER_INPUT || 0);
               return Number.isInteger(fromInput) && fromInput > 0 ? fromInput : 0;
             };
@@ -83,6 +75,25 @@ jobs:
               core.setFailed('Unable to resolve pull request number from event payload or workflow_dispatch input.');
               return;
             }
+
+            const { data: pr } = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: prNumber
+            });
+            const headSha = pr.head.sha;
+            const publishEligibilityStatus = async (state, description) => {
+              await github.rest.repos.createCommitStatus({
+                owner,
+                repo,
+                sha: headSha,
+                state,
+                context: eligibilityStatusContext,
+                description,
+                target_url: workflowUrl
+              });
+            };
+            await publishEligibilityStatus('pending', 'Evaluating BaseCoat merge policy.');
 
             const readJsonFromDefaultBranch = async path => {
               const { data } = await github.rest.repos.getContent({
@@ -97,37 +108,29 @@ jobs:
               return JSON.parse(Buffer.from(data.content, data.encoding || 'base64').toString('utf8'));
             };
 
-            const policy = await readJsonFromDefaultBranch('.github/governance/policy-packs.json');
-            const humanBoundaries = await readJsonFromDefaultBranch('.github/governance/human-approval-boundaries.json');
-            const requestedPack = String(process.env.POLICY_PACK || '').trim();
-            const selectedPack = requestedPack || policy.default_profile;
-            if (!policy.profiles?.[selectedPack]) {
-              core.setFailed(`Unknown policy pack '${selectedPack}'. Valid profiles: ${Object.keys(policy.profiles || {}).join(', ')}`);
-              return;
-            }
-            const selectedBoundaryProfile = (humanBoundaries.profiles?.[selectedPack])
-              ? selectedPack
-              : humanBoundaries.default_profile;
-            if (!humanBoundaries.profiles?.[selectedBoundaryProfile]) {
-              core.setFailed(`Unable to resolve human-approval profile for '${selectedPack}'.`);
-              return;
-            }
+            try {
+              const policy = await readJsonFromDefaultBranch('.github/governance/policy-packs.json');
+              const humanBoundaries = await readJsonFromDefaultBranch('.github/governance/human-approval-boundaries.json');
+              const requestedPack = String(process.env.POLICY_PACK || '').trim();
+              const selectedPack = requestedPack || policy.default_profile;
+              if (!policy.profiles?.[selectedPack]) {
+                throw new Error(`Unknown policy pack '${selectedPack}'. Valid profiles: ${Object.keys(policy.profiles || {}).join(', ')}`);
+              }
+              const selectedBoundaryProfile = (humanBoundaries.profiles?.[selectedPack])
+                ? selectedPack
+                : humanBoundaries.default_profile;
+              if (!humanBoundaries.profiles?.[selectedBoundaryProfile]) {
+                throw new Error(`Unable to resolve human-approval profile for '${selectedPack}'.`);
+              }
 
-            const profile = policy.profiles[selectedPack];
-            const boundaryProfile = humanBoundaries.profiles[selectedBoundaryProfile];
-            const alwaysHumanRequired = new Set(humanBoundaries.always_human_required || []);
-            const requiredChecks = profile.main?.required_checks || [];
-            const mergeQueuePosture = profile.main?.merge_queue_posture || 'deferred';
-            if (!['required', 'deferred'].includes(mergeQueuePosture)) {
-              core.setFailed(`Invalid merge_queue_posture '${mergeQueuePosture}' for profile '${selectedPack}'.`);
-              return;
-            }
-
-            const { data: pr } = await github.rest.pulls.get({
-              owner,
-              repo,
-              pull_number: prNumber
-            });
+              const profile = policy.profiles[selectedPack];
+              const boundaryProfile = humanBoundaries.profiles[selectedBoundaryProfile];
+              const alwaysHumanRequired = new Set(humanBoundaries.always_human_required || []);
+              const requiredChecks = profile.main?.required_checks || [];
+              const mergeQueuePosture = profile.main?.merge_queue_posture || 'deferred';
+              if (!['required', 'deferred'].includes(mergeQueuePosture)) {
+                throw new Error(`Invalid merge_queue_posture '${mergeQueuePosture}' for profile '${selectedPack}'.`);
+              }
 
             const blockers = [];
             const labelNames = (pr.labels || []).map(label => String(label.name || '').toLowerCase());
@@ -140,17 +143,19 @@ jobs:
             if (String(pr.mergeable_state || '').toLowerCase() === 'dirty') {
               blockers.push('PR has merge conflicts (mergeable_state=dirty).');
             }
-            if (String(pr.mergeable_state || '').toLowerCase() === 'blocked') {
-              blockers.push('PR is blocked by repository merge constraints.');
-            }
-
             const files = await github.paginate(github.rest.pulls.listFiles, {
               owner,
               repo,
               pull_number: prNumber,
               per_page: 100
             });
-            const changed = files.map(f => f.filename);
+            const changed = files
+              .flatMap(file => [file.filename, file.previous_filename])
+              .filter(Boolean);
+            const productionReleasePaths = policy.production_release_paths || [];
+            const touchesProductionReleasePath = changed.some(file =>
+              productionReleasePaths.includes(file)
+            );
 
             const classifyRiskTier = () => {
               const routes = policy.risk_tier_routing || {};
@@ -180,11 +185,31 @@ jobs:
                 latestReviewByUser.set(login, review);
               }
             }
-            const approvedReviewers = new Set(
-              Array.from(latestReviewByUser.values())
-                .filter(review => review.state === 'APPROVED')
-                .map(review => review.user.login)
+            const approvalCandidates = Array.from(latestReviewByUser.values())
+              .filter(review => review.state === 'APPROVED')
+              .map(review => review.user.login);
+            const qualifiedPermissionLevels = new Set(['admin', 'maintain', 'write']);
+            const qualifiedApprovers = await Promise.all(
+              approvalCandidates.map(async login => {
+                try {
+                  const { data: reviewerPermission } = await github.rest.repos.getCollaboratorPermissionLevel({
+                    owner,
+                    repo,
+                    username: login
+                  });
+                  const hasQualifiedPermission = [
+                    reviewerPermission.permission,
+                    reviewerPermission.role_name
+                  ].some(level => qualifiedPermissionLevels.has(String(level || '').toLowerCase()));
+                  if (hasQualifiedPermission) return login;
+                  core.info(`Ignoring approval from @${login}; reviewer does not have write, maintain, or admin permission.`);
+                } catch (error) {
+                  core.warning(`Unable to verify repository permission for @${login}; approval will not count.`);
+                }
+                return null;
+              })
             );
+            const approvedReviewers = new Set(qualifiedApprovers.filter(Boolean));
             if (approvedReviewers.size < requiredApprovals) {
               blockers.push(
                 `Insufficient approvals for risk tier '${riskTier}' (${approvedReviewers.size}/${requiredApprovals}).`
@@ -201,10 +226,10 @@ jobs:
             if (
               alwaysHumanRequired.has('production_environment_approval') &&
               boundaryProfile.production_release_approval_required === true &&
-              riskTier === 'critical' &&
+              (riskTier === 'critical' || touchesProductionReleasePath) &&
               approvedReviewers.size === 0
             ) {
-              blockers.push('production_environment_approval: critical-tier release path requires explicit human approval.');
+              blockers.push('production_environment_approval: production release path requires explicit human approval.');
             }
             if (
               alwaysHumanRequired.has('policy_exception_override') &&
@@ -221,43 +246,86 @@ jobs:
               blockers.push('security_incident_override: incident/security-incident changes require explicit human approval.');
             }
 
-            const headSha = pr.head.sha;
-            const { data: combined } = await github.rest.repos.getCombinedStatusForRef({
-              owner,
-              repo,
-              ref: headSha
-            });
-            const statusByContext = new Map();
-            for (const status of combined.statuses || []) {
-              if (!status?.context) continue;
-              statusByContext.set(status.context, String(status.state || '').toLowerCase());
-            }
+            const readRequiredCheckState = async () => {
+              const statusByContext = new Map();
+              const checkByName = new Map();
+              const listCheckRunsForRef = async ref => {
+                const checkRuns = [];
+                for (let page = 1; ; page += 1) {
+                  const { data } = await github.rest.checks.listForRef({
+                    owner,
+                    repo,
+                    ref,
+                    per_page: 100,
+                    page
+                  });
+                  const pageRuns = data.check_runs || [];
+                  checkRuns.push(...pageRuns);
+                  if (pageRuns.length < 100) break;
+                }
+                return checkRuns;
+              };
+              const checkRefs = Array.from(new Set([headSha, pr.merge_commit_sha].filter(Boolean)));
+              for (const ref of checkRefs) {
+                const { data: combined } = await github.rest.repos.getCombinedStatusForRef({
+                  owner,
+                  repo,
+                  ref
+                });
+                for (const status of combined.statuses || []) {
+                  if (!status?.context || status.creator?.login !== 'github-actions[bot]') continue;
+                  statusByContext.set(status.context, String(status.state || '').toLowerCase());
+                }
 
-            const checkRuns = await github.paginate(github.rest.checks.listForRef, {
-              owner,
-              repo,
-              ref: headSha,
-              per_page: 100
-            }, response => response.data.check_runs || []);
-            const checkByName = new Map();
-            for (const check of checkRuns || []) {
-              if (!check?.name) continue;
-              const conclusion = String(check.conclusion || '').toLowerCase();
-              if (conclusion) checkByName.set(check.name, conclusion);
-            }
+                const checkRuns = await listCheckRunsForRef(ref);
+                core.info(`Found ${checkRuns.length} check runs for ${ref}.`);
+                for (const check of checkRuns || []) {
+                  const trustedActionsCheck = check.app?.id === githubActionsIntegrationId ||
+                    check.app?.slug === 'github-actions';
+                  if (!check?.name || !trustedActionsCheck) continue;
+                  checkByName.set(check.name, {
+                    status: String(check.status || '').toLowerCase(),
+                    conclusion: String(check.conclusion || '').toLowerCase()
+                  });
+                }
+              }
 
-            const unsatisfiedChecks = [];
-            for (const checkName of requiredChecks) {
-              const statusState = statusByContext.get(checkName);
-              const checkState = checkByName.get(checkName);
-              const statusSucceeded = statusState === 'success';
-              const checkSucceeded = checkState === 'success';
-              if (!statusSucceeded && !checkSucceeded) {
-                unsatisfiedChecks.push(
-                  `${checkName} (status=${statusState || 'pending'}, check=${checkState || 'pending'})`
+              const unsatisfiedChecks = [];
+              let hasPendingChecks = false;
+              for (const checkName of requiredChecks) {
+                const statusState = statusByContext.get(checkName);
+                const checkState = checkByName.get(checkName);
+                const statusSucceeded = statusState === 'success';
+                const checkSucceeded = checkState?.conclusion === 'success';
+                if (!statusSucceeded && !checkSucceeded) {
+                  const noCheckSignal = !statusState && !checkState;
+                  const statusPending = statusState === 'pending';
+                  const checkPending = Boolean(checkState && checkState.status !== 'completed');
+                  hasPendingChecks ||= noCheckSignal || statusPending || checkPending;
+                  unsatisfiedChecks.push(
+                    `${checkName} (status=${statusState || 'pending'}, check=${checkState?.conclusion || checkState?.status || 'pending'})`
+                  );
+                }
+              }
+              return { unsatisfiedChecks, hasPendingChecks };
+            };
+
+            const maxCheckPollAttempts = 60;
+            const checkPollIntervalMs = 15000;
+            let requiredCheckState;
+            for (let attempt = 1; attempt <= maxCheckPollAttempts; attempt += 1) {
+              requiredCheckState = await readRequiredCheckState();
+              if (requiredCheckState.unsatisfiedChecks.length === 0 || !requiredCheckState.hasPendingChecks) {
+                break;
+              }
+              if (attempt < maxCheckPollAttempts) {
+                core.info(
+                  `Waiting for required checks (${attempt}/${maxCheckPollAttempts}): ${requiredCheckState.unsatisfiedChecks.join('; ')}`
                 );
+                await new Promise(resolve => setTimeout(resolve, checkPollIntervalMs));
               }
             }
+            const unsatisfiedChecks = requiredCheckState?.unsatisfiedChecks || requiredChecks;
             if (unsatisfiedChecks.length > 0) {
               blockers.push(`Required checks not satisfied: ${unsatisfiedChecks.join('; ')}`);
             }
@@ -326,6 +394,19 @@ jobs:
             core.setOutput('eligible', eligible ? 'true' : 'false');
             core.setOutput('pr_number', String(prNumber));
             core.setOutput('merge_queue_posture', mergeQueuePosture);
+            await publishEligibilityStatus(
+              eligible ? 'success' : 'failure',
+              eligible
+                ? `Eligible under ${selectedPack}/${riskTier}.`
+                : `Blocked by ${blockers.length} BaseCoat policy condition(s).`
+            );
+            if (!eligible) {
+              core.setFailed(`Merge eligibility gate blocked: ${blockers.join(' | ')}`);
+            }
+            } catch (error) {
+              await publishEligibilityStatus('failure', 'BaseCoat merge policy evaluation failed.');
+              core.setFailed(error instanceof Error ? error.message : String(error));
+            }
 
   merge:
     name: Enable auto-merge

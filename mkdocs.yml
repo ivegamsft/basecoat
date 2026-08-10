@@ -76,6 +76,7 @@ nav:
   - Getting Started:
     - Quickstart: getting-started.md
     - Enterprise Setup: guides/enterprise-setup.md
+    - Solo-Developer Profile: guides/solo-dev-profile.md
     - Consumer Sync Guide: guides/consumer-sync.md
   - Asset Reference:
     - Overview: reference/quick-reference.md

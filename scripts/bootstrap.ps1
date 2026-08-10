@@ -37,6 +37,10 @@
     profile when -OnboardingProfile is not provided.
     Defaults to BASECOAT_ONBOARDING_CONTRACT_PATH, then .github/basecoat-onboarding-profile.json.
 
+.PARAMETER ValidateProfileOnly
+    Resolve and validate the onboarding profile contract, print the selected
+    profile as JSON, and exit before running bootstrap phases.
+
 .EXAMPLE
     pwsh scripts/bootstrap.ps1
 
@@ -61,7 +65,8 @@ param(
     [string]$SharedMemoryRepo = $env:BASECOAT_SHARED_MEMORY_REPO,
     [ValidateSet('solo-dev', 'team-dev', 'regulated-team')]
     [string]$OnboardingProfile,
-    [string]$OnboardingContractPath = $(if ($env:BASECOAT_ONBOARDING_CONTRACT_PATH) { $env:BASECOAT_ONBOARDING_CONTRACT_PATH } else { '.github\basecoat-onboarding-profile.json' })
+    [string]$OnboardingContractPath = $(if ($env:BASECOAT_ONBOARDING_CONTRACT_PATH) { $env:BASECOAT_ONBOARDING_CONTRACT_PATH } else { '.github\basecoat-onboarding-profile.json' }),
+    [switch]$ValidateProfileOnly
 )
 
 Set-StrictMode -Version Latest
@@ -204,9 +209,11 @@ function Get-GitHubOidcAudience {
 
 function Get-OnboardingProfileSelection(
     [string]$requestedProfile,
-    [string]$contractPath
+    [string]$contractPath,
+    [switch]$strictContract
 ) {
     $profileFromContract = $null
+    $contract = $null
     if (-not [string]::IsNullOrWhiteSpace($contractPath)) {
         $resolvedContractPath = if ([System.IO.Path]::IsPathRooted($contractPath)) {
             $contractPath
@@ -217,13 +224,25 @@ function Get-OnboardingProfileSelection(
         if (Test-Path $resolvedContractPath) {
             try {
                 $contractRaw = Get-Content -Path $resolvedContractPath -Raw
-                if (-not [string]::IsNullOrWhiteSpace($contractRaw)) {
+                if ([string]::IsNullOrWhiteSpace($contractRaw)) {
+                    if ($strictContract) {
+                        throw 'Contract file is empty.'
+                    }
+                } else {
                     $contract = $contractRaw | ConvertFrom-Json -ErrorAction Stop
-                    if ($contract.profile) {
-                        $profileFromContract = $contract.profile.ToString().Trim()
+                    $profileProperty = $contract.PSObject.Properties['profile']
+                    if (-not $profileProperty -or [string]::IsNullOrWhiteSpace([string]$profileProperty.Value)) {
+                        if ($strictContract) {
+                            throw "Required field 'profile' is missing or empty."
+                        }
+                    } else {
+                        $profileFromContract = $profileProperty.Value.ToString().Trim()
                     }
                 }
             } catch {
+                if ($strictContract) {
+                    throw "Invalid onboarding contract at '$resolvedContractPath': $($_.Exception.Message)"
+                }
                 Write-Warn "Could not parse onboarding contract at '$resolvedContractPath': $($_.Exception.Message)"
             }
         }
@@ -268,6 +287,42 @@ function Get-OnboardingProfileSelection(
 
     if (-not $profiles.ContainsKey($candidateProfile)) {
         throw "Unsupported onboarding profile '$candidateProfile'. Allowed values: solo-dev, team-dev, regulated-team."
+    }
+
+    if ($contract) {
+        $migrationFromProperty = $contract.PSObject.Properties['migration_from']
+        $migrationFrom = if ($migrationFromProperty -and $migrationFromProperty.Value) {
+            $migrationFromProperty.Value.ToString().Trim()
+        } else {
+            $null
+        }
+        $allowDowngradeProperty = $contract.PSObject.Properties['allow_profile_downgrade']
+        $allowProfileDowngrade = $false
+
+        if ($allowDowngradeProperty) {
+            if ($allowDowngradeProperty.Value -isnot [bool]) {
+                throw "Onboarding contract field 'allow_profile_downgrade' must be a boolean."
+            }
+            $allowProfileDowngrade = [bool]$allowDowngradeProperty.Value
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($migrationFrom)) {
+            if (-not $profiles.ContainsKey($migrationFrom)) {
+                throw "Unsupported migration_from profile '$migrationFrom'. Allowed values: solo-dev, team-dev, regulated-team."
+            }
+
+            $profileRank = @{
+                'solo-dev' = 1
+                'team-dev' = 2
+                'regulated-team' = 3
+            }
+            if (
+                $profileRank[$candidateProfile] -lt $profileRank[$migrationFrom] -and
+                -not $allowProfileDowngrade
+            ) {
+                throw "Profile downgrade from '$migrationFrom' to '$candidateProfile' is blocked. Set allow_profile_downgrade to true only with explicit approval."
+            }
+        }
     }
 
     return [pscustomobject]$profiles[$candidateProfile]
@@ -611,6 +666,21 @@ if (-not $repoRoot) {
 }
 Set-Location $repoRoot
 
+# Resolve the profile without running setup phases when used by CI or contract tests.
+if ($ValidateProfileOnly) {
+    try {
+        Get-OnboardingProfileSelection `
+            -requestedProfile $OnboardingProfile `
+            -contractPath $OnboardingContractPath `
+            -strictContract |
+            ConvertTo-Json -Compress
+        exit 0
+    } catch {
+        Write-Error $_.Exception.Message
+        exit 1
+    }
+}
+
 Write-Host ""
 Write-Host "  BaseCoat Bootstrap" -ForegroundColor White
 Write-Host "  Profile: bootstrap + readiness checks" -ForegroundColor DarkGray
@@ -937,8 +1007,8 @@ Bootstrap validation found critical errors:
 
 $(($script:errors | ForEach-Object { "- $_" }) -join "`n")
 
-Run \`pwsh scripts/bootstrap.ps1\` to review full details.
-Audit log: \`.memory/bootstrap-audit.json\`
+Run pwsh scripts/bootstrap.ps1 to review full details.
+Audit log: .memory/bootstrap-audit.json
 "@
                 if (Create-GitHubIssue -repoSlug $repoSlug -title $errorTitle -body $errorBody -labels @('github-actions', 'priority:high', 'maintenance')) {
                     Write-Host "  ✅ Issue created for critical errors" -ForegroundColor Green
@@ -954,8 +1024,8 @@ Bootstrap validation found warnings:
 
 $(($script:warnings | ForEach-Object { "- $_" }) -join "`n")
 
-Run \`pwsh scripts/bootstrap.ps1\` to review full details.
-Audit log: \`.memory/bootstrap-audit.json\`
+Run pwsh scripts/bootstrap.ps1 to review full details.
+Audit log: .memory/bootstrap-audit.json
 "@
                 if (Create-GitHubIssue -repoSlug $repoSlug -title $warningTitle -body $warningBody -labels @('maintenance', 'documentation')) {
                     Write-Host "  ✅ Issue created for warnings" -ForegroundColor Green

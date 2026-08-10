@@ -32,6 +32,12 @@ The following status checks **must pass** before a pull request can be merged to
 Additional checks may run and fail without blocking merge (advisory-only checks), but the
 above six are required for all PRs to `main`.
 
+Repositories enabling `solo-dev` self-merge must additionally require one
+independent approval after the last push and the `BaseCoat merge eligibility`
+commit status. The review rule is the portable human boundary; the repo-local
+status is a fail-closed policy and check aggregator, not an executor-specific
+identity. See `docs/guides/solo-dev-profile.md`.
+
 ### 3. Restricted Direct Pushes
 
 - **Allow force pushes**: No
@@ -41,9 +47,14 @@ above six are required for all PRs to `main`.
 
 ### 4. Bypass Rules
 
-- **Admins can bypass protection**: Yes (with audit trail expected)
+- **Admins can bypass protection**: No for normal delivery; include
+  administrators in classic protection or keep the ruleset bypass list empty
 - **GitHub Apps bypass**: Not allowed
 - **Automation bypass**: Not allowed (all automation must work within protection constraints)
+
+The `solo-dev` profile changes approval counts, not bypass posture. Its
+workflow-based self-merge path must use GitHub auto-merge after required checks;
+it must never use administrator bypass.
 
 ## Enforcement
 
@@ -78,6 +89,7 @@ To apply branch protection via GitHub UI:
 7. Disable:
    - ☐ Allow force pushes
    - ☐ Allow deletions
+8. Include administrators and leave bypass actors empty.
 
 ## Validation
 
@@ -111,3 +123,4 @@ If validation fails:
 - [Repository Settings](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches)
 - Governance Contract: `docs/reference/governance-contract.md`
 - Governance Audit: `.github/workflows/governance-audit.yml`
+- Solo-dev setup: `docs/guides/solo-dev-profile.md`
