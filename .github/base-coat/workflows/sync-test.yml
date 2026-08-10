@@ -202,6 +202,8 @@ jobs:
           for item in "${expected[@]}"; do
             test -e "$target/$item"
           done
+          test -f "$target/scripts/cleanup-branches.ps1"
+          test -f "$target/scripts/publish-orphaned-lane-ledger.ps1"
 
           unexpected=(.git tests test fixtures sync.sh sync.ps1)
           for item in "${unexpected[@]}"; do
@@ -227,6 +229,11 @@ jobs:
             $full = Join-Path $target $item
             if (-not (Test-Path -Path $full)) {
               throw "Expected item missing: $item"
+            }
+          }
+          foreach ($runtimeScript in @('scripts/cleanup-branches.ps1', 'scripts/publish-orphaned-lane-ledger.ps1')) {
+            if (-not (Test-Path -Path (Join-Path $target $runtimeScript) -PathType Leaf)) {
+              throw "Expected runtime script missing: $runtimeScript"
             }
           }
 

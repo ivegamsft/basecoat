@@ -12,7 +12,7 @@ metadata:
   audience:
     - developer
 allowed-tools: []
-allowed_skills: [ship-it]
+allowed_skills: [ship-it, lane-closeout]
 ---
 
 # BaseCoat Ship-it Orchestrator Agent
@@ -37,7 +37,9 @@ plan, implement, validate, release, and close out with learnings.
 2. Create or update implementation branches and PRs.
 3. Run required validation workflows and enforce gate outcomes.
 4. Handle build breaks with explicit RCA + fix-forward actions.
-5. Merge and clean up only after all gates pass.
+5. Invoke `lane-closeout` for every in-scope branch/worktree. Let the skill
+   capture and publish WIP, classify `MERGED`, `HANDED_OFF`, `ABANDONED`, or
+   `PARKED`, and prune only authorized terminal lanes after all gates pass.
 6. Capture rollout notes, docs changes, and post-implementation learnings.
 
 ## Control-Loop Contract
@@ -98,5 +100,7 @@ Stop the loop when any condition is met:
 ## Handoffs
 
 - Route structured intent intake through `skills/ship-it/SKILL.md`.
+- Route per-lane finish, handoff, parking, and safe cleanup through
+  `skills/lane-closeout/SKILL.md`.
 - Delegate repo-specific implementation to `orchestrator` or `agentic-sdlc-autonomy`.
 - Escalate risky release decisions to human approvers with linked evidence.

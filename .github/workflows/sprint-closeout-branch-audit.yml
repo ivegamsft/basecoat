@@ -1,9 +1,6 @@
 name: "BaseCoat - Sprint Closeout Branch Audit"
 
 on:
-  pull_request_target:
-    types:
-      - closed
   schedule:
     - cron: "0 2 * * 0"
   workflow_dispatch:
@@ -18,9 +15,15 @@ on:
         required: false
         default: false
         type: boolean
+      publish_issue:
+        description: "Create or update the orphaned-lane ledger issue"
+        required: false
+        default: true
+        type: boolean
 
 permissions:
   contents: write
+  issues: write
   pull-requests: read
 
 concurrency:
@@ -29,7 +32,6 @@ concurrency:
 
 jobs:
   branch-audit:
-    if: github.event_name != 'pull_request_target' || (github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -51,8 +53,6 @@ jobs:
 
           $applyChanges = if ("${{ github.event_name }}" -eq "workflow_dispatch") {
             "${{ inputs.apply_changes }}" -eq "true"
-          } elseif ("${{ github.event_name }}" -eq "pull_request_target") {
-            "${{ github.event.pull_request.merged }}" -eq "true"
           } else {
             $false
           }
@@ -61,6 +61,7 @@ jobs:
             StaleDays     = $staleDays
             DefaultBranch = 'main'
             AssumeYes     = $true
+            LedgerPath    = 'test-results/lane-closeout/orphaned-lanes.json'
           }
 
           if ($applyChanges) {
@@ -68,3 +69,21 @@ jobs:
           }
 
           pwsh ./scripts/cleanup-branches.ps1 @params
+
+      - name: Publish orphaned-lane ledger issue
+        if: github.event_name != 'workflow_dispatch' || inputs.publish_issue
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pwsh ./scripts/publish-orphaned-lane-ledger.ps1 `
+            -LedgerPath 'test-results/lane-closeout/orphaned-lanes.json'
+
+      - name: Upload lane-closeout ledger
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: orphaned-lane-ledger
+          path: test-results/lane-closeout/
+          if-no-files-found: error
+          retention-days: 30

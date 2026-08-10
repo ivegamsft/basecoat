@@ -19,12 +19,19 @@
         "30-error-and-budget"
       ]
     },
+    "lane-closeout": {
+      "description": "Enable safe Stop-time lane capture, push, and reporting without cleanup.",
+      "enabledHookPacks": [
+        "40-lane-closeout"
+      ]
+    },
     "standard": {
-      "description": "Recommended. Enable memory, tool guardrails, and error and budget handling.",
+      "description": "Recommended. Enable memory, tool guardrails, error handling, and safe lane closeout.",
       "enabledHookPacks": [
         "10-session-memory",
         "20-tool-guardrails",
-        "30-error-and-budget"
+        "30-error-and-budget",
+        "40-lane-closeout"
       ]
     }
   },
@@ -62,6 +69,19 @@
         "copilotCloudAgent": true,
         "notes": [
           "Budget threshold handling is implemented through postToolUse because there is no native OnBudgetExceeded event."
+        ]
+      }
+    },
+    "40-lane-closeout": {
+      "path": ".github/hooks/40-lane-closeout.json",
+      "description": "Stop-time safe lane capture, WIP publishing, and conservative PARKED ledger reporting.",
+      "platformSupport": {
+        "vsCode": true,
+        "copilotCli": true,
+        "copilotCloudAgent": true,
+        "notes": [
+          "Safe mode never rebases, merges, closes PRs, deletes branches, or removes worktrees.",
+          "Cloud Agent runs only the bash handler."
         ]
       }
     }

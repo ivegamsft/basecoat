@@ -120,7 +120,9 @@ For `profile=pilot-wawkr`, phase artifacts carry canary-specific lane metadata:
    prior stage to close before opening or updating a PR.
 3. Record rollout and rollback evidence links in sprint issues.
 4. Capture post-release learnings before closeout.
-5. Run branch cleanup audit after merged PRs on `main` (workflow trigger) and review audit logs.
+5. Invoke `lane-closeout` for every in-scope lane. Review its terminal-state
+   ledger, then use the branch cleanup audit as the remote reaper backstop that
+   updates the orphaned-lane issue for machines where local closeout never ran.
 6. Treat non-recoverable build-break classifications as escalation events; do not loop retries beyond configured retry budget.
 7. Block stage promotion when required release gates fail for the selected risk band.
 8. Require rollback runbook and rollback validation evidence before production cutover.

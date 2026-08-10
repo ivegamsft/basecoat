@@ -1,0 +1,22 @@
+name: "lane-closeout-routing"
+description: "Routing evaluation for safe, idempotent branch and worktree lane closeout."
+skill: "skills/lane-closeout/SKILL.md"
+scenarios:
+  - id: "finish-lane-positive"
+    input: "Finish this worktree lane: capture WIP, push it, open or update the PR, and return me to main safely."
+    expect_activation: true
+  - id: "blocked-pr-handoff-positive"
+    input: "Close out this branch even though review is pending; preserve it as a handed-off lane and record the next action."
+    expect_activation: true
+  - id: "conflict-parking-positive"
+    input: "The lane conflicts with main. Preserve and push the work, classify it PARKED, and do not delete anything."
+    expect_activation: true
+  - id: "safe-session-stop-positive"
+    input: "At session end run safe lane closeout: capture, push, and report only, with no destructive cleanup."
+    expect_activation: true
+  - id: "branch-list-negative"
+    input: "List all local and remote branches without changing anything."
+    expect_activation: false
+  - id: "sprint-closeout-negative"
+    input: "Prepare the sprint retrospective and carryover report for leadership."
+    expect_activation: false

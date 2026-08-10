@@ -15,9 +15,15 @@ on:
         required: false
         default: false
         type: boolean
+      publish_issue:
+        description: "Create or update the orphaned-lane ledger issue"
+        required: false
+        default: true
+        type: boolean
 
 permissions:
   contents: write
+  issues: write
   pull-requests: read
 
 concurrency:
@@ -55,11 +61,29 @@ jobs:
             StaleDays     = $staleDays
             DefaultBranch = 'main'
             AssumeYes     = $true
+            LedgerPath    = 'test-results/lane-closeout/orphaned-lanes.json'
           }
 
           if ($applyChanges) {
             $params.ApplyChanges = $true
           }
 
-          pwsh ./scripts/cleanup-branches.ps1 @params
+          pwsh ./.github/base-coat/scripts/cleanup-branches.ps1 @params
 
+      - name: Publish orphaned-lane ledger issue
+        if: github.event_name != 'workflow_dispatch' || inputs.publish_issue
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pwsh ./.github/base-coat/scripts/publish-orphaned-lane-ledger.ps1 `
+            -LedgerPath 'test-results/lane-closeout/orphaned-lanes.json'
+
+      - name: Upload lane-closeout ledger
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: orphaned-lane-ledger
+          path: test-results/lane-closeout/
+          if-no-files-found: error
+          retention-days: 30

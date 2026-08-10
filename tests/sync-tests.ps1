@@ -311,6 +311,12 @@ try {
             -Message "Sync test failed: $dir/ not found in target directory"
     }
 
+    foreach ($runtimeScript in @('scripts/cleanup-branches.ps1', 'scripts/publish-orphaned-lane-ledger.ps1')) {
+        $testCount++
+        Assert-SyncPathExists -Path (Join-Path $targetDir $runtimeScript) `
+            -Message "Sync test failed: distributed runtime '$runtimeScript' not found"
+    }
+
     Write-Host "  Passed: target directory contains expected metadata and asset directories" -ForegroundColor Green
 }
 catch {
@@ -334,7 +340,7 @@ try {
 
     $targetDir = Join-Path $consumer '.github/base-coat'
 
-    foreach ($excluded in @('tests', 'scripts', 'sync.ps1', 'sync.sh', '.github', '.gitignore', '.gitleaks.toml', 'basecoat-metadata.json')) {
+    foreach ($excluded in @('tests', 'sync.ps1', 'sync.sh', '.github', '.gitignore', '.gitleaks.toml', 'basecoat-metadata.json')) {
         $testCount++
         Assert-SyncPathNotExists -Path (Join-Path $targetDir $excluded) `
             -Message "Sync test failed: non-distributed item '$excluded' was copied to target"

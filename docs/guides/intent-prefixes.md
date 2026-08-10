@@ -20,7 +20,7 @@ release, version drift) to reduce routing ambiguity.
 | `optimize:` | Normalize composite prompts into an execution packet with scope, stop rules, validation clauses, and routing hints before execution | **Now, advisory-first** | `@task-scope-validator`, `@orchestrator`, `@prompt-coach` |
 | `spike:` | Time-boxed investigation, no deliverable | **Now, research only** | `@solution-architect` |
 | `chore:` | Maintenance, cleanup, non-functional | **Soon** | `@devops-engineer`, `@release-manager` |
-| `pr:` | Pull request lifecycle handling: remaining WIP logging, merge readiness, build-gated closeout, and branch hygiene. Use `pr-lifecycle=full` when you want the whole chain kept together. | **Now** | `@orphaned-pr-cleanup`, `@merge-coordinator`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
+| `pr:` | Pull request lifecycle handling: remaining WIP logging, merge readiness, build-gated lane closeout, and branch/worktree hygiene. Use `pr-lifecycle=full` when you want the whole chain kept together. | **Now** | `lane-closeout` skill, `@orphaned-pr-cleanup`, `@merge-coordinator`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
 | `fleet:` | Close previous sprint, plan and execute the next sprint, triage oldest issues, audit PRs/builds, clean branches | **Now** | `@parallel-session-coordinator`, `@sprint-closeout-auditor`, `@sprint-planner`, `@issue-triage`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
 | `workflow:` | GitHub Actions workflow failure triage and repair | **Now** | `@broken-build-troubleshooter`, `@self-healing-ci`, `@devops-engineer` |
 | `actions:` | GitHub Actions configuration, runs, and policy checks | **Now** | `@self-healing-ci`, `@ci-failure-escalation`, `@devops-engineer` |
@@ -399,7 +399,10 @@ choose either `feature:` or `pr:`.
 1. Log remaining WIP and triage stale or blocked pull requests with `@orphaned-pr-cleanup`.
 2. Validate merge readiness and ordering with `@merge-coordinator`.
 3. Verify required CI status before closure; if builds are red, route to `@broken-build-troubleshooter`.
-4. Run `@branch-hygiene-sweeper` after merge/close actions to prune only safe branches.
+4. Run `lane-closeout` for each exact branch/worktree and record
+   `MERGED`, `HANDED_OFF`, `ABANDONED`, or `PARKED`.
+5. Prune eligible terminal lanes only through `@branch-hygiene-sweeper` and the
+   `git-worktrees` skill after re-verifying the exact worktree mapping.
 
 ### Guardrails
 
@@ -408,6 +411,10 @@ choose either `feature:` or `pr:`.
 - Only run branch cleanup for branches tied to merged/closed PRs with required builds passing.
 - Do not mark a full lifecycle request complete while WIP tasks or uncommitted changes remain.
 - Do not auto-prune `preserved/`, `backup/`, or `wip/` branches; log them as retained WIP with an owner and next action.
+- Treat a blocked open PR as `HANDED_OFF` and a conflict, interruption, or failed
+  publish as `PARKED`; both are valid recorded stopping states.
+- Session/worktree-end automation runs lane-closeout in `safe` mode: capture,
+  push, and report only, never rebase, merge, close, delete, or remove a worktree.
 - Prefer serial merges for overlapping branches to reduce conflict churn.
 
 ---

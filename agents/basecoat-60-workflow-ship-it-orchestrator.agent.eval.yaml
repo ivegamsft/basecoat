@@ -85,3 +85,21 @@ tests:
         - "retry"
         - "max_retries"
         - "escalate"
+  - id: lane-closeout-terminal-classification
+    description: Delegates each lane to lane-closeout and accepts blocked handoff as terminal
+    input: "Finish all ship-it worktrees, but one PR is still waiting for approval."
+    expect:
+      contains:
+        - "lane-closeout"
+        - "HANDED_OFF"
+        - "approval"
+        - "keep"
+  - id: lane-closeout-dirty-conflict-safety
+    description: Preserves dirty conflict state without destructive cleanup
+    input: "A dirty lane conflicts with main; close the ship-it loop without losing work."
+    expect:
+      contains:
+        - "PARKED"
+        - "wip/"
+        - "do not prune"
+        - "next action"

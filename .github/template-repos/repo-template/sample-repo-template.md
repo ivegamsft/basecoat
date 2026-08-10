@@ -15,7 +15,8 @@ This sample shows a template repository setup that installs and enforces Base Co
 
 1. Copy this template structure into your new repository template.
 2. Update `.github/base-coat.lock.json` for your organization and approved version.
-3. Pick a hook onboarding profile in `.github/basecoat-hook-profiles.json` (`none`, `memory`, `guardrails`, or `standard`).
+3. Pick a hook onboarding profile in `.github/basecoat-hook-profiles.json`
+   (`none`, `memory`, `guardrails`, `lane-closeout`, or `standard`).
 4. Run `Bootstrap Base Coat From Lock` workflow.
 5. Commit imported `.github/base-coat` files plus the selected `.github/hooks/*.json` packs.
 6. Set `enforce-basecoat-template` as a required status check.
@@ -24,4 +25,8 @@ This sample shows a template repository setup that installs and enforces Base Co
 
 - Keep lock updates and Base Coat content updates in the same pull request.
 - Avoid direct edits under `.github/base-coat` except approved upgrade pull requests.
-- `standard` is the recommended profile. It enables session memory, tool guardrails, and error and budget handling with pass-through-safe script stubs.
+- `lane-closeout` captures dirty WIP to a unique `wip/` ref, pushes when safe,
+  and conservatively records `PARKED`; full classification is deferred to the
+  skill, and the hook never performs destructive cleanup.
+- `standard` is the recommended profile. It includes safe lane closeout with
+  session memory, tool guardrails, and error and budget handling.

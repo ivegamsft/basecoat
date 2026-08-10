@@ -302,6 +302,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running lane closeout tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'lane-closeout-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Lane closeout tests failed' -ForegroundColor Red
+    Write-FailureLog 'lane-closeout-tests'
+    exit 1
+}
+
 Write-Host 'Running cleanup branch automation tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'cleanup-branches-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

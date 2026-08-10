@@ -209,6 +209,12 @@ if [[ -d "$TMP_DIR/source/.github/base-coat/workflows" ]]; then
   cp -R "$TMP_DIR/source/.github/base-coat/workflows" "$REPO_ROOT/$TARGET_DIR/workflows"
 fi
 
+# Copy runtime scripts required by distributed workflows.
+if [[ -d "$TMP_DIR/source/.github/base-coat/scripts" ]]; then
+  rm -rf "$REPO_ROOT/$TARGET_DIR/scripts"
+  cp -R "$TMP_DIR/source/.github/base-coat/scripts" "$REPO_ROOT/$TARGET_DIR/scripts"
+fi
+
 # Legacy cleanup: basecoat-metadata.json was previously distributed.
 rm -f "$REPO_ROOT/$TARGET_DIR/basecoat-metadata.json"
 

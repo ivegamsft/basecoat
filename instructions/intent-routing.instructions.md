@@ -42,7 +42,7 @@ Rules:
 | `fleet:` | Close the sprint, plan the next one, triage oldest issues, and clean branches | Now | `@parallel-session-coordinator`, `@sprint-closeout-auditor`, `@sprint-planner`, `@issue-triage`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
 | `workflow:` | GitHub Actions/workflow failure triage and repair | Now | `@broken-build-troubleshooter`, `@self-healing-ci`, `@devops-engineer` |
 | `actions:` | GitHub Actions configuration, runs, and policy checks | Now | `@self-healing-ci`, `@ci-failure-escalation`, `@devops-engineer` |
-| `pr:` | Pull request lifecycle execution: remaining WIP logging, mergeability, broken-build recovery, and safe cleanup | Now | `@orphaned-pr-cleanup`, `@merge-coordinator`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
+| `pr:` | Pull request lifecycle execution: remaining WIP logging, mergeability, broken-build recovery, lane closeout, and safe cleanup | Now | `lane-closeout` skill, `@orphaned-pr-cleanup`, `@merge-coordinator`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
 | `issue:` | GitHub issue triage, labeling, and backlog hygiene | Now | `@issue-triage`, `@sprint-planner` |
 | `portfolio:` | Project audit for issue/PR dedupe, categorization, dependency mapping, feature grouping, and project linkage | Now | `@issue-triage`, `@orphaned-pr-cleanup`, `@sprint-project-mapper`, `@sprint-planner`, `@governance-auditor` |
 | `release:` | Release planning, version bumping, and publication | Now | `@release-manager`, `@release-readiness-chair`, `@release-impact-advisor` |
@@ -335,14 +335,23 @@ and GitHub Actions workflow/CI failures route to `workflow:`.
 | `backlog wip` | `issue:` (backlog WIP triage) | `@issue-triage` |
 | `clean up branches` / `stale branches` | `chore:` | `@branch-hygiene-sweeper` |
 | `clean up worktrees` / `clean up work trees` / `prune worktrees` | `chore:` | `@branch-hygiene-sweeper` + `git-worktrees` skill |
+| `finish this lane` / `close out this branch` / `return to main` | `pr:` | `lane-closeout` skill |
 
 Branch cleanup routes to `@branch-hygiene-sweeper`; worktree cleanup additionally
 uses the `git-worktrees` skill (`skills/git-worktrees/SKILL.md`), which owns the
 stale-worktree pruning workflow and its safety checks.
 
+Lane finish requests route first to `skills/lane-closeout/SKILL.md`. It owns
+dirty-WIP capture, sync/publish, PR create-or-update, terminal-state
+classification, and safe handoff to branch/worktree cleanup primitives.
+
 `wip/`, `preserved/`, and `backup/` branches are retained (never auto-pruned)
 and logged with an owner and next action. Never remove a worktree that has
 uncommitted changes or one an active agent is using.
+
+Session/worktree-end automation uses lane-closeout `safe` mode: capture, push,
+and report only, with no rebase, merge, PR close, branch deletion, or worktree
+removal.
 
 ### Backlog and sprint execution
 

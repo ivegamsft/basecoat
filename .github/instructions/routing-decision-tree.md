@@ -69,6 +69,8 @@ for broader remediation-oriented pipeline/process auditing.
 
 | Intent | Direct Call |
 |---|---|
+| Finish a branch/worktree, publish WIP, and return to main | `/lane-closeout` |
+| Park or hand off a blocked lane without losing work | `/lane-closeout` |
 | Clean up merged/stale branches | `/branch-hygiene-sweeper` |
 | List branches ready to delete | `/branch-hygiene-sweeper` |
 | Audit PR lifecycle health | `/branch-hygiene-sweeper` |

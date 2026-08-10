@@ -343,6 +343,16 @@ try {
         Copy-Item -Path $workflowsSource -Destination $workflowsDest -Recurse -Force
     }
 
+    # Copy runtime scripts required by distributed workflows.
+    $runtimeScriptsSource = Join-Path $sourcePath '.github' 'base-coat' 'scripts'
+    $runtimeScriptsDest = Join-Path $fullTargetDir 'scripts'
+    if (Test-Path $runtimeScriptsSource) {
+        if (Test-Path $runtimeScriptsDest) {
+            Remove-Item -Path $runtimeScriptsDest -Recurse -Force
+        }
+        Copy-Item -Path $runtimeScriptsSource -Destination $runtimeScriptsDest -Recurse -Force
+    }
+
     # Copy only basic documentation (not full docs tree)
     $docsDest = Join-Path $fullTargetDir 'docs'
     if (Test-Path $docsDest) {

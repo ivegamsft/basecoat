@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "hooks": {
+    "Stop": [
+      {
+        "type": "command",
+        "bash": "./scripts/hooks/lane-closeout-safe.sh",
+        "powershell": "./scripts/hooks/lane-closeout-safe.ps1",
+        "timeoutSec": 30
+      }
+    ]
+  }
+}

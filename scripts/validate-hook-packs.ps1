@@ -44,7 +44,7 @@ Assert-Condition ($profileNames.Count -gt 0) 'Hook profile manifest must declare
 Assert-Condition ($packNames.Count -gt 0) 'Hook profile manifest must declare at least one pack.'
 Assert-Condition ($profileNames -contains $manifest.defaultProfile) "Default profile '$($manifest.defaultProfile)' must exist in profiles."
 
-$requiredProfiles = @('none', 'memory', 'guardrails', 'standard')
+$requiredProfiles = @('none', 'memory', 'guardrails', 'lane-closeout', 'standard')
 foreach ($profileName in $requiredProfiles) {
     Assert-Condition ($profileNames -contains $profileName) "Hook profile manifest missing required profile '$profileName'."
 }
@@ -60,6 +60,7 @@ $expectedPackEvents = @{
     '10-session-memory' = @('SessionStart', 'Stop')
     '20-tool-guardrails' = @('preToolUse', 'postToolUse')
     '30-error-and-budget' = @('errorOccurred', 'postToolUse')
+    '40-lane-closeout' = @('Stop')
 }
 
 foreach ($packName in $packNames) {
@@ -113,6 +114,22 @@ Assert-Condition ($budgetHandlers.Count -eq 1) '30-error-and-budget.json must ha
 Assert-Condition ($budgetHandlers[0].bash -eq './scripts/hooks/budget-threshold.sh') 'Budget threshold handler must use ./scripts/hooks/budget-threshold.sh.'
 Assert-Condition ($budgetHandlers[0].powershell -eq './scripts/hooks/budget-threshold.ps1') 'Budget threshold handler must use ./scripts/hooks/budget-threshold.ps1.'
 
+$lanePack = Read-JsonFile -Path (Join-Path $hooksDir '40-lane-closeout.json')
+$laneHandlers = @($lanePack.hooks.Stop)
+Assert-Condition ($laneHandlers.Count -eq 1) '40-lane-closeout.json must have exactly one Stop handler.'
+Assert-Condition ($laneHandlers[0].bash -eq './scripts/hooks/lane-closeout-safe.sh') 'Lane closeout must use lane-closeout-safe.sh.'
+Assert-Condition ($laneHandlers[0].powershell -eq './scripts/hooks/lane-closeout-safe.ps1') 'Lane closeout must use lane-closeout-safe.ps1.'
+
+$lanePowerShell = Get-Content (Join-Path $scriptDir 'lane-closeout-safe.ps1') -Raw
+$laneBash = Get-Content (Join-Path $scriptDir 'lane-closeout-safe.sh') -Raw
+foreach ($content in @($lanePowerShell, $laneBash)) {
+    Assert-Condition ($content -match 'wip/') 'Lane closeout handler must preserve dirty work on a wip/ ref.'
+    Assert-Condition ($content -match 'PARKED') 'Lane closeout handler must record PARKED state.'
+    Assert-Condition ($content -notmatch 'reset\s+--hard') 'Lane closeout handler must not hard reset.'
+    Assert-Condition ($content -notmatch 'clean\s+-[a-zA-Z]*f') 'Lane closeout handler must not force-clean.'
+    Assert-Condition ($content -notmatch 'branch\s+-D') 'Lane closeout handler must not force-delete branches.'
+}
+
 foreach ($profileName in $profileNames) {
     $profile = $manifest.profiles.$profileName
     Assert-Condition (-not [string]::IsNullOrWhiteSpace($profile.description)) "Profile '$profileName' must include a description."
@@ -128,6 +145,7 @@ $hooksDoc = Get-Content $hooksDocPath -Raw
 Assert-Condition ($hooksDoc -match [regex]::Escape('.github/basecoat-hook-profiles.json')) 'docs/reference/hooks.md must document .github/basecoat-hook-profiles.json.'
 Assert-Condition ($hooksDoc -match 'Onboarding hook packs') 'docs/reference/hooks.md must include the onboarding hook packs section.'
 Assert-Condition ($hooksDoc -match '\| Profile \| Enabled packs \| Platform support \|') 'docs/reference/hooks.md must include the onboarding profile support matrix.'
+Assert-Condition ($hooksDoc -match '40-lane-closeout') 'docs/reference/hooks.md must document the safe lane-closeout hook pack.'
 
 $agentPath = Join-Path $templateRootPath '..\..\..\agents\basecoat-10-core-project-onboarding.agent.md'
 $agentContent = Get-Content $agentPath -Raw

@@ -378,6 +378,7 @@ Recommended pack breakdown:
 - `10-session-memory.json` - `SessionStart` and `Stop`
 - `20-tool-guardrails.json` - `preToolUse` and `postToolUse`
 - `30-error-and-budget.json` - `errorOccurred` plus budget threshold handling via `postToolUse`
+- `40-lane-closeout.json` - safe `Stop`-time WIP capture, push, and terminal-state reporting
 
 Example profile manifest:
 
@@ -391,11 +392,15 @@ Example profile manifest:
     "guardrails": {
       "enabledHookPacks": ["20-tool-guardrails", "30-error-and-budget"]
     },
+    "lane-closeout": {
+      "enabledHookPacks": ["40-lane-closeout"]
+    },
     "standard": {
       "enabledHookPacks": [
         "10-session-memory",
         "20-tool-guardrails",
-        "30-error-and-budget"
+        "30-error-and-budget",
+        "40-lane-closeout"
       ]
     }
   }
@@ -407,7 +412,8 @@ Example profile manifest:
 | `none` | none | n/a |
 | `memory` | `10-session-memory` | VS Code, Copilot CLI, Cloud Agent (bash only) |
 | `guardrails` | `20-tool-guardrails`, `30-error-and-budget` | VS Code, Copilot CLI, Cloud Agent (bash only) |
-| `standard` | all three packs | VS Code, Copilot CLI, Cloud Agent (bash only) |
+| `lane-closeout` | `40-lane-closeout` | VS Code, Copilot CLI, Cloud Agent (bash only) |
+| `standard` | all four packs | VS Code, Copilot CLI, Cloud Agent (bash only) |
 
 Safe defaults for onboarding:
 
@@ -415,6 +421,9 @@ Safe defaults for onboarding:
 - `preToolUse` / `postToolUse` should default to non-blocking guardrail stubs.
 - `errorOccurred` should normalize or forward errors without crashing the runtime.
 - Budget threshold handling should use a dedicated `postToolUse` stub because there is no native `OnBudgetExceeded` event in `.github/hooks/*.json`.
+- Safe lane closeout may capture and push WIP plus write a local ledger, but it
+  must never rebase, merge, close PRs, delete branches, remove worktrees, or
+  publish status paths that look sensitive.
 
 Validation rules for onboarding packs:
 

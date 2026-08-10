@@ -214,7 +214,8 @@ inputs:
 
 ### 6. sprint-closeout-branch-audit.yml
 
-**Purpose:** Clean up merged/stale branches
+**Purpose:** Safely reap proven merged branches and report orphaned lanes that
+did not complete local `lane-closeout`
 
 **Trigger:**
 
@@ -225,7 +226,10 @@ inputs:
 
 - Finds branches merged to main/master
 - Identifies branches older than N days
-- Optionally deletes stale branches
+- Deletes only stale merged branches with no open PR or protected WIP prefix
+- Retains unverified local branches instead of force-deleting them
+- Writes a terminal-state ledger and idempotently creates or updates the
+  `Orphaned lane ledger` issue for retained `HANDED_OFF`/`PARKED` lanes
 - Dry-run mode for safety
 
 **Configuration:**
@@ -238,12 +242,18 @@ inputs:
   apply_changes:
     description: "Actually delete branches (true/false)"
     default: "false"
+  publish_issue:
+    description: "Create or update the orphaned-lane issue"
+    default: "true"
 ```
 
 **Output:**
 
 - List of candidate branches for deletion
 - Dry-run report or actual deletion
+- `orphaned-lane-ledger` workflow artifact
+- Marker-keyed open issue containing owner and next-action follow-up for
+  retained lanes; the workflow closes it when the ledger returns to zero
 - Summary of cleanup actions
 
 **Consumer Value:**

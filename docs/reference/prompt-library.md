@@ -2,7 +2,7 @@
 
 Generated from the canonical intent vocabulary and asset frontmatter. Do not edit the generated tables directly; run `pwsh scripts/generate-prompt-library.ps1`.
 
-Coverage: 33 intents, 131 skills, and 129 agents.
+Coverage: 33 intents, 132 skills, and 129 agents.
 
 ## Lifecycle prompts
 
@@ -73,7 +73,7 @@ Next action: approve the exact removal list
 | `fleet:` | <code>fleet: Close the sprint, plan the next one, triage oldest issues, and clean branches in this repository. Include scope, evidence, and the next safe action.</code> |
 | `workflow:` | <code>workflow: GitHub Actions/workflow failure triage and repair in this repository. Include scope, evidence, and the next safe action.</code> |
 | `actions:` | <code>actions: GitHub Actions configuration, runs, and policy checks in this repository. Include scope, evidence, and the next safe action.</code> |
-| `pr:` | <code>pr: Pull request lifecycle execution: remaining WIP logging, mergeability, broken-build recovery, and safe cleanup in this repository. Include scope, evidence, and the next safe action.</code> |
+| `pr:` | <code>pr: Pull request lifecycle execution: remaining WIP logging, mergeability, broken-build recovery, lane closeout, and safe cleanup in this repository. Include scope, evidence, and the next safe action.</code> |
 | `issue:` | <code>issue: GitHub issue triage, labeling, and backlog hygiene in this repository. Include scope, evidence, and the next safe action.</code> |
 | `portfolio:` | <code>portfolio: Project audit for issue/PR dedupe, categorization, dependency mapping, feature grouping, and project linkage in this repository. Include scope, evidence, and the next safe action.</code> |
 | `release:` | <code>release: Release planning, version bumping, and publication in this repository. Include scope, evidence, and the next safe action.</code> |
@@ -184,6 +184,7 @@ Next action: approve the exact removal list
 | `infrastructure-audit` | <code>Use the 'infrastructure-audit' skill. Task: reviewing IaC code quality.</code> | [skills/infrastructure-audit/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/infrastructure-audit/SKILL.md) |
 | `issue-triage` | <code>Use the 'issue-triage' skill. Task: backlog hygiene and duplicate detection.</code> | [skills/issue-triage/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/issue-triage/SKILL.md) |
 | `landing-zone-audit` | <code>Use the 'landing-zone-audit' skill. Task: audit landing zone designs.</code> | [skills/landing-zone-audit/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/landing-zone-audit/SKILL.md) |
+| `lane-closeout` | <code>Use the 'lane-closeout' skill. Task: capture dirty WIP.</code> | [skills/lane-closeout/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/lane-closeout/SKILL.md) |
 | `lexicon` | <code>Use the 'lexicon' skill. Task: create project lexicon file.</code> | [skills/lexicon/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/lexicon/SKILL.md) |
 | `manual-test-strategy` | <code>Use the 'manual-test-strategy' skill. Task: classify manual versus automated coverage.</code> | [skills/manual-test-strategy/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/manual-test-strategy/SKILL.md) |
 | `mcp-audit` | <code>Use the 'mcp-audit' skill. Task: reviewing MCP server code quality.</code> | [skills/mcp-audit/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/mcp-audit/SKILL.md) |
