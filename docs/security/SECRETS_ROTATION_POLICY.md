@@ -2,25 +2,36 @@
 
 **Effective Date**: Sprint 38, June 24, 2026  
 **Policy Owner**: Platform Security  
-**Last Updated**: June 24, 2026
+**Last Updated**: August 10, 2026
 
 ---
 
 ## Secrets Inventory
 
-Repository manages 12 action secrets for portfolio operations:
+The active inventory depends on deployed portfolio features:
 
-- Repository action secrets (`AZURE_CREDENTIALS`, `COPILOT_GITHUB_TOKEN`, `MEMORY_REPO_TOKEN`, `PRODUCTION_REPO_TOKEN`)
+- Repository action secrets (`AZURE_CREDENTIALS`, `MEMORY_REPO_TOKEN`, `PRODUCTION_REPO_TOKEN`)
 - Organization secrets (`DASHBOARD_ORG`, `BASECOAT_EXTENSION_*`)
 - Webhook secrets and OAuth tokens
 
 | Secret Name | Type | Last Rotated | Next Due | Rotation Frequency |
 | --- | --- | --- | --- | --- |
 | `AZURE_CREDENTIALS` | Service Principal | 2026-05-08 | 2026-08-08 | Quarterly |
-| `COPILOT_GITHUB_TOKEN` | GitHub PAT | 2026-06-10 | 2026-09-10 | Quarterly |
 | `MEMORY_REPO_TOKEN` | GitHub PAT | 2026-02-15 | 2026-08-15 | Semi-annual |
 | `PRODUCTION_REPO_TOKEN` | GitHub PAT | 2026-03-22 | 2026-09-22 | Semi-annual |
 | `DASHBOARD_ORG` | OAuth | 2026-01-20 | 2026-07-20 | Semi-annual |
+
+### Retired Agentic Workflow Secret Slots
+
+| Secret Name | Default Status | Allowed Exception |
+| --- | --- | --- |
+| `COPILOT_GITHUB_TOKEN` | Retired for organization-backed `copilot-requests: write` inference | A least-privilege fallback only when organization-backed inference is unavailable |
+| `GH_AW_GITHUB_TOKEN` | Retired for default inference and repository access | A separate least-privilege PAT only when a workflow explicitly requires expanded GitHub API access |
+
+Do not recreate or schedule rotation for these secret slots in repositories using
+organization-backed inference. If an approved exception is provisioned, record
+its owner, purpose, expiration, and removal condition in the secrets audit log,
+then remove it when the exception no longer applies.
 
 ---
 
@@ -29,7 +40,6 @@ Repository manages 12 action secrets for portfolio operations:
 ### Quarterly Rotation (Every 90 days)
 
 - `AZURE_CREDENTIALS`
-- `COPILOT_GITHUB_TOKEN`
 
 **Schedule**:
 
@@ -101,7 +111,7 @@ az ad sp credential list --id <service-principal-id> --query '[0].displayName'
 # (Paste into GitHub Secrets UI)
 ```
 
-### GitHub Tokens (COPILOT_GITHUB_TOKEN, MEMORY_REPO_TOKEN, PRODUCTION_REPO_TOKEN)
+### GitHub Tokens (MEMORY_REPO_TOKEN, PRODUCTION_REPO_TOKEN)
 
 Process:
 
@@ -189,7 +199,7 @@ If a secret is suspected compromised:
 6. Update GitHub secret
 7. Monitor first workflow run for success
 
-### GitHub PAT (COPILOT_GITHUB_TOKEN, MEMORY_REPO_TOKEN, PRODUCTION_REPO_TOKEN)
+### GitHub PAT (MEMORY_REPO_TOKEN, PRODUCTION_REPO_TOKEN)
 
 1. Go to GitHub **Settings → Developer settings → Personal access tokens**
 2. Find the token by ID (usually named after service)
@@ -212,12 +222,12 @@ If a secret is suspected compromised:
 ## Policy Review Schedule
 
 - **Frequency**: Annual (or on-demand if incident occurs)
-- **Last Reviewed**: June 24, 2026
-- **Next Review**: June 24, 2027
+- **Last Reviewed**: August 10, 2026
+- **Next Review**: August 10, 2027
 - **Owner**: Platform Security
 
 ---
 
-**Policy Version**: 1.0  
+**Policy Version**: 1.1
 **Approved By**: Security Audit (Issue #1747)  
 **Distribution**: Platform Security, DevOps Team, Portfolio Operations

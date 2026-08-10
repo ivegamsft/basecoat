@@ -280,22 +280,6 @@ function Get-OnboardingSecretVariableRequirements(
 ) {
     $requirements = [System.Collections.Generic.List[object]]::new()
 
-    $requirements.Add([pscustomobject]@{
-        Name = 'COPILOT_GITHUB_TOKEN'
-        Kind = 'secret'
-        Remediation = "Run 'pwsh scripts/bootstrap-copilot-github-token.ps1 -Repo <repo>' or set with 'gh secret set COPILOT_GITHUB_TOKEN -R <repo>'."
-        Rotation = 'Rotate every 30 days (set PAT expiration <=30 days).'
-    })
-
-    if ($profileSelection.secrets_mode -in @('workflow-secrets', 'org-managed')) {
-        $requirements.Add([pscustomobject]@{
-            Name = 'GH_AW_GITHUB_TOKEN'
-            Kind = 'secret'
-            Remediation = "Set with 'gh secret set GH_AW_GITHUB_TOKEN -R <repo>' using a least-privilege fine-grained PAT."
-            Rotation = 'Rotate every 30 days (set PAT expiration <=30 days).'
-        })
-    }
-
     if ($profileSelection.secrets_mode -eq 'org-managed') {
         $requirements.Add([pscustomobject]@{
             Name = 'GH_AW_GITHUB_MCP_SERVER_TOKEN'

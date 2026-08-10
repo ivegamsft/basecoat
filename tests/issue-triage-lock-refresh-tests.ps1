@@ -37,35 +37,30 @@ if ($workflow -match '8c7d04ebf1ece56cd381446125da3e0f6896294a' -or $workflow -m
     throw 'issue-triage lock must not retain stale gh-aw-actions/setup SHAs.'
 }
 
-if ($workflow -notmatch 'compiler_version":"v0\.74\.4"') {
-    throw 'issue-triage lock must align compiler_version to v0.74.4.'
+if ($workflow -notmatch 'compiler_version":"v0\.85\.4"') {
+    throw 'issue-triage lock must align compiler_version to v0.85.4.'
 }
-if ($workflow -notmatch 'github/gh-aw-actions/setup@d3abfe96a194bce3a523ed2093ddedd5704cdf62') {
-    throw 'issue-triage lock must align setup action SHA to d3abfe96a194bce3a523ed2093ddedd5704cdf62.'
+if ($workflow -notmatch 'github/gh-aw-actions/setup@2709137ea6c5b0e19aa621454dc643ea8dc526b1') {
+    throw 'issue-triage lock must align setup action SHA to gh-aw v0.85.4.'
 }
-if ($workflow -notmatch 'GH_AW_INFO_CLI_VERSION: "v0\.74\.4"') {
-    throw 'issue-triage lock must align GH_AW_INFO_CLI_VERSION to v0.74.4.'
+if ($workflow -notmatch 'GH_AW_INFO_CLI_VERSION: "v0\.85\.4"') {
+    throw 'issue-triage lock must align GH_AW_INFO_CLI_VERSION to v0.85.4.'
 }
-if ($workflow -notmatch 'ghcr\.io/github/gh-aw-mcpg:v0\.3\.9@sha256:64828b42a4482f58fab16509d7f8f495a6d97c972a98a68aff20543531ac0388') {
-    throw 'issue-triage lock must pin gh-aw-mcpg v0.3.9 to sha256:64828b42...'
+if ($workflow -notmatch 'ghcr\.io/github/gh-aw-mcpg:v0\.4\.8@sha256:38bbea36cdb46a3c9d04d1db05e672966f5239b431a2022eb35881688e5721d8') {
+    throw 'issue-triage lock must pin gh-aw-mcpg v0.4.8 to its compiled digest.'
 }
-if ($workflow -notmatch '(?m)^\s*COPILOT_GITHUB_TOKEN:\s*\$\{\{\s*secrets\.COPILOT_GITHUB_TOKEN\s*\}\}\s*$') {
-    throw 'issue-triage lock must reference secrets.COPILOT_GITHUB_TOKEN in workflow env bindings.'
+$copilotPermissionPattern = '(?m)^\s*copilot-requests:\s*write\s*$'
+$copilotPermissionCount = [regex]::Matches($workflow, $copilotPermissionPattern).Count
+if ($copilotPermissionCount -ne 2) {
+    throw "issue-triage lock must grant copilot-requests: write to agent and detection jobs (found $copilotPermissionCount)."
 }
-$placeholderExportPattern = '(?m)^\s*export COPILOT_GITHUB_TOKEN=placeholder-token-for-credential-isolation\s*$'
-$placeholderExportCount = [regex]::Matches($workflow, $placeholderExportPattern).Count
-if ($placeholderExportCount -ne 2) {
-    throw "issue-triage lock must export placeholder COPILOT_GITHUB_TOKEN in both AWF phases (found $placeholderExportCount)."
+$actionsTokenPattern = '(?m)^\s*COPILOT_GITHUB_TOKEN:\s*\$\{\{\s*github\.token\s*\}\}\s*$'
+$actionsTokenCount = [regex]::Matches($workflow, $actionsTokenPattern).Count
+if ($actionsTokenCount -ne 2) {
+    throw "issue-triage lock must use the short-lived GitHub Actions token for both Copilot phases (found $actionsTokenCount)."
 }
-$awfInvocationPattern = '(?m)^\s*sudo -E awf '
-$awfInvocationCount = [regex]::Matches($workflow, $awfInvocationPattern).Count
-if ($awfInvocationCount -ne 2) {
-    throw "issue-triage lock must invoke 'sudo -E awf' in both AWF phases (found $awfInvocationCount)."
-}
-$excludeCopilotPattern = '--exclude-env COPILOT_GITHUB_TOKEN'
-$excludeCopilotCount = [regex]::Matches($workflow, $excludeCopilotPattern).Count
-if ($excludeCopilotCount -ne 0) {
-    throw "issue-triage lock must NOT exclude COPILOT_GITHUB_TOKEN from env-all passthrough when placeholder isolation is exported (found $excludeCopilotCount)."
+if ($workflow -match 'name:\s*Validate COPILOT_GITHUB_TOKEN secret') {
+    throw 'issue-triage lock must not retain the expiring PAT validation gate.'
 }
 
 Write-Host 'Issue triage lock refresh tests passed.'

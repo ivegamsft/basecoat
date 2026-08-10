@@ -13,32 +13,33 @@ to GitHub events.
 gh extension install github/gh-aw
 ```
 
-### 2. Add the Repository Secret
+### 2. Configure Copilot Authentication
 
-Agentic workflows require a fine-grained Personal Access Token to authenticate
-the Copilot agent:
+BaseCoat's checked-in agentic workflows use the recommended organization-backed
+authentication contract:
 
-1. Go to [Create a fine-grained PAT](https://github.com/settings/personal-access-tokens/new)
-2. Set **Resource owner** to your user account (not the org)
-3. Under **Account permissions**, set **Copilot Requests** → `Read`
-4. No repository permissions needed
-5. Set PAT expiration to **30 days or less** and generate the token
-6. Add to the repository: **Settings → Secrets and variables → Actions → New repository secret**
-   - Name: `COPILOT_GITHUB_TOKEN`
-   - Value: the token you generated
+```yaml
+permissions:
+  copilot-requests: write
+```
+
+This uses the short-lived `${{ github.token }}` for inference and avoids
+personal access token expiration. The organization must have an active Copilot
+subscription with centralized billing.
+
+For a repository without organization-backed Copilot billing, remove that
+permission before compiling and configure a fine-grained
+`COPILOT_GITHUB_TOKEN` with **Copilot Requests: Read** instead.
 
 ## Model Compatibility Guardrail
 
 Some repositories or enterprise tenants do not expose every Copilot model. If a
-run fails with `400 The requested model is not supported`, set a supported model
-in the workflow lock file fallback (for example `gpt-5-mini`) and/or configure a
-repository variable override:
-
-- `GH_AW_MODEL_AGENT_COPILOT`
-- `GH_AW_MODEL_DETECTION_COPILOT`
-
-Prefer explicit `gpt-5-mini` defaults for portability unless a workflow requires
-a different model tier.
+run fails with `400 The requested model is not supported`, select a supported
+model in the checked-in workflow source and recompile the lock file. BaseCoat
+pins models statically so source, generated locks, and contract tests remain
+consistent; do not edit generated lock files or add repository-variable
+overrides. Prefer `gpt-5-mini` for portability unless a workflow requires a
+different model tier.
 
 ## Active Workflows
 
@@ -106,17 +107,10 @@ Issue triage failures can present as:
 400 The requested model is not supported.
 ```
 
-To reduce this risk in BaseCoat, the compiled issue-triage workflow defaults both
-agent and detection phases to `gpt-5-mini` when no repository variable override
-is set.
-
-If you need an override, use repository variables (not prompt text):
-
-- `GH_AW_MODEL_AGENT_COPILOT`
-- `GH_AW_MODEL_DETECTION_COPILOT`
-
-Set each variable to a model confirmed as supported by your Copilot plan/tier.
-Unsupported values fail fast during `Execute GitHub Copilot CLI`.
+To reduce this risk in BaseCoat, the issue-triage source statically pins both
+agent and detection phases to `gpt-5-mini`. Repository model variables do not
+override this workflow. Change the source `model:` value, recompile the lock,
+and run the workflow contract tests when a model migration is required.
 
 ## Allowed Expressions
 

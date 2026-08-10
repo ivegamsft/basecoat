@@ -1,0 +1,13 @@
+name: Hand-authored queue regression
+
+on:
+  workflow_dispatch:
+
+jobs:
+  invalid:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: hand-authored
+      queue: max
+    steps:
+      - run: echo "strict actionlint must reject concurrency.queue"

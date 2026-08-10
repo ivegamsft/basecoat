@@ -7,11 +7,13 @@ permissions:
   contents: read
   issues: read
   pull-requests: read
+  copilot-requests: write
 safe-outputs:
   add-labels:
   add-comment:
     hide-older-comments: true
 engine: copilot
+model: gpt-5-mini
 timeout-minutes: 20
 run-name: "Issue Triage — #${{ github.event.issue.number }}"
 ---

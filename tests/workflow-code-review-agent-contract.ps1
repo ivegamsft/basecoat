@@ -21,6 +21,8 @@ $lockPaths = @(
 )
 
 $failures = @()
+$infoModelPattern = '(?m)^[ \t]*GH_AW_INFO_MODEL:[ \t]*(?:"gpt-5-mini"|gpt-5-mini)[ \t]*\r?$'
+$copilotModelPattern = '(?m)^[ \t]*COPILOT_MODEL:[ \t]*(?:"gpt-5-mini"|gpt-5-mini)[ \t]*\r?$'
 
 foreach ($path in $lockPaths) {
     if (-not (Test-Path $path)) {
@@ -34,14 +36,30 @@ foreach ($path in $lockPaths) {
         $failures += "Model variable override still present: $path"
     }
 
-    $infoModelMatches = [regex]::Matches($content, 'GH_AW_INFO_MODEL:\s*"gpt-5-mini"').Count
-    if ($infoModelMatches -lt 1) {
-        $failures += "Missing pinned GH_AW_INFO_MODEL in: $path"
+    $infoModelMatches = [regex]::Matches($content, $infoModelPattern).Count
+    if ($infoModelMatches -ne 1) {
+        $failures += "Expected exactly 1 pinned GH_AW_INFO_MODEL in $path; found $infoModelMatches"
     }
 
-    $copilotModelMatches = [regex]::Matches($content, 'COPILOT_MODEL:\s*"gpt-5-mini"').Count
-    if ($copilotModelMatches -lt 2) {
-        $failures += "Expected at least 2 pinned COPILOT_MODEL entries in: $path"
+    $copilotModelMatches = [regex]::Matches($content, $copilotModelPattern).Count
+    if ($copilotModelMatches -ne 2) {
+        $failures += "Expected exactly 2 pinned COPILOT_MODEL entries in $path; found $copilotModelMatches"
+    }
+}
+
+$invalidModelFixtures = @(
+    'gpt-5-mini"',
+    '"gpt-5-mini',
+    'gpt-5-mini-extra',
+    '"gpt-5-mini-extra"'
+)
+
+foreach ($invalidModel in $invalidModelFixtures) {
+    if ([regex]::IsMatch("GH_AW_INFO_MODEL: $invalidModel", $infoModelPattern)) {
+        $failures += "GH_AW_INFO_MODEL regex accepted malformed value: $invalidModel"
+    }
+    if ([regex]::IsMatch("COPILOT_MODEL: $invalidModel", $copilotModelPattern)) {
+        $failures += "COPILOT_MODEL regex accepted malformed value: $invalidModel"
     }
 }
 

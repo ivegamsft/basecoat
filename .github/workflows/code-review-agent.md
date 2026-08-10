@@ -1,17 +1,6 @@
 ---
 name: code-review-agent
 description: "Automated PR code review for bugs, security vulnerabilities, and logic errors. USE FOR: finding correctness issues, security vulnerabilities, data loss risks, logic errors. DO NOT USE FOR: style/formatting feedback, refactoring suggestions, pre-existing issues unrelated to the PR."
-visibility: basic
-capabilities:
-  reasoning_depth: high
-  tool_use: required
-  context_window: large
-  latency_profile: interactive
-  cost_tier: medium
-  safety_level: standard
-model_policy:
-  fallback: false
-  preferred_families: [gpt]
 on:
   pull_request:
     types: [opened, synchronize]
@@ -20,6 +9,7 @@ permissions:
   contents: read
   issues: read
   pull-requests: read
+  copilot-requests: write
 safe-outputs:
   report-failure-as-issue: false
   add-comment:
@@ -27,6 +17,7 @@ safe-outputs:
   noop:
     report-as-issue: false
 engine: copilot
+model: gpt-5-mini
 timeout-minutes: 20
 run-name: "Code Review — PR #${{ github.event.pull_request.number }}"
 ---

@@ -55,33 +55,82 @@ jobs:
           fi
 
           if [[ -z "$base_ref" ]]; then
-            echo "should_skip=false" >> "$GITHUB_OUTPUT"
-            echo "args=" >> "$GITHUB_OUTPUT"
-            echo 'lint_args=-ignore "shellcheck reported issue.*SC(2016|2086|2129):"' >> "$GITHUB_OUTPUT"
-            exit 0
+            mapfile -t workflow_files < <(
+              find .github/workflows -maxdepth 1 -type f \
+                \( -name '*.yml' -o -name '*.yaml' \) -printf '%p\n' |
+                sed 's#^\./##' |
+                sort
+            )
+          else
+            mapfile -t workflow_files < <(git diff --name-only "${base_ref}...HEAD" -- '.github/workflows/*.yml' '.github/workflows/*.yaml')
           fi
-
-          mapfile -t workflow_files < <(git diff --name-only "${base_ref}...HEAD" -- '.github/workflows/*.yml' '.github/workflows/*.yaml')
 
           if [[ ${#workflow_files[@]} -eq 0 ]]; then
             echo "No workflow files changed in this PR."
-            echo "should_skip=true" >> "$GITHUB_OUTPUT"
-            echo "args=" >> "$GITHUB_OUTPUT"
-            echo "lint_args=" >> "$GITHUB_OUTPUT"
+            echo "hand_authored_args=" >> "$GITHUB_OUTPUT"
+            echo "generated_lock_args=" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          printf 'Linting changed workflow files:\n'
-          printf -- '- %s\n' "${workflow_files[@]}"
-          echo "should_skip=false" >> "$GITHUB_OUTPUT"
-          echo "args=${workflow_files[*]}" >> "$GITHUB_OUTPUT"
-          echo 'lint_args=-ignore "shellcheck reported issue.*SC(2016|2086|2129):"' >> "$GITHUB_OUTPUT"
+          hand_authored_files=()
+          generated_lock_files=()
+          for workflow_file in "${workflow_files[@]}"; do
+            if [[ "$workflow_file" == *.lock.yml || "$workflow_file" == *.lock.yaml ]]; then
+              generated_lock_files+=("$workflow_file")
+            else
+              hand_authored_files+=("$workflow_file")
+            fi
+          done
 
-      - name: Lint GitHub Actions workflows
-        if: steps.workflow-files.outputs.should_skip != 'true'
+          printf 'Selected workflow files:\n'
+          printf -- '- %s\n' "${workflow_files[@]}"
+          echo "hand_authored_args=${hand_authored_files[*]}" >> "$GITHUB_OUTPUT"
+          echo "generated_lock_args=${generated_lock_files[*]}" >> "$GITHUB_OUTPUT"
+
+      - name: Lint hand-authored workflows
+        if: steps.workflow-files.outputs.hand_authored_args != ''
         uses: rhysd/actionlint@914e7df21a07ef503a81201c76d2b11c789d3fca
         with:
-          args: ${{ steps.workflow-files.outputs.lint_args }} ${{ steps.workflow-files.outputs.args }}
+          args: >-
+            -ignore "shellcheck reported issue.*SC(2016|2086|2129):"
+            ${{ steps.workflow-files.outputs.hand_authored_args }}
+
+      - name: Lint generated gh-aw locks
+        if: steps.workflow-files.outputs.generated_lock_args != ''
+        uses: rhysd/actionlint@914e7df21a07ef503a81201c76d2b11c789d3fca
+        with:
+          args: >-
+            -ignore "shellcheck reported issue.*SC(2016|2086|2129):"
+            -ignore "unknown permission scope \"copilot-requests\""
+            -ignore "unexpected key \"queue\" for \"concurrency\" section"
+            ${{ steps.workflow-files.outputs.generated_lock_args }}
+
+      - name: Hand-authored queue regression is rejected
+        id: strict-queue-regression
+        continue-on-error: true
+        uses: rhysd/actionlint@914e7df21a07ef503a81201c76d2b11c789d3fca
+        with:
+          args: >-
+            -ignore "shellcheck reported issue.*SC(2016|2086|2129):"
+            tests/fixtures/actionlint/hand-authored-queue.yml
+
+      - name: Assert hand-authored queue regression failed
+        if: always()
+        shell: bash
+        run: |
+          if [[ "${{ steps.strict-queue-regression.outcome }}" != "failure" ]]; then
+            echo "Strict actionlint unexpectedly accepted hand-authored concurrency.queue."
+            exit 1
+          fi
+
+      - name: Generated gh-aw compatibility regression passes
+        uses: rhysd/actionlint@914e7df21a07ef503a81201c76d2b11c789d3fca
+        with:
+          args: >-
+            -ignore "shellcheck reported issue.*SC(2016|2086|2129):"
+            -ignore "unknown permission scope \"copilot-requests\""
+            -ignore "unexpected key \"queue\" for \"concurrency\" section"
+            tests/fixtures/actionlint/generated-gh-aw.lock.yml
 
   validate-commit-messages:
     runs-on: ubuntu-latest

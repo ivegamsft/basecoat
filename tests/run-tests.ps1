@@ -198,6 +198,38 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running issue-triage workflow contract tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'workflow-issue-triage-contract.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Issue-triage workflow contract tests failed' -ForegroundColor Red
+    Write-FailureLog 'workflow-issue-triage-contract'
+    exit 1
+}
+
+Write-Host 'Running code-review-agent workflow contract tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'workflow-code-review-agent-contract.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Code-review-agent workflow contract tests failed' -ForegroundColor Red
+    Write-FailureLog 'workflow-code-review-agent-contract'
+    exit 1
+}
+
+Write-Host 'Running Copilot authentication workflow contract tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'workflow-copilot-auth-contract.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Copilot authentication workflow contract tests failed' -ForegroundColor Red
+    Write-FailureLog 'workflow-copilot-auth-contract'
+    exit 1
+}
+
+Write-Host 'Running actionlint compatibility contract tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'workflow-actionlint-compat-contract.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Actionlint compatibility contract tests failed' -ForegroundColor Red
+    Write-FailureLog 'workflow-actionlint-compat-contract'
+    exit 1
+}
+
 Write-Host 'Running post-merge release chain workflow tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'post-merge-release-chain-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

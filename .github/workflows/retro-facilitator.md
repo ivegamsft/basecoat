@@ -6,11 +6,13 @@ permissions:
   contents: read
   issues: read
   pull-requests: read
+  copilot-requests: write
 safe-outputs:
   create-issue:
     max: 1
     close-older-issues: true
 engine: copilot
+model: claude-sonnet-4.6
 timeout-minutes: 20
 run-name: "Weekly Sprint Retrospective — ${{ github.run_number }}"
 ---

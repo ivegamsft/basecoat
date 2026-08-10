@@ -85,11 +85,25 @@ Require-Pattern -Name 'relationship marker part-of' -Pattern 'Part of #N'
 Require-Pattern -Name 'relationship marker related-to' -Pattern 'Related to #N'
 
 # Runtime model guardrails in compiled workflow.
-Require-LockPattern -Name 'agent model fallback is gpt-5-mini' -Pattern "COPILOT_MODEL:\s*\$\{\{\s*vars\.GH_AW_MODEL_AGENT_COPILOT\s*\|\|\s*'gpt-5-mini'\s*\}\}"
-Require-LockPattern -Name 'detection model fallback is gpt-5-mini' -Pattern "COPILOT_MODEL:\s*\$\{\{\s*vars\.GH_AW_MODEL_DETECTION_COPILOT\s*\|\|\s*'gpt-5-mini'\s*\}\}"
+$pinnedModelPattern = '(?m)^[ \t]*COPILOT_MODEL:[ \t]*(?:"gpt-5-mini"|gpt-5-mini)[ \t]*\r?$'
+$pinnedModelCount = [regex]::Matches($lock, $pinnedModelPattern).Count
+if ($pinnedModelCount -ne 2) {
+    $script:failures += "expected exactly 2 agent and detection gpt-5-mini pins; found $pinnedModelCount"
+}
 
-if ($lock -match "COPILOT_MODEL:\s*\$\{\{\s*vars\.GH_AW_MODEL_(AGENT|DETECTION)_COPILOT\s*\|\|\s*'claude-sonnet-4.6'\s*\}\}") {
-    $script:failures += 'unsupported claude-sonnet-4.6 fallback present in lock file'
+foreach ($invalidModel in @(
+    'gpt-5-mini"',
+    '"gpt-5-mini',
+    'gpt-5-mini-extra',
+    '"gpt-5-mini-extra"'
+)) {
+    if ([regex]::IsMatch("COPILOT_MODEL: $invalidModel", $pinnedModelPattern)) {
+        $script:failures += "model regex accepted malformed value: $invalidModel"
+    }
+}
+
+if ($lock -match 'GH_AW_MODEL_(AGENT|DETECTION)_COPILOT') {
+    $script:failures += 'repository model override present in lock file'
 }
 
 if ($failures.Count -gt 0) {

@@ -1,5 +1,5 @@
 ---
-description: "Use when configuring COPILOT_GITHUB_TOKEN for gh-aw workflows. Enforces repo-level secret setup, least-privilege token guidance, and non-echo handling for PAT input."
+description: "Use only when gh-aw needs a PAT fallback because organization-backed inference is unavailable or expanded API access is required. Enforces least-privilege, non-echo token handling."
 applyTo: "**/scripts/bootstrap-copilot-github-token.ps1,docs/operations/GITHUB_SECRETS.md"
 ---
 
@@ -10,7 +10,9 @@ Apply this instruction when implementing or updating repository bootstrap logic 
 
 ## Requirements
 
-- Configure `COPILOT_GITHUB_TOKEN` as a **repository secret** (not a variable).
+- When using the PAT fallback, configure `COPILOT_GITHUB_TOKEN` as a
+  **repository secret** (not a variable). Do not configure it for
+  organization-backed `copilot-requests: write` workflows.
 - Use `gh secret set` to automate setup; do not require manual UI copy-paste only.
 - Never print the PAT value to console or logs.
 - Accept secure input (`SecureString`, stdin, or equivalent) and clear plaintext memory.
@@ -18,8 +20,12 @@ Apply this instruction when implementing or updating repository bootstrap logic 
 
 ## Token Strategy
 
-- `COPILOT_GITHUB_TOKEN` is for gh-aw engine authentication and should use the
-  minimum scopes needed for that path.
+- Prefer `permissions: copilot-requests: write` for repositories with
+  organization-backed Copilot billing. This uses the short-lived GitHub Actions
+  token and requires no inference PAT.
+- `COPILOT_GITHUB_TOKEN` is the fallback for gh-aw engine authentication when
+  organization-backed inference is unavailable and should use the minimum
+  scopes needed for that path.
 - Prefer a **separate PAT** for `GH_AW_GITHUB_TOKEN` and
   `GH_AW_GITHUB_MCP_SERVER_TOKEN`.
 - Reusing one PAT across all secrets is allowed only when explicitly requested.

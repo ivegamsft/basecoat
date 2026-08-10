@@ -48,9 +48,9 @@ Default profile resolution order:
 
 | Profile | Workflow pack | Required secrets/variables surfaced by bootstrap |
 |---|---|---|
-| `solo-dev` | `solo` | `COPILOT_GITHUB_TOKEN` |
-| `team-dev` | `team` | `COPILOT_GITHUB_TOKEN`, `GH_AW_GITHUB_TOKEN` (+ `PRODUCTION_REPO_TOKEN` when publish workflow exists; portal variables and `GHCR_PULL_TOKEN` when portal deploy workflow exists) |
-| `regulated-team` | `regulated` | `COPILOT_GITHUB_TOKEN`, `GH_AW_GITHUB_TOKEN`, `GH_AW_GITHUB_MCP_SERVER_TOKEN` (+ same workflow-conditional requirements as team-dev) |
+| `solo-dev` | `solo` | No Copilot inference secret; checked-in workflows use `copilot-requests: write` |
+| `team-dev` | `team` | No agentic auth secret (+ `PRODUCTION_REPO_TOKEN` when publish workflow exists; portal variables and `GHCR_PULL_TOKEN` when portal deploy workflow exists) |
+| `regulated-team` | `regulated` | `GH_AW_GITHUB_MCP_SERVER_TOKEN` (+ same workflow-conditional requirements as team-dev) |
 
 Bootstrap output includes token rotation/expiration guidance and never writes
 plaintext secrets to repository files.
@@ -73,12 +73,18 @@ The deploy workflow now fails fast in the `Validate deployment secrets` step whe
 
 ### `COPILOT_GITHUB_TOKEN`
 
-**Used by:** `issue-triage.lock.yml`, `code-review-agent.lock.yml`,
-`security-analyst.lock.yml`, `retro-facilitator.lock.yml`,
-`self-healing-ci.lock.yml`, `release-impact-advisor.lock.yml`
+**Used by:** Copilot-engine gh-aw workflows compiled without
+`permissions: copilot-requests: write`.
 
-**Purpose:** Authenticates the GitHub Agentic Workflow (gh-aw) agent containers.
-Without this secret the agentic lock-file workflows will fail to start.
+**Purpose:** Fallback authentication for repositories that do not use
+organization-backed Copilot inference. BaseCoat's checked-in workflows use the
+short-lived `${{ github.token }}` through `copilot-requests: write`, so this PAT
+is not used for their inference requests.
+
+When organization-backed inference is available, prefer
+`copilot-requests: write`; it avoids personal token expiration and bills through
+the organization's Copilot subscription. If centralized billing is unavailable,
+compile without that permission and configure this secret.
 
 **How to create (recommended):**
 
@@ -105,15 +111,29 @@ the secret, then revoke the old token.
 
 ### `GH_AW_GITHUB_TOKEN`
 
-**Used by:** All `*.lock.yml` agentic workflow files
+**Used by:** Agentic workflows only when repository operations require a
+fine-grained PAT beyond the built-in `GITHUB_TOKEN`.
 
-**Purpose:** Grants the agentic workflow read access to repository contents
-during agent execution (separate from `COPILOT_GITHUB_TOKEN` for least-privilege
-isolation).
+**Purpose:** Optional override for GitHub API access during agent execution.
+BaseCoat's checked-in workflows fall back to the short-lived `GITHUB_TOKEN`.
 
 **How to create:** Use a **separate token** from `COPILOT_GITHUB_TOKEN`
 (recommended). Name it `basecoat-gh-aw` and grant only the minimum
 repository read permissions required. Set PAT expiration to **30 days or less**.
+
+Do not store a `gho_` OAuth token in this secret. Current gh-aw activation fails
+closed when it detects OAuth tokens because they are unsuitable for automation.
+
+Before syncing gh-aw v0.85.4 locks into an organization-backed repository,
+remove obsolete OAuth values even if the new inference path will ignore them:
+
+```powershell
+gh secret delete COPILOT_GITHUB_TOKEN --repo OWNER/REPO
+gh secret delete GH_AW_GITHUB_TOKEN --repo OWNER/REPO
+```
+
+Only recreate either secret as a fine-grained PAT when the repository still
+needs the documented fallback or expanded GitHub API access.
 
 ---
 
@@ -270,26 +290,14 @@ Not currently wired up. Reserve the name if Slack integration is planned.
 
 ---
 
-## Optional Repository Variables (Agentic Workflow Model Overrides)
+## Agentic Workflow Models
 
-Set these under **Settings → Secrets and variables → Actions → Variables** when
-you need to override default gh-aw model selection:
-
-### `GH_AW_MODEL_AGENT_COPILOT`
-
-**Used by:** Agent phase in `issue-triage.lock.yml` (and other gh-aw lock files
-that reference the same variable)
-
-**Default when unset (issue triage):** `gpt-5-mini`
-
-### `GH_AW_MODEL_DETECTION_COPILOT`
-
-**Used by:** Threat-detection phase in `issue-triage.lock.yml`
-
-**Default when unset (issue triage):** `gpt-5-mini`
-
-Use only values supported by your Copilot subscription tier. If unsupported, the
-workflow fails with `400 The requested model is not supported`.
+BaseCoat's checked-in gh-aw workflows use static model pins from their workflow
+sources. In particular, issue triage and code review pin `gpt-5-mini` and reject
+`GH_AW_MODEL_AGENT_COPILOT` and `GH_AW_MODEL_DETECTION_COPILOT` overrides in
+contract tests. To change a model, update the source, recompile its lock, and run
+the workflow contract tests. Do not configure those repository variables for
+these workflows.
 
 ---
 

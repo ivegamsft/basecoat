@@ -7,9 +7,11 @@ permissions:
   contents: read
   issues: read
   pull-requests: read
+  copilot-requests: write
 safe-outputs:
   add-comment:
 engine: copilot
+model: claude-sonnet-4.6
 timeout-minutes: 20
 run-name: "Release Impact — PR #${{ github.event.pull_request.number }}"
 ---
