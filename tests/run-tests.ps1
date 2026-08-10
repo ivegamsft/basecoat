@@ -182,6 +182,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running npm lock integrity tests...'
+& node --test (Join-Path $PSScriptRoot 'npm-lock-integrity.test.mjs')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'npm lock integrity tests failed' -ForegroundColor Red
+    Write-FailureLog 'npm-lock-integrity'
+    exit 1
+}
+
 Write-Host 'Running automation stuck-state watchdog tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'automation-stuck-state-watchdog-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

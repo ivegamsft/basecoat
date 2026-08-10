@@ -102,6 +102,9 @@ jobs:
         shell: pwsh
         run: pwsh tests/token-status-tests.ps1
 
+      - name: Validate — npm lock integrity policy
+        run: node scripts/npm-lock-integrity.mjs --check
+
       - name: Upload test results on failure
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
