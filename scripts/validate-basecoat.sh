@@ -2,7 +2,9 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="${1:-$(pwd)}"
+ROOT_DIR="$(cd "$ROOT_DIR" && pwd)"
 FAIL_ON_WARNING=0
 warning_count=0
 if [[ ${2:-} == "--fail-on-warning" ]]; then
@@ -10,13 +12,19 @@ if [[ ${2:-} == "--fail-on-warning" ]]; then
 fi
 cd "$ROOT_DIR"
 
-required=(README.md CHANGELOG.md version.json asset-manifest.json sync.sh sync.ps1 instructions skills prompts agents)
+required=(README.md CHANGELOG.md version.json asset-manifest.json instructions skills prompts agents)
+if [[ ! -d workflows || -e .git ]]; then
+  required+=(sync.sh sync.ps1)
+fi
 for item in "${required[@]}"; do
   if [[ ! -e "$item" ]]; then
     echo "Missing required path: $item" >&2
     exit 1
   fi
 done
+
+echo "Validating immutable workflow action pins..."
+python3 "$SCRIPT_DIR/validate-workflow-action-pins.py" --root "$ROOT_DIR" --mode auto
 
 # INVENTORY.md moved to docs/reference/ in v3.11.0 — accept either location (lowercase after Phase 3+4)
 if [[ ! -e "INVENTORY.md" && ! -e "docs/reference/INVENTORY.md" && ! -e "docs/reference/inventory.md" ]]; then

@@ -1,10 +1,12 @@
 name: Submit Learning to Basecoat Memory
 
 # Starter workflow — appears in Actions > New workflow for IBuySpy-Shared repos.
-# Calls the reusable submit-learning-callable.yml in IBuySpy-Shared/basecoat.
+# Checks out an immutable BaseCoat revision and runs its submission script.
 #
 # Prerequisites (one-time admin setup):
 #   MEMORY_REPO_TOKEN set as an org-level Actions secret in IBuySpy-Shared.
+#   BASECOAT_REPO_TOKEN set as an org-level Actions secret with read access to
+#   the private IBuySpy-Shared/basecoat repository.
 #   See: https://github.com/IBuySpy-Shared/basecoat/blob/main/docs/memory/SETUP-INTERNAL.md
 
 on:
@@ -45,14 +47,40 @@ on:
 
 jobs:
   submit:
-    uses: IBuySpy-Shared/basecoat/.github/workflows/submit-learning-callable.yml@main
-    with:
-      subject:  ${{ inputs.subject }}
-      fact:     ${{ inputs.fact }}
-      evidence: ${{ inputs.evidence }}
-      domain:   ${{ inputs.domain }}
-      source:   ${{ github.repository }}
-      team:     ${{ inputs.team }}
-      open_pr:  true
-    secrets:
-      memory_repo_token: ${{ secrets.MEMORY_REPO_TOKEN }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Check out immutable BaseCoat scripts
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          repository: IBuySpy-Shared/basecoat
+          ref: 4ada1fe12338d242f825d08eb523cf3b086b3e2e
+          path: .basecoat-source
+          token: ${{ secrets.BASECOAT_REPO_TOKEN }}
+          persist-credentials: false
+
+      - name: Submit learning
+        shell: bash
+        env:
+          MEMORY_REPO_TOKEN: ${{ secrets.MEMORY_REPO_TOKEN }}
+          SUBJECT: ${{ inputs.subject }}
+          FACT: ${{ inputs.fact }}
+          EVIDENCE: ${{ inputs.evidence }}
+          DOMAIN: ${{ inputs.domain }}
+          SOURCE: ${{ github.repository }}
+          TEAM: ${{ inputs.team }}
+        run: |
+          team_args=()
+          if [[ -n "$TEAM" ]]; then
+            team_args+=(--team "$TEAM")
+          fi
+          bash .basecoat-source/scripts/submit-learning.sh \
+            --subject "$SUBJECT" \
+            --fact "$FACT" \
+            --evidence "$EVIDENCE" \
+            --domain "$DOMAIN" \
+            --source "$SOURCE" \
+            "${team_args[@]}" \
+            --open-pr

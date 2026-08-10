@@ -12,7 +12,7 @@ jobs:
   measure:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@<pinned-sha>
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Capture start time
         run: echo "start=$(date -u +%s)" >> "$GITHUB_ENV"
       - name: Compute takt time

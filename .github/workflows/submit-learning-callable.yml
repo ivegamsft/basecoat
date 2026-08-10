@@ -7,7 +7,7 @@ name: "BaseCoat - Submit Learning (Callable)"
 #
 #   jobs:
 #     submit:
-#       uses: IBuySpy-Shared/basecoat/.github/workflows/submit-learning-callable.yml@main
+#       uses: IBuySpy-Shared/basecoat/.github/workflows/submit-learning-callable.yml@4ada1fe12338d242f825d08eb523cf3b086b3e2e
 #       with:
 #         subject:  "ci:agent-pr-approval"
 #         fact:     "Copilot agent PRs need a maintainer empty-commit to trigger CI."

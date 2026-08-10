@@ -18,13 +18,50 @@ ARCHIVE_BASE="base-coat-$VERSION"
 rm -rf "$DIST_DIR"
 mkdir -p "$STAGE_DIR"
 
-for item in README.md CHANGELOG.md INVENTORY.md version.json asset-manifest.json sync.sh sync.ps1 instructions skills prompts agents scripts .githooks docs examples .github; do
+for item in README.md CHANGELOG.md INVENTORY.md version.json asset-manifest.json sync.sh sync.ps1 instructions skills prompts agents scripts templates .githooks docs examples .github; do
   if [[ -e "$item" ]]; then
     cp -R "$item" "$STAGE_DIR/$item"
   fi
 done
 
-(cd "$DIST_DIR/stage" && zip -qr "../$ARCHIVE_BASE.zip" base-coat)
+distributed_workflows="$STAGE_DIR/.github/base-coat/workflows"
+if [[ ! -d "$distributed_workflows" ]]; then
+  echo "Package validation failed: missing distributed workflows '$distributed_workflows'" >&2
+  exit 1
+fi
+cp -R "$distributed_workflows" "$STAGE_DIR/workflows"
+
+validation_scripts=(
+  scripts/validate-basecoat.ps1
+  scripts/validate-basecoat.sh
+  scripts/validate-workflow-action-pins.ps1
+  scripts/validate-workflow-action-pins.py
+)
+for relative_path in "${validation_scripts[@]}"; do
+  if [[ ! -f "$STAGE_DIR/$relative_path" ]]; then
+    echo "Package validation failed: missing workflow pin validator '$relative_path'" >&2
+    exit 1
+  fi
+done
+python3 - "$STAGE_DIR/asset-manifest.json" "${validation_scripts[@]}" <<'PY'
+import json
+import sys
+
+manifest_path, *required_paths = sys.argv[1:]
+with open(manifest_path, encoding="utf-8") as handle:
+    manifest_paths = {asset["path"] for asset in json.load(handle)["assets"]}
+missing = [path for path in required_paths if path not in manifest_paths]
+if missing:
+    raise SystemExit(
+        "Package validation failed: asset-manifest.json is missing " + ", ".join(missing)
+    )
+PY
+
+if command -v zip >/dev/null 2>&1; then
+  (cd "$DIST_DIR/stage" && zip -qr "../$ARCHIVE_BASE.zip" base-coat)
+else
+  (cd "$DIST_DIR/stage" && python3 -m zipfile -c "../$ARCHIVE_BASE.zip" base-coat)
+fi
 tar -C "$DIST_DIR/stage" -czf "$DIST_DIR/$ARCHIVE_BASE.tar.gz" base-coat
 
 (cd "$DIST_DIR" && sha256sum "$ARCHIVE_BASE.zip" "$ARCHIVE_BASE.tar.gz" > SHA256SUMS.txt)

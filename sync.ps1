@@ -343,14 +343,26 @@ try {
         Copy-Item -Path $workflowsSource -Destination $workflowsDest -Recurse -Force
     }
 
-    # Copy runtime scripts required by distributed workflows.
+    # Copy runtime scripts and installed-payload validators.
     $runtimeScriptsSource = Join-Path $sourcePath '.github' 'base-coat' 'scripts'
     $runtimeScriptsDest = Join-Path $fullTargetDir 'scripts'
+    if (Test-Path $runtimeScriptsDest) {
+        Remove-Item -Path $runtimeScriptsDest -Recurse -Force
+    }
+    New-Item -ItemType Directory -Path $runtimeScriptsDest -Force | Out-Null
     if (Test-Path $runtimeScriptsSource) {
-        if (Test-Path $runtimeScriptsDest) {
-            Remove-Item -Path $runtimeScriptsDest -Recurse -Force
+        Copy-Item -Path (Join-Path $runtimeScriptsSource '*') -Destination $runtimeScriptsDest -Recurse -Force
+    }
+    foreach ($validator in @(
+            'validate-basecoat.ps1',
+            'validate-basecoat.sh',
+            'validate-workflow-action-pins.ps1',
+            'validate-workflow-action-pins.py'
+        )) {
+        $validatorSource = Join-Path $sourcePath "scripts/$validator"
+        if (Test-Path $validatorSource -PathType Leaf) {
+            Copy-Item -Path $validatorSource -Destination (Join-Path $runtimeScriptsDest $validator) -Force
         }
-        Copy-Item -Path $runtimeScriptsSource -Destination $runtimeScriptsDest -Recurse -Force
     }
 
     # Copy only basic documentation (not full docs tree)

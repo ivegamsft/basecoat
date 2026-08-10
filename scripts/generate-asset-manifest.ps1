@@ -23,6 +23,12 @@ function Get-AssetType {
     if ($Path -like 'instructions/*.instructions.md') { return 'instruction' }
     if ($Path -like 'prompts/*.prompt.md') { return 'prompt' }
     if ($Path -like 'skills/*/SKILL.md') { return 'skill' }
+    if ($Path -in @(
+            'scripts/validate-basecoat.ps1',
+            'scripts/validate-basecoat.sh',
+            'scripts/validate-workflow-action-pins.ps1',
+            'scripts/validate-workflow-action-pins.py'
+        )) { return 'script' }
     return $null
 }
 
@@ -39,6 +45,12 @@ $candidates += Get-ChildItem agents -Filter '*.agent.md' -File | ForEach-Object 
 $candidates += Get-ChildItem instructions -Filter '*.instructions.md' -File | ForEach-Object { $_.FullName }
 $candidates += Get-ChildItem prompts -Filter '*.prompt.md' -File | ForEach-Object { $_.FullName }
 $candidates += Get-ChildItem skills -Recurse -Filter 'SKILL.md' -File | ForEach-Object { $_.FullName }
+$candidates += @(
+    'scripts/validate-basecoat.ps1',
+    'scripts/validate-basecoat.sh',
+    'scripts/validate-workflow-action-pins.ps1',
+    'scripts/validate-workflow-action-pins.py'
+) | ForEach-Object { (Resolve-Path $_).Path }
 
 $assets = foreach ($full in $candidates | Sort-Object) {
     $relative = Resolve-Path -Relative $full

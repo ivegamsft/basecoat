@@ -1,6 +1,8 @@
 [CmdletBinding()]
 param(
     [string]$RootDir = (Get-Location).Path,
+    [ValidateSet('Auto', 'Source', 'Installed')]
+    [string]$WorkflowValidationMode = 'Auto',
     [switch]$Strict,
     [switch]$FailOnWarning
 )
@@ -8,14 +10,30 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-Set-Location $RootDir
+$resolvedRoot = (Resolve-Path -LiteralPath $RootDir).Path
+Set-Location $resolvedRoot
+$effectiveWorkflowValidationMode = if ($WorkflowValidationMode -ne 'Auto') {
+    $WorkflowValidationMode
+}
+elseif (Test-Path (Join-Path $resolvedRoot 'workflows') -PathType Container) {
+    if (Test-Path (Join-Path $resolvedRoot '.git')) { 'Source' } else { 'Installed' }
+}
+else {
+    'Source'
+}
 
-$required = @('README.md', 'CHANGELOG.md', 'version.json', 'asset-manifest.json', 'sync.sh', 'sync.ps1', 'instructions', 'skills', 'prompts', 'agents')
+$required = @('README.md', 'CHANGELOG.md', 'version.json', 'asset-manifest.json', 'instructions', 'skills', 'prompts', 'agents')
+if ($effectiveWorkflowValidationMode -eq 'Source') {
+    $required += @('sync.sh', 'sync.ps1')
+}
 foreach ($item in $required) {
     if (-not (Test-Path $item)) {
         throw "Missing required path: $item"
     }
 }
+
+Write-Host 'Validating immutable workflow action pins...'
+& (Join-Path $PSScriptRoot 'validate-workflow-action-pins.ps1') -RootDir $resolvedRoot -Mode $effectiveWorkflowValidationMode
 
 # INVENTORY.md may be at root or in docs/reference/ (accepts lowercase after Phase 3+4 rename)
 $inventoryPath = if (Test-Path 'INVENTORY.md') { 'INVENTORY.md' } elseif (Test-Path 'docs/reference/INVENTORY.md') { 'docs/reference/INVENTORY.md' } elseif (Test-Path 'docs/reference/inventory.md') { 'docs/reference/inventory.md' } else { $null }
@@ -394,10 +412,12 @@ catch {
     throw "Validation failed: asset-manifest.json is invalid ($($_.Exception.Message))"
 }
 
-Test-AgentMetadataFreshness
-Test-IntentRoutingSkillReferences
-Test-LogFirstGate
-Test-DocsHomepageAssetCounts
+if ($effectiveWorkflowValidationMode -eq 'Source') {
+    Test-AgentMetadataFreshness
+    Test-IntentRoutingSkillReferences
+    Test-LogFirstGate
+    Test-DocsHomepageAssetCounts
+}
 
 if ($errors -gt 0) {
     throw "Validation failed with $errors error(s)"

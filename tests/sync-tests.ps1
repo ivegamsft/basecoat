@@ -311,10 +311,39 @@ try {
             -Message "Sync test failed: $dir/ not found in target directory"
     }
 
-    foreach ($runtimeScript in @('scripts/cleanup-branches.ps1', 'scripts/publish-orphaned-lane-ledger.ps1')) {
+    foreach ($runtimeScript in @(
+            'scripts/cleanup-branches.ps1',
+            'scripts/publish-orphaned-lane-ledger.ps1',
+            'scripts/validate-basecoat.ps1',
+            'scripts/validate-basecoat.sh',
+            'scripts/validate-workflow-action-pins.ps1',
+            'scripts/validate-workflow-action-pins.py'
+        )) {
         $testCount++
         Assert-SyncPathExists -Path (Join-Path $targetDir $runtimeScript) `
             -Message "Sync test failed: distributed runtime '$runtimeScript' not found"
+    }
+
+    $invalidWorkflow = Join-Path $targetDir 'workflows/sync-test-unpinned.yml'
+    Push-Location $repoRoot
+    try {
+        & (Join-Path $targetDir 'scripts/validate-basecoat.ps1') -RootDir $targetDir -WorkflowValidationMode Installed
+
+        Set-Content -Path $invalidWorkflow -Value "jobs:`n  validate:`n    steps:`n      - uses: actions/checkout@v4"
+        $rejected = $false
+        try {
+            & (Join-Path $targetDir 'scripts/validate-basecoat.ps1') -RootDir $targetDir -WorkflowValidationMode Installed
+        }
+        catch {
+            $rejected = $true
+        }
+    }
+    finally {
+        Pop-Location
+        Remove-Item $invalidWorkflow -Force -ErrorAction SilentlyContinue
+    }
+    if (-not $rejected) {
+        throw 'Sync test failed: installed validator accepted an unpinned workflow action'
     }
 
     Write-Host "  Passed: target directory contains expected metadata and asset directories" -ForegroundColor Green

@@ -8,8 +8,9 @@ contribute learnings with zero per-repo setup.
 
 ```text
 Admin (one time)
-  └─ Sets MEMORY_REPO_TOKEN as an org-level Actions secret
-        └─ All YOUR-ORG repos inherit it automatically
+  ├─ Sets MEMORY_REPO_TOKEN as an org-level Actions secret
+  └─ Sets BASECOAT_REPO_TOKEN as an org-level Actions secret
+        └─ All YOUR-ORG repos inherit both automatically
 
 Any internal repo
   └─ Run: bash <(curl -fsSL .../onboard-basecoat.sh) --repo org/repo
@@ -36,6 +37,12 @@ Any internal repo
 
 That's it. Every org repo now has `MEMORY_REPO_TOKEN` available in Actions
 **without any per-repo configuration**.
+
+Also create `BASECOAT_REPO_TOKEN` as an org-level Actions secret. Use a
+fine-grained token with **Contents: Read** access to the private BaseCoat
+repository. The starter workflows use it to read immutable BaseCoat scripts
+and release metadata; keep `MEMORY_REPO_TOKEN` scoped only to the memory
+repository.
 
 ## Step 2 — Enlist a Repo (one command)
 

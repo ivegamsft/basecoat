@@ -19,9 +19,32 @@ if (Test-Path $distDir) {
 New-Item -ItemType Directory -Force -Path $stageDir | Out-Null
 
 # mkdocs.yml is excluded — it's a docs-site build config, not consumer guidance
-foreach ($item in @('README.md', 'CHANGELOG.md', 'INVENTORY.md', 'version.json', 'asset-manifest.json', 'sync.sh', 'sync.ps1', 'instructions', 'skills', 'prompts', 'agents', 'scripts', '.githooks', 'docs', 'examples', '.github')) {
+foreach ($item in @('README.md', 'CHANGELOG.md', 'INVENTORY.md', 'version.json', 'asset-manifest.json', 'sync.sh', 'sync.ps1', 'instructions', 'skills', 'prompts', 'agents', 'scripts', 'templates', '.githooks', 'docs', 'examples', '.github')) {
     if (Test-Path $item) {
         Copy-Item -Path $item -Destination (Join-Path $stageDir $item) -Recurse -Force
+    }
+}
+
+$distributedWorkflows = Join-Path $stageDir '.github\base-coat\workflows'
+if (-not (Test-Path $distributedWorkflows -PathType Container)) {
+    throw "Package validation failed: missing distributed workflows '$distributedWorkflows'"
+}
+Copy-Item -Path $distributedWorkflows -Destination (Join-Path $stageDir 'workflows') -Recurse -Force
+
+$validationScripts = @(
+    'scripts/validate-basecoat.ps1',
+    'scripts/validate-basecoat.sh',
+    'scripts/validate-workflow-action-pins.ps1',
+    'scripts/validate-workflow-action-pins.py'
+)
+$manifest = Get-Content (Join-Path $stageDir 'asset-manifest.json') -Raw | ConvertFrom-Json
+$manifestPaths = @($manifest.assets | ForEach-Object { $_.path })
+foreach ($relativePath in $validationScripts) {
+    if (-not (Test-Path (Join-Path $stageDir $relativePath) -PathType Leaf)) {
+        throw "Package validation failed: missing workflow pin validator '$relativePath'"
+    }
+    if ($relativePath -notin $manifestPaths) {
+        throw "Package validation failed: asset-manifest.json is missing '$relativePath'"
     }
 }
 

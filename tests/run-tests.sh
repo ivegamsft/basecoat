@@ -17,6 +17,12 @@ assert_path_exists() {
 echo "Running validate-basecoat.sh..."
 bash scripts/validate-basecoat.sh
 
+echo "Running installed workflow action pinning tests..."
+bash tests/workflow-action-pinning-tests.sh
+
+echo "Running Bash sync validation install tests..."
+bash tests/sync-validation-install-tests.sh
+
 echo "Running package-basecoat.sh..."
 bash scripts/package-basecoat.sh
 

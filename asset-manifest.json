@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "libraryVersion": "4.1.0",
-  "generatedAt": "2026-08-10T03:10:09.9724988Z",
+  "generatedAt": "2026-08-10T17:27:24.5652094Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -1574,7 +1574,7 @@
     {
       "path": "instructions/basecoat-50-security-copilot-github-token-bootstrap.instructions.md",
       "type": "instruction",
-      "sha": "62c65763b1c38c30a2cd692c677ebccead05f603",
+      "sha": "c51291090fff8f5e6269eacac34d888bb8026d3c",
       "version": null,
       "effectiveVersion": "4.1.0",
       "versionSource": "library"
@@ -1807,6 +1807,38 @@
       "path": "prompts/token-status.prompt.md",
       "type": "prompt",
       "sha": "93d1c22f56ec8684203d3fc8953f6b8b1cdeca72",
+      "version": null,
+      "effectiveVersion": "4.1.0",
+      "versionSource": "library"
+    },
+    {
+      "path": "scripts/validate-basecoat.ps1",
+      "type": "script",
+      "sha": "a01d22fde0403d7e1c241c41c04454bb222cee16",
+      "version": null,
+      "effectiveVersion": "4.1.0",
+      "versionSource": "library"
+    },
+    {
+      "path": "scripts/validate-basecoat.sh",
+      "type": "script",
+      "sha": "2025aa3781dd91b03949668c7b7fb02954cbe519",
+      "version": null,
+      "effectiveVersion": "4.1.0",
+      "versionSource": "library"
+    },
+    {
+      "path": "scripts/validate-workflow-action-pins.ps1",
+      "type": "script",
+      "sha": "10cc2f2e806845be0625de93c5cd318f1b240603",
+      "version": null,
+      "effectiveVersion": "4.1.0",
+      "versionSource": "library"
+    },
+    {
+      "path": "scripts/validate-workflow-action-pins.py",
+      "type": "script",
+      "sha": "c5c0ccec516535aedce6ed2c7f4c4c6a6cd568e5",
       "version": null,
       "effectiveVersion": "4.1.0",
       "versionSource": "library"

@@ -209,11 +209,17 @@ if [[ -d "$TMP_DIR/source/.github/base-coat/workflows" ]]; then
   cp -R "$TMP_DIR/source/.github/base-coat/workflows" "$REPO_ROOT/$TARGET_DIR/workflows"
 fi
 
-# Copy runtime scripts required by distributed workflows.
+# Copy runtime scripts and installed-payload validators.
+rm -rf "$REPO_ROOT/$TARGET_DIR/scripts"
+mkdir -p "$REPO_ROOT/$TARGET_DIR/scripts"
 if [[ -d "$TMP_DIR/source/.github/base-coat/scripts" ]]; then
-  rm -rf "$REPO_ROOT/$TARGET_DIR/scripts"
-  cp -R "$TMP_DIR/source/.github/base-coat/scripts" "$REPO_ROOT/$TARGET_DIR/scripts"
+  cp -R "$TMP_DIR/source/.github/base-coat/scripts/." "$REPO_ROOT/$TARGET_DIR/scripts/"
 fi
+for validator in validate-basecoat.ps1 validate-basecoat.sh validate-workflow-action-pins.ps1 validate-workflow-action-pins.py; do
+  if [[ -f "$TMP_DIR/source/scripts/$validator" ]]; then
+    cp "$TMP_DIR/source/scripts/$validator" "$REPO_ROOT/$TARGET_DIR/scripts/$validator"
+  fi
+done
 
 # Legacy cleanup: basecoat-metadata.json was previously distributed.
 rm -f "$REPO_ROOT/$TARGET_DIR/basecoat-metadata.json"

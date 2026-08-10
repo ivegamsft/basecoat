@@ -190,6 +190,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running workflow action pinning tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'workflow-action-pinning-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Workflow action pinning tests failed' -ForegroundColor Red
+    Write-FailureLog 'workflow-action-pinning-tests'
+    exit 1
+}
+
 Write-Host 'Running automation stuck-state watchdog tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'automation-stuck-state-watchdog-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
