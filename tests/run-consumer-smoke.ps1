@@ -3,6 +3,7 @@ param(
     [string]$Version = '',
     [ValidateSet('Release', 'Current')]
     [string]$ArtifactSource = 'Release',
+    [string]$CallableRefOverride = '',
     [switch]$KeepRepo
 )
 
@@ -83,6 +84,46 @@ function Assert-ReleaseAssetDigest {
     $actualDigest = (Get-FileHash -Path $AssetPath -Algorithm SHA256).Hash.ToLowerInvariant()
     if ($actualDigest -ne $digestMatch.Groups[1].Value.ToLowerInvariant()) {
         throw "Release asset digest mismatch: $AssetName"
+    }
+}
+
+function Assert-ReusableWorkflowContract {
+    param(
+        [string]$CallerPath,
+        [string]$ValidatorPath
+    )
+
+    Assert-PathExists -Path $CallerPath -Message "Released caller missing: $CallerPath"
+    $callerContent = Get-Content $CallerPath -Raw
+    $match = [regex]::Match(
+        $callerContent,
+        '(?m)^\s*uses:\s+(?<repo>[^/\s]+/[^/\s]+)/(?<path>\.github/workflows/[^@\s]+)@(?<ref>[^\s#]+)'
+    )
+    if (-not $match.Success) {
+        throw "Unable to resolve reusable callable from actual caller: $CallerPath"
+    }
+
+    $callableRepo = $match.Groups['repo'].Value
+    if ($callableRepo -match '^(YOUR-ORG|YOUR_ORG)/') {
+        $callableRepo = $BaseCoatRepo
+    }
+    $callablePath = $match.Groups['path'].Value
+    $callableRef = $match.Groups['ref'].Value
+    if ($CallableRefOverride) {
+        Write-Host "Validating the released caller against remote candidate callable ref $CallableRefOverride"
+        $callableRef = $CallableRefOverride
+    }
+    $downloadedCallable = Join-Path $tempRepo (Split-Path $callablePath -Leaf)
+    gh api -H 'Accept: application/vnd.github.raw+json' `
+        "repos/$callableRepo/contents/$callablePath`?ref=$callableRef" |
+        Set-Content -Path $downloadedCallable -Encoding utf8
+    if ($LASTEXITCODE -ne 0) {
+        throw "Unable to fetch actual callable $callableRepo/$callablePath@$callableRef"
+    }
+
+    & python $ValidatorPath $downloadedCallable $CallerPath
+    if ($LASTEXITCODE -ne 0) {
+        throw "Released caller/callable contract validation failed for $CallerPath"
     }
 }
 
@@ -167,7 +208,8 @@ try {
             '.github/base-coat/scripts/validate-basecoat.ps1',
             '.github/base-coat/scripts/validate-basecoat.sh',
             '.github/base-coat/scripts/validate-workflow-action-pins.ps1',
-            '.github/base-coat/scripts/validate-workflow-action-pins.py'
+            '.github/base-coat/scripts/validate-workflow-action-pins.py',
+            '.github/base-coat/scripts/validate-reusable-workflow-contracts.py'
         )
     }
     else {
@@ -175,6 +217,17 @@ try {
     }
     foreach ($path in $requiredPaths) {
         Assert-PathExists -Path $path -Message "Installed baseline missing: $path"
+    }
+
+    if ($ArtifactSource -eq 'Current') {
+        Assert-ReusableWorkflowContract `
+            -CallerPath (Join-Path $installPath '.github/workflow-templates/check-basecoat-version.yml') `
+            -ValidatorPath (Join-Path $installPath 'scripts/validate-reusable-workflow-contracts.py')
+    }
+    else {
+        Assert-ReusableWorkflowContract `
+            -CallerPath (Join-Path $sourceExtractPath '.github/workflow-templates/check-basecoat-version.yml') `
+            -ValidatorPath (Join-Path $repoRoot 'scripts/validate-reusable-workflow-contracts.py')
     }
 
     if ($ArtifactSource -eq 'Current') {

@@ -2,6 +2,29 @@
 
 Reference for upstream workflow templates in BaseCoat. Consumer installs use `scripts/configure-downstream-workflows.ps1`, which currently installs only the supported subset (`reusable` by default, with supported `templates` via opt-in) from `.github/base-coat/workflows`.
 
+Cross-repository reusable workflows require the canonical BaseCoat repository
+to allow Actions access from organization repositories under **Settings →
+Actions → General → Access**. The release workflow audits that prerequisite and
+fails closed unless access is `organization` or `enterprise`. The audit uses
+the dedicated `BASECOAT_RELEASE_AUDIT_TOKEN`, normally a fine-grained PAT with
+repository **Administration: read**. A GitHub App installation token must be
+generated at runtime rather than stored as a long-lived secret. The existing
+administration-capable `PRODUCTION_REPO_TOKEN` remains a publication fallback
+while repositories migrate to the narrower audit credential.
+
+For the version updater, public source releases can be resolved anonymously.
+Private or internal sources require the named, read-only `fetch_token`, bound
+to the exact `fetch_host`; it is separate from the write-capable update token.
+Existing callers at `@main` remain compatible with `source_repo` and
+`alert_threshold`, and consumers without the distributed updater receive only
+the legacy notification fallback. A v4.1 caller cannot forward `fetch_token`;
+if its internal/private source rejects anonymous lookup, the fallback records a
+stable setup issue with target empty and disposition `unknown` rather than
+claiming the installed version is current.
+The callable does not declare its own job permissions; it inherits the caller's
+grant so the exact v4.1 issues/contents contract and current PR-mode contract
+both remain valid.
+
 ## Related operational workflows
 
 - [Portfolio Audit Workflow](./portfolio-audit-workflow.md) for issue/PR dedupe, dependency traceability, feature grouping, and active project-link verification.
@@ -576,15 +599,36 @@ gh run list --workflow basecoat-version-check.yml
 
 ```yaml
 # .github/workflows/your-workflow.yml
+permissions:
+  actions: read
+  contents: read
+  issues: write
+  pull-requests: write
+
 jobs:
   my-job:
-    uses: ./.github/base-coat/workflows/check-version.yml
+    uses: IBuySpy-Shared/basecoat/.github/workflows/check-basecoat-version-callable.yml@9ab8894828e3a887d97c3383e7f23ed892d9a088
     with:
       # Required: the BaseCoat source repository whose releases define the
-      # latest version. Replace with your BaseCoat upstream in owner/repo form.
-      source_repo: YOUR-ORG/basecoat
-    secrets: inherit
+      # latest version. It must be passed explicitly; it is never derived from
+      # the calling workflow reference (which resolves to this consumer repo).
+      source_repo: IBuySpy-Shared/basecoat
+      fetch_host: github.com
+      update_actor: ${{ vars.BASECOAT_UPDATE_ACTOR }}
+    secrets:
+      update_token: ${{ secrets.BASECOAT_UPDATE_TOKEN }}
+      fetch_token: ${{ secrets.BASECOAT_FETCH_TOKEN }}
 ```
+
+Forward only the named update token; do not expose unrelated repository or
+organization secrets. A stored fine-grained PAT needs **Actions: read**,
+**Checks: read**, **Commit statuses: read**, **Contents: read and write**,
+**Issues: read and write**, and **Pull requests: read and write** repository
+permissions because pull-request mode uses it as the updater's `GH_TOKEN`.
+For a private canonical source, set `fetch_host` to its exact HTTPS authority
+and forward read-only `fetch_token`. If a private mirror uses another host, set
+`mirror_fetch_host` and forward a separately scoped `mirror_fetch_token`.
+Delivery tokens are never reused for source or mirror authentication.
 
 ### Disabling Workflows
 

@@ -16,10 +16,18 @@
 # Default: https://github.com/YOUR-ORG/basecoat.git
 source: https://github.com/YOUR-ORG/basecoat.git
 
+# mirror: optional corporate clone endpoint. Release metadata still comes from
+# source, while immutable tag/SHA resolution and sync fetches use this mirror.
+# mirror: https://github.corp.example/platform/basecoat.git
+
 # ref: branch or tag to sync from.
 # Pin to a release tag (e.g. v3.25.0) for production stability.
 # Default: main
 ref: main
+
+# known_bad_releases: optional fail-safe tag remapping shared by sync and updater.
+# known_bad_releases:
+#   v3.30.4: v3.30.5
 
 # agents: explicit allow-list of agent names (without the .agent.md suffix).
 # Omit this key entirely to sync all available agents.
@@ -56,6 +64,24 @@ ref: main
 #   script: scripts/basecoat/sync-basecoat.ps1
 #   exclude:
 #     - archive/   # skip archived/deprecated assets
+
+
+# -- Consumer update policy ---------------------------------------------------
+#
+# Pull-based scheduled checks are authoritative. The distributed workflow can
+# also accept repository_dispatch type "basecoat-release-published" to reduce
+# notification latency.
+
+updates:
+  channel: stable
+  cadence: weekly
+  mode: notify          # notify | pull-request
+  approval: required    # required | automatic
+  allowed_bumps: [patch, minor]
+  # source inherits the top-level source unless explicitly overridden
+  ref: latest
+  # mirror: https://github.corp.example/platform/basecoat.git
+  # validation: pwsh tests/run-tests.ps1
 
 
 # -- Memory sweep configuration ------------------------------------------------

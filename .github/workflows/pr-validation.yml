@@ -479,11 +479,45 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
+      - name: Validate immutable consumer callable pin
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $template = Get-Content -LiteralPath '.github/workflow-templates/check-basecoat-version.yml' -Raw
+          $sha = [regex]::Match($template, 'check-basecoat-version-callable\.yml@([0-9a-f]{40})').Groups[1].Value
+          if (-not $sha) { throw 'Consumer workflow template is missing an immutable callable pin.' }
+          $encoded = gh api "repos/IBuySpy-Shared/basecoat/contents/.github/workflows/check-basecoat-version-callable.yml?ref=$sha" --jq '.content'
+          if ($LASTEXITCODE -ne 0) { throw "Consumer callable pin '$sha' is not fetchable." }
+          $callable = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String(($encoded -replace '\s', '')))
+          if ($callable -notmatch 'Detect mixed agent naming state') {
+            throw "Consumer callable pin '$sha' does not contain the finalized mixed-agent-state safeguard."
+          }
+          # The pinned callable is the workflow consumers actually run. A marker
+          # match alone lets a stale pin that lacks a newly required input/secret
+          # pass here and fail at consumer startup. Validate the contract of the
+          # *pinned* callable against the template that ships to consumers.
+          $pinnedDir = Join-Path $env:RUNNER_TEMP 'basecoat-pin'
+          New-Item -ItemType Directory -Force -Path $pinnedDir | Out-Null
+          $pinnedPath = Join-Path $pinnedDir 'check-basecoat-version-callable.yml'
+          Set-Content -LiteralPath $pinnedPath -Value $callable -Encoding utf8NoBOM
+          python3 scripts/validate-reusable-workflow-contracts.py $pinnedPath '.github/workflow-templates/check-basecoat-version.yml'
+          if ($LASTEXITCODE -ne 0) {
+            throw "Pinned callable '$sha' fails the reusable-workflow contract for the consumer template; publish and pin a commit whose callable declares every input/secret the template passes."
+          }
+          # A called reusable workflow can only narrow the caller's permission
+          # grant, never elevate it. The pinned callable must therefore inherit
+          # caller permissions (no workflow-/job-level permissions block), or a
+          # minimal caller is rejected at startup before the job runs.
+          if ($callable -match '(?m)^\s*permissions\s*:') {
+            throw "Pinned callable '$sha' declares a permissions block; it must inherit the caller's permissions instead of narrowing or elevating them."
+          }
+
       - name: Execute sync.sh in an isolated temp repo
         shell: bash
         env:
-          GITHUB_TOKEN: ${{ github.token }}
-          GH_TOKEN: ${{ github.token }}
+          BASECOAT_FETCH_TOKEN: ${{ github.token }}
+          BASECOAT_FETCH_HOST: github.com
           BASECOAT_SOURCE_REPO: ${{ github.event.pull_request.head.repo.clone_url || format('https://github.com/{0}.git', github.repository) }}
           BASECOAT_SOURCE_REF: ${{ github.head_ref || github.ref_name }}
         run: |

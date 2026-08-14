@@ -1,6 +1,6 @@
 ---
 name: rollout-basecoat
-description: "Use when onboarding a repository to BaseCoat in an enterprise setting. Focuses on pinned versions, safe rollout, installation method, and validation steps."
+description: "BaseCoat consumer rollout and update specialist. USE FOR: onboarding or updating a BaseCoat consumer, installing immutable BaseCoat releases, configuring downstream update notifications, creating guarded upgrade PR policy, and validating consumer sync provenance. DO NOT USE FOR: editing BaseCoat framework internals, designing unrelated agents or skills, deploying application infrastructure, or bypassing consumer branch protection."
 visibility: basic
 model: gpt-5.3-codex
 compatibility: []
@@ -22,6 +22,7 @@ Purpose: onboard a repository or portfolio to BaseCoat using safe, repeatable re
 - Preferred installation channel
 - Approved BaseCoat version or release tag
 - Any enterprise constraints such as restricted egress or internal mirrors
+- Consumer update mode, approval policy, and allowed SemVer bumps
 
 ## Process
 
@@ -39,6 +40,9 @@ Purpose: onboard a repository or portfolio to BaseCoat using safe, repeatable re
    See `skills/rollout-basecoat/references/delivery-lifecycle.md` for the exact
    change-path and no-change-path commands.
 6. Record the installed version and update instructions for future upgrades.
+7. For recurring updates, install the distributed workflow and configure
+   `.basecoat.yml` `updates`. Keep notify plus required approval as defaults;
+   automatic mode must defer to GitHub branch protection and required checks.
 
 ## Expected Output
 

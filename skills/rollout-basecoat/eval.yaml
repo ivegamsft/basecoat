@@ -17,6 +17,12 @@ scenarios:
   - id: "pos-5"
     input: "Our sync script lives at scripts/basecoat/sync-basecoat.ps1, not the repo root — refresh basecoat and open a PR."
     expect_activation: true
+  - id: "pos-6"
+    input: "Configure this downstream repo to notify us about BaseCoat patch releases."
+    expect_activation: true
+  - id: "pos-7"
+    input: "Enable guarded automatic BaseCoat upgrade pull requests without bypassing branch protection."
+    expect_activation: true
   - id: "neg-1"
     input: "Write a new custom agent for threat modeling."
     expect_activation: false

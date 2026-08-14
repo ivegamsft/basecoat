@@ -7,6 +7,7 @@ BASECOAT_REPO="${1:-IBuySpy-Shared/basecoat}"
 BASECOAT_VERSION="${2:-v$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$REPO_ROOT/version.json" | head -n 1)}"
 ARTIFACT_SOURCE="${3:-release}"
 KEEP_REPO="${KEEP_REPO:-0}"
+CALLABLE_REF_OVERRIDE="${CALLABLE_REF_OVERRIDE:-}"
 TEMP_REPO="$REPO_ROOT/test-results/basecoat-consumer-bash-$$"
 DOWNLOAD_DIR="$TEMP_REPO/.basecoat-download"
 INSTALL_PATH="$TEMP_REPO/.github/base-coat"
@@ -40,6 +41,32 @@ assert_path_exists() {
     echo "$message" >&2
     exit 1
   fi
+}
+
+assert_reusable_workflow_contract() {
+  local caller_path="$1"
+  local validator_path="$2"
+  local uses
+  uses="$(sed -nE 's|^[[:space:]]*uses:[[:space:]]+([^[:space:]#]+).*|\1|p' "$caller_path" | head -n 1)"
+  if [[ ! "$uses" =~ ^([^/]+/[^/]+)/(\.github/workflows/[^@]+)@(.+)$ ]]; then
+    echo "Unable to resolve reusable callable from actual caller: $caller_path" >&2
+    exit 1
+  fi
+  local callable_repo="${BASH_REMATCH[1]}"
+  local callable_path="${BASH_REMATCH[2]}"
+  local callable_ref="${BASH_REMATCH[3]}"
+  if [[ "$callable_repo" == YOUR-ORG/* || "$callable_repo" == YOUR_ORG/* ]]; then
+    callable_repo="$BASECOAT_REPO"
+  fi
+  if [[ -n "$CALLABLE_REF_OVERRIDE" ]]; then
+    echo "Validating the released caller against remote candidate callable ref $CALLABLE_REF_OVERRIDE"
+    callable_ref="$CALLABLE_REF_OVERRIDE"
+  fi
+  local downloaded_callable="$TEMP_REPO/${callable_path##*/}"
+  gh api -H 'Accept: application/vnd.github.raw+json' \
+    "repos/$callable_repo/contents/$callable_path?ref=$callable_ref" \
+    > "$downloaded_callable"
+  python3 "$validator_path" "$downloaded_callable" "$caller_path"
 }
 
 verify_release_digest() {
@@ -142,7 +169,8 @@ if [[ "$ARTIFACT_SOURCE" == "current" ]]; then
     "$INSTALL_PATH/scripts/validate-basecoat.ps1" \
     "$INSTALL_PATH/scripts/validate-basecoat.sh" \
     "$INSTALL_PATH/scripts/validate-workflow-action-pins.ps1" \
-    "$INSTALL_PATH/scripts/validate-workflow-action-pins.py"; do
+    "$INSTALL_PATH/scripts/validate-workflow-action-pins.py" \
+    "$INSTALL_PATH/scripts/validate-reusable-workflow-contracts.py"; do
     assert_path_exists "$path" "Installed validation component missing: $path"
   done
 else
@@ -152,6 +180,16 @@ else
 fi
 
 bash "$INSTALL_PATH/scripts/validate-basecoat.sh" "$INSTALL_PATH"
+
+if [[ "$ARTIFACT_SOURCE" == "current" ]]; then
+  assert_reusable_workflow_contract \
+    "$INSTALL_PATH/.github/workflow-templates/check-basecoat-version.yml" \
+    "$INSTALL_PATH/scripts/validate-reusable-workflow-contracts.py"
+else
+  assert_reusable_workflow_contract \
+    "$source_extract/.github/workflow-templates/check-basecoat-version.yml" \
+    "$REPO_ROOT/scripts/validate-reusable-workflow-contracts.py"
+fi
 
 if [[ "$ARTIFACT_SOURCE" == "current" ]]; then
   invalid_workflow="$INSTALL_PATH/workflows/consumer-smoke-unpinned.yml"

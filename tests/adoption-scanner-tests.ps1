@@ -26,6 +26,45 @@ $scannerScript = Join-Path (Join-Path $repoRoot 'scripts') 'adoption/detect-base
 if (-not (Test-Path $scannerScript)) {
     throw "OutputFormat validation failed: scanner script path missing ($scannerScript)"
 }
+. $scannerScript -LibraryOnly
+$elapsedStart = [datetime]'2026-08-01T00:00:00Z'
+foreach ($case in @(
+    @{ Offset = [timespan]::FromHours(11) + [timespan]::FromMinutes(59); Expected = 0 },
+    @{ Offset = [timespan]::FromHours(12); Expected = 0 },
+    @{ Offset = [timespan]::FromHours(23) + [timespan]::FromMinutes(59); Expected = 0 },
+    @{ Offset = [timespan]::FromHours(24); Expected = 1 },
+    @{ Offset = [timespan]::FromDays(3) + [timespan]::FromHours(12); Expected = 3 }
+)) {
+    $actual = Get-CompletedElapsedDays -Start $elapsedStart -Now ($elapsedStart + $case.Offset)
+    if ($actual -ne $case.Expected) {
+        throw "Fleet drift age must count completed days at offset '$($case.Offset)'; expected $($case.Expected), got $actual."
+    }
+}
+$unknownMarker = '<!-- basecoat-consumer-update:{"schema":1,"current_version":"4.1.0","target_version":"","target_sha":"","disposition":"unknown","pr_url":"","drift_started_at":"2026-08-01T00:00:00Z"} -->'
+$global:BasecoatUnknownIssueJson = @(
+    [pscustomobject]@{
+        body = $unknownMarker
+        url = 'https://github.com/example/consumer/issues/7'
+        createdAt = '2026-08-01T00:00:00Z'
+        state = 'OPEN'
+    }
+) | ConvertTo-Json -Compress
+function global:gh {
+    $global:LASTEXITCODE = 0
+    return $global:BasecoatUnknownIssueJson
+}
+$unknownState = Get-ConsumerUpdateState -Repository 'example/consumer'
+Remove-Item Function:\gh -Force
+Remove-Variable BasecoatUnknownIssueJson -Scope Global
+if (
+    -not $unknownState -or
+    $unknownState.target_version -ne '' -or
+    $unknownState.disposition -ne 'unknown' -or
+    $unknownState.issue_state -ne 'OPEN' -or
+    $unknownState.issue_url -ne 'https://github.com/example/consumer/issues/7'
+) {
+    throw 'Fleet scanner must preserve the stable legacy setup issue when its unresolved target is empty.'
+}
 $stdoutPath = Join-Path ([System.IO.Path]::GetTempPath()) ("adoption-scanner-outputformat-stdout-" + [System.Guid]::NewGuid().ToString() + ".log")
 $stderrPath = Join-Path ([System.IO.Path]::GetTempPath()) ("adoption-scanner-outputformat-stderr-" + [System.Guid]::NewGuid().ToString() + ".log")
 $stderrContent = ''
@@ -94,6 +133,13 @@ $testJsonOutput = @{
             assets      = @(
                 @{ asset = "agents/example.agent.md"; status = "current"; type = "agent" }
             )
+            current_version = "4.2.0-rc.1"
+            target_version = "4.2.0"
+            drift_age_days = 2
+            issue_url = "https://github.com/example/test/issues/1"
+            issue_state = "OPEN"
+            pr_url = "https://github.com/example/test/pull/2"
+            disposition = "approval-required"
         }
     )
     copilot_seats = @()
@@ -107,6 +153,41 @@ $parsed = $testJsonOutput | ConvertFrom-Json
 if (-not $parsed.scan_date -or -not $parsed.org -or -not $parsed.repos) {
     throw "JSON structure validation failed: missing required fields"
 }
+if (-not $parsed.repos[0].current_version -or -not $parsed.repos[0].target_version -or
+    -not $parsed.repos[0].disposition -or $parsed.repos[0].issue_state -ne 'OPEN') {
+    throw "JSON structure validation failed: missing fleet update status fields"
+}
+if ($parsed.repos[0].current_version -ne '4.2.0-rc.1' -or $parsed.repos[0].target_version -ne '4.2.0') {
+    throw 'Fleet JSON must preserve a prerelease current version distinct from the stable target.'
+}
+
+$scannerContent = Get-Content -LiteralPath $scannerScript -Raw
+if ($scannerContent -notmatch 'marker\.drift_started_at') {
+    throw 'Fleet scanner must compute drift age from the stable marker timestamp.'
+}
+if ($scannerContent -notmatch '--limit 1000') {
+    throw 'Fleet scanner must search deeply enough to find an older stable updater marker.'
+}
+if ($scannerContent -notmatch 'current_version = \[string\]\$marker\.current_version') {
+    throw 'Fleet scanner must retain the installed version from the stable updater marker.'
+}
+if ($scannerContent -notmatch '\[int\]\$marker\.schema -ne 1' -or
+    $scannerContent -notmatch '\$disposition -ne ''unknown''' -or
+    $scannerContent -notmatch 'TryParse\(\[string\]\$marker\.drift_started_at') {
+    throw 'Fleet scanner must reject incomplete resolved-target markers while accepting unknown empty targets.'
+}
+if ($scannerContent -notmatch 'elseif \(\$updateState -and \$updateState\.current_version\)') {
+    throw 'Fleet scanner must use marker state when a consumer stores version metadata at a custom stage path.'
+}
+if ($scannerContent -notmatch "target_version = if \(\`$updateState\) \{ \`$updateState\.target_version \} else \{ '' \}") {
+    throw 'Fleet scanner must leave target empty when no update marker exists.'
+}
+if ($scannerContent -notmatch "disposition = if \(\`$updateState\) \{ \`$updateState\.disposition \} else \{ 'unknown' \}") {
+    throw 'Fleet scanner must report unknown when no update marker exists.'
+}
+if ($scannerContent -notmatch 'issue_state = if \(\$updateState\)') {
+    throw 'Fleet scanner must preserve whether the stable update issue is open or closed.'
+}
 Write-Host '    ✓ JSON output format is valid'
 
 # Test 4: Markdown output format validation
@@ -114,9 +195,9 @@ Write-Host '  Test 4: Validate markdown output format structure...'
 $testMarkdownOutput = @"
 ## Basecoat Adoption — IBuySpy-Shared
 
-| Repo | Synced | Current | Stale | Coverage |
-|------|--------|---------|-------|----------|
-| test-repo | 2 | 2 | 0 | 66.7% |
+| Repo | Synced | Current | Stale | Installed | Target | Drift age | Disposition | PR | Coverage |
+|------|-------:|--------:|------:|-----------|--------|-----------|-------------|----|----------|
+| test-repo | 12 | 10 | 2 | 4.2.0-rc.1 | 4.2.0 | 2d | approval-required | PR | 66.7% |
 
 ### Copilot Seats
 
@@ -128,7 +209,7 @@ $testMarkdownOutput = @"
 if ($testMarkdownOutput -notmatch '## Basecoat Adoption') {
     throw "Markdown format validation failed: missing title"
 }
-if ($testMarkdownOutput -notmatch '\| Repo \| Synced \| Current \| Stale') {
+if ($testMarkdownOutput -notmatch '\| Repo \| Synced \| Current \| Stale \| Installed \| Target \| Drift age') {
     throw "Markdown format validation failed: missing table header"
 }
 Write-Host '    ✓ Markdown output format is valid'

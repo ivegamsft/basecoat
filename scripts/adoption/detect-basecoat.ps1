@@ -27,7 +27,8 @@ param(
     [string]$BasecoatRepo = "basecoat",
     [ValidateSet("table", "json", "markdown")]
     [string]$OutputFormat = "table",
-    [switch]$AssetDetail   # Flip view: show per-asset adoption rate across repos
+    [switch]$AssetDetail,   # Flip view: show per-asset adoption rate across repos
+    [switch]$LibraryOnly
 )
 
 Set-StrictMode -Version Latest
@@ -74,6 +75,102 @@ function Get-FrontmatterVersionFromContent {
     }
     return $null
 }
+
+function Get-JsonFromContent {
+    param($ContentMeta)
+    if (-not $ContentMeta -or -not $ContentMeta.content) { return $null }
+    try {
+        $decoded = [System.Text.Encoding]::UTF8.GetString(
+            [System.Convert]::FromBase64String(($ContentMeta.content -replace "`n", ""))
+        )
+        return $decoded | ConvertFrom-Json
+    }
+    catch {
+        return $null
+    }
+}
+
+function Get-TextFromContent {
+    param($ContentMeta)
+    if (-not $ContentMeta -or -not $ContentMeta.content) { return $null }
+    try {
+        return [System.Text.Encoding]::UTF8.GetString(
+            [System.Convert]::FromBase64String(($ContentMeta.content -replace "`n", ""))
+        )
+    }
+    catch { return $null }
+}
+
+function Get-ConsumerStagePath {
+    param([string]$Owner, [string]$Repo)
+    $workflow = Get-ContentMeta -Owner $Owner -Repo $Repo -Path '.github/workflows/check-basecoat-version.yml'
+    $text = Get-TextFromContent -ContentMeta $workflow
+    if ($text -and $text -match '(?m)^\s*stage_path:\s*[''"]?([^''"\s#]+)') {
+        $candidate = $Matches[1].Trim().TrimEnd('/')
+        if ($candidate -and $candidate -notmatch '(^|/)\.\.(/|$)') { return $candidate }
+    }
+    return '.github/base-coat'
+}
+
+function Get-CompletedElapsedDays {
+    param(
+        [Parameter(Mandatory)][datetime]$Start,
+        [datetime]$Now = (Get-Date).ToUniversalTime()
+    )
+
+    $elapsedDays = ($Now.ToUniversalTime() - $Start.ToUniversalTime()).TotalDays
+    return [math]::Max(0, [int][math]::Floor($elapsedDays))
+}
+
+function Get-ConsumerUpdateState {
+    param([string]$Repository)
+
+    $issuesJson = gh issue list --repo $Repository --state all --limit 1000 `
+        --search "basecoat-consumer-update in:body" `
+        --json body,url,createdAt,state 2>&1
+    if ($LASTEXITCODE -ne 0) { return $null }
+
+    $issues = $issuesJson | ConvertFrom-Json
+    foreach ($issue in $issues | Sort-Object -Property createdAt -Descending) {
+        if ($issue.body -match '<!-- basecoat-consumer-update:(\{[^\r\n]*\}) -->') {
+            try {
+                $marker = $Matches[1] | ConvertFrom-Json
+                $parsedStarted = [datetimeoffset]::MinValue
+                $targetVersion = [string]$marker.target_version
+                $disposition = [string]$marker.disposition
+                if (
+                    [int]$marker.schema -ne 1 -or
+                    [string]::IsNullOrWhiteSpace([string]$marker.current_version) -or
+                    [string]::IsNullOrWhiteSpace($disposition) -or
+                    ([string]::IsNullOrWhiteSpace($targetVersion) -and $disposition -ne 'unknown') -or
+                    -not [datetimeoffset]::TryParse([string]$marker.drift_started_at, [ref]$parsedStarted)
+                ) {
+                    continue
+                }
+                return @{
+                    current_version = [string]$marker.current_version
+                    target_version = $targetVersion
+                    target_sha = [string]$marker.target_sha
+                    disposition = $disposition
+                    issue_url = [string]$issue.url
+                    issue_state = [string]$issue.state
+                    pr_url = [string]$marker.pr_url
+                    drift_started_at = [string]$marker.drift_started_at
+                    drift_age_days = if ($issue.state -eq 'OPEN' -and $marker.drift_started_at) {
+                        Get-CompletedElapsedDays -Start ([datetime]$marker.drift_started_at)
+                    }
+                    else { 0 }
+                }
+            }
+            catch {
+                continue
+            }
+        }
+    }
+    return $null
+}
+
+if ($LibraryOnly) { return }
 
 # --- Main ---
 
@@ -175,6 +272,17 @@ foreach ($repo in $targetRepos) {
     $repoAssets = @()
     $currentCount = 0
     $staleCount = 0
+    $updateState = Get-ConsumerUpdateState -Repository "$Org/$repoName"
+    $stagePath = Get-ConsumerStagePath -Owner $Org -Repo $repoName
+    $versionMeta = Get-ContentMeta -Owner $Org -Repo $repoName -Path "$stagePath/version.json"
+    $versionJson = Get-JsonFromContent -ContentMeta $versionMeta
+    $installedVersion = if ($versionJson -and $versionJson.version) {
+        [string]$versionJson.version
+    }
+    elseif ($updateState -and $updateState.current_version) {
+        [string]$updateState.current_version
+    }
+    else { '' }
 
     # List .github/agents, .github/instructions, .github/prompts, .github/skills in one pass
     $syncDirs = @(".github/agents", ".github/instructions", ".github/prompts", ".github/skills")
@@ -242,6 +350,14 @@ foreach ($repo in $targetRepos) {
             totalFiles  = $foundFiles.Count
             coverage    = if ($sourceAssets.Count -gt 0) { [math]::Round(($totalSynced / $sourceAssets.Count) * 100, 1) } else { 0 }
             assets      = $repoAssets
+            current_version = $installedVersion
+            target_version = if ($updateState) { $updateState.target_version } else { '' }
+            target_sha = if ($updateState) { $updateState.target_sha } else { '' }
+            drift_age_days = if ($updateState) { $updateState.drift_age_days } else { 0 }
+            issue_url = if ($updateState) { $updateState.issue_url } else { '' }
+            issue_state = if ($updateState) { $updateState.issue_state } else { '' }
+            pr_url = if ($updateState) { $updateState.pr_url } else { '' }
+            disposition = if ($updateState) { $updateState.disposition } else { 'unknown' }
         }
     }
 }
@@ -282,11 +398,12 @@ switch ($OutputFormat) {
     }
     "markdown" {
         Write-Host "`n## Basecoat Adoption — $Org`n"
-        Write-Host "| Repo | Synced | Current | Stale | Coverage |"
-        Write-Host "|------|--------|---------|-------|----------|"
+        Write-Host "| Repo | Synced | Current | Stale | Installed | Target | Drift age | Disposition | Issue state | Issue | PR | Coverage |"
+        Write-Host "|------|-------:|--------:|------:|-----------|--------|-----------|-------------|-------------|-------|----|----------|"
         foreach ($r in $adoptionReport) {
-            $staleFlag = if ($r.stale -gt 0) { " ⚠️" } else { "" }
-            Write-Host "| $($r.repo) | $($r.synced) | $($r.current) | $($r.stale)$staleFlag | $($r.coverage)% |"
+            $issue = if ($r.issue_url) { "[Issue]($($r.issue_url))" } else { "" }
+            $pr = if ($r.pr_url) { "[PR]($($r.pr_url))" } else { "" }
+            Write-Host "| $($r.repo) | $($r.synced) | $($r.current) | $($r.stale) | $($r.current_version) | $($r.target_version) | $($r.drift_age_days)d | $($r.disposition) | $($r.issue_state) | $issue | $pr | $($r.coverage)% |"
         }
         if ($seatInfo.Count -gt 0) {
             Write-Host "`n### Copilot Seats`n"
@@ -408,4 +525,3 @@ if ($AssetDetail) {
         }
     }
 }
-

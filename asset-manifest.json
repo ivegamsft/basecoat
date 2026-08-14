@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "libraryVersion": "4.1.0",
-  "generatedAt": "2026-08-10T17:27:24.5652094Z",
+  "generatedAt": "2026-08-11T10:52:14.4743923Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -822,7 +822,7 @@
     {
       "path": "agents/basecoat-60-workflow-rollout-basecoat.agent.md",
       "type": "agent",
-      "sha": "4c0e911faee1c593a7697530e9d384f83423b1dd",
+      "sha": "36570151df45c0318c7fa35f75a818d5a23f089b",
       "version": null,
       "effectiveVersion": "4.1.0",
       "versionSource": "library"
@@ -1828,6 +1828,14 @@
       "versionSource": "library"
     },
     {
+      "path": "scripts/validate-reusable-workflow-contracts.py",
+      "type": "script",
+      "sha": "537ca417ddfc039db68d2c36aa9b2d92c136fbd3",
+      "version": null,
+      "effectiveVersion": "4.1.0",
+      "versionSource": "library"
+    },
+    {
       "path": "scripts/validate-workflow-action-pins.ps1",
       "type": "script",
       "sha": "10cc2f2e806845be0625de93c5cd318f1b240603",
@@ -2686,7 +2694,7 @@
     {
       "path": "skills/rollout-basecoat/SKILL.md",
       "type": "skill",
-      "sha": "c92e1d29df0b7f5ea4ee90737740915de9dd8a36",
+      "sha": "9bc1cf2e6df31546605bff9bfaca9e4f118e9853",
       "version": null,
       "effectiveVersion": "4.1.0",
       "versionSource": "library"

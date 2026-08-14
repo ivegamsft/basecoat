@@ -38,6 +38,40 @@ read_basecoat_yml_value() {
     | sed -e 's/^#.*$//' -e 's/[[:space:]]\{1,\}#.*$//' -e 's/[[:space:]]*$//' -e 's/^"\(.*\)"$/\1/' -e "s/^'\(.*\)'$/\1/"
 }
 
+read_basecoat_yml_map_value() {
+  local section="$1"
+  local key="$2"
+  local config="$REPO_ROOT/.basecoat.yml"
+  [[ -f "$config" ]] || return 0
+
+  local bom=$'\xEF\xBB\xBF'
+  sed "1s/^${bom}//" "$config" | awk -v section="$section" -v key="$key" '
+    $0 ~ "^[[:space:]]*#" { next }
+    $0 ~ "^[A-Za-z0-9_-]+:[[:space:]]*$" {
+      current=$0
+      sub(/:.*/, "", current)
+      in_section=(current == section)
+      next
+    }
+    in_section && $0 ~ "^[[:space:]]{2,}[^#][^:]*:[[:space:]]*" {
+      entry=$0
+      sub(/^[[:space:]]*/, "", entry)
+      separator=index(entry, ":")
+      map_key=substr(entry, 1, separator - 1)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", map_key)
+      gsub(/^["'\'']|["'\'']$/, "", map_key)
+      if (map_key != key) { next }
+      value=substr(entry, separator + 1)
+      sub(/^[[:space:]]*/, "", value)
+      sub(/[[:space:]]+#.*$/, "", value)
+      sub(/[[:space:]]+$/, "", value)
+      gsub(/^["'\'']|["'\'']$/, "", value)
+      print value
+      exit
+    }
+  '
+}
+
 redact_repo_url() {
   # Strip any "user[:password]@" userinfo and any "?query"/"#fragment" (which may
   # carry a token) from an http(s) URL so credential-bearing clone URLs are never
@@ -72,19 +106,32 @@ if [[ -z "$SOURCE_REF" ]]; then
 fi
 
 # Known-bad release tag redirect (version drift guard).
-TARGET_REF=""
-case "$SOURCE_REF" in
-  v3.30.4)
-    TARGET_REF="v3.30.5"
-    ;;
-esac
+TARGET_REF="$(read_basecoat_yml_map_value known_bad_releases "$SOURCE_REF")"
+if [[ -z "$TARGET_REF" && "$SOURCE_REF" == "v3.30.4" ]]; then
+  TARGET_REF="v3.30.5"
+fi
 if [[ -n "$TARGET_REF" ]]; then
   echo "WARNING: Requested ref '$SOURCE_REF' is a known-bad release tag (version drift). Auto-upgrading sync source to '$TARGET_REF'. Update your .basecoat.yml pin to '$TARGET_REF' or newer." >&2
   SOURCE_REF="$TARGET_REF"
   SOURCE_REF_ORIGIN="redirect"
 fi
 
+SOURCE_MIRROR="${BASECOAT_MIRROR:-}"
+SOURCE_MIRROR_ORIGIN="env"
+if [[ -z "$SOURCE_MIRROR" ]]; then
+  SOURCE_MIRROR="$(read_basecoat_yml_value mirror)"
+  if [[ -n "$SOURCE_MIRROR" ]]; then
+    SOURCE_MIRROR_ORIGIN=".basecoat.yml"
+  else
+    SOURCE_MIRROR_ORIGIN="unset"
+  fi
+fi
+FETCH_REPO="${SOURCE_MIRROR:-$SOURCE_REPO}"
+
 echo "Resolved BaseCoat source '$(redact_repo_url "$SOURCE_REPO")' (from $SOURCE_REPO_ORIGIN), ref '$SOURCE_REF' (from $SOURCE_REF_ORIGIN)"
+if [[ -n "$SOURCE_MIRROR" ]]; then
+  echo "Using corporate mirror '$(redact_repo_url "$SOURCE_MIRROR")' (from $SOURCE_MIRROR_ORIGIN) for immutable fetches."
+fi
 
 TMP_DIR="$(mktemp -d)"
 cleanup() {
@@ -175,22 +222,63 @@ validate_workflow_directory() {
   fi
 }
 
-echo "Cloning $(redact_repo_url "$SOURCE_REPO")#$SOURCE_REF"
-if ! git clone --depth 1 --branch "$SOURCE_REF" "$SOURCE_REPO" "$TMP_DIR/source" >/dev/null 2>&1; then
-  # In CI for private GitHub repos, anonymous clone can fail. Retry with an auth
-  # header when either GITHUB_TOKEN or GH_TOKEN is available.
-  token="${GITHUB_TOKEN:-${GH_TOKEN:-}}"
-  if [[ "$SOURCE_REPO" =~ ^https://github\.com/ ]] && [[ -n "$token" ]]; then
+echo "Cloning $(redact_repo_url "$FETCH_REPO")#$SOURCE_REF"
+clone_source() {
+  if [[ "$SOURCE_REF" =~ ^[0-9a-fA-F]{40}$ ]]; then
+    git init "$TMP_DIR/source" >/dev/null 2>&1 \
+      && git -C "$TMP_DIR/source" remote add origin "$FETCH_REPO" \
+      && git -C "$TMP_DIR/source" fetch --depth 1 origin "$SOURCE_REF" >/dev/null 2>&1 \
+      && git -C "$TMP_DIR/source" checkout --detach FETCH_HEAD >/dev/null 2>&1
+  else
+    git clone --depth 1 --branch "$SOURCE_REF" "$FETCH_REPO" "$TMP_DIR/source" >/dev/null 2>&1
+  fi
+}
+
+if ! clone_source; then
+  # Private source authentication is opt-in and bound to one explicit HTTPS
+  # authority so a consumer delivery token is never forwarded to a mirror.
+  token="${BASECOAT_FETCH_TOKEN:-}"
+  trusted_authority="${BASECOAT_FETCH_HOST:-}"
+  if [[ "$FETCH_REPO" =~ ^(https://[^/]+)(/|$) ]] && [[ -n "$token" ]]; then
+    auth_origin="${BASH_REMATCH[1]}/"
+    auth_authority="${BASH_REMATCH[1]#https://}"
+    normalized_auth_authority="$(printf '%s' "$auth_authority" | tr '[:upper:]' '[:lower:]')"
+    normalized_trusted_authority="$(printf '%s' "$trusted_authority" | tr '[:upper:]' '[:lower:]')"
+    if [[ -z "$trusted_authority" || "$normalized_auth_authority" != "$normalized_trusted_authority" ]]; then
+      echo "Authenticated fetch retry refused for untrusted authority in $(redact_repo_url "$FETCH_REPO")" >&2
+      exit 1
+    fi
     auth_header="$(printf 'x-access-token:%s' "$token" | base64 | tr -d '\r\n')"
-    if ! git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth_header" \
-      clone --depth 1 --branch "$SOURCE_REF" "$SOURCE_REPO" "$TMP_DIR/source" >/dev/null 2>&1; then
-      echo "Failed to clone $(redact_repo_url "$SOURCE_REPO")#$SOURCE_REF (anonymous and token-auth attempts failed)." >&2
+    rm -rf "$TMP_DIR/source"
+    if [[ "$SOURCE_REF" =~ ^[0-9a-fA-F]{40}$ ]]; then
+      auth_ok=false
+      if git init "$TMP_DIR/source" >/dev/null 2>&1 \
+        && git -C "$TMP_DIR/source" remote add origin "$FETCH_REPO" \
+        && git -c "http.${auth_origin}.extraheader=AUTHORIZATION: basic $auth_header" \
+          -C "$TMP_DIR/source" fetch --depth 1 origin "$SOURCE_REF" >/dev/null 2>&1 \
+        && git -C "$TMP_DIR/source" checkout --detach FETCH_HEAD >/dev/null 2>&1; then
+        auth_ok=true
+      fi
+    elif git -c "http.${auth_origin}.extraheader=AUTHORIZATION: basic $auth_header" \
+      clone --depth 1 --branch "$SOURCE_REF" "$FETCH_REPO" "$TMP_DIR/source" >/dev/null 2>&1; then
+      auth_ok=true
+    else
+      auth_ok=false
+    fi
+    if [[ "$auth_ok" != true ]]; then
+      echo "Failed to clone $(redact_repo_url "$FETCH_REPO")#$SOURCE_REF (anonymous and token-auth attempts failed)." >&2
       exit 1
     fi
   else
-    echo "Failed to clone $(redact_repo_url "$SOURCE_REPO")#$SOURCE_REF." >&2
+    echo "Failed to clone $(redact_repo_url "$FETCH_REPO")#$SOURCE_REF." >&2
     exit 1
   fi
+fi
+
+SOURCE_COMMIT="$(git -C "$TMP_DIR/source" rev-parse HEAD)"
+if [[ -n "${BASECOAT_EXPECTED_SHA:-}" && "$SOURCE_COMMIT" != "$BASECOAT_EXPECTED_SHA" ]]; then
+  echo "BaseCoat source provenance check failed: expected commit '$BASECOAT_EXPECTED_SHA' but fetched '$SOURCE_COMMIT'." >&2
+  exit 1
 fi
 
 mkdir -p "$REPO_ROOT/$TARGET_DIR"
@@ -220,6 +308,19 @@ for validator in validate-basecoat.ps1 validate-basecoat.sh validate-workflow-ac
     cp "$TMP_DIR/source/scripts/$validator" "$REPO_ROOT/$TARGET_DIR/scripts/$validator"
   fi
 done
+
+json_escape() {
+  printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g'
+}
+cat > "$REPO_ROOT/$TARGET_DIR/.source-provenance.json" <<EOF
+{
+  "schemaVersion": 1,
+  "commit": "$(json_escape "$SOURCE_COMMIT")",
+  "requestedRef": "$(json_escape "$SOURCE_REF")",
+  "source": "$(json_escape "$(redact_repo_url "$SOURCE_REPO")")",
+  "mirror": "$(json_escape "$(redact_repo_url "$SOURCE_MIRROR")")"
+}
+EOF
 
 # Legacy cleanup: basecoat-metadata.json was previously distributed.
 rm -f "$REPO_ROOT/$TARGET_DIR/basecoat-metadata.json"

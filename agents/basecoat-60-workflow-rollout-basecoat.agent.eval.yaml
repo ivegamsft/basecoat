@@ -8,10 +8,12 @@ scenarios:
   - id: 'pos-2'
     input: 'Please route this task to the rollout-basecoat agent.'
     expect_activation: true
+  - id: 'pos-3'
+    input: 'Set up consumer-owned BaseCoat patch notifications and guarded upgrade PRs.'
+    expect_activation: true
   - id: 'neg-1'
     input: 'Write a haiku about programming.'
     expect_activation: false
   - id: 'neg-2'
     input: 'Give me a recipe for chocolate chip cookies.'
     expect_activation: false
-

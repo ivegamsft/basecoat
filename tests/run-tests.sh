@@ -26,6 +26,9 @@ bash tests/sync-validation-install-tests.sh
 echo "Running package-basecoat.sh..."
 bash scripts/package-basecoat.sh
 
+echo "Running reusable-workflow contract tests..."
+python3 tests/reusable-workflow-contract-tests.py
+
 version="$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' version.json | head -n 1)"
 assert_path_exists "dist/base-coat-$version.zip" "Packaging test failed: zip artifact missing"
 assert_path_exists "dist/base-coat-$version.tar.gz" "Packaging test failed: tar.gz artifact missing"

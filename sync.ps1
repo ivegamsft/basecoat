@@ -42,6 +42,34 @@ function Get-BasecoatYmlValue {
     return $null
 }
 
+function Get-BasecoatYmlMap {
+    param(
+        [Parameter(Mandatory)][string]$Section,
+        [Parameter(Mandatory)][string]$RepoRoot
+    )
+
+    $result = @{}
+    $config = Join-Path $RepoRoot '.basecoat.yml'
+    if (-not (Test-Path -LiteralPath $config)) { return $result }
+
+    $inSection = $false
+    foreach ($line in Get-Content -LiteralPath $config) {
+        if ($line -match '^\s*(#|$)') { continue }
+        if ($line -match '^([A-Za-z0-9_-]+):\s*$') {
+            $inSection = $Matches[1] -eq $Section
+            continue
+        }
+        if ($inSection -and $line -match '^\s{2,}([^:]+):\s*(.+)$') {
+            $key = $Matches[1].Trim().Trim('"', "'")
+            $value = ($Matches[2] -replace '\s+#.*$', '').Trim().Trim('"', "'")
+            $result[$key] = $value
+            continue
+        }
+        if ($inSection -and $line -match '^\S') { break }
+    }
+    return $result
+}
+
 function Get-RedactedRepoUrl {
     param([string]$Url)
 
@@ -53,6 +81,62 @@ function Get-RedactedRepoUrl {
     # Match case-insensitively since URI schemes are case-insensitive.
     $display = $Url -replace '(?i)^(https?://)[^/@]*@', '$1'
     return ($display -replace '[?#].*$', '')
+}
+
+function Protect-SyncSensitiveText {
+    param([AllowNull()][object]$Value)
+
+    if ($null -eq $Value) { return $null }
+    $text = [string]$Value
+    $text = $text -replace '(?i)(https?://)[^/@\s]+@', '$1'
+    $text = $text -replace '(?i)(https?://[^\s?#]+)[?#][^\s]*', '$1'
+    $text = $text -replace '(?i)(AUTHORIZATION:\s*basic\s+)\S+', '${1}***'
+    foreach ($secret in @($env:BASECOAT_UPDATE_TOKEN, $env:BASECOAT_FETCH_TOKEN, $env:GH_TOKEN, $env:GITHUB_TOKEN)) {
+        if ($secret) { $text = $text.Replace($secret, '***') }
+    }
+    return $text
+}
+
+function Invoke-SyncGit {
+    param([Parameter(Mandatory)][string[]]$Arguments)
+
+    $output = & git @Arguments 2>&1
+    $exitCode = $LASTEXITCODE
+    $safeArguments = @($Arguments | ForEach-Object { Protect-SyncSensitiveText $_ })
+    $safeOutput = @($output | ForEach-Object { Protect-SyncSensitiveText $_ })
+    if ($exitCode -ne 0) {
+        throw "git $($safeArguments -join ' ') failed (exit $exitCode): $($safeOutput -join "`n")"
+    }
+    return $safeOutput
+}
+
+function Invoke-SyncGitWithAuthRetry {
+    param(
+        [Parameter(Mandatory)][string[]]$Arguments,
+        [Parameter(Mandatory)][string]$RepoUrl
+    )
+
+    try {
+        return Invoke-SyncGit -Arguments $Arguments
+    }
+    catch {
+        $token = $env:BASECOAT_FETCH_TOKEN
+        $trustedAuthority = $env:BASECOAT_FETCH_HOST
+        $uri = $null
+        if (-not $token -or -not $trustedAuthority -or
+            -not [uri]::TryCreate($RepoUrl, [System.UriKind]::Absolute, [ref]$uri) -or
+            $uri.Scheme -ne 'https' -or
+            -not $uri.Authority.Equals($trustedAuthority, [System.StringComparison]::OrdinalIgnoreCase)) {
+            throw
+        }
+        $authBytes = [Text.Encoding]::ASCII.GetBytes("x-access-token:$token")
+        $authHeader = [Convert]::ToBase64String($authBytes)
+        $authOrigin = "$($uri.Scheme)://$($uri.Authority)/"
+        $authenticatedArguments = @(
+            '-c', "http.$authOrigin.extraheader=AUTHORIZATION: basic $authHeader"
+        ) + $Arguments
+        return Invoke-SyncGit -Arguments $authenticatedArguments
+    }
 }
 
 $sourceRepo = $env:BASECOAT_REPO
@@ -81,6 +165,11 @@ if (-not $sourceRef) {
     }
 }
 
+$configuredRedirects = Get-BasecoatYmlMap -Section 'known_bad_releases' -RepoRoot $repoRoot
+foreach ($entry in $configuredRedirects.GetEnumerator()) {
+    $knownBadRefRedirects[$entry.Key] = $entry.Value
+}
+
 if ($knownBadRefRedirects.ContainsKey($sourceRef)) {
     $requestedRef = $sourceRef
     $sourceRef = $knownBadRefRedirects[$requestedRef]
@@ -88,7 +177,18 @@ if ($knownBadRefRedirects.ContainsKey($sourceRef)) {
     Write-Warning "Requested ref '$requestedRef' is a known-bad release tag (version drift). Auto-upgrading sync source to '$sourceRef'. Update your .basecoat.yml pin to '$sourceRef' or newer."
 }
 
+$sourceMirror = $env:BASECOAT_MIRROR
+$sourceMirrorOrigin = 'env'
+if (-not $sourceMirror) {
+    $sourceMirror = Get-BasecoatYmlValue -Key 'mirror' -RepoRoot $repoRoot
+    $sourceMirrorOrigin = if ($sourceMirror) { '.basecoat.yml' } else { 'unset' }
+}
+$fetchRepo = if ($sourceMirror) { $sourceMirror } else { $sourceRepo }
+
 Write-Host "Resolved BaseCoat source '$(Get-RedactedRepoUrl $sourceRepo)' (from $sourceRepoOrigin), ref '$sourceRef' (from $sourceRefOrigin)"
+if ($sourceMirror) {
+    Write-Host "Using corporate mirror '$(Get-RedactedRepoUrl $sourceMirror)' (from $sourceMirrorOrigin) for immutable fetches."
+}
 
 $allowedDocsTopLevelEntries = @('reference', 'guides', 'agents', 'diagrams')
 $supportedAgentFrontmatterKeys = @('name', 'description', 'tools', 'mcp-servers')
@@ -316,7 +416,23 @@ $sourcePath = Join-Path $tempRoot 'source'
 
 try {
     New-Item -ItemType Directory -Path $tempRoot | Out-Null
-    git clone --depth 1 --branch $sourceRef $sourceRepo $sourcePath | Out-Null
+    if ($sourceRef -match '^[0-9a-fA-F]{40}$') {
+        $null = Invoke-SyncGit -Arguments @('init', $sourcePath)
+        $null = Invoke-SyncGit -Arguments @('-C', $sourcePath, 'remote', 'add', 'origin', $fetchRepo)
+        $null = Invoke-SyncGitWithAuthRetry -Arguments @(
+            '-C', $sourcePath, 'fetch', '--depth', '1', 'origin', $sourceRef
+        ) -RepoUrl $fetchRepo
+        $null = Invoke-SyncGit -Arguments @('-C', $sourcePath, 'checkout', '--detach', 'FETCH_HEAD')
+    }
+    else {
+        $null = Invoke-SyncGitWithAuthRetry -Arguments @(
+            'clone', '--depth', '1', '--branch', $sourceRef, $fetchRepo, $sourcePath
+        ) -RepoUrl $fetchRepo
+    }
+    $sourceCommit = ((Invoke-SyncGit -Arguments @('-C', $sourcePath, 'rev-parse', 'HEAD')) -join "`n").Trim()
+    if ($env:BASECOAT_EXPECTED_SHA -and $sourceCommit -ne $env:BASECOAT_EXPECTED_SHA) {
+        throw "BaseCoat source provenance check failed: expected commit '$($env:BASECOAT_EXPECTED_SHA)' but fetched '$sourceCommit'."
+    }
 
     $fullTargetDir = Join-Path $repoRoot $targetDir
     New-Item -ItemType Directory -Force -Path $fullTargetDir | Out-Null
@@ -364,6 +480,14 @@ try {
             Copy-Item -Path $validatorSource -Destination (Join-Path $runtimeScriptsDest $validator) -Force
         }
     }
+
+    [ordered]@{
+        schemaVersion = 1
+        commit = $sourceCommit
+        requestedRef = $sourceRef
+        source = Get-RedactedRepoUrl $sourceRepo
+        mirror = Get-RedactedRepoUrl $sourceMirror
+    } | ConvertTo-Json | Set-Content -Path (Join-Path $fullTargetDir '.source-provenance.json') -Encoding UTF8
 
     # Copy only basic documentation (not full docs tree)
     $docsDest = Join-Path $fullTargetDir 'docs'

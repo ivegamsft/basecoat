@@ -36,6 +36,7 @@ validation_scripts=(
   scripts/validate-basecoat.sh
   scripts/validate-workflow-action-pins.ps1
   scripts/validate-workflow-action-pins.py
+  scripts/validate-reusable-workflow-contracts.py
 )
 for relative_path in "${validation_scripts[@]}"; do
   if [[ ! -f "$STAGE_DIR/$relative_path" ]]; then
@@ -56,6 +57,21 @@ if missing:
         "Package validation failed: asset-manifest.json is missing " + ", ".join(missing)
     )
 PY
+
+packaged_callers=()
+while IFS= read -r packaged_caller; do
+  packaged_callers+=("$packaged_caller")
+done < <(
+  grep -rlE '/\.github/workflows/check-basecoat-version-callable\.yml@' \
+    "$STAGE_DIR/.github/workflow-templates" --include='*.yml' --include='*.yaml'
+)
+if [[ ${#packaged_callers[@]} -eq 0 ]]; then
+  echo "Package validation failed: no packaged BaseCoat version workflow callers found" >&2
+  exit 1
+fi
+python3 "$STAGE_DIR/scripts/validate-reusable-workflow-contracts.py" \
+  "$STAGE_DIR/.github/workflows/check-basecoat-version-callable.yml" \
+  "${packaged_callers[@]}"
 
 if command -v zip >/dev/null 2>&1; then
   (cd "$DIST_DIR/stage" && zip -qr "../$ARCHIVE_BASE.zip" base-coat)

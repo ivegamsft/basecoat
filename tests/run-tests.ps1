@@ -84,6 +84,13 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host 'Running package-basecoat.ps1...'
 ./scripts/package-basecoat.ps1
 
+Write-Host 'Running reusable-workflow contract tests...'
+& python (Join-Path $PSScriptRoot 'reusable-workflow-contract-tests.py')
+if ($LASTEXITCODE -ne 0) {
+    Write-FailureLog 'reusable-workflow-contract-tests'
+    exit 1
+}
+
 $version = (Get-Content version.json -Raw | ConvertFrom-Json).version
 Assert-PathExists -Path "dist/base-coat-$version.zip" -Message 'Packaging test failed: zip artifact missing'
 Assert-PathExists -Path "dist/base-coat-$version.tar.gz" -Message 'Packaging test failed: tar.gz artifact missing'
@@ -142,11 +149,27 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running Bash sync parity tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'sync-sh-parity-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Bash sync parity tests failed' -ForegroundColor Red
+    Write-FailureLog 'sync-sh-parity-tests'
+    exit 1
+}
+
 Write-Host 'Running adoption scanner tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'adoption-scanner-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
     Write-Host 'Adoption scanner tests failed' -ForegroundColor Red
     Write-FailureLog 'adoption-scanner-tests'
+    exit 1
+}
+
+Write-Host 'Running consumer updater tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'consumer-updater-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Consumer updater tests failed' -ForegroundColor Red
+    Write-FailureLog 'consumer-updater-tests'
     exit 1
 }
 

@@ -123,6 +123,8 @@ jobs:
 
       - name: Run PowerShell test suite
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           $failOnGuidanceAuditErrors = '${{ github.event_name }}' -ne 'pull_request'
           pwsh tests/run-tests.ps1 -GuidanceAuditFailOnError:$failOnGuidanceAuditErrors

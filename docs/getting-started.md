@@ -57,16 +57,22 @@ on:
   schedule:
     - cron: '0 9 * * 1'  # Weekly Monday 09:00 UTC
   workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+  issues: write
+  pull-requests: write
 jobs:
-  check:
-    uses: YOUR-ORG/basecoat/.github/workflows/check-basecoat-version-callable.yml@main
+  update:
+    uses: IBuySpy-Shared/basecoat/.github/workflows/check-basecoat-version-callable.yml@9ab8894828e3a887d97c3383e7f23ed892d9a088
     with:
       stage_path: .github/base-coat
-      alert_threshold: 1
-      source_repo: YOUR-ORG/basecoat
-    permissions:
-      issues: write
-      contents: read
+      source_repo: IBuySpy-Shared/basecoat
+      fetch_host: github.com
+      update_actor: ${{ vars.BASECOAT_UPDATE_ACTOR }}
+    secrets:
+      update_token: ${{ secrets.BASECOAT_UPDATE_TOKEN }}
+      fetch_token: ${{ secrets.BASECOAT_FETCH_TOKEN }}
 ```
 
 ## Next steps

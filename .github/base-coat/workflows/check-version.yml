@@ -1,4 +1,4 @@
-name: "BaseCoat - Check BaseCoat Version"
+name: "BaseCoat - Consumer Update"
 
 on:
   workflow_call:
@@ -7,10 +7,6 @@ on:
         description: Path to synced BaseCoat assets
         type: string
         default: .github/base-coat
-      alert_threshold:
-        description: Number of minor versions behind before alerting
-        type: number
-        default: 1
       source_repo:
         description: >-
           Source BaseCoat repository in owner/repo format (for example,
@@ -21,149 +17,357 @@ on:
           resolves to the consumer rather than to BaseCoat.
         type: string
         required: true
+      source_ref:
+        description: Release selector (latest or immutable semver tag)
+        type: string
+        default: ""
+      mirror:
+        description: Optional corporate mirror clone URL or owner/repo
+        type: string
+        default: ""
+      fetch_host:
+        description: Exact HTTPS authority allowed to receive the canonical-source fetch token
+        type: string
+        default: ""
+      mirror_fetch_host:
+        description: Exact HTTPS authority allowed to receive the optional mirror fetch token
+        type: string
+        default: ""
+      mode:
+        description: Override updates.mode (notify or pull-request)
+        type: string
+        default: ""
+      approval:
+        description: Override updates.approval (required or automatic)
+        type: string
+        default: ""
+      allowed_bumps:
+        description: Optional comma-separated override (patch,minor)
+        type: string
+        default: ""
+      update_actor:
+        description: GitHub App bot login for update_token when its actor cannot be derived
+        type: string
+        default: ""
+      alert_threshold:
+        description: Deprecated compatibility input; any SemVer drift is evaluated
+        type: number
+        default: 0
     secrets:
+      update_token:
+        description: Dedicated GitHub App token or fine-grained PAT used only for upgrade PR delivery
+        required: false
       fetch_token:
         description: >-
-          Token with read access to the source repository releases. Required
-          when the source repository is private or internal; the default
-          GITHUB_TOKEN cannot read releases across repositories.
+          Dedicated read-only token for the configured canonical source
+          authority. Required when the source repository is private or internal;
+          the default GITHUB_TOKEN cannot read releases across repositories.
+        required: false
+      mirror_fetch_token:
+        description: Dedicated read-only token for the configured mirror authority
         required: false
 
 jobs:
-  check-version:
+  consumer-update:
     runs-on: ubuntu-latest
-    permissions:
-      issues: write
-      contents: read
+    timeout-minutes: 30
+    concurrency:
+      group: basecoat-consumer-update-${{ github.repository }}
+      cancel-in-progress: false
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - name: Check out consumer repository read-only
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          token: ${{ github.token }}
 
-      - name: Read consumer version
-        id: consumer
-        run: |
-          VERSION_FILE="${{ inputs.stage_path }}/version.json"
-          if [ ! -f "$VERSION_FILE" ]; then
-            echo "No version.json found at $VERSION_FILE"
-            echo "version=0.0.0" >> $GITHUB_OUTPUT
-            echo "found=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          VERSION=$(jq -r '.version' "$VERSION_FILE")
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "found=true" >> $GITHUB_OUTPUT
-          echo "Consumer BaseCoat version: $VERSION"
-
-      - name: Get latest BaseCoat release
-        id: latest
+      - name: Detect installed consumer updater
+        id: updater
+        shell: pwsh
         env:
-          SOURCE_REPO_INPUT: ${{ inputs.source_repo }}
-          FETCH_TOKEN: ${{ secrets.fetch_token }}
-          GH_TOKEN_DEFAULT: ${{ github.token }}
+          BASECOAT_STAGE_PATH: ${{ inputs.stage_path }}
         run: |
-          set -euo pipefail
-          SOURCE_REPO="$SOURCE_REPO_INPUT"
-          if [ -z "$SOURCE_REPO" ]; then
-            echo "::error::The 'source_repo' input is required (owner/repo of the BaseCoat source repository whose releases define the latest version)."
-            exit 1
-          fi
+          $script = Join-Path $env:BASECOAT_STAGE_PATH 'scripts/invoke-basecoat-consumer-update.ps1'
+          "installed=$((Test-Path -LiteralPath $script).ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
 
-          if [ -n "$FETCH_TOKEN" ]; then
-            export GH_TOKEN="$FETCH_TOKEN"
-          else
-            export GH_TOKEN="$GH_TOKEN_DEFAULT"
-          fi
-
-          if ! LATEST=$(gh release list --repo "$SOURCE_REPO" --limit 1 --json tagName -q '.[0].tagName' 2>release_err.log); then
-            echo "::error::Failed to read releases from $SOURCE_REPO. If the source repository is private or internal, pass a 'fetch_token' secret with release read access."
-            cat release_err.log >&2 || true
-            exit 1
-          fi
-          LATEST="${LATEST#v}"
-          if [ -z "$LATEST" ]; then
-            echo "::error::No releases found for $SOURCE_REPO. A published release is required for drift detection."
-            exit 1
-          fi
-          echo "source_repo=$SOURCE_REPO" >> "$GITHUB_OUTPUT"
-          echo "version=$LATEST" >> "$GITHUB_OUTPUT"
-          echo "Latest BaseCoat version: $LATEST"
-
-      - name: Compare versions
-        id: compare
-        run: |
-          CONSUMER="${{ steps.consumer.outputs.version }}"
-          LATEST="${{ steps.latest.outputs.version }}"
-          THRESHOLD="${{ inputs.alert_threshold }}"
-
-          # Extract minor version numbers
-          CONSUMER_MINOR=$(echo "$CONSUMER" | cut -d. -f2)
-          LATEST_MINOR=$(echo "$LATEST" | cut -d. -f2)
-          CONSUMER_MAJOR=$(echo "$CONSUMER" | cut -d. -f1)
-          LATEST_MAJOR=$(echo "$LATEST" | cut -d. -f1)
-
-          DRIFT=0
-          if [ "$LATEST_MAJOR" -gt "$CONSUMER_MAJOR" ]; then
-            DRIFT=$(( (LATEST_MAJOR - CONSUMER_MAJOR) * 100 + LATEST_MINOR ))
-          elif [ "$LATEST_MAJOR" -eq "$CONSUMER_MAJOR" ]; then
-            DRIFT=$(( LATEST_MINOR - CONSUMER_MINOR ))
-          fi
-
-          echo "drift=$DRIFT" >> $GITHUB_OUTPUT
-          echo "needs_alert=$([ $DRIFT -ge $THRESHOLD ] && echo true || echo false)" >> $GITHUB_OUTPUT
-          echo "consumer_version=$CONSUMER" >> $GITHUB_OUTPUT
-          echo "latest_version=$LATEST" >> $GITHUB_OUTPUT
-          echo "Version drift: $DRIFT minor versions"
-
-      - name: Open or update drift issue
-        if: steps.compare.outputs.needs_alert == 'true'
-        run: |
-          CONSUMER="${{ steps.compare.outputs.consumer_version }}"
-          LATEST="${{ steps.compare.outputs.latest_version }}"
-          DRIFT="${{ steps.compare.outputs.drift }}"
-          TITLE="chore: BaseCoat upgrade available (v${CONSUMER} → v${LATEST})"
-
-          # Check for existing open issue (idempotent)
-          EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "$TITLE" --json number -q '.[0].number' 2>/dev/null || echo "")
-
-          if [ -n "$EXISTING" ]; then
-            echo "Existing issue #$EXISTING found, updating comment"
-            gh issue comment "$EXISTING" --repo "$GITHUB_REPOSITORY" --body "Re-checked on $(date -u '+%Y-%m-%d'): still $DRIFT versions behind. Latest: v${LATEST}, current: v${CONSUMER}."
-          else
-            gh issue create --repo "$GITHUB_REPOSITORY" \
-              --title "$TITLE" \
-              --body "## BaseCoat Upgrade Available\n\nThis repo's BaseCoat assets are out of date.\n\n| | Version |\n|---|---|\n| **Current** | v${CONSUMER} |\n| **Latest** | v${LATEST} |\n| **Versions behind** | ${{ steps.compare.outputs.drift }} |\n\n## How to upgrade\n\nAlways use the sync script — do not manually copy or PR in agent files, as this bypasses the clean-replace step that removes stale assets.\n\n\`\`\`bash\ncurl -fsSL https://raw.githubusercontent.com/${{ steps.latest.outputs.source_repo }}/main/sync.sh | bash\n\`\`\`\n\nOr on Windows: download the [latest release](https://github.com/${{ steps.latest.outputs.source_repo }}/releases/latest) and run \`sync.ps1\`.\n\n---\n*Opened automatically by the BaseCoat version drift detector.*" \
-              --label "maintenance"
-          fi
+      - name: Disable stale updater auto-merge
+        shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
+        run: |
+          $defaultBranch = gh repo view $env:GITHUB_REPOSITORY --json defaultBranchRef --jq '.defaultBranchRef.name'
+          if ($LASTEXITCODE -ne 0 -or -not $defaultBranch) {
+            throw 'Unable to resolve the consumer default branch before updater checkout.'
+          }
+          $owner = ($env:GITHUB_REPOSITORY -split '/', 2)[0]
+          $prs = gh pr list --repo $env:GITHUB_REPOSITORY --state open --limit 1000 `
+            --search 'basecoat-consumer-update-pr:v1 in:body' `
+            --json number,body,headRefName,baseRefName,isCrossRepository,headRepositoryOwner,autoMergeRequest |
+            ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0) {
+            Write-Warning 'Unable to list BaseCoat updater pull requests with the workflow token; continuing for legacy caller compatibility.'
+            exit 0
+          }
+          foreach ($pr in $prs) {
+            $headOwner = if ($pr.headRepositoryOwner) { [string]$pr.headRepositoryOwner.login } else { '' }
+            $owned = $pr.body -and $pr.body.Contains('<!-- basecoat-consumer-update-pr:v1 -->') -and
+              -not [bool]$pr.isCrossRepository -and [string]$pr.baseRefName -eq $defaultBranch -and
+              $headOwner -eq $owner -and
+              [string]$pr.headRefName -match '^chore/basecoat-update-[A-Za-z0-9._-]+-\d+(?:-attempt-\d+)?$'
+            if ($owned -and $pr.autoMergeRequest) {
+              gh pr merge $pr.number --repo $env:GITHUB_REPOSITORY --disable-auto
+              if ($LASTEXITCODE -ne 0) {
+                throw "Unable to disable auto-merge for BaseCoat updater PR #$($pr.number)."
+              }
+            }
+          }
+
+      - name: Configure pull-request delivery credentials
+        if: steps.updater.outputs.installed == 'true'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.update_token || github.token }}
+          persist-credentials: false
+
+      - name: Run consumer-owned BaseCoat updater
+        if: steps.updater.outputs.installed == 'true'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASECOAT_UPDATE_TOKEN: ${{ secrets.update_token }}
+          BASECOAT_UPDATE_ACTOR: ${{ inputs.update_actor }}
+          BASECOAT_STAGE_PATH: ${{ inputs.stage_path }}
+          BASECOAT_SOURCE_REPO: ${{ inputs.source_repo }}
+          BASECOAT_SOURCE_REF: ${{ inputs.source_ref }}
+          BASECOAT_MIRROR: ${{ inputs.mirror }}
+          BASECOAT_UPDATE_MODE: ${{ inputs.mode }}
+          BASECOAT_UPDATE_APPROVAL: ${{ inputs.approval }}
+          BASECOAT_ALLOWED_BUMPS: ${{ inputs.allowed_bumps }}
+          BASECOAT_FETCH_HOST: ${{ inputs.fetch_host }}
+          BASECOAT_FETCH_TOKEN: ${{ secrets.fetch_token }}
+          BASECOAT_MIRROR_FETCH_HOST: ${{ inputs.mirror_fetch_host }}
+          BASECOAT_MIRROR_FETCH_TOKEN: ${{ secrets.mirror_fetch_token }}
+        run: |
+          $script = Join-Path $env:BASECOAT_STAGE_PATH 'scripts/invoke-basecoat-consumer-update.ps1'
+          & $script `
+            -StagePath $env:BASECOAT_STAGE_PATH `
+            -Source $env:BASECOAT_SOURCE_REPO `
+            -Ref $env:BASECOAT_SOURCE_REF `
+            -Mirror $env:BASECOAT_MIRROR `
+            -Mode $env:BASECOAT_UPDATE_MODE `
+            -Approval $env:BASECOAT_UPDATE_APPROVAL `
+            -AllowedBumps $env:BASECOAT_ALLOWED_BUMPS
+
+      - name: Legacy notification fallback
+        if: steps.updater.outputs.installed != 'true'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASECOAT_STAGE_PATH: ${{ inputs.stage_path }}
+          BASECOAT_SOURCE_REPO: ${{ inputs.source_repo }}
+          BASECOAT_SOURCE_REF: ${{ inputs.source_ref }}
+          BASECOAT_FETCH_HOST: ${{ inputs.fetch_host }}
+          BASECOAT_FETCH_TOKEN: ${{ secrets.fetch_token }}
+        run: |
+          function Get-TopLevelValue([string]$Key) {
+            if (-not (Test-Path -LiteralPath '.basecoat.yml')) { return '' }
+            foreach ($line in Get-Content -LiteralPath '.basecoat.yml') {
+              if ($line -match "^$([regex]::Escape($Key)):\s*(.*?)\s*(?:#.*)?$") {
+                return $Matches[1].Trim().Trim('"', "'")
+              }
+            }
+            return ''
+          }
+          function Get-SectionValue([string]$Section, [string]$Key) {
+            if (-not (Test-Path -LiteralPath '.basecoat.yml')) { return '' }
+            $inSection = $false
+            foreach ($line in Get-Content -LiteralPath '.basecoat.yml') {
+              if ($line -match '^([A-Za-z0-9_-]+):') {
+                $inSection = $Matches[1] -eq $Section
+                continue
+              }
+              if ($inSection -and $line -match "^\s{2,}$([regex]::Escape($Key)):\s*(.*?)\s*(?:#.*)?$") {
+                return $Matches[1].Trim().Trim('"', "'")
+              }
+            }
+            return ''
+          }
+          function Convert-ToRepoSlug([string]$Value) {
+            $candidate = $Value.Trim()
+            $uri = $null
+            if ([uri]::TryCreate($candidate, [System.UriKind]::Absolute, [ref]$uri)) {
+              if ($uri.Scheme -ne 'https') { throw 'Legacy release lookup supports only HTTPS repository URLs.' }
+              $authority = if ($uri.IsDefaultPort) { $uri.Host } else { "$($uri.Host):$($uri.Port)" }
+              return "$authority/$($uri.AbsolutePath.Trim('/'))" -replace '\.git$', ''
+            }
+            return (($candidate -split '[?#]', 2)[0].TrimEnd('/') -replace '\.git$', '')
+          }
+          $stage = $env:BASECOAT_STAGE_PATH
+          $versionFile = Join-Path $stage 'version.json'
+          if (-not (Test-Path -LiteralPath $versionFile)) {
+            throw "Legacy fallback cannot find '$versionFile'. Sync BaseCoat before enabling version checks."
+          }
+          $current = [System.Management.Automation.SemanticVersion]((Get-Content -LiteralPath $versionFile -Raw | ConvertFrom-Json).version)
+          $source = $env:BASECOAT_SOURCE_REPO
+          if (-not $source) { $source = Get-SectionValue 'updates' 'source' }
+          if (-not $source) { $source = Get-TopLevelValue 'source' }
+          if (-not $source) { $source = 'IBuySpy-Shared/basecoat' }
+          $requestedRef = $env:BASECOAT_SOURCE_REF
+          if (-not $requestedRef) { $requestedRef = Get-SectionValue 'updates' 'ref' }
+          if (-not $requestedRef) { $requestedRef = 'latest' }
+          $source = Convert-ToRepoSlug $source
+          $sourceAuthority = if (($source -split '/').Count -eq 2) { 'github.com' } else { ($source -split '/', 2)[0] }
+          $markerPrefix = '<!-- basecoat-consumer-update:'
+          $issues = gh issue list --repo $env:GITHUB_REPOSITORY --state all --limit 1000 `
+            --search 'basecoat-consumer-update: in:body' --json number,body,state,url | ConvertFrom-Json
+          $existing = $issues | Where-Object { $_.body -and $_.body.Contains($markerPrefix) } | Select-Object -First 1
+          $oldGhToken = $env:GH_TOKEN
+          $oldEnterpriseToken = $env:GH_ENTERPRISE_TOKEN
+          $oldGhHost = $env:GH_HOST
+          $release = $null
+          $lookupFailure = $null
+          try {
+            try {
+              if ($env:BASECOAT_FETCH_TOKEN -and $env:BASECOAT_FETCH_HOST -and
+                  $sourceAuthority.Equals($env:BASECOAT_FETCH_HOST, [System.StringComparison]::OrdinalIgnoreCase)) {
+                if ($env:BASECOAT_FETCH_HOST -eq 'github.com') {
+                  $env:GH_TOKEN = $env:BASECOAT_FETCH_TOKEN
+                }
+                else {
+                  $env:GH_ENTERPRISE_TOKEN = $env:BASECOAT_FETCH_TOKEN
+                  $env:GH_HOST = $env:BASECOAT_FETCH_HOST
+                }
+              }
+              $releaseArgs = @('release', 'view')
+              if ($requestedRef -and $requestedRef -notin @('latest', 'stable')) { $releaseArgs += $requestedRef }
+              $releaseArgs += @('--repo', $source, '--json', 'tagName,url')
+              $releaseJson = gh @releaseArgs
+              if ($LASTEXITCODE -ne 0 -or -not $releaseJson) {
+                throw 'Legacy release lookup was unavailable.'
+              }
+              $release = $releaseJson | ConvertFrom-Json
+            }
+            finally {
+              $env:GH_TOKEN = $oldGhToken
+              $env:GH_ENTERPRISE_TOKEN = $oldEnterpriseToken
+              $env:GH_HOST = $oldGhHost
+            }
+          }
+          catch {
+            $lookupFailure = $_.Exception.Message
+          }
+          if ($lookupFailure) {
+            $started = (Get-Date).ToUniversalTime().ToString('o')
+            $marker = "$markerPrefix{`"schema`":1,`"current_version`":`"$current`",`"target_version`":`"`",`"target_sha`":`"`",`"disposition`":`"unknown`",`"pr_url`":`"`",`"drift_started_at`":`"$started`"} -->"
+            $title = 'chore(basecoat): configure private release lookup'
+            $body = "$marker`n## BaseCoat update check needs configuration`n`nThe legacy caller started successfully, but the private/internal BaseCoat source cannot be resolved without a read-only fetch credential.`n`nUpdate the installed caller to forward ``fetch_token`` as documented, or sync BaseCoat v4.2.0 or newer. No pull-request delivery was attempted."
+            if ($existing) {
+              gh issue edit $existing.number --repo $env:GITHUB_REPOSITORY --title $title --body $body
+              if ($LASTEXITCODE -ne 0) { throw 'Unable to persist the legacy BaseCoat setup issue.' }
+              if ($existing.state -eq 'CLOSED') {
+                gh issue reopen $existing.number --repo $env:GITHUB_REPOSITORY
+                if ($LASTEXITCODE -ne 0) { throw 'Unable to reopen the legacy BaseCoat setup issue.' }
+              }
+            }
+            else {
+              gh issue create --repo $env:GITHUB_REPOSITORY --title $title --body $body
+              if ($LASTEXITCODE -ne 0) { throw 'Unable to create the legacy BaseCoat setup issue.' }
+            }
+            Write-Warning 'Legacy private release lookup needs a named fetch_token; recorded a consumer setup issue.'
+            exit 0
+          }
+          $target = [System.Management.Automation.SemanticVersion]($release.tagName -replace '^v', '')
+          if ($target -le $current) {
+            if ($existing -and $existing.state -eq 'OPEN') {
+              gh issue close $existing.number --repo $env:GITHUB_REPOSITORY `
+                --comment 'Installed BaseCoat version reached the latest stable release.'
+            }
+            exit 0
+          }
+          $started = (Get-Date).ToUniversalTime().ToString('o')
+          if ($existing -and $existing.state -eq 'OPEN' -and $existing.body -match '<!-- basecoat-consumer-update:(\{[^\r\n]*\}) -->') {
+            try {
+              $oldMarker = $Matches[1] | ConvertFrom-Json
+              $parsedStarted = [datetimeoffset]::MinValue
+              if ($oldMarker.drift_started_at -and
+                  [datetimeoffset]::TryParse([string]$oldMarker.drift_started_at, [ref]$parsedStarted)) {
+                $started = $parsedStarted.UtcDateTime.ToString('o')
+              }
+            }
+            catch {
+              Write-Warning 'Ignoring malformed legacy BaseCoat issue marker; it will be replaced.'
+            }
+          }
+          $marker = "$markerPrefix{`"schema`":1,`"current_version`":`"$current`",`"target_version`":`"$target`",`"target_sha`":`"`",`"disposition`":`"notified-legacy`",`"pr_url`":`"`",`"drift_started_at`":`"$started`"} -->"
+          $body = "$marker`n## BaseCoat update available`n`nCurrent: ``v$current```nTarget: ``$($release.tagName)```n`n[Release notes]($($release.url))`n`nSync BaseCoat v4.2.0 or newer to enable immutable provenance and guarded PR delivery."
+          if ($existing) {
+            gh issue edit $existing.number --repo $env:GITHUB_REPOSITORY `
+              --title "chore(basecoat): update v$current to v$target" --body $body
+            if ($existing.state -eq 'CLOSED') { gh issue reopen $existing.number --repo $env:GITHUB_REPOSITORY }
+          }
+          else {
+            gh issue create --repo $env:GITHUB_REPOSITORY `
+              --title "chore(basecoat): update v$current to v$target" --body $body
+          }
 
       - name: Detect mixed agent naming state
-        run: |
-          AGENTS_DIR="${{ inputs.stage_path }}/agents"
-          if [ ! -d "$AGENTS_DIR" ]; then
-            echo "No agents directory found at $AGENTS_DIR; skipping mixed-state check."
-            exit 0
-          fi
-
-          PREFIXED=$(find "$AGENTS_DIR" -maxdepth 1 -name 'basecoat-*.agent.md' | wc -l | tr -d ' ')
-          NON_PREFIXED=$(find "$AGENTS_DIR" -maxdepth 1 -name '*.agent.md' ! -name 'basecoat-*.agent.md' ! -name 'orchestrator.agent.md' | wc -l | tr -d ' ')
-
-          echo "Prefixed agents (basecoat-*): $PREFIXED"
-          echo "Non-prefixed agents: $NON_PREFIXED"
-
-          if [ "$PREFIXED" -gt 0 ] && [ "$NON_PREFIXED" -gt 0 ]; then
-            echo "::warning::Mixed agent naming detected: $PREFIXED basecoat-* agents and $NON_PREFIXED non-prefixed agents coexist. This indicates an incomplete manual upgrade. Run the sync script to restore a clean state."
-            TITLE="chore: BaseCoat mixed agent state detected — manual upgrade incomplete"
-            EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "$TITLE" --json number -q '.[0].number' 2>/dev/null || echo "")
-            if [ -z "$EXISTING" ]; then
-              gh issue create --repo "$GITHUB_REPOSITORY" \
-                --title "$TITLE" \
-                --body "## Mixed BaseCoat Agent State\n\nBoth old flat-name agents and new \`basecoat-\`-prefixed agents were found in \`$AGENTS_DIR\`.\n\n| | Count |\n|---|---|\n| Prefixed (\`basecoat-*\`) | $PREFIXED |\n| Non-prefixed (stale) | $NON_PREFIXED |\n\nThis typically happens when an upgrade PR manually added new agents without removing old ones. The sync script prevents this by replacing the entire agents directory.\n\n## How to fix\n\n\`\`\`bash\ncurl -fsSL https://raw.githubusercontent.com/${{ steps.latest.outputs.source_repo }}/main/sync.sh | bash\n\`\`\`\n\nOr on Windows: download the [latest release](https://github.com/${{ steps.latest.outputs.source_repo }}/releases/latest) and run \`sync.ps1\`.\n\n---\n*Opened automatically by the BaseCoat version check.*" \
-                --label "maintenance"
-            else
-              echo "Mixed-state issue #$EXISTING already open."
-            fi
-          else
-            echo "Agent naming state is consistent."
-          fi
+        shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
+          BASECOAT_STAGE_PATH: ${{ inputs.stage_path }}
+        run: |
+          $agentsDir = Join-Path $env:BASECOAT_STAGE_PATH 'agents'
+          if (-not (Test-Path -LiteralPath $agentsDir -PathType Container)) {
+            Write-Host "No agents directory found at '$agentsDir'; skipping mixed-state check."
+            exit 0
+          }
+          $agents = @(Get-ChildItem -LiteralPath $agentsDir -File -Filter '*.agent.md')
+          $prefixed = @($agents | Where-Object Name -Like 'basecoat-*.agent.md')
+          $nonPrefixed = @($agents | Where-Object {
+            $_.Name -notlike 'basecoat-*.agent.md' -and $_.Name -ne 'orchestrator.agent.md'
+          })
+          Write-Host "Prefixed agents (basecoat-*): $($prefixed.Count)"
+          Write-Host "Non-prefixed agents: $($nonPrefixed.Count)"
+          if ($prefixed.Count -eq 0 -or $nonPrefixed.Count -eq 0) {
+            Write-Host 'Agent naming state is consistent.'
+            exit 0
+          }
+          Write-Warning 'Mixed agent naming detected; the BaseCoat upgrade is incomplete.'
+          $marker = '<!-- basecoat-mixed-agent-state:v1 -->'
+          $issues = gh issue list --repo $env:GITHUB_REPOSITORY --state open --limit 1000 `
+            --search 'basecoat-mixed-agent-state:v1 in:body' --json number,body | ConvertFrom-Json
+          $existing = $issues | Where-Object { $_.body -and $_.body.Contains($marker) } | Select-Object -First 1
+          if ($existing) {
+            Write-Host "Mixed-state issue #$($existing.number) already open."
+            exit 0
+          }
+          $body = @"
+          $marker
+          ## Mixed BaseCoat agent state
+
+          Both `basecoat-*` agents and stale non-prefixed agents were found in `$agentsDir`.
+
+          | Naming | Count |
+          |---|---:|
+          | `basecoat-*` | $($prefixed.Count) |
+          | Non-prefixed | $($nonPrefixed.Count) |
+
+          Run the repository's BaseCoat sync script to perform a clean replacement.
+          "@
+          $labelArgs = @()
+          gh label view maintenance --repo $env:GITHUB_REPOSITORY *> $null
+          if ($LASTEXITCODE -eq 0) { $labelArgs = @('--label', 'maintenance') }
+          gh issue create --repo $env:GITHUB_REPOSITORY `
+            --title 'chore: BaseCoat mixed agent state detected — manual upgrade incomplete' `
+            --body $body @labelArgs
+
+      - name: Upload fleet status
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: basecoat-consumer-update-status
+          path: basecoat-update-status.json
+          if-no-files-found: warn
+          retention-days: 30

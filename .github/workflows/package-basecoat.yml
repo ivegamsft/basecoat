@@ -94,6 +94,32 @@ jobs:
           name: base-coat-release
           path: dist
 
+      - name: Audit reusable workflow sharing
+        env:
+          GH_TOKEN: ${{ secrets.BASECOAT_RELEASE_AUDIT_TOKEN || secrets.PRODUCTION_REPO_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${GH_TOKEN}" ]]; then
+            echo "::error::BASECOAT_RELEASE_AUDIT_TOKEN (or the existing PRODUCTION_REPO_TOKEN fallback) is required to audit reusable Actions access before publication."
+            echo "::error::Provide a fine-grained PAT with repository Administration: read, or generate a GitHub App installation token at runtime with equivalent access."
+            exit 1
+          fi
+          if ! access_level="$(gh api "repos/${REPOSITORY}/actions/permissions/access" --jq '.access_level')"; then
+            echo "::error::Unable to audit reusable Actions access for ${REPOSITORY}. Confirm Actions is enabled and BASECOAT_RELEASE_AUDIT_TOKEN has Administration: read."
+            exit 1
+          fi
+          case "${access_level}" in
+            organization|enterprise)
+              echo "Reusable Actions access is ${access_level}."
+              ;;
+            *)
+              echo "::error::Reusable Actions access is '${access_level}', so downstream organization repositories cannot start the released caller."
+              echo "::error::Set Settings → Actions → General → Access to 'Accessible from repositories in the organization' before publishing."
+              exit 1
+              ;;
+          esac
+
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}

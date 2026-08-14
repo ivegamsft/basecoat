@@ -35,7 +35,8 @@ $validationScripts = @(
     'scripts/validate-basecoat.ps1',
     'scripts/validate-basecoat.sh',
     'scripts/validate-workflow-action-pins.ps1',
-    'scripts/validate-workflow-action-pins.py'
+    'scripts/validate-workflow-action-pins.py',
+    'scripts/validate-reusable-workflow-contracts.py'
 )
 $manifest = Get-Content (Join-Path $stageDir 'asset-manifest.json') -Raw | ConvertFrom-Json
 $manifestPaths = @($manifest.assets | ForEach-Object { $_.path })
@@ -46,6 +47,24 @@ foreach ($relativePath in $validationScripts) {
     if ($relativePath -notin $manifestPaths) {
         throw "Package validation failed: asset-manifest.json is missing '$relativePath'"
     }
+}
+
+$contractValidator = Join-Path $stageDir 'scripts\validate-reusable-workflow-contracts.py'
+$packagedCallable = Join-Path $stageDir '.github\workflows\check-basecoat-version-callable.yml'
+$packagedCallers = @(
+    Get-ChildItem (Join-Path $stageDir '.github\workflow-templates') -File |
+        Where-Object {
+            $_.Extension -in @('.yml', '.yaml') -and
+            (Get-Content $_.FullName -Raw) -match '/\.github/workflows/check-basecoat-version-callable\.yml@'
+        } |
+        ForEach-Object { $_.FullName }
+)
+if ($packagedCallers.Count -eq 0) {
+    throw 'Package validation failed: no packaged BaseCoat version workflow callers found'
+}
+& python $contractValidator $packagedCallable @packagedCallers
+if ($LASTEXITCODE -ne 0) {
+    throw 'Package validation failed: reusable-workflow caller/callable contract mismatch'
 }
 
 # Exclude eval metadata from packaged install payloads

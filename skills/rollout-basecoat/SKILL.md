@@ -1,7 +1,7 @@
 ---
 name: rollout-basecoat
 compatibility: [github-copilot-cli]
-description: "Use when refreshing a consumer repository to the latest BaseCoat build or a pinned BaseCoat release tag. USE FOR: refresh basecoat, update basecoat in a consumer repo, run sync.ps1 or sync.sh with .basecoat.yml defaults, verify installed basecoat version after sync, recover when rollout-basecoat skill invocation fails. DO NOT USE FOR: editing BaseCoat framework internals, designing new agents or skills, running unrelated CI/CD deployments."
+description: "Use when refreshing a consumer repository or configuring BaseCoat consumer updates. USE FOR: refresh basecoat, update basecoat, configure downstream update notifications, enable guarded BaseCoat upgrade PRs, run sync.ps1 or sync.sh with .basecoat.yml defaults, verify installed versions, recover rollout failures. DO NOT USE FOR: editing BaseCoat framework internals, designing new agents or skills, unrelated deployments."
 category: operations
 
 visibility: public
@@ -22,6 +22,8 @@ Refresh a consumer repository to the latest BaseCoat build or a pinned release.
 - update basecoat
 - sync basecoat to latest
 - upgrade basecoat in this repo
+- notify me when BaseCoat updates are available
+- open guarded BaseCoat upgrade PRs
 
 ## Workflow
 
@@ -45,6 +47,11 @@ what changed" is an incomplete run.
 6. Commit, push, open a PR, then remove the worktree and prune. If the sync
    produced no changes, skip the PR and report "already up to date."
 7. Report what changed, the PR URL, and any follow-up steps.
+
+For recurring consumer-owned updates, configure `.basecoat.yml` `updates` policy
+and install the distributed check workflow. Defaults remain notify plus required
+approval. Automatic mode may request GitHub auto-merge, but never bypasses
+required checks or branch protection. Major releases always require approval.
 
 See [`references/delivery-lifecycle.md`](references/delivery-lifecycle.md) for the
 exact worktree, commit, push, PR, cleanup, and fallback commands and safety rules.

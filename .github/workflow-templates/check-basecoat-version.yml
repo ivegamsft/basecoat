@@ -1,84 +1,30 @@
-name: Check BaseCoat Version
+name: Check BaseCoat Updates
 
-# Requires BASECOAT_REPO_TOKEN as an organization Actions secret with read
-# access to the private IBuySpy-Shared/basecoat repository.
+# For the private BaseCoat source, configure read-only BASECOAT_FETCH_TOKEN.
+# Pull-request mode additionally requires BASECOAT_UPDATE_TOKEN.
 
 on:
   schedule:
     - cron: "0 9 * * 1"
   workflow_dispatch:
+  repository_dispatch:
+    types:
+      - basecoat-release-published
+
+permissions:
+  actions: read
+  contents: read
+  issues: write
+  pull-requests: write
 
 jobs:
-  check:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      issues: write
-      contents: read
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
-
-      - name: Read consumer version
-        id: consumer
-        shell: bash
-        run: |
-          version_file=".github/base-coat/version.json"
-          if [[ ! -f "$version_file" ]]; then
-            echo "version=0.0.0" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          echo "version=$(jq -r '.version' "$version_file")" >> "$GITHUB_OUTPUT"
-
-      - name: Get latest BaseCoat release
-        id: latest
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.BASECOAT_REPO_TOKEN }}
-        run: |
-          latest="$(gh release list --repo IBuySpy-Shared/basecoat --limit 1 --json tagName -q '.[0].tagName' | sed 's/^v//')"
-          echo "version=$latest" >> "$GITHUB_OUTPUT"
-
-      - name: Compare versions
-        id: compare
-        shell: bash
-        env:
-          CONSUMER: ${{ steps.consumer.outputs.version }}
-          LATEST: ${{ steps.latest.outputs.version }}
-        run: |
-          consumer_major="${CONSUMER%%.*}"
-          consumer_minor="$(cut -d. -f2 <<< "$CONSUMER")"
-          latest_major="${LATEST%%.*}"
-          latest_minor="$(cut -d. -f2 <<< "$LATEST")"
-          drift=0
-          if (( latest_major > consumer_major )); then
-            drift=$(( (latest_major - consumer_major) * 100 + latest_minor ))
-          elif (( latest_major == consumer_major )); then
-            drift=$(( latest_minor - consumer_minor ))
-          fi
-          echo "drift=$drift" >> "$GITHUB_OUTPUT"
-          echo "needs_alert=$([[ $drift -ge 1 ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
-
-      - name: Open or update drift issue
-        if: steps.compare.outputs.needs_alert == 'true'
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-          CONSUMER: ${{ steps.consumer.outputs.version }}
-          LATEST: ${{ steps.latest.outputs.version }}
-          DRIFT: ${{ steps.compare.outputs.drift }}
-        run: |
-          title="chore: BaseCoat upgrade available (v${CONSUMER} → v${LATEST})"
-          existing="$(gh issue list --state open --search "$title" --json number -q '.[0].number' 2>/dev/null || true)"
-          if [[ -n "$existing" ]]; then
-            gh issue comment "$existing" --body "Re-checked on $(date -u '+%Y-%m-%d'): still $DRIFT versions behind. Latest: v${LATEST}, current: v${CONSUMER}."
-          else
-            label_args=()
-            if gh label view maintenance >/dev/null 2>&1; then
-              label_args+=(--label maintenance)
-            fi
-            gh issue create \
-              --title "$title" \
-              "${label_args[@]}" \
-              --body "BaseCoat v${LATEST} is available; this repository currently uses v${CONSUMER}. Run the pinned sync process documented by IBuySpy-Shared/basecoat to upgrade."
-          fi
+  update:
+    uses: IBuySpy-Shared/basecoat/.github/workflows/check-basecoat-version-callable.yml@9ab8894828e3a887d97c3383e7f23ed892d9a088
+    with:
+      stage_path: .github/base-coat
+      source_repo: IBuySpy-Shared/basecoat
+      fetch_host: github.com
+      update_actor: ${{ vars.BASECOAT_UPDATE_ACTOR }}
+    secrets:
+      update_token: ${{ secrets.BASECOAT_UPDATE_TOKEN }}
+      fetch_token: ${{ secrets.BASECOAT_FETCH_TOKEN }}

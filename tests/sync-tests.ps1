@@ -317,7 +317,8 @@ try {
             'scripts/validate-basecoat.ps1',
             'scripts/validate-basecoat.sh',
             'scripts/validate-workflow-action-pins.ps1',
-            'scripts/validate-workflow-action-pins.py'
+            'scripts/validate-workflow-action-pins.py',
+            'scripts/invoke-basecoat-consumer-update.ps1'
         )) {
         $testCount++
         Assert-SyncPathExists -Path (Join-Path $targetDir $runtimeScript) `
@@ -744,6 +745,87 @@ finally {
 # ============================================================================
 # .basecoat.yml source/ref resolution (issue #2705)
 # ============================================================================
+Write-Host "`nTest 12: PowerShell sync uses mirror and immutable SHA provenance" -ForegroundColor Yellow
+
+$consumer = $null
+try {
+    $consumer = New-ConsumerRepo -WithGitHubDir
+    $sourceSha = (git -C $repoRoot rev-parse HEAD).Trim()
+    Push-Location $consumer
+    try {
+        $env:BASECOAT_REPO = 'file://missing-canonical-repository'
+        $env:BASECOAT_MIRROR = "file://$repoRoot"
+        $env:BASECOAT_REF = $sourceSha
+        $env:BASECOAT_EXPECTED_SHA = $sourceSha
+        & pwsh -NoProfile -File (Join-Path $repoRoot 'sync.ps1')
+        $exitCode = $LASTEXITCODE
+    }
+    finally {
+        Remove-Item Env:\BASECOAT_REPO,Env:\BASECOAT_MIRROR,Env:\BASECOAT_REF,Env:\BASECOAT_EXPECTED_SHA -ErrorAction SilentlyContinue
+        Pop-Location
+    }
+
+    $testCount++
+    if ($exitCode -ne 0) { throw 'PowerShell immutable mirror sync failed.' }
+    $provenance = Get-Content -LiteralPath (Join-Path $consumer '.github/base-coat/.source-provenance.json') -Raw | ConvertFrom-Json
+    $testCount++
+    if ($provenance.commit -ne $sourceSha) {
+        throw "PowerShell immutable mirror sync recorded '$($provenance.commit)', expected '$sourceSha'."
+    }
+    Write-Host '  Passed: PowerShell sync fetched the mirror by immutable SHA and recorded provenance' -ForegroundColor Green
+}
+catch {
+    $failures += $_.Exception.Message
+}
+finally {
+    if ($consumer -and (Test-Path $consumer)) {
+        Remove-Item -Path $consumer -Recurse -Force
+    }
+}
+
+# ============================================================================
+# Test 13: Sync redacts credential-bearing source failures
+# ============================================================================
+Write-Host "`nTest 13: PowerShell sync redacts credential-bearing source failures" -ForegroundColor Yellow
+
+$consumer = $null
+try {
+    $consumer = New-ConsumerRepo -WithGitHubDir
+    Push-Location $consumer
+    try {
+        $credentialUrl = 'https://user:password@127.0.0.1:1/basecoat.git?token=secret-value'
+        $env:BASECOAT_REPO = $credentialUrl
+        $env:BASECOAT_MIRROR = $credentialUrl
+        $env:BASECOAT_REF = 'main'
+        $output = & pwsh -NoProfile -File (Join-Path $repoRoot 'sync.ps1') 2>&1 | Out-String
+        $exitCode = $LASTEXITCODE
+    }
+    finally {
+        Remove-Item Env:\BASECOAT_REPO,Env:\BASECOAT_MIRROR,Env:\BASECOAT_REF -ErrorAction SilentlyContinue
+        Pop-Location
+    }
+
+    $testCount++
+    if ($exitCode -eq 0) { throw 'PowerShell sync redaction fixture must fail cloning.' }
+    $testCount++
+    if ($output -match 'user:password|secret-value|token=') {
+        throw "PowerShell sync leaked source credentials: $output"
+    }
+    $testCount++
+    if ($output -notmatch 'https://127\.0\.0\.1:1/basecoat\.git') {
+        throw "PowerShell sync redaction removed useful source context: $output"
+    }
+    Write-Host '  Passed: PowerShell sync failure output redacts URL credentials' -ForegroundColor Green
+}
+catch {
+    $failures += $_.Exception.Message
+}
+finally {
+    if ($consumer -and (Test-Path $consumer)) {
+        Remove-Item -Path $consumer -Recurse -Force
+    }
+}
+
 Write-Host "`nTesting .basecoat.yml source/ref pinning..." -ForegroundColor Cyan
 
 function New-BasecoatSource {
@@ -887,6 +969,43 @@ catch {
 finally {
     if ($consumer -and (Test-Path $consumer)) { Remove-Item -Path $consumer -Recurse -Force }
     if ($sourceRepo -and (Test-Path $sourceRepo)) { Remove-Item -Path $sourceRepo -Recurse -Force }
+}
+
+# ============================================================================
+# Test 14: Private HTTPS sources use a host-scoped authenticated retry
+# ============================================================================
+Write-Host "`nTest 14: PowerShell sync supports private HTTPS source authentication" -ForegroundColor Yellow
+try {
+    $syncContent = Get-Content -LiteralPath (Join-Path $repoRoot 'sync.ps1') -Raw
+    $testCount++
+    if ($syncContent -notmatch 'Invoke-SyncGitWithAuthRetry') {
+        throw 'PowerShell sync is missing authenticated clone/fetch retry handling.'
+    }
+    $testCount++
+    if ($syncContent -notmatch 'http\.\$authOrigin\.extraheader=AUTHORIZATION: basic') {
+        throw 'PowerShell sync authentication must be scoped to the source URL origin.'
+    }
+    $testCount++
+    if ($syncContent -notmatch 'AUTHORIZATION:\\s\*basic') {
+        throw 'PowerShell sync must redact encoded authorization headers from failures.'
+    }
+    $testCount++
+    if ($syncContent -notmatch "\`$uri\.Scheme -ne 'https'") {
+        throw 'PowerShell sync must never send a fetch token over plain HTTP.'
+    }
+    $testCount++
+    if ($syncContent -notmatch '\$token = \$env:BASECOAT_FETCH_TOKEN' -or
+        $syncContent -match '\$token = if \(\$env:GITHUB_TOKEN\)') {
+        throw 'PowerShell sync must use only the dedicated source fetch token.'
+    }
+    $testCount++
+    if ($syncContent -notmatch 'uri\.Authority\.Equals\(\$trustedAuthority') {
+        throw 'PowerShell sync must bind authenticated retry to the configured source authority.'
+    }
+    Write-Host '  Passed: private HTTPS retry is host-scoped and safely redacted' -ForegroundColor Green
+}
+catch {
+    $failures += $_.Exception.Message
 }
 
 # ============================================================================
