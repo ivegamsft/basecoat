@@ -1,0 +1,11 @@
+name: Unnecessary self-hosted public fixture
+
+on:
+  workflow_dispatch:
+
+jobs:
+  public-job:
+    runs-on: [self-hosted, linux]
+    timeout-minutes: 10
+    steps:
+      - run: curl --fail https://api.github.com

@@ -22,6 +22,7 @@ jobs:
 
   release:
     needs: production-token-preflight
+    # Release creation and mirror publication use public GitHub APIs.
     runs-on: ubuntu-latest
     timeout-minutes: 20
 

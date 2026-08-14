@@ -1,5 +1,25 @@
 {
-  "version": 1,
+  "version": 2,
+  "capabilities": [
+    "public-internet",
+    "oidc",
+    "credential-auth",
+    "public-cloud-deploy",
+    "public-pages-deploy",
+    "public-registry-publish",
+    "public-build",
+    "public-release-publish",
+    "deployment-credentials",
+    "public-api-dispatch",
+    "private-network",
+    "runner-managed-identity",
+    "delegated-runner",
+    "public-ci",
+    "windows-runtime",
+    "macos-runtime",
+    "untrusted-fork-safe",
+    "multi-os-matrix"
+  ],
   "classes": [
     {
       "runner_class": "github-hosted-linux",
@@ -9,11 +29,14 @@
         "unit-test",
         "docs",
         "repository-validation",
-        "public-ci"
+        "public-ci",
+        "OIDC or credential-auth public cloud deployment",
+        "credentialed public API publication"
       ],
       "required_capabilities": [
         "public-internet"
-      ]
+      ],
+      "recommendation_priority": 0
     },
     {
       "runner_class": "github-hosted-windows",
@@ -25,7 +48,8 @@
       "required_capabilities": [
         "windows-runtime",
         "public-internet"
-      ]
+      ],
+      "recommendation_priority": 80
     },
     {
       "runner_class": "github-hosted-macos",
@@ -37,7 +61,8 @@
       "required_capabilities": [
         "macos-runtime",
         "public-internet"
-      ]
+      ],
+      "recommendation_priority": 80
     },
     {
       "runner_class": "self-hosted-linux",
@@ -46,13 +71,13 @@
         "deploy",
         "release",
         "private-network",
-        "managed-identity"
+        "runner-managed-identity"
       ],
-      "required_capabilities": [
+      "required_capabilities_any": [
         "private-network",
-        "managed-identity",
-        "deployment-credentials"
-      ]
+        "runner-managed-identity"
+      ],
+      "recommendation_priority": 100
     },
     {
       "runner_class": "configurable-deploy",
@@ -64,7 +89,9 @@
       "required_capabilities": [
         "private-network",
         "deployment-credentials"
-      ]
+      ],
+      "recommend_for_audit": false,
+      "recommendation_priority": 0
     },
     {
       "runner_class": "configurable-release",
@@ -75,7 +102,9 @@
       "required_capabilities": [
         "private-network",
         "deployment-credentials"
-      ]
+      ],
+      "recommend_for_audit": false,
+      "recommendation_priority": 0
     },
     {
       "runner_class": "github-hosted-matrix",
@@ -86,7 +115,8 @@
       "required_capabilities": [
         "multi-os-matrix",
         "public-internet"
-      ]
+      ],
+      "recommendation_priority": 90
     },
     {
       "runner_class": "reusable-workflow",
@@ -96,7 +126,8 @@
       ],
       "required_capabilities": [
         "delegated-runner"
-      ]
+      ],
+      "recommendation_priority": 110
     }
   ]
 }

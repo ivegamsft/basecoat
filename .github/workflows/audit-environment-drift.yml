@@ -34,6 +34,7 @@ permissions:
 
 jobs:
   audit:
+    # Public API drift checks do not use runner-managed identity or private networking.
     runs-on: ubuntu-latest
     timeout-minutes: 20
     outputs:

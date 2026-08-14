@@ -28,6 +28,30 @@ function Get-StashContentKey {
     return (($parts | ForEach-Object { $_.Trim().Substring(0, 8) }) -join '')
 }
 
+function Get-StashSensitivityKey {
+    param([string]$Ref)
+
+    $parts = @(
+        (git rev-parse "$Ref^{tree}" 2>$null),
+        (git rev-parse "$Ref^2^{tree}" 2>$null)
+    ) | Where-Object { $_ }
+    $untracked = (git rev-parse "$Ref^3^{tree}" 2>$null)
+    if ($LASTEXITCODE -eq 0 -and $untracked) {
+        $parts += $untracked
+    }
+    return (($parts | ForEach-Object { $_.Trim().Substring(0, 8) }) -join '')
+}
+
+function Test-RetainedStashSnapshot {
+    param([string]$Ref)
+
+    if ([string]::IsNullOrWhiteSpace($Ref)) {
+        return $false
+    }
+    $retainedSnapshots = @(git stash list --format='%H' 2>$null)
+    return $LASTEXITCODE -eq 0 -and $retainedSnapshots -contains $Ref
+}
+
 function Get-PorcelainStatusPaths {
     $startInfo = [Diagnostics.ProcessStartInfo]::new()
     $startInfo.FileName = 'git'
@@ -108,6 +132,7 @@ try {
         terminalState = 'PARKED'
         wipRef = $null
         snapshot = $null
+        snapshotContentKey = $null
         pushSucceeded = $false
         restoreSucceeded = $true
         nextAction = 'Run lane-closeout in full mode to resolve PR and gate state.'
@@ -138,6 +163,22 @@ try {
         }
     } | Select-Object -First 1
 
+    $previousLedger = $null
+    if (Test-Path $ledger) {
+        try {
+            $previousLedger = Get-Content $ledger -Raw | ConvertFrom-Json
+        }
+        catch {
+            $previousLedger = $null
+        }
+    }
+    $previousLedgerSnapshot = if ($previousLedger) { [string]$previousLedger.snapshot } else { '' }
+    $previousLedgerContentKey = if ($previousLedger -and $previousLedger.PSObject.Properties['snapshotContentKey']) {
+        [string]$previousLedger.snapshotContentKey
+    }
+    else { '' }
+    $previousLedgerSnapshotWasRetained = Test-RetainedStashSnapshot $previousLedgerSnapshot
+
     $stashBefore = (git rev-parse --verify refs/stash 2>$null)
     if ($LASTEXITCODE -eq 0 -and $stashBefore) {
         $stashBefore = $stashBefore.Trim()
@@ -153,6 +194,33 @@ try {
 
     $stashAfter = (git rev-parse --verify refs/stash 2>$null)
     if ($LASTEXITCODE -ne 0 -or -not $stashAfter -or $stashAfter.Trim() -eq $stashBefore) {
+        if ($stashBefore -and
+            $previousLedger -and
+            $previousLedger.nextAction -match 'sensitive-path' -and
+            $previousLedgerSnapshot -eq $stashBefore -and
+            $previousLedgerSnapshotWasRetained) {
+            $worktreeStillDirty = @(git status --porcelain=v1 --untracked-files=all).Count -gt 0
+            if (-not $worktreeStillDirty) {
+                git stash apply --index $previousLedgerSnapshot --quiet
+                $worktreeStillDirty = $LASTEXITCODE -eq 0
+            }
+            $record.snapshot = $previousLedgerSnapshot
+            $record.snapshotContentKey = if ($previousLedgerContentKey) {
+                $previousLedgerContentKey
+            }
+            else {
+                Get-StashSensitivityKey $previousLedgerSnapshot
+            }
+            $record.restoreSucceeded = $worktreeStillDirty
+            $record.nextAction = if ($worktreeStillDirty) {
+                'Review sensitive-path candidate before publishing WIP: retained sensitive-path candidate'
+            }
+            else {
+                'Restore the retained stash manually before continuing.'
+            }
+            Write-LaneLedger $record
+            exit 0
+        }
         $record.error = 'git stash did not create a new WIP snapshot.'
         $record.nextAction = 'Capture submodule or unsupported WIP manually, then rerun lane-closeout.'
         Write-LaneLedger $record
@@ -161,8 +229,24 @@ try {
 
     $snapshot = $stashAfter.Trim()
     $tree = Get-StashContentKey $snapshot
+    $sensitivityKey = Get-StashSensitivityKey $snapshot
     $previousSnapshot = (git rev-parse 'stash@{1}' 2>$null)
     $duplicateSensitiveSnapshot = $false
+    if (-not $sensitivePath -and
+        $previousLedger -and
+        $previousLedger.nextAction -match 'sensitive-path' -and
+        $previousLedger.snapshot -and
+        $previousLedgerContentKey -eq $sensitivityKey) {
+        $sensitivePath = 'retained sensitive-path candidate'
+        if ($previousLedgerSnapshotWasRetained -and
+            (Get-StashContentKey $previousLedgerSnapshot) -eq $tree) {
+            $previousSnapshot = $previousLedgerSnapshot
+            $duplicateSensitiveSnapshot = $true
+        }
+        else {
+            $previousSnapshot = $null
+        }
+    }
     if ($sensitivePath -and $LASTEXITCODE -eq 0 -and $previousSnapshot) {
         $previousSnapshot = $previousSnapshot.Trim()
         $duplicateSensitiveSnapshot = (Get-StashContentKey $previousSnapshot) -eq $tree
@@ -173,6 +257,7 @@ try {
     }
     $wipRef = "wip/$safeBranch-$tree"
     $record.snapshot = $snapshot
+    $record.snapshotContentKey = $sensitivityKey
     $record.wipRef = $wipRef
     $record.terminalState = 'PARKED'
 
@@ -199,6 +284,12 @@ try {
                 git stash drop --quiet 'stash@{0}'
                 if ($duplicateSensitiveSnapshot) {
                     $record.snapshot = $previousSnapshot
+                    $record.snapshotContentKey = if ($previousLedgerContentKey) {
+                        $previousLedgerContentKey
+                    }
+                    else {
+                        Get-StashSensitivityKey $previousSnapshot
+                    }
                 }
             }
         }

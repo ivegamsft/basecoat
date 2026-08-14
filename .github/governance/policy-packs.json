@@ -24,12 +24,12 @@
       ".github/workflows/extension-deploy.yml": {
         "job": "deploy",
         "expected_job_environment": "${{ github.event_name == 'workflow_dispatch' && ((github.event.inputs.environment == 'prod' || github.event.inputs.environment == 'production') && 'production' || github.event.inputs.environment) || 'production' }}",
-        "expected_workflow_sha256": "ec9053d5f8b0ed12d069a9bd4b3b80bf271c81fa5a2c100c5e1fe78be883ee98"
+        "expected_workflow_sha256": "8580b1a0af218f475b3b8208da1853ab3e2941d8170de63024771c13a0e91227"
       },
       ".github/workflows/mcp-deploy.yml": {
         "job": "deploy",
         "expected_job_environment": "${{ github.event_name == 'pull_request' && 'staging' || (github.event_name == 'workflow_dispatch' && ((github.event.inputs.environment == 'prod' || github.event.inputs.environment == 'production') && 'production' || github.event.inputs.environment) || 'production') }}",
-        "expected_workflow_sha256": "899226a68b9b748febb6eb357a8718736c641fc0853dccb575859670615d87de"
+        "expected_workflow_sha256": "5286787e7ae8cbeac86f69aff2d100e5ce15b9fd03fbdab2c6902bfff92462dd"
       },
       ".github/workflows/publish-to-production.yml": {
         "job": "publish",

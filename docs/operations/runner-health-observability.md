@@ -13,7 +13,14 @@ window:
 1. Queue wait for release/deploy workflows (P50/P95/max and threshold breaches).
 2. Offline runner capacity for repository-scoped self-hosted runners.
 3. Potential wrong-runner failure patterns, including lane workflow failures with
-   no assigned runner or failures occurring on GitHub-hosted runners.
+   no assigned runner or failures on GitHub-hosted runners that are not approved
+   by the runner-routing contract. Contract exemptions match the observed hosted
+   operating-system class (`github-hosted-linux`, `github-hosted-windows`, or
+   `github-hosted-macos`) exactly; a contract for Linux never suppresses a
+   Windows or macOS failure. Ordinary failures on correctly routed contracted
+   public jobs do not inflate this signal. GitHub-hosted child jobs from
+   repository-local reusable workflow calls are also treated as delegated
+   routing rather than direct caller-job mismatches.
 
 ## Execution model
 

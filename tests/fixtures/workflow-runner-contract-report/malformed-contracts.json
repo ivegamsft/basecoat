@@ -1,0 +1,53 @@
+{
+  "version": 2,
+  "contracts": [
+    {
+      "workflow": "aligned-public.yml",
+      "job": "public-job",
+      "allowed_runner_classes": [],
+      "required_capabilities": [],
+      "forbidden_capabilities": [],
+      "max_timeout_minutes": 0
+    },
+    {
+      "workflow": "aligned-public.yml",
+      "job": "fractional-timeout",
+      "allowed_runner_classes": ["github-hosted-linux"],
+      "required_capabilities": ["public-internet"],
+      "forbidden_capabilities": ["private-network"],
+      "max_timeout_minutes": 1.5
+    },
+    {
+      "workflow": "aligned-public.yml",
+      "job": "text-timeout",
+      "allowed_runner_classes": ["github-hosted-linux"],
+      "required_capabilities": ["public-internet"],
+      "forbidden_capabilities": ["private-network"],
+      "max_timeout_minutes": "ten"
+    },
+    {
+      "workflow": "aligned-public.yml",
+      "job": "scalar-arrays",
+      "allowed_runner_classes": "github-hosted-linux",
+      "required_capabilities": "public-internet",
+      "forbidden_capabilities": "private-network",
+      "max_timeout_minutes": 10
+    },
+    {
+      "workflow": "aligned-public.yml",
+      "job": "unknown-class",
+      "allowed_runner_classes": ["github-hosted-linux", "github-hsoted-linux"],
+      "required_capabilities": ["public-internet"],
+      "forbidden_capabilities": ["private-network"],
+      "max_timeout_minutes": 10
+    },
+    {
+      "workflow": "aligned-public.yml",
+      "job": "unknown-capability",
+      "allowed_runner_classes": ["github-hosted-linux"],
+      "required_capabilities": ["public-internet"],
+      "forbidden_capabilities": ["private-netwrok"],
+      "max_timeout_minutes": 10
+    }
+  ]
+}

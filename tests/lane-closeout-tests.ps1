@@ -173,11 +173,27 @@ try {
         throw 'Safe hook must restore the sensitive-path candidate to the working tree'
     }
     $firstSensitiveLedger = Get-Content $ledgerPath.FullName -Raw | ConvertFrom-Json
+    $expectedSensitiveKeyParts = @(
+        (git rev-parse "$($firstSensitiveLedger.snapshot)^{tree}"),
+        (git rev-parse "$($firstSensitiveLedger.snapshot)^2^{tree}")
+    ) | Where-Object { $_ }
+    $sensitiveUntrackedTree = git rev-parse "$($firstSensitiveLedger.snapshot)^3^{tree}" 2>$null
+    if ($LASTEXITCODE -eq 0 -and $sensitiveUntrackedTree) {
+        $expectedSensitiveKeyParts += $sensitiveUntrackedTree
+    }
+    $expectedSensitiveKey = ($expectedSensitiveKeyParts | ForEach-Object {
+        $_.Trim().Substring(0, 8)
+    }) -join ''
     if (-not $firstSensitiveLedger.restoreSucceeded -or $firstSensitiveLedger.pushSucceeded -or $firstSensitiveLedger.nextAction -notmatch 'sensitive-path') {
         throw 'First sensitive capture must preserve the sensitive-review action after successful restore'
     }
+    if ($firstSensitiveLedger.snapshotContentKey -ne $expectedSensitiveKey) {
+        throw 'Sensitive snapshot content key must include worktree, index, and untracked trees'
+    }
     $firstSensitiveSnapshot = $firstSensitiveLedger.snapshot
 
+    $firstSensitiveLedger.PSObject.Properties.Remove('snapshotContentKey')
+    $firstSensitiveLedger | ConvertTo-Json -Depth 6 | Set-Content -Path $ledgerPath.FullName -Encoding utf8
     & pwsh -NoProfile -File $hookScriptPath
     if (@(git stash list).Count -ne 1) {
         throw 'Safe hook rerun must not duplicate a retained sensitive-path stash'
@@ -186,8 +202,31 @@ try {
     if ($sensitiveLedger.pushSucceeded -or $sensitiveLedger.nextAction -notmatch 'sensitive-path') {
         throw 'Safe hook must record sensitive-directory review without publishing'
     }
-    if ($sensitiveLedger.snapshot -ne $firstSensitiveSnapshot -or -not $sensitiveLedger.restoreSucceeded) {
+    if ($sensitiveLedger.snapshot -ne $firstSensitiveSnapshot -or
+        -not $sensitiveLedger.snapshotContentKey -or
+        -not $sensitiveLedger.restoreSucceeded) {
         throw 'Duplicate sensitive capture must retain the original snapshot and successful restore state'
+    }
+
+    git stash drop 'stash@{0}' | Out-Null
+    & pwsh -NoProfile -File $hookScriptPath
+    $replacementSensitiveLedger = Get-Content $ledgerPath.FullName -Raw | ConvertFrom-Json
+    $replacementSnapshots = @(git stash list --format='%H')
+    if ($replacementSnapshots.Count -ne 1 -or
+        $replacementSnapshots -notcontains $replacementSensitiveLedger.snapshot -or
+        -not $replacementSensitiveLedger.restoreSucceeded -or
+        $replacementSensitiveLedger.nextAction -notmatch 'sensitive-path') {
+        throw "Sensitive rerun must replace a dropped ledger snapshot with a retained recovery stash (stashes=$($replacementSnapshots -join ','); pushed=$($replacementSensitiveLedger.pushSucceeded); next=$($replacementSensitiveLedger.nextAction); snapshot=$($replacementSensitiveLedger.snapshot); restored=$($replacementSensitiveLedger.restoreSucceeded))"
+    }
+
+    git reset --hard HEAD | Out-Null
+    Set-Content safe-followup.txt 'safe follow-up'
+    & pwsh -NoProfile -File $hookScriptPath
+    $safeFollowupLedger = Get-Content $ledgerPath.FullName -Raw | ConvertFrom-Json
+    if (-not $safeFollowupLedger.pushSucceeded -or
+        $safeFollowupLedger.nextAction -match 'sensitive-path' -or
+        @(git stash list).Count -ne 1) {
+        throw 'A stale sensitive ledger must not block a different safe snapshot'
     }
 }
 finally {
@@ -599,6 +638,69 @@ try {
     }
     if (@(git stash list).Count -ne 1) {
         throw 'Bash safe hook must retain one local stash for sensitive-directory review'
+    }
+    $bashGitDir = (git rev-parse --absolute-git-dir).Trim()
+    $bashLedgerPath = Get-ChildItem (Join-Path $bashGitDir 'basecoat\lane-closeout') -Filter '*.json' | Select-Object -First 1
+    $firstBashSensitiveLedger = Get-Content $bashLedgerPath.FullName -Raw | ConvertFrom-Json
+    $firstBashSensitiveSnapshot = $firstBashSensitiveLedger.snapshot
+    $expectedBashSensitiveKeyParts = @(
+        (git rev-parse "$firstBashSensitiveSnapshot^{tree}"),
+        (git rev-parse "$firstBashSensitiveSnapshot^2^{tree}")
+    ) | Where-Object { $_ }
+    $bashSensitiveUntrackedTree = git rev-parse "$firstBashSensitiveSnapshot^3^{tree}" 2>$null
+    if ($LASTEXITCODE -eq 0 -and $bashSensitiveUntrackedTree) {
+        $expectedBashSensitiveKeyParts += $bashSensitiveUntrackedTree
+    }
+    $expectedBashSensitiveKey = ($expectedBashSensitiveKeyParts | ForEach-Object {
+        $_.Trim().Substring(0, 8)
+    }) -join ''
+    if ($firstBashSensitiveLedger.snapshotContentKey -ne $expectedBashSensitiveKey) {
+        throw 'Bash sensitive snapshot key must include worktree, index, and untracked trees'
+    }
+
+    & $bashPath $bashHookPath
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Bash sensitive-directory rerun returned non-zero'
+    }
+    if (@(git ls-remote --heads origin 'refs/heads/wip/*').Count -ne 1) {
+        throw 'Bash sensitive-directory rerun must not publish a WIP ref'
+    }
+    if (@(git stash list).Count -ne 1) {
+        throw 'Bash sensitive-directory rerun must retain one local stash'
+    }
+    $rerunBashSensitiveLedger = Get-Content $bashLedgerPath.FullName -Raw | ConvertFrom-Json
+    if ($rerunBashSensitiveLedger.pushSucceeded -or
+        $rerunBashSensitiveLedger.nextAction -notmatch 'sensitive-path' -or
+        $rerunBashSensitiveLedger.snapshot -ne $firstBashSensitiveSnapshot -or
+        -not $rerunBashSensitiveLedger.restoreSucceeded) {
+        throw "Bash sensitive-directory rerun must retain the original local review state (pushed=$($rerunBashSensitiveLedger.pushSucceeded); next=$($rerunBashSensitiveLedger.nextAction); snapshot=$($rerunBashSensitiveLedger.snapshot); expected=$firstBashSensitiveSnapshot; restored=$($rerunBashSensitiveLedger.restoreSucceeded))"
+    }
+
+    git stash drop 'stash@{0}' | Out-Null
+    & $bashPath $bashHookPath
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Bash sensitive-directory replacement rerun returned non-zero'
+    }
+    $replacementBashSensitiveLedger = Get-Content $bashLedgerPath.FullName -Raw | ConvertFrom-Json
+    $replacementBashSnapshots = @(git stash list --format='%H')
+    if ($replacementBashSnapshots.Count -ne 1 -or
+        $replacementBashSnapshots -notcontains $replacementBashSensitiveLedger.snapshot -or
+        -not $replacementBashSensitiveLedger.restoreSucceeded -or
+        $replacementBashSensitiveLedger.nextAction -notmatch 'sensitive-path') {
+        throw "Bash sensitive rerun must replace a dropped ledger snapshot with a retained recovery stash (stashes=$($replacementBashSnapshots -join ','); pushed=$($replacementBashSensitiveLedger.pushSucceeded); next=$($replacementBashSensitiveLedger.nextAction); snapshot=$($replacementBashSensitiveLedger.snapshot); restored=$($replacementBashSensitiveLedger.restoreSucceeded))"
+    }
+
+    git reset --hard HEAD | Out-Null
+    Set-Content safe-followup.txt 'safe follow-up'
+    & $bashPath $bashHookPath
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Bash safe follow-up rerun returned non-zero'
+    }
+    $safeFollowupBashLedger = Get-Content $bashLedgerPath.FullName -Raw | ConvertFrom-Json
+    if (-not $safeFollowupBashLedger.pushSucceeded -or
+        $safeFollowupBashLedger.nextAction -match 'sensitive-path' -or
+        @(git stash list).Count -ne 1) {
+        throw 'A stale Bash sensitive ledger must not block a different safe snapshot'
     }
 }
 finally {

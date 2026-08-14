@@ -55,6 +55,7 @@ env:
 jobs:
   deploy:
     name: Build and deploy portal
+    # Azure OIDC and credential login use public control-plane endpoints.
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment: staging

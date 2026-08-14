@@ -5,6 +5,7 @@ on:
     paths:
       - ".github/workflows/runner-health-observability.yml"
       - ".github/workflow-runner-capability-classes.json"
+      - ".github/workflow-runner-routing-contracts.json"
       - "scripts/report-runner-health.ps1"
       - "scripts/audit-workflow-runner-capabilities.ps1"
       - "docs/operations/workflow-runner-routing.md"

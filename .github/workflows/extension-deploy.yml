@@ -43,6 +43,7 @@ env:
 jobs:
   build-push:
     name: Build and push extension image
+    # Docker/GHCR operations use public endpoints and require a Linux runner.
     runs-on: ubuntu-latest
     timeout-minutes: 20
     if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork }}
@@ -92,6 +93,7 @@ jobs:
 
   deploy:
     name: Deploy extension to Azure Container Apps
+    # Azure control-plane calls are public; bash-heavy steps require Linux.
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: build-push

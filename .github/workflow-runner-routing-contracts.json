@@ -1,78 +1,108 @@
 {
-  "version": 1,
+  "version": 2,
   "contracts": [
+    {
+      "workflow": "audit-environment-drift.yml",
+      "job": "audit",
+      "allowed_runner_classes": ["github-hosted-linux"],
+      "required_capabilities": ["public-internet"],
+      "forbidden_capabilities": ["private-network", "runner-managed-identity"],
+      "max_timeout_minutes": 20
+    },
+    {
+      "workflow": "docs.yml",
+      "job": "deploy",
+      "allowed_runner_classes": ["github-hosted-linux"],
+      "required_capabilities": ["oidc", "public-pages-deploy"],
+      "forbidden_capabilities": ["private-network", "runner-managed-identity"],
+      "max_timeout_minutes": 20
+    },
     {
       "workflow": "extension-deploy.yml",
       "job": "build-push",
-      "allowed_runner_classes": [
-        "github-hosted-linux",
-        "configurable-deploy",
-        "self-hosted-linux"
-      ],
+      "allowed_runner_classes": ["github-hosted-linux"],
+      "required_capabilities": ["public-registry-publish"],
+      "forbidden_capabilities": ["private-network", "runner-managed-identity"],
       "max_timeout_minutes": 20
     },
     {
       "workflow": "extension-deploy.yml",
       "job": "deploy",
-      "allowed_runner_classes": [
-        "github-hosted-linux",
-        "configurable-deploy",
-        "self-hosted-linux"
-      ],
+      "allowed_runner_classes": ["github-hosted-linux"],
+      "required_capabilities": ["credential-auth", "public-cloud-deploy"],
+      "forbidden_capabilities": ["oidc", "private-network", "runner-managed-identity"],
       "max_timeout_minutes": 20
     },
     {
       "workflow": "mcp-build.yml",
       "job": "build",
-      "allowed_runner_classes": [
-        "github-hosted-linux",
-        "configurable-deploy",
-        "self-hosted-linux"
-      ],
+      "allowed_runner_classes": ["github-hosted-linux"],
+      "required_capabilities": ["public-build"],
+      "forbidden_capabilities": ["private-network", "runner-managed-identity"],
       "max_timeout_minutes": 20
     },
     {
       "workflow": "mcp-deploy.yml",
       "job": "build-push",
-      "allowed_runner_classes": [
-        "github-hosted-linux",
-        "configurable-deploy",
-        "self-hosted-linux"
-      ],
+      "allowed_runner_classes": ["github-hosted-linux"],
+      "required_capabilities": ["public-registry-publish"],
+      "forbidden_capabilities": ["private-network", "runner-managed-identity"],
       "max_timeout_minutes": 20
     },
     {
       "workflow": "mcp-deploy.yml",
       "job": "deploy",
-      "allowed_runner_classes": [
-        "github-hosted-linux"
-      ],
+      "allowed_runner_classes": ["github-hosted-linux"],
+      "required_capabilities": ["credential-auth", "public-cloud-deploy"],
+      "forbidden_capabilities": ["oidc", "private-network", "runner-managed-identity"],
+      "max_timeout_minutes": 20
+    },
+    {
+      "workflow": "package-basecoat.yml",
+      "job": "release",
+      "allowed_runner_classes": ["github-hosted-linux"],
+      "required_capabilities": ["public-release-publish"],
+      "forbidden_capabilities": ["private-network", "runner-managed-identity"],
       "max_timeout_minutes": 20
     },
     {
       "workflow": "portal-deploy.yml",
       "job": "deploy",
-      "allowed_runner_classes": [
-        "github-hosted-linux",
-        "configurable-deploy",
-        "self-hosted-linux"
-      ],
+      "allowed_runner_classes": ["github-hosted-linux"],
+      "required_capabilities": ["credential-auth", "oidc", "public-cloud-deploy"],
+      "forbidden_capabilities": ["private-network", "runner-managed-identity"],
+      "max_timeout_minutes": 20
+    },
+    {
+      "workflow": "publish-to-production.yml",
+      "job": "publish",
+      "allowed_runner_classes": ["github-hosted-linux"],
+      "required_capabilities": ["public-release-publish"],
+      "forbidden_capabilities": ["private-network", "runner-managed-identity"],
+      "max_timeout_minutes": 10
+    },
+    {
+      "workflow": "release.yml",
+      "job": "release",
+      "allowed_runner_classes": ["github-hosted-linux"],
+      "required_capabilities": ["public-release-publish"],
+      "forbidden_capabilities": ["private-network", "runner-managed-identity"],
       "max_timeout_minutes": 20
     },
     {
       "workflow": "docs-production.yml",
       "job": "dispatch-production-docs",
-      "allowed_runner_classes": [
-        "github-hosted-linux"
-      ],
+      "allowed_runner_classes": ["github-hosted-linux"],
+      "required_capabilities": ["public-api-dispatch"],
+      "forbidden_capabilities": ["private-network", "runner-managed-identity"],
       "max_timeout_minutes": 10
     },
     {
       "workflow": "close-production-issues.yml",
       "job": "close-issues",
-      "allowed_runner_classes": [
-        "github-hosted-linux"
-      ],
+      "allowed_runner_classes": ["github-hosted-linux"],
+      "required_capabilities": ["public-api-dispatch"],
+      "forbidden_capabilities": ["private-network", "runner-managed-identity"],
       "max_timeout_minutes": 10
     }
   ]

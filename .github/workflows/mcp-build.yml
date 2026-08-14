@@ -19,6 +19,7 @@ permissions:
 jobs:
   build:
     name: Build, lint, and validate MCP server
+    # CI-only Docker and Bicep validation is intentionally GitHub-hosted Linux.
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:

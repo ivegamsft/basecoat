@@ -108,6 +108,7 @@ jobs:
   deploy:
     if: github.event_name != 'pull_request'
     needs: [validate, verify-github-pages-environment]
+    # GitHub Pages OIDC targets public GitHub endpoints.
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment:

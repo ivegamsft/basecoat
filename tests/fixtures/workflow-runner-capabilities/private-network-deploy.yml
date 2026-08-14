@@ -1,0 +1,12 @@
+name: Explicit private network fixture
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    # runner-capability: private-network
+    runs-on: [self-hosted, linux]
+    timeout-minutes: 10
+    steps:
+      - run: curl --fail https://internal.example

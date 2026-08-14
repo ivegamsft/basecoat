@@ -830,6 +830,9 @@ if ($runnerCapabilityIssues.Count -eq 0) {
     if ($auditJson.summary.unclassified_jobs -gt 0) {
         $runnerCapabilityIssues += "audit-workflow-runner-capabilities (found $($auditJson.summary.unclassified_jobs) unclassified jobs)"
     }
+    if ($auditJson.summary.mismatches -gt 0) {
+        $runnerCapabilityIssues += "audit-workflow-runner-capabilities (found $($auditJson.summary.mismatches) runner mismatches)"
+    }
     if ($auditJson.summary.total_jobs -le 0) {
         $runnerCapabilityIssues += 'audit-workflow-runner-capabilities (no workflow jobs classified)'
     }
@@ -946,6 +949,606 @@ if ($dispatchRegressionViolations.Count -eq 0) {
 else {
     Write-Host "    FAIL Production dispatch regression issues found in: $($dispatchRegressionViolations -join ', ')" -ForegroundColor Red
     $guardrailFailures += 'production-dispatch-runner-token-regression'
+}
+
+# Test 21: Public Linux publication/deployment jobs must remain explicitly
+# GitHub-hosted, audit-aligned, and free of private-runner requirements.
+Write-Host '  Test 21: Validate public Linux runner routing contracts...'
+$publicLinuxRoutingViolations = @()
+
+if ($null -eq $auditJson) {
+    $auditJson = & pwsh -NoProfile -File $runnerAuditScriptPath -OutputFormat json | ConvertFrom-Json
+}
+$runnerContractData = Get-Content $runnerContractPolicyPath -Raw | ConvertFrom-Json
+$runnerContracts = @($runnerContractData.contracts)
+$expectedPublicContracts = @(
+    @{ Workflow = 'audit-environment-drift.yml'; Job = 'audit'; RequiredCapabilities = @('public-internet') },
+    @{ Workflow = 'close-production-issues.yml'; Job = 'close-issues'; RequiredCapabilities = @('public-api-dispatch') },
+    @{ Workflow = 'docs-production.yml'; Job = 'dispatch-production-docs'; RequiredCapabilities = @('public-api-dispatch') },
+    @{ Workflow = 'docs.yml'; Job = 'deploy'; RequiredCapabilities = @('oidc', 'public-pages-deploy') },
+    @{ Workflow = 'extension-deploy.yml'; Job = 'build-push'; RequiredCapabilities = @('public-registry-publish') },
+    @{ Workflow = 'extension-deploy.yml'; Job = 'deploy'; RequiredCapabilities = @('credential-auth', 'public-cloud-deploy') },
+    @{ Workflow = 'mcp-build.yml'; Job = 'build'; RequiredCapabilities = @('public-build') },
+    @{ Workflow = 'mcp-deploy.yml'; Job = 'build-push'; RequiredCapabilities = @('public-registry-publish') },
+    @{ Workflow = 'mcp-deploy.yml'; Job = 'deploy'; RequiredCapabilities = @('credential-auth', 'public-cloud-deploy') },
+    @{ Workflow = 'package-basecoat.yml'; Job = 'release'; RequiredCapabilities = @('public-release-publish') },
+    @{ Workflow = 'portal-deploy.yml'; Job = 'deploy'; RequiredCapabilities = @('credential-auth', 'oidc', 'public-cloud-deploy') },
+    @{ Workflow = 'publish-to-production.yml'; Job = 'publish'; RequiredCapabilities = @('public-release-publish') },
+    @{ Workflow = 'release.yml'; Job = 'release'; RequiredCapabilities = @('public-release-publish') }
+)
+
+if ($runnerContractData.version -ne 2) {
+    $publicLinuxRoutingViolations += "contract schema version is '$($runnerContractData.version)' (expected 2)"
+}
+
+$contractKeys = @()
+foreach ($contract in $runnerContracts) {
+    $contractKey = "$($contract.workflow)|$($contract.job)"
+    $contractKeys += $contractKey
+    foreach ($requiredField in @(
+        'workflow',
+        'job',
+        'allowed_runner_classes',
+        'required_capabilities',
+        'forbidden_capabilities',
+        'max_timeout_minutes'
+    )) {
+        if ($contract.PSObject.Properties.Name -notcontains $requiredField) {
+            $publicLinuxRoutingViolations += "$contractKey (missing v2 field '$requiredField')"
+        }
+    }
+
+    if (@($contract.allowed_runner_classes).Count -eq 0) {
+        $publicLinuxRoutingViolations += "$contractKey (allowed_runner_classes must not be empty)"
+    }
+    if (@($contract.required_capabilities).Count -eq 0) {
+        $publicLinuxRoutingViolations += "$contractKey (required_capabilities must not be empty)"
+    }
+    if (@($contract.forbidden_capabilities).Count -eq 0) {
+        $publicLinuxRoutingViolations += "$contractKey (forbidden_capabilities must not be empty)"
+    }
+    if ($null -eq $contract.max_timeout_minutes -or [int]$contract.max_timeout_minutes -le 0) {
+        $publicLinuxRoutingViolations += "$contractKey (max_timeout_minutes must be positive)"
+    }
+}
+
+foreach ($duplicateKey in @($contractKeys | Group-Object | Where-Object { $_.Count -gt 1 })) {
+    $publicLinuxRoutingViolations += "$($duplicateKey.Name) (duplicate routing contract)"
+}
+
+$expectedPublicContractKeys = @(
+    $expectedPublicContracts |
+        ForEach-Object { "$($_.Workflow)|$($_.Job)" } |
+        Sort-Object
+)
+$publicLinuxContractKeys = @(
+    $runnerContracts |
+        Where-Object {
+            $allowedClasses = @($_.allowed_runner_classes)
+            $allowedClasses.Count -eq 1 -and
+                $allowedClasses[0] -eq 'github-hosted-linux'
+        } |
+        ForEach-Object { "$($_.workflow)|$($_.job)" } |
+        Sort-Object
+)
+if (($publicLinuxContractKeys -join ',') -ne ($expectedPublicContractKeys -join ',')) {
+    $publicLinuxRoutingViolations += "public Linux contract set changed (actual: '$($publicLinuxContractKeys -join ', ')')"
+}
+
+foreach ($expectedContract in $expectedPublicContracts) {
+    $workflow = $expectedContract.Workflow
+    $job = $expectedContract.Job
+    $expectedKey = "$workflow|$job"
+    $matchingContracts = @($runnerContracts | Where-Object {
+        $_.workflow -eq $workflow -and $_.job -eq $job
+    })
+    if ($matchingContracts.Count -ne 1) {
+        $publicLinuxRoutingViolations += "$expectedKey (expected one routing contract, found $($matchingContracts.Count))"
+        continue
+    }
+    $target = $matchingContracts[0]
+    $actualRequiredCapabilities = @($target.required_capabilities | Sort-Object)
+    $expectedRequiredCapabilities = @($expectedContract.RequiredCapabilities | Sort-Object)
+    if (($actualRequiredCapabilities -join ',') -ne ($expectedRequiredCapabilities -join ',')) {
+        $publicLinuxRoutingViolations += "$expectedKey (required_capabilities changed: '$($actualRequiredCapabilities -join ', ')')"
+    }
+    $expectedForbiddenCapabilities = @('private-network', 'runner-managed-identity')
+    if ($expectedKey -in @('extension-deploy.yml|deploy', 'mcp-deploy.yml|deploy')) {
+        $expectedForbiddenCapabilities += 'oidc'
+    }
+    $actualForbiddenCapabilities = @($target.forbidden_capabilities | Sort-Object)
+    $expectedForbiddenCapabilities = @($expectedForbiddenCapabilities | Sort-Object)
+    if (($actualForbiddenCapabilities -join ',') -ne ($expectedForbiddenCapabilities -join ',')) {
+        $publicLinuxRoutingViolations += "$expectedKey (forbidden_capabilities changed: '$($actualForbiddenCapabilities -join ', ')')"
+    }
+
+    $auditRow = @($auditJson.jobs | Where-Object {
+        $_.Workflow -eq $workflow -and $_.Job -eq $job
+    })
+    if ($auditRow.Count -ne 1) {
+        $publicLinuxRoutingViolations += "$workflow/$job (expected one audit row, found $($auditRow.Count))"
+        continue
+    }
+
+    $row = $auditRow[0]
+    if ($row.RunsOn -ne 'ubuntu-latest' -or
+        $row.ActualRunnerClass -ne 'github-hosted-linux' -or
+        $row.RecommendedRunnerClass -ne 'github-hosted-linux' -or
+        $row.Status -ne 'aligned') {
+        $publicLinuxRoutingViolations += "$workflow/$job (audit routing is $($row.RecommendedRunnerClass)/$($row.ActualRunnerClass)/$($row.Status))"
+    }
+    $rowCapabilities = @($row.RequiredCapabilities -split ',' | ForEach-Object { $_.Trim() })
+    foreach ($capability in @($target.required_capabilities)) {
+        if ($rowCapabilities -notcontains $capability) {
+            $publicLinuxRoutingViolations += "$workflow/$job (missing capability '$capability')"
+        }
+    }
+    foreach ($capability in @($target.forbidden_capabilities)) {
+        if ($rowCapabilities -contains $capability) {
+            $publicLinuxRoutingViolations += "$workflow/$job (forbidden capability '$capability')"
+        }
+    }
+
+    $allowedClasses = @($target.allowed_runner_classes)
+    if ($allowedClasses.Count -ne 1 -or $allowedClasses[0] -ne 'github-hosted-linux') {
+        $publicLinuxRoutingViolations += "$workflow/$job (contract must allow only github-hosted-linux)"
+    }
+    $forbiddenCapabilities = @($target.forbidden_capabilities)
+    foreach ($requiredForbiddenCapability in @('private-network', 'runner-managed-identity')) {
+        if ($forbiddenCapabilities -notcontains $requiredForbiddenCapability) {
+            $publicLinuxRoutingViolations += "$workflow/$job (contract must forbid '$requiredForbiddenCapability')"
+        }
+    }
+}
+
+if ($publicLinuxRoutingViolations.Count -eq 0) {
+    Write-Host '    PASS Public Linux jobs are pinned, audit-aligned, and contract-restricted'
+}
+else {
+    Write-Host "    FAIL Public Linux runner routing issues found in: $($publicLinuxRoutingViolations -join ', ')" -ForegroundColor Red
+    $guardrailFailures += 'public-linux-runner-routing'
+}
+
+# Test 22: Authentication mode, permission inheritance, and private workload
+# evidence must remain independent from the assigned runner.
+Write-Host '  Test 22: Validate authentication and private capability inference...'
+$runnerFixtureDir = Join-Path $repoRoot 'tests\fixtures\workflow-runner-capabilities'
+$runnerFixtureContractPath = Join-Path $runnerFixtureDir 'contracts.json'
+$malformedClassPath = Join-Path $runnerFixtureDir 'malformed-classes.json'
+$emptyClassPath = Join-Path $runnerFixtureDir 'empty-classes.json'
+$runnerFixtureAudit = & pwsh -NoProfile -File $runnerAuditScriptPath `
+    -OutputFormat json `
+    -WorkflowDirectory $runnerFixtureDir `
+    -ContractPath $runnerFixtureContractPath | ConvertFrom-Json
+$runnerSeparationViolations = @()
+
+$runnerHealthScriptPath = Join-Path $repoRoot 'scripts\report-runner-health.ps1'
+if (-not (Test-Path $runnerHealthScriptPath)) {
+    $runnerSeparationViolations += 'runner health contract filtering (script missing)'
+}
+else {
+    $runnerHealthSource = Get-Content $runnerHealthScriptPath -Raw
+    if ($runnerHealthSource -notmatch 'workflow-runner-routing-contracts\.json' -or
+        $runnerHealthSource -notmatch 'Test-IsContractedGithubHostedJob' -or
+        $runnerHealthSource -notmatch 'Get-GithubHostedRunnerClass' -or
+        $runnerHealthSource -notmatch 'Test-HasGithubHostedContract' -or
+        $runnerHealthSource -notmatch '\$hasGithubHostedContract') {
+        $runnerSeparationViolations += 'runner health contract filtering (contracted public failures still treated as wrong-runner evidence)'
+    }
+
+    $runnerHealthTestRoot = Join-Path $repoRoot "tests\.runner-health-test-$([guid]::NewGuid().ToString('N'))"
+    $runnerHealthFakeBin = Join-Path $runnerHealthTestRoot 'bin'
+    $runnerHealthContractPath = Join-Path $runnerHealthTestRoot 'contracts.json'
+    $originalPath = $env:PATH
+    $originalRunnerLabels = $env:BASECOAT_TEST_RUNNER_LABELS
+    $originalRunnerJobName = $env:BASECOAT_TEST_RUNNER_JOB_NAME
+    try {
+        New-Item -ItemType Directory -Path $runnerHealthFakeBin -Force | Out-Null
+        @'
+param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Arguments)
+$endpoint = ($Arguments -join ' ')
+$now = (Get-Date).ToUniversalTime()
+if ($endpoint -match 'actions/workflows/release\.yml/runs') {
+    [pscustomobject]@{
+        workflow_runs = @(
+            [pscustomobject]@{
+                id = 42
+                created_at = $now.AddMinutes(-10).ToString('o')
+                run_started_at = $now.AddMinutes(-9).ToString('o')
+                updated_at = $now.AddMinutes(-1).ToString('o')
+                conclusion = 'failure'
+                html_url = 'https://example.test/runs/42'
+                run_attempt = 1
+            }
+        )
+    } | ConvertTo-Json -Depth 8 -Compress
+}
+elseif ($endpoint -match 'actions/runs/42/jobs') {
+    [pscustomobject]@{
+        jobs = @(
+            [pscustomobject]@{
+                name = if ($env:BASECOAT_TEST_RUNNER_JOB_NAME) { $env:BASECOAT_TEST_RUNNER_JOB_NAME } else { 'release' }
+                conclusion = 'failure'
+                runner_name = 'GitHub Actions 1'
+                started_at = $now.AddMinutes(-9).ToString('o')
+                labels = @($env:BASECOAT_TEST_RUNNER_LABELS -split ',')
+            }
+        )
+    } | ConvertTo-Json -Depth 8 -Compress
+}
+elseif ($endpoint -match 'actions/runners') {
+    [pscustomobject]@{ runners = @() } | ConvertTo-Json -Depth 4 -Compress
+}
+else {
+    [pscustomobject]@{ workflow_runs = @() } | ConvertTo-Json -Depth 4 -Compress
+}
+'@ | Set-Content -Path (Join-Path $runnerHealthFakeBin 'fake-gh.ps1')
+        Set-Content -Path (Join-Path $runnerHealthFakeBin 'gh.cmd') -Value '@pwsh -NoProfile -File "%~dp0fake-gh.ps1" %*'
+        @'
+#!/usr/bin/env bash
+exec pwsh -NoProfile -File "$(dirname "$0")/fake-gh.ps1" "$@"
+'@ | Set-Content -Path (Join-Path $runnerHealthFakeBin 'gh') -NoNewline
+        if (-not $IsWindows) {
+            chmod +x (Join-Path $runnerHealthFakeBin 'gh')
+        }
+        @{
+            version = 2
+            contracts = @(
+                @{
+                    workflow = 'release.yml'
+                    job = 'release'
+                    allowed_runner_classes = @('github-hosted-linux')
+                    required_capabilities = @('public-release-publish')
+                    forbidden_capabilities = @('private-network')
+                    max_timeout_minutes = 20
+                }
+            )
+        } | ConvertTo-Json -Depth 8 | Set-Content -Path $runnerHealthContractPath
+        $env:PATH = "$runnerHealthFakeBin$([IO.Path]::PathSeparator)$originalPath"
+
+        $env:BASECOAT_TEST_RUNNER_JOB_NAME = 'release'
+        $env:BASECOAT_TEST_RUNNER_LABELS = 'ubuntu-latest'
+        $approvedLinuxReport = & pwsh -NoProfile -File $runnerHealthScriptPath `
+            -Repository 'example/repo' `
+            -LookbackDays 1 `
+            -OutputFormat json `
+            -ContractPath $runnerHealthContractPath | ConvertFrom-Json
+        if ($approvedLinuxReport.summary.potential_wrong_runner_patterns -ne 0) {
+            $runnerSeparationViolations += 'runner health exact class filtering (approved Linux failure was flagged)'
+        }
+
+        $env:BASECOAT_TEST_RUNNER_JOB_NAME = 'release'
+        $env:BASECOAT_TEST_RUNNER_LABELS = 'windows-latest'
+        $disallowedWindowsReport = & pwsh -NoProfile -File $runnerHealthScriptPath `
+            -Repository 'example/repo' `
+            -LookbackDays 1 `
+            -OutputFormat json `
+            -ContractPath $runnerHealthContractPath | ConvertFrom-Json
+        if ($disallowedWindowsReport.summary.potential_wrong_runner_patterns -ne 1) {
+            $runnerSeparationViolations += 'runner health exact class filtering (disallowed Windows failure was suppressed)'
+        }
+
+        $env:BASECOAT_TEST_RUNNER_JOB_NAME = 'release'
+        $env:BASECOAT_TEST_RUNNER_LABELS = 'self-hosted,ubuntu-latest'
+        $selfHostedLinuxReport = & pwsh -NoProfile -File $runnerHealthScriptPath `
+            -Repository 'example/repo' `
+            -LookbackDays 1 `
+            -OutputFormat json `
+            -ContractPath $runnerHealthContractPath | ConvertFrom-Json
+        if ($selfHostedLinuxReport.summary.potential_wrong_runner_patterns -ne 1) {
+            $runnerSeparationViolations += 'runner health hosted class filtering (self-hosted label set was suppressed)'
+        }
+        elseif ($selfHostedLinuxReport.wrong_runner_patterns[0].pattern_description -ne
+            'contracted-public-job-failed-on-self-hosted-runner') {
+            $runnerSeparationViolations += 'runner health hosted class filtering (self-hosted pattern was mislabeled)'
+        }
+
+        $env:BASECOAT_TEST_RUNNER_JOB_NAME = 'package'
+        $env:BASECOAT_TEST_RUNNER_LABELS = 'ubuntu-latest'
+        $uncontractedHostedReport = & pwsh -NoProfile -File $runnerHealthScriptPath `
+            -Repository 'example/repo' `
+            -LookbackDays 1 `
+            -OutputFormat json `
+            -ContractPath $runnerHealthContractPath | ConvertFrom-Json
+        if ($uncontractedHostedReport.summary.potential_wrong_runner_patterns -ne 0) {
+            $runnerSeparationViolations += 'runner health contract scope (uncontracted hosted failure was flagged)'
+        }
+
+        $env:BASECOAT_TEST_RUNNER_JOB_NAME = 'production-token-preflight / Validate token is configured'
+        $env:BASECOAT_TEST_RUNNER_LABELS = 'ubuntu-latest'
+        $delegatedHostedReport = & pwsh -NoProfile -File $runnerHealthScriptPath `
+            -Repository 'example/repo' `
+            -LookbackDays 1 `
+            -OutputFormat json `
+            -ContractPath $runnerHealthContractPath | ConvertFrom-Json
+        if ($delegatedHostedReport.summary.potential_wrong_runner_patterns -ne 0) {
+            $runnerSeparationViolations += 'runner health delegated filtering (reusable hosted child was flagged)'
+        }
+    }
+    finally {
+        $env:PATH = $originalPath
+        $env:BASECOAT_TEST_RUNNER_LABELS = $originalRunnerLabels
+        $env:BASECOAT_TEST_RUNNER_JOB_NAME = $originalRunnerJobName
+        if (Test-Path $runnerHealthTestRoot) {
+            Remove-Item -Path $runnerHealthTestRoot -Recurse -Force
+        }
+    }
+}
+
+$malformedClassOutput = ''
+$malformedClassRejected = $false
+try {
+    & $runnerAuditScriptPath `
+        -OutputFormat json `
+        -WorkflowDirectory $runnerFixtureDir `
+        -ClassPath $malformedClassPath `
+        -ContractPath $runnerFixtureContractPath | Out-Null
+}
+catch {
+    $malformedClassRejected = $true
+    $malformedClassOutput = $_.Exception.Message
+}
+$missingMalformedClassDiagnostics = @(
+    'fractional-priority',
+    'text-priority',
+    'text-recommendation-flag',
+    'capabilities must contain only non-empty strings',
+    'scalar-required-all',
+    'scalar-required-any'
+) | Where-Object { $malformedClassOutput -notmatch [regex]::Escape($_) }
+if (-not $malformedClassRejected -or $missingMalformedClassDiagnostics.Count -gt 0) {
+    $missingSummary = if ($missingMalformedClassDiagnostics.Count -gt 0) {
+        "; missing diagnostics: $($missingMalformedClassDiagnostics -join ', ')"
+    }
+    else { '' }
+    $runnerSeparationViolations += "malformed runner class fixture (invalid class catalog field accepted$missingSummary)"
+}
+
+$emptyClassOutput = (& pwsh -NoProfile -File $runnerAuditScriptPath `
+    -OutputFormat json `
+    -WorkflowDirectory $runnerFixtureDir `
+    -ClassPath $emptyClassPath `
+    -ContractPath $runnerFixtureContractPath 2>&1) -join "`n"
+if ($LASTEXITCODE -eq 0 -or $emptyClassOutput -notmatch 'classes must be a non-empty array') {
+    $runnerSeparationViolations += 'empty runner class fixture (empty catalog accepted)'
+}
+
+$fixtureRows = @($runnerFixtureAudit.jobs)
+if ($runnerFixtureAudit.summary.mismatches -ne 3) {
+    $runnerSeparationViolations += "fixture audit (expected three unnecessary-runner mismatches, found $($runnerFixtureAudit.summary.mismatches))"
+}
+
+$publicOidcRow = @($runnerFixtureAudit.jobs | Where-Object {
+    $_.Workflow -eq 'public-oidc-deploy.yml' -and $_.Job -eq 'deploy'
+})
+if ($publicOidcRow.Count -ne 1) {
+    $runnerSeparationViolations += 'public OIDC fixture (missing audit row)'
+}
+else {
+    $publicCaps = @($publicOidcRow[0].RequiredCapabilities -split ',' | ForEach-Object { $_.Trim() })
+    if ($publicOidcRow[0].RecommendedRunnerClass -ne 'github-hosted-linux' -or
+        $publicOidcRow[0].Status -ne 'aligned' -or
+        $publicCaps -notcontains 'oidc' -or
+        $publicCaps -contains 'credential-auth' -or
+        $publicCaps -contains 'private-network' -or
+        $publicCaps -contains 'runner-managed-identity') {
+        $runnerSeparationViolations += 'public OIDC fixture (incorrectly requires private runner)'
+    }
+}
+
+$publicCredentialRow = @($fixtureRows | Where-Object {
+    $_.Workflow -eq 'public-credential-deploy.yml' -and $_.Job -eq 'deploy'
+})
+if ($publicCredentialRow.Count -ne 1) {
+    $runnerSeparationViolations += 'public credential fixture (missing audit row)'
+}
+else {
+    $credentialCaps = @($publicCredentialRow[0].RequiredCapabilities -split ',' | ForEach-Object { $_.Trim() })
+    if ($publicCredentialRow[0].RecommendedRunnerClass -ne 'github-hosted-linux' -or
+        $publicCredentialRow[0].Status -ne 'aligned' -or
+        $credentialCaps -notcontains 'credential-auth' -or
+        $credentialCaps -contains 'oidc') {
+        $runnerSeparationViolations += 'public credential fixture (credential login misclassified as OIDC)'
+    }
+}
+
+$commentedLoginInputsRow = @($fixtureRows | Where-Object {
+    $_.Workflow -eq 'commented-login-inputs.yml' -and $_.Job -eq 'deploy'
+})
+if ($commentedLoginInputsRow.Count -ne 1) {
+    $runnerSeparationViolations += 'commented Azure Login inputs fixture (missing audit row)'
+}
+else {
+    $commentedLoginCaps = @($commentedLoginInputsRow[0].RequiredCapabilities -split ',' | ForEach-Object { $_.Trim() })
+    if ($commentedLoginInputsRow[0].RecommendedRunnerClass -ne 'github-hosted-linux' -or
+        $commentedLoginInputsRow[0].Status -ne 'aligned' -or
+        $commentedLoginCaps -contains 'oidc' -or
+        $commentedLoginCaps -contains 'credential-auth') {
+        $runnerSeparationViolations += 'commented Azure Login inputs fixture (placeholder treated as authentication evidence)'
+    }
+}
+
+$commentedPermissionRow = @($fixtureRows | Where-Object {
+    $_.Workflow -eq 'commented-oidc-permission.yml' -and $_.Job -eq 'deploy'
+})
+if ($commentedPermissionRow.Count -ne 1) {
+    $runnerSeparationViolations += 'commented OIDC permission fixture (missing audit row)'
+}
+else {
+    $commentedPermissionCaps = @($commentedPermissionRow[0].RequiredCapabilities -split ',' | ForEach-Object { $_.Trim() })
+    if ($commentedPermissionCaps -contains 'oidc') {
+        $runnerSeparationViolations += 'commented OIDC permission fixture (disabled permission inferred as capability evidence)'
+    }
+}
+
+$siblingPermissionRow = @($fixtureRows | Where-Object {
+    $_.Workflow -eq 'sibling-permission-isolation.yml' -and $_.Job -eq 'deploy'
+})
+if ($siblingPermissionRow.Count -ne 1) {
+    $runnerSeparationViolations += 'sibling permission fixture (missing deploy audit row)'
+}
+else {
+    $siblingCaps = @($siblingPermissionRow[0].RequiredCapabilities -split ',' | ForEach-Object { $_.Trim() })
+    if ($siblingCaps -contains 'oidc') {
+        $runnerSeparationViolations += 'sibling permission fixture (job-level OIDC permission leaked across jobs)'
+    }
+}
+
+$unnecessarySelfHostedRow = @($fixtureRows | Where-Object {
+    $_.Workflow -eq 'unnecessary-self-hosted-public.yml' -and $_.Job -eq 'public-job'
+})
+if ($unnecessarySelfHostedRow.Count -ne 1) {
+    $runnerSeparationViolations += 'unnecessary self-hosted fixture (missing audit row)'
+}
+else {
+    $unnecessaryCaps = @($unnecessarySelfHostedRow[0].RequiredCapabilities -split ',' | ForEach-Object { $_.Trim() })
+    if ($unnecessarySelfHostedRow[0].ActualRunnerClass -ne 'self-hosted-linux' -or
+        $unnecessarySelfHostedRow[0].RecommendedRunnerClass -ne 'github-hosted-linux' -or
+        $unnecessarySelfHostedRow[0].Status -ne 'mismatch' -or
+        $unnecessaryCaps -contains 'private-network') {
+        $runnerSeparationViolations += 'unnecessary self-hosted fixture (runner assignment became circular capability evidence)'
+    }
+}
+
+$markerTextRow = @($fixtureRows | Where-Object {
+    $_.Workflow -eq 'marker-text-is-not-evidence.yml' -and $_.Job -eq 'public-job'
+})
+if ($markerTextRow.Count -ne 1) {
+    $runnerSeparationViolations += 'marker text fixture (missing audit row)'
+}
+else {
+    $markerTextCapabilities = @($markerTextRow[0].RequiredCapabilities -split ',' | ForEach-Object { $_.Trim() })
+    if ($markerTextCapabilities -contains 'private-network' -or
+        $markerTextCapabilities -contains 'oidc' -or
+        $markerTextCapabilities -contains 'public-cloud-deploy' -or
+        $markerTextCapabilities -contains 'public-registry-publish' -or
+        $markerTextCapabilities -contains 'public-build' -or
+        $markerTextCapabilities -contains 'public-release-publish' -or
+        $markerTextRow[0].RecommendedRunnerClass -ne 'github-hosted-linux' -or
+        $markerTextRow[0].Status -ne 'mismatch') {
+        $runnerSeparationViolations += 'marker text fixture (block-scalar command text inferred as capability evidence)'
+    }
+}
+
+$privateNetworkRow = @($fixtureRows | Where-Object {
+    $_.Workflow -eq 'private-network-deploy.yml' -and $_.Job -eq 'deploy'
+})
+if ($privateNetworkRow.Count -ne 1) {
+    $runnerSeparationViolations += 'private network fixture (missing audit row)'
+}
+else {
+    $privateNetworkCaps = @($privateNetworkRow[0].RequiredCapabilities -split ',' | ForEach-Object { $_.Trim() })
+    if ($privateNetworkRow[0].RecommendedRunnerClass -ne 'self-hosted-linux' -or
+        $privateNetworkRow[0].Status -ne 'aligned' -or
+        $privateNetworkCaps -notcontains 'private-network') {
+        $runnerSeparationViolations += 'private network fixture (explicit workload marker was not honored)'
+    }
+}
+
+$privateIdentityRow = @($runnerFixtureAudit.jobs | Where-Object {
+    $_.Workflow -eq 'private-identity-deploy.yml' -and $_.Job -eq 'deploy'
+})
+if ($privateIdentityRow.Count -ne 1) {
+    $runnerSeparationViolations += 'private identity fixture (missing audit row)'
+}
+else {
+    $privateCaps = @($privateIdentityRow[0].RequiredCapabilities -split ',' | ForEach-Object { $_.Trim() })
+    if ($privateIdentityRow[0].RecommendedRunnerClass -ne 'self-hosted-linux' -or
+        $privateIdentityRow[0].Status -ne 'aligned' -or
+        $privateCaps -notcontains 'runner-managed-identity' -or
+        $privateCaps -contains 'oidc') {
+        $runnerSeparationViolations += 'private identity fixture (private requirements were masked)'
+    }
+}
+
+$multilineIdentityRows = @($runnerFixtureAudit.jobs | Where-Object {
+    $_.Workflow -eq 'multiline-runner-identity.yml'
+})
+if ($multilineIdentityRows.Count -ne 13 -or
+    @($multilineIdentityRows | Where-Object {
+        $_.RecommendedRunnerClass -ne 'self-hosted-linux' -or
+        $_.Status -ne 'aligned' -or
+        @($_.RequiredCapabilities -split ',\s*') -notcontains 'runner-managed-identity'
+    }).Count -gt 0) {
+    $runnerSeparationViolations += 'multiline runner identity fixture (executable identity flow not detected)'
+}
+
+$identityTextRow = @($runnerFixtureAudit.jobs | Where-Object {
+    $_.Workflow -eq 'identity-text-is-not-evidence.yml' -and $_.Job -eq 'public-job'
+})
+if ($identityTextRow.Count -ne 1) {
+    $runnerSeparationViolations += 'identity text fixture (missing audit row)'
+}
+else {
+    $identityTextCapabilities = @($identityTextRow[0].RequiredCapabilities -split ',' | ForEach-Object { $_.Trim() })
+    if ($identityTextCapabilities -contains 'runner-managed-identity' -or
+        $identityTextRow[0].RecommendedRunnerClass -ne 'github-hosted-linux' -or
+        $identityTextRow[0].Status -ne 'mismatch') {
+        $runnerSeparationViolations += 'identity text fixture (comment, string, or heredoc inferred as executable evidence)'
+    }
+}
+
+$contractReportFixtureDir = Join-Path $repoRoot 'tests\fixtures\workflow-runner-contract-report'
+$violatingContractPath = Join-Path $contractReportFixtureDir 'contracts.json'
+$violationMarkdown = (& pwsh -NoProfile -File $runnerAuditScriptPath `
+    -OutputFormat markdown `
+    -WorkflowDirectory $contractReportFixtureDir `
+    -ContractPath $violatingContractPath) -join "`n"
+if ($violationMarkdown -notmatch '## Runner Contract Violations' -or
+    $violationMarkdown -notmatch 'forbidden-capability' -or
+    $violationMarkdown -match '## Mismatch Details') {
+    $runnerSeparationViolations += 'contract violation report (details missing when mismatches are zero)'
+}
+
+$malformedContractPath = Join-Path $contractReportFixtureDir 'malformed-contracts.json'
+$malformedContractAudit = & pwsh -NoProfile -File $runnerAuditScriptPath `
+    -OutputFormat json `
+    -WorkflowDirectory $contractReportFixtureDir `
+    -ContractPath $malformedContractPath | ConvertFrom-Json
+$malformedRules = @($malformedContractAudit.contract_violations.Rule)
+if (@($malformedRules | Where-Object { $_ -eq 'contract-nonempty-array' }).Count -ne 3 -or
+    @($malformedRules | Where-Object { $_ -eq 'contract-positive-integer-timeout' }).Count -ne 3 -or
+    @($malformedRules | Where-Object { $_ -eq 'contract-array-field' }).Count -ne 3 -or
+    @($malformedRules | Where-Object { $_ -eq 'known-runner-class' }).Count -ne 1 -or
+    @($malformedRules | Where-Object { $_ -eq 'known-capability' }).Count -ne 1) {
+    $runnerSeparationViolations += 'malformed contract fixture (shape, timeout, runner class, or capability accepted)'
+}
+& pwsh -NoProfile -File $runnerAuditScriptPath `
+    -OutputFormat json `
+    -WorkflowDirectory $contractReportFixtureDir `
+    -ContractPath $malformedContractPath `
+    -FailOnContractViolation *> $null
+if ($LASTEXITCODE -eq 0) {
+    $runnerSeparationViolations += 'malformed contract fixture (-FailOnContractViolation did not fail)'
+}
+
+foreach ($invalidContractCollection in @('missing-contracts.json', 'scalar-contracts.json')) {
+    $invalidContractCollectionPath = Join-Path $contractReportFixtureDir $invalidContractCollection
+    $invalidContractCollectionAudit = & pwsh -NoProfile -File $runnerAuditScriptPath `
+        -OutputFormat json `
+        -WorkflowDirectory $contractReportFixtureDir `
+        -ContractPath $invalidContractCollectionPath | ConvertFrom-Json
+    if (@($invalidContractCollectionAudit.contract_violations.Rule | Where-Object {
+        $_ -eq 'contract-collection'
+    }).Count -ne 1) {
+        $runnerSeparationViolations += "$invalidContractCollection (invalid top-level contracts shape accepted)"
+    }
+    & pwsh -NoProfile -File $runnerAuditScriptPath `
+        -OutputFormat json `
+        -WorkflowDirectory $contractReportFixtureDir `
+        -ContractPath $invalidContractCollectionPath `
+        -FailOnContractViolation *> $null
+    if ($LASTEXITCODE -eq 0) {
+        $runnerSeparationViolations += "$invalidContractCollection (-FailOnContractViolation did not fail)"
+    }
+}
+
+if ($runnerSeparationViolations.Count -eq 0) {
+    Write-Host '    PASS Authentication, permissions, workload needs, and runner assignment remain distinct'
+}
+else {
+    Write-Host "    FAIL Runner capability separation issues found in: $($runnerSeparationViolations -join ', ')" -ForegroundColor Red
+    $guardrailFailures += 'runner-capability-separation'
 }
 
 if ($guardrailFailures.Count -gt 0) {

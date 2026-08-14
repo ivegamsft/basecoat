@@ -1,0 +1,28 @@
+name: Sibling permission isolation fixture
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  oidc-source:
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - run: echo "Sibling owns the OIDC permission"
+
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Azure login inputs without inherited OIDC permission
+        uses: azure/login@example
+        with:
+          client-id: example
+          tenant-id: example
+          subscription-id: example

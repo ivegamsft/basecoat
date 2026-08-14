@@ -4,7 +4,8 @@ param(
     [int]$QueueWarnSeconds = 300,
     [ValidateSet('markdown', 'json')]
     [string]$OutputFormat = 'markdown',
-    [string]$OutputPath
+    [string]$OutputPath,
+    [string]$ContractPath = '.github\workflow-runner-routing-contracts.json'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -55,6 +56,157 @@ function Get-QueueSeconds {
     return [math]::Round($seconds, 2)
 }
 
+function Get-WorkflowJobDisplayName {
+    param(
+        [string]$WorkflowPath,
+        [string]$JobKey
+    )
+
+    if (-not (Test-Path $WorkflowPath)) {
+        return $null
+    }
+
+    $inTargetJob = $false
+    foreach ($line in (Get-Content $WorkflowPath)) {
+        if ($line -match '^\s{2}([A-Za-z0-9_-]+):\s*$') {
+            if ($inTargetJob) {
+                break
+            }
+            $inTargetJob = $matches[1] -eq $JobKey
+            continue
+        }
+        if ($inTargetJob -and $line -match '^\s{4}name:\s*(.+?)\s*$') {
+            return $matches[1].Trim().Trim('"', "'")
+        }
+    }
+
+    return $null
+}
+
+function Get-ReusableWorkflowJobPrefixes {
+    param(
+        [string]$WorkflowPath
+    )
+
+    if (-not (Test-Path $WorkflowPath)) {
+        return @()
+    }
+
+    $prefixes = [System.Collections.Generic.List[string]]::new()
+    $jobKey = $null
+    $jobName = $null
+    $isReusable = $false
+    foreach ($line in (Get-Content $WorkflowPath)) {
+        if ($line -match '^\s{2}([A-Za-z0-9_-]+):\s*$') {
+            if ($jobKey -and $isReusable) {
+                $prefixes.Add($jobKey)
+                if ($jobName) {
+                    $prefixes.Add($jobName)
+                }
+            }
+            $jobKey = $matches[1]
+            $jobName = $null
+            $isReusable = $false
+            continue
+        }
+        if (-not $jobKey) {
+            continue
+        }
+        if ($line -match '^\s{4}name:\s*(.+?)\s*$') {
+            $jobName = $matches[1].Trim().Trim('"', "'")
+        }
+        elseif ($line -match '^\s{4}uses:\s*[''"]?\./\.github/workflows/') {
+            $isReusable = $true
+        }
+    }
+    if ($jobKey -and $isReusable) {
+        $prefixes.Add($jobKey)
+        if ($jobName) {
+            $prefixes.Add($jobName)
+        }
+    }
+
+    return @($prefixes | Select-Object -Unique)
+}
+
+$repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
+$contractFilePath = if ([System.IO.Path]::IsPathRooted($ContractPath)) {
+    $ContractPath
+}
+else {
+    Join-Path $repoRoot $ContractPath
+}
+$contractedGithubHostedJobs = @{}
+if (Test-Path $contractFilePath) {
+    $contractData = Get-Content $contractFilePath -Raw | ConvertFrom-Json
+    foreach ($contract in @($contractData.contracts)) {
+        $allowedHostedClasses = @(
+            $contract.allowed_runner_classes |
+                Where-Object { $_ -match '^github-hosted-' }
+        )
+        if ($allowedHostedClasses.Count -eq 0) {
+            continue
+        }
+        $allowedClassSet = [System.Collections.Generic.HashSet[string]]::new(
+            [System.StringComparer]::OrdinalIgnoreCase
+        )
+        foreach ($runnerClass in $allowedHostedClasses) {
+            [void]$allowedClassSet.Add($runnerClass)
+        }
+        $contractedGithubHostedJobs["$($contract.workflow)|$($contract.job)"] = $allowedClassSet
+        $workflowPath = Join-Path $repoRoot ".github\workflows\$($contract.workflow)"
+        $displayName = Get-WorkflowJobDisplayName -WorkflowPath $workflowPath -JobKey $contract.job
+        if (-not [string]::IsNullOrWhiteSpace($displayName)) {
+            $contractedGithubHostedJobs["$($contract.workflow)|$displayName"] = $allowedClassSet
+        }
+    }
+}
+
+function Get-GithubHostedRunnerClass {
+    param(
+        [string[]]$Labels
+    )
+
+    if (@($Labels) -contains 'self-hosted') {
+        return $null
+    }
+
+    foreach ($label in @($Labels)) {
+        switch -Regex ($label) {
+            '^ubuntu(?:-|$)' { return 'github-hosted-linux' }
+            '^windows(?:-|$)' { return 'github-hosted-windows' }
+            '^macos(?:-|$)' { return 'github-hosted-macos' }
+        }
+    }
+
+    return $null
+}
+
+function Test-IsContractedGithubHostedJob {
+    param(
+        [string]$WorkflowFile,
+        [string]$JobName,
+        [string]$RunnerClass
+    )
+
+    if ([string]::IsNullOrWhiteSpace($RunnerClass)) {
+        return $false
+    }
+
+    $jobKey = "$WorkflowFile|$JobName"
+    return $contractedGithubHostedJobs.ContainsKey($jobKey) -and
+        $contractedGithubHostedJobs[$jobKey].Contains($RunnerClass)
+}
+
+function Test-HasGithubHostedContract {
+    param(
+        [string]$WorkflowFile,
+        [string]$JobName
+    )
+
+    return $contractedGithubHostedJobs.ContainsKey("$WorkflowFile|$JobName")
+}
+
 if ([string]::IsNullOrWhiteSpace($Repository)) {
     $Repository = gh repo view --json nameWithOwner --jq .nameWithOwner 2>$null
     if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($Repository)) {
@@ -81,6 +233,11 @@ foreach ($w in $releaseLaneWorkflows) { $workflowLaneMap[$w] = 'release-lane' }
 foreach ($w in $deployLaneWorkflows) { $workflowLaneMap[$w] = 'deploy-lane' }
 
 $workflowFiles = @($workflowLaneMap.Keys | Sort-Object)
+$delegatedJobPrefixes = @{}
+foreach ($workflowFile in $workflowFiles) {
+    $workflowPath = Join-Path $repoRoot ".github\workflows\$workflowFile"
+    $delegatedJobPrefixes[$workflowFile] = @(Get-ReusableWorkflowJobPrefixes -WorkflowPath $workflowPath)
+}
 $cutoff = (Get-Date).ToUniversalTime().AddDays(-1 * $LookbackDays)
 
 $queueObservations = New-Object System.Collections.Generic.List[object]
@@ -136,16 +293,27 @@ foreach ($workflowFile in $workflowFiles) {
                 foreach ($job in $failedJobs) {
                     $labels = @($job.labels)
                     $runnerName = [string]$job.runner_name
-                    $isGithubHosted = $false
-                    if ($runnerName -match '^GitHub Actions') {
-                        $isGithubHosted = $true
-                    }
-                    if (@('ubuntu-latest', 'windows-latest', 'macos-latest') | Where-Object { $labels -contains $_ }) {
-                        $isGithubHosted = $true
-                    }
+                    $actualHostedRunnerClass = Get-GithubHostedRunnerClass -Labels $labels
+                    $isGithubHosted = $runnerName -match '^GitHub Actions' -or
+                        -not [string]::IsNullOrWhiteSpace($actualHostedRunnerClass)
 
                     $missingRunnerAssignment = [string]::IsNullOrWhiteSpace($runnerName) -or -not $job.started_at
-                    $isPotentialWrongRunner = $isGithubHosted -or $missingRunnerAssignment
+                    $hasGithubHostedContract = Test-HasGithubHostedContract `
+                        -WorkflowFile $workflowFile `
+                        -JobName $job.name
+                    $isContractedGithubHosted = $isGithubHosted -and
+                        (Test-IsContractedGithubHostedJob `
+                            -WorkflowFile $workflowFile `
+                            -JobName $job.name `
+                            -RunnerClass $actualHostedRunnerClass)
+                    $isApprovedDelegatedGithubHosted = $isGithubHosted -and @(
+                        $delegatedJobPrefixes[$workflowFile] |
+                            Where-Object { $job.name -like "$_ / *" }
+                    ).Count -gt 0
+                    $isPotentialWrongRunner = ($hasGithubHostedContract -and
+                        -not $isContractedGithubHosted -and
+                        -not $isApprovedDelegatedGithubHosted) -or
+                        $missingRunnerAssignment
                     if (-not $isPotentialWrongRunner) {
                         continue
                     }
@@ -153,6 +321,18 @@ foreach ($workflowFile in $workflowFiles) {
                     $queueAtFailure = $null
                     if ($createdAt -and $run.updated_at) {
                         $queueAtFailure = Get-QueueSeconds -CreatedAt $createdAt -StartedAt ([datetime]$run.updated_at)
+                    }
+                    $patternDescription = if ($missingRunnerAssignment) {
+                        'no-runner-assigned-on-failure'
+                    }
+                    elseif ($labels -contains 'self-hosted') {
+                        'contracted-public-job-failed-on-self-hosted-runner'
+                    }
+                    elseif ($isGithubHosted) {
+                        'failed-on-disallowed-github-hosted-runner'
+                    }
+                    else {
+                        'contracted-public-job-failed-on-unapproved-runner'
                     }
 
                     $wrongRunnerPatterns.Add([pscustomobject]@{
@@ -167,7 +347,7 @@ foreach ($workflowFile in $workflowFiles) {
                             runner_name         = $runnerName
                             labels              = ($labels -join ', ')
                             queue_seconds       = $queueAtFailure
-                            pattern_description = if ($missingRunnerAssignment) { 'no-runner-assigned-on-failure' } else { 'failed-on-github-hosted-in-lane-workflow' }
+                            pattern_description = $patternDescription
                         })
                 }
             }

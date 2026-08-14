@@ -34,9 +34,11 @@
 
 ## July 2026 Runner Routing Audit
 
-1. Prefer `vars.RUNNER_DEPLOY` and `vars.RUNNER_RELEASE` over hard-coded runner groups when a workflow needs a migration-safe fallback.
-2. Use the soft-fallback expression (`vars.RUNNER_DEPLOY || 'ubuntu-latest'`) instead of a resolver or preflight job. The `resolve-deploy-runner` resolver pattern has been removed; workflows should not fail when `RUNNER_DEPLOY` is unset.
-3. For deploy workflows requiring Linux capabilities on PR events, add a PR guard: `github.event_name == 'pull_request' && 'ubuntu-latest' || vars.RUNNER_DEPLOY || 'ubuntu-latest'`.
-4. CI-only workflows that require Docker (e.g., image build/smoke tests) should pin to `ubuntu-latest` unconditionally; do not route them through `vars.RUNNER_DEPLOY`.
-5. Keep PR validation and other fast gates on GitHub-hosted runners unless a private network or managed identity is required.
-6. Runner contract changes in deploy/release workflows must sync `.github/workflow-runner-routing-contracts.json`; contract violations are enforced by `workflow-runner-capability-audit.yml` (which runs `scripts/audit-workflow-runner-capabilities.ps1 -FailOnContractViolation`) and by Test 19 in `tests/workflow-guardrails-tests.ps1` (the `runner-capability-classification` test, part of the `validate-windows` CI job).
+1. Use `vars.RUNNER_DEPLOY` and `vars.RUNNER_RELEASE` only when private network access or runner-managed identity is required.
+2. Pin public-endpoint deployments and publications to `ubuntu-latest`; OIDC and repository credentials do not require a self-hosted runner.
+3. If a private deploy workflow needs Linux on pull requests, use the guarded expression `github.event_name == 'pull_request' && 'ubuntu-latest' || vars.RUNNER_DEPLOY || 'ubuntu-latest'`.
+4. CI-only workflows that require Docker should pin to `ubuntu-latest` unconditionally.
+5. Keep PR validation and public OIDC deployments on GitHub-hosted runners unless a private network or runner-managed identity is required.
+6. Runner contract changes must sync `.github/workflow-runner-routing-contracts.json`, including required and forbidden capabilities. Contract violations are enforced by `workflow-runner-capability-audit.yml` and Tests 19-22 in `tests/workflow-guardrails-tests.ps1`.
+7. Classify Azure Login OIDC only when the applicable step supplies `client-id`, `tenant-id`, and `subscription-id`; `with.creds` is credential authentication even when the workflow grants `id-token: write`.
+8. Do not infer workload capabilities from `runs-on`. Private requirements must be explicit in workload markers or routing contracts so unnecessary self-hosted routes remain visible as mismatches.
