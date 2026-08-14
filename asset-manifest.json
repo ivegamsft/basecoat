@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "libraryVersion": "4.1.0",
-  "generatedAt": "2026-08-11T10:52:14.4743923Z",
+  "generatedAt": "2026-08-14T06:20:07.2064573Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -622,7 +622,7 @@
     {
       "path": "agents/basecoat-50-security-secrets-manager.agent.md",
       "type": "agent",
-      "sha": "d92e752848939ddab77da433ceb25c4f1423ac77",
+      "sha": "ea5efb69d7e03ea79b90036b655f1b646cb2c48d",
       "version": null,
       "effectiveVersion": "4.1.0",
       "versionSource": "library"
@@ -742,7 +742,7 @@
     {
       "path": "agents/basecoat-60-workflow-incident-responder.agent.md",
       "type": "agent",
-      "sha": "7d87fdc90328e0cd6ab31ebd566a5a85281d65cd",
+      "sha": "0976f97ecec285f296b42ac98e469465a6dc4c63",
       "version": null,
       "effectiveVersion": "4.1.0",
       "versionSource": "library"
@@ -759,6 +759,14 @@
       "path": "agents/basecoat-60-workflow-infrastructure-deploy.agent.md",
       "type": "agent",
       "sha": "9e11dd9660daff075360b78a6b3f1d4b2be3d2fe",
+      "version": null,
+      "effectiveVersion": "4.1.0",
+      "versionSource": "library"
+    },
+    {
+      "path": "agents/basecoat-60-workflow-local-dev-data-pack-orchestrator.agent.md",
+      "type": "agent",
+      "sha": "3ab8f8b094dc4e82fb26daefd10b0b829e6c4e5a",
       "version": null,
       "effectiveVersion": "4.1.0",
       "versionSource": "library"
@@ -1222,7 +1230,7 @@
     {
       "path": "instructions/basecoat-10-core-intent-routing.instructions.md",
       "type": "instruction",
-      "sha": "29d23ac41adf37822a1083faf64b5ffa8ceed7e4",
+      "sha": "1934f36b7aa30b205c7d51edc54c48ddb5009f62",
       "version": null,
       "effectiveVersion": "4.1.0",
       "versionSource": "library"
@@ -1718,7 +1726,7 @@
     {
       "path": "instructions/intent-routing.instructions.md",
       "type": "instruction",
-      "sha": "4391b92f550dc6de423022b7a1310ceb5ce2b0e7",
+      "sha": "08e0c38f361897ac2e07e8a6cf5397d534129d7c",
       "version": null,
       "effectiveVersion": "4.1.0",
       "versionSource": "library"
@@ -2527,6 +2535,14 @@
       "path": "skills/lexicon/SKILL.md",
       "type": "skill",
       "sha": "ed78f458f0869612f647799dffcf21ddeef81f4e",
+      "version": null,
+      "effectiveVersion": "4.1.0",
+      "versionSource": "library"
+    },
+    {
+      "path": "skills/local-dev-data-pack/SKILL.md",
+      "type": "skill",
+      "sha": "c9baa1a0babdb4e9cff2529d292a97801e9af95f",
       "version": null,
       "effectiveVersion": "4.1.0",
       "versionSource": "library"

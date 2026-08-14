@@ -1,0 +1,21 @@
+[
+  {
+    "id": "todo-cosmos-001",
+    "tenantId": "dev-tenant",
+    "title": "Validate local cosmos wiring",
+    "isDone": false
+  },
+  {
+    "id": "todo-cosmos-002",
+    "tenantId": "dev-tenant",
+    "title": "Verify deterministic seed IDs",
+    "isDone": false
+  },
+  {
+    "id": "todo-cosmos-003",
+    "tenantId": "dev-tenant",
+    "title": "Confirm compose profile startup",
+    "isDone": true
+  }
+]
+

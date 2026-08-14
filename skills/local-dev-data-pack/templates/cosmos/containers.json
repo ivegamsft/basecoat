@@ -1,0 +1,11 @@
+{
+  "databaseId": "app-dev",
+  "containers": [
+    {
+      "id": "todos",
+      "partitionKeyPath": "/tenantId",
+      "throughput": 400
+    }
+  ]
+}
+

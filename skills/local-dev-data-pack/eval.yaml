@@ -1,0 +1,28 @@
+name: "local-dev-data-pack-routing"
+description: "Routing evaluation — validates trigger activation for local-dev-data-pack skill."
+skill: "skills/local-dev-data-pack/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Generate a local docker compose setup for Postgres and Cosmos and seed sample data for desktop testing."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Build a data pack that loads SQL Server seed data into my local test stack."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Create profile-based compose services and store-specific loaders so local persistent stores are preloaded."
+    expect_activation: true
+  - id: "pos-4"
+    input: "Validate and audit my local data pack to ensure Postgres and Cosmos seeds are idempotent."
+    expect_activation: true
+  - id: "pos-5"
+    input: "Update the SQL Server local data-pack seeds for a new scenario version and re-validate it."
+    expect_activation: true
+  - id: "pos-6"
+    input: "Delete the old local data-pack scenario for cosmos after a dry-run preview."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Deploy PostgreSQL to Azure and configure failover groups."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Write a new GraphQL endpoint for customer search."
+    expect_activation: false

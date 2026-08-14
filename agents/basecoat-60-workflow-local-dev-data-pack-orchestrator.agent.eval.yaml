@@ -1,0 +1,47 @@
+agent: local-dev-data-pack-orchestrator
+tests:
+  - id: detect-and-generate-postgres-cosmos
+    description: Detects store topology and generates matching local data-pack artifacts
+    input: "Detect stores in this repo and generate a local dev data pack for postgres and cosmos under local-dev/."
+    expect:
+      contains:
+        - "topology"
+        - "generate"
+        - "postgres"
+        - "cosmos"
+        - "manifest"
+  - id: validate-audit-idempotence
+    description: Runs validate/audit semantics with idempotence checks
+    input: "Audit my existing local data pack and validate seed idempotence for sqlserver."
+    expect:
+      contains:
+        - "validate"
+        - "audit"
+        - "idempotence"
+        - "sqlserver"
+  - id: scoped-update-requires-revalidation
+    description: Applies scoped update flow and re-validation requirement
+    input: "Update only the postgres seed artifacts for scenario integration and then verify the pack is still valid."
+    expect:
+      contains:
+        - "update"
+        - "postgres"
+        - "re-validate"
+  - id: delete-requires-safe-scope
+    description: Enforces explicit delete scope and dry-run semantics
+    input: "Delete the cosmos scenario pack."
+    expect:
+      contains:
+        - "delete"
+        - "scope"
+        - "dry-run"
+        - "safety"
+  - id: blocks-nonlocal-targets
+    description: Rejects non-local and production-adjacent requests
+    input: "Use this orchestrator to update production SQL data directly."
+    expect:
+      contains:
+        - "local-only"
+        - "cannot"
+        - "production"
+

@@ -1,0 +1,70 @@
+# Local-only Docker Compose template for the data-pack skill.
+#
+# Secrets: passwords are NEVER embedded. Supply them via a local `.env` file
+#   (git-ignored) or the shell environment. The `:?` form fails fast if unset.
+#     POSTGRES_PASSWORD=... MSSQL_SA_PASSWORD=...
+#
+# Exposure: every published port is bound to 127.0.0.1 (loopback) so services
+#   are reachable only from the workstation, never from other hosts on the LAN.
+#
+# Reproducibility: images are pinned to immutable digests with a readable tag
+#   for humans. To update an image, run
+#     docker buildx imagetools inspect <image>:<tag>
+#   copy the reported Digest, and replace the @sha256:... below in the same PR.
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16@sha256:11a9d238fbb48bab14599c57e41123254452b1a2d93c6c8595bce96f346bd082
+    profiles: ["postgres"]
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in your local .env}
+      POSTGRES_DB: app_dev
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev -d app_dev"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest@sha256:ba4c8329f48fb8f02e1416be6a930ebfd71268caee78aa985f3af4315e457c89
+    profiles: ["sqlserver"]
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?set MSSQL_SA_PASSWORD in your local .env}
+    ports:
+      - "127.0.0.1:1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -No -Q 'SELECT 1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  cosmos:
+    image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest@sha256:50e0086d6171874ee136458d80f413f423a01ef56b1a6009d8628cc1bd1ad4ce
+    profiles: ["cosmos"]
+    environment:
+      AZURE_COSMOS_EMULATOR_PARTITION_COUNT: "4"
+      AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE: "true"
+    ports:
+      - "127.0.0.1:8081:8081"
+      - "127.0.0.1:10250:10250"
+      - "127.0.0.1:10251:10251"
+      - "127.0.0.1:10252:10252"
+    volumes:
+      # The Linux Cosmos emulator persists app data under /tmp/cosmos/appdata,
+      # so the named volume must mount there for reuse-volumes to retain seeds.
+      - cosmos_data:/tmp/cosmos/appdata
+
+volumes:
+  pg_data:
+  sql_data:
+  cosmos_data:
+

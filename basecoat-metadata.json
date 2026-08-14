@@ -1,7 +1,7 @@
 {
   "$schema": "basecoat-metadata-schema",
   "version": "3.27.0",
-  "generated": "2026-07-22",
+  "generated": "2026-08-06",
   "categories": {
     "AI & Development": {
       "label": "AI & Development",
@@ -2389,6 +2389,17 @@
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-ship-it-control-loop.agent.md",
       "model": "gpt-5.3-codex",
+      "argumentHint": ""
+    },
+    {
+      "name": "basecoat-60-workflow-local-dev-data-pack-orchestrator",
+      "description": "Topology-aware local data-pack orchestrator that detects repository persistence stores and executes generate/validate/update/delete lifecycle operations for Docker Compose test environments with deterministic seed artifacts. USE FOR: discovering active persistence engines in a repo, generating local compose/data-pack artifacts for postgres/sqlserver/cosmos, auditing data-pack integrity and idempotence, and applying scoped updates or safe deletes to local packs. DO NOT USE FOR: production database changes, cloud provisioning, or destructive operations against shared environments.",
+      "category": "Meta",
+      "keywords": [],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/basecoat-60-workflow-local-dev-data-pack-orchestrator.agent.md",
+      "model": "claude-sonnet-4.6",
       "argumentHint": ""
     }
   ]

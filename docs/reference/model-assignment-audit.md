@@ -1,6 +1,6 @@
 # Model Assignment Audit
 
-Assignments scanned: 136.
+Assignments scanned: 137.
 
 | Asset | Field | Model | Status | Recommendation |
 |---|---|---|---|---|
@@ -106,6 +106,7 @@ Assignments scanned: 136.
 | [agents/basecoat-60-workflow-gate-diagnostician.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-gate-diagnostician.agent.md) | `model` | `claude-sonnet-4.6` | public-supported | Keep assignment; verify runtime entitlement and task-specific evals. |
 | [agents/basecoat-60-workflow-incident-responder.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-incident-responder.agent.md) | `model` | `claude-sonnet-4.6` | public-supported | Keep assignment; verify runtime entitlement and task-specific evals. |
 | [agents/basecoat-60-workflow-infrastructure-deploy.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-infrastructure-deploy.agent.md) | `model` | `claude-sonnet-4.6` | public-supported | Keep assignment; verify runtime entitlement and task-specific evals. |
+| [agents/basecoat-60-workflow-local-dev-data-pack-orchestrator.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-local-dev-data-pack-orchestrator.agent.md) | `model` | `claude-sonnet-4.6` | public-supported | Keep assignment; verify runtime entitlement and task-specific evals. |
 | [agents/basecoat-60-workflow-queue-rebalancer.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-queue-rebalancer.agent.md) | `model` | `gpt-5.4-mini` | fixed-effort | Keep only when the invocation omits reasoning_effort; never map reasoning_depth to a provider effort. |
 | [agents/basecoat-60-workflow-release-freeze-enforcer.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-release-freeze-enforcer.agent.md) | `model` | `claude-sonnet-4.6` | public-supported | Keep assignment; verify runtime entitlement and task-specific evals. |
 | [agents/basecoat-60-workflow-release-freeze-enforcer.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-release-freeze-enforcer.agent.md) | `fallback_models` | `gpt-5.3-codex` | public-supported | Keep assignment; verify runtime entitlement and task-specific evals. |

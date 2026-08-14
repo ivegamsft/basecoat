@@ -2,7 +2,7 @@
 
 Generated from the canonical intent vocabulary and asset frontmatter. Do not edit the generated tables directly; run `pwsh scripts/generate-prompt-library.ps1`.
 
-Coverage: 33 intents, 132 skills, and 129 agents.
+Coverage: 33 intents, 133 skills, and 130 agents.
 
 ## Lifecycle prompts
 
@@ -186,6 +186,7 @@ Next action: approve the exact removal list
 | `landing-zone-audit` | <code>Use the 'landing-zone-audit' skill. Task: audit landing zone designs.</code> | [skills/landing-zone-audit/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/landing-zone-audit/SKILL.md) |
 | `lane-closeout` | <code>Use the 'lane-closeout' skill. Task: capture dirty WIP.</code> | [skills/lane-closeout/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/lane-closeout/SKILL.md) |
 | `lexicon` | <code>Use the 'lexicon' skill. Task: create project lexicon file.</code> | [skills/lexicon/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/lexicon/SKILL.md) |
+| `local-dev-data-pack` | <code>Use the 'local-dev-data-pack' skill. Task: scaffold local compose profiles.</code> | [skills/local-dev-data-pack/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/local-dev-data-pack/SKILL.md) |
 | `manual-test-strategy` | <code>Use the 'manual-test-strategy' skill. Task: classify manual versus automated coverage.</code> | [skills/manual-test-strategy/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/manual-test-strategy/SKILL.md) |
 | `mcp-audit` | <code>Use the 'mcp-audit' skill. Task: reviewing MCP server code quality.</code> | [skills/mcp-audit/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/mcp-audit/SKILL.md) |
 | `mcp-development` | <code>Use the 'mcp-development' skill. Task: scaffold MCP server.</code> | [skills/mcp-development/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/mcp-development/SKILL.md) |
@@ -333,6 +334,7 @@ Next action: approve the exact removal list
 | `incident-responder` | <code>@incident-responder Help me with this task: classify and triage active production incidents.</code> | [agents/basecoat-60-workflow-incident-responder.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-incident-responder.agent.md) |
 | `incident-to-backlog-router` | <code>@incident-to-backlog-router Help me with this task: create GitHub issues from incident metadata with Type/Priority/Risk/Guardrail State/SRE Impact pre-filled.</code> | [agents/basecoat-60-workflow-incident-to-backlog-router.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-incident-to-backlog-router.agent.md) |
 | `infrastructure-deploy` | <code>@infrastructure-deploy Help me with this task: deploy Azure Bicep templates.</code> | [agents/basecoat-60-workflow-infrastructure-deploy.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-infrastructure-deploy.agent.md) |
+| `local-dev-data-pack-orchestrator` | <code>@local-dev-data-pack-orchestrator Help me with this task: discovering active persistence engines in a repo.</code> | [agents/basecoat-60-workflow-local-dev-data-pack-orchestrator.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-local-dev-data-pack-orchestrator.agent.md) |
 | `parallel-session-coordinator` | <code>@parallel-session-coordinator Help me with this task: run parallel feature sprints.</code> | [agents/basecoat-60-workflow-parallel-session-coordinator.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-parallel-session-coordinator.agent.md) |
 | `queue-rebalancer` | <code>@queue-rebalancer Help me with this task: reordering open PRs/issues by dependency to unblock broken builds fast.</code> | [agents/basecoat-60-workflow-queue-rebalancer.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-queue-rebalancer.agent.md) |
 | `release-freeze-enforcer` | <code>@release-freeze-enforcer Help me with this task: evaluate freeze exceptions.</code> | [agents/basecoat-60-workflow-release-freeze-enforcer.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-release-freeze-enforcer.agent.md) |
