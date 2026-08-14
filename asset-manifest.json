@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "libraryVersion": "4.1.0",
-  "generatedAt": "2026-08-14T06:20:07.2064573Z",
+  "generatedAt": "2026-08-14T07:04:30.5911908Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -358,7 +358,7 @@
     {
       "path": "agents/basecoat-10-core-project-onboarding.agent.md",
       "type": "agent",
-      "sha": "a4b69f98486c169059e191f889097b05ed795f72",
+      "sha": "6e37ba7120ee193f14a33ff4413833f30682e658",
       "version": null,
       "effectiveVersion": "4.1.0",
       "versionSource": "library"

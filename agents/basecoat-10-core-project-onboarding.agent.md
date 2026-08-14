@@ -18,7 +18,7 @@ Single-invocation repo setup with BaseCoat integration. Safe to re-run on existi
 
 ## Inputs
 
-- `repo_name`, `repo_description`, `visibility` (default: `private`), `sprint_1_goal`, `github_org`, `basecoat_version` (default: `main`), `hook_profile` (`none|memory|guardrails|standard`, default: `standard`)
+- `repo_name`, `repo_description`, `visibility` (default: `private`), `sprint_1_goal`, `github_org`, `basecoat_version` (default: `main`), `hook_profile` (`none|memory|guardrails|lane-closeout|standard`, default: `standard`)
 
 ## Workflow
 
@@ -26,7 +26,7 @@ Single-invocation repo setup with BaseCoat integration. Safe to re-run on existi
 2. Create or clone the repository (idempotent; skips creation if exists).
 3. Scaffold root files if absent: `sync.ps1`, `sync.sh`, `setup.ps1`, `.gitignore`, `README.md`.
 4. Sync BaseCoat governance into `.github/base-coat/` via `sync.ps1` at the pinned version.
-5. Configure hook packs from the selected profile (`none|memory|guardrails|standard`), write `.github/basecoat-hook-profiles.json`, and provision `.github/hooks/` pack files.
+5. Configure hook packs from the selected profile (`none|memory|guardrails|lane-closeout|standard`), write `.github/basecoat-hook-profiles.json`, and provision `.github/hooks/` pack files.
 6. Create `.github/ISSUE_TEMPLATE/` with `feature.yml` and `bug.yml` templates if absent.
 7. Log the Sprint 1 goal as a GitHub issue with acceptance criteria.
 8. Stage all scaffolded files, commit with conventional message, and push only for a brand-new repository; reruns on existing repositories should use a review branch so branch protection still applies.
