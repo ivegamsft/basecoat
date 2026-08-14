@@ -7,9 +7,40 @@
     ".github/workflows/mcp-deploy.yml",
     ".github/workflows/publish-to-production.yml"
   ],
+  "production_environment": {
+    "name": "production",
+    "approval_boundary": "production_environment_approval",
+    "workflow_bindings": {
+      ".github/workflows/close-production-issues.yml": {
+        "job": "close-issues",
+        "expected_job_environment": "production",
+        "expected_workflow_sha256": "84a5ae7f4ebd7d63aaea962d041378441a0f7641783c63603b8e741cf6c118ad"
+      },
+      ".github/workflows/docs-production.yml": {
+        "job": "dispatch-production-docs",
+        "expected_job_environment": "production",
+        "expected_workflow_sha256": "7de5c4012fa2eb55c1a708f0e27232a1c99ceebd827cf32c114f76100981444e"
+      },
+      ".github/workflows/extension-deploy.yml": {
+        "job": "deploy",
+        "expected_job_environment": "${{ github.event_name == 'workflow_dispatch' && ((github.event.inputs.environment == 'prod' || github.event.inputs.environment == 'production') && 'production' || github.event.inputs.environment) || 'production' }}",
+        "expected_workflow_sha256": "ec9053d5f8b0ed12d069a9bd4b3b80bf271c81fa5a2c100c5e1fe78be883ee98"
+      },
+      ".github/workflows/mcp-deploy.yml": {
+        "job": "deploy",
+        "expected_job_environment": "${{ github.event_name == 'pull_request' && 'staging' || (github.event_name == 'workflow_dispatch' && ((github.event.inputs.environment == 'prod' || github.event.inputs.environment == 'production') && 'production' || github.event.inputs.environment) || 'production') }}",
+        "expected_workflow_sha256": "899226a68b9b748febb6eb357a8718736c641fc0853dccb575859670615d87de"
+      },
+      ".github/workflows/publish-to-production.yml": {
+        "job": "publish",
+        "expected_job_environment": "production",
+        "expected_workflow_sha256": "e4266a0f40dea559379468499bb091b927970a13e147b919be8469f1e77ec097"
+      }
+    }
+  },
   "profiles": {
     "solo-dev": {
-      "description": "Single maintainer optimization with strict checks and independent review.",
+      "description": "Single maintainer optimization with strict checks and explicit critical-risk acknowledgement.",
       "main": {
         "required_checks": [
           "lint-and-validate",
@@ -20,11 +51,27 @@
           "release-label-gate"
         ],
         "merge_queue_posture": "deferred",
+        "automated_review": {
+          "required": true,
+          "reviewer_logins": [
+            "copilot-pull-request-reviewer[bot]"
+          ],
+          "accepted_states": [
+            "COMMENTED",
+            "APPROVED"
+          ]
+        },
         "required_approvals_by_risk_tier": {
-          "low": 1,
-          "medium": 1,
-          "high": 1,
-          "critical": 1
+          "low": 0,
+          "medium": 0,
+          "high": 0,
+          "critical": 0
+        },
+        "required_maintainer_acknowledgement_by_risk_tier": {
+          "low": false,
+          "medium": false,
+          "high": false,
+          "critical": true
         }
       },
       "cloud_agent": {
@@ -47,11 +94,22 @@
           "release-label-gate"
         ],
         "merge_queue_posture": "deferred",
+        "automated_review": {
+          "required": false,
+          "reviewer_logins": [],
+          "accepted_states": []
+        },
         "required_approvals_by_risk_tier": {
           "low": 0,
           "medium": 1,
           "high": 1,
           "critical": 1
+        },
+        "required_maintainer_acknowledgement_by_risk_tier": {
+          "low": false,
+          "medium": false,
+          "high": false,
+          "critical": false
         }
       },
       "cloud_agent": {
@@ -75,11 +133,22 @@
           "prd-spec-gate"
         ],
         "merge_queue_posture": "required",
+        "automated_review": {
+          "required": false,
+          "reviewer_logins": [],
+          "accepted_states": []
+        },
         "required_approvals_by_risk_tier": {
           "low": 1,
           "medium": 1,
           "high": 2,
           "critical": 2
+        },
+        "required_maintainer_acknowledgement_by_risk_tier": {
+          "low": false,
+          "medium": false,
+          "high": false,
+          "critical": false
         }
       },
       "cloud_agent": {
@@ -116,7 +185,12 @@
     ],
     "critical": [
       "iac/",
+      ".github/governance/",
+      ".github/base-coat/governance/",
       ".github/environment-protection-production.json",
+      ".github/workflows/pr-auto-merge-executor.yml",
+      ".github/workflows/basecoat-pr-auto-merge-executor.yml",
+      ".github/base-coat/workflows/pr-auto-merge-executor.yml",
       ".github/workflows/portal-deploy.yml",
       ".github/workflows/mcp-deploy.yml",
       ".github/workflows/extension-deploy.yml"

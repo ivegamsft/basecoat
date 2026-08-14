@@ -8,15 +8,30 @@ This reference defines three governance packs that route changes by risk tier.
 
 | Pack | Intended use | Low risk | Medium risk | High risk | Critical risk |
 |---|---|---|---|---|---|
-| `solo-dev` | Single maintainer repos with an available independent reviewer | 1 approval | 1 approval | 1 approval | 1 approval |
+| `solo-dev` | True single-maintainer repos with reliable automated checks | 0 approvals | 0 approvals | 0 approvals | 0 approvals + maintainer acknowledgement |
 | `team-dev` | Team repos with routine collaboration and shared ownership | 0 approvals | 1 approval | 1 approval | 1 approval |
 | `regulated-team` | Security-sensitive or regulated delivery streams | 1 approval | 1 approval | 2 approvals | 2 approvals |
 
 Required checks per pack are defined in `.github/governance/policy-packs.json`.
-The portable `solo-dev` ruleset requires one review globally because a
-repo-local GitHub Actions status cannot provide an executor-specific identity.
-The author may still complete the merge after another qualified collaborator
-approves the latest push; self-merge never means self-approval.
+The portable `solo-dev` ruleset requires zero approving reviews. The trusted
+executor preserves human intent for critical changes through a durable
+maintainer acknowledgement, while `team-dev` and `regulated-team` continue to
+require independent write, maintain, or admin reviewers.
+
+The `solo-dev` pack also requires an automated review from
+`copilot-pull-request-reviewer[bot]` for the current PR head. A review of an
+earlier commit does not satisfy the executor.
+
+For critical `solo-dev` PRs, post
+`/acknowledge-critical <full-head-sha>` after the executor observes the latest
+push. The PR author may
+acknowledge because this is an accountable-maintainer decision, not a fabricated
+GitHub review. A linked issue labeled `approved` with an exact qualified
+maintainer `/approve` comment is also accepted. Bots, stale SHA comments, users
+without write, maintain, or admin permission never count, and deleting or
+editing the acknowledgement revokes it. Changes to a linked issue's exact
+`/approve` comment or `approved` label set linked PR eligibility to pending and
+dispatch reevaluation.
 
 ## Risk-tier routing
 
@@ -30,8 +45,12 @@ Routing is path-based and evaluated from changed files:
 The effective tier is the highest tier matched by any changed file.
 
 `production_release_paths` separately identifies production workflows that
-always retain the human production-approval boundary, even when their path risk
-tier is `high` rather than `critical`.
+always retain the protected GitHub environment boundary, even when their path
+risk tier is `high` rather than `critical`. The PR executor validates the
+`production_environment` and `production_environment_contract` settings plus
+the live environment's reviewer and branch protections. It does not convert
+environment approval into an independent PR approval. The actual deployment
+remains paused on the `production` environment.
 
 ## Cloud-agent guardrails by pack
 

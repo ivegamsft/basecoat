@@ -11,10 +11,20 @@ on:
       - ready_for_review
       - labeled
       - unlabeled
+      - edited
   pull_request_review:
     types:
       - submitted
       - dismissed
+  issue_comment:
+    types:
+      - created
+      - edited
+      - deleted
+  issues:
+    types:
+      - labeled
+      - unlabeled
   workflow_dispatch:
     inputs:
       pr_number:
@@ -23,19 +33,258 @@ on:
         type: string
 
 permissions:
+  actions: write
   checks: read
   contents: write
+  deployments: read
   pull-requests: write
   issues: write
   statuses: write
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.pull_request_review.pull_request.number || inputs.pr_number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'issues' && format('issue-{0}', github.event.issue.number) || github.event_name == 'issue_comment' && format('comment-{0}', github.event.comment.id) || format('pr-{0}', github.event.pull_request.number || github.event.pull_request_review.pull_request.number || inputs.pr_number || github.ref) }}
   cancel-in-progress: true
 
 jobs:
+  route-pr-acknowledgement:
+    name: Route PR acknowledgement changes
+    if: |
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      (
+        contains(github.event.comment.body, '/acknowledge-critical') ||
+        contains(github.event.changes.body.from, '/acknowledge-critical')
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Reevaluate PR after acknowledgement mutation
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        env:
+          WORKFLOW_REF: ${{ github.workflow_ref }}
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const prNumber = Number(context.payload.issue?.number || 0);
+            const action = String(context.payload.action || '');
+            const parseAcknowledgement = body => {
+              const match = String(body || '').trim().match(
+                /^\/acknowledge-critical\s+([0-9a-f]{40})$/i
+              );
+              return match ? match[1].toLowerCase() : '';
+            };
+            const currentSha = parseAcknowledgement(context.payload.comment?.body);
+            const previousSha = parseAcknowledgement(context.payload.changes?.body?.from);
+            const acknowledgementAdded =
+              action !== 'deleted' && Boolean(currentSha) && !previousSha;
+            const acknowledgementReplaced =
+              action === 'edited' &&
+              Boolean(previousSha) &&
+              Boolean(currentSha) &&
+              previousSha !== currentSha;
+            const acknowledgementRevoked =
+              (action === 'deleted' && Boolean(currentSha)) ||
+              (action === 'edited' && Boolean(previousSha) && !currentSha) ||
+              acknowledgementReplaced;
+            if (!prNumber || (!acknowledgementAdded && !acknowledgementRevoked)) {
+              core.info('PR comment did not add or revoke an exact acknowledgement.');
+              return;
+            }
+
+            const { data: pullRequest } = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: prNumber
+            });
+            if (acknowledgementAdded) {
+              const commentUser = context.payload.comment?.user;
+              const commentLogin = String(commentUser?.login || '');
+              if (commentUser?.type === 'Bot' || commentLogin.toLowerCase().endsWith('[bot]')) {
+                core.info(`Ignoring acknowledgement addition from bot @${commentLogin || 'unknown'}.`);
+                return;
+              }
+              const { data: permission } = await github.rest.repos.getCollaboratorPermissionLevel({
+                owner,
+                repo,
+                username: commentLogin
+              });
+              const permissionLevels = [permission.permission, permission.role_name]
+                .map(level => String(level || '').toLowerCase());
+              if (!permissionLevels.some(level => ['admin', 'maintain', 'write'].includes(level))) {
+                core.info(`Ignoring acknowledgement addition from unqualified user @${commentLogin}.`);
+                return;
+              }
+              if (currentSha !== String(pullRequest.head.sha || '').toLowerCase()) {
+                core.info(`Ignoring acknowledgement for stale SHA ${currentSha}.`);
+                return;
+              }
+            }
+
+            const workflowId = String(process.env.WORKFLOW_REF || '')
+              .match(/\.github\/workflows\/([^@]+)@/)?.[1];
+            if (!workflowId) {
+              throw new Error(`Unable to resolve workflow filename from '${process.env.WORKFLOW_REF || ''}'.`);
+            }
+            await github.rest.repos.createCommitStatus({
+              owner,
+              repo,
+              sha: pullRequest.head.sha,
+              state: 'pending',
+              context: 'BaseCoat merge eligibility',
+              description: 'Solo-dev maintainer acknowledgement evidence changed.',
+              target_url: `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`
+            });
+            await github.rest.actions.createWorkflowDispatch({
+              owner,
+              repo,
+              workflow_id: workflowId,
+              ref: context.payload.repository?.default_branch || 'main',
+              inputs: { pr_number: String(prNumber) }
+            });
+
+  route-linked-issue-evidence:
+    name: Route linked issue acknowledgement changes
+    if: |
+      !github.event.issue.pull_request &&
+      (
+        (
+          github.event_name == 'issue_comment' &&
+          (
+            contains(github.event.comment.body, '/approve') ||
+            contains(github.event.changes.body.from, '/approve')
+          )
+        ) ||
+        (
+          github.event_name == 'issues' &&
+          github.event.label.name == 'approved'
+        )
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - name: Reevaluate PRs linked to changed issue evidence
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        env:
+          WORKFLOW_REF: ${{ github.workflow_ref }}
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issueNumber = Number(context.payload.issue?.number || 0);
+            const currentBody = String(context.payload.comment?.body || '').trim();
+            const previousBody = String(context.payload.changes?.body?.from || '').trim();
+            const action = String(context.payload.action || '');
+            const exactIssueApproval = body => /^\/approve$/i.test(body);
+            const approvalAdded =
+              context.eventName === 'issue_comment' &&
+              action !== 'deleted' &&
+              exactIssueApproval(currentBody) &&
+              !exactIssueApproval(previousBody);
+            const approvalRevoked =
+              context.eventName === 'issue_comment' &&
+              (
+                (action === 'deleted' && exactIssueApproval(currentBody)) ||
+                (
+                  action === 'edited' &&
+                  exactIssueApproval(previousBody) &&
+                  !exactIssueApproval(currentBody)
+                )
+              );
+            const commentEvidenceChanged = approvalAdded || approvalRevoked;
+            const approvedLabelChanged =
+              context.eventName === 'issues' &&
+              String(context.payload.label?.name || '').toLowerCase() === 'approved';
+            if (!issueNumber || (!commentEvidenceChanged && !approvedLabelChanged)) {
+              core.info('Issue event did not change linked acknowledgement evidence.');
+              return;
+            }
+            if (approvalAdded) {
+              const commentUser = context.payload.comment?.user;
+              const commentLogin = String(commentUser?.login || '');
+              if (commentUser?.type === 'Bot' || commentLogin.toLowerCase().endsWith('[bot]')) {
+                core.info(`Ignoring linked issue approval addition from bot @${commentLogin || 'unknown'}.`);
+                return;
+              }
+              const { data: permission } = await github.rest.repos.getCollaboratorPermissionLevel({
+                owner,
+                repo,
+                username: commentLogin
+              });
+              const permissionLevels = [permission.permission, permission.role_name]
+                .map(level => String(level || '').toLowerCase());
+              if (!permissionLevels.some(level => ['admin', 'maintain', 'write'].includes(level))) {
+                core.info(`Ignoring linked issue approval addition from unqualified user @${commentLogin}.`);
+                return;
+              }
+              const { data: issue } = await github.rest.issues.get({
+                owner,
+                repo,
+                issue_number: issueNumber
+              });
+              const labels = (issue.labels || []).map(label =>
+                String(typeof label === 'string' ? label : label.name || '').toLowerCase()
+              );
+              if (!labels.includes('approved')) {
+                core.info(
+                  `Issue #${issueNumber} is not labeled approved yet; issue-approve will route after finalizing the label.`
+                );
+                return;
+              }
+            }
+
+            const workflowId = String(process.env.WORKFLOW_REF || '')
+              .match(/\.github\/workflows\/([^@]+)@/)?.[1];
+            if (!workflowId) {
+              throw new Error(`Unable to resolve workflow filename from '${process.env.WORKFLOW_REF || ''}'.`);
+            }
+            const defaultBranch = context.payload.repository?.default_branch || 'main';
+            const closingIssuePattern =
+              /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)\b/gim;
+            const linksIssue = pullRequest => {
+              const text = `${pullRequest.title || ''}\n${pullRequest.body || ''}`;
+              closingIssuePattern.lastIndex = 0;
+              let match;
+              while ((match = closingIssuePattern.exec(text)) !== null) {
+                if (Number(match[1]) === issueNumber) return true;
+              }
+              return false;
+            };
+            const openPullRequests = await github.paginate(github.rest.pulls.list, {
+              owner,
+              repo,
+              state: 'open',
+              per_page: 100
+            });
+            const linkedPullRequests = openPullRequests.filter(linksIssue);
+            for (const pullRequest of linkedPullRequests) {
+              await github.rest.repos.createCommitStatus({
+                owner,
+                repo,
+                sha: pullRequest.head.sha,
+                state: 'pending',
+                context: 'BaseCoat merge eligibility',
+                description: `Linked issue #${issueNumber} acknowledgement evidence changed.`,
+                target_url: `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`
+              });
+              await github.rest.actions.createWorkflowDispatch({
+                owner,
+                repo,
+                workflow_id: workflowId,
+                ref: defaultBranch,
+                inputs: { pr_number: String(pullRequest.number) }
+              });
+              core.info(`Queued reevaluation for PR #${pullRequest.number} linked to issue #${issueNumber}.`);
+            }
+            if (linkedPullRequests.length === 0) {
+              core.info(`No open pull requests close issue #${issueNumber}.`);
+            }
+
   evaluate:
     name: Evaluate merge eligibility
+    if: |
+      github.event_name != 'issues' &&
+      github.event_name != 'issue_comment'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     outputs:
@@ -56,6 +305,7 @@ jobs:
             const marker = '<!-- pr-auto-merge-executor:v1 -->';
             const eligibilityStatusContext = 'BaseCoat merge eligibility';
             const githubActionsIntegrationId = 15368;
+            const { createHash } = require('crypto');
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const workflowUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
@@ -66,9 +316,121 @@ jobs:
               if (context.payload.pull_request_review?.pull_request?.number) {
                 return Number(context.payload.pull_request_review.pull_request.number);
               }
+              if (context.payload.issue?.pull_request && context.payload.issue?.number) {
+                return Number(context.payload.issue.number);
+              }
               const fromInput = Number(process.env.PR_NUMBER_INPUT || 0);
               return Number.isInteger(fromInput) && fromInput > 0 ? fromInput : 0;
             };
+
+            // BEGIN SOLO-DEV ACKNOWLEDGEMENT CONTRACT
+            const criticalAcknowledgementCommand = '/acknowledge-critical';
+            const qualifiedPermissionLevels = new Set(['admin', 'maintain', 'write']);
+            const isBotActor = user => {
+              const login = String(user?.login || '');
+              return user?.type === 'Bot' || login.toLowerCase().endsWith('[bot]');
+            };
+            const hasQualifiedPermission = permission => [
+              permission?.permission,
+              permission?.role_name
+            ].some(level => qualifiedPermissionLevels.has(String(level || '').toLowerCase()));
+            const parseCriticalAcknowledgement = body => {
+              const match = String(body || '').trim().match(
+                /^\/acknowledge-critical\s+([0-9a-f]{40})$/i
+              );
+              return match ? match[1].toLowerCase() : '';
+            };
+            const isExactIssueApproval = body => /^\/approve$/i.test(String(body || '').trim());
+            const collectLinkedIssueNumbers = text => {
+              const issueNumbers = new Set();
+              const pattern = /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)\b/gim;
+              let match;
+              while ((match = pattern.exec(String(text || ''))) !== null) {
+                const issueNumber = Number(match[1]);
+                if (Number.isInteger(issueNumber) && issueNumber > 0) {
+                  issueNumbers.add(issueNumber);
+                }
+              }
+              return Array.from(issueNumbers);
+            };
+            const evaluateMaintainerAcknowledgement = async ({
+              headSha,
+              headObservedAt,
+              prComments,
+              linkedIssues,
+              resolvePermission
+            }) => {
+              const rejected = [];
+              const commentsNewestFirst = [...(prComments || [])].sort(
+                (left, right) => new Date(right.created_at || 0) - new Date(left.created_at || 0)
+              );
+              for (const comment of commentsNewestFirst) {
+                const acknowledgedSha = parseCriticalAcknowledgement(comment.body);
+                if (!acknowledgedSha) continue;
+                const login = comment.user?.login;
+                if (isBotActor(comment.user)) {
+                  rejected.push(`bot:${login || 'unknown'}`);
+                  continue;
+                }
+                if (acknowledgedSha !== String(headSha || '').toLowerCase()) {
+                  rejected.push(`stale-sha:${login || 'unknown'}`);
+                  continue;
+                }
+                const commentTime = new Date(comment.created_at || 0).getTime();
+                const latestPushTime = new Date(headObservedAt || 0).getTime();
+                if (
+                  !Number.isFinite(commentTime) ||
+                  !Number.isFinite(latestPushTime) ||
+                  commentTime <= latestPushTime
+                ) {
+                  rejected.push(`stale-time:${login || 'unknown'}`);
+                  continue;
+                }
+                if (!hasQualifiedPermission(await resolvePermission(login))) {
+                  rejected.push(`permission:${login || 'unknown'}`);
+                  continue;
+                }
+                return {
+                  satisfied: true,
+                  source: 'pr-comment',
+                  actor: login,
+                  reference: acknowledgedSha,
+                  rejected
+                };
+              }
+
+              for (const issue of linkedIssues || []) {
+                if (!issue.approved) continue;
+                for (const comment of issue.comments || []) {
+                  if (!isExactIssueApproval(comment.body)) continue;
+                  const login = comment.user?.login;
+                  if (isBotActor(comment.user)) {
+                    rejected.push(`bot:${login || 'unknown'}`);
+                    continue;
+                  }
+                  if (!hasQualifiedPermission(await resolvePermission(login))) {
+                    rejected.push(`permission:${login || 'unknown'}`);
+                    continue;
+                  }
+                  return {
+                    satisfied: true,
+                    source: 'linked-approved-issue',
+                    actor: login,
+                    reference: `#${issue.number}`,
+                    rejected
+                  };
+                }
+              }
+
+              return {
+                satisfied: false,
+                source: 'none',
+                actor: '',
+                reference: '',
+                rejected
+              };
+            };
+            // END SOLO-DEV ACKNOWLEDGEMENT CONTRACT
 
             const prNumber = resolvePrNumber();
             if (!prNumber) {
@@ -106,6 +468,40 @@ jobs:
                 throw new Error(`Expected file content for ${path} on ${defaultBranch}.`);
               }
               return JSON.parse(Buffer.from(data.content, data.encoding || 'base64').toString('utf8'));
+            };
+            const readTextFromPullRequestHead = async path => {
+              const { data } = await github.rest.repos.getContent({
+                owner,
+                repo,
+                path,
+                ref: headSha
+              });
+              if (Array.isArray(data) || typeof data.content !== 'string') {
+                throw new Error(`Expected file content for ${path} at pull request head.`);
+              }
+              return Buffer.from(data.content, data.encoding || 'base64').toString('utf8');
+            };
+            const readWorkflowJobEnvironments = (workflowText, jobId) => {
+              let inJobs = false;
+              let currentJob = '';
+              const environments = [];
+              for (const line of String(workflowText || '').replace(/\r\n/g, '\n').split('\n')) {
+                if (!inJobs) {
+                  if (/^jobs:\s*(?:#.*)?$/.test(line)) inJobs = true;
+                  continue;
+                }
+                if (/^\S/.test(line) && !/^\s*#/.test(line)) break;
+                const jobMatch = line.match(/^  ([A-Za-z0-9_-]+):\s*(?:#.*)?$/);
+                if (jobMatch) {
+                  currentJob = jobMatch[1];
+                  continue;
+                }
+                if (currentJob === jobId) {
+                  const environmentMatch = line.match(/^    environment:\s*(.*?)\s*$/);
+                  if (environmentMatch) environments.push(environmentMatch[1]);
+                }
+              }
+              return environments;
             };
 
             try {
@@ -153,9 +549,31 @@ jobs:
               .flatMap(file => [file.filename, file.previous_filename])
               .filter(Boolean);
             const productionReleasePaths = policy.production_release_paths || [];
-            const touchesProductionReleasePath = changed.some(file =>
-              productionReleasePaths.includes(file)
-            );
+            const productionReleasePathSet = new Set(productionReleasePaths);
+            const productionWorkflowPathsToVerify = new Set();
+            const productionPathRoutingErrors = [];
+            for (const file of files) {
+              const currentPathGoverned = productionReleasePathSet.has(file.filename);
+              const previousPathGoverned = productionReleasePathSet.has(file.previous_filename);
+              if (currentPathGoverned && file.status !== 'removed') {
+                productionWorkflowPathsToVerify.add(file.filename);
+              }
+              if (
+                file.status === 'renamed' &&
+                previousPathGoverned &&
+                !currentPathGoverned
+              ) {
+                productionPathRoutingErrors.push(
+                  `governed production workflow renamed outside inventory: ${file.previous_filename} -> ${file.filename}`
+                );
+              }
+            }
+            const touchesProductionReleasePath =
+              productionWorkflowPathsToVerify.size > 0 ||
+              productionPathRoutingErrors.length > 0 ||
+              files.some(file =>
+                file.status === 'removed' && productionReleasePathSet.has(file.filename)
+              );
 
             const classifyRiskTier = () => {
               const routes = policy.risk_tier_routing || {};
@@ -167,6 +585,116 @@ jobs:
             };
             const riskTier = classifyRiskTier();
             const requiredApprovals = Number(profile.main?.required_approvals_by_risk_tier?.[riskTier] || 0);
+            const acknowledgementRequiredByPolicy = Boolean(
+              profile.main?.required_maintainer_acknowledgement_by_risk_tier?.[riskTier]
+            );
+            const acknowledgementRequiredByBoundary = Boolean(
+              boundaryProfile.maintainer_acknowledgement_required_by_risk?.[riskTier]
+            );
+            if (acknowledgementRequiredByPolicy !== acknowledgementRequiredByBoundary) {
+              throw new Error(
+                `Maintainer acknowledgement contract mismatch for '${selectedPack}/${riskTier}'.`
+              );
+            }
+            const acknowledgementBoundaryAllowlist = new Set(
+              boundaryProfile.maintainer_acknowledgement_satisfies_boundaries || []
+            );
+            const policyExceptionBoundaryActive =
+              alwaysHumanRequired.has('policy_exception_override') &&
+              labelNames.includes('policy-exception');
+            const securityIncidentBoundaryActive =
+              alwaysHumanRequired.has('security_incident_override') &&
+              (labelNames.includes('security-incident') || labelNames.includes('incident'));
+            const acknowledgementReasons = [];
+            if (acknowledgementRequiredByPolicy) acknowledgementReasons.push(`risk:${riskTier}`);
+            if (
+              policyExceptionBoundaryActive &&
+              acknowledgementBoundaryAllowlist.has('policy_exception_override')
+            ) {
+              acknowledgementReasons.push('policy_exception_override');
+            }
+            if (
+              securityIncidentBoundaryActive &&
+              acknowledgementBoundaryAllowlist.has('security_incident_override')
+            ) {
+              acknowledgementReasons.push('security_incident_override');
+            }
+            const requiresMaintainerAcknowledgement = acknowledgementReasons.length > 0;
+            const requiresHumanReviewByBoundary = Boolean(
+              boundaryProfile.pr_approval_required_by_risk?.[riskTier]
+            );
+            if (requiresHumanReviewByBoundary !== (requiredApprovals > 0)) {
+              throw new Error(`PR approval contract mismatch for '${selectedPack}/${riskTier}'.`);
+            }
+
+            const prComments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number: prNumber,
+              per_page: 100
+            });
+            const headMarkerPrefix = '<!-- pr-auto-merge-head:v1 ';
+            const headMarkerRegex =
+              /<!-- pr-auto-merge-head:v1 sha:([0-9a-f]{40}) observed:([^ ]+) -->/i;
+            let headMarkerComment = prComments.find(comment =>
+              comment.user?.login === 'github-actions[bot]' &&
+              typeof comment.body === 'string' &&
+              comment.body.includes(headMarkerPrefix)
+            );
+            const parsedHeadMarker = headMarkerComment?.body?.match(headMarkerRegex);
+            let headObservation = parsedHeadMarker
+              ? { sha: parsedHeadMarker[1].toLowerCase(), observedAt: parsedHeadMarker[2] }
+              : null;
+            const recordsHeadUpdate =
+              context.eventName === 'pull_request_target' &&
+              ['opened', 'reopened', 'synchronize'].includes(context.payload.action);
+            if (
+              recordsHeadUpdate ||
+              !headObservation ||
+              headObservation.sha !== headSha.toLowerCase()
+            ) {
+              const observedAt = recordsHeadUpdate
+                ? (context.payload.pull_request?.updated_at || new Date().toISOString())
+                : new Date().toISOString();
+              const headMarkerBody =
+                `${headMarkerPrefix}sha:${headSha.toLowerCase()} observed:${observedAt} -->`;
+              if (headMarkerComment) {
+                const { data: updatedHeadMarker } = await github.rest.issues.updateComment({
+                  owner,
+                  repo,
+                  comment_id: headMarkerComment.id,
+                  body: headMarkerBody
+                });
+                headMarkerComment = updatedHeadMarker;
+              } else {
+                const { data: createdHeadMarker } = await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: prNumber,
+                  body: headMarkerBody
+                });
+                headMarkerComment = createdHeadMarker;
+              }
+              headObservation = { sha: headSha.toLowerCase(), observedAt };
+            }
+            const permissionCache = new Map();
+            const resolvePermission = async login => {
+              if (!login) return null;
+              if (permissionCache.has(login)) return permissionCache.get(login);
+              try {
+                const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
+                  owner,
+                  repo,
+                  username: login
+                });
+                permissionCache.set(login, data);
+                return data;
+              } catch (error) {
+                core.warning(`Unable to verify repository permission for @${login}.`);
+                permissionCache.set(login, null);
+                return null;
+              }
+            };
 
             const reviews = await github.paginate(github.rest.pulls.listReviews, {
               owner,
@@ -174,10 +702,45 @@ jobs:
               pull_number: prNumber,
               per_page: 100
             });
+            const automatedReviewPolicy = profile.main?.automated_review || {
+              required: false,
+              reviewer_logins: [],
+              accepted_states: []
+            };
+            const automatedReviewerLogins = new Set(
+              (automatedReviewPolicy.reviewer_logins || []).map(login =>
+                String(login || '').toLowerCase()
+              )
+            );
+            const acceptedAutomatedReviewStates = new Set(
+              (automatedReviewPolicy.accepted_states || []).map(state =>
+                String(state || '').toUpperCase()
+              )
+            );
+            if (
+              automatedReviewPolicy.required === true &&
+              (automatedReviewerLogins.size === 0 || acceptedAutomatedReviewStates.size === 0)
+            ) {
+              throw new Error(`Automated review policy is incomplete for profile '${selectedPack}'.`);
+            }
+            const currentHeadAutomatedReviews = reviews.filter(review =>
+              automatedReviewerLogins.has(String(review.user?.login || '').toLowerCase()) &&
+              review.commit_id === headSha &&
+              acceptedAutomatedReviewStates.has(String(review.state || '').toUpperCase())
+            );
+            const automatedReviewSatisfied =
+              automatedReviewPolicy.required !== true ||
+              currentHeadAutomatedReviews.length > 0;
+            if (!automatedReviewSatisfied) {
+              blockers.push(
+                `Automated review required for current head ${headSha}; request ` +
+                `${Array.from(automatedReviewerLogins).join(' or ')}.`
+              );
+            }
             const latestReviewByUser = new Map();
             for (const review of reviews) {
               const login = review.user?.login;
-              if (!login || login === pr.user?.login) continue;
+              if (!login || login === pr.user?.login || isBotActor(review.user)) continue;
               const previous = latestReviewByUser.get(login);
               const currentTime = new Date(review.submitted_at || review.created_at || 0).getTime();
               const previousTime = previous ? new Date(previous.submitted_at || previous.created_at || 0).getTime() : -1;
@@ -186,26 +749,13 @@ jobs:
               }
             }
             const approvalCandidates = Array.from(latestReviewByUser.values())
-              .filter(review => review.state === 'APPROVED')
+              .filter(review => review.state === 'APPROVED' && review.commit_id === headSha)
               .map(review => review.user.login);
-            const qualifiedPermissionLevels = new Set(['admin', 'maintain', 'write']);
             const qualifiedApprovers = await Promise.all(
               approvalCandidates.map(async login => {
-                try {
-                  const { data: reviewerPermission } = await github.rest.repos.getCollaboratorPermissionLevel({
-                    owner,
-                    repo,
-                    username: login
-                  });
-                  const hasQualifiedPermission = [
-                    reviewerPermission.permission,
-                    reviewerPermission.role_name
-                  ].some(level => qualifiedPermissionLevels.has(String(level || '').toLowerCase()));
-                  if (hasQualifiedPermission) return login;
-                  core.info(`Ignoring approval from @${login}; reviewer does not have write, maintain, or admin permission.`);
-                } catch (error) {
-                  core.warning(`Unable to verify repository permission for @${login}; approval will not count.`);
-                }
+                const reviewerPermission = await resolvePermission(login);
+                if (hasQualifiedPermission(reviewerPermission)) return login;
+                core.info(`Ignoring approval from @${login}; reviewer does not have write, maintain, or admin permission.`);
                 return null;
               })
             );
@@ -215,34 +765,234 @@ jobs:
                 `Insufficient approvals for risk tier '${riskTier}' (${approvedReviewers.size}/${requiredApprovals}).`
               );
             }
-            const requiresHumanReviewByBoundary = Boolean(
-              boundaryProfile.pr_approval_required_by_risk?.[riskTier]
-            );
             if (requiresHumanReviewByBoundary && approvedReviewers.size === 0) {
               blockers.push(
                 `Human review boundary requires at least one approval for risk tier '${riskTier}'.`
               );
             }
-            if (
-              alwaysHumanRequired.has('production_environment_approval') &&
-              boundaryProfile.production_release_approval_required === true &&
-              (riskTier === 'critical' || touchesProductionReleasePath) &&
-              approvedReviewers.size === 0
-            ) {
-              blockers.push('production_environment_approval: production release path requires explicit human approval.');
+
+            let maintainerAcknowledgement = {
+              satisfied: !requiresMaintainerAcknowledgement,
+              source: 'not-required',
+              actor: '',
+              reference: '',
+              rejected: []
+            };
+            if (requiresMaintainerAcknowledgement) {
+              const linkedIssues = [];
+              for (const issueNumber of collectLinkedIssueNumbers(`${pr.title || ''}\n${pr.body || ''}`)) {
+                const { data: issue } = await github.rest.issues.get({
+                  owner,
+                  repo,
+                  issue_number: issueNumber
+                });
+                if (issue.pull_request || issue.state !== 'open') continue;
+                const issueLabels = (issue.labels || []).map(label =>
+                  String(typeof label === 'string' ? label : label.name || '').toLowerCase()
+                );
+                const issueComments = await github.paginate(github.rest.issues.listComments, {
+                  owner,
+                  repo,
+                  issue_number: issueNumber,
+                  per_page: 100
+                });
+                linkedIssues.push({
+                  number: issueNumber,
+                  approved: issueLabels.includes('approved'),
+                  comments: issueComments
+                });
+              }
+              maintainerAcknowledgement = await evaluateMaintainerAcknowledgement({
+                headSha,
+                headObservedAt: headObservation?.observedAt,
+                prComments,
+                linkedIssues,
+                resolvePermission
+              });
+              if (!maintainerAcknowledgement.satisfied) {
+                blockers.push(
+                  `Maintainer acknowledgement required (${acknowledgementReasons.join(', ')}). Comment ` +
+                  `\`${criticalAcknowledgementCommand} ${headSha}\` after the latest push, ` +
+                  'or link an issue labeled approved with an exact `/approve` comment from a qualified maintainer.'
+                );
+              }
             }
-            if (
-              alwaysHumanRequired.has('policy_exception_override') &&
-              labelNames.includes('policy-exception') &&
-              approvedReviewers.size === 0
-            ) {
+
+            let productionEnvironmentBoundary = 'not-applicable';
+            if (touchesProductionReleasePath) {
+              const policyEnvironment = policy.production_environment || {};
+              const environmentContract = humanBoundaries.production_environment_contract || {};
+              const environmentErrors = [];
+              if (!alwaysHumanRequired.has('production_environment_approval')) {
+                environmentErrors.push('production_environment_approval is not an always-human boundary');
+              }
+              if (boundaryProfile.production_release_approval_required !== true) {
+                environmentErrors.push(`profile '${selectedPack}' does not require production environment approval`);
+              }
+              if (policyEnvironment.approval_boundary !== 'production_environment_approval') {
+                environmentErrors.push('policy does not route production releases to production_environment_approval');
+              }
+              if (
+                !policyEnvironment.name ||
+                policyEnvironment.name !== environmentContract.environment
+              ) {
+                environmentErrors.push('policy and human-boundary production environment names do not match');
+              }
+              if (environmentContract.enforcement !== 'github_environment') {
+                environmentErrors.push('production approval enforcement is not github_environment');
+              }
+              if (Number(environmentContract.minimum_required_reviewers || 0) < 1) {
+                environmentErrors.push('production environment requires fewer than one reviewer');
+              }
+              if (environmentContract.deployment_branch_policy !== 'protected_or_selected') {
+                environmentErrors.push('production environment branch policy is not protected_or_selected');
+              }
+              if (
+                environmentContract.deployment_workflow_binding_verification !==
+                'pr_head_digest_and_environment_against_trusted_policy'
+              ) {
+                environmentErrors.push(
+                  'production deployment workflow binding is not verified against trusted policy'
+                );
+              }
+              if (environmentContract.pr_approval_is_equivalent !== false) {
+                environmentErrors.push('production environment approval is incorrectly modeled as PR approval');
+              }
+              if (
+                selectedPack === 'solo-dev' &&
+                environmentContract.solo_dev_prevent_self_review !== false
+              ) {
+                environmentErrors.push('solo-dev production contract must allow the sole maintainer to approve deployment');
+              }
+              const workflowBindings = policyEnvironment.workflow_bindings || {};
+              for (const releasePath of productionReleasePaths) {
+                const binding = workflowBindings[releasePath];
+                if (
+                  !binding ||
+                  !String(binding.job || '').trim() ||
+                  !String(binding.expected_job_environment || '').trim() ||
+                  !/^[0-9a-f]{64}$/i.test(String(binding.expected_workflow_sha256 || '').trim())
+                ) {
+                  environmentErrors.push(
+                    `production workflow binding policy is incomplete for ${releasePath}`
+                  );
+                }
+              }
+              environmentErrors.push(...productionPathRoutingErrors);
+              for (const workflowPath of productionWorkflowPathsToVerify) {
+                const binding = workflowBindings[workflowPath];
+                if (!binding) continue;
+                const expectedEnvironment = String(binding.expected_job_environment || '').trim();
+                const expectedWorkflowSha256 = String(binding.expected_workflow_sha256 || '')
+                  .trim()
+                  .toLowerCase();
+                if (!expectedEnvironment.includes(String(policyEnvironment.name || ''))) {
+                  environmentErrors.push(
+                    `trusted production workflow binding for ${workflowPath} does not reference ${policyEnvironment.name}`
+                  );
+                  continue;
+                }
+                try {
+                  const workflowText = await readTextFromPullRequestHead(workflowPath);
+                  const observedWorkflowSha256 = createHash('sha256')
+                    .update(workflowText, 'utf8')
+                    .digest('hex');
+                  if (observedWorkflowSha256 !== expectedWorkflowSha256) {
+                    environmentErrors.push(
+                      `${workflowPath} does not match its trusted full-workflow digest`
+                    );
+                    continue;
+                  }
+                  const observedEnvironments = readWorkflowJobEnvironments(
+                    workflowText,
+                    String(binding.job || '').trim()
+                  );
+                  if (
+                    observedEnvironments.length !== 1 ||
+                    observedEnvironments[0] !== expectedEnvironment
+                  ) {
+                    environmentErrors.push(
+                      `${workflowPath} job '${binding.job}' does not retain its trusted production environment binding`
+                    );
+                  }
+                } catch (error) {
+                  environmentErrors.push(
+                    `unable to verify production workflow binding for ${workflowPath}`
+                  );
+                  core.warning(error instanceof Error ? error.message : String(error));
+                }
+              }
+              if (environmentErrors.length === 0) {
+                try {
+                  const { data: liveEnvironment } = await github.rest.repos.getEnvironment({
+                    owner,
+                    repo,
+                    environment_name: policyEnvironment.name
+                  });
+                  const reviewerRule = (liveEnvironment.protection_rules || []).find(
+                    rule => rule.type === 'required_reviewers'
+                  );
+                  const liveReviewerCount = (reviewerRule?.reviewers || []).length;
+                  if (liveReviewerCount < Number(environmentContract.minimum_required_reviewers)) {
+                    environmentErrors.push(
+                      `live '${policyEnvironment.name}' environment has ${liveReviewerCount} required reviewer(s)`
+                    );
+                  }
+                  if (
+                    selectedPack === 'solo-dev' &&
+                    reviewerRule?.prevent_self_review !== false
+                  ) {
+                    environmentErrors.push(
+                      `live '${policyEnvironment.name}' environment prevents solo-maintainer self-review`
+                    );
+                  }
+                  const liveBranchPolicy = liveEnvironment.deployment_branch_policy || {};
+                  let liveBranchPolicyValid = liveBranchPolicy.protected_branches === true;
+                  if (
+                    !liveBranchPolicyValid &&
+                    liveBranchPolicy.custom_branch_policies === true
+                  ) {
+                    const { data: liveBranchPolicies } =
+                      await github.rest.repos.listDeploymentBranchPolicies({
+                        owner,
+                        repo,
+                        environment_name: policyEnvironment.name,
+                        per_page: 100
+                      });
+                    liveBranchPolicyValid = (liveBranchPolicies.branch_policies || []).some(
+                      branchPolicy => branchPolicy.name === 'main'
+                    );
+                  }
+                  if (!liveBranchPolicyValid) {
+                    environmentErrors.push(
+                      `live '${policyEnvironment.name}' environment does not allow protected branches or select main`
+                    );
+                  }
+                } catch (error) {
+                  environmentErrors.push(
+                    `unable to verify live '${policyEnvironment.name}' environment protection`
+                  );
+                  core.warning(error instanceof Error ? error.message : String(error));
+                }
+              }
+              if (environmentErrors.length > 0) {
+                blockers.push(
+                  `production_environment_approval contract invalid: ${environmentErrors.join('; ')}.`
+                );
+              } else {
+                productionEnvironmentBoundary = `verified-live:${policyEnvironment.name}`;
+              }
+            }
+            if (policyExceptionBoundaryActive && approvedReviewers.size === 0 && !(
+              acknowledgementBoundaryAllowlist.has('policy_exception_override') &&
+              maintainerAcknowledgement.satisfied
+            )) {
               blockers.push('policy_exception_override: policy-exception changes require explicit human approval.');
             }
-            if (
-              alwaysHumanRequired.has('security_incident_override') &&
-              (labelNames.includes('security-incident') || labelNames.includes('incident')) &&
-              approvedReviewers.size === 0
-            ) {
+            if (securityIncidentBoundaryActive && approvedReviewers.size === 0 && !(
+              acknowledgementBoundaryAllowlist.has('security_incident_override') &&
+              maintainerAcknowledgement.satisfied
+            )) {
               blockers.push('security_incident_override: incident/security-incident changes require explicit human approval.');
             }
 
@@ -334,6 +1084,20 @@ jobs:
             }
 
             const eligible = blockers.length === 0;
+            const acknowledgementSummary = requiresMaintainerAcknowledgement
+              ? (
+                  maintainerAcknowledgement.satisfied
+                    ? `${maintainerAcknowledgement.source} by @${maintainerAcknowledgement.actor} (${maintainerAcknowledgement.reference})`
+                    : 'required-missing'
+                )
+              : 'not-required';
+            const automatedReviewSummary = automatedReviewPolicy.required === true
+              ? (
+                  automatedReviewSatisfied
+                    ? `satisfied:${currentHeadAutomatedReviews[0].user.login}`
+                    : 'required-missing-current-head'
+                )
+              : 'not-required';
             const summaryLines = eligible
               ? [
                   `${marker}`,
@@ -343,7 +1107,10 @@ jobs:
                   `- Policy pack: \`${selectedPack}\``,
                   `- Risk tier: \`${riskTier}\``,
                   `- Required approvals: \`${requiredApprovals}\``,
+                  `- Automated review: \`${automatedReviewSummary}\``,
                   `- Human review boundary: \`${requiresHumanReviewByBoundary ? 'required' : 'not-required'}\``,
+                  `- Maintainer acknowledgement: \`${acknowledgementSummary}\``,
+                  `- Production environment boundary: \`${productionEnvironmentBoundary}\``,
                   `- Merge queue posture: \`${mergeQueuePosture}\``,
                   '',
                   `Run: ${workflowUrl}`
@@ -356,7 +1123,11 @@ jobs:
                   `- Policy pack: \`${selectedPack}\``,
                   `- Risk tier: \`${riskTier}\``,
                   `- Required approvals: \`${requiredApprovals}\``,
+                  `- Automated review: \`${automatedReviewSummary}\``,
                   `- Human review boundary: \`${requiresHumanReviewByBoundary ? 'required' : 'not-required'}\``,
+                  `- Maintainer acknowledgement: \`${acknowledgementSummary}\``,
+                  `- Production environment boundary: \`${productionEnvironmentBoundary}\``,
+                  `- Merge queue posture: \`${mergeQueuePosture}\``,
                   '',
                   ...blockers.map(reason => `- ${reason}`),
                   '',
@@ -364,13 +1135,7 @@ jobs:
                 ];
             const body = summaryLines.join('\n');
 
-            const comments = await github.paginate(github.rest.issues.listComments, {
-              owner,
-              repo,
-              issue_number: prNumber,
-              per_page: 100
-            });
-            const existing = comments.find(c =>
+            const existing = prComments.find(c =>
               c.user?.login === 'github-actions[bot]' &&
               typeof c.body === 'string' &&
               c.body.includes(marker)

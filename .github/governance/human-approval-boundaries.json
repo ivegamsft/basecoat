@@ -5,6 +5,15 @@
     "policy_exception_override",
     "security_incident_override"
   ],
+  "production_environment_contract": {
+    "environment": "production",
+    "enforcement": "github_environment",
+    "minimum_required_reviewers": 1,
+    "deployment_branch_policy": "protected_or_selected",
+    "deployment_workflow_binding_verification": "pr_head_digest_and_environment_against_trusted_policy",
+    "pr_approval_is_equivalent": false,
+    "solo_dev_prevent_self_review": false
+  },
   "profiles": {
     "solo-dev": {
       "issue_approval_signal_required": true,
@@ -12,8 +21,18 @@
         "low": false,
         "medium": false,
         "high": false,
+        "critical": false
+      },
+      "maintainer_acknowledgement_required_by_risk": {
+        "low": false,
+        "medium": false,
+        "high": false,
         "critical": true
       },
+      "maintainer_acknowledgement_satisfies_boundaries": [
+        "policy_exception_override",
+        "security_incident_override"
+      ],
       "production_release_approval_required": true
     },
     "team-dev": {
@@ -24,6 +43,13 @@
         "high": true,
         "critical": true
       },
+      "maintainer_acknowledgement_required_by_risk": {
+        "low": false,
+        "medium": false,
+        "high": false,
+        "critical": false
+      },
+      "maintainer_acknowledgement_satisfies_boundaries": [],
       "production_release_approval_required": true
     },
     "regulated-team": {
@@ -34,6 +60,13 @@
         "high": true,
         "critical": true
       },
+      "maintainer_acknowledgement_required_by_risk": {
+        "low": false,
+        "medium": false,
+        "high": false,
+        "critical": false
+      },
+      "maintainer_acknowledgement_satisfies_boundaries": [],
       "production_release_approval_required": true
     }
   }

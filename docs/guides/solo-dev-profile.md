@@ -1,19 +1,21 @@
 # Solo-Developer Governance Profile
 
 Use the `solo-dev` profile for a repository with one accountable maintainer and
-an available independent reviewer. It still requires pull requests, required
-checks, protected `main`, and an auditable merge path. It simplifies operations;
-it does not weaken branch protection or authorize administrator bypass.
+no dependable second reviewer. It still requires pull requests, required
+status checks, protected `main`, configured automated review, and an auditable
+merge path. It simplifies operations; it does not weaken team profiles or
+authorize administrator bypass.
 
 ## Choose the right profile
 
 | Signal | `solo-dev` | `team-dev` | `regulated-team` |
 |---|---|---|---|
-| Active maintainers | One accountable maintainer plus a designated independent reviewer | Two or more regular contributors | Any team with mandated separation of duties |
-| Routine independent review | Required by the portable ruleset | Required for medium and higher risk | Required for every risk tier |
+| Active maintainers | One accountable maintainer | Two or more regular contributors | Any team with mandated separation of duties |
+| Routine independent review | Not required; checks and automated review remain required | Required for medium and higher risk | Required for every risk tier |
+| Critical PR intent | Explicit maintainer acknowledgement | Independent PR approval | Two independent PR approvals |
 | Merge queue | Deferred | Deferred | Required |
-| Production, policy exceptions, incidents | Independent human approval remains required | Independent human approval required | Stricter approval and evidence requirements |
-| Best fit | Single-owner service with reliable CI and an available reviewer | Shared ownership and normal team delivery | Regulated, security-sensitive, or audited delivery |
+| Production deployment | Protected GitHub environment approval | Protected GitHub environment approval | Protected GitHub environment approval |
+| Best fit | True single-owner service with reliable CI | Shared ownership and normal team delivery | Regulated, security-sensitive, or audited delivery |
 
 Choose `team-dev` as soon as another person regularly owns, reviews, or operates
 the repository. Choose `regulated-team` when policy, customer commitments, or
@@ -31,7 +33,10 @@ branch:
 - review conversations must be resolved
 - administrators are subject to the rules and the bypass list is empty
 - the auto-merge workflow uses GitHub auto-merge, never `--admin`
-- GitHub requires one independent approval after the last push
+- routine pull requests require zero independent PR approvals
+- critical pull requests require explicit maintainer acknowledgement
+- governance policy, human-boundary, and canonical/distributed/downstream
+  executor changes are always classified as critical
 - the executor's `BaseCoat merge eligibility` status is required as a
   fail-closed policy and check aggregator
 
@@ -45,46 +50,74 @@ The six canonical validation checks come from
 5. `validate-windows`
 6. `release-label-gate`
 
-The ruleset must also require `BaseCoat merge eligibility`. The trusted
-executor publishes that commit status directly against the pull request head
-SHA. Pin the required context to GitHub Actions integration ID `15368` for
-provenance, but do not treat that shared app identity as the human boundary:
-another repository workflow can run under the same integration. The globally
-required independent review is the portable enforceable boundary. Pending
-validation or policy violations keep the status red and prevent both manual and
-automatic merge.
+The ruleset must also require `BaseCoat merge eligibility`. The trusted executor
+publishes that commit status directly against the pull request head SHA. Pin the
+required context to GitHub Actions integration ID `15368` for provenance.
+The executor requires a `copilot-pull-request-reviewer[bot]` review whose
+`commit_id` matches the current head. Pending validation, a missing current-head
+automated review, a missing critical acknowledgement, or policy violations keep
+the status red and prevent both manual and automatic merge.
 
 If a consumer uses different check names, update its local policy pack and
 ruleset together. Do not delete checks from only one surface.
 
 ## Self-merge policy
 
-For the portable `solo-dev` setup, every risk tier requires one approving
-review. The repository owner may author and merge the PR after another
-qualified collaborator approves the latest push and all required checks and
-repository rules pass. This is the permitted **self-merge** path.
+Routine `solo-dev` PRs use zero independent PR approvals. The accountable
+maintainer may author and merge after required checks, automated review, and the
+`BaseCoat merge eligibility` status pass. This zero-review path applies only to
+`solo-dev`; acknowledgement never substitutes for the independent reviews in
+`team-dev` or `regulated-team`.
 
-Self-merge does not mean self-approval. GitHub's pull-request rule, not a
-repo-local status producer, enforces the human boundary. The executor ignores
-the PR author's review, validates reviewer repository permission, and counts
-only write, maintain, or admin approvals. If no independent approver is
-available, the change remains blocked.
+Critical `solo-dev` PRs require one of these durable acknowledgement records:
 
-Conditional zero-review merging requires an executor-specific GitHub App or an
-organization-required workflow outside PR-author control. The shipped
-repo-local executor does not claim that identity boundary, so its portable
-ruleset requires one review globally.
+1. After the executor observes the latest push, a write, maintain, or admin user
+   comments on the PR with the exact full current head SHA:
+
+   ```text
+   /acknowledge-critical <full-head-sha>
+   ```
+
+2. The PR uses a closing keyword such as `Closes #123`, and that open issue has
+   both the `approved` label and an exact `/approve` comment from a write,
+   maintain, or admin user.
+
+The PR author may provide the acknowledgement. It is an explicit maintainer
+decision, not a GitHub review. The executor rejects bots, arbitrary commenters,
+short SHAs, a SHA from an earlier push, and PR comments created before the
+latest head-update event. Editing or deleting the acknowledgement revokes it and
+returns the eligibility status to blocked. The same mechanism supplies explicit
+human intent for a `solo-dev` PR labeled `policy-exception`,
+`security-incident`, or `incident`; team profiles still require independent PR
+review for those boundaries.
+
+For linked-issue evidence, adding, editing, or deleting the qualified
+`/approve` comment and adding or removing the `approved` label automatically
+sets linked PR eligibility to pending and dispatches reevaluation. Editing the
+PR title or body also reevaluates closing links.
 
 Production release paths are explicit policy, not inferred from the broad
 `high` tier. The shipped policy pack includes every BaseCoat workflow that can
-target the `production` environment in `production_release_paths`.
+target the `production` environment in `production_release_paths`, plus the
+trusted deployment job and exact `environment` scalar in
+`production_environment.workflow_bindings`, plus a SHA-256 digest covering the
+entire workflow. For changes to those workflows, the executor reads the PR-head
+file and verifies both the full digest and environment binding before checking
+the live protected GitHub `production` environment. This prevents moving
+production effects into an unprotected sibling job. PR approval is not treated
+as equivalent; the deployment job itself waits for its environment reviewer.
 
 Before enabling solo-dev self-merge in a consumer repository, inventory
 every local workflow that can deploy to production, including workflows with
 dynamic `environment` expressions, and add every path to
-`production_release_paths`. This is a mandatory precondition: do not activate
-the solo-dev ruleset until the consumer check names and production workflow
-inventory are complete.
+`production_release_paths`. Add its deployment job ID and exact environment
+scalar and normalized UTF-8 SHA-256 digest to
+`production_environment.workflow_bindings`. To change a production workflow,
+first merge a critical, acknowledged policy PR that preauthorizes the exact
+prospective digest; then submit the byte-matching workflow PR. This two-PR
+sequence is mandatory because the executor reads trusted policy from `main`.
+Do not activate the solo-dev ruleset until the consumer check names and
+production workflow inventory are complete.
 
 Risk tier is the highest path tier matched by the changed files. See
 [Governance Policy Packs](../reference/governance-policy-packs.md) and
@@ -136,6 +169,19 @@ This installs:
 - `.github/governance/policy-packs.json`
 - `.github/governance/human-approval-boundaries.json`
 
+To use linked approved issues as critical acknowledgement, also install the
+issue approval workflow:
+
+```powershell
+pwsh scripts/configure-downstream-workflows.ps1 `
+  -Workflow issue-approve.yml `
+  -KeepUnknownBc
+```
+
+That workflow applies the repository-standard `approved` label for a qualified
+`/approve` comment, then dispatches merge-eligibility reevaluation after the
+label is finalized.
+
 The exact `-Workflow` selector installs only the executor and its governance
 contracts. Targeted mode preserves every non-selected workflow; `-KeepUnknownBc`
 adds an explicit safeguard for older installer versions. On reinstall, targeted
@@ -159,11 +205,12 @@ In GitHub:
 2. **Settings > Actions > General > Workflow permissions**
    - keep **Read repository contents and packages permissions**
    - do not grant repository-wide write access; the executor declares only its
-     required `checks: read`, `contents: write`, `pull-requests: write`,
-     `issues: write`, and `statuses: write` permissions
+     required `actions: write`, `checks: read`, `deployments: read`,
+     `contents: write`, `pull-requests: write`, `issues: write`, and
+     `statuses: write` permissions
 3. **Settings > Rules > Rulesets**
    - create an active branch ruleset targeting the default branch
-   - require one approval and approval after the last push
+   - require zero approving reviews
    - require conversation resolution
    - require all six validation checks plus `BaseCoat merge eligibility`
    - require branches to be up to date
@@ -171,6 +218,20 @@ In GitHub:
    - leave the bypass list empty
 4. **Settings > Secrets and variables > Actions > Variables**
    - set `BASECOAT_POLICY_PACK` to `solo-dev`
+5. **Settings > Environments > production**
+   - configure at least one required reviewer
+   - allow only protected branches or selected deployment branches including
+     `main`
+   - keep production secrets and variables environment-scoped
+   - for a true single-maintainer repository, leave prevent-self-review
+     disabled so the accountable maintainer can approve the deployment
+6. **Copilot code review**
+   - enable automatic Copilot review on each push where available, or request it
+     after every push:
+
+     ```powershell
+     gh pr edit PR_NUMBER --add-reviewer copilot-pull-request-reviewer
+     ```
 
 Set the variable explicitly even though workflows can fall back to the policy
 file's `default_profile`. Explicit selection prevents onboarding and workflow
@@ -221,8 +282,8 @@ Create `solo-dev-main-ruleset.json`:
         "allowed_merge_methods": ["squash"],
         "dismiss_stale_reviews_on_push": true,
         "require_code_owner_review": false,
-        "require_last_push_approval": true,
-        "required_approving_review_count": 1,
+        "require_last_push_approval": false,
+        "required_approving_review_count": 0,
         "required_review_thread_resolution": true
       }
     },
@@ -272,12 +333,24 @@ gh workflow list --repo $repository
 
 Open a non-draft test PR and confirm:
 
-1. the executor comment reports `solo-dev`, the expected risk tier, and one
-   required independent approval
+1. a routine PR reports zero required approvals and becomes eligible after the
+   required checks and a Copilot review bound to the current head pass
 2. auto-merge remains pending while any required check is missing or failing
-3. every test PR remains blocked without an independent approval after the last
-   push
-4. no run or command uses an administrator bypass
+3. a critical test PR remains blocked until the current head is acknowledged:
+
+   ```powershell
+   $headSha = gh pr view PR_NUMBER --json headRefOid --jq .headRefOid
+   gh pr comment PR_NUMBER --body "/acknowledge-critical $headSha"
+   ```
+
+4. pushing another commit invalidates the prior PR-comment acknowledgement
+5. editing or deleting the acknowledgement returns eligibility to blocked
+6. a linked issue with `approved` plus a qualified `/approve` comment also
+   satisfies the critical acknowledgement, and mutating either evidence item
+   triggers reevaluation
+7. production deployment remains paused at the protected `production`
+   environment even after the PR merges
+8. no run or command uses an administrator bypass
 
 ## Rollback
 

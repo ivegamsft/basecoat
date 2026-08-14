@@ -12,6 +12,74 @@ $distributedPolicyPath = Join-Path $repoRoot '.github\base-coat\governance\polic
 $installerPath = Join-Path $repoRoot 'scripts\configure-downstream-workflows.ps1'
 $bootstrapPath = Join-Path $repoRoot 'scripts\bootstrap.ps1'
 
+function Get-WorkflowJobEnvironment {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$WorkflowText,
+        [Parameter(Mandatory = $true)]
+        [string]$JobId
+    )
+
+    $inJobs = $false
+    $currentJob = ''
+    foreach ($line in ($WorkflowText -replace "`r`n", "`n" -split "`n")) {
+        if (-not $inJobs) {
+            if ($line -match '^jobs:\s*(?:#.*)?$') {
+                $inJobs = $true
+            }
+            continue
+        }
+        if ($line -match '^\S' -and $line -notmatch '^\s*#') {
+            break
+        }
+        if ($line -match '^  ([A-Za-z0-9_-]+):\s*(?:#.*)?$') {
+            $currentJob = $Matches[1]
+            continue
+        }
+        if ($currentJob -eq $JobId -and $line -match '^    environment:\s*(.*?)\s*$') {
+            return $Matches[1]
+        }
+    }
+    return ''
+}
+
+function Get-GitBlobSha256 {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$RepositoryRoot,
+        [Parameter(Mandatory = $true)]
+        [string]$Path
+    )
+
+    $startInfo = [System.Diagnostics.ProcessStartInfo]::new()
+    $startInfo.FileName = 'git'
+    $startInfo.WorkingDirectory = $RepositoryRoot
+    $startInfo.UseShellExecute = $false
+    $startInfo.RedirectStandardOutput = $true
+    $startInfo.RedirectStandardError = $true
+    $startInfo.ArgumentList.Add('cat-file')
+    $startInfo.ArgumentList.Add('blob')
+    $startInfo.ArgumentList.Add("HEAD:$Path")
+    $process = [System.Diagnostics.Process]::new()
+    $process.StartInfo = $startInfo
+    [void]$process.Start()
+    $memory = [System.IO.MemoryStream]::new()
+    $process.StandardOutput.BaseStream.CopyTo($memory)
+    $errorText = $process.StandardError.ReadToEnd()
+    $process.WaitForExit()
+    if ($process.ExitCode -ne 0) {
+        throw "Unable to read Git blob for ${Path}: $errorText"
+    }
+    $sha256 = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        return -join ($sha256.ComputeHash($memory.ToArray()) | ForEach-Object { $_.ToString('x2') })
+    } finally {
+        $sha256.Dispose()
+        $memory.Dispose()
+        $process.Dispose()
+    }
+}
+
 foreach ($path in @(
     $guidePath,
     $mkdocsPath,
@@ -42,8 +110,12 @@ foreach ($requiredText in @(
     'pr-auto-merge-executor.yml',
     'bypass list is empty',
     'BaseCoat merge eligibility',
+    '/acknowledge-critical <full-head-sha>',
+    'zero independent PR approvals',
+    'protected GitHub',
     '"allowed_merge_methods": ["squash"]',
     '-Workflow pr-auto-merge-executor.yml',
+    '-Workflow issue-approve.yml',
     'Read repository contents and packages permissions'
 )) {
     if ($guide -notmatch [regex]::Escape($requiredText)) {
@@ -66,9 +138,9 @@ foreach ($requiredText in @(
     if ($pullRequestRule.parameters.allowed_merge_methods -notcontains 'squash') {
         throw 'Solo-dev ruleset must allow the squash method used by the executor.'
     }
-    if ($pullRequestRule.parameters.required_approving_review_count -ne 1 -or
-        $pullRequestRule.parameters.require_last_push_approval -ne $true) {
-        throw 'Portable solo-dev ruleset must enforce one independent approval after the last push.'
+    if ($pullRequestRule.parameters.required_approving_review_count -ne 0 -or
+        $pullRequestRule.parameters.require_last_push_approval -ne $false) {
+        throw 'Portable solo-dev ruleset must allow zero-review routine merges.'
     }
     $requiredStatusRule = $rulesetPayload.rules | Where-Object { $_.type -eq 'required_status_checks' }
     $requiredStatusChecks = @($requiredStatusRule.parameters.required_status_checks)
@@ -95,9 +167,47 @@ if (($policy | ConvertTo-Json -Depth 20) -ne ($distributedPolicy | ConvertTo-Jso
     throw 'Canonical and distributed governance policy packs must remain identical.'
 }
 foreach ($riskTier in @('low', 'medium', 'high', 'critical')) {
-    if ($policy.profiles.'solo-dev'.main.required_approvals_by_risk_tier.$riskTier -ne 1) {
-        throw "Portable solo-dev policy must require one independent approval for $riskTier risk."
+    if ($policy.profiles.'solo-dev'.main.required_approvals_by_risk_tier.$riskTier -ne 0) {
+        throw "Portable solo-dev policy must require zero independent approvals for $riskTier risk."
     }
+}
+foreach ($riskTier in @('low', 'medium', 'high')) {
+    if ($policy.profiles.'solo-dev'.main.required_maintainer_acknowledgement_by_risk_tier.$riskTier) {
+        throw "Routine solo-dev tier '$riskTier' must not require maintainer acknowledgement."
+    }
+}
+if (-not $policy.profiles.'solo-dev'.main.required_maintainer_acknowledgement_by_risk_tier.critical) {
+    throw 'Critical solo-dev changes must require explicit maintainer acknowledgement.'
+}
+$criticalTrustRootPaths = @(
+    '.github/governance/policy-packs.json',
+    '.github/governance/human-approval-boundaries.json',
+    '.github/base-coat/governance/policy-packs.json',
+    '.github/base-coat/governance/human-approval-boundaries.json',
+    '.github/workflows/pr-auto-merge-executor.yml',
+    '.github/workflows/basecoat-pr-auto-merge-executor.yml',
+    '.github/base-coat/workflows/pr-auto-merge-executor.yml'
+)
+foreach ($trustRootPath in $criticalTrustRootPaths) {
+    $isCritical = @($policy.risk_tier_routing.critical |
+        Where-Object { $trustRootPath.StartsWith([string]$_) }).Count -gt 0
+    if (-not $isCritical) {
+        throw "Solo-dev acknowledgement trust root must route to critical: $trustRootPath"
+    }
+}
+$automatedReview = $policy.profiles.'solo-dev'.main.automated_review
+if ($automatedReview.required -ne $true -or
+    $automatedReview.reviewer_logins -notcontains 'copilot-pull-request-reviewer[bot]' -or
+    $automatedReview.accepted_states -notcontains 'COMMENTED') {
+    throw 'Solo-dev must require a current-head Copilot automated review.'
+}
+if ($policy.profiles.'team-dev'.main.required_approvals_by_risk_tier.medium -ne 1 -or
+    $policy.profiles.'team-dev'.main.required_approvals_by_risk_tier.critical -ne 1) {
+    throw 'Team-dev must retain independent approval requirements.'
+}
+if ($policy.profiles.'regulated-team'.main.required_approvals_by_risk_tier.low -ne 1 -or
+    $policy.profiles.'regulated-team'.main.required_approvals_by_risk_tier.critical -ne 2) {
+    throw 'Regulated-team must retain its independent approval requirements.'
 }
 foreach ($productionPath in @(
     '.github/workflows/close-production-issues.yml',
@@ -108,6 +218,36 @@ foreach ($productionPath in @(
 )) {
     if ($policy.production_release_paths -notcontains $productionPath) {
         throw "Policy must retain human approval for production path: $productionPath"
+    }
+}
+$workflowBindings = $policy.production_environment.workflow_bindings
+foreach ($productionPath in @($policy.production_release_paths)) {
+    $bindingProperty = $workflowBindings.PSObject.Properties |
+        Where-Object { $_.Name -eq $productionPath } |
+        Select-Object -First 1
+    if (-not $bindingProperty) {
+        throw "Production workflow binding policy is missing: $productionPath"
+    }
+    $binding = $bindingProperty.Value
+    if ([string]::IsNullOrWhiteSpace($binding.job) -or
+        [string]::IsNullOrWhiteSpace($binding.expected_job_environment) -or
+        $binding.expected_workflow_sha256 -notmatch '^[0-9a-f]{64}$' -or
+        $binding.expected_job_environment -notmatch [regex]::Escape($policy.production_environment.name)) {
+        throw "Production workflow binding policy is incomplete: $productionPath"
+    }
+    $workflowPath = Join-Path $repoRoot ($productionPath -replace '/', '\')
+    $workflowText = Get-Content -Path $workflowPath -Raw
+    $observedEnvironment = Get-WorkflowJobEnvironment `
+        -WorkflowText $workflowText `
+        -JobId $binding.job
+    if ($observedEnvironment -ne $binding.expected_job_environment) {
+        throw "Production workflow does not match its trusted environment binding: $productionPath"
+    }
+    $observedWorkflowSha256 = Get-GitBlobSha256 `
+        -RepositoryRoot $repoRoot `
+        -Path $productionPath
+    if ($observedWorkflowSha256 -ne $binding.expected_workflow_sha256) {
+        throw "Production workflow does not match its trusted full-workflow digest: $productionPath"
     }
 }
 $productionCapableWorkflows = Get-ChildItem -Path (Join-Path $repoRoot '.github\workflows') -Filter '*.yml' |

@@ -5,9 +5,11 @@ on:
     types: [created]
 
 permissions:
+  actions: write
   issues: write
   contents: read
   pull-requests: read
+  statuses: write
 
 concurrency:
   group: cloud-agent-execution
@@ -601,4 +603,132 @@ jobs:
 
             if (assignmentErrorMessage) {
               core.setFailed(`Copilot cloud agent assignment failed: ${assignmentErrorMessage}`);
+            }
+
+  reevaluate-linked-prs:
+    name: Reevaluate PRs linked to approved issues
+    needs:
+      - route-pr-approve
+      - approve
+    if: |
+      always() &&
+      contains(github.event.comment.body, '/approve')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Dispatch merge eligibility after approval labels settle
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const actor = context.payload.comment?.user;
+            const actorLogin = String(actor?.login || '');
+            if (actor?.type === 'Bot' || actorLogin.toLowerCase().endsWith('[bot]')) {
+              core.info(`Ignoring issue approval finalization from bot @${actorLogin || 'unknown'}.`);
+              return;
+            }
+            const { data: actorPermission } = await github.rest.repos.getCollaboratorPermissionLevel({
+              owner,
+              repo,
+              username: actorLogin
+            });
+            const actorPermissionLevels = [
+              actorPermission.permission,
+              actorPermission.role_name
+            ].map(level => String(level || '').toLowerCase());
+            if (!actorPermissionLevels.some(level => ['admin', 'maintain', 'write'].includes(level))) {
+              core.info(`Ignoring issue approval finalization from unqualified user @${actorLogin}.`);
+              return;
+            }
+            const issueNumbers = new Set();
+            const collectClosingIssues = text => {
+              const pattern = /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)\b/gim;
+              let match;
+              while ((match = pattern.exec(String(text || ''))) !== null) {
+                const issueNumber = Number(match[1]);
+                if (Number.isInteger(issueNumber) && issueNumber > 0) {
+                  issueNumbers.add(issueNumber);
+                }
+              }
+            };
+
+            if (context.payload.issue?.pull_request) {
+              const { data: sourcePr } = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: context.payload.issue.number
+              });
+              collectClosingIssues(`${sourcePr.title || ''}\n${sourcePr.body || ''}`);
+            } else if (context.payload.issue?.number) {
+              issueNumbers.add(Number(context.payload.issue.number));
+            }
+
+            const approvedIssueNumbers = new Set();
+            for (const issueNumber of issueNumbers) {
+              const { data: issue } = await github.rest.issues.get({
+                owner,
+                repo,
+                issue_number: issueNumber
+              });
+              const labels = (issue.labels || []).map(label =>
+                String(typeof label === 'string' ? label : label.name || '').toLowerCase()
+              );
+              if (labels.includes('approved')) {
+                approvedIssueNumbers.add(issueNumber);
+              }
+            }
+            if (approvedIssueNumbers.size === 0) {
+              core.info('No finalized approved issue evidence requires PR reevaluation.');
+              return;
+            }
+
+            const workflows = await github.paginate(github.rest.actions.listRepoWorkflows, {
+              owner,
+              repo,
+              per_page: 100
+            });
+            const executorWorkflow = workflows.find(workflow =>
+              String(workflow.path || '').endsWith('pr-auto-merge-executor.yml')
+            );
+            if (!executorWorkflow) {
+              core.info(
+                'PR auto-merge executor is not installed; skipping optional linked PR reevaluation.'
+              );
+              return;
+            }
+
+            const openPullRequests = await github.paginate(github.rest.pulls.list, {
+              owner,
+              repo,
+              state: 'open',
+              per_page: 100
+            });
+            const routedPrNumbers = new Set();
+            for (const pullRequest of openPullRequests) {
+              const text = `${pullRequest.title || ''}\n${pullRequest.body || ''}`;
+              const closesApprovedIssue = Array.from(approvedIssueNumbers).some(
+                issueNumber => new RegExp(
+                  `\\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\\s+#${issueNumber}\\b`,
+                  'i'
+                ).test(text)
+              );
+              if (!closesApprovedIssue || routedPrNumbers.has(pullRequest.number)) continue;
+              routedPrNumbers.add(pullRequest.number);
+              await github.rest.repos.createCommitStatus({
+                owner,
+                repo,
+                sha: pullRequest.head.sha,
+                state: 'pending',
+                context: 'BaseCoat merge eligibility',
+                description: 'Linked issue approval was finalized.',
+                target_url: `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`
+              });
+              await github.rest.actions.createWorkflowDispatch({
+                owner,
+                repo,
+                workflow_id: executorWorkflow.id,
+                ref: context.payload.repository?.default_branch || 'main',
+                inputs: { pr_number: String(pullRequest.number) }
+              });
             }

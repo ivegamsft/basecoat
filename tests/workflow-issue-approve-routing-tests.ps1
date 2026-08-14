@@ -29,6 +29,10 @@ foreach ($entry in $files) {
     if ($content -notmatch '(?m)pull-requests:\s*read') {
         throw "$name must grant pull-requests read access for PR routing."
     }
+    if ($content -notmatch '(?m)actions:\s*write' -or
+        $content -notmatch '(?m)statuses:\s*write') {
+        throw "$name must grant actions/status permissions for linked PR reevaluation."
+    }
     if ($content -notmatch 'contains\(github\.event\.comment\.body,\s*''/approve''\)') {
         throw "$name must gate routing and approval jobs on '/approve' comments."
     }
@@ -40,6 +44,21 @@ foreach ($entry in $files) {
     }
     if ($content -notmatch 'Processed /approve') {
         throw "$name must document direct /approve processing in the PR response."
+    }
+    foreach ($requiredRoutingText in @(
+        'reevaluate-linked-prs',
+        'Linked issue approval was finalized.',
+        'listRepoWorkflows',
+        'createWorkflowDispatch',
+        'pr-auto-merge-executor.yml',
+        'skipping optional linked PR reevaluation'
+    )) {
+        if ($content -notmatch [regex]::Escape($requiredRoutingText)) {
+            throw "$name must route finalized issue approval to linked PRs: $requiredRoutingText"
+        }
+        if ($content -match "throw new Error\('Unable to find the installed PR auto-merge executor workflow") {
+            throw "$name must remain independently installable when the optional executor is absent."
+        }
     }
     if ($content -match '⚠️|✅|⛔') {
         throw "$name must not use emoji in user-facing comments."
