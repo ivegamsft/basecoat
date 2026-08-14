@@ -246,6 +246,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running version-check callable contract tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'version-check-callable-contract.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Version-check callable contract tests failed' -ForegroundColor Red
+    Write-FailureLog 'version-check-callable-contract'
+    exit 1
+}
+
 Write-Host 'Running post-merge release chain workflow tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'post-merge-release-chain-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

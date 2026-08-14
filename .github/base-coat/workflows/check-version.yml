@@ -12,9 +12,22 @@ on:
         type: number
         default: 1
       source_repo:
-        description: Source BaseCoat repository in owner/repo format
+        description: >-
+          Source BaseCoat repository in owner/repo format (for example,
+          YOUR-ORG/basecoat). This is the repository whose releases define the
+          latest BaseCoat version. It must be passed explicitly; it is not
+          derived from the calling workflow reference, because this workflow is
+          distributed into the consumer repository, where that reference
+          resolves to the consumer rather than to BaseCoat.
         type: string
         required: true
+    secrets:
+      fetch_token:
+        description: >-
+          Token with read access to the source repository releases. Required
+          when the source repository is private or internal; the default
+          GITHUB_TOKEN cannot read releases across repositories.
+        required: false
 
 jobs:
   check-version:
@@ -42,14 +55,37 @@ jobs:
 
       - name: Get latest BaseCoat release
         id: latest
-        run: |
-          SOURCE_REPO="${{ inputs.source_repo }}"
-          LATEST=$(gh release list --repo "$SOURCE_REPO" --limit 1 --json tagName -q '.[0].tagName' | sed 's/^v//')
-          echo "source_repo=$SOURCE_REPO" >> $GITHUB_OUTPUT
-          echo "version=$LATEST" >> $GITHUB_OUTPUT
-          echo "Latest BaseCoat version: $LATEST"
         env:
-          GH_TOKEN: ${{ github.token }}
+          SOURCE_REPO_INPUT: ${{ inputs.source_repo }}
+          FETCH_TOKEN: ${{ secrets.fetch_token }}
+          GH_TOKEN_DEFAULT: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          SOURCE_REPO="$SOURCE_REPO_INPUT"
+          if [ -z "$SOURCE_REPO" ]; then
+            echo "::error::The 'source_repo' input is required (owner/repo of the BaseCoat source repository whose releases define the latest version)."
+            exit 1
+          fi
+
+          if [ -n "$FETCH_TOKEN" ]; then
+            export GH_TOKEN="$FETCH_TOKEN"
+          else
+            export GH_TOKEN="$GH_TOKEN_DEFAULT"
+          fi
+
+          if ! LATEST=$(gh release list --repo "$SOURCE_REPO" --limit 1 --json tagName -q '.[0].tagName' 2>release_err.log); then
+            echo "::error::Failed to read releases from $SOURCE_REPO. If the source repository is private or internal, pass a 'fetch_token' secret with release read access."
+            cat release_err.log >&2 || true
+            exit 1
+          fi
+          LATEST="${LATEST#v}"
+          if [ -z "$LATEST" ]; then
+            echo "::error::No releases found for $SOURCE_REPO. A published release is required for drift detection."
+            exit 1
+          fi
+          echo "source_repo=$SOURCE_REPO" >> "$GITHUB_OUTPUT"
+          echo "version=$LATEST" >> "$GITHUB_OUTPUT"
+          echo "Latest BaseCoat version: $LATEST"
 
       - name: Compare versions
         id: compare

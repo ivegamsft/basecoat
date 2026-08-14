@@ -4,6 +4,19 @@ BaseCoat provides a callable workflow that consumer repos can schedule to detect
 Release-version drift remains the default signal, with optional asset-level drift available via
 `asset-manifest.json` and the adoption scanner.
 
+## Prerequisites
+
+The callable is a reusable workflow hosted in the BaseCoat repository. Before consumers can call it:
+
+- **Actions sharing must be enabled.** In the BaseCoat repository, set
+  *Settings → Actions → General → Access* to **Accessible from repositories in the organization**
+  (or a broader scope). If sharing is `none`, downstream runs fail at startup with
+  `error parsing called workflow ... workflow was not found`, even though the file exists.
+- **Private/internal sources need a fetch token.** The default `GITHUB_TOKEN` cannot read releases
+  across repositories. When BaseCoat is private or internal, pass a `fetch_token` secret with
+  release read access (see the private-source example below). Without it the run **fails closed**
+  with an explicit error rather than silently reporting no drift.
+
 ## How it works
 
 ```mermaid
@@ -51,6 +64,31 @@ jobs:
 | `stage_path` | `.github/base-coat` | Path to synced BaseCoat assets |
 | `alert_threshold` | `1` | Versions behind before alerting |
 | `source_repo` | Required | Source BaseCoat repository in `owner/repo` format |
+
+### Secrets
+
+| Secret | Required | Description |
+|---|---|---|
+| `fetch_token` | Only for private/internal sources | Token with read access to the source repository's releases. Omit for public sources (the default `GITHUB_TOKEN` is used). |
+
+### Private or internal source
+
+When the source BaseCoat repository is private or internal, pass a `fetch_token` secret:
+
+```yaml
+jobs:
+  check:
+    uses: YOUR-ORG/basecoat/.github/workflows/check-basecoat-version-callable.yml@main
+    with:
+      stage_path: .github/base-coat
+      alert_threshold: 1
+      source_repo: YOUR-ORG/basecoat
+    secrets:
+      fetch_token: ${{ secrets.BASECOAT_REPO_TOKEN }}
+    permissions:
+      issues: write
+      contents: read
+```
 
 ## Choosing an alert threshold (N versions)
 

@@ -579,6 +579,10 @@ gh run list --workflow basecoat-version-check.yml
 jobs:
   my-job:
     uses: ./.github/base-coat/workflows/check-version.yml
+    with:
+      # Required: the BaseCoat source repository whose releases define the
+      # latest version. Replace with your BaseCoat upstream in owner/repo form.
+      source_repo: YOUR-ORG/basecoat
     secrets: inherit
 ```
 
