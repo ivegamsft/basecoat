@@ -12,8 +12,10 @@ Use these rules in npm-based repos to avoid CI drift:
 
 The required npm registry is
 `https://packagefeedproxy.microsoft.io/npm/`. Do not generate BaseCoat lockfiles
-through `registry.npmjs.org` or fetch the internal `dist.tarball` URL returned by
-the proxy metadata.
+through `registry.npmjs.org`. The verifier still prefers the corporate proxy
+tarball endpoint first; when that endpoint is unavailable for a package, it may
+fall back to the proxy metadata tarball URL only if that URL resolves to trusted
+Microsoft storage.
 
 The proxy currently publishes `dist.shasum` without `dist.integrity` for some
 packages. After any dependency update:

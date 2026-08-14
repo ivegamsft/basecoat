@@ -137,6 +137,31 @@ test('rejects redirects outside the corporate proxy delivery chain', async () =>
   );
 });
 
+test('falls back to a trusted metadata tarball URL when the proxy tarball endpoint fails', async () => {
+  const requested = [];
+  const fetchImpl = async (url) => {
+    requested.push(url);
+    if (requested.length === 1) {
+      return new Response(null, { status: 400 });
+    }
+    return new Response(tarball, { status: 200 });
+  };
+
+  const actual = await fetchProxyTarballIntegrity(
+    '@scope/example',
+    '1.2.3',
+    sha1,
+    {
+      fetchImpl,
+      resolveTarballUrl: async () => 'https://unit.vsblob.vsassets.io/package.tgz',
+    },
+  );
+
+  assert.equal(actual, sha512);
+  assert.equal(requested[0], buildProxyTarballUrl('@scope/example', '1.2.3'));
+  assert.equal(requested[1], 'https://unit.vsblob.vsassets.io/package.tgz');
+});
+
 test('repairs integrity and strips resolved fields according to publication policy', async () => {
   const lockData = {
     lockfileVersion: 3,

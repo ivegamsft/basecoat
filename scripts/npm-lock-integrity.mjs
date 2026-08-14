@@ -11,6 +11,7 @@ export const CORPORATE_NPM_PROXY = 'https://packagefeedproxy.microsoft.io/npm/';
 const TRUSTED_REDIRECT_SUFFIXES = [
   '.vsassets.io',
   '.blob.core.windows.net',
+  '.pkgs.visualstudio.com',
 ];
 
 const INTEGRITY_DIGEST_LENGTHS = new Map([
@@ -147,6 +148,43 @@ function digest(buffer, algorithm) {
   return `${algorithm}-${createHash(algorithm).update(buffer).digest('base64')}`;
 }
 
+function parseTarballUrlCandidate(value) {
+  if (typeof value === 'string') {
+    return value.trim();
+  }
+  if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'string') {
+    return value[0].trim();
+  }
+  return null;
+}
+
+export function resolveMetadataTarballUrl(packageName, version) {
+  const output = execFileSync(
+    'npm',
+    [
+      'view',
+      `${packageName}@${version}`,
+      'dist.tarball',
+      '--registry',
+      CORPORATE_NPM_PROXY,
+      '--json',
+    ],
+    { encoding: 'utf8', shell: true },
+  );
+
+  let candidate;
+  try {
+    candidate = parseTarballUrlCandidate(JSON.parse(output));
+  } catch {
+    candidate = parseTarballUrlCandidate(output);
+  }
+
+  if (candidate && isTrustedProxyRedirect(candidate)) {
+    return candidate;
+  }
+  return null;
+}
+
 function verifyExistingIntegrity(buffer, existingIntegrity, packageId) {
   if (typeof existingIntegrity !== 'string' || existingIntegrity.length === 0) {
     return;
@@ -175,9 +213,11 @@ export async function fetchProxyTarballIntegrity(
   options = {},
 ) {
   const fetchImpl = options.fetchImpl ?? globalThis.fetch;
+  const resolveTarballUrl = options.resolveTarballUrl ?? resolveMetadataTarballUrl;
   const maxRedirects = options.maxRedirects ?? 5;
   const packageId = `${packageName}@${version}`;
   let url = buildProxyTarballUrl(packageName, version);
+  let fallbackTried = false;
 
   for (let redirectCount = 0; redirectCount <= maxRedirects; redirectCount += 1) {
     if (!isTrustedProxyRedirect(url)) {
@@ -200,6 +240,14 @@ export async function fetchProxyTarballIntegrity(
     }
 
     if (!response.ok) {
+      if (!fallbackTried) {
+        const fallbackUrl = await resolveTarballUrl(packageName, version);
+        if (fallbackUrl) {
+          fallbackTried = true;
+          url = fallbackUrl;
+          continue;
+        }
+      }
       throw new Error(`${packageId} proxy tarball request failed with HTTP ${response.status}.`);
     }
 
