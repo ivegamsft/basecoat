@@ -165,6 +165,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running adoption metrics parser tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'adoption-metrics-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Adoption metrics parser tests failed' -ForegroundColor Red
+    Write-FailureLog 'adoption-metrics-tests'
+    exit 1
+}
+
 Write-Host 'Running consumer updater tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'consumer-updater-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

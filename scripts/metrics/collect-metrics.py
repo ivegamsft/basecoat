@@ -22,6 +22,15 @@ from datetime import datetime, timedelta, timezone
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 
+try:
+    from repo_inputs import normalize_dashboard_repos
+except ModuleNotFoundError:
+    from pathlib import Path
+    import sys as _sys
+
+    _sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from repo_inputs import normalize_dashboard_repos
+
 
 def get_env(name, required=True):
     value = os.environ.get(name, "")
@@ -67,6 +76,55 @@ def to_int(value):
         return int(value)
     except (TypeError, ValueError):
         return 0
+
+
+def collect_dashboard_repos(raw_value):
+    """Normalize dashboard repository configuration into repo slugs."""
+    return normalize_dashboard_repos(raw_value)
+
+
+def repo_is_accessible(repo, token):
+    """Return True when GitHub can resolve the repository."""
+    return github_api(f"https://api.github.com/repos/{repo}", token) is not None
+
+
+def unavailable_repo_metrics(error):
+    return {
+        "available": False,
+        "error": error,
+        "pull_requests": {
+            "available": False,
+            "error": error,
+            "prs_merged_28d": 0,
+            "cycle_time_median_hours": 0,
+        },
+        "ci": {
+            "available": False,
+            "error": error,
+            "success_rate": 0,
+            "pass_rate": 0,
+            "ci_pass_rate_last_20_runs": 0,
+            "ci_pass_rate_last_100_runs": 0,
+            "total_runs_sampled": 0,
+            "runs_sampled_last_20": 0,
+            "successful_runs_last_20": 0,
+        },
+        "issues": {
+            "available": False,
+            "error": error,
+            "issues_closed_28d": 0,
+            "resolution_time_median_hours": 0,
+        },
+        "basecoat_coverage": {
+            "available": False,
+            "error": error,
+            "agents": 0,
+            "instructions": 0,
+            "skills": 0,
+            "prompts": 0,
+            "percentage": 0,
+        },
+    }
 
 
 def collect_copilot_metrics(org, token):
@@ -122,6 +180,9 @@ def collect_copilot_metrics(org, token):
 def collect_pr_metrics(repo, token):
     """Collect PR velocity metrics for a repo."""
     print(f"  Collecting PR metrics for {repo}...")
+    if not repo_is_accessible(repo, token):
+        return unavailable_repo_metrics("inaccessible_repo")
+
     since = (datetime.now(timezone.utc) - timedelta(days=28)).isoformat()
 
     # Get recently closed PRs
@@ -157,6 +218,9 @@ def collect_pr_metrics(repo, token):
 def collect_ci_metrics(repo, token):
     """Collect CI pass-rate metrics for a repo."""
     print(f"  Collecting CI metrics for {repo}...")
+    if not repo_is_accessible(repo, token):
+        return unavailable_repo_metrics("inaccessible_repo")
+
     runs = github_api(
         f"https://api.github.com/repos/{repo}/actions/runs?per_page=100&status=completed",
         token
@@ -207,6 +271,9 @@ def collect_ci_metrics(repo, token):
 def collect_issue_metrics(repo, token):
     """Collect issue resolution metrics."""
     print(f"  Collecting issue metrics for {repo}...")
+    if not repo_is_accessible(repo, token):
+        return unavailable_repo_metrics("inaccessible_repo")
+
     since = (datetime.now(timezone.utc) - timedelta(days=28)).isoformat()
 
     issues = github_api(
@@ -238,6 +305,8 @@ def collect_issue_metrics(repo, token):
 def collect_basecoat_coverage(repo, token):
     """Check which Base Coat assets are present in the target repo."""
     print(f"  Checking Base Coat coverage in {repo}...")
+    if not repo_is_accessible(repo, token):
+        return unavailable_repo_metrics("inaccessible_repo")
 
     # Check for common basecoat directories
     coverage = {}
@@ -256,6 +325,44 @@ def collect_basecoat_coverage(repo, token):
     coverage["percentage"] = round(total_found / total_possible * 100, 1)
 
     return coverage
+
+
+def render_summary(metrics):
+    """Render the adoption metrics summary markdown."""
+    lines = []
+    lines.append("# Adoption Metrics Summary")
+    lines.append("")
+    lines.append(f"Collected: {metrics['collected_at'][:10]}")
+    lines.append("")
+    lines.append("## Copilot Usage")
+    lines.append("")
+    if metrics["copilot"]["available"]:
+        lines.append(f"- Active users: {metrics['copilot'].get('total_active_users', 'N/A')}")
+        lines.append("")
+    else:
+        lines.append("- Copilot metrics not available (check token permissions)")
+        lines.append("")
+    lines.append("## Repository Metrics")
+    lines.append("")
+    lines.append("| Repo | PRs Merged | Cycle Time | CI Success (100 runs) | CI Pass Rate (20 runs) | Coverage |")
+    lines.append("|------|-----------|------------|-----------------------|------------------------|----------|")
+    for repo, data in metrics["repos"].items():
+        pr = data.get("pull_requests", {})
+        ci = data.get("ci", {})
+        cov = data.get("basecoat_coverage", {})
+        if data.get("available") is False:
+            lines.append(f"| {repo} | unavailable | unavailable | unavailable | unavailable | unavailable |")
+            continue
+        ci_success = ci.get("success_rate", 0)
+        ci_pass_20 = ci.get("ci_pass_rate_last_20_runs", ci_success)
+        sampled_20 = ci.get("runs_sampled_last_20", 0)
+        success_20 = ci.get("successful_runs_last_20", 0)
+        lines.append(
+            f"| {repo} | {pr.get('prs_merged_28d', 0)} | {pr.get('cycle_time_median_hours', 0)}h | "
+            f"{ci_success}% | {ci_pass_20}% ({success_20}/{sampled_20}) | {cov.get('percentage', 0)}% |"
+        )
+    lines.append("")
+    return "\n".join(lines)
 
 
 def detect_degradation(current, history):
@@ -281,6 +388,8 @@ def detect_degradation(current, history):
 
     # Check per-repo CI success rate drop
     for repo, data in current.get("repos", {}).items():
+        if data.get("available") is False:
+            continue
         prev_repo = prev.get("repos", {}).get(repo, {})
         curr_ci = data.get("ci", {}).get("pass_rate", data.get("ci", {}).get("success_rate", 100))
         prev_ci = prev_repo.get("ci", {}).get("pass_rate", prev_repo.get("ci", {}).get("success_rate", 100))
@@ -318,7 +427,7 @@ def main():
     copilot_token = os.environ.get("COPILOT_METRICS_TOKEN", token)
     org = get_env("DASHBOARD_ORG")
     repos_json = get_env("DASHBOARD_REPOS")
-    repos = json.loads(repos_json)
+    repos = collect_dashboard_repos(repos_json)
 
     print(f"Organization: {org}")
     print(f"Repos to monitor: {repos}")
@@ -334,7 +443,11 @@ def main():
 
     for repo in repos:
         print(f"\n── {repo} ──")
+        if not repo_is_accessible(repo, token):
+            metrics["repos"][repo] = unavailable_repo_metrics("inaccessible_repo")
+            continue
         metrics["repos"][repo] = {
+            "available": True,
             "pull_requests": collect_pr_metrics(repo, token),
             "ci": collect_ci_metrics(repo, token),
             "issues": collect_issue_metrics(repo, token),
@@ -379,30 +492,7 @@ def main():
     # Generate summary markdown
     summary_path = os.path.join(output_dir, "SUMMARY.md")
     with open(summary_path, "w") as f:
-        f.write(f"# Adoption Metrics Summary\n\n")
-        f.write(f"Collected: {metrics['collected_at'][:10]}\n\n")
-        f.write(f"## Copilot Usage\n\n")
-        if metrics["copilot"]["available"]:
-            f.write(f"- Active users: {metrics['copilot'].get('total_active_users', 'N/A')}\n\n")
-        else:
-            f.write("- Copilot metrics not available (check token permissions)\n\n")
-        f.write(f"## Repository Metrics\n\n")
-        f.write("| Repo | PRs Merged | Cycle Time | CI Success (100 runs) | CI Pass Rate (20 runs) | Coverage |\n")
-        f.write("|------|-----------|------------|-----------------------|------------------------|----------|\n")
-        for repo, data in metrics["repos"].items():
-            short = repo.split("/")[-1]
-            pr = data["pull_requests"]
-            ci = data["ci"]
-            cov = data["basecoat_coverage"]
-            ci_success = ci.get("success_rate", 0)
-            ci_pass_20 = ci.get("ci_pass_rate_last_20_runs", ci_success)
-            sampled_20 = ci.get("runs_sampled_last_20", 0)
-            success_20 = ci.get("successful_runs_last_20", 0)
-            f.write(
-                f"| {short} | {pr['prs_merged_28d']} | {pr['cycle_time_median_hours']}h | "
-                f"{ci_success}% | {ci_pass_20}% ({success_20}/{sampled_20}) | {cov['percentage']}% |\n"
-            )
-        f.write("\n")
+        f.write(render_summary(metrics))
     print(f"✓ Summary written to {summary_path}")
 
 

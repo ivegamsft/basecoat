@@ -21,6 +21,8 @@ from datetime import datetime, timezone
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 
+from repo_inputs import normalize_dashboard_repos
+
 
 OUTPUT_DIR = os.environ.get("OUTPUT_DIR", "dashboard/metrics")
 
@@ -49,12 +51,9 @@ def check_dependencies():
             "DASHBOARD_REPOS not configured — no repos scanned"
         )
     else:
-        try:
-            repos = json.loads(dashboard_repos)
-            if not repos:
-                missing.append("DASHBOARD_REPOS is an empty list — no repos will be scanned")
-        except json.JSONDecodeError:
-            warnings.append("DASHBOARD_REPOS is not valid JSON — repo list may be incorrect")
+        repos = normalize_dashboard_repos(dashboard_repos)
+        if not repos:
+            missing.append("DASHBOARD_REPOS is an empty list — no repos will be scanned")
 
     if missing:
         overall = "not-ready" if len(missing) >= 2 else "partial"
@@ -100,7 +99,7 @@ def emit_app_insights(connection_string, payload):
                         "overall": payload["readiness"]["overall"],
                         "missing_count": str(len(payload["readiness"]["missing_dependencies"])),
                         "warning_count": str(len(payload["readiness"]["warnings"])),
-                        "repos_configured": str(len(json.loads(os.environ.get("DASHBOARD_REPOS", "[]")))),
+                        "repos_configured": str(len(normalize_dashboard_repos(os.environ.get("DASHBOARD_REPOS", "[]")))),
                         "app_insights_connected": str(
                             bool(os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING", ""))
                         ).lower(),

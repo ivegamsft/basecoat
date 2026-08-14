@@ -222,14 +222,15 @@ gh workflow run adoption-metrics.yml</code></pre>
     function renderDashboard(latest, history) {
         const app = document.getElementById('app');
         const repos = Object.entries(latest.repos);
+        const availableRepos = repos.filter(([, data]) => data.available !== false);
         const copilot = latest.copilot;
 
-        const totalPRs = repos.reduce((s, [, d]) => s + d.pull_requests.prs_merged_28d, 0);
-        const avgCI = repos.length > 0
-            ? (repos.reduce((s, [, d]) => s + d.ci.success_rate, 0) / repos.length).toFixed(1)
+        const totalPRs = availableRepos.reduce((s, [, d]) => s + d.pull_requests.prs_merged_28d, 0);
+        const avgCI = availableRepos.length > 0
+            ? (availableRepos.reduce((s, [, d]) => s + d.ci.success_rate, 0) / availableRepos.length).toFixed(1)
             : 0;
-        const avgCoverage = repos.length > 0
-            ? (repos.reduce((s, [, d]) => s + d.basecoat_coverage.percentage, 0) / repos.length).toFixed(1)
+        const avgCoverage = availableRepos.length > 0
+            ? (availableRepos.reduce((s, [, d]) => s + d.basecoat_coverage.percentage, 0) / availableRepos.length).toFixed(1)
             : 0;
 
         let html = `
@@ -242,7 +243,7 @@ gh workflow run adoption-metrics.yml</code></pre>
             <div class="card">
                 <h2>PRs Merged (28d)</h2>
                 <div class="value">${totalPRs}</div>
-                <div class="delta">across ${repos.length} repos</div>
+                <div class="delta">across ${availableRepos.length} active repos${repos.length !== availableRepos.length ? `, ${repos.length - availableRepos.length} unavailable` : ''}</div>
             </div>
             <div class="card">
                 <h2>CI Success Rate</h2>
@@ -267,17 +268,18 @@ gh workflow run adoption-metrics.yml</code></pre>
                 <tbody>`;
 
         for (const [repo, data] of repos) {
-            const short = repo.split('/').pop();
-            const ci = data.ci.success_rate;
-            const ciBadge = ci >= 90 ? 'badge-green' : ci >= 75 ? 'badge-yellow' : 'badge-red';
+            const unavailable = data.available === false;
+            const ci = unavailable ? 0 : data.ci.success_rate;
+            const ciBadge = unavailable ? 'badge-gray' : ci >= 90 ? 'badge-green' : ci >= 75 ? 'badge-yellow' : 'badge-red';
+            const label = unavailable ? `${repo} (unavailable)` : repo;
             html += `
                 <tr>
-                    <td><strong>${short}</strong></td>
-                    <td>${data.pull_requests.prs_merged_28d}</td>
-                    <td>${data.pull_requests.cycle_time_median_hours}h</td>
+                    <td><strong>${label}</strong></td>
+                    <td>${unavailable ? '—' : data.pull_requests.prs_merged_28d}</td>
+                    <td>${unavailable ? '—' : `${data.pull_requests.cycle_time_median_hours}h`}</td>
                     <td><span class="badge ${ciBadge}">${ci}%</span></td>
-                    <td>${data.issues.issues_closed_28d}</td>
-                    <td>${data.basecoat_coverage.percentage}%</td>
+                    <td>${unavailable ? '—' : data.issues.issues_closed_28d}</td>
+                    <td>${unavailable ? '—' : `${data.basecoat_coverage.percentage}%`}</td>
                 </tr>`;
         }
 
@@ -297,11 +299,13 @@ gh workflow run adoption-metrics.yml</code></pre>
         if (history.length > 1) {
             const labels = history.map(h => h.collected_at.slice(0, 10));
             const ciData = history.map(h => {
-                const r = Object.values(h.repos);
+                const r = Object.values(h.repos).filter((d) => d.available !== false);
                 return r.length > 0 ? (r.reduce((s, d) => s + d.ci.success_rate, 0) / r.length).toFixed(1) : 0;
             });
             const prData = history.map(h => {
-                return Object.values(h.repos).reduce((s, d) => s + d.pull_requests.prs_merged_28d, 0);
+                return Object.values(h.repos)
+                    .filter((d) => d.available !== false)
+                    .reduce((s, d) => s + d.pull_requests.prs_merged_28d, 0);
             });
 
             new Chart(document.getElementById('trendChart'), {
