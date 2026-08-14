@@ -8,10 +8,12 @@ scenarios:
   - id: 'pos-2'
     input: 'Please route this task to the incident-responder agent.'
     expect_activation: true
+  - id: 'pos-credential-exposure'
+    input: 'A production token was exposed in an Actions log. Contain the exposure, coordinate revocation, and keep the incident open until recovery is verified.'
+    expect_activation: true
   - id: 'neg-1'
     input: 'Write a haiku about programming.'
     expect_activation: false
   - id: 'neg-2'
     input: 'Give me a recipe for chocolate chip cookies.'
     expect_activation: false
-

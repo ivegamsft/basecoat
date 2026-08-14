@@ -1680,14 +1680,18 @@
     },
     {
       "name": "basecoat-60-workflow-incident-responder",
-      "description": "Structured incident response and recovery agent for classifying incidents, guiding mitigation, coordinating communications, verifying recovery, and facilitating post-incident learning. USE FOR: classify and triage active production incidents, guide on-call mitigation steps, facilitate post-incident retrospectives. DO NOT USE FOR: proactive security hardening, routine deployment tasks.",
+      "description": "Structured incident response and recovery agent for classifying incidents, guiding mitigation, coordinating communications, verifying recovery, and facilitating post-incident learning. USE FOR: classify and triage active production incidents, guide on-call mitigation steps, run credential-exposure containment and closure (revoke/replace/recover consumers), and facilitate post-incident retrospectives. DO NOT USE FOR: proactive security hardening, routine deployment tasks.",
       "category": "Meta",
       "keywords": [
         "incident-response",
         "sre",
         "on-call",
         "troubleshooting",
-        "post-mortem"
+        "post-mortem",
+        "credential-exposure",
+        "token-leak",
+        "secret-leak",
+        "pat"
       ],
       "aliases": [],
       "pairedSkill": "",

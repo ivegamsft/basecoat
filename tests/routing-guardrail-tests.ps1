@@ -391,7 +391,7 @@ foreach ($label in @('canonical (basecoat-10-core-intent-routing)', 'alias (inte
 }
 
 # Test 19: canonical/alias/guide route synchronization for corrected routes
-Write-Host '  Test 19: Validate outage/worktree/burndown routes are synchronized and actionable...'
+Write-Host '  Test 19: Validate outage/worktree/burndown/credential-exposure routes are synchronized and actionable...'
 foreach ($label in $newPrefixTargets.Keys) {
     $path = $newPrefixTargets[$label]
     if (-not (Test-Path $path)) { continue }
@@ -401,6 +401,25 @@ foreach ($label in $newPrefixTargets.Keys) {
     if ($content -notmatch 'prune worktrees.*git-worktrees') { $missing += 'worktree cleanup->git-worktrees skill' }
     if ($content -notmatch 'clean up work trees') { $missing += 'two-word work-trees alias' }
     if ($content -notmatch 'burndown.*@orphaned-pr-cleanup') { $missing += 'burndown->@orphaned-pr-cleanup' }
+    if ($label -eq 'guide (intent-prefixes)') {
+        $chainPattern = '(?m)^\|[^\r\n]*`security:` credential exposure[^\r\n]*incident-responder -> secrets-manager -> guardrail'
+        if ($content -notmatch $chainPattern) {
+            $missing += 'credential exposure->incident-responder/secrets-manager/guardrail'
+        }
+    }
+    else {
+        $sectionMatch = [regex]::Match(
+            $content,
+            '(?s)### Credential exposure security subroute(?<body>.*?)(?:\r?\n### |\z)'
+        )
+        if (
+            -not $sectionMatch.Success -or
+            $sectionMatch.Groups['body'].Value -notmatch
+                '(?s)@incident-responder.*@secrets-manager.*@guardrail'
+        ) {
+            $missing += 'credential exposure->incident-responder/secrets-manager/guardrail'
+        }
+    }
     if ($missing.Count -gt 0) {
         $failures += "route-sync-missing-$label"
         Write-Host "    FAIL $label missing route sync: $($missing -join ', ')" -ForegroundColor Red
@@ -411,7 +430,43 @@ foreach ($label in $newPrefixTargets.Keys) {
 }
 
 # Test 20: backlog-burndown skill ingests open PRs (skill + eval coverage)
-Write-Host '  Test 20: Validate backlog-burndown skill covers open PRs...'
+# Test 20: generic security route remains synchronized across guide + instruction aliases
+Write-Host '  Test 20: Validate generic security route remains synchronized across guide and routing instructions...'
+$securityRouteMissing = @()
+$guidePath = Join-Path $repoRoot 'docs\guides\intent-prefixes.md'
+if (-not (Test-Path $guidePath)) {
+    $securityRouteMissing += 'intent-prefixes.md missing'
+}
+else {
+    $guideContent = Get-Content $guidePath -Raw
+    if ($guideContent -notmatch '(?m)^\|\s*`security:`\s*\|.*security-analyst.*policy-as-code-compliance.*guardrail') {
+        $securityRouteMissing += 'intent-prefixes.md missing security-analyst->policy-as-code-compliance->guardrail chain'
+    }
+}
+$instructionPaths = @(
+    (Join-Path $repoRoot 'instructions\basecoat-10-core-intent-routing.instructions.md'),
+    (Join-Path $repoRoot 'instructions\intent-routing.instructions.md')
+)
+foreach ($path in $instructionPaths) {
+    if (-not (Test-Path $path)) {
+        $securityRouteMissing += "$([System.IO.Path]::GetFileName($path)) missing"
+        continue
+    }
+    $content = Get-Content $path -Raw
+    if ($content -notmatch '(?m)^\|\s*`security:`\s*\|.*@security-analyst.*@guardrail') {
+        $securityRouteMissing += "$([System.IO.Path]::GetFileName($path)) missing @security-analyst/@guardrail route"
+    }
+}
+if ($securityRouteMissing.Count -gt 0) {
+    $failures += 'generic-security-route-sync-missing'
+    Write-Host "    FAIL generic security route sync gaps: $($securityRouteMissing -join ', ')" -ForegroundColor Red
+}
+else {
+    Write-Host '    PASS generic security route is synchronized across guide and instruction aliases'
+}
+
+# Test 21: backlog-burndown skill ingests open PRs (skill + eval coverage)
+Write-Host '  Test 21: Validate backlog-burndown skill covers open PRs...'
 $burndownSkill = Join-Path $repoRoot 'skills\backlog-burndown\SKILL.md'
 $burndownEval = Join-Path $repoRoot 'skills\backlog-burndown\eval.yaml'
 $burndownRef = Join-Path $repoRoot 'skills\backlog-burndown\references\burndown-workflow.md'

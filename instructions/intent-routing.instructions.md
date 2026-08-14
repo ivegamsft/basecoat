@@ -327,6 +327,19 @@ before acting. The `outage:` aliases (`broke`, `broken`, `down`, `dead`,
 running service, site, or app; application code or test defects route to `bug:`
 and GitHub Actions workflow/CI failures route to `workflow:`.
 
+### Credential exposure security subroute
+
+Treat `token exposed`, `secret leaked`, `credential in logs`, `key disclosed`,
+and equivalent phrases as an active `security:` incident. Route to
+`@incident-responder` for containment and closure tracking, then
+`@secrets-manager` for revocation, replacement, and consumer verification, and
+finally `@guardrail` for prevention validation.
+
+Do not introduce a separate intent for credential exposure. Keep the incident
+open and blocked while any credential-owner action remains. Deleting a log,
+removing the disclosure path, or replacing a repository secret does not prove
+the exposed source credential was revoked.
+
 ### Work-in-progress and cleanup
 
 | Term or phrase | Normalized intent | Route to |

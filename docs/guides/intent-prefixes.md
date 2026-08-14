@@ -586,6 +586,7 @@ Use these default chains unless there is a task-specific reason to override.
 | `infra:` | `azure-preflight -> azure-prepare -> azure-validate -> azure-deploy` | preflight advisory, then staged deployment |
 | `deploy:` | `azure-prepare -> azure-validate -> azure-deploy` | staged deployment with pre-flight validation |
 | `security:` | `security-analyst -> policy-as-code-compliance -> guardrail` | remediation and policy validation |
+| `security:` credential exposure | `incident-responder -> secrets-manager -> guardrail` | containment, revocation/replacement, consumer recovery, and prevention validation |
 | `plan:` | `product-manager -> sprint-planner` | scoped sprint-ready backlog |
 | `test:` | `manual-test-strategy -> strategy-to-automation` | test strategy and automation candidates |
 | `portfolio:` | `issue-triage -> orphaned-pr-cleanup -> sprint-project-mapper -> sprint-planner -> governance-auditor` | end-to-end project hygiene with dedupe, grouping, dependency traceability, and governance checks |
@@ -597,6 +598,18 @@ When chaining, each handoff prompt should include:
 3. What remains.
 4. Constraints that must carry forward.
 5. Expected output contract.
+
+### Credential exposure closure
+
+Phrases such as `token exposed`, `secret leaked`, `credential in logs`, or
+`key disclosed` stay under the existing `security:` intent. They activate the
+credential-exposure chain rather than creating a new intent.
+
+The chain is not complete until the disclosure path is fixed, the exposed
+credential is revoked, a least-privilege replacement is installed, exposed
+artifacts are removed after sanitized evidence capture, all consumers recover,
+and learnings are logged. Owner-only credential actions remain explicit blockers;
+log deletion or secret-store replacement alone is not closure.
 
 ---
 
