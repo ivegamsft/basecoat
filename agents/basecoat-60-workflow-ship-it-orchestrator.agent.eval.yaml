@@ -50,6 +50,15 @@ tests:
         - "VS Code"
         - "cloud"
         - "fallback"
+  - id: stacked-pr-finalization-routing
+    description: Keeps dependent PR stacks on feature lanes and requires retargeting after parent merge
+    input: "A dependent PR stack should stay on feature/*, retarget the upper PR after its parent merges, and finish with one finalization PR."
+    expect:
+      contains:
+        - "feature/*"
+        - "retarget"
+        - "parent merges"
+        - "finalization PR"
   - id: persistent-loop-cycle-summary
     description: Requires cycle summaries with actionable loop state
     input: "Run ship-it as a persistent loop and show one cycle update."

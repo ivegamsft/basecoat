@@ -257,6 +257,23 @@ Execution contract:
 9. In `pr-lifecycle=full` mode, do not mark the request complete while WIP
    tasks or uncommitted changes remain unresolved.
 
+## Dependent PR Stack Routing
+
+Stacked PRs are allowed only for explicit dependency chains. They are not the
+default shape for independent wave work.
+
+Routing rules:
+
+1. Route dependent multi-PR work to `feature/*` integration lanes.
+2. Keep independent items on separate branches and avoid artificial stacking.
+3. Retarget every upper PR after its parent merges, then rerun validation.
+4. Use a single `feature/* -> main` finalization PR when the stack is collapsed.
+5. Keep `agent/*` as the authoring lane and `feature/*` as the integration lane
+   only when ordering constraints require it.
+
+This routing must stay synchronized with the canonical BaseCoat routing
+instruction and the current ship-it/lane-closeout control-loop assets.
+
 ## Plan-First Enforcement
 
 For any implementation intent that touches multiple files or requires design

@@ -88,6 +88,30 @@ Disallowed by policy:
 - Emergency override requires explicit owner approval and incident tracking.
 - Every override must record rationale, blast radius, and follow-up actions.
 
+## Dependent PR stack routing
+
+Dependent PR stacks are allowed only when a change set is explicitly split into
+parent/child layers. They are not the default shape for independent wave work.
+
+Rules:
+
+1. Start stacked work on `feature/*` only when a later PR depends on an earlier
+   layer that must merge first.
+2. Keep independent wave items on their own branch path; do not stack unrelated
+   work just to preserve ordering.
+3. Retarget each upper PR to the latest branch tip after its parent layer
+   merges, then re-run validation before final merge.
+4. Finish the feature with a single `feature/* -> main` finalization PR once
+   the stack is collapsed and green.
+5. Keep `agent/*` lanes as the authoring surface; use `feature/*` as the
+   integration lane only when dependency ordering requires it.
+
+This contract aligns with the ship-it control loop and lane closeout assets:
+
+- `ship-it-control-loop` provides bounded cycle state and retry handling.
+- `lane-closeout` captures WIP, classifies the lane, and performs safe cleanup
+  only after the final PR state is known.
+
 ## Scorecard and rollout guardrails
 
 ### Metrics
