@@ -27,9 +27,9 @@ Persistent control-loop contract for fleet-style ship-it execution.
 
 1. `goal`
 2. `target_repo`
-3. `max_cycles`
-4. `max_retries`
-5. `dry_run`
+3. `max_cycles` (default `10`)
+4. `max_retries` (default `2`)
+5. `dry_run` (default `true`)
 6. `stop_conditions` (optional override set)
 
 ## Process

@@ -52,9 +52,9 @@ Required control-loop inputs:
 
 - `goal`
 - `target_repo`
-- `max_cycles`
-- `max_retries`
-- `dry_run`
+- `max_cycles` (safety-bound default `10`)
+- `max_retries` (safety-bound default `2`)
+- `dry_run` (default `true`)
 
 Cycle output must always include: phase, task/PR/check status snapshot, retry
 state, next action, and stop-condition status (`continue|complete|blocked|max_cycles|manual_stop`).

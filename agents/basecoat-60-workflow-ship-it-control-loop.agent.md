@@ -11,6 +11,9 @@ metadata:
     - developer
 allowed-tools: []
 allowed_skills: [ship-it, ship-it-control-loop]
+context_policy:
+  load_scope: standard
+  retention: session
 ---
 
 # Ship-it Control Loop Agent
@@ -23,9 +26,9 @@ Maintain a persistent, bounded ship-it loop so operators do not re-issue repetit
 
 1. `goal` — delivery objective for the active loop
 2. `target_repo` — `owner/repo`
-3. `max_cycles` — hard cap for loop iterations
-4. `max_retries` — per-subtask retry budget
-5. `dry_run` — plan-only mode with no side effects
+3. `max_cycles` — hard cap for loop iterations (default `10`)
+4. `max_retries` — per-subtask retry budget (default `2`)
+5. `dry_run` — plan-only mode with no side effects (default `true`)
 6. `stop_conditions` — optional overrides for completion/blocking/manual-stop
 
 ## Loop Contract

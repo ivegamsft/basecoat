@@ -9,7 +9,7 @@ metadata:
   maturity: alpha
   audience:
     - developer
-allowed-tools: []
+allowed-tools: [bash, git, gh]
 ---
 
 # Workflow Gate Diagnostician Agent

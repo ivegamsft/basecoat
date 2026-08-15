@@ -159,6 +159,51 @@ try {
     if ($storyUpdated -notmatch 'Updated detail for replacement check') {
         throw 'Update mode did not replace section content'
     }
+
+    # Regression: update mode must treat the replacement block literally (no regex substitution
+    # token expansion) and must encode table-breaking characters in untrusted values.
+    @'
+{
+  "cycle_id": "wave-42",
+  "story_title": "Repo Story (Test)",
+  "timeline": [
+    {
+      "timestamp": "2026-07-22T02:00:00Z",
+      "event": "token $& and $1 with \\ backslash and | pipe",
+      "reference": "ref\r| injected |"
+    }
+  ],
+  "learnings": [
+    {
+      "title": "Preserve $1 $& \\ literally",
+      "detail": "Detail with $& $1 and | pipe and \\ backslash.",
+      "action": "Keep tokens literal."
+    }
+  ]
+}
+'@ | Set-Content -Path $inputPath -Encoding UTF8
+
+    & pwsh -NoProfile -File $scriptPath `
+        -InputPath $inputPath `
+        -StoryPath $storyPath `
+        -Mode update `
+        -OutputDir $outputDir
+
+    if ($LASTEXITCODE -ne 0) {
+        throw 'chronicle-to-story export script failed on token-preservation update'
+    }
+
+    $storyTokens = Get-Content -Path $storyPath -Raw
+    if ($storyTokens -notmatch [regex]::Escape('Preserve $1 $& \ literally')) {
+        throw 'Update mode did not preserve substitution tokens literally'
+    }
+    if ($storyTokens -notmatch '&#124;') {
+        throw 'Expected pipe character reference (&#124;) in encoded table cell'
+    }
+    # The injected value "ref\r| injected |" must not survive as a raw pipe-delimited row.
+    if ($storyTokens.Contains('| injected |')) {
+        throw 'Untrusted pipe/CR content broke out into a raw table row'
+    }
 }
 finally {
     if (Test-Path $tempDir) {

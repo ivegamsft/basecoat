@@ -27,6 +27,32 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+# Path casing is significant on case-sensitive filesystems (Linux/macOS); only Windows
+# compares case-insensitively, otherwise a sibling like "Basecoat" could pass as "basecoat".
+$PathComparison = if ($IsWindows) {
+    [System.StringComparison]::OrdinalIgnoreCase
+} else {
+    [System.StringComparison]::Ordinal
+}
+
+function Assert-NoSymlinkDestination {
+    param([string]$Destination)
+
+    # Enumerate the parent directory so a pre-existing link entry is detected even when it is a
+    # dangling symlink (Test-Path follows the link and returns false for a missing target). Reject
+    # any reparse point / link leaf so a planted child link cannot redirect the write outside the repo.
+    $parent = Split-Path -Parent $Destination
+    $leaf = Split-Path -Leaf $Destination
+    $existingEntries = @(Get-ChildItem -LiteralPath $parent -Force -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name.Equals($leaf, $PathComparison) })
+    foreach ($entry in $existingEntries) {
+        $isReparsePoint = ($entry.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -eq [System.IO.FileAttributes]::ReparsePoint
+        if ($isReparsePoint -or $null -ne $entry.ResolveLinkTarget($false)) {
+            throw "Refusing to write through a symbolic link destination: $Destination"
+        }
+    }
+}
+
 function Normalize-Key {
     param([string]$Value)
     if ([string]::IsNullOrWhiteSpace($Value)) {
@@ -36,6 +62,46 @@ function Normalize-Key {
     $normalized = $Value.ToLowerInvariant()
     $normalized = [regex]::Replace($normalized, "[^a-z0-9]+", "-")
     return $normalized.Trim("-")
+}
+
+function Format-TableCell {
+    param([string]$Value)
+    if ([string]::IsNullOrWhiteSpace($Value)) {
+        return "-"
+    }
+    # Encode pipes as a character reference (avoids backslash-escaping ambiguity where an
+    # already-escaped "\|" would double-escape) and collapse every newline form (CRLF, CR, LF)
+    # so untrusted values cannot corrupt the table.
+    $escaped = $Value -replace '\|', '&#124;'
+    $escaped = $escaped -replace '[\r\n]+', ' '
+    return $escaped.Trim()
+}
+
+function Get-CanonicalRealPath {
+    param([string]$Path)
+
+    # Resolve symbolic links / junctions on every existing path segment (not just the leaf)
+    # so a linked ancestor beneath the repo cannot redirect writes outside the repository root.
+    $full = [System.IO.Path]::GetFullPath($Path)
+    $root = [System.IO.Path]::GetPathRoot($full)
+    if ([string]::IsNullOrEmpty($root)) {
+        $root = [string]([System.IO.Path]::DirectorySeparatorChar)
+    }
+    $remainder = $full.Substring($root.Length)
+    $separators = [char[]]@([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
+    $segments = $remainder.Split($separators, [System.StringSplitOptions]::RemoveEmptyEntries)
+    $accumulated = $root
+    foreach ($segment in $segments) {
+        $accumulated = Join-Path $accumulated $segment
+        if (Test-Path -LiteralPath $accumulated) {
+            $item = Get-Item -LiteralPath $accumulated -Force
+            $linkTarget = $item.ResolveLinkTarget($true)
+            if ($null -ne $linkTarget) {
+                $accumulated = $linkTarget.FullName
+            }
+        }
+    }
+    return [System.IO.Path]::GetFullPath($accumulated)
 }
 
 function Ensure-RepoScopedPath {
@@ -50,8 +116,13 @@ function Ensure-RepoScopedPath {
     } else {
         Join-Path $RootPath $RelativeOrAbsolutePath
     }
-    $resolved = [System.IO.Path]::GetFullPath($candidate)
-    if (-not $resolved.StartsWith($RootPath, [System.StringComparison]::OrdinalIgnoreCase)) {
+    # Canonicalize links/junctions on both paths so an in-repo symlink cannot redirect writes outside the root.
+    $resolved = Get-CanonicalRealPath $candidate
+    $rootFull = Get-CanonicalRealPath $RootPath
+    $rootPrefix = $rootFull.TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar) + [System.IO.Path]::DirectorySeparatorChar
+    $isInside = $resolved.Equals($rootFull, $PathComparison) -or `
+        $resolved.StartsWith($rootPrefix, $PathComparison)
+    if (-not $isInside) {
         throw "$Label must resolve inside repository root. Resolved: $resolved"
     }
 
@@ -238,12 +309,9 @@ if ($timeline.Count -eq 0) {
     $sectionLines.Add("| Time | Event | Reference |")
     $sectionLines.Add("|---|---|---|")
     foreach ($entry in $timeline) {
-        $t = [string]$entry.timestamp
-        $e = [string]$entry.event
-        $r = [string]$entry.reference
-        if ([string]::IsNullOrWhiteSpace($t)) { $t = "-" }
-        if ([string]::IsNullOrWhiteSpace($e)) { $e = "-" }
-        if ([string]::IsNullOrWhiteSpace($r)) { $r = "-" }
+        $t = Format-TableCell ([string]$entry.timestamp)
+        $e = Format-TableCell ([string]$entry.event)
+        $r = Format-TableCell ([string]$entry.reference)
         $sectionLines.Add("| $t | $e | $r |")
     }
 }
@@ -288,7 +356,9 @@ if ([string]::IsNullOrWhiteSpace($existingStoryContent)) {
     $newContent = $storyHeader + $sectionBlock + "`n"
 } elseif ($Mode -eq "update" -and $existingStoryContent.Contains($startMarker) -and $existingStoryContent.Contains($endMarker)) {
     $pattern = "(?s)" + [regex]::Escape($startMarker) + ".*?" + [regex]::Escape($endMarker)
-    $newContent = [regex]::Replace($existingStoryContent, $pattern, $sectionBlock, 1)
+    # Use a MatchEvaluator so any '$' in $sectionBlock is treated literally, not as a substitution token.
+    $blockEvaluator = [System.Text.RegularExpressions.MatchEvaluator] { param($m) $sectionBlock }
+    $newContent = [regex]::new($pattern).Replace($existingStoryContent, $blockEvaluator, 1)
     if (-not $newContent.EndsWith("`n")) {
         $newContent += "`n"
     }
@@ -298,13 +368,15 @@ if ([string]::IsNullOrWhiteSpace($existingStoryContent)) {
 }
 
 New-Item -Path ([System.IO.Path]::GetDirectoryName($storyAbsolutePath)) -ItemType Directory -Force | Out-Null
-Set-Content -Path $storyAbsolutePath -Value $newContent -Encoding UTF8
+Assert-NoSymlinkDestination $storyAbsolutePath
+Set-Content -Path $storyAbsolutePath -Value $newContent -Encoding UTF8 -NoNewline
 
 $packetPath = Join-Path $outputAbsoluteDir "story-update-packet.md"
 $issuesPath = Join-Path $outputAbsoluteDir "issue-ready-learnings.md"
 $summaryPath = Join-Path $outputAbsoluteDir "summary.json"
 $memoryPath = Join-Path $outputAbsoluteDir "memory-promotion-suggestions.json"
 
+Assert-NoSymlinkDestination $packetPath
 Set-Content -Path $packetPath -Value $sectionBlock -Encoding UTF8
 
 $issueLines = [System.Collections.Generic.List[string]]::new()
@@ -316,18 +388,18 @@ if ($issueRows.Count -eq 0) {
     $issueLines.Add("| Suggested Issue Title | Context | Action | Learning Key |")
     $issueLines.Add("|---|---|---|---|")
     foreach ($row in $issueRows) {
-        $title = [string]$row.issue_title
-        $context = [string]$row.context
-        $action = [string]$row.action
-        $key = [string]$row.learning_key
-        if ([string]::IsNullOrWhiteSpace($context)) { $context = "-" }
-        if ([string]::IsNullOrWhiteSpace($action)) { $action = "-" }
+        $title = Format-TableCell ([string]$row.issue_title)
+        $context = Format-TableCell ([string]$row.context)
+        $action = Format-TableCell ([string]$row.action)
+        $key = Format-TableCell ([string]$row.learning_key)
         $issueLines.Add("| $title | $context | $action | $key |")
     }
 }
+Assert-NoSymlinkDestination $issuesPath
 Set-Content -Path $issuesPath -Value ($issueLines -join "`n") -Encoding UTF8
 
 if ($IncludeMemorySuggestions) {
+    Assert-NoSymlinkDestination $memoryPath
     @($memoryRows) | ConvertTo-Json -Depth 20 | Set-Content -Path $memoryPath -Encoding UTF8
 }
 
@@ -344,6 +416,7 @@ $summary = [ordered]@{
     generated_at_utc = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
 }
 
+Assert-NoSymlinkDestination $summaryPath
 $summary | ConvertTo-Json -Depth 20 | Set-Content -Path $summaryPath -Encoding UTF8
 
 Write-Host "Chronicle story export complete." -ForegroundColor Green
