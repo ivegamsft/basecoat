@@ -69,6 +69,9 @@ jobs:
                   # Skip placeholder/non-existent API domains
                   if 'api.basecoat.dev' in url:
                       continue
+                  # Skip POST-only OAuth endpoints (valid, but return 404 to a HEAD/GET checker)
+                  if 'github.com/login/oauth/access_token' in url:
+                      continue
                   discovered.setdefault(url, set()).add(str(md))
 
           def check(url: str):

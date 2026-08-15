@@ -141,6 +141,6 @@ jobs:
 
 ## References
 
-- [Azure: Workload identity federation for GitHub Actions](https://learn.microsoft.com/en-us/azure/active-directory/workload-identities/workload-identity-federation-create-trust-github)
+- [Azure: Workload identity federation for GitHub Actions](https://learn.microsoft.com/en-us/entra/workload-id/workload-identity-federation-create-trust?pivots=identity-wif-apps-methods-azp)
 - [GitHub: Configuring OpenID Connect in Azure](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/configuring-openid-connect-in-azure)
 - [azure/login action documentation](https://github.com/Azure/login#login-with-openid-connect-oidc-recommended)
