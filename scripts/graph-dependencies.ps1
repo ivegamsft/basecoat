@@ -277,6 +277,7 @@ if ($ShowOrphans -or (-not $OutputFile)) {
     $orphanSection = [System.Text.StringBuilder]::new()
     $null = $orphanSection.AppendLine()
     $null = $orphanSection.AppendLine("## Orphaned nodes ($($orphans.Count) total — no incoming or outgoing edges)")
+    $null = $orphanSection.AppendLine()
     if ($orphans) {
         foreach ($o in $orphans) {
             $null = $orphanSection.AppendLine("- $o")

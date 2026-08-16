@@ -762,6 +762,13 @@ else {
     if ($dependencyGraphWorkflow -notmatch '''- Source workflow: \.github/workflows/dependency-graph-pages\.yml''') {
         $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (missing parser-safe source workflow metadata line in dependency graph report content)'
     }
+
+    # Regression: stdout must be flattened (joined) before interpolation so the
+    # report never contains the literal string "System.Object[]".
+    if ($dependencyGraphWorkflow -notmatch [regex]::Escape('(pwsh scripts/graph-dependencies.ps1') -or
+        $dependencyGraphWorkflow -notmatch [regex]::Escape(') -join "')) {
+        $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (graph-dependencies.ps1 stdout must be joined with -join before interpolation to prevent System.Object[] in the report)'
+    }
 }
 
 $assetHealthWorkflowPath = Join-Path $workflowDir 'asset-health.yml'

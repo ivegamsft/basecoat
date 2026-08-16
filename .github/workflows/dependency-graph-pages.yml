@@ -34,7 +34,7 @@ jobs:
           $ErrorActionPreference = 'Stop'
 
           New-Item -ItemType Directory -Force -Path docs/reports | Out-Null
-          $graph = pwsh scripts/graph-dependencies.ps1 -ShowOrphans
+          $graph = (pwsh scripts/graph-dependencies.ps1 -ShowOrphans) -join "`n"
           $timestamp = Get-Date -AsUTC -Format 'yyyy-MM-ddTHH:mm:ssZ'
           $content = @(
             '# Dependency Graph',
