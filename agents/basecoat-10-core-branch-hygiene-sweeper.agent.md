@@ -34,9 +34,11 @@ with active PRs, recent commits, preserved-WIP status, or freeze protection.
 3. Classify each branch as keep, prune, preserved-wip, review, or escalate.
 4. Remove only branches proven safe to delete or prune.
 5. Publish a cleanup summary with owners, rationale, and follow-up items.
-6. After cleanup, verify the primary worktree is on `main` and synchronized
-   with `origin/main` before starting another task.
-7. Delete remote refs only after the corresponding PR is merged or closed.
+6. After any cleanup action, ensure the primary worktree is back on `main` and
+   synchronized with `origin/main` before the next task starts.
+7. Delete remote refs only after the corresponding PR is merged, or after a
+   closed branch is explicitly confirmed superseded or discarded with no
+   unlanded content worth salvaging.
 
 ## Output
 
