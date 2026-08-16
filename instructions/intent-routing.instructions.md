@@ -393,6 +393,13 @@ removal.
 | `wave` | `wave:` | `@sprint-planner`, `@parallel-session-coordinator` |
 | `burn the backlog` / `work the backlog` / `backlog autopilot` / `continuous delivery loop` | `autopilot:` | `@backlog-autopilot`, `@ship-it-control-loop`, `@delivery-autopilot` |
 
+`stacked PR` / `stacked pull request` / `branch stack` routes to `wave:` with
+`@sprint-planner`, `@parallel-session-coordinator`, and the
+`@ship-it-control-loop` agent. Treat the stack as an ordered wave: create
+layers oldest-to-newest, merge bottom-up, and refresh only when a lower layer
+changes. Use the CLI-only `ship-it-control-loop` skill only when the active
+platform is compatible with that skill.
+
 Burn-down and wave execution include open PRs, not just issues. Decomposition
 hierarchy: **sprint -> wave -> issue -> task**.
 

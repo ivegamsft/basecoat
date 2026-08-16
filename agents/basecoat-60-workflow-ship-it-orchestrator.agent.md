@@ -37,9 +37,13 @@ plan, implement, validate, release, and close out with learnings.
 2. Create or update implementation branches and PRs.
 3. Run required validation workflows and enforce gate outcomes.
 4. Handle build breaks with explicit RCA + fix-forward actions.
-5. Invoke `lane-closeout` for every in-scope branch/worktree. Let the skill
-   capture and publish WIP, classify `MERGED`, `HANDED_OFF`, `ABANDONED`, or
-   `PARKED`, and prune only authorized terminal lanes after all gates pass.
+5. Invoke `lane-closeout` for every in-scope branch/worktree. For upper layers
+   in a stacked PR chain, capture WIP and use the supported `HANDED_OFF` or
+   `PARKED` outcome without terminal merge/rebase; use full closeout for
+   terminal integration and finalization lanes. Merge bottom-up and refresh
+   the stack only when a lower layer changes. Let the skill classify `MERGED`,
+   `HANDED_OFF`, `ABANDONED`, or `PARKED`, and prune only authorized terminal
+   lanes after all gates pass.
 6. Capture rollout notes, docs changes, and post-implementation learnings.
 
 ## Control-Loop Contract
