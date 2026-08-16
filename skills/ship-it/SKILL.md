@@ -29,7 +29,7 @@ Turn a delivery goal into a governed execution bundle.
 4. `spec_ref` (optional): PRD/spec reference
 5. `risk_band`: `low|medium|high|critical`
 6. `profile` (optional, onboarding-conductor): `solo-dev|team-dev|regulated-team|pilot-luxesite`
-7. `dry_run` (bool), `max_cycles`/`max_retries` (optional caps)
+7. `dry_run` (default `true`); `max_cycles` (default `10`); `max_retries` (default `2`)
 
 ## Workflow
 
