@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "4.1.0",
-  "releaseDate": "2026-08-10",
-  "notes": "Release: adds continuous backlog autopilot, a generated prompt library, capability-aware model routing, reliable downstream refresh flows, and an adapter-free MCP dependency graph"
+  "version": "4.2.0",
+  "releaseDate": "2026-08-16",
+  "notes": "Release: adds a local dev data-pack skill with orchestrator lifecycle, a guarded downstream consumer updater, and safe lane-closeout automation; hardens CI action pinning, corporate-proxy integrity, and credential-exposure closeout; and repairs docs links, metrics inputs, and version-drift contracts."
 }

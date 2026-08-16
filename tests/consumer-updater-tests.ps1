@@ -322,13 +322,13 @@ New-Item -ItemType Directory -Path $scratch -Force | Out-Null
 try {
     Push-Location $repoRoot
     & $scriptPath -PlanOnly -StagePath . `
-        -ReleaseJson '{"tag":"v4.1.1","sha":"0123456789abcdef0123456789abcdef01234567","url":"https://example.test/releases/v4.1.1","published_at":"2026-08-09T00:00:00Z"}' `
+        -ReleaseJson '{"tag":"v4.2.1","sha":"0123456789abcdef0123456789abcdef01234567","url":"https://example.test/releases/v4.2.1","published_at":"2026-08-09T00:00:00Z"}' `
         -StatusPath 'test-results/consumer-updater-tests/status.json' | Out-Null
     Pop-Location
 
     $plan = Get-Content -LiteralPath (Join-Path $scratch 'status.json') -Raw | ConvertFrom-Json
-    Assert-Equal $plan.current_version '4.1.0' 'Plan must read the installed version.'
-    Assert-Equal $plan.target_version '4.1.1' 'Plan must resolve patch target.'
+    Assert-Equal $plan.current_version '4.2.0' 'Plan must read the installed version.'
+    Assert-Equal $plan.target_version '4.2.1' 'Plan must resolve patch target.'
     Assert-Equal $plan.bump 'patch' 'Plan must classify patch drift.'
     Assert-Equal $plan.mode 'notify' 'Plan must retain safe default mode.'
     Assert-Equal $plan.approval 'required' 'Plan must retain safe default approval.'

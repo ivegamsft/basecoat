@@ -4,6 +4,35 @@ All notable changes to this repository should be recorded in this file.
 
 ## Unreleased
 
+## 4.2.0 - 2026-08-16
+
+### Added
+
+- Added a local development data-pack skill with orchestrator lifecycle management for spinning up and tearing down dev data. (#2756)
+- Added a guarded downstream consumer updater so consuming repositories can be refreshed safely with validation and rollback. (#2796)
+- Added safe lane-closeout automation to standardize post-merge lane cleanup. (#2744)
+
+### Changed
+
+- Added dependent PR stack routing rules so stacked pull requests are routed and sequenced correctly. (#2823)
+- Enforced immutable, SHA-pinned workflow Actions across CI to prevent tag mutation. (#2790)
+- Added an enforceable solo-developer profile for single-maintainer governance. (#2772)
+- Enforced corporate-proxy lock integrity during builds. (#2764)
+- Unblocked solo-maintainer approvals so single-maintainer repositories can satisfy approval policy. (#2810)
+- Modeled public deployment runner capabilities in CI. (#2742)
+
+### Fixed
+
+- Repaired broken documentation links flagged by the link-checker report. (#2671)
+- Verified npm proxy tarballs against trusted metadata with a fallback path. (#2822)
+- Normalized dashboard repository inputs for metrics reporting. (#2821)
+- Added a lane-closeout hook profile to the onboarding flow. (#2819)
+- Hardened credential-exposure closeout handling. (#2740)
+- Accepted `source_repo` in the version-drift callable contract. (#2815)
+- Switched automation to short-lived Copilot workflow authentication. (#2795)
+- Closed post-merge correctness gaps in lane closeout. (#2803)
+- Addressed PR #2636 code-review follow-ups: regex-injection, table-cell encoding, and symlink-safe write hardening in the chronicle export script, plus agent frontmatter and control-loop default alignment. (#2641)
+
 ## 4.1.0 - 2026-08-10
 
 ### Added
