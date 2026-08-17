@@ -96,6 +96,7 @@ nav:
     - Governance Landing: GOVERNANCE.md
     - Governance: reference/governance.md
   - How-To Guides:
+    - Downstream Prompt Catalog: guides/downstream-prompt-catalog.md
     - Intent Prefixes: guides/intent-prefixes.md
     - Get Started (integrate prompt): guides/integrate-prompt.md
     - Make It Your Own: guides/customization.md
