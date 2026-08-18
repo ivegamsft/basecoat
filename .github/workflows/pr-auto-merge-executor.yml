@@ -1084,6 +1084,8 @@ jobs:
             }
 
             const eligible = blockers.length === 0;
+            const waitingForAutomatedReview =
+              !automatedReviewSatisfied && blockers.length === 1;
             const acknowledgementSummary = requiresMaintainerAcknowledgement
               ? (
                   maintainerAcknowledgement.satisfied
@@ -1119,7 +1121,7 @@ jobs:
                   `${marker}`,
                   '## PR auto-merge executor status',
                   '',
-                  `- Status: **blocked**`,
+                  `- Status: **${waitingForAutomatedReview ? 'waiting' : 'blocked'}**`,
                   `- Policy pack: \`${selectedPack}\``,
                   `- Risk tier: \`${riskTier}\``,
                   `- Required approvals: \`${requiredApprovals}\``,
@@ -1159,13 +1161,16 @@ jobs:
             core.setOutput('eligible', eligible ? 'true' : 'false');
             core.setOutput('pr_number', String(prNumber));
             core.setOutput('merge_queue_posture', mergeQueuePosture);
+            const shouldFailEligibility = !eligible && !waitingForAutomatedReview;
             await publishEligibilityStatus(
-              eligible ? 'success' : 'failure',
+              eligible ? 'success' : waitingForAutomatedReview ? 'pending' : 'failure',
               eligible
                 ? `Eligible under ${selectedPack}/${riskTier}.`
-                : `Blocked by ${blockers.length} BaseCoat policy condition(s).`
+                : waitingForAutomatedReview
+                  ? 'Waiting for the required automated review on the current head.'
+                  : `Blocked by ${blockers.length} BaseCoat policy condition(s).`
             );
-            if (!eligible) {
+            if (shouldFailEligibility) {
               core.setFailed(`Merge eligibility gate blocked: ${blockers.join(' | ')}`);
             }
             } catch (error) {
