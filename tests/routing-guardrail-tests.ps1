@@ -334,7 +334,7 @@ else {
 }
 
 # Test 17: new design/sprint/wave prefixes present in canonical, alias, and guide
-Write-Host '  Test 17: Validate ui:, ux:, ia:, sprint:, wave: map to expected route targets...'
+Write-Host '  Test 17: Validate ui:, ux:, ia:, design:, sprint:, wave: map to expected route targets...'
 $canonicalFile = Join-Path $repoRoot 'instructions\basecoat-10-core-intent-routing.instructions.md'
 $newPrefixTargets = @{
     'canonical (basecoat-10-core-intent-routing)' = $canonicalFile
@@ -353,6 +353,7 @@ foreach ($label in $newPrefixTargets.Keys) {
         'ui:'     = '@frontend-dev'
         'ux:'     = '@ux-designer'
         'ia:'     = '@tech-writer'
+        'design:' = 'basecoat-sheen'
         'sprint:' = '@sprint-closeout-auditor'
         'wave:'   = '@parallel-session-coordinator'
     }
@@ -367,7 +368,7 @@ foreach ($label in $newPrefixTargets.Keys) {
         Write-Host "    FAIL $label missing route targets: $($missing -join ', ')" -ForegroundColor Red
     }
     else {
-        Write-Host "    PASS $label binds ui:/ux:/ia:/sprint:/wave: to distinct route targets"
+        Write-Host "    PASS $label binds ui:/ux:/ia:/design:/sprint:/wave: to distinct route targets"
     }
 }
 

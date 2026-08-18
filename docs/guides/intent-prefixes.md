@@ -40,9 +40,10 @@ release, version drift) to reduce routing ambiguity.
 | `chronicle:` | Export session/worktree learnings into durable story updates and issue-ready follow-up packets | **Soon** | `@memory-promoter`, `@tech-writer` |
 | `test:` | Test coverage gap or test failure | **Now** | `@manual-test-strategy` |
 | `refactor:` | Structural improvement, no behavior change | **Later, batch** | `@code-review` |
-| `ui:` | User interface: components, layout, visual and interaction implementation | **Soon** | `@frontend-dev`, `@ux-designer` |
-| `ux:` | User experience: flows, usability, journeys, interaction design | **Soon** | `@ux-designer`, `@frontend-dev` |
-| `ia:` | Information architecture: content structure, navigation, taxonomy, sitemap | **Soon** | `@ux-designer`, `@tech-writer` |
+| `ui:` | User interface: components, layout, visual and interaction implementation | **Soon** | `@frontend-dev`, `@ux-designer`; conditional sheen delegate for governance/audit |
+| `ux:` | User experience: flows, usability, journeys, interaction design | **Soon** | `@ux-designer`, `@frontend-dev`; conditional sheen delegate for governance/audit |
+| `ia:` | Information architecture: content structure, navigation, taxonomy, sitemap | **Soon** | `@ux-designer`, `@tech-writer`; conditional sheen delegate for governance/audit |
+| `design:` | AI-assisted UX/UI governance, design system, component audit, or finish-coat work | **Soon** | Downstream `basecoat-sheen` catalog |
 | `sprint:` | Sprint planning, execution, or closeout | **Now** | `@sprint-planner`, `@sprint-closeout-auditor` |
 | `wave:` | Dependency-ordered batch within a sprint (issues and PRs) | **Now** | `@sprint-planner`, `@parallel-session-coordinator` |
 | `autopilot:` | Continuous oldest-to-newest backlog burndown in dependency-ordered waves, unattended until stopped or blocked | **Now** | `@backlog-autopilot`, `@parallel-session-coordinator`, `@ship-it-control-loop`, `@delivery-autopilot` |
@@ -63,7 +64,7 @@ for selecting chain patterns.
 | Planning | `plan:`, `spike:`, `sprint:`, `wave:` | prioritized backlog, design notes, decision doc |
 | Continuous delivery | `autopilot:` | unattended multi-wave backlog burndown with merge-queue landing and deploy |
 | Packetization | `optimize:` | normalized execution packet and optional execution chain |
-| Quality | `test:`, `docs:`, `ui:`, `ux:`, `ia:` | tests, documentation, or design artifacts |
+| Quality | `test:`, `docs:`, `ui:`, `ux:`, `ia:`, `design:` | tests, documentation, or design artifacts |
 | Knowledge capture | `chronicle:` | story/update packet, follow-up issue bundle, optional memory suggestions |
 | Infrastructure | `azure:`, `infra:`, `deploy:` | preflight advisory, IaC changes, staged deployment |
 
@@ -286,12 +287,15 @@ interpretation.
 ### Design terms: UI vs UX vs IA
 
 `ui`, `ux`, and `ia` are distinct disciplines and must not collapse to one route.
+Governance and audit requests may use the downstream `basecoat-sheen` delegate;
+direct implementation remains with the local routes.
 
 | Term | Discipline | Normalized intent | Routes to |
 |---|---|---|---|
-| `ui` | User interface — components, layout, visual and interaction implementation | `ui:` | `@frontend-dev`, `@ux-designer` |
-| `ux` | User experience — flows, usability, journeys, interaction design | `ux:` | `@ux-designer`, `@frontend-dev` |
-| `ia` | Information architecture — content structure, navigation, taxonomy, sitemap | `ia:` | `@ux-designer`, `@tech-writer` |
+| `ui` | User interface — components, layout, visual and interaction implementation | `ui:` | `@frontend-dev`, `@ux-designer`; conditional downstream governance/audit delegate |
+| `ux` | User experience — flows, usability, journeys, interaction design | `ux:` | `@ux-designer`, `@frontend-dev`; conditional downstream governance/audit delegate |
+| `ia` | Information architecture — content structure, navigation, taxonomy, sitemap | `ia:` | `@ux-designer`, `@tech-writer`; conditional downstream governance/audit delegate |
+| `design` | AI-assisted UX/UI governance, design system, or finish-coat work | `design:` | Downstream `basecoat-sheen` catalog; discover a published entry point |
 
 ### Error and failure: route on the subject noun
 

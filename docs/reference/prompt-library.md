@@ -2,7 +2,7 @@
 
 Generated from the canonical intent vocabulary and asset frontmatter. Do not edit the generated tables directly; run `pwsh scripts/generate-prompt-library.ps1`.
 
-Coverage: 33 intents, 133 skills, and 130 agents.
+Coverage: 34 intents, 133 skills, and 130 agents.
 
 ## Lifecycle prompts
 
@@ -93,6 +93,7 @@ Next action: approve the exact removal list
 | `ui:` | <code>ui: User interface: components, layout, visual and interaction implementation in this repository. Include scope, evidence, and the next safe action.</code> |
 | `ux:` | <code>ux: User experience: user flows, usability, journeys, interaction design in this repository. Include scope, evidence, and the next safe action.</code> |
 | `ia:` | <code>ia: Information architecture: content structure, navigation, taxonomy, sitemap in this repository. Include scope, evidence, and the next safe action.</code> |
+| `design:` | <code>design: AI-assisted UX/UI governance, design system, component audit, or finish-coat work in this repository. Include scope, evidence, and the next safe action.</code> |
 | `sprint:` | <code>sprint: Sprint planning, execution, or closeout in this repository. Include scope, evidence, and the next safe action.</code> |
 | `wave:` | <code>wave: Dependency-ordered batch within a sprint (issues and PRs) in this repository. Include scope, evidence, and the next safe action.</code> |
 | `autopilot:` | <code>autopilot: Continuous oldest-to-newest backlog burndown in dependency-ordered waves, unattended until stopped or blocked in this repository. Include scope, evidence, and the next safe action.</code> |

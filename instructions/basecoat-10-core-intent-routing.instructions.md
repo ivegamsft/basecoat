@@ -57,9 +57,10 @@ Rules:
 | `version:` | BaseCoat version inspection and drift check | Now | `@release-manager`, `@devops-engineer` |
 | `test:` | Test coverage gap or test failure | Now | `@manual-test-strategy`, `@strategy-to-automation` |
 | `refactor:` | Structural improvement, no behavior change | Later | `@code-review`, `@performance-analyst` |
-| `ui:` | User interface: components, layout, visual and interaction implementation | Soon | `@frontend-dev`, `@ux-designer` |
-| `ux:` | User experience: user flows, usability, journeys, interaction design | Soon | `@ux-designer`, `@frontend-dev` |
-| `ia:` | Information architecture: content structure, navigation, taxonomy, sitemap | Soon | `@ux-designer`, `@tech-writer` |
+| `ui:` | User interface: components, layout, visual and interaction implementation | Soon | `@frontend-dev`, `@ux-designer`; conditional sheen delegate for governance/audit |
+| `ux:` | User experience: user flows, usability, journeys, interaction design | Soon | `@ux-designer`, `@frontend-dev`; conditional sheen delegate for governance/audit |
+| `ia:` | Information architecture: content structure, navigation, taxonomy, sitemap | Soon | `@ux-designer`, `@tech-writer`; conditional sheen delegate for governance/audit |
+| `design:` | AI-assisted UX/UI governance, design system, component audit, or finish-coat work | Soon | Delegate to the `IBuySpy-Shared/basecoat-sheen` catalog and discover its published entry point |
 | `sprint:` | Sprint planning, execution, or closeout | Now | `@sprint-planner`, `@sprint-closeout-auditor` |
 | `wave:` | Dependency-ordered batch within a sprint (issues and PRs) | Now | `@sprint-planner`, `@parallel-session-coordinator` |
 | `autopilot:` | Continuous oldest-to-newest backlog burndown in dependency-ordered waves, unattended until stopped or blocked | Now | `@backlog-autopilot`, `@parallel-session-coordinator`, `@ship-it-control-loop`, `@delivery-autopilot` |
@@ -317,12 +318,32 @@ interpretation.
 ### Design terms (UI vs UX vs IA)
 
 `ui`, `ux`, and `ia` are distinct disciplines and must not collapse to one route.
+All three may delegate to `IBuySpy-Shared/basecoat-sheen` for AI-assisted UX/UI
+governance, design-system auditing, and finish-coat work. This delegation is
+conditional: direct implementation remains with the local frontend/UX route,
+while governance and audit requests may use the downstream delegate.
 
 | Term | Discipline | Normalized intent | Route to |
 |---|---|---|---|
-| `ui` | User interface — components, layout, visual and interaction implementation | `ui:` | `@frontend-dev`, `@ux-designer` |
-| `ux` | User experience — flows, usability, journeys, interaction design | `ux:` | `@ux-designer`, `@frontend-dev` |
-| `ia` | Information architecture — content structure, navigation, taxonomy, sitemap | `ia:` | `@ux-designer`, `@tech-writer` |
+| `ui` | User interface — components, layout, visual and interaction implementation | `ui:` | `@frontend-dev`, `@ux-designer`; conditional sheen delegate for governance/audit |
+| `ux` | User experience — flows, usability, journeys, interaction design | `ux:` | `@ux-designer`, `@frontend-dev`; conditional sheen delegate for governance/audit |
+| `ia` | Information architecture — content structure, navigation, taxonomy, sitemap | `ia:` | `@ux-designer`, `@tech-writer`; conditional sheen delegate for governance/audit |
+| `design` / `finish-coat` / `sheen` | AI-assisted UX/UI governance, design system, or finish-coat work | `design:` | Delegate to the downstream `basecoat-sheen` catalog |
+
+## Downstream Delegate: basecoat-sheen
+
+`IBuySpy-Shared/basecoat-sheen` is the finish-coat layer of BaseCoat, providing
+AI-assisted UX/UI governance skills.
+
+Delegate routing contract:
+
+1. When a `ui:`, `ux:`, `ia:`, or `design:` request is primarily about
+   governance, auditing, or design-system enforcement, route to `basecoat-sheen`.
+2. When the request is a direct implementation task (write the React component,
+   fix the CSS), route to `@frontend-dev` as primary, with sheen for review.
+3. Verify the downstream repository's current catalog and entry point before
+   delegating; BaseCoat does not assume skill names or contracts in that repo.
+4. Public catalog: [basecoat-sheen](https://github.com/ivegamsft/sheen)
 
 ### Error and failure terms (noun-keyed)
 
