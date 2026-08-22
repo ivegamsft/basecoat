@@ -36,18 +36,24 @@ if ($workflow -match 'v0\.3\.6') {
 if ($workflow -match '8c7d04ebf1ece56cd381446125da3e0f6896294a' -or $workflow -match 'b8068426813005612b960b5ab0b8bd2c27142323') {
     throw 'issue-triage lock must not retain stale gh-aw-actions/setup SHAs.'
 }
+if ($workflow -match '/usr/local/bin/copilot') {
+    throw 'issue-triage lock must not invoke /usr/local/bin/copilot directly.'
+}
 
-if ($workflow -notmatch 'compiler_version":"v0\.85\.4"') {
-    throw 'issue-triage lock must align compiler_version to v0.85.4.'
+if ($workflow -notmatch 'compiler_version":"v0\.86\.2"') {
+    throw 'issue-triage lock must align compiler_version to v0.86.2.'
 }
-if ($workflow -notmatch 'github/gh-aw-actions/setup@2709137ea6c5b0e19aa621454dc643ea8dc526b1') {
-    throw 'issue-triage lock must align setup action SHA to gh-aw v0.85.4.'
+if ($workflow -notmatch 'github/gh-aw-actions/setup@6aab9e5b5c91c615506061f09bedd81a23babe3c') {
+    throw 'issue-triage lock must align setup action SHA to gh-aw v0.86.2.'
 }
-if ($workflow -notmatch 'GH_AW_INFO_CLI_VERSION: "v0\.85\.4"') {
-    throw 'issue-triage lock must align GH_AW_INFO_CLI_VERSION to v0.85.4.'
+if ($workflow -notmatch 'GH_AW_INFO_CLI_VERSION: "v0\.86\.2"') {
+    throw 'issue-triage lock must align GH_AW_INFO_CLI_VERSION to v0.86.2.'
 }
-if ($workflow -notmatch 'ghcr\.io/github/gh-aw-mcpg:v0\.4\.8@sha256:38bbea36cdb46a3c9d04d1db05e672966f5239b431a2022eb35881688e5721d8') {
-    throw 'issue-triage lock must pin gh-aw-mcpg v0.4.8 to its compiled digest.'
+if ($workflow -notmatch 'ghcr\.io/github/gh-aw-mcpg:v0\.4\.9@sha256:e5a1569aeaf41820fa7bdee3e94468cae448133cdbf00119ad24f5b74db1ab9f') {
+    throw 'issue-triage lock must pin gh-aw-mcpg v0.4.9 to its compiled digest.'
+}
+if ($workflow -notmatch '"\$\{RUNNER_TEMP\}/gh-aw/actions/copilot_harness\.cjs"\s*"\$\{RUNNER_TEMP\}/gh-aw/bin/copilot"') {
+    throw 'issue-triage lock must invoke the harness with the staged ${RUNNER_TEMP}/gh-aw/bin/copilot binary.'
 }
 $copilotPermissionPattern = '(?m)^\s*copilot-requests:\s*write\s*$'
 $copilotPermissionCount = [regex]::Matches($workflow, $copilotPermissionPattern).Count
