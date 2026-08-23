@@ -1,6 +1,6 @@
 # Asset Catalog
 
-Complete reference of BaseCoat assets grouped by category. Counts reflect the current repository state (**116 agents**, **115 skills**, **91 instructions**, **10 prompts**).
+Complete reference of BaseCoat assets grouped by category. Counts reflect the current repository state (**130 agents**, **133 skills**, **91 instructions**, **6 prompts**).
 
 ## Agents
 

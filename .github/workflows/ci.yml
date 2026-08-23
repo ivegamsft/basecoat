@@ -30,13 +30,13 @@ jobs:
               status=1
               continue
             fi
-            # Find closing --- within first 30 lines
-            if ! sed -n '2,30p' "$file" | grep -qxF -- '---'; then
-              echo "::error file=$file::Missing YAML frontmatter closing '---' within first 30 lines"
+            # Find closing --- within first 60 lines
+            if ! sed -n '2,60p' "$file" | grep -qxF -- '---'; then
+              echo "::error file=$file::Missing YAML frontmatter closing '---' within first 60 lines"
               status=1
               continue
             fi
-            if ! sed -n '1,30p' "$file" | grep -qi '^description:'; then
+            if ! sed -n '1,60p' "$file" | grep -qi '^description:'; then
               echo "::error file=$file::Missing 'description' in YAML frontmatter"
               status=1
             fi

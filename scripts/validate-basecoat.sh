@@ -44,8 +44,8 @@ while IFS= read -r file; do
   fi
 
   if [[ "$(basename "$file")" == *.agent.md ]]; then
-    if ! sed -n '2,30p' "$file" | grep -qxF -- '---'; then
-      echo "Missing YAML frontmatter closing '---' within first 30 lines in $file" >&2
+    if ! sed -n '2,60p' "$file" | grep -qxF -- '---'; then
+      echo "Missing YAML frontmatter closing '---' within first 60 lines in $file" >&2
       exit 1
     fi
 

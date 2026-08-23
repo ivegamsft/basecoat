@@ -42,12 +42,33 @@ $tierByAgent = @{
     "secrets-manager" = "balanced"; "security-analyst" = "reasoning"; "security-monitor" = "balanced"; "security-operations" = "balanced"
     "self-healing-ci" = "fast"; "solution-architect" = "reasoning"; "sprint-planner" = "balanced"; "sprint-retrospective" = "balanced"
     "sre-engineer" = "balanced"; "strategy-to-automation" = "reasoning"; "supply-chain-security" = "reasoning"; "tech-writer" = "balanced"
-    "ux-designer" = "balanced"
+    "ux-designer" = "balanced"; "agentic-sdlc-autonomy" = "reasoning"; "dependabot-prioritizer" = "fast"
+    "instruction-auditor" = "fast"; "project-rules-drift-auditor" = "reasoning"; "backlog-autopilot" = "balanced"
+    "ci-guardrail-accelerator" = "fast"; "incident-to-backlog-router" = "balanced"; "parallel-session-coordinator" = "balanced"
+    "orchestrator" = "fast"; "basecoat-10-core-orchestrator" = "balanced"
+}
+
+# Agents that require a specific model not covered by tier defaults.
+# Values are resolved through Resolve-FrontmatterModel (aliases apply).
+$exactModelByAgent = @{
+    "parallel-session-coordinator" = "claude-sonnet-4.6"
+    "basecoat-10-core-orchestrator" = "claude-sonnet-4.6"
 }
 
 function Get-AgentNameFromFile {
-    param([string]$FileName)
+    param(
+        [string]$FileName,
+        [hashtable]$TierByAgent
+    )
     $base = $FileName -replace '\.agent\.md$', ''
+
+    # If the un-stripped filename is itself a recognized key, prefer it. This avoids
+    # collisions such as "basecoat-10-core-orchestrator" and "orchestrator" both
+    # collapsing to the same stripped name "orchestrator" and sharing one tier/model.
+    if ($TierByAgent -and $TierByAgent.ContainsKey($base)) {
+        return $base
+    }
+
     return ($base -replace '^basecoat-\d+-[^-]+-', '')
 }
 
@@ -88,7 +109,7 @@ $updated = 0
 $skipped = 0
 
 Get-ChildItem -Path $AgentsPath -Filter "*.agent.md" -File | Sort-Object Name | ForEach-Object {
-    $agentName = Get-AgentNameFromFile -FileName $_.Name
+    $agentName = Get-AgentNameFromFile -FileName $_.Name -TierByAgent $tierByAgent
     if (-not $tierByAgent.ContainsKey($agentName)) {
         $skipped++
         Write-Warning "Skipping $($_.Name): no tier mapping for '$agentName'"
@@ -96,7 +117,11 @@ Get-ChildItem -Path $AgentsPath -Filter "*.agent.md" -File | Sort-Object Name | 
     }
 
     $tier = $tierByAgent[$agentName]
-    $resolved = Resolve-FrontmatterModel -RequestedModel (Get-TierDefaultFrontmatterModel -Tier $tier) -Tier $tier -Context $agentName
+    if ($exactModelByAgent.ContainsKey($agentName)) {
+        $resolved = Resolve-FrontmatterModel -RequestedModel $exactModelByAgent[$agentName] -Tier $tier -Context $agentName
+    } else {
+        $resolved = Resolve-FrontmatterModel -RequestedModel (Get-TierDefaultFrontmatterModel -Tier $tier) -Tier $tier -Context $agentName
+    }
     $targetModel = $resolved.Model
     if ($resolved.Substituted) {
         Write-Warning "[$agentName] $($resolved.Reason): '$($resolved.Requested)' -> '$targetModel'"

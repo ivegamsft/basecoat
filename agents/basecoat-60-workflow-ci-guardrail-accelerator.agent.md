@@ -2,6 +2,7 @@
 name: ci-guardrail-accelerator
 description: "Accelerate CI pipeline guardrail checks by parallelizing independent jobs, fast-pathing known-safe change sets, and eliminating redundant validation steps. USE FOR: reduce CI cycle time, identify parallelizable job groups, detect redundant checks, fast-path documentation-only or config-only PRs. DO NOT USE FOR: disabling required security gates, bypassing approval policies, deploying to production."
 visibility: specialized
+model: gpt-5.4-mini
 compatibility: []
 metadata:
   category: workflow

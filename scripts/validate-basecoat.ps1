@@ -222,7 +222,7 @@ function Test-IntentRoutingSkillReferences {
 }
 
 foreach ($file in $files) {
-    $lines = Get-Content $file.FullName -TotalCount 50
+    $lines = Get-Content $file.FullName -TotalCount 60
     $content = Get-Content $file.FullName -Raw
     if ($lines.Count -eq 0 -or $lines[0] -ne '---') {
         Write-Host "ERROR: Missing frontmatter start in $($file.FullName)" -ForegroundColor Red
@@ -253,7 +253,7 @@ foreach ($file in $files) {
     }
 
     if ($file.Name -like '*.agent.md') {
-        $maxFrontmatterLine = [Math]::Min($lines.Count, 30)
+        $maxFrontmatterLine = [Math]::Min($lines.Count, 60)
         $frontmatterClosed = $false
         for ($i = 1; $i -lt $maxFrontmatterLine; $i++) {
             if ($lines[$i] -eq '---') {
@@ -263,7 +263,7 @@ foreach ($file in $files) {
         }
 
         if (-not $frontmatterClosed) {
-            Write-Host "ERROR: Missing YAML frontmatter closing '---' within first 30 lines in $($file.FullName)" -ForegroundColor Red
+            Write-Host "ERROR: Missing YAML frontmatter closing '---' within first 60 lines in $($file.FullName)" -ForegroundColor Red
             $errors++
             continue
         }

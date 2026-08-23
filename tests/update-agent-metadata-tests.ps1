@@ -54,6 +54,39 @@ model: claude-sonnet-4.6
         throw 'Expected the tier updater to apply the shared reasoning policy'
     }
 
+    @'
+---
+name: orchestrator
+description: test fixture
+visibility: basic
+model: gpt-5.4-mini
+---
+'@ | Set-Content -Path (Join-Path $agentsDir 'orchestrator.agent.md') -Encoding UTF8
+
+    @'
+---
+name: basecoat-10-core-orchestrator
+description: test fixture
+visibility: basic
+model: claude-sonnet-4.6
+---
+'@ | Set-Content -Path (Join-Path $agentsDir 'basecoat-10-core-orchestrator.agent.md') -Encoding UTF8
+
+    & pwsh -NoProfile -File $scriptPath -AgentsPath $agentsDir
+    if ($LASTEXITCODE -ne 0) {
+        throw 'update-agent-metadata.ps1 exited with non-zero status (orchestrator collision fixture)'
+    }
+
+    $orchestrator = Get-Content -Path (Join-Path $agentsDir 'orchestrator.agent.md') -Raw
+    if ($orchestrator -notmatch '(?m)^model:\s*gpt-5.4-mini\s*$') {
+        throw 'Expected orchestrator.agent.md to keep the fast-tier default gpt-5.4-mini'
+    }
+
+    $coreOrchestrator = Get-Content -Path (Join-Path $agentsDir 'basecoat-10-core-orchestrator.agent.md') -Raw
+    if ($coreOrchestrator -notmatch '(?m)^model:\s*claude-sonnet-4.6\s*$') {
+        throw 'Expected basecoat-10-core-orchestrator.agent.md to preserve its claude-sonnet-4.6 exact-model override and not collapse into the generic "orchestrator" fast-tier key'
+    }
+
     Write-Host 'Update agent metadata tests passed'
 }
 finally {

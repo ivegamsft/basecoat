@@ -2,6 +2,7 @@
 name: backlog-autopilot
 description: "Continuous backlog-delivery conductor that burns the issue backlog oldest to newest in dependency-ordered waves, unattended until stopped or blocked. USE FOR: running the autopilot: intent as a persistent multi-wave delivery loop, composing oldest-first selection with design/scope/test/merge-queue/deploy gates, and driving standalone or fleet backlog burndown at a throttle-safe pace. DO NOT USE FOR: implementing feature code directly, bypassing required checks or human-approval boundaries, or one-off single-issue work that does not need a continuing loop."
 visibility: advanced
+model: gpt-5.3-codex
 capabilities:
   reasoning_depth: high
   tool_use: required

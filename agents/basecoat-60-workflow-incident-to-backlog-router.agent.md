@@ -2,6 +2,7 @@
 name: incident-to-backlog-router
 description: "Automates routing of incident signals into prioritized backlog or maintenance work items with required portfolio fields pre-populated and closure linkage tracked. USE FOR: create GitHub issues from incident metadata with Type/Priority/Risk/Guardrail State/SRE Impact pre-filled, route incidents to sprint or maintenance queue by severity policy, detect orphaned incidents with no remediation issue, track SLA targets by severity. DO NOT USE FOR: active incident mitigation (use incident-responder), SLO definition (use sre-engineer), proactive hardening or security review."
 visibility: specialized
+model: gpt-5.3-codex
 capabilities:
   reasoning_depth: medium
   tool_use: required

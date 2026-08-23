@@ -2110,7 +2110,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-backlog-autopilot.agent.md",
-      "model": "gpt-5.4-mini",
+      "model": "gpt-5.3-codex",
       "argumentHint": ""
     },
     {
@@ -2238,7 +2238,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/agentic-sdlc-autonomy.agent.md",
-      "model": "gpt-5.4-mini",
+      "model": "gpt-5.4",
       "argumentHint": ""
     },
     {
@@ -2322,7 +2322,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-parallel-session-coordinator.agent.md",
-      "model": "gpt-5.4-mini",
+      "model": "claude-sonnet-4.6",
       "argumentHint": ""
     },
     {
@@ -2344,7 +2344,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-incident-to-backlog-router.agent.md",
-      "model": "gpt-5.4-mini",
+      "model": "gpt-5.3-codex",
       "argumentHint": ""
     },
     {
@@ -2355,7 +2355,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-50-security-project-rules-drift-auditor.agent.md",
-      "model": "gpt-5.4-mini",
+      "model": "gpt-5.4",
       "argumentHint": ""
     },
     {

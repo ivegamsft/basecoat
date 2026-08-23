@@ -2,6 +2,7 @@
 name: dependabot-prioritizer
 description: "Triage and prioritize open Dependabot PR queues by CVE severity, semver risk, ecosystem impact, and blocking dependency chains. USE FOR: rank Dependabot PRs for merge order, identify security-blocking updates, group safe batch merges, surface dependency chain blockers. DO NOT USE FOR: creating Dependabot config, general code review, implementing upgrade changes."
 visibility: specialized
+model: gpt-5.4-mini
 compatibility: []
 metadata:
   category: core

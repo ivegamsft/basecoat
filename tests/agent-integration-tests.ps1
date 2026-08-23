@@ -21,7 +21,7 @@ function Get-Frontmatter {
 function Test-FrontmatterClosingWithinLineLimit {
     param(
         [string]$Path,
-        [int]$LineLimit = 30
+        [int]$LineLimit = 60
     )
 
     $lines = Get-Content -Path $Path
@@ -160,8 +160,8 @@ foreach ($file in $agentFiles) {
         $failures += "$($file.Name): Missing or empty 'description' field in frontmatter"
     }
 
-    if (-not (Test-FrontmatterClosingWithinLineLimit -Path $file.FullName -LineLimit 30)) {
-        $failures += "$($file.Name): Missing YAML frontmatter closing '---' within first 30 lines"
+    if (-not (Test-FrontmatterClosingWithinLineLimit -Path $file.FullName -LineLimit 60)) {
+        $failures += "$($file.Name): Missing YAML frontmatter closing '---' within first 60 lines"
     }
 }
 

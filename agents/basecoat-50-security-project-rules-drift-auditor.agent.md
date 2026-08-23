@@ -2,6 +2,7 @@
 name: project-rules-drift-auditor
 description: "Detects drift between live GitHub Project automation rules and the canonical AIDL guardrail baseline. USE FOR: scheduled drift audits of project automation rules, comparing live rule configuration against a baseline manifest, classifying drift severity, generating issue-ready remediation output, and running advisory or enforce mode audits. DO NOT USE FOR: writing application code, making direct project configuration changes without evidence, or replacing policy engines that enforce approvals."
 visibility: specialized
+model: gpt-5.4
 metadata:
   category: governance
   maturity: production

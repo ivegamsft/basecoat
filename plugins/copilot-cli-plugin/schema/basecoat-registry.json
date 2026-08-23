@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generated": "2026-08-09T18:32:44Z",
+  "generated": "2026-08-22T16:22:01Z",
   "agents": {
     "agent-designer": {
       "id": "agent-designer",
@@ -31,7 +31,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "gpt-5.4-mini",
+      "model": "gpt-5.4",
       "maturity": "beta",
       "category": "uncategorized"
     },
@@ -143,7 +143,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "gpt-5.4-mini",
+      "model": "gpt-5.3-codex",
       "maturity": "alpha",
       "category": "workflow"
     },
@@ -1124,7 +1124,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "gpt-5.4-mini",
+      "model": "gpt-5.3-codex",
       "maturity": "alpha",
       "category": "workflow"
     },
@@ -1396,7 +1396,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "gpt-5.4-mini",
+      "model": "claude-sonnet-4.6",
       "maturity": "alpha",
       "category": "workflow"
     },
@@ -1528,7 +1528,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "gpt-5.4-mini",
+      "model": "gpt-5.4",
       "maturity": "production",
       "category": "governance"
     },
