@@ -21,6 +21,7 @@ release, version drift) to reduce routing ambiguity.
 | `spike:` | Time-boxed investigation, no deliverable | **Now, research only** | `@solution-architect` |
 | `chore:` | Maintenance, cleanup, non-functional | **Soon** | `@devops-engineer`, `@release-manager` |
 | `pr:` | Pull request lifecycle handling: remaining WIP logging, merge readiness, build-gated lane closeout, and branch/worktree hygiene. Use `pr-lifecycle=full` when you want the whole chain kept together. | **Now** | `lane-closeout` skill, `@orphaned-pr-cleanup`, `@merge-coordinator`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
+| `repo-cleanup:` | Bulk post-merge hygiene sweep: sync `main` to latest, prune stale/orphaned worktrees, delete merged local and remote branches | **Now** | `repo-cleanup` skill, `git-worktrees` skill |
 | `fleet:` | Close previous sprint, plan and execute the next sprint, triage oldest issues, audit PRs/builds, clean branches | **Now** | `@parallel-session-coordinator`, `@sprint-closeout-auditor`, `@sprint-planner`, `@issue-triage`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
 | `workflow:` | GitHub Actions workflow failure triage and repair | **Now** | `@broken-build-troubleshooter`, `@self-healing-ci`, `@devops-engineer` |
 | `actions:` | GitHub Actions configuration, runs, and policy checks | **Now** | `@self-healing-ci`, `@ci-failure-escalation`, `@devops-engineer` |
@@ -323,10 +324,16 @@ before acting.
 | `backlog wip` | `issue:` (backlog WIP triage) | `@issue-triage` |
 | `clean up branches` / `stale branches` | `chore:` | `@branch-hygiene-sweeper` |
 | `clean up worktrees` / `clean up work trees` / `prune worktrees` | `chore:` | `@branch-hygiene-sweeper` + `git-worktrees` skill |
+| `sync main and clean up branches and worktrees` / `repo cleanup` | `repo-cleanup:` | `repo-cleanup` skill |
 
 `wip/`, `preserved/`, and `backup/` branches are retained (never auto-pruned) and
 logged with an owner and next action. Never remove a worktree with uncommitted
-changes or one an active agent is using.
+changes or one an active agent is using. A combined "sync main + prune
+worktrees + delete merged branches" ask routes to `repo-cleanup:`
+(`skills/repo-cleanup/SKILL.md`), which performs its own branch
+classification and deletion directly (with exact-ref safeguards) rather
+than delegating to `@branch-hygiene-sweeper`, and orchestrates only the
+`git-worktrees` skill for worktree pruning, as one bulk sweep.
 
 ### Backlog and sprint execution
 

@@ -41,6 +41,7 @@ Rules:
 | `workflow:` | GitHub Actions/workflow failure triage and repair | Now | `@broken-build-troubleshooter`, `@self-healing-ci`, `@devops-engineer` |
 | `actions:` | GitHub Actions configuration, runs, and policy checks | Now | `@self-healing-ci`, `@ci-failure-escalation`, `@devops-engineer` |
 | `pr:` | Pull request lifecycle execution: remaining WIP logging, mergeability, broken-build recovery, lane closeout, and safe cleanup | Now | `lane-closeout` skill, `@orphaned-pr-cleanup`, `@merge-coordinator`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
+| `repo-cleanup:` | Bulk post-merge hygiene sweep: sync `main`, prune stale/orphaned worktrees, delete merged local+remote branches | Now | `repo-cleanup` skill, `git-worktrees` skill |
 | `issue:` | GitHub issue triage, labeling, and backlog hygiene | Now | `@issue-triage`, `@sprint-planner` |
 | `portfolio:` | Project audit for issue/PR dedupe, categorization, dependency mapping, feature grouping, and project linkage | Now | `@issue-triage`, `@orphaned-pr-cleanup`, `@sprint-project-mapper`, `@sprint-planner`, `@governance-auditor` |
 | `release:` | Release planning, version bumping, and publication | Now | `@release-manager`, `@release-readiness-chair`, `@release-impact-advisor` |
@@ -384,11 +385,17 @@ the exposed source credential was revoked.
 | `backlog wip` | `issue:` (backlog WIP triage) | `@issue-triage` |
 | `clean up branches` / `stale branches` | `chore:` | `@branch-hygiene-sweeper` |
 | `clean up worktrees` / `clean up work trees` / `prune worktrees` | `chore:` | `@branch-hygiene-sweeper` + `git-worktrees` skill |
+| `sync main and clean up branches and worktrees` / `repo cleanup` | `repo-cleanup:` | `repo-cleanup` skill |
 | `finish this lane` / `close out this branch` / `return to main` | `pr:` | `lane-closeout` skill |
 
 Branch cleanup routes to `@branch-hygiene-sweeper`; worktree cleanup additionally
 uses the `git-worktrees` skill (`skills/git-worktrees/SKILL.md`), which owns the
-stale-worktree pruning workflow and its safety checks.
+stale-worktree pruning workflow and its safety checks. A combined "sync main +
+prune worktrees + delete merged branches" ask routes to `repo-cleanup:`,
+which performs its own branch classification and deletion directly (with
+exact-ref safeguards) rather than delegating to `@branch-hygiene-sweeper`,
+and orchestrates only the `git-worktrees` skill for worktree pruning, as
+one bulk sweep (`skills/repo-cleanup/SKILL.md`).
 
 Lane finish requests route first to `skills/lane-closeout/SKILL.md`. It owns
 dirty-WIP capture, sync/publish, PR create-or-update, terminal-state

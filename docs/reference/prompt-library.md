@@ -2,7 +2,7 @@
 
 Generated from the canonical intent vocabulary and asset frontmatter. Do not edit the generated tables directly; run `pwsh scripts/generate-prompt-library.ps1`.
 
-Coverage: 34 intents, 133 skills, and 130 agents.
+Coverage: 35 intents, 134 skills, and 130 agents.
 
 ## Lifecycle prompts
 
@@ -74,6 +74,7 @@ Next action: approve the exact removal list
 | `workflow:` | <code>workflow: GitHub Actions/workflow failure triage and repair in this repository. Include scope, evidence, and the next safe action.</code> |
 | `actions:` | <code>actions: GitHub Actions configuration, runs, and policy checks in this repository. Include scope, evidence, and the next safe action.</code> |
 | `pr:` | <code>pr: Pull request lifecycle execution: remaining WIP logging, mergeability, broken-build recovery, lane closeout, and safe cleanup in this repository. Include scope, evidence, and the next safe action.</code> |
+| `repo-cleanup:` | <code>repo-cleanup: Bulk post-merge hygiene sweep: sync `main`, prune stale/orphaned worktrees, delete merged local+remote branches in this repository. Include scope, evidence, and the next safe action.</code> |
 | `issue:` | <code>issue: GitHub issue triage, labeling, and backlog hygiene in this repository. Include scope, evidence, and the next safe action.</code> |
 | `portfolio:` | <code>portfolio: Project audit for issue/PR dedupe, categorization, dependency mapping, feature grouping, and project linkage in this repository. Include scope, evidence, and the next safe action.</code> |
 | `release:` | <code>release: Release planning, version bumping, and publication in this repository. Include scope, evidence, and the next safe action.</code> |
@@ -208,6 +209,7 @@ Next action: approve the exact removal list
 | `refactoring` | <code>Use the 'refactoring' skill. Task: extract large method safely.</code> | [skills/refactoring/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/refactoring/SKILL.md) |
 | `release-audit` | <code>Use the 'release-audit' skill. Task: audit a release candidate.</code> | [skills/release-audit/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/release-audit/SKILL.md) |
 | `release-notes` | <code>Use the 'release-notes' skill. Task: create release notes for a version.</code> | [skills/release-notes/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/release-notes/SKILL.md) |
+| `repo-cleanup` | <code>Use the 'repo-cleanup' skill. Task: sync main and clean up worktrees and branches together (return the primary worktree to a synced main, prune stale/orphaned worktrees, and delete local+remote branches whose PR is merged or closed with no unlanded content).</code> | [skills/repo-cleanup/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/repo-cleanup/SKILL.md) |
 | `rollout-basecoat` | <code>Use the 'rollout-basecoat' skill. Task: refresh basecoat.</code> | [skills/rollout-basecoat/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/rollout-basecoat/SKILL.md) |
 | `s4-deployment-checklist` | <code>Use the 's4-deployment-checklist' skill. Task: checklist-driven release gating.</code> | [skills/s4-deployment-checklist/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/s4-deployment-checklist/SKILL.md) |
 | `s4-rollback-testing` | <code>Use the 's4-rollback-testing' skill. Task: building repeatable rollback rehearsal workflows.</code> | [skills/s4-rollback-testing/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/s4-rollback-testing/SKILL.md) |

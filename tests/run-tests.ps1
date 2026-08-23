@@ -413,6 +413,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running repo-cleanup contract tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'repo-cleanup-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Repo-cleanup contract tests failed' -ForegroundColor Red
+    Write-FailureLog 'repo-cleanup-tests'
+    exit 1
+}
+
 Write-Host 'Running cleanup branch automation tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'cleanup-branches-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

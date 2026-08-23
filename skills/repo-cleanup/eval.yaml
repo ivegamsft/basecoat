@@ -1,0 +1,31 @@
+name: "repo-cleanup-routing"
+description: "Routing evaluation — validates trigger activation for the repo-cleanup skill."
+skill: "skills/repo-cleanup/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Go to main, get latest, clean up worktrees and branches and orphaned branches."
+    expect_activation: true
+  - id: "pos-2"
+    input: "repo-cleanup: all our PRs merged, sync main and delete the merged feature branches."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Sweep the repo for stale worktrees and branches now that the ship-it wave is done."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Finish this lane, push my WIP, and open a PR for review."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Create a new feature branch and start implementing the login page."
+    expect_activation: false
+  - id: "neg-3"
+    input: "Go to main and get latest."
+    expect_activation: false
+    note: "Sync-only request — must not trigger the destructive bulk worktree/branch cleanup. Only combined sync + worktree/branch cleanup asks (see pos-1) should activate this skill."
+  - id: "neg-4"
+    input: "Clean up my old branches."
+    expect_activation: false
+    note: "Branch-only request with no sync/worktree component — this skill is a combined sync+worktree+branch sweep, not a granular single-purpose branch cleanup; a branch-only ask must not be routed into the bulk destructive workflow."
+  - id: "neg-5"
+    input: "Prune the stale worktrees."
+    expect_activation: false
+    note: "Worktree-only request with no sync/branch component — must not activate this bulk skill; a granular worktree-only ask should stay narrower in scope than the combined sweep."

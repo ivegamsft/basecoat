@@ -356,6 +356,7 @@ foreach ($label in $newPrefixTargets.Keys) {
         'design:' = 'basecoat-sheen'
         'sprint:' = '@sprint-closeout-auditor'
         'wave:'   = '@parallel-session-coordinator'
+        'repo-cleanup:' = 'repo-cleanup` skill'
     }
     $missing = @()
     foreach ($p in $routeExpectations.Keys) {
@@ -368,7 +369,7 @@ foreach ($label in $newPrefixTargets.Keys) {
         Write-Host "    FAIL $label missing route targets: $($missing -join ', ')" -ForegroundColor Red
     }
     else {
-        Write-Host "    PASS $label binds ui:/ux:/ia:/design:/sprint:/wave: to distinct route targets"
+        Write-Host "    PASS $label binds ui:/ux:/ia:/design:/sprint:/wave:/repo-cleanup: to distinct route targets"
     }
 }
 
