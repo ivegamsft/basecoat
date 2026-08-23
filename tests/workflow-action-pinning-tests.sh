@@ -49,6 +49,37 @@ jobs:
       - run: |
           echo "uses: actions/checkout@v4"
 EOF
+cat > "$FIXTURE_ROOT/agents/test.agent.md" <<'EOF'
+---
+name: test
+description: "Fixture agent"
+---
+EOF
+# Regression coverage for the pipefail/SIGPIPE false negative fixed by the
+# bounded awk frontmatter scan: the closing delimiter above lands on line 4,
+# then this padding fills lines 5-59 with well over 200KB (comfortably more
+# than a pipe buffer's worth of bytes). A naive
+# `sed -n '2,60p' file | grep -qxF -- '---'` pipeline has grep exit right
+# after matching the early delimiter, so sed gets SIGPIPE while still
+# writing the padding and the check spuriously fails. The bounded awk scan
+# reads the whole window and must still pass here.
+for _ in $(seq 1 55); do
+  printf '%04000d\n' 0 >> "$FIXTURE_ROOT/agents/test.agent.md"
+done
+cat >> "$FIXTURE_ROOT/agents/test.agent.md" <<'EOF'
+
+## Inputs
+
+- Input
+
+## Workflow
+
+1. Step
+
+## Output
+
+- Result
+EOF
 
 cp \
   "$REPO_ROOT/scripts/validate-basecoat.sh" \
@@ -56,6 +87,47 @@ cp \
   "$FIXTURE_ROOT/scripts/"
 
 bash "$FIXTURE_ROOT/scripts/validate-basecoat.sh" "$FIXTURE_ROOT"
+
+cat > "$FIXTURE_ROOT/agents/test.agent.md" <<'EOF'
+---
+name: broken
+description: "Missing close delimiter fixture"
+
+## Inputs
+
+- Input
+
+## Workflow
+
+1. Step
+
+## Output
+
+- Result
+EOF
+if bash "$FIXTURE_ROOT/scripts/validate-basecoat.sh" "$FIXTURE_ROOT"; then
+  echo "Installed Bash validation did not reject missing frontmatter closing delimiter." >&2
+  exit 1
+fi
+
+cat > "$FIXTURE_ROOT/agents/test.agent.md" <<'EOF'
+---
+name: test
+description: "Fixture agent"
+---
+
+## Inputs
+
+- Input
+
+## Workflow
+
+1. Step
+
+## Output
+
+- Result
+EOF
 
 cat > "$FIXTURE_ROOT/workflows/invalid.yml" <<'EOF'
 jobs:
