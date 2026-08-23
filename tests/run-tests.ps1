@@ -333,6 +333,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running auto-approve cloud-agent workflows tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'auto-approve-cloud-agent-workflows-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Auto-approve cloud-agent workflows tests failed' -ForegroundColor Red
+    Write-FailureLog 'auto-approve-cloud-agent-workflows-tests'
+    exit 1
+}
+
 Write-Host 'Running human approval boundaries policy tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'human-approval-boundaries-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
