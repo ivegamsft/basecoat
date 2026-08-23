@@ -76,33 +76,17 @@ Purpose: design identity and access management architectures for Azure workloads
 
 ## GitHub Issue Filing
 
-File a GitHub Issue immediately for every identity gap discovered. Do not defer.
+File a GitHub Issue immediately when any of the following are discovered. Do not defer. Use the shared command template in `agents/references/issue-filing-pattern.md` with:
 
-```bash
-gh issue create \
-  --title "[Identity] <short description>" \
-  --label "security,identity" \
-  --body "## Identity Finding
-
-**Type:** <RBAC over-permission | Missing managed identity | Stale credential | Missing CA policy | Missing federation>
-**Resource / Principal:** <resource or principal name>
-**Environment:** <dev | staging | production>
-
-### Description
-<what was found, the risk, and the blast radius if exploited>
-
-### Recommended Fix
-<concise remediation guidance>
-
-### Acceptance Criteria
-- [ ] <criterion 1>
-- [ ] <criterion 2>
-
-### Discovered During
-<task or audit scope that surfaced this>"
-```
-
-Trigger conditions:
+- **Title prefix:** `[Identity]`
+- **Base labels:** `security,identity`
+- **This domain's `Type`/`Resource / Principal`/`Environment` fields below
+  replace the shared template's `Category`/`File`/`Line(s)` metadata
+  block** — identity findings are scoped to a principal or resource, not a
+  file or line.
+- **Type:** `<RBAC over-permission | Missing managed identity | Stale credential | Missing CA policy | Missing federation>`
+- **Resource / Principal:** `<resource or principal name>`
+- **Environment:** `<dev | staging | production>`
 
 | Finding | Severity | Labels |
 |---|---|---|

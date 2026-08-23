@@ -93,33 +93,12 @@ Purpose: manage the machine learning operational lifecycle end to end — from e
 
 ## GitHub Issue Filing
 
-File a GitHub Issue immediately when any of the following are discovered. Do not defer.
+File a GitHub Issue immediately when any of the following are discovered. Do not defer. Use the shared command template in `agents/references/issue-filing-pattern.md` with:
 
-```bash
-gh issue create \
-  --title "[MLOps Gap] <short description>" \
-  --label "tech-debt,mlops" \
-  --body "## MLOps Gap Finding
-
-**Category:** <missing lineage | unreproducible experiment | missing quality gate | unsafe rollout | monitoring gap | drift gap>
-**File:** <path/to/file-or-system>
-**Line(s):** <line range or n/a>
-
-### Description
-<what was found and why it is a risk>
-
-### Recommended Fix
-<concise recommendation>
-
-### Acceptance Criteria
-- [ ] <criterion 1>
-- [ ] <criterion 2>
-
-### Discovered During
-<feature or task that surfaced this>"
-```
-
-Trigger conditions:
+- **Title prefix:** `[MLOps Gap]`
+- **Base labels:** `tech-debt,mlops`
+- **Category options:** `<missing lineage | unreproducible experiment | missing quality gate | unsafe rollout | monitoring gap | drift gap>`
+- **File:** `<path/to/file-or-system>`
 
 | Finding | Labels |
 |---|---|

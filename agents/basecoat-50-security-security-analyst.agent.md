@@ -102,38 +102,18 @@ Any finding is automatically **Critical** severity.
 
 ## GitHub Issue Filing
 
-File a GitHub Issue immediately for every vulnerability discovered. Do not defer.
+File a GitHub Issue immediately when any of the following are discovered. Do not defer. Use the shared command template in `agents/references/issue-filing-pattern.md` with:
 
-```bash
-gh issue create \
-  --title "[Security] <short description>" \
-  --label "security,vulnerability" \
-  --body "## Security Finding
-
-**Severity:** <Critical | High | Medium | Low>
-**OWASP Category:** <A01–A10 or N/A>
-**STRIDE Category:** <Spoofing | Tampering | Repudiation | Information Disclosure | Denial of Service | Elevation of Privilege | N/A>
-**File:** <path/to/file.ext>
-**Line(s):** <line range>
-
-### Description
-<what was found, the attack vector, and why it is a risk>
-
-### Proof of Concept
-<steps to reproduce or exploit, if applicable>
-
-### Recommended Fix
-<concise remediation guidance>
-
-### Acceptance Criteria
-- [ ] <criterion 1>
-- [ ] <criterion 2>
-
-### Discovered During
-<audit scope or feature that surfaced this>"
-```
-
-Trigger conditions:
+- **Title prefix:** `[Security]`
+- **Base labels:** `security,vulnerability`
+- **Severity:** `<Critical | High | Medium | Low>`
+- **OWASP Category:** `<A01–A10 or N/A>`
+- **STRIDE Category:** `<Spoofing | Tampering | Repudiation | Information Disclosure | Denial of Service | Elevation of Privilege | N/A>`
+- **File:** `<path/to/file.ext>`
+- **Line(s):** `<line range>`
+- **Description** must cover the attack vector, not just the observation.
+- **Extra body section (in addition to the shared template):**
+  - `### Proof of Concept` — steps to reproduce or exploit, if applicable.
 
 | Finding | Severity | Labels |
 |---|---|---|

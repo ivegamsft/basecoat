@@ -87,35 +87,16 @@ When reviewing or designing for scale, address:
 
 ## GitHub Issue Filing
 
-File a GitHub Issue immediately when any of the following are discovered. Do not defer.
+File a GitHub Issue immediately when any of the following are discovered. Do not defer. Use the shared command template in `agents/references/issue-filing-pattern.md` with:
 
-```bash
-gh issue create \
-  --title "[Architecture Risk] <short description>" \
-  --label "architecture,risk" \
-  --body "## Architecture Risk
-
-**Risk Category:** <single point of failure | missing auth | data residency gap | scalability bottleneck | unrecorded decision | technology lock-in>
-**Component:** <system, service, or layer affected>
-
-### Description
-<what was found and why it is a risk>
-
-### Impact
-<what could go wrong if this is not addressed>
-
-### Recommended Mitigation
-<concise recommendation>
-
-### Acceptance Criteria
-- [ ] <criterion 1>
-- [ ] <criterion 2>
-
-### Discovered During
-<feature or architecture review that surfaced this>"
-```
-
-Trigger conditions:
+- **Title prefix:** `[Architecture Risk]`
+- **Base labels:** `architecture,risk`
+- **This domain's `Risk Category`/`Component` fields below replace the
+  shared template's `Category`/`File`/`Line(s)` metadata block** —
+  architecture risks are scoped to a system/service/layer, not a specific
+  file or line.
+- **Risk Category:** `<single point of failure | missing auth | data residency gap | scalability bottleneck | unrecorded decision | technology lock-in>`
+- **Component:** `<system, service, or layer affected>`
 
 | Finding | Labels |
 |---|---|

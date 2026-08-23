@@ -69,32 +69,23 @@ Lifecycle rules:
 
 ## GitHub Issue Filing
 
-```bash
-gh issue create \
-  --title "[AgentOps] <short operational finding>" \
-  --label "agentops,operations" \
-  --body "## AgentOps Finding
+File a GitHub Issue immediately when any of the following are discovered. Do not defer. Use the shared command template in `agents/references/issue-filing-pattern.md` with:
 
-**Agent:** <agent name>
-**Version:** <version>
-**Category:** <rollout regression | drift | config risk | capacity risk | incident correlation gap>
-**Environment:** <prod | staging | other>
-
-### Summary
-<what changed and why it matters>
-
-### Evidence
-- Metric or alert: <name>
-- Time window: <timestamp range>
-- Related change: <version/config/model/tool update>
-
-### Recommended Action
-- [ ] <action 1>
-
-### Exit Criteria
-- [ ] Health thresholds restored
-- [ ] Rollout decision documented"
-```
+- **Title prefix:** `[AgentOps]`
+- **Base labels:** `agentops,operations`
+- **Category options:** `<rollout regression | drift | config risk | capacity risk | incident correlation gap>`
+- **Agent:** `<agent name>`
+- **Version:** `<version>`
+- **Environment:** `<prod | staging | other>`
+- **This domain replaces the shared template's `### Description` /
+  `### Recommended Fix` / `### Acceptance Criteria` / `### Discovered
+  During` sections with its own structure** (do not use both):
+  - `### Summary` — what changed and why it matters.
+  - `### Evidence` — **Metric or alert:** name; **Time window:** timestamp
+    range; **Related change:** version/config/model/tool update.
+  - `### Recommended Action` — `- [ ] <action 1>`.
+  - `### Exit Criteria` — `- [ ] Health thresholds restored` and
+    `- [ ] Rollout decision documented`.
 
 | Finding | Labels |
 |---|---|

@@ -104,33 +104,17 @@ See `skills/api-design/api-governance-checklist.md` for the full governance chec
 
 ## GitHub Issue Filing
 
-File a GitHub Issue immediately when any of the following are discovered. Do not defer.
+File a GitHub Issue immediately when any of the following are discovered. Do not defer. Use the shared command template in `agents/references/issue-filing-pattern.md` with:
 
-```bash
-gh issue create \
-  --title "[API Contract] <short description>" \
-  --label "api-design,contract-violation" \
-  --body "## API Contract Violation
-
-**Category:** <missing docs | breaking change | governance failure | inconsistent naming | missing auth | missing pagination>
-**Spec File:** <path/to/spec.yaml>
-**Endpoint/Field:** <affected endpoint or field>
-
-### Description
-<what was found and why it is a risk>
-
-### Recommended Fix
-<concise recommendation>
-
-### Acceptance Criteria
-- [ ] <criterion 1>
-- [ ] <criterion 2>
-
-### Discovered During
-<feature or task that surfaced this>"
-```
-
-Trigger conditions:
+- **Title prefix:** `[API Contract]`
+- **Base labels:** `api-design,contract-violation`
+- **This domain's `Spec File`/`Endpoint/Field` fields below replace the
+  shared template's `File`/`Line(s)` fields** — API contract findings are
+  scoped to a spec file and endpoint/field, not a source line; `Category`
+  is still used as-is, populated from the options below.
+- **Category options:** `<missing docs | breaking change | governance failure | inconsistent naming | missing auth | missing pagination>`
+- **Spec File:** `<path/to/spec.yaml>`
+- **Endpoint/Field:** `<affected endpoint or field>`
 
 | Finding | Labels |
 |---|---|

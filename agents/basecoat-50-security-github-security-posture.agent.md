@@ -30,7 +30,7 @@ Purpose: audit GitHub organization and repository security settings using GitHub
 1. **Verify access** — confirm the active `gh` CLI session has the required scopes (`repo`, `read:org`) by running `gh auth status`. Halt and report if scopes are missing.
 2. **Collect org-level settings** — query org code security configurations, org rulesets, and secret scanning status using the checks defined in `skills/github-security-posture/SKILL.md`.
 3. **Collect repo-level settings** — for each target repository, query branch protection rules, repo rulesets, secret scanning and push protection, code scanning alerts, Dependabot alerts, and CODEOWNERS presence.
-4. **Score each check** — assign a traffic-light rating (🟢 Pass / 🟡 Warning / 🔴 Fail) per the scoring rubric in `skills/github-security-posture/SKILL.md`.
+4. **Score each check** — assign a rating (Pass / Warning / Fail) per the scoring rubric in `skills/github-security-posture/SKILL.md`.
 5. **Generate posture report** — populate `skills/github-security-posture/posture-report-template.md` with all check results, scores, and remediation commands.
 6. **File issues for every failing check** — do not defer. See GitHub Issue Filing section below.
 
@@ -97,9 +97,9 @@ gh api /repos/{owner}/{repo}/contents/CODEOWNERS 2>/dev/null \
 
 | Rating | Criteria |
 |---|---|
-| 🟢 Pass | Setting is enabled/configured as required. No action needed. |
-| 🟡 Warning | Partially configured, or open medium-severity alerts exist. Remediation recommended within 30 days. |
-| 🔴 Fail | Setting is disabled or absent, or open critical/high alerts exist. Immediate remediation required. |
+| Pass | Setting is enabled/configured as required. No action needed. |
+| Warning | Partially configured, or open medium-severity alerts exist. Remediation recommended within 30 days. |
+| Fail | Setting is disabled or absent, or open critical/high alerts exist. Immediate remediation required. |
 
 Overall posture score:
 
@@ -152,41 +152,34 @@ Navigate to `https://github.com/organizations/{org}/settings/security_products` 
 
 ## GitHub Issue Filing
 
-File a GitHub Issue immediately for every 🔴 Fail finding. Do not defer.
+File a GitHub Issue immediately when any of the following are discovered. Do not defer. Use the shared command template in `agents/references/issue-filing-pattern.md` with:
 
-```bash
-gh issue create \
-  --title "[Security Posture] <short description of failing check>" \
-  --label "security,posture-audit" \
-  --body "## Security Posture Finding
-
-**Rating:** 🔴 Fail
-**Check:** <check name>
-**Target:** <org or owner/repo>
-**Scope:** <Org-level | Repo-level>
-
-### Finding
-<what was found — which setting is missing or misconfigured>
-
-### Risk
-<why this matters — what an attacker or incident could exploit>
-
-### Remediation
-<concise fix using gh CLI commands or link to settings page>
-
-\`\`\`bash
-<remediation command>
-\`\`\`
-
-### Acceptance Criteria
-- [ ] Setting is enabled and confirmed via API
-- [ ] Re-run posture audit shows 🟢 Pass for this check
-
-### Discovered During
-GitHub Security Posture audit — $(date -u +%Y-%m-%dT%H:%MZ)"
-```
-
-Trigger conditions:
+- **Title prefix:** `[Security Posture]`
+- **Base labels:** `security,posture-audit`
+- **This domain's `Rating`/`Check`/`Target`/`Scope` fields below replace the
+  shared template's `Category`/`File`/`Line(s)` metadata block** — this
+  domain audits org/repo-level settings, not specific files or lines.
+- **Rating:** always `Fail` — only failing checks are filed.
+- **Check:** `<check name>`
+- **Target:** `<org or owner/repo>`
+- **Scope:** `<Org-level | Repo-level>`
+- **This domain replaces the shared template's `### Description` /
+  `### Recommended Fix` / `### Acceptance Criteria` / `### Discovered
+  During` sections with its own structure** (do not use both):
+  - `### Finding` — what was found: which setting is missing or
+    misconfigured.
+  - `### Risk` — why this matters: what an attacker or incident could
+    exploit.
+  - `### Remediation` — concise fix using `gh` CLI commands or a link to
+    the settings page, followed by a fenced ` ```bash ` block with the
+    exact remediation command.
+  - `### Acceptance Criteria` — `- [ ] Setting is enabled and confirmed via
+    API` and `- [ ] Re-run posture audit shows Pass for this check`.
+  - `### Discovered During` — `GitHub Security Posture audit — <UTC
+    timestamp>`. Because the shared template's body is filed through a
+    single-quoted heredoc, `$(date ...)` is **not** evaluated inside it —
+    compute the timestamp first (`date -u +%Y-%m-%dT%H:%MZ`) and paste the
+    literal resulting value into this field, not the `$(...)` expression.
 
 | Finding | Severity | Labels |
 |---|---|---|
@@ -210,7 +203,7 @@ Trigger conditions:
 ## Output Format
 
 - Deliver a completed posture report using `skills/github-security-posture/posture-report-template.md`.
-- Include traffic-light ratings (🟢/🟡/🔴) for every check.
+- Include a rating (Pass/Warning/Fail) for every check.
 - Reference filed issue numbers alongside each failing check: `// See #123 — secret scanning disabled, filed as High`.
 - Provide a summary of: total checks by rating, overall posture score, and recommended remediation priority order.
 

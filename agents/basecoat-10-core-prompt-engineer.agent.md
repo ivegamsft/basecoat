@@ -96,33 +96,12 @@ Purpose: design, optimize, and version system prompts and instruction sets for L
 
 ## GitHub Issue Filing
 
-File a GitHub Issue immediately when any of the following are discovered. Do not defer.
+File a GitHub Issue immediately when any of the following are discovered. Do not defer. Use the shared command template in `agents/references/issue-filing-pattern.md` with:
 
-```bash
-gh issue create \
-  --title "[Prompt Engineering] <short description>" \
-  --label "prompt-engineering,tech-debt" \
-  --body "## Prompt Engineering Finding
-
-**Category:** <ambiguous instruction | token waste | missing constraint | untested edge case | version drift>
-**File:** <path/to/file.ext>
-**Line(s):** <line range>
-
-### Description
-<what was found and why it is a risk>
-
-### Recommended Fix
-<concise recommendation>
-
-### Acceptance Criteria
-- [ ] <criterion 1>
-- [ ] <criterion 2>
-
-### Discovered During
-<feature or task that surfaced this>"
-```
-
-Trigger conditions:
+- **Title prefix:** `[Prompt Engineering]`
+- **Base labels:** `prompt-engineering,tech-debt`
+- **Category options:** `<ambiguous instruction | token waste | missing constraint | untested edge case | version drift>`
+- **File:** `<path/to/file.ext>`
 
 | Finding | Labels |
 |---|---|

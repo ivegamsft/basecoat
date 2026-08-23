@@ -40,44 +40,31 @@ Purpose: convert manual test paths, charter findings, and regression checklist i
 
 ## GitHub Issue Filing
 
-For every automation candidate, run:
+File a GitHub Issue immediately when any of the following are discovered. Do not defer. Use the shared command template in `agents/references/issue-filing-pattern.md` with:
 
-```bash
-gh issue create \
-  --title "[Automation Candidate] <short description>" \
-  --label "testing,automation-candidate" \
-  --body "## Automation Candidate
-
-**Priority:** <high | medium | low>
-**Risk Level:** <high | medium | low>
-**Test Type:** <smoke | regression | integration | agent-spec>
-
-### Behavior Under Test
-<plain-language description of what this test validates>
-
-### Positive Path
-- **Input:** <input or precondition>
-- **Expected result:** <observable outcome>
-- **Evidence:** <what to check: response, state, log, UI element>
-
-### Negative Path
-- **Input:** <invalid input or failure condition>
-- **Expected result:** <safe failure outcome>
-- **Evidence:** <what to check>
-
-### Acceptance Criteria
-- [ ] <criterion 1>
-- [ ] <criterion 2>
-
-### Source
-**Manual path / charter / checklist item:** <reference>
-**Rubric classification:** <automate-now | hybrid>
-
-### Notes
-<dependencies, environment constraints, or prerequisite state>"
-```
-
-If a sprint label is applicable, append `--label "<sprint-label>"`.
+- **Title prefix:** `[Automation Candidate]`
+- **Base labels:** `testing,automation-candidate`
+- **This domain's `Priority`/`Risk Level`/`Test Type`/`Manual path /
+  charter / checklist item`/`Rubric classification` fields below replace
+  the shared template's `Category`/`File`/`Line(s)` metadata block** —
+  automation-candidate findings are scoped to a manual test reference, not
+  a file or line.
+- **Priority:** `<high | medium | low>`
+- **Risk Level:** `<high | medium | low>`
+- **Test Type:** `<smoke | regression | integration | agent-spec>`
+- **Manual path / charter / checklist item:** `<reference>`
+- **Rubric classification:** `<automate-now | hybrid>`
+- **Extra body sections (in addition to the shared template):**
+  - `### Behavior Under Test` — plain-language description of what this
+    test validates.
+  - `### Positive Path` — **Input:** input or precondition; **Expected
+    result:** observable outcome; **Evidence:** what to check (response,
+    state, log, UI element).
+  - `### Negative Path` — **Input:** invalid input or failure condition;
+    **Expected result:** safe failure outcome; **Evidence:** what to check.
+  - `### Notes` — dependencies, environment constraints, or prerequisite
+    state.
+- If a sprint label is applicable, append `--label "<sprint-label>"`.
 
 ## Output Shape
 

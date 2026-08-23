@@ -96,33 +96,12 @@ Every component must satisfy these requirements before it ships:
 
 ## GitHub Issue Filing
 
-File a GitHub Issue immediately when any of the following are discovered. Do not defer.
+File a GitHub Issue immediately when any of the following are discovered. Do not defer. Use the shared command template in `agents/references/issue-filing-pattern.md` with:
 
-```bash
-gh issue create \
-  --title "[Tech Debt] <short description>" \
-  --label "tech-debt,frontend,accessibility" \
-  --body "## Tech Debt Finding
-
-**Category:** <missing ARIA | hardcoded color | non-semantic markup | missing loading state | inline styles>
-**File:** <path/to/component.ext>
-**Line(s):** <line range>
-
-### Description
-<what was found and why it is a risk>
-
-### Recommended Fix
-<concise recommendation>
-
-### Acceptance Criteria
-- [ ] <criterion 1>
-- [ ] <criterion 2>
-
-### Discovered During
-<feature or task that surfaced this>"
-```
-
-Trigger conditions:
+- **Title prefix:** `[Tech Debt]`
+- **Base labels:** `tech-debt,frontend,accessibility`
+- **Category options:** `<missing ARIA | hardcoded color | non-semantic markup | missing loading state | inline styles>`
+- **File:** `<path/to/component.ext>`
 
 | Finding | Labels |
 |---|---|

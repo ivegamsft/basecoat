@@ -48,24 +48,12 @@
 
 ## GitHub Issue Filing
 
-```bash
-gh issue create \
-  --title "[DataOps Gap] <short description>" \
-  --label "tech-debt,dataops" \
-  --body "## DataOps Gap Finding
+File a GitHub Issue immediately when any of the following are discovered. Do not defer. Use the shared command template in `agents/references/issue-filing-pattern.md` with:
 
-**Category:** <quality gap | lineage gap | governance gap | orchestration gap | contract gap | drift gap>
-**File:** <path>
-
-### Description
-<what was found and why it is a risk>
-
-### Recommended Fix
-<concise recommendation>
-
-### Acceptance Criteria
-- [ ] <criterion>"
-```
+- **Title prefix:** `[DataOps Gap]`
+- **Base labels:** `tech-debt,dataops`
+- **Category options:** `<quality gap | lineage gap | governance gap | orchestration gap | contract gap | drift gap>`
+- **File:** `<path>`
 
 | Finding | Labels |
 |---|---|

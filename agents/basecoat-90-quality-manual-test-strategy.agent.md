@@ -34,33 +34,22 @@ Purpose: turn a feature description or risk inventory into a complete, actionabl
 
 ## GitHub Issue Filing
 
-For every identified automation backlog candidate, run:
+File a GitHub Issue immediately when any of the following are discovered. Do not defer. Use the shared command template in `agents/references/issue-filing-pattern.md` with:
 
-```bash
-gh issue create \
-  --title "[Automation Candidate] <short description>" \
-  --label "testing,automation-candidate" \
-  --body "## Automation Candidate
-
-**Priority:** <high | medium | low>
-**Risk Level:** <high | medium | low>
-**Test Type:** <smoke | regression | integration | exploratory>
-
-### Description
-<what the manual path does and why it is a candidate for automation>
-
-### Acceptance Criteria
-- [ ] <criterion 1>
-- [ ] <criterion 2>
-
-### Manual Path Reference
-<which charter, checklist item, or rubric row this came from>
-
-### Notes
-<any constraints, dependencies, or environment-specific concerns>"
-```
-
-If a sprint label is applicable, append `--label "<sprint-label>"`.
+- **Title prefix:** `[Automation Candidate]`
+- **Base labels:** `testing,automation-candidate`
+- **This domain's `Priority`/`Risk Level`/`Test Type` fields below replace
+  the shared template's `Category`/`File`/`Line(s)` metadata block** —
+  manual-test findings are scoped to a test case, not a file or line.
+- **Priority:** `<high | medium | low>`
+- **Risk Level:** `<high | medium | low>`
+- **Test Type:** `<smoke | regression | integration | exploratory>`
+- **Extra body sections (in addition to the shared template):**
+  - `### Manual Path Reference` — which charter, checklist item, or rubric
+    row this came from.
+  - `### Notes` — any constraints, dependencies, or environment-specific
+    concerns.
+- If a sprint label is applicable, append `--label "<sprint-label>"`.
 
 ## Expected Output
 

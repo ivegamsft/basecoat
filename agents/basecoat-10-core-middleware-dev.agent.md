@@ -98,33 +98,12 @@ These patterns apply regardless of the broker (Kafka, Azure Service Bus, RabbitM
 
 ## GitHub Issue Filing
 
-File a GitHub Issue immediately when any of the following are discovered. Do not defer.
+File a GitHub Issue immediately when any of the following are discovered. Do not defer. Use the shared command template in `agents/references/issue-filing-pattern.md` with:
 
-```bash
-gh issue create \
-  --title "[Tech Debt] <short description>" \
-  --label "tech-debt,middleware,reliability" \
-  --body "## Tech Debt Finding
-
-**Category:** <missing retry | no DLQ | synchronous call should be async | missing idempotency>
-**File:** <path/to/file.ext>
-**Line(s):** <line range>
-
-### Description
-<what was found and why it is a reliability or correctness risk>
-
-### Recommended Fix
-<concise recommendation>
-
-### Acceptance Criteria
-- [ ] <criterion 1>
-- [ ] <criterion 2>
-
-### Discovered During
-<feature or task that surfaced this>"
-```
-
-Trigger conditions:
+- **Title prefix:** `[Tech Debt]`
+- **Base labels:** `tech-debt,middleware,reliability`
+- **Category options:** `<missing retry | no DLQ | synchronous call should be async | missing idempotency>`
+- **File:** `<path/to/file.ext>`
 
 | Finding | Labels |
 |---|---|
