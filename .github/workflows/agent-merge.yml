@@ -319,7 +319,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download rollback patch artifact
-        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: agent-merge-rollback-patch
 

@@ -11,7 +11,9 @@ $actionMap = @{
   'actions/upload-artifact@v7' = 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
   'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a' = 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
   'actions/setup-node@v6.4.0' = 'actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e'
-  'actions/setup-node@v4' = 'actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020'
+  'actions/setup-node@v4' = 'actions/setup-node@820762786026740c76f36085b0efc47a31fe5020'
+  'actions/setup-node@v7' = 'actions/setup-node@820762786026740c76f36085b0efc47a31fe5020'
+  'actions/download-artifact@v8' = 'actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c'
   'actions/setup-python@v6' = 'actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405'
   'azure/login@v3.0.0' = 'azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43'
   'azure/arm-deploy@v2' = 'azure/arm-deploy@a1361c2c2cd398621955b16ca32e01c65ea340f5'
@@ -37,8 +39,12 @@ foreach ($file in $files) {
   # Fix 2: Replace mapped refs
   foreach ($key in $actionMap.Keys) {
     $value = $actionMap[$key]
-    # Use regex word boundary to avoid partial matches
-    $content = $content -replace [regex]::Escape("uses: $key"), "uses: $value"
+    # Require a non-word/non-dot boundary after the key so major-version-only
+    # keys (e.g. "actions/checkout@v4") don't prefix-match longer semantic
+    # versions (e.g. "actions/checkout@v4.1.2"), which would otherwise be
+    # rewritten into an invalid ref like "actions/checkout@<sha>.1.2".
+    $pattern = [regex]::Escape("uses: $key") + '(?![.\w])'
+    $content = $content -replace $pattern, "uses: $value"
   }
   
   if ($content -ne $originalContent) {
