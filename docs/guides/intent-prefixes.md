@@ -43,7 +43,7 @@ release, version drift) to reduce routing ambiguity.
 | `ui:` | User interface: components, layout, visual and interaction implementation | **Soon** | `@frontend-dev`, `@ux-designer`; conditional sheen delegate for governance/audit |
 | `ux:` | User experience: flows, usability, journeys, interaction design | **Soon** | `@ux-designer`, `@frontend-dev`; conditional sheen delegate for governance/audit |
 | `ia:` | Information architecture: content structure, navigation, taxonomy, sitemap | **Soon** | `@ux-designer`, `@tech-writer`; conditional sheen delegate for governance/audit |
-| `design:` | AI-assisted UX/UI governance, design system, component audit, or finish-coat work | **Soon** | Downstream `basecoat-sheen` catalog |
+| `design:` | Product-definition and UX/UI governance, design system, component audit, or finish-coat work; `debate:` compares options before implementation | **Soon** | Read downstream `PRODUCT.md`, use `.github/base-coat/docs/reference/design-debate-format.md` (or custom overlay location), then use the `basecoat-sheen` catalog when applicable |
 | `sprint:` | Sprint planning, execution, or closeout | **Now** | `@sprint-planner`, `@sprint-closeout-auditor` |
 | `wave:` | Dependency-ordered batch within a sprint (issues and PRs) | **Now** | `@sprint-planner`, `@parallel-session-coordinator` |
 | `autopilot:` | Continuous oldest-to-newest backlog burndown in dependency-ordered waves, unattended until stopped or blocked | **Now** | `@backlog-autopilot`, `@parallel-session-coordinator`, `@ship-it-control-loop`, `@delivery-autopilot` |
@@ -295,7 +295,7 @@ direct implementation remains with the local routes.
 | `ui` | User interface — components, layout, visual and interaction implementation | `ui:` | `@frontend-dev`, `@ux-designer`; conditional downstream governance/audit delegate |
 | `ux` | User experience — flows, usability, journeys, interaction design | `ux:` | `@ux-designer`, `@frontend-dev`; conditional downstream governance/audit delegate |
 | `ia` | Information architecture — content structure, navigation, taxonomy, sitemap | `ia:` | `@ux-designer`, `@tech-writer`; conditional downstream governance/audit delegate |
-| `design` | AI-assisted UX/UI governance, design system, or finish-coat work | `design:` | Downstream `basecoat-sheen` catalog; discover a published entry point |
+| `design` | Product-definition and UX/UI governance, design system, component audit, or finish-coat work; `debate:` compares options before implementation | `design:` | Read downstream `PRODUCT.md`, use `.github/base-coat/docs/reference/design-debate-format.md` (or custom overlay location), then use the `basecoat-sheen` catalog when applicable |
 
 ### Error and failure: route on the subject noun
 

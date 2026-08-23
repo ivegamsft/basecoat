@@ -64,6 +64,39 @@ changes, validation plan, handoffs, and stop reason.
 After presenting the plan, wait for approval before applying changes.
 ```
 
+## Product definition and design debate
+
+Use `design:` when onboarding a downstream repository's product and design
+context. The repository's `PRODUCT.md` is the product-truth input; it is not
+safe to infer or replace from BaseCoat defaults.
+
+```text
+design: debate: onboard this repository using PRODUCT.md and the design-debate format at `.github/base-coat/docs/reference/design-debate-format.md` (or custom overlay location).
+
+First run a read-only inventory:
+- locate PRODUCT.md and identify its product, users, purpose, boundaries, and
+  design principles
+- inspect existing UI, UX, information architecture, accessibility, and design
+  system guidance
+- identify conflicts, missing sections, stale terminology, and assumptions
+
+Debate the smallest viable options for resolving each gap. Follow
+`.github/base-coat/docs/reference/design-debate-format.md` (or custom overlay location). For every option,
+include evidence, user impact, implementation scope, accessibility impact,
+risks, and a recommendation. Do not edit PRODUCT.md, design files, issues, or
+pull requests during discovery.
+
+Return: product-definition status, evidence, design debate, decision points,
+proposed changes, validation plan, and explicit approval boundary.
+```
+
+The onboarding flow must preserve downstream ownership: BaseCoat can provide
+the operating contract and debate format, but the downstream repository owns
+its product register, users, purpose, brand, boundaries, and design decisions.
+
+Here `debate:` is a design-mode modifier: compare evidence and options before
+implementation. It does not create a second routing path or authorize writes.
+
 The lifecycle-specific prompts for onboarding, refreshing, and removing
 BaseCoat are maintained in the generated
 [prompt library](../reference/prompt-library.md). Use the combined prompt above

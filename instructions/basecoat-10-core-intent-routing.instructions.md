@@ -60,7 +60,7 @@ Rules:
 | `ui:` | User interface: components, layout, visual and interaction implementation | Soon | `@frontend-dev`, `@ux-designer`; conditional sheen delegate for governance/audit |
 | `ux:` | User experience: user flows, usability, journeys, interaction design | Soon | `@ux-designer`, `@frontend-dev`; conditional sheen delegate for governance/audit |
 | `ia:` | Information architecture: content structure, navigation, taxonomy, sitemap | Soon | `@ux-designer`, `@tech-writer`; conditional sheen delegate for governance/audit |
-| `design:` | AI-assisted UX/UI governance, design system, component audit, or finish-coat work | Soon | Delegate to the `IBuySpy-Shared/basecoat-sheen` catalog and discover its published entry point |
+| `design:` | Product-definition and UX/UI governance, design system, component audit, or finish-coat work; `debate:` requests compare options before implementation | Soon | Read downstream `PRODUCT.md`, use `.github/base-coat/docs/reference/design-debate-format.md` (or custom overlay location), then delegate to the `IBuySpy-Shared/basecoat-sheen` catalog when applicable |
 | `sprint:` | Sprint planning, execution, or closeout | Now | `@sprint-planner`, `@sprint-closeout-auditor` |
 | `wave:` | Dependency-ordered batch within a sprint (issues and PRs) | Now | `@sprint-planner`, `@parallel-session-coordinator` |
 | `autopilot:` | Continuous oldest-to-newest backlog burndown in dependency-ordered waves, unattended until stopped or blocked | Now | `@backlog-autopilot`, `@parallel-session-coordinator`, `@ship-it-control-loop`, `@delivery-autopilot` |

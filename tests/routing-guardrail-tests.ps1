@@ -524,6 +524,74 @@ else {
     Write-Host '    PASS rca prefix resolves to a documented public skill'
 }
 
+# Test 22: product.md definition and design onboarding contract are present.
+Write-Host '  Test 22: Validate PRODUCT.md and downstream design debate contract...'
+$productFile = Join-Path $repoRoot 'PRODUCT.md'
+$productReference = Join-Path $repoRoot 'docs\reference\product.md'
+$catalogFile = Join-Path $repoRoot 'docs\guides\downstream-prompt-catalog.md'
+$productMissing = @()
+$productContent = if (Test-Path $productFile) { Get-Content $productFile -Raw } else { '' }
+foreach ($section in @('Register', 'Users', 'Problem', 'Product Purpose', 'Brand Personality / Tone', 'Anti-references', 'Design Principles', 'Accessibility & Inclusion', 'Boundaries', 'Stack')) {
+    if (-not $productContent -or $productContent -notmatch "(?m)^##\s+$([regex]::Escape($section))\s*$") {
+        $productMissing += "PRODUCT.md section: $section"
+    }
+}
+if ($productContent -and $productContent -notmatch '(?m)^## Register\s*\r?\n(?:\s*\r?\n)*\s*(brand|product)\s*\r?\n(?:\s*\r?\n)*(?=##|\z)') {
+    $productMissing += 'PRODUCT.md Register: must be a bare "brand" or "product" value with nothing else before the next section'
+}
+if (-not (Test-Path $productReference)) { $productMissing += 'docs/reference/product.md' }
+$debateFormatFile = Join-Path $repoRoot 'docs\reference\design-debate-format.md'
+if (-not (Test-Path $debateFormatFile)) {
+    $productMissing += 'docs/reference/design-debate-format.md'
+}
+else {
+    $debateFormatContent = Get-Content $debateFormatFile -Raw
+    foreach ($heading in @('## Inputs', '## Required structure', '### Question', '### Option 1', '### Option 2', '### Recommendation', '### Approval boundary')) {
+        if ($debateFormatContent -notmatch [regex]::Escape($heading)) {
+            $productMissing += "design-debate-format.md heading: $heading"
+        }
+    }
+}
+if (-not (Test-Path $catalogFile)) {
+    $productMissing += 'downstream prompt catalog'
+}
+else {
+    $catalogContent = Get-Content $catalogFile -Raw
+    foreach ($term in @('Product definition and design debate', 'PRODUCT.md', 'design-debate format', 'design: debate:', 'explicit approval boundary')) {
+        if ($catalogContent -notmatch [regex]::Escape($term)) { $productMissing += "catalog term: $term" }
+    }
+}
+foreach ($path in @(
+    (Join-Path $repoRoot 'instructions\basecoat-10-core-intent-routing.instructions.md'),
+    (Join-Path $repoRoot 'instructions\intent-routing.instructions.md')
+)) {
+    if (-not (Test-Path $path) -or (Get-Content $path -Raw) -notmatch 'design:.*PRODUCT.md.*design-debate-format') {
+        $productMissing += "design route contract: $([System.IO.Path]::GetFileName($path))"
+    }
+}
+$intentPrefixesPath = Join-Path $repoRoot 'docs\guides\intent-prefixes.md'
+if (-not (Test-Path $intentPrefixesPath)) {
+    $productMissing += 'design route contract: intent-prefixes.md'
+}
+else {
+    $intentPrefixesLines = Get-Content $intentPrefixesPath
+    $designPrefixRow = $intentPrefixesLines | Where-Object { $_ -match '^\|\s*`design:`' }
+    $designAliasRow = $intentPrefixesLines | Where-Object { $_ -match '^\|\s*`design`\s*\|' }
+    if (-not $designPrefixRow -or $designPrefixRow -notmatch 'PRODUCT.md.*design-debate-format') {
+        $productMissing += 'design route contract: intent-prefixes.md prefix row'
+    }
+    if (-not $designAliasRow -or $designAliasRow -notmatch 'PRODUCT.md.*design-debate-format') {
+        $productMissing += 'design route contract: intent-prefixes.md alias row'
+    }
+}
+if ($productMissing.Count -gt 0) {
+    $failures += 'product-design-onboarding-contract-missing'
+    Write-Host "    FAIL product/design onboarding gaps: $($productMissing -join ', ')" -ForegroundColor Red
+}
+else {
+    Write-Host '    PASS PRODUCT.md and downstream design debate contract present'
+}
+
 if ($failures.Count -gt 0) {
     Write-Host "Routing guardrail tests FAILED: $($failures -join ', ')" -ForegroundColor Red
     exit 1

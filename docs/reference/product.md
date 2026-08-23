@@ -1,41 +1,20 @@
-# Base Coat — Product Identity
+# Product Definition
 
-## What is Base Coat?
+The repository-level `PRODUCT.md` (at the repository root; not copied by
+consumer sync since this reference file is) is the canonical product
+definition for BaseCoat. It uses a BaseCoat-specific sectioned structure in
+CommonMark that captures product context, users, purpose, boundaries, and
+design principles for this repository.
 
-Base Coat is a full-SDLC Copilot customization framework built on four primitives: agents, skills, instructions, and prompts. It provides specialized assets that cover the entire software development lifecycle — from architecture and coding to testing, security, DevOps, and project management.
+## How downstream repositories use it
 
-## Who is it for?
+During onboarding, inventory the downstream repository's existing
+`PRODUCT.md` before proposing design or UX changes. If it is missing, propose a
+repository-owned definition rather than silently creating one. Use the
+`design:` onboarding debate to compare the proposed product definition with
+the repository's current UI, UX, information architecture, accessibility
+requirements, and design-system evidence.
 
-- **Engineering teams** using GitHub Copilot who want consistent, high-quality AI assistance across all disciplines
-- **Platform/DevOps teams** who want to standardize AI agent behavior across their organization
-- **Individual developers** who want specialized agents instead of generic AI chat
-
-## Core Principles
-
-1. **Full SDLC coverage** — Not just code generation. Architecture, testing, security, DevOps, docs, and PM too.
-2. **One entry point** — `/basecoat` routes to any of 50 agents. No need to memorize agent names.
-3. **Opinionated but extensible** — Ships with battle-tested defaults. Every agent, skill, and instruction can be customized.
-4. **Framework, not a product** — Base Coat is infrastructure for your agents, not a hosted service.
-5. **Governance built in** — Instructions enforce security, quality, and naming standards automatically.
-
-## How it differs from single-domain tools
-
-Tools like Impeccable focus on one discipline (UI/design) with deep expertise. Base Coat covers 6 disciplines with 50 agents:
-
-- 🔨 **Development** (4 agents) — backend, frontend, middleware, data
-- 🏗️ **Architecture** (3 agents) — system design, API design, UX
-- 🔍 **Quality** (7 agents) — code review, security, performance, testing
-- 🚀 **DevOps** (3 agents) — CI/CD, releases, enterprise rollout
-- 📋 **Process** (5 agents) — sprint planning, PM, triage, retros
-- 🧰 **Meta** (6 agents) — agent design, prompts, MCP, docs
-
-## Architecture
-
-```text
-/basecoat (router)
-├── agents/        50 agent definitions (.agent.md)
-├── skills/        33 skill packages with templates
-├── instructions/  34 instruction files (.instructions.md)
-├── prompts/       3 reusable prompt files
-└── basecoat-metadata.json  (machine-readable registry)
-```
+The BaseCoat file is a reference for the operating model, not a template to
+copy over a downstream product definition. Tools must preserve sections,
+frontmatter, and machine islands they do not own.

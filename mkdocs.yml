@@ -78,6 +78,8 @@ nav:
     - Enterprise Setup: guides/enterprise-setup.md
     - Solo-Developer Profile: guides/solo-dev-profile.md
     - Consumer Sync Guide: guides/consumer-sync.md
+    - Product Definition: reference/product.md
+    - Design Debate Format: reference/design-debate-format.md
   - Asset Reference:
     - Overview: reference/quick-reference.md
     - Inventory: reference/inventory.md
