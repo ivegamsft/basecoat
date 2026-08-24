@@ -325,6 +325,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running bootstrap secret-requirement contract tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'bootstrap-secret-requirements-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Bootstrap secret-requirement contract tests failed' -ForegroundColor Red
+    Write-FailureLog 'bootstrap-secret-requirements-tests'
+    exit 1
+}
+
 Write-Host 'Running issue-approve routing workflow tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'workflow-issue-approve-routing-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
