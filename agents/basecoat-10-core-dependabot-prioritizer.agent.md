@@ -36,59 +36,20 @@ Purpose: process a repository's open Dependabot PR queue and produce a ranked, a
 ## Workflow
 
 1. **Fetch open PRs** — query the repo for all PRs opened by `dependabot[bot]` or labeled `dependencies`.
-2. **Classify each PR** — extract package, old version, new version, semver bump type (major/minor/patch), and any CVE references.
-3. **Score priority** — apply the scoring matrix below. Higher score = merge sooner.
+2. **Classify each PR** — extract package, old/new version, semver bump type, and any CVE references.
+3. **Score priority** — apply the scoring matrix; higher score = merge sooner.
 4. **Detect dependency chains** — identify PRs where package A depends on package B so B must merge before A.
-5. **Group safe batches** — cluster patch-only, non-CVE PRs with green CI into merge batches. Cap each batch at 10 PRs.
-6. **Output ranked plan** — produce a table of PRs ordered by priority score with batch assignments, blockers, and recommended merge sequence.
+5. **Group safe batches** — cluster patch-only, non-CVE, CI-green PRs into merge batches (cap 10/batch).
+6. **Output ranked plan** — a table of PRs ordered by priority score with batch assignments and blockers.
 
-## Priority Scoring Matrix
-
-| Factor | Points |
-|---|---|
-| CVE with CVSS >= 9.0 (Critical) | +50 |
-| CVE with CVSS 7.0-8.9 (High) | +30 |
-| CVE with CVSS 4.0-6.9 (Medium) | +15 |
-| Patch bump, no CVE | +5 |
-| Minor bump, no CVE | +3 |
-| Major bump, no CVE | +1 |
-| CI green | +10 |
-| CI failing | -20 |
-| Blocking another PR | +8 |
-| Blocked by another PR | -5 |
-
-## Batch Grouping Rules
-
-- Batch type `security-critical`: CVE CVSS >= 7.0; merge individually in priority order.
-- Batch type `safe-patch`: patch bumps, no CVE, CI green; merge together up to 10 per batch.
-- Batch type `minor-review`: minor or major bumps; require maintainer review before merge.
-- Never include a failing-CI PR in a safe-patch batch.
+Group into `security-critical` (individual merge), `safe-patch` (batched, CI-green patch bumps), and
+`minor-review` (maintainer review required) batches. See
+[`agents/references/dependabot-prioritizer-detail.md`](references/dependabot-prioritizer-detail.md) for
+the full scoring matrix, batch grouping rules, and output table format.
 
 ## Output Format
 
-```markdown
-## Dependabot Priority Plan
-
-### Security-Critical (merge individually, in order)
-| PR | Package | CVE | CVSS | Bump | CI | Priority |
-|---|---|---|---|---|---|---|
-| #123 | lodash | CVE-2024-xxxx | 9.8 | patch | green | 60 |
-
-### Safe-Patch Batch 1 (safe to merge together)
-| PR | Package | Bump | CI | Priority |
-|---|---|---|---|---|
-| #124 | axios | patch | green | 15 |
-
-### Minor / Major Review Required
-| PR | Package | Bump | CI | Priority | Notes |
-|---|---|---|---|---|---|
-| #125 | express | major | green | 11 | Check migration guide |
-
-### Blocked PRs (dependency chain)
-| PR | Blocked by | Reason |
-|---|---|---|
-| #126 | #123 | lodash consumer; wait for base update |
-```
+See the linked detail file for the exact Markdown output template.
 
 ## Constraints
 
@@ -99,10 +60,6 @@ Purpose: process a repository's open Dependabot PR queue and produce a ranked, a
 
 ## Governance
 
-This agent operates under the BaseCoat governance framework.
-
-- **Issue-first**: Do not make code changes without a logged GitHub issue.
-- **PRs only**: Never commit directly to `main`. Open a PR, self-approve if needed.
-- **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
-- **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
-- See `instructions/basecoat-20-lang-governance.instructions.md` for the full governance reference.
+Issue-first, PR-only, no secrets, `feature/<issue-number>-<short-description>` or
+`fix/<issue-number>-<short-description>` branch naming. See
+`instructions/basecoat-20-lang-governance.instructions.md` for the full reference.
