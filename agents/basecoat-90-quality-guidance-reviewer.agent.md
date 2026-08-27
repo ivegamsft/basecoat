@@ -43,96 +43,25 @@ with `guidance-author`.
 
 ## Workflow
 
-1. **Parse frontmatter**
-   - Confirm valid YAML between `---` delimiters
-   - Check required fields by asset type:
-     - Instructions: `description`, `applyTo`
-     - Skills: `name`, `description`
-     - Agents: `name`, `description`, `compatibility`, `metadata.category`, `metadata.tags`,
-       `metadata.maturity`, `metadata.audience`, `allowed-tools`, `allowed_skills`
-     - Note: `model:` is a legacy optional field; current convention uses `model_policy`.
-       `metadata.maturity` (not top-level `maturity:`) holds the maturity value.
-     - Prompts: `name`, `description`, `mode`
+1. **Parse frontmatter** — confirm valid YAML; check required fields by asset type.
+2. **Check required body sections** — agents need `## Inputs`, `## Workflow`/`## Process`, and an
+   Output-family heading; skills need a readable body; instructions need at least one `##`
+   section.
+3. **Apply markdown lint rules** — MD036, MD031, MD040, MD032, MD026, MD047, MD022, no trailing
+   spaces.
+4. **Validate BaseCoat conventions** — heading hierarchy, supported `model:` values, `maturity:`
+   enum, valid `allowed_skills` references, agent `name:` matches its filename's short-name.
+5. **Assess scope and quality** — `USE FOR`/`DO NOT USE FOR` format, body/frontmatter alignment,
+   numbered actionable steps, no leftover assumption flags or placeholder text.
+6. **Compile verdict** — assign each finding `PASS`, `WARN` (quality issue, non-blocking), or
+   `FAIL` (blocks commit, must fix).
 
-2. **Check required body sections**
-   - Agents must have all three: `## Inputs`, `## Workflow` or `## Process`, and one of
-     `## Output` / `## Expected Output` / `## Report` / `## Results`
-   - Skills must have a readable description body (not just frontmatter)
-   - Instructions must have at least one `##` section
-
-3. **Apply markdown lint rules**
-   - **MD036** — no bold-as-heading (`**text**` used as a heading substitute)
-   - **MD031** — blank line required before and after every fenced code block
-   - **MD040** — every fenced code block must have a language specifier
-   - **MD032** — lists must be surrounded by blank lines
-   - **MD026** — headings must not end with `:` or `.`
-   - **MD047** — file must end with a single newline
-   - **MD022** — headings must have blank lines before and after
-   - No trailing spaces on any line
-
-4. **Validate BaseCoat conventions**
-   - `##` headings only — no H1 except the file title, no H3+ without an H2 parent
-   - `model:` must be a supported value (claude-sonnet-4.6, gpt-5.3-codex, etc.)
-   - `maturity:` must be one of: `alpha`, `experimental`, `beta`, `production` (prefer
-     `experimental` for new assets — `alpha` is accepted for existing assets not yet migrated)
-   - `allowed_skills` entries must reference existing `skills/<name>/` directories
-     (check against known skills list if available)
-   - Agent `name` must match the short-name portion of the file base name: strip the
-     `basecoat-NN-<category>-` prefix; the remaining filename base (before `.agent.md`)
-     must equal `name:`. Example: `basecoat-10-core-agent-designer.agent.md` → `name: agent-designer`.
-     Bare filenames like `guidance-reviewer.agent.md` must match `name: guidance-reviewer` exactly.
-
-5. **Assess scope and quality**
-   - Is the description using `USE FOR:` / `DO NOT USE FOR:` format per BaseCoat convention
-     (see `.github/instructions/agents-skills-dev.instructions.md`)?
-   - Does the purpose statement in the body match the frontmatter description?
-   - Are all `## Workflow` steps numbered and actionable?
-   - Are any `<!-- ASSUMPTION: ... -->` flags left by the author?
-   - Are examples realistic (no placeholder `<TODO>` or lorem ipsum)?
-
-6. **Compile verdict**
-   - Assign each finding: `PASS`, `WARN`, or `FAIL`
-   - `FAIL` = blocks commit (must fix)
-   - `WARN` = should fix (quality issue, won't block CI)
-   - `PASS` = no issues found
+Full rule lists, convention details, and the field-by-field checklist are in
+[`agents/references/guidance-reviewer-detail.md`](references/guidance-reviewer-detail.md).
 
 ## Output
 
-Produce a structured review report:
-
-```markdown
-## Guidance Review Report
-
-**File**: <target path>
-**Asset type**: <type>
-**Overall verdict**: PASS | FAIL
-
-### Findings
-
-| # | Rule | Severity | Location | Message |
-|---|---|---|---|---|
-| 1 | MD031 | FAIL | Line 42 | Code fence missing blank line before |
-| 2 | frontmatter.model | WARN | frontmatter | Model 'gpt-4' not in supported list |
-
-### Required Actions (FAIL items)
-
-1. Add blank line before code fence at line 42.
-
-### Recommended Actions (WARN items)
-
-1. Update `model` to `claude-sonnet-4.6` or another supported value.
-
-### Verdict Summary
-
-- Frontmatter: PASS / FAIL
-- Required sections: PASS / FAIL
-- Markdown lint: PASS / FAIL
-- Conventions: PASS / FAIL
-- Scope/quality: PASS / WARN
-
-**Ready to commit**: Yes / No
-```
-
-If verdict is FAIL, include the handoff suggestion:
-> Use the **Fix and Re-Draft** handoff to send the report back to `guidance-author`
-> for correction.
+Produce a structured Guidance Review Report: file/asset-type header, overall verdict, a findings
+table (rule, severity, location, message), required vs. recommended actions, a per-category
+verdict summary, and a Ready-to-commit Yes/No line. If verdict is FAIL, suggest the **Fix and
+Re-Draft** handoff back to `guidance-author`. See the detail file for the exact template.
