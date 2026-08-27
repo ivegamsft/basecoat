@@ -579,6 +579,18 @@ try {
         }
     }
 
+    # Agent references: agent files may link to agents/references/<name>-detail.md
+    # for overflow content moved out to satisfy the token budget. Copy the whole
+    # subtree so those relative links resolve for installed agents.
+    $agentReferencesSource = Join-Path $agentSource 'references'
+    if (Test-Path $agentReferencesSource) {
+        $agentReferencesDest = Join-Path $agentDest 'references'
+        if (Test-Path $agentReferencesDest) {
+            Remove-Item -Path $agentReferencesDest -Recurse -Force
+        }
+        Copy-Item -Path $agentReferencesSource -Destination $agentReferencesDest -Recurse -Force
+    }
+
     # Seed release-notes template into downstream-customizable location.
     # Never overwrite local customizations.
     $managedReleaseTemplate = Join-Path $fullTargetDir 'templates/release-notes/default.md'

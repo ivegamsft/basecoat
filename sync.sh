@@ -412,6 +412,14 @@ if [[ -d "$REPO_ROOT/$TARGET_DIR/agents" ]]; then
   find "$REPO_ROOT/$TARGET_DIR/agents" -maxdepth 1 -name '*.agent.md' -exec cp {} "$REPO_ROOT/.github/agents/" \;
 fi
 
+# Agent references: agent files may link to agents/references/<name>-detail.md
+# for overflow content moved out to satisfy the token budget. Copy the whole
+# subtree so those relative links resolve for installed agents.
+if [[ -d "$REPO_ROOT/$TARGET_DIR/agents/references" ]]; then
+  rm -rf "$REPO_ROOT/.github/agents/references"
+  cp -R "$REPO_ROOT/$TARGET_DIR/agents/references" "$REPO_ROOT/.github/agents/references"
+fi
+
 # Seed release-notes template into downstream-customizable location.
 # Never overwrite local customizations.
 managed_release_template="$REPO_ROOT/$TARGET_DIR/templates/release-notes/default.md"

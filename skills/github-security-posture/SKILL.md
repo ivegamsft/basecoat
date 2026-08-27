@@ -22,6 +22,7 @@ Dependabot alerts, branch protection, and CODEOWNERS.
 |------|----------|
 | [`references/org-checks.md`](references/org-checks.md) | Org-level checks (O1–O4), org API quick reference, scoring rubric |
 | [`references/repo-checks.md`](references/repo-checks.md) | Repo-level checks (R1–R8), repo API quick reference |
+| [`references/remediation.md`](references/remediation.md) | Remediation commands per check, and GitHub issue-filing template/fields |
 
 ## Key Patterns
 

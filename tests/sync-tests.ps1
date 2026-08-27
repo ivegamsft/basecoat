@@ -173,6 +173,17 @@ try {
     Assert-SyncPathExists -Path (Join-Path $consumer '.github/ISSUE_TEMPLATE/issue.md') `
         -Message 'Sync test failed: .github/ISSUE_TEMPLATE/issue.md not seeded'
 
+    $testCount++
+    Assert-SyncPathExists -Path (Join-Path $consumer '.github/agents/references') `
+        -Message 'Sync test failed: .github/agents/references/ not created (agent detail overflow files are not distributed)'
+
+    $testCount++
+    $agentReferenceSourceCount = (Get-ChildItem (Join-Path $repoRoot 'agents/references') -Filter '*.md' -File).Count
+    $agentReferenceCount = (Get-ChildItem (Join-Path $consumer '.github/agents/references') -Filter '*.md' -File).Count
+    if ($agentReferenceCount -ne $agentReferenceSourceCount) {
+        throw "Sync test failed: .github/agents/references/ has $agentReferenceCount files, expected $agentReferenceSourceCount (source agents/references/)"
+    }
+
     Write-Host "  Passed: agents($agentCount), instructions($instrCount), prompts($promptCount) synced" -ForegroundColor Green
 }
 catch {

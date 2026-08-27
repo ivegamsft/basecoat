@@ -366,6 +366,21 @@ try {
                 }
             }
         }
+
+        # Agent references: agent files may link to references/<name>-detail.md for
+        # overflow content moved out to satisfy the token budget. Copy the whole
+        # subtree so those relative links resolve for installed agents.
+        $referencesSrc = Join-Path $SrcDir 'references'
+        if (Test-Path $referencesSrc) {
+            $referencesDest = Join-Path $DestDir 'references'
+            if ($DryRun) {
+                Write-Info "[DRY RUN] Would sync agent references subtree"
+            } else {
+                if (Test-Path $referencesDest) { Remove-Item -Path $referencesDest -Recurse -Force }
+                Copy-Item -Path $referencesSrc -Destination $referencesDest -Recurse -Force
+                Write-Ok "Synced agent references subtree"
+            }
+        }
     }
 
     $githubDir  = Join-Path $repoRoot '.github'
