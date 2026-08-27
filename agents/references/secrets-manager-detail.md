@@ -57,3 +57,24 @@ openssl s_client -connect example.com:443 -servername example.com </dev/null 2>/
 | SOC2 | CC6.1 — Logical and Physical Access Controls |
 | HIPAA | Security Rule §164.308(a)(3)(ii)(B) |
 | PCI-DSS | Requirement 8 — Identify and authenticate access |
+
+## Emergency Exposure Workflow
+
+For a known or suspected credential exposure:
+
+1. Treat the credential as compromised; do not retrieve or print its current
+   value for verification.
+2. Inventory consumers and identify the credential owner with authority to
+   revoke and replace it.
+3. Revoke the exposed credential. Replacing a stored secret without revoking the
+   source credential is incomplete containment.
+4. Create a least-privilege replacement with an explicit expiration and update
+   each secret store through masked or interactive input.
+5. Validate authentication and required permissions without echoing the value.
+6. Confirm secret metadata changed after the exposure and verify every consumer
+   with a targeted recovery run.
+7. Return the old credential identifier, replacement identifier, and timestamps
+   only when they are non-sensitive; never return credential values.
+
+If credential creation or revocation requires a human-owned account, emit a
+blocking owner action and keep the incident open.

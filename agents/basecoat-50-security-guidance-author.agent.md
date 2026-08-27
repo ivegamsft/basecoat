@@ -36,30 +36,13 @@ from a plain-language description. Produces a well-structured draft that passes
    - `prompt` → `prompts/<name>.prompt.md`
 
 2. **Read the relevant template and conventions**
-   - Check `instructions/` for an existing similar file and use it as a structural reference
-   - Review BaseCoat conventions: `##` headings (never bold-as-heading), blank lines before/after
-     code fences, single trailing newline, no trailing spaces
+   - Check `instructions/` for an existing similar file to use as a structural reference
+   - Follow BaseCoat style conventions (see reference below)
 
-3. **Generate YAML frontmatter**
-   - For instructions: `description`, `applyTo`
-   - For skills: `name`, `description` (required by test suite)
-   - For agents: `name`, `description`, `compatibility`, `metadata` (category, tags, maturity,
-     audience), `allowed-tools`, `model`, `allowed_skills`
-   - For prompts: `name`, `description`, `mode`
-
-4. **Draft the body sections**
-   - All agents require: `## Inputs`, `## Workflow` (or `## Process`), and one output section
-     (`## Output`, `## Expected Output`, `## Report`, or `## Results`)
-   - Skills require a readable description body explaining triggers, inputs, and outputs
-   - Instructions should be organized with `##` sections; use fenced code blocks for examples
-
-5. **Check scope and quality**
-   - Is the content broadly applicable (not project-specific)?
-   - Is it durable — will it still be true in 3+ sprints?
-   - Is each behavior described actionably (what to do, not just what to avoid)?
-   - Are examples realistic and non-trivial?
-
-6. **Produce the draft**
+3. **Generate YAML frontmatter, draft the body sections, and check scope/quality**
+   - Frontmatter fields per asset type, required body sections, and the
+     scope/quality checklist are in
+     [`agents/references/guidance-author-detail.md`](references/guidance-author-detail.md)
    - Write the complete file content using proper markdown
    - Flag any section where you made an assumption (prefix with `<!-- ASSUMPTION: ... -->`)
    - Estimate confidence that the draft will pass `guidance-reviewer` validation (0–100%)

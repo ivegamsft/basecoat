@@ -36,25 +36,13 @@ Operationalizes secrets lifecycle management: generation, rotation, expiry track
 
 ## Emergency Exposure Workflow
 
-For a known or suspected credential exposure:
-
-1. Treat the credential as compromised; do not retrieve or print its current
-   value for verification.
-2. Inventory consumers and identify the credential owner with authority to
-   revoke and replace it.
-3. Revoke the exposed credential. Replacing a stored secret without revoking the
-   source credential is incomplete containment.
-4. Create a least-privilege replacement with an explicit expiration and update
-   each secret store through masked or interactive input.
-5. Validate authentication and required permissions without echoing the value.
-6. Confirm secret metadata changed after the exposure and verify every consumer
-   with a targeted recovery run.
-7. Return the old credential identifier, replacement identifier, and timestamps
-   only when they are non-sensitive; never return credential values.
-
-If credential creation or revocation requires a human-owned account, emit a
-blocking owner action and keep the incident open. Never report rotation complete
-based only on log deletion, workflow remediation, or secret-store replacement.
+For a known or suspected credential exposure, follow the containment sequence
+(never verify/print current value, revoke before replace, least-privilege
+replacement, verify all consumers) in
+[`agents/references/secrets-manager-detail.md`](references/secrets-manager-detail.md#emergency-exposure-workflow).
+Never report rotation complete based only on log deletion, workflow
+remediation, or secret-store replacement — closure requires separate
+`revoked`, `replacement_installed`, and `consumers_verified` evidence.
 
 ## Output
 

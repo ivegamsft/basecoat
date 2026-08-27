@@ -16,37 +16,35 @@ allowed-tools: []
 # Workflow Run History Cleanup Agent
 
 Purpose: clean stale GitHub Actions workflow runs without destroying useful
-forensic history. The agent applies retention policy, excludes active incident
-evidence, and emits a verifiable deletion report.
+forensic history — apply retention policy, exclude active incident evidence,
+and emit a verifiable deletion report.
 
 ## Inputs
 
 - `repo` (required) — `owner/repo` slug
-- `workflows` (optional) — workflow file names or IDs to scope cleanup
-- `keep_days` (optional, default `30`) — minimum age threshold for deletion
+- `workflows` (optional) — workflow file names/IDs to scope cleanup
+- `keep_days` (optional, default `30`) — minimum age for deletion
 - `preserve_failed_days` (optional, default `90`) — keep failed runs longer for RCA
 - `max_deletions` (optional, default `200`) — safety cap per execution
-- `dry_run` (optional, default `true`) — report-only mode without deletion
+- `dry_run` (optional, default `true`) — report-only mode
 
 ## Workflow
 
-1. Enumerate candidate runs with `gh run list` scoped by repository and optional
-   workflows.
+1. Enumerate candidate runs with `gh run list` scoped by repository and optional workflows.
 2. Filter to completed terminal states only (`success`, `failure`, `cancelled`,
    `skipped`, `timed_out`, `neutral`).
-3. Exclude runs newer than `keep_days`.
-4. Exclude failed runs newer than `preserve_failed_days`.
-5. Exclude runs linked to active incidents or blocking issues when detected via
-   labels/titles (`blocker`, `incident`, `rca`, `halt`).
-6. Apply `max_deletions` cap and sort oldest-first.
-7. If `dry_run=true`, emit the planned deletion set only.
-8. If `dry_run=false`, delete each selected run with `gh run delete <id>`.
-9. Emit a structured cleanup report with deleted IDs and preserved rationale.
+3. Exclude runs newer than `keep_days`, and failed runs newer than `preserve_failed_days`.
+4. Exclude runs linked to active incidents/blocking issues via labels/titles
+   (`blocker`, `incident`, `rca`, `halt`).
+5. Apply `max_deletions` cap and sort oldest-first.
+6. If `dry_run=true`, emit the planned deletion set only.
+7. If `dry_run=false`, delete each selected run with `gh run delete <id>`.
+8. Emit a structured cleanup report with deleted IDs and preserved rationale.
 
 ## Guardrails
 
-- Never delete `in_progress`, `queued`, or `requested` runs.
-- Never delete runs tied to active outage/incident investigations.
+- Never delete `in_progress`, `queued`, or `requested` runs, or runs tied to
+  active outage/incident investigations.
 - Never exceed `max_deletions` in one execution.
 - Stop and escalate if API permissions are insufficient or run metadata is incomplete.
 - Prefer dry-run first; require explicit confirmation before destructive execution.
@@ -65,16 +63,12 @@ workflow_run_cleanup_report:
   preserved_for_incident: 0
   preserved_for_age: 0
   capped_by_max_deletions: false
-  notes:
-    - "No active incident-linked runs were deleted."
+  notes: []
 ```
 
 ## CLI Reference
 
 ```bash
-# list recent runs
 gh run list --repo {repo} --limit 500 --json databaseId,workflowName,conclusion,status,createdAt,url
-
-# delete one run
 gh run delete {run_id} --repo {repo}
 ```

@@ -19,45 +19,25 @@ Purpose: continuously map Workcell BOM dependencies to cell health, open blocker
 ## Inputs
 
 - Workcell BOM or intake manifest with cell dependency declarations
-- Current cell health signals (Bicep deployment status, deployment history, health checks, or outage notices)
+- Current cell health signals (deployment status/history, health checks, outage notices)
 - Existing blocker issues and labels for the affected cells
-- Repository conventions for issue labels, owners, and escalation paths
+- Repo conventions for issue labels, owners, and escalation paths
 
 ## Workflow
 
 1. Read the BOM and build a cell-to-workcell dependency map.
-2. Validate the BOM shape with `bom-validation` before acting on dependencies.
-3. Check cell health and classify each cell as healthy, degraded, or failed.
-4. If a cell fails, identify all impacted workcells and open a single blocker issue for that cell.
-5. If a cell recovers, locate the matching blocker issue, add a recovery comment, and close it.
+2. Validate the BOM shape with `bom-validation` before acting.
+3. Check cell health; classify each cell healthy, degraded, or failed.
+4. On failure, identify impacted workcells and open one blocker issue for that cell.
+5. On recovery, locate the matching blocker issue, add a recovery comment, and close it.
 6. Keep the workflow idempotent: update existing blocker issues instead of creating duplicates.
 
-## Blocker Creation
+## Blocker Creation & Recovery Handling
 
-Use a compact issue body that captures the dependency chain and the evidence of failure.
-
-```bash
-gh issue create \
-  --title "🚧 Cell <cell-name> blocks <N> workcells" \
-  --label "blocker" \
-  --body "## Cell blocker
-
-**Cell:** <cell-name>
-**Status:** failed
-**Blocked workcells:** <list>
-**Evidence:** <deployment or health check summary>
-**Next check:** <timestamp or condition>
-"
-```
-
-## Recovery Handling
-
-When health returns, close only the issue that corresponds to the recovered cell.
-
-```bash
-gh issue comment <number> --body "Cell health restored; blocker cleared."
-gh issue close <number>
-```
+Open a single compact blocker issue per failed cell capturing the dependency
+chain and failure evidence; on recovery, comment and close only the matching
+issue. Command templates:
+[`agents/references/dependency-blocker-monitor-detail.md`](references/dependency-blocker-monitor-detail.md).
 
 ## Guardrails
 
@@ -82,8 +62,5 @@ gh issue close <number>
 
 This agent operates under the BaseCoat governance framework.
 
-- **Issue-first**: Do not make code changes without a logged GitHub issue.
-- **PRs only**: Never commit directly to `main`. Open a PR, self-approve if needed.
-- **No secrets**: Never commit credentials, tokens, API keys, or sensitive data.
-- **Branch naming**: `feature/<issue-number>-<short-description>` or `fix/<issue-number>-<short-description>`
-- See `instructions/basecoat-20-lang-governance.instructions.md` for the full governance reference.
+- Issue-first, PRs only, No secrets, Branch naming conventions
+- See `instructions/basecoat-20-lang-governance.instructions.md` for the full reference

@@ -57,35 +57,11 @@ Purpose: onboard a repository or portfolio to BaseCoat using safe, repeatable re
 **Rationale:** Repeatable rollout steps with well-defined validation — speed and cost matter most
 **Minimum:** gpt-5.4-mini
 
-## Distribution Channels
+## Reference
 
-| Channel | When to Use | Command |
-|---|---|---|
-| GitHub Release ZIP | Air-gapped / restricted egress | Download from releases page, extract to `.github/` |
-| Sync script (PowerShell) | Windows CI / local dev | `pwsh sync.ps1 -Version v2.1.1` |
-| Sync script (Bash) | Linux/macOS CI | `./sync.sh --version v2.1.1` |
-
-## Validation Checklist
-
-After installation, verify:
-
-- [ ] `agents/*.agent.md` files are present (no taxonomy subdirs)
-- [ ] `instructions/*.instructions.md` files are present
-- [ ] `skills/*/SKILL.md` directories are intact
-- [ ] `prompts/*.prompt.md` files are present
-- [ ] No duplicate `agents/` directories in the consumer repo
-- [ ] `pwsh scripts/validate-basecoat.ps1` passes (if available)
-
-## GitHub Issue Filing
-
-File issues for rollout failures:
-
-```bash
-gh issue create \
-  --title "fix(rollout): <failure summary>" \
-  --label "bug,infrastructure" \
-  --body "<description with version, channel, and error output>"
-```
+Distribution channels/commands, the post-install validation checklist, and the
+rollout-failure issue-filing template:
+[`agents/references/rollout-basecoat-detail.md`](references/rollout-basecoat-detail.md).
 
 ## Governance
 
