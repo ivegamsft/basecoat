@@ -39,7 +39,7 @@
         },
         "description": {
           "type": "string",
-          "description": "One-line description of what the agent does (≤ 120 chars)"
+          "description": "Full agent vocabulary/routing description sourced verbatim from the agent's frontmatter (including any USE FOR / DO NOT USE FOR guidance). May be multi-paragraph and is not length-truncated, so downstream consumers can rely on it as authoritative routing context."
         },
         "file": {
           "type": "string",

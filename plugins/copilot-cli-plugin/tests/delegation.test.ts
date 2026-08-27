@@ -1,5 +1,6 @@
 import { delegate, DelegationEngine, DelegationOptions } from '../src/delegation/index';
 import { BasecoatCommand, InvocationContext } from '../src/types';
+import * as registry from '../src/registry/index';
 
 function makeCommand(agent: string, task = 'do the thing'): BasecoatCommand {
   return { agent, task, args: {}, rawInput: `/basecoat ${agent} ${task}` };
@@ -41,6 +42,23 @@ describe('delegate()', () => {
     expect(result.agentId).toBe('nonexistent-agent');
     expect(result.error).toBe('Agent not found: nonexistent-agent');
     expect(result.output).toBe('');
+  });
+
+  it('propagates registry load failures instead of masking them as "Agent not found"', async () => {
+    const loadError = new Error('ENOENT: bundled registry file missing');
+    const findAgentSpy = jest.spyOn(registry, 'findAgent').mockImplementation(() => {
+      throw loadError;
+    });
+
+    const command = makeCommand('ship-it-control-loop', 'do something');
+    const context = makeContext(command);
+
+    // A genuine registry-load failure (corrupt/missing bundled JSON) must
+    // surface as a distinguishable error rather than being swallowed into
+    // the generic "Agent not found" message used for real lookup misses.
+    await expect(delegate(command, context)).rejects.toThrow(loadError);
+
+    findAgentSpy.mockRestore();
   });
 
   it('measures a duration greater than 0 for a successful delegation', async () => {

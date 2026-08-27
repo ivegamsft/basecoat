@@ -28,6 +28,120 @@ if (-not (Test-Path -LiteralPath $policyScriptPath)) {
 $fallbackModel = Get-DefaultFrontmatterModel
 $modelSubstitutions = New-Object System.Collections.Generic.List[string]
 
+function Get-FrontmatterScalarValue {
+    <#
+    .SYNOPSIS
+        Extracts a top-level frontmatter scalar value for $KeyName, folding
+        YAML block scalars (`>` folded, `|` literal, with optional chomping
+        indicators `-` (strip) / `+` (keep), default (clip)) into a single
+        value instead of returning the bare block-scalar indicator
+        character, while preserving relative indentation within the block
+        and honoring chomping semantics.
+    #>
+    param(
+        [string[]]$Lines,
+        [string]$KeyName
+    )
+
+    for ($i = 0; $i -lt $Lines.Count; $i++) {
+        if ($Lines[$i] -notmatch "^${KeyName}:\s*(.*)$") { continue }
+
+        $inlineValue = $Matches[1].Trim()
+
+        if ($inlineValue -match '^([>|])([+-]?)\s*$') {
+            $isFolded = $Matches[1] -eq '>'
+            $chomp = $Matches[2]
+            $rawLines = New-Object System.Collections.Generic.List[string]
+            $baseIndent = $null
+            for ($j = $i + 1; $j -lt $Lines.Count; $j++) {
+                $candidate = $Lines[$j]
+                if ($candidate.Trim() -eq '') {
+                    # Blank lines are valid inside block scalars (paragraph
+                    # breaks for folded scalars); keep scanning instead of
+                    # stopping here.
+                    $rawLines.Add('')
+                    continue
+                }
+                if ($candidate -notmatch '^(\s+)\S') { break }
+                $indent = $Matches[1].Length
+                if ($null -eq $baseIndent) { $baseIndent = $indent }
+                elseif ($indent -lt $baseIndent) { break }
+                $rawLines.Add($candidate)
+            }
+            if ($null -eq $baseIndent) {
+                return ''
+            }
+
+            # Dedent by exactly the block's base indentation, preserving any
+            # additional relative indentation within each line. A blanket
+            # per-line Trim() (as before) would destroy meaningful literal
+            # indentation (e.g. nested lists inside a `|` description).
+            $dedented = @($rawLines | ForEach-Object {
+                if ($_ -eq '') { '' } else { $_.Substring([Math]::Min($baseIndent, $_.Length)) }
+            })
+
+            # Chomping indicator controls trailing-newline handling:
+            #   (none) = clip  -> trailing blanks removed, single trailing newline kept
+            #   '-'    = strip -> trailing blanks removed, no trailing newline
+            #   '+'    = keep  -> trailing blank lines preserved as-is
+            $trailingBlankCount = 0
+            for ($k = $dedented.Count - 1; $k -ge 0; $k--) {
+                if ($dedented[$k] -eq '') { $trailingBlankCount++ } else { break }
+            }
+            $contentLines = if ($trailingBlankCount -gt 0) {
+                @($dedented | Select-Object -First ($dedented.Count - $trailingBlankCount))
+            } else {
+                $dedented
+            }
+            if ($contentLines.Count -eq 0) {
+                return ''
+            }
+
+            if (-not $isFolded) {
+                $body = ($contentLines -join "`n")
+            } else {
+                # Folded (`>`) scalars per YAML fold rules: a single line
+                # break between two content lines folds to a space, while N
+                # (N>=1) consecutive blank lines between content lines fold
+                # to exactly N newline characters (not collapsed to a fixed
+                # paragraph separator) so the exact blank-line count of the
+                # source is reproduced in the folded value.
+                $sb = New-Object System.Text.StringBuilder
+                $pendingBlankLines = 0
+                $hasContent = $false
+                foreach ($line in $contentLines) {
+                    $trimmedLine = $line.Trim()
+                    if ($trimmedLine -eq '') {
+                        $pendingBlankLines++
+                        continue
+                    }
+                    if ($hasContent) {
+                        if ($pendingBlankLines -gt 0) {
+                            [void]$sb.Append(("`n" * $pendingBlankLines))
+                        } else {
+                            [void]$sb.Append(' ')
+                        }
+                    }
+                    [void]$sb.Append($trimmedLine)
+                    $hasContent = $true
+                    $pendingBlankLines = 0
+                }
+                $body = $sb.ToString()
+            }
+
+            switch ($chomp) {
+                '-' { return $body }
+                '+' { return $body + ("`n" * ($trailingBlankCount + 1)) }
+                default { return "$body`n" }
+            }
+        }
+
+        return $inlineValue.Trim('"').Trim("'")
+    }
+
+    return $null
+}
+
 Get-ChildItem $AgentsPath -Filter "*.agent.md" | ForEach-Object {
     $file = $_.FullName
     $content = Get-Content $file -Raw
@@ -36,12 +150,15 @@ Get-ChildItem $AgentsPath -Filter "*.agent.md" | ForEach-Object {
     # Extract YAML frontmatter
     if ($content -match "^---\s*\n([\s\S]+?)\n---") {
         $frontmatter = $Matches[1]
+        $frontmatterLines = $frontmatter -split "`r?`n"
 
         $id = $_.Name -replace "\.agent\.md$", ""
         # Extract short agent name from new naming convention
         $id = $id -replace '^basecoat-\d+-\w+-', ''
-        $name = if ($frontmatter -match "^name:\s*(.+)$") { $Matches[1].Trim().Trim('"') } else { $id }
-        $description = if ($frontmatter -match "^description:\s*(.+)$") { $Matches[1].Trim().Trim('"') } else { "No description" }
+        $name = Get-FrontmatterScalarValue -Lines $frontmatterLines -KeyName 'name'
+        if ([string]::IsNullOrWhiteSpace($name)) { $name = $id }
+        $description = Get-FrontmatterScalarValue -Lines $frontmatterLines -KeyName 'description'
+        if ([string]::IsNullOrWhiteSpace($description)) { $description = "No description" }
         $requestedModel = if ($frontmatter -match "(?m)^model:\s*(.+)$") { $Matches[1].Trim() } else { $fallbackModel }
         $model = (Resolve-FrontmatterModel -RequestedModel $requestedModel -Context "generate-registry:$id").Model
         if ($requestedModel.Trim('"').Trim("'") -ne $model) {
@@ -71,7 +188,7 @@ Get-ChildItem $AgentsPath -Filter "*.agent.md" | ForEach-Object {
         $agents[$id] = [ordered]@{
             id           = $id
             name         = $name
-            description  = $description.Substring(0, [Math]::Min(120, $description.Length))
+            description  = $description
             file         = $relativePath
             keywords     = @($keywords | Select-Object -First 15)
             capabilities = @($capabilities)

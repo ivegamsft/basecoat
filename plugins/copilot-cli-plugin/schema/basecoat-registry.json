@@ -1,11 +1,11 @@
 {
   "version": "1.0.0",
-  "generated": "2026-08-22T16:22:01Z",
+  "generated": "2026-08-26T16:19:45Z",
   "agents": {
     "agent-designer": {
       "id": "agent-designer",
       "name": "agent-designer",
-      "description": "No description",
+      "description": "Agent factory specialist. USE FOR: creating agent specs, auditing agent/skill definitions, capability-based routing decisions, and revising weak specs. DO NOT USE FOR: product feature coding, infrastructure deployment, unrelated code review.",
       "file": "agents/basecoat-10-core-agent-designer.agent.md",
       "keywords": [
         "agent",
@@ -21,7 +21,7 @@
     "agentic-sdlc-autonomy": {
       "id": "agentic-sdlc-autonomy",
       "name": "agentic-sdlc-autonomy",
-      "description": "No description",
+      "description": "Audit, measure, implement, and operate rules-based human-in-the-loop autonomy for agent-operated repositories. Use when evaluating or improving agentic SDLC governance: PR risk classification (A0-A5 levels), auto-merge policy, merge queue gates, deployment lane policy, DB migration controls, IaC safety rules, runner isolation, production approval flows, and policy-versus-settings drift.",
       "file": "agents/agentic-sdlc-autonomy.agent.md",
       "keywords": [
         "agentic",
@@ -38,7 +38,7 @@
     "agentops": {
       "id": "agentops",
       "name": "agentops",
-      "description": "No description",
+      "description": "Agent operations and infrastructure specialist. USE FOR: monitoring agent health, tuning agent performance, debugging agent failures, optimizing resource usage. DO NOT USE FOR: individual agent tasks, direct coding.",
       "file": "agents/basecoat-10-core-agentops.agent.md",
       "keywords": [
         "agentops"
@@ -53,7 +53,7 @@
     "api-designer": {
       "id": "api-designer",
       "name": "api-designer",
-      "description": "No description",
+      "description": "REST API and contract design specialist. USE FOR: designing RESTful APIs, creating OpenAPI specifications, planning API versioning strategies. DO NOT USE FOR: API implementation, testing.",
       "file": "agents/basecoat-10-core-api-designer.agent.md",
       "keywords": [
         "api",
@@ -69,7 +69,7 @@
     "api-security": {
       "id": "api-security",
       "name": "api-security",
-      "description": "No description",
+      "description": "API Security Agent for comprehensive API threat modeling, OWASP API Security Top 10 assessment, and secure API design. Covers authentication, authorization, rate limiting, and API-specific vulnerabilities. USE FOR: run OWASP API Top 10 assessment, model API threats with STRIDE, audit auth flows. DO NOT USE FOR: container image scanning, general code review.",
       "file": "agents/basecoat-50-security-api-security.agent.md",
       "keywords": [
         "api",
@@ -85,7 +85,7 @@
     "app-inventory": {
       "id": "app-inventory",
       "name": "app-inventory",
-      "description": "No description",
+      "description": "Scans legacy applications to discover dependencies, identify technology stacks, assess migration complexity, and generate architecture diagrams for portfolio analysis. USE FOR: scan legacy app tech stack, assess migration complexity, generate dependency inventory. DO NOT USE FOR: writing new code, live production monitoring.",
       "file": "agents/basecoat-10-core-app-inventory.agent.md",
       "keywords": [
         "app",
@@ -101,7 +101,7 @@
     "azure-landing-zone": {
       "id": "azure-landing-zone",
       "name": "azure-landing-zone",
-      "description": "No description",
+      "description": "Azure Landing Zone (ESLZ) agent for scaffolding enterprise-scale landing zones following Microsoft's Cloud Adoption Framework. Use when designing management group hierarchies, platform subscriptions, hub networking, policy baselines, or landing zone vending templates.",
       "file": "agents/basecoat-40-azure-azure-landing-zone.agent.md",
       "keywords": [
         "azure",
@@ -118,7 +118,7 @@
     "backend-dev": {
       "id": "backend-dev",
       "name": "backend-dev",
-      "description": "No description",
+      "description": "Backend and services development specialist. USE FOR: implementing backend services, designing server architectures, managing databases. DO NOT USE FOR: frontend work, DevOps operations.",
       "file": "agents/basecoat-10-core-backend-dev.agent.md",
       "keywords": [
         "backend",
@@ -134,7 +134,7 @@
     "backlog-autopilot": {
       "id": "backlog-autopilot",
       "name": "backlog-autopilot",
-      "description": "No description",
+      "description": "Continuous backlog-delivery conductor that burns the issue backlog oldest to newest in dependency-ordered waves, unattended until stopped or blocked. USE FOR: running the autopilot: intent as a persistent multi-wave delivery loop, composing oldest-first selection with design/scope/test/merge-queue/deploy gates, and driving standalone or fleet backlog burndown at a throttle-safe pace. DO NOT USE FOR: implementing feature code directly, bypassing required checks or human-approval boundaries, or one-off single-issue work that does not need a continuing loop.",
       "file": "agents/basecoat-60-workflow-backlog-autopilot.agent.md",
       "keywords": [
         "backlog",
@@ -150,7 +150,7 @@
     "backlog-rebalancer": {
       "id": "backlog-rebalancer",
       "name": "backlog-rebalancer",
-      "description": "No description",
+      "description": "Unified backlog orchestration agent. USE FOR: priority reranking, sprint/wave reassignment with dependency checks, and capacity-aware portfolio balancing. DO NOT USE FOR: unsafeguarded mass reassignment, dependency-violating moves, or unreviewed metadata churn.",
       "file": "agents/basecoat-60-workflow-backlog-rebalancer.agent.md",
       "keywords": [
         "backlog",
@@ -166,7 +166,7 @@
     "bom-validator": {
       "id": "bom-validator",
       "name": "bom-validator",
-      "description": "No description",
+      "description": "Use when validating a Workcell BOM against the plant registry before S2 starts. USE FOR: schema validation, CAF naming checks, circular dependency detection, and GitHub check results. DO NOT USE FOR: runtime state merges or cutover decisions.",
       "file": "agents/basecoat-10-core-bom-validator.agent.md",
       "keywords": [
         "bom",
@@ -182,7 +182,7 @@
     "branch-hygiene-sweeper": {
       "id": "branch-hygiene-sweeper",
       "name": "branch-hygiene-sweeper",
-      "description": "No description",
+      "description": "Use when cleaning stale branches, dangling refs, and release branch hygiene while preserving active work. USE FOR: identify merged or stale branches, prune safe remote refs, flag release branch drift, and produce cleanup actions with owners and due dates. DO NOT USE FOR: deleting branches with open PRs, changing branch protection, or resolving merge conflicts.",
       "file": "agents/basecoat-10-core-branch-hygiene-sweeper.agent.md",
       "keywords": [
         "branch",
@@ -199,7 +199,7 @@
     "broken-build-troubleshooter": {
       "id": "broken-build-troubleshooter",
       "name": "broken-build-troubleshooter",
-      "description": "No description",
+      "description": "Use when CI or local builds are failing and the team needs fast, repeatable triage to isolate root cause and restore green status. USE FOR: classify failure signatures, pinpoint failing stage/test/toolchain segment, propose minimal safe remediation, and generate a fix validation checklist. DO NOT USE FOR: feature implementation, long-form architecture documents, or security incident response ownership.",
       "file": "agents/basecoat-60-workflow-broken-build-troubleshooter.agent.md",
       "keywords": [
         "broken",
@@ -216,7 +216,7 @@
     "build-master": {
       "id": "build-master",
       "name": "build-master",
-      "description": "No description",
+      "description": "Background merge-control agent that keeps healthy lanes moving while isolating broken lanes and dispatching cloud break-fix PRs. USE FOR: lane-aware merge orchestration, CI break containment, cloud fix delegation, and safe resume after recovery. DO NOT USE FOR: bypassing branch protection, direct pushes to protected branches, or autonomous high-risk security/infra remediations.",
       "file": "agents/basecoat-60-workflow-build-master.agent.md",
       "keywords": [
         "build",
@@ -236,7 +236,7 @@
     "change-isolation-architect": {
       "id": "change-isolation-architect",
       "name": "change-isolation-architect",
-      "description": "No description",
+      "description": "Designs layered CI/CD isolation so independent domains (for example mobile, database, portal, extension, and infra) can evolve and release separately without cross-triggered pipeline noise.",
       "file": "agents/basecoat-10-core-change-isolation-architect.agent.md",
       "keywords": [
         "change",
@@ -253,7 +253,7 @@
     "chaos-engineer": {
       "id": "chaos-engineer",
       "name": "chaos-engineer",
-      "description": "No description",
+      "description": "Chaos engineering agent for fault injection, game days, resilience scoring, recovery validation, and SLO-aware resilience experiments. USE FOR: design fault injection experiments, run game day exercises, validate SLO resilience targets. DO NOT USE FOR: debugging application bugs, writing unit tests.",
       "file": "agents/basecoat-10-core-chaos-engineer.agent.md",
       "keywords": [
         "chaos",
@@ -269,7 +269,7 @@
     "ci-audit": {
       "id": "ci-audit",
       "name": "ci-audit",
-      "description": "No description",
+      "description": "Use when asked to audit repository governance posture or produce a governance evidence pack. USE FOR: auditing branch protection, required status checks, merge queue configuration, environment protection rules, production reviewers, runner groups, workflow dispatch access, CODEOWNERS enforcement, and policy-versus-settings gaps for a single repository. DO NOT USE FOR: writing application code, general code reviews, org-level enterprise policy administration, or infrastructure-as-code development.",
       "file": "agents/basecoat-50-security-ci-audit.agent.md",
       "keywords": [
         "ci",
@@ -285,7 +285,7 @@
     "ci-failure-escalation": {
       "id": "ci-failure-escalation",
       "name": "ci-failure-escalation",
-      "description": "No description",
+      "description": "Detects N consecutive CI failures on the same workflow job, opens a blocking issue, and gates further deploys to that environment — the andon cord / halt-the-line pattern for CI/CD pipelines. USE FOR: gate deploys on CI failures, open blocking issues, enforce halt-line policy. DO NOT USE FOR: fixing failing tests, writing CI config.",
       "file": "agents/basecoat-60-workflow-ci-failure-escalation.agent.md",
       "keywords": [
         "ci",
@@ -302,7 +302,7 @@
     "ci-guardrail-accelerator": {
       "id": "ci-guardrail-accelerator",
       "name": "ci-guardrail-accelerator",
-      "description": "No description",
+      "description": "Accelerate CI pipeline guardrail checks by parallelizing independent jobs, fast-pathing known-safe change sets, and eliminating redundant validation steps. USE FOR: reduce CI cycle time, identify parallelizable job groups, detect redundant checks, fast-path documentation-only or config-only PRs. DO NOT USE FOR: disabling required security gates, bypassing approval policies, deploying to production.",
       "file": "agents/basecoat-60-workflow-ci-guardrail-accelerator.agent.md",
       "keywords": [
         "ci",
@@ -319,7 +319,7 @@
     "code-review": {
       "id": "code-review",
       "name": "code-review",
-      "description": "No description",
+      "description": "Code review and quality gate specialist. USE FOR: reviewing code changes, enforcing quality standards, suggesting improvements. DO NOT USE FOR: writing code, direct fixes.",
       "file": "agents/basecoat-90-quality-code-review.agent.md",
       "keywords": [
         "code",
@@ -335,7 +335,7 @@
     "config-auditor": {
       "id": "config-auditor",
       "name": "config-auditor",
-      "description": "No description",
+      "description": "Configuration auditor for detecting committed secrets and sensitive config. USE FOR: scanning repositories for hardcoded credentials, API keys, and PII; enforcing encryption standards for secrets at rest; generating compliance reports; performing pre-commit validation. DO NOT USE FOR: real-time monitoring, incident response (use Secrets Manager instead), general code reviews.",
       "file": "agents/basecoat-50-security-config-auditor.agent.md",
       "keywords": [
         "config",
@@ -350,8 +350,8 @@
     },
     "container-security": {
       "id": "container-security",
-      "name": "container-security",
-      "description": "No description",
+      "name": "Container Security",
+      "description": "Container and Kubernetes security — Pod Security Standards, runtime security, CSPM findings, image scanning, and supply chain security for containerized workloads. USE FOR: scan container images for CVEs, audit Pod Security Standards, assess Kubernetes runtime security. DO NOT USE FOR: writing application code, network firewall rules.",
       "file": "agents/basecoat-50-security-container-security.agent.md",
       "keywords": [
         "container",
@@ -367,7 +367,7 @@
     "containerization-planner": {
       "id": "containerization-planner",
       "name": "containerization-planner",
-      "description": "No description",
+      "description": "Helps assess containerization readiness, choose deployment platforms (Docker/AKS/ACA), and generate container configurations including Dockerfiles, multi-stage builds, health probes, resource limits, and deployment manifests. USE FOR: containerize an app, choose AKS vs ACA, generate Dockerfiles. DO NOT USE FOR: image scanning, cluster incidents.",
       "file": "agents/basecoat-30-ai-containerization-planner.agent.md",
       "keywords": [
         "containerization",
@@ -383,7 +383,7 @@
     "contract-testing": {
       "id": "contract-testing",
       "name": "contract-testing",
-      "description": "No description",
+      "description": "Contract Testing Agent for consumer-driven contracts, E2E testing strategy, and mutation testing for distributed systems. USE FOR: write Pact consumer-driven contracts, design service integration tests, set up contract verification in CI. DO NOT USE FOR: load testing, manual QA workflows.",
       "file": "agents/basecoat-10-core-contract-testing.agent.md",
       "keywords": [
         "contract",
@@ -399,7 +399,7 @@
     "daily-standup-facilitator": {
       "id": "daily-standup-facilitator",
       "name": "daily-standup-facilitator",
-      "description": "No description",
+      "description": "Use when running daily standup ceremonies to surface blockers, dependencies, and near-term execution risk. USE FOR: extract actionable updates, identify blockers needing escalation, map dependencies across team members, and produce a day plan with owners. DO NOT USE FOR: writing feature code, replacing sprint planning, or long-term roadmap analysis.",
       "file": "agents/basecoat-30-ai-daily-standup-facilitator.agent.md",
       "keywords": [
         "daily",
@@ -416,7 +416,7 @@
     "data-architect": {
       "id": "data-architect",
       "name": "data-architect",
-      "description": "No description",
+      "description": "Data architecture design specialist. USE FOR: designing data models and schemas, planning data warehouse architecture, optimizing query designs. DO NOT USE FOR: ETL operations, data pipeline troubleshooting.",
       "file": "agents/basecoat-80-data-data-architect.agent.md",
       "keywords": [
         "data",
@@ -431,8 +431,8 @@
     },
     "data-integrity": {
       "id": "data-integrity",
-      "name": "data-integrity",
-      "description": "No description",
+      "name": "Data Integrity",
+      "description": "Distributed data integrity patterns — eventual consistency strategies, conflict resolution, ACID compliance, backup verification, and data recovery procedures.\n",
       "file": "agents/basecoat-80-data-data-integrity.agent.md",
       "keywords": [
         "data",
@@ -448,7 +448,7 @@
     "data-pipeline": {
       "id": "data-pipeline",
       "name": "data-pipeline",
-      "description": "No description",
+      "description": "Data pipeline agent for medallion lakehouse architecture, data quality, ML pipeline orchestration, and feature store integration. Use when building or reviewing bronze/silver/gold Delta Lake pipelines, data quality checks, feature engineering, or ML training workflows.",
       "file": "agents/basecoat-60-workflow-data-pipeline.agent.md",
       "keywords": [
         "data",
@@ -464,7 +464,7 @@
     "data-tier": {
       "id": "data-tier",
       "name": "data-tier",
-      "description": "No description",
+      "description": "Data persistence and storage optimization. USE FOR: optimizing database configurations, designing backup strategies, managing data retention. DO NOT USE FOR: application development, real-time operations.",
       "file": "agents/basecoat-80-data-data-tier.agent.md",
       "keywords": [
         "data",
@@ -480,7 +480,7 @@
     "database-migration": {
       "id": "database-migration",
       "name": "database-migration",
-      "description": "No description",
+      "description": "Database migration and modernization specialist. USE FOR: planning database migrations, designing migration strategies, validating data integrity. DO NOT USE FOR: operational database management, routine backups.",
       "file": "agents/basecoat-80-data-database-migration.agent.md",
       "keywords": [
         "database",
@@ -496,7 +496,7 @@
     "dataops": {
       "id": "dataops",
       "name": "dataops",
-      "description": "No description",
+      "description": "Data operations and pipeline management. USE FOR: managing data pipelines, monitoring data quality, optimizing data flow. DO NOT USE FOR: data analysis, business intelligence.",
       "file": "agents/basecoat-80-data-dataops.agent.md",
       "keywords": [
         "dataops"
@@ -511,7 +511,7 @@
     "definition-of-done": {
       "id": "definition-of-done",
       "name": "definition-of-done",
-      "description": "No description",
+      "description": "Validate that a feature, PR, or release meets the Definition of Done before closing. Enforces testing evidence, config verification, response validation, and acceptance criteria. USE FOR: check PR meets DoD, validate acceptance criteria, verify release readiness. DO NOT USE FOR: writing acceptance criteria, implementing features.",
       "file": "agents/basecoat-10-core-definition-of-done.agent.md",
       "keywords": [
         "definition",
@@ -528,7 +528,7 @@
     "delivery-autopilot": {
       "id": "delivery-autopilot",
       "name": "delivery-autopilot",
-      "description": "No description",
+      "description": "Approve-once delivery orchestrator that evaluates readiness, executes merge policy, and escalates deterministic remediation payloads. USE FOR: running end-to-end approved issue -> PR -> release automation, driving merge and escalation decisions from policy-backed status signals, and generating deterministic dry-run execution plans for audit and rehearsal. DO NOT USE FOR: bypassing required checks or human approval boundaries, implementing feature code directly, or performing ad hoc manual release actions outside the governed workflow chain.",
       "file": "agents/basecoat-60-workflow-delivery-autopilot.agent.md",
       "keywords": [
         "delivery",
@@ -544,7 +544,7 @@
     "delivery-gap-mapper": {
       "id": "delivery-gap-mapper",
       "name": "delivery-gap-mapper",
-      "description": "No description",
+      "description": "Use when you need to detect delivery gaps, cluster issues/PRs by function, map dependencies, and operationalize execution in a GitHub Project. USE FOR: identifying issue/PR patterns, grouping backlog by feature/function, mapping hard vs soft dependencies, creating/updating a GitHub Project and linking items. DO NOT USE FOR: implementing product code changes, bypassing governance gates, or force-closing issues without evidence.",
       "file": "agents/basecoat-10-core-delivery-gap-mapper.agent.md",
       "keywords": [
         "delivery",
@@ -561,7 +561,7 @@
     "dependabot-prioritizer": {
       "id": "dependabot-prioritizer",
       "name": "dependabot-prioritizer",
-      "description": "No description",
+      "description": "Triage and prioritize open Dependabot PR queues by CVE severity, semver risk, ecosystem impact, and blocking dependency chains. USE FOR: rank Dependabot PRs for merge order, identify security-blocking updates, group safe batch merges, surface dependency chain blockers. DO NOT USE FOR: creating Dependabot config, general code review, implementing upgrade changes.",
       "file": "agents/basecoat-10-core-dependabot-prioritizer.agent.md",
       "keywords": [
         "dependabot",
@@ -577,7 +577,7 @@
     "dependency-blocker-monitor": {
       "id": "dependency-blocker-monitor",
       "name": "dependency-blocker-monitor",
-      "description": "No description",
+      "description": "Use when monitoring workcell BOM dependencies and cell health to open or resolve blocker issues when a cell fails or recovers. USE FOR: read workcell BOM dependencies, monitor cell deployment status, create blocker issues, and resolve them on recovery. DO NOT USE FOR: general incident response, application code, or one-off issue triage.",
       "file": "agents/basecoat-10-core-dependency-blocker-monitor.agent.md",
       "keywords": [
         "dependency",
@@ -594,7 +594,7 @@
     "dependency-lifecycle": {
       "id": "dependency-lifecycle",
       "name": "dependency-lifecycle",
-      "description": "No description",
+      "description": "Agent for managing dependency updates, tracking breaking changes, planning upgrade paths, monitoring vulnerabilities, analyzing semantic versioning, and generating migration guides. USE FOR: plan upgrade paths, generate migration guides, audit dependency CVEs. DO NOT USE FOR: writing new features, infrastructure provisioning.",
       "file": "agents/basecoat-10-core-dependency-lifecycle.agent.md",
       "keywords": [
         "dependency",
@@ -610,7 +610,7 @@
     "dependency-update-advisor": {
       "id": "dependency-update-advisor",
       "name": "dependency-update-advisor",
-      "description": "No description",
+      "description": "Reviews Dependabot pull requests and posts a structured risk assessment comment: semver bump type, breaking change likelihood, suggested test focus areas, and known CVE context. USE FOR: assess Dependabot PR risk, evaluate semver bump safety, get CVE context for dependency update. DO NOT USE FOR: creating Dependabot config, general code review.",
       "file": "agents/basecoat-10-core-dependency-update-advisor.agent.md",
       "keywords": [
         "dependency",
@@ -627,7 +627,7 @@
     "devops-engineer": {
       "id": "devops-engineer",
       "name": "devops-engineer",
-      "description": "No description",
+      "description": "DevOps and infrastructure automation specialist. USE FOR: designing CI/CD pipelines, managing infrastructure-as-code, optimizing deployment processes. DO NOT USE FOR: application code, product feature development.",
       "file": "agents/basecoat-10-core-devops-engineer.agent.md",
       "keywords": [
         "devops",
@@ -643,7 +643,7 @@
     "domain-designer": {
       "id": "domain-designer",
       "name": "domain-designer",
-      "description": "No description",
+      "description": "Domain-driven design specialist. USE FOR: designing domain models, planning domain-oriented architectures, designing bounded contexts. DO NOT USE FOR: implementation, code generation.",
       "file": "agents/basecoat-30-ai-domain-designer.agent.md",
       "keywords": [
         "domain",
@@ -659,7 +659,7 @@
     "dotnet-modernization-advisor": {
       "id": "dotnet-modernization-advisor",
       "name": "dotnet-modernization-advisor",
-      "description": "No description",
+      "description": "Advisor for .NET modernization assessment, upgrade planning, and execution guidance. Use when migrating legacy .NET Framework/older .NET solutions to modern .NET versions.",
       "file": "agents/basecoat-20-lang-dotnet-modernization-advisor.agent.md",
       "keywords": [
         "dotnet",
@@ -676,7 +676,7 @@
     "e2e-test-strategy": {
       "id": "e2e-test-strategy",
       "name": "e2e-test-strategy",
-      "description": "No description",
+      "description": "E2E Test Strategy Agent for end-to-end testing orchestration, critical path identification, flakiness prevention, and cross-browser coverage. Covers Playwright, Cypress, Selenium patterns and integration with CI/CD pipelines. USE FOR: design E2E suite, map critical user paths, fix flaky tests. DO NOT USE FOR: unit testing, contract testing.",
       "file": "agents/basecoat-90-quality-e2e-test-strategy.agent.md",
       "keywords": [
         "e2e",
@@ -693,7 +693,7 @@
     "escalation-router": {
       "id": "escalation-router",
       "name": "escalation-router",
-      "description": "No description",
+      "description": "Use when high-risk decisions need a human approver and a PR-comment approval trail. USE FOR: release signoff, irreversible changes, compliance gates. DO NOT USE FOR: routine automation.",
       "file": "agents/basecoat-10-core-escalation-router.agent.md",
       "keywords": [
         "escalation",
@@ -709,7 +709,7 @@
     "exploratory-charter": {
       "id": "exploratory-charter",
       "name": "exploratory-charter",
-      "description": "No description",
+      "description": "Use when you need time-boxed exploratory testing sessions. Generates mission-driven charters with scope, triage routing, and evidence capture. Automatically files GitHub Issues for automation candidates found during exploration.",
       "file": "agents/basecoat-10-core-exploratory-charter.agent.md",
       "keywords": [
         "exploratory",
@@ -725,7 +725,7 @@
     "factory-conductor": {
       "id": "factory-conductor",
       "name": "factory-conductor",
-      "description": "No description",
+      "description": "Use when reading .factory-state.json and auto-queuing the next ready wave of factory work. USE FOR: route S2/S3/S4 work, batch dispatch by wave, and ping the right follow-up workflow. DO NOT USE FOR: state normalization, BOM validation, or product backlog prioritization.",
       "file": "agents/basecoat-10-core-factory-conductor.agent.md",
       "keywords": [
         "factory",
@@ -741,7 +741,7 @@
     "factory-state-curator": {
       "id": "factory-state-curator",
       "name": "factory-state-curator",
-      "description": "No description",
+      "description": "Use when merging Workcell intake YAML, GitHub labels, and gate results into a single S1-S5 state snapshot. USE FOR: normalize station state, publish .factory-state.json, reconcile blockers, and surface stale work. DO NOT USE FOR: implementing product code or changing workflow policy.",
       "file": "agents/basecoat-10-core-factory-state-curator.agent.md",
       "keywords": [
         "factory",
@@ -758,7 +758,7 @@
     "failure-pattern-process": {
       "id": "failure-pattern-process",
       "name": "failure-pattern-process",
-      "description": "No description",
+      "description": "Failure pattern process agent for evidence-first mining, raw logging, triage, and enhancement planning. USE FOR: mining failure signals across issues/PRs/CI/logs/incidents, producing append-only raw findings logs, classifying common versus repo-specific patterns with rationale, and building prioritized enhancement plans with early-detection gates. DO NOT USE FOR: implementing feature code changes, auto-remediating production incidents, or bypassing evidence and gate requirements.",
       "file": "agents/basecoat-30-ai-failure-pattern-process.agent.md",
       "keywords": [
         "failure",
@@ -775,7 +775,7 @@
     "feedback-loop": {
       "id": "feedback-loop",
       "name": "feedback-loop",
-      "description": "No description",
+      "description": "Continuous learning and optimization through user feedback collection, prompt effectiveness tracking, outcome measurement, A/B testing, regression detection, and instruction refinement. USE FOR: track prompt effectiveness, run A/B test on instructions, detect quality regression. DO NOT USE FOR: product feature feedback, writing new prompts.",
       "file": "agents/basecoat-10-core-feedback-loop.agent.md",
       "keywords": [
         "feedback",
@@ -791,7 +791,7 @@
     "finops-advisor": {
       "id": "finops-advisor",
       "name": "finops-advisor",
-      "description": "No description",
+      "description": "FinOps advisor for cloud cost governance, cost optimization, chargeback/showback models, and 12-Factor App best practices for cost efficiency. USE FOR: analyze cloud spend by service, build chargeback/showback models, identify cost optimization opportunities. DO NOT USE FOR: live incident response, infrastructure provisioning.",
       "file": "agents/basecoat-10-core-finops-advisor.agent.md",
       "keywords": [
         "finops",
@@ -807,7 +807,7 @@
     "flow-admission-controller": {
       "id": "flow-admission-controller",
       "name": "flow-admission-controller",
-      "description": "No description",
+      "description": "Use when designing or tuning intake controls for PR volume, merge-queue admission, and reviewer/runner capacity limits. USE FOR: WIP limit policies, queue admission rules, stale PR handling, and safe load-shedding design. DO NOT USE FOR: overriding branch protections manually, skipping approvals, or implementing unrelated product features.",
       "file": "agents/flow-admission-controller.agent.md",
       "keywords": [
         "flow",
@@ -824,7 +824,7 @@
     "flow-auditor": {
       "id": "flow-auditor",
       "name": "flow-auditor",
-      "description": "No description",
+      "description": "Use when auditing PR intake, merge queue health, CI tier efficiency, and stale-branch pressure across repositories. USE FOR: queue bottleneck audits, CI waste analysis, PR aging reviews, merge-path risk scoring, and evidence-backed findings. DO NOT USE FOR: writing feature code, merging PRs without approval, or changing branch protections directly.",
       "file": "agents/flow-auditor.agent.md",
       "keywords": [
         "flow",
@@ -840,7 +840,7 @@
     "flow-governance-conductor": {
       "id": "flow-governance-conductor",
       "name": "flow-governance-conductor",
-      "description": "No description",
+      "description": "Use when coordinating flow-governance analysis across code, PRs, issues, skills, and scripts. USE FOR: reusing existing flow/CI/governance skills first, mapping findings to current agents and scripts, identifying missing skill/script coverage, and producing issue-ready gap backlogs. DO NOT USE FOR: writing product features, bypassing branch or environment protections, or force-merging pull requests.",
       "file": "agents/flow-governance-conductor.agent.md",
       "keywords": [
         "flow",
@@ -857,7 +857,7 @@
     "flow-optimizer": {
       "id": "flow-optimizer",
       "name": "flow-optimizer",
-      "description": "No description",
+      "description": "Use when building an optimization program that combines audit evidence with prioritized fixes and execution sequencing. USE FOR: phased flow optimization plans, merge-queue and CI policy tuning, target KPI definition, and rollout risk reduction. DO NOT USE FOR: one-off bugfix coding, ad hoc release approvals, or force-merging around failed checks.",
       "file": "agents/flow-optimizer.agent.md",
       "keywords": [
         "flow",
@@ -873,7 +873,7 @@
     "flow-suggester": {
       "id": "flow-suggester",
       "name": "flow-suggester",
-      "description": "No description",
+      "description": "Use when converting audit findings into prioritized, issue-ready fixes with acceptance criteria and owners. USE FOR: translating audit evidence into GitHub issues, prioritizing queue and CI fixes, auto-creating high-confidence issues, sequencing remediation work, and defining measurable outcomes. DO NOT USE FOR: running uncontrolled migrations, bypassing governance gates, or shipping code changes directly.",
       "file": "agents/flow-suggester.agent.md",
       "keywords": [
         "flow",
@@ -889,7 +889,7 @@
     "flow-tracker": {
       "id": "flow-tracker",
       "name": "flow-tracker",
-      "description": "No description",
+      "description": "Use when tracking repository flow metrics over time and recommending corrective actions when trends degrade. USE FOR: weekly flow scorecards, trend analysis, regression alerts, and metric-backed improvement suggestions. DO NOT USE FOR: speculative architecture redesign, editing production code, or replacing incident response workflows.",
       "file": "agents/flow-tracker.agent.md",
       "keywords": [
         "flow",
@@ -905,7 +905,7 @@
     "frontend-dev": {
       "id": "frontend-dev",
       "name": "frontend-dev",
-      "description": "No description",
+      "description": "Frontend and UI development specialist. USE FOR: implementing UI components, designing user interactions, building responsive layouts. DO NOT USE FOR: backend development, infrastructure.",
       "file": "agents/basecoat-10-core-frontend-dev.agent.md",
       "keywords": [
         "frontend",
@@ -920,8 +920,8 @@
     },
     "gate-diagnostician": {
       "id": "gate-diagnostician",
-      "name": "gate-diagnostician",
-      "description": "No description",
+      "name": "workflow-gate-diagnostician",
+      "description": "Diagnoses policy and environment gate blockers in delivery workflows and produces minimal-safe unblock actions with deterministic evidence artifacts. USE FOR: environment approval deadlocks, permissions and branch-policy gate failures, Pages/deployment gate state diagnostics, and workflow-blocker RCA with validation reruns. DO NOT USE FOR: broad feature implementation, bypassing required approvals, or editing unrelated application logic.",
       "file": "agents/basecoat-60-workflow-gate-diagnostician.agent.md",
       "keywords": [
         "gate",
@@ -937,7 +937,7 @@
     "github-security-posture": {
       "id": "github-security-posture",
       "name": "github-security-posture",
-      "description": "No description",
+      "description": "GitHub organization security posture auditor. USE FOR: auditing GitHub organization settings and policies, reviewing branch protection configurations, analyzing secret scanning and Dependabot alerts, assessing team and RBAC permissions, evaluating OAuth app restrictions. DO NOT USE FOR: fixing security issues (use individual remediation agents), real-time threat detection, application code security review.",
       "file": "agents/basecoat-50-security-github-security-posture.agent.md",
       "keywords": [
         "github",
@@ -954,7 +954,7 @@
     "gitops-engineer": {
       "id": "gitops-engineer",
       "name": "gitops-engineer",
-      "description": "No description",
+      "description": "GitOps and deployment automation specialist. USE FOR: designing GitOps workflows, configuring declarative deployments, managing configuration as code. DO NOT USE FOR: manual deployments, emergency operations.",
       "file": "agents/basecoat-10-core-gitops-engineer.agent.md",
       "keywords": [
         "gitops",
@@ -970,7 +970,7 @@
     "governance-auditor": {
       "id": "governance-auditor",
       "name": "governance-auditor",
-      "description": "No description",
+      "description": "Use when auditing issue and PR metadata, label drift, template gaps, and workflow enforcement coverage. USE FOR: label audits, template consistency checks, workflow drift reviews, gap identification, and issue-ready findings. DO NOT USE FOR: writing application code, implementing product features, or changing labels without evidence.",
       "file": "agents/governance-auditor.agent.md",
       "keywords": [
         "governance",
@@ -986,7 +986,7 @@
     "governance-author": {
       "id": "governance-author",
       "name": "governance-author",
-      "description": "No description",
+      "description": "Use when writing or revising common-vs-specific governance guidance, canonical label contracts, and migration notes. USE FOR: drafting docs/reference/governance-contract.md, separating shared rules from repo-specific rules, mapping legacy labels to canonical labels, and planning governance issue backlogs. DO NOT USE FOR: implementation code, release management, or ad hoc issue cleanup.",
       "file": "agents/governance-author.agent.md",
       "keywords": [
         "governance",
@@ -1002,7 +1002,7 @@
     "guardrail": {
       "id": "guardrail",
       "name": "guardrail",
-      "description": "No description",
+      "description": "Guardrail validation agent for checking outputs against safety, quality, compliance, and formatting rules before delivery. USE FOR: validate agent output against safety rules, enforce quality gates on generated content, check compliance formatting before delivery. DO NOT USE FOR: writing new code or content, debugging application errors.",
       "file": "agents/basecoat-30-ai-guardrail.agent.md",
       "keywords": [
         "guardrail"
@@ -1017,7 +1017,7 @@
     "guidance-author": {
       "id": "guidance-author",
       "name": "guidance-author",
-      "description": "No description",
+      "description": "BaseCoat guidance documentation author. USE FOR: creating security playbooks and best practices, authoring new instruction files and agent templates, writing skill documentation, drafting guidance framework updates. DO NOT USE FOR: incident response, operational tasks, code implementation.",
       "file": "agents/basecoat-50-security-guidance-author.agent.md",
       "keywords": [
         "guidance",
@@ -1033,7 +1033,7 @@
     "guidance-reviewer": {
       "id": "guidance-reviewer",
       "name": "guidance-reviewer",
-      "description": "No description",
+      "description": "USE FOR: validating a BaseCoat guidance draft before committing, checking lint rules on agent/skill/instruction/prompt files, auditing frontmatter schema compliance, verifying BaseCoat conventions, returning pass/fail verdict with actionable fixes. DO NOT USE FOR: writing new guidance assets, scanning repos for instruction coverage gaps, general code review unrelated to BaseCoat assets.",
       "file": "agents/basecoat-90-quality-guidance-reviewer.agent.md",
       "keywords": [
         "guidance",
@@ -1049,7 +1049,7 @@
     "ha-architect": {
       "id": "ha-architect",
       "name": "ha-architect",
-      "description": "No description",
+      "description": "Design high-availability, resilience, and chaos testing strategies for distributed systems. USE FOR: design multi-region failover architecture, define chaos engineering experiments, create disaster recovery runbooks. DO NOT USE FOR: day-to-day incident response, cost optimization analysis.",
       "file": "agents/basecoat-10-core-ha-architect.agent.md",
       "keywords": [
         "ha",
@@ -1064,8 +1064,8 @@
     },
     "hardening-advisor": {
       "id": "hardening-advisor",
-      "name": "hardening-advisor",
-      "description": "No description",
+      "name": "Hardening Advisor",
+      "description": "CIS Benchmarks and STIG hardening advisor for Dockerfiles, Kubernetes manifests, databases, and infrastructure configurations against security standards. USE FOR: harden Dockerfile against CIS benchmarks, audit Kubernetes manifests for STIG compliance, review infrastructure config security. DO NOT USE FOR: application code security review, live incident mitigation.",
       "file": "agents/basecoat-10-core-hardening-advisor.agent.md",
       "keywords": [
         "hardening",
@@ -1081,7 +1081,7 @@
     "identity-architect": {
       "id": "identity-architect",
       "name": "identity-architect",
-      "description": "No description",
+      "description": "Identity and access architecture specialist. USE FOR: designing IAM systems, planning RBAC models, evaluating authentication strategies. DO NOT USE FOR: IAM implementation, directory administration.",
       "file": "agents/basecoat-10-core-identity-architect.agent.md",
       "keywords": [
         "identity",
@@ -1097,7 +1097,7 @@
     "incident-responder": {
       "id": "incident-responder",
       "name": "incident-responder",
-      "description": "No description",
+      "description": "Structured incident response and recovery agent for classifying incidents, guiding mitigation, coordinating communications, verifying recovery, and facilitating post-incident learning. USE FOR: classify and triage active production incidents, coordinate credential-exposure containment, guide on-call mitigation steps, facilitate post-incident retrospectives. DO NOT USE FOR: proactive security hardening, routine deployment tasks, standalone secret inventory.",
       "file": "agents/basecoat-60-workflow-incident-responder.agent.md",
       "keywords": [
         "incident",
@@ -1113,7 +1113,7 @@
     "incident-to-backlog-router": {
       "id": "incident-to-backlog-router",
       "name": "incident-to-backlog-router",
-      "description": "No description",
+      "description": "Automates routing of incident signals into prioritized backlog or maintenance work items with required portfolio fields pre-populated and closure linkage tracked. USE FOR: create GitHub issues from incident metadata with Type/Priority/Risk/Guardrail State/SRE Impact pre-filled, route incidents to sprint or maintenance queue by severity policy, detect orphaned incidents with no remediation issue, track SLA targets by severity. DO NOT USE FOR: active incident mitigation (use incident-responder), SLO definition (use sre-engineer), proactive hardening or security review.",
       "file": "agents/basecoat-60-workflow-incident-to-backlog-router.agent.md",
       "keywords": [
         "incident",
@@ -1131,7 +1131,7 @@
     "infrastructure-deploy": {
       "id": "infrastructure-deploy",
       "name": "infrastructure-deploy",
-      "description": "No description",
+      "description": "Orchestrates Azure infrastructure deployments using Bicep, handles resource group management, parameter validation, and rollback strategies. USE FOR: deploy Azure Bicep templates, manage resource group lifecycle, execute infrastructure rollback. DO NOT USE FOR: application code deployments, cost analysis and optimization.",
       "file": "agents/basecoat-60-workflow-infrastructure-deploy.agent.md",
       "keywords": [
         "infrastructure",
@@ -1147,7 +1147,7 @@
     "instruction-auditor": {
       "id": "instruction-auditor",
       "name": "instruction-auditor",
-      "description": "No description",
+      "description": "Detects missing instruction coverage for a repo — identifies tech stacks and workflow patterns present in the codebase that have no corresponding BaseCoat instruction file in the overlay. USE FOR: find uncovered tech stacks in a repo overlay, audit BaseCoat instruction file gaps, identify missing workflow pattern coverage. DO NOT USE FOR: writing new instruction files, general code review.",
       "file": "agents/basecoat-50-security-instruction-auditor.agent.md",
       "keywords": [
         "instruction",
@@ -1163,7 +1163,7 @@
     "issue-triage": {
       "id": "issue-triage",
       "name": "issue-triage",
-      "description": "No description",
+      "description": "Issue quality triage specialist. USE FOR: duplicate/invalid detection, closed-issue verification, label/type/priority enforcement, and issue/PR linkage checks. DO NOT USE FOR: implementation coding, unrelated PR management, or sprint capacity planning.",
       "file": "agents/basecoat-10-core-issue-triage.agent.md",
       "keywords": [
         "issue",
@@ -1179,7 +1179,7 @@
     "legacy-modernization": {
       "id": "legacy-modernization",
       "name": "legacy-modernization",
-      "description": "No description",
+      "description": "Guides teams through Web Forms to Razor Pages migration using the strangler fig pattern for incremental modernization of legacy ASP.NET applications. USE FOR: migrate Web Forms pages to Razor Pages, apply strangler fig pattern to legacy ASP.NET apps, plan incremental .NET modernization. DO NOT USE FOR: greenfield application development, cloud infrastructure migration.",
       "file": "agents/basecoat-10-core-legacy-modernization.agent.md",
       "keywords": [
         "legacy",
@@ -1195,7 +1195,7 @@
     "llmops": {
       "id": "llmops",
       "name": "llmops",
-      "description": "No description",
+      "description": "LLM operations and prompt engineering specialist. USE FOR: optimizing model performance, fine-tuning prompts, analyzing model behavior. DO NOT USE FOR: model training, infrastructure setup.",
       "file": "agents/basecoat-10-core-llmops.agent.md",
       "keywords": [
         "llmops"
@@ -1207,10 +1207,29 @@
       "maturity": "alpha",
       "category": "core"
     },
+    "local-dev-data-pack-orchestrator": {
+      "id": "local-dev-data-pack-orchestrator",
+      "name": "local-dev-data-pack-orchestrator",
+      "description": "Topology-aware local data-pack orchestrator that detects repository persistence stores and executes generate/validate/update/delete lifecycle operations for Docker Compose test environments with deterministic seed artifacts. USE FOR: discovering active persistence engines in a repo, generating local compose/data-pack artifacts for postgres/sqlserver/cosmos, auditing data-pack integrity and idempotence, and applying scoped updates or safe deletes to local packs. DO NOT USE FOR: production database changes, cloud provisioning, or destructive operations against shared environments.",
+      "file": "agents/basecoat-60-workflow-local-dev-data-pack-orchestrator.agent.md",
+      "keywords": [
+        "local",
+        "dev",
+        "data",
+        "pack",
+        "orchestrator"
+      ],
+      "capabilities": [
+        "general"
+      ],
+      "model": "claude-sonnet-4.6",
+      "maturity": "alpha",
+      "category": "workflow"
+    },
     "manual-test-strategy": {
       "id": "manual-test-strategy",
       "name": "manual-test-strategy",
-      "description": "No description",
+      "description": "Use when you need a structured manual testing strategy for a feature or risk inventory. Produces a decision rubric, exploratory charter, regression checklist, defect template, and automation backlog. Automatically files GitHub Issues for automation candidates.",
       "file": "agents/basecoat-90-quality-manual-test-strategy.agent.md",
       "keywords": [
         "manual",
@@ -1227,7 +1246,7 @@
     "mcp-developer": {
       "id": "mcp-developer",
       "name": "mcp-developer",
-      "description": "No description",
+      "description": "MCP (Model Context Protocol) development specialist. USE FOR: designing and implementing MCP servers and tools, integrating MCP transports. DO NOT USE FOR: direct model interactions, non-MCP tasks.",
       "file": "agents/basecoat-10-core-mcp-developer.agent.md",
       "keywords": [
         "mcp",
@@ -1243,7 +1262,7 @@
     "memory-curator": {
       "id": "memory-curator",
       "name": "memory-curator",
-      "description": "No description",
+      "description": "Cross-session memory and knowledge management curator. USE FOR: extracting and storing knowledge from long conversations, deduplicating learning across sessions, injecting relevant context into new conversations, managing memory decay and TTLs. DO NOT USE FOR: real-time conversation support, immediate decision-making, output formatting.",
       "file": "agents/basecoat-10-core-memory-curator.agent.md",
       "keywords": [
         "memory",
@@ -1259,7 +1278,7 @@
     "memory-promoter": {
       "id": "memory-promoter",
       "name": "memory-promoter",
-      "description": "No description",
+      "description": "Analyzes session transcripts and sprint summaries to identify high-value patterns for promotion to long-term BaseCoat memory contributions. USE FOR: extract reusable patterns from session transcripts, identify conventions worth promoting to BaseCoat memory, review sprint summaries for learnings. DO NOT USE FOR: writing code or instructions directly, real-time session assistance.",
       "file": "agents/basecoat-10-core-memory-promoter.agent.md",
       "keywords": [
         "memory",
@@ -1275,7 +1294,7 @@
     "merge-coordinator": {
       "id": "merge-coordinator",
       "name": "merge-coordinator",
-      "description": "No description",
+      "description": "Parallel branch merge coordinator. Use when multiple feature branches need to be merged into a target branch without interactive git editors hanging automated pipelines. Handles conflict detection, safe resolution, and ordered PR merging.",
       "file": "agents/basecoat-10-core-merge-coordinator.agent.md",
       "keywords": [
         "merge",
@@ -1291,7 +1310,7 @@
     "middleware-dev": {
       "id": "middleware-dev",
       "name": "middleware-dev",
-      "description": "No description",
+      "description": "Middleware and integration development specialist. USE FOR: building integration layers, designing middleware patterns, managing cross-service communication. DO NOT USE FOR: frontend or backend-specific work.",
       "file": "agents/basecoat-10-core-middleware-dev.agent.md",
       "keywords": [
         "middleware",
@@ -1307,7 +1326,7 @@
     "mlops": {
       "id": "mlops",
       "name": "mlops",
-      "description": "No description",
+      "description": "ML operations and model management specialist. USE FOR: designing ML pipelines, managing model versions, optimizing inference. DO NOT USE FOR: model training, data science.",
       "file": "agents/basecoat-30-ai-mlops.agent.md",
       "keywords": [
         "mlops"
@@ -1322,7 +1341,7 @@
     "new-customization": {
       "id": "new-customization",
       "name": "new-customization",
-      "description": "No description",
+      "description": "Use when creating or updating a customization asset such as an instruction, skill, prompt, or agent. Chooses the right primitive, authors the file, and validates frontmatter and placement.",
       "file": "agents/basecoat-10-core-new-customization.agent.md",
       "keywords": [
         "new",
@@ -1337,8 +1356,8 @@
     },
     "observability-engineer": {
       "id": "observability-engineer",
-      "name": "observability-engineer",
-      "description": "No description",
+      "name": "Observability Engineer",
+      "description": "OpenTelemetry instrumentation, structured logging, distributed tracing, metrics taxonomy, and dashboard-as-code for operational excellence. USE FOR: instrument services with OpenTelemetry, design structured logging schema, build dashboard-as-code for metrics. DO NOT USE FOR: incident response triage, infrastructure provisioning.",
       "file": "agents/basecoat-10-core-observability-engineer.agent.md",
       "keywords": [
         "observability",
@@ -1353,8 +1372,8 @@
     },
     "orchestrator": {
       "id": "orchestrator",
-      "name": "orchestrator",
-      "description": "No description",
+      "name": "orchestrator-compat",
+      "description": "Compatibility alias for the orchestrator agent. Preserves the legacy filename while the prefixed BaseCoat agent is the canonical source. USE FOR: routing multi-step workflows, coordinating parallel agents, tracking execution state. DO NOT USE FOR: single-step tasks, user-facing triage, direct tool calls.",
       "file": "agents/orchestrator.agent.md",
       "keywords": [
         "orchestrator"
@@ -1369,7 +1388,7 @@
     "orphaned-pr-cleanup": {
       "id": "orphaned-pr-cleanup",
       "name": "orphaned-pr-cleanup",
-      "description": "No description",
+      "description": "Use when identifying and resolving stale or orphaned pull requests that have no active owner, blocked reviews, or outdated mergeability status. USE FOR: detect PRs without recent activity, classify close/revive/merge candidates, request ownership reassignment, and produce cleanup actions with SLA windows. DO NOT USE FOR: code implementation work, deep architecture design, or replacing release governance decisions.",
       "file": "agents/basecoat-10-core-orphaned-pr-cleanup.agent.md",
       "keywords": [
         "orphaned",
@@ -1386,7 +1405,7 @@
     "parallel-session-coordinator": {
       "id": "parallel-session-coordinator",
       "name": "parallel-session-coordinator",
-      "description": "No description",
+      "description": "Coordinate multiple concurrent Copilot worktree sessions executing independent issues in parallel, with merge serialization and conflict prevention. USE FOR: run parallel feature sprints, coordinate multi-worktree execution, enforce serialized merge pacing across sessions, detect and prevent merge conflicts before they occur. DO NOT USE FOR: single-session work, direct code implementation, bypassing required CI checks.",
       "file": "agents/basecoat-60-workflow-parallel-session-coordinator.agent.md",
       "keywords": [
         "parallel",
@@ -1403,7 +1422,7 @@
     "penetration-test": {
       "id": "penetration-test",
       "name": "penetration-test",
-      "description": "No description",
+      "description": "Security penetration testing specialist. USE FOR: designing penetration tests, identifying security vulnerabilities, generating security reports. DO NOT USE FOR: fixing vulnerabilities, incident response.",
       "file": "agents/basecoat-90-quality-penetration-test.agent.md",
       "keywords": [
         "penetration",
@@ -1419,7 +1438,7 @@
     "performance-analyst": {
       "id": "performance-analyst",
       "name": "performance-analyst",
-      "description": "No description",
+      "description": "Performance optimization specialist. USE FOR: profiling latency/throughput bottlenecks, query and cache diagnostics, and load-test planning with measurable targets. DO NOT USE FOR: feature implementation, incident command decisions, or architecture rewrites without measured regressions.",
       "file": "agents/basecoat-10-core-performance-analyst.agent.md",
       "keywords": [
         "performance",
@@ -1435,7 +1454,7 @@
     "policy-as-code-compliance": {
       "id": "policy-as-code-compliance",
       "name": "policy-as-code-compliance",
-      "description": "No description",
+      "description": "Policy-as-code compliance agent for validating code and configuration against organizational rules, managing exceptions, and producing audit-ready compliance reports. USE FOR: validate Terraform against OPA policies, generate compliance audit reports, manage policy exceptions. DO NOT USE FOR: writing application business logic, live incident response.",
       "file": "agents/basecoat-50-security-policy-as-code-compliance.agent.md",
       "keywords": [
         "policy",
@@ -1453,7 +1472,7 @@
     "product-manager": {
       "id": "product-manager",
       "name": "product-manager",
-      "description": "No description",
+      "description": "Use when gathering requirements, writing user stories, defining acceptance criteria, planning roadmaps, or prioritizing features using frameworks like RICE or MoSCoW.",
       "file": "agents/basecoat-10-core-product-manager.agent.md",
       "keywords": [
         "product",
@@ -1469,7 +1488,7 @@
     "production-readiness": {
       "id": "production-readiness",
       "name": "production-readiness",
-      "description": "No description",
+      "description": "Production Readiness Agent for ensuring applications meet operational requirements before release; coordinates BCP/DRP, incident response, and safety analysis. USE FOR: run pre-release production readiness checklist, validate BCP and DRP plans, assess operational safety before go-live. DO NOT USE FOR: feature development, post-incident root cause analysis.",
       "file": "agents/basecoat-10-core-production-readiness.agent.md",
       "keywords": [
         "production",
@@ -1485,7 +1504,7 @@
     "program-bootstrap": {
       "id": "program-bootstrap",
       "name": "program-bootstrap",
-      "description": "No description",
+      "description": "Thin orchestration entrypoint for end-to-end startup pack generation. USE FOR: bootstrapping a new program with coordinated onboarding/backlog/spec/architecture/workflow outputs, running dry-run orchestration before writing artifacts, resuming partially completed orchestration with checkpoints, preserving repo-specific delivery labels while normalizing governance labels. DO NOT USE FOR: replacing specialist agents, forcing one repo taxonomy, direct single-step authoring that a specialist agent already handles.",
       "file": "agents/program-bootstrap.agent.md",
       "keywords": [
         "program",
@@ -1501,7 +1520,7 @@
     "project-onboarding": {
       "id": "project-onboarding",
       "name": "project-onboarding",
-      "description": "No description",
+      "description": "Single-invocation new repo setup with BaseCoat integration. Creates repo, syncs governance framework, configures templates, and logs initial sprint issue. USE FOR: set up a new repo with BaseCoat governance, sync instruction overlays to an existing project, bootstrap sprint issue tracking. DO NOT USE FOR: onboarding individual developers, migrating existing codebases.",
       "file": "agents/basecoat-10-core-project-onboarding.agent.md",
       "keywords": [
         "project",
@@ -1517,7 +1536,7 @@
     "project-rules-drift-auditor": {
       "id": "project-rules-drift-auditor",
       "name": "project-rules-drift-auditor",
-      "description": "No description",
+      "description": "Detects drift between live GitHub Project automation rules and the canonical AIDL guardrail baseline. USE FOR: scheduled drift audits of project automation rules, comparing live rule configuration against a baseline manifest, classifying drift severity, generating issue-ready remediation output, and running advisory or enforce mode audits. DO NOT USE FOR: writing application code, making direct project configuration changes without evidence, or replacing policy engines that enforce approvals.",
       "file": "agents/basecoat-50-security-project-rules-drift-auditor.agent.md",
       "keywords": [
         "project",
@@ -1535,7 +1554,7 @@
     "prompt-coach": {
       "id": "prompt-coach",
       "name": "prompt-coach",
-      "description": "No description",
+      "description": "Use when reviewing prompts, scoring prompt quality, identifying anti-patterns, and guiding iterative refinement of LLM prompts.",
       "file": "agents/basecoat-10-core-prompt-coach.agent.md",
       "keywords": [
         "prompt",
@@ -1551,7 +1570,7 @@
     "prompt-engineer": {
       "id": "prompt-engineer",
       "name": "prompt-engineer",
-      "description": "No description",
+      "description": "Prompt optimization and system prompt engineering agent. Use when designing system prompts, optimizing token usage, crafting few-shot examples, or structuring chain-of-thought instructions.",
       "file": "agents/basecoat-10-core-prompt-engineer.agent.md",
       "keywords": [
         "prompt",
@@ -1567,7 +1586,7 @@
     "queue-rebalancer": {
       "id": "queue-rebalancer",
       "name": "queue-rebalancer",
-      "description": "No description",
+      "description": "Dependency-aware unblock lane coordinator. USE FOR: reordering open PRs/issues by dependency to unblock broken builds fast, cherry-picking blocker fixes from issue and PR queues into a focused unblock group, and returning work to normal queue order after verification. DO NOT USE FOR: sprint capacity planning, standalone feature design/spec work, adding new product scope without explicit check-in, or promoting feature work without tests.",
       "file": "agents/basecoat-60-workflow-queue-rebalancer.agent.md",
       "keywords": [
         "queue",
@@ -1583,7 +1602,7 @@
     "rca": {
       "id": "rca",
       "name": "rca",
-      "description": "No description",
+      "description": "Root Cause Analysis agent for deep-dive incident investigations, hypothesis testing, and prevention follow-up. USE FOR: run post-incident root cause analysis, trace production outage to contributing factors, generate 5-why analysis report. DO NOT USE FOR: live incident triage and containment, general performance tuning.",
       "file": "agents/basecoat-10-core-rca.agent.md",
       "keywords": [
         "rca"
@@ -1598,7 +1617,7 @@
     "release-freeze-enforcer": {
       "id": "release-freeze-enforcer",
       "name": "release-freeze-enforcer",
-      "description": "No description",
+      "description": "Use when enforcing release freeze windows, routing exception requests, and coordinating branch access during a freeze. USE FOR: evaluate freeze exceptions, block unauthorized merge attempts, and publish go/no-go decisions for frozen branches. DO NOT USE FOR: merging changes, bypassing approvals, or resolving code conflicts.",
       "file": "agents/basecoat-60-workflow-release-freeze-enforcer.agent.md",
       "keywords": [
         "release",
@@ -1615,7 +1634,7 @@
     "release-impact-advisor": {
       "id": "release-impact-advisor",
       "name": "release-impact-advisor",
-      "description": "No description",
+      "description": "Assesses release readiness, change impacts, blast radius, rollback planning, and safe deployment strategies with canary deployments, feature flags, and changelog generation. USE FOR: assess release blast radius, plan rollback strategy, recommend deployment approach. DO NOT USE FOR: executing deployments, live incident response.",
       "file": "agents/basecoat-60-workflow-release-impact-advisor.agent.md",
       "keywords": [
         "release",
@@ -1632,7 +1651,7 @@
     "release-manager": {
       "id": "release-manager",
       "name": "release-manager",
-      "description": "No description",
+      "description": "Automated versioned release workflow. Reads merged PRs since the last release, bumps version.json, writes CHANGELOG entry, creates git tag, and publishes GitHub release. USE FOR: bump semver and publish GitHub release, generate changelog from merged PRs, create git release tag. DO NOT USE FOR: sprint planning, deployment risk assessment.",
       "file": "agents/basecoat-60-workflow-release-manager.agent.md",
       "keywords": [
         "release",
@@ -1648,7 +1667,7 @@
     "release-readiness-chair": {
       "id": "release-readiness-chair",
       "name": "release-readiness-chair",
-      "description": "No description",
+      "description": "Use when facilitating release readiness ceremonies and making explicit go/no-go decisions. USE FOR: collect release evidence across quality, operations, and rollback readiness; identify unresolved launch risks; enforce gate criteria; and publish decision records with owners and due dates. DO NOT USE FOR: implementing feature code, replacing incident response command, or product roadmap planning.",
       "file": "agents/basecoat-60-workflow-release-readiness-chair.agent.md",
       "keywords": [
         "release",
@@ -1665,7 +1684,7 @@
     "replanning-engine": {
       "id": "replanning-engine",
       "name": "replanning-engine",
-      "description": "No description",
+      "description": "Use when S2 assessment data shows the work is far larger than estimated and a replanning decision is needed. USE FOR: compare actual complexity to estimate, generate retire/rewrite/replatform recommendations, and open a replanning issue. DO NOT USE FOR: routine triage or deployment execution.",
       "file": "agents/basecoat-10-core-replanning-engine.agent.md",
       "keywords": [
         "replanning",
@@ -1680,8 +1699,8 @@
     },
     "resilience-reviewer": {
       "id": "resilience-reviewer",
-      "name": "resilience-reviewer",
-      "description": "No description",
+      "name": "Resilience Reviewer",
+      "description": "Code-level resilience pattern review — circuit breakers, timeouts, bulkhead isolation, graceful degradation, retry logic, and load shedding implementation. USE FOR: review circuit breaker and retry patterns in code, audit timeout hierarchy, validate graceful degradation. DO NOT USE FOR: live incident response, infrastructure capacity planning.",
       "file": "agents/basecoat-90-quality-resilience-reviewer.agent.md",
       "keywords": [
         "resilience",
@@ -1697,7 +1716,7 @@
     "retro-facilitator": {
       "id": "retro-facilitator",
       "name": "retro-facilitator",
-      "description": "No description",
+      "description": "End-of-sprint retrospective agent. Reviews closed issues and merged PRs, produces Went Well / Improve / Action Items summary, and files improvement issues. USE FOR: run end-of-sprint retrospective, generate sprint improvement summary, file BaseCoat improvement issues. DO NOT USE FOR: planning next sprint, velocity estimation.",
       "file": "agents/basecoat-60-workflow-retro-facilitator.agent.md",
       "keywords": [
         "retro",
@@ -1713,7 +1732,7 @@
     "rollout-basecoat": {
       "id": "rollout-basecoat",
       "name": "rollout-basecoat",
-      "description": "No description",
+      "description": "BaseCoat consumer rollout and update specialist. USE FOR: onboarding or updating a BaseCoat consumer, installing immutable BaseCoat releases, configuring downstream update notifications, creating guarded upgrade PR policy, and validating consumer sync provenance. DO NOT USE FOR: editing BaseCoat framework internals, designing unrelated agents or skills, deploying application infrastructure, or bypassing consumer branch protection.",
       "file": "agents/basecoat-60-workflow-rollout-basecoat.agent.md",
       "keywords": [
         "rollout",
@@ -1729,7 +1748,7 @@
     "run-history-cleanup": {
       "id": "run-history-cleanup",
       "name": "run-history-cleanup",
-      "description": "No description",
+      "description": "Cleans GitHub Actions workflow run history safely by deleting stale, completed runs according to retention policy while preserving evidence for active incidents and compliance windows. USE FOR: pruning old completed workflow runs, reducing run-history noise, enforcing run-retention policy, and producing a cleanup report. DO NOT USE FOR: deleting in-progress runs, deleting runs tied to active incidents, changing workflow YAML retention-days, or bypassing compliance retention rules.",
       "file": "agents/basecoat-60-workflow-run-history-cleanup.agent.md",
       "keywords": [
         "run",
@@ -1746,7 +1765,7 @@
     "s4-shadow-mode-validator": {
       "id": "s4-shadow-mode-validator",
       "name": "s4-shadow-mode-validator",
-      "description": "No description",
+      "description": "Use when comparing shadow-mode and live behavior during S4 soak before cutover. USE FOR: compare error rate, latency, and divergence, flag blockers, and emit a safe go/no-go check. DO NOT USE FOR: state curation or general monitoring.",
       "file": "agents/basecoat-10-core-s4-shadow-mode-validator.agent.md",
       "keywords": [
         "s4",
@@ -1763,8 +1782,8 @@
     },
     "secrets-manager": {
       "id": "secrets-manager",
-      "name": "secrets-manager",
-      "description": "No description",
+      "name": "Secrets Manager",
+      "description": "Secrets lifecycle management - discovery, rotation, expiry scanning, emergency revocation, and Vault patterns for infrastructure and application secrets. USE FOR: plan secrets rotation schedules, scan for expiring credentials, execute emergency revocation after credential exposure, verify replacement consumers. DO NOT USE FOR: detecting hardcoded secrets in code, general performance optimization, incident communications.",
       "file": "agents/basecoat-50-security-secrets-manager.agent.md",
       "keywords": [
         "secrets",
@@ -1780,7 +1799,7 @@
     "security-analyst": {
       "id": "security-analyst",
       "name": "security-analyst",
-      "description": "No description",
+      "description": "Security analysis and threat assessment specialist. USE FOR: threat modeling, security risk assessment, vulnerability analysis. DO NOT USE FOR: incident response, remediation.",
       "file": "agents/basecoat-50-security-security-analyst.agent.md",
       "keywords": [
         "security",
@@ -1795,8 +1814,8 @@
     },
     "security-monitor": {
       "id": "security-monitor",
-      "name": "security-monitor",
-      "description": "No description",
+      "name": "Security Monitor",
+      "description": "Detection engineering and SIEM configuration — maps MITRE ATT&CK tactics to detection rules, builds alerting baselines, and operationalizes NIST CSF Detect. USE FOR: build ATT&CK-mapped detection rules, calibrate SIEM alert thresholds, map compliance to detection coverage. DO NOT USE FOR: live incident response, secrets rotation.",
       "file": "agents/basecoat-50-security-security-monitor.agent.md",
       "keywords": [
         "security",
@@ -1812,7 +1831,7 @@
     "security-operations": {
       "id": "security-operations",
       "name": "security-operations",
-      "description": "No description",
+      "description": "Provide SOC (Security Operations Center) playbook guidance for threat detection, incident response, secrets rotation, audit logging, and operational security. USE FOR: run SOC incident response playbook, triage security alerts, coordinate credential rotation post-breach. DO NOT USE FOR: building SIEM detection rules, code-level security review.",
       "file": "agents/basecoat-50-security-security-operations.agent.md",
       "keywords": [
         "security",
@@ -1828,7 +1847,7 @@
     "self-healing-ci": {
       "id": "self-healing-ci",
       "name": "self-healing-ci",
-      "description": "No description",
+      "description": "Automated CI failure analysis, log parsing, and pipeline remediation with retry strategies, flaky test detection, dependency resolution, and cache invalidation. USE FOR: auto-remediate CI failures, quarantine flaky tests, resolve build dependency and cache errors. DO NOT USE FOR: designing CI pipeline architecture, code-level debugging.",
       "file": "agents/basecoat-60-workflow-self-healing-ci.agent.md",
       "keywords": [
         "self",
@@ -1845,7 +1864,7 @@
     "ship-it-control-loop": {
       "id": "ship-it-control-loop",
       "name": "ship-it-control-loop",
-      "description": "No description",
+      "description": "Persistent fleet delivery loop coordinator for ship-it sessions. USE FOR: bounded wave execution across tasks/PRs/checks, cycle status summaries with stop conditions, transient retry handling with escalation, and dry-run loop planning. DO NOT USE FOR: bypassing required checks, direct production deployment without governance evidence, or unmanaged infinite orchestration loops.",
       "file": "agents/basecoat-60-workflow-ship-it-control-loop.agent.md",
       "keywords": [
         "ship",
@@ -1863,7 +1882,7 @@
     "ship-it-orchestrator": {
       "id": "ship-it-orchestrator",
       "name": "ship-it-orchestrator",
-      "description": "No description",
+      "description": "Intent-to-production orchestrator that converts `ship-it`, `spec-2-prod`, and `onboarding-conductor` goals into governed execution loops with tracked PR, validation, release, and learning artifacts. USE FOR: goal-driven spec-to-prod orchestration, onboarding conductor discover/plan/apply/validate loops, build-break recovery coordination, and release readiness tracking. DO NOT USE FOR: bypassing approval gates, direct production deployment without evidence, or ad hoc one-off edits with no delivery loop.",
       "file": "agents/basecoat-60-workflow-ship-it-orchestrator.agent.md",
       "keywords": [
         "ship",
@@ -1880,7 +1899,7 @@
     "solution-architect": {
       "id": "solution-architect",
       "name": "solution-architect",
-      "description": "No description",
+      "description": "Solution architecture agent for system design, C4 diagrams, ADRs, technology selection, and cross-cutting concerns. Use when designing new systems, evaluating technology choices, or reviewing architecture for scalability and risk.",
       "file": "agents/basecoat-10-core-solution-architect.agent.md",
       "keywords": [
         "solution",
@@ -1896,7 +1915,7 @@
     "sprint-closeout-auditor": {
       "id": "sprint-closeout-auditor",
       "name": "sprint-closeout-auditor",
-      "description": "No description",
+      "description": "Sprint closeout validation specialist. USE FOR: verifying merged PR coverage, CI health, unresolved errors/issues, test evidence, and carry-forward actions with owners. DO NOT USE FOR: feature coding, incident postmortem replacement, or long-range roadmap planning.",
       "file": "agents/basecoat-50-security-sprint-closeout-auditor.agent.md",
       "keywords": [
         "sprint",
@@ -1913,7 +1932,7 @@
     "sprint-planner": {
       "id": "sprint-planner",
       "name": "sprint-planner",
-      "description": "No description",
+      "description": "Goal-to-issues decomposition and wave dependency mapping. Accepts a sprint goal, produces GitHub issues with labels, wave dependency maps, agent assignments, acceptance criteria, and sprint tracking setup via milestone plus GitHub Project. USE FOR: decompose sprint goal into GitHub issues, build wave dependency map, assign agent roles. DO NOT USE FOR: running sprint retrospectives, story point estimation.",
       "file": "agents/basecoat-10-core-sprint-planner.agent.md",
       "keywords": [
         "sprint",
@@ -1929,7 +1948,7 @@
     "sprint-project-mapper": {
       "id": "sprint-project-mapper",
       "name": "sprint-project-mapper",
-      "description": "No description",
+      "description": "Use when issues/PRs need clustering into meaningful sprint/project groups and rollup metrics for planning or release notes. USE FOR: grouping by sprint/wave/tags, computing issue-PR-LOC-cycle-time metrics, validating group size significance, and producing release-note-ready summaries. DO NOT USE FOR: code implementation, CI/CD deployment, or one-off issue editing.",
       "file": "agents/basecoat-10-core-sprint-project-mapper.agent.md",
       "keywords": [
         "sprint",
@@ -1946,7 +1965,7 @@
     "sprint-retrospective": {
       "id": "sprint-retrospective",
       "name": "sprint-retrospective",
-      "description": "No description",
+      "description": "Reconstructs repository history for sprint retrospectives, generating structured markdown with metrics, timelines, and actionable development tips. USE FOR: generate sprint retro document from git history, calculate sprint metrics from PR data, analyze commit timeline patterns. DO NOT USE FOR: planning next sprint, filing improvement issues.",
       "file": "agents/basecoat-10-core-sprint-retrospective.agent.md",
       "keywords": [
         "sprint",
@@ -1962,7 +1981,7 @@
     "sre-engineer": {
       "id": "sre-engineer",
       "name": "sre-engineer",
-      "description": "No description",
+      "description": "Reliability operations specialist. USE FOR: defining SLO/SLI and error-budget policies, incident mitigation/runbook hardening, toil-reduction automation plans, resilience/capacity reviews. DO NOT USE FOR: product feature implementation, speculative architecture rewrites without an outage signal, or bypassing incident/change governance.",
       "file": "agents/basecoat-10-core-sre-engineer.agent.md",
       "keywords": [
         "sre",
@@ -1978,7 +1997,7 @@
     "station-bottleneck-analyzer": {
       "id": "station-bottleneck-analyzer",
       "name": "station-bottleneck-analyzer",
-      "description": "No description",
+      "description": "Use when analyzing takt-time JSON to compute queue length and throughput by station, rank bottlenecks, and file the weekly bottleneck report issue. USE FOR: station-level queue pressure, throughput trends, weekly issue filing, and follow-up actions. DO NOT USE FOR: dispatching work or changing replanning policy.",
       "file": "agents/basecoat-10-core-station-bottleneck-analyzer.agent.md",
       "keywords": [
         "station",
@@ -1995,7 +2014,7 @@
     "strategy-to-automation": {
       "id": "strategy-to-automation",
       "name": "strategy-to-automation",
-      "description": "No description",
+      "description": "Use when converting manual test paths into automation candidates. Maps paths to smoke tests, regression tiers, or agent specs. ALWAYS files a GitHub Issue for every automation candidate identified.",
       "file": "agents/basecoat-10-core-strategy-to-automation.agent.md",
       "keywords": [
         "strategy",
@@ -2012,7 +2031,7 @@
     "supply-chain-security": {
       "id": "supply-chain-security",
       "name": "supply-chain-security",
-      "description": "No description",
+      "description": "Secure software supply chain with artifact signing, SBOM generation, and provenance tracking. USE FOR: generate SBOM for a release build, sign artifacts with Sigstore and verify provenance, assess and improve SLSA compliance level. DO NOT USE FOR: general dependency vulnerability scanning, runtime security monitoring.",
       "file": "agents/basecoat-50-security-supply-chain-security.agent.md",
       "keywords": [
         "supply",
@@ -2029,7 +2048,7 @@
     "takt-time-tracker": {
       "id": "takt-time-tracker",
       "name": "takt-time-tracker",
-      "description": "No description",
+      "description": "Use when measuring dwell time at each station and flagging SLA breaches. USE FOR: compute median and p95 time at S1-S5, identify bottlenecks, and export dashboard-ready JSON. DO NOT USE FOR: dispatching work or making replanning decisions.",
       "file": "agents/basecoat-10-core-takt-time-tracker.agent.md",
       "keywords": [
         "takt",
@@ -2046,7 +2065,7 @@
     "task-scope-validator": {
       "id": "task-scope-validator",
       "name": "task-scope-validator",
-      "description": "No description",
+      "description": "Task scope validator for sub-agent dispatch. Analyzes task prompts to detect overscope, ambiguity, and risk before forwarding to explore, task, or general-purpose agents. USE FOR: validate task prompts pre-dispatch, classify tasks as automatable/gather-only/defer, identify scope refinement needs. DO NOT USE FOR: executing tasks, writing implementation code, or modifying task prompts without user feedback.",
       "file": "agents/basecoat-60-workflow-task-scope-validator.agent.md",
       "keywords": [
         "task",
@@ -2063,7 +2082,7 @@
     "tech-writer": {
       "id": "tech-writer",
       "name": "tech-writer",
-      "description": "No description",
+      "description": "Use when creating or improving technical documentation, API docs, runbooks, tutorials, ADRs, changelogs, or implementing docs-as-code workflows.",
       "file": "agents/basecoat-10-core-tech-writer.agent.md",
       "keywords": [
         "tech",
@@ -2079,7 +2098,7 @@
     "ux-designer": {
       "id": "ux-designer",
       "name": "ux-designer",
-      "description": "No description",
+      "description": "UX design agent for user journey mapping, wireframe specs, component design, and accessibility audits. Use when designing user experiences, evaluating usability, or auditing interfaces for WCAG compliance.",
       "file": "agents/basecoat-10-core-ux-designer.agent.md",
       "keywords": [
         "ux",
