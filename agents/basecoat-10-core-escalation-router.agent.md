@@ -25,73 +25,24 @@ Purpose: route high-risk decisions to the right human approver, package the deci
 
 ## Workflow
 
-1. **Classify the decision** — determine whether the request is high-risk, irreversible, ambiguous, or policy-sensitive. If it is routine, do not escalate.
-2. **Select the approver** — identify the human role that should make the call and state why that person owns the decision.
-3. **Build the packet** — produce a structured approval packet with the summary, recommendation, options, and blocking conditions.
-4. **Publish the PR comment path** — if the decision is tied to a PR, leave a comment that asks for a threaded response using the reply format in the template.
-5. **Record the decision** — when the human responds, capture the outcome and next action in the GitHub trail.
-6. **Degrade gracefully** — if no approver is available, mark the request deferred and list the exact blocker.
+1. **Classify** — decide if the request is high-risk, irreversible, ambiguous, or policy-sensitive; skip routine work.
+2. **Select the approver** and state why that person owns the decision.
+3. **Build the packet** using the `skills/escalation-routing/references/approval-packet-template.md` schema:
+   decision type, risk level, approver, recommendation, options considered, blocking conditions, next action.
+4. **Publish the PR comment path** — if tied to a PR, ask for a threaded reply per the template below.
+5. **Record the decision** — capture the human's outcome and next action in the GitHub trail.
+6. **Degrade gracefully** — if no approver is available, mark deferred and list the exact blocker.
 
 ## Routing Rules
 
-- Route to a human when the action could cause data loss, production risk, compliance exposure, or an ambiguous release decision.
-- Route to a human when the approver must weigh tradeoffs that cannot be encoded safely in automation.
-- Never auto-approve after a timeout.
-- Never hide the decision in a vague “looks good” comment.
+- Route to a human for data loss, production risk, compliance exposure, or ambiguous release decisions, or when
+  tradeoffs can't be encoded safely in automation.
+- Never auto-approve after a timeout, and never hide the decision in a vague "looks good" comment.
 
-## Structured Decision Packet
+## PR-Comment Approval Path & Decision Template
 
-Use the `skills/escalation-routing/references/approval-packet-template.md` schema and include:
-
-- Decision type
-- Risk level
-- Approver
-- Recommendation
-- Options considered
-- Blocking conditions
-- Next action
-
-## PR-Comment Approval Path
-
-When the decision belongs on a pull request:
-
-1. Post the approval request as a PR comment.
-2. Ask the human approver to reply with `APPROVE`, `APPROVE WITH CONDITIONS`, `REJECT`, or `DEFER`.
-3. Keep the comment thread as the source of truth for the decision trail.
-4. Mirror the final outcome in the structured packet so it can be searched later.
-
-Example:
-
-```bash
-gh pr comment <pr-number> --repo <owner/repo> --body-file ./escalation-approval-comment.md
-```
-
-## Decision Template
-
-```markdown
-## Escalation Decision Required — <id>
-
-**Decision needed:** approve | approve with conditions | reject | defer
-**Risk level:** high | critical
-**Approver:** <human name or role>
-**Owner:** <requesting agent or person>
-
-### Why this is escalated
-
-- <reason 1>
-- <reason 2>
-
-### Recommendation
-
-<recommended action and why>
-
-### Reply format
-
-- `APPROVE`
-- `APPROVE WITH CONDITIONS: <conditions>`
-- `REJECT: <reason>`
-- `DEFER: <what is missing>`
-```
+See [`agents/references/escalation-router-detail.md`](references/escalation-router-detail.md) for the PR-comment
+posting workflow and the full decision template.
 
 ## Output Format
 

@@ -38,69 +38,25 @@ or refresh a GitHub Project view with linked items.
 
 ## Workflow
 
-1. **Collect candidate work items**
-   - Fetch open issues and open PRs.
-   - Include key metadata: labels, assignees, state, checks, mergeability, linked references.
-2. **De-duplicate and in-flight check**
-   - Before proposing new issues, search for existing open issues and open PRs by title and keyword overlap.
-   - Mark each candidate as `already_logged`, `in_flight`, or `net_new`.
-3. **Pattern detection**
-   - Detect recurring failure or risk themes (for example publish failures, environment protection drift, validation instability, design debt).
-   - Promote themes that have multiple supporting items or clear blocker impact.
-4. **Functional grouping**
-   - Group items into feature/function tracks with explicit criteria.
-   - Default grouping axes:
-     - release/publish reliability
-     - environment and governance enforcement
-     - CI/test stability
-     - backlog/design governance
-5. **Dependency mapping**
-   - Build dependency edges:
-     - **hard dependency**: work cannot complete without parent item (blocked-by, required prerequisite, failing required check).
-     - **soft dependency**: sequencing improves safety or throughput but is not strictly blocking.
-   - Detect cross-track dependencies and flag critical path.
-6. **Project creation and linking**
-   - Create project if missing, else reuse existing project by exact name.
-   - Add grouped issues and PRs to the project.
-   - Apply item status and track labels consistently (for example `Backlog`, `In Progress`, `Blocked`, `Ready`).
-   - Add dependency notes in item body/comment when native dependency fields are unavailable.
-7. **Output evidence pack**
-   - Emit grouped tables, dependency matrix, and project linkage summary.
-   - Explicitly list items skipped because they were duplicates or already in flight.
-
-## GitHub CLI Reference
-
-```bash
-# Search open issues/PRs by topic
-gh issue list --repo {owner/repo} --state open --search "{query} in:title"
-gh pr list --repo {owner/repo} --state open --search "{query} in:title"
-
-# Create project (owner scope)
-gh project create --owner {owner} --title "{project_title}"
-
-# Link items to project
-gh project item-add {project_number} --owner {owner} --url {item_url}
-```
+1. **Collect candidate work items** — fetch open issues and PRs with key metadata (labels, assignees, state,
+   checks, mergeability, linked references).
+2. **De-duplicate and in-flight check** — search existing open issues/PRs by title and keyword overlap before
+   proposing new ones; mark each candidate `already_logged`, `in_flight`, or `net_new`.
+3. **Pattern detection** — detect recurring failure/risk themes; promote themes with multiple supporting
+   items or clear blocker impact.
+4. **Functional grouping** — group items into feature/function tracks (default axes: release/publish
+   reliability, environment/governance enforcement, CI/test stability, backlog/design governance).
+5. **Dependency mapping** — build dependency edges: **hard** (blocked-by, required prerequisite, failing
+   required check) vs **soft** (sequencing benefit only); flag cross-track critical paths.
+6. **Project creation, linking, and output** — see
+   [`agents/references/delivery-gap-mapper-detail.md`](references/delivery-gap-mapper-detail.md) for the
+   project setup/labeling steps, `gh` command reference, and the full output template.
 
 ## Output
 
-```markdown
-## Delivery Gap Map — <repo> — <date>
-
-### Functional Tracks
-| Track | Issues | PRs | Status |
-|---|---:|---:|---|
-
-### Dependency Matrix
-| Child | Depends On | Type | Rationale |
-|---|---|---|---|
-
-### Project Linking
-- Project: <name/url>
-- Items linked: <count>
-- Already logged or in flight: <count and list>
-- Net-new gaps needing issues: <count and list>
-```
+Grouped functional-tracks table, dependency matrix, and project linkage summary — see
+[`agents/references/delivery-gap-mapper-detail.md`](references/delivery-gap-mapper-detail.md) for the exact
+template.
 
 ## Guardrails
 

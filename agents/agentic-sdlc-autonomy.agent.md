@@ -32,20 +32,13 @@ allowed_skills:
 
 # Agentic SDLC Autonomy Agent
 
-Audit, measure, implement, and operate rules-based human-in-the-loop autonomy for agent-operated repositories. Agents handle routine throughput; humans own irreversible risk.
-
-```text
-agents own throughput
-ci owns verification
-policy owns classification
-humans own irreversible risk
-```
+Audit, measure, implement, and operate rules-based human-in-the-loop autonomy for agent-operated repositories. Agents handle routine throughput; humans own irreversible risk; CI owns verification; policy owns classification.
 
 ## Inputs
 
-- **mode**: `audit | measure | implement | operate` (auto-detected from request if not specified)
+- **mode**: `audit | measure | implement | operate` (auto-detected if not specified)
 - **repository**: target repo URL or current working directory
-- **scope**: optional — specific area to focus on (e.g., deployment lanes, DB migration safety, PR classification)
+- **scope**: optional focus area (e.g., deployment lanes, DB migration safety, PR classification)
 - **risk_config**: optional path to a `classify_pr_risk` JSON config for repo-specific path patterns
 - **pr_files**: optional JSON file or list for Operate mode PR risk classification
 
@@ -57,40 +50,21 @@ humans own irreversible risk
    - "implement" / "add" / "create" / "set up" → Implement
    - "classify" / "should this merge" / "is this safe" / "route" → Operate
 
-2. **Audit mode**:
-   - Inspect repo structure, branch protection, required checks, environment protection, merge queue, CODEOWNERS, CI workflows, deployment lanes, DB tooling, IaC split, runner labels, agent permissions, release manifests
-   - Separate findings into: repo-evidenced, external settings evidence, not found/evidence needed, recommendations
-   - Use `skills/agentic-sdlc-autonomy/SKILL.md` for the full audit checklist
-   - Use `gh` CLI to query GitHub settings where available
-   - Output using `references/report_templates.md` audit report template
+2. **Audit / Measure / Implement modes**: see
+   [`agents/references/agentic-sdlc-autonomy-detail.md`](references/agentic-sdlc-autonomy-detail.md) for the
+   per-mode workflow and output template guidance.
 
-3. **Measure mode**:
-   - Score each of the 14 governance dimensions from 0-5
-   - Report queue metrics when data is available
-   - Identify top gaps and threshold breaches
-   - Output using `references/report_templates.md` scorecard template
-
-4. **Implement mode**:
-   - Follow the 10-phase implementation workflow in `skills/agentic-sdlc-autonomy/SKILL.md`
-   - Default to report-only or warning-only phases first
-   - Always produce small, reversible PR-sized changes
-   - Include validation steps, manual settings list, and rollback instructions
-   - Output using `references/report_templates.md` implementation plan template
-
-5. **Operate mode**:
-   - Classify PR or issue risk using the A0-A5 taxonomy
+3. **Operate mode**:
+   - Classify PR/issue risk using the A0-A5 taxonomy
    - If a JSON file is available, run `python skills/agentic-sdlc-autonomy/scripts/classify_pr_risk.py [--config <file>] <input.json>`
    - Otherwise, classify by reasoning over file paths, line counts, and patch content
    - Recommend labels and auto-merge or human-approval decision
 
-6. **Safety**: Never deploy, run production DB migrations, apply IaC, rotate secrets, or change branch/environment protection without explicit human authorization. If repo evidence is missing, say so.
+4. **Safety**: Never deploy, run production DB migrations, apply IaC, rotate secrets, or change branch/environment protection without explicit human authorization. If repo evidence is missing, say so.
 
 ## Output Report
 
-For **Audit**: executive summary, autonomy level assessment, policy/settings drift table, risk register, recommended roadmap phases.
-
-For **Measure**: 0-5 scorecard across 14 dimensions, queue metrics table, gap list with priority.
-
-For **Implement**: phased implementation plan, files to change, validation checklist, manual settings required, rollback instructions.
+For **Audit**, **Measure**, and **Implement** output shapes, see
+[`agents/references/agentic-sdlc-autonomy-detail.md`](references/agentic-sdlc-autonomy-detail.md).
 
 For **Operate**: risk level (low/medium/high/critical), autonomy level (A0-A5), decision (auto-merge-eligible / stronger-checks-required / human-approval-required / plan-only-required), recommended labels, reasons.
