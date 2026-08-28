@@ -16,15 +16,17 @@ function Assert-Match {
 }
 
 $skillPath = Join-Path $repoRoot 'skills\repo-cleanup\SKILL.md'
+$contractPath = Join-Path $repoRoot 'skills\repo-cleanup\contract.md'
 $evalPath = Join-Path $repoRoot 'skills\repo-cleanup\eval.yaml'
 
-foreach ($path in @($skillPath, $evalPath)) {
+foreach ($path in @($skillPath, $contractPath, $evalPath)) {
     if (-not (Test-Path $path)) {
         throw "Missing repo-cleanup asset: $path"
     }
 }
 
 $skill = Get-Content $skillPath -Raw
+$contract = Get-Content $contractPath -Raw
 Assert-Match $skill '(?m)^visibility:\s+public\r?$' 'repo-cleanup must be publicly visible'
 Assert-Match $skill '(?m)^compatibility:\s+\[github-copilot-cli\]\r?$' 'repo-cleanup must be scoped to github-copilot-cli only (no copilot-coding-agent)'
 
@@ -75,6 +77,16 @@ foreach ($guardrail in @(
 
 # This skill must never delegate deletion/pruning to branch-hygiene-sweeper.
 Assert-Match $skill ([regex]::Escape('does not delegate any part of its workflow')) 'repo-cleanup skill must state it does not delegate to @branch-hygiene-sweeper'
+
+foreach ($guardrail in @(
+        'release/freeze-protected',
+        'closed superseded/discarded',
+        'active agent use',
+        'refresh failure',
+        'Never perform destructive operations on `main`'
+    )) {
+    Assert-Match $contract ([regex]::Escape($guardrail)) "repo-cleanup contract missing moved safety invariant: $guardrail"
+}
 
 $eval = Get-Content $evalPath -Raw
 foreach ($scenario in @('neg-4', 'neg-5')) {
