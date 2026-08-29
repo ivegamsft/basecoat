@@ -56,7 +56,7 @@ See [emergency-and-compliance.md](references/secrets-management/emergency-and-co
 
 - Use `detect-secrets` pre-commit hook + `.secrets.baseline`.
 - Add `.env`, `*.pem`, `*.key`, `secrets/` to `.gitignore`.
-- Configure repository branch protection to block secrets in push (gitleaks, `secret-scan.yml`).
+- Configure repository branch protection to block secrets in push (gitleaks, the BaseCoat secret-scan reusable workflow).
 
 ## Reference Files
 

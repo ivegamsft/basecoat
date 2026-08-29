@@ -365,6 +365,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running skill workflow dependency tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'skill-workflow-dependency-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Skill workflow dependency tests failed' -ForegroundColor Red
+    Write-FailureLog 'skill-workflow-dependency-tests'
+    exit 1
+}
+
 Write-Host 'Running ship-it build-break detector tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'ship-it-build-break-detector-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

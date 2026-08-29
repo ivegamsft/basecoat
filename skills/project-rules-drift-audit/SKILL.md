@@ -42,12 +42,17 @@ and the canonical AIDL guardrail baseline.
 
 ## Workflow
 
-1. Load baseline from `scripts/project-rules-baseline.json`.
-2. Fetch live rules via `gh api graphql`.
-3. Classify each delta: `missing`, `modified`, or `extra`.
-4. Apply severity model and generate remediation rubric.
-5. Emit JSON report and Markdown summary (`advisory` mode).
-6. Open one GitHub issue per finding at or above threshold (`enforce` mode).
+1. Confirm `.github/workflows/project-rules-drift-audit.yml` exists (opt-in
+   template workflow, not installed by default -- see
+   `scripts/configure-downstream-workflows.ps1`). If missing, stop and
+   report it with installation guidance:
+   `pwsh scripts/configure-downstream-workflows.ps1 -InstallClass templates -Workflow project-rules-drift-audit.yml`.
+2. Load baseline from `scripts/project-rules-baseline.json`.
+3. Fetch live rules via `gh api graphql`.
+4. Classify each delta: `missing`, `modified`, or `extra`.
+5. Apply severity model and generate remediation rubric.
+6. Emit JSON report and Markdown summary (`advisory` mode).
+7. Open one GitHub issue per finding at or above threshold (`enforce` mode).
 
 ## Severity
 

@@ -31,7 +31,7 @@ on:
         type: string
   push:
     paths:
-      - 'scripts/project-rules-baseline.json'
+      - '.github/base-coat/scripts/project-rules-baseline.json'
 
 permissions:
   contents: read
@@ -94,11 +94,11 @@ jobs:
 
       - name: Validate baseline manifest
         run: |
-          if [ ! -f scripts/project-rules-baseline.json ]; then
-            echo "ERROR: scripts/project-rules-baseline.json not found."
+          if [ ! -f .github/base-coat/scripts/project-rules-baseline.json ]; then
+            echo "ERROR: .github/base-coat/scripts/project-rules-baseline.json not found."
             exit 1
           fi
-          if python3 -c "import json, sys; json.load(open('scripts/project-rules-baseline.json'))"; then
+          if python3 -c "import json, sys; json.load(open('.github/base-coat/scripts/project-rules-baseline.json'))"; then
             echo "Baseline manifest is valid JSON."
           else
             echo "ERROR: Baseline manifest is not valid JSON."
@@ -121,7 +121,7 @@ jobs:
         run: |
           $params = @{
             Repo              = '${{ github.repository }}'
-            BaselinePath      = 'scripts/project-rules-baseline.json'
+            BaselinePath      = '.github/base-coat/scripts/project-rules-baseline.json'
             Mode              = '${{ steps.params.outputs.mode }}'
             SeverityThreshold = '${{ steps.params.outputs.threshold }}'
             OutputPath        = 'drift-report.json'
@@ -135,7 +135,7 @@ jobs:
 
           $exitCode = 0
           try {
-            pwsh scripts/project-rules-drift-audit.ps1 @params
+            pwsh .github/base-coat/scripts/project-rules-drift-audit.ps1 @params
             $exitCode = $LASTEXITCODE
           } catch {
             Write-Host "Audit script error: $_"

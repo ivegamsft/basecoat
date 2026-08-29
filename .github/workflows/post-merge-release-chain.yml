@@ -211,15 +211,47 @@ jobs:
                 ref: 'main',
                 inputs
               });
-              await github.rest.actions.createWorkflowDispatch({
-                owner,
-                repo,
-                workflow_id: 'package-basecoat.yml',
-                ref: 'main'
-              });
             } catch (err) {
               dispatchError = err;
             }
+
+            // package-basecoat.yml packages BaseCoat's own release artifact and
+            // is never part of the distributed workflow payload (it has no
+            // installer entry in scripts/configure-downstream-workflows.ps1),
+            // so it will not exist in a consumer repo that installs this
+            // template. Probe for it and dispatch only when present, instead
+            // of dispatching unconditionally: an unconditional dispatch 404s
+            // in every downstream repo and its error was previously merged
+            // into dispatchError, misreporting the whole chain (including the
+            // successful ship-it-release-gate.yml dispatch) as FAILED.
+            let packagingDispatched = false;
+            let packagingSkippedReason = null;
+            if (!dispatchError) {
+              try {
+                await github.rest.actions.getWorkflow({
+                  owner,
+                  repo,
+                  workflow_id: 'package-basecoat.yml'
+                });
+                await github.rest.actions.createWorkflowDispatch({
+                  owner,
+                  repo,
+                  workflow_id: 'package-basecoat.yml',
+                  ref: 'main'
+                });
+                packagingDispatched = true;
+              } catch (err) {
+                if (err.status === 404) {
+                  packagingSkippedReason = 'package-basecoat.yml not present in this repository (BaseCoat-only packaging step).';
+                } else {
+                  dispatchError = err;
+                }
+              }
+            }
+
+            const packagingLine = packagingDispatched
+              ? '- Follow-up dispatch: `package-basecoat.yml`'
+              : `- Follow-up dispatch skipped: ${packagingSkippedReason || 'package-basecoat.yml unavailable'}`;
 
             const prCommentBody = dispatchError
               ? [
@@ -236,7 +268,7 @@ jobs:
                   '## Post-merge release chain status',
                   '',
                   `OK: dispatched \`ship-it-release-gate.yml\` for merged PR #${prNumber}.`,
-                  '- Follow-up dispatch: `package-basecoat.yml`',
+                  packagingLine,
                   `- Risk band: \`${riskBand}\``,
                   `- Change type: \`${changeType}\``,
                   `- Required checks pass: \`${allRequiredChecksPass}\``,

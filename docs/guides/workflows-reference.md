@@ -1,6 +1,6 @@
 # BaseCoat Workflow Reference
 
-Reference for upstream workflow templates in BaseCoat. Consumer installs use `scripts/configure-downstream-workflows.ps1`, which currently installs only the supported subset (`reusable` by default, with supported `templates` via opt-in) from `.github/base-coat/workflows`.
+Reference for upstream workflow templates in BaseCoat. Consumer installs use `scripts/configure-downstream-workflows.ps1`, which currently installs the supported default subset (`reusable` and `ship-it` by default, with supported `onboarding-telemetry`/`templates`/`internal` via opt-in) from `.github/base-coat/workflows`.
 
 Cross-repository reusable workflows require the canonical BaseCoat repository
 to allow Actions access from organization repositories under **Settings →

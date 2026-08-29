@@ -1,18 +1,19 @@
 name: "BaseCoat - Adoption Metrics"
-# [Internal-only] Memory workflow - BaseCoat operational use
+# Distributed template: collects BaseCoat adoption/telemetry-readiness metrics
+# for this repository and publishes them to its own gh-pages branch.
 
 on:
   schedule:
     - cron: '0 9 * * 1'  # Every Monday at 9am UTC
   workflow_dispatch: {}
   workflow_run:
-    # Must match docs.yml's exact `name:` ("BaseCoat - Deploy Docs"), not the
-    # bare "Deploy Docs" -- GitHub Actions' workflow_run.workflows[] filter is
-    # an exact match against the workflow's display name, so the mismatched
-    # name previously here made this trigger permanently dead (adoption
-    # metrics would never fire off pages deployment completion, only on the
-    # weekly cron/manual dispatch paths).
-    workflows: ["BaseCoat - Deploy Docs"]
+    # "Deploy Docs" is a generic placeholder matching the common mkdocs
+    # gh-deploy workflow display name. This is a distributed template: each
+    # consumer repo's own docs-deploy workflow name may differ, so rename
+    # this entry to match if your repo's docs-publish workflow is named
+    # differently. See scripts/known-workflow-dependency-gaps.json (docs.yml)
+    # for why this is not validated as a BaseCoat-distributed entrypoint.
+    workflows: ["Deploy Docs"]
     types: [completed]
 
 permissions:
@@ -70,14 +71,14 @@ jobs:
           OUTPUT_DIR: dashboard/metrics
           # App Insights telemetry (onboarding telemetry pack — see docs/operations/onboarding-telemetry-readiness.md)
           APPLICATIONINSIGHTS_CONNECTION_STRING: ${{ secrets.APPLICATIONINSIGHTS_CONNECTION_STRING }}
-        run: python scripts/metrics/collect-metrics.py
+        run: python .github/base-coat/scripts/metrics/collect-metrics.py
 
       - name: Emit telemetry readiness check
         env:
           APPLICATIONINSIGHTS_CONNECTION_STRING: ${{ secrets.APPLICATIONINSIGHTS_CONNECTION_STRING }}
           COPILOT_METRICS_TOKEN: ${{ secrets.COPILOT_METRICS_TOKEN }}
           DASHBOARD_REPOS: ${{ secrets.DASHBOARD_REPOS || format('["{0}"]', github.repository) }}
-        run: python scripts/metrics/emit-telemetry-readiness.py
+        run: python .github/base-coat/scripts/metrics/emit-telemetry-readiness.py
 
       - name: Deploy to gh-pages
         run: |

@@ -34,7 +34,13 @@ All scripts support deterministic `-DryRun` mode and JSON outputs for workflow h
 
 ## Integration Path
 
-1. `pr-auto-merge-executor.yml` consumes merge-readiness posture.
+These three workflows are optional downstream consumers of this skill's output
+files, not preconditions the skill depends on: each is an opt-in `templates`
+class entry in `scripts/configure-downstream-workflows.ps1`, not installed by
+default. If a workflow below isn't installed, its output JSON file simply goes
+unconsumed -- no delivery-autopilot script fails or blocks on its absence.
+
+1. `basecoat-pr-auto-merge-executor.yml` consumes merge-readiness posture.
 2. `post-merge-release-chain.yml` consumes merge results to dispatch release gate workflow.
 3. `automation-stuck-state-watchdog.yml` consumes escalation payload data when SLA stages stall.
 

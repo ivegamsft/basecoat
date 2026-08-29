@@ -137,6 +137,30 @@ if ($pilotSummary.release_gate_contract.lane_profiles.'pilot-luxesite'.required_
 }
 
 $workflowContent = Get-Content -Raw -Path $workflowFile
+$skillContent = Get-Content -Raw -Path $skillFile
+$outputContractPath = Join-Path $repoRoot "skills\ship-it\references\output-contract.md"
+if (-not (Test-Path $outputContractPath)) {
+  throw "Missing ship-it output contract reference: $outputContractPath"
+}
+$outputContractContent = Get-Content -Raw -Path $outputContractPath
+foreach ($requiredText in @(
+  'ship-it-intent-dispatch.yml',
+  'stop and report',
+  'never substitute'
+)) {
+  if ($skillContent -notmatch [regex]::Escape($requiredText)) {
+    throw "Ship-it skill must fail closed and require observable execution evidence: $requiredText"
+  }
+}
+foreach ($requiredText in @(
+  'do not substitute `/approve`',
+  'do not report success',
+  'observable workflow run IDs'
+)) {
+  if ($outputContractContent -notmatch [regex]::Escape($requiredText)) {
+    throw "Ship-it output contract reference must document fail-closed evidence requirements: $requiredText"
+  }
+}
 if ($workflowContent -notmatch "workflow_dispatch:") {
   throw "Ship-it workflow must include workflow_dispatch trigger."
 }

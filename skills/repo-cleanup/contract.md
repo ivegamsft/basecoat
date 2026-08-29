@@ -21,9 +21,9 @@ git pull --ff-only origin main
 
 Enumerate both local and remote branches. For each non-`main` branch, use
 `gh pr list --head <branch> --state all --limit 50 --json number,state,mergedAt,headRefName,headRefOid,baseRefName`.
-Treat a result count of 50 as truncated and escalate. Resolve all PRs; keep open PRs, branches with no recent PR, protected prefixes,
-and branches with no recent PR and recent commits, plus ambiguous or
-closed-but-unconfirmed states. A branch is safe when its PR
+Treat a result count of 50 as truncated and escalate. Resolve all PRs; keep
+open PRs, protected prefixes, branches with no PR and recent commits, and
+ambiguous or closed-but-unconfirmed states. A branch is safe only when its PR
 is merged into `main`, or when a closed superseded/discarded PR was explicitly
 confirmed as having no unlanded content, and its recorded `headRefOid` exactly
 equals the current local or remote tip. A merged PR with a different base or

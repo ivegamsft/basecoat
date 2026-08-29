@@ -260,6 +260,9 @@ if ($workflow -notmatch 'maxCheckPollAttempts\s*=\s*60' -or
     $workflow -notmatch 'await new Promise\(resolve => setTimeout\(resolve, checkPollIntervalMs\)\)') {
     throw 'Workflow must wait for pending required checks before publishing a terminal eligibility result.'
 }
+if ($workflow -notmatch [regex]::Escape('if (existing && existing.startedAt > startedAt) continue;')) {
+    throw 'Workflow must keep only the most recently started check run per name so a stale cancelled/failed rerun cannot clobber a newer passing result.'
+}
 if ($workflow -notmatch 'if \(!statusSucceeded && !checkSucceeded\)') {
     throw 'Workflow must treat pending or missing required checks as unsatisfied.'
 }

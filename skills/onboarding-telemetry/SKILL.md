@@ -40,10 +40,16 @@ for a newly onboarded BaseCoat repo.
 ## Steps
 
 1. Identify profile (`solo-dev`, `team-dev`, `regulated-team`).
-2. Check `APPLICATIONINSIGHTS_CONNECTION_STRING` and `COPILOT_METRICS_TOKEN` are set per profile requirements.
-3. Confirm `DASHBOARD_REPOS` includes the target repo.
-4. Trigger `adoption-metrics.yml` via `workflow_dispatch` to generate first readiness snapshot.
-5. Review `dashboard/metrics/telemetry-readiness.json` on `gh-pages`; surface any `missing_dependencies`.
+2. Confirm `adoption-metrics.yml` exists under `.github/workflows/` (opt-in
+   template, not installed by default -- see
+   `scripts/configure-downstream-workflows.ps1`'s `onboarding-telemetry`
+   class). If missing, stop and report it with installation guidance:
+   `pwsh scripts/configure-downstream-workflows.ps1 -InstallClass onboarding-telemetry`
+   (or `-IncludeTemplates`). Never assume it is present.
+3. Check `APPLICATIONINSIGHTS_CONNECTION_STRING` and `COPILOT_METRICS_TOKEN` are set per profile requirements.
+4. Confirm `DASHBOARD_REPOS` includes the target repo.
+5. Trigger `adoption-metrics.yml` via `workflow_dispatch` to generate first readiness snapshot.
+6. Review `dashboard/metrics/telemetry-readiness.json` on `gh-pages`; surface any `missing_dependencies`.
 
 ## Inputs and Outputs
 

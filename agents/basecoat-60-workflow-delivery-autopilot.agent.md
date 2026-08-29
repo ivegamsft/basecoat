@@ -41,7 +41,7 @@ Coordinate approve-once delivery by chaining status evaluation, merge execution,
 1. Run `scripts/delivery-autopilot/evaluate-status.ps1` to compute stage and gate posture.
 2. If merge-ready, run `scripts/delivery-autopilot/execute-merge.ps1` in `dry_run` or execution mode.
 3. If blocked, run `scripts/delivery-autopilot/build-escalation-payload.ps1` to create deterministic escalation payload JSON.
-4. Publish outputs for workflow handoff (`automation-stuck-state-watchdog.yml`, `pr-auto-merge-executor.yml`, and `post-merge-release-chain.yml`).
+4. Publish outputs for workflow handoff (`automation-stuck-state-watchdog.yml`, `basecoat-pr-auto-merge-executor.yml`, and `post-merge-release-chain.yml`). These are optional downstream consumers -- opt-in `templates` class entries, not installed by default -- so the payload files are simply left unconsumed if a consumer hasn't installed them; nothing in this agent's own execution depends on their presence.
 
 ## Guardrails
 

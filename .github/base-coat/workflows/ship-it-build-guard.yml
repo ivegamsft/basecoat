@@ -4,9 +4,8 @@ on:
   workflow_dispatch:
     inputs:
       target_repo:
-        description: Repository in owner/repo format
-        required: true
-        default: IBuySpy-Shared/basecoat
+        description: Repository in owner/repo format (defaults to this repository)
+        required: false
         type: string
       target_branch:
         description: Branch to monitor (optional)
@@ -38,7 +37,13 @@ on:
   workflow_run:
     workflows:
       - BaseCoat - Ship-it Intent Dispatch
-      - BaseCoat - PR Validation
+      # BaseCoat - PR Validation is intentionally NOT listed in the distributed
+      # copy: it is basecoat's own self-hosted CI workflow name
+      # (.github/workflows/pr-validation.yml) and is never part of the
+      # downstream workflow payload, so listing it here would be a dead
+      # trigger for every consumer repo. The root copy of this file (used for
+      # basecoat's own automation) keeps that entry since the workflow exists
+      # in this repo. See issue #2943 discussion.
     types: [completed]
 
 permissions:
@@ -160,7 +165,7 @@ jobs:
             $params.DryRun = $true
           }
 
-          .\scripts\ship-it\build-break-detector.ps1 @params
+          .\.github\base-coat\scripts\ship-it\build-break-detector.ps1 @params
 
       - name: Export detector action
         id: detector

@@ -677,6 +677,13 @@ Invoke-DispatchScenario -Name "goal-id-fallback" -RiskBand "high" -PromotionStag
   -ArtifactStatus $defaultArtifacts -PromotionContext $prodContext -DryRun `
   -ExpectedExit 0
 
+# Fail closed on omission: keys entirely absent from the grouped inputs must
+# default to a BLOCKING status (not_run / missing), never a passing one,
+# otherwise silently-dropped dispatch fields would masquerade as evidence.
+Invoke-DispatchScenario -Name "omitted-keys-fail-closed" -RiskBand "high" -PromotionStage "production" `
+  -GateStatus "lint=pass" -ArtifactStatus "spec=present" -PromotionContext "goal_ids=G1" `
+  -ExpectedExit 1
+
 # Fail closed: a malformed grouped token (missing '=') must be rejected rather
 # than silently dropped, so bad dispatch input cannot yield a passing gate.
 # Also verify an unknown key (typo) is rejected instead of masking a real block.

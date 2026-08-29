@@ -19,13 +19,20 @@ new canonical filenames are installed.
 
 ## Installation classes
 
-The installer supports three classes:
+The installer supports five classes:
 
 1. `reusable` (default)
-2. `templates` (opt-in)
-3. `internal` (opt-in)
+2. `ship-it` (default) — active, event-triggered ship-it delivery workflows
+   (`ship-it-intent-dispatch.yml`, `ship-it-build-guard.yml`,
+   `ship-it-release-gate.yml`); the skill's fail-closed contract requires
+   all three to be installed together or not at all, so this class
+   installs by default (see issue #2943).
+3. `onboarding-telemetry` (opt-in via `-InstallClass`) — autonomous,
+   scheduled, write-permission workflow (`adoption-metrics.yml`)
+4. `templates` (opt-in)
+5. `internal` (opt-in)
 
-By default, only reusable workflows are installed.
+By default, `reusable` and `ship-it` workflows are installed.
 
 ## Quick start
 
@@ -35,13 +42,22 @@ Run from repository root:
 pwsh scripts/configure-downstream-workflows.ps1
 ```
 
-Default install (reusable class) includes:
+Default install (reusable + ship-it classes) includes:
 
 ```text
 .github/workflows/
 ├── basecoat-upstream-version-drift.yml
 ├── basecoat-version-check.yml
-└── basecoat-secret-scan.yml
+├── basecoat-secret-scan.yml
+├── ship-it-intent-dispatch.yml
+├── ship-it-build-guard.yml
+└── ship-it-release-gate.yml
+```
+
+To install only the reusable class (skip ship-it):
+
+```bash
+pwsh scripts/configure-downstream-workflows.ps1 -InstallClass reusable
 ```
 
 ## Include templates and internal workflows

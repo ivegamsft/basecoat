@@ -38,6 +38,13 @@ baseline and produce a severity-classified, issue-ready drift report.
 
 ## Workflow
 
+0. **Preflight (enforce mode only)** — confirm `.github/workflows/project-rules-drift-audit.yml`
+   exists. It is an opt-in template workflow (not installed by
+   `configure-downstream-workflows.ps1`'s default `-InstallClass`); a
+   downstream consumer must run it with `-InstallClass templates` (or
+   `-IncludeTemplates`) to receive it. If it is missing, stop and report it
+   with that installation guidance rather than silently falling back to
+   manual issue creation.
 1. **Load baseline** — read the canonical AIDL guardrail baseline from `baseline_path`.
    Reject runs where the baseline file is absent or unparseable.
 2. **Fetch live rules** — retrieve all automation rules from the target GitHub Project

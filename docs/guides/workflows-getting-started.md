@@ -12,6 +12,8 @@ Supported distributable workflows by class:
 | Class | Installed by default | Workflows |
 |----------|---------|---------|
 | **Reusable** | Yes | `basecoat-upstream-version-drift.yml`, `basecoat-version-check.yml`, `basecoat-secret-scan.yml` |
+| **Ship-it** | Yes | `ship-it-intent-dispatch.yml`, `ship-it-build-guard.yml`, `ship-it-release-gate.yml` (all three install together per the skill's fail-closed contract; see issue #2943) |
+| **Onboarding-telemetry** | No (`-InstallClass onboarding-telemetry`) | `adoption-metrics.yml` (autonomous, scheduled, write-permission workflow -- opt-in) |
 | **Templates** | No (`-IncludeTemplates`) | `basecoat-dependency-update-advisor.yml`, `basecoat-issue-approve.yml`, `basecoat-pr-auto-merge-executor.yml`, `basecoat-sprint-closeout-branch-audit.yml`, `basecoat-token-inventory.yml` |
 | **Internal** | No (`-IncludeInternal`) | Internal-only automation workflows (unsupported in downstream consumer repos) |
 
@@ -25,11 +27,20 @@ Run the downstream workflow installer from your consumer repository:
 pwsh scripts/configure-downstream-workflows.ps1
 ```
 
-This installs (default reusable class):
+This installs (default reusable + ship-it classes):
 
 - `basecoat-upstream-version-drift.yml`
 - `basecoat-version-check.yml`
 - `basecoat-secret-scan.yml`
+- `ship-it-intent-dispatch.yml`
+- `ship-it-build-guard.yml`
+- `ship-it-release-gate.yml`
+
+To install only the reusable class (skip ship-it):
+
+```bash
+pwsh scripts/configure-downstream-workflows.ps1 -InstallClass reusable
+```
 
 To include template workflows:
 

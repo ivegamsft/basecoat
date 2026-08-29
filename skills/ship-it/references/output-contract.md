@@ -5,6 +5,16 @@ Reference for the artifacts the ship-it skill emits. The `## Output` section of
 The producing scripts (cited with file:line) are authoritative for exact field
 shapes — consult them when integrating, as fields may evolve.
 
+## Fail-Closed Dependency Contract
+
+Before dispatching anything, verify all three workflows exist under
+`.github/workflows/`: `ship-it-intent-dispatch.yml`, `ship-it-build-guard.yml`,
+`ship-it-release-gate.yml`. If any is absent, stop and report the missing
+dependency by name; do not substitute `/approve` or any other unrelated
+command as a fallback, and do not report success. Verification requires
+observable workflow run IDs, conclusions, and the expected issue/label state
+transitions — creating a comment or issue is not itself evidence of execution.
+
 ## Producers
 
 | Source | Emits |

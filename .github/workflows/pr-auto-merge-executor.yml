@@ -1033,9 +1033,17 @@ jobs:
                   const trustedActionsCheck = check.app?.id === githubActionsIntegrationId ||
                     check.app?.slug === 'github-actions';
                   if (!check?.name || !trustedActionsCheck) continue;
+                  // Multiple check runs can share the same name after a rerun
+                  // (e.g. an earlier cancelled run alongside a later success).
+                  // Keep only the most recently started run per name so a stale
+                  // cancelled/failed run can never clobber a newer passing one.
+                  const existing = checkByName.get(check.name);
+                  const startedAt = Date.parse(check.started_at || '') || 0;
+                  if (existing && existing.startedAt > startedAt) continue;
                   checkByName.set(check.name, {
                     status: String(check.status || '').toLowerCase(),
-                    conclusion: String(check.conclusion || '').toLowerCase()
+                    conclusion: String(check.conclusion || '').toLowerCase(),
+                    startedAt
                   });
                 }
               }

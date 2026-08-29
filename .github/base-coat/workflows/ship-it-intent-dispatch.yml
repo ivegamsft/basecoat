@@ -18,9 +18,8 @@ on:
         required: true
         type: string
       target_repo:
-        description: Repository in owner/repo format
-        required: true
-        default: IBuySpy-Shared/basecoat
+        description: Repository in owner/repo format (defaults to this repository)
+        required: false
         type: string
       spec_ref:
         description: Optional spec or PRD reference
@@ -285,7 +284,7 @@ jobs:
             $params.DryRun = $true
           }
 
-          .\scripts\ship-it\dispatch-intent.ps1 @params
+          .\.github\base-coat\scripts\ship-it\dispatch-intent.ps1 @params
 
       - name: Create remediation issue when dispatch fails
         if: steps.dispatch.outcome == 'failure'

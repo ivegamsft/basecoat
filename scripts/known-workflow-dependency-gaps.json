@@ -1,0 +1,68 @@
+[
+  {
+    "workflow": "docs.yml",
+    "scope": "skills/docs-site/",
+    "issue": "#2919",
+    "note": "docs-site SKILL.md example workflow name is illustrative (site-generation output target chosen by the consumer), not a BaseCoat-distributed entrypoint."
+  },
+  {
+    "workflow": "takt-time-workflow.yml",
+    "scope": "skills/takt-time-measurement/",
+    "issue": "#2919",
+    "note": "takt-time-measurement SKILL.md names the workflow file the skill generates for the consumer's own repo; it is a skill-authored template output, not a BaseCoat-distributed entrypoint."
+  },
+  {
+    "workflow": "issue-metadata-hygiene.yml",
+    "scope": "skills/issue-triage/",
+    "issue": "#2919",
+    "note": "issue-triage's metadata-contract.md documents this scheduled hygiene audit as a BaseCoat-repo-only maintenance workflow; it is not registered in configure-downstream-workflows.ps1 and is not a downstream skill dependency."
+  },
+  {
+    "workflow": "db-migrate.yml",
+    "scope": "skills/database-migration/",
+    "issue": "#2919",
+    "note": "database-migration's schema-versioning.md illustrates a workflow the consumer authors in their own repo (fenced example under a '# .github/workflows/db-migrate.yml' comment header); it is not a BaseCoat-distributed entrypoint."
+  },
+  {
+    "workflow": "container-build-push.yml",
+    "scope": "skills/container-migration/",
+    "issue": "#2919",
+    "note": "container-migration's workflow.md instructs the consumer to create this workflow themselves (ACR push/pull via OIDC); it is a skill-authored template output for the consumer's own repo, not a BaseCoat-distributed entrypoint."
+  },
+  {
+    "workflow": "orchestrate.yml",
+    "scope": "instructions/basecoat-60-workflow-multi-repo-orchestration.instructions.md",
+    "issue": "#2919",
+    "note": "Illustrative hub/spoke pattern example for a generic hypothetical multi-repo setup (fictional 'spoke-alpha' repo), not a BaseCoat-distributed entrypoint."
+  },
+  {
+    "workflow": "deploy.yml",
+    "scope": "instructions/basecoat-60-workflow-multi-repo-orchestration.instructions.md",
+    "issue": "#2919",
+    "note": "Illustrative hub/spoke pattern example for a generic hypothetical multi-repo setup (fictional 'spoke-alpha' repo), not a BaseCoat-distributed entrypoint."
+  },
+  {
+    "workflow": "notify-hub.yml",
+    "scope": "instructions/basecoat-60-workflow-multi-repo-orchestration.instructions.md",
+    "issue": "#2919",
+    "note": "Illustrative anti-pattern example (spoke dispatching back to hub) for a generic hypothetical multi-repo setup, not a BaseCoat-distributed entrypoint."
+  },
+  {
+    "workflow": "ci.yml",
+    "scope": "instructions/basecoat-60-workflow-workflow-file-integrity.instructions.md",
+    "issue": "#2919",
+    "note": "Generic illustrative filename in a code-generation-safety example (writing/validating a workflow file), not a BaseCoat-distributed entrypoint."
+  },
+  {
+    "workflow": "deploy.yml",
+    "scope": "instructions/basecoat-60-workflow-workflow-file-integrity.instructions.md",
+    "issue": "#2919",
+    "note": "Generic illustrative filename in a checksum-registry example for security-sensitive workflows, not a BaseCoat-distributed entrypoint."
+  },
+  {
+    "workflow": "project-rules-drift-audit.yml",
+    "scope": "instructions/basecoat-10-core-agent-routing.instructions.md",
+    "issue": "#2919",
+    "note": "Illustrative fenced debug-prompt example demonstrating the 'mention exact files up front' technique; the workflow filename is an arbitrary stand-in for 'some workflow in this repo', not an assertion that a downstream consumer must have this specific opt-in template installed."
+  }
+]

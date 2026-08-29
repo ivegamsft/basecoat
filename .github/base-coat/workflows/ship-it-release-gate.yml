@@ -8,9 +8,8 @@ on:
     # evaluation step) so the full release-gate-enforcer contract stays reachable.
     inputs:
       target_repo:
-        description: Repository in owner/repo format
-        required: true
-        default: IBuySpy-Shared/basecoat
+        description: Repository in owner/repo format (defaults to this repository)
+        required: false
         type: string
       target_branch:
         description: Branch tied to promotion evidence
@@ -144,7 +143,7 @@ jobs:
           PROMOTION_CONTEXT: ${{ inputs.promotion_context }}
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
-          ./scripts/ship-it/invoke-release-gate.ps1 `
+          ./.github/base-coat/scripts/ship-it/invoke-release-gate.ps1 `
             -TargetRepo $env:TARGET_REPO `
             -TargetBranch $env:TARGET_BRANCH `
             -RiskBand $env:RISK_BAND `
