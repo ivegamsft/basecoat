@@ -9,7 +9,7 @@ The GitHub Copilot CLI does **not** currently support custom slash commands from
 ### Attempted Command: `/basecoat`
 
 ```text
-/basecoat architect "design factory basecoat-10-core-architecture and document"
+/basecoat architect "design factory architecture and document"
 ```
 
 **Result:**
@@ -41,20 +41,20 @@ Unknown command: /basecoat
 Use the agent name directly with `@` mention syntax:
 
 ```text
-@basecoat-10-core-solution-architect design the factory basecoat-10-core-architecture and document
+@solution-architect design the factory architecture and document
 ```
 
 **Advantages:**
 
 - Clean, direct syntax
-- Works across all basecoat-10-core-agents in basecoat
+- Works across all agents in basecoat
 - No special prefix needed
 - Explicit agent routing
 
 **Example:**
 
 ```text
-@solution-architect: Design a microservices basecoat-10-core-architecture for a SaaS platform with:
+@solution-architect: Design a microservices architecture for a SaaS platform with:
 - Multi-region deployment
 - High availability
 - Cost optimization
@@ -67,22 +67,22 @@ Use the agent name directly with `@` mention syntax:
 Describe your request naturally, mentioning the agent:
 
 ```text
-I need help designing factory architecture. Delegate this to the basecoat-10-core-solution-architect agent 
-from basecoat: "design the factory basecoat-10-core-architecture and document"
+I need help designing factory architecture. Delegate this to the solution-architect agent
+from basecoat: "design the factory architecture and document"
 ```
 
 **Advantages:**
 
 - Flexible phrasing
-- Works with multiple basecoat-10-core-agents
+- Works with multiple agents
 - Natural conversation flow
 - Full context passed to agent
 
 **Example:**
 
 ```text
-I'm building an event-driven system. Can you delegate to the basecoat-10-core-solution-architect agent 
-from basecoat to design an event basecoat-10-core-architecture that handles 100k events/sec with 
+I'm building an event-driven system. Can you delegate to the solution-architect agent
+from basecoat to design an event architecture that handles 100k events/sec with
 multi-region failover?
 ```
 
@@ -93,7 +93,7 @@ multi-region failover?
 Use the task/tool infrastructure to explicitly invoke agents:
 
 ```text
-Please invoke the basecoat-10-core-solution-architect agent to: design the factory basecoat-10-core-architecture and document
+Please invoke the solution-architect agent to: design the factory architecture and document
 ```
 
 **Advantages:**
@@ -106,48 +106,48 @@ Please invoke the basecoat-10-core-solution-architect agent to: design the facto
 **Example:**
 
 ```text
-Invoke the basecoat-10-core-solution-architect agent to create a C4 basecoat-10-core-architecture diagram and ADR 
+Invoke the solution-architect agent to create a C4 architecture diagram and ADR
 for event sourcing with CQRS pattern
 ```
 
 ---
 
-## Available basecoat-10-core-agents (Quick Reference)
+## Available Agents (Quick Reference)
 
-### basecoat-10-core-architecture & Design (Use `@agent-name`)
+### Architecture & Design (Use `@agent-name`)
 
-- `@basecoat-10-core-solution-architect` ΓÇö System design, C4 diagrams, tech selection, ADRs
-- `@basecoat-40-azure-azure-landing-zone` ΓÇö Enterprise basecoat-40-azure-azure setup, management groups, policy
-- `@basecoat-60-workflow-infrastructure-deploy` ΓÇö IaC deployment, Terraform, basecoat-10-core-bicep orchestration
-- `@basecoat-30-ai-containerization-planner` ΓÇö Dockerfiles, Kubernetes, multi-stage builds
+- `@solution-architect` — System design, C4 diagrams, tech selection, ADRs
+- `@azure-landing-zone` — Enterprise Azure setup, management groups, policy
+- `@infrastructure-deploy` — IaC deployment, Terraform, Bicep orchestration
+- `@containerization-planner` — Dockerfiles, Kubernetes, multi-stage builds
 
-### basecoat-50-security-security & Compliance
+### Security & Compliance
 
-- `@basecoat-50-security-security-analyst` ΓÇö Vulnerability assessment, threat modeling, OWASP
-- `@basecoat-50-security-policy-as-code-compliance` ΓÇö Policy validation, exceptions, audit reports
-- `@basecoat-10-core-identity-architect` ΓÇö basecoat-40-azure-azure RBAC, Entra ID, zero trust design
+- `@security-analyst` — Vulnerability assessment, threat modeling, OWASP
+- `@policy-as-code-compliance` — Policy validation, exceptions, audit reports
+- `@identity-architect` — Azure RBAC, Entra ID, zero trust design
 
 ### Data & Analytics
 
-- `@basecoat-80-data-data-architect` ΓÇö Medallion architecture, ETL patterns, basecoat-20-lang-governance
-- `@basecoat-80-data-database-migration` ΓÇö Zero-downtime migrations, schema evolution
-- `@basecoat-30-ai-mlops` ΓÇö Model lifecycle, experiment tracking, drift monitoring
+- `@data-architect` — Medallion architecture, ETL patterns, governance
+- `@database-migration` — Zero-downtime migrations, schema evolution
+- `@mlops` — Model lifecycle, experiment tracking, drift monitoring
 
 ### DevOps & Operations
 
-- `@basecoat-10-core-devops-engineer` ΓÇö CI/CD pipelines, IaC, basecoat-10-core-observability setup
-- `@basecoat-10-core-sre-engineer` ΓÇö SLOs, error budgets, incident response, chaos engineering
-- `@basecoat-60-workflow-release-manager` ΓÇö Versioned releases, CHANGELOG, rollback procedures
+- `@devops-engineer` — CI/CD pipelines, IaC, observability setup
+- `@sre-engineer` — SLOs, error budgets, incident response, chaos engineering
+- `@release-manager` — Versioned releases, CHANGELOG, rollback procedures
 
-### basecoat-10-core-development
+### Development
 
-- `@basecoat-10-core-backend-dev` ΓÇö APIs, services, business logic
-- `@basecoat-10-core-frontend-dev` ΓÇö UI components, responsive design, accessibility
-- `@basecoat-90-quality-code-review` ΓÇö Code quality, performance, basecoat-50-security-security review
+- `@backend-dev` — APIs, services, business logic
+- `@frontend-dev` — UI components, responsive design, accessibility
+- `@code-review` — Code quality, performance, security review
 
 ### Other
 
-- See [agents.md](../agents/agents.md) for complete list of 73 basecoat-10-core-agents
+- See [AGENTS.md](../agents/AGENTS.md) for the complete agent list
 
 ---
 
@@ -156,7 +156,7 @@ for event sourcing with CQRS pattern
 ### Γ¥î Does NOT Work
 
 ```text
-/basecoat architect design factory basecoat-10-core-architecture
+/basecoat architect design factory architecture
 ```
 
 **Error**: Unknown command: /basecoat
@@ -164,21 +164,21 @@ for event sourcing with CQRS pattern
 ### Γ£à Works Instead
 
 ```text
-@basecoat-10-core-solution-architect design the factory basecoat-10-core-architecture and document
+@solution-architect design the factory architecture and document
 ```
 
 ### Γ£à Also Works
 
 ```text
-I need the basecoat-10-core-solution-architect agent from basecoat to: design factory basecoat-10-core-architecture
+I need the solution-architect agent from basecoat to: design factory architecture
 ```
 
 ### Γ£à Programmatic Way
 
 ```python
 # In code or automation
-agent = "basecoat-10-core-solution-architect"
-task = "design the factory basecoat-10-core-architecture and document"
+agent = "solution-architect"
+task = "design the factory architecture and document"
 # Delegate to agent...
 ```
 
@@ -188,7 +188,7 @@ task = "design the factory basecoat-10-core-architecture and document"
 
 ### Discovery
 
-1. Review `AGENTS.md` for all available basecoat-10-core-agents
+1. Review `AGENTS.md` for all available agents
 2. Check `docs/AGENT_SKILL_MAP.md` for discipline-indexed search
 3. Read agent `.md` file for capabilities and requirements
 
@@ -201,14 +201,14 @@ task = "design the factory basecoat-10-core-architecture and document"
 ### With Context
 
 ```text
-@agent-name 
+@agent-name
 
 **Context:**
 - Architecture: Microservices
 - Scale: 100k requests/sec
 - Requirements: Multi-region, HA, cost-optimized
 
-**Task:** Design the complete basecoat-10-core-architecture and create an ADR
+**Task:** Design the complete architecture and create an ADR
 ```
 
 ---
@@ -250,9 +250,9 @@ task = "design the factory basecoat-10-core-architecture and document"
 
 ## Reporting Issues
 
-If you encounter issues with basecoat-10-core-agents or workarounds:
+If you encounter issues with agents or workarounds:
 
-1. **Check** [agents.md](../agents/agents.md) for agent availability
+1. **Check** [AGENTS.md](../agents/AGENTS.md) for agent availability
 2. **Try** different agent names (exact match required)
 3. **Report** via GitHub Issues with:
    - Command attempted

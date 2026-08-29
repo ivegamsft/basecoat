@@ -1,6 +1,6 @@
 # Agent Lifecycle Hooks Specification
 
-Defines a portable hook model for Base Coat basecoat-10-core-agents so memory, telemetry, error handling, and session rotation can be attached to agent execution without modifying every agent prompt.
+Defines a portable hook model for Base Coat agents so memory, telemetry, error handling, and session rotation can be attached to agent execution without modifying every agent prompt.
 
 > **Tracking:** Issue [#145](https://github.com/IBuySpy-Shared/basecoat/issues/145)
 
@@ -39,7 +39,7 @@ A hook system should be **optional, composable, and failure-tolerant**. If a hoo
 | `OnError` | Tool call fails | Log to error KB, check retry policy | ✅ All (`errorOccurred` in VS Code/CLI) |
 | `OnBudgetExceeded` | Token budget threshold hit | Force session rotation, trigger handoff | ⚠️ BaseCoat extension only |
 
-> **Note on BaseCoat extensions:** `PostCompact` and `OnBudgetExceeded` are BaseCoat-defined concepts not natively supported by current platform runtimes. Implement them via application logic in agent guidance or basecoat-10-core-mcp middleware rather than native hook basecoat-10-core-config files.
+> **Note on BaseCoat extensions:** `PostCompact` and `OnBudgetExceeded` are BaseCoat-defined concepts not natively supported by current platform runtimes. Implement them via application logic in agent guidance or MCP middleware rather than native hook config files.
 
 ### `SessionStart`
 
@@ -54,7 +54,7 @@ Typical responsibilities:
 
 ### `SessionEnd` / `Stop`
 
-> **Platform note:** VS Code and Copilot CLI call this event `Stop`. Use `Stop` in `.github/hooks/*.json` config. Use `SessionEnd` in BaseCoat agent guidance prose and basecoat-10-core-mcp patterns. Semantics are identical.
+> **Platform note:** VS Code and Copilot CLI call this event `Stop`. Use `Stop` in `.github/hooks/*.json` config. Use `SessionEnd` in BaseCoat agent guidance prose and MCP patterns. Semantics are identical.
 
 Runs when a session is about to terminate normally or rotate into a fresh session.
 
@@ -116,7 +116,7 @@ Typical responsibilities:
 
 - Aggregate subagent results and pass summaries to parent context
 - Clean up subagent-scoped resources
-- Record subagent duration and output basecoat-90-quality-quality metrics
+- Record subagent duration and output quality metrics
 
 ### `PreCompact`
 
@@ -136,11 +136,11 @@ Typical responsibilities:
 
 - Verify that critical state survived compaction
 - Re-inject missing anchors such as issue number, branch name, or open blockers
-- Record compaction basecoat-90-quality-quality metrics for later tuning
+- Record compaction quality metrics for later tuning
 
 ### `OnError` / `errorOccurred`
 
-> **Platform note:** VS Code and Copilot CLI call this event `errorOccurred`. Use `errorOccurred` in `.github/hooks/*.json` config. Use `OnError` in BaseCoat prose and basecoat-10-core-mcp patterns.
+> **Platform note:** VS Code and Copilot CLI call this event `errorOccurred`. Use `errorOccurred` in `.github/hooks/*.json` config. Use `OnError` in BaseCoat prose and MCP patterns.
 
 Runs when a tool call or hook-managed action fails.
 
@@ -157,7 +157,7 @@ Runs when token usage crosses a configured threshold.
 
 Typical responsibilities:
 
-- Trigger session rotation before output basecoat-90-quality-quality degrades further
+- Trigger session rotation before output quality degrades further
 - Save a compact but complete handoff summary
 - Block additional large context loads or expensive tool calls
 - Emit telemetry so budget tuning can be improved later
@@ -307,13 +307,13 @@ Suggested fields:
 
 A Base Coat deployment can register hooks in three common ways:
 
-1. **`mcp.json`** — route hook logic through basecoat-10-core-mcp tools or middleware
+1. **`mcp.json`** — route hook logic through MCP tools or middleware
 2. **`hooks.json`** — declare file-based hook handlers for runtimes that support native hook configs
 3. **Code-based registration** — use application code when the host runtime exposes an SDK
 
 #### Pattern A: `mcp.json`
 
-Use this when the runtime exposes extensibility through basecoat-10-core-mcp servers or wrapper tools.
+Use this when the runtime exposes extensibility through MCP servers or wrapper tools.
 
 ```json
 {
@@ -367,7 +367,7 @@ Use this when targeting VS Code, Copilot CLI, or the Copilot Cloud Agent directl
 }
 ```
 
-> **Cloud Agent:** Only `bash` commands are honored in the ephemeral Linbasecoat-10-core-ux sandbox. `powershell` entries are silently ignored. Use the cross-platform `command` field as a fallback.
+> **Cloud Agent:** Only `bash` commands are honored in the ephemeral Linux sandbox. `powershell` entries are silently ignored. Use the cross-platform `command` field as a fallback.
 
 #### Onboarding hook packs
 
@@ -470,35 +470,35 @@ runtime.hooks.register('SessionStart', async (event) => {
 
 #### Platform Name Mapping
 
-BaseCoat uses consistent hook names in basecoat-10-core-documentation and basecoat-10-core-mcp patterns. When writing native hook basecoat-10-core-config files, use the platform names in the table below:
+BaseCoat uses consistent hook names in documentation and MCP patterns. When writing native hook config files, use the platform names in the table below:
 
 | BaseCoat Name | VS Code / Copilot CLI Name | Cloud Agent | Notes |
 |---|---|---|---|
-| `SessionStart` | `SessionStart` | ✅ | Identical |
-| `SessionEnd` | `Stop` | ✅ | Name differs — use `Stop` in JSON basecoat-10-core-config |
-| `UserPromptSubmitted` | `UserPromptSubmit` | ✅ | Minor name variant |
-| `PreToolUse` | `preToolUse` | ✅ | camelCase in JSON basecoat-10-core-config |
-| `PostToolUse` | `postToolUse` | ✅ | camelCase in JSON basecoat-10-core-config |
-| `SubagentStart` | `SubagentStart` | ❌ | VS Code / CLI only |
-| `SubagentStop` | `SubagentStop` | ❌ | VS Code / CLI only |
-| `PreCompact` | `PreCompact` | ❌ | VS Code / CLI only |
+| `SessionStart` | `SessionStart` | Supported | Identical |
+| `SessionEnd` | `Stop` | Supported | Name differs — use `Stop` in JSON config |
+| `UserPromptSubmitted` | `UserPromptSubmit` | Supported | Minor name variant |
+| `PreToolUse` | `preToolUse` | Supported | camelCase in JSON config |
+| `PostToolUse` | `postToolUse` | Supported | camelCase in JSON config |
+| `SubagentStart` | `SubagentStart` | Not supported | VS Code / CLI only |
+| `SubagentStop` | `SubagentStop` | Not supported | VS Code / CLI only |
+| `PreCompact` | `PreCompact` | Not supported | VS Code / CLI only |
 | `PostCompact` | — | — | BaseCoat extension, not in platform |
-| `OnError` | `errorOccurred` | ✅ | Name differs — use `errorOccurred` in JSON basecoat-10-core-config |
-| `OnBudgetExceeded` | — | — | BaseCoat extension, implement via basecoat-10-core-mcp middleware |
+| `OnError` | `errorOccurred` | Supported | Name differs — use `errorOccurred` in JSON config |
+| `OnBudgetExceeded` | — | — | BaseCoat extension, implement via MCP middleware |
 
-| Runtime | Hook Pattern | basecoat-10-core-config Location | Notes |
+| Runtime | Hook Pattern | Config Location | Notes |
 |--------|--------------|----------------|-------|
 | VS Code (Preview) | Native JSON + agent frontmatter | `.github/hooks/*.json` | Recommended for interactive sessions |
 | Copilot CLI | Native JSON | `.github/hooks/*.json`, `~/.copilot/hooks/` | Same format; also supports user-level hooks |
 | Copilot Cloud Agent | Native JSON (bash only) | `.github/hooks/*.json` in cloned repo | No user-level hooks; ephemeral sandbox; bash only |
 | Claude Code | Native hooks | `.claude/settings.json` | VS Code also reads this location |
-| basecoat-10-core-mcp middleware | Pattern A (`mcp.json`) | Configured in basecoat-10-core-mcp server | Use for non-file-based runtimes |
+| MCP middleware | Pattern A (`mcp.json`) | Configured in MCP server | Use for non-file-based runtimes |
 
 #### GitHub Copilot
 
 For interactive VS Code sessions: use `.github/hooks/*.json` (Pattern B). For the Copilot Cloud Agent: same format, bash only. For programmatic MCP-based integrations: use Pattern A.
 
-The cleanest native integration is `.github/hooks/*.json` — no wrapper needed. For more complex logic (context injection, loop detection), wrap behavior as basecoat-10-core-mcp tools and route through Pattern A.
+The cleanest native integration is `.github/hooks/*.json` — no wrapper needed. For more complex logic (context injection, loop detection), wrap behavior as MCP tools and route through Pattern A.
 
 #### Claude Code
 
@@ -506,7 +506,7 @@ Claude Code reads `.claude/settings.json` and `.github/hooks/*.json`. VS Code al
 
 #### Codex / Other Runtimes
 
-Use Pattern B (declarative `hooks.json`) with the `command` cross-platform field. Keep handlers small, deterministic, and side-effect-free so basecoat-10-core-config remains portable.
+Use Pattern B (declarative `hooks.json`) with the `command` cross-platform field. Keep handlers small, deterministic, and side-effect-free so config remains portable.
 
 ### Error Handling in Hooks
 
@@ -619,7 +619,7 @@ Typical response:
 
 ### Session Rotation → `OnBudgetExceeded`
 
-When the session crosses a budget threshold, hooks should rotate before basecoat-90-quality-quality collapses.
+When the session crosses a budget threshold, hooks should rotate before quality collapses.
 
 Recommended sequence:
 
@@ -632,7 +632,7 @@ Recommended sequence:
 
 ### Telemetry → All Hooks
 
-Every hook point can emit telemetry. See `docs/reference/TELEMETRY.md` for the full telemetry integration guide, including basecoat-40-azure-azure Application Insights configuration.
+Every hook point can emit telemetry. See `docs/reference/TELEMETRY.md` for the full telemetry integration guide, including Azure Application Insights configuration.
 
 Suggested measurements:
 
@@ -652,9 +652,9 @@ Suggested measurements:
 
 **Privacy rule:** Never include prompt content, file contents, or user-identifying data in telemetry payloads. Log only structural metadata: agent names, tool names, timestamps, durations, and success/fail signals.
 
-#### basecoat-40-azure-azure Application Insights via Hooks (opt-in)
+#### Azure Application Insights via Hooks (opt-in)
 
-Users can route BaseCoat telemetry to their own basecoat-40-azure-azure Application Insights workspace by setting `APPINSIGHTS_CONNECTION_STRING` in their environment. Hook scripts check for this variable and POST custom events to the App Insights ingestion API. If the variable is not set, the hook silently passes through.
+Users can route BaseCoat telemetry to their own Azure Application Insights workspace by setting `APPINSIGHTS_CONNECTION_STRING` in their environment. Hook scripts check for this variable and POST custom events to the App Insights ingestion API. If the variable is not set, the hook silently passes through.
 
 ```json
 {
@@ -758,6 +758,6 @@ When adding hook support to a Base Coat-aligned runtime:
 ## Related References
 
 - [`docs/token-optimization.md`](../guides/token-optimization.md) — Token budget, compaction, and context handoff patterns
-- [`docs/../architecture/multi-agent-orchestration-patterns.md`](../architecture/multi-agent-orchestration-patterns.md) — Session handoff and coordination patterns across basecoat-10-core-agents
-- [`instructions/basecoat-20-lang-governance.instructions.md`](/instructions/basecoat-20-lang-governance.instructions.md) — Always-on basecoat-20-lang-governance and safety constraints
+- [`docs/../architecture/multi-agent-orchestration-patterns.md`](../architecture/multi-agent-orchestration-patterns.md) — Session handoff and coordination patterns across agents
+- [`instructions/basecoat-20-lang-governance.instructions.md`](/instructions/basecoat-20-lang-governance.instructions.md) — Always-on governance and safety constraints
 - Issue [#145](https://github.com/IBuySpy-Shared/basecoat/issues/145) — Tracking issue for lifecycle hook specification

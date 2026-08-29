@@ -10,25 +10,14 @@ adopt across repositories through a single sync command.
 
 ### 1. Full SDLC Agent Coverage
 
-Provide specialized AI basecoat-10-core-agents for every phase of the software basecoat-10-core-development lifecycle —
+Provide specialized AI agents for every phase of the software development lifecycle —
 not just code generation. Base Coat covers architecture, coding, testing, security,
-DevOps, basecoat-10-core-process management, and meta-tooling (agent design, prompt engineering, basecoat-10-core-mcp).
-
-**Current state:** 50 basecoat-10-core-agents across 6 disciplines (v2.1.0):
-
-| Discipline | basecoat-10-core-agents | Examples |
-|---|---|---|
-| 🔨 basecoat-10-core-development | 4 | backend-dev, frontend-dev, middleware-dev, basecoat-80-data-data-tier |
-| 🏗️ basecoat-10-core-architecture | 5 | solution-architect, api-designer, ux-designer, app-inventory, basecoat-10-core-legacy-modernization |
-| 🔍 basecoat-90-quality-quality | 10 | code-review, security-analyst, guardrail, performance-analyst, basecoat-10-core-chaos-engineer |
-| 🚀 DevOps | 4 | devops-engineer, agentops, release-manager, basecoat-60-workflow-self-healing-ci |
-| 📋 basecoat-10-core-process | 6 | sprint-planner, product-manager, issue-triage, retro-facilitator, basecoat-10-core-sprint-retrospective |
-| 🧰 Meta | 6+ | agent-designer, prompt-engineer, mcp-developer, tech-writer, basecoat-10-core-memory-curator |
+DevOps, process management, and meta-tooling (agent design, prompt engineering, MCP).
 
 ### 2. One Entry Point, Zero Memorization
 
-The `/basecoat` router skill provides a single entry point that routes to any of
-the 50 agents. Users say `/basecoat basecoat-10-core-backend build a REST API` and the router resolves
+The `/basecoat` router skill provides a single entry point that routes to any
+agent. Users say `/basecoat backend build a REST API` and the router resolves
 the right agent, attaches paired skills, and ensures ambient instructions are active.
 
 **Design philosophy:** Users should never need to memorize agent names. Discovery mode
@@ -44,16 +33,16 @@ Base Coat separates concerns into four primitives that compose cleanly:
 - **Instructions** enforce *what rules* everyone follows (ambient, cross-cutting)
 - **Prompts** provide *how work gets invoked quickly* (structured entry points)
 
-This separation means a new basecoat-50-security-security policy updates one instruction file and every
-agent inherits it — not 49 agent files edited individually.
+This separation means a new security policy updates one instruction file and every
+agent inherits it — not every agent file edited individually.
 
-### 4. Enterprise basecoat-20-lang-governance by Default
+### 4. Enterprise Governance by Default
 
 Base Coat is infrastructure for governed AI assistance:
 
-- **Ambient instructions** enforce security, naming, quality, and basecoat-10-core-process standards
+- **Ambient instructions** enforce security, naming, quality, and process standards
   in every Copilot conversation automatically
-- **basecoat-30-ai-guardrail agents** validate outputs before delivery
+- **Guardrail agents** validate outputs before delivery
 - **Secret scanning hooks** block credentials in commits
 - **CI validation** ensures all assets have valid frontmatter, structure, and catalog entries
 - **Version-pinned distribution** prevents drift across consuming repositories
@@ -72,8 +61,8 @@ artifact downloads, and template-based bootstrapping — all with SHA256 verific
 Beyond individual agents, Base Coat supports multi-agent orchestration:
 
 - **Parallel dispatch** patterns for fleet-mode sprints
-- **Merge coordination** to prevent conflicts when multiple basecoat-10-core-agents work simultaneously
-- **Structured handoff protocols** between basecoat-10-core-agents
+- **Merge coordination** to prevent conflicts when multiple agents work simultaneously
+- **Structured handoff protocols** between agents
 - **Sprint planning** that decomposes goals into agent-assignable issues with wave dependencies
 - **Retrospective** tooling that measures agent effectiveness
 
@@ -102,7 +91,7 @@ Base Coat includes tooling to measure its own impact:
 |---|---|
 | A hosted service or SaaS product | It is infrastructure — files in your repo |
 | A single-domain tool | It covers the full SDLC, not just one discipline |
-| A replacement for human judgment | basecoat-10-core-agents stop and ask when scope is ambiguous |
+| A replacement for human judgment | Agents stop and ask when scope is ambiguous |
 | A code generation library | It governs *how* AI generates code, not *what* code |
 | A runtime dependency | Consuming repos work fine if Base Coat is removed |
 
@@ -111,6 +100,6 @@ Base Coat includes tooling to measure its own impact:
 1. **New repos start governed** — bootstrap from a pinned release in under a minute
 2. **Standards are ambient** — instructions load automatically, no opt-in needed
 3. **Updates are safe** — version-pinned distribution with validation gates
-4. **basecoat-10-core-agents are discoverable** — one router, categorized catalog, keyword search
+4. **Agents are discoverable** — one router, categorized catalog, keyword search
 5. **Impact is measurable** — adoption metrics, cost tracking, feedback loops
-6. **The framework practices what it preaches** — Base Coat is maintained using its own basecoat-10-core-agents
+6. **The framework practices what it preaches** — Base Coat is maintained using its own agents

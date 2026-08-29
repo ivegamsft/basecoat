@@ -14,7 +14,7 @@ release, version drift) so routing and evidence collection are deterministic.
 |---|---|---|
 | Agent (`agents/*.agent.md`) | Executor | End-to-end workflow orchestration |
 | Skill (`skills/*/SKILL.md`) | Capability | Focused reusable method |
-| Instruction (`instructions/*.instructions.md`) | Constraint | Cross-cutting behavior basecoat-30-ai-guardrail |
+| Instruction (`instructions/*.instructions.md`) | Constraint | Cross-cutting behavior guardrail |
 | Prompt (`prompts/*.prompt.md`) | Entry point | Intent shaping and kickoff |
 
 ### Work taxonomy
@@ -67,7 +67,7 @@ Use canonical terms in agents, skills, instructions, and prompts.
 | Determine severity and owner | classify | review quickly |
 | Enforce a rule or policy | validate | check stuff |
 | Escalate to a higher responder | escalate | pass along |
-| Transfer context between basecoat-10-core-agents | handoff | transfer, toss over |
+| Transfer context between agents | handoff | transfer, toss over |
 | Sprint end reporting | closeout | shutdown, wrap-up |
 | Scope reduction for safety | constrain | trim vaguely |
 | Plan without implementation | plan-only | think about, discuss only |
@@ -80,10 +80,10 @@ Use canonical terms in agents, skills, instructions, and prompts.
 | Intent family | Typical prefixes | Primary outcome | Primary agent classes |
 |---|---|---|---|
 | Delivery | `feature:`, `refactor:` | Shipped change set | architect, dev, reviewer |
-| basecoat-10-core-reliability | `bug:`, `outage:`, `perf:` | Restored stability | diagnostics, responder, SRE |
-| basecoat-20-lang-governance | `audit:`, `security:`, `chore:` | Risk reduction and compliance | security, policy, release |
+| Reliability | `bug:`, `outage:`, `perf:` | Restored stability | diagnostics, responder, SRE |
+| Governance | `audit:`, `security:`, `chore:` | Risk reduction and compliance | security, policy, release |
 | Planning | `plan:`, `spike:` | Decision artifact or backlog map | planner, product, architect |
-| basecoat-90-quality-quality | `test:`, `docs:` | basecoat-10-core-verification and clarity | test strategy, reviewer, writer |
+| Quality | `test:`, `docs:` | verification and clarity | test strategy, reviewer, writer |
 | GitHub operations | `workflow:`, `actions:`, `pr:`, `issue:`, `release:`, `version:` | Run triage, repo hygiene, release/version actions | CI, release, triage, coordination |
 
 ### Deterministic routing policy
@@ -102,9 +102,9 @@ before disambiguation.
 
 | Pattern | Sequence | Use when |
 |---|---|---|
-| Design to delivery | `basecoat-10-core-solution-architect -> backend-dev/basecoat-10-core-frontend-dev -> basecoat-90-quality-code-review` | New feature implementation |
+| Design to delivery | `basecoat-10-core-solution-architect -> basecoat-10-core-backend-dev/basecoat-10-core-frontend-dev -> basecoat-90-quality-code-review` | New feature implementation |
 | Incident response | `basecoat-10-core-rca -> basecoat-60-workflow-incident-responder -> basecoat-10-core-sre-engineer` | Service degradation or outage |
-| basecoat-50-security-security hardening | `basecoat-50-security-security-analyst -> basecoat-50-security-policy-as-code-compliance -> basecoat-30-ai-guardrail` | basecoat-50-security-security findings require remediation |
+| Security hardening | `basecoat-50-security-security-analyst -> basecoat-50-security-policy-as-code-compliance -> basecoat-30-ai-guardrail` | Security findings require remediation |
 | Test evolution | `basecoat-90-quality-manual-test-strategy -> basecoat-10-core-strategy-to-automation -> basecoat-90-quality-e2e-test-strategy` | Manual pathways need automation |
 | Sprint cycle | `basecoat-10-core-product-manager -> basecoat-10-core-sprint-planner -> basecoat-60-workflow-retro-facilitator` | Sprint planning and closeout |
 
@@ -155,7 +155,7 @@ next-hop: basecoat-90-quality-code-review
 
 ```text
 plan: next sprint for extension hardening
-scope: open issues tagged extension and basecoat-50-security-security
+scope: open issues tagged extension and security
 constraints: planning only, no implementation
 deliverable: prioritized issue list with dependency waves
 evidence: rationale per issue
@@ -193,7 +193,7 @@ next-hop: basecoat-10-core-sprint-planner
   `allowed-tools`.
 - Strongly recommended: `model`, `allowed_skills`, `task_phase`,
   `interaction_type`, `invocation_rules`, `visibility`, `handoffs`.
-- Required body sections: `## Inputs`, `## Workflow` or `## basecoat-10-core-process`, `## Output`
+- Required body sections: `## Inputs`, `## Workflow` or `## Process`, `## Output`
   or `## Results`.
 
 ### Skill files
