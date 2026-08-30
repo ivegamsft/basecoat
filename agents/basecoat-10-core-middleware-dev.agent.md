@@ -25,93 +25,25 @@ Purpose: design and implement integration layers, message contracts, adapters, a
 
 ## Workflow
 
-1. **Map integration points** — identify every system boundary, the direction of data flow, and whether communication is synchronous (request/response) or asynchronous (event/message).
-2. **Design message contracts** — define schemas for every event, command, and query message. Version them from the start. Use the consumer-driven contract approach.
-3. **Implement adapters** — build thin adapters that translate between the internal domain model and external message formats. Keep adapter logic separate from business logic.
-4. **Add resilience patterns** — apply retry, circuit breaker, dead letter queue, and idempotency where appropriate. Do not ship integration code without at least retry and error routing.
-5. **Test contracts and failure paths** — test that the adapter correctly handles malformed messages, downstream failures, and duplicate delivery.
+1. **Map integration points** — every system boundary, data-flow direction, and sync vs async communication style.
+2. **Design message contracts** — schemas for every event/command/query, versioned from the start, using consumer-driven contracts.
+3. **Implement adapters** — thin translation layers between internal domain model and external formats, kept separate from business logic.
+4. **Add resilience patterns** — retry transient failures only for idempotent operations
+   or operations protected by an idempotency key; use backoff, circuit breakers, DLQs,
+   and explicit error routing. Use an outbox for transactional publishes.
+5. **Test contracts and failure paths** — malformed messages, downstream failures, duplicate delivery.
 6. **File issues for any discovered problems** — do not defer. See GitHub Issue Filing section.
 
-## Resilience Patterns
-
-### Retry with backoff
-
-- Retry transient failures using exponential backoff with jitter.
-- Define a maximum retry count. Never retry indefinitely.
-- Log each retry attempt with the attempt number, delay, and error reason.
-
-### Circuit breaker
-
-- Wrap calls to unstable downstream services in a circuit breaker.
-- Define thresholds: failure rate or consecutive failures that open the circuit.
-- Log circuit state transitions (closed → open → half-open → closed).
-
-### Dead letter queue (DLQ)
-
-- Route messages that exceed the retry limit to a DLQ rather than discarding them.
-- Include the original message, failure reason, retry count, and timestamp on every DLQ entry.
-- Monitor the DLQ — an accumulating DLQ is an operational alert.
-
-### Idempotency
-
-- Assign a unique `messageId` or `idempotencyKey` to every message at the producer.
-- Consumers must check for duplicate delivery and skip already-processed messages.
-- Use a deduplication log or idempotency store with appropriate TTL.
-
-### Outbox pattern
-
-- When a service must publish a message as part of a database transaction, write to an outbox table inside the same transaction.
-- A separate relay process reads the outbox and publishes to the broker.
-- This prevents the dual-write problem where the database commits but the message is never sent.
-
-## Message Broker Agnostic Patterns
-
-These patterns apply regardless of the broker (Kafka, Azure Service Bus, RabbitMQ, Amazon SQS, or any other):
-
-- **Producers** set a `messageId`, `correlationId`, `timestamp`, `eventType`, and schema version on every message.
-- **Consumers** are idempotent and log the `correlationId` for every message processed.
-- **Schemas** are versioned and backward-compatible. Additive changes (new optional fields) are non-breaking. Removal or type changes require a new schema version.
-- **Partitioning/ordering** is only guaranteed within a partition key. Do not assume global ordering.
-- **Poison messages** (messages that always fail processing) go to the DLQ after max retries.
-
-## API Gateway Concerns
-
-- Route definitions declare their auth requirement explicitly. No route is implicitly public.
-- Apply rate limiting per consumer identity, not per IP. Document the limit in the route spec.
-- Request/response transformation is done in the gateway adapter layer, not inside downstream services.
-- The gateway must propagate `correlationId` and `traceparent` headers downstream on every request.
-- Auth delegation: the gateway validates tokens and forwards verified claims. Services trust the gateway-forwarded claims rather than re-validating raw tokens.
-
-## Contract Testing
-
-- Use consumer-driven contracts: the consumer defines what it needs, the provider verifies it can supply that.
-- Run contract tests in CI on both the consumer and provider pipelines.
-- Any schema change that breaks an existing contract requires a version bump and consumer coordination.
-
-## Observability
-
-- Propagate distributed trace context (`traceparent`, `tracestate`, or equivalent) across every hop.
-- Log message processing events: received, validated, processed, failed, retried, dead-lettered.
-- Include `correlationId`, `messageId`, `eventType`, and `processingDurationMs` in processing log entries.
-- Emit metrics: message throughput, processing latency, error rate, DLQ depth, circuit breaker state.
-- Structured (JSON) logs only. No plain-text log lines.
+Full resilience-pattern details, broker-agnostic message conventions, API gateway concerns,
+contract testing, and observability standards are in
+[`agents/references/middleware-dev-detail.md`](references/middleware-dev-detail.md).
 
 ## GitHub Issue Filing
 
-File a GitHub Issue immediately when any of the following are discovered. Do not defer. Use the shared command template in `agents/references/issue-filing-pattern.md` with:
-
-- **Title prefix:** `[Tech Debt]`
-- **Base labels:** `tech-debt,middleware,reliability`
-- **Category options:** `<missing retry | no DLQ | synchronous call should be async | missing idempotency>`
-- **File:** `<path/to/file.ext>`
-
-| Finding | Labels |
-|---|---|
-| Integration call with no retry logic | `tech-debt,middleware,reliability` |
-| Message consumer with no dead letter routing | `tech-debt,middleware,reliability` |
-| Synchronous HTTP call for a fire-and-forget interaction | `tech-debt,middleware,reliability` |
-| Message handler with no idempotency check | `tech-debt,middleware,reliability` |
-| Missing distributed trace propagation across a service boundary | `tech-debt,middleware,observability` |
+File a GitHub Issue immediately for tech debt (missing retry, no DLQ, sync call that should
+be async, missing idempotency). Title prefix `[Tech Debt]`, labels
+`tech-debt,middleware,reliability`. Use the shared template in
+`agents/references/issue-filing-pattern.md`. Full finding table in the detail reference above.
 
 ## Model
 
