@@ -19,6 +19,9 @@ permissions:
   issues: read
   pull-requests: read
   copilot-requests: write
+tools:
+  github:
+    toolsets: [default, actions]
 safe-outputs:
   add-comment:
     hide-older-comments: true
@@ -48,7 +51,11 @@ diagnosis and remediation guidance.
 - **Watched workflows**: `BaseCoat - CI` (or `CI`) and `BaseCoat - Validate BaseCoat` on `main` (covers the primary failure hotspots)
 - **Auto mode guard**: automatic `workflow_run` handling is gated by repo variable `SELF_HEALING_CI_AUTO=true` (disabled by default when unset).
 
-Fetch full workflow run details using:
+Fetch full workflow run details using the authenticated **GitHub Actions tools**
+(the `actions` toolset — e.g. run/job inspection and job-log reads). These MCP tools
+carry the workflow token and work inside the sandbox. The `gh run view` invocations
+below are illustrative of the same data; prefer the GitHub Actions tools when the
+sandboxed `gh` CLI is unauthenticated:
 
 ```bash
 gh run view ${{ github.event.workflow_run.id || inputs.run_id }} --repo ${{ github.repository }} --json name,headBranch,conclusion,status,jobs,pullRequests,url,event
