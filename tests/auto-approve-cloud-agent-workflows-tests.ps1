@@ -52,9 +52,47 @@ foreach ($entry in $files) {
         throw "${name}: template's workflow_run filter must also include 'BaseCoat Template - PR Auto Merge Executor' to match the downstream-installed executor's renamed workflow."
     }
 
-    # --- auto-approve-workflows job: restricted to app/copilot-swe-agent ---
-    if ($content -notmatch "auto-approve-workflows:\s*\r?\n\s*if:\s*github\.actor == 'app/copilot-swe-agent'") {
-        throw "${name}: auto-approve-workflows job must remain gated on github.actor == 'app/copilot-swe-agent'."
+    # --- auto-approve-workflows must run from the trusted default branch:
+    # a pull_request workflow can itself be awaiting the approval it must grant. ---
+    if ($topLevelTriggerContent -notmatch 'pull_request_target:\s*\r?\n\s*types:\s*\[opened,\s*reopened,\s*synchronize\]') {
+        throw "${name}: auto-approver must use pull_request_target so it can run before cloud-agent pull_request workflows are approved."
+    }
+    # Event actors vary as workflows fan out, while the PR author ID is stable. ---
+    if ($content -notmatch "if:\s*github\.event_name == 'pull_request_target'\s*&&\s*github\.event\.pull_request\.user\.id == 198982749") {
+        throw "${name}: auto-approve-workflows must be gated on trusted pull_request_target events whose author ID is the stable Copilot cloud-agent user ID (198982749)."
+    }
+    if ($content -notmatch 'github\.rest\.pulls\.get') {
+        throw "${name}: auto-approval must fetch the PR before selecting runs so it uses the live current head."
+    }
+    if ($content -notmatch 'const headSha = await getCurrentHeadSha\(\)') {
+        throw "${name}: auto-approval must resolve the current PR head SHA from the live PR record."
+    }
+    if ($content -notmatch 'run\.head_sha === headSha') {
+        throw "${name}: auto-approval must filter requested runs to the current PR head SHA."
+    }
+    if ($content -notmatch 'const currentHeadSha = await getCurrentHeadSha\(\)') {
+        throw "${name}: auto-approval must revalidate the current PR head before each workflow approval."
+    }
+    if ($content -notmatch 'if \(currentHeadSha !== headSha\)') {
+        throw "${name}: auto-approval must stop when the PR advances after requested runs are selected."
+    }
+    if ($content -notmatch 'cancel-in-progress:\s*true') {
+        throw "${name}: auto-approval must cancel superseded queued runs for the same PR."
+    }
+    if ($content -notmatch 'github\.paginate\(github\.rest\.actions\.listWorkflowRunsForRepo') {
+        throw "${name}: auto-approval must paginate requested workflow runs so eligible runs beyond the first page are considered."
+    }
+    if ($content -match 'const\s*\{\s*data:\s*runsData\s*\}\s*=\s*await\s+github\.rest\.actions\.listWorkflowRunsForRepo') {
+        throw "${name}: auto-approval must not make a first-page-only requested workflow-run lookup."
+    }
+    if ($content -notmatch 'new Map\(' -or $content -notmatch '\.map\(run => \[run\.id, run\]\)') {
+        throw "${name}: auto-approval must de-duplicate workflow runs by run ID before approving them."
+    }
+    if ($content -notmatch "if:\s*steps\.policy-pack\.outputs\.auto_approve\s*!=\s*'true'") {
+        throw "${name}: auto-approval must record and skip approval when the selected policy pack disables it."
+    }
+    if ($content -notmatch 'SELECTED_PACK:\s*\$\{\{\s*steps\.policy-pack\.outputs\.selected_pack\s*\}\}') {
+        throw "${name}: policy-pack output used by a shell step must be passed through an environment variable."
     }
 
     # --- both jobs' checkouts must pin the default branch, so a PR can never

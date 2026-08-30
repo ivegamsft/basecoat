@@ -1,7 +1,10 @@
 name: "BaseCoat - Auto-approve cloud agent workflows"
 
 on:
-  pull_request:
+  # Run the trusted default-branch copy. A pull_request workflow authored by
+  # Copilot can itself be held for approval, preventing it from approving the
+  # other requested runs it was created to unblock.
+  pull_request_target:
     types: [opened, reopened, synchronize]
   workflow_run:
     workflows: ["BaseCoat - PR Auto Merge Executor"]
@@ -19,11 +22,14 @@ permissions:
 
 concurrency:
   group: cloud-agent-${{ github.event.pull_request.number || github.event.workflow_run.id }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   auto-approve-workflows:
-    if: github.actor == 'app/copilot-swe-agent'
+    # A pull_request event can be emitted by a maintainer or automation after
+    # the cloud agent creates the PR. Author identity is stable; event actor
+    # is not, and using it caused eligible solo-dev runs to be skipped.
+    if: github.event_name == 'pull_request_target' && github.event.pull_request.user.id == 198982749
     name: Auto-approve pending workflows
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -73,32 +79,53 @@ jobs:
           script: |
             const { owner, repo } = context.repo;
             const prNumber = context.payload.pull_request.number;
+            const getCurrentHeadSha = async () => {
+              const { data: pullRequest } = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: prNumber
+              });
+              return pullRequest.head.sha;
+            };
+            const headSha = await getCurrentHeadSha();
+
+            console.log(`Checking for pending workflows on PR #${prNumber} at ${headSha}`);
             
-            console.log(`Checking for pending workflows on PR #${prNumber} from app/copilot-swe-agent`);
-            
-            // Get all pending workflow runs for this PR
-            const { data: runsData } = await github.rest.actions.listWorkflowRunsForRepo({
+            // Paginate so an eligible current-head run is never omitted when
+            // the repository has more than one page of requested runs.
+            const runs = await github.paginate(github.rest.actions.listWorkflowRunsForRepo, {
               owner,
               repo,
               status: 'requested',
               per_page: 100
             });
             
-            // Filter runs associated with this PR
-            const pendingRuns = runsData.workflow_runs.filter(run => {
-              return run.pull_requests && 
-                     run.pull_requests.some(pr => pr.number === prNumber);
-            });
+            // Only the current PR head may be approved. Requested runs are the
+            // GitHub-side source of truth for an unapproved decision, so stale
+            // or already-approved runs are excluded. De-duplicate run IDs in
+            // case the REST list contains the same run across pagination.
+            const pendingRuns = [...new Map(
+              runs
+                .filter(run => run.head_sha === headSha &&
+                  run.pull_requests?.some(pr => pr.number === prNumber))
+                .map(run => [run.id, run])
+            ).values()];
             
             if (pendingRuns.length === 0) {
               console.log(`✓ No pending workflows found for PR #${prNumber}`);
               return;
             }
             
-            console.log(`Found ${pendingRuns.length} pending workflow(s) for PR #${prNumber}`);
+            console.log(`Found ${pendingRuns.length} pending workflow(s) for PR #${prNumber} at ${headSha}`);
             
             // Approve each pending workflow
             for (const run of pendingRuns) {
+              const currentHeadSha = await getCurrentHeadSha();
+              if (currentHeadSha !== headSha) {
+                console.log(`PR #${prNumber} advanced from ${headSha} to ${currentHeadSha}; stopping so its newer event can evaluate the current head.`);
+                return;
+              }
+
               try {
                 await github.rest.actions.approveWorkflowRun({
                   owner,
@@ -118,8 +145,10 @@ jobs:
 
       - name: Record policy-pack skip
         if: steps.policy-pack.outputs.auto_approve != 'true'
+        env:
+          SELECTED_PACK: ${{ steps.policy-pack.outputs.selected_pack }}
         run: |
-          echo "Skipping auto-approval because policy pack '${{ steps.policy-pack.outputs.selected_pack }}' disables cloud-agent auto-approval." >> "$GITHUB_STEP_SUMMARY"
+          echo "Skipping auto-approval because policy pack '${SELECTED_PACK}' disables cloud-agent auto-approval." >> "$GITHUB_STEP_SUMMARY"
 
   auto-retrigger-merge-eligibility-review-race:
     # copilot-pull-request-reviewer[bot] has repo permission 'none', so its
