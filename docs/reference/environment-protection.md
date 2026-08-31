@@ -8,7 +8,7 @@ This baseline defines required protection controls for all deployment environmen
 |---|---|---|---|
 | `dev` | Early validation and integration | Optional | Any branch for workflow-dispatch testing |
 | `staging` | Pre-production validation | Optional (recommended for regulated repos) | `main` and release/hotfix branches only |
-| `production` (`prod` alias) | Production-facing deployments | Required manual approval | Protected branches only (`main`, `release/*`, `hotfix/*`) |
+| `production` (`prod` alias) | Production-facing deployments | Required manual approval | Selected branch/tag policies: `main` branch and `v*` release tags |
 | `github-pages` | Docs site publishing via `docs.yml` | None | Protected branches only with `main` protected, or selected branches including `main` |
 
 ## Mandatory production protections
@@ -16,7 +16,7 @@ This baseline defines required protection controls for all deployment environmen
 Production (`production`, with `prod` as optional alias) environments must enforce all of the following — manual approvals are required for any release to proceed:
 
 1. Manual approvals are required before deployment jobs start.
-2. Deployment is restricted to protected branches or explicitly listed branch patterns.
+2. Deployment is restricted to protected branches or selected branch/tag policies that include the `main` branch and `v*` release tags.
 3. Workflow jobs targeting production use an explicit GitHub environment (`environment: production` preferred).
 4. Production deployment configuration is sourced from protected environment secrets/variables, not inline literals.
 5. Approval and deployment history remains available in GitHub environment audit trails.
@@ -44,13 +44,12 @@ Do not place production values directly in workflow YAML, repository-level varia
 
 ## Branch-specific deployment rules
 
-Production deployment environments must enable branch restrictions that align with protected release paths:
+Production deployment environments must enable selected branch/tag policies that align with protected release paths and immutable release publishing:
 
 - `main`
-- `release/*`
-- `hotfix/*`
+- `v*` release tags
 
-Any additional production branch pattern requires a governance update in this file and an associated issue.
+Any additional production branch or tag pattern requires a governance update in this file and an associated issue.
 
 ## Approval and deployment audit trail
 

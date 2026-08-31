@@ -203,6 +203,7 @@ jobs:
           if [ -n "$TARGETS" ]; then
             echo "$TARGETS" | while IFS= read -r f; do
               perl -pi -e '
+                s{\QIBuySpy-Shared/basecoat-sheen\E}{ivegamsft/sheen}g;
                 s{\QIBuySpy-Shared/basecoat.git\E}{ivegamsft/basecoat.git}g;
                 s{IBuySpy-Shared/basecoat\.(?![A-Za-z0-9_-])}{ivegamsft/basecoat.}g;
                 s{IBuySpy-Shared/basecoat(?![A-Za-z0-9_.-])}{ivegamsft/basecoat}g;

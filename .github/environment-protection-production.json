@@ -8,7 +8,11 @@
   "branch_policies": [
     {
       "pattern": "main",
-      "type": "named_branch"
+      "type": "branch"
+    },
+    {
+      "pattern": "v*",
+      "type": "tag"
     }
   ],
   "protection_rules": {

@@ -1,7 +1,7 @@
 # Environment Protection and Production Approvals Implementation
 
-> **Issue:** [#1547](https://github.com/IBuySpy-Shared/basecoat/issues/1547)  
-> **Sprint:** Sprint 36  
+> **Issue:** [#1547](https://github.com/IBuySpy-Shared/basecoat/issues/1547)
+> **Sprint:** Sprint 36
 > **Component:** Production governance and deployment safety
 
 ---
@@ -20,37 +20,48 @@ This document describes the implementation of environment protection and product
 
 ## Implementation Scope
 
-### Environment Protection (prod)
+### Environment Protection (`production`)
 
 Configuration file: `.github/environment-protection-production.json`
 
 **Enforced rules:**
 
-- ✅ Deployments to `prod` environment restricted to `main` branch
-- ✅ Requires 1 approval for deployment
-- ✅ Prevents self-review (author cannot approve own deployment)
-- ✅ Wait timer: 0 (immediate after approval)
+- Deployments to `production` environment restricted to `main` branch and `v*` release tags
+- Requires 1 approval for deployment
+- Allows the designated reviewer to approve their own dispatch in this single-operator repository
+- Wait timer: 0 (immediate after approval)
 
 **Application method:**
 
 Via GitHub UI (primary):
 
-1. Navigate to: Settings → Environments → prod
+1. Navigate to: Settings → Environments → production
 2. Enable "Deployment branches and environments"
-3. Select "Protected branches only"
-4. Add protection rules:
+3. Select "Selected branches and tags"
+4. Add branch policy `main`
+5. Add tag policy `v*`
+6. Add protection rules:
    - Check "Require reviewers"
    - Set "Required number of reviewers: 1"
-   - Check "Prevent self review"
-
 Or via API:
 
 ```bash
 # Configure deployment branch policy
 gh api \
   --method PUT \
-  /repos/IBuySpy-Shared/basecoat/environments/prod \
-  -f deployment_branch_policy='{"protected_branches":true,"custom_branch_policies":false}'
+  /repos/IBuySpy-Shared/basecoat/environments/production \
+  -F wait_timer=0 \
+  -F prevent_self_review=false \
+  -F 'deployment_branch_policy[protected_branches]=false' \
+  -F 'deployment_branch_policy[custom_branch_policies]=true'
+
+gh api /repos/IBuySpy-Shared/basecoat/environments/production/deployment-branch-policies \
+  -f name='main' \
+  -f type='branch'
+
+gh api /repos/IBuySpy-Shared/basecoat/environments/production/deployment-branch-policies \
+  -f name='v*' \
+  -f type='tag'
 
 # Add protection rule (requires admin access)
 # Currently no direct API for setting approval requirement; use UI
@@ -87,14 +98,18 @@ The `.github/workflows/enforce-protection.yml` workflow:
 
 - Runs on a schedule (daily at 2 AM UTC)
 - Runs on manual dispatch
-- Runs when environment protection configs are changed
-- Bootstraps `prod` when missing via GitHub environment API
-- Retries environment list checks with deterministic backoff to handle API propagation delay
-- Emits direct API/list API/template diagnostics when `prod` is still not observable
+- Runs when the legacy advisory workflow changes
+- Discovers whether `production` exists and reports missing-environment drift
+- Audits required reviewers and selected branch/tag policies
+- Emits direct API/list API/template diagnostics when `production` is not observable
 - Verifies:
   - Production environment exists and is configured
   - Staging environment (if present) is documented
   - Enforcement rules are in place per documentation
+
+It is advisory only and does not apply the template. Administrators must apply
+`.github/environment-protection-production.json` manually in repository settings or
+through a separately privileged governance path.
 
 ---
 
@@ -165,7 +180,7 @@ The `.github/workflows/enforce-protection.yml` workflow:
 
 ---
 
-**Owner:** security_analyst agent  
-**Related Issue:** #1556 (Branch Protection Baseline)  
-**Last Updated:** 2026-06-14  
+**Owner:** security_analyst agent
+**Related Issue:** #1556 (Branch Protection Baseline)
+**Last Updated:** 2026-06-14
 **Status:** Implemented

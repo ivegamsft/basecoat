@@ -7,7 +7,6 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - ".github/environment-protection-*.json"
       - ".github/workflows/enforce-protection.yml"
 
 permissions:
@@ -16,7 +15,7 @@ permissions:
 
 jobs:
   bootstrap-prod-environment:
-    name: "Bootstrap prod environment"
+    name: "Discover production environment"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
@@ -25,7 +24,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
-      - name: Bootstrap prod environment
+      - name: Discover production environment
         id: bootstrap
         run: |
           set -euo pipefail
@@ -34,33 +33,11 @@ jobs:
           bootstrap_mode="existing"
 
           if gh api "/repos/${repo}/environments/production" --jq '.name' >/dev/null 2>/tmp/prod-direct-before.err; then
-            echo "✓ Found existing 'production' environment"
+            echo "Found existing 'production' environment"
           else
-            echo "ℹ️  'production' environment missing; creating baseline environment via API"
-            bootstrap_output="$(gh api \
-              --method PUT \
-              "/repos/${repo}/environments/production" \
-              -F wait_timer=0 \
-              -F prevent_self_review=false \
-              -F 'deployment_branch_policy[protected_branches]=true' \
-              -F 'deployment_branch_policy[custom_branch_policies]=false' \
-              --jq '{name, html_url, deployment_branch_policy}' 2>&1)" || {
-              if echo "$bootstrap_output" | grep -Fq 'Resource not accessible by integration'; then
-                echo "::warning::Unable to bootstrap 'production' environment with github.token in this run."
-                echo "::warning::Skipping hard-fail because environment bootstrap is advisory when token permissions are limited."
-                echo "$bootstrap_output"
-                bootstrap_mode="permission_limited"
-              else
-                echo "$bootstrap_output"
-                exit 1
-              fi
-            }
-
-            if [[ "$bootstrap_mode" != "permission_limited" ]]; then
-              printf '%s\n' "$bootstrap_output" > /tmp/prod-bootstrap.json
-              bootstrap_mode="created_or_updated"
-              echo "✓ Bootstrap create/update request accepted"
-            fi
+            echo "::warning::'production' environment missing."
+            echo "::warning::Settings action required: create a protected 'production' environment from .github/environment-protection-production.json."
+            bootstrap_mode="missing"
           fi
 
           echo "bootstrap_mode=${bootstrap_mode}" >> "$GITHUB_OUTPUT"
@@ -108,13 +85,13 @@ jobs:
           done
 
           if [[ "$direct" != "true" || "$listed" != "true" ]]; then
-            if [[ "${{ steps.bootstrap.outputs.bootstrap_mode }}" == "permission_limited" ]]; then
-              echo "::warning::'production' environment could not be bootstrapped because github.token lacks environment admin permissions in this run."
-              echo "::warning::Skipping hard-fail because environment bootstrap is advisory when token permissions are limited."
+            if [[ "${{ steps.bootstrap.outputs.bootstrap_mode }}" == "missing" ]]; then
+              echo "::warning::'production' environment is missing."
+              echo "::warning::Settings action required: create it from .github/environment-protection-production.json."
               exit 0
             fi
 
-            echo "::error::'production' environment not listed after bootstrap — propagation check failed"
+            echo "::error::'production' environment not listed — propagation check failed"
             echo "repository=${repo}"
             echo "direct_lookup_success=${direct}"
             echo "list_lookup_success=${listed}"
@@ -166,17 +143,41 @@ jobs:
           
           echo "Production environment exists (name: $PROD_ENV)"
           
+          ENV_JSON=$(gh api /repos/${{ github.repository }}/environments/$PROD_ENV)
+
           # Verify protection rules are configured
-          PROTECTION_RULES=$(gh api /repos/${{ github.repository }}/environments/$PROD_ENV --jq '.protection_rules' 2>/dev/null || echo "[]")
+          PROTECTION_RULES=$(echo "$ENV_JSON" | jq '.protection_rules')
           if [ "$PROTECTION_RULES" = "[]" ] || [ -z "$PROTECTION_RULES" ]; then
             echo "::warning::No protection rules configured on '$PROD_ENV' environment"
             echo "   Configure via UI: Settings → Environments → $PROD_ENV → Deployment branches and environments"
+          fi
+
+          CUSTOM_POLICY=$(echo "$ENV_JSON" | jq -r '.deployment_branch_policy.custom_branch_policies // false')
+          if [ "$CUSTOM_POLICY" != "true" ]; then
+            echo "::warning::'$PROD_ENV' environment must use selected branch/tag policies, not protected branches only."
+            echo "   Configure selected policies: branch 'main' and tag 'v*'."
+          else
+            PROD_POLICIES=$(gh api /repos/${{ github.repository }}/environments/$PROD_ENV/deployment-branch-policies --jq '.branch_policies[] | "\(.type):\(.name)"' 2>/dev/null || true)
+            if ! echo "$PROD_POLICIES" | grep -Fqx 'branch:main'; then
+              echo "::warning::'$PROD_ENV' selected policies do not include branch:main."
+            fi
+            if ! echo "$PROD_POLICIES" | grep -Fqx 'tag:v*'; then
+              echo "::warning::'$PROD_ENV' selected policies do not include tag:v*."
+            fi
+            UNEXPECTED_POLICIES=$(printf '%s\n' "$PROD_POLICIES" \
+              | grep -v -F -x 'branch:main' \
+              | grep -v -F -x 'tag:v*' \
+              | grep -v '^$' || true)
+            if [ -n "$UNEXPECTED_POLICIES" ]; then
+              echo "::warning::'$PROD_ENV' selected policies include entries outside the documented allowlist:"
+              echo "$UNEXPECTED_POLICIES"
+            fi
           fi
           
           echo "Prod environment protection check complete"
           
           # Display current environment details
-          gh api /repos/${{ github.repository }}/environments/$PROD_ENV --jq '{name, can_admins_bypass, protection_rules}' || true
+          gh api /repos/${{ github.repository }}/environments/$PROD_ENV --jq '{name, can_admins_bypass, protection_rules, deployment_branch_policy}' || true
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -227,10 +228,11 @@ jobs:
           # Environment and Production Approval Protection Summary
           
           ## Production Environment (production)
-          ✓ Configured in: .github/environment-protection-production.json
-          ✓ Bootstrap mode: ${{ needs.bootstrap-prod-environment.outputs.bootstrap_mode }}
-          ✓ Protection settings:
+          - Template: .github/environment-protection-production.json
+          - Discovery mode: ${{ needs.bootstrap-prod-environment.outputs.bootstrap_mode }}
+          - Required protection settings:
             - Deployment branch restricted to main
+            - Deployment tags restricted to v* release tags
             - Requires 1 approval for deployments
             - Allows the designated reviewer to approve their own dispatch in this single-operator repository
           
@@ -245,9 +247,10 @@ jobs:
           1. Production environment protection:
              Via GitHub UI: Settings → Environments → production
              - Enable "Deployment branches and environments"
-             - Select "Protected branches only" 
+             - Select "Selected branches and tags"
+             - Add branch policy: main
+             - Add tag policy: v*
              - Set "Required number of reviewers: 1"
-             - Check "Prevent self review"
           
           2. Staging environment (optional):
              Via GitHub UI: Settings → Environments → staging

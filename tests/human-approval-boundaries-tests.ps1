@@ -70,6 +70,15 @@ if (-not $productionProtection.deployment_branch_policy.protected_branches -and
     -not $productionProtection.deployment_branch_policy.custom_branch_policies) {
     throw 'Production environment template must restrict deployment branches.'
 }
+if ($productionProtection.deployment_branch_policy.protected_branches -or
+    -not $productionProtection.deployment_branch_policy.custom_branch_policies) {
+    throw 'Production environment template must use selected deployment branch/tag policies.'
+}
+$selectedPolicies = @($productionProtection.branch_policies | ForEach-Object { "$($_.type):$($_.pattern)" } | Sort-Object)
+$expectedSelectedPolicies = @('branch:main', 'tag:v*')
+if (($selectedPolicies -join '|') -ne ($expectedSelectedPolicies -join '|')) {
+    throw 'Production selected deployment policies must be exactly branch:main and tag:v*.'
+}
 
 $riskTiers = @('low', 'medium', 'high', 'critical')
 foreach ($profileProperty in $json.profiles.PSObject.Properties) {

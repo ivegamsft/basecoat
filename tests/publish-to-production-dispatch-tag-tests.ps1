@@ -100,6 +100,9 @@ if ($content -notmatch "git grep -inI -E 'ibuyspy-shared\|ibuyspy-dev'") {
 if (-not $content.Contains('^LICENSE:3:Copyright \(c\) 2025 IBuySpy-Shared$')) {
     throw 'publish-to-production.yml must narrowly allowlist only the LICENSE legal attribution'
 }
+if ($content -notmatch 'IBuySpy-Shared/basecoat-sheen.+ivegamsft/sheen') {
+    throw 'publish-to-production.yml must rewrite internal basecoat-sheen references to the public catalog'
+}
 
 $removeStepStart = $content.IndexOf('      - name: Remove internal-only content before publish')
 $nextStepStart = $content.IndexOf('      - name: Stamp published version')
@@ -162,6 +165,7 @@ try {
     New-Item -ItemType Directory -Path (Join-Path $scratchRoot 'component\tests') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $scratchRoot 'docs\memory') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $scratchRoot 'docs\sprint-plans') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $scratchRoot 'instructions') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $scratchRoot 'scripts\adoption') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $scratchRoot 'skills\dotnet-modernization') -Force | Out-Null
     Set-Content -Path (Join-Path $scratchRoot '.github\workflows\docs.yml') -Value 'name: Public docs'
@@ -174,6 +178,8 @@ try {
     Set-Content -Path (Join-Path $scratchRoot 'component\tests\internal.ps1') -Value 'IBuySpy-Shared test fixture'
     Set-Content -Path (Join-Path $scratchRoot 'component\widget.test.js') -Value 'const org = "IBuySpy-Dev";'
     Set-Content -Path (Join-Path $scratchRoot 'docs\sprint-plans\internal.md') -Value 'IBuySpy-Shared internal plan'
+    Set-Content -Path (Join-Path $scratchRoot 'instructions\basecoat-10-core-intent-routing.instructions.md') `
+        -Value 'Delegate to IBuySpy-Shared/basecoat-sheen for design work.'
     Set-Content -Path (Join-Path $scratchRoot 'docs\public.md') -Value 'Install from https://github.com/IBuySpy-Shared/basecoat.'
     Set-Content -Path (Join-Path $scratchRoot 'SPRINT-99-EXECUTION-SUMMARY.md') -Value 'Internal summary'
     Set-Content -Path (Join-Path $scratchRoot 'CHANGELOG.md') -Value @(
@@ -296,6 +302,9 @@ try {
     }
     if ((Get-Content 'docs\memory\shared-memory-guide.md' -Raw) -notmatch 'example-org/basecoat-memory') {
         throw 'Publish payload did not neutralize the private shared-memory repository example'
+    }
+    if ((Get-Content 'instructions\basecoat-10-core-intent-routing.instructions.md' -Raw) -notmatch 'ivegamsft/sheen') {
+        throw 'Publish payload did not rewrite internal basecoat-sheen references to the public catalog'
     }
     $submitLearningSh = Get-Content 'scripts\submit-learning.sh' -Raw
     if ($submitLearningSh -notmatch 'MEMORY_REPO="\$\{BASECOAT_SHARED_MEMORY_REPO:-\}"' -or

@@ -11,6 +11,7 @@ on:
       - ".github/workflows/mcp-deploy.yml"
       - ".github/workflows/docs.yml"
       - ".github/workflows/portal-deploy.yml"
+      - ".github/environment-protection-production.json"
       - "docs/reference/environment-protection.md"
       - "docs/operations/environment-protection-enforcement.md"
   schedule:
@@ -49,7 +50,9 @@ jobs:
           grep -q 'manual approvals are required' docs/reference/environment-protection.md
           grep -q 'protected environment secrets/variables' docs/reference/environment-protection.md
           grep -q '`github-pages`' docs/reference/environment-protection.md
+          grep -q 'selected branch/tag policies' docs/reference/environment-protection.md
           grep -q 'environment protection gates' docs/operations/environment-protection-enforcement.md
+          grep -q 'SemVer release tags' docs/operations/environment-protection-enforcement.md
           grep -q 'GitHub Pages branch restrictions configured' docs/operations/environment-protection-enforcement.md
           grep -q 'No permanent bypasses for production manual approval controls are allowed.' docs/operations/environment-protection-enforcement.md
 
@@ -93,7 +96,8 @@ jobs:
 
           ENV_JSON="$(gh api "repos/${REPOSITORY}/environments/${PROD_ENV}")"
           REVIEWER_COUNT="$(echo "$ENV_JSON" | jq '[.protection_rules[]? | select(.type == "required_reviewers") | (.reviewers // [])[]] | length')"
-          BRANCH_POLICY="$(echo "$ENV_JSON" | jq -r '.deployment_branch_policy.protected_branches // false')"
+          PROTECTED_BRANCH_POLICY="$(echo "$ENV_JSON" | jq -r '.deployment_branch_policy.protected_branches // false')"
+          CUSTOM_BRANCH_POLICY="$(echo "$ENV_JSON" | jq -r '.deployment_branch_policy.custom_branch_policies // false')"
 
           if [[ "$REVIEWER_COUNT" -lt 1 ]]; then
             echo "::warning::Environment '${PROD_ENV}' has no required reviewers."
@@ -101,10 +105,35 @@ jobs:
             echo "- ADVISORY: '${PROD_ENV}' environment has no required reviewers." >> "$GITHUB_STEP_SUMMARY"
           fi
 
-          if [[ "$BRANCH_POLICY" != "true" ]]; then
-            echo "::warning::Environment '${PROD_ENV}' does not enforce protected-branch deployment policy."
-            echo "::warning::Settings action required: enable deployment branch policy for protected branches."
-            echo "- ADVISORY: '${PROD_ENV}' environment does not enforce protected-branch deployment policy." >> "$GITHUB_STEP_SUMMARY"
+          if [[ "$CUSTOM_BRANCH_POLICY" == "true" ]]; then
+            PROD_POLICIES="$(gh api "repos/${REPOSITORY}/environments/${PROD_ENV}/deployment-branch-policies" --jq '.branch_policies[] | "\(.type):\(.name)"' 2>/dev/null || true)"
+            if ! echo "$PROD_POLICIES" | grep -Fqx 'branch:main'; then
+              echo "::warning::Environment '${PROD_ENV}' selected deployment policies do not include the 'main' branch."
+              echo "::warning::Settings action required: add selected branch policy 'main'."
+              echo "- ADVISORY: '${PROD_ENV}' selected deployment policies do not include 'main'." >> "$GITHUB_STEP_SUMMARY"
+            fi
+            if ! echo "$PROD_POLICIES" | grep -Fqx 'tag:v*'; then
+              echo "::warning::Environment '${PROD_ENV}' selected deployment policies do not include SemVer release tags."
+              echo "::warning::Settings action required: add selected tag policy 'v*' so tag-triggered release publishing can enter the protected environment."
+              echo "- ADVISORY: '${PROD_ENV}' selected deployment policies do not include 'v*' release tags." >> "$GITHUB_STEP_SUMMARY"
+            fi
+            UNEXPECTED_PROD_POLICIES="$(printf '%s\n' "$PROD_POLICIES" \
+              | grep -v -F -x 'branch:main' \
+              | grep -v -F -x 'tag:v*' \
+              | grep -v '^$' || true)"
+            if [[ -n "$UNEXPECTED_PROD_POLICIES" ]]; then
+              echo "::warning::Environment '${PROD_ENV}' selected deployment policies include entries outside the documented allowlist:"
+              echo "$UNEXPECTED_PROD_POLICIES"
+              echo "- ADVISORY: '${PROD_ENV}' selected deployment policies include entries outside 'branch:main' and 'tag:v*'." >> "$GITHUB_STEP_SUMMARY"
+            fi
+          elif [[ "$PROTECTED_BRANCH_POLICY" == "true" ]]; then
+            echo "::warning::Environment '${PROD_ENV}' uses protected branches only; tag-triggered production publishing requires selected branch/tag policies."
+            echo "::warning::Settings action required: switch to selected branch/tag policies with 'main' and tag pattern 'v*'."
+            echo "- ADVISORY: '${PROD_ENV}' uses protected branches only and may block release tag publishing." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::warning::Environment '${PROD_ENV}' does not enforce deployment branch/tag restrictions."
+            echo "::warning::Settings action required: enable selected branch/tag policies with 'main' and tag pattern 'v*'."
+            echo "- ADVISORY: '${PROD_ENV}' environment does not enforce deployment branch/tag restrictions." >> "$GITHUB_STEP_SUMMARY"
           fi
 
           if ! PAGES_ENV_JSON="$(gh api "repos/${REPOSITORY}/environments/github-pages" 2>/dev/null)"; then
