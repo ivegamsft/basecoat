@@ -4,13 +4,10 @@ Reference for upstream workflow templates in BaseCoat. Consumer installs use `sc
 
 Cross-repository reusable workflows require the canonical BaseCoat repository
 to allow Actions access from organization repositories under **Settings →
-Actions → General → Access**. The release workflow audits that prerequisite and
-fails closed unless access is `organization` or `enterprise`. The audit uses
-the dedicated `BASECOAT_RELEASE_AUDIT_TOKEN`, normally a fine-grained PAT with
-repository **Administration: read**. A GitHub App installation token must be
-generated at runtime rather than stored as a long-lived secret. The existing
-administration-capable `PRODUCTION_REPO_TOKEN` remains a publication fallback
-while repositories migrate to the narrower audit credential.
+Actions → General → Access**. BaseCoat is internal, so its release workflows do
+not query that administrative setting or require an audit credential; consumer
+workflow invocation is the compatibility check. `PRODUCTION_REPO_TOKEN`
+remains dedicated to publishing to the production mirror.
 
 For the version updater, public source releases can be resolved anonymously.
 Private or internal sources require the named, read-only `fetch_token`, bound

@@ -37,23 +37,13 @@ the `publish` job runs.
 - Issue #575 — Original setup guidance (closed, regex applied)
 - Issue #1352 — Current blocker tracking token permission fix
 
-## Release Audit Token
+## Internal Release Authorization
 
-`.github/workflows/release.yml` includes an "Audit reusable workflow sharing"
-step that confirms this repo's Actions are org-shared before a tag is allowed
-to publish. `.github/workflows/package-basecoat.yml`'s `release` job runs the
-same audit, but only when triggered by a tag push (`if: startsWith(github.ref,
-'refs/tags/')`) — a plain `workflow_dispatch` packaging run skips it entirely.
-Both authenticate with `BASECOAT_RELEASE_AUDIT_TOKEN` (falling back to
-`PRODUCTION_REPO_TOKEN` if unset) and require `Administration: read` on
-`IBuySpy-Shared/basecoat` itself — a different scope than `PRODUCTION_REPO_TOKEN`, which only covers
-the `ivegamsft/basecoat` mirror. Do not rely on the fallback: set
-`BASECOAT_RELEASE_AUDIT_TOKEN` explicitly, or the step 404s and hard-fails
-the release (see Issue #2837 and `docs/operations/github-secrets.md`).
-
-`pwsh scripts/bootstrap.ps1` surfaces this requirement automatically whenever
-`.github/workflows/release.yml` or `.github/workflows/package-basecoat.yml`
-is present.
+BaseCoat is an internal repository. Release workflows do not query the
+administrative reusable-Actions access endpoint and do not require
+`BASECOAT_RELEASE_AUDIT_TOKEN`. Keep reusable Actions sharing configured under
+**Settings → Actions → General → Access**; consumer invocation, rather than a
+release-time administrative API read, confirms that the setting is usable.
 
 ## PRD / Spec Gate
 

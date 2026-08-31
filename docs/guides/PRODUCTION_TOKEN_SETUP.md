@@ -220,7 +220,6 @@ If the validation script or workflow preflight fails, check:
 - **Issue #1352** — This issue (token lacks push access, blocking releases)
 - **Issue #575** — Original token setup guidance (closed, regex applied)
 - **Issue #1353** — Enhancement: add preflight gate to catch similar failures
-- **Issue #2837** — Related but separate token: `release.yml`'s "Audit reusable workflow sharing" step needs its own `BASECOAT_RELEASE_AUDIT_TOKEN` secret (`Administration: read` on `IBuySpy-Shared/basecoat` itself, not the production mirror). It is not interchangeable with `PRODUCTION_REPO_TOKEN` — see `docs/operations/github-secrets.md#basecoat_release_audit_token`.
 - **Workflow:** `.github/workflows/publish-to-production.yml`
 - **Validation Helper:** `scripts/validate-production-token.sh` (bash) | `scripts/validate-production-token.ps1` (PowerShell)
 

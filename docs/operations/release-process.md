@@ -41,7 +41,13 @@ Before starting a release, verify:
 - [ ] `gh` CLI is installed and authenticated (`gh auth status`)
 - [ ] Working tree is clean (`git status` shows no changes)
 - [ ] `PRODUCTION_REPO_TOKEN` preflight is green (`gh workflow run token-preflight.yml --repo IBuySpy-Shared/basecoat` then `gh run watch`)
-- [ ] `BASECOAT_RELEASE_AUDIT_TOKEN` is configured (`gh secret list --repo IBuySpy-Shared/basecoat | grep BASECOAT_RELEASE_AUDIT_TOKEN`) — required by `release.yml`'s "Audit reusable workflow sharing" step since Aug 13, 2026 (PR #2796). Without it, the step falls back to `PRODUCTION_REPO_TOKEN`, which is scoped to the production mirror and 404s against this repo's admin API, hard-failing publication (see [Issue #2837](https://github.com/IBuySpy-Shared/basecoat/issues/2837) and `docs/operations/github-secrets.md`).
+
+`BASECOAT_RELEASE_AUDIT_TOKEN` is not a release prerequisite. BaseCoat is an
+internal repository, and release workflows no longer call the administrative
+Actions-sharing API that required a separate long-lived credential. Reusable
+workflow sharing remains an administrator-controlled repository setting and is
+validated when consumers invoke a workflow; a release must not require a
+broader credential merely to re-read that setting.
 
 ---
 

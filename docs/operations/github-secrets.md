@@ -59,7 +59,6 @@ the corresponding workflow file is present in the repo (any profile, including
 | Workflow present | Secret/variable required |
 |---|---|
 | `.github/workflows/publish-to-production.yml` | `PRODUCTION_REPO_TOKEN` |
-| `.github/workflows/release.yml` or `.github/workflows/package-basecoat.yml` | `BASECOAT_RELEASE_AUDIT_TOKEN` |
 | `.github/workflows/portal-deploy.yml` (skipped for `solo-dev`) | Portal variables and `GHCR_PULL_TOKEN` |
 
 Bootstrap output includes token rotation/expiration guidance and never writes
@@ -287,68 +286,6 @@ emits a warning and skips interactive prompting.
 **Rotation schedule:** Rotate when the production PAT expiration approaches.
 Set a calendar reminder matching the PAT expiration date. Generate a replacement
 token before the old one expires, update the secret, then revoke the old token.
-
----
-
-### `BASECOAT_RELEASE_AUDIT_TOKEN`
-
-**Used by:** `.github/workflows/release.yml`; `.github/workflows/package-basecoat.yml`'s
-`release` job (only runs on tag-triggered pushes — `if: startsWith(github.ref,
-'refs/tags/')` — so a plain `workflow_dispatch` packaging run skips this audit
-entirely)
-
-**Purpose:** Authorizes both workflows' tag-triggered "Audit reusable workflow
-sharing" preflight steps, which confirm this repository's reusable Actions
-are shared org-wide (`Settings → Actions → General → Access` set to
-"Accessible from repositories in the organization") before a version tag is
-allowed to publish (via either the release or the standalone packaging
-workflow). This is a safety gate so a release cannot ship whose callable
-downstream workflows would be unable to start in consuming repositories.
-
-If this secret is unset, the step falls back to `PRODUCTION_REPO_TOKEN`. **Do
-not rely on that fallback** — `PRODUCTION_REPO_TOKEN` is scoped to the
-`PRODUCTION-ORG/basecoat` mirror, not this repository, so it 404s against
-this repository's `actions/permissions/access` admin API and hard-fails the
-release. Set `BASECOAT_RELEASE_AUDIT_TOKEN` explicitly.
-
-**Required scope:** `Administration: read` on this repository (fine-grained
-PAT). No write access is needed — the audit only reads the current Actions
-access-level setting.
-
-**How to create:**
-
-1. Sign in to <https://github.com> as an account with admin access to this repository
-2. Go to **Settings → Developer settings → Fine-grained tokens → Generate new token**
-3. Set **Resource owner** to your org (or personal account for a fork)
-4. Set **Repository access** to `Only select repositories` → this repository
-5. Under **Repository permissions**, grant:
-   - **Administration**: Read-only
-6. Generate the token and copy it immediately
-7. Add it as a secret on the repository:
-
-```powershell
-gh secret set BASECOAT_RELEASE_AUDIT_TOKEN --repo YOUR-ORG/basecoat
-```
-
-**Verification:**
-
-```bash
-gh secret list --repo YOUR-ORG/basecoat | grep BASECOAT_RELEASE_AUDIT_TOKEN
-```
-
-**Bootstrap check:** Run `pwsh scripts/bootstrap.ps1` — Phase 3 surfaces a
-missing token with exact remediation steps whenever `.github/workflows/release.yml`
-or `.github/workflows/package-basecoat.yml` is present in the repo.
-
-**Rotation schedule:** Rotate every 30 days (set PAT expiration <=30 days).
-
-**Incident history:** Added Aug 13, 2026 (PR #2796) as a new pre-publish
-gate. The secret was never provisioned to match, which silently blocked the
-`v4.2.0` release until diagnosed — see
-[Issue #2837](https://github.com/IBuySpy-Shared/basecoat/issues/2837) for the
-failure and remediation record. If you see `gh: Not Found (HTTP 404)` on the
-"Audit reusable workflow sharing" step, this secret is missing or
-under-scoped.
 
 ---
 

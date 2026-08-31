@@ -167,20 +167,19 @@ def main() -> None:
                     f"{result.stdout}\n{result.stderr}"
                 )
 
-        release_workflow = (
-            ROOT / ".github" / "workflows" / "package-basecoat.yml"
-        ).read_text(encoding="utf-8")
-        for required in (
-            "actions/permissions/access",
-            "BASECOAT_RELEASE_AUDIT_TOKEN",
-            "Administration: read",
-            "organization|enterprise",
-            "Settings → Actions → General → Access",
-        ):
-            if required not in release_workflow:
-                raise AssertionError(
-                    f"release publication is missing Actions sharing audit evidence: {required}"
-                )
+        for workflow_name in ("release.yml", "package-basecoat.yml"):
+            release_workflow = (
+                ROOT / ".github" / "workflows" / workflow_name
+            ).read_text(encoding="utf-8")
+            for retired_audit_dependency in (
+                "actions/permissions/access",
+                "BASECOAT_RELEASE_AUDIT_TOKEN",
+            ):
+                if retired_audit_dependency in release_workflow:
+                    raise AssertionError(
+                        f"{workflow_name} must not require the retired "
+                        f"release audit dependency: {retired_audit_dependency}"
+                    )
 
         bash_packager = (ROOT / "scripts" / "package-basecoat.sh").read_text(
             encoding="utf-8"

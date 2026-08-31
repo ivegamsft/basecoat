@@ -331,8 +331,7 @@ function Get-OnboardingProfileSelection(
 function Get-OnboardingSecretVariableRequirements(
     [pscustomobject]$profileSelection,
     [bool]$hasPublishWorkflow,
-    [bool]$hasPortalDeployWorkflow,
-    [bool]$hasReleaseWorkflow
+    [bool]$hasPortalDeployWorkflow
 ) {
     $requirements = [System.Collections.Generic.List[object]]::new()
 
@@ -351,15 +350,6 @@ function Get-OnboardingSecretVariableRequirements(
             Kind = 'secret'
             Remediation = "Set with 'gh secret set PRODUCTION_REPO_TOKEN --repo <repo>' after creating PAT on ivegamsft/basecoat with Contents/Admin/Workflows read-write."
             Rotation = 'Rotate before PAT expiration; keep expiration <=30 days where possible.'
-        })
-    }
-
-    if ($hasReleaseWorkflow) {
-        $requirements.Add([pscustomobject]@{
-            Name = 'BASECOAT_RELEASE_AUDIT_TOKEN'
-            Kind = 'secret'
-            Remediation = "Set with 'gh secret set BASECOAT_RELEASE_AUDIT_TOKEN -R <repo>' using a fine-grained PAT with Administration: read on this repo, so release.yml and package-basecoat.yml's 'Audit reusable workflow sharing' steps can confirm reusable Actions are org-shared before publishing. Falls back to PRODUCTION_REPO_TOKEN if unset, but that token is scoped to the ivegamsft/basecoat mirror and will 404 against this repo's admin API -- set this secret explicitly rather than relying on the fallback."
-            Rotation = 'Rotate every 30 days (set PAT expiration <=30 days).'
         })
     }
 
@@ -835,8 +825,6 @@ try {
 
 $publishWorkflow = Join-Path $repoRoot '.github\workflows\publish-to-production.yml'
 $portalDeployWorkflow = Join-Path $repoRoot '.github\workflows\portal-deploy.yml'
-$releaseWorkflow = Join-Path $repoRoot '.github\workflows\release.yml'
-$packageWorkflow = Join-Path $repoRoot '.github\workflows\package-basecoat.yml'
 $script:portalDeployReady = $false
 if ((Test-Path $portalDeployWorkflow) -and $profileSelection -and $profileSelection.profile -ne 'solo-dev' -and $repoSlug) {
     try {
@@ -889,8 +877,7 @@ if ($repoSlug -and $profileSelection) {
     $requirements = Get-OnboardingSecretVariableRequirements `
         -profileSelection $profileSelection `
         -hasPublishWorkflow (Test-Path $publishWorkflow) `
-        -hasPortalDeployWorkflow (Test-Path $portalDeployWorkflow) `
-        -hasReleaseWorkflow ((Test-Path $releaseWorkflow) -or (Test-Path $packageWorkflow))
+        -hasPortalDeployWorkflow (Test-Path $portalDeployWorkflow)
     Test-OnboardingSecretVariableRequirements `
         -repoSlug $repoSlug `
         -requirements $requirements `

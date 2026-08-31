@@ -126,6 +126,7 @@ nav:
       - MCP Metrics Build and Deploy Flow: diagrams/mcp-metrics-build-and-deploy-flow.md
     - ADR-001 Naming Convention: architecture/decisions/adr-001-naming-convention.md
     - ADR-002 Agent Model Shifting and Cost Governance: architecture/decisions/adr-002-agent-model-shifting-and-cost-governance.md
+    - ADR-003 Solo-Developer Workflow Approval and Release Publishing: architecture/decisions/adr-003-solo-dev-workflow-approval-and-release-publishing.md
     - Multi-Agent Patterns: architecture/multi-agent-orchestration-patterns.md
   - About:
     - Philosophy: philosophy.md

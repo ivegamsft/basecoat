@@ -70,15 +70,11 @@ additional scopes. This preserves the exact v4.1 caller contract while current
 PR-mode callers explicitly grant the permissions their delivery policy needs.
 
 The canonical BaseCoat repository must expose reusable Actions to organization
-repositories under **Settings → Actions → General → Access**. Release
-publication audits this setting and fails before publishing when access is
-`none`. Organization or enterprise access is accepted. Configure
-`BASECOAT_RELEASE_AUDIT_TOKEN` as a dedicated fine-grained PAT with
-**Administration: read** for the canonical repository. If GitHub App auth is
-preferred, generate its installation token at runtime and pass it to the audit
-step; never persist that short-lived token as a repository secret. Until the
-dedicated credential is configured, publication can use the existing
-administration-capable `PRODUCTION_REPO_TOKEN` as a compatibility fallback.
+repositories under **Settings → Actions → General → Access**. Organization or
+enterprise access is accepted. Because BaseCoat is internal, release
+publication does not call the administrative access endpoint or require a
+separate release-audit token; consumer workflow invocation remains the
+authoritative compatibility check.
 
 The callable requires
 `.github/base-coat/scripts/invoke-basecoat-consumer-update.ps1`, distributed by

@@ -105,6 +105,9 @@ flowchart LR
 
 - **[ADR-001 — Naming Convention](decisions/adr-001-naming-convention.md)**: Why `basecoat`
   (repo) and `base-coat` (artifact) coexist
+- **[ADR-003 — Solo-Developer Workflow Approval and Release Publishing](decisions/adr-003-solo-dev-workflow-approval-and-release-publishing.md)**:
+  How trusted cloud-agent CI approval, protected production deployments, and
+  internal-repository release authorization remain separate
 - **Distributed sync model**: Assets live in consumer repos — no runtime dependency on BaseCoat
 - **Quality gate**: CI blocks merges if avg asset score < 5.0/10 or any asset scores 0
 - **Idempotent drift detection**: Version check workflow updates existing issues rather than
