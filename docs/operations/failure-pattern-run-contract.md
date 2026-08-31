@@ -26,8 +26,8 @@ Provide a concise, scriptable contract for running the failure pattern process f
 ## Workstream 2 Minimum Reliability Slice (#2047)
 
 For the smallest viable implementation of the reliability-debt program under
-epic [#1452](https://github.com/IBuySpy-Shared/basecoat/issues/1452), each run
-must explicitly satisfy the [#2047](https://github.com/IBuySpy-Shared/basecoat/issues/2047)
+epic [#1452](https://github.com/ivegamsft/basecoat/issues/1452), each run
+must explicitly satisfy the [#2047](https://github.com/ivegamsft/basecoat/issues/2047)
 outcome contract:
 
 1. **Top 3 recurring failure modes triaged** with owner, RCA record, and fix

@@ -27,7 +27,7 @@
 
 .EXAMPLE
     $t = Read-Host "PAT" -AsSecureString
-    pwsh scripts/bootstrap-copilot-github-token.ps1 -Repo "IBuySpy-Shared/basecoat" -Token $t
+    pwsh scripts/bootstrap-copilot-github-token.ps1 -Repo "ivegamsft/basecoat" -Token $t
 #>
 
 [CmdletBinding()]

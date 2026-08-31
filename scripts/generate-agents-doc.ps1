@@ -31,7 +31,7 @@ if (-not $RepositoryUrl) {
         $RepositoryUrl = "https://github.com/$($Matches[1])"
     }
     else {
-        $RepositoryUrl = 'https://github.com/IBuySpy-Shared/basecoat'
+        $RepositoryUrl = 'https://github.com/ivegamsft/basecoat'
     }
 }
 

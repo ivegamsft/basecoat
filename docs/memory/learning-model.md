@@ -32,7 +32,7 @@ LIMIT 20
 
 ### 3. Organizational knowledge (shared memory)
 
-`scripts/sync-shared-memory.ps1` pulls from `IBuySpy-Shared/basecoat-memory`:
+`scripts/sync-shared-memory.ps1` pulls from `example-org/basecoat-memory`:
 
 - `hot-index.md` — shared hot-cache entries for the org
 - `memories/<domain>.md` — domain-specific knowledge (azure, security, dotnet…)
@@ -73,7 +73,7 @@ Two research directions are being evaluated for future learning improvements:
 context of a larger model to handle recursive self-improvement tasks. In the
 Base Coat context: a lightweight prompt that takes the current `memory-index`
 as input and proposes additions, removals, or re-rankings based on recent
-session activity. Evaluated in issue [#574](https://github.com/IBuySpy-Shared/basecoat/issues/574).
+session activity. Evaluated in issue [#574](https://github.com/ivegamsft/basecoat/issues/574).
 
 **Hierarchical Reasoning Model (HRM)** — A structured reasoning approach that
 decomposes complex tasks into a tree of sub-goals, each solved at the
@@ -116,7 +116,7 @@ After a session that produces reusable insights:
 > **Note:** In `-Export` mode, `-Subject` is required (format: `domain:key`).
 > `-Domain` only filters results in pull/sync mode — it has no effect on exports.
 
-Exported memories are reviewed via PR in `IBuySpy-Shared/basecoat-memory`
+Exported memories are reviewed via PR in `example-org/basecoat-memory`
 before merging. This prevents low-quality or sensitive facts from entering
 the shared knowledge base.
 

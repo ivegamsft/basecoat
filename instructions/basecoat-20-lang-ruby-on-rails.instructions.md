@@ -320,7 +320,7 @@ jobs:
 
 ### OIDC federated credentials
 
-Configure an Entra ID app registration with a federated credential for the GitHub Actions `repo:IBuySpy-Shared/myapp:ref:refs/heads/main` subject. Do not use client secrets in the deploy job; rely solely on `azure/login` with `client-id`, `tenant-id`, and `subscription-id`.
+Configure an Entra ID app registration with a federated credential for the GitHub Actions `repo:example-org/myapp:ref:refs/heads/main` subject. Do not use client secrets in the deploy job; rely solely on `azure/login` with `client-id`, `tenant-id`, and `subscription-id`.
 
 ## Environment Configuration
 

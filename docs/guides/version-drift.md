@@ -54,10 +54,10 @@ permissions:
 
 jobs:
   update:
-    uses: IBuySpy-Shared/basecoat/.github/workflows/check-basecoat-version-callable.yml@9ab8894828e3a887d97c3383e7f23ed892d9a088
+    uses: ivegamsft/basecoat/.github/workflows/check-basecoat-version-callable.yml@9ab8894828e3a887d97c3383e7f23ed892d9a088
     with:
       stage_path: .github/base-coat
-      source_repo: IBuySpy-Shared/basecoat
+      source_repo: ivegamsft/basecoat
       fetch_host: github.com
       update_actor: ${{ vars.BASECOAT_UPDATE_ACTOR }}
     secrets:
@@ -157,7 +157,7 @@ target resolution.
 ## Configure policy
 
 ```yaml
-source: https://github.com/IBuySpy-Shared/basecoat.git
+source: https://github.com/ivegamsft/basecoat.git
 ref: v4.1.0
 
 updates:
@@ -166,7 +166,7 @@ updates:
   mode: pull-request
   approval: required
   allowed_bumps: [patch, minor]
-  source: IBuySpy-Shared/basecoat
+  source: ivegamsft/basecoat
   ref: latest
   validation: pwsh tests/run-tests.ps1
 ```
@@ -178,7 +178,7 @@ sync payload.
 ## Corporate mirrors and known-bad releases
 
 ```yaml
-source: https://github.com/IBuySpy-Shared/basecoat.git
+source: https://github.com/ivegamsft/basecoat.git
 mirror: https://github.corp.example/platform/basecoat.git
 
 known_bad_releases:

@@ -604,12 +604,12 @@ permissions:
 
 jobs:
   my-job:
-    uses: IBuySpy-Shared/basecoat/.github/workflows/check-basecoat-version-callable.yml@9ab8894828e3a887d97c3383e7f23ed892d9a088
+    uses: ivegamsft/basecoat/.github/workflows/check-basecoat-version-callable.yml@9ab8894828e3a887d97c3383e7f23ed892d9a088
     with:
       # Required: the BaseCoat source repository whose releases define the
       # latest version. It must be passed explicitly; it is never derived from
       # the calling workflow reference (which resolves to this consumer repo).
-      source_repo: IBuySpy-Shared/basecoat
+      source_repo: ivegamsft/basecoat
       fetch_host: github.com
       update_actor: ${{ vars.BASECOAT_UPDATE_ACTOR }}
     secrets:

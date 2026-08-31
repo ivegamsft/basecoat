@@ -61,7 +61,7 @@ Rules:
 | `ui:` | User interface: components, layout, visual and interaction implementation | Soon | `@frontend-dev`, `@ux-designer`; conditional sheen delegate for governance/audit |
 | `ux:` | User experience: user flows, usability, journeys, interaction design | Soon | `@ux-designer`, `@frontend-dev`; conditional sheen delegate for governance/audit |
 | `ia:` | Information architecture: content structure, navigation, taxonomy, sitemap | Soon | `@ux-designer`, `@tech-writer`; conditional sheen delegate for governance/audit |
-| `design:` | Product-definition and UX/UI governance, design system, component audit, or finish-coat work; `debate:` requests compare options before implementation | Soon | Read downstream `PRODUCT.md`, use `.github/base-coat/docs/reference/design-debate-format.md` (or custom overlay location), then delegate to the `IBuySpy-Shared/basecoat-sheen` catalog when applicable |
+| `design:` | Product-definition and UX/UI governance, design system, component audit, or finish-coat work; `debate:` requests compare options before implementation | Soon | Read downstream `PRODUCT.md`, use `.github/base-coat/docs/reference/design-debate-format.md` (or custom overlay location), then delegate to the `ivegamsft/sheen` catalog when applicable |
 | `sprint:` | Sprint planning, execution, or closeout | Now | `@sprint-planner`, `@sprint-closeout-auditor` |
 | `wave:` | Dependency-ordered batch within a sprint (issues and PRs) | Now | `@sprint-planner`, `@parallel-session-coordinator` |
 | `autopilot:` | Continuous oldest-to-newest backlog burndown in dependency-ordered waves, unattended until stopped or blocked | Now | `@backlog-autopilot`, `@parallel-session-coordinator`, `@ship-it-control-loop`, `@delivery-autopilot` |
@@ -319,7 +319,7 @@ interpretation.
 ### Design terms (UI vs UX vs IA)
 
 `ui`, `ux`, and `ia` are distinct disciplines and must not collapse to one route.
-All three may delegate to `IBuySpy-Shared/basecoat-sheen` for AI-assisted UX/UI
+All three may delegate to `ivegamsft/sheen` for AI-assisted UX/UI
 governance, design-system auditing, and finish-coat work. This delegation is
 conditional: direct implementation remains with the local frontend/UX route,
 while governance and audit requests may use the downstream delegate.
@@ -333,7 +333,7 @@ while governance and audit requests may use the downstream delegate.
 
 ## Downstream Delegate: basecoat-sheen
 
-`IBuySpy-Shared/basecoat-sheen` is the finish-coat layer of BaseCoat, providing
+`ivegamsft/sheen` is the finish-coat layer of BaseCoat, providing
 AI-assisted UX/UI governance skills.
 
 Delegate routing contract:

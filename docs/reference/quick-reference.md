@@ -289,7 +289,7 @@ curl -X POST https://api.basecoat.dev/v1/auth/logout \
 - **Implementation:** See IMPLEMENTATION_NOTES.md
 - **Spec:** See PORTAL_API_v1.0.yml
 - **Email:** api-support@basecoat.dev
-- **Issues:** https://github.com/IBuySpy-Shared/basecoat/issues
+- **Issues:** https://github.com/ivegamsft/basecoat/issues
 
 ---
 

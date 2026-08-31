@@ -4,7 +4,7 @@
 
 **Status:** Proposed
 
-**Related issue:** [#1664](https://github.com/IBuySpy-Shared/basecoat/issues/1664)
+**Related issue:** [#1664](https://github.com/ivegamsft/basecoat/issues/1664)
 
 ---
 

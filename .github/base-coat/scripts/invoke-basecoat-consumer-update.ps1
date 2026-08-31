@@ -639,7 +639,7 @@ function Get-UpdatePolicy {
         Get-YamlScalar -Lines $Lines -Section 'updates' -Key 'source'
     }
     if (-not $sourceValue) { $sourceValue = Get-YamlScalar -Lines $Lines -Key 'source' }
-    if (-not $sourceValue) { $sourceValue = 'IBuySpy-Shared/basecoat' }
+    if (-not $sourceValue) { $sourceValue = 'ivegamsft/basecoat' }
 
     $mirrorValue = if ($Overrides['Mirror']) { $Overrides['Mirror'] } else {
         Get-YamlScalar -Lines $Lines -Section 'updates' -Key 'mirror'

@@ -68,7 +68,7 @@ GITHUB_OIDC_ISSUER="https://token.actions.githubusercontent.com"
 az ad app federated-credential create --id <appId> --parameters '{
   "name": "main-branch",
   "issuer": "'$GITHUB_OIDC_ISSUER'",
-  "subject": "repo:IBuySpy-Shared/basecoat:ref:refs/heads/main",
+  "subject": "repo:ivegamsft/basecoat:ref:refs/heads/main",
   "audiences": ["api://AzureADTokenExchange"]
 }'
 
@@ -76,7 +76,7 @@ az ad app federated-credential create --id <appId> --parameters '{
 az ad app federated-credential create --id <appId> --parameters '{
   "name": "pull-requests",
   "issuer": "'$GITHUB_OIDC_ISSUER'",
-  "subject": "repo:IBuySpy-Shared/basecoat:pull_request",
+  "subject": "repo:ivegamsft/basecoat:pull_request",
   "audiences": ["api://AzureADTokenExchange"]
 }'
 
@@ -84,7 +84,7 @@ az ad app federated-credential create --id <appId> --parameters '{
 az ad app federated-credential create --id <appId> --parameters '{
   "name": "production-env",
   "issuer": "'$GITHUB_OIDC_ISSUER'",
-  "subject": "repo:IBuySpy-Shared/basecoat:environment:production",
+  "subject": "repo:ivegamsft/basecoat:environment:production",
   "audiences": ["api://AzureADTokenExchange"]
 }'
 ```

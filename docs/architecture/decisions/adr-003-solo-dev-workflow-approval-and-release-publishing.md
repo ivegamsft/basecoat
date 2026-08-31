@@ -4,9 +4,9 @@
 
 **Status:** Accepted
 
-**Related issues:** [#2837](https://github.com/IBuySpy-Shared/basecoat/issues/2837),
-[#2953](https://github.com/IBuySpy-Shared/basecoat/issues/2953), and
-[#2956](https://github.com/IBuySpy-Shared/basecoat/issues/2956)
+**Related issues:** [#2837](https://github.com/ivegamsft/basecoat/issues/2837),
+[#2953](https://github.com/ivegamsft/basecoat/issues/2953), and
+[#2956](https://github.com/ivegamsft/basecoat/issues/2956)
 
 ---
 

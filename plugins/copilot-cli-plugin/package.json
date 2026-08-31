@@ -5,7 +5,7 @@
   "keywords": ["github-copilot", "copilot-plugin", "basecoat", "ai-agents", "cli"],
   "repository": {
     "type": "git",
-    "url": "https://github.com/IBuySpy-Shared/basecoat.git",
+    "url": "https://github.com/ivegamsft/basecoat.git",
     "directory": "plugins/copilot-cli-plugin"
   },
   "engines": {

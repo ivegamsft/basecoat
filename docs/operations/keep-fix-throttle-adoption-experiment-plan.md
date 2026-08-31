@@ -1,7 +1,7 @@
 # Keep/Fix/Throttle Adoption Experiment Plan
 
-**Issue:** [#2051](https://github.com/IBuySpy-Shared/basecoat/issues/2051)  
-**Parent Epic:** [#1452](https://github.com/IBuySpy-Shared/basecoat/issues/1452)  
+**Issue:** [#2051](https://github.com/ivegamsft/basecoat/issues/2051)  
+**Parent Epic:** [#1452](https://github.com/ivegamsft/basecoat/issues/1452)  
 **Owner:** @ibuyspy  
 **Experiment Window:** 4–6 weeks (2026-06-25 to 2026-08-06)
 
@@ -38,7 +38,7 @@ Captured before rollout of workstreams 1–4; used as the experiment start point
 
 - Finalize experiment plan and baseline metrics (this document)
 - Publish adoption experiment plan artifact
-- Configure weekly scorecard workflow ([#2050](https://github.com/IBuySpy-Shared/basecoat/issues/2050))
+- Configure weekly scorecard workflow ([#2050](https://github.com/ivegamsft/basecoat/issues/2050))
 - Complete workstreams 1–4 rollout
 
 ### Phase 2: Run (Weeks 1–5)
@@ -61,7 +61,7 @@ Captured before rollout of workstreams 1–4; used as the experiment start point
 
 1. Workflow: `.github/workflows/keep-fix-throttle-weekly-scorecard.yml` runs every Monday 08:00 UTC
 2. Generates scorecard artifact with trend classification (improving/stable/regressing)
-3. Posts readout comment to [#2050](https://github.com/IBuySpy-Shared/basecoat/issues/2050)
+3. Posts readout comment to [#2050](https://github.com/ivegamsft/basecoat/issues/2050)
 4. Runbook: `docs/operations/keep-fix-throttle-weekly-scorecard.md`
 
 ### Go/No-Go Decision Logic
@@ -89,7 +89,7 @@ Captured before rollout of workstreams 1–4; used as the experiment start point
 
 ## Reporting
 
-Weekly readout target: [Issue #2050](https://github.com/IBuySpy-Shared/basecoat/issues/2050)
+Weekly readout target: [Issue #2050](https://github.com/ivegamsft/basecoat/issues/2050)
 
 Each readout includes:
 

@@ -196,7 +196,7 @@ Consumer Enterprise Repo
 npx @basecoat/agent-sdk init --repo-type enterprise
 
 # 2. Import reference workflow (optional, reference only)
-gh aw import github://IBuySpy-Shared/basecoat/code-review-agent
+gh aw import github://ivegamsft/basecoat/code-review-agent
 
 # 3. Create custom workflow
 gh aw new custom-triage
@@ -434,8 +434,8 @@ git push origin main
 - [MCP Developer Agent](../agents/basecoat-10-core-mcp-developer.agent.md)
 
 ### Related Issues
-- [#1304: Memory Workflows Distribution](https://github.com/IBuySpy-Shared/basecoat/issues/1304)
-- [#1303: CI/CD Templatization](https://github.com/IBuySpy-Shared/basecoat/issues/1303)
+- [#1304: Memory Workflows Distribution](https://github.com/ivegamsft/basecoat/issues/1304)
+- [#1303: CI/CD Templatization](https://github.com/ivegamsft/basecoat/issues/1303)
 
 ---
 

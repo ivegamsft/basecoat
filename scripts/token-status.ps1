@@ -38,7 +38,7 @@
     pwsh scripts/token-status.ps1 -InputFile .\session-metrics.json -Json | ConvertFrom-Json
 
 .LINK
-    https://github.com/IBuySpy-Shared/basecoat/issues/1363
+    https://github.com/ivegamsft/basecoat/issues/1363
 #>
 
 [CmdletBinding()]

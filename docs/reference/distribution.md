@@ -13,7 +13,7 @@ Git submodules provide version-pinned, dependency-aware integration of Base Coat
 #### Adding as a Submodule
 
 ```bash
-git submodule add https://github.com/IBuySpy-Shared/basecoat.git .github/basecoat
+git submodule add https://github.com/ivegamsft/basecoat.git .github/basecoat
 git submodule update --init --recursive
 ```
 
@@ -57,7 +57,7 @@ The `.gitmodules` file tracks submodule references:
 ```ini
 [submodule ".github/basecoat"]
   path = .github/basecoat
-  url = https://github.com/IBuySpy-Shared/basecoat.git
+  url = https://github.com/ivegamsft/basecoat.git
   branch = main
 ```
 
@@ -72,7 +72,7 @@ Base Coat provides `sync.ps1` (PowerShell) and `sync.sh` (Bash) scripts for flex
 #### Using sync.ps1 (Windows/PowerShell)
 
 ```powershell
-.\sync.ps1 -SourceRepo "https://github.com/IBuySpy-Shared/basecoat.git" -DestinationPath ".github/basecoat" -Version "v1.0.0"
+.\sync.ps1 -SourceRepo "https://github.com/ivegamsft/basecoat.git" -DestinationPath ".github/basecoat" -Version "v1.0.0"
 ```
 
 Copies the specified version of basecoat to the destination path.
@@ -80,7 +80,7 @@ Copies the specified version of basecoat to the destination path.
 #### Using sync.sh (macOS/Linux)
 
 ```bash
-bash sync.sh --source-repo https://github.com/IBuySpy-Shared/basecoat.git --destination-path .github/basecoat --version v1.0.0
+bash sync.sh --source-repo https://github.com/ivegamsft/basecoat.git --destination-path .github/basecoat --version v1.0.0
 ```
 
 #### Selective Sync
@@ -105,10 +105,10 @@ Base Coat publishes versioned artifacts via GitHub Releases.
 
 ```bash
 # Download ZIP
-curl -L https://github.com/IBuySpy-Shared/basecoat/releases/download/v1.0.0/basecoat-v1.0.0.zip -o basecoat.zip
+curl -L https://github.com/ivegamsft/basecoat/releases/download/v1.0.0/basecoat-v1.0.0.zip -o basecoat.zip
 
 # Download tar.gz
-curl -L https://github.com/IBuySpy-Shared/basecoat/releases/download/v1.0.0/basecoat-v1.0.0.tar.gz -o basecoat.tar.gz
+curl -L https://github.com/ivegamsft/basecoat/releases/download/v1.0.0/basecoat-v1.0.0.tar.gz -o basecoat.tar.gz
 ```
 
 Extract to your desired location:
@@ -124,7 +124,7 @@ tar -xzf basecoat.tar.gz -C .github/basecoat
 Each release includes a `SHA256SUMS` file for integrity verification:
 
 ```bash
-curl -L https://github.com/IBuySpy-Shared/basecoat/releases/download/v1.0.0/SHA256SUMS -o SHA256SUMS
+curl -L https://github.com/ivegamsft/basecoat/releases/download/v1.0.0/SHA256SUMS -o SHA256SUMS
 sha256sum -c SHA256SUMS
 ```
 
@@ -153,7 +153,7 @@ Base Coat includes a `version.json` file containing build metadata and version i
 {
   "version": "1.0.0",
   "buildDate": "2024-01-15T10:30:00Z",
-  "repository": "https://github.com/IBuySpy-Shared/basecoat",
+  "repository": "https://github.com/ivegamsft/basecoat",
   "changelogUrl": "../CHANGELOG.md"
 }
 ```
@@ -166,7 +166,7 @@ Git tag naming convention: `v<MAJOR>.<MINOR>.<PATCH>`
 
 ```bash
 # List available tags
-git ls-remote --tags https://github.com/IBuySpy-Shared/basecoat.git | grep refs/tags
+git ls-remote --tags https://github.com/ivegamsft/basecoat.git | grep refs/tags
 
 # Pin to a specific tag
 git config -f .gitmodules submodule.basecoat.branch refs/tags/v1.0.0
@@ -241,7 +241,7 @@ Add a workflow step to sync basecoat on pushes or PRs:
 ```yaml
 
 - name: Sync Base Coat
-  uses: IBuySpy-Shared/basecoat/actions/sync@v1
+  uses: ivegamsft/basecoat/actions/sync@v1
   with:
     destination: .github/basecoat
     version: v1.0.0
@@ -255,7 +255,7 @@ Or use the sync scripts directly:
 - name: Sync Base Coat (PowerShell)
   shell: powershell
   run: |
-    Invoke-WebRequest -Uri "https://github.com/IBuySpy-Shared/basecoat/releases/download/v1.0.0/sync.ps1" -OutFile sync.ps1
+    Invoke-WebRequest -Uri "https://github.com/ivegamsft/basecoat/releases/download/v1.0.0/sync.ps1" -OutFile sync.ps1
     .\sync.ps1 -DestinationPath ".github/basecoat" -Version "v1.0.0"
 ```
 
@@ -296,7 +296,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check for new version
         run: |
-          LATEST=$(git ls-remote --tags https://github.com/IBuySpy-Shared/basecoat.git | grep -oP 'v\d+\.\d+\.\d+' | sort -V | tail -1)
+          LATEST=$(git ls-remote --tags https://github.com/ivegamsft/basecoat.git | grep -oP 'v\d+\.\d+\.\d+' | sort -V | tail -1)
           CURRENT=$(jq -r '.version' .github/basecoat/version.json)
           echo "LATEST=$LATEST" >> $GITHUB_ENV
           echo "CURRENT=$CURRENT" >> $GITHUB_ENV

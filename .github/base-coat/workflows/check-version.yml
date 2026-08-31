@@ -213,7 +213,7 @@ jobs:
           $source = $env:BASECOAT_SOURCE_REPO
           if (-not $source) { $source = Get-SectionValue 'updates' 'source' }
           if (-not $source) { $source = Get-TopLevelValue 'source' }
-          if (-not $source) { $source = 'IBuySpy-Shared/basecoat' }
+          if (-not $source) { $source = 'ivegamsft/basecoat' }
           $requestedRef = $env:BASECOAT_SOURCE_REF
           if (-not $requestedRef) { $requestedRef = Get-SectionValue 'updates' 'ref' }
           if (-not $requestedRef) { $requestedRef = 'latest' }

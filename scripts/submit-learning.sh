@@ -23,7 +23,7 @@
 #   --contact  "@alice"
 #   --open-pr           Open a PR in basecoat-memory after pushing
 #   --dry-run           Print candidate without writing
-#   --memory-repo       Override target repo (default: IBuySpy-Shared/basecoat-memory)
+#   --memory-repo       Override target repo (requires --memory-repo or BASECOAT_SHARED_MEMORY_REPO)
 
 set -euo pipefail
 
@@ -37,7 +37,7 @@ TEAM=""
 CONTACT=""
 OPEN_PR=false
 DRY_RUN=false
-MEMORY_REPO="${BASECOAT_SHARED_MEMORY_REPO:-IBuySpy-Shared/basecoat-memory}"
+MEMORY_REPO="${BASECOAT_SHARED_MEMORY_REPO:-}"
 
 # ── Argument parsing ───────────────────────────────────────────────────────────
 while [[ $# -gt 0 ]]; do
@@ -58,6 +58,7 @@ done
 
 # ── Validate required args ─────────────────────────────────────────────────────
 errors=()
+[[ -z "$MEMORY_REPO" ]] && errors+=("--memory-repo or BASECOAT_SHARED_MEMORY_REPO is required")
 [[ -z "$SUBJECT"  ]] && errors+=("--subject is required")
 [[ -z "$FACT"     ]] && errors+=("--fact is required")
 [[ -z "$EVIDENCE" ]] && errors+=("--evidence is required")
