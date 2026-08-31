@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "4.2.0",
-  "releaseDate": "2026-08-16",
-  "notes": "Release: adds a local dev data-pack skill with orchestrator lifecycle, a guarded downstream consumer updater, and safe lane-closeout automation; hardens CI action pinning, corporate-proxy integrity, and credential-exposure closeout; and repairs docs links, metrics inputs, and version-drift contracts."
+  "version": "4.2.1",
+  "releaseDate": "2026-08-31",
+  "notes": "Patch release: ships the post-4.2.0 stabilization wave, including solo-dev workflow approval fixes, retired internal release audit credentials, token-budget reductions, updated agent guidance references, and CI/release documentation corrections."
 }

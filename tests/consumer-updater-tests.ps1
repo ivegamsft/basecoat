@@ -24,6 +24,10 @@ if (-not (Test-Path -LiteralPath $scriptPath)) { throw "Missing updater script: 
 
 Write-Host 'Running consumer updater tests...'
 
+$installedPackageVersion = (Get-Content -LiteralPath (Join-Path $repoRoot 'version.json') -Raw | ConvertFrom-Json).version
+$installedPackageSemVer = ConvertTo-SemVer $installedPackageVersion
+$patchDriftTargetVersion = '{0}.{1}.{2}' -f $installedPackageSemVer.Major, $installedPackageSemVer.Minor, ($installedPackageSemVer.Patch + 1)
+
 $patchCurrent = ConvertTo-SemVer '4.1.0'
 $patchTarget = ConvertTo-SemVer 'v4.1.1'
 Assert-Equal (Compare-SemVer $patchCurrent $patchTarget) -1 'Patch drift must be detected.'
@@ -322,13 +326,18 @@ New-Item -ItemType Directory -Path $scratch -Force | Out-Null
 try {
     Push-Location $repoRoot
     & $scriptPath -PlanOnly -StagePath . `
-        -ReleaseJson '{"tag":"v4.2.1","sha":"0123456789abcdef0123456789abcdef01234567","url":"https://example.test/releases/v4.2.1","published_at":"2026-08-09T00:00:00Z"}' `
+        -ReleaseJson (@{
+            tag = "v$patchDriftTargetVersion"
+            sha = '0123456789abcdef0123456789abcdef01234567'
+            url = "https://example.test/releases/v$patchDriftTargetVersion"
+            published_at = '2026-08-09T00:00:00Z'
+        } | ConvertTo-Json -Compress) `
         -StatusPath 'test-results/consumer-updater-tests/status.json' | Out-Null
     Pop-Location
 
     $plan = Get-Content -LiteralPath (Join-Path $scratch 'status.json') -Raw | ConvertFrom-Json
-    Assert-Equal $plan.current_version '4.2.0' 'Plan must read the installed version.'
-    Assert-Equal $plan.target_version '4.2.1' 'Plan must resolve patch target.'
+    Assert-Equal $plan.current_version $installedPackageVersion 'Plan must read the installed version.'
+    Assert-Equal $plan.target_version $patchDriftTargetVersion 'Plan must resolve patch target.'
     Assert-Equal $plan.bump 'patch' 'Plan must classify patch drift.'
     Assert-Equal $plan.mode 'notify' 'Plan must retain safe default mode.'
     Assert-Equal $plan.approval 'required' 'Plan must retain safe default approval.'
