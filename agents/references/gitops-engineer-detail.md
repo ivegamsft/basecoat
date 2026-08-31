@@ -214,11 +214,19 @@ jobs:
 #!/bin/bash
 # Detect infrastructure drift
 
-# Check Argo CD sync status
-argocd app wait my-app --sync
+# Report Argo CD drift without waiting indefinitely for synchronization.
+argocd app diff my-app
+argo_diff_status=$?
+if [ "$argo_diff_status" -eq 1 ]; then
+    echo "Argo CD drift detected. Reconcile through an approved GitOps change."
+    exit 2
+elif [ "$argo_diff_status" -ne 0 ]; then
+    echo "Argo CD diff failed." >&2
+    exit "$argo_diff_status"
+fi
 
 # Render manifests for review; reconcile only through an approved GitOps change.
-kubectl apply -f clusters/production -n production --dry-run=client --output=yaml
+kubectl apply -k clusters/production -n production --dry-run=client --output=yaml
 
 # Terraform drift detection
 terraform plan -detailed-exitcode -out=tfplan
@@ -245,8 +253,8 @@ kubectl get application my-app -n argocd -o yaml > my-app-backup.yaml
 git revert <commit>  # Revert to previous state
 # Argo CD automatically syncs to previous state
 
-# Manual restore if needed
-kubectl delete application/my-app -n argocd
+# Manual restore if needed: update the Application in place. Deleting it can
+# trigger Argo CD's finalizer and cascade-delete the managed workloads.
 kubectl apply -f my-app-backup.yaml
 ```
 

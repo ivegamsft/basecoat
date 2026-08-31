@@ -6,7 +6,8 @@ Full patterns for `agents/basecoat-10-core-middleware-dev.agent.md`.
 
 ### Retry with backoff
 
-- Retry transient failures using exponential backoff with jitter.
+- Retry transient failures only for idempotent operations or operations
+  protected by an idempotency key, using exponential backoff with jitter.
 - Define a maximum retry count. Never retry indefinitely.
 - Log each retry attempt with the attempt number, delay, and error reason.
 
