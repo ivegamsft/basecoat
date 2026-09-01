@@ -698,6 +698,8 @@ jobs:
             const requiresHumanReviewByRisk = Boolean(
               boundaryProfile.pr_approval_required_by_risk?.[riskTier]
             );
+            const requiresHumanReviewByBoundary =
+              requiresHumanReviewByRisk || requiresHumanApprovalBySize;
             if (
               requiresHumanReviewByRisk &&
               requiredApprovals < Number(profile.main?.required_approvals_by_risk_tier?.[riskTier] || 0)

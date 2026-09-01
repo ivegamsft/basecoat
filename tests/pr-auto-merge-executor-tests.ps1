@@ -257,6 +257,9 @@ if ($workflow -notmatch 'github\.rest\.repos\.getCollaboratorPermissionLevel') {
 if ($workflow -notmatch "new Set\(\['admin', 'maintain', 'write'\]\)") {
     throw 'Workflow must restrict qualified approvers to write, maintain, or admin permission.'
 }
+if ($workflow -notmatch 'const requiresHumanReviewByBoundary\s*=\s*\r?\n\s*requiresHumanReviewByRisk \|\| requiresHumanApprovalBySize;') {
+    throw 'Workflow must define the reported human review boundary from risk and size policy.'
+}
 foreach ($requiredAcknowledgementText in @(
     '/acknowledge-critical',
     'evaluateMaintainerAcknowledgement',
