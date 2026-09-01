@@ -242,7 +242,6 @@ jobs:
             exit 1
           fi
 
-          mapfile -t labels < <(jq -r '.pull_request.labels[]?.name // empty' "${GITHUB_EVENT_PATH}")
           pr_number="${{ github.event.pull_request.number }}"
           if [[ -z "$pr_number" || "$pr_number" == "null" ]]; then
             pr_number="$(
@@ -254,49 +253,58 @@ jobs:
                 --jq '.[0].number // empty' 2>/dev/null || true
             )"
           fi
-          mapfile -t api_labels < <(
-            if [[ -n "$pr_number" ]]; then
-              gh pr view "$pr_number" \
-                --repo "${{ github.repository }}" \
-                --json labels \
-                --jq '.labels[].name' 2>/dev/null || true
+          mapfile -t labels < <(jq -r '.pull_request.labels[]?.name // empty' "${GITHUB_EVENT_PATH}")
+          max_label_poll_attempts=10
+          for attempt in $(seq 1 "$max_label_poll_attempts"); do
+            mapfile -t api_labels < <(
+              if [[ -n "$pr_number" ]]; then
+                gh pr view "$pr_number" \
+                  --repo "${{ github.repository }}" \
+                  --json labels \
+                  --jq '.labels[].name' 2>/dev/null || true
+              fi
+            )
+
+            if [[ ${#api_labels[@]} -gt 0 ]]; then
+              labels=("${api_labels[@]}")
             fi
-          )
 
-          if [[ ${#api_labels[@]} -gt 0 ]]; then
-            labels=("${api_labels[@]}")
-          fi
+            has_release_label=0
+            bypass_reason=""
+            for label in "${labels[@]}"; do
+              normalized_label="$(tr '[:upper:]' '[:lower:]' <<<"$label")"
+              # skip-release-label-gate takes priority; dependencies is a secondary bypass for automated PRs.
+              case "$normalized_label" in
+                skip-release-label-gate) bypass_reason="skip-release-label-gate label" ;;
+                dependencies) [[ -z "$bypass_reason" ]] && bypass_reason="automated dependency update (dependencies label)" ;;
+                *) ;;
+              esac
+              if is_release_label "$label"; then
+                has_release_label=1
+              fi
+            done
 
-          if [[ ${#labels[@]} -gt 0 ]]; then
-            printf 'Observed PR labels:\n'
-            printf -- '- %s\n' "${labels[@]}"
-          else
-            echo "Observed PR labels: (none)"
-          fi
+            if [[ "$has_release_label" -eq 1 ]]; then
+              echo "Release label gate passed on label poll ${attempt}/${max_label_poll_attempts}."
+              exit 0
+            fi
 
-          has_release_label=0
-          bypass_reason=""
-          for label in "${labels[@]}"; do
-            normalized_label="$(tr '[:upper:]' '[:lower:]' <<<"$label")"
-            # skip-release-label-gate takes priority; dependencies is a secondary bypass for automated PRs.
-            case "$normalized_label" in
-              skip-release-label-gate) bypass_reason="skip-release-label-gate label" ;;
-              dependencies) [[ -z "$bypass_reason" ]] && bypass_reason="automated dependency update (dependencies label)" ;;
-              *) ;;
-            esac
-            if is_release_label "$label"; then
-              has_release_label=1
+            if [[ -n "$bypass_reason" ]]; then
+              echo "::warning::Release label gate bypassed: $bypass_reason."
+              exit 0
+            fi
+
+            if [[ "$attempt" -lt "$max_label_poll_attempts" && -n "$pr_number" ]]; then
+              echo "Waiting for asynchronous PR labeling (${attempt}/${max_label_poll_attempts})..."
+              sleep 3
             fi
           done
 
-          if [[ "$has_release_label" -eq 1 ]]; then
-            echo "Release label gate passed."
-            exit 0
-          fi
-
-          if [[ -n "$bypass_reason" ]]; then
-            echo "::warning::Release label gate bypassed: $bypass_reason."
-            exit 0
+          if [[ ${#labels[@]} -gt 0 ]]; then
+            printf 'Observed PR labels after polling:\n'
+            printf -- '- %s\n' "${labels[@]}"
+          else
+            echo "Observed PR labels after polling: (none)"
           fi
 
           echo "::error::PR is missing release labels. Add one label matching wave:*, sprint:*, wave-*, sprint-* or wave/sprint."

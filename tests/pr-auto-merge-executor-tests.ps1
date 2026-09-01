@@ -7,6 +7,7 @@ $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
 $workflowPath = Join-Path $repoRoot '.github\workflows\pr-auto-merge-executor.yml'
 $templatePath = Join-Path $repoRoot '.github\base-coat\workflows\pr-auto-merge-executor.yml'
 $humanBoundaryPath = Join-Path $repoRoot '.github\governance\human-approval-boundaries.json'
+$prValidationPath = Join-Path $repoRoot '.github\workflows\pr-validation.yml'
 
 if (-not (Test-Path $workflowPath)) {
     throw "Missing workflow file: $workflowPath"
@@ -17,12 +18,26 @@ if (-not (Test-Path $templatePath)) {
 if (-not (Test-Path $humanBoundaryPath)) {
     throw "Missing human approval boundary file: $humanBoundaryPath"
 }
+if (-not (Test-Path $prValidationPath)) {
+    throw "Missing PR validation workflow file: $prValidationPath"
+}
 
 $workflow = Get-Content -Path $workflowPath -Raw
 $template = Get-Content -Path $templatePath -Raw
+$prValidation = Get-Content -Path $prValidationPath -Raw
 
 if ($workflow -ne $template) {
     throw 'Workflow template mismatch: .github/workflows and .github/base-coat/workflows copies must be identical.'
+}
+foreach ($requiredReleaseLabelPollingText in @(
+    'max_label_poll_attempts=10',
+    'for attempt in $(seq 1 "$max_label_poll_attempts"); do',
+    'Waiting for asynchronous PR labeling',
+    'Release label gate passed on label poll'
+)) {
+    if ($prValidation -notmatch [regex]::Escape($requiredReleaseLabelPollingText)) {
+        throw "PR validation must wait for asynchronous release labeling: $requiredReleaseLabelPollingText"
+    }
 }
 
 if ($workflow -notmatch '(?m)^name:\s*"?BaseCoat - PR Auto Merge Executor"?\s*$') {
@@ -37,7 +52,25 @@ if ($workflow -notmatch '(?ms)pull_request_target:\s*\r?\n\s*branches:\s*\r?\n\s
 if ($workflow -notmatch '(?ms)pull_request_target:.*?types:.*?-\s*edited') {
     throw 'Workflow must reevaluate when PR title/body edits change linked issue evidence.'
 }
-foreach ($concurrencyNamespace in @("format('issue-{0}'", "format('comment-{0}'", "format('pr-{0}'")) {
+if ($workflow -notmatch '(?ms)workflow_run:\s*\r?\n\s*workflows:\s*\r?\n\s*-\s*"BaseCoat - CI"\s*\r?\n\s*types:\s*\r?\n\s*-\s*completed') {
+    throw 'Workflow must reroute successful BaseCoat CI completion events to merge eligibility evaluation.'
+}
+foreach ($requiredCiCompletionRoutingText in @(
+    'route-ci-completion',
+    "github.event.workflow_run.conclusion == 'success'",
+    "github.event.workflow_run.event == 'pull_request'",
+    'github.event.workflow_run.head_repository.full_name == github.repository',
+    'github.paginate(',
+    'github.rest.repos.listPullRequestsAssociatedWithCommit',
+    'per_page: 100',
+    'Queued post-CI merge eligibility reevaluation for PR #${pullRequest.number}.',
+    "github.event_name != 'workflow_run'"
+)) {
+    if ($workflow -notmatch [regex]::Escape($requiredCiCompletionRoutingText)) {
+        throw "Workflow is missing trusted CI-completion routing: $requiredCiCompletionRoutingText"
+    }
+}
+foreach ($concurrencyNamespace in @("format('workflow-run-{0}'", "format('issue-{0}'", "format('comment-{0}'", "format('pr-{0}'")) {
     if ($workflow -notmatch [regex]::Escape($concurrencyNamespace)) {
         throw "Workflow must namespace concurrency routing: $concurrencyNamespace"
     }

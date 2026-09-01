@@ -24,6 +24,11 @@ on:
     types:
       - labeled
       - unlabeled
+  workflow_run:
+    workflows:
+      - "BaseCoat - CI"
+    types:
+      - completed
   workflow_dispatch:
     inputs:
       pr_number:
@@ -41,10 +46,63 @@ permissions:
   statuses: write
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name == 'issues' && format('issue-{0}', github.event.issue.number) || github.event_name == 'issue_comment' && format('comment-{0}', github.event.comment.id) || format('pr-{0}', github.event.pull_request.number || inputs.pr_number || github.ref) }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'workflow_run' && format('workflow-run-{0}', github.event.workflow_run.id) || github.event_name == 'issues' && format('issue-{0}', github.event.issue.number) || github.event_name == 'issue_comment' && format('comment-{0}', github.event.comment.id) || format('pr-{0}', github.event.pull_request.number || inputs.pr_number || github.ref) }}
   cancel-in-progress: true
 
 jobs:
+  route-ci-completion:
+    name: Route successful CI completion
+    if: |
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Reevaluate pull requests after required checks complete
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        env:
+          WORKFLOW_REF: ${{ github.workflow_ref }}
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const headSha = String(context.payload.workflow_run?.head_sha || '');
+            const workflowId = String(process.env.WORKFLOW_REF || '')
+              .match(/\.github\/workflows\/([^@]+)@/)?.[1];
+            if (!headSha || !workflowId) {
+              throw new Error('Unable to resolve the completed CI head SHA or auto-merge workflow filename.');
+            }
+
+            const associatedPullRequests = await github.paginate(
+              github.rest.repos.listPullRequestsAssociatedWithCommit,
+              {
+                owner,
+                repo,
+                commit_sha: headSha,
+                per_page: 100
+              }
+            );
+            const targetPullRequests = associatedPullRequests.filter(pullRequest =>
+              pullRequest.state === 'open' &&
+              pullRequest.base?.ref === 'main' &&
+              pullRequest.head?.sha === headSha
+            );
+            for (const pullRequest of targetPullRequests) {
+              await github.rest.actions.createWorkflowDispatch({
+                owner,
+                repo,
+                workflow_id: workflowId,
+                ref: context.payload.repository?.default_branch || 'main',
+                inputs: { pr_number: String(pullRequest.number) }
+              });
+              core.info(`Queued post-CI merge eligibility reevaluation for PR #${pullRequest.number}.`);
+            }
+            if (targetPullRequests.length === 0) {
+              core.info(`No open main-targeting pull request is associated with CI head ${headSha}.`);
+            }
+
   route-pr-acknowledgement:
     name: Route PR acknowledgement changes
     if: |
@@ -283,7 +341,8 @@ jobs:
     name: Evaluate merge eligibility
     if: |
       github.event_name != 'issues' &&
-      github.event_name != 'issue_comment'
+      github.event_name != 'issue_comment' &&
+      github.event_name != 'workflow_run'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     outputs:
