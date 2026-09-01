@@ -80,7 +80,10 @@ foreach ($entry in @(
     Assert-Match $content 'github\.paginate\(github\.rest\.pulls\.list' "$name must page through open pull requests with REST."
     Assert-Match $content "base:\s*defaultBranch" "$name must limit scheduled reconciliation to the protected default branch."
     Assert-Match $content 'github\.paginate\(github\.rest\.pulls\.listReviews' "$name must inspect review evidence with REST."
-    Assert-Match $content 'github\.rest\.repos\.getCombinedStatusForRef' "$name must inspect merge eligibility status with REST."
+    if ($content -match 'getCombinedStatusForRef') {
+        throw "$name must not use combined status for reconciliation; it collapses the status timeline and weakens the watermark."
+    }
+    Assert-Match $content 'github\.paginate\(github\.rest\.repos\.listCommitStatusesForRef' "$name must inspect merge eligibility status timeline with REST."
     Assert-Match $content "status\.context === 'BaseCoat merge eligibility'" "$name must inspect the latest merge eligibility watermark."
     Assert-Match $content 'new Date\(right\.created_at\) - new Date\(left\.created_at\)' "$name must use REST status timestamps when ordering merge eligibility statuses."
     Assert-Match $content 'new Date\(latestReview\.submitted_at \|\| latestReview\.created_at\) <=' "$name must skip reconciliation when review evidence has already been evaluated."

@@ -317,13 +317,14 @@ jobs:
               )[0];
               if (!latestReview) continue;
 
-              const { data: combinedStatus } = await github.rest.repos.getCombinedStatusForRef({
+              const statuses = await github.paginate(github.rest.repos.listCommitStatusesForRef, {
                 owner,
                 repo,
-                ref: pullRequest.head.sha
+                ref: pullRequest.head.sha,
+                per_page: 100
               });
               const eligibilityStatuses =
-                (combinedStatus.statuses || []).filter(
+                (statuses || []).filter(
                   status => status.context === 'BaseCoat merge eligibility'
                 ) || [];
               const latestEligibility = eligibilityStatuses.sort(
