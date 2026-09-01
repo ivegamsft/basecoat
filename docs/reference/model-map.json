@@ -1,24 +1,31 @@
 {
-  "generated": "2026-08-09T22:29:28Z",
+  "generated": "2026-09-01T00:44:32Z",
   "source": "agents/*.agent.md",
   "models": [
     {
       "canonical": "claude-sonnet-4.6",
-      "count": 77,
+      "count": 79,
       "aliases": [
         "claude-sonnet-4.6"
       ]
     },
     {
       "canonical": "gpt-5.3-codex",
-      "count": 24,
+      "count": 26,
       "aliases": [
         "gpt-5.3-codex"
       ]
     },
     {
+      "canonical": "gpt-5.4",
+      "count": 2,
+      "aliases": [
+        "gpt-5.4"
+      ]
+    },
+    {
       "canonical": "gpt-5.4-mini",
-      "count": 28,
+      "count": 23,
       "aliases": [
         "gpt-5.4-mini"
       ]

@@ -55,6 +55,7 @@ flowchart LR
 - [GOVERNANCE.md](GOVERNANCE.md) — Canonical governance landing page for shared vs repo-specific rules
 - [reference/governance-contract.md](reference/governance-contract.md) — Canonical common-vs-specific governance guide
 - [reference/inventory.md](reference/inventory.md) — Full asset listing (agents, skills, instructions, prompts)
+- [reference/repository-inventory.md](reference/repository-inventory.md) — Current counts, model assignments, and token-budget snapshot
 - [reference/governance.md](reference/governance.md) — Contribution policies and review standards
 - [reference/distribution.md](reference/distribution.md) — Sync mechanism for consumer repos
 - [reference/hooks.md](reference/hooks.md) — Git hooks and pre-commit validation
