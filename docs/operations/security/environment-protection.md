@@ -83,7 +83,7 @@ For teams that need a pre-production testing environment:
 
 ## Integration with Branch Protection
 
-This implementation assumes the `main` branch has baseline protections (required approvals, status checks, signed commits). See **[Branch Protection](docs/reference/branch-protection.md)** (Issue #1556) for branch-level controls.
+This implementation assumes the `main` branch has baseline protections (required approvals, status checks, signed commits). See **[Branch Protection](../../reference/branch-protection.md)** (Issue #1556) for branch-level controls.
 
 **Deployment safety depends on both layers:**
 
@@ -115,10 +115,10 @@ through a separately privileged governance path.
 
 ## Related Documentation
 
-- [Branch Protection Ruleset](docs/reference/branch-protection.md) — Main branch controls (Issue #1556)
-- [Secret Scanning](docs/operations/security/secret-scanning.md) — Complementary security control
-- [Security Remediation Traceability Workflow](docs/operations/security/remediation-traceability-workflow.md) — Canonical closure-evidence workflow for security findings
-- [Deployment Checklist](docs/guides/deployment-checklist.md) — How to execute safe deployments
+- [Branch Protection Ruleset](../../reference/branch-protection.md) — Main branch controls (Issue #1556)
+- [Secret Scanning](secret-scanning.md) — Complementary security control
+- [Security Remediation Traceability Workflow](remediation-traceability-workflow.md) — Canonical closure-evidence workflow for security findings
+- [Deployment Checklist](../../guides/deployment-checklist.md) — How to execute safe deployments
 
 ---
 

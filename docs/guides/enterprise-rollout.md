@@ -32,7 +32,7 @@ This document describes how to distribute Base Coat broadly, safely, and repeata
 ### CLI
 
 - Use GitHub CLI or an internal artifact client to download a specific release
-- Example: `gh release download v0.3.0 --repo YOUR-ORG/basecoat`
+- Example: `gh release download v4.2.1 --repo YOUR-ORG/basecoat`
 
 ## Governance Model
 

@@ -2,8 +2,10 @@
 
 ## Rule
 
-Every container image pushed from CI/CD **must** be tagged with the full git commit SHA.
-Tagging only with `:latest` is **forbidden**.
+Every container image pushed from CI/CD should have a full commit-SHA tag.
+Tagging only with `:latest` is **forbidden**. The portal deployment currently
+uses a shortened, environment-prefixed SHA tag; that tag is not collision-free
+or immutable and must not be treated as the sole audit or rollback identifier.
 
 ## Why
 
@@ -51,9 +53,10 @@ docker inspect <image>:<sha> --format '{{ index .RepoTags }}'
 az acr repository show-tags --name <registry> --repository <image> --output table
 ```
 
-Confirm the SHA tag appears in the tag list alongside any convenience tags.
+Confirm the full SHA tag appears in the tag list alongside any convenience
+tags. For a legacy shortened tag, verify the deployment's recorded commit SHA.
 
 ## Enforcement
 
 - All workflow PRs are reviewed against this guardrail.
-- If a workflow pushes a container image without a SHA tag, the PR must be blocked until corrected.
+- New workflow image-push changes must include a full commit-SHA tag.

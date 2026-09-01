@@ -255,5 +255,5 @@ Questions? File an issue:
 
 ---
 
-**Last Updated:** 2026-05-31  
-**Version:** 3.10.0 (Initial Release)
+**Last Updated:** 2026-08-31
+**Version:** 4.2.1

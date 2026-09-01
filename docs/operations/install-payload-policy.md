@@ -37,12 +37,14 @@ Exclusions are enforced at two layers:
 
 ### 1. Package Scripts
 
-Both packaging scripts remove eval files immediately after staging content:
+Only the PowerShell packaging script removes eval files immediately after
+staging content:
 
-- **`scripts/package-basecoat.sh`** — uses `find ... -delete` to remove
-  `eval.yaml` and `*.agent.eval.yaml` from `dist/stage/skills` and `dist/stage/agents`
 - **`scripts/package-basecoat.ps1`** — uses `Get-ChildItem` + `Remove-Item` to
-  remove the same patterns, then verifies zero leaks remain (throws on failure)
+  remove `eval.yaml` and `*.agent.eval.yaml`, then verifies zero leaks remain
+  (throws on failure)
+- **`scripts/package-basecoat.sh`** — stages files and relies on the CI
+  verification step to catch eval metadata leaks
 - **`.github/workflows/package-basecoat.yml`** (GHCP zip step) — runs `find ... -delete`
   on `dist/ghcp-stage/skills` and `dist/ghcp-stage/agents` before zipping
 

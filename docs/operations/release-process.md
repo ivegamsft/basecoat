@@ -176,14 +176,16 @@ git push origin vX.Y.Z
 
 ### 6. Publish GitHub Release
 
-Pushing a `v*.*.*` tag triggers the `release.yml` and `package-basecoat.yml` workflows automatically. These workflows:
+Pushing a `v*.*.*` tag triggers the `release.yml` and `package-basecoat.yml`
+workflows automatically. `release.yml` publishes the release with its source
+archive, `sync.ps1`, `sync.sh`, and changelog-derived notes. The
+`package-basecoat.yml` workflow packages release artifacts. It generates notes
+only when it creates the release; when `release.yml` created the release first,
+it uploads artifacts without replacing the changelog-derived notes.
 
-1. Build a source archive (`basecoat-vX.Y.Z.zip`) from the tagged commit
-2. Overlay `version.json` in the archive so payload metadata matches the release tag
-3. Attach `sync.ps1` and `sync.sh` to the GitHub release for consumer upgrades
-4. Extract release notes from `CHANGELOG.md` (prefers `## X.Y.Z`, then falls back to `## Unreleased`)
-5. If no changelog section exists, generate grouped release notes from merged PRs since the last tag
-6. Create or update the GitHub release with the archive, sync scripts, and notes
+The source release extracts notes from `CHANGELOG.md` (preferring `## X.Y.Z`,
+then `## Unreleased`) and falls back to grouped release notes when no matching
+section exists.
 
 #### Release artifact and version alignment contract
 

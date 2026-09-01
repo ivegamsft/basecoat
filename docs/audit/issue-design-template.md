@@ -1,5 +1,7 @@
 # Design & Debate Template for CI/CD Learnings
 
+> **Status:** Operational template
+
 Use this template when opening an issue to log one of the 9 CI/CD learnings. The goal is **debate and design**, not implementation. Discussion happens async in issue threads; consensus is documented in the issue description over time.
 
 ---

@@ -4,13 +4,16 @@
 
 The `PRODUCTION_REPO_TOKEN` is a fine-grained Personal Access Token (PAT) that authenticates the `BaseCoat - Publish to Production` workflow when syncing releases from the internal `IBuySpy-Shared/basecoat` repository to the public production mirror at `ivegamsft/basecoat`.
 
-**Status:** Issue #1352 — Token currently lacks push access, blocking releases.
+**Current control:** `token-preflight.yml` blocks publication when the token is
+missing, expired, or cannot push to the production mirror. The v4.2.1
+publication completed successfully on 2026-08-31.
 
 ---
 
-## Problem
+## When the preflight fails
 
-The current `PRODUCTION_REPO_TOKEN` has `permissions.push=False`, preventing the publish workflow from pushing to `ivegamsft/basecoat`.
+If the preflight reports that `PRODUCTION_REPO_TOKEN` lacks push access, the
+publish workflow stops before it changes the production mirror.
 
 **Symptoms:**
 
@@ -124,12 +127,12 @@ Alternatively, using the GitHub UI:
 
 ### Step 7: Re-run the Publish Workflow
 
-Once the secret is set, re-trigger the publish workflow for the stuck release:
+Once the secret is set, re-trigger the publish workflow for the release tag:
 
 **From CLI:**
 
 ```bash
-gh workflow run publish-to-production.yml --repo IBuySpy-Shared/basecoat --ref v3.30.6
+gh workflow run publish-to-production.yml --repo IBuySpy-Shared/basecoat --ref main --field tag=v4.2.1
 ```
 
 **From GitHub UI:**
@@ -217,9 +220,9 @@ If the validation script or workflow preflight fails, check:
 
 ## Related Issues & Documentation
 
-- **Issue #1352** — This issue (token lacks push access, blocking releases)
-- **Issue #575** — Original token setup guidance (closed, regex applied)
-- **Issue #1353** — Enhancement: add preflight gate to catch similar failures
+- **Issue #1352** — Historical token-access incident (closed)
+- **Issue #575** — Original token-access incident (closed)
+- **Issue #1353** — Preflight-gate enhancement (closed)
 - **Workflow:** `.github/workflows/publish-to-production.yml`
 - **Validation Helper:** `scripts/validate-production-token.sh` (bash) | `scripts/validate-production-token.ps1` (PowerShell)
 
@@ -253,5 +256,5 @@ A: Anyone with Admin or Maintain access to the IBuySpy-Shared/basecoat repositor
 ---
 
 **Document Owner:** BaseCoat Platform Team  
-**Last Updated:** 2026-06-25  
-**Next Review:** 2026-07-25 (Monthly)
+**Last Updated:** 2026-08-31
+**Next Review:** 2026-09-30 (Monthly)

@@ -1,6 +1,6 @@
 # Guardrail: OIDC Federation for GitHub Actions → Azure
 
-> **Status:** Mandatory
+> **Status:** OIDC required by default
 > **Scope:** All GitHub Actions workflows that authenticate to Azure
 > **Issue:** #56
 
@@ -8,9 +8,14 @@
 
 ## Rule
 
-**All GitHub Actions workflows authenticating to Azure MUST use OpenID Connect (OIDC) federated credentials via `azure/login@v2`.**
+**GitHub Actions workflows authenticating to Azure MUST use OpenID Connect
+(OIDC) federated credentials via `azure/login@v2` by default.**
 
-Stored service principal credentials (client secrets, client certificates stored as GitHub Secrets) are **forbidden**. Any workflow that uses `AZURE_CLIENT_SECRET` or equivalent stored credential will be rejected in code review and flagged by CI.
+Stored service-principal credentials are an exception that must be explicitly
+documented and kept in GitHub Secrets. The portal deployment workflow supports
+the temporary `AZURE_CREDENTIALS` fallback while selecting OIDC whenever that
+secret is absent. New workflows must not add stored-credential authentication
+without an approved operational requirement.
 
 ---
 
@@ -26,74 +31,50 @@ The entire flow is secretless. GitHub never sees an Azure credential, and Azure 
 
 ## Bootstrap Pattern
 
-### 1. Create an Entra App Registration
+### 1. Define the Entra identity in IaC
 
-```bash
-az ad app create --display-name "basecoat-github-actions"
-```
+Create the app registration, service principal, federated credentials, and
+least-privilege role assignments through the repository's IaC. Do not create
+or change Azure identities ad hoc through the CLI or portal.
 
-Note the `appId` (this becomes `AZURE_CLIENT_ID`).
+### 2. Add federated credentials
 
-### 2. Create a Service Principal
+Define one federated credential per branch or environment that needs access.
+Set the `issuer` in the IaC definition to
+`https://token.actions.githubusercontent.com`, or to the enterprise-scoped
+issuer when an enterprise custom issuer policy is enabled:
 
-```bash
-az ad sp create --id <appId>
-```
-
-### 3. Assign Roles
-
-Grant least-privilege RBAC roles on the target subscription or resource group:
-
-```bash
-az role assignment create \
-  --assignee <appId> \
-  --role Contributor \
-  --scope /subscriptions/<subscription-id>/resourceGroups/<rg-name>
-```
-
-### 4. Add Federated Credentials
-
-Create one federated credential per branch or environment that needs access.
-
-Set an issuer variable first so the credential matches your runtime token:
-
-```bash
-# Default issuer:
-GITHUB_OIDC_ISSUER="https://token.actions.githubusercontent.com"
-
-# Enterprise-scoped issuer (if enterprise custom issuer policy is enabled):
-# GITHUB_OIDC_ISSUER="https://token.actions.githubusercontent.com/<enterprise-slug>"
-
-# For the main branch
-az ad app federated-credential create --id <appId> --parameters '{
+```text
+For the main branch:
+{
   "name": "main-branch",
-  "issuer": "'$GITHUB_OIDC_ISSUER'",
+  "issuer": "https://token.actions.githubusercontent.com",
   "subject": "repo:IBuySpy-Shared/basecoat:ref:refs/heads/main",
   "audiences": ["api://AzureADTokenExchange"]
-}'
+}
 
-# For pull requests
-az ad app federated-credential create --id <appId> --parameters '{
+For pull requests:
+{
   "name": "pull-requests",
-  "issuer": "'$GITHUB_OIDC_ISSUER'",
+  "issuer": "https://token.actions.githubusercontent.com",
   "subject": "repo:IBuySpy-Shared/basecoat:pull_request",
   "audiences": ["api://AzureADTokenExchange"]
-}'
+}
 
-# For a specific environment
-az ad app federated-credential create --id <appId> --parameters '{
+For a specific environment:
+{
   "name": "production-env",
-  "issuer": "'$GITHUB_OIDC_ISSUER'",
+  "issuer": "https://token.actions.githubusercontent.com",
   "subject": "repo:IBuySpy-Shared/basecoat:environment:production",
   "audiences": ["api://AzureADTokenExchange"]
-}'
+}
 ```
 
-### 5. Store IDs as GitHub Secrets
+### 3. Store identifiers as repository variables
 
 Only **non-secret identifiers** are stored — no passwords or keys:
 
-| GitHub Secret | Value |
+| Repository variable | Value |
 |---|---|
 | `AZURE_CLIENT_ID` | App registration Application (client) ID |
 | `AZURE_TENANT_ID` | Entra ID (Azure AD) tenant ID |
@@ -116,9 +97,9 @@ jobs:
 
       - uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
       - run: az account show
 ```
@@ -127,7 +108,7 @@ jobs:
 
 ---
 
-## Why Client Secrets Are Banned
+## Why OIDC Is Preferred
 
 | Risk | Description |
 |---|---|

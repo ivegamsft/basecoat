@@ -38,7 +38,7 @@ These assets are optional at the template level, but when present they must be v
 `.github/base-coat.lock.json` must include:
 
 - `baseCoatRepo`: upstream repository reference.
-- `version`: pinned semantic tag (example: `v0.3.0`).
+- `version`: pinned semantic tag (example: `vX.Y.Z`).
 - `installPath`: expected install location (default: `.github/base-coat`).
 - `checksumRequired`: boolean for release checksum policy.
 
@@ -47,7 +47,7 @@ Example:
 ```json
 {
   "baseCoatRepo": "YOUR-ORG/basecoat",
-  "version": "v0.3.0",
+  "version": "vX.Y.Z",
   "installPath": ".github/base-coat",
   "checksumRequired": true
 }

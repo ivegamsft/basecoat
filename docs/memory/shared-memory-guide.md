@@ -12,11 +12,12 @@ basecoat-memory/
 ├── CONTRIBUTING.md
 ├── hot-index.md          ← L2s: shared hot-cache (loaded by sync script)
 ├── memories/
-│   ├── azure.md          ← Domain memories
-│   ├── dotnet.md
-│   ├── security.md
-│   ├── agents.md
-│   └── <domain>.md
+│   ├── azure/
+│   │   └── <subject>.md  ← Domain and subject memories
+│   ├── dotnet/
+│   ├── security/
+│   ├── agents/
+│   └── <domain>/
 └── .github/
     └── workflows/
         └── validate-memory.yml
@@ -83,7 +84,7 @@ Run `scripts/sync-shared-memory.ps1` at session start to pull latest.
 
 ### Manual contribution
 
-Edit `memories/<domain>.md` directly in a PR:
+Edit `memories/<domain>/<subject>.md` directly in a PR:
 
 ```markdown
 ## <fact-title>
@@ -119,7 +120,7 @@ The `hot-index.md` file is a structured catalog loaded as L2s context:
 
 <one-sentence summary of the pattern>
 
-→ Full detail: memories/<domain>.md#<anchor>
+→ Full detail: memories/<domain>/<subject>.md#<anchor>
 ```
 
 The agent uses heat level and recency to decide whether to load the full
@@ -142,7 +143,7 @@ Domain names are lowercase, hyphen-separated:
 | `data` | Data pipelines, schema patterns, medallion architecture |
 | `llm` | Prompt engineering, token optimization, model selection |
 
-Create a new domain file when content doesn't fit an existing domain.
+Create a new domain directory when content doesn't fit an existing domain.
 
 ---
 

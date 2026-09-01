@@ -19,7 +19,7 @@ context out of the token budget.
 | Layer | Name | Where stored |
 |-------|------|-------------|
 | L2s | Shared hot index | `basecoat-memory/hot-index.md` (synced via `sync-shared-memory.ps1`) |
-| L3s | Shared domain cache | `basecoat-memory/memories/<domain>.md` |
+| L3s | Shared domain cache | `basecoat-memory/memories/<domain>/<subject>.md` |
 
 ---
 

@@ -74,7 +74,9 @@ Install reusable + templates + internal:
 pwsh scripts/configure-downstream-workflows.ps1 -IncludeTemplates -IncludeInternal -IncludeUnsupported
 ```
 
-Install all classes, including advanced/unsupported workflows:
+Install reusable, ship-it, templates, and internal workflows, including
+advanced/unsupported workflows. Onboarding telemetry (`adoption-metrics.yml`) is
+a separate opt-in class and is not included:
 
 ```bash
 pwsh scripts/configure-downstream-workflows.ps1 -IncludeTemplates -IncludeInternal -IncludeUnsupported

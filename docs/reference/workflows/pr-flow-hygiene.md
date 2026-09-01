@@ -115,7 +115,7 @@ gh api graphql -f query='mutation {
 Then enable auto-merge (`gh pr merge <N> --merge --auto`) — it fires immediately after the last
 thread resolves.
 
-See also: [blocked-issues.md — PR Blocked With All Checks Passing](../../../operations/blocked-issues.md#pr-blocked-with-all-checks-passing--unresolved-review-threads)
+See also: [blocked-issues.md — PR Blocked With All Checks Passing](../../operations/blocked-issues.md#pr-blocked-with-all-checks-passing--unresolved-review-threads)
 
 ## Job-level entry and exit contract
 

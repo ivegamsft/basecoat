@@ -31,33 +31,33 @@ BaseCoat assets are organized into four types, each with a specific role in shap
 
 | Type | Count | Role | Location |
 |---|---|---|---|
-| **Agents** | 79 | End-to-end task executors with defined inputs, workflow, and output | `agents/*.agent.md` |
-| **Skills** | 57 | Reusable domain capabilities invoked by agents | `skills/*/SKILL.md` |
-| **Instructions** | 64 | Copilot behavior rules applied by file path pattern | `instructions/*.instructions.md` |
-| **Prompts** | 3 | Structured templates for repeatable tasks | `prompts/*.prompt.md` |
+| **Agents** | 130 | End-to-end task executors with defined inputs, workflow, and output | `agents/*.agent.md` |
+| **Skills** | 134 | Reusable domain capabilities invoked by agents | `skills/*/SKILL.md` |
+| **Instructions** | 91 | Copilot behavior rules applied by file path pattern | `instructions/*.instructions.md` |
+| **Prompts** | 6 | Structured templates for repeatable tasks | `prompts/*.prompt.md` |
 
 ```mermaid
 flowchart TD
-    BC["BaseCoat Assets"] --> A["Agents\n79 files\nagents/*.agent.md"]
-    BC --> S["Skills\n57 directories\nskills/*/SKILL.md"]
-    BC --> I["Instructions\n64 files\ninstructions/*.instructions.md"]
-    BC --> P["Prompts\n3 files\nprompts/*.prompt.md"]
+    BC["BaseCoat Assets"] --> A["Agents\n130 files\nagents/*.agent.md"]
+    BC --> S["Skills\n134 directories\nskills/*/SKILL.md"]
+    BC --> I["Instructions\n91 files\ninstructions/*.instructions.md"]
+    BC --> P["Prompts\n6 files\nprompts/*.prompt.md"]
 
     A --> A1["Legacy Modernization"]
     A --> A2["Self-Healing CI"]
     A --> A3["Memory Promoter"]
     A --> A4["Issue Triage"]
-    A --> A5["...75 more"]
+    A --> A5["...126 more"]
 
     S --> S1["azure-linux-app-service"]
     S --> S2["cross-stack-modernization"]
     S --> S3["database-migration"]
-    S --> S4["...54 more"]
+    S --> S4["...131 more"]
 
     I --> I1["workflow-integrity"]
     I --> I2["governance"]
     I --> I3["python"]
-    I --> I4["...61 more"]
+    I --> I4["...88 more"]
 ```
 
 ## Consumer Sync Lifecycle
@@ -109,7 +109,8 @@ flowchart LR
   How trusted cloud-agent CI approval, protected production deployments, and
   internal-repository release authorization remain separate
 - **Distributed sync model**: Assets live in consumer repos — no runtime dependency on BaseCoat
-- **Quality gate**: CI blocks merges if avg asset score < 5.0/10 or any asset scores 0
+- **Quality gate**: Assets below 6.0/10 are red; the asset-health workflow
+  blocks only when the overall library grade is F
 - **Idempotent drift detection**: Version check workflow updates existing issues rather than
   opening duplicates
 
@@ -117,10 +118,10 @@ flowchart LR
 
 ```text
 basecoat/
-├── agents/          # 79 agent definition files
-├── skills/          # 57 skill directories
-├── instructions/    # 64 instruction files
-├── prompts/         # 3 prompt templates
+├── agents/          # 130 agent definition files
+├── skills/          # 134 skill directories
+├── instructions/    # 91 instruction files
+├── prompts/         # 6 prompt templates
 ├── scripts/         # Sync, audit, coherence, adoption scripts
 ├── tests/           # Validation and quality gate tests
 ├── docs/            # This documentation

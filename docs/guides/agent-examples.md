@@ -290,7 +290,7 @@ graceful degradation, health endpoint, runbook exists, rollback plan documented.
 **Agent:** `@rollout-basecoat`
 
 ```text
-@rollout-basecoat Onboard the repo myorg/payments-service to BaseCoat v4.1.0.
+@rollout-basecoat Onboard the repo myorg/payments-service to BaseCoat v4.2.1.
 Enterprise constraints: no direct internet access — must pull from our internal
 mirror at artifacts.myorg.internal/basecoat.
 ```
@@ -307,7 +307,7 @@ Or run the bootstrap script directly:
 ```powershell
 pwsh scripts/bootstrap-basecoat.ps1 `
   -BasecoatRepo https://artifacts.myorg.internal/basecoat.git `
-  -Ref v4.1.0
+  -Ref v4.2.1
 ```
 
 ---
@@ -336,9 +336,9 @@ and produce an upgrade sequence that minimizes CI failures.
 **Agent:** `@release-manager`
 
 ```text
-@release-manager Prepare the v4.1.0 release. Changes since v4.0.0:
-continuous backlog autopilot, generated prompt examples, capability-aware
-model routing, downstream refresh hardening, and removal of Hono from MCP.
+@release-manager Prepare the v4.2.1 release. Changes since v4.2.0:
+post-release stabilization, workflow approval fixes, token-budget reductions,
+and documentation corrections.
 Validate tests pass, bump version.json,
 draft the CHANGELOG entry, and generate the release notes.
 ```
@@ -483,7 +483,7 @@ github-security-posture → GitHub settings audit
 ## Tips
 
 **Call agents directly by name.** Use `@agent-name` for any task you already
-know — no router needed. The [routing decision tree](.github/instructions/routing-decision-tree.md)
+know — no router needed. The [routing decision tree](../../.github/instructions/routing-decision-tree.md)
 maps 40+ intents to direct agent or skill calls:
 
 ```text

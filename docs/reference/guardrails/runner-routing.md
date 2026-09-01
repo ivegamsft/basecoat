@@ -6,7 +6,8 @@
 
 | Workload characteristic | Recommended runner |
 |---|---|
-| Needs Azure/cloud access (deploy, Packer, Key Vault) | Self-hosted (has managed identity) |
+| Needs private Azure/cloud access (Packer, Key Vault) | Self-hosted (managed identity or private network) |
+| Public-control-plane Azure deployment using OIDC | GitHub-hosted is acceptable |
 | Heavy compute (image builds, large compiles) | Self-hosted (dedicated capacity) |
 | Quick CI gate (<30 s typical) | GitHub-hosted (fast cold-start) |
 | Requires CodeQL or GitHub-native tooling | GitHub-hosted |
@@ -18,7 +19,8 @@
 
 ### Pattern 1: Direct routing to a runner group
 
-Use when the job always requires self-hosted resources (deployment, image build, Key Vault access).
+Use when the job always requires self-hosted resources (private deployment,
+image build, or Key Vault access).
 
 ```yaml
 jobs:
@@ -159,7 +161,8 @@ External contributor PRs must run on GitHub-hosted runners or an isolated, unpri
 | Lint / unit test / PR gate | `ubuntu-latest` |
 | CodeQL / dependency scan | `ubuntu-latest` |
 | Container image build (heavy) | `group: shared-build-agents` + `[self-hosted, linux, x64]` |
-| Deploy (Azure / AWS / GCP) | `group: shared-build-agents` + `[self-hosted, linux, x64]` |
+| Private-cloud deployment | `group: shared-build-agents` + `[self-hosted, linux, x64]` |
+| Public-control-plane OIDC deployment | `ubuntu-latest` is acceptable |
 | Packer / VM image build | `group: shared-build-agents` + `[self-hosted, linux, x64]` |
 | Key Vault / secrets retrieval | `group: shared-build-agents` + `[self-hosted, linux, x64]` |
 | External fork / untrusted PR | `ubuntu-latest` only |

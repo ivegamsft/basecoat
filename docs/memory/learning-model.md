@@ -35,7 +35,8 @@ LIMIT 20
 `scripts/sync-shared-memory.ps1` pulls from `IBuySpy-Shared/basecoat-memory`:
 
 - `hot-index.md` — shared hot-cache entries for the org
-- `memories/<domain>.md` — domain-specific knowledge (azure, security, dotnet…)
+- `memories/<domain>/<subject>.md` — domain-specific knowledge (azure,
+  security, dotnet…)
 
 This knowledge is contributed by any team member running the sync script with
 the `-Export` flag after a session that produced durable insights.

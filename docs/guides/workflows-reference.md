@@ -50,7 +50,12 @@ testing and uses pinned action SHAs.
 | #1828 | `.github/workflows/downstream-reviewer-routing-audit.yml` | Weekly cross-repo reviewer-routing scorecard; escalates missing/unconfigured/ineffective routing automation states across opted-in consumer repos |
 | #1832 | `.github/workflows/post-onboarding-drift-loop.yml` | Weekly post-onboarding drift loop across opted-in repos. Detects branch/ruleset, intake, reviewer-routing, and metadata hygiene drift; opens/updates deduplicated remediation issues; publishes fleet + per-repo trend scorecards |
 
-## Distributed Workflow Templates (10 Total)
+## Selected Distributed Workflow Templates
+
+The installer distributes a policy-selected subset of the workflow catalog.
+The sections below describe the principal templates and operational workflows;
+use `scripts/configure-downstream-workflows.ps1` as the source of truth for
+the current install classes and destination filenames.
 
 ### 1. asset-health.yml
 
@@ -637,7 +642,7 @@ mv .github/workflows/basecoat-version-check.yml .github/workflows/basecoat-versi
 rm .github/workflows/basecoat-version-check.yml
 ```
 
-## Release Notes
+## Historical Initial-Release Note
 
 **Version 3.10.0** (2026-05-31)
 
@@ -648,4 +653,4 @@ rm .github/workflows/basecoat-version-check.yml
 
 ---
 
-**Last Updated:** 2026-05-31
+**Last Updated:** 2026-08-31

@@ -158,7 +158,7 @@ target resolution.
 
 ```yaml
 source: https://github.com/IBuySpy-Shared/basecoat.git
-ref: v4.1.0
+ref: v4.2.1
 
 updates:
   channel: stable

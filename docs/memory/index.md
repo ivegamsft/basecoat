@@ -15,7 +15,7 @@ storage capacity.
 ```text
 L0  Agent frontmatter          Always loaded, ~200 tokens per agent
 L1  Scoped instructions        Always loaded for matching file types, ~500–1,500 tokens
-L2  Hot-index (session store)  Fast KV lookup, loaded on demand, ~1,500 tokens
+L2  Team Hot Index             Loaded at session start, ~400 tokens
 L3  Session DuckDB             Full search, queried when L2 misses, cost: ~5K tokens
 L4  Personal store_memory      Persisted across sessions, surfaced as memories{}
     └── Shared promotion path  Cross-team knowledge via basecoat-memory repo

@@ -67,8 +67,8 @@ This copies Base Coat assets into `.github/base-coat/` and also copies agents, i
 For production environments, always pin to a specific release:
 
 ```bash
-export BASECOAT_REF='v1.0.0'
-curl -fsSL https://raw.githubusercontent.com/YOUR-ORG/basecoat/v1.0.0/sync.sh | bash
+export BASECOAT_REF='v4.2.1'
+curl -fsSL https://raw.githubusercontent.com/YOUR-ORG/basecoat/v4.2.1/sync.sh | bash
 ```
 
 ---

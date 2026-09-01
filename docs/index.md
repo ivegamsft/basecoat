@@ -73,6 +73,7 @@ flowchart LR
 - [reference/guidance-vocabulary-syntax-guide.md](reference/guidance-vocabulary-syntax-guide.md) — Canonical vocabulary, taxonomy, ontology, and prompt syntax
 - [reference/treatment-matrix.md](reference/treatment-matrix.md) — Issue treatment matrix
 - [reference/fleet-loop-adoption-scorecard.md](reference/fleet-loop-adoption-scorecard.md) — Fleet audit findings: policy vs implementation vs live behavior across consumer repos
+- [reference/documentation-accuracy-audit.md](reference/documentation-accuracy-audit.md) — Page-by-page current-code accuracy review register
 - [reference/guardrails/](reference/guardrails/) — Guardrail configuration files
 - [diagrams/architecture-diagrams-index.md](diagrams/architecture-diagrams-index.md) — Visual reference index for architecture, dispatch, and validation flows
 
