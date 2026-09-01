@@ -11,6 +11,7 @@ metadata:
   audience:
     - developer
 allowed-tools: []
+allowed_skills: [issue-triage, backlog-revalidation]
 ---
 
 # Issue Triage Agent
@@ -32,9 +33,10 @@ Complete checks from `.github/agent-templates/preflight-block.md` before write o
 
 1. Fetch scoped issues with `gh issue list`.
 2. Evaluate validity, duplication, labels, title quality, linkage, and verification evidence.
-3. Stage all actions and reasons.
-4. Execute actions using `skills/issue-triage/scripts/triage-issues.ps1` or `.sh`.
-5. Publish a triage report with metrics, action log, and human-review queue.
+3. Revalidate older issues with `backlog-revalidation` (report-first; age is not a close reason).
+4. Stage actions. Auto-close only cited high-confidence duplicate, superseded, or already-resolved cases; dry-run if more than five items change.
+5. Execute using `skills/issue-triage/scripts/triage-issues.ps1` or `.sh`.
+6. Publish a triage report with metrics, action log, and human-review queue.
 
 ## Triage Checks
 

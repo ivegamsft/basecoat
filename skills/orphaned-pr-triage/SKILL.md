@@ -23,9 +23,11 @@ Use this skill to standardize stale PR cleanup and keep merge queues actionable.
 | File | Purpose |
 |---|---|
 | [`references/triage-checklist.md`](references/triage-checklist.md) | Candidate detection, bucketing, and action templates |
+| [`../backlog-revalidation/references/classification-contract.md`](../backlog-revalidation/references/classification-contract.md) | Shared issue/PR revalidation classes and evidence contract |
 
 ## Agent Pairing
 
 - `orphaned-pr-cleanup`
 - `issue-triage`
+- `backlog-revalidation` for evidence-based classification of old PRs (inactivity is a filter, not a close reason)
 - `merge-coordinator`

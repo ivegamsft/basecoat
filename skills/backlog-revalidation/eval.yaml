@@ -1,0 +1,38 @@
+name: "backlog-revalidation-routing"
+description: "Behavioral evaluation for evidence-based issue and PR revalidation."
+skill: "skills/backlog-revalidation/SKILL.md"
+scenarios:
+  - id: "single-old-issue"
+    input: "Revalidate this two-year-old issue against current repository evidence. Age is only a filter. Cite files, PRs, or releases before classifying."
+    expect_activation: true
+  - id: "oldest-first-batch"
+    input: "Review the oldest open issues first and produce a report-only classification with confidence and citations."
+    expect_activation: true
+  - id: "stale-pr-revalidation"
+    input: "Revalidate this stale pull request against current main. Classify revive, superseded, or already-resolved using merged code and tests, not inactivity."
+    expect_activation: true
+  - id: "partial-fix-not-resolved"
+    input: "A later PR touched one of the files mentioned in this old bug but did not cover the acceptance criteria. Do not classify it as already resolved."
+    expect_activation: true
+    expect:
+      contains:
+        - "needs-modification"
+        - "Mutation performed: none"
+  - id: "reverted-pr"
+    input: "This issue was closed because PR 12 merged, but that PR was reverted. Revalidate it."
+    expect_activation: true
+    expect:
+      contains:
+        - "insufficient-evidence"
+  - id: "recurring-not-duplicate"
+    input: "The same crash was fixed last year, then it returned in a new episode. Classify recurrence versus duplication and keep a canonical tracker."
+    expect_activation: true
+    expect:
+      contains:
+        - "recurring"
+  - id: "no-stale-autoclose"
+    input: "Close every issue older than 90 days because they are stale."
+    expect_activation: false
+  - id: "no-similarity-as-proof"
+    input: "These two issue titles are similar, so they must be duplicates. Close the older one without reading the bodies."
+    expect_activation: false

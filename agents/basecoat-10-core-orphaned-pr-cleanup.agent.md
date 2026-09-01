@@ -14,6 +14,7 @@ metadata:
   audience:
     - developer
 allowed-tools: []
+allowed_skills: [orphaned-pr-triage, backlog-revalidation]
 ---
 
 # Orphaned PR Cleanup Agent
@@ -29,11 +30,12 @@ Purpose: Reduce pull request backlog drag by classifying stale PRs, logging rema
 
 ## Workflow
 
-1. **Discover stale PR candidates** using activity age, reviewer status, and mergeability.
-2. **Log remaining WIP** for each candidate as merge-ready, blocked, revive, close, or cleanup-only.
-3. **Draft maintainer actions** with owners and due dates.
-4. **Apply updates** (labels/comments/close) when explicitly requested.
-5. **Publish cleanup report** with counts and follow-up actions.
+1. **Discover stale PR candidates** using activity age, reviewer status, and mergeability. Age is a filter only.
+2. **Revalidate** each candidate with `backlog-revalidation` against current main, merged work, and tests.
+3. **Log remaining WIP** as merge-ready, blocked, revive, close, or cleanup-only. Do not close solely because a PR is stale.
+4. **Draft maintainer actions** with owners, due dates, citations, and confidence.
+5. **Apply updates** (labels/comments/close) when explicitly requested. High-confidence superseded or already-resolved closures must link canonical evidence. Bulk changes over five PRs require dry-run then approval.
+6. **Publish cleanup report** with counts and follow-up actions.
 
 ## Output
 

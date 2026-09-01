@@ -23,6 +23,7 @@ Use this skill to audit and improve GitHub issue quality. It can run standalone 
 - Title and relationship quality checks
 - Branch linkage and missing-PR detection
 - Proposed fix context for bug issues
+- Older-issue revalidation via `backlog-revalidation` (age is a filter, not a disposition)
 
 ## Reference Files
 
@@ -50,12 +51,15 @@ Use this skill to audit and improve GitHub issue quality. It can run standalone 
 7. Relationship audit
 8. Branch connection
 9. Priority review
+10. PRD/spec pre-flight
+11. Older-issue revalidation (`backlog-revalidation`; report-first)
 
 Canonical priorities are `priority:critical`, `priority:high`, `priority:medium`, and `priority:low`.
 
 ## Agent Pairing
 
 - `issue-triage` agent for fully automated triage runs.
+- `backlog-revalidation` for evidence-based classification of older issues.
 - `backlog-burndown` for sprint velocity and scope tracking.
 - `sprint-planner` for placing triaged issues into sprint commitments.
 - `escalation-router` for issues requiring human sign-off before action.

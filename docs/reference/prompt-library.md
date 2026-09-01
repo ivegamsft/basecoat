@@ -2,7 +2,7 @@
 
 Generated from the canonical intent vocabulary and asset frontmatter. Do not edit the generated tables directly; run `pwsh scripts/generate-prompt-library.ps1`.
 
-Coverage: 35 intents, 135 skills, and 130 agents.
+Coverage: 35 intents, 136 skills, and 130 agents.
 
 ## Lifecycle prompts
 
@@ -68,6 +68,20 @@ Confidence: low - dynamic loading has not been observed
 Decision: instrument
 Validation: capture plugin-load telemetry before removal
 Rollback: disable the experiment and retain the package
+Mutation performed: none
+```
+
+### Backlog revalidation output example
+
+```text
+Item: issue #1234
+Mode: single
+Age filter only: yes
+Classification: superseded
+Confidence: high - merged PR #567 implemented the same outcome
+Citations: PR #567, src/example.ts:40, v4.2.1 release notes
+Canonical: https://github.com/example/repo/issues/2000
+Recommended action: close
 Mutation performed: none
 ```
 
@@ -139,6 +153,7 @@ Mutation performed: none
 | `backend-dev` | <code>Use the 'backend-dev' skill. Task: implement a REST endpoint.</code> | [skills/backend-dev/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/backend-dev/SKILL.md) |
 | `backlog-burndown` | <code>Use the 'backlog-burndown' skill. Task: build burn-down tables from issue and open-PR state changes.</code> | [skills/backlog-burndown/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/backlog-burndown/SKILL.md) |
 | `backlog-rebalance-engine` | <code>Use the 'backlog-rebalance-engine' skill. Task: idempotent project item add-or-update.</code> | [skills/backlog-rebalance-engine/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/backlog-rebalance-engine/SKILL.md) |
+| `backlog-revalidation` | <code>Use the 'backlog-revalidation' skill. Task: classify old issues as still needed.</code> | [skills/backlog-revalidation/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/backlog-revalidation/SKILL.md) |
 | `basecoat` | <code>Use the 'basecoat' skill. Task: find the right BaseCoat agent.</code> | [skills/basecoat/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/basecoat/SKILL.md) |
 | `bom-schema` | <code>Use the 'bom-schema' skill. Task: JSON schema for BOM validation.</code> | [skills/bom-schema/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/bom-schema/SKILL.md) |
 | `bom-validation` | <code>Use the 'bom-validation' skill. Task: validating BOM completeness before S2.</code> | [skills/bom-validation/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/bom-validation/SKILL.md) |

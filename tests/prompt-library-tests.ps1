@@ -24,6 +24,7 @@ try {
         '### Refresh BaseCoat',
         '### Remove BaseCoat',
         '### YAGNI analysis output example',
+        '### Backlog revalidation output example',
         '## Sample outputs',
         '<!-- markdownlint-disable MD033 -->',
         '<!-- markdownlint-enable MD033 -->'

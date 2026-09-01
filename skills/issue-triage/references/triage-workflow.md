@@ -352,3 +352,35 @@ EOF
 # Remove once links are added
 gh issue edit $N --remove-label "needs-prd"
 ```
+
+---
+
+## Check 11: Older-Issue Revalidation
+
+**Goal**: Classify older issues against current repository evidence. Age and
+the `stale` label are candidate filters, never a close reason.
+
+Use `skills/backlog-revalidation/SKILL.md` and
+`skills/backlog-revalidation/references/classification-contract.md`.
+
+### Decision Tree
+
+```text
+Issue older than the configured age filter (default 90 days)?
+├── No → skip
+└── Yes → collect citations (links, merged PRs, commits, current code, tests, docs, ADRs, releases)
+    ├── High-confidence duplicate / superseded / already-resolved with canonical evidence
+    │   → recommend close via issue-triage (not in scheduled mode; dry-run if bulk >5)
+    ├── Recurring episode of a previously fixed defect
+    │   → keep/open canonical tracker; link episodes; do not close as duplicate
+    ├── Partial fix, reverted PR, or reopened product direction
+    │   → needs-modification or insufficient-evidence; human review
+    └── Ambiguous
+        → insufficient-evidence; human-review queue
+```
+
+### Guardrails
+
+- Never close solely because the issue is stale or inactive.
+- Scheduled revalidation is report-only.
+- Comment with classification, confidence, and citations before any mutation.

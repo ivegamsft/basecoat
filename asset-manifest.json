@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "libraryVersion": "4.2.1",
-  "generatedAt": "2026-09-01T21:37:38.2524515Z",
+  "generatedAt": "2026-09-01T23:00:24.1343929Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -238,7 +238,7 @@
     {
       "path": "agents/basecoat-10-core-issue-triage.agent.md",
       "type": "agent",
-      "sha": "02a82a7fde1c8df4416454292ca7ad2529b73f44",
+      "sha": "a4f5d3d7319a7f9c0a3253492b43941fe7b1c674",
       "version": null,
       "effectiveVersion": "4.2.1",
       "versionSource": "library"
@@ -326,7 +326,7 @@
     {
       "path": "agents/basecoat-10-core-orphaned-pr-cleanup.agent.md",
       "type": "agent",
-      "sha": "6c63db604e29ad2e094824d821a924f29999eb76",
+      "sha": "c49cf2494da62c0f0e05d75dd95363e12372c79b",
       "version": null,
       "effectiveVersion": "4.2.1",
       "versionSource": "library"
@@ -2036,6 +2036,14 @@
       "versionSource": "library"
     },
     {
+      "path": "skills/backlog-revalidation/SKILL.md",
+      "type": "skill",
+      "sha": "5383978ee452705a70f629285b6bac808769a784",
+      "version": null,
+      "effectiveVersion": "4.2.1",
+      "versionSource": "library"
+    },
+    {
       "path": "skills/basecoat/SKILL.md",
       "type": "skill",
       "sha": "df0b5609fbf8780fd4c1932298eaa36f1d80af5d",
@@ -2510,7 +2518,7 @@
     {
       "path": "skills/issue-triage/SKILL.md",
       "type": "skill",
-      "sha": "db627a5b4debfd683fb517dc243d278dbd1bb59b",
+      "sha": "6580c092b916b0a4673f0c9b8dec960135756f0d",
       "version": null,
       "effectiveVersion": "4.2.1",
       "versionSource": "library"
@@ -2614,7 +2622,7 @@
     {
       "path": "skills/orphaned-pr-triage/SKILL.md",
       "type": "skill",
-      "sha": "a9e1f39a3be809351894cbd0ba48eeefb5049ab1",
+      "sha": "28c2fc3132761188a3fefb8876fea330abc006d3",
       "version": null,
       "effectiveVersion": "4.2.1",
       "versionSource": "library"
