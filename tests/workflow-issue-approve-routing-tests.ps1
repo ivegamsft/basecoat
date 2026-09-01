@@ -36,8 +36,23 @@ foreach ($entry in $files) {
     if ($content -notmatch 'contains\(github\.event\.comment\.body,\s*''/approve''\)') {
         throw "$name must gate routing and approval jobs on '/approve' comments."
     }
+    if ($content -notmatch 'contains\(github\.event\.comment\.body,\s*''/spec-2-prod''\)') {
+        throw "$name must treat /spec-2-prod as an implementation directive."
+    }
+    if ($content -notmatch 'hasSpecEvidence' -or
+        $content -notmatch 'Spec reference') {
+        throw "$name must require supplied spec evidence before agent assignment."
+    }
+    if ($content -notmatch 'Open a ready-for-review implementation PR \(not a draft\)' -or
+        $content -notmatch 'Closes #') {
+        throw "$name must require a ready, issue-closing implementation PR from the coding agent."
+    }
     if ($content -notmatch 'getCollaboratorPermissionLevel') {
         throw "$name must verify the original commenter can approve issues."
+    }
+
+    if ($files[0].Content -ne $files[1].Content) {
+        throw 'Issue-approve workflow and template must remain byte-identical.'
     }
     if ($content -notmatch 'copilot-agent') {
         throw "$name must still apply approved/copilot-agent labels."

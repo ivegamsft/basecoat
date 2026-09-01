@@ -110,8 +110,8 @@ foreach ($requiredText in @(
     'pr-auto-merge-executor.yml',
     'bypass list is empty',
     'BaseCoat merge eligibility',
-    '/acknowledge-critical <full-head-sha>',
     'zero independent PR approvals',
+    'size:XXL',
     'protected GitHub',
     '"allowed_merge_methods": ["squash"]',
     '-Workflow pr-auto-merge-executor.yml',
@@ -176,8 +176,8 @@ foreach ($riskTier in @('low', 'medium', 'high')) {
         throw "Routine solo-dev tier '$riskTier' must not require maintainer acknowledgement."
     }
 }
-if (-not $policy.profiles.'solo-dev'.main.required_maintainer_acknowledgement_by_risk_tier.critical) {
-    throw 'Critical solo-dev changes must require explicit maintainer acknowledgement.'
+if ($policy.profiles.'solo-dev'.main.required_maintainer_acknowledgement_by_risk_tier.critical) {
+    throw 'Critical solo-dev changes must not add a human acknowledgement gate.'
 }
 $criticalTrustRootPaths = @(
     '.github/governance/policy-packs.json',
@@ -196,10 +196,19 @@ foreach ($trustRootPath in $criticalTrustRootPaths) {
     }
 }
 $automatedReview = $policy.profiles.'solo-dev'.main.automated_review
-if ($automatedReview.required -ne $true -or
-    $automatedReview.reviewer_logins -notcontains 'copilot-pull-request-reviewer[bot]' -or
-    $automatedReview.accepted_states -notcontains 'COMMENTED') {
-    throw 'Solo-dev must require a current-head Copilot automated review.'
+if ($automatedReview.required -or
+    @($automatedReview.reviewer_logins).Count -ne 0 -or
+    @($automatedReview.accepted_states).Count -ne 0) {
+    throw 'Solo-dev must treat Copilot review feedback as advisory.'
+}
+$humanApprovalSizes = @($policy.profiles.'solo-dev'.main.human_approval_required_sizes)
+if ($humanApprovalSizes.Count -ne 1 -or $humanApprovalSizes[0] -ne 'XXL' -or
+    $policy.profiles.'solo-dev'.main.minimum_qualified_approvals_for_human_size -ne 1) {
+    throw 'Solo-dev must require one qualified approval only for size:XXL.'
+}
+if ($policy.profiles.'solo-dev'.main.autonomous_delivery_requires -notcontains 'approved-issue' -or
+    $policy.profiles.'solo-dev'.main.autonomous_delivery_requires -notcontains 'spec-evidence') {
+    throw 'Solo-dev autonomous delivery must require approved issue and spec evidence.'
 }
 if ($policy.profiles.'team-dev'.main.required_approvals_by_risk_tier.medium -ne 1 -or
     $policy.profiles.'team-dev'.main.required_approvals_by_risk_tier.critical -ne 1) {

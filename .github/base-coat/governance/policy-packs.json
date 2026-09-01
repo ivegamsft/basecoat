@@ -40,7 +40,7 @@
   },
   "profiles": {
     "solo-dev": {
-      "description": "Single maintainer optimization with strict checks and explicit critical-risk acknowledgement.",
+      "description": "Single maintainer autonomous delivery through XL; XXL changes require a qualified human approval.",
       "main": {
         "reconcile_merge_eligibility": true,
         "required_checks": [
@@ -53,15 +53,19 @@
         ],
         "merge_queue_posture": "deferred",
         "automated_review": {
-          "required": true,
-          "reviewer_logins": [
-            "copilot-pull-request-reviewer[bot]"
-          ],
-          "accepted_states": [
-            "COMMENTED",
-            "APPROVED"
-          ]
+          "required": false,
+          "reviewer_logins": [],
+          "accepted_states": []
         },
+        "human_approval_required_sizes": [
+          "XXL"
+        ],
+        "minimum_qualified_approvals_for_human_size": 1,
+        "autonomous_delivery_requires": [
+          "approved-issue",
+          "spec-evidence",
+          "required-checks"
+        ],
         "required_approvals_by_risk_tier": {
           "low": 0,
           "medium": 0,
@@ -72,7 +76,7 @@
           "low": false,
           "medium": false,
           "high": false,
-          "critical": true
+          "critical": false
         }
       },
       "cloud_agent": {

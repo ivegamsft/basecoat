@@ -320,7 +320,8 @@ jobs:
   approve:
     if: |
       !github.event.issue.pull_request &&
-      contains(github.event.comment.body, '/approve')
+      (contains(github.event.comment.body, '/approve') ||
+       contains(github.event.comment.body, '/spec-2-prod'))
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -361,6 +362,11 @@ jobs:
 
             const hasPriority = PRIORITY_LABELS.some(l => labels.includes(l));
             if (!hasPriority) missing.push('**Priority label** — add one of: `priority:critical`, `priority:high`, `priority:medium`, `priority:low`');
+
+            const hasSpecEvidence = /(?:^|\n)\s*-\s*Spec:\s*(?!<|N\/?A\b)\S+/im.test(issue.body || '');
+            if (!hasSpecEvidence) {
+              missing.push('**Spec reference** — add a non-placeholder `Spec:` link under `PRD and Spec References`');
+            }
 
             const hasBlocker = BLOCKING_LABELS.some(l => labels.includes(l));
             if (hasBlocker) {
@@ -442,7 +448,7 @@ jobs:
                 '',
                 checklist,
                 '',
-                'Once the missing information is added, comment `/approve` again to retry.',
+                'Once the missing information is added, comment `/approve` or `/spec-2-prod` again to retry.',
               ].join('\n');
 
               await github.rest.issues.createComment({
@@ -529,7 +535,7 @@ jobs:
                   agent_assignment: {
                     target_repo: `${context.repo.owner}/${context.repo.repo}`,
                     base_branch: 'main',
-                    custom_instructions: "Fix the issue using the repository's existing conventions.",
+                    custom_instructions: `Implement the approved specification in issue #${issue.number} using the repository's existing conventions. Open a ready-for-review implementation PR (not a draft) with \`Closes #${issue.number}\` in its body. Required CI and the merge executor own merge eligibility; do not request a human review for XS through XL changes.`,
                     custom_agent: '',
                     model: '',
                   },
@@ -558,8 +564,8 @@ jobs:
               ? [
                   'Approved. Issue assigned to the Copilot coding agent.',
                   '',
-                  'Copilot will analyze this issue and open a draft PR with the implementation.',
-                  'Review the PR when ready and merge after CI passes.',
+                  'Copilot will implement the supplied specification and open a ready implementation PR.',
+                  'Required CI and the merge executor will progress an eligible XS-XL PR without a review handoff.',
                 ].join('\n')
               : preflightErrorMessage
               ? [
@@ -612,7 +618,8 @@ jobs:
       - approve
     if: |
       always() &&
-      contains(github.event.comment.body, '/approve')
+      (contains(github.event.comment.body, '/approve') ||
+       contains(github.event.comment.body, '/spec-2-prod'))
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

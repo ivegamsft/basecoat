@@ -642,7 +642,24 @@ jobs:
               return 'low';
             };
             const riskTier = classifyRiskTier();
-            const requiredApprovals = Number(profile.main?.required_approvals_by_risk_tier?.[riskTier] || 0);
+            const sizeLabel = labelNames
+              .map(label => label.match(/^size:(xs|s|m|l|xl|xxl)$/i)?.[1]?.toUpperCase() || '')
+              .find(Boolean) || '';
+            if (!sizeLabel) {
+              blockers.push('PR is missing a canonical size label.');
+            }
+            const humanApprovalSizes = new Set(
+              (profile.main?.human_approval_required_sizes || []).map(size =>
+                String(size || '').toUpperCase()
+              )
+            );
+            const requiresHumanApprovalBySize = humanApprovalSizes.has(sizeLabel);
+            const requiredApprovals = Math.max(
+              Number(profile.main?.required_approvals_by_risk_tier?.[riskTier] || 0),
+              requiresHumanApprovalBySize
+                ? Number(profile.main?.minimum_qualified_approvals_for_human_size || 1)
+                : 0
+            );
             const acknowledgementRequiredByPolicy = Boolean(
               profile.main?.required_maintainer_acknowledgement_by_risk_tier?.[riskTier]
             );
@@ -678,10 +695,13 @@ jobs:
               acknowledgementReasons.push('security_incident_override');
             }
             const requiresMaintainerAcknowledgement = acknowledgementReasons.length > 0;
-            const requiresHumanReviewByBoundary = Boolean(
+            const requiresHumanReviewByRisk = Boolean(
               boundaryProfile.pr_approval_required_by_risk?.[riskTier]
             );
-            if (requiresHumanReviewByBoundary !== (requiredApprovals > 0)) {
+            if (
+              requiresHumanReviewByRisk &&
+              requiredApprovals < Number(profile.main?.required_approvals_by_risk_tier?.[riskTier] || 0)
+            ) {
               throw new Error(`PR approval contract mismatch for '${selectedPack}/${riskTier}'.`);
             }
 
@@ -823,7 +843,7 @@ jobs:
                 `Insufficient approvals for risk tier '${riskTier}' (${approvedReviewers.size}/${requiredApprovals}).`
               );
             }
-            if (requiresHumanReviewByBoundary && approvedReviewers.size === 0) {
+            if (requiresHumanReviewByRisk && approvedReviewers.size === 0) {
               blockers.push(
                 `Human review boundary requires at least one approval for risk tier '${riskTier}'.`
               );
@@ -881,11 +901,14 @@ jobs:
               const policyEnvironment = policy.production_environment || {};
               const environmentContract = humanBoundaries.production_environment_contract || {};
               const environmentErrors = [];
-              if (!alwaysHumanRequired.has('production_environment_approval')) {
+              const productionApprovalRequired =
+                Boolean(boundaryProfile.production_release_approval_required) ||
+                requiresHumanApprovalBySize;
+              if (
+                productionApprovalRequired &&
+                !alwaysHumanRequired.has('production_environment_approval')
+              ) {
                 environmentErrors.push('production_environment_approval is not an always-human boundary');
-              }
-              if (boundaryProfile.production_release_approval_required !== true) {
-                environmentErrors.push(`profile '${selectedPack}' does not require production environment approval`);
               }
               if (policyEnvironment.approval_boundary !== 'production_environment_approval') {
                 environmentErrors.push('policy does not route production releases to production_environment_approval');
@@ -899,7 +922,10 @@ jobs:
               if (environmentContract.enforcement !== 'github_environment') {
                 environmentErrors.push('production approval enforcement is not github_environment');
               }
-              if (Number(environmentContract.minimum_required_reviewers || 0) < 1) {
+              if (
+                productionApprovalRequired &&
+                Number(environmentContract.minimum_required_reviewers || 0) < 1
+              ) {
                 environmentErrors.push('production environment requires fewer than one reviewer');
               }
               if (environmentContract.deployment_branch_policy !== 'protected_or_selected') {
@@ -997,6 +1023,7 @@ jobs:
                     );
                   }
                   if (
+                    productionApprovalRequired &&
                     selectedPack === 'solo-dev' &&
                     reviewerRule?.prevent_self_review !== false
                   ) {

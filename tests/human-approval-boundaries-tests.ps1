@@ -35,7 +35,6 @@ if (-not $json.profiles.$($json.default_profile)) {
 }
 
 $requiredAlways = @(
-    'production_environment_approval',
     'policy_exception_override',
     'security_incident_override'
 )
@@ -53,18 +52,18 @@ if ($policy.production_environment.approval_boundary -ne 'production_environment
     throw 'Policy must route production approval to production_environment_approval.'
 }
 if ($environmentContract.enforcement -ne 'github_environment' -or
-    $environmentContract.minimum_required_reviewers -lt 1 -or
+    $environmentContract.minimum_required_reviewers -ne 0 -or
     $environmentContract.deployment_branch_policy -ne 'protected_or_selected' -or
     $environmentContract.deployment_workflow_binding_verification -ne 'pr_head_digest_and_environment_against_trusted_policy' -or
     $environmentContract.pr_approval_is_equivalent -ne $false -or
     $environmentContract.solo_dev_prevent_self_review -ne $false) {
-    throw 'Production approval must be enforced by a protected GitHub environment, never by PR approval.'
+    throw 'Solo-dev production must retain environment binding and branch controls without a reviewer gate.'
 }
 if ($productionProtection.environment -ne $environmentContract.environment -or
-    $productionProtection.protection_rules.require_deployment_approvals.enabled -ne $true -or
-    $productionProtection.protection_rules.require_deployment_approvals.required_reviewers -lt
+    $productionProtection.protection_rules.require_deployment_approvals.enabled -ne $false -or
+    $productionProtection.protection_rules.require_deployment_approvals.required_reviewers -ne
         $environmentContract.minimum_required_reviewers) {
-    throw 'Production environment template must satisfy the human approval contract.'
+    throw 'Production environment template must permit solo-dev autonomous deployment.'
 }
 if (-not $productionProtection.deployment_branch_policy.protected_branches -and
     -not $productionProtection.deployment_branch_policy.custom_branch_policies) {
@@ -116,8 +115,11 @@ foreach ($tier in @('low', 'medium', 'high')) {
         throw "Solo-dev routine tier '$tier' must not require maintainer acknowledgement."
     }
 }
-if (-not $json.profiles.'solo-dev'.maintainer_acknowledgement_required_by_risk.critical) {
-    throw 'Solo-dev critical changes must require maintainer acknowledgement.'
+if ($json.profiles.'solo-dev'.maintainer_acknowledgement_required_by_risk.critical) {
+    throw 'Solo-dev critical changes must not introduce a second human gate.'
+}
+if ($json.profiles.'solo-dev'.production_release_approval_required) {
+    throw 'Solo-dev production deployment must not require human approval.'
 }
 foreach ($profileName in @('team-dev', 'regulated-team')) {
     if (@($json.profiles.$profileName.maintainer_acknowledgement_satisfies_boundaries).Count -ne 0) {

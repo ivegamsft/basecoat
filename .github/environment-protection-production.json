@@ -17,8 +17,8 @@
   ],
   "protection_rules": {
     "require_deployment_approvals": {
-      "enabled": true,
-      "required_reviewers": 1,
+      "enabled": false,
+      "required_reviewers": 0,
       "dismissal_restrictions": {
         "users": [],
         "teams": []

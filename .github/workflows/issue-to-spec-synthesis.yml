@@ -18,10 +18,11 @@ jobs:
     name: Synthesize spec from approved issue
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # Trigger only when the 'approved' label is added to a copilot-agent issue
+    # Synthesis is an explicit fallback for incomplete intake, never a competing
+    # path for a human-supplied spec that has been approved for implementation.
     if: |
-      github.event.label.name == 'approved' &&
-      contains(github.event.issue.labels.*.name, 'copilot-agent')
+      github.event.label.name == 'synthesize-spec' &&
+      !contains(github.event.issue.labels.*.name, 'approved')
 
     steps:
       - name: Synthesize spec and open PR
