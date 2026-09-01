@@ -56,7 +56,7 @@ $candidates += @(
 
 $assets = foreach ($full in $candidates | Sort-Object) {
     $relative = Resolve-Path -Relative $full
-    if ($relative.StartsWith('.\')) { $relative = $relative.Substring(2) }
+    if ($relative -match '^\.[\\/]') { $relative = $relative.Substring(2) }
     $relative = $relative -replace '\\', '/'
     $type = Get-AssetType $relative
     if (-not $type) { continue }

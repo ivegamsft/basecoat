@@ -32,11 +32,12 @@ foreach ($p in @($agentPath, $agentEvalPath, $configPath, $waveScript, $paceScri
 }
 
 Write-Host "backlog-autopilot: routing registration"
-foreach ($rp in @($canonRouting, $aliasRouting)) {
-    $text = Get-Content $rp -Raw
-    Assert ($text -match '\|\s*`autopilot:`') "autopilot: prefix row in $(Split-Path $rp -Leaf)"
-    Assert ($text -match 'Backlog Autopilot Routing') "autopilot routing section in $(Split-Path $rp -Leaf)"
-}
+$canonicalText = Get-Content $canonRouting -Raw
+Assert ($canonicalText -match '\|\s*`autopilot:`') "autopilot: prefix row in $(Split-Path $canonRouting -Leaf)"
+Assert ($canonicalText -match 'Backlog Autopilot Routing') "autopilot routing section in $(Split-Path $canonRouting -Leaf)"
+$aliasText = Get-Content $aliasRouting -Raw
+Assert ($aliasText -match 'canonicalInstruction:\s*"basecoat-10-core-intent-routing\.instructions\.md"') "intent-routing compatibility alias identifies canonical routing"
+Assert ($aliasText -match 'See `basecoat-10-core-intent-routing\.instructions\.md`') "intent-routing compatibility alias points to canonical routing"
 
 Write-Host "backlog-autopilot: merge-queue posture"
 $config = Get-Content $configPath -Raw | ConvertFrom-Json

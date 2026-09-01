@@ -25,30 +25,38 @@ function Add-Failure {
     $script:failures += $Message
 }
 
-# Test 1: canonical and compatibility intent-routing instructions include
-# lifecycle enum semantics and dual-prefix rejection.
+# Test 1: canonical intent-routing instruction includes lifecycle enum semantics
+# and dual-prefix rejection; the compatibility alias must point to the canonical source.
 Write-Host '  Test 1: Validate pr-lifecycle parsing contract in routing instructions...'
 $canonicalRouting = Join-Path $repoRoot 'instructions\basecoat-10-core-intent-routing.instructions.md'
 $compatRouting = Join-Path $repoRoot 'instructions\intent-routing.instructions.md'
 
-foreach ($path in @($canonicalRouting, $compatRouting)) {
-    if (-not (Test-Path $path)) {
-        Add-Failure "Missing routing instruction file: $path"
-        continue
-    }
-
-    $content = Get-Content -Raw -Path $path
+if (-not (Test-Path $canonicalRouting)) {
+    Add-Failure "Missing canonical routing instruction file: $canonicalRouting"
+}
+else {
+    $content = Get-Content -Raw -Path $canonicalRouting
     if ($content -notmatch 'pr-lifecycle=<none\|standard\|full>') {
-        Add-Failure "$path missing pr-lifecycle enum contract"
+        Add-Failure "$canonicalRouting missing pr-lifecycle enum contract"
     }
     if ($content -notmatch 'default to[\s\S]{0,120}pr-lifecycle=standard') {
-        Add-Failure "$path missing default standard lifecycle guidance"
+        Add-Failure "$canonicalRouting missing default standard lifecycle guidance"
     }
     if ($content -notmatch 'Reject invalid `pr-lifecycle` values|validate enum values') {
-        Add-Failure "$path missing invalid enum rejection guidance"
+        Add-Failure "$canonicalRouting missing invalid enum rejection guidance"
     }
     if ($content -notmatch 'dual-prefix|feature:\s*pr:|single authoritative prefix') {
-        Add-Failure "$path missing dual-prefix rejection guidance"
+        Add-Failure "$canonicalRouting missing dual-prefix rejection guidance"
+    }
+}
+if (-not (Test-Path $compatRouting)) {
+    Add-Failure "Missing compatibility routing instruction file: $compatRouting"
+}
+else {
+    $content = Get-Content -Raw -Path $compatRouting
+    if ($content -notmatch 'canonicalInstruction:\s*"basecoat-10-core-intent-routing\.instructions\.md"' -or
+        $content -notmatch 'See `basecoat-10-core-intent-routing\.instructions\.md`') {
+        Add-Failure "$compatRouting must point to the canonical routing instruction"
     }
 }
 

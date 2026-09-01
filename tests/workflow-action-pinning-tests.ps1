@@ -103,10 +103,26 @@ jobs:
     steps:
       - uses: actions/checkout@$checkoutSha
 "@
+    $dependencyWorkflow = Join-Path $sourceRoot 'skills/example/node_modules/dependency/.github/workflows/invalid.yml'
+    New-Item -ItemType Directory -Path (Split-Path -Parent $dependencyWorkflow) -Force | Out-Null
+    Set-Content -Path $dependencyWorkflow -Value @"
+jobs:
+  validate:
+    steps:
+      - uses: actions/checkout@v4
+"@
+    $templateDependencyWorkflow = Join-Path $sourceRoot '.github/template-repos/example/node_modules/dependency/.github/workflows/invalid.yml'
+    New-Item -ItemType Directory -Path (Split-Path -Parent $templateDependencyWorkflow) -Force | Out-Null
+    Set-Content -Path $templateDependencyWorkflow -Value @"
+jobs:
+  validate:
+    steps:
+      - uses: actions/checkout@v4
+"@
 
     $sourceResult = Invoke-Validator -RootDir $sourceRoot
     if ($sourceResult.ExitCode -ne 0 -or $sourceResult.Output -notmatch "mode 'source'") {
-        throw "Expected complete source layout to pass in source mode.`n$($sourceResult.Output)"
+        throw "Expected complete source layout to pass in source mode while ignoring dependency workflows.`n$($sourceResult.Output)"
     }
 
     $invalidScopeFiles = @(
@@ -370,6 +386,13 @@ jobs:
         New-Item -ItemType Directory -Path (Join-Path $missingStarterRoot $directory) -Force | Out-Null
     }
     Assert-ValidatorFails -RootDir $missingStarterRoot -Mode Source -Expected 'Required workflow validation scope is missing: .github/workflow-templates' | Out-Null
+
+    $vendoredTemplateRoot = Join-Path $fixtureRoot 'vendored-template-workflows'
+    foreach ($directory in $sourceWorkflowDirectories | Where-Object { $_ -ne '.github/template-repos/example/.github/workflows' }) {
+        New-Item -ItemType Directory -Path (Join-Path $vendoredTemplateRoot $directory) -Force | Out-Null
+    }
+    New-Item -ItemType Directory -Path (Join-Path $vendoredTemplateRoot '.github/template-repos/example/node_modules/dependency/.github/workflows') -Force | Out-Null
+    Assert-ValidatorFails -RootDir $vendoredTemplateRoot -Mode Source -Expected 'Required workflow validation scope is missing: .github/template-repos/**/.github/workflows' | Out-Null
 
     $missingSkillRoot = Join-Path $fixtureRoot 'missing-skills'
     foreach ($directory in $sourceWorkflowDirectories | Where-Object { $_ -ne 'skills/example' }) {

@@ -17,7 +17,13 @@ mkdir -p \
   "$FIXTURE_ROOT/prompts" \
   "$FIXTURE_ROOT/agents" \
   "$FIXTURE_ROOT/scripts" \
-  "$FIXTURE_ROOT/workflows"
+  "$FIXTURE_ROOT/workflows" \
+  "$FIXTURE_ROOT/.github/workflows" \
+  "$FIXTURE_ROOT/.github/base-coat/workflows" \
+  "$FIXTURE_ROOT/.github/workflow-templates" \
+  "$FIXTURE_ROOT/.github/template-repos/example/.github/workflows" \
+  "$FIXTURE_ROOT/.github/template-repos/example/node_modules/pkg/.github/workflows" \
+  "$FIXTURE_ROOT/docs/examples/workflows"
 
 cat > "$FIXTURE_ROOT/README.md" <<'EOF'
 # Installed fixture
@@ -48,6 +54,30 @@ jobs:
         with: { uses: nested-input }
       - run: |
           echo "uses: actions/checkout@v4"
+EOF
+for source_workflow in \
+  ".github/workflows/valid.yml" \
+  ".github/base-coat/workflows/valid.yml" \
+  ".github/workflow-templates/valid.yml" \
+  "docs/examples/workflows/valid.yml"; do
+  cat > "$FIXTURE_ROOT/$source_workflow" <<EOF
+jobs:
+  validate:
+    steps:
+      - uses: actions/checkout@$CHECKOUT_SHA
+EOF
+done
+cat > "$FIXTURE_ROOT/.github/template-repos/example/.github/workflows/valid-template.yml" <<EOF
+jobs:
+  validate:
+    steps:
+      - uses: actions/checkout@$CHECKOUT_SHA
+EOF
+cat > "$FIXTURE_ROOT/.github/template-repos/example/node_modules/pkg/.github/workflows/invalid-template.yml" <<'EOF'
+jobs:
+  validate:
+    steps:
+      - uses: actions/checkout@v4
 EOF
 cat > "$FIXTURE_ROOT/agents/test.agent.md" <<'EOF'
 ---
@@ -87,6 +117,9 @@ cp \
   "$FIXTURE_ROOT/scripts/"
 
 bash "$FIXTURE_ROOT/scripts/validate-basecoat.sh" "$FIXTURE_ROOT"
+python3 "$FIXTURE_ROOT/scripts/validate-workflow-action-pins.py" \
+  --root "$FIXTURE_ROOT" \
+  --mode source
 
 cat > "$FIXTURE_ROOT/agents/test.agent.md" <<'EOF'
 ---

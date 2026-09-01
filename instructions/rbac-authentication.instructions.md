@@ -7,4 +7,4 @@ canonicalInstruction: "basecoat-50-security-rbac-authentication.instructions.md"
 
 # BaseCoat Compatibility Alias
 
---8<-- "basecoat-50-security-rbac-authentication.instructions.md"
+See `basecoat-50-security-rbac-authentication.instructions.md`.

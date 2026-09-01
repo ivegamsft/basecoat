@@ -95,7 +95,6 @@ foreach ($scenario in @('neg-4', 'neg-5')) {
 
 $routingFiles = @(
     'instructions\basecoat-10-core-intent-routing.instructions.md',
-    'instructions\intent-routing.instructions.md',
     'docs\guides\intent-prefixes.md'
 )
 foreach ($relative in $routingFiles) {
@@ -128,5 +127,9 @@ foreach ($relative in $routingFiles) {
         }
     }
 }
+
+$routingAlias = Get-Content (Join-Path $repoRoot 'instructions\intent-routing.instructions.md') -Raw
+Assert-Match $routingAlias 'canonicalInstruction:\s*"basecoat-10-core-intent-routing\.instructions\.md"' 'intent-routing compatibility alias must identify the canonical source'
+Assert-Match $routingAlias 'See `basecoat-10-core-intent-routing\.instructions\.md`' 'intent-routing compatibility alias must point to the canonical source'
 
 Write-Host 'PASS repo-cleanup skill guardrails, eval negatives, and routing are present and consistent'

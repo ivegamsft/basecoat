@@ -53,6 +53,7 @@ Use this instruction when a change introduces new files, modules, packages, clas
   - `security.instructions.md`
   - `ux.instructions.md`
   - `intent-routing.instructions.md`
+  - `governance.instructions.md`
   - `plan-first.instructions.md`
   - `ci-firewall.instructions.md`
   - `rbac-authentication.instructions.md`

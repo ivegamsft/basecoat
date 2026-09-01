@@ -101,9 +101,9 @@ function Test-AgentMetadataFreshness {
 }
 
 function Test-LogFirstGate {
-    $govPath = Join-Path (Get-Location) 'instructions/governance.instructions.md'
+    $govPath = Join-Path (Get-Location) 'instructions/basecoat-20-lang-governance.instructions.md'
     if (-not (Test-Path $govPath)) {
-        Write-Host "ERROR: instructions/governance.instructions.md is missing" -ForegroundColor Red
+        Write-Host "ERROR: canonical governance instruction is missing" -ForegroundColor Red
         $script:errors++
         return
     }
@@ -122,7 +122,7 @@ function Test-LogFirstGate {
     }
 
     if ($missing.Count -gt 0) {
-        Write-Host "ERROR: instructions/governance.instructions.md is missing required LOG-FIRST gate elements: $($missing -join '; ')" -ForegroundColor Red
+        Write-Host "ERROR: canonical governance instruction is missing required LOG-FIRST gate elements: $($missing -join '; ')" -ForegroundColor Red
         $script:errors++
     }
 }
@@ -167,7 +167,7 @@ function Test-DocsHomepageAssetCounts {
 }
 
 function Test-IntentRoutingSkillReferences {
-    $intentRoutingPath = Join-Path (Get-Location) 'instructions/intent-routing.instructions.md'
+    $intentRoutingPath = Join-Path (Get-Location) 'instructions/basecoat-10-core-intent-routing.instructions.md'
     if (-not (Test-Path $intentRoutingPath)) {
         return
     }
@@ -186,7 +186,7 @@ function Test-IntentRoutingSkillReferences {
         $contractMissing += "explicit 'feature:' routing rule"
     }
     if ($contractMissing.Count -gt 0) {
-        Write-Host "ERROR: instructions/intent-routing.instructions.md is missing required enforcement contract elements: $($contractMissing -join '; ')" -ForegroundColor Red
+        Write-Host "ERROR: canonical intent-routing instruction is missing required enforcement contract elements: $($contractMissing -join '; ')" -ForegroundColor Red
         $script:errors++
     }
 
@@ -214,7 +214,7 @@ function Test-IntentRoutingSkillReferences {
 
             $skillPath = Join-Path (Get-Location) "skills/$skillRef/SKILL.md"
             if (-not (Test-Path $skillPath)) {
-                Write-Host "ERROR: instructions/intent-routing.instructions.md references missing skill '$skillRef' in Prefix-to-Skill Routing" -ForegroundColor Red
+                Write-Host "ERROR: canonical intent-routing instruction references missing skill '$skillRef' in Prefix-to-Skill Routing" -ForegroundColor Red
                 $script:errors++
             }
         }

@@ -45,7 +45,6 @@ foreach ($scenario in @('finish-lane-positive', 'blocked-pr-handoff-positive', '
 
 $routingFiles = @(
     'instructions\basecoat-10-core-intent-routing.instructions.md',
-    'instructions\intent-routing.instructions.md',
     '.github\instructions\routing-decision-tree.md',
     'docs\guides\intent-prefixes.md'
 )
@@ -53,6 +52,9 @@ foreach ($relative in $routingFiles) {
     $content = Get-Content (Join-Path $repoRoot $relative) -Raw
     Assert-Match $content 'lane-closeout' "$relative missing lane-closeout routing"
 }
+$routingAlias = Get-Content (Join-Path $repoRoot 'instructions\intent-routing.instructions.md') -Raw
+Assert-Match $routingAlias 'canonicalInstruction:\s*"basecoat-10-core-intent-routing\.instructions\.md"' 'intent-routing compatibility alias must identify the canonical source'
+Assert-Match $routingAlias 'See `basecoat-10-core-intent-routing\.instructions\.md`' 'intent-routing compatibility alias must point to the canonical source'
 
 $orchestrator = Get-Content (Join-Path $repoRoot 'agents\basecoat-60-workflow-ship-it-orchestrator.agent.md') -Raw
 Assert-Match $orchestrator 'allowed_skills:\s+\[ship-it,\s*lane-closeout\]' 'ship-it orchestrator must allow lane-closeout'

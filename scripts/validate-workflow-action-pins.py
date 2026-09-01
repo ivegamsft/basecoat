@@ -53,11 +53,16 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def workflow_files(directory: Path) -> list[Path]:
+def workflow_files(directory: Path, source_root: Path | None = None) -> list[Path]:
+    exclusion_root = source_root or directory
     return sorted(
         path
         for path in directory.rglob("*")
-        if path.is_file() and path.suffix.lower() in WORKFLOW_SUFFIXES
+        if (
+            path.is_file()
+            and path.suffix.lower() in WORKFLOW_SUFFIXES
+            and "node_modules" not in path.relative_to(exclusion_root).parts
+        )
     )
 
 
@@ -67,7 +72,7 @@ def source_workflow_files(root: Path) -> list[Path]:
         scope = root / relative_scope
         if not scope.is_dir():
             raise ScopeError(f"Required workflow validation scope is missing: {relative_scope.as_posix()}")
-        files.extend(workflow_files(scope))
+        files.extend(workflow_files(scope, root))
 
     template_root = root / TEMPLATE_ROOT
     if not template_root.is_dir():
@@ -78,19 +83,23 @@ def source_workflow_files(root: Path) -> list[Path]:
     template_scopes = sorted(
         path
         for path in template_root.rglob("workflows")
-        if path.is_dir() and path.parent.name == ".github"
+        if (
+            path.is_dir()
+            and path.parent.name == ".github"
+            and "node_modules" not in path.relative_to(root).parts
+        )
     )
     if not template_scopes:
         raise ScopeError(
             f"Required workflow validation scope is missing: {TEMPLATE_ROOT.as_posix()}/**/.github/workflows"
         )
     for scope in template_scopes:
-        files.extend(workflow_files(scope))
+        files.extend(workflow_files(scope, root))
 
     skill_root = root / SKILL_ROOT
     if not skill_root.is_dir():
         raise ScopeError(f"Required workflow validation scope is missing: {SKILL_ROOT.as_posix()}")
-    files.extend(workflow_files(skill_root))
+    files.extend(workflow_files(skill_root, root))
 
     return sorted(set(files))
 
@@ -99,7 +108,7 @@ def installed_workflow_files(root: Path) -> list[Path]:
     scope = root / INSTALLED_SCOPE
     if not scope.is_dir():
         raise ScopeError(f"Required workflow validation scope is missing: {INSTALLED_SCOPE.as_posix()}")
-    return workflow_files(scope)
+    return workflow_files(scope, root)
 
 
 def detect_mode(root: Path, requested_mode: str) -> str:

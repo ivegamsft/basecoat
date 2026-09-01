@@ -20,13 +20,15 @@ Set-Location $repoRoot
 Write-Host 'Running routing guardrail tests...'
 
 $failures = @()
+$canonicalRoutingFile = Join-Path $repoRoot 'instructions\basecoat-10-core-intent-routing.instructions.md'
+$aliasRoutingFile = Join-Path $repoRoot 'instructions\intent-routing.instructions.md'
+$routingFile = $canonicalRoutingFile
 
-# Test 1: intent-routing instruction contains plan-first enforcement section
-Write-Host '  Test 1: Validate plan-first enforcement is present in intent-routing...'
-$routingFile = Join-Path $repoRoot 'instructions\intent-routing.instructions.md'
+# Test 1: canonical intent-routing instruction contains the routing contract
+Write-Host '  Test 1: Validate plan-first enforcement is present in canonical intent-routing...'
 if (-not (Test-Path $routingFile)) {
     $failures += 'intent-routing file missing'
-    Write-Host '    ✗ instructions/intent-routing.instructions.md not found' -ForegroundColor Red
+    Write-Host '    ✗ instructions/basecoat-10-core-intent-routing.instructions.md not found' -ForegroundColor Red
 }
 else {
     $content = Get-Content $routingFile -Raw
@@ -333,13 +335,12 @@ else {
     }
 }
 
-# Test 17: new design/sprint/wave prefixes present in canonical, alias, and guide
+# Test 17: new design/sprint/wave prefixes present in canonical routing and guide
 Write-Host '  Test 17: Validate ui:, ux:, ia:, design:, sprint:, wave: map to expected route targets...'
-$canonicalFile = Join-Path $repoRoot 'instructions\basecoat-10-core-intent-routing.instructions.md'
+$canonicalFile = $canonicalRoutingFile
 $newPrefixTargets = @{
     'canonical (basecoat-10-core-intent-routing)' = $canonicalFile
-    'alias (intent-routing)'                       = $routingFile
-    'guide (intent-prefixes)'                      = $prefixGuide
+    'guide (intent-prefixes)'                     = $prefixGuide
 }
 foreach ($label in $newPrefixTargets.Keys) {
     $path = $newPrefixTargets[$label]
@@ -350,12 +351,12 @@ foreach ($label in $newPrefixTargets.Keys) {
     }
     $content = Get-Content $path -Raw
     $routeExpectations = [ordered]@{
-        'ui:'     = '@frontend-dev'
-        'ux:'     = '@ux-designer'
-        'ia:'     = '@tech-writer'
-        'design:' = 'basecoat-sheen'
-        'sprint:' = '@sprint-closeout-auditor'
-        'wave:'   = '@parallel-session-coordinator'
+        'ui:'           = '@frontend-dev'
+        'ux:'           = '@ux-designer'
+        'ia:'           = '@tech-writer'
+        'design:'       = 'basecoat-sheen'
+        'sprint:'       = '@sprint-closeout-auditor'
+        'wave:'         = '@parallel-session-coordinator'
         'repo-cleanup:' = 'repo-cleanup` skill'
     }
     $missing = @()
@@ -375,7 +376,7 @@ foreach ($label in $newPrefixTargets.Keys) {
 
 # Test 18: Term Disambiguation section and UI/UX/IA distinction with ambiguity guidance
 Write-Host '  Test 18: Validate Term Disambiguation section and disambiguation-question guidance...'
-foreach ($label in @('canonical (basecoat-10-core-intent-routing)', 'alias (intent-routing)')) {
+foreach ($label in @('canonical (basecoat-10-core-intent-routing)')) {
     $path = $newPrefixTargets[$label]
     if (-not (Test-Path $path)) { continue }
     $content = Get-Content $path -Raw
@@ -392,7 +393,7 @@ foreach ($label in @('canonical (basecoat-10-core-intent-routing)', 'alias (inte
     }
 }
 
-# Test 19: canonical/alias/guide route synchronization for corrected routes
+# Test 19: canonical routing and guide stay synchronized for corrected routes
 Write-Host '  Test 19: Validate outage/worktree/burndown/credential-exposure routes are synchronized and actionable...'
 foreach ($label in $newPrefixTargets.Keys) {
     $path = $newPrefixTargets[$label]
@@ -431,9 +432,8 @@ foreach ($label in $newPrefixTargets.Keys) {
     }
 }
 
-# Test 20: backlog-burndown skill ingests open PRs (skill + eval coverage)
-# Test 20: generic security route remains synchronized across guide + instruction aliases
-Write-Host '  Test 20: Validate generic security route remains synchronized across guide and routing instructions...'
+# Test 20: generic security route remains synchronized across guide + canonical routing
+Write-Host '  Test 20: Validate generic security route remains synchronized across guide and canonical routing...'
 $securityRouteMissing = @()
 $guidePath = Join-Path $repoRoot 'docs\guides\intent-prefixes.md'
 if (-not (Test-Path $guidePath)) {
@@ -455,6 +455,12 @@ foreach ($path in $instructionPaths) {
         continue
     }
     $content = Get-Content $path -Raw
+    if ($path -eq $aliasRoutingFile) {
+        if ($content -notmatch 'See `basecoat-10-core-intent-routing.instructions.md`') {
+            $securityRouteMissing += "$([System.IO.Path]::GetFileName($path)) missing canonical pointer stub"
+        }
+        continue
+    }
     if ($content -notmatch '(?m)^\|\s*`security:`\s*\|.*@security-analyst.*@guardrail') {
         $securityRouteMissing += "$([System.IO.Path]::GetFileName($path)) missing @security-analyst/@guardrail route"
     }
@@ -464,7 +470,7 @@ if ($securityRouteMissing.Count -gt 0) {
     Write-Host "    FAIL generic security route sync gaps: $($securityRouteMissing -join ', ')" -ForegroundColor Red
 }
 else {
-    Write-Host '    PASS generic security route is synchronized across guide and instruction aliases'
+    Write-Host '    PASS generic security route is synchronized across guide and canonical routing'
 }
 
 # Test 21: backlog-burndown skill ingests open PRs (skill + eval coverage)
@@ -566,7 +572,20 @@ foreach ($path in @(
     (Join-Path $repoRoot 'instructions\basecoat-10-core-intent-routing.instructions.md'),
     (Join-Path $repoRoot 'instructions\intent-routing.instructions.md')
 )) {
-    if (-not (Test-Path $path) -or (Get-Content $path -Raw) -notmatch 'design:.*PRODUCT.md.*design-debate-format') {
+    if (-not (Test-Path $path)) {
+        $productMissing += "design route contract: $([System.IO.Path]::GetFileName($path))"
+        continue
+    }
+
+    $content = Get-Content $path -Raw
+    if ($path -eq $aliasRoutingFile) {
+        if ($content -notmatch 'See `basecoat-10-core-intent-routing.instructions.md`') {
+            $productMissing += "design route contract: $([System.IO.Path]::GetFileName($path))"
+        }
+        continue
+    }
+
+    if ($content -notmatch 'design:.*PRODUCT.md.*design-debate-format') {
         $productMissing += "design route contract: $([System.IO.Path]::GetFileName($path))"
     }
 }
@@ -591,6 +610,50 @@ if ($productMissing.Count -gt 0) {
 }
 else {
     Write-Host '    PASS PRODUCT.md and downstream design debate contract present'
+}
+
+# Test 23: compatibility aliases remain pointer stubs
+Write-Host '  Test 23: Validate compatibility aliases remain pointer stubs...' 
+$aliasFailures = @()
+$aliasFiles = Get-ChildItem (Join-Path $repoRoot 'instructions') -Filter '*.instructions.md' | Where-Object {
+    $_.Name -notlike 'basecoat-*'
+}
+foreach ($file in $aliasFiles) {
+    $content = Get-Content $file.FullName -Raw
+    if ($content -notmatch '(?m)^compatibilityAlias:\s*true') {
+        $aliasFailures += "$($file.Name): missing compatibilityAlias marker"
+        continue
+    }
+    $body = ($content -replace '(?s)^---.*?---\s*','').Trim()
+    $canonicalMatch = [regex]::Match($content, '(?m)^canonicalInstruction:\s*"?(?<target>basecoat-[^/"\\\r\n]+\.instructions\.md)"?\s*$')
+    if ($body.Length -eq 0) {
+        $aliasFailures += "$($file.Name): empty alias body"
+        continue
+    }
+    if (-not $canonicalMatch.Success) {
+        $aliasFailures += "$($file.Name): missing canonical instruction target"
+        continue
+    }
+    $canonicalTarget = $canonicalMatch.Groups['target'].Value
+    $bodyLines = @($body -split '\r?\n' | Where-Object { $_.Trim().Length -gt 0 })
+    $expectedPointer = "See ``$canonicalTarget``."
+    $expectedInclude = "--8<-- `"$canonicalTarget`""
+    $hasExpectedHeading = $bodyLines.Count -eq 2 -and $bodyLines[0] -match '^# BaseCoat (Compatibility Alias|compatibility alias for .+)$'
+    $hasExpectedPointer = $bodyLines.Count -eq 2 -and ($bodyLines[1] -ceq $expectedPointer -or $bodyLines[1] -ceq $expectedInclude)
+    if (-not $hasExpectedHeading -or -not $hasExpectedPointer) {
+        $aliasFailures += "$($file.Name): body must contain only its compatibility heading and canonical pointer"
+        continue
+    }
+    if (-not (Test-Path (Join-Path $file.DirectoryName $canonicalTarget))) {
+        $aliasFailures += "$($file.Name): canonical instruction does not exist"
+    }
+}
+if ($aliasFailures.Count -gt 0) {
+    $failures += 'compatibility-alias-drift'
+    Write-Host "    FAIL compatibility alias drift: $($aliasFailures -join '; ')" -ForegroundColor Red
+}
+else {
+    Write-Host '    PASS compatibility aliases remain pointer stubs'
 }
 
 if ($failures.Count -gt 0) {

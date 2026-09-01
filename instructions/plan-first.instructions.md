@@ -7,4 +7,4 @@ canonicalInstruction: "basecoat-10-core-plan-first.instructions.md"
 
 # BaseCoat Compatibility Alias
 
---8<-- "basecoat-10-core-plan-first.instructions.md"
+See `basecoat-10-core-plan-first.instructions.md`.

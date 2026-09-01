@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "libraryVersion": "4.2.1",
-  "generatedAt": "2026-09-01T02:39:45.4913214Z",
+  "generatedAt": "2026-09-01T21:37:38.2524515Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -1286,7 +1286,7 @@
     {
       "path": "instructions/basecoat-10-core-naming.instructions.md",
       "type": "instruction",
-      "sha": "dd1ea9059af3a0275109a67d604594dee30f5a5a",
+      "sha": "283ad1a3e9c4247828c3f395270f41f8518f11ad",
       "version": null,
       "effectiveVersion": "4.2.1",
       "versionSource": "library"
@@ -1702,7 +1702,7 @@
     {
       "path": "instructions/ci-firewall.instructions.md",
       "type": "instruction",
-      "sha": "9aa4296b3ebfb7202900abfb798a66aee5da4775",
+      "sha": "6fc66de6f223f00b9b71ee2d953b5c0809d2ed07",
       "version": null,
       "effectiveVersion": "4.2.1",
       "versionSource": "library"
@@ -1718,7 +1718,7 @@
     {
       "path": "instructions/governance.instructions.md",
       "type": "instruction",
-      "sha": "fff8d76a976f9f7792abff102a4810e97929e621",
+      "sha": "d1147a8eb82e2682e76af57107ea99f54711500f",
       "version": null,
       "effectiveVersion": "4.2.1",
       "versionSource": "library"
@@ -1726,7 +1726,7 @@
     {
       "path": "instructions/intent-routing.instructions.md",
       "type": "instruction",
-      "sha": "fbea17abbe5ca36669e25d190c5a41b63e4d2d31",
+      "sha": "12eb5b550869e33232ecdd17bf959ddbe13763e4",
       "version": null,
       "effectiveVersion": "4.2.1",
       "versionSource": "library"
@@ -1742,7 +1742,7 @@
     {
       "path": "instructions/plan-first.instructions.md",
       "type": "instruction",
-      "sha": "e2f0e52098121995c35f604b9995871d31c94c6e",
+      "sha": "17a424ed6a843a610d39d5d10a37878e4ed8e334",
       "version": null,
       "effectiveVersion": "4.2.1",
       "versionSource": "library"
@@ -1750,7 +1750,7 @@
     {
       "path": "instructions/rbac-authentication.instructions.md",
       "type": "instruction",
-      "sha": "05eb5a8de10e2f0f84018a259dcada5b37202f23",
+      "sha": "17c9c2af66681b303e022d4c2574d112b9986c2c",
       "version": null,
       "effectiveVersion": "4.2.1",
       "versionSource": "library"
@@ -1822,7 +1822,7 @@
     {
       "path": "scripts/validate-basecoat.ps1",
       "type": "script",
-      "sha": "acb0e9967d8fb8451a6c9103da4e4879cb5bdaa1",
+      "sha": "0d8b254aecbd538b9ab063cb61fef2a521aaf1f5",
       "version": null,
       "effectiveVersion": "4.2.1",
       "versionSource": "library"
@@ -1854,7 +1854,7 @@
     {
       "path": "scripts/validate-workflow-action-pins.py",
       "type": "script",
-      "sha": "c5c0ccec516535aedce6ed2c7f4c4c6a6cd568e5",
+      "sha": "2af3764c6289d92d3a94b81f52b5e2871ab8e5d4",
       "version": null,
       "effectiveVersion": "4.2.1",
       "versionSource": "library"

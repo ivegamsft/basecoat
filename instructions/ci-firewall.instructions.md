@@ -7,4 +7,4 @@ canonicalInstruction: "basecoat-60-workflow-ci-firewall.instructions.md"
 
 # BaseCoat Compatibility Alias
 
---8<-- "basecoat-60-workflow-ci-firewall.instructions.md"
+See `basecoat-60-workflow-ci-firewall.instructions.md`.
