@@ -1290,3 +1290,8 @@ jobs:
           set -euo pipefail
           gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash --delete-branch
           echo "Auto-merge enabled for PR #${PR_NUMBER}."
+          merge_state=$(gh pr view "${PR_NUMBER}" --repo "${REPOSITORY}" --json mergeStateStatus --jq '.mergeStateStatus')
+          if [[ "${merge_state}" == "BEHIND" ]]; then
+            gh api --method PUT "repos/${REPOSITORY}/pulls/${PR_NUMBER}/update-branch" >/dev/null
+            echo "Updated PR #${PR_NUMBER} from the protected base branch; CI will re-evaluate the new head."
+          fi

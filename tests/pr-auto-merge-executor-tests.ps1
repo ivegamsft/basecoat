@@ -138,6 +138,10 @@ if ($workflow -notmatch 'pr-auto-merge-executor:v1') {
 if ($workflow -notmatch 'gh pr merge "\$\{PR_NUMBER\}" --repo "\$\{REPOSITORY\}" --auto --squash --delete-branch') {
     throw 'Workflow must use gh pr merge with --auto --squash --delete-branch.'
 }
+if ($workflow -notmatch 'mergeStateStatus' -or
+    $workflow -notmatch 'pulls/\$\{PR_NUMBER\}/update-branch') {
+    throw 'Workflow must update an eligible auto-merge PR when strict protection reports it behind main.'
+}
 if ($workflow -match '(?m)gh pr merge .+--admin') {
     throw 'Workflow must never use administrator bypass for auto-merge.'
 }
