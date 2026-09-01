@@ -42,8 +42,18 @@ foreach ($concurrencyNamespace in @("format('issue-{0}'", "format('comment-{0}'"
         throw "Workflow must namespace concurrency routing: $concurrencyNamespace"
     }
 }
-if ($workflow -notmatch '(?m)pull_request_review:') {
-    throw 'Workflow must retrigger on pull request reviews.'
+if ($workflow -notmatch '(?ms)pull_request_review:\s*\r?\n\s*types:\s*\r?\n\s*-\s*dismissed') {
+    throw 'Workflow must re-evaluate review dismissal without directly accepting untrusted submitted reviews.'
+}
+$reviewTrigger = [regex]::Match(
+    $workflow,
+    '(?ms)^\s{2}pull_request_review:\s*\r?\n(?<block>.*?)(?=^\s{2}[a-z_]+:\s*$|^permissions:\s*$)'
+)
+if (-not $reviewTrigger.Success) {
+    throw 'Workflow must define the pull_request_review dismissal trigger.'
+}
+if ($reviewTrigger.Groups['block'].Value -match '(?m)(?:\[\s*submitted\s*\]|^\s*-\s*submitted\s*$)') {
+    throw 'Workflow must not run directly on submitted pull request reviews; the Copilot reviewer app has no repository permission and GitHub blocks those runs before any job can execute.'
 }
 if ($workflow -notmatch '(?ms)issue_comment:\s*\r?\n\s*types:\s*\r?\n\s*-\s*created\s*\r?\n\s*-\s*edited\s*\r?\n\s*-\s*deleted') {
     throw 'Workflow must retrigger when a PR acknowledgement comment is created, edited, or deleted.'

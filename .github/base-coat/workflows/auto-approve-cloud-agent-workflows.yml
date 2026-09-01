@@ -7,18 +7,12 @@ on:
   pull_request_target:
     types: [opened, reopened, synchronize]
   workflow_run:
-    # Both names are watched because the downstream installer
-    # (scripts/configure-downstream-workflows.ps1) renames the installed copy
-    # of pr-auto-merge-executor.yml's workflow name to
-    # "BaseCoat Template - PR Auto Merge Executor", so a canonical-name-only
-    # filter would never see the installed workflow's runs.
-    workflows: ["BaseCoat - PR Auto Merge Executor", "BaseCoat Template - PR Auto Merge Executor"]
-    # "requested" fires when the source run is created, before it can have
-    # reached a terminal status/conclusion; the run that actually needs
-    # re-dispatch is status=completed/conclusion=action_required, so listen
-    # for "completed" -- it is the deterministic point where action_required
-    # is finalized.
+    # The downstream installer renames the code-review workflow, so listen to
+    # its installed workflow name rather than the canonical source filename.
+    workflows: ["BaseCoat Agent Template - Code Review"]
     types: [completed]
+  schedule:
+    - cron: "*/15 * * * *"
 
 permissions:
   pull-requests: read
@@ -155,35 +149,19 @@ jobs:
         run: |
           echo "Skipping auto-approval because policy pack '${SELECTED_PACK}' disables cloud-agent auto-approval." >> "$GITHUB_STEP_SUMMARY"
 
-  auto-retrigger-merge-eligibility-review-race:
-    # copilot-pull-request-reviewer[bot] has repo permission 'none', so its
-    # pull_request_review events leave "BaseCoat - PR Auto Merge Executor"
-    # stuck in status=completed/conclusion=action_required with zero jobs
-    # (see #2838). Verified directly against the GitHub REST API that
-    # `POST .../actions/runs/{run_id}/approve` does NOT support this case --
-    # it 403s with "This run is not from a fork pull request or queued by
-    # the Actions bot" -- so a blocked run can never be approved after the
-    # fact. Instead, dispatch a fresh workflow_dispatch run of the same
-    # workflow for the same PR: workflow_dispatch is triggered by this
-    # (trusted, default-branch) job's own identity, so it is never subject
-    # to the actor-permission gate, and pr-auto-merge-executor.yml already
-    # supports a `pr_number` input for exactly this purpose.
+  re-evaluate-after-automated-review:
     if: github.event_name == 'workflow_run'
-    name: Re-dispatch merge-eligibility review-race run
+    name: Re-evaluate merge eligibility after automated review
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 7
     permissions:
       actions: write
       contents: read
       pull-requests: read
     steps:
-      - name: Checkout repository
+      - name: Checkout trusted governance
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
-          # Defense in depth: workflow_run-triggered jobs already execute the
-          # default-branch version of this workflow file, but pin the
-          # checkout explicitly too so this policy-pack read can never be
-          # coerced into resolving a PR-modified governance file.
           ref: ${{ github.event.repository.default_branch }}
 
       - name: Resolve governance policy pack
@@ -193,78 +171,186 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-
           POLICY_FILE=".github/governance/policy-packs.json"
-          if [[ ! -f "${POLICY_FILE}" ]]; then
-            echo "::error::Missing governance policy pack file: ${POLICY_FILE}"
-            exit 1
-          fi
-
           SELECTED_PACK="${POLICY_PACK:-$(jq -r '.default_profile' "${POLICY_FILE}")}"
           if ! jq -e --arg p "${SELECTED_PACK}" '.profiles[$p]' "${POLICY_FILE}" >/dev/null; then
             echo "::error::Unknown BASECOAT_POLICY_PACK '${SELECTED_PACK}'."
             exit 1
           fi
+          echo "auto_approve=$(jq -r --arg p "${SELECTED_PACK}" '.profiles[$p].cloud_agent.auto_approve_workflow_runs // false' "${POLICY_FILE}")" >> "${GITHUB_OUTPUT}"
+          echo "automated_review=$(jq -c --arg p "${SELECTED_PACK}" '.profiles[$p].main.automated_review // { required: false }' "${POLICY_FILE}")" >> "${GITHUB_OUTPUT}"
 
-          AUTO_APPROVE="$(jq -r --arg p "${SELECTED_PACK}" '.profiles[$p].cloud_agent.auto_approve_workflow_runs // false' "${POLICY_FILE}")"
-          echo "selected_pack=${SELECTED_PACK}" >> "${GITHUB_OUTPUT}"
-          echo "auto_approve=${AUTO_APPROVE}" >> "${GITHUB_OUTPUT}"
-
-      - name: Re-dispatch eligibility check for the blocked PR if pending
+      - name: Dispatch current-head eligibility evaluation
         if: steps.policy-pack.outputs.auto_approve == 'true'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        env:
+          AUTOMATED_REVIEW: ${{ steps.policy-pack.outputs.automated_review }}
         with:
           script: |
             const { owner, repo } = context.repo;
-            const runId = context.payload.workflow_run.id;
-            // The immutable app ID for copilot-pull-request-reviewer[bot] (has repo
-            // permission 'none', which is why its pull_request_review events leave
-            // this run action_required/zero-jobs). Restricting to this exact actor
-            // + event prevents re-dispatching action_required runs blocked for any
-            // other reason (e.g. a genuine fork-PR approval requirement, or a run
-            // triggered via pull_request_target/issue_comment/issues/manual entry
-            // points), where a blind re-dispatch would be unwanted.
-            const copilotReviewerActorId = 175728472;
-
-            const { data: run } = await github.rest.actions.getWorkflowRun({ owner, repo, run_id: runId });
-            if (run.status !== 'action_required' && run.conclusion !== 'action_required') {
-              console.log(`Run ${runId} status='${run.status}' conclusion='${run.conclusion}' — no re-dispatch needed.`);
+            const run = context.payload.workflow_run;
+            if (run.conclusion !== 'success') {
+              console.log(`Code review run ${run.id} concluded '${run.conclusion}'; no eligibility evaluation dispatched.`);
               return;
             }
-
-            if (run.event !== 'pull_request_review' || run.triggering_actor?.id !== copilotReviewerActorId) {
-              console.log(`⚠ Run ${runId} is action_required but was not triggered by copilot-pull-request-reviewer's pull_request_review event (event='${run.event}', triggering_actor='${run.triggering_actor?.login}#${run.triggering_actor?.id}') — leaving it for manual/normal handling.`);
+            const { data: trustedReviewWorkflow } = await github.rest.actions.getWorkflow({
+              owner,
+              repo,
+              workflow_id: 'basecoat-agent-code-review.yml'
+            });
+            if (run.workflow_id !== trustedReviewWorkflow.id) {
+              console.log(`Workflow run ${run.id} does not match trusted review workflow ${trustedReviewWorkflow.id}; no eligibility evaluation dispatched.`);
               return;
             }
-
-            const prNumber = run.pull_requests?.[0]?.number ?? await (async () => {
-              // pull_requests is not guaranteed to be populated on a workflow-run
-              // REST object -- review-triggered runs are one of the cases where
-              // GitHub can return an empty array. Fall back to resolving the PR
-              // from the run's head commit.
-              const { data: associatedPrs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
-                owner,
-                repo,
-                commit_sha: run.head_sha
-              });
-              const openPr = associatedPrs.find(pr => pr.state === 'open' && pr.head?.sha === run.head_sha);
-              return openPr?.number;
-            })();
+            const prNumber = run.pull_requests?.[0]?.number;
             if (!prNumber) {
-              console.log(`⚠ Run ${runId} is action_required but has no associated pull request (checked run.pull_requests and listPullRequestsAssociatedWithCommit for head_sha ${run.head_sha}); cannot re-dispatch.`);
+              console.log(`Code review run ${run.id} has no associated pull request; no eligibility evaluation dispatched.`);
               return;
             }
-
+            const { data: pullRequest } = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: prNumber
+            });
+            if (pullRequest.state !== 'open' || pullRequest.head.sha !== run.head_sha) {
+              console.log(`PR #${prNumber} is no longer open at reviewed head ${run.head_sha}; no eligibility evaluation dispatched.`);
+              return;
+            }
+            const automatedReview = JSON.parse(process.env.AUTOMATED_REVIEW);
+            if (automatedReview.required) {
+              if (
+                !Array.isArray(automatedReview.reviewer_logins) ||
+                automatedReview.reviewer_logins.length === 0 ||
+                !Array.isArray(automatedReview.accepted_states) ||
+                automatedReview.accepted_states.length === 0
+              ) {
+                core.setFailed('Required automated-review policy must define reviewer_logins and accepted_states.');
+                return;
+              }
+              const reviewers = new Set((automatedReview.reviewer_logins || []).map(login => login.toLowerCase()));
+              const states = new Set(
+                (automatedReview.accepted_states || []).map(state => String(state).toUpperCase())
+              );
+              let reviewObserved = false;
+              for (let attempt = 1; attempt <= 20; attempt += 1) {
+                const reviews = await github.paginate(github.rest.pulls.listReviews, {
+                  owner, repo, pull_number: prNumber, per_page: 100
+                });
+                reviewObserved = reviews.some(review =>
+                  reviewers.has(String(review.user?.login || '').toLowerCase()) &&
+                  states.has(String(review.state || '').toUpperCase()) &&
+                  review.commit_id === run.head_sha
+                );
+                if (reviewObserved || attempt === 20) break;
+                await new Promise(resolve => setTimeout(resolve, 15000));
+              }
+              if (!reviewObserved) {
+                console.log(`Required automated review did not complete for PR #${prNumber} at ${run.head_sha}; no eligibility evaluation dispatched.`);
+                return;
+              }
+            }
             await github.rest.actions.createWorkflowDispatch({
               owner,
               repo,
-              // The downstream installer (scripts/configure-downstream-workflows.ps1)
-              // writes this executor as basecoat-pr-auto-merge-executor.yml; the
-              // canonical pr-auto-merge-executor.yml filename only exists in this
-              // source repo, so the installed template copy must target the
-              // installed filename or the re-dispatch call will 404.
               workflow_id: 'basecoat-pr-auto-merge-executor.yml',
               ref: context.payload.repository.default_branch,
               inputs: { pr_number: String(prNumber) }
             });
-            console.log(`✓ Re-dispatched merge eligibility evaluation for PR #${prNumber} (blocked run ${runId} was action_required).`);
+            console.log(`Dispatched merge eligibility evaluation for PR #${prNumber} after successful automated review.`);
+
+  reconcile-open-auto-merge-pull-requests:
+    if: github.event_name == 'schedule'
+    name: Reconcile open auto-merge pull requests
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout trusted governance
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Resolve governance policy pack
+        id: policy-pack
+        env:
+          POLICY_PACK: ${{ vars.BASECOAT_POLICY_PACK }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          POLICY_FILE=".github/governance/policy-packs.json"
+          SELECTED_PACK="${POLICY_PACK:-$(jq -r '.default_profile' "${POLICY_FILE}")}"
+          if ! jq -e --arg p "${SELECTED_PACK}" '.profiles[$p]' "${POLICY_FILE}" >/dev/null; then
+            echo "::error::Unknown BASECOAT_POLICY_PACK '${SELECTED_PACK}'."
+            exit 1
+          fi
+          echo "auto_approve=$(jq -r --arg p "${SELECTED_PACK}" '.profiles[$p].cloud_agent.auto_approve_workflow_runs // false' "${POLICY_FILE}")" >> "${GITHUB_OUTPUT}"
+          echo "reconcile=$(jq -r --arg p "${SELECTED_PACK}" '.profiles[$p].main.reconcile_merge_eligibility // false' "${POLICY_FILE}")" >> "${GITHUB_OUTPUT}"
+
+      - name: Dispatch current eligibility evaluations
+        if: steps.policy-pack.outputs.reconcile == 'true'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            let cursor = null;
+            do {
+              const result = await github.graphql(
+                `query($owner:String!, $repo:String!, $cursor:String) {
+                  repository(owner:$owner, name:$repo) {
+                    pullRequests(first:50, after:$cursor, states:OPEN) {
+                      pageInfo { hasNextPage endCursor }
+                      nodes {
+                        number
+                        baseRefName
+                        reviews(last:1) {
+                          nodes { submittedAt }
+                        }
+                        commits(last:1) {
+                          nodes {
+                            commit {
+                              status {
+                                contexts {
+                                  context
+                                  createdAt
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }`,
+                { owner, repo, cursor }
+              );
+              const connection = result.repository.pullRequests;
+              for (const pullRequest of connection.nodes) {
+                if (pullRequest.baseRefName !== context.payload.repository.default_branch) continue;
+                const latestReview = pullRequest.reviews.nodes[0];
+                if (!latestReview) continue;
+                const eligibilityStatuses =
+                  pullRequest.commits.nodes[0]?.commit?.status?.contexts?.filter(
+                    status => status.context === 'BaseCoat merge eligibility'
+                  ) || [];
+                const latestEligibility = eligibilityStatuses.sort(
+                  (left, right) => new Date(right.createdAt) - new Date(left.createdAt)
+                )[0];
+                if (
+                  latestEligibility &&
+                  new Date(latestReview.submittedAt) <= new Date(latestEligibility.createdAt)
+                ) {
+                  continue;
+                }
+                await github.rest.actions.createWorkflowDispatch({
+                  owner,
+                  repo,
+                  workflow_id: 'basecoat-pr-auto-merge-executor.yml',
+                  ref: context.payload.repository.default_branch,
+                  inputs: { pr_number: String(pullRequest.number) }
+                });
+                console.log(`Dispatched merge eligibility evaluation for new review evidence on PR #${pullRequest.number}.`);
+              }
+              cursor = connection.pageInfo.hasNextPage ? connection.pageInfo.endCursor : null;
+            } while (cursor);

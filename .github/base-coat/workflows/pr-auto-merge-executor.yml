@@ -14,7 +14,6 @@ on:
       - edited
   pull_request_review:
     types:
-      - submitted
       - dismissed
   issue_comment:
     types:
@@ -42,7 +41,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name == 'issues' && format('issue-{0}', github.event.issue.number) || github.event_name == 'issue_comment' && format('comment-{0}', github.event.comment.id) || format('pr-{0}', github.event.pull_request.number || github.event.pull_request_review.pull_request.number || inputs.pr_number || github.ref) }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'issues' && format('issue-{0}', github.event.issue.number) || github.event_name == 'issue_comment' && format('comment-{0}', github.event.comment.id) || format('pr-{0}', github.event.pull_request.number || inputs.pr_number || github.ref) }}
   cancel-in-progress: true
 
 jobs:

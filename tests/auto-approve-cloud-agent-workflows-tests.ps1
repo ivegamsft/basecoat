@@ -1,194 +1,98 @@
-[CmdletBinding()]
-param()
-
 $ErrorActionPreference = 'Stop'
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
 $workflowPath = Join-Path $repoRoot '.github\workflows\auto-approve-cloud-agent-workflows.yml'
 $templatePath = Join-Path $repoRoot '.github\base-coat\workflows\auto-approve-cloud-agent-workflows.yml'
 
-if (-not (Test-Path $workflowPath)) {
-    throw "Missing workflow file: $workflowPath"
-}
-if (-not (Test-Path $templatePath)) {
-    throw "Missing template workflow file: $templatePath"
+foreach ($path in @($workflowPath, $templatePath)) {
+    if (-not (Test-Path $path)) {
+        throw "Missing workflow file: $path"
+    }
 }
 
-$files = @(
-    @{ Name = '.github/workflows/auto-approve-cloud-agent-workflows.yml'; Content = (Get-Content -Path $workflowPath -Raw) },
-    @{ Name = '.github/base-coat/workflows/auto-approve-cloud-agent-workflows.yml'; Content = (Get-Content -Path $templatePath -Raw) }
-)
+function Assert-Match {
+    param(
+        [string]$Content,
+        [string]$Pattern,
+        [string]$Message
+    )
 
-foreach ($entry in $files) {
+    if ($Content -notmatch $Pattern) {
+        throw $Message
+    }
+}
+
+$runtime = Get-Content $workflowPath -Raw
+$template = Get-Content $templatePath -Raw
+
+foreach ($entry in @(
+        @{ Name = '.github/workflows/auto-approve-cloud-agent-workflows.yml'; Content = $runtime; WorkflowId = 'pr-auto-merge-executor.yml'; ReviewWorkflow = 'code-review-agent'; ReviewWorkflowFile = 'code-review-agent.lock.yml' },
+        @{ Name = '.github/base-coat/workflows/auto-approve-cloud-agent-workflows.yml'; Content = $template; WorkflowId = 'basecoat-pr-auto-merge-executor.yml'; ReviewWorkflow = 'BaseCoat Agent Template - Code Review'; ReviewWorkflowFile = 'basecoat-agent-code-review.yml' }
+    )) {
     $name = $entry.Name
     $content = $entry.Content
 
-    $jobMarker = 'auto-retrigger-merge-eligibility-review-race:'
-    $jobIndex = $content.IndexOf($jobMarker)
-    if ($jobIndex -lt 0) {
-        throw "${name}: must define the auto-retrigger-merge-eligibility-review-race job."
+    Assert-Match $content 'pull_request_target:\s*\r?\n\s*types:\s*\[opened,\s*reopened,\s*synchronize\]' "$name must retain trusted pull_request_target auto-approval."
+    Assert-Match $content "if:\s*github\.event_name == 'pull_request_target'\s*&&\s*github\.event\.pull_request\.user\.id == 198982749" "$name must gate auto-approval on the stable Copilot cloud-agent author ID."
+    Assert-Match $content 'cancel-in-progress:\s*true' "$name must cancel superseded approval work."
+    Assert-Match $content 'const headSha = await getCurrentHeadSha\(\)' "$name must select runs against the live pull request head."
+    Assert-Match $content 'run\.head_sha === headSha' "$name must filter approval candidates to the current head."
+    Assert-Match $content 'const currentHeadSha = await getCurrentHeadSha\(\)' "$name must revalidate the head before approving each run."
+    Assert-Match $content 'if \(currentHeadSha !== headSha\)' "$name must stop approval when the pull request advances."
+    Assert-Match $content 'github\.paginate\(github\.rest\.actions\.listWorkflowRunsForRepo' "$name must paginate requested workflow runs."
+    Assert-Match $content 'new Map\(' "$name must de-duplicate requested workflow runs."
+    Assert-Match $content 'ref:\s*\$\{\{\s*github\.event\.repository\.default_branch\s*\}\}' "$name must load governance only from the trusted default branch."
+    Assert-Match $content "if:\s*steps\.policy-pack\.outputs\.auto_approve != 'true'" "$name must record an explicit policy-pack approval skip."
+    Assert-Match $content ("workflow_run:\s*\r?\n(?:\s*#[^\r\n]*\r?\n)*\s*workflows:\s*\[" + [regex]::Escape('"' + $entry.ReviewWorkflow + '"') + "\]\s*\r?\n\s*types:\s*\[completed\]") "$name must react to completed installed code-review workflow runs."
+    if ($content -match 'BaseCoat (Template - )?PR Auto Merge Executor') {
+        throw "$name must not trigger on PR Auto Merge Executor workflow_run events; the unprivileged review actor makes those runs action_required."
     }
-    $reDispatchJobContent = $content.Substring($jobIndex)
-    $topLevelTriggerContent = $content.Substring(0, $jobIndex)
-
-    # --- top-level trigger contract: must listen for the finalized workflow_run
-    # completion, not "requested" (which fires before status/conclusion settle
-    # and would leave a still-blocked action_required run with no later event
-    # to retry against). ---
-    if ($topLevelTriggerContent -notmatch 'workflow_run:\s*\r?\n(\s*#[^\r\n]*\r?\n)*\s*workflows:\s*\[[^\]]*"BaseCoat - PR Auto Merge Executor"[^\]]*\]\s*\r?\n(\s*#[^\r\n]*\r?\n)*\s*types:\s*\[completed\]') {
-        throw "${name}: workflow_run trigger must watch 'BaseCoat - PR Auto Merge Executor' with types: [completed], not [requested]."
-    }
-    if ($topLevelTriggerContent -match 'workflow_run:(?:(?!\r?\n\S).)*types:\s*\[requested\]') {
-        throw "${name}: workflow_run trigger must not use types: [requested] -- that fires before the run's terminal action_required conclusion is set."
-    }
-
-    # --- the template copy must also watch the downstream-installed executor's
-    # renamed workflow (scripts/configure-downstream-workflows.ps1 renames
-    # pr-auto-merge-executor.yml's `name:` to "BaseCoat Template - PR Auto
-    # Merge Executor" when installed), or its workflow_run filter would never
-    # match downstream. The in-repo runtime copy never sees a renamed
-    # executor, so this only applies to the template file. ---
-    if ($name -like '*base-coat*' -and $topLevelTriggerContent -notmatch 'workflows:\s*\[[^\]]*"BaseCoat Template - PR Auto Merge Executor"[^\]]*\]') {
-        throw "${name}: template's workflow_run filter must also include 'BaseCoat Template - PR Auto Merge Executor' to match the downstream-installed executor's renamed workflow."
-    }
-
-    # --- auto-approve-workflows must run from the trusted default branch:
-    # a pull_request workflow can itself be awaiting the approval it must grant. ---
-    if ($topLevelTriggerContent -notmatch 'pull_request_target:\s*\r?\n\s*types:\s*\[opened,\s*reopened,\s*synchronize\]') {
-        throw "${name}: auto-approver must use pull_request_target so it can run before cloud-agent pull_request workflows are approved."
-    }
-    # Event actors vary as workflows fan out, while the PR author ID is stable. ---
-    if ($content -notmatch "if:\s*github\.event_name == 'pull_request_target'\s*&&\s*github\.event\.pull_request\.user\.id == 198982749") {
-        throw "${name}: auto-approve-workflows must be gated on trusted pull_request_target events whose author ID is the stable Copilot cloud-agent user ID (198982749)."
-    }
-    if ($content -notmatch 'github\.rest\.pulls\.get') {
-        throw "${name}: auto-approval must fetch the PR before selecting runs so it uses the live current head."
-    }
-    if ($content -notmatch 'const headSha = await getCurrentHeadSha\(\)') {
-        throw "${name}: auto-approval must resolve the current PR head SHA from the live PR record."
-    }
-    if ($content -notmatch 'run\.head_sha === headSha') {
-        throw "${name}: auto-approval must filter requested runs to the current PR head SHA."
-    }
-    if ($content -notmatch 'const currentHeadSha = await getCurrentHeadSha\(\)') {
-        throw "${name}: auto-approval must revalidate the current PR head before each workflow approval."
-    }
-    if ($content -notmatch 'if \(currentHeadSha !== headSha\)') {
-        throw "${name}: auto-approval must stop when the PR advances after requested runs are selected."
-    }
-    if ($content -notmatch 'cancel-in-progress:\s*true') {
-        throw "${name}: auto-approval must cancel superseded queued runs for the same PR."
-    }
-    if ($content -notmatch 'github\.paginate\(github\.rest\.actions\.listWorkflowRunsForRepo') {
-        throw "${name}: auto-approval must paginate requested workflow runs so eligible runs beyond the first page are considered."
-    }
-    if ($content -match 'const\s*\{\s*data:\s*runsData\s*\}\s*=\s*await\s+github\.rest\.actions\.listWorkflowRunsForRepo') {
-        throw "${name}: auto-approval must not make a first-page-only requested workflow-run lookup."
-    }
-    if ($content -notmatch 'new Map\(' -or $content -notmatch '\.map\(run => \[run\.id, run\]\)') {
-        throw "${name}: auto-approval must de-duplicate workflow runs by run ID before approving them."
-    }
-    if ($content -notmatch "if:\s*steps\.policy-pack\.outputs\.auto_approve\s*!=\s*'true'") {
-        throw "${name}: auto-approval must record and skip approval when the selected policy pack disables it."
-    }
-    if ($content -notmatch 'SELECTED_PACK:\s*\$\{\{\s*steps\.policy-pack\.outputs\.selected_pack\s*\}\}') {
-        throw "${name}: policy-pack output used by a shell step must be passed through an environment variable."
-    }
-
-    # --- both jobs' checkouts must pin the default branch, so a PR can never
-    # get this auto-approval gate to trust a PR-modified copy of
-    # .github/governance/policy-packs.json ---
-    $checkoutSections = $content -split '(?=- name: Checkout repository)' | Where-Object { $_ -match 'Checkout repository' }
-    if ($checkoutSections.Count -lt 2) {
-        throw "${name}: expected two 'Checkout repository' steps (one per job)."
-    }
-    foreach ($section in $checkoutSections) {
-        $nextStepIndex = $section.IndexOf("`n      - name:", 1)
-        $block = if ($nextStepIndex -ge 0) { $section.Substring(0, $nextStepIndex) } else { $section }
-        if ($block -notmatch 'ref:\s*\$\{\{\s*github\.event\.repository\.default_branch\s*\}\}') {
-            throw "${name}: every checkout that precedes a policy-packs.json read must pin ref: `${{ github.event.repository.default_branch }}` so a PR cannot supply its own governance policy."
-        }
-    }
-
-    # --- re-dispatch job: must only trigger via workflow_run ---
-    if ($reDispatchJobContent -notmatch "if:\s*github\.event_name == 'workflow_run'") {
-        throw "${name}: re-dispatch job must be gated on github.event_name == 'workflow_run'."
-    }
-
-    # --- must restrict to the exact copilot-pull-request-reviewer review-race scenario ---
-    if ($reDispatchJobContent -notmatch "run\.event !== 'pull_request_review'") {
-        throw "${name}: re-dispatch script must check run.event === 'pull_request_review' before acting."
-    }
-    if ($reDispatchJobContent -notmatch 'copilotReviewerActorId\s*=\s*175728472') {
-        throw "${name}: re-dispatch script must pin the immutable copilot-pull-request-reviewer[bot] actor ID (175728472)."
-    }
-    if ($reDispatchJobContent -notmatch 'triggering_actor\?\.id\s*!==\s*copilotReviewerActorId') {
-        throw "${name}: re-dispatch script must compare triggering_actor.id against the pinned Copilot reviewer actor ID."
-    }
-
-    # --- must use createWorkflowDispatch, not approveWorkflowRun (proven non-functional for this scenario) ---
-    if ($reDispatchJobContent -match 'approveWorkflowRun') {
-        throw "${name}: re-dispatch job must not call approveWorkflowRun -- verified via the live GitHub API that it 403s for same-repo actor-gated runs ('This run is not from a fork pull request or queued by the Actions bot')."
-    }
-    if ($reDispatchJobContent -notmatch 'createWorkflowDispatch') {
-        throw "${name}: re-dispatch job must call createWorkflowDispatch to unblock the stuck run."
-    }
-    if ($name -like '*base-coat*') {
-        if ($reDispatchJobContent -notmatch "workflow_id:\s*'basecoat-pr-auto-merge-executor\.yml'") {
-            throw "${name}: template re-dispatch job must target basecoat-pr-auto-merge-executor.yml -- the filename the downstream installer actually writes (scripts/configure-downstream-workflows.ps1)."
-        }
-    } else {
-        if ($reDispatchJobContent -notmatch "workflow_id:\s*'pr-auto-merge-executor\.yml'") {
-            throw "${name}: re-dispatch job must target pr-auto-merge-executor.yml."
-        }
-    }
-    if ($reDispatchJobContent -notmatch 'inputs:\s*\{\s*pr_number:') {
-        throw "${name}: re-dispatch job must pass the blocked run's PR number as the pr_number input."
-    }
-
-    # --- must gate action_required detection so it doesn't act on unrelated run states ---
-    if ($reDispatchJobContent -notmatch "run\.status !== 'action_required' && run\.conclusion !== 'action_required'") {
-        throw "${name}: re-dispatch script must verify the run is actually action_required before dispatching."
-    }
-
-    # --- must respect the cloud_agent.auto_approve_workflow_runs policy-pack flag ---
-    if ($reDispatchJobContent -notmatch 'cloud_agent\.auto_approve_workflow_runs') {
-        throw "${name}: must gate on the cloud_agent.auto_approve_workflow_runs policy-pack flag."
-    }
-
-    # --- must not silently swallow missing PR number ---
-    if ($reDispatchJobContent -notmatch 'cannot re-dispatch') {
-        throw "${name}: re-dispatch script must log and skip (not throw) when no PR number is resolvable."
-    }
-
-    # --- run.pull_requests is not guaranteed populated (e.g. review-triggered
-    # events); must fall back to resolving the PR from the run's head commit ---
-    if ($reDispatchJobContent -notmatch 'listPullRequestsAssociatedWithCommit') {
-        throw "${name}: re-dispatch script must fall back to listPullRequestsAssociatedWithCommit when run.pull_requests is empty."
-    }
-    if ($reDispatchJobContent -notmatch 'commit_sha:\s*run\.head_sha') {
-        throw "${name}: fallback PR lookup must query by run.head_sha."
-    }
-    $jobHeaderContent = ($reDispatchJobContent -split '(?s)steps:')[0]
-    if ($jobHeaderContent -notmatch 'pull-requests:\s*read') {
-        throw "${name}: re-dispatch job must declare pull-requests: read permission for the listPullRequestsAssociatedWithCommit fallback."
-    }
+    Assert-Match $content 're-evaluate-after-automated-review:' "$name missing post-review eligibility dispatch job."
+    Assert-Match $content "if:\s*github\.event_name == 'workflow_run'" "$name must limit post-review dispatch to workflow_run events."
+    $postReviewJob = ($content -split 're-evaluate-after-automated-review:', 2)[1]
+    Assert-Match $postReviewJob 'ref:\s*\$\{\{\s*github\.event\.repository\.default_branch\s*\}\}' "$name must load post-review governance only from the trusted default branch."
+    Assert-Match $content 're-evaluate-after-automated-review:[\s\S]*?timeout-minutes:\s*7' "$name must allow the review poll to complete cleanly."
+    Assert-Match $content "if:\s*steps\.policy-pack\.outputs\.auto_approve == 'true'" "$name must honor the cloud-agent auto-approval policy gate."
+    Assert-Match $content 'jq -r --arg p' "$name must use the policy pack as a jq argument, not interpolate it into a filter."
+    Assert-Match $content 'jq -c --arg p' "$name must safely load automated-review policy."
+    Assert-Match $content "run\.conclusion !== 'success'" "$name must dispatch eligibility evaluation only after a successful automated review."
+    Assert-Match $content ([regex]::Escape("workflow_id: '$($entry.ReviewWorkflowFile)'")) "$name must resolve the trusted installed review workflow by file."
+    Assert-Match $content 'run\.workflow_id !== trustedReviewWorkflow\.id' "$name must reject same-name workflow runs that do not match the trusted workflow ID."
+    Assert-Match $content 'run\.pull_requests\?\.?\[0\]\?\.number' "$name must require an associated pull request."
+    Assert-Match $content "pullRequest\.state !== 'open' \|\| pullRequest\.head\.sha !== run\.head_sha" "$name must skip closed or stale-head pull requests."
+    Assert-Match $content 'github\.rest\.pulls\.listReviews' "$name must poll for the required current-head automated review."
+    Assert-Match $content 'for \(let attempt = 1; attempt <= 20; attempt \+= 1\)' "$name must retry review observation to avoid an unordered-review race."
+    Assert-Match $content 'reviewObserved \|\| attempt === 20' "$name must not sleep after the final review poll."
+    Assert-Match $content 'review\.commit_id === run\.head_sha' "$name must require review evidence for the reviewed head."
+    Assert-Match $content 'accepted_states \|\| \[\]\)\.map\(state => String\(state\)\.toUpperCase\(\)\)' "$name must normalize configured accepted review states."
+    Assert-Match $content "states\.has\(String\(review\.state \|\| ''\)\.toUpperCase\(\)\)" "$name must compare GitHub review states case-insensitively."
+    Assert-Match $content 'Required automated-review policy must define reviewer_logins and accepted_states' "$name must fail explicitly when required automated-review policy evidence is incomplete."
+    Assert-Match $content 'github\.rest\.actions\.createWorkflowDispatch' "$name must dispatch the merge eligibility workflow."
+    Assert-Match $content ([regex]::Escape("workflow_id: '$($entry.WorkflowId)'")) "$name must dispatch the correct installed merge eligibility workflow."
+    Assert-Match $content 'schedule:\s*\r?\n\s*-\s*cron:\s*"?\*/15 \* \* \* \*"?' "$name must periodically reconcile later human-review changes from a trusted default-branch run."
+    Assert-Match $content 'reconcile-open-auto-merge-pull-requests:' "$name missing scheduled auto-merge reconciliation."
+    Assert-Match $content "if:\s*github\.event_name == 'schedule'" "$name must limit scheduled reconciliation to schedule events."
+    Assert-Match $content 'main\.reconcile_merge_eligibility // false' "$name must load a reconciliation policy distinct from workflow-run auto-approval."
+    Assert-Match $content "reconcile-open-auto-merge-pull-requests:[\s\S]*?if:\s*steps\.policy-pack\.outputs\.reconcile == 'true'" "$name must apply the dedicated governance policy gate to scheduled reconciliation."
+    Assert-Match $content 'pullRequests\(first:50,\s*after:\$cursor,\s*states:OPEN\)' "$name must page through open pull requests."
+    Assert-Match $content 'baseRefName' "$name must limit scheduled reconciliation to the protected default branch."
+    Assert-Match $content 'reviews\(last:1\)' "$name must inspect the newest review evidence."
+    Assert-Match $content "status\.context === 'BaseCoat merge eligibility'" "$name must inspect the latest merge eligibility watermark."
+    Assert-Match $content 'new Date\(latestReview\.submittedAt\) <= new Date\(latestEligibility\.createdAt\)' "$name must skip reconciliation when review evidence has already been evaluated."
+    Assert-Match $content 'connection\.pageInfo\.hasNextPage' "$name must paginate scheduled reconciliation."
 }
 
-if ($files[0].Content -ne $files[1].Content) {
-    $jobMarker = 'auto-retrigger-merge-eligibility-review-race:'
-    $bodies = $files | ForEach-Object {
-        $body = $_.Content.Substring($_.Content.IndexOf($jobMarker))
-        # Normalize the two other intentional divergences: the workflow_id the
-        # template dispatches (installed filename) vs. the runtime's own filename,
-        # and any comment-only lines explaining that divergence.
-        $body = $body -replace "workflow_id:\s*'(?:pr-auto-merge-executor|basecoat-pr-auto-merge-executor)\.yml'", "workflow_id: '<normalized>'"
-        ($body -split "\r?\n" | Where-Object { $_.TrimStart() -notmatch '^(#|//)' }) -join "`n"
-    }
-    if ($bodies[0] -ne $bodies[1]) {
-        throw 'auto-approve-cloud-agent-workflows.yml and its base-coat template copy must be identical below the workflow_run trigger (aside from the workflows: name list, the dispatched workflow_id filename, and explanatory comments, which intentionally differ to account for the downstream-renamed executor).'
-    }
+function Get-NormalizedDispatchJob {
+    param([string]$Content)
+
+    $job = ($Content -split 're-evaluate-after-automated-review:', 2)[1]
+    $job = $job -replace "workflow_id: '(?:pr-auto-merge-executor|basecoat-pr-auto-merge-executor)\.yml'", "workflow_id: '<normalized>'"
+    $job = $job -replace "workflow_id: '(?:code-review-agent\.lock|basecoat-agent-code-review)\.yml'", "workflow_id: '<review-normalized>'"
+    return (($job -split "\r?\n" | Where-Object { $_.TrimStart() -notmatch '^(#|//)' }) -join "`n")
 }
 
+if ((Get-NormalizedDispatchJob $runtime) -ne (Get-NormalizedDispatchJob $template)) {
+    throw 'Runtime and template post-review dispatch jobs must remain equivalent except for the installed executor filename and comments.'
+}
 
 Write-Host 'Auto-approve cloud-agent workflows tests passed.'
