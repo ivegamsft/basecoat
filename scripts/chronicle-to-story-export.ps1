@@ -77,6 +77,20 @@ function Format-TableCell {
     return $escaped.Trim()
 }
 
+function Format-MarkdownReference {
+    param([string]$Value)
+    if ([string]::IsNullOrWhiteSpace($Value)) {
+        return "-"
+    }
+
+    $trimmed = $Value.Trim()
+    if ($trimmed -match '^https?://[^\s<>]+$') {
+        return "<$trimmed>"
+    }
+
+    return $trimmed
+}
+
 function Get-CanonicalRealPath {
     param([string]$Path)
 
@@ -293,6 +307,7 @@ $sectionLines.Add("- **Mode**: $Mode")
 $sectionLines.Add("")
 
 $sectionLines.Add("### Session Sources")
+$sectionLines.Add("")
 if ($sessionRefs.Count -eq 0) {
     $sectionLines.Add("- (none provided)")
 } else {
@@ -303,6 +318,7 @@ if ($sessionRefs.Count -eq 0) {
 $sectionLines.Add("")
 
 $sectionLines.Add("### Timeline")
+$sectionLines.Add("")
 if ($timeline.Count -eq 0) {
     $sectionLines.Add("- (none provided)")
 } else {
@@ -318,6 +334,7 @@ if ($timeline.Count -eq 0) {
 $sectionLines.Add("")
 
 $sectionLines.Add("### Learnings")
+$sectionLines.Add("")
 foreach ($row in $learningRows) {
     $rowTitle = [string]$row.title
     if ([string]::IsNullOrWhiteSpace($rowTitle)) { $rowTitle = "(untitled learning)" }
@@ -332,11 +349,12 @@ foreach ($row in $learningRows) {
 $sectionLines.Add("")
 
 $sectionLines.Add("### References")
+$sectionLines.Add("")
 if ($references.Count -eq 0) {
     $sectionLines.Add("- (none provided)")
 } else {
     foreach ($reference in $references) {
-        $sectionLines.Add("- $reference")
+        $sectionLines.Add("- $(Format-MarkdownReference $reference)")
     }
 }
 $sectionLines.Add("<!-- CHRONICLE:END $cycleKey -->")

@@ -94,6 +94,14 @@ try {
     if ($story -notmatch '\[learning:capture-first-fail-evidence-early\]') {
         throw 'Expected second learning key not found in story'
     }
+    if ($story -notmatch [regex]::Escape('<https://github.com/IBuySpy-Shared/basecoat/issues/2621>')) {
+        throw 'Expected bare HTTP references to be wrapped as Markdown autolinks'
+    }
+    foreach ($heading in @('### Session Sources', '### Timeline', '### Learnings', '### References')) {
+        if ($story -notmatch ([regex]::Escape($heading) + '\r?\n\r?\n')) {
+            throw "Expected a blank line after heading: $heading"
+        }
+    }
 
     $learningMatches = [regex]::Matches($story, '\[learning:')
     if ($learningMatches.Count -ne 2) {
