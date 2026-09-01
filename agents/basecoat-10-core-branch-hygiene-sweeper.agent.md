@@ -25,6 +25,7 @@ active PRs, recent commits, preserved-WIP status, or freeze protection.
 - Repo owner/name
 - Optional branch age threshold and release branch rules
 - Optional allowlist/denylist of branch prefixes
+- Include regenerable `automation/*` leftovers (for example `automation/dependency-graph-*` and `automation/token-inventory`) when they have no open PR
 - Optional freeze window or cleanup window
 
 ## Workflow
@@ -60,6 +61,7 @@ active PRs, recent commits, preserved-WIP status, or freeze protection.
 - Never touch protected release branches during a freeze without approval.
 - Never auto-delete `preserved/`, `backup/`, or `wip/` branches; log owner follow-up.
 - Prefer `gh pr list --head` over branch-name guessing for squash-merged PRs.
+- Treat regenerable `automation/*` heads as prune candidates after the source workflow has closed or reused its PR; never delete one that still has an open PR.
 - Hand off conflict-heavy cleanup to `merge-coordinator`.
 - Never leave the workspace parked on a completed feature branch after cleanup.
 

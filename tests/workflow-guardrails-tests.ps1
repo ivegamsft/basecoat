@@ -769,6 +769,36 @@ else {
         $dependencyGraphWorkflow -notmatch [regex]::Escape(') -join "')) {
         $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (graph-dependencies.ps1 stdout must be joined with -join before interpolation to prevent System.Object[] in the report)'
     }
+
+    if ($dependencyGraphWorkflow -match 'automation/dependency-graph-\$env:GITHUB_RUN_ID') {
+        $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (must reuse a stable automation/dependency-graph branch instead of GITHUB_RUN_ID leftovers)'
+    }
+
+    if ($dependencyGraphWorkflow -notmatch [regex]::Escape("`$branch = 'automation/dependency-graph'")) {
+        $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (missing stable automation/dependency-graph branch name)'
+    }
+
+    if ($dependencyGraphWorkflow -notmatch 'cleanup-automation-branch' -or
+        $dependencyGraphWorkflow -notmatch 'git/refs/heads/') {
+        $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (missing closed-PR cleanup for automation/dependency-graph branches)'
+    }
+}
+
+$tokenInventoryWorkflowPath = Join-Path $workflowDir 'token-inventory.yml'
+if (-not (Test-Path $tokenInventoryWorkflowPath)) {
+    $stabilizationGuardrailIssues += 'token-inventory.yml (missing file)'
+}
+else {
+    $tokenInventoryWorkflow = Get-Content $tokenInventoryWorkflowPath -Raw
+
+    if ($tokenInventoryWorkflow -notmatch 'BRANCH: automation/token-inventory') {
+        $stabilizationGuardrailIssues += 'token-inventory.yml (missing stable automation/token-inventory branch name)'
+    }
+
+    if ($tokenInventoryWorkflow -notmatch 'cleanup-automation-branch' -or
+        $tokenInventoryWorkflow -notmatch 'git/refs/heads/') {
+        $stabilizationGuardrailIssues += 'token-inventory.yml (missing closed-PR cleanup for automation/token-inventory)'
+    }
 }
 
 $assetHealthWorkflowPath = Join-Path $workflowDir 'asset-health.yml'
