@@ -2,7 +2,7 @@
 
 Generated from the canonical intent vocabulary and asset frontmatter. Do not edit the generated tables directly; run `pwsh scripts/generate-prompt-library.ps1`.
 
-Coverage: 35 intents, 134 skills, and 130 agents.
+Coverage: 35 intents, 135 skills, and 130 agents.
 
 ## Lifecycle prompts
 
@@ -55,6 +55,20 @@ Managed files eligible for removal: 24
 Repository-owned files preserved: 7
 Approval required: yes
 Next action: approve the exact removal list
+```
+
+### YAGNI analysis output example
+
+```text
+Candidate: package-x
+Usage: dynamic
+Evidence for use: runtime plugin configuration is unresolved
+Evidence against use: no direct source import found
+Confidence: low - dynamic loading has not been observed
+Decision: instrument
+Validation: capture plugin-load telemetry before removal
+Rollback: disable the experiment and retain the package
+Mutation performed: none
 ```
 
 ## Intent prompts
@@ -237,6 +251,7 @@ Next action: approve the exact removal list
 | `twelve-factor` | <code>Use the 'twelve-factor' skill. Task: move config from code to environment.</code> | [skills/twelve-factor/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/twelve-factor/SKILL.md) |
 | `ux` | <code>Use the 'ux' skill. Task: map end-to-end user journey.</code> | [skills/ux/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/ux/SKILL.md) |
 | `workflow-parallelization` | <code>Use the 'workflow-parallelization' skill. Task: identify parallelizable CI jobs.</code> | [skills/workflow-parallelization/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/workflow-parallelization/SKILL.md) |
+| `yagni-analysis` | <code>Use the 'yagni-analysis' skill. Task: audit suspected dead dependencies.</code> | [skills/yagni-analysis/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/yagni-analysis/SKILL.md) |
 
 ## Agent prompts
 

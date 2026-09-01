@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "libraryVersion": "4.2.1",
-  "generatedAt": "2026-08-31T02:56:06.9310460Z",
+  "generatedAt": "2026-09-01T02:39:45.4913214Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -2927,6 +2927,14 @@
       "path": "skills/workflow-parallelization/SKILL.md",
       "type": "skill",
       "sha": "67c3be64e4f063f105f3505a752af62756cf4dc9",
+      "version": null,
+      "effectiveVersion": "4.2.1",
+      "versionSource": "library"
+    },
+    {
+      "path": "skills/yagni-analysis/SKILL.md",
+      "type": "skill",
+      "sha": "54ea0a2d8d400f3196f45d3b8508ce26141990a8",
       "version": null,
       "effectiveVersion": "4.2.1",
       "versionSource": "library"

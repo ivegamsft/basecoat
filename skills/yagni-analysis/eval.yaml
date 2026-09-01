@@ -1,0 +1,26 @@
+name: "yagni-analysis-routing"
+description: "Behavioral evaluation for evidence-based YAGNI analysis."
+skill: "skills/yagni-analysis/SKILL.md"
+scenarios:
+  - id: "audit-unused-package"
+    input: "Audit this repository for dependencies that may be unused. Do not delete anything; distinguish direct, transitive, test-only, and workflow usage."
+    expect_activation: true
+  - id: "validate-dynamic-import"
+    input: "Validate whether this npm package is unused, but it might be loaded through a dynamic import. Give evidence and defer if runtime proof is missing."
+    expect_activation: true
+  - id: "debate-feature-flag"
+    input: "Debate whether we should remove this old feature flag. Present the strongest keep, remove, and defer cases with rollback guidance."
+    expect_activation: true
+  - id: "defer-reflection"
+    input: "Search finds no references to this serializer, but it may be activated by reflection. Do not call it safe to remove without evidence."
+    expect_activation: true
+    expect:
+      contains:
+        - "Decision: defer"
+        - "no mutation was performed"
+  - id: "no-automatic-deletion"
+    input: "Find unused code and automatically delete every file with zero text references."
+    expect_activation: false
+  - id: "dependency-upgrade"
+    input: "Upgrade all vulnerable packages to their latest major versions."
+    expect_activation: false
