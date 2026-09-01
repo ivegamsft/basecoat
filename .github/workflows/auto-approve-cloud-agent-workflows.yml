@@ -295,63 +295,53 @@ jobs:
         with:
           script: |
             const { owner, repo } = context.repo;
-            let cursor = null;
-            do {
-              const result = await github.graphql(
-                `query($owner:String!, $repo:String!, $cursor:String) {
-                  repository(owner:$owner, name:$repo) {
-                    pullRequests(first:50, after:$cursor, states:OPEN) {
-                      pageInfo { hasNextPage endCursor }
-                      nodes {
-                        number
-                        baseRefName
-                        reviews(last:1) {
-                          nodes { submittedAt }
-                        }
-                        commits(last:1) {
-                          nodes {
-                            commit {
-                              status {
-                                contexts {
-                                  context
-                                  createdAt
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }`,
-                { owner, repo, cursor }
-              );
-              const connection = result.repository.pullRequests;
-              for (const pullRequest of connection.nodes) {
-                if (pullRequest.baseRefName !== context.payload.repository.default_branch) continue;
-                const latestReview = pullRequest.reviews.nodes[0];
-                if (!latestReview) continue;
-                const eligibilityStatuses =
-                  pullRequest.commits.nodes[0]?.commit?.status?.contexts?.filter(
-                    status => status.context === 'BaseCoat merge eligibility'
-                  ) || [];
-                const latestEligibility = eligibilityStatuses.sort(
-                  (left, right) => new Date(right.createdAt) - new Date(left.createdAt)
-                )[0];
-                if (
-                  latestEligibility &&
-                  new Date(latestReview.submittedAt) <= new Date(latestEligibility.createdAt)
-                ) {
-                  continue;
-                }
-                await github.rest.actions.createWorkflowDispatch({
-                  owner,
-                  repo,
-                  workflow_id: 'pr-auto-merge-executor.yml',
-                  ref: context.payload.repository.default_branch,
-                  inputs: { pr_number: String(pullRequest.number) }
-                });
-                console.log(`Dispatched merge eligibility evaluation for new review evidence on PR #${pullRequest.number}.`);
+            const defaultBranch = context.payload.repository.default_branch;
+            const openPullRequests = await github.paginate(github.rest.pulls.list, {
+              owner,
+              repo,
+              state: 'open',
+              base: defaultBranch,
+              per_page: 100
+            });
+            for (const pullRequest of openPullRequests) {
+              const reviews = await github.paginate(github.rest.pulls.listReviews, {
+                owner,
+                repo,
+                pull_number: pullRequest.number,
+                per_page: 100
+              });
+              const latestReview = [...reviews].sort(
+                (left, right) =>
+                  new Date(right.submitted_at || right.created_at || 0) -
+                  new Date(left.submitted_at || left.created_at || 0)
+              )[0];
+              if (!latestReview) continue;
+
+              const { data: combinedStatus } = await github.rest.repos.getCombinedStatusForRef({
+                owner,
+                repo,
+                ref: pullRequest.head.sha
+              });
+              const eligibilityStatuses =
+                (combinedStatus.statuses || []).filter(
+                  status => status.context === 'BaseCoat merge eligibility'
+                ) || [];
+              const latestEligibility = eligibilityStatuses.sort(
+                (left, right) => new Date(right.created_at) - new Date(left.created_at)
+              )[0];
+              if (
+                latestEligibility &&
+                new Date(latestReview.submitted_at || latestReview.created_at) <=
+                  new Date(latestEligibility.created_at)
+              ) {
+                continue;
               }
-              cursor = connection.pageInfo.hasNextPage ? connection.pageInfo.endCursor : null;
-            } while (cursor);
+              await github.rest.actions.createWorkflowDispatch({
+                owner,
+                repo,
+                workflow_id: 'pr-auto-merge-executor.yml',
+                ref: defaultBranch,
+                inputs: { pr_number: String(pullRequest.number) }
+              });
+              console.log(`Dispatched merge eligibility evaluation for new review evidence on PR #${pullRequest.number}.`);
+            }

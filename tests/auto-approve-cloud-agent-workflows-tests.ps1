@@ -74,12 +74,16 @@ foreach ($entry in @(
     Assert-Match $content "if:\s*github\.event_name == 'schedule'" "$name must limit scheduled reconciliation to schedule events."
     Assert-Match $content 'main\.reconcile_merge_eligibility // false' "$name must load a reconciliation policy distinct from workflow-run auto-approval."
     Assert-Match $content "reconcile-open-auto-merge-pull-requests:[\s\S]*?if:\s*steps\.policy-pack\.outputs\.reconcile == 'true'" "$name must apply the dedicated governance policy gate to scheduled reconciliation."
-    Assert-Match $content 'pullRequests\(first:50,\s*after:\$cursor,\s*states:OPEN\)' "$name must page through open pull requests."
-    Assert-Match $content 'baseRefName' "$name must limit scheduled reconciliation to the protected default branch."
-    Assert-Match $content 'reviews\(last:1\)' "$name must inspect the newest review evidence."
+    if ($content -match 'github\.graphql') {
+        throw "$name must not use GitHub GraphQL for scheduled reconciliation; GITHUB_TOKEN cannot read every requested field there."
+    }
+    Assert-Match $content 'github\.paginate\(github\.rest\.pulls\.list' "$name must page through open pull requests with REST."
+    Assert-Match $content "base:\s*defaultBranch" "$name must limit scheduled reconciliation to the protected default branch."
+    Assert-Match $content 'github\.paginate\(github\.rest\.pulls\.listReviews' "$name must inspect review evidence with REST."
+    Assert-Match $content 'github\.rest\.repos\.getCombinedStatusForRef' "$name must inspect merge eligibility status with REST."
     Assert-Match $content "status\.context === 'BaseCoat merge eligibility'" "$name must inspect the latest merge eligibility watermark."
-    Assert-Match $content 'new Date\(latestReview\.submittedAt\) <= new Date\(latestEligibility\.createdAt\)' "$name must skip reconciliation when review evidence has already been evaluated."
-    Assert-Match $content 'connection\.pageInfo\.hasNextPage' "$name must paginate scheduled reconciliation."
+    Assert-Match $content 'new Date\(right\.created_at\) - new Date\(left\.created_at\)' "$name must use REST status timestamps when ordering merge eligibility statuses."
+    Assert-Match $content 'new Date\(latestReview\.submitted_at \|\| latestReview\.created_at\) <=' "$name must skip reconciliation when review evidence has already been evaluated."
 }
 
 function Get-NormalizedDispatchJob {
