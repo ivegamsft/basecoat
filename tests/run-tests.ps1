@@ -373,6 +373,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running post-onboarding drift loop tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'post-onboarding-drift-loop-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Post-onboarding drift loop tests failed' -ForegroundColor Red
+    Write-FailureLog 'post-onboarding-drift-loop-tests'
+    exit 1
+}
+
 Write-Host 'Running human approval boundaries policy tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'human-approval-boundaries-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

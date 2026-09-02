@@ -79,16 +79,43 @@ jobs:
               }
             };
 
-            const contentExists = async (owner, repo, path) => {
+            const isAuthError = error => error && (error.status === 401 || error.status === 403);
+
+            const probeFile = async (owner, repo, path) => {
               try {
                 const response = await github.rest.repos.getContent({ owner, repo, path });
-                return !Array.isArray(response.data) && response.data.type === 'file';
+                return {
+                  exists: !Array.isArray(response.data) && response.data.type === 'file',
+                  inaccessible: false
+                };
               } catch (error) {
+                if (isAuthError(error)) {
+                  core.warning(`Unable to check ${owner}/${repo}:${path}: ${error.message}`);
+                  return { exists: false, inaccessible: true };
+                }
                 if (error.status !== 404) {
                   core.warning(`Unable to check ${owner}/${repo}:${path}: ${error.message}`);
                 }
-                return false;
+                return { exists: false, inaccessible: false };
               }
+            };
+
+            const surfaceFromProbes = (probes, okDetail, missingPrefix) => {
+              const inaccessible = probes.filter(item => item.inaccessible);
+              const missing = probes.filter(item => !item.exists && !item.inaccessible);
+              if (missing.length > 0) {
+                return {
+                  status: 'drift',
+                  detail: `${missingPrefix}${missing.map(item => item.path).join(', ')}`
+                };
+              }
+              if (inaccessible.length > 0) {
+                return {
+                  status: 'inaccessible',
+                  detail: `token cannot read ${inaccessible.map(item => item.path).join(', ')}`
+                };
+              }
+              return { status: 'ok', detail: okDetail };
             };
 
             const getMergeableState = async (owner, repo, pullNumber) => {
@@ -242,6 +269,7 @@ jobs:
                 core.warning(`Unable to read repository metadata for ${repoFullName}: ${error.message}`);
               }
 
+              let branchProtectionInaccessible = false;
               try {
                 await github.rest.repos.getBranchProtection({
                   owner,
@@ -254,41 +282,60 @@ jobs:
                 if (error.status === 404) {
                   branchProtectionEnabled = false;
                   branchProtectionDetail = `default branch (${defaultBranch}) has no protection`;
+                } else if (isAuthError(error)) {
+                  branchProtectionInaccessible = true;
+                  branchProtectionDetail = `branch protection check inaccessible: ${error.message}`;
                 } else {
                   branchProtectionEnabled = false;
                   branchProtectionDetail = `branch protection check failed: ${error.message}`;
                 }
               }
 
+              let rulesetsInaccessible = false;
               try {
                 const rulesetsResponse = await github.rest.repos.getRepoRulesets({ owner, repo, per_page: 100 });
                 rulesetsCount = rulesetsResponse.data.length;
               } catch (error) {
+                if (isAuthError(error)) {
+                  rulesetsInaccessible = true;
+                }
                 core.warning(`Unable to list rulesets for ${repoFullName}: ${error.message}`);
               }
 
-              const branchRulesetSurface = {
-                status: branchProtectionEnabled || rulesetsCount > 0 ? 'ok' : 'drift',
-                detail: branchProtectionEnabled || rulesetsCount > 0
-                  ? `${branchProtectionDetail}; rulesets=${rulesetsCount}`
-                  : `${branchProtectionDetail}; rulesets=${rulesetsCount}`
-              };
+              const branchRulesetSurface = branchProtectionEnabled || rulesetsCount > 0
+                ? {
+                    status: 'ok',
+                    detail: `${branchProtectionDetail}; rulesets=${rulesetsCount}`
+                  }
+                : (branchProtectionInaccessible || rulesetsInaccessible)
+                  ? {
+                      status: 'inaccessible',
+                      detail: `${branchProtectionDetail}; rulesets=${rulesetsCount}`
+                    }
+                  : {
+                      status: 'drift',
+                      detail: `${branchProtectionDetail}; rulesets=${rulesetsCount}`
+                    };
 
-              const intakeMissing = [];
+              const intakeProbes = [];
               for (const path of requiredIntakeFiles) {
-                if (!(await contentExists(owner, repo, path))) {
-                  intakeMissing.push(path);
-                }
+                const probe = await probeFile(owner, repo, path);
+                intakeProbes.push({ path, ...probe });
               }
-              const intakeSurface = {
-                status: intakeMissing.length === 0 ? 'ok' : 'drift',
-                detail: intakeMissing.length === 0 ? 'intake issue + PR templates are present' : `missing: ${intakeMissing.join(', ')}`
-              };
+              const intakeSurface = surfaceFromProbes(
+                intakeProbes,
+                'intake issue + PR templates are present',
+                'missing: '
+              );
 
               const reviewerWorkflows = [];
+              let reviewerWorkflowInaccessible = false;
               for (const workflowFile of reviewerWorkflowCandidates) {
-                if (await contentExists(owner, repo, `.github/workflows/${workflowFile}`)) {
+                const probe = await probeFile(owner, repo, `.github/workflows/${workflowFile}`);
+                if (probe.exists) {
                   reviewerWorkflows.push(workflowFile);
+                } else if (probe.inaccessible) {
+                  reviewerWorkflowInaccessible = true;
                 }
               }
 
@@ -328,27 +375,30 @@ jobs:
                   ? readyPullRequests.length > 0
                   : readyWithoutReview >= reviewerGapThreshold;
 
-              // If PR data could not be retrieved, the reviewer-routing surface is unknown; report it
-              // as drift rather than a false 'ok' so an inaccessible repo does not hide real gaps.
-              const reviewerRoutingSurface = {
-                status: pullDataUnavailable ? 'drift' : (reviewerRoutingDrift ? 'drift' : 'ok'),
-                detail: pullDataUnavailable
-                  ? 'pull request data unavailable (repo inaccessible or API error); reviewer-routing status could not be evaluated'
-                  : (reviewerWorkflows.length === 0
-                    ? `no reviewer-routing workflow detected; ready_prs=${readyPullRequests.length}`
-                    : `workflows=${reviewerWorkflows.join(', ')}; ready_no_review=${readyWithoutReview}; behind_or_dirty_no_review=${behindOrDirtyNoReview}; threshold=${reviewerGapThreshold}`)
-              };
+              // Auth failures are inaccessible, not drift. GITHUB_TOKEN cannot read
+              // sibling private repos, which previously kept remediation issues open forever.
+              const reviewerRoutingSurface = pullDataUnavailable || reviewerWorkflowInaccessible
+                ? {
+                    status: 'inaccessible',
+                    detail: 'pull request data unavailable (repo inaccessible or API error); reviewer-routing status could not be evaluated'
+                  }
+                : {
+                    status: reviewerRoutingDrift ? 'drift' : 'ok',
+                    detail: reviewerWorkflows.length === 0
+                      ? `no reviewer-routing workflow detected; ready_prs=${readyPullRequests.length}`
+                      : `workflows=${reviewerWorkflows.join(', ')}; ready_no_review=${readyWithoutReview}; behind_or_dirty_no_review=${behindOrDirtyNoReview}; threshold=${reviewerGapThreshold}`
+                  };
 
-              const metadataMissing = [];
+              const metadataProbes = [];
               for (const path of requiredMetadataFiles) {
-                if (!(await contentExists(owner, repo, path))) {
-                  metadataMissing.push(path);
-                }
+                const probe = await probeFile(owner, repo, path);
+                metadataProbes.push({ path, ...probe });
               }
-              const metadataHygieneSurface = {
-                status: metadataMissing.length === 0 ? 'ok' : 'drift',
-                detail: metadataMissing.length === 0 ? 'metadata hygiene surfaces are present' : `missing: ${metadataMissing.join(', ')}`
-              };
+              const metadataHygieneSurface = surfaceFromProbes(
+                metadataProbes,
+                'metadata hygiene surfaces are present',
+                'missing: '
+              );
 
               const surfaces = {
                 branch_ruleset: branchRulesetSurface,
@@ -358,6 +408,7 @@ jobs:
               };
 
               const driftCount = Object.values(surfaces).filter(surface => surface.status === 'drift').length;
+              const inaccessibleCount = Object.values(surfaces).filter(surface => surface.status === 'inaccessible').length;
               repositoriesResult.push({
                 repo: repoFullName,
                 defaultBranch,
