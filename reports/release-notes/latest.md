@@ -1,77 +1,27 @@
-# Release Notes Validation Report
+## 4.2.1 - 2026-08-31
 
-Generated: 2026-05-31 19:58:46-04:00
-Repository: https://ibuyspy@github.com/IBuySpy-Shared/basecoat
+### Added
 
-## v3.30.0 (v3.29.0..v3.30.0)
+- Added the repo-cleanup skill and `repo-cleanup:` intent prefix. (#2903)
+- Added downstream prompt catalog documentation. (#2856)
+- Registered `basecoat-sheen` as the delegate for UI, UX, IA, and design routing. (#2867)
 
-- PRs in window: 1
-- Waves: N/A
-- Sprints: N/A
-- Binding status: Needs confirmation
+### Changed
 
-### Highlights
-- refactor: standardize BaseCoat-prefixed naming for agents and instructions (PR #1297)
+- Trimmed oversized agent files through token-budget waves 14 through 19. (#2928, #2930, #2931, #2932, #2934, #2950)
+- Documented stacked PR integration, branch-hygiene cleanup, explicit ship-it defaults, product design onboarding, and release authorization decisions. (#2841, #2849, #2850, #2870, #2904, #2959)
+- Added BaseCoat release-audit token bootstrap guidance before retiring the token for the internal repository release path. (#2913, #2959)
 
-### Fixes and improvements
-- None identified
+### Fixed
 
-## v3.29.0 (v3.28.2..v3.29.0)
+- Stabilized dependency graph report generation. (#2848)
+- Waited for current-head automated review and auto-approved trusted merge-eligibility runs blocked by the Copilot review race. (#2869, #2892)
+- Completed front matter model coverage and restored repo-health validation. (#2872, #2901)
+- Upgraded gh-aw and Node GitHub Actions pins for current runner compatibility. (#2884, #2886, #2920)
+- Deduplicated GitHub Issue Filing boilerplate and repaired agent vocabulary extraction. (#2907, #2924)
+- Restored CI by enforcing the repo-cleanup skill budget and failing closed when downstream workflows are missing. (#2941, #2942)
+- Corrected bulk-rename over-match corruption across docs. (#2945)
+- Granted self-healing CI the GitHub Actions toolset. (#2948)
+- Prevented skipped solo-dev cloud workflow approvals. (#2954)
+- Preserved extracted guidance safety for idempotent retries, Kustomize rendering, and Argo CD drift/recovery. (#2958)
 
-- PRs in window: 4
-- Waves: N/A
-- Sprints: N/A
-- Binding status: Needs confirmation
-
-### Highlights
-- feat(skills): add audit skill siblings for code review
-
-Add six new audit skills for reviewing generated or implemented output:
-- backend-audit: Review backend code, testing, performance, security
-- api-audit: Review API design, contracts, error handling
-- devops-audit: Review CI/CD pipelines and deployment configs
-- infrastructure-audit: Review IaC (Bicep/Terraform) and networking
-- mcp-audit: Review MCP server implementations and schemas
-- agentops-audit: Review agent definitions and routing
-
-Each skill includes focused review criteria, concrete checklists, and validation-oriented output.
-
-Closes #1279, #1281, #1282, #1283, #1284, #1285 (PR #1296)
-
-### Fixes and improvements
-- feat(skills): add audit skill siblings for code review
-
-Add six new audit skills for reviewing generated or implemented output:
-- backend-audit: Review backend code, testing, performance, security
-- api-audit: Review API design, contracts, error handling
-- devops-audit: Review CI/CD pipelines and deployment configs
-- infrastructure-audit: Review IaC (Bicep/Terraform) and networking
-- mcp-audit: Review MCP server implementations and schemas
-- agentops-audit: Review agent definitions and routing
-
-Each skill includes focused review criteria, concrete checklists, and validation-oriented output.
-
-Closes #1279, #1281, #1282, #1283, #1284, #1285 (PR #1296)
-- fix: sanitize exported custom-agent frontmatter in sync/bootstrap (PR #1294)
-- fix(workflows): harden deploy auth and infra bootstrap (PR #1275)
-
-## v3.28.2 (v3.28.1..v3.28.2)
-
-- PRs in window: 41
-- Waves: N/A
-- Sprints: N/A
-- Binding status: Needs confirmation
-
-### Highlights
-- feat(guardrails): deployment RCA guardrails and deploy/rca intent prefixes (PR #1261)
-- feat(intent): add fleet shortcut routing (PR #1256)
-- feat: automate sprint closeout branch audit (#1157) (PR #1249)
-- feat: composable skill scripts and triage workflow hardening (PR #1214)
-- feat(skills): composable script execution framework - hardening fix (PR #1203)
-
-### Fixes and improvements
-- fix: update stale dates in sprint artifacts (#1209) (PR #1272)
-- fix: Pin GitHub Actions to full 40-char commit SHAs (PR #1270)
-- fix(workflow): make token inventory PR step policy-resilient (PR #1267)
-- fix(intent-routing): replace missing skill refs in Prefix-to-Skill Routing table (PR #1263)
-- fix(intent): enforce feature:/bug: prefix contract (PR #1262)
