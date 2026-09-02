@@ -365,6 +365,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running merge eligibility human-review reconcile tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'merge-eligibility-human-review-reconcile-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Merge eligibility human-review reconcile tests failed' -ForegroundColor Red
+    Write-FailureLog 'merge-eligibility-human-review-reconcile-tests'
+    exit 1
+}
+
 Write-Host 'Running human approval boundaries policy tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'human-approval-boundaries-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
