@@ -32,11 +32,13 @@ The following status checks **must pass** before a pull request can be merged to
 Additional checks may run and fail without blocking merge (advisory-only checks), but the
 above six are required for all PRs to `main`.
 
-Repositories enabling `solo-dev` self-merge must additionally require one
-independent approval after the last push and the `BaseCoat merge eligibility`
-commit status. The review rule is the portable human boundary; the repo-local
-status is a fail-closed policy and check aggregator, not an executor-specific
-identity. See `docs/guides/solo-dev-profile.md`.
+Repositories enabling `solo-dev` self-merge must additionally require the
+`BaseCoat merge eligibility` commit status. They must not require an
+independent PR approval after the last push through `size:XL`, and they must
+leave `require_extra_approval_for_unattributed_changes` off so Copilot-authored
+commits do not sit in GitHub Review required. The repo-local eligibility status
+is a fail-closed policy and check aggregator, not an executor-specific identity.
+See `docs/guides/solo-dev-profile.md`.
 
 ### 3. Restricted Direct Pushes
 

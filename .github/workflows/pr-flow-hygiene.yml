@@ -64,6 +64,7 @@ jobs:
           DRAFT_DRIFT_DAYS: ${{ inputs.draft_drift_days || '14' }}
           READY_STALE_DAYS: ${{ inputs.ready_stale_days || '7' }}
           MAX_ITEMS: ${{ inputs.max_items || '200' }}
+          POLICY_PACK: ${{ vars.BASECOAT_POLICY_PACK }}
         with:
           script: |
             const weeklyMarker = '<!-- pr-flow-hygiene:weekly:v2 -->';
@@ -91,6 +92,8 @@ jobs:
             };
             const hasReleaseLabel = labels => normalizeLabels(labels).some(isReleaseLabel);
             const isHotfixBranch = ref => /^hotfix\//i.test(String(ref || ''));
+            const selectedPack = String(process.env.POLICY_PACK || '').trim();
+            const isSoloDevPack = selectedPack === 'solo-dev';
             const getReviewerCount = async (prNumber, prAuthor) => {
               const { data: submittedReviews } = await github.rest.pulls.listReviews({
                 owner: context.repo.owner,
@@ -107,6 +110,7 @@ jobs:
             const evaluateReadiness = ({ pr, labels, assigneeCount, reviewerCount, ageDays, draftDriftDays }) => {
               const reasons = [];
               const hotfixFastPath = !pr.draft && isHotfixBranch(pr.head?.ref);
+              const skipReviewerAssignee = hotfixFastPath || isSoloDevPack;
               let mode = 'ready-routing';
 
               if (pr.draft) {
@@ -114,13 +118,13 @@ jobs:
                 if (ageDays >= draftDriftDays) {
                   reasons.push(`Draft age is ${ageDays} days (threshold: ${draftDriftDays}).`);
                 }
-                return { reasons, mode, hotfixFastPath };
+                return { reasons, mode, hotfixFastPath, skipReviewerAssignee };
               }
 
-              if (!hotfixFastPath && reviewerCount === 0) {
+              if (!skipReviewerAssignee && reviewerCount === 0) {
                 reasons.push('No requested reviewer or reviewer team is set.');
               }
-              if (!hotfixFastPath && assigneeCount === 0) {
+              if (!skipReviewerAssignee && assigneeCount === 0) {
                 reasons.push('No assignee is set for ownership handoff.');
               }
               if (!hasReleaseLabel(labels)) {
@@ -130,7 +134,7 @@ jobs:
                 reasons.push('PR mergeable_state is BEHIND; branch needs update before review can complete.');
               }
 
-              return { reasons, mode, hotfixFastPath };
+              return { reasons, mode, hotfixFastPath, skipReviewerAssignee };
             };
 
             const upsertBotComment = async ({ issueNumber, marker, body }) => {
@@ -376,10 +380,10 @@ jobs:
               if (idleDays >= readyStaleDays) {
                 readyStale.push(detail);
               }
-              if (!hotfixFastPath && assigneeCount === 0) {
+              if (!hotfixFastPath && !isSoloDevPack && assigneeCount === 0) {
                 readyNoOwner.push(detail);
               }
-              if (!hotfixFastPath && reviewerCount === 0) {
+              if (!hotfixFastPath && !isSoloDevPack && reviewerCount === 0) {
                 readyNoReviewer.push(detail);
               }
             }

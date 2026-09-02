@@ -14,7 +14,7 @@ flowchart TD
   B --> C{Draft?}
   C -->|Yes| D[Draft drift checks]
   C -->|No| E[Readiness checks]
-  E --> F{hotfix/* branch?}
+  E --> F{hotfix/* or solo-dev?}
   F -->|Yes| G[Skip reviewer and assignee blockers]
   F -->|No| H[Require reviewer and assignee metadata]
   G --> I[Always enforce release label and BEHIND checks]
@@ -71,9 +71,10 @@ Environment variables used by the script:
 | `READY_STALE_DAYS` | `inputs.ready_stale_days` |
 | `MAX_ITEMS` | `inputs.max_items` |
 
-## Hotfix fast-path behavior
+## Hotfix and solo-dev fast-path behavior
 
-For `hotfix/*` branch PRs, readiness evaluation skips:
+For `hotfix/*` branch PRs, and for repositories whose
+`BASECOAT_POLICY_PACK` is `solo-dev`, readiness evaluation skips:
 
 - missing reviewer blocker
 - missing assignee blocker

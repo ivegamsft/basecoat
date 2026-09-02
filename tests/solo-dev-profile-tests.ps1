@@ -95,6 +95,14 @@ foreach ($path in @(
 }
 
 $guide = Get-Content -Path $guidePath -Raw
+$branchProtectionPath = Join-Path $repoRoot 'docs\reference\branch-protection.md'
+$branchProtection = Get-Content -Path $branchProtectionPath -Raw
+if ($branchProtection -match 'one independent approval after the last push') {
+    throw 'Branch protection baseline must not require an extra last-push approval for solo-dev self-merge.'
+}
+if ($branchProtection -notmatch 'require_extra_approval_for_unattributed_changes') {
+    throw 'Branch protection baseline must disable extra approval for unattributed Copilot commits on solo-dev.'
+}
 $mkdocs = Get-Content -Path $mkdocsPath -Raw
 $contract = Get-Content -Path $contractPath -Raw
 $policy = Get-Content -Path $policyPath -Raw | ConvertFrom-Json
@@ -111,6 +119,7 @@ foreach ($requiredText in @(
     'bypass list is empty',
     'BaseCoat merge eligibility',
     'zero independent PR approvals',
+    'do not require extra approval for unattributed changes',
     'size:XXL',
     'protected GitHub',
     '"allowed_merge_methods": ["squash"]',
@@ -139,7 +148,8 @@ foreach ($requiredText in @(
         throw 'Solo-dev ruleset must allow the squash method used by the executor.'
     }
     if ($pullRequestRule.parameters.required_approving_review_count -ne 0 -or
-        $pullRequestRule.parameters.require_last_push_approval -ne $false) {
+        $pullRequestRule.parameters.require_last_push_approval -ne $false -or
+        $pullRequestRule.parameters.require_extra_approval_for_unattributed_changes -ne $false) {
         throw 'Portable solo-dev ruleset must allow zero-review routine merges.'
     }
     $requiredStatusRule = $rulesetPayload.rules | Where-Object { $_.type -eq 'required_status_checks' }

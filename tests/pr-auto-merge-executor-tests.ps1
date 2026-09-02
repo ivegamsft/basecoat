@@ -316,6 +316,17 @@ if ($workflow -notmatch [regex]::Escape('if (existing && existing.startedAt > st
 if ($workflow -notmatch 'if \(!statusSucceeded && !checkSucceeded\)') {
     throw 'Workflow must treat pending or missing required checks as unsatisfied.'
 }
+if ($workflow -notmatch 'waitingForRequiredChecks' -or
+    $workflow -notmatch 'waitingForExternalProgress' -or
+    $workflow -notmatch [regex]::Escape('Waiting for required status checks to complete.')) {
+    throw 'Workflow must keep merge eligibility pending while required checks are still running.'
+}
+if ($workflow -notmatch [regex]::Escape('contains(fromJSON(''["opened","reopened","synchronize"]''), github.event.action)')) {
+    throw 'Workflow must cancel in-progress eligibility only when the pull request head changes.'
+}
+if ($workflow -match '(?m)^\s*cancel-in-progress:\s*true\s*$') {
+    throw 'Workflow must not cancel in-progress eligibility on label or edit storms.'
+}
 if ($workflow -notmatch "pr\.base\?\.ref !== 'main'") {
     throw 'Workflow must block manual dispatches targeting a non-main base branch.'
 }

@@ -193,6 +193,7 @@ In GitHub:
 3. **Settings > Rules > Rulesets**
    - create an active branch ruleset targeting the default branch
    - require zero approving reviews
+   - do not require extra approval for unattributed changes
    - do not require conversation resolution; Copilot feedback is advisory
    - require all six validation checks plus `BaseCoat merge eligibility`
    - require branches to be up to date
@@ -256,6 +257,7 @@ Create `solo-dev-main-ruleset.json`:
         "allowed_merge_methods": ["squash"],
         "dismiss_stale_reviews_on_push": true,
         "require_code_owner_review": false,
+        "require_extra_approval_for_unattributed_changes": false,
         "require_last_push_approval": false,
         "required_approving_review_count": 0,
         "required_review_thread_resolution": false

@@ -47,7 +47,9 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'workflow_run' && format('workflow-run-{0}', github.event.workflow_run.id) || github.event_name == 'issues' && format('issue-{0}', github.event.issue.number) || github.event_name == 'issue_comment' && format('comment-{0}', github.event.comment.id) || format('pr-{0}', github.event.pull_request.number || inputs.pr_number || github.ref) }}
-  cancel-in-progress: true
+  # Cancel only when the PR head changes. Label/edit storms must not abort a
+  # live eligibility poll and leave BaseCoat merge eligibility unpublished.
+  cancel-in-progress: ${{ github.event_name == 'pull_request_target' && contains(fromJSON('["opened","reopened","synchronize"]'), github.event.action) }}
 
 jobs:
   route-ci-completion:
@@ -1179,8 +1181,14 @@ jobs:
             }
 
             const eligible = blockers.length === 0;
+            const waitingForRequiredChecks =
+              Boolean(requiredCheckState?.hasPendingChecks) &&
+              unsatisfiedChecks.length > 0 &&
+              blockers.length === 1 &&
+              String(blockers[0]).startsWith('Required checks not satisfied:');
             const waitingForAutomatedReview =
               !automatedReviewSatisfied && blockers.length === 1;
+            const waitingForExternalProgress = waitingForAutomatedReview || waitingForRequiredChecks;
             const acknowledgementSummary = requiresMaintainerAcknowledgement
               ? (
                   maintainerAcknowledgement.satisfied
@@ -1216,7 +1224,7 @@ jobs:
                   `${marker}`,
                   '## PR auto-merge executor status',
                   '',
-                  `- Status: **${waitingForAutomatedReview ? 'waiting' : 'blocked'}**`,
+                  `- Status: **${waitingForExternalProgress ? 'waiting' : 'blocked'}**`,
                   `- Policy pack: \`${selectedPack}\``,
                   `- Risk tier: \`${riskTier}\``,
                   `- Required approvals: \`${requiredApprovals}\``,
@@ -1256,14 +1264,16 @@ jobs:
             core.setOutput('eligible', eligible ? 'true' : 'false');
             core.setOutput('pr_number', String(prNumber));
             core.setOutput('merge_queue_posture', mergeQueuePosture);
-            const shouldFailEligibility = !eligible && !waitingForAutomatedReview;
+            const shouldFailEligibility = !eligible && !waitingForExternalProgress;
             await publishEligibilityStatus(
-              eligible ? 'success' : waitingForAutomatedReview ? 'pending' : 'failure',
+              eligible ? 'success' : waitingForExternalProgress ? 'pending' : 'failure',
               eligible
                 ? `Eligible under ${selectedPack}/${riskTier}.`
-                : waitingForAutomatedReview
-                  ? 'Waiting for the required automated review on the current head.'
-                  : `Blocked by ${blockers.length} BaseCoat policy condition(s).`
+                : waitingForRequiredChecks
+                  ? 'Waiting for required status checks to complete.'
+                  : waitingForAutomatedReview
+                    ? 'Waiting for the required automated review on the current head.'
+                    : `Blocked by ${blockers.length} BaseCoat policy condition(s).`
             );
             if (shouldFailEligibility) {
               core.setFailed(`Merge eligibility gate blocked: ${blockers.join(' | ')}`);
