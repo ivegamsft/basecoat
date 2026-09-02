@@ -42,7 +42,7 @@
     "solo-dev": {
       "description": "Single maintainer autonomous delivery through XL; XXL changes require a qualified human approval.",
       "main": {
-        "reconcile_merge_eligibility": true,
+        "reconcile_merge_eligibility": false,
         "required_checks": [
           "lint-and-validate",
           "test",
