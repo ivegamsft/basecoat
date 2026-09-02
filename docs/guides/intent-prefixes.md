@@ -52,6 +52,7 @@ fleet, wave, and "cut a release".
 | `wave:` | Dependency-ordered batch within a sprint (issues and PRs) | **Now** | `@sprint-planner`, `@parallel-session-coordinator` |
 | `autopilot:` | Continuous oldest-to-newest backlog burndown in dependency-ordered waves, unattended until stopped or blocked | **Now** | `@backlog-autopilot`, `@parallel-session-coordinator`, `@ship-it-control-loop`, `@delivery-autopilot` |
 | `ship-it:` | Land one specific change (implement, PR, merge, close). Not a fleet burndown. Combine as `fleet: ship-it:` to burn the backlog oldest-first using the ship-it control loop | **Now** | `ship-it` skill, `@ship-it-control-loop`, `@delivery-autopilot` |
+| `learn:` | Opt-in extract or consult of recurring CI/workflow signatures in `docs/reference/repo-pathways.md`. Not a post-merge daemon | **Now** | `repo-learning` skill, `@rca`, `@self-healing-ci`, `@ci-failure-escalation` |
 
 ### Prefix disambiguation
 
@@ -80,7 +81,7 @@ for selecting chain patterns.
 | Continuous delivery | `autopilot:`, `ship-it:` | unattended multi-wave burndown, or land one change through merge |
 | Packetization | `optimize:` | normalized execution packet and optional execution chain |
 | Quality | `test:`, `docs:`, `ui:`, `ux:`, `ia:`, `design:` | tests, documentation, or design artifacts |
-| Knowledge capture | `chronicle:` | story/update packet, follow-up issue bundle, optional memory suggestions |
+| Knowledge capture | `chronicle:`, `learn:` | story/update packet, follow-up issue bundle, optional memory suggestions, or opt-in repo pathway extract/consult |
 | Infrastructure | `azure:`, `infra:`, `deploy:` | preflight advisory, IaC changes, staged deployment |
 
 ---

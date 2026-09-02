@@ -55,6 +55,7 @@ Rules:
 | `architect:` | Architecture design or system-design decision | Later | `@solution-architect` |
 | `docs:` | Documentation only | Soon | `@tech-writer` |
 | `chronicle:` | Export session/worktree learnings into durable story artifacts and follow-up issue packets | Soon | `@memory-promoter`, `@tech-writer` |
+| `learn:` | Opt-in extract or consult of recurring CI/workflow signatures in `docs/reference/repo-pathways.md` | Now | `repo-learning` skill, `@rca`, `@self-healing-ci`, `@ci-failure-escalation` |
 | `version:` | BaseCoat version inspection and drift check | Now | `@release-manager`, `@devops-engineer` |
 | `test:` | Test coverage gap or test failure | Now | `@manual-test-strategy`, `@strategy-to-automation` |
 | `refactor:` | Structural improvement, no behavior change | Later | `@code-review`, `@performance-analyst` |

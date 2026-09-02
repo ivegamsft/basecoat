@@ -26,7 +26,7 @@ Purpose: Monitors a GitHub Actions workflow job for consecutive failures, halts 
 
 ## Workflow
 
-1. **Query recent runs** — fetch the last `failure_threshold + 2` runs of `workflow_name`, filter to `job_name`.
+1. **Query recent runs** — fetch the last `failure_threshold + 2` runs of `workflow_name`, filter to `job_name`. Consult `docs/reference/repo-pathways.md` for a matching signature before opening a new blocking issue.
 2. **Count consecutive failures** — walk runs newest→oldest; stop at first success/skip.
 3. **If consecutive failures ≥ threshold:**
    a. **Open or update a blocking issue** keyed by a stable `repo`/`workflow_name`/`job_name` marker (not the failure count, so repeated failures update the issue instead of duplicating), label `blocker`, body with failure timeline, last error snippet, remediation — see template in detail file.

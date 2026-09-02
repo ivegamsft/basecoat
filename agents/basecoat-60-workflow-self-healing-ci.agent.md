@@ -24,7 +24,7 @@ Purpose: detect, classify, and safely remediate recurring CI failures with audit
 
 ## Workflow
 
-1. Collect failure context and classify root cause family.
+1. Collect failure context and classify root cause family. Consult `docs/reference/repo-pathways.md` for a matching signature before inventing a new remediation.
 2. Select the least-destructive remediation strategy.
 3. Execute with safeguards and traceable audit metadata.
 4. Re-run only required scope (job/test/dependency step).

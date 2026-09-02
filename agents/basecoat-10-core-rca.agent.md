@@ -24,10 +24,11 @@ Purpose: perform structured root cause analysis for incidents after the system i
 - Timeline of events and recent changes
 - Existing mitigation steps and validation results
 - Prior incidents, runbooks, or known failure modes
+- `docs/reference/repo-pathways.md` — matching CI/workflow signatures (consult before re-diagnosing)
 
 ## Workflow
 
-1. **Symptom triage** — clarify blast radius, customer impact, and observable symptoms.
+1. **Symptom triage** — clarify blast radius, customer impact, and observable symptoms. Grep `docs/reference/repo-pathways.md` for the job or error family; apply a matching pathway before generating new hypotheses.
 2. **Timeline reconstruction** — map events leading up to the incident and identify inflection points.
 3. **Theory generation** — propose at least three plausible root-cause hypotheses, ranked by likelihood.
 4. **Evidence gathering** — list what confirms or refutes each theory and call out missing evidence.

@@ -2,7 +2,7 @@
 
 Generated from the canonical intent vocabulary and asset frontmatter. Do not edit the generated tables directly; run `pwsh scripts/generate-prompt-library.ps1`.
 
-Coverage: 35 intents, 137 skills, and 130 agents.
+Coverage: 36 intents, 138 skills, and 130 agents.
 
 ## Lifecycle prompts
 
@@ -116,6 +116,7 @@ Mutation performed: none
 | `architect:` | <code>architect: Architecture design or system-design decision in this repository. Include scope, evidence, and the next safe action.</code> |
 | `docs:` | <code>docs: Documentation only in this repository. Include scope, evidence, and the next safe action.</code> |
 | `chronicle:` | <code>chronicle: Export session/worktree learnings into durable story artifacts and follow-up issue packets in this repository. Include scope, evidence, and the next safe action.</code> |
+| `learn:` | <code>learn: Opt-in extract or consult of recurring CI/workflow signatures in `docs/reference/repo-pathways.md` in this repository. Include scope, evidence, and the next safe action.</code> |
 | `version:` | <code>version: BaseCoat version inspection and drift check in this repository. Include scope, evidence, and the next safe action.</code> |
 | `test:` | <code>test: Test coverage gap or test failure in this repository. Include scope, evidence, and the next safe action.</code> |
 | `refactor:` | <code>refactor: Structural improvement, no behavior change in this repository. Include scope, evidence, and the next safe action.</code> |
@@ -240,6 +241,7 @@ Mutation performed: none
 | `release-audit` | <code>Use the 'release-audit' skill. Task: audit a release candidate.</code> | [skills/release-audit/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/release-audit/SKILL.md) |
 | `release-notes` | <code>Use the 'release-notes' skill. Task: create release notes for a version.</code> | [skills/release-notes/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/release-notes/SKILL.md) |
 | `repo-cleanup` | <code>Use the 'repo-cleanup' skill. Task: one combined request to sync main while cleaning worktrees and deleting proven-safe merged branches after a ship-it wave.</code> | [skills/repo-cleanup/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/repo-cleanup/SKILL.md) |
+| `repo-learning` | <code>Use the 'repo-learning' skill. Task: learn: prefix.</code> | [skills/repo-learning/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/repo-learning/SKILL.md) |
 | `rollout-basecoat` | <code>Use the 'rollout-basecoat' skill. Task: refresh basecoat.</code> | [skills/rollout-basecoat/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/rollout-basecoat/SKILL.md) |
 | `s4-deployment-checklist` | <code>Use the 's4-deployment-checklist' skill. Task: checklist-driven release gating.</code> | [skills/s4-deployment-checklist/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/s4-deployment-checklist/SKILL.md) |
 | `s4-rollback-testing` | <code>Use the 's4-rollback-testing' skill. Task: building repeatable rollback rehearsal workflows.</code> | [skills/s4-rollback-testing/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/s4-rollback-testing/SKILL.md) |
