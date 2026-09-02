@@ -381,6 +381,22 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running downstream reviewer-routing audit tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'downstream-reviewer-routing-audit-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Downstream reviewer-routing audit tests failed' -ForegroundColor Red
+    Write-FailureLog 'downstream-reviewer-routing-audit-tests'
+    exit 1
+}
+
+Write-Host 'Running docs link checker tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'docs-link-checker-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Docs link checker tests failed' -ForegroundColor Red
+    Write-FailureLog 'docs-link-checker-tests'
+    exit 1
+}
+
 Write-Host 'Running human approval boundaries policy tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'human-approval-boundaries-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

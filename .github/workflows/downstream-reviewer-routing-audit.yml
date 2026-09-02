@@ -148,7 +148,11 @@ jobs:
                   direction: 'desc'
                 });
               } catch (error) {
+                const hidden = error && (error.status === 401 || error.status === 403 || error.status === 404);
                 core.warning(`Unable to audit ${repoFullName}: ${error.message}`);
+                if (!hidden) {
+                  throw error;
+                }
                 scoreRows.push({
                   repo: `${owner}/${repo}`,
                   state: 'downstream repo inaccessible (audit could not be evaluated)',
@@ -246,7 +250,10 @@ jobs:
               return b.readyWithoutReview - a.readyWithoutReview || a.repo.localeCompare(b.repo);
             });
 
-            const escalations = scoreRows.filter(row => row.state !== 'healthy');
+            const escalations = scoreRows.filter(row =>
+              row.state !== 'healthy' &&
+              !String(row.state).includes('inaccessible')
+            );
             const markdown = [
               '# Downstream Reviewer Routing Audit',
               '',
@@ -263,12 +270,11 @@ jobs:
               '',
               '## Escalation policy',
               '',
-              '1. `downstream repo inaccessible (audit could not be evaluated)`',
-              '2. `no reviewer-routing automation installed`',
-              '3. `automation installed but not configured`',
-              '4. `automation configured but ineffective in live PRs`',
+              '1. `no reviewer-routing automation installed`',
+              '2. `automation installed but not configured`',
+              '3. `automation configured but ineffective in live PRs`',
               '',
-              'A `downstream repo inaccessible` result means open pull requests could not be listed (missing access or an API error); confirm the audit token can read the repository, then re-run.',
+              'A `downstream repo inaccessible` result (HTTP 401/403/404) is informational: the default `GITHUB_TOKEN` cannot see private sibling repos. It is reported in the table but does not count as an escalation.',
               '',
               'Remediation guide: `docs/guides/downstream-reviewer-routing-audit.md`'
             ].join('\n');

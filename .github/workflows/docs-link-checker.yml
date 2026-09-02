@@ -72,20 +72,34 @@ jobs:
                   # Skip POST-only OAuth endpoints (valid, but return 404 to a HEAD/GET checker)
                   if 'github.com/login/oauth/access_token' in url:
                       continue
+                  # Skip template placeholders used in consumer-facing docs
+                  if 'github.com/YOUR-ORG' in url or 'github.com/your-org' in url.lower():
+                      continue
+                  # Skip method-restricted corp npm proxy (HEAD/GET often 405)
+                  if 'packagefeedproxy.microsoft.io' in url:
+                      continue
                   discovered.setdefault(url, set()).add(str(md))
 
           def check(url: str):
-              req = urllib.request.Request(url, method='HEAD', headers={'User-Agent': 'basecoat-link-checker'})
-              try:
+              def attempt(method):
+                  req = urllib.request.Request(url, method=method, headers={'User-Agent': 'basecoat-link-checker'})
                   with urllib.request.urlopen(req, timeout=15) as resp:
                       return int(getattr(resp, 'status', 200)), ''
+              try:
+                  return attempt('HEAD')
               except urllib.error.HTTPError as err:
-                  return int(getattr(err, 'code', 0) or 0), str(err)
-              except Exception as err:
+                  code = int(getattr(err, 'code', 0) or 0)
+                  if code in (403, 405, 501):
+                      try:
+                          return attempt('GET')
+                      except urllib.error.HTTPError as inner:
+                          return int(getattr(inner, 'code', 0) or 0), str(inner)
+                      except Exception as inner:
+                          return 0, str(inner)
+                  return code, str(err)
+              except Exception:
                   try:
-                      req = urllib.request.Request(url, method='GET', headers={'User-Agent': 'basecoat-link-checker'})
-                      with urllib.request.urlopen(req, timeout=15) as resp:
-                          return int(getattr(resp, 'status', 200)), ''
+                      return attempt('GET')
                   except Exception as inner:
                       return 0, str(inner)
 
