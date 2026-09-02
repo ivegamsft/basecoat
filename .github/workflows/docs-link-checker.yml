@@ -69,8 +69,10 @@ jobs:
                   # Skip placeholder/non-existent API domains
                   if 'api.basecoat.dev' in url:
                       continue
-                  # Skip POST-only OAuth endpoints (valid, but return 404 to a HEAD/GET checker)
+                  # Skip POST-only OAuth/OIDC endpoints (valid, but return 404 to a HEAD/GET checker)
                   if 'github.com/login/oauth/access_token' in url:
+                      continue
+                  if 'token.actions.githubusercontent.com' in url:
                       continue
                   # Skip template placeholders used in consumer-facing docs
                   if 'github.com/YOUR-ORG' in url or 'github.com/your-org' in url.lower():

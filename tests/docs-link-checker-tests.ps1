@@ -27,6 +27,9 @@ Assert-Match $workflow "github\.com/YOUR-ORG" `
 Assert-Match $workflow 'packagefeedproxy\.microsoft\.io' `
     'Docs link checker must skip the corp npm proxy that returns 405 to HEAD/GET.'
 
+Assert-Match $workflow 'token\.actions\.githubusercontent\.com' `
+    'Docs link checker must skip the Actions OIDC token endpoint (POST-only, 404 to HEAD/GET).'
+
 Assert-Match $workflow 'code in \(403, 405, 501\)' `
     'HEAD 403/405/501 must retry GET before classifying a link as broken.'
 
