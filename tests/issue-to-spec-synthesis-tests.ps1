@@ -21,5 +21,7 @@ Assert-Match $synthesis 'const prdPath = `docs/prd/synthesized/' 'Synthesis must
 Assert-Match $synthesis 'const specPath = `docs/spec/synthesized/' 'Synthesis must generate a spec artifact.'
 Assert-Match $synthesis 'path: prdPath' 'Synthesis must write the generated PRD.'
 Assert-Match $synthesis 'PRD and spec synthesized from this issue' 'Source issue must link to the generated artifacts.'
+Assert-Match $synthesis 'github-token: \$\{\{ secrets\.GH_AW_GITHUB_TOKEN \|\| github\.token \}\}' 'Synthesis must use the configured write token when available.'
+Assert-Match $synthesis 'Recovering existing synthesis branch without a PR' 'Synthesis retries must recover a branch created before PR creation failed.'
 
 Write-Host 'PASS needs-prd to PRD/spec synthesis contract.'
