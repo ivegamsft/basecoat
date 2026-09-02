@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "protectedResourceTypeGlobs": [
+    "azuread_*",
+    "azurerm_role_assignment",
+    "azurerm_key_vault*"
+  ],
+  "override": {
+    "label": "terraform-destroy-ack"
+  }
+}

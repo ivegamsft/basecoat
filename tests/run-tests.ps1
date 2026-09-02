@@ -229,6 +229,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running terraform plan destroy guardrail tests...'
+& node --test (Join-Path $PSScriptRoot 'terraform-plan-destroy-guardrail.test.js')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Terraform plan destroy guardrail tests failed' -ForegroundColor Red
+    Write-FailureLog 'terraform-plan-destroy-guardrail'
+    exit 1
+}
+
 Write-Host 'Running workflow action pinning tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'workflow-action-pinning-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

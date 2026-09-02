@@ -1,0 +1,51 @@
+name: Terraform plan destroy guardrail
+
+on:
+  pull_request:
+  merge_group:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  terraform-plan-destroy-guardrail:
+    name: Surface Terraform plan destroys
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          fetch-depth: 0
+
+      - name: Inspect terraform plan destroys
+        env:
+          TERRAFORM_DESTROY_ACK_APPROVED: ${{ contains(join(github.event.pull_request.labels.*.name, ','), 'terraform-destroy-ack') }}
+          TERRAFORM_DESTROY_BASE_REF: origin/${{ github.base_ref || github.event.repository.default_branch || 'main' }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          script=".github/base-coat/templates/terraform-plan-destroy-guardrail/inspect-terraform-plan-destroys.js"
+          if [ ! -f "$script" ]; then
+            script="templates/terraform-plan-destroy-guardrail/inspect-terraform-plan-destroys.js"
+          fi
+          comment_file="${RUNNER_TEMP}/terraform-plan-destroys.md"
+          set +e
+          node "$script" \
+            --policy-file terraform-plan-destroy-guardrail-policy.json \
+            --plan-json tfplan.json \
+            --base-ref "${TERRAFORM_DESTROY_BASE_REF}" \
+            --override-approved "${TERRAFORM_DESTROY_ACK_APPROVED}" \
+            --comment-file "$comment_file"
+          status=$?
+          set -e
+          if [ -f "$comment_file" ] && [ "${{ github.event_name }}" = "pull_request" ]; then
+            gh pr comment "${{ github.event.pull_request.number }}" --body-file "$comment_file"
+          fi
+          exit "$status"
