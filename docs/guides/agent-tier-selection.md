@@ -44,6 +44,7 @@ agent is stateless and receives all needed context in its dispatch prompt.
 |---|---|
 | Invocation | `task(agent_type: "...", model: "...", prompt: "...")` |
 | Scope | Session-parallel; up to 5 concurrent agents |
+| Default model | Mini or standard; do not inherit a parent premium (Opus) model. See `docs/reference/model-routing-defaults.md`. |
 | Strengths | Independent subtask fan-out, sprint execution, phase-gated workflows |
 | Limitations | Hard cap of 5 concurrent (enterprise 429 risk above this); no inter-agent coordination |
 | Required for | Sprint phases where subtasks are independent and bounded |

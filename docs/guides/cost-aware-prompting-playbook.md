@@ -3,13 +3,16 @@
 Use this playbook when running long, multi-phase CLI delivery loops where token
 spend is driven more by context carryover than by output size.
 
+Canonical model policy: `docs/reference/model-routing-defaults.md`. Premium
+tier (Opus) is opt-in; named models below are examples, not pins.
+
 ## Quick Routing Matrix
 
 | Work shape | Session move | Model default | Execution style |
 |---|---|---|---|
-| Mechanical cleanup (branch/worktree hygiene, scans, formatting) | Stay in session; `/compact` at phase boundary | `gpt-5.4-mini` with omitted `reasoning_effort` | Interactive or delegated batch |
-| Moderate reasoning (triage, planning, scoped reviews) | Stay in session if same objective; `/compact` on phase switch | `claude-sonnet-5` (or equivalent reasoning tier) | Delegate scan work, keep decisions in main thread |
-| Hard ambiguity (architecture, deep debugging, security tradeoffs) | Use a focused session if objective changes | `claude-opus-4.8` (or top-tier equivalent) | Time-boxed deep pass, then downshift |
+| Mechanical cleanup (branch/worktree hygiene, scans, formatting) | Stay in session; `/compact` at phase boundary | Mini / flash class (example: `gpt-5.4-mini`) with omitted `reasoning_effort` | Interactive or delegated batch |
+| Moderate reasoning (triage, planning, scoped reviews) | Stay in session if same objective; `/compact` on phase switch | Standard class (example: `claude-sonnet-5`) | Delegate scan work, keep decisions in main thread |
+| Hard ambiguity (architecture, deep debugging, security tradeoffs) | Use a focused session if objective changes | Standard first; premium only with a written trigger | Time-boxed deep pass, then downshift |
 
 ## Phase-Boundary Rule: `/compact` vs `/new`
 
@@ -27,9 +30,13 @@ decision-only.
 
 - Delegate: repository scans, issue sweeps, dependency checks, repetitive status loops.
 - Keep in main thread: merge decisions, release gate approvals, risk acceptance.
+- Sub-agents default to mini or standard. Do not pass the parent premium model into a scan.
 
 Batch related work in one kickoff and monitor with `/tasks` rather than repeated
 restarts of the same orchestration intent.
+
+At each phase boundary, record model family and a one-line cost rollup when
+usage is available. Warn if premium ran without a trigger; do not block.
 
 ## Durable Learnings Pattern
 

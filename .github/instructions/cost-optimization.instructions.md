@@ -11,6 +11,7 @@ Baseline CLI cost (2.08B tokens/mo) reduced through five behavioral patterns:
 
 Operator quick reference:
 
+- `docs/reference/model-routing-defaults.md` (premium opt-in; sub-agents stay standard)
 - `docs/guides/cost-aware-prompting-playbook.md`
 - `docs/guides/phase-boundary-session-checklist.md`
 
