@@ -138,10 +138,12 @@ defined in `prd-spec-gate.yml`:
 If EITHER link is missing:
 
 1. Apply the `needs-prd` label via `safeoutputs.add-labels`.
-2. Apply the `needs-info` label via `safeoutputs.add-labels`.
-3. Post an advisory comment via `safeoutputs.add-comment` explaining that any PR
-   for this issue will be blocked by the PRD/spec gate, and providing the standard
-   format to add to both the issue and the eventual PR description:
+2. Apply the `synthesize-spec` label via `safeoutputs.add-labels`. This triggers
+   `.github/workflows/issue-to-spec-synthesis.yml`, which generates linked draft
+   PRD and spec artifacts for the issue.
+3. Post an advisory comment via `safeoutputs.add-comment` explaining that
+   synthesis has been requested and that any implementation PR must reference the
+   generated PRD and spec:
 
 ```text
 PRD: <link>
@@ -149,7 +151,8 @@ Spec: <link>
 ```
 
 Reference `skills/issue-triage/references/triage-workflow.md` Check 10 for the full
-advisory comment template.
+advisory comment template. Only apply `needs-info` when the issue failed the
+minimum-bar quality check or lacks information synthesis cannot infer.
 
 If both links are already present in the issue body, no action is needed for this step.
 

@@ -397,6 +397,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running issue-to-spec synthesis tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'issue-to-spec-synthesis-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Issue-to-spec synthesis tests failed' -ForegroundColor Red
+    Write-FailureLog 'issue-to-spec-synthesis-tests'
+    exit 1
+}
+
 Write-Host 'Running human approval boundaries policy tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'human-approval-boundaries-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
