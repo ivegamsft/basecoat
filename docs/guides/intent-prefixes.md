@@ -7,6 +7,9 @@ Every message prefix tells the AI three things at once: **what kind of work**,
 Prefix prompts should use native SDLC nouns (workflow run, job, PR, issue,
 release, version drift) to reduce routing ambiguity.
 
+See `docs/reference/glossary.md` for overloaded terms such as WIP, ship-it,
+fleet, wave, and "cut a release".
+
 ---
 
 ## The prefix vocabulary
@@ -20,7 +23,7 @@ release, version drift) to reduce routing ambiguity.
 | `optimize:` | Normalize composite prompts into an execution packet with scope, stop rules, validation clauses, and routing hints before execution | **Now, advisory-first** | `@task-scope-validator`, `@orchestrator`, `@prompt-coach` |
 | `spike:` | Time-boxed investigation, no deliverable | **Now, research only** | `@solution-architect` |
 | `chore:` | Maintenance, cleanup, non-functional | **Soon** | `@devops-engineer`, `@release-manager` |
-| `pr:` | Pull request lifecycle handling: remaining WIP logging, merge readiness, build-gated lane closeout, and branch/worktree hygiene. Use `pr-lifecycle=full` when you want the whole chain kept together. | **Now** | `lane-closeout` skill, `@orphaned-pr-cleanup`, `@merge-coordinator`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
+| `pr:` | Pull request lifecycle handling: remaining WIP-branch logging, merge readiness, build-gated lane closeout, and branch/worktree hygiene. Use `pr-lifecycle=full` when you want the whole chain kept together. | **Now** | `lane-closeout` skill, `@orphaned-pr-cleanup`, `@merge-coordinator`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
 | `repo-cleanup:` | Bulk post-merge hygiene sweep: sync `main` to latest, prune stale/orphaned worktrees, delete merged local and remote branches | **Now** | `repo-cleanup` skill, `git-worktrees` skill |
 | `fleet:` | Close previous sprint, plan and execute the next sprint, triage oldest issues, audit PRs/builds, clean branches | **Now** | `@parallel-session-coordinator`, `@sprint-closeout-auditor`, `@sprint-planner`, `@issue-triage`, `@broken-build-troubleshooter`, `@branch-hygiene-sweeper` |
 | `workflow:` | GitHub Actions workflow failure triage and repair | **Now** | `@broken-build-troubleshooter`, `@self-healing-ci`, `@devops-engineer` |
@@ -48,6 +51,17 @@ release, version drift) to reduce routing ambiguity.
 | `sprint:` | Sprint planning, execution, or closeout | **Now** | `@sprint-planner`, `@sprint-closeout-auditor` |
 | `wave:` | Dependency-ordered batch within a sprint (issues and PRs) | **Now** | `@sprint-planner`, `@parallel-session-coordinator` |
 | `autopilot:` | Continuous oldest-to-newest backlog burndown in dependency-ordered waves, unattended until stopped or blocked | **Now** | `@backlog-autopilot`, `@parallel-session-coordinator`, `@ship-it-control-loop`, `@delivery-autopilot` |
+| `ship-it:` | Land one specific change (implement, PR, merge, close). Not a fleet burndown. Combine as `fleet: ship-it:` to burn the backlog oldest-first using the ship-it control loop | **Now** | `ship-it` skill, `@ship-it-control-loop`, `@delivery-autopilot` |
+
+### Prefix disambiguation
+
+| Cluster | Use this | Not that |
+|---|---|---|
+| Backlog batch | `fleet:` whole-repo sprint/backlog operations; `sprint:` one sprint plan/execute/closeout; `wave:` one dependency-ordered batch inside a sprint; `autopilot:` unattended oldest-first burndown; `ship-it:` finish this change | Do not use `fleet:` when you only want the current fix merged |
+| GitHub Actions | `workflow:` failing run triage and repair; `actions:` workflow files, runs, and policy | Do not use `actions:` for a red job that needs RCA |
+| Infra staged | `azure:` Azure-scoped preflight; `infra:` IaC/network/RBAC; `deploy:` staged prepare-validate-deploy | Do not use `deploy:` for a design-only Azure question |
+| Reliability | `bug:` defect/regression; `outage:` service down; `rca:` read-only root cause of a known failure | Do not use `outage:` for a non-user-facing test failure |
+| Front-end | `ui:` implement components/layout; `ux:` flows and usability; `ia:` content structure and navigation | Do not use `ui:` for taxonomy-only information architecture |
 
 ---
 
@@ -63,7 +77,7 @@ for selecting chain patterns.
 | Governance | `audit:`, `security:`, `chore:` | findings, policy action, risk controls |
 | GitHub Operations | `workflow:`, `actions:`, `pr:`, `issue:`, `portfolio:`, `release:`, `version:` | run triage, repo hygiene, release/version decisions |
 | Planning | `plan:`, `spike:`, `sprint:`, `wave:` | prioritized backlog, design notes, decision doc |
-| Continuous delivery | `autopilot:` | unattended multi-wave backlog burndown with merge-queue landing and deploy |
+| Continuous delivery | `autopilot:`, `ship-it:` | unattended multi-wave burndown, or land one change through merge |
 | Packetization | `optimize:` | normalized execution packet and optional execution chain |
 | Quality | `test:`, `docs:`, `ui:`, `ux:`, `ia:`, `design:` | tests, documentation, or design artifacts |
 | Knowledge capture | `chronicle:` | story/update packet, follow-up issue bundle, optional memory suggestions |

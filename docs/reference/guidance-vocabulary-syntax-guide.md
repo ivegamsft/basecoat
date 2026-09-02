@@ -74,6 +74,14 @@ Use canonical terms in agents, skills, instructions, and prompts.
 | GitHub Actions execution instance | workflow run | build, pipeline run (ambiguous) |
 | Failing unit inside a run | job | step bundle, task |
 | Log-backed remediation entry point | run evidence first | guess first, classify first |
+| Unfinished git branch | WIP branch | WIP (unqualified), leftover branch |
+| Draft documentation still in progress | working doc | WIP doc, WIP (unqualified) |
+| Land one change to merged/closed | ship-it | just merge it, ship it (unprefixed) |
+| Publish a versioned GitHub release | publish a release | cut a release |
+| Whole-repo backlog/sprint operations | fleet | burn it down, do all the issues |
+| Dependency-ordered batch inside a sprint | wave | batch (unqualified), swarm |
+| One sprint plan/execute/closeout | sprint | fleet (when only one sprint is in scope) |
+| Stale issue or PR with no active owner | orphan | abandoned (unqualified) |
 
 ## Intent families and execution model
 
