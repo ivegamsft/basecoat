@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "ratchetCadence": "once per sprint",
+  "maxIncreasePerRatchet": 2,
+  "override": {
+    "label": "coverage-ratchet-override"
+  },
+  "targets": [
+    {
+      "name": "frontend-vitest",
+      "thresholdsFile": "config/coverage-thresholds.json",
+      "baseline": {
+        "capturedAt": "YYYY-MM-DD",
+        "source": "bootstrap-from-current-thresholds",
+        "metrics": {
+          "statements": 50,
+          "branches": 40,
+          "functions": 45,
+          "lines": 50
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+name: Coverage threshold ratchet
+
+on:
+  pull_request:
+  merge_group:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coverage-ratchet:
+    name: Enforce coverage threshold ratchet
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          fetch-depth: 0
+
+      - name: Check coverage threshold ratchet
+        env:
+          COVERAGE_RATCHET_OVERRIDE_APPROVED: ${{ contains(join(github.event.pull_request.labels.*.name, ','), 'coverage-ratchet-override') }}
+          COVERAGE_RATCHET_BASE_REF: origin/${{ github.base_ref || github.event.repository.default_branch || 'main' }}
+        run: |
+          set -euo pipefail
+          script=".github/base-coat/templates/coverage-threshold-ratchet/check-coverage-threshold-ratchet.js"
+          if [ ! -f "$script" ]; then
+            script="templates/coverage-threshold-ratchet/check-coverage-threshold-ratchet.js"
+          fi
+          node "$script" \
+            --policy-file coverage-threshold-ratchet-policy.json \
+            --base-ref "${COVERAGE_RATCHET_BASE_REF}" \
+            --override-approved "${COVERAGE_RATCHET_OVERRIDE_APPROVED}"

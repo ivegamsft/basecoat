@@ -213,6 +213,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running coverage threshold ratchet tests...'
+& node --test (Join-Path $PSScriptRoot 'coverage-threshold-ratchet.test.js')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Coverage threshold ratchet tests failed' -ForegroundColor Red
+    Write-FailureLog 'coverage-threshold-ratchet'
+    exit 1
+}
+
 Write-Host 'Running npm lock integrity tests...'
 & node --test (Join-Path $PSScriptRoot 'npm-lock-integrity.test.mjs')
 if ($LASTEXITCODE -ne 0) {
