@@ -6,6 +6,7 @@ on:
       - "v*.*.*"
 
 permissions:
+  actions: write
   contents: write
   pull-requests: read
 
@@ -211,3 +212,16 @@ jobs:
             echo "::error::Sync scripts not found in release assets"
             exit 1
           }
+
+      # Events created with GITHUB_TOKEN do not start another workflow. Dispatch
+      # changelog publication explicitly after the release has been updated.
+      - name: Dispatch release changelog publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh workflow run release-changelog-generation.yml \
+            --repo "${GITHUB_REPOSITORY}" \
+            --ref main \
+            -f "tag=${GITHUB_REF_NAME}"

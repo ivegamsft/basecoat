@@ -57,10 +57,39 @@ jobs:
           version="${tag#v}"
           date_utc="$(date -u +%Y-%m-%d)"
           notes_file="reports/release-${version}.md"
+          latest_notes_file="reports/release-notes/latest.md"
           scripts/generate-release-notes.sh "$tag" "$version" "$notes_file"
+          mkdir -p "$(dirname "$latest_notes_file")"
+          cp "$notes_file" "$latest_notes_file"
 
+          changelog_changed=false
           if grep -Eq "^## v?${version}\b" CHANGELOG.md; then
-            echo "Changelog already contains ${version}; skipping PR creation."
+            echo "Changelog already contains ${version}; publishing refreshed latest notes only."
+          else
+            changelog_changed=true
+            NOTES_FILE="$notes_file" VERSION="$version" DATE_UTC="$date_utc" python - <<'PY'
+            from pathlib import Path
+            import os
+
+            changelog = Path("CHANGELOG.md")
+            notes = Path(os.environ["NOTES_FILE"]).read_text(encoding="utf-8").strip()
+            version = os.environ["VERSION"]
+            date_utc = os.environ["DATE_UTC"]
+
+            section = f"\n## {version} - {date_utc}\n\n{notes}\n"
+            content = changelog.read_text(encoding="utf-8")
+            marker = "## Unreleased"
+            if marker in content:
+              head, tail = content.split(marker, 1)
+              updated = f"{head}{marker}\n\n- No unreleased changes.\n{section}{tail.lstrip()}"
+            else:
+              updated = f"{content.rstrip()}\n{section}"
+            changelog.write_text(updated, encoding="utf-8")
+            PY
+          fi
+
+          if git diff --quiet -- CHANGELOG.md "$latest_notes_file"; then
+            echo "Release documentation is already current for ${version}; skipping PR creation."
             echo "should_open_pr=false" >> "$GITHUB_OUTPUT"
             echo "branch_name=" >> "$GITHUB_OUTPUT"
             echo "version=$version" >> "$GITHUB_OUTPUT"
@@ -68,32 +97,12 @@ jobs:
             exit 0
           fi
 
-          NOTES_FILE="$notes_file" VERSION="$version" DATE_UTC="$date_utc" python - <<'PY'
-          from pathlib import Path
-          import os
-
-          changelog = Path("CHANGELOG.md")
-          notes = Path(os.environ["NOTES_FILE"]).read_text(encoding="utf-8").strip()
-          version = os.environ["VERSION"]
-          date_utc = os.environ["DATE_UTC"]
-
-          section = f"\n## {version} - {date_utc}\n\n{notes}\n"
-          content = changelog.read_text(encoding="utf-8")
-          marker = "## Unreleased"
-          if marker in content:
-            head, tail = content.split(marker, 1)
-            updated = f"{head}{marker}\n\n- No unreleased changes.\n{section}{tail.lstrip()}"
-          else:
-            updated = f"{content.rstrip()}\n{section}"
-          changelog.write_text(updated, encoding="utf-8")
-          PY
-
           branch_name="automation/changelog-${version}-${GITHUB_RUN_ID}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch_name"
-          git add CHANGELOG.md
-          git commit -m "docs(changelog): add release notes for ${version}"
+          git add CHANGELOG.md "$latest_notes_file"
+          git commit -m "docs(release): publish release notes for ${version}"
           git push origin "$branch_name"
 
           echo "should_open_pr=true" >> "$GITHUB_OUTPUT"

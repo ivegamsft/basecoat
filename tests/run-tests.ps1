@@ -381,6 +381,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running release-note publication tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'release-note-publication-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Release-note publication tests failed' -ForegroundColor Red
+    Write-FailureLog 'release-note-publication-tests'
+    exit 1
+}
+
 Write-Host 'Running downstream reviewer-routing audit tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'downstream-reviewer-routing-audit-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
