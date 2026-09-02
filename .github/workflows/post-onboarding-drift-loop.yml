@@ -267,6 +267,34 @@ jobs:
                 defaultBranch = repoResponse.data.default_branch || defaultBranch;
               } catch (error) {
                 core.warning(`Unable to read repository metadata for ${repoFullName}: ${error.message}`);
+                // Private sibling/cross-org targets return 404 (not 403) when
+                // GITHUB_TOKEN cannot see the repo. Continuing would treat
+                // later 404s as "no protection" / "missing files".
+                if (error.status === 401 || error.status === 403 || error.status === 404) {
+                  const hiddenDetail = `repository metadata unavailable (HTTP ${error.status}); token cannot read ${repoFullName}`;
+                  const hiddenSurface = { status: 'inaccessible', detail: hiddenDetail };
+                  repositoriesResult.push({
+                    repo: repoFullName,
+                    defaultBranch,
+                    branchProtectionEnabled: false,
+                    rulesetsCount: 0,
+                    readyOpenPrs: 0,
+                    readyWithoutReview: 0,
+                    behindOrDirtyNoReview: 0,
+                    reviewerWorkflowFiles: [],
+                    driftCount: 0,
+                    surfaces: {
+                      branch_ruleset: hiddenSurface,
+                      intake_surface: hiddenSurface,
+                      reviewer_routing: {
+                        status: 'inaccessible',
+                        detail: 'pull request data unavailable (repo inaccessible or API error); reviewer-routing status could not be evaluated'
+                      },
+                      metadata_hygiene: hiddenSurface
+                    }
+                  });
+                  continue;
+                }
               }
 
               let branchProtectionInaccessible = false;
@@ -296,7 +324,7 @@ jobs:
                 const rulesetsResponse = await github.rest.repos.getRepoRulesets({ owner, repo, per_page: 100 });
                 rulesetsCount = rulesetsResponse.data.length;
               } catch (error) {
-                if (isAuthError(error)) {
+                if (isAuthError(error) || error.status === 404) {
                   rulesetsInaccessible = true;
                 }
                 core.warning(`Unable to list rulesets for ${repoFullName}: ${error.message}`);

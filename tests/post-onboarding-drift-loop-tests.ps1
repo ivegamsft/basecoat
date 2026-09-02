@@ -24,6 +24,15 @@ $workflow = Get-Content $workflowPath -Raw
 Assert-Match $workflow 'const isAuthError = error => error && \(error\.status === 401 \|\| error\.status === 403\)' `
     'Drift loop must classify 401/403 as auth errors, not missing files.'
 
+Assert-Match $workflow 'error\.status === 401 \|\| error\.status === 403 \|\| error\.status === 404' `
+    'repos.get 404 on a hidden private repo must short-circuit as inaccessible, not missing files.'
+
+Assert-Match $workflow 'repository metadata unavailable \(HTTP' `
+    'Hidden-repo short-circuit must record HTTP status in the inaccessible detail.'
+
+Assert-Match $workflow 'if \(isAuthError\(error\) \|\| error\.status === 404\) \{\s*rulesetsInaccessible = true' `
+    'getRepoRulesets 404 must be inaccessible, not rulesets=0 drift.'
+
 Assert-Match $workflow 'const probeFile = async' `
     'Drift loop must probe files with inaccessible vs missing outcomes.'
 
