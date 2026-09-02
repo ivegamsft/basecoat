@@ -85,7 +85,7 @@ jobs:
             else:
               updated = f"{content.rstrip()}\n{section}"
             changelog.write_text(updated, encoding="utf-8")
-            PY
+          PY
           fi
 
           if git diff --quiet -- CHANGELOG.md "$latest_notes_file"; then
