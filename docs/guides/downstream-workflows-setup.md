@@ -96,7 +96,7 @@ The installer now uses canonical `basecoat-*` naming and removes legacy files
 when replacements are installed. Current legacy mappings:
 
 | Legacy filename | Canonical filename |
-|---|---|
+| --- | --- |
 | `bc-check-health.yml` | `basecoat-upstream-version-drift.yml` |
 | `bc-version-check.yml` | `basecoat-version-check.yml` |
 | `bc-secret-scan.yml` | `basecoat-secret-scan.yml` |
@@ -133,13 +133,16 @@ pwsh scripts/configure-downstream-workflows.ps1 -SourceDir ".github/base-coat/wo
 pwsh scripts/configure-downstream-workflows.ps1 -SourceDir ".github/basecoat-sync/workflows"
 ```
 
-### Unknown managed workflows were removed
+### Unmarked workflows were preserved
 
-By default, the installer removes unknown files with managed prefixes
-(`bc-`, `basecoat-`, `basecoat-agent-`, `basecoat-internal-`).
+BaseCoat only retires workflows explicitly marked `factory-owned` in
+`.github/base-coat/workflows/workflow-ownership-manifest.json`. Unmarked files
+are repository-owned by default, even if their filename has a managed prefix.
 
-To keep unknown managed files:
+Use the guarded retirement command only after completing the
+[offboarding checklist](downstream-workflow-offboarding.md):
 
-```bash
-pwsh scripts/configure-downstream-workflows.ps1 -KeepUnknownBc
+```powershell
+pwsh .github/base-coat/scripts/retire-downstream-workflows.ps1 `
+  -Workflow basecoat-secret-scan.yml -DryRun
 ```

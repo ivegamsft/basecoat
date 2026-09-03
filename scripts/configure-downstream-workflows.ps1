@@ -48,8 +48,8 @@
     required. Targeted installs preserve all non-selected and unknown workflows.
 
 .PARAMETER KeepUnknownBc
-    Keep unknown managed workflow files already present in destination.
-    Managed prefixes are bc-, basecoat-, basecoat-agent-, basecoat-internal-.
+    Retained for compatibility. Unmarked workflow files are now always preserved
+    because they are repository-owned by default.
 
 .PARAMETER DryRun
     Print planned actions without modifying files.
@@ -90,6 +90,12 @@ if (-not $repoRoot) {
 }
 Set-Location $repoRoot
 
+$ownershipModulePath = Join-Path $PSScriptRoot 'workflow-ownership.ps1'
+if (-not (Test-Path -LiteralPath $ownershipModulePath -PathType Leaf)) {
+    throw "Workflow ownership guard not found: $ownershipModulePath"
+}
+. $ownershipModulePath
+
 $resolvedSource = if ([System.IO.Path]::IsPathRooted($SourceDir)) {
     $SourceDir
 } else {
@@ -114,6 +120,11 @@ $resolvedGovernanceDest = if ([System.IO.Path]::IsPathRooted($GovernanceDestinat
 
 if (-not (Test-Path -Path $resolvedSource -PathType Container)) {
     throw "Source workflow directory not found: $resolvedSource"
+}
+$ownershipManifestPath = Join-Path $resolvedSource 'workflow-ownership-manifest.json'
+$hasOwnershipManifest = Test-Path -LiteralPath $ownershipManifestPath -PathType Leaf
+if (-not $hasOwnershipManifest) {
+    Write-Warn "Workflow ownership manifest is missing from '$SourceDir'; workflows will install, but no retirement will occur."
 }
 
 if (-not (Test-Path -Path $resolvedDest -PathType Container)) {
@@ -410,6 +421,11 @@ $factoryOnlyWorkflowFiles = @(
     'bc-database-ci-cd.yml',
     'basecoat-internal-database-ci-cd.yml'
 )
+if ($hasOwnershipManifest) {
+    Assert-FactoryOwnershipManifestCoverage `
+        -WorkflowNames ($knownManagedFiles + $factoryOnlyWorkflowFiles) `
+        -OwnershipManifestPath $ownershipManifestPath
+}
 
 $copied = 0
 $removed = 0
@@ -436,13 +452,21 @@ foreach ($workflowEntry in $workflowMap) {
 
     if (-not $workflowEntry.Supported -and -not $IncludeUnsupported) {
         if (Test-Path $destFile) {
-            if ($DryRun) {
-                Write-Info "Would remove unsupported workflow: $($workflowEntry.Destination)"
+            if (-not $hasOwnershipManifest) {
+                Write-Warn "Preserving unsupported workflow without an ownership manifest: $($workflowEntry.Destination)"
+                $skipped++
+            } elseif ($DryRun) {
+                Write-Info "Would retire unsupported factory workflow: $($workflowEntry.Destination)"
+                $removed++
             } else {
-                Remove-Item -Path $destFile -Force
-                Write-Ok "Removed unsupported workflow: $($workflowEntry.Destination)"
+                [void](Remove-FactoryOwnedWorkflow `
+                        -WorkflowName $workflowEntry.Destination `
+                        -WorkflowDirectory $resolvedDest `
+                        -OwnershipManifestPath $ownershipManifestPath `
+                        -Reason 'unsupported workflow' `
+                        -DryRun:$DryRun)
+                $removed++
             }
-            $removed++
         } else {
             Write-Info "Skipping unsupported workflow: $($workflowEntry.Destination)"
             $skipped++
@@ -488,13 +512,21 @@ foreach ($workflowEntry in $workflowMap) {
         }
         $legacyPath = Join-Path $resolvedDest $legacyName
         if (Test-Path -Path $legacyPath -PathType Leaf) {
-            if ($DryRun) {
-                Write-Info "Would remove legacy workflow filename: $legacyName"
+            if (-not $hasOwnershipManifest) {
+                Write-Warn "Preserving legacy workflow without an ownership manifest: $legacyName"
+                $skipped++
+            } elseif ($DryRun) {
+                Write-Info "Would retire legacy factory workflow filename: $legacyName"
+                $removed++
             } else {
-                Remove-Item -Path $legacyPath -Force
-                Write-Ok "Removed legacy workflow filename: $legacyName"
+                [void](Remove-FactoryOwnedWorkflow `
+                        -WorkflowName $legacyName `
+                        -WorkflowDirectory $resolvedDest `
+                        -OwnershipManifestPath $ownershipManifestPath `
+                        -Reason 'legacy filename replacement' `
+                        -DryRun:$DryRun)
+                $removed++
             }
-            $removed++
         }
     }
 
@@ -536,13 +568,8 @@ if (-not $KeepUnknownBc -and -not $targetedInstall) {
         }
 
     foreach ($file in $unknownManagedFiles) {
-        if ($DryRun) {
-            Write-Info "Would remove unknown managed workflow: $($file.Name)"
-        } else {
-            Remove-Item -Path $file.FullName -Force
-            Write-Ok "Removed unknown managed workflow: $($file.Name)"
-        }
-        $removed++
+        Write-Warn "Preserving unmarked workflow as repository-owned: $($file.Name)"
+        $skipped++
     }
 }
 
@@ -550,13 +577,21 @@ if (-not $targetedInstall) {
     foreach ($factoryWorkflow in $factoryOnlyWorkflowFiles) {
         $factoryPath = Join-Path $resolvedDest $factoryWorkflow
         if (Test-Path -Path $factoryPath -PathType Leaf) {
-            if ($DryRun) {
-                Write-Info "Would remove factory-only workflow: $factoryWorkflow"
+            if (-not $hasOwnershipManifest) {
+                Write-Warn "Preserving factory-only workflow without an ownership manifest: $factoryWorkflow"
+                $skipped++
+            } elseif ($DryRun) {
+                Write-Info "Would retire factory-only workflow: $factoryWorkflow"
+                $removed++
             } else {
-                Remove-Item -Path $factoryPath -Force
-                Write-Ok "Removed factory-only workflow: $factoryWorkflow"
+                [void](Remove-FactoryOwnedWorkflow `
+                        -WorkflowName $factoryWorkflow `
+                        -WorkflowDirectory $resolvedDest `
+                        -OwnershipManifestPath $ownershipManifestPath `
+                        -Reason 'factory-only retirement' `
+                        -DryRun:$DryRun)
+                $removed++
             }
-            $removed++
         }
     }
 }

@@ -95,6 +95,12 @@ without writing files:
 pwsh scripts/configure-downstream-workflows.ps1 -DryRun
 ```
 
+The distributed `workflow-ownership-manifest.json` marks the workflows that
+BaseCoat may retire. All workflows not explicitly marked `factory-owned` are
+repository-owned and preserved. See the
+[Downstream Workflow Offboarding Checklist](../guides/downstream-workflow-offboarding.md)
+before retiring a factory workflow.
+
 `version-check.yml` validates this repository's version metadata. Consumer
 workflow filenames can use `basecoat-*` names because those are the installer
 destinations, not necessarily the workflow source filenames.

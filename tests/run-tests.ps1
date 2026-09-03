@@ -157,6 +157,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running workflow ownership tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'workflow-ownership-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Workflow ownership tests failed' -ForegroundColor Red
+    Write-FailureLog 'workflow-ownership-tests'
+    exit 1
+}
+
 Write-Host 'Running adoption scanner tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'adoption-scanner-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

@@ -10,7 +10,7 @@ For weekly post-onboarding drift detection with remediation issue dedupe and tre
 Supported distributable workflows by class:
 
 | Class | Installed by default | Workflows |
-|----------|---------|---------|
+| --- | --- | --- |
 | **Reusable** | Yes | `basecoat-upstream-version-drift.yml`, `basecoat-version-check.yml`, `basecoat-secret-scan.yml` |
 | **Ship-it** | Yes | `ship-it-intent-dispatch.yml`, `ship-it-build-guard.yml`, `ship-it-release-gate.yml` (all three install together per the skill's fail-closed contract; see issue #2943) |
 | **Onboarding-telemetry** | No (`-InstallClass onboarding-telemetry`) | `adoption-metrics.yml` (autonomous, scheduled, write-permission workflow -- opt-in) |
@@ -189,17 +189,16 @@ gh workflow run basecoat-upstream-version-drift.yml \
 
 ### Disabling Workflows
 
-To disable a workflow:
+Do not bulk-remove workflows during BaseCoat offboarding. A workflow absent
+from the distributed ownership manifest is repository-owned by default.
 
-```bash
-# Option 1: Rename file (add .disabled extension)
-mv .github/workflows/basecoat-sprint-closeout-branch-audit.yml .github/workflows/basecoat-sprint-closeout-branch-audit.yml.disabled
+For an approved factory-owned retirement, follow the
+[Downstream Workflow Offboarding Checklist](downstream-workflow-offboarding.md)
+and preview the removal first:
 
-# Option 2: Remove from repository
-rm .github/workflows/basecoat-secret-scan.yml
-
-# Option 3: Set status=skipped in workflow file
-# status: skipped
+```powershell
+pwsh .github/base-coat/scripts/retire-downstream-workflows.ps1 `
+  -Workflow basecoat-secret-scan.yml -DryRun
 ```
 
 ## Troubleshooting

@@ -68,6 +68,15 @@ Tests for workflow compliance in `.github/workflows/*.yml` covering:
 - **matrix bounds**: Matrix strategies have reasonable parallelism
 - **job naming**: Jobs have descriptive names
 
+### `workflow-ownership-tests.ps1`
+
+Tests the downstream workflow ownership boundary:
+
+- The distributed manifest defaults unmarked workflows to `repo-owned`
+- Retirement rejects repository-owned workflows without deleting them
+- Retirement permits explicitly marked factory-owned workflows
+- The installer preserves unmarked workflows, including managed-looking names
+
 ### `pr-flow-hygiene-tests.ps1`
 
 Tests for `.github/workflows/pr-flow-hygiene.yml` covering:

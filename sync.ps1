@@ -473,7 +473,9 @@ try {
             'validate-basecoat.ps1',
             'validate-basecoat.sh',
             'validate-workflow-action-pins.ps1',
-            'validate-workflow-action-pins.py'
+            'validate-workflow-action-pins.py',
+            'workflow-ownership.ps1',
+            'retire-downstream-workflows.ps1'
         )) {
         $validatorSource = Join-Path $sourcePath "scripts/$validator"
         if (Test-Path $validatorSource -PathType Leaf) {

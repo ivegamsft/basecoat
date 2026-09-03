@@ -303,7 +303,7 @@ mkdir -p "$REPO_ROOT/$TARGET_DIR/scripts"
 if [[ -d "$TMP_DIR/source/.github/base-coat/scripts" ]]; then
   cp -R "$TMP_DIR/source/.github/base-coat/scripts/." "$REPO_ROOT/$TARGET_DIR/scripts/"
 fi
-for validator in validate-basecoat.ps1 validate-basecoat.sh validate-workflow-action-pins.ps1 validate-workflow-action-pins.py; do
+for validator in validate-basecoat.ps1 validate-basecoat.sh validate-workflow-action-pins.ps1 validate-workflow-action-pins.py workflow-ownership.ps1 retire-downstream-workflows.ps1; do
   if [[ -f "$TMP_DIR/source/scripts/$validator" ]]; then
     cp "$TMP_DIR/source/scripts/$validator" "$REPO_ROOT/$TARGET_DIR/scripts/$validator"
   fi
