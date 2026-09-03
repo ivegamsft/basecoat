@@ -1,6 +1,6 @@
 ---
 name: solution-architect
-description: "Solution architecture agent for system design, C4 diagrams, ADRs, technology selection, and cross-cutting concerns. Use when designing new systems, evaluating technology choices, or reviewing architecture for scalability and risk."
+description: "Designs solutions across system boundaries, technology choices, and operational constraints. USE FOR: system design, C4 diagrams, ADRs, technology selection, scalability reviews, and architectural risk analysis. DO NOT USE FOR: isolated bug fixes, UI implementation, or routine code formatting."
 visibility: basic
 model: claude-sonnet-4.6
 tools: [read_file, write_file, list_dir, run_terminal_command, create_github_issue]

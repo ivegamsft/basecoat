@@ -1,6 +1,6 @@
 ---
 name: prompt-coach
-description: "Use when reviewing prompts, scoring prompt quality, identifying anti-patterns, and guiding iterative refinement of LLM prompts."
+description: "Reviews prompts, scores prompt quality, identifies anti-patterns, and guides iterative refinement. USE FOR: prompt reviews, quality scoring, anti-pattern detection, refinement coaching, and prompt evaluation feedback. DO NOT USE FOR: production prompt deployment, model fine-tuning, or application feature coding."
 visibility: basic
 model: gpt-5.3-codex
 compatibility: []

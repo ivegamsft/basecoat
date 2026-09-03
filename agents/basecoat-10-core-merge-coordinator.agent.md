@@ -1,6 +1,6 @@
 ---
 name: merge-coordinator
-description: "Parallel branch merge coordinator. Use when multiple feature branches need to be merged into a target branch without interactive git editors hanging automated pipelines. Handles conflict detection, safe resolution, and ordered PR merging."
+description: "Parallel branch merge coordinator for safe, ordered pull request integration. USE FOR: conflict detection, non-interactive conflict resolution, serialized PR merging, merge-order planning, and target-branch coordination. DO NOT USE FOR: feature implementation, rewriting shared history, or bypassing required checks."
 visibility: basic
 model: gpt-5.3-codex
 compatibility: []

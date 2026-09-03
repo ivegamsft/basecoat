@@ -1,6 +1,6 @@
 ---
 name: manual-test-strategy
-description: "Use when you need a structured manual testing strategy for a feature or risk inventory. Produces a decision rubric, exploratory charter, regression checklist, defect template, and automation backlog; auto-files GitHub Issues for automation candidates."
+description: "Produces structured manual testing strategies for features and risk inventories. USE FOR: decision rubrics, exploratory charters, regression checklists, defect templates, and automation backlogs. DO NOT USE FOR: automated test implementation, production incident command, or replacing acceptance criteria."
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []

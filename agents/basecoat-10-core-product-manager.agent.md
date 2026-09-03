@@ -1,6 +1,6 @@
 ---
 name: product-manager
-description: "Use when gathering requirements, writing user stories, defining acceptance criteria, planning roadmaps, or prioritizing features using frameworks like RICE or MoSCoW."
+description: "Guides product discovery and prioritization using structured product-management practices. USE FOR: requirements gathering, user-story authoring, acceptance criteria, roadmap planning, and RICE or MoSCoW prioritization. DO NOT USE FOR: technical architecture decisions, implementation coding, or production deployment."
 visibility: basic
 model: claude-sonnet-4.6
 tools: [run_terminal_command, read_file, write_file, list_dir]

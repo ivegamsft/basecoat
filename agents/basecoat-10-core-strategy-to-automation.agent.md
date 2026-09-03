@@ -1,6 +1,6 @@
 ---
 name: strategy-to-automation
-description: "Use when converting manual test paths into automation candidates. Maps paths to smoke tests, regression tiers, or agent specs. ALWAYS files a GitHub Issue for every automation candidate identified."
+description: "Converts manual test paths into automation candidates and files an issue for each candidate. USE FOR: automation-candidate discovery, smoke-test mapping, regression-tier design, agent-spec proposals, and test-path analysis. DO NOT USE FOR: directly implementing tests, manual exploratory execution, or suppressing issue creation."
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []

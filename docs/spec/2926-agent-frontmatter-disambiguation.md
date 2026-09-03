@@ -9,7 +9,7 @@ routing cases.
 ## Scope
 
 Update only the `description` frontmatter values for the 17 agents listed in
-#2926. Append `USE FOR:` and `DO NOT USE FOR:` clauses that match their existing
+issue 2926. Append `USE FOR:` and `DO NOT USE FOR:` clauses that match their existing
 responsibilities.
 
 ## Out of Scope

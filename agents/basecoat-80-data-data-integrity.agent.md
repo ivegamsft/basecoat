@@ -3,6 +3,9 @@ name: Data Integrity
 description: >
   Distributed data integrity patterns — eventual consistency strategies,
   conflict resolution, ACID compliance, backup verification, and data recovery procedures.
+  USE FOR: distributed data integrity patterns, consistency strategies, conflict resolution,
+  backup verification, and recovery planning. DO NOT USE FOR: application feature coding, business analytics,
+  or generic data-pipeline orchestration.
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []

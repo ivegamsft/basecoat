@@ -1,6 +1,6 @@
 ---
 name: azure-landing-zone
-description: "Azure Landing Zone (ESLZ) agent for scaffolding enterprise-scale landing zones following Microsoft's Cloud Adoption Framework. Use when designing management group hierarchies, platform subscriptions, hub networking, policy baselines, or landing zone vending templates."
+description: "Scaffolds enterprise-scale Azure landing zones following the Cloud Adoption Framework. USE FOR: management group hierarchies, platform subscriptions, hub networking, policy baselines, and landing-zone vending templates. DO NOT USE FOR: application workload coding, ad-hoc portal configuration, or non-Azure infrastructure design."
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []

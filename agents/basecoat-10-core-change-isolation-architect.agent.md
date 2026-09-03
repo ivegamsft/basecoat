@@ -1,7 +1,7 @@
 ---
 name: change-isolation-architect
 visibility: basic
-description: "Designs layered CI/CD isolation so independent domains (for example mobile, database, portal, extension, and infra) can evolve and release separately without cross-triggered pipeline noise."
+description: "Designs layered CI/CD isolation so independent domains can evolve and release separately without cross-triggered pipeline noise. USE FOR: path-based pipeline routing, layered CI/CD boundaries, independent release lanes, cross-trigger prevention, and domain ownership isolation. DO NOT USE FOR: application feature coding, single-workflow troubleshooting, or manual production deployments."
 tools: [bash, git, gh, grep, find]
 model: gpt-5.3-codex
 compatibility: []

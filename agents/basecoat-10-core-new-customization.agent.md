@@ -1,6 +1,6 @@
 ---
 name: new-customization
-description: "Use when creating or updating a customization asset such as an instruction, skill, prompt, or agent. Chooses the right primitive, authors the file, and validates frontmatter and placement."
+description: "Creates or updates customization assets and validates their frontmatter and placement. USE FOR: selecting instructions, authoring skills, creating prompts, defining agents, and validating customization metadata. DO NOT USE FOR: application feature coding, CI/CD infrastructure changes, or runtime incident remediation."
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []

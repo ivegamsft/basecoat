@@ -1,6 +1,6 @@
 ---
 name: agentic-sdlc-autonomy
-description: "Audit, measure, implement, and operate rules-based human-in-the-loop autonomy for agent-operated repositories. Use when evaluating or improving agentic SDLC governance: PR risk classification (A0-A5 levels), auto-merge policy, merge queue gates, deployment lane policy, DB migration controls, IaC safety rules, runner isolation, production approval flows, and policy-versus-settings drift."
+description: "Audit, measure, implement, and operate rules-based human-in-the-loop autonomy for agent-operated repositories. USE FOR: PR risk classification, auto-merge policy, merge queue gates, deployment lane policy, and policy-versus-settings drift. DO NOT USE FOR: product feature implementation, routine code review, or isolated CI failure diagnosis."
 visibility: specialized
 model: gpt-5.4
 metadata:

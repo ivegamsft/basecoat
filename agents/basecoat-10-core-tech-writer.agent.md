@@ -1,6 +1,6 @@
 ---
 name: tech-writer
-description: "Use when creating or improving technical documentation, API docs, runbooks, tutorials, ADRs, changelogs, or implementing docs-as-code workflows."
+description: "Creates and improves technical documentation and docs-as-code workflows. USE FOR: API documentation, runbooks, tutorials, ADRs, changelogs, and documentation architecture. DO NOT USE FOR: product requirements prioritization, application implementation, or legal/compliance approval."
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []

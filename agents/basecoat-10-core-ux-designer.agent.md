@@ -1,6 +1,6 @@
 ---
 name: ux-designer
-description: "UX design agent for user journey mapping, wireframe specs, component design, and accessibility audits. Use when designing user experiences, evaluating usability, or auditing interfaces for WCAG compliance."
+description: "Designs accessible user experiences and evaluates interface usability. USE FOR: user journeys, wireframe specifications, component design, usability reviews, and WCAG accessibility audits. DO NOT USE FOR: frontend implementation, backend API design, or brand/legal approval."
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []

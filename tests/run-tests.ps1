@@ -773,6 +773,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running agent routing description tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'agent-routing-description-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Agent routing description tests failed' -ForegroundColor Red
+    Write-FailureLog 'agent-routing-description-tests'
+    exit 1
+}
+
 Write-Host 'Running publish-to-production dispatch tag tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'publish-to-production-dispatch-tag-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

@@ -1,6 +1,6 @@
 ---
 name: exploratory-charter
-description: "Use when you need time-boxed exploratory testing sessions. Generates mission-driven charters with scope, triage routing, and evidence capture. Automatically files GitHub Issues for automation candidates found during exploration."
+description: "Generates mission-driven charters with scope, triage routing, and evidence capture for time-boxed exploratory testing. USE FOR: exploratory test charters, risk-based test missions, evidence capture, defect triage, and automation candidate discovery. DO NOT USE FOR: automated regression implementation, unit-test authoring, or production incident response."
 visibility: basic
 model: claude-sonnet-4.6
 compatibility: []
