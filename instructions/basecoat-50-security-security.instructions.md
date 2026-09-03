@@ -1,6 +1,6 @@
 ---
 description: "Use when working on authentication, authorization, secrets, input handling, or any change with security implications. Covers common secure coding best practices."
-applyTo: "**/*"
+applyTo: "**/*.{cs,csproj,fs,fsproj,ts,tsx,js,jsx,py,go,java,kt,rb,php,rs,sql,bicep,tf}"
 ---
 
 # Security Standards

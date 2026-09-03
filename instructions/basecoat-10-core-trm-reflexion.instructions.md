@@ -1,6 +1,6 @@
 ---
 description: "TRM (Tiny Recursive Model) Reflexion loop for intent classification and turn budget estimation. Apply whenever classifying task intent or tracking progress against a turn budget."
-applyTo: "**/*"
+applyTo: "agents/**/*,skills/**/*,prompts/**/*,.github/**/*"
 ---
 
 # TRM Reflexion — Intent Classification & Progress Tracking

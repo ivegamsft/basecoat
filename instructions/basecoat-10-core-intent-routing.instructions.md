@@ -1,6 +1,6 @@
 ---
 description: "Intent prefix routing — interprets user-defined prefixes to determine urgency, timing, and which agents or skills to invoke. Applies to all conversations."
-applyTo: "**/*"
+applyTo: "agents/**/*,skills/**/*,prompts/**/*,.github/**/*"
 ---
 
 # Intent Prefix Routing

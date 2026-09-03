@@ -1,6 +1,6 @@
 ---
 description: "Use when an agent is retrying work, revising the same change repeatedly, or deciding whether to continue versus escalate. Prevents infinite retry loops, edit thrashing, and repeated failed actions."
-applyTo: "**/*"
+applyTo: "agents/**/*,skills/**/*,prompts/**/*,.github/**/*"
 ---
 
 # Agent Behavior Standards

@@ -1,6 +1,6 @@
 ---
 description: "Use when adding, updating, or reviewing tests. Covers common testing best practices for regression protection, determinism, and change validation."
-applyTo: "**/*"
+applyTo: "tests/**/*,**/*.{test,spec}.{cs,ts,tsx,js,jsx,py,go,java,kt,rb,php,rs}"
 ---
 
 # Testing Standards

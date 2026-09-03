@@ -1,6 +1,6 @@
 ---
 description: "Use when planning sprints, triaging issues, managing pull requests, coordinating releases, or evaluating delivery health. Covers the end-to-end delivery lifecycle from intake through production release."
-applyTo: "**/*"
+applyTo: ".github/**/*,docs/**/*,agents/**/*,skills/**/*,prompts/**/*"
 ---
 
 # Delivery and Process Standards

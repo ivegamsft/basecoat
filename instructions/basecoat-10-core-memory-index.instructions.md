@@ -1,6 +1,6 @@
 ---
 description: "L2 memory index. Loads at session start to prime fast pattern recall. Maps trigger contexts to known high-confidence patterns and subject tags for deeper retrieval. Keep under 500 tokens — index only, no full memories."
-applyTo: "**/*"
+applyTo: "agents/**/*,skills/**/*,prompts/**/*,.github/**/*"
 distribute: false
 ---
 

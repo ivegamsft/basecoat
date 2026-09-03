@@ -1,6 +1,6 @@
 ---
 description: "Use when managing long-running Copilot sessions, switching tasks, or coordinating handoffs. Covers context hygiene, session rotation, and clean-state working practices."
-applyTo: "**/*"
+applyTo: "agents/**/*,skills/**/*,prompts/**/*,.github/**/*"
 ---
 
 # Session Hygiene Standards

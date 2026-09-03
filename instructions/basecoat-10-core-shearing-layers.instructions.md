@@ -1,6 +1,6 @@
 ---
 description: "Shearing Layers design framework — guides contributors and AI agents to reason about change velocity and coupling between BaseCoat layers."
-applyTo: "**/*"
+applyTo: "**/*.{cs,csproj,fs,fsproj,ts,tsx,js,jsx,py,go,java,kt,rb,php,rs,sql,bicep,tf}"
 ---
 
 # Shearing Layers

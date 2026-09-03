@@ -1,6 +1,6 @@
 ---
 description: "Use when reviewing or accepting AI-generated code. Provides a risk-tiered verification protocol to reduce trust overhead while catching real issues."
-applyTo: "**/*"
+applyTo: "agents/**/*,skills/**/*,prompts/**/*,.github/**/*,tests/**/*"
 ---
 
 # AI Output Verification Protocol

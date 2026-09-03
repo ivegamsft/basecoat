@@ -1,6 +1,6 @@
 ---
 description: "Use when working with backend-dev, frontend-dev, middleware-dev, or data-tier agents. Covers shared code style, error handling, security, logging, testing, and agent collaboration expectations."
-applyTo: "**/*"
+applyTo: "**/*.{cs,csproj,fs,fsproj,ts,tsx,js,jsx,py,go,java,kt,rb,php,rs,sql}"
 ---
 
 # Development Standards

@@ -1,6 +1,6 @@
 ---
 description: "Defines a two-stage review protocol for subagent task output. Stage 1 checks spec compliance, Stage 2 checks code quality. Applies when orchestrating multi-agent work."
-applyTo: "**/*"
+applyTo: "agents/**/*,skills/**/*,prompts/**/*,.github/**/*"
 ---
 
 # Two-Stage Subagent Review Protocol

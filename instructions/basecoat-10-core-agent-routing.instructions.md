@@ -1,6 +1,6 @@
 ---
 description: "Use when deciding which agent tier to invoke for a task. Provides cost-aware, security-conscious agent routing to avoid mismatches between task requirements and agent capabilities."
-applyTo: "**/*"
+applyTo: "agents/**/*,skills/**/*,prompts/**/*,.github/**/*"
 ---
 
 # Agent-Tier Routing for Copilot Workflows

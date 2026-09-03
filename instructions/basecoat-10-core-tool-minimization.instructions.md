@@ -1,6 +1,6 @@
 ---
 description: "Use when configuring agent tool access or planning task execution. Enforces selective tool enablement, lower context noise, and disciplined MCP server usage."
-applyTo: "**/*"
+applyTo: "agents/**/*,skills/**/*,prompts/**/*,.github/**/*"
 ---
 
 # Tool Minimization

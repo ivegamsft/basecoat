@@ -1,6 +1,6 @@
 ---
 description: "HRM Phase 2 — Formal layer contracts, two-dimensional routing matrix, guidance signals, and agent decomposition scope rules for the BaseCoat execution hierarchy."
-applyTo: "**/*"
+applyTo: "agents/**/*,skills/**/*,prompts/**/*,.github/**/*"
 distribute: false
 ---
 

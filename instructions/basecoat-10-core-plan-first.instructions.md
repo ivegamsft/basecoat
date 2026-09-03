@@ -1,6 +1,6 @@
 ---
 description: "Use when tasks require multiple steps, cross-file changes, or non-trivial design decisions. Enforces an explore-plan-implement-verify workflow so work stays scoped and intentional."
-applyTo: "**/*"
+applyTo: "agents/**/*,skills/**/*,prompts/**/*,.github/**/*"
 ---
 
 # Plan-First Workflow

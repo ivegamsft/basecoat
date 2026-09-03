@@ -273,8 +273,35 @@ else {
     Write-Host '    ✓ All non-guide routing instruction files use scoped applyTo patterns'
 }
 
-# Test 14: intent-routing includes fleet persistent control-loop mode contract
-Write-Host '  Test 14: Validate fleet persistent control-loop mode contract in intent-routing...'
+# Test 14: source instruction always-on context stays within the token budget
+Write-Host '  Test 14: Validate source instruction always-on token budget...'
+$sourceInstructionsDir = Join-Path $repoRoot 'instructions'
+$alwaysOnBudget = 12000
+if (-not (Test-Path $sourceInstructionsDir)) {
+    $failures += 'source-instructions-missing'
+    Write-Host '    ✗ source instructions directory not found' -ForegroundColor Red
+}
+else {
+    $alwaysOnFiles = @(
+        Get-ChildItem $sourceInstructionsDir -Filter '*.instructions.md' -File |
+        Where-Object {
+            (Get-Content $_.FullName -Raw) -match '(?m)^applyTo:\s*["'']\*\*/\*["'']\s*$'
+        }
+    )
+    $alwaysOnBytes = ($alwaysOnFiles | Measure-Object -Property Length -Sum).Sum
+    $alwaysOnTokens = [math]::Ceiling($alwaysOnBytes / 4)
+
+    if ($alwaysOnTokens -gt $alwaysOnBudget) {
+        $failures += 'source-instructions-always-on-budget-exceeded'
+        Write-Host "    ✗ Always-on source instructions use ~$alwaysOnTokens tokens (budget: $alwaysOnBudget)" -ForegroundColor Red
+    }
+    else {
+        Write-Host "    ✓ Always-on source instructions use ~$alwaysOnTokens tokens (budget: $alwaysOnBudget)"
+    }
+}
+
+# Test 15: intent-routing includes fleet persistent control-loop mode contract
+Write-Host '  Test 15: Validate fleet persistent control-loop mode contract in intent-routing...'
 if (Test-Path $routingFile) {
     $content = Get-Content $routingFile -Raw
     $missingContract = @()
@@ -292,8 +319,8 @@ if (Test-Path $routingFile) {
     }
 }
 
-# Test 15: intent-prefixes guide includes persistent next-wave loop mode
-Write-Host '  Test 15: Validate persistent next-wave loop guidance in intent-prefixes guide...'
+# Test 16: intent-prefixes guide includes persistent next-wave loop mode
+Write-Host '  Test 16: Validate persistent next-wave loop guidance in intent-prefixes guide...'
 if (Test-Path $prefixGuide) {
     $content = Get-Content $prefixGuide -Raw
     $missingGuide = @()
@@ -310,8 +337,8 @@ if (Test-Path $prefixGuide) {
     }
 }
 
-# Test 16: phase-boundary checklist exists and covers required pivots
-Write-Host '  Test 16: Validate phase-boundary session checklist coverage...'
+# Test 17: phase-boundary checklist exists and covers required pivots
+Write-Host '  Test 17: Validate phase-boundary session checklist coverage...'
 $phaseChecklist = Join-Path $repoRoot 'docs\guides\phase-boundary-session-checklist.md'
 if (-not (Test-Path $phaseChecklist)) {
     $failures += 'phase-boundary-checklist-missing'

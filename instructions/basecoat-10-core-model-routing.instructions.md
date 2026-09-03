@@ -1,6 +1,6 @@
 ---
 description: "Use when dispatching sub-agents or choosing models for tasks. Provides cost-aware model routing to avoid over-spending on premium models for simple tasks."
-applyTo: "**/*"
+applyTo: "agents/**/*,skills/**/*,prompts/**/*,.github/**/*"
 ---
 
 # Model Routing for Copilot CLI Fleet Mode

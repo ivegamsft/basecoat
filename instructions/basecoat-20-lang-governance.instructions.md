@@ -1,6 +1,6 @@
 ---
 description: "CRITICAL — Read this first. Governance rules for all AI agents working in this repository. Covers issue-first mandate, secret policy, PR-only workflow, branch naming, when to stop vs proceed, and token/model awareness stub."
-applyTo: "**/*"
+applyTo: ".github/**/*,agents/**/*,skills/**/*,prompts/**/*,instructions/**/*,docs/**/*,scripts/**/*,tests/**/*"
 priority: 1
 distribute: false
 ---
