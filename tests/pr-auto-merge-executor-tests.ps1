@@ -219,6 +219,18 @@ if ($workflow -notmatch 'human-approval-boundaries\.json') {
 if ($workflow -notmatch 'getContent') {
     throw 'Workflow must read governance policy from the trusted default branch.'
 }
+foreach ($requiredBootstrapPolicyText in @(
+    'readJsonFromDefaultBranchOptional',
+    'Number(error?.status) === 404',
+    'BaseCoat governance policy ${path} is not yet present on ${defaultBranch}.',
+    "const policy = await readJsonFromDefaultBranchOptional('.github/governance/policy-packs.json');",
+    "const humanBoundaries = await readJsonFromDefaultBranchOptional('.github/governance/human-approval-boundaries.json');",
+    'BaseCoat governance policy is not yet installed on ${defaultBranch}; skipping merge evaluation.'
+)) {
+    if (-not $workflow.Contains($requiredBootstrapPolicyText)) {
+        throw "Workflow must handle absent default-branch policy as a neutral bootstrap skip: $requiredBootstrapPolicyText"
+    }
+}
 if ($workflow -notmatch 'required_checks') {
     throw 'Workflow must evaluate required checks from policy packs.'
 }

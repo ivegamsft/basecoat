@@ -529,6 +529,17 @@ jobs:
               }
               return JSON.parse(Buffer.from(data.content, data.encoding || 'base64').toString('utf8'));
             };
+            const readJsonFromDefaultBranchOptional = async path => {
+              try {
+                return await readJsonFromDefaultBranch(path);
+              } catch (error) {
+                if (Number(error?.status) === 404) {
+                  core.info(`BaseCoat governance policy ${path} is not yet present on ${defaultBranch}.`);
+                  return null;
+                }
+                throw error;
+              }
+            };
             const readTextFromPullRequestHead = async path => {
               const { data } = await github.rest.repos.getContent({
                 owner,
@@ -565,8 +576,15 @@ jobs:
             };
 
             try {
-              const policy = await readJsonFromDefaultBranch('.github/governance/policy-packs.json');
-              const humanBoundaries = await readJsonFromDefaultBranch('.github/governance/human-approval-boundaries.json');
+              const policy = await readJsonFromDefaultBranchOptional('.github/governance/policy-packs.json');
+              const humanBoundaries = await readJsonFromDefaultBranchOptional('.github/governance/human-approval-boundaries.json');
+              if (!policy || !humanBoundaries) {
+                await publishEligibilityStatus(
+                  'success',
+                  `BaseCoat governance policy is not yet installed on ${defaultBranch}; skipping merge evaluation.`
+                );
+                return;
+              }
               const requestedPack = String(process.env.POLICY_PACK || '').trim();
               const selectedPack = requestedPack || policy.default_profile;
               if (!policy.profiles?.[selectedPack]) {

@@ -12,6 +12,12 @@ if [[ ${2:-} == "--fail-on-warning" ]]; then
 fi
 cd "$ROOT_DIR"
 
+has_frontmatter_field() {
+  local field="$1"
+  local file="$2"
+  awk -v field="$field" 'NR <= 20 && tolower($0) ~ "^" tolower(field) ":" { found = 1 } END { exit(found ? 0 : 1) }' "$file"
+}
+
 required=(README.md CHANGELOG.md version.json asset-manifest.json instructions skills prompts agents)
 if [[ ! -d workflows || -e .git ]]; then
   required+=(sync.sh sync.ps1)
@@ -38,7 +44,7 @@ while IFS= read -r file; do
     exit 1
   fi
 
-  if ! sed -n '1,20p' "$file" | grep -qi '^description:'; then
+  if ! has_frontmatter_field 'description' "$file"; then
     echo "Missing description in frontmatter for $file" >&2
     exit 1
   fi
@@ -66,7 +72,7 @@ while IFS= read -r file; do
   fi
 
   if [[ "$(basename "$file")" == "SKILL.md" ]]; then
-    if ! sed -n '1,20p' "$file" | grep -qi '^name:'; then
+    if ! has_frontmatter_field 'name' "$file"; then
       echo "Missing name in frontmatter for $file" >&2
       exit 1
     fi

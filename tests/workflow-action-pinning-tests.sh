@@ -85,14 +85,9 @@ name: test
 description: "Fixture agent"
 ---
 EOF
-# Regression coverage for the pipefail/SIGPIPE false negative fixed by the
-# bounded awk frontmatter scan: the closing delimiter above lands on line 4,
-# then this padding fills lines 5-59 with well over 200KB (comfortably more
-# than a pipe buffer's worth of bytes). A naive
-# `sed -n '2,60p' file | grep -qxF -- '---'` pipeline has grep exit right
-# after matching the early delimiter, so sed gets SIGPIPE while still
-# writing the padding and the check spuriously fails. The bounded awk scan
-# reads the whole window and must still pass here.
+# Regression coverage for pipefail/SIGPIPE false negatives: the early
+# frontmatter fields and delimiter are followed by enough data to overflow
+# a pipe buffer. Bounded awk scans must still validate this fixture.
 for _ in $(seq 1 55); do
   printf '%04000d\n' 0 >> "$FIXTURE_ROOT/agents/test.agent.md"
 done
