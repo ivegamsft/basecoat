@@ -1,0 +1,10 @@
+name: "copilot-review-triage-agent-routing"
+description: "Validates routing for the pull request-scoped Copilot review triage agent."
+agent: "agents/basecoat-90-quality-copilot-review-triage.agent.md"
+scenarios:
+  - id: "triage-automated-review"
+    input: "Process unresolved automated Copilot review threads on PR 42 and escalate any contract changes."
+    expect_activation: true
+  - id: "write-feature"
+    input: "Implement a new payment service feature."
+    expect_activation: false

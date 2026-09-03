@@ -6,7 +6,7 @@ BaseCoat provides a curated library of agents, skills, instructions, and prompts
 
 The operating model combines **Guardrails** (BaseCoat assets and standards) with **Visibility** (issues, PRs, workflows, and milestones) so execution is both governed and observable.
 
-**122 agents** · **120 skills** · **91 instruction files** · **11 prompt starters**
+**131 agents** · **139 skills** · **91 instruction files** · **11 prompt starters**
 
 ---
 

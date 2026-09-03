@@ -1,0 +1,22 @@
+name: "copilot-review-triage-routing"
+description: "Routing evaluation for triaging inbound automated Copilot review threads."
+skill: "skills/copilot-review-triage/SKILL.md"
+scenarios:
+  - id: "small-nit-resolved"
+    input: "A Copilot PR review says to fix a misspelled comment. Apply the safe nit, record the commit, and resolve the thread."
+    expect_activation: true
+  - id: "medium-validated"
+    input: "Triage this Copilot suggestion to add a null edge-case test. Validate it before deciding whether to apply and resolve it."
+    expect_activation: true
+  - id: "medium-declined"
+    input: "Assess this bounded Copilot refactor suggestion, explain why it duplicates existing behavior if unsound, and resolve the thread."
+    expect_activation: true
+  - id: "large-escalated"
+    input: "A Copilot review suggests changing our public API authorization contract. Escalate it to a human and leave the thread open."
+    expect_activation: true
+  - id: "initial-review"
+    input: "Review this new pull request for bugs and leave findings."
+    expect_activation: false
+  - id: "security-autofix"
+    input: "Automatically apply and resolve all security review comments without human approval."
+    expect_activation: false

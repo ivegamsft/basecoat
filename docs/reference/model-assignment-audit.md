@@ -1,6 +1,6 @@
 # Model Assignment Audit
 
-Assignments scanned: 146.
+Assignments scanned: 147.
 
 | Asset | Field | Model | Status | Recommendation |
 |---|---|---|---|---|
@@ -135,6 +135,7 @@ Assignments scanned: 146.
 | [agents/basecoat-80-data-database-migration.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-80-data-database-migration.agent.md) | `model` | `claude-sonnet-4.6` | public-supported | Keep assignment; verify runtime entitlement and task-specific evals. |
 | [agents/basecoat-80-data-dataops.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-80-data-dataops.agent.md) | `model` | `gpt-5.3-codex` | public-supported | Keep assignment; verify runtime entitlement and task-specific evals. |
 | [agents/basecoat-90-quality-code-review.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-90-quality-code-review.agent.md) | `model` | `gpt-5.3-codex` | public-supported | Keep assignment; verify runtime entitlement and task-specific evals. |
+| [agents/basecoat-90-quality-copilot-review-triage.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-90-quality-copilot-review-triage.agent.md) | `model` | `gpt-5.3-codex` | public-supported | Keep assignment; verify runtime entitlement and task-specific evals. |
 | [agents/basecoat-90-quality-e2e-test-strategy.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-90-quality-e2e-test-strategy.agent.md) | `model` | `claude-sonnet-4.6` | public-supported | Keep assignment; verify runtime entitlement and task-specific evals. |
 | [agents/basecoat-90-quality-guidance-reviewer.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-90-quality-guidance-reviewer.agent.md) | `model` | `claude-sonnet-4.6` | public-supported | Keep assignment; verify runtime entitlement and task-specific evals. |
 | [agents/basecoat-90-quality-manual-test-strategy.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-90-quality-manual-test-strategy.agent.md) | `model` | `claude-sonnet-4.6` | public-supported | Keep assignment; verify runtime entitlement and task-specific evals. |

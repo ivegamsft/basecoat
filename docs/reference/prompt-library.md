@@ -2,7 +2,7 @@
 
 Generated from the canonical intent vocabulary and asset frontmatter. Do not edit the generated tables directly; run `pwsh scripts/generate-prompt-library.ps1`.
 
-Coverage: 36 intents, 138 skills, and 130 agents.
+Coverage: 36 intents, 139 skills, and 131 agents.
 
 ## Lifecycle prompts
 
@@ -170,6 +170,7 @@ Mutation performed: none
 | `container-build-assessment` | <code>Use the 'container-build-assessment' skill. Task: reviewing Dockerfile structure before containerization.</code> | [skills/container-build-assessment/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/container-build-assessment/SKILL.md) |
 | `container-migration` | <code>Use the 'container-migration' skill. Task: containerize this legacy app.</code> | [skills/container-migration/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/container-migration/SKILL.md) |
 | `contract-testing` | <code>Use the 'contract-testing' skill. Task: add Pact contract tests between services.</code> | [skills/contract-testing/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/contract-testing/SKILL.md) |
+| `copilot-review-triage` | <code>Use the 'copilot-review-triage' skill. Task: sizing Copilot review threads.</code> | [skills/copilot-review-triage/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/copilot-review-triage/SKILL.md) |
 | `copilot-usage-analytics` | <code>Use the 'copilot-usage-analytics' skill. Task: estimate Copilot session cost.</code> | [skills/copilot-usage-analytics/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/copilot-usage-analytics/SKILL.md) |
 | `cqrs-event-sourcing` | <code>Use the 'cqrs-event-sourcing' skill. Task: design CQRS architecture for a service.</code> | [skills/cqrs-event-sourcing/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/cqrs-event-sourcing/SKILL.md) |
 | `create-instruction` | <code>Use the 'create-instruction' skill. Task: create a new instructions file.</code> | [skills/create-instruction/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/create-instruction/SKILL.md) |
@@ -390,6 +391,7 @@ Mutation performed: none
 | `database-migration` | <code>@database-migration Help me with this task: planning database migrations.</code> | [agents/basecoat-80-data-database-migration.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-80-data-database-migration.agent.md) |
 | `dataops` | <code>@dataops Help me with this task: managing data pipelines.</code> | [agents/basecoat-80-data-dataops.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-80-data-dataops.agent.md) |
 | `code-review` | <code>@code-review Help me with this task: reviewing code changes.</code> | [agents/basecoat-90-quality-code-review.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-90-quality-code-review.agent.md) |
+| `copilot-review-triage` | <code>@copilot-review-triage Help me with this task: impact-sizing review threads.</code> | [agents/basecoat-90-quality-copilot-review-triage.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-90-quality-copilot-review-triage.agent.md) |
 | `e2e-test-strategy` | <code>@e2e-test-strategy Help me with this task: design E2E suite.</code> | [agents/basecoat-90-quality-e2e-test-strategy.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-90-quality-e2e-test-strategy.agent.md) |
 | `guidance-reviewer` | <code>@guidance-reviewer Help me with this task: validating a BaseCoat guidance draft before committing.</code> | [agents/basecoat-90-quality-guidance-reviewer.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-90-quality-guidance-reviewer.agent.md) |
 | `manual-test-strategy` | <code>@manual-test-strategy Help me with this task: decision rubrics.</code> | [agents/basecoat-90-quality-manual-test-strategy.agent.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-90-quality-manual-test-strategy.agent.md) |

@@ -1,7 +1,7 @@
 {
   "$schema": "basecoat-metadata-schema",
   "version": "3.27.0",
-  "generated": "2026-08-06",
+  "generated": "2026-09-02",
   "categories": {
     "AI & Development": {
       "label": "AI & Development",
@@ -2400,6 +2400,17 @@
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-local-dev-data-pack-orchestrator.agent.md",
       "model": "claude-sonnet-4.6",
+      "argumentHint": ""
+    },
+    {
+      "name": "basecoat-90-quality-copilot-review-triage",
+      "description": "Runs a pull request-scoped triage loop for inbound automated Copilot review threads. USE FOR: impact-sizing review threads, validating Medium suggestions, recording safe dispositions, resolving Small and Medium threads, and escalating Large findings. DO NOT USE FOR: initial pull request review, auto-applying security or contract changes, or overriding human review gates.",
+      "category": "Quality",
+      "keywords": [],
+      "aliases": [],
+      "pairedSkill": "",
+      "file": "agents/basecoat-90-quality-copilot-review-triage.agent.md",
+      "model": "gpt-5.3-codex",
       "argumentHint": ""
     }
   ]
