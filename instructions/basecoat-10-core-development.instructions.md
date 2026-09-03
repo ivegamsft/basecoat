@@ -73,6 +73,7 @@ The four dev core agents operate as a coordinated team. Follow this handoff orde
 **Conflict resolution:** When two agents need to agree on a shape, the backend-dev agent's API contract is the tie-breaker. Data-tier changes that break the contract require backend-dev review before merging.
 
 **No agent should:**
+
 - Bypass the repository pattern to call the database from a handler or middleware layer.
 - Embed API-response formatting logic in a repository or data access function.
 - Define business rules in a migration, query, or infrastructure configuration.
