@@ -693,6 +693,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running HRM/TRM/memory A/B evaluation tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'hrm-trm-memory-ab-eval-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'HRM/TRM/memory A/B evaluation tests failed' -ForegroundColor Red
+    Write-FailureLog 'hrm-trm-memory-ab-eval-tests'
+    exit 1
+}
+
 Write-Host 'Running harness eval gate workflow tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'harness-change-eval-gate-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

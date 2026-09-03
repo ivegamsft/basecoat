@@ -25,10 +25,21 @@ jobs:
             -OutputDir test-results `
             -SummaryFile test-results/eval-summary.md
 
+      - name: Run HRM/TRM/memory A/B evaluation gate
+        shell: pwsh
+        run: |
+          pwsh scripts/eval-assets.ps1 `
+            -CaseFile tests/evals/hrm-trm-memory-ab.behavior.json `
+            -OutputDir test-results/hrm-trm-memory-ab `
+            -SummaryFile test-results/hrm-trm-memory-ab/eval-summary.md `
+            -AbComparison `
+            -MinimumLift 0.5
+
       - name: Add summary to job output
         shell: bash
         run: |
           cat test-results/eval-summary.md >> "$GITHUB_STEP_SUMMARY"
+          cat test-results/hrm-trm-memory-ab/eval-summary.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload evaluation artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -37,5 +48,6 @@ jobs:
           path: |
             test-results/eval-agents.json
             test-results/eval-summary.md
+            test-results/hrm-trm-memory-ab/eval-agents.json
+            test-results/hrm-trm-memory-ab/eval-summary.md
           retention-days: 7
-
