@@ -22,11 +22,11 @@ By contrast the sibling **HVE** framework ships *more* total instruction content
 
 ## Why This Matters
 
-_Not specified._
+*Not specified.*
 
 ## Scope
 
-_Not specified._
+*Not specified.*
 
 ## Acceptance Criteria
 
@@ -38,4 +38,4 @@ _Not specified._
 
 - PRD: `docs/prd/synthesized/issue-2975-re-scope-always-on-instructions-by-load-timing-to-reclaim-40.prd.md`
 - Refs #2975
-- Issue: https://github.com/IBuySpy-Shared/basecoat/issues/2975
+- Issue: <https://github.com/IBuySpy-Shared/basecoat/issues/2975>

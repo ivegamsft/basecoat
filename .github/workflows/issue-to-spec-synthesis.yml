@@ -57,8 +57,8 @@ jobs:
             const refsMatch    = body.match(/##\s*References?\s*\n([\s\S]*?)(?=##|$)/i);
 
             const problem = problemMatch ? problemMatch[1].trim() : body.trim().split('\n').slice(0, 8).join('\n');
-            const scope   = scopeMatch   ? scopeMatch[1].trim()   : '_Not specified._';
-            const why     = whyMatch     ? whyMatch[1].trim()     : '_Not specified._';
+            const scope   = scopeMatch   ? scopeMatch[1].trim()   : '*Not specified.*';
+            const why     = whyMatch     ? whyMatch[1].trim()     : '*Not specified.*';
             const refs    = refsMatch    ? refsMatch[1].trim()    : `- Refs #${issueNum}`;
             const now     = new Date().toISOString().split('T')[0];
 
@@ -94,7 +94,7 @@ jobs:
               '## References',
               '',
               refs,
-              `- Issue: https://github.com/${context.repo.owner}/${context.repo.repo}/issues/${issueNum}`,
+              `- Issue: <https://github.com/${context.repo.owner}/${context.repo.repo}/issues/${issueNum}>`,
               '',
             ].join('\n');
 
@@ -132,7 +132,7 @@ jobs:
               '',
               `- PRD: \`${prdPath}\``,
               refs,
-              `- Issue: https://github.com/${context.repo.owner}/${context.repo.repo}/issues/${issueNum}`,
+              `- Issue: <https://github.com/${context.repo.owner}/${context.repo.repo}/issues/${issueNum}>`,
               '',
             ].join('\n');
 

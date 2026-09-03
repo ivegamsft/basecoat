@@ -22,11 +22,11 @@ By contrast the sibling **HVE** framework ships *more* total instruction content
 
 ## Why This Matters
 
-_Not specified._
+*Not specified.*
 
 ## Scope
 
-_Not specified._
+*Not specified.*
 
 ## Success Criteria
 
@@ -36,4 +36,4 @@ _Not specified._
 ## References
 
 - Refs #2975
-- Issue: https://github.com/IBuySpy-Shared/basecoat/issues/2975
+- Issue: <https://github.com/IBuySpy-Shared/basecoat/issues/2975>
