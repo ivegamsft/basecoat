@@ -22,7 +22,7 @@ safe-outputs:
   noop:
     report-as-issue: false
 engine: copilot
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 timeout-minutes: 20
 run-name: "Security Analysis — PR #${{ github.event.pull_request.number }}"
 ---

@@ -12,7 +12,7 @@ safe-outputs:
     max: 1
     close-older-issues: true
 engine: copilot
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 timeout-minutes: 20
 run-name: "Weekly Sprint Retrospective — ${{ github.run_number }}"
 ---

@@ -32,7 +32,7 @@ concurrency:
   group: "gh-aw-${{ github.workflow }}-${{ github.event.workflow_run.id || github.event.workflow_run.head_sha || inputs.run_id || github.run_id }}"
   cancel-in-progress: true
 engine: copilot
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 timeout-minutes: 20
 run-name: "Self-Healing CI — run ${{ github.event.workflow_run.id || inputs.run_id || github.run_id }}"
 ---
