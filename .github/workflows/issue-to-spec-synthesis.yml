@@ -56,10 +56,11 @@ jobs:
             const whyMatch     = body.match(/##\s*Why\s+this\s+matters\s*\n([\s\S]*?)(?=##|$)/i);
             const refsMatch    = body.match(/##\s*References?\s*\n([\s\S]*?)(?=##|$)/i);
 
-            const problem = problemMatch ? problemMatch[1].trim() : body.trim().split('\n').slice(0, 8).join('\n');
-            const scope   = scopeMatch   ? scopeMatch[1].trim()   : '*Not specified.*';
-            const why     = whyMatch     ? whyMatch[1].trim()     : '*Not specified.*';
-            const refs    = refsMatch    ? refsMatch[1].trim()    : `- Refs #${issueNum}`;
+            const normalizeSection = value => value.trim().replace(/\n{3,}/g, '\n\n');
+            const problem = normalizeSection(problemMatch ? problemMatch[1] : body.trim().split('\n').slice(0, 8).join('\n'));
+            const scope   = normalizeSection(scopeMatch ? scopeMatch[1] : '*Not specified.*');
+            const why     = normalizeSection(whyMatch ? whyMatch[1] : '*Not specified.*');
+            const refs    = normalizeSection(refsMatch ? refsMatch[1] : `- Refs #${issueNum}`);
             const now     = new Date().toISOString().split('T')[0];
 
             const prdContent = [

@@ -19,7 +19,6 @@ Comparing the two consumer repos migrating the **same** app (.NET Pet Shop 4.0 /
 
 basecoat, by contrast, produces an excellent **backward-looking** narrative (`ibuypets-v3/docs/prompts/ibuypets-v3-repo-story.md`) — what happened, what it cost, lessons — but there is no forward, reversible roadmap artifact. Several consequences trace to this absence:
 
-
 ## Why This Matters
 
 *Not specified.*
