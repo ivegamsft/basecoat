@@ -1,6 +1,6 @@
 # basecoat
 
-> GitHub Copilot CLI plugin — routes natural-language commands to the right [Basecoat](https://github.com/IBuySpy-Shared/basecoat) agent.
+> GitHub Copilot CLI plugin — routes natural-language commands to the right [Basecoat](https://github.com/ivegamsft/basecoat) agent.
 
 ## Installation
 
@@ -41,7 +41,7 @@ The plugin ships with a registry of 73 Basecoat agents covering:
 - Frontend, backend, data tier development
 - Documentation, testing, release management
 
-See [agents/](https://github.com/IBuySpy-Shared/basecoat/tree/main/agents) for the full list.
+See [agents/](https://github.com/ivegamsft/basecoat/tree/main/agents) for the full list.
 
 ## Configuration
 

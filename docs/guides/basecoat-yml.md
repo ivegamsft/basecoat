@@ -197,7 +197,7 @@ updates:
   mode: notify
   approval: required
   allowed_bumps: [patch, minor]
-  source: IBuySpy-Shared/basecoat
+  source: ivegamsft/basecoat
   ref: latest
   # mirror: https://github.corp.example/platform/basecoat.git
   # validation: pwsh tests/run-tests.ps1

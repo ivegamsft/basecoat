@@ -52,16 +52,16 @@ emit issue-ready learnings, and produce optional memory-promotion suggestions.
 
 ### References
 
-- <https://github.com/IBuySpy-Shared/basecoat/issues/2993>
-- <https://github.com/IBuySpy-Shared/basecoat/issues/2704>
-- <https://github.com/IBuySpy-Shared/basecoat/issues/2775>
-- <https://github.com/IBuySpy-Shared/basecoat/issues/2776>
-- <https://github.com/IBuySpy-Shared/basecoat/issues/2983>
-- <https://github.com/IBuySpy-Shared/basecoat/pull/2981>
-- <https://github.com/IBuySpy-Shared/basecoat/pull/2984>
-- <https://github.com/IBuySpy-Shared/basecoat/pull/2986>
-- <https://github.com/IBuySpy-Shared/basecoat/pull/2989>
-- <https://github.com/IBuySpy-Shared/basecoat/pull/2991>
+- <https://github.com/ivegamsft/basecoat/issues/2993>
+- <https://github.com/ivegamsft/basecoat/issues/2704>
+- <https://github.com/ivegamsft/basecoat/issues/2775>
+- <https://github.com/ivegamsft/basecoat/issues/2776>
+- <https://github.com/ivegamsft/basecoat/issues/2983>
+- <https://github.com/ivegamsft/basecoat/pull/2981>
+- <https://github.com/ivegamsft/basecoat/pull/2984>
+- <https://github.com/ivegamsft/basecoat/pull/2986>
+- <https://github.com/ivegamsft/basecoat/pull/2989>
+- <https://github.com/ivegamsft/basecoat/pull/2991>
 - git range 04143b9..b87de505
 - docs/reference/repository-inventory.md
 <!-- CHRONICLE:END 2026-07-24-to-2026-09-01-backlog-recovery -->

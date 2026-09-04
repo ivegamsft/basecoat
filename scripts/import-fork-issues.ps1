@@ -2,7 +2,7 @@
 [CmdletBinding()]
 param(
     [string]$SourceRepo = "ivegamsft/basecoat",
-    [string]$TargetRepo = $(if ($env:GITHUB_REPOSITORY) { $env:GITHUB_REPOSITORY } else { "IBuySpy-Shared/basecoat" }),
+    [string]$TargetRepo = $(if ($env:GITHUB_REPOSITORY) { $env:GITHUB_REPOSITORY } else { "ivegamsft/basecoat" }),
     [ValidateSet("open", "closed", "all")]
     [string]$SourceState = "open",
     [ValidateRange(1, 500)]

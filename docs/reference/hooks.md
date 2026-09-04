@@ -2,7 +2,7 @@
 
 Defines a portable hook model for Base Coat agents so memory, telemetry, error handling, and session rotation can be attached to agent execution without modifying every agent prompt.
 
-> **Tracking:** Issue [#145](https://github.com/IBuySpy-Shared/basecoat/issues/145)
+> **Tracking:** Issue [#145](https://github.com/ivegamsft/basecoat/issues/145)
 
 ---
 
@@ -262,7 +262,7 @@ A portable hook contract keeps the framework implementation-neutral while still 
   "timestamp": "2025-04-27T18:42:31Z",
   "sessionId": "sess_01J...",
   "agent": "basecoat-10-core-backend-dev",
-  "repository": "IBuySpy-Shared/basecoat",
+  "repository": "ivegamsft/basecoat",
   "branch": "feat/145-hooks-framework",
   "budget": {
     "usedTokens": 78124,
@@ -680,7 +680,7 @@ Users can route BaseCoat telemetry to their own Azure Application Insights works
 }
 ```
 
-See issue [#1172](https://github.com/IBuySpy-Shared/basecoat/issues/1172) for the full design and implementation plan.
+See issue [#1172](https://github.com/ivegamsft/basecoat/issues/1172) for the full design and implementation plan.
 
 ---
 
@@ -760,4 +760,4 @@ When adding hook support to a Base Coat-aligned runtime:
 - [`docs/token-optimization.md`](../guides/token-optimization.md) — Token budget, compaction, and context handoff patterns
 - [`docs/../architecture/multi-agent-orchestration-patterns.md`](../architecture/multi-agent-orchestration-patterns.md) — Session handoff and coordination patterns across agents
 - [`instructions/basecoat-20-lang-governance.instructions.md`](/instructions/basecoat-20-lang-governance.instructions.md) — Always-on governance and safety constraints
-- Issue [#145](https://github.com/IBuySpy-Shared/basecoat/issues/145) — Tracking issue for lifecycle hook specification
+- Issue [#145](https://github.com/ivegamsft/basecoat/issues/145) — Tracking issue for lifecycle hook specification

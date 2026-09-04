@@ -9,7 +9,7 @@
     basecoat main, and active Copilot seat data.
 
 .PARAMETER Org
-    GitHub organization to scan. Defaults to IBuySpy-Shared.
+    GitHub organization to scan. Defaults to example-org.
 
 .PARAMETER BasecoatRepo
     The basecoat source repository. Defaults to basecoat.
@@ -23,7 +23,7 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$Org = "IBuySpy-Shared",
+    [string]$Org = "example-org",
     [string]$BasecoatRepo = "basecoat",
     [ValidateSet("table", "json", "markdown")]
     [string]$OutputFormat = "table",

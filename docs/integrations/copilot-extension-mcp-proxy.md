@@ -1,7 +1,7 @@
 # Copilot Extension MCP Proxy Contract
 
 This document defines the integration contract for the extension proxy routes added
-for issue [#1129](https://github.com/IBuySpy-Shared/basecoat/issues/1129).
+for issue [#1129](https://github.com/ivegamsft/basecoat/issues/1129).
 
 The extension service proxies read-only calls to the deployed BaseCoat MCP server
 (`mcp/basecoat-metrics`) using MCP `tools/call` requests over HTTP.

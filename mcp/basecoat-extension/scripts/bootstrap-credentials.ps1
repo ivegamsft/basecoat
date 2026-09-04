@@ -41,7 +41,7 @@ Prerequisites:
 - GitHub CLI (gh) authenticated and authorized to configure repository secrets
 - Azure CLI (az) authenticated with Key Vault permissions (optional, for production)
 - One of:
-  * GitHub App registered in IBuySpy-Shared org (manual step via github.com/organizations/{org}/settings/apps/new)
+  * GitHub App registered in example-org org (manual step via github.com/organizations/{org}/settings/apps/new)
   * GitHub token (PAT or workflow token) for app-token mode
   * Azure credentials (AZURE_TENANT_ID, AZURE_CLIENT_ID) for OIDC mode
 
@@ -50,7 +50,7 @@ GitHub App ID. If not provided, reads from $env:BASECOAT_EXTENSION_APP_ID
 If not provided, script will prompt you to create app manually via GitHub UI.
 
 .PARAMETER OrgName
-GitHub organization for app creation guidance. Default: IBuySpy-Shared (extracted from $Repo)
+GitHub organization for app creation guidance. Default: example-org (extracted from $Repo)
 Only used if credentials are missing (to show correct creation link).
 
 .PARAMETER ClientId
@@ -67,7 +67,7 @@ Path to GitHub App private key PEM file. Default: ./private-key.pem
 If not provided, reads from $env:BASECOAT_EXTENSION_PRIVATE_KEY_PATH
 
 .PARAMETER Repo
-GitHub repository in format 'owner/repo'. Default: IBuySpy-Shared/basecoat
+GitHub repository in format 'owner/repo'. Default: ivegamsft/basecoat
 If not provided, reads from $env:BASECOAT_EXTENSION_REPO
 
 .PARAMETER KeyVaultName
@@ -120,7 +120,7 @@ param(
     [string]$PrivateKeyPath = $env:BASECOAT_EXTENSION_PRIVATE_KEY_PATH,
 
     [Parameter(Mandatory = $false)]
-    [string]$Repo = $env:BASECOAT_EXTENSION_REPO ?? "IBuySpy-Shared/basecoat",
+    [string]$Repo = $env:BASECOAT_EXTENSION_REPO ?? "ivegamsft/basecoat",
 
     [Parameter(Mandatory = $false)]
     [string]$KeyVaultName = $env:BASECOAT_EXTENSION_KEY_VAULT_NAME ?? "",

@@ -49,7 +49,7 @@ For the main branch:
 {
   "name": "main-branch",
   "issuer": "https://token.actions.githubusercontent.com",
-  "subject": "repo:IBuySpy-Shared/basecoat:ref:refs/heads/main",
+  "subject": "repo:ivegamsft/basecoat:ref:refs/heads/main",
   "audiences": ["api://AzureADTokenExchange"]
 }
 
@@ -57,7 +57,7 @@ For pull requests:
 {
   "name": "pull-requests",
   "issuer": "https://token.actions.githubusercontent.com",
-  "subject": "repo:IBuySpy-Shared/basecoat:pull_request",
+  "subject": "repo:ivegamsft/basecoat:pull_request",
   "audiences": ["api://AzureADTokenExchange"]
 }
 
@@ -65,7 +65,7 @@ For a specific environment:
 {
   "name": "production-env",
   "issuer": "https://token.actions.githubusercontent.com",
-  "subject": "repo:IBuySpy-Shared/basecoat:environment:production",
+  "subject": "repo:ivegamsft/basecoat:environment:production",
   "audiences": ["api://AzureADTokenExchange"]
 }
 ```

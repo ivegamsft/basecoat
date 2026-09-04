@@ -184,7 +184,7 @@ context for `@backend-dev` to implement.
 ```text
 @sprint-planner Sprint goal: Ship the memory triage feature — consumers can
 self-screen learnings before submitting, and the steward team has a structured
-review checklist. Sprint 25, repository: IBuySpy-Shared/basecoat, team size: 3.
+review checklist. Sprint 25, repository: ivegamsft/basecoat, team size: 3.
 ```
 
 **What comes back:**
@@ -377,9 +377,9 @@ Minimum frequency: 2 occurrences. Filter out anything repo-specific.
 pwsh scripts/submit-learning.ps1 `
   -Subject "ci:check-coherence-default-exit" `
   -Fact "check-coherence.ps1 exits 0 unless -Strict is passed. CI is non-blocking without it." `
-  -Evidence "https://github.com/IBuySpy-Shared/basecoat/issues/709" `
+  -Evidence "https://github.com/ivegamsft/basecoat/issues/709" `
   -Domain "ci" `
-  -Source "IBuySpy-Shared/basecoat" `
+  -Source "ivegamsft/basecoat" `
   -OpenPR
 ```
 

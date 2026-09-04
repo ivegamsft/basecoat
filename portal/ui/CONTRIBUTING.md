@@ -11,7 +11,7 @@ Thank you for contributing to the Basecoat Portal UI component library! This doc
 ## Getting Started
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/IBuySpy-Shared/basecoat.git`
+2. Clone your fork: `git clone https://github.com/ivegamsft/basecoat.git`
 3. Create a feature branch: `git checkout -b feat/component-name`
 4. Install dependencies: `npm install`
 5. Make your changes

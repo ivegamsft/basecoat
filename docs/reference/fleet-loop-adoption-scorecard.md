@@ -6,8 +6,8 @@ downstream consumer repositories evaluated against it. It exists so audit findin
 reusable guidance for future rollouts rather than session-trapped history.
 
 - Audit scope: `basecoat`, `work-tracker`, `gh-devops-runners`, `luxesite`
-- Tracking issue: [#1827](https://github.com/IBuySpy-Shared/basecoat/issues/1827)
-- Follow-on automation issue: [#1828](https://github.com/IBuySpy-Shared/basecoat/issues/1828)
+- Tracking issue: [#1827](https://github.com/ivegamsft/basecoat/issues/1827)
+- Follow-on automation issue: [#1828](https://github.com/ivegamsft/basecoat/issues/1828)
 - Companion audit guide: `docs/guides/downstream-reviewer-routing-audit.md`
 
 ---

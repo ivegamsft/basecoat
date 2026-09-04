@@ -144,7 +144,7 @@ Read-only and advisory intents such as `audit:`, `spike:`, and `rca:` do not
 enter this gate.
 
 The gate is defined in
-[basecoat-10-core-intent-routing.instructions.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/basecoat-10-core-intent-routing.instructions.md)
+[basecoat-10-core-intent-routing.instructions.md](https://github.com/ivegamsft/basecoat/blob/main/instructions/basecoat-10-core-intent-routing.instructions.md)
 and `governance.instructions.md`. Downstream users should expect an issue or
 tracked record reference in the output for these intents.
 
@@ -160,7 +160,7 @@ tracked record reference in the output for these intents.
 | `optimize: ... advisory-only` | Packetization only | Emit the execution packet and stop |
 
 The canonical routing contract is
-[basecoat-10-core-intent-routing.instructions.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/basecoat-10-core-intent-routing.instructions.md).
+[basecoat-10-core-intent-routing.instructions.md](https://github.com/ivegamsft/basecoat/blob/main/instructions/basecoat-10-core-intent-routing.instructions.md).
 The user-oriented syntax guide is
 [intent-prefixes.md](intent-prefixes.md).
 
@@ -249,7 +249,7 @@ dispatch is the orchestrator contract.
 
 For platform-sensitive skills, verify the declared `compatibility` before
 delegating. The canonical values are documented in
-[agents-skills-dev.instructions.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/.github/instructions/agents-skills-dev.instructions.md).
+[agents-skills-dev.instructions.md](https://github.com/ivegamsft/basecoat/blob/main/.github/instructions/agents-skills-dev.instructions.md).
 
 ## Output contract for downstream consumers
 

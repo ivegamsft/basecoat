@@ -22,7 +22,7 @@
   When set, emits the state assessment without making changes.
 
 .EXAMPLE
-  .\goal-loop-engine.ps1 -Repo IBuySpy-Shared/basecoat -ParentIssueNumber 1874 -SprintIssueNumbers 1875,1876,1877
+  .\goal-loop-engine.ps1 -Repo ivegamsft/basecoat -ParentIssueNumber 1874 -SprintIssueNumbers 1875,1876,1877
 #>
 [CmdletBinding()]
 param(

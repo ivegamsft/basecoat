@@ -18,12 +18,12 @@ The six execution workstreams are tracked as dedicated issues with explicit owne
 
 | Workstream | Tracker | Owner | Delivery signal |
 |---|---|---|---|
-| 1. Standardize proven patterns as defaults | [#2046](https://github.com/IBuySpy-Shared/basecoat/issues/2046) | @ibuyspy | ≥3 patterns promoted and adoption target met |
-| 2. Reliability debt program for recurring failures | [#2047](https://github.com/IBuySpy-Shared/basecoat/issues/2047) | @ibuyspy | Top recurring failures fixed with MTTR/recurrence targets |
-| 3. Tooling routing matrix (local/background/cloud/manual) | [#2048](https://github.com/IBuySpy-Shared/basecoat/issues/2048) | @ibuyspy | Routing defaults published and orchestration overhead reduced |
-| 4. Risk-tier autonomy policy enforcement | [#2049](https://github.com/IBuySpy-Shared/basecoat/issues/2049) | @ibuyspy | Tier coverage + enforcement guardrails in place |
-| 5. Weekly scorecard + trend reporting | [#2050](https://github.com/IBuySpy-Shared/basecoat/issues/2050) | @ibuyspy | Weekly scorecard cadence with trend classification |
-| 6. 4-6 week adoption experiment and readout | [#2051](https://github.com/IBuySpy-Shared/basecoat/issues/2051) | @ibuyspy | Experiment complete with go/no-go readout |
+| 1. Standardize proven patterns as defaults | [#2046](https://github.com/ivegamsft/basecoat/issues/2046) | @ibuyspy | ≥3 patterns promoted and adoption target met |
+| 2. Reliability debt program for recurring failures | [#2047](https://github.com/ivegamsft/basecoat/issues/2047) | @ibuyspy | Top recurring failures fixed with MTTR/recurrence targets |
+| 3. Tooling routing matrix (local/background/cloud/manual) | [#2048](https://github.com/ivegamsft/basecoat/issues/2048) | @ibuyspy | Routing defaults published and orchestration overhead reduced |
+| 4. Risk-tier autonomy policy enforcement | [#2049](https://github.com/ivegamsft/basecoat/issues/2049) | @ibuyspy | Tier coverage + enforcement guardrails in place |
+| 5. Weekly scorecard + trend reporting | [#2050](https://github.com/ivegamsft/basecoat/issues/2050) | @ibuyspy | Weekly scorecard cadence with trend classification |
+| 6. 4-6 week adoption experiment and readout | [#2051](https://github.com/ivegamsft/basecoat/issues/2051) | @ibuyspy | Experiment complete with go/no-go readout |
 
 ### Workstream 5 delivery path
 

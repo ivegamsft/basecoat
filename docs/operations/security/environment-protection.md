@@ -1,6 +1,6 @@
 # Environment Protection and Production Approvals Implementation
 
-> **Issue:** [#1547](https://github.com/IBuySpy-Shared/basecoat/issues/1547)
+> **Issue:** [#1547](https://github.com/ivegamsft/basecoat/issues/1547)
 > **Sprint:** Sprint 36
 > **Component:** Production governance and deployment safety
 
@@ -49,17 +49,17 @@ Or via API:
 # Configure deployment branch policy
 gh api \
   --method PUT \
-  /repos/IBuySpy-Shared/basecoat/environments/production \
+  /repos/ivegamsft/basecoat/environments/production \
   -F wait_timer=0 \
   -F prevent_self_review=false \
   -F 'deployment_branch_policy[protected_branches]=false' \
   -F 'deployment_branch_policy[custom_branch_policies]=true'
 
-gh api /repos/IBuySpy-Shared/basecoat/environments/production/deployment-branch-policies \
+gh api /repos/ivegamsft/basecoat/environments/production/deployment-branch-policies \
   -f name='main' \
   -f type='branch'
 
-gh api /repos/IBuySpy-Shared/basecoat/environments/production/deployment-branch-policies \
+gh api /repos/ivegamsft/basecoat/environments/production/deployment-branch-policies \
   -f name='v*' \
   -f type='tag'
 
@@ -148,7 +148,7 @@ through a separately privileged governance path.
 
 **Resolution:**
 
-1. Verify environment config via UI or API: `gh api /repos/IBuySpy-Shared/basecoat/environments/prod`
+1. Verify environment config via UI or API: `gh api /repos/ivegamsft/basecoat/environments/prod`
 2. Check workflow has `environment: prod` in the deployment job
 3. Review environment protection rules for bypass actors
 4. Confirm user role doesn't have admin bypass permissions

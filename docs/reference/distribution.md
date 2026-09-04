@@ -12,7 +12,7 @@ stale agents, instructions, skills, prompts, or workflows.
 Add BaseCoat as a version-pinned submodule:
 
 ```bash
-git submodule add https://github.com/IBuySpy-Shared/basecoat.git .github/base-coat
+git submodule add https://github.com/ivegamsft/basecoat.git .github/base-coat
 git submodule update --init --recursive
 ```
 
@@ -48,13 +48,13 @@ its supported replacement.
 For example:
 
 ```powershell
-$env:BASECOAT_REPO = "https://github.com/IBuySpy-Shared/basecoat.git"
+$env:BASECOAT_REPO = "https://github.com/ivegamsft/basecoat.git"
 $env:BASECOAT_REF = "v4.2.1"
 .\sync.ps1
 ```
 
 ```bash
-BASECOAT_REPO=https://github.com/IBuySpy-Shared/basecoat.git \
+BASECOAT_REPO=https://github.com/ivegamsft/basecoat.git \
 BASECOAT_REF=v4.2.1 \
 bash sync.sh
 ```

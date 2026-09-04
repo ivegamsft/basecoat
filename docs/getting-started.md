@@ -64,10 +64,10 @@ permissions:
   pull-requests: write
 jobs:
   update:
-    uses: IBuySpy-Shared/basecoat/.github/workflows/check-basecoat-version-callable.yml@9ab8894828e3a887d97c3383e7f23ed892d9a088
+    uses: ivegamsft/basecoat/.github/workflows/check-basecoat-version-callable.yml@9ab8894828e3a887d97c3383e7f23ed892d9a088
     with:
       stage_path: .github/base-coat
-      source_repo: IBuySpy-Shared/basecoat
+      source_repo: ivegamsft/basecoat
       fetch_host: github.com
       update_actor: ${{ vars.BASECOAT_UPDATE_ACTOR }}
     secrets:

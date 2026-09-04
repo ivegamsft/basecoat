@@ -144,7 +144,7 @@ pathways file before re-deriving root cause from raw logs, and require a
 
 Discovery and debate are complete. No files have been changed for this item
 beyond this doc and its tracking issue, **#2906**
-(https://github.com/IBuySpy-Shared/basecoat/issues/2906) — implementation
+(https://github.com/ivegamsft/basecoat/issues/2906) — implementation
 (the `repo-learning` skill, its `eval.yaml`, the `pathways` artifact schema,
 the untrusted-input handling and redaction contract, and wiring into any
 existing agent) awaits explicit approval.
