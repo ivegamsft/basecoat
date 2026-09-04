@@ -84,6 +84,8 @@ jobs:
             'reports/**'
             'checks.json'
             'docs/sprint-plans/**'
+            'docs/prd/synthesized/**'
+            'docs/spec/synthesized/**'
             'docs/audit/**'
             'docs/archive/**'
             '.github/agent-templates/**'
