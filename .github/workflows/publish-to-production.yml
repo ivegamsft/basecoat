@@ -227,6 +227,10 @@ jobs:
             'scripts/sweep-enterprise-memory.ps1'
             'scripts/validate-intake-contract.ps1'
             'skills/environment-bootstrap/references/oidc-federation.md'
+            'docs/guides/coverage-threshold-ratchet.md'
+            'docs/guides/terraform-plan-destroy-guardrail.md'
+            'templates/coverage-threshold-ratchet/README.md'
+            'templates/terraform-plan-destroy-guardrail/README.md'
           )
 
           for f in "${NEUTRAL_ORG_FILES[@]}"; do
