@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "4.2.1",
-  "releaseDate": "2026-08-31",
-  "notes": "Patch release: ships the post-4.2.0 stabilization wave, including solo-dev workflow approval fixes, retired internal release audit credentials, token-budget reductions, updated agent guidance references, and CI/release documentation corrections."
+  "version": "4.2.2",
+  "releaseDate": "2026-09-04",
+  "notes": "Patch release: ships CI model compatibility, workflow retirement safeguards, scoped always-on guidance, review triage, and deterministic HRM/TRM/memory evaluation improvements."
 }

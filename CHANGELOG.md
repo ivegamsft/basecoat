@@ -4,6 +4,24 @@ All notable changes to this repository should be recorded in this file.
 
 ## Unreleased
 
+## 4.2.2 - 2026-09-04
+
+### Added
+
+- Added Copilot review triage capability with size-based routing and human escalation safeguards. (#3079)
+- Added a deterministic A/B evaluation gate for the HRM/TRM/memory cognitive layer, including score-lift and turn-count reporting. (#3100)
+
+### Changed
+
+- Scoped always-on instruction loading by asset and path to reduce baseline context cost. (#3086)
+- Added workflow ownership metadata and guarded downstream workflow retirement. (#3091)
+
+### Fixed
+
+- Repaired supported gh-aw model selection and synchronized generated workflow locks. (#3097)
+- Hardened intake artifact normalization and PRD/spec generation recovery. (#3085, #3095)
+- Corrected merge bootstrap handling and Bash validation false negatives. (#3080)
+
 ## 4.2.1 - 2026-08-31
 
 ### Added
