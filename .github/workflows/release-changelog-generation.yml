@@ -62,11 +62,9 @@ jobs:
           mkdir -p "$(dirname "$latest_notes_file")"
           cp "$notes_file" "$latest_notes_file"
 
-          changelog_changed=false
           if grep -Eq "^## v?${version}\b" CHANGELOG.md; then
             echo "Changelog already contains ${version}; publishing refreshed latest notes only."
           else
-            changelog_changed=true
             NOTES_FILE="$notes_file" VERSION="$version" DATE_UTC="$date_utc" python - <<'PY'
             from pathlib import Path
             import os
