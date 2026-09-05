@@ -45,6 +45,11 @@
     "fs-extra": "^11.1.0",
     "yargs": "^17.7.0"
   },
+  "overrides": {
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "9.0.7"
+    }
+  },
   "engines": {
     "node": ">=18.0.0"
   }
