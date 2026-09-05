@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [string]$RootDir = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path,
-    [ValidateSet('Auto', 'Source', 'Installed')]
+    [ValidateSet('Auto', 'Source', 'Installed', 'Consumer')]
     [string]$Mode = 'Auto'
 )
 

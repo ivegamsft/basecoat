@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [string]$RootDir = (Get-Location).Path,
-    [ValidateSet('Auto', 'Source', 'Installed')]
+    [ValidateSet('Auto', 'Source', 'Installed', 'Consumer')]
     [string]$WorkflowValidationMode = 'Auto',
     [switch]$Strict,
     [switch]$FailOnWarning

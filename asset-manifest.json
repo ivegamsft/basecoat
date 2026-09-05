@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "libraryVersion": "4.2.2",
-  "generatedAt": "2026-09-04T05:55:28.7953770Z",
+  "generatedAt": "2026-09-05T18:26:52.5339273Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -1830,7 +1830,7 @@
     {
       "path": "scripts/validate-basecoat.ps1",
       "type": "script",
-      "sha": "0d8b254aecbd538b9ab063cb61fef2a521aaf1f5",
+      "sha": "e87708f24c92ba7c93c5154aafd14067906b2d5c",
       "version": null,
       "effectiveVersion": "4.2.2",
       "versionSource": "library"
@@ -1854,7 +1854,7 @@
     {
       "path": "scripts/validate-workflow-action-pins.ps1",
       "type": "script",
-      "sha": "10cc2f2e806845be0625de93c5cd318f1b240603",
+      "sha": "21aa8d2ff3f76863d7f28e207efb4ee32a58a428",
       "version": null,
       "effectiveVersion": "4.2.2",
       "versionSource": "library"
@@ -1862,7 +1862,7 @@
     {
       "path": "scripts/validate-workflow-action-pins.py",
       "type": "script",
-      "sha": "2af3764c6289d92d3a94b81f52b5e2871ab8e5d4",
+      "sha": "71f38f9104666889f64ebe39e42ea91eea01ba33",
       "version": null,
       "effectiveVersion": "4.2.2",
       "versionSource": "library"

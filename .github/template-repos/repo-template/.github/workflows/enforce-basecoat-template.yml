@@ -51,6 +51,12 @@ jobs:
           print('Lock and baseline validation passed')
           PY
 
+      - name: Enforce SHA-pinned consumer workflow actions
+        run: |
+          python ".github/base-coat/scripts/validate-workflow-action-pins.py" \
+            --root . \
+            --mode consumer
+
       - name: Block unsafe Base Coat edits on pull requests
         if: github.event_name == 'pull_request'
         run: |

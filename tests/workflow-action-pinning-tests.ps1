@@ -5,13 +5,14 @@ $validatorPath = Join-Path $repoRoot 'scripts/validate-workflow-action-pins.ps1'
 $fixtureRoot = Join-Path $repoRoot 'test-results/workflow-action-pinning-fixture'
 $sourceRoot = Join-Path $fixtureRoot 'source'
 $installedRoot = Join-Path $fixtureRoot 'installed'
+$consumerRoot = Join-Path $fixtureRoot 'consumer'
 $checkoutSha = '9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0'
 $dockerDigest = 'sha256:' + ('a' * 64)
 
 function Invoke-Validator {
     param(
         [string]$RootDir,
-        [ValidateSet('Auto', 'Source', 'Installed')]
+        [ValidateSet('Auto', 'Source', 'Installed', 'Consumer')]
         [string]$Mode = 'Auto'
     )
 
@@ -26,7 +27,7 @@ function Assert-ValidatorFails {
     param(
         [string]$RootDir,
         [string]$Expected,
-        [ValidateSet('Auto', 'Source', 'Installed')]
+        [ValidateSet('Auto', 'Source', 'Installed', 'Consumer')]
         [string]$Mode = 'Auto'
     )
 
@@ -336,6 +337,24 @@ jobs:
     if ($installedResult.ExitCode -ne 0 -or $installedResult.Output -notmatch "mode 'installed'") {
         throw "Expected installed payload layout to pass in installed mode.`n$($installedResult.Output)"
     }
+
+    New-Item -ItemType Directory -Path (Join-Path $consumerRoot '.github/workflows') -Force | Out-Null
+    Set-Content -Path (Join-Path $consumerRoot '.github/workflows/valid.yml') -Value @"
+jobs:
+  validate:
+    steps:
+      - uses: actions/checkout@$checkoutSha
+      - uses: ./.github/actions/local
+      - run: echo "consumer workflow"
+"@
+    $consumerResult = Invoke-Validator -RootDir $consumerRoot
+    if ($consumerResult.ExitCode -ne 0 -or $consumerResult.Output -notmatch "mode 'consumer'") {
+        throw "Expected consumer workflow layout to pass in consumer mode.`n$($consumerResult.Output)"
+    }
+
+    Set-Content -Path (Join-Path $consumerRoot '.github/workflows/invalid.yml') -Value "jobs:`n  validate:`n    steps:`n      - uses: actions/checkout@v4"
+    Assert-ValidatorFails -RootDir $consumerRoot -Expected '.github/workflows/invalid.yml:4' | Out-Null
+    Remove-Item (Join-Path $consumerRoot '.github/workflows/invalid.yml') -Force
 
     Set-Content -Path (Join-Path $installedRoot 'workflows/invalid.yml') -Value "jobs:`n  validate:`n    steps:`n      - uses: owner/action@main"
     Assert-ValidatorFails -RootDir $installedRoot -Expected 'workflows/invalid.yml:4' | Out-Null

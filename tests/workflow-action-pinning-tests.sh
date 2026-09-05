@@ -18,6 +18,7 @@ mkdir -p \
   "$FIXTURE_ROOT/agents" \
   "$FIXTURE_ROOT/scripts" \
   "$FIXTURE_ROOT/workflows" \
+  "$FIXTURE_ROOT/consumer/.github/workflows" \
   "$FIXTURE_ROOT/.github/workflows" \
   "$FIXTURE_ROOT/.github/base-coat/workflows" \
   "$FIXTURE_ROOT/.github/workflow-templates" \
@@ -115,6 +116,29 @@ bash "$FIXTURE_ROOT/scripts/validate-basecoat.sh" "$FIXTURE_ROOT"
 python3 "$FIXTURE_ROOT/scripts/validate-workflow-action-pins.py" \
   --root "$FIXTURE_ROOT" \
   --mode source
+
+cat > "$FIXTURE_ROOT/consumer/.github/workflows/valid.yml" <<EOF
+jobs:
+  validate:
+    steps:
+      - uses: actions/checkout@$CHECKOUT_SHA
+      - uses: ./.github/actions/local
+EOF
+python3 "$FIXTURE_ROOT/scripts/validate-workflow-action-pins.py" \
+  --root "$FIXTURE_ROOT/consumer" \
+  --mode consumer
+cat > "$FIXTURE_ROOT/consumer/.github/workflows/invalid.yml" <<'EOF'
+jobs:
+  validate:
+    steps:
+      - uses: actions/checkout@v4
+EOF
+if python3 "$FIXTURE_ROOT/scripts/validate-workflow-action-pins.py" \
+  --root "$FIXTURE_ROOT/consumer" \
+  --mode consumer; then
+  echo "Consumer workflow action pinning validation did not reject an unpinned workflow action." >&2
+  exit 1
+fi
 
 cat > "$FIXTURE_ROOT/agents/test.agent.md" <<'EOF'
 ---
