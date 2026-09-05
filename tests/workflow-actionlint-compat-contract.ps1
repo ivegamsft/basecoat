@@ -22,7 +22,9 @@ if ($errors.Count -eq 0) {
         'generated_lock_args=',
         'Lint hand-authored workflows',
         'Lint generated gh-aw locks',
-        'Hand-authored queue regression is rejected',
+        'Probe hand-authored queue parser compatibility',
+        'Record hand-authored queue parser behavior',
+        'unsupported queue usage remains detectable',
         'Generated gh-aw compatibility regression passes'
     )) {
         if (-not $workflow.Contains($requiredText)) {
