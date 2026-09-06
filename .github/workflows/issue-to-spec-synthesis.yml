@@ -1,8 +1,17 @@
 name: "BaseCoat - Issue to Spec Synthesis"
 
 on:
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: "Specific issue number to synthesize. When omitted, backfills the oldest open needs-prd issue."
+        required: false
+        type: string
   issues:
     types: [labeled]
+  workflow_run:
+    workflows: ["Issue Triage Agent"]
+    types: [completed]
 
 permissions:
   contents: write
@@ -10,7 +19,7 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.issue.number }}
+  group: ${{ github.workflow }}-${{ github.event.issue.number || github.event.workflow_run.id || inputs.issue_number || github.run_id }}
   cancel-in-progress: false
 
 jobs:
@@ -21,8 +30,16 @@ jobs:
     # Synthesis is an explicit fallback for incomplete intake, never a competing
     # path for a human-supplied spec that has been approved for implementation.
     if: |
-      github.event.label.name == 'synthesize-spec' &&
-      !contains(github.event.issue.labels.*.name, 'approved')
+      (
+        github.event_name == 'issues' &&
+        github.event.label.name == 'synthesize-spec' &&
+        !contains(github.event.issue.labels.*.name, 'approved')
+      ) ||
+      (
+        github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success'
+      ) ||
+      github.event_name == 'workflow_dispatch'
 
     steps:
       - name: Synthesize spec and open PR
@@ -30,12 +47,70 @@ jobs:
         with:
           github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || github.token }}
           script: |
-            const issue = context.payload.issue;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            async function fetchIssue(issueNumber) {
+              const { data } = await github.rest.issues.get({
+                owner,
+                repo,
+                issue_number: Number(issueNumber),
+              });
+              return data;
+            }
+
+            async function findPendingIssue() {
+              const candidates = await github.paginate(github.rest.issues.listForRepo, {
+                owner,
+                repo,
+                state: 'open',
+                labels: 'needs-prd',
+                per_page: 100,
+              });
+              return candidates
+                .filter(candidate => !candidate.pull_request)
+                .filter(candidate => !candidate.labels.some(label => label.name === 'approved'))
+                .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))[0];
+            }
+
+            let issue;
+            if (context.eventName === 'issues') {
+              issue = context.payload.issue;
+            } else if (context.eventName === 'workflow_dispatch' && core.getInput('issue_number')) {
+              issue = await fetchIssue(core.getInput('issue_number'));
+            } else {
+              issue = await findPendingIssue();
+            }
+
+            if (!issue) {
+              core.notice('No open needs-prd issues require synthesis.');
+              return;
+            }
+
             const issueNum = issue.number;
             const title = issue.title;
             const body = issue.body || '';
             const labels = issue.labels.map(l => l.name);
             const author = issue.user.login;
+
+            async function clearIntakeLabels(reason) {
+              for (const label of ['needs-prd', 'synthesize-spec', 'needs-info']) {
+                if (!labels.includes(label)) continue;
+                try {
+                  await github.rest.issues.removeLabel({
+                    owner,
+                    repo,
+                    issue_number: issueNum,
+                    name: label,
+                  });
+                } catch (err) {
+                  if (err.status !== 404) {
+                    core.warning(`Could not remove ${label} from #${issueNum}: ${err.message}`);
+                  }
+                }
+              }
+              core.notice(`Cleared stale intake labels for #${issueNum}: ${reason}`);
+            }
 
             // Derive slug from issue title; fall back to 'untitled' if title is all punctuation/emoji
             const slug = (title
@@ -139,8 +214,8 @@ jobs:
 
             // Get default branch SHA
             const { data: ref } = await github.rest.git.getRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
+              owner,
+              repo,
               ref: 'heads/main',
             });
             const baseSha = ref.object.sha;
@@ -150,8 +225,8 @@ jobs:
             let branchExists = false;
             try {
               await github.rest.git.createRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
+                owner,
+                repo,
                 ref: `refs/heads/${branchName}`,
                 sha: baseSha,
               });
@@ -159,16 +234,17 @@ jobs:
               if (err.status === 422) {
                 branchExists = true;
                 const existing = await github.rest.pulls.list({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  head: `${context.repo.owner}:${branchName}`,
+                  owner,
+                  repo,
+                  head: `${owner}:${branchName}`,
                   state: 'all',
                 });
                 const existingPr = existing.data[0];
                 if (existingPr) {
+                  await clearIntakeLabels(`existing synthesis PR ${existingPr.html_url}`);
                   await github.rest.issues.createComment({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
+                    owner,
+                    repo,
                     issue_number: issueNum,
                     body: `A PRD/spec synthesis PR already exists for this issue: ${existingPr.html_url}`,
                   });
@@ -184,8 +260,8 @@ jobs:
             if (!branchExists) {
               // GitHub creates parent paths when each generated artifact is written.
               await github.rest.repos.createOrUpdateFileContents({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
+                owner,
+                repo,
                 path: prdPath,
                 message: `prd(synthesized): generate PRD for issue #${issueNum}\n\nAuto-generated by issue-to-spec-synthesis.yml\n\nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>`,
                 content: Buffer.from(prdContent).toString('base64'),
@@ -193,8 +269,8 @@ jobs:
               });
 
               await github.rest.repos.createOrUpdateFileContents({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
+                owner,
+                repo,
                 path: specPath,
                 message: `spec(synthesized): generate spec for issue #${issueNum}\n\nAuto-generated by issue-to-spec-synthesis.yml\n\nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>`,
                 content: Buffer.from(specContent).toString('base64'),
@@ -204,8 +280,8 @@ jobs:
 
             // Open PR
             const { data: pr } = await github.rest.pulls.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
+              owner,
+              repo,
               title: `spec: synthesize spec for issue #${issueNum} — ${title}`,
               body: [
                 `Auto-generated spec from approved issue #${issueNum}.`,
@@ -230,8 +306,8 @@ jobs:
             // Add labels (degrade to warning if any label doesn't exist)
             try {
               await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
+                owner,
+                repo,
                 issue_number: pr.number,
                 labels: prLabels,
               });
@@ -241,8 +317,8 @@ jobs:
 
             // Comment on original issue
             await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
+              owner,
+              repo,
               issue_number: issueNum,
               body: [
                 `PRD and spec synthesized from this issue. Draft PR: ${pr.html_url}`,
@@ -251,5 +327,7 @@ jobs:
                 `Spec: \`${specPath}\``,
               ].join('\n'),
             });
+
+            await clearIntakeLabels(`opened synthesis PR ${pr.html_url}`);
 
             core.notice(`Spec PR opened: ${pr.html_url}`);

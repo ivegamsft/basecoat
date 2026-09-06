@@ -24,6 +24,12 @@ Assert-Match $synthesis 'PRD and spec synthesized from this issue' 'Source issue
 Assert-Match $synthesis 'github-token: \$\{\{ secrets\.GH_AW_GITHUB_TOKEN \|\| github\.token \}\}' 'Synthesis must use the configured write token when available.'
 Assert-Match $synthesis 'github\.rest\.pulls\.create' 'Synthesis must open the PR with the configured write-token client.'
 Assert-Match $synthesis 'Recovering existing synthesis branch without a PR' 'Synthesis retries must recover a branch created before PR creation failed.'
+Assert-Match $synthesis 'workflow_dispatch:' 'Synthesis must support manual/backfill reconciliation.'
+Assert-Match $synthesis 'workflow_run:' 'Synthesis must reconcile labels after issue-triage completes because workflow-token label events do not trigger workflows.'
+Assert-Match $synthesis 'findPendingIssue' 'Synthesis must find the oldest open needs-prd issue when reconciling.'
+Assert-Match $synthesis 'github\.rest\.issues\.removeLabel' 'Synthesis must remove stale intake labels after creating or finding a synthesis PR.'
+Assert-Match $synthesis 'name: label' 'Synthesis label cleanup must remove the current stale label from the helper loop.'
+Assert-Match $synthesis "'needs-prd', 'synthesize-spec', 'needs-info'" 'Synthesis must clear needs-prd, synthesize-spec, and obsolete needs-info labels.'
 Assert-Match $synthesis ":\s+'\*Not specified\.\*'" 'Generated fallback text must use MarkdownLint-compliant asterisk emphasis.'
 Assert-Match $synthesis '`- Issue: <https://github\.com/\$\{context\.repo\.owner\}/\$\{context\.repo\.repo\}/issues/\$\{issueNum\}>' 'Generated issue references must use MarkdownLint-compliant angle-bracketed URLs.'
 
