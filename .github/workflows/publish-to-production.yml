@@ -101,6 +101,7 @@ jobs:
             'docs/operations/github-secrets.md'
             'docs/operations/intake-pilot-wawkr-results.md'
             'docs/operations/pr-gate-intake-rollout.md'
+            'docs/operations/repo-story.md'
             'docs/reference/workflows/pr-flow-hygiene.md'
             'docs/research/**'
             'docs/templates/copilot-extension/**'
@@ -178,7 +179,11 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Exact source-repository references have a truthful public equivalent.
+          # Source issue, PR, and workflow-run URLs do not have a truthful public
+          # equivalent. Redact them before rewriting neutral repository references
+          # so private tracker links are not republished as misleading public links.
+          #
+          # Remaining exact source-repository references have a truthful public equivalent.
           # Remaining organization examples are rewritten only in an explicit set of
           # public templates, scripts, and docs where a neutral example is valid.
           #
@@ -205,6 +210,9 @@ jobs:
           if [ -n "$TARGETS" ]; then
             echo "$TARGETS" | while IFS= read -r f; do
               perl -pi -e '
+                s{https://github\.com/IBuySpy-Shared/basecoat/issues/[0-9]+}{internal source issue}g;
+                s{https://github\.com/IBuySpy-Shared/basecoat/pull/[0-9]+}{internal source pull request}g;
+                s{https://github\.com/IBuySpy-Shared/basecoat/actions/runs/[0-9]+(?:/job/[0-9]+)?}{internal source workflow run}g;
                 s{\QIBuySpy-Shared/basecoat-sheen\E}{ivegamsft/sheen}g;
                 s{\QIBuySpy-Shared/basecoat.git\E}{ivegamsft/basecoat.git}g;
                 s{IBuySpy-Shared/basecoat\.(?![A-Za-z0-9_-])}{ivegamsft/basecoat.}g;

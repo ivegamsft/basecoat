@@ -34,7 +34,7 @@
       ".github/workflows/publish-to-production.yml": {
         "job": "publish",
         "expected_job_environment": "production",
-        "expected_workflow_sha256": "7f43c3d9f43a9006eaa1503e607d067c3648209fad124dad88fafbe6b4c78e03"
+        "expected_workflow_sha256": "5905cc6ac6d53d8dfbdae3d88f7c118a0f482fa650d1f3efcca9cad50f28227d"
       }
     }
   },
