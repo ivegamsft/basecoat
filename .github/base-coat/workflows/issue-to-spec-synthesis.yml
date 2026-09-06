@@ -45,7 +45,7 @@ jobs:
       - name: Synthesize spec and open PR
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v7.0.1
         with:
-          github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || github.token }}
+          github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.PRODUCTION_REPO_TOKEN || github.token }}
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
