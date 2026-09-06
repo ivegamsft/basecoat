@@ -49,7 +49,6 @@ jobs:
         with:
           github-token: ${{ github.token }}
           script: |
-            const { getOctokit } = require('@actions/github');
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const writeGithub = process.env.WRITE_TOKEN ? getOctokit(process.env.WRITE_TOKEN) : github;

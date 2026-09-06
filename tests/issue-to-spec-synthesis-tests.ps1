@@ -24,6 +24,9 @@ Assert-Match $synthesis 'PRD and spec synthesized from this issue' 'Source issue
 Assert-Match $synthesis 'WRITE_TOKEN: \$\{\{ secrets\.GH_AW_GITHUB_TOKEN \|\| secrets\.PRODUCTION_REPO_TOKEN \}\}' 'Synthesis must expose the configured org write token for mutations.'
 Assert-Match $synthesis 'github-token: \$\{\{ github\.token \}\}' 'Synthesis must keep the default GitHub token for source repository reads.'
 Assert-Match $synthesis 'const writeGithub = process\.env\.WRITE_TOKEN \? getOctokit\(process\.env\.WRITE_TOKEN\) : github;' 'Synthesis must create a separate write-token client while preserving the default read client.'
+if ($synthesis -match "const \{ getOctokit \} = require\('@actions/github'\)") {
+    throw 'Synthesis must use the getOctokit helper provided by github-script instead of redeclaring it.'
+}
 Assert-Match $synthesis 'writeGithub\.rest\.pulls\.create' 'Synthesis must open the PR with the configured write-token client.'
 Assert-Match $synthesis 'Recovering existing synthesis branch without a PR' 'Synthesis retries must recover a branch created before PR creation failed.'
 Assert-Match $synthesis 'workflow_dispatch:' 'Synthesis must support manual/backfill reconciliation.'
