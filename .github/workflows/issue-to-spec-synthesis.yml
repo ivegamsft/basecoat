@@ -45,12 +45,18 @@ jobs:
       - name: Synthesize spec and open PR
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v7.0.1
         env:
-          WRITE_TOKEN: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.PRODUCTION_REPO_TOKEN }}
+          WRITE_TOKEN: ${{ secrets.GH_AW_GITHUB_TOKEN }}
         with:
           github-token: ${{ github.token }}
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
+            // This workflow's `permissions:` block grants the default GITHUB_TOKEN
+            // contents/issues/pull-requests write on THIS repo, so it is the correct
+            // write client here. PRODUCTION_REPO_TOKEN is scoped only to the public
+            // mirror repo and has no access to this source repo — never use it for
+            // synthesis writes. GH_AW_GITHUB_TOKEN, when configured, is an optional
+            // higher-privilege override (e.g. to trigger downstream workflows).
             const writeGithub = process.env.WRITE_TOKEN ? getOctokit(process.env.WRITE_TOKEN) : github;
 
             async function fetchIssue(issueNumber) {

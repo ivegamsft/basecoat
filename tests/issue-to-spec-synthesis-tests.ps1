@@ -21,7 +21,10 @@ Assert-Match $synthesis 'const prdPath = `docs/prd/synthesized/' 'Synthesis must
 Assert-Match $synthesis 'const specPath = `docs/spec/synthesized/' 'Synthesis must generate a spec artifact.'
 Assert-Match $synthesis 'path: prdPath' 'Synthesis must write the generated PRD.'
 Assert-Match $synthesis 'PRD and spec synthesized from this issue' 'Source issue must link to the generated artifacts.'
-Assert-Match $synthesis 'WRITE_TOKEN: \$\{\{ secrets\.GH_AW_GITHUB_TOKEN \|\| secrets\.PRODUCTION_REPO_TOKEN \}\}' 'Synthesis must expose the configured org write token for mutations.'
+Assert-Match $synthesis 'WRITE_TOKEN: \$\{\{ secrets\.GH_AW_GITHUB_TOKEN \}\}' 'Synthesis must expose only the optional org write-token override for mutations.'
+if ($synthesis -match 'secrets\.PRODUCTION_REPO_TOKEN') {
+    throw 'Synthesis must not use PRODUCTION_REPO_TOKEN: it is scoped to the public mirror repo and has no access to this source repo.'
+}
 Assert-Match $synthesis 'github-token: \$\{\{ github\.token \}\}' 'Synthesis must keep the default GitHub token for source repository reads.'
 Assert-Match $synthesis 'const writeGithub = process\.env\.WRITE_TOKEN \? getOctokit\(process\.env\.WRITE_TOKEN\) : github;' 'Synthesis must create a separate write-token client while preserving the default read client.'
 if ($synthesis -match "const \{ getOctokit \} = require\('@actions/github'\)") {
