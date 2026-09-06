@@ -54,6 +54,7 @@
     "typescript": "5.9.3"
   },
   "overrides": {
+    "qs": "6.16.0",
     "@typescript-eslint/typescript-estree": {
       "minimatch": "9.0.7"
     }
