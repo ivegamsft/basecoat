@@ -190,6 +190,11 @@ In GitHub:
      required `actions: write`, `checks: read`, `deployments: read`,
      `contents: write`, `pull-requests: write`, `issues: write`, and
      `statuses: write` permissions
+   - if the repository installs a workflow that opens pull requests with the
+     default token (for example `issue-to-spec-synthesis.yml`), also enable
+     **Allow GitHub Actions to create and approve pull requests**; see
+     [PR-creation permission](#pr-creation-permission-for-automation-workflows)
+     below before enabling it
 3. **Settings > Rules > Rulesets**
    - create an active branch ruleset targeting the default branch
    - require zero approving reviews
@@ -212,6 +217,50 @@ Set the variable explicitly even though workflows can fall back to the policy
 file's `default_profile`. Explicit selection prevents onboarding and workflow
 defaults from being confused during migrations.
 
+### PR-creation permission for automation workflows
+
+Workflows that open pull requests using the default `GITHUB_TOKEN` (for
+example `issue-to-spec-synthesis.yml`, which turns a triaged issue into a
+draft spec PR) are blocked by a separate, hierarchical GitHub setting:
+**Allow GitHub Actions to create and approve pull requests**. It is distinct
+from the read/write workflow-permissions radio button above — a workflow's
+own `permissions:` block already grants it `pull-requests: write`, but
+GitHub still refuses the actual create/approve call unless this toggle is on.
+
+The setting is enforced top-down: **Enterprise → Organization → Repository**.
+If an Enterprise or Organization has set it to `Disabled` (not
+`Not enforced`), no lower level can override it — `gh api` calls to enable it
+at the repo or org return `409` with a message that write permissions for
+workflows are disabled by the enterprise, even with `admin:org` scope.
+
+Enable it at the **narrowest scope that unblocks the need**:
+
+- Prefer repository-level, opt-in only for repositories that install a
+  PR-creating workflow. Do not enable it org-wide or enterprise-wide as a
+  blanket default — it is not scoped per-workflow, so it unblocks PR
+  creation *and self-approval* for every workflow in scope, not just the
+  intended one.
+- Combined with this profile's `required_approving_review_count: 0` for
+  XS–XL pull requests, a broadly-enabled toggle would let any workflow (not
+  only the intended one) create and self-approve a PR that then merges with
+  no human review at those sizes. Scoping enablement to only the repos and
+  workflows that need it keeps that blast radius bounded.
+- Confirm the workflow itself mitigates the residual risk: synthesis output
+  is always a draft spec PR gated on an explicit human `/approve` comment
+  before implementation proceeds, so enabling the toggle for that workflow
+  does not itself grant unreviewed code changes.
+- If an Enterprise policy is `Disabled` with no delegation, no repo or org
+  action can fix it — escalate to an Enterprise owner to move the policy to
+  `Not enforced`, then enable it per-repository as needed. Falling back to a
+  manually-created PAT (see `docs/operations/github-secrets.md`) trades an
+  enforced platform policy for a standing secret with rotation burden; treat
+  it strictly as a temporary measure while escalation is pending, not a
+  substitute for fixing the policy.
+
+`scripts/bootstrap.ps1` performs a best-effort, warn-only check for this
+setting when a PR-creating workflow is present, so onboarding surfaces the
+requirement without blocking on it.
+
 ## Programmatic GitHub setup
 
 The caller needs repository administration permission. Replace
@@ -228,6 +277,13 @@ gh api --method PATCH "repos/$repository" `
 gh variable set BASECOAT_POLICY_PACK `
   --repo $repository `
   --body "solo-dev"
+
+# Only if the repository installs a PR-creating automation workflow
+# (for example issue-to-spec-synthesis.yml). A 409 here means the setting
+# is blocked by org or enterprise policy — escalate to that owner instead
+# of retrying at the repository scope.
+gh api --method PUT "repos/$repository/actions/permissions/workflow" `
+  -F can_approve_pull_request_reviews=true
 ```
 
 Create `solo-dev-main-ruleset.json`:

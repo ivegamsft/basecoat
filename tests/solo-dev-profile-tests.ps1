@@ -125,7 +125,10 @@ foreach ($requiredText in @(
     '"allowed_merge_methods": ["squash"]',
     '-Workflow pr-auto-merge-executor.yml',
     '-Workflow issue-approve.yml',
-    'Read repository contents and packages permissions'
+    'Read repository contents and packages permissions',
+    'PR-creation permission for automation workflows',
+    'can_approve_pull_request_reviews',
+    'Allow GitHub Actions to create and approve pull requests'
 )) {
     if ($guide -notmatch [regex]::Escape($requiredText)) {
         throw "Solo-dev guide is missing required guidance: $requiredText"
@@ -169,6 +172,20 @@ if ($mkdocs -notmatch 'Solo-Developer Profile:\s+guides/solo-dev-profile\.md') {
 }
 if ($contract -notmatch 'Solo-Developer Governance Profile') {
     throw 'Onboarding profile contract must link to the solo-dev implementation guide.'
+}
+
+$githubSecretsPath = Join-Path $repoRoot 'docs\operations\github-secrets.md'
+$githubSecrets = Get-Content -Path $githubSecretsPath -Raw
+if ($githubSecrets -notmatch [regex]::Escape('solo-dev-profile.md#pr-creation-permission-for-automation-workflows')) {
+    throw 'github-secrets.md must point GH_AW_GITHUB_TOKEN readers to the PR-creation permission platform setting before creating a PAT.'
+}
+
+$bootstrapContentForPolicyChecks = Get-Content -Path $bootstrapPath -Raw
+if ($bootstrapContentForPolicyChecks -notmatch [regex]::Escape('can_approve_pull_request_reviews')) {
+    throw 'bootstrap.ps1 must check the can_approve_pull_request_reviews permission for PR-creating workflows.'
+}
+if ($bootstrapContentForPolicyChecks -notmatch [regex]::Escape('issue-to-spec-synthesis.yml')) {
+    throw 'bootstrap.ps1 PR-creation permission check must be gated on presence of a PR-creating workflow.'
 }
 if ($policy.default_profile -ne 'solo-dev') {
     throw 'Canonical governance policy must keep the shipped solo-dev default explicit.'

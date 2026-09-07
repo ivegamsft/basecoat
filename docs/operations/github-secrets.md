@@ -126,6 +126,17 @@ fine-grained PAT beyond the built-in `GITHUB_TOKEN`.
 **Purpose:** Optional override for GitHub API access during agent execution.
 BaseCoat's checked-in workflows fall back to the short-lived `GITHUB_TOKEN`.
 
+**Try the platform setting first.** If a workflow fails with `GitHub Actions
+is not permitted to create or approve pull requests`, that is usually a
+platform policy gap, not a missing token — see
+[PR-creation permission](../guides/solo-dev-profile.md#pr-creation-permission-for-automation-workflows)
+in the solo-dev profile guide. Enable **Allow GitHub Actions to create and
+approve pull requests** at the repository (or, if blocked, escalate to the
+org/enterprise owner) before creating this PAT. Only fall back to
+`GH_AW_GITHUB_TOKEN` when that policy is blocked above the repository with no
+delegation available — a standing PAT carries a rotation burden that the
+platform setting does not.
+
 **How to create:** Use a **separate token** from `COPILOT_GITHUB_TOKEN`
 (recommended). Name it `basecoat-gh-aw` and grant only the minimum
 repository read permissions required. Set PAT expiration to **30 days or less**.
