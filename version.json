@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "4.2.2",
-  "releaseDate": "2026-09-04",
-  "notes": "Patch release: ships CI model compatibility, workflow retirement safeguards, scoped always-on guidance, review triage, and deterministic HRM/TRM/memory evaluation improvements."
+  "version": "4.3.0",
+  "releaseDate": "2026-09-07",
+  "notes": "Minor release: ships consumer workflow SHA-pin enforcement, dependency/security fixes, PRD/spec synthesis recovery, and governance planning specs for PR controls, standards, licensing, Responsible AI/privacy, and tracker mutation review gates."
 }
