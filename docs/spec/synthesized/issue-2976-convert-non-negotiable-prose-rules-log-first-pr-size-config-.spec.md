@@ -39,8 +39,14 @@ Implement this as an incremental control inventory plus validation hardening:
    - config-secret handling in repo configuration examples and docs.
 3. Reuse existing PowerShell validation patterns and fail with actionable
    messages.
-4. Update documentation to distinguish enforced controls from advisory judgment
-   guidance.
+4. Wire the enforceable checks into PR or CI gates so violations fail closed at
+   the point they would otherwise be merged. The PR-size rule must retain the
+   existing routine-work ceiling of 15 changed files or 300 net line changes and
+   document the explicit override path for larger work.
+5. Update documentation to distinguish enforced controls from advisory judgment
+   guidance. When a prose rule becomes enforced, replace the long always-on
+   wording with a one-line pointer to the authoritative control inventory or
+   validator.
 
 The implementation must avoid brittle natural-language policing. Validate
 structured metadata, changed-file counts, known config paths, policy files, and
@@ -53,9 +59,13 @@ manual-review guidance instead of pretending it is enforceable.
   and config-secret handling.
 - [ ] Existing validation commands fail on representative violations and pass
   on compliant fixtures.
+- [ ] Enforced controls fail closed in the relevant PR/CI path, including the
+  15-file/300-line PR-size ceiling and the documented override path.
 - [ ] Error output names the violated control and gives the remediation.
 - [ ] Advisory controls remain documented but are not presented as deterministic
   gates.
+- [ ] Always-on instruction text for newly enforced controls is reduced to
+  one-line pointers instead of duplicated long-form prose.
 - [ ] PR references this PRD and spec.
 
 ## References

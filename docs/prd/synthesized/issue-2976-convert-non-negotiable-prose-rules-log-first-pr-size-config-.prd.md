@@ -38,10 +38,18 @@ In scope:
   follow-up design.
 - Add or extend validation for enforceable controls, starting with issue-first
   implementation evidence, PR-size/batch limits, and config-secret handling.
+- Make enforceable controls fail closed in the PR or CI path where the
+  violation would matter. At minimum, preserve the existing PR-size ceiling of
+  15 changed files or 300 net line changes, require an explicit documented
+  override path for larger work, and reject configuration examples that place
+  secrets in committed config.
 - Wire new checks into the existing PowerShell validation/test suite instead of
   introducing a new runner.
 - Document any intentionally advisory controls so reviewers know why they
   remain prose.
+- Reduce instructions for controls that become enforced to short pointers to
+  the authoritative validation or policy surface instead of duplicating long
+  always-on prose.
 
 Out of scope:
 
@@ -52,15 +60,18 @@ Out of scope:
 
 ## Success Criteria
 
-- [ ] At least one enforceable validation exists for each covered
-  non-negotiable category: issue-first evidence, PR-size/batch limits, and
-  config-secret handling.
+- [ ] Covered controls fail closed where they are enforced: implementation PRs
+  without issue evidence fail the appropriate PR gate, routine PRs above 15
+  files or 300 net changed lines fail without an explicit override, and
+  committed config-secret examples fail validation.
 - [ ] Advisory-only rules are documented with a reason they cannot be reliably
   enforced.
 - [ ] Validation failures produce actionable messages naming the violated rule
   and remediation path.
 - [ ] `scripts\validate-basecoat.ps1` or the existing test suite exercises the
   new checks.
+- [ ] Always-on instruction prose for enforced rules is reduced to one-line
+  pointers to the control inventory or validation surface.
 
 ## References
 
