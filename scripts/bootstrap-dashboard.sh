@@ -11,7 +11,7 @@ set -euo pipefail
 #   ./scripts/bootstrap-dashboard.sh --remove     — Remove repos from config
 #   ./scripts/bootstrap-dashboard.sh --list       — Show current repos
 
-REPO="IBuySpy-Shared/basecoat"
+REPO="ivegamsft/basecoat"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CACHE_FILE="$SCRIPT_DIR/.dashboard-repos-cache.json"
 

@@ -23,7 +23,7 @@ param(
 
     [string]$OutputDir = [System.IO.Path]::Combine("artifacts", "aidl-incident-to-backlog-router"),
 
-    [string]$Repo = "IBuySpy-Shared/basecoat",
+    [string]$Repo = "ivegamsft/basecoat",
 
     [string]$AreaTaxonomyPath = ""
 )

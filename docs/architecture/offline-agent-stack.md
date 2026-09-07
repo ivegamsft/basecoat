@@ -87,7 +87,7 @@ A truly air-gapped machine cannot download installers, models, packages, or Git 
 Clone and package the repository:
 
 ```powershell
-git clone https://github.com/IBuySpy-Shared/basecoat.git
+git clone https://github.com/ivegamsft/basecoat.git
 Set-Location .\basecoat
 git bundle create .\basecoat.bundle --all
 ```

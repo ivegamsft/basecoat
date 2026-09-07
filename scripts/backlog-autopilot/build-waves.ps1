@@ -18,7 +18,7 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$Repo = "IBuySpy-Shared/basecoat",
+    [string]$Repo = "ivegamsft/basecoat",
     [int]$WaveSize = 0,
     [string]$InputPath,
     [string]$ConfigPath = (Join-Path $PSScriptRoot "autopilot.config.json"),
