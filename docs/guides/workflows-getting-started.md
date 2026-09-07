@@ -57,6 +57,13 @@ For a single-maintainer repository, follow the
 [Solo-Developer Governance Profile](solo-dev-profile.md) before enabling
 `basecoat-pr-auto-merge-executor.yml`. The profile requires protected `main`,
 all policy-pack checks, an empty bypass list, and GitHub-native auto-merge.
+If you also install a workflow that creates pull requests, such as
+`issue-to-spec-synthesis.yml`, enable the separate repository-level
+**Allow GitHub Actions to create and approve pull requests** setting only for
+that repo when GitHub exposes repo-level control. If your Enterprise UI only
+offers a global enablement checkbox, do not turn it on just for one downstream
+repo; first confirm org-level override/restriction is available, or use a
+scoped credential fallback while #3158 designs a safer durable pattern.
 
 To include internal workflows as well (internal workflows are marked unsupported,
 so include both flags):
@@ -222,12 +229,19 @@ gh workflow view basecoat-upstream-version-drift.yml
 
 ### Permission Errors
 
-Some workflows require specific permissions. Grant them in your repository:
+Some workflows require specific permissions. Keep the repository default
+workflow permission narrow and let each workflow declare its own least-privilege
+`permissions:` block:
 
 1. Go to **Settings** → **Actions** → **General**
-2. Set **Workflow permissions** to:
-   - ✅ Read and write permissions
-   - ✅ Allow GitHub Actions to create and approve pull requests
+2. Set **Workflow permissions** to **Read repository contents and packages permissions**
+3. For repos that install PR-creating automation, enable the separate
+   **Allow GitHub Actions to create and approve pull requests** toggle.
+   This setting is inherited or blocked from Enterprise → Organization →
+   Repository. If the Enterprise control is a global checkbox rather than
+   delegation, treat it as a high-blast-radius governance decision: restrict it
+   at the org before enabling it, or fall back to a scoped credential until a
+   safer design is approved.
 
 ### Secret/Token Errors
 

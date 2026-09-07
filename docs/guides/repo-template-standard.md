@@ -107,5 +107,26 @@ Set these as required status checks for template consumers:
 1. Create repository from template.
 2. Run bootstrap workflow.
 3. Commit resulting `.github/base-coat` content.
-4. Enable enforcement workflow as required status check.
-5. Enforce upgrades through standard pull request flow.
+4. Commit `.github/basecoat-onboarding-profile.json` or otherwise select the
+   intended profile before installing optional workflow packs.
+5. Run `scripts/bootstrap.ps1` after the BaseCoat content is present so the
+   repository surfaces profile, secret, and platform-policy warnings.
+6. Install downstream workflows with
+   `scripts/configure-downstream-workflows.ps1`; for solo maintainers, apply
+   the [Solo-Developer Governance Profile](solo-dev-profile.md) before enabling
+   auto-merge automation.
+7. Enable enforcement workflow as a required status check.
+8. Enforce upgrades through standard pull request flow.
+
+## Platform Settings That Do Not Ship
+
+Repository templates ship files, not GitHub platform-policy values. Template
+consumers must configure these settings in each created repository:
+
+- keep **Settings > Actions > General > Workflow permissions** set to **Read
+  repository contents and packages permissions**,
+- enable **Allow GitHub Actions to create and approve pull requests** only for
+  repos that install PR-creating automation, and
+- do not enable an Enterprise-wide global checkbox just to satisfy one repo.
+  First confirm org-level override/restriction is available, or use a scoped
+  credential fallback until #3158 resolves the safer onboarding pattern.

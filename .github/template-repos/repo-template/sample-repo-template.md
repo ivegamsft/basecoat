@@ -19,7 +19,15 @@ This sample shows a template repository setup that installs and enforces Base Co
    (`none`, `memory`, `guardrails`, `lane-closeout`, or `standard`).
 4. Run `Bootstrap Base Coat From Lock` workflow.
 5. Commit imported `.github/base-coat` files plus the selected `.github/hooks/*.json` packs.
-6. Set `enforce-basecoat-template` as a required status check.
+6. Add the consumer repo's `.github/basecoat-onboarding-profile.json` and run
+   `scripts/bootstrap.ps1` from the imported BaseCoat content.
+7. Install downstream workflows with `scripts/configure-downstream-workflows.ps1`.
+8. Keep default workflow permissions read-only. If the repo installs
+   PR-creating automation such as `issue-to-spec-synthesis.yml`, enable
+   **Allow GitHub Actions to create and approve pull requests** only where the
+   policy can be constrained to the repo or org. Do not enable an
+   Enterprise-wide global checkbox solely for one downstream repo.
+9. Set `enforce-basecoat-template` as a required status check.
 
 ## Notes
 

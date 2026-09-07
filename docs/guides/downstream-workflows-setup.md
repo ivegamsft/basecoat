@@ -34,6 +34,25 @@ The installer supports five classes:
 
 By default, `reusable` and `ship-it` workflows are installed.
 
+## Onboarding prerequisites
+
+Before installing workflows in a consumer repository, run the BaseCoat
+bootstrap script and select the governance profile for that repo. For
+single-maintainer repositories, follow the
+[Solo-Developer Governance Profile](solo-dev-profile.md); for team-owned repos,
+use the profile selected by `.github/basecoat-onboarding-profile.json`.
+
+Keep the repository default workflow permission set to **Read repository
+contents and packages permissions**. Workflows that need write access declare
+their own `permissions:` blocks. If a selected workflow creates pull requests
+with `GITHUB_TOKEN` (for example `issue-to-spec-synthesis.yml`), enable the
+separate repository-level **Allow GitHub Actions to create and approve pull
+requests** setting for that repo only when GitHub exposes repo-level control.
+If the Enterprise control is only a global checkbox that enables the capability
+across the enterprise, do not turn it on just for one consumer repo. Confirm an
+org-level override/restriction is available first, or use a scoped credential
+fallback while #3158 designs the durable policy.
+
 ## Quick start
 
 Run from repository root:
