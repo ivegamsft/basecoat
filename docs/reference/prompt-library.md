@@ -2,7 +2,7 @@
 
 Generated from the canonical intent vocabulary and asset frontmatter. Do not edit the generated tables directly; run `pwsh scripts/generate-prompt-library.ps1`.
 
-Coverage: 36 intents, 140 skills, and 131 agents.
+Coverage: 36 intents, 141 skills, and 131 agents.
 
 ## Lifecycle prompts
 
@@ -236,6 +236,7 @@ Mutation performed: none
 | `project-rules-drift-audit` | <code>Use the 'project-rules-drift-audit' skill. Task: comparing live project rule configuration to a baseline manifest.</code> | [skills/project-rules-drift-audit/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/project-rules-drift-audit/SKILL.md) |
 | `public-safe-sanitization` | <code>Use the 'public-safe-sanitization' skill. Task: sanitizing roadmap/issue notes for sharing.</code> | [skills/public-safe-sanitization/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/public-safe-sanitization/SKILL.md) |
 | `queue-rebalancer` | <code>Use the 'queue-rebalancer' skill. Task: blocker-first ordering.</code> | [skills/queue-rebalancer/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/queue-rebalancer/SKILL.md) |
+| `rai-privacy-review` | <code>Use the 'rai-privacy-review' skill. Task: Responsible AI plans.</code> | [skills/rai-privacy-review/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/rai-privacy-review/SKILL.md) |
 | `rca` | <code>Use the 'rca' skill. Task: post-incident RCA.</code> | [skills/rca/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/rca/SKILL.md) |
 | `receiving-code-review` | <code>Use the 'receiving-code-review' skill. Task: address PR review comments.</code> | [skills/receiving-code-review/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/receiving-code-review/SKILL.md) |
 | `refactoring` | <code>Use the 'refactoring' skill. Task: extract large method safely.</code> | [skills/refactoring/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/refactoring/SKILL.md) |

@@ -126,7 +126,8 @@ as distinct assets and disambiguate by source path (`instructions/` vs
 | `skills/performance-profiling/SKILL.md` | isolate and measure slow code paths                     | profiling, performance, latency, hot path    |
 | `skills/production-readiness/SKILL.md`  | PRR gates, business continuity planning, disaster recovery, and FMEA templates | skill, production-readiness, bcp, drp |
 | `skills/rca/SKILL.md`                   | structured root cause analysis for incidents and failures | rca, root-cause, incident, failure |
-| `skills/refactoring/SKILL.md`           | restructure code without changing behavior              | refactor, cleanup, simplify, extract, rename |
+| `skills/rai-privacy-review/SKILL.md` | Responsible AI and privacy plans and review decisions for user-impacting and data-handling work | responsible-ai, privacy, data-classification, human-oversight, governance |
+| `skills/refactoring/SKILL.md`            | restructure code without changing behavior              | refactor, cleanup, simplify, extract, rename |
 | `skills/security/SKILL.md`              | OWASP checklist, STRIDE threat model, and vulnerability templates | security, owasp, stride, threat-model, vulnerability |
 | `skills/security-operations/SKILL.md`   | Threat detection, SIEM rules, and incident response automation patterns | skill, security-operations, siem, detection |
 | `skills/github-security-posture/SKILL.md` | audit GitHub org and repo security configurations with traffic-light scoring and remediation commands | github, security, posture, audit, rulesets, secret-scanning, dependabot, branch-protection, codeowners |

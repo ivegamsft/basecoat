@@ -245,6 +245,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running RAI/privacy review tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'rai-privacy-review-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'RAI/privacy review tests failed' -ForegroundColor Red
+    Write-FailureLog 'rai-privacy-review-tests'
+    exit 1
+}
+
 Write-Host 'Running coverage threshold ratchet tests...'
 & node --test (Join-Path $PSScriptRoot 'coverage-threshold-ratchet.test.js')
 if ($LASTEXITCODE -ne 0) {
