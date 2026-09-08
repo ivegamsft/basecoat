@@ -11,11 +11,18 @@ Express/TypeScript/Sequelize API server for the Basecoat Portal.
 
 ```bash
 cp .env.example .env
-# Edit .env with your database credentials
+# Edit .env with database credentials and GitHub OAuth credentials
 npm install
 npm run db:migrate
 npm run dev
 ```
+
+Create a GitHub OAuth App (or a GitHub App with a user authorization callback)
+before starting the browser flow. Set its callback URL to
+`http://localhost:3000/auth/github/callback`, then copy its client ID and client
+secret into `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`. The API redirects a
+completed sign-in to `FRONTEND_URL/auth/callback`; use
+`http://localhost:5173` for the Vite development server.
 
 ## Scripts
 
@@ -38,7 +45,10 @@ npm run dev
 
 ## Environment Variables
 
-See `.env.example` for all required variables.
+See `.env.example` for all required variables. `GITHUB_CLIENT_ID` and
+`GITHUB_CLIENT_SECRET` are required to begin a sign-in; the API returns
+`503 GITHUB_OAUTH_NOT_CONFIGURED` instead of redirecting to GitHub when either
+value is absent.
 
 ## Architecture
 

@@ -3,7 +3,7 @@ import { createApp } from './app';
 import sequelize from './config/database';
 import logger from './config/logger';
 
-const PORT = Number(process.env.PORT) || 3001;
+const PORT = Number(process.env.PORT) || 3000;
 
 async function main(): Promise<void> {
   try {

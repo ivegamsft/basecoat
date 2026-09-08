@@ -3,6 +3,22 @@ import { Strategy as GitHubStrategy, Profile } from 'passport-github2';
 import { VerifyCallback } from 'passport-oauth2';
 import { User } from '../models';
 
+function hasConfiguredValue(value: string | undefined): boolean {
+  return Boolean(
+    value?.trim() &&
+      !value.startsWith('<') &&
+      value !== 'test-client-id' &&
+      value !== 'test-client-secret'
+  );
+}
+
+export function isGitHubOAuthConfigured(): boolean {
+  return (
+    hasConfiguredValue(process.env.GITHUB_CLIENT_ID) &&
+    hasConfiguredValue(process.env.GITHUB_CLIENT_SECRET)
+  );
+}
+
 export async function verifyGitHubProfile(
   _accessToken: string,
   _refreshToken: string,

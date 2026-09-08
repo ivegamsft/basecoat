@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 // Mock the passport config before the app is imported so no real
 // GitHub OAuth or database calls happen during unit tests.
 jest.mock('../src/config/passport', () => {
+  const isGitHubOAuthConfigured = jest.fn(() => true);
   const mockPassport = {
     initialize: jest.fn(
       () => (_req: unknown, _res: unknown, next: () => void) => next()
@@ -30,31 +31,52 @@ jest.mock('../src/config/passport', () => {
       }
     ),
   };
-  return { __esModule: true, default: mockPassport };
+  return { __esModule: true, default: mockPassport, isGitHubOAuthConfigured };
 });
 
 import { createApp } from '../src/app';
+import { isGitHubOAuthConfigured } from '../src/config/passport';
 
 const app = createApp();
 const JWT_SECRET = 'dev-secret';
+const mockGitHubOAuthConfigured = isGitHubOAuthConfigured as jest.MockedFunction<
+  typeof isGitHubOAuthConfigured
+>;
 
 describe('GitHub OAuth routes', () => {
+  afterEach(() => {
+    mockGitHubOAuthConfigured.mockReturnValue(true);
+  });
+
+  it('GET /auth/github/availability reports missing OAuth credentials', async () => {
+    mockGitHubOAuthConfigured.mockReturnValue(false);
+    const res = await request(app).get('/auth/github/availability');
+    expect(res.status).toBe(200);
+    expect(res.body.data.configured).toBe(false);
+  });
+
+  it('GET /auth/github returns configuration error when OAuth credentials are absent', async () => {
+    mockGitHubOAuthConfigured.mockReturnValue(false);
+    const res = await request(app).get('/auth/github');
+    expect(res.status).toBe(503);
+    expect(res.body.error.code).toBe('GITHUB_OAUTH_NOT_CONFIGURED');
+  });
+
   it('GET /auth/github redirects to GitHub (302)', async () => {
     const res = await request(app).get('/auth/github');
     expect(res.status).toBe(302);
     expect(res.headers.location).toMatch(/github\.com/);
   });
 
-  it('GET /auth/github/callback with mocked success returns token and user', async () => {
+  it('GET /auth/github/callback redirects to the frontend with a token', async () => {
     const res = await request(app).get('/auth/github/callback');
-    expect(res.status).toBe(200);
-    expect(res.body.data).toHaveProperty('token');
-    expect(res.body.data.user).toMatchObject({
-      username: 'testuser',
-      role: 'viewer',
-    });
-    // Token should be a valid JWT
-    const decoded = jwt.verify(res.body.data.token, JWT_SECRET) as Record<
+    expect(res.status).toBe(302);
+    const callbackUrl = new URL(res.headers.location);
+    expect(callbackUrl.origin).toBe('http://localhost:5173');
+    expect(callbackUrl.pathname).toBe('/auth/callback');
+    const token = callbackUrl.searchParams.get('token');
+    expect(token).toBeTruthy();
+    const decoded = jwt.verify(token!, JWT_SECRET) as Record<
       string,
       unknown
     >;

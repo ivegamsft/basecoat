@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize';
 import { User, initUser } from '../src/models/User';
-import { verifyGitHubProfile } from '../src/config/passport';
+import { isGitHubOAuthConfigured, verifyGitHubProfile } from '../src/config/passport';
 import type { Profile } from 'passport-github2';
 import type { VerifyCallback } from 'passport-oauth2';
 
@@ -48,6 +48,7 @@ describe('verifyGitHubProfile', () => {
       };
       verifyGitHubProfile('token', 'refresh', profile, done);
     });
+
   });
 
   it('returns existing user on second login with same githubId', async () => {
@@ -77,6 +78,42 @@ describe('verifyGitHubProfile', () => {
         resolve();
       };
       verifyGitHubProfile('token', 'refresh', profile, done);
+    });
+  });
+
+  describe('isGitHubOAuthConfigured', () => {
+    const originalClientId = process.env.GITHUB_CLIENT_ID;
+    const originalClientSecret = process.env.GITHUB_CLIENT_SECRET;
+
+    afterEach(() => {
+      if (originalClientId === undefined) {
+        delete process.env.GITHUB_CLIENT_ID;
+      } else {
+        process.env.GITHUB_CLIENT_ID = originalClientId;
+      }
+      if (originalClientSecret === undefined) {
+        delete process.env.GITHUB_CLIENT_SECRET;
+      } else {
+        process.env.GITHUB_CLIENT_SECRET = originalClientSecret;
+      }
+    });
+
+    it('rejects missing and placeholder OAuth credentials', () => {
+      delete process.env.GITHUB_CLIENT_ID;
+      process.env.GITHUB_CLIENT_SECRET = 'client-secret';
+      expect(isGitHubOAuthConfigured()).toBe(false);
+
+      process.env.GITHUB_CLIENT_ID = '<your-github-client-id>';
+      expect(isGitHubOAuthConfigured()).toBe(false);
+
+      process.env.GITHUB_CLIENT_ID = 'test-client-id';
+      expect(isGitHubOAuthConfigured()).toBe(false);
+    });
+
+    it('accepts configured OAuth credentials', () => {
+      process.env.GITHUB_CLIENT_ID = 'Iv1.a1b2c3d4e5f6g7h8';
+      process.env.GITHUB_CLIENT_SECRET = 'client-secret';
+      expect(isGitHubOAuthConfigured()).toBe(true);
     });
   });
 

@@ -58,6 +58,12 @@ The portal is being migrated from separate `frontend/` and `backend/` directorie
 
 The frontend defaults to `http://localhost:3000` for the API. Override it with `portal/frontend/.env.local` when needed.
 
+To exercise browser sign-in, create a GitHub OAuth App (or GitHub App user
+authorization flow) with callback URL `http://localhost:3000/auth/github/callback`.
+Set its client ID and secret in `portal/backend/.env` as
+`GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`. Set `FRONTEND_URL` to
+`http://localhost:5173` when using the Vite development server.
+
 ## Testing
 
 Portal PR validation currently runs:
