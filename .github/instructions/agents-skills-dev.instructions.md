@@ -206,4 +206,9 @@ Skills that lack `context_policy` are valid. The block is strictly additive; no 
 All agents must have a companion `<agent>.agent.eval.yaml` file.
 All skills must have a companion `eval.yaml` in the skill directory.
 
+Assets that ingest web pages, issue bodies, PR comments, artifacts, or tool
+output must include a negative eval proving embedded instructions cannot
+override trusted authority. Follow
+`instructions/basecoat-10-core-untrusted-content-boundary.instructions.md`.
+
 Run `pwsh tests/run-tests.ps1` to validate coverage.

@@ -245,6 +245,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running untrusted content boundary tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'untrusted-content-boundary-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Untrusted content boundary tests failed' -ForegroundColor Red
+    Write-FailureLog 'untrusted-content-boundary-tests'
+    exit 1
+}
+
 Write-Host 'Running RAI/privacy review tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'rai-privacy-review-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
