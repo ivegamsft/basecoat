@@ -16,7 +16,7 @@ BaseCoat gives your organization one place to manage agents, skills, instruction
 | Asset type | Count | What it does |
 |---|---|---|
 | **Agents** | 131 | End-to-end task executors — sprint planners, code reviewers, security analysts, and more |
-| **Skills** | 139 | Reusable domain capabilities invoked by agents |
+| **Skills** | 140 | Reusable domain capabilities invoked by agents |
 | **Instructions** | 91 | Copilot behavior rules scoped by file path pattern |
 | **Prompts** | 6 | Structured templates for repeatable tasks |
 
@@ -57,6 +57,7 @@ flowchart LR
 - [reference/inventory.md](reference/inventory.md) — Full asset listing (agents, skills, instructions, prompts)
 - [reference/repository-inventory.md](reference/repository-inventory.md) — Current counts, model assignments, and token-budget snapshot
 - [reference/governance.md](reference/governance.md) — Contribution policies and review standards
+- [reference/governance/standards-mapping.md](reference/governance/standards-mapping.md) — Advisory standards mapping taxonomy and reporting contract
 - [reference/distribution.md](reference/distribution.md) — Sync mechanism for consumer repos
 - [reference/hooks.md](reference/hooks.md) — Git hooks and pre-commit validation
 - [reference/goals.md](reference/goals.md) — Project goals and OKRs

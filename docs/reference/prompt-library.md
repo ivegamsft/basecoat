@@ -2,7 +2,7 @@
 
 Generated from the canonical intent vocabulary and asset frontmatter. Do not edit the generated tables directly; run `pwsh scripts/generate-prompt-library.ps1`.
 
-Coverage: 36 intents, 139 skills, and 131 agents.
+Coverage: 36 intents, 140 skills, and 131 agents.
 
 ## Lifecycle prompts
 
@@ -261,6 +261,7 @@ Mutation performed: none
 | `sprint-planner` | <code>Use the 'sprint-planner' skill. Task: sprint goal decomposition.</code> | [skills/sprint-planner/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/sprint-planner/SKILL.md) |
 | `sprint-project-mapper` | <code>Use the 'sprint-project-mapper' skill. Task: clustering by sprint/wave/project tags.</code> | [skills/sprint-project-mapper/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/sprint-project-mapper/SKILL.md) |
 | `sprint-retrospective` | <code>Use the 'sprint-retrospective' skill. Task: create sprint retrospective document.</code> | [skills/sprint-retrospective/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/sprint-retrospective/SKILL.md) |
+| `standards-mapping` | <code>Use the 'standards-mapping' skill. Task: OWASP/NIST/CAF/WAF/AI RMF coverage mapping.</code> | [skills/standards-mapping/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/standards-mapping/SKILL.md) |
 | `standup-signal-extraction` | <code>Use the 'standup-signal-extraction' skill. Task: convert updates into blockers/actions/dependencies.</code> | [skills/standup-signal-extraction/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/standup-signal-extraction/SKILL.md) |
 | `station-bottleneck-analyzer` | <code>Use the 'station-bottleneck-analyzer' skill. Task: station-level queue pressure.</code> | [skills/station-bottleneck-analyzer/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/station-bottleneck-analyzer/SKILL.md) |
 | `supply-chain-security` | <code>Use the 'supply-chain-security' skill. Task: sign container image with Cosign.</code> | [skills/supply-chain-security/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/supply-chain-security/SKILL.md) |

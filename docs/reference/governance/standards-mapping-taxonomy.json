@@ -1,0 +1,166 @@
+{
+  "taxonomyVersion": "2026-09-08",
+  "freshnessReviewAfterDays": 180,
+  "advisoryDisclaimer": "Standards mappings are advisory planning aids only. They are not compliance attestations, certifications, or legal advice.",
+  "supportedFrameworks": [
+    {
+      "id": "owasp",
+      "name": "OWASP",
+      "owner": "BaseCoat security maintainers",
+      "freshnessDate": "2026-09-08",
+      "allowedCitationMode": "public identifiers and BaseCoat-owned summaries",
+      "categories": [
+        {
+          "id": "owasp-api-security",
+          "summary": "API security review coverage for authentication, authorization, input handling, rate limits, and abuse controls.",
+          "defaultComponentTypes": ["api", "service"],
+          "evidenceAssets": [
+            "skills/api-security/SKILL.md",
+            "skills/security/SKILL.md",
+            "agents/basecoat-50-security-api-security.agent.md"
+          ]
+        },
+        {
+          "id": "owasp-software-supply-chain",
+          "summary": "Supply-chain risk review coverage for dependency provenance, package integrity, and build pipeline tampering risks.",
+          "defaultComponentTypes": ["repository", "pipeline", "package"],
+          "evidenceAssets": [
+            "skills/supply-chain-security/SKILL.md",
+            "skills/github-security-posture/SKILL.md"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nist-csf",
+      "name": "NIST Cybersecurity Framework",
+      "owner": "BaseCoat governance maintainers",
+      "freshnessDate": "2026-09-08",
+      "allowedCitationMode": "public function/category identifiers and BaseCoat-owned summaries",
+      "categories": [
+        {
+          "id": "nist-csf-govern",
+          "summary": "Governance evidence for policy ownership, repository controls, and decision records.",
+          "defaultComponentTypes": ["repository", "program"],
+          "evidenceAssets": [
+            "skills/governance-audit/SKILL.md",
+            "docs/reference/governance/enforced-controls.md"
+          ]
+        },
+        {
+          "id": "nist-csf-detect",
+          "summary": "Detection and incident signal coverage for repository and operational monitoring.",
+          "defaultComponentTypes": ["repository", "operations"],
+          "evidenceAssets": [
+            "skills/security-operations/SKILL.md",
+            "agents/basecoat-50-security-security-monitor.agent.md"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "microsoft-caf",
+      "name": "Microsoft Cloud Adoption Framework",
+      "owner": "BaseCoat Azure maintainers",
+      "freshnessDate": "2026-09-08",
+      "allowedCitationMode": "public methodology names and BaseCoat-owned summaries",
+      "categories": [
+        {
+          "id": "caf-govern",
+          "summary": "Cloud governance and policy evidence for Azure adoption and landing-zone planning.",
+          "defaultComponentTypes": ["azure", "landing-zone", "migration-plan"],
+          "evidenceAssets": [
+            "skills/azure-policy-audit/SKILL.md",
+            "skills/azure-landing-zone/SKILL.md",
+            "instructions/basecoat-20-lang-governance.instructions.md"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "microsoft-waf",
+      "name": "Microsoft Azure Well-Architected Framework",
+      "owner": "BaseCoat Azure maintainers",
+      "freshnessDate": "2026-09-08",
+      "allowedCitationMode": "public pillar names and BaseCoat-owned summaries",
+      "categories": [
+        {
+          "id": "waf-security",
+          "summary": "Azure workload security review coverage through Well-Architected review and policy audit evidence.",
+          "defaultComponentTypes": ["azure", "workload", "architecture"],
+          "evidenceAssets": [
+            "skills/azure-waf-review/SKILL.md",
+            "skills/azure-policy-audit/SKILL.md",
+            "skills/production-readiness/SKILL.md"
+          ]
+        },
+        {
+          "id": "waf-reliability",
+          "summary": "Reliability posture coverage for resilience, recovery, availability, and operational readiness planning.",
+          "defaultComponentTypes": ["workload", "architecture", "service"],
+          "evidenceAssets": [
+            "skills/ha-resilience/SKILL.md",
+            "skills/production-readiness/SKILL.md"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nist-ai-rmf",
+      "name": "NIST AI Risk Management Framework",
+      "owner": "BaseCoat AI governance maintainers",
+      "freshnessDate": "2026-09-08",
+      "allowedCitationMode": "public function identifiers and BaseCoat-owned summaries",
+      "categories": [
+        {
+          "id": "ai-rmf-govern-map",
+          "summary": "AI governance planning evidence for responsible use boundaries, privacy review, and model behavior risk capture.",
+          "defaultComponentTypes": ["ai-system", "agent", "skill"],
+          "evidenceAssets": [
+            "docs/spec/synthesized/issue-3116-governance-enhancement-add-responsible-ai-privacy-planningre.spec.md",
+            "skills/agent-design/SKILL.md",
+            "skills/governance/SKILL.md"
+          ]
+        }
+      ]
+    }
+  ],
+  "sampleOutcomes": [
+    {
+      "component": "Public API service",
+      "componentType": "api",
+      "framework": "owasp",
+      "categoryId": "owasp-api-security",
+      "coverageStatus": "covered",
+      "evidencePaths": ["skills/api-security/SKILL.md"],
+      "caveat": "Coverage indicates BaseCoat review guidance exists; it does not prove the target API is compliant."
+    },
+    {
+      "component": "Azure migration plan",
+      "componentType": "migration-plan",
+      "framework": "microsoft-caf",
+      "categoryId": "caf-govern",
+      "coverageStatus": "partial",
+      "evidencePaths": ["skills/azure-policy-audit/SKILL.md"],
+      "caveat": "Policy audit evidence exists, but the mapper must confirm landing-zone decisions and ownership records."
+    },
+    {
+      "component": "Desktop utility",
+      "componentType": "desktop-app",
+      "framework": "nist-ai-rmf",
+      "categoryId": "ai-rmf-govern-map",
+      "coverageStatus": "not-applicable",
+      "evidencePaths": [],
+      "caveat": "No AI behavior is in scope for this component."
+    },
+    {
+      "component": "Unclassified batch job",
+      "componentType": "batch-job",
+      "framework": "owasp",
+      "categoryId": "owasp-api-security",
+      "coverageStatus": "gap",
+      "evidencePaths": [],
+      "caveat": "No matching BaseCoat evidence path was identified for the selected component and category."
+    }
+  ]
+}

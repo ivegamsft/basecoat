@@ -1,0 +1,22 @@
+name: "standards-mapping-skill-routing"
+description: "Routing evaluation for advisory standards coverage and gap mapping."
+skill: "skills/standards-mapping/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Map this API service to OWASP and NIST CSF categories and show BaseCoat evidence paths."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Create an advisory CAF and WAF standards gap report for our Azure migration plan."
+    expect_activation: true
+  - id: "pos-3"
+    input: "Crosswalk this agent bundle to NIST AI RMF and report covered, partial, gap, and not-applicable categories."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Run a penetration test against this staging URL."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Certify that this system is compliant with NIST and provide legal attestation language."
+    expect_activation: false
+  - id: "neg-3"
+    input: "Copy the full text of a restricted standards document into our repository."
+    expect_activation: false

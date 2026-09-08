@@ -229,6 +229,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running standards mapping tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'standards-mapping-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Standards mapping tests failed' -ForegroundColor Red
+    Write-FailureLog 'standards-mapping-tests'
+    exit 1
+}
+
 Write-Host 'Running coverage threshold ratchet tests...'
 & node --test (Join-Path $PSScriptRoot 'coverage-threshold-ratchet.test.js')
 if ($LASTEXITCODE -ne 0) {
