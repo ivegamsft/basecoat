@@ -1,0 +1,16 @@
+name: "task-provenance-skill-routing"
+description: "Routing evaluation for durable task evidence records."
+skill: "skills/task-provenance/SKILL.md"
+scenarios:
+  - id: "pos-1"
+    input: "Create a replayable research, plan, change, and review evidence trail for issue 123."
+    expect_activation: true
+  - id: "pos-2"
+    input: "Capture PR validation evidence in .copilot-tracking for a durable audit handoff."
+    expect_activation: true
+  - id: "neg-1"
+    input: "Store production credentials in a tracking file."
+    expect_activation: false
+  - id: "neg-2"
+    input: "Open a GitHub pull request for my code change."
+    expect_activation: false

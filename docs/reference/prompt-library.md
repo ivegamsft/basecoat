@@ -2,7 +2,7 @@
 
 Generated from the canonical intent vocabulary and asset frontmatter. Do not edit the generated tables directly; run `pwsh scripts/generate-prompt-library.ps1`.
 
-Coverage: 36 intents, 141 skills, and 131 agents.
+Coverage: 36 intents, 142 skills, and 131 agents.
 
 ## Lifecycle prompts
 
@@ -268,6 +268,7 @@ Mutation performed: none
 | `supply-chain-security` | <code>Use the 'supply-chain-security' skill. Task: sign container image with Cosign.</code> | [skills/supply-chain-security/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/supply-chain-security/SKILL.md) |
 | `takt-time-measurement` | <code>Use the 'takt-time-measurement' skill. Task: workflow templates.</code> | [skills/takt-time-measurement/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/takt-time-measurement/SKILL.md) |
 | `task-decomposition` | <code>Use the 'task-decomposition' skill. Task: split large tasks into smaller async work items.</code> | [skills/task-decomposition/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/task-decomposition/SKILL.md) |
+| `task-provenance` | <code>Use the 'task-provenance' skill. Task: issue/PR provenance.</code> | [skills/task-provenance/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/task-provenance/SKILL.md) |
 | `tech-debt` | <code>Use the 'tech-debt' skill. Task: build technical debt register.</code> | [skills/tech-debt/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/tech-debt/SKILL.md) |
 | `twelve-factor` | <code>Use the 'twelve-factor' skill. Task: move config from code to environment.</code> | [skills/twelve-factor/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/twelve-factor/SKILL.md) |
 | `ux` | <code>Use the 'ux' skill. Task: map end-to-end user journey.</code> | [skills/ux/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/ux/SKILL.md) |

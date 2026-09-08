@@ -383,6 +383,7 @@ The tables below are generated from the current repository contents to keep the 
 | `skills/station-bottleneck-analyzer/SKILL.md` | Use when analyzing takt-time JSON to calculate queue length and throughput by station, rank bottlenecks, and draft the weekly bottleneck report issue. USE FOR: station-level queue pressure, throughput trends, bottleneck ranking, and weekly issue filing. DO NOT USE FOR: dispatching work or changing routing policy. | station, bottleneck, analyzer |
 | `skills/takt-time-measurement/SKILL.md` | Use when measuring takt time, exporting throughput metrics, or building a GitHub Actions workflow that captures timing data. USE FOR: workflow templates, takt calculations, and metric export guidance. DO NOT USE FOR: general project management or unrelated observability tasks. | takt, time, measurement |
 | `skills/task-decomposition/SKILL.md` | Use when breaking complex tasks into sub-agent-friendly chunks, validating automation fitness, and composing multi-step prompts. USE FOR: split large tasks into smaller async work items, decide if work is automatable vs research vs deferred, validate sub-agent prompts for clarity, design task decomposition workflows. DO NOT USE FOR: single-step code changes, immediate sync problem-solving, architectural design starting from scratch. | task, decomposition |
+| `skills/task-provenance/SKILL.md` | Optional durable research, plan, change, and review evidence trails for tasks. | task, provenance, evidence, audit, handoff |
 
 ### Instructions
 

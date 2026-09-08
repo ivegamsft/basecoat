@@ -261,6 +261,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running task provenance tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'task-provenance-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Task provenance tests failed' -ForegroundColor Red
+    Write-FailureLog 'task-provenance-tests'
+    exit 1
+}
+
 Write-Host 'Running coverage threshold ratchet tests...'
 & node --test (Join-Path $PSScriptRoot 'coverage-threshold-ratchet.test.js')
 if ($LASTEXITCODE -ne 0) {
