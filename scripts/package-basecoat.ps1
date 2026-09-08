@@ -39,6 +39,9 @@ $validationScripts = @(
     'scripts/validate-reusable-workflow-contracts.py'
 )
 $manifest = Get-Content (Join-Path $stageDir 'asset-manifest.json') -Raw | ConvertFrom-Json
+if ($manifest.libraryVersion -ne $version) {
+    throw "Package validation failed: asset-manifest.json libraryVersion '$($manifest.libraryVersion)' does not match version.json version '$version'"
+}
 $manifestPaths = @($manifest.assets | ForEach-Object { $_.path })
 foreach ($relativePath in $validationScripts) {
     if (-not (Test-Path (Join-Path $stageDir $relativePath) -PathType Leaf)) {

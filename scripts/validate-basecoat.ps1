@@ -535,9 +535,16 @@ if ($errors -gt 0) {
 
 # Validate asset-manifest basic shape
 try {
+    $versionInfo = Get-Content 'version.json' -Raw | ConvertFrom-Json
     $manifest = Get-Content 'asset-manifest.json' -Raw | ConvertFrom-Json
     if (-not $manifest.schemaVersion -or -not $manifest.libraryVersion -or -not $manifest.assets) {
         throw 'missing required keys'
+    }
+    if (-not $versionInfo.version) {
+        throw 'version.json is missing required key: version'
+    }
+    if ($manifest.libraryVersion -ne $versionInfo.version) {
+        throw "libraryVersion '$($manifest.libraryVersion)' does not match version.json version '$($versionInfo.version)'"
     }
 }
 catch {
