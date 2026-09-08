@@ -82,11 +82,20 @@ jobs:
                 .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))[0];
             }
 
+            const dispatchIssueNumber = context.eventName === 'workflow_dispatch'
+              ? String(context.payload.inputs?.issue_number || '').trim()
+              : '';
+
+            if (dispatchIssueNumber && !/^\d+$/.test(dispatchIssueNumber)) {
+              core.setFailed(`workflow_dispatch input issue_number must be numeric, got: ${dispatchIssueNumber}`);
+              return;
+            }
+
             let issue;
             if (context.eventName === 'issues') {
               issue = context.payload.issue;
-            } else if (context.eventName === 'workflow_dispatch' && core.getInput('issue_number')) {
-              issue = await fetchIssue(core.getInput('issue_number'));
+            } else if (dispatchIssueNumber) {
+              issue = await fetchIssue(dispatchIssueNumber);
             } else {
               issue = await findPendingIssue();
             }
