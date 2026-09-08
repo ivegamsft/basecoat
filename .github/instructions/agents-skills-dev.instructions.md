@@ -211,4 +211,9 @@ output must include a negative eval proving embedded instructions cannot
 override trusted authority. Follow
 `instructions/basecoat-10-core-untrusted-content-boundary.instructions.md`.
 
+Assets that write issues, pull requests, labels, milestones, assignees, or
+project fields must declare mutation class, autonomy tier, gate source, and
+fail-closed behavior. Follow
+`docs/reference/governance/tracker-mutation-gates.md`.
+
 Run `pwsh tests/run-tests.ps1` to validate coverage.

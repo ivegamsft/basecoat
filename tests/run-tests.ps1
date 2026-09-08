@@ -269,6 +269,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running tracker mutation gates tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'tracker-mutation-gates-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Tracker mutation gates tests failed' -ForegroundColor Red
+    Write-FailureLog 'tracker-mutation-gates-tests'
+    exit 1
+}
+
 Write-Host 'Running coverage threshold ratchet tests...'
 & node --test (Join-Path $PSScriptRoot 'coverage-threshold-ratchet.test.js')
 if ($LASTEXITCODE -ne 0) {
