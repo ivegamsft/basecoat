@@ -145,8 +145,10 @@ enter this gate.
 
 The gate is defined in
 [basecoat-10-core-intent-routing.instructions.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/basecoat-10-core-intent-routing.instructions.md)
-and `governance.instructions.md`. Downstream users should expect an issue or
-tracked record reference in the output for these intents.
+and `governance.instructions.md`; enforced surfaces are inventoried in
+[`docs/reference/governance/enforced-controls.md`](../reference/governance/enforced-controls.md).
+Downstream users should expect an issue or tracked record reference in the
+output for these intents.
 
 ### Prefix placement changes behavior
 

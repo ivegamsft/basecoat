@@ -221,6 +221,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running enforced controls tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'enforced-controls-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Enforced controls tests failed' -ForegroundColor Red
+    Write-FailureLog 'enforced-controls-tests'
+    exit 1
+}
+
 Write-Host 'Running coverage threshold ratchet tests...'
 & node --test (Join-Path $PSScriptRoot 'coverage-threshold-ratchet.test.js')
 if ($LASTEXITCODE -ne 0) {

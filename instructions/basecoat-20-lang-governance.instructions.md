@@ -46,8 +46,9 @@ the authoritative work record. Logging and implementing must be separate steps.
 ## Hard Rules
 
 - **Issue-first:** No implementation without an issue number. No issue = hard stop.
-  Satisfy the LOG-FIRST gate above before any code change.
-- **No secrets:** Never write API keys, tokens, passwords, PII, or connection strings to any file, commit, or comment. If a task requires a secret, stop and ask the operator.
+  Satisfy the LOG-FIRST gate above before any code change; enforcement surfaces
+  are tracked in [`docs/reference/governance/enforced-controls.md`](../docs/reference/governance/enforced-controls.md).
+- **No secrets:** Never write API keys, tokens, passwords, PII, or connection strings to any file, commit, or comment; config examples are validated by `scripts/validate-basecoat.ps1`.
 - **Internal-only GitHub writes:** Never create/update issues, PRs, or comments in non-allowlisted repositories. Use deny-by-default with an explicit internal allowlist.
 - **Workflow secrets:** GitHub Actions must use `${{ secrets.SECRET_NAME }}` — no literals. See [`docs/guardrails/secrets-in-workflows.md`](/docs/guardrails/secrets-in-workflows.md).
 - **PR-only:** Never push directly to `main`. Always open a PR and wait for CI to pass.
@@ -65,7 +66,7 @@ the authoritative work record. Logging and implementing must be separate steps.
 - Prefer one issue per PR.
 - Batch only tightly related changes that are reviewable in one pass.
 - Keep batch PRs to **15 files or fewer** and **300 changed lines or fewer** (additions + deletions).
-- If a batch must exceed either limit, split it or document the mechanical reason in the PR description.
+- If a batch must exceed either limit, split it or document the mechanical reason in the PR description; enforcement surfaces are tracked in [`docs/reference/governance/enforced-controls.md`](../docs/reference/governance/enforced-controls.md).
 - Large mechanical batches should include validation evidence, a rollback note, and PRD/spec links when the change is high-risk or high-change.
 
 ## Branch Naming

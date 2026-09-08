@@ -127,6 +127,138 @@ function Test-LogFirstGate {
     }
 }
 
+function Test-ConfigSecretExamples {
+    $secretNamePattern = '(?i)(secret|password|passwd|pwd|token|api[_-]?key|connection[_-]?string|instrumentation[_-]?key|client[_-]?secret|private[_-]?key)'
+    $nonSecretNamePattern = '(?i)^(id-token|token_type|inputTokens|requiredSecrets|secret_permissions)$'
+    $placeholderPattern = '(?i)^(\s*|<[^>]+>|\$\{\{[^}]+}}\s*|\$\{[^}]+\}|%[^%]+%|your[-_a-z0-9]*|replace[-_a-z0-9]*|change[-_a-z0-9]*|example[-_a-z0-9]*|dummy[-_a-z0-9]*|placeholder[-_a-z0-9]*|todo[-_a-z0-9]*|redacted|not-set|unset)$'
+    $filesToScan = @()
+    $violations = @()
+
+    function Add-ConfigSecretViolation {
+        param(
+            [string]$Path,
+            [string]$Location,
+            [string]$Name
+        )
+        $placeholder = "<your-$($Name.ToLowerInvariant().Replace('_', '-'))>"
+        $script:configSecretViolations += "${Path}:${Location} ${Name} must use a placeholder such as $placeholder; do not commit example secret values."
+    }
+
+    function Test-ConfigSecretValue {
+        param(
+            [string]$Name,
+            [AllowNull()][object]$Value
+        )
+        if ($Name -notmatch $secretNamePattern -or $Name -match $nonSecretNamePattern) {
+            return $false
+        }
+        if ($null -eq $Value -or $Value -isnot [string]) {
+            return $false
+        }
+        return $Value.Trim() -notmatch $placeholderPattern
+    }
+
+    function Test-JsonConfigSecrets {
+        param(
+            [Parameter(Mandatory = $true)][object]$Node,
+            [Parameter(Mandatory = $true)][string]$RelativePath,
+            [string]$JsonPath = '$'
+        )
+        if ($null -eq $Node) {
+            return
+        }
+
+        if ($Node -is [System.Collections.IDictionary]) {
+            foreach ($key in $Node.Keys) {
+                $childPath = "$JsonPath.$key"
+                $value = $Node[$key]
+                if (Test-ConfigSecretValue -Name ([string]$key) -Value $value) {
+                    Add-ConfigSecretViolation -Path $RelativePath -Location $childPath -Name ([string]$key)
+                    continue
+                }
+                Test-JsonConfigSecrets -Node $value -RelativePath $RelativePath -JsonPath $childPath
+            }
+            return
+        }
+
+        if ($Node -is [pscustomobject]) {
+            foreach ($property in $Node.PSObject.Properties) {
+                $childPath = "$JsonPath.$($property.Name)"
+                if (Test-ConfigSecretValue -Name $property.Name -Value $property.Value) {
+                    Add-ConfigSecretViolation -Path $RelativePath -Location $childPath -Name $property.Name
+                    continue
+                }
+                Test-JsonConfigSecrets -Node $property.Value -RelativePath $RelativePath -JsonPath $childPath
+            }
+            return
+        }
+
+        if ($Node -is [System.Collections.IEnumerable] -and $Node -isnot [string]) {
+            $index = 0
+            foreach ($item in $Node) {
+                Test-JsonConfigSecrets -Node $item -RelativePath $RelativePath -JsonPath "$JsonPath[$index]"
+                $index++
+            }
+        }
+    }
+
+    $envExampleFiles = @(Get-ChildItem -Path (Get-Location) -Recurse -File -Filter '.env.example' | Where-Object {
+        $_.FullName -notmatch '\\(\.git|dist|node_modules|test-results)\\'
+    })
+    $filesToScan += $envExampleFiles
+
+    $exampleConfigFiles = @(Get-ChildItem -Path (Get-Location) -Recurse -File -Include '*.json', '*.yaml', '*.yml' | Where-Object {
+        $_.FullName -notmatch '\\(\.git|dist|node_modules|test-results)\\' -and
+        $_.Name -match '(?i)(example|sample|template|config|settings|secrets?)'
+    })
+    $filesToScan += $exampleConfigFiles
+
+    $script:configSecretViolations = @()
+    foreach ($file in ($filesToScan | Sort-Object FullName -Unique)) {
+        $relativePath = [System.IO.Path]::GetRelativePath((Get-Location).Path, $file.FullName)
+        if ($file.Extension -eq '.json') {
+            try {
+                $json = Get-Content -LiteralPath $file.FullName -Raw | ConvertFrom-Json
+                Test-JsonConfigSecrets -Node $json -RelativePath $relativePath
+            }
+            catch {
+                Write-Host "ERROR: $relativePath is invalid JSON ($($_.Exception.Message))" -ForegroundColor Red
+                $script:errors++
+            }
+            continue
+        }
+
+        $lineNumber = 0
+        foreach ($line in Get-Content -LiteralPath $file.FullName) {
+            $lineNumber++
+            if ($line -match '^\s*#' -or $line -match '^\s*//' -or $line -notmatch '^\s*([A-Za-z_][A-Za-z0-9_-]*|["''][^"'']+["''])\s*[:=]\s*(.+?)\s*$') {
+                continue
+            }
+
+            $name = $matches[1].Trim().Trim('"').Trim("'")
+            $value = $matches[2].Trim().Trim('"').Trim("'")
+            if ($name -notmatch $secretNamePattern -or
+                $name -match $nonSecretNamePattern -or
+                $value -match '^\s*(\[|\{|true$|false$|null$|[0-9]+$)' -or
+                $value -match $placeholderPattern) {
+                continue
+            }
+
+            Add-ConfigSecretViolation -Path $relativePath -Location ([string]$lineNumber) -Name $name
+        }
+    }
+
+    $violations = @($script:configSecretViolations)
+    Remove-Variable -Name configSecretViolations -Scope Script -ErrorAction SilentlyContinue
+    if ($violations.Count -gt 0) {
+        Write-Host 'ERROR: ENFORCED-CONTROL config-secret-examples failed. Secret-like configuration examples must use placeholders.' -ForegroundColor Red
+        foreach ($violation in $violations) {
+            Write-Host "ERROR: $violation" -ForegroundColor Red
+        }
+        $script:errors += $violations.Count
+    }
+}
+
 function Test-DocsHomepageAssetCounts {
     $docsIndexPath = Join-Path (Get-Location) 'docs/index.md'
     if (-not (Test-Path $docsIndexPath)) {
@@ -416,6 +548,7 @@ if ($effectiveWorkflowValidationMode -eq 'Source') {
     Test-AgentMetadataFreshness
     Test-IntentRoutingSkillReferences
     Test-LogFirstGate
+    Test-ConfigSecretExamples
     Test-DocsHomepageAssetCounts
 }
 
