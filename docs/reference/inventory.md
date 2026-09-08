@@ -133,6 +133,7 @@ as distinct assets and disambiguate by source path (`instructions/` vs
 | `skills/service-bus-migration/SKILL.md` | Azure Service Bus migration patterns and guidance | service-bus, migration, messaging, Azure |
 | `skills/sprint-management/SKILL.md`     | sprint planning, backlog grooming, and retrospective templates | sprint, planning, backlog, retrospective |
 | `skills/sprint-retrospective/SKILL.md`  | repo history reconstruction and sprint retrospective templates | sprint, retrospective, history, metrics, tips |
+| `skills/standards-mapping/SKILL.md` | advisory OWASP, NIST, CAF, WAF, and AI RMF coverage and gap reports | standards, governance, owasp, nist, caf, waf, ai-rmf |
 | `skills/supply-chain-security/SKILL.md` | Artifact signing, SBOM generation, provenance tracking, and vuln scanning | skill, supply-chain, sbom, signing |
 | `skills/tech-debt/SKILL.md`             | Technical debt management, RICE prioritization, debt budgets, and visualization | skill, tech-debt, prioritization, rice |
 | `skills/twelve-factor/SKILL.md`         | 12-Factor App methodology for codebase, config, backing services, and processes | skill, twelve-factor, methodology, cloud-native |
