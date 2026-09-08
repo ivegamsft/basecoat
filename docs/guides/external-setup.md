@@ -36,3 +36,12 @@ Use `BASECOAT_REF` to pin to a release tag:
 BASECOAT_REPO=https://github.com/YOUR-ORG/basecoat.git \
 BASECOAT_REF=v4.2.1 ./sync.sh
 ```
+
+## Configure Portal user sign-in
+
+Downstream repositories that run the legacy Portal must create and configure a
+separate GitHub OAuth App for browser sign-in. This is not provisioned by the
+BaseCoat bootstrap, which creates an Azure deployment OIDC identity only. See
+[Portal GitHub OAuth Onboarding](portal-github-oauth-onboarding.md) for the
+administrator handoff, environment variables, validation procedure, and
+copy-ready prompts.

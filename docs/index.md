@@ -18,7 +18,7 @@ BaseCoat gives your organization one place to manage agents, skills, instruction
 | **Agents** | 131 | End-to-end task executors — sprint planners, code reviewers, security analysts, and more |
 | **Skills** | 142 | Reusable domain capabilities invoked by agents |
 | **Instructions** | 93 | Copilot behavior rules scoped by file path pattern |
-| **Prompts** | 6 | Structured templates for repeatable tasks |
+| **Prompts** | 7 | Structured templates for repeatable tasks |
 
 ---
 
@@ -81,6 +81,7 @@ flowchart LR
 ## Guides (`docs/guides/`)
 
 - [guides/intent-prefixes.md](guides/intent-prefixes.md) — Intent vocabulary, routing behavior, and prompt templates
+- [guides/portal-github-oauth-onboarding.md](guides/portal-github-oauth-onboarding.md) — Downstream Portal GitHub OAuth App provisioning, configuration, and validation
 - [guides/token-optimization.md](guides/token-optimization.md) — Operator token-efficiency checklist, model/mode defaults, and context normalization patterns
 - [guides/cost-aware-prompting-playbook.md](guides/cost-aware-prompting-playbook.md) — Tactical model/session/delegation rules for long-running advanced CLI workflows
 - [guides/phase-boundary-session-checklist.md](guides/phase-boundary-session-checklist.md) — Command-level `/compact` vs `/new` checklist across cleanup, implementation, RCA, and docs pivots

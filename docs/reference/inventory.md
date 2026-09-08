@@ -147,6 +147,7 @@ as distinct assets and disambiguate by source path (`instructions/` vs
 | `prompts/architect.prompt.md`   | break down a system or feature before implementation | architecture, design, tradeoffs, plan |
 | `prompts/code-review.prompt.md` | initiate a focused code review workflow              | review, pull request, findings        |
 | `prompts/bugfix.prompt.md`      | investigate and fix a bug at the root cause          | bugfix, incident, regression, failure |
+| `prompts/portal-github-oauth-onboarding.prompt.md` | prepare a safe Portal GitHub OAuth App configuration without exposing credentials | portal, github, oauth, onboarding |
 
 ### Portal Prompts
 

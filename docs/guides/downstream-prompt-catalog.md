@@ -64,6 +64,20 @@ changes, validation plan, handoffs, and stop reason.
 After presenting the plan, wait for approval before applying changes.
 ```
 
+### Portal GitHub OAuth
+
+For a downstream repository running the legacy BaseCoat Portal, use the
+[Portal GitHub OAuth Onboarding](portal-github-oauth-onboarding.md) guide and
+the `portal-github-oauth-onboarding` prompt. The Portal requires a separate
+GitHub OAuth App for user sign-in; it does not use the Azure deployment OIDC
+identity, a workflow PAT, or the Copilot Extension GitHub App.
+
+```text
+plan: prepare GitHub OAuth App onboarding for this repository's BaseCoat Portal.
+Use docs/guides/portal-github-oauth-onboarding.md and stop before any external
+configuration change.
+```
+
 ## Product definition and design debate
 
 Use `design:` when onboarding a downstream repository's product and design
