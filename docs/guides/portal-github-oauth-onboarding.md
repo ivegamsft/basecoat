@@ -165,4 +165,3 @@ presence, callback URL alignment, frontend origin, and database readiness.
 Never print credentials or tokens. Make the smallest safe configuration or
 code change only after recording the work item and presenting evidence.
 ```
-
