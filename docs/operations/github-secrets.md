@@ -47,7 +47,7 @@ Default profile resolution order:
 4. `team-dev`
 
 | Profile | Workflow pack | Agentic auth secret |
-|---|---|---|
+| --- | --- | --- |
 | `solo-dev` | `solo` | None; checked-in workflows use `copilot-requests: write` |
 | `team-dev` | `team` | None |
 | `regulated-team` | `regulated` | `GH_AW_GITHUB_MCP_SERVER_TOKEN` |
@@ -57,7 +57,7 @@ the corresponding workflow file is present in the repo (any profile, including
 `solo-dev`):
 
 | Workflow present | Secret/variable required |
-|---|---|
+| --- | --- |
 | `.github/workflows/publish-to-production.yml` | `PRODUCTION_REPO_TOKEN` |
 | `.github/workflows/portal-deploy.yml` (skipped for `solo-dev`) | Portal variables and `GHCR_PULL_TOKEN` |
 
@@ -126,20 +126,25 @@ fine-grained PAT beyond the built-in `GITHUB_TOKEN`.
 **Purpose:** Optional override for GitHub API access during agent execution.
 BaseCoat's checked-in workflows fall back to the short-lived `GITHUB_TOKEN`.
 
-**Try the platform setting first.** If a workflow fails with `GitHub Actions
-is not permitted to create or approve pull requests`, that is usually a
-platform policy gap, not a missing token — see
+**Fallback only.** If a workflow fails with `GitHub Actions is not permitted to
+create or approve pull requests`, that is usually a platform policy gap, not a
+missing token — see
 [PR-creation permission](../guides/solo-dev-profile.md#pr-creation-permission-for-automation-workflows)
-in the solo-dev profile guide. Enable **Allow GitHub Actions to create and
-approve pull requests** at the repository (or, if blocked, escalate to the
-org/enterprise owner) before creating this PAT. Only fall back to
-`GH_AW_GITHUB_TOKEN` when that policy is blocked above the repository with no
-delegation available — a standing PAT carries a rotation burden that the
-platform setting does not.
+in the solo-dev profile guide. Review the Enterprise, organization, and
+repository scope before enabling **Allow GitHub Actions to create and approve
+pull requests**. Enterprise-level global enablement can affect every org and
+repo unless org policy restricts it, and it also allows Actions to submit
+approving PR reviews. Prefer org-level restriction/override, then repo-level
+opt-in where available. Only fall back to `GH_AW_GITHUB_TOKEN` when that policy
+cannot be narrowed safely and the automation is approved for selected repos.
 
 **How to create:** Use a **separate token** from `COPILOT_GITHUB_TOKEN`
-(recommended). Name it `basecoat-gh-aw` and grant only the minimum
-repository read permissions required. Set PAT expiration to **30 days or less**.
+(recommended). Name it `basecoat-gh-aw`, scope it only to the repositories and
+API permissions the workflow needs, and grant the minimum read/write
+permissions required for the PR operation. Set PAT expiration to **30 days or
+less**, document the owner, and rotate it on the same schedule. Treat this as a
+temporary exception; a GitHub App or brokered token with repository-scoped
+installation and audit logging is the preferred durable design.
 
 Do not store a `gho_` OAuth token in this secret. Current gh-aw activation fails
 closed when it detects OAuth tokens because they are unsuitable for automation.

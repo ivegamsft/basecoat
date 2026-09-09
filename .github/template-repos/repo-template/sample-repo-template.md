@@ -23,15 +23,21 @@ This sample shows a template repository setup that installs and enforces Base Co
    `scripts/bootstrap.ps1` from the imported BaseCoat content.
 7. Install downstream workflows with `scripts/configure-downstream-workflows.ps1`.
 8. Keep default workflow permissions read-only. If the repo installs
-   PR-creating automation such as `issue-to-spec-synthesis.yml`, enable
-   **Allow GitHub Actions to create and approve pull requests** only where the
-   policy can be constrained to the repo or org. Do not enable an
-   Enterprise-wide global checkbox solely for one downstream repo.
+   PR-creating automation such as `issue-to-spec-synthesis.yml`, review
+   **Allow GitHub Actions to create and approve pull requests** as a separate
+   Enterprise → Organization → Repository policy capability. Do not enable an
+   Enterprise-wide global checkbox solely for one downstream repo unless org
+   restriction, audit ownership, and rollback are already planned; prefer org
+   restriction, repo opt-in where available, or a temporary scoped
+   `GH_AW_GITHUB_TOKEN` while moving toward a GitHub App or brokered token.
 9. Set `enforce-basecoat-template` as a required status check.
 
 ## Notes
 
 - Keep lock updates and Base Coat content updates in the same pull request.
+- This template ships files and bootstrap guidance only. Enterprise/org/repo
+  Actions settings, secrets, fine-grained PATs, and GitHub App credentials do
+  not ship downstream and must be configured by the consumer owner.
 - Avoid direct edits under `.github/base-coat` except approved upgrade pull requests.
 - `lane-closeout` captures dirty WIP to a unique `wip/` ref, pushes when safe,
   and conservatively records `PARKED`; full classification is deferred to the

@@ -9,7 +9,7 @@ authorize administrator bypass.
 ## Choose the right profile
 
 | Signal | `solo-dev` | `team-dev` | `regulated-team` |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Active maintainers | One accountable maintainer | Two or more regular contributors | Any team with mandated separation of duties |
 | Routine independent review | Not required through `size:XL`; checks remain required | Required for medium and higher risk | Required for every risk tier |
 | XXL PR intent | One qualified human approval | Independent PR approval | Two independent PR approvals |
@@ -191,10 +191,11 @@ In GitHub:
      `contents: write`, `pull-requests: write`, `issues: write`, and
      `statuses: write` permissions
    - if the repository installs a workflow that opens pull requests with the
-     default token (for example `issue-to-spec-synthesis.yml`), also enable
-     **Allow GitHub Actions to create and approve pull requests**; see
+     default token (for example `issue-to-spec-synthesis.yml`), review the
+     separate **Allow GitHub Actions to create and approve pull requests**
+     platform policy; see
      [PR-creation permission](#pr-creation-permission-for-automation-workflows)
-     below before enabling it
+     below before enabling it at any scope
 3. **Settings > Rules > Rulesets**
    - create an active branch ruleset targeting the default branch
    - require zero approving reviews
@@ -233,29 +234,46 @@ If an Enterprise or Organization has set it to `Disabled` (not
 at the repo or org return `409` with a message that write permissions for
 workflows are disabled by the enterprise, even with `admin:org` scope.
 
-Enable it at the **narrowest scope that unblocks the need**:
+This policy capability and related Actions settings do **not** ship with
+BaseCoat or with repository templates. BaseCoat ships workflow files,
+policy-pack files, and bootstrap guidance; the Enterprise, organization, and
+repository owners must separately decide whether Actions may create or approve
+pull requests in the consumer environment.
 
-- Prefer repository-level, opt-in only for repositories that install a
-  PR-creating workflow. Do not enable it org-wide or enterprise-wide as a
-  blanket default — it is not scoped per-workflow, so it unblocks PR
-  creation *and self-approval* for every workflow in scope, not just the
-  intended one.
-- Combined with this profile's `required_approving_review_count: 0` for
-  XS–XL pull requests, a broadly-enabled toggle would let any workflow (not
-  only the intended one) create and self-approve a PR that then merges with
-  no human review at those sizes. Scoping enablement to only the repos and
-  workflows that need it keeps that blast radius bounded.
-- Confirm the workflow itself mitigates the residual risk: synthesis output
-  is always a draft spec PR gated on an explicit human `/approve` comment
-  before implementation proceeds, so enabling the toggle for that workflow
-  does not itself grant unreviewed code changes.
-- If an Enterprise policy is `Disabled` with no delegation, no repo or org
-  action can fix it — escalate to an Enterprise owner to move the policy to
-  `Not enforced`, then enable it per-repository as needed. Falling back to a
-  manually-created PAT (see `docs/operations/github-secrets.md`) trades an
-  enforced platform policy for a standing secret with rotation burden; treat
-  it strictly as a temporary measure while escalation is pending, not a
-  substitute for fixing the policy.
+First avoid PR-creating automation when a read-only report or issue comment is
+sufficient. When PR creation is required, use this policy decision order:
+
+1. Treat Enterprise-level global enablement as the highest-blast-radius option:
+   it can affect every organization and repository unless each org explicitly
+   restricts it. Do **not** enable the Enterprise checkbox solely to unblock one
+   BaseCoat or downstream repository unless org restriction, audit ownership,
+   and rollback are already part of the plan.
+2. Prefer an organization-level override or restriction when the Enterprise
+   owner can delegate safely but the repository-level control is unavailable.
+3. Prefer repository-level opt-in only when GitHub exposes that control under
+   the current Enterprise and organization policy, and only for repositories
+   that install a PR-creating workflow.
+4. If the platform policy cannot be narrowed safely, use a scoped
+   `GH_AW_GITHUB_TOKEN` only as a temporary fallback. A GitHub App or brokered
+   token with repository-scoped installation and auditability is the preferred
+   durable direction.
+
+The blast radius matters more in `solo-dev`: routine XS through XL pull
+requests have `required_approving_review_count: 0`. A broadly enabled toggle
+allows every workflow in scope to create PRs and submit approving PR reviews,
+not just the intended workflow. In a permissive ruleset, an unrelated or
+compromised workflow could create and self-approve a PR that then has no
+independent-review gate. Keep enablement scoped to the repositories that need
+it, and confirm the workflow itself has compensating controls such as draft-only
+output and an explicit human `/approve` directive before implementation.
+
+If an Enterprise policy is `Disabled` with no delegation, no repo or org action
+can fix it locally. Escalate to an Enterprise owner for policy review instead
+of treating it as a repository-admin prerequisite. Falling back to a
+manually-created PAT (see `docs/operations/github-secrets.md`) trades an
+enforced platform policy for a standing secret with rotation burden; treat it
+strictly as a temporary exception while a GitHub App or brokered token design is
+implemented.
 
 `scripts/bootstrap.ps1` performs a best-effort, warn-only check for this
 setting when a PR-creating workflow is present, so onboarding surfaces the
@@ -279,9 +297,10 @@ gh variable set BASECOAT_POLICY_PACK `
   --body "solo-dev"
 
 # Only if the repository installs a PR-creating automation workflow
-# (for example issue-to-spec-synthesis.yml). A 409 here means the setting
-# is blocked by org or enterprise policy — escalate to that owner instead
-# of retrying at the repository scope.
+# (for example issue-to-spec-synthesis.yml), and only after reviewing
+# Enterprise, organization, and repository policy scope. A 409 here means the
+# setting is blocked above the repository — escalate to that owner instead of
+# retrying at the repository scope.
 gh api --method PUT "repos/$repository/actions/permissions/workflow" `
   -F can_approve_pull_request_reviews=true
 ```

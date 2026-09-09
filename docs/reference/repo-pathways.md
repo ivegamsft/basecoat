@@ -11,7 +11,7 @@ before re-diagnosing a matching symptom.
 ## Schema
 
 | Field | Required | Notes |
-|---|---|---|
+| --- | --- | --- |
 | `id` | yes | kebab-case, stable, unique |
 | `symptom` | yes | Observable failure (job name, error family) |
 | `root-cause` | yes | Why it happens |
@@ -148,3 +148,22 @@ before re-diagnosing a matching symptom.
   `USE FOR:`/`DO NOT USE FOR:` already complied on `main` (131/131); the
   remediation PR #3308 was closed as unnecessary churn after it broke the pinned
   `@data-integrity` and `@dotnet-modernization-advisor` examples.
+
+### governance-enterprise-actions-toggle-blast-radius
+
+- **id:** `governance-enterprise-actions-toggle-blast-radius`
+- **symptom:** PR-creating workflow onboarding treats
+  **Allow GitHub Actions to create and approve pull requests** as a local
+  repository prerequisite that a repo admin can enable for one workflow or repo.
+- **root-cause:** The GitHub Actions capability can be controlled by an
+  Enterprise-wide checkbox. Enterprise enablement affects every unrestricted org
+  and repo and also permits Actions to submit approving PR reviews.
+- **workaround:** Do not enable the Enterprise checkbox solely for one selected
+  repo. Prefer org-level restriction or override, then repo-level opt-in where
+  available. Use a scoped `GH_AW_GITHUB_TOKEN` only as a temporary fallback for
+  selected repos.
+- **prevention:** Treat Enterprise enablement as a high-blast-radius governance
+  decision with audit ownership and rollback. For automation that only needs to
+  create PRs in selected repos, prefer org/repo-scoped policy alternatives or a
+  GitHub App or brokered token design.
+- **evidence:** Issue #3158; Issue #3159.

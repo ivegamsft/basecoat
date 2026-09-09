@@ -894,10 +894,10 @@ if ((Test-Path $synthesisWorkflow) -and $repoSlug) {
         if ($canApprovePRs -eq 'true') {
             Write-Check "Actions can create/approve pull requests" $true
         } else {
-            Write-Warn "Actions cannot create pull requests — enable 'Allow GitHub Actions to create and approve pull requests' in Settings > Actions > General, or escalate to the org/enterprise owner if that returns a policy error. See docs/guides/solo-dev-profile.md#pr-creation-permission-for-automation-workflows"
+            Write-Warn "Actions cannot create pull requests with GITHUB_TOKEN — review the Enterprise, organization, and repository scope for 'Allow GitHub Actions to create and approve pull requests'. Do not assume a repository admin can enable it locally; Enterprise-wide enablement affects every unrestricted org/repo. See docs/guides/solo-dev-profile.md#pr-creation-permission-for-automation-workflows"
         }
     } catch {
-        Write-Warn "Could not verify PR-creation permission (may need repo admin access): $_"
+        Write-Warn "Could not verify PR-creation permission (review Enterprise, organization, and repository policy scope): $_"
     }
 }
 

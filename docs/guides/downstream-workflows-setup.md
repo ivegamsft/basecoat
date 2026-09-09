@@ -45,13 +45,16 @@ use the profile selected by `.github/basecoat-onboarding-profile.json`.
 Keep the repository default workflow permission set to **Read repository
 contents and packages permissions**. Workflows that need write access declare
 their own `permissions:` blocks. If a selected workflow creates pull requests
-with `GITHUB_TOKEN` (for example `issue-to-spec-synthesis.yml`), enable the
-separate repository-level **Allow GitHub Actions to create and approve pull
-requests** setting for that repo only when GitHub exposes repo-level control.
-If the Enterprise control is only a global checkbox that enables the capability
-across the enterprise, do not turn it on just for one consumer repo. Confirm an
-org-level override/restriction is available first, or use a scoped credential
-fallback while #3158 designs the durable policy.
+with `GITHUB_TOKEN` (for example `issue-to-spec-synthesis.yml`), review the
+separate **Allow GitHub Actions to create and approve pull requests** platform
+policy. Template installation ships workflow files, governance files, and
+bootstrap guidance; it does not ship Enterprise, organization, or repository
+Actions settings, secrets, or GitHub App credentials. Use the narrowest safe
+policy path: avoid Enterprise-wide global enablement for one consumer repo,
+prefer org-level override/restriction where available, then repo-level opt-in
+where available, then a temporary scoped `GH_AW_GITHUB_TOKEN`. A GitHub App or
+brokered token is the preferred durable fix when the platform toggle cannot be
+narrowed safely.
 
 ## Quick start
 

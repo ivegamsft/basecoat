@@ -179,6 +179,15 @@ $githubSecrets = Get-Content -Path $githubSecretsPath -Raw
 if ($githubSecrets -notmatch [regex]::Escape('solo-dev-profile.md#pr-creation-permission-for-automation-workflows')) {
     throw 'github-secrets.md must point GH_AW_GITHUB_TOKEN readers to the PR-creation permission platform setting before creating a PAT.'
 }
+foreach ($requiredSecretPattern in @(
+    [regex]::Escape('Fallback only.'),
+    'Only fall back to `GH_AW_GITHUB_TOKEN`\s+when that policy\s+cannot be narrowed safely',
+    'a GitHub App or brokered token with repository-scoped\s+installation and audit logging is the preferred durable design'
+)) {
+    if ($githubSecrets -notmatch $requiredSecretPattern) {
+        throw "github-secrets.md is missing fallback-only PR-credential guidance: $requiredSecretPattern"
+    }
+}
 
 $bootstrapContentForPolicyChecks = Get-Content -Path $bootstrapPath -Raw
 if ($bootstrapContentForPolicyChecks -notmatch [regex]::Escape('can_approve_pull_request_reviews')) {
@@ -186,6 +195,42 @@ if ($bootstrapContentForPolicyChecks -notmatch [regex]::Escape('can_approve_pull
 }
 if ($bootstrapContentForPolicyChecks -notmatch [regex]::Escape('issue-to-spec-synthesis.yml')) {
     throw 'bootstrap.ps1 PR-creation permission check must be gated on presence of a PR-creating workflow.'
+}
+foreach ($requiredBootstrapText in @(
+    'review the Enterprise, organization, and repository scope',
+    'Do not assume a repository admin can enable it locally',
+    'Enterprise-wide enablement affects every unrestricted org/repo'
+)) {
+    if ($bootstrapContentForPolicyChecks -notmatch [regex]::Escape($requiredBootstrapText)) {
+        throw "bootstrap.ps1 warning is missing policy-scope guidance: $requiredBootstrapText"
+    }
+}
+
+$downstreamDocs = @(
+    'docs\guides\solo-dev-profile.md',
+    'docs\guides\workflows-getting-started.md',
+    'docs\guides\downstream-workflows-setup.md',
+    'docs\guides\repo-template-standard.md',
+    '.github\template-repos\repo-template\sample-repo-template.md'
+)
+foreach ($relativePath in $downstreamDocs) {
+    $content = Get-Content -Path (Join-Path $repoRoot $relativePath) -Raw
+    $contentNormalized = $content -replace '\s+', ' '
+    foreach ($requiredText in @(
+        'Actions settings',
+        'Enterprise',
+        'organization',
+        'repository',
+        'GitHub App',
+        'brokered token'
+    )) {
+        if ($contentNormalized -notmatch [regex]::Escape($requiredText)) {
+            throw "$relativePath is missing revised PR-creation onboarding guidance: $requiredText"
+        }
+    }
+    if ($content -notmatch 'do(?:es)?\s+(?:\*\*)?not(?:\*\*)?\s+ship') {
+        throw "$relativePath must state that platform settings do not ship downstream."
+    }
 }
 if ($policy.default_profile -ne 'solo-dev') {
     throw 'Canonical governance policy must keep the shipped solo-dev default explicit.'

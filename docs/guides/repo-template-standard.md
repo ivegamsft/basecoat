@@ -120,13 +120,22 @@ Set these as required status checks for template consumers:
 
 ## Platform Settings That Do Not Ship
 
-Repository templates ship files, not GitHub platform-policy values. Template
-consumers must configure these settings in each created repository:
+Repository templates ship files, not GitHub platform-policy values or Actions
+settings. Template consumers must configure these settings in each created
+repository:
 
 - keep **Settings > Actions > General > Workflow permissions** set to **Read
   repository contents and packages permissions**,
-- enable **Allow GitHub Actions to create and approve pull requests** only for
-  repos that install PR-creating automation, and
+- review **Allow GitHub Actions to create and approve pull requests** as a
+  separate Enterprise → Organization → Repository policy capability before
+  installing PR-creating automation, and
 - do not enable an Enterprise-wide global checkbox just to satisfy one repo.
-  First confirm org-level override/restriction is available, or use a scoped
-  credential fallback until #3158 resolves the safer onboarding pattern.
+  Treat Enterprise enablement as the highest-blast-radius option because it can
+  affect every org and repo unless org policy restricts it; prefer org-level
+  override/restriction, then repo-level opt-in where available, then a
+  temporary scoped `GH_AW_GITHUB_TOKEN`. Use a GitHub App or brokered token as
+  the preferred durable fix when platform policy cannot be narrowed safely.
+
+Templates and BaseCoat releases do not include Enterprise/org/repo Actions
+settings, repository secrets, fine-grained PATs, or GitHub App credentials. The
+consumer owner must configure those controls outside the template adoption PR.

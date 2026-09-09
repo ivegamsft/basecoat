@@ -58,12 +58,17 @@ For a single-maintainer repository, follow the
 `basecoat-pr-auto-merge-executor.yml`. The profile requires protected `main`,
 all policy-pack checks, an empty bypass list, and GitHub-native auto-merge.
 If you also install a workflow that creates pull requests, such as
-`issue-to-spec-synthesis.yml`, enable the separate repository-level
-**Allow GitHub Actions to create and approve pull requests** setting only for
-that repo when GitHub exposes repo-level control. If your Enterprise UI only
-offers a global enablement checkbox, do not turn it on just for one downstream
-repo; first confirm org-level override/restriction is available, or use a
-scoped credential fallback while #3158 designs a safer durable pattern.
+`issue-to-spec-synthesis.yml`, review the separate
+**Allow GitHub Actions to create and approve pull requests** platform policy.
+The workflow files and bootstrap guidance ship from the template; Enterprise,
+organization, and repository Actions settings, secrets, and GitHub App
+credentials do not ship downstream. Enable the platform capability only at the
+narrowest scope GitHub and your Enterprise policy allow. If your Enterprise UI
+only offers a global checkbox, do not turn it on for one downstream repo unless
+org restriction, audit ownership, and rollback are already planned. Prefer
+org-level restriction/override, then repo-level opt-in where available, then a
+temporary scoped `GH_AW_GITHUB_TOKEN`; a GitHub App or brokered token is the
+preferred durable fix.
 
 To include internal workflows as well (internal workflows are marked unsupported,
 so include both flags):
@@ -235,13 +240,15 @@ workflow permission narrow and let each workflow declare its own least-privilege
 
 1. Go to **Settings** → **Actions** → **General**
 2. Set **Workflow permissions** to **Read repository contents and packages permissions**
-3. For repos that install PR-creating automation, enable the separate
+3. For repos that install PR-creating automation, review the separate
    **Allow GitHub Actions to create and approve pull requests** toggle.
    This setting is inherited or blocked from Enterprise → Organization →
-   Repository. If the Enterprise control is a global checkbox rather than
-   delegation, treat it as a high-blast-radius governance decision: restrict it
-   at the org before enabling it, or fall back to a scoped credential until a
-   safer design is approved.
+   Repository and does not ship with workflow templates. If the Enterprise
+   control is a global checkbox rather than delegation, treat it as a
+   high-blast-radius governance decision: do not enable it solely for one repo;
+   restrict it at the org or opt in at the repo where available, or fall back
+   temporarily to a scoped credential while designing a GitHub App or brokered
+   token.
 
 ### Secret/Token Errors
 
