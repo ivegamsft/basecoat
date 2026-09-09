@@ -121,3 +121,30 @@ before re-diagnosing a matching symptom.
   new path filter against recent merged PRs and confirm the skip ratio matches
   intent before relying on it.
 - **evidence:** PR #3293; verified on PR #3297.
+
+### agent-description-derived-artifacts
+
+- **id:** `agent-description-derived-artifacts`
+- **symptom:** Editing an `agents/*.agent.md` frontmatter `description` fails
+  `tests/prompt-library-tests.ps1` with either "prompt-library.md is stale" or
+  "Prompt library missing regression example: @<agent> Help me with this task:
+  <phrase>".
+- **root-cause:** `docs/reference/prompt-library.md` is generated, and it derives
+  each agent's example task text from the *first phrase* of that agent's
+  description. The test additionally pins a handful of those examples verbatim,
+  so rewording a leading phrase breaks an assertion far from the edited file.
+  `basecoat-metadata.json` and
+  `plugins/copilot-cli-plugin/schema/basecoat-registry.json` are derived from the
+  same frontmatter.
+- **workaround:** After any description edit run
+  `scripts/generate-prompt-library.ps1`, `scripts/update-metadata.ps1`, and
+  `scripts/generate-registry.ps1`, then re-run the test. If a pinned example
+  breaks, preserve the original leading phrase rather than editing the test.
+- **prevention:** Treat the description's opening phrase as a referenced
+  identifier, not free prose. Before a bulk description change, confirm the
+  finding is real against current `main`: downstream `warn-rules` audits are
+  snapshots of an older release and may already be fixed upstream.
+- **evidence:** Issue #3134 — all 17 agents reported as missing
+  `USE FOR:`/`DO NOT USE FOR:` already complied on `main` (131/131); the
+  remediation PR #3308 was closed as unnecessary churn after it broke the pinned
+  `@data-integrity` and `@dotnet-modernization-advisor` examples.
