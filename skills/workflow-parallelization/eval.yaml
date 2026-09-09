@@ -19,3 +19,6 @@ scenarios:
   - id: neg-feature-code
     input: Write a Python function to sort a list.
     expect_activation: false
+  - id: neg-merge-conflict-resolution
+    input: Resolve this conflicted PR branch and produce the final merge commit; route conflict mediation to merge-conflict-mediator.
+    expect_activation: false

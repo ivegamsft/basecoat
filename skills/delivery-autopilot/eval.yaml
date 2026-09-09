@@ -11,3 +11,6 @@ scenarios:
   - id: "neg-1"
     input: "Implement a new frontend dashboard feature from scratch."
     expect_activation: false
+  - id: "neg-2"
+    input: "Write the application code for the approved API change; route implementation to backend-dev before delivery-autopilot."
+    expect_activation: false

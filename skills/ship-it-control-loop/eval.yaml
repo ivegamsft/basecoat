@@ -20,3 +20,8 @@ tests:
       contains:
         - "stop"
         - "complete"
+  - id: neg-new-ship-it-dispatch
+    prompt: "Start a new spec-to-prod delivery with governed issue creation; route initial dispatch to ship-it."
+    expect:
+      decision: no_trigger
+      confidence: 0.9

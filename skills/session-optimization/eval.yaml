@@ -19,3 +19,6 @@ scenarios:
   - id: neg-feature-code
     input: Implement a new REST endpoint for user authentication.
     expect_activation: false
+  - id: neg-session-forensics
+    input: Count the top tools and model switches in yesterday's Copilot CLI session; route analysis to session-analysis.
+    expect_activation: false

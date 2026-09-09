@@ -66,3 +66,8 @@ scenarios:
       - "Reports drifts as gaps"
       - "Does not modify settings directly"
       - "Recommends manual settings to update"
+
+  - id: neg-stale-branch-cleanup
+    description: "Route stale branch cleanup to branch-hygiene-sweeper instead of autonomy governance"
+    input: "Find merged branches older than 30 days and prune safe remote refs."
+    expect_activation: false

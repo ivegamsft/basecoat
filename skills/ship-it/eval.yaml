@@ -64,3 +64,11 @@ tests:
     expect:
       decision: no_trigger
       confidence: 0.9
+  - id: ship-it-control-loop-negative
+    description: Routes existing wave continuation to ship-it-control-loop instead of starting ship-it dispatch
+    messages:
+      - role: user
+        content: "Continue the existing ship-it wave, apply retry policy, and summarize the next control-loop cycle."
+    expect:
+      decision: no_trigger
+      confidence: 0.9

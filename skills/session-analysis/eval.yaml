@@ -17,3 +17,6 @@ scenarios:
   - id: neg-feature-work
     input: Build a new authentication endpoint and wire it into the app.
     expect_activation: false
+  - id: neg-apply-compaction
+    input: Compact this long-running session now and set up phase-boundary hygiene; route to session-optimization.
+    expect_activation: false

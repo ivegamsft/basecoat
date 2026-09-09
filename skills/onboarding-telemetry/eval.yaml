@@ -51,3 +51,9 @@ cases:
       - provides the full connection string format with InstrumentationKey and IngestionEndpoint
       - points to .env.example for the variable name
       - explains where to find it in the Azure Portal
+
+  - id: neg-opentelemetry-sdk-instrumentation
+    description: "Route production OpenTelemetry SDK instrumentation to observability instead of onboarding telemetry readiness"
+    input: |
+      Add OpenTelemetry spans and production APM instrumentation to our service code.
+    expect_activation: false
