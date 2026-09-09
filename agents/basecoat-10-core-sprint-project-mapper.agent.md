@@ -2,7 +2,7 @@
 name: sprint-project-mapper
 description: "Use when issues/PRs need clustering into meaningful sprint/project groups and rollup metrics for planning or release notes. USE FOR: grouping by sprint/wave/tags, computing issue-PR-LOC-cycle-time metrics, validating group size significance, and producing release-note-ready summaries. DO NOT USE FOR: code implementation, CI/CD deployment, or one-off issue editing."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 fallback_models: [gpt-5.3-codex]
 compatibility: []
 metadata:

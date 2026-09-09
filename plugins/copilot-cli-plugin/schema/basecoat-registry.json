@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generated": "2026-08-26T16:19:45Z",
+  "generated": "2026-09-09T11:32:42Z",
   "agents": {
     "agent-designer": {
       "id": "agent-designer",
@@ -21,7 +21,7 @@
     "agentic-sdlc-autonomy": {
       "id": "agentic-sdlc-autonomy",
       "name": "agentic-sdlc-autonomy",
-      "description": "Audit, measure, implement, and operate rules-based human-in-the-loop autonomy for agent-operated repositories. Use when evaluating or improving agentic SDLC governance: PR risk classification (A0-A5 levels), auto-merge policy, merge queue gates, deployment lane policy, DB migration controls, IaC safety rules, runner isolation, production approval flows, and policy-versus-settings drift.",
+      "description": "Audit, measure, implement, and operate rules-based human-in-the-loop autonomy for agent-operated repositories. USE FOR: PR risk classification, auto-merge policy, merge queue gates, deployment lane policy, and policy-versus-settings drift. DO NOT USE FOR: product feature implementation, routine code review, or isolated CI failure diagnosis.",
       "file": "agents/agentic-sdlc-autonomy.agent.md",
       "keywords": [
         "agentic",
@@ -46,7 +46,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -78,7 +78,7 @@
       "capabilities": [
         "security"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "security"
     },
@@ -94,14 +94,14 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
     "azure-landing-zone": {
       "id": "azure-landing-zone",
       "name": "azure-landing-zone",
-      "description": "Azure Landing Zone (ESLZ) agent for scaffolding enterprise-scale landing zones following Microsoft's Cloud Adoption Framework. Use when designing management group hierarchies, platform subscriptions, hub networking, policy baselines, or landing zone vending templates.",
+      "description": "Scaffolds enterprise-scale Azure landing zones following the Cloud Adoption Framework. USE FOR: management group hierarchies, platform subscriptions, hub networking, policy baselines, and landing-zone vending templates. DO NOT USE FOR: application workload coding, ad-hoc portal configuration, or non-Azure infrastructure design.",
       "file": "agents/basecoat-40-azure-azure-landing-zone.agent.md",
       "keywords": [
         "azure",
@@ -111,7 +111,7 @@
       "capabilities": [
         "infrastructure"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "cloud"
     },
@@ -134,7 +134,7 @@
     "backlog-autopilot": {
       "id": "backlog-autopilot",
       "name": "backlog-autopilot",
-      "description": "Continuous backlog-delivery conductor that burns the issue backlog oldest to newest in dependency-ordered waves, unattended until stopped or blocked. USE FOR: running the autopilot: intent as a persistent multi-wave delivery loop, composing oldest-first selection with design/scope/test/merge-queue/deploy gates, and driving standalone or fleet backlog burndown at a throttle-safe pace. DO NOT USE FOR: implementing feature code directly, bypassing required checks or human-approval boundaries, or one-off single-issue work that does not need a continuing loop.",
+      "description": "Continuous backlog-delivery conductor that burns the issue backlog oldest to newest in dependency-ordered waves, unattended until stopped or blocked. USE FOR: running persistent multi-wave backlog delivery; coordinating design, scope, test, merge-queue, and deploy gates; driving standalone or fleet backlog burndown. DO NOT USE FOR: implementing feature code directly, bypassing checks or approval boundaries, one-off single-issue work.",
       "file": "agents/basecoat-60-workflow-backlog-autopilot.agent.md",
       "keywords": [
         "backlog",
@@ -159,7 +159,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "production",
       "category": "workflow"
     },
@@ -175,7 +175,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -229,14 +229,14 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "beta",
       "category": "Workflow"
     },
     "change-isolation-architect": {
       "id": "change-isolation-architect",
       "name": "change-isolation-architect",
-      "description": "Designs layered CI/CD isolation so independent domains (for example mobile, database, portal, extension, and infra) can evolve and release separately without cross-triggered pipeline noise.",
+      "description": "Designs layered CI/CD isolation so independent domains can evolve and release separately without cross-triggered pipeline noise. USE FOR: path-based pipeline routing, layered CI/CD boundaries, independent release lanes, cross-trigger prevention, and domain ownership isolation. DO NOT USE FOR: application feature coding, single-workflow troubleshooting, or manual production deployments.",
       "file": "agents/basecoat-10-core-change-isolation-architect.agent.md",
       "keywords": [
         "change",
@@ -360,7 +360,7 @@
       "capabilities": [
         "security"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "security"
     },
@@ -376,7 +376,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "ai"
     },
@@ -392,9 +392,26 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
+    },
+    "copilot-review-triage": {
+      "id": "copilot-review-triage",
+      "name": "copilot-review-triage",
+      "description": "Runs a pull request-scoped triage loop for inbound automated Copilot review threads. USE FOR: impact-sizing review threads, validating Medium suggestions, recording safe dispositions, resolving Small and Medium threads, and escalating Large findings. DO NOT USE FOR: initial pull request review, auto-applying security or contract changes, or overriding human review gates.",
+      "file": "agents/basecoat-90-quality-copilot-review-triage.agent.md",
+      "keywords": [
+        "copilot",
+        "review",
+        "triage"
+      ],
+      "capabilities": [
+        "testing"
+      ],
+      "model": "gpt-5.3-codex",
+      "maturity": "alpha",
+      "category": "quality"
     },
     "daily-standup-facilitator": {
       "id": "daily-standup-facilitator",
@@ -409,7 +426,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "ai"
     },
@@ -425,14 +442,14 @@
       "capabilities": [
         "backend"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "data"
     },
     "data-integrity": {
       "id": "data-integrity",
       "name": "Data Integrity",
-      "description": "Distributed data integrity patterns — eventual consistency strategies, conflict resolution, ACID compliance, backup verification, and data recovery procedures.\n",
+      "description": "Distributed data integrity patterns — eventual consistency strategies, conflict resolution, ACID compliance, backup verification, and data recovery procedures. USE FOR: distributed data integrity patterns, consistency strategies, conflict resolution, backup verification, and recovery planning. DO NOT USE FOR: application feature coding, business analytics, or generic data-pipeline orchestration.\n",
       "file": "agents/basecoat-80-data-data-integrity.agent.md",
       "keywords": [
         "data",
@@ -441,14 +458,14 @@
       "capabilities": [
         "backend"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "data"
     },
     "data-pipeline": {
       "id": "data-pipeline",
       "name": "data-pipeline",
-      "description": "Data pipeline agent for medallion lakehouse architecture, data quality, ML pipeline orchestration, and feature store integration. Use when building or reviewing bronze/silver/gold Delta Lake pipelines, data quality checks, feature engineering, or ML training workflows.",
+      "description": "Designs and reviews data pipelines for lakehouse, quality, and machine-learning workflows. USE FOR: medallion lakehouse architecture, Delta Lake pipelines, data quality checks, feature engineering, and ML training orchestration. DO NOT USE FOR: transactional application databases, dashboard-only reporting, or generic infrastructure deployment.",
       "file": "agents/basecoat-60-workflow-data-pipeline.agent.md",
       "keywords": [
         "data",
@@ -457,7 +474,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "workflow"
     },
@@ -489,7 +506,7 @@
       "capabilities": [
         "backend"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "data"
     },
@@ -521,7 +538,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -603,14 +620,14 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
     "dependency-update-advisor": {
       "id": "dependency-update-advisor",
       "name": "dependency-update-advisor",
-      "description": "Reviews Dependabot pull requests and posts a structured risk assessment comment: semver bump type, breaking change likelihood, suggested test focus areas, and known CVE context. USE FOR: assess Dependabot PR risk, evaluate semver bump safety, get CVE context for dependency update. DO NOT USE FOR: creating Dependabot config, general code review.",
+      "description": "Reviews Dependabot pull requests and posts a structured risk assessment comment: semver bump type, breaking change likelihood, test focus, and CVE context. USE FOR: assess Dependabot PR risk, semver bump safety, CVE context. DO NOT USE FOR: creating Dependabot config, general code review.",
       "file": "agents/basecoat-10-core-dependency-update-advisor.agent.md",
       "keywords": [
         "dependency",
@@ -652,14 +669,14 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "ai"
     },
     "dotnet-modernization-advisor": {
       "id": "dotnet-modernization-advisor",
       "name": "dotnet-modernization-advisor",
-      "description": "Advisor for .NET modernization assessment, upgrade planning, and execution guidance. Use when migrating legacy .NET Framework/older .NET solutions to modern .NET versions.",
+      "description": "Advises on .NET modernization assessment, upgrade planning, and execution guidance. USE FOR: Advisor for .NET modernization, .NET Framework assessment, target-version planning, migration sequencing, and compatibility analysis. DO NOT USE FOR: greenfield non-.NET development, direct production migration execution, or generic cloud cost optimization.",
       "file": "agents/basecoat-20-lang-dotnet-modernization-advisor.agent.md",
       "keywords": [
         "dotnet",
@@ -669,7 +686,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "language"
     },
@@ -686,7 +703,7 @@
       "capabilities": [
         "testing"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "quality"
     },
@@ -709,7 +726,7 @@
     "exploratory-charter": {
       "id": "exploratory-charter",
       "name": "exploratory-charter",
-      "description": "Use when you need time-boxed exploratory testing sessions. Generates mission-driven charters with scope, triage routing, and evidence capture. Automatically files GitHub Issues for automation candidates found during exploration.",
+      "description": "Generates mission-driven charters with scope, triage routing, and evidence capture for time-boxed exploratory testing. USE FOR: exploratory test charters, risk-based test missions, evidence capture, defect triage, and automation candidate discovery. DO NOT USE FOR: automated regression implementation, unit-test authoring, or production incident response.",
       "file": "agents/basecoat-10-core-exploratory-charter.agent.md",
       "keywords": [
         "exploratory",
@@ -718,7 +735,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -734,7 +751,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -751,7 +768,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -768,7 +785,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "ai"
     },
@@ -784,7 +801,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -800,7 +817,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -817,7 +834,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "production",
       "category": "flow-governance"
     },
@@ -866,7 +883,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "production",
       "category": "flow-governance"
     },
@@ -930,7 +947,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "workflow"
     },
@@ -947,7 +964,7 @@
       "capabilities": [
         "security"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "security"
     },
@@ -963,7 +980,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -995,7 +1012,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "production",
       "category": "governance"
     },
@@ -1010,7 +1027,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "ai"
     },
@@ -1026,7 +1043,7 @@
       "capabilities": [
         "security"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "security"
     },
@@ -1042,7 +1059,7 @@
       "capabilities": [
         "testing"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "experimental",
       "category": "quality"
     },
@@ -1058,7 +1075,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -1074,7 +1091,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -1106,7 +1123,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "workflow"
     },
@@ -1140,7 +1157,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "workflow"
     },
@@ -1179,7 +1196,7 @@
     "legacy-modernization": {
       "id": "legacy-modernization",
       "name": "legacy-modernization",
-      "description": "Guides teams through Web Forms to Razor Pages migration using the strangler fig pattern for incremental modernization of legacy ASP.NET applications. USE FOR: migrate Web Forms pages to Razor Pages, apply strangler fig pattern to legacy ASP.NET apps, plan incremental .NET modernization. DO NOT USE FOR: greenfield application development, cloud infrastructure migration.",
+      "description": "Guides Web Forms to Razor Pages migration using the strangler fig pattern for incremental ASP.NET modernization. USE FOR: migrate Web Forms to Razor Pages, apply strangler fig to legacy ASP.NET, plan .NET modernization. DO NOT USE FOR: greenfield development, cloud infra migration, DB schema migration.",
       "file": "agents/basecoat-10-core-legacy-modernization.agent.md",
       "keywords": [
         "legacy",
@@ -1188,7 +1205,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -1203,7 +1220,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -1222,14 +1239,14 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "workflow"
     },
     "manual-test-strategy": {
       "id": "manual-test-strategy",
       "name": "manual-test-strategy",
-      "description": "Use when you need a structured manual testing strategy for a feature or risk inventory. Produces a decision rubric, exploratory charter, regression checklist, defect template, and automation backlog. Automatically files GitHub Issues for automation candidates.",
+      "description": "Produces structured manual testing strategies for features and risk inventories. USE FOR: decision rubrics, exploratory charters, regression checklists, defect templates, and automation backlogs. DO NOT USE FOR: automated test implementation, production incident command, or replacing acceptance criteria.",
       "file": "agents/basecoat-90-quality-manual-test-strategy.agent.md",
       "keywords": [
         "manual",
@@ -1239,7 +1256,7 @@
       "capabilities": [
         "testing"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "quality"
     },
@@ -1255,7 +1272,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -1271,14 +1288,14 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
     "memory-promoter": {
       "id": "memory-promoter",
       "name": "memory-promoter",
-      "description": "Analyzes session transcripts and sprint summaries to identify high-value patterns for promotion to long-term BaseCoat memory contributions. USE FOR: extract reusable patterns from session transcripts, identify conventions worth promoting to BaseCoat memory, review sprint summaries for learnings. DO NOT USE FOR: writing code or instructions directly, real-time session assistance.",
+      "description": "Analyzes session transcripts and sprint summaries to identify high-value patterns for promotion to long-term BaseCoat memory contributions. USE FOR: extract reusable patterns from transcripts, identify conventions worth promoting, review sprint summaries for learnings. DO NOT USE FOR: writing code/instructions directly, real-time session assistance.",
       "file": "agents/basecoat-10-core-memory-promoter.agent.md",
       "keywords": [
         "memory",
@@ -1294,7 +1311,7 @@
     "merge-coordinator": {
       "id": "merge-coordinator",
       "name": "merge-coordinator",
-      "description": "Parallel branch merge coordinator. Use when multiple feature branches need to be merged into a target branch without interactive git editors hanging automated pipelines. Handles conflict detection, safe resolution, and ordered PR merging.",
+      "description": "Parallel branch merge coordinator for safe, ordered pull request integration. USE FOR: conflict detection, non-interactive conflict resolution, serialized PR merging, merge-order planning, and target-branch coordination. DO NOT USE FOR: feature implementation, rewriting shared history, or bypassing required checks.",
       "file": "agents/basecoat-10-core-merge-coordinator.agent.md",
       "keywords": [
         "merge",
@@ -1341,7 +1358,7 @@
     "new-customization": {
       "id": "new-customization",
       "name": "new-customization",
-      "description": "Use when creating or updating a customization asset such as an instruction, skill, prompt, or agent. Chooses the right primitive, authors the file, and validates frontmatter and placement.",
+      "description": "Creates or updates customization assets and validates their frontmatter and placement. USE FOR: selecting instructions, authoring skills, creating prompts, defining agents, and validating customization metadata. DO NOT USE FOR: application feature coding, CI/CD infrastructure changes, or runtime incident remediation.",
       "file": "agents/basecoat-10-core-new-customization.agent.md",
       "keywords": [
         "new",
@@ -1350,7 +1367,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -1366,7 +1383,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -1405,7 +1422,7 @@
     "parallel-session-coordinator": {
       "id": "parallel-session-coordinator",
       "name": "parallel-session-coordinator",
-      "description": "Coordinate multiple concurrent Copilot worktree sessions executing independent issues in parallel, with merge serialization and conflict prevention. USE FOR: run parallel feature sprints, coordinate multi-worktree execution, enforce serialized merge pacing across sessions, detect and prevent merge conflicts before they occur. DO NOT USE FOR: single-session work, direct code implementation, bypassing required CI checks.",
+      "description": "Coordinate multiple concurrent Copilot worktree sessions executing independent issues in parallel, with merge serialization and conflict prevention. USE FOR: parallel feature sprints, multi-worktree execution, serialized merge pacing, merge-conflict prevention. DO NOT USE FOR: single-session work, direct code implementation, bypassing required CI checks.",
       "file": "agents/basecoat-60-workflow-parallel-session-coordinator.agent.md",
       "keywords": [
         "parallel",
@@ -1415,7 +1432,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "workflow"
     },
@@ -1431,7 +1448,7 @@
       "capabilities": [
         "testing"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "quality"
     },
@@ -1465,14 +1482,14 @@
       "capabilities": [
         "security"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "security"
     },
     "product-manager": {
       "id": "product-manager",
       "name": "product-manager",
-      "description": "Use when gathering requirements, writing user stories, defining acceptance criteria, planning roadmaps, or prioritizing features using frameworks like RICE or MoSCoW.",
+      "description": "Guides product discovery and prioritization using structured product-management practices. USE FOR: requirements gathering, user-story authoring, acceptance criteria, roadmap planning, and RICE or MoSCoW prioritization. DO NOT USE FOR: technical architecture decisions, implementation coding, or production deployment.",
       "file": "agents/basecoat-10-core-product-manager.agent.md",
       "keywords": [
         "product",
@@ -1481,7 +1498,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -1497,14 +1514,14 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
     "program-bootstrap": {
       "id": "program-bootstrap",
       "name": "program-bootstrap",
-      "description": "Thin orchestration entrypoint for end-to-end startup pack generation. USE FOR: bootstrapping a new program with coordinated onboarding/backlog/spec/architecture/workflow outputs, running dry-run orchestration before writing artifacts, resuming partially completed orchestration with checkpoints, preserving repo-specific delivery labels while normalizing governance labels. DO NOT USE FOR: replacing specialist agents, forcing one repo taxonomy, direct single-step authoring that a specialist agent already handles.",
+      "description": "Thin orchestration entrypoint for end-to-end startup pack generation. USE FOR: bootstrapping a new program with coordinated onboarding/backlog/spec/architecture/workflow outputs, dry-run orchestration before writing artifacts, resuming partial orchestration with checkpoints, preserving repo-specific delivery labels while normalizing governance labels. DO NOT USE FOR: replacing specialist agents, forcing one repo taxonomy, direct single-step authoring that a specialist agent already handles.",
       "file": "agents/program-bootstrap.agent.md",
       "keywords": [
         "program",
@@ -1513,7 +1530,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "workflow"
     },
@@ -1529,7 +1546,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -1554,7 +1571,7 @@
     "prompt-coach": {
       "id": "prompt-coach",
       "name": "prompt-coach",
-      "description": "Use when reviewing prompts, scoring prompt quality, identifying anti-patterns, and guiding iterative refinement of LLM prompts.",
+      "description": "Reviews prompts, scores prompt quality, identifies anti-patterns, and guides iterative refinement. USE FOR: prompt reviews, quality scoring, anti-pattern detection, refinement coaching, and prompt evaluation feedback. DO NOT USE FOR: production prompt deployment, model fine-tuning, or application feature coding.",
       "file": "agents/basecoat-10-core-prompt-coach.agent.md",
       "keywords": [
         "prompt",
@@ -1570,7 +1587,7 @@
     "prompt-engineer": {
       "id": "prompt-engineer",
       "name": "prompt-engineer",
-      "description": "Prompt optimization and system prompt engineering agent. Use when designing system prompts, optimizing token usage, crafting few-shot examples, or structuring chain-of-thought instructions.",
+      "description": "Designs and optimizes system prompts for reliable, efficient model behavior. USE FOR: system prompt design, token optimization, few-shot examples, instruction structuring, and prompt-template authoring. DO NOT USE FOR: model training, production infrastructure setup, or general copyediting.",
       "file": "agents/basecoat-10-core-prompt-engineer.agent.md",
       "keywords": [
         "prompt",
@@ -1610,7 +1627,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -1627,7 +1644,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "workflow"
     },
@@ -1644,7 +1661,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "workflow"
     },
@@ -1660,7 +1677,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "workflow"
     },
@@ -1677,7 +1694,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "workflow"
     },
@@ -1693,7 +1710,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -1709,7 +1726,7 @@
       "capabilities": [
         "testing"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "quality"
     },
@@ -1725,7 +1742,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "workflow"
     },
@@ -1776,7 +1793,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -1792,7 +1809,7 @@
       "capabilities": [
         "security"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "security"
     },
@@ -1840,7 +1857,7 @@
       "capabilities": [
         "security"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "security"
     },
@@ -1857,7 +1874,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "workflow"
     },
@@ -1882,7 +1899,7 @@
     "ship-it-orchestrator": {
       "id": "ship-it-orchestrator",
       "name": "ship-it-orchestrator",
-      "description": "Intent-to-production orchestrator that converts `ship-it`, `spec-2-prod`, and `onboarding-conductor` goals into governed execution loops with tracked PR, validation, release, and learning artifacts. USE FOR: goal-driven spec-to-prod orchestration, onboarding conductor discover/plan/apply/validate loops, build-break recovery coordination, and release readiness tracking. DO NOT USE FOR: bypassing approval gates, direct production deployment without evidence, or ad hoc one-off edits with no delivery loop.",
+      "description": "Intent-to-production orchestrator converting `ship-it`, `spec-2-prod`, and `onboarding-conductor` goals into governed execution loops with tracked PR, validation, release, and learning artifacts. USE FOR: goal-driven spec-to-prod orchestration, onboarding conductor discover/plan/apply/validate loops, build-break recovery coordination, and release readiness tracking. DO NOT USE FOR: bypassing approval gates, direct production deployment without evidence, or ad hoc one-off edits with no delivery loop.",
       "file": "agents/basecoat-60-workflow-ship-it-orchestrator.agent.md",
       "keywords": [
         "ship",
@@ -1892,14 +1909,14 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "workflow"
     },
     "solution-architect": {
       "id": "solution-architect",
       "name": "solution-architect",
-      "description": "Solution architecture agent for system design, C4 diagrams, ADRs, technology selection, and cross-cutting concerns. Use when designing new systems, evaluating technology choices, or reviewing architecture for scalability and risk.",
+      "description": "Designs solutions across system boundaries, technology choices, and operational constraints. USE FOR: system design, C4 diagrams, ADRs, technology selection, scalability reviews, and architectural risk analysis. DO NOT USE FOR: isolated bug fixes, UI implementation, or routine code formatting.",
       "file": "agents/basecoat-10-core-solution-architect.agent.md",
       "keywords": [
         "solution",
@@ -1908,7 +1925,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -1941,7 +1958,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -1958,7 +1975,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -1974,7 +1991,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -2007,14 +2024,14 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
     "strategy-to-automation": {
       "id": "strategy-to-automation",
       "name": "strategy-to-automation",
-      "description": "Use when converting manual test paths into automation candidates. Maps paths to smoke tests, regression tiers, or agent specs. ALWAYS files a GitHub Issue for every automation candidate identified.",
+      "description": "Converts manual test paths into automation candidates and files an issue for each candidate. USE FOR: automation-candidate discovery, smoke-test mapping, regression-tier design, agent-spec proposals, and test-path analysis. DO NOT USE FOR: directly implementing tests, manual exploratory execution, or suppressing issue creation.",
       "file": "agents/basecoat-10-core-strategy-to-automation.agent.md",
       "keywords": [
         "strategy",
@@ -2024,7 +2041,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -2041,7 +2058,7 @@
       "capabilities": [
         "security"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "security"
     },
@@ -2058,7 +2075,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
@@ -2075,14 +2092,14 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "workflow"
     },
     "tech-writer": {
       "id": "tech-writer",
       "name": "tech-writer",
-      "description": "Use when creating or improving technical documentation, API docs, runbooks, tutorials, ADRs, changelogs, or implementing docs-as-code workflows.",
+      "description": "Creates and improves technical documentation and docs-as-code workflows. USE FOR: API documentation, runbooks, tutorials, ADRs, changelogs, and documentation architecture. DO NOT USE FOR: product requirements prioritization, application implementation, or legal/compliance approval.",
       "file": "agents/basecoat-10-core-tech-writer.agent.md",
       "keywords": [
         "tech",
@@ -2091,14 +2108,14 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     },
     "ux-designer": {
       "id": "ux-designer",
       "name": "ux-designer",
-      "description": "UX design agent for user journey mapping, wireframe specs, component design, and accessibility audits. Use when designing user experiences, evaluating usability, or auditing interfaces for WCAG compliance.",
+      "description": "Designs accessible user experiences and evaluates interface usability. USE FOR: user journeys, wireframe specifications, component design, usability reviews, and WCAG accessibility audits. DO NOT USE FOR: frontend implementation, backend API design, or brand/legal approval.",
       "file": "agents/basecoat-10-core-ux-designer.agent.md",
       "keywords": [
         "ux",
@@ -2107,7 +2124,7 @@
       "capabilities": [
         "general"
       ],
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "maturity": "alpha",
       "category": "core"
     }

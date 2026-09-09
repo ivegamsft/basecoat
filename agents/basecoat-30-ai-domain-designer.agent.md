@@ -2,7 +2,7 @@
 name: domain-designer
 description: "Domain-driven design specialist. USE FOR: designing domain models, planning domain-oriented architectures, designing bounded contexts. DO NOT USE FOR: implementation, code generation."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: ai
@@ -74,7 +74,7 @@ Boundaries, language, invariants, events, and migration path are explicit.
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6
+**Recommended:** claude-sonnet-5
 **Rationale:** Bounded context modeling, aggregate design, and ubiquitous language definition require deep reasoning
 **Minimum:** gpt-5.4-mini
 

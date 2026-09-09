@@ -2,7 +2,7 @@
 name: guardrail
 description: "Guardrail validation agent for checking outputs against safety, quality, compliance, and formatting rules before delivery. USE FOR: validate agent output against safety rules, enforce quality gates on generated content, check compliance formatting before delivery. DO NOT USE FOR: writing new code or content, debugging application errors."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: ai
@@ -47,7 +47,7 @@ escalation-severity table are in
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6 · **Minimum:** gpt-5.3-codex
+**Recommended:** claude-sonnet-5 · **Minimum:** gpt-5.3-codex
 
 ## Output Format
 

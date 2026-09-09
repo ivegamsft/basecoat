@@ -17,33 +17,34 @@ Generated from GitHub Docs model data retrieved through `gh api`, then enriched 
 | Model | Provider | Status | Copilot CLI | CLI auto-selection | Configurable reasoning | Task area |
 |---|---|---|---:|---:|---:|---|
 | `gpt-5-mini` | OpenAI | GA | True | True | False | General-purpose coding and writing |
+| `kimi-k3` | Moonshot AI | GA | True | False | True | Agentic coding and long-context work |
 | `kimi-k2.7-code` | Moonshot AI | GA | True | False | False | General-purpose coding and agent tasks |
-| `raptor-mini` | Fine-tuned GPT-5 mini | GA | False | False | False | General-purpose coding and writing |
-| `mai-code-1-flash-picker` | Microsoft | GA | True | True | False | General-purpose coding and writing |
-| `gemini-3.6-flash` | Google | GA | True | False | False | Fast help with simple or repetitive tasks |
+| `mai-code-1.1-flash` | Microsoft | GA | True | True | False | General-purpose coding and writing, image understanding |
+| `mai-code-1-flash-picker` | Microsoft | GA | True | False | False | General-purpose coding and writing |
+| `gemini-3.8-flash` | Google | GA | True | False | False | Fast help with simple or repetitive tasks |
+| `gemini-3.7-flash` | Google | GA | True | True | False | Fast help with simple or repetitive tasks |
+| `gemini-3.6-flash` | Google | GA | True | True | False | Fast help with simple or repetitive tasks |
 | `gemini-3.5-flash` | Google | GA | True | False | False | Fast help with simple or repetitive tasks |
-| `gemini-3.1-pro-preview` | Google | Public preview | True | False | False | Deep reasoning and debugging |
-| `claude-sonnet-5` | Anthropic | GA | True | False | True | General-purpose coding and agent tasks |
+| `claude-sonnet-5` | Anthropic | GA | True | True | True | General-purpose coding and agent tasks |
 | `claude-sonnet-4.6` | Anthropic | GA | True | True | True | General-purpose coding and agent tasks |
-| `claude-sonnet-4.5` | Anthropic | GA | True | False | False | General-purpose coding and agent tasks |
-| `claude-opus-5` | Anthropic | GA | True | False | True | Deep reasoning and debugging |
+| `claude-opus-5` | Anthropic | GA | True | True | True | Deep reasoning and debugging |
 | `claude-opus-4.8-fast` | Anthropic | GA | True | False | True | Deep reasoning and debugging |
-| `claude-opus-4.8` | Anthropic | GA | True | False | True | Deep reasoning and debugging |
-| `claude-opus-4.7` | Anthropic | GA | True | False | True | Deep reasoning and debugging |
-| `claude-opus-4.6` | Anthropic | GA | True | False | True | Not classified by GitHub Docs |
-| `claude-opus-4.5` | Anthropic | GA | True | False | False | Not classified by GitHub Docs |
+| `grok-4.5` | xAI | GA | True | False | False | General-purpose coding and agent tasks |
+| `claude-opus-4.8` | Anthropic | GA | True | True | True | Deep reasoning and debugging |
 | `claude-haiku-4.5` | Anthropic | GA | True | True | False | Fast help with simple or repetitive tasks |
+| `claude-fable-5.1` | Anthropic | GA | True | False | True | Long-horizon, autonomous coding and knowledge-work |
 | `claude-fable-5` | Anthropic | GA | True | False | True | Long-horizon, autonomous coding and knowledge-work |
-| `gpt-5.6-terra` | OpenAI | GA | True | False | True | General-purpose coding and agent tasks |
-| `gpt-5.6-sol` | OpenAI | GA | True | False | True | Deep reasoning and debugging |
-| `gpt-5.6-luna` | OpenAI | GA | True | False | True | Fast help with simple or repetitive tasks |
-| `gpt-5.5` | OpenAI | GA | True | False | True | Deep reasoning and debugging |
+| `gpt-6-astra` | OpenAI | GA | True | False | True | Long-horizon, autonomous coding and agentic tasks |
+| `gpt-5.6-terra` | OpenAI | GA | True | True | True | General-purpose coding and agent tasks |
+| `gpt-5.6-sol` | OpenAI | GA | True | True | True | Deep reasoning and debugging |
+| `gpt-5.6-luna` | OpenAI | GA | True | True | True | Fast help with simple or repetitive tasks |
+| `gpt-5.5` | OpenAI | GA | True | True | True | Deep reasoning and debugging |
 | `gpt-5.4-nano` | OpenAI | GA | False | False | False | Not classified by GitHub Docs |
 | `gpt-5.4-mini` | OpenAI | GA | True | True | False | Agentic software development |
 | `gpt-5.4` | OpenAI | GA | True | True | True | Deep reasoning and debugging |
-| `gpt-5.3-codex` | OpenAI | GA | True | True | True | Agentic software development |
-| `kimi-k3` | Moonshot AI | GA | True | False | True | Agentic coding and long-context work |
-| `grok-4.5` | xAI | GA | True | False | False | General-purpose coding and agent tasks |
+| `gpt-5.3-codex` | OpenAI | GA | True | False | True | Agentic software development |
+| `claude-opus-4.7` | Anthropic | GA | True | False | True | Deep reasoning and debugging |
+| `grok-4.6` | xAI | GA | True | False | False | General-purpose coding and agent tasks |
 
 ## Runtime availability
 

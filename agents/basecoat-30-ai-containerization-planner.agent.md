@@ -2,7 +2,7 @@
 name: containerization-planner
 description: "Helps assess containerization readiness, choose deployment platforms (Docker/AKS/ACA), and generate container configurations including Dockerfiles, multi-stage builds, health probes, resource limits, and deployment manifests. USE FOR: containerize an app, choose AKS vs ACA, generate Dockerfiles. DO NOT USE FOR: image scanning, cluster incidents."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: ai

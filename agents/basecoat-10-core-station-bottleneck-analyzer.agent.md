@@ -3,7 +3,7 @@ name: station-bottleneck-analyzer
 description: "Use when analyzing takt-time JSON to compute queue length and throughput by station, rank bottlenecks, and file the weekly bottleneck report issue. USE FOR: station-level queue pressure, throughput trends, weekly issue filing, and follow-up actions. DO NOT USE FOR: dispatching work or changing replanning policy."
 visibility: basic
 tools: [read_file, run_terminal_command, create_github_issue]
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 fallback_models: [gpt-5.3-codex]
 compatibility: []
 metadata:

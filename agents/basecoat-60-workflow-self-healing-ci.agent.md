@@ -2,7 +2,7 @@
 name: self-healing-ci
 description: "Automated CI failure analysis, log parsing, and pipeline remediation with retry strategies, flaky test detection, dependency resolution, and cache invalidation. USE FOR: auto-remediate CI failures, quarantine flaky tests, resolve build dependency and cache errors. DO NOT USE FOR: designing CI pipeline architecture, code-level debugging."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: workflow
@@ -60,7 +60,7 @@ rollback path for dependency changes; human override at strategy or repo scope.
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6 · **Minimum:** gpt-5.4-mini
+**Recommended:** claude-sonnet-5 · **Minimum:** gpt-5.4-mini
 
 ## Governance
 

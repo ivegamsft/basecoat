@@ -2,7 +2,7 @@
 name: agentops
 description: "Agent operations and infrastructure specialist. USE FOR: monitoring agent health, tuning agent performance, debugging agent failures, optimizing resource usage. DO NOT USE FOR: individual agent tasks, direct coding."
 visibility: internal
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: core

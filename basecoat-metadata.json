@@ -321,7 +321,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-agentops.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -355,7 +355,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-app-inventory.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -390,7 +390,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-bom-validator.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -458,7 +458,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-contract-testing.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -475,7 +475,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-definition-of-done.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -509,7 +509,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-dependency-lifecycle.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -576,7 +576,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-exploratory-charter.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -593,7 +593,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-factory-conductor.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -611,7 +611,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-factory-state-curator.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -628,7 +628,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-feedback-loop.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -646,7 +646,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-finops-advisor.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -682,7 +682,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-gitops-engineer.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -699,7 +699,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-ha-architect.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -712,7 +712,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-hardening-advisor.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -768,7 +768,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-legacy-modernization.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -786,7 +786,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-llmops.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -803,7 +803,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-mcp-developer.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -819,7 +819,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-memory-curator.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -885,7 +885,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-new-customization.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -898,7 +898,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-observability-engineer.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -914,7 +914,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-orchestrator.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -931,7 +931,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/program-bootstrap.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -982,7 +982,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-product-manager.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -999,7 +999,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-production-readiness.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1015,7 +1015,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-project-onboarding.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1065,7 +1065,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-rca.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1082,7 +1082,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-replanning-engine.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1100,7 +1100,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-s4-shadow-mode-validator.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1118,7 +1118,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-solution-architect.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1135,7 +1135,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-sprint-planner.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1153,7 +1153,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-sprint-project-mapper.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1169,7 +1169,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-sprint-retrospective.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1204,7 +1204,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-station-bottleneck-analyzer.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1220,7 +1220,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-strategy-to-automation.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1237,7 +1237,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-takt-time-tracker.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1254,7 +1254,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-tech-writer.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1271,7 +1271,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-10-core-ux-designer.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1288,7 +1288,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-20-lang-dotnet-modernization-advisor.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1305,7 +1305,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-30-ai-containerization-planner.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1322,7 +1322,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-30-ai-daily-standup-facilitator.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1340,7 +1340,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-30-ai-domain-designer.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1357,7 +1357,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-30-ai-failure-pattern-process.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1373,7 +1373,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-30-ai-guardrail.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1407,7 +1407,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-40-azure-azure-landing-zone.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1423,7 +1423,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-50-security-api-security.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1469,7 +1469,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-50-security-container-security.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1482,7 +1482,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-50-security-github-security-posture.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1500,7 +1500,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-50-security-guidance-author.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1535,7 +1535,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-50-security-policy-as-code-compliance.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1548,7 +1548,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-50-security-secrets-manager.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1594,7 +1594,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-50-security-security-operations.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1628,7 +1628,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-50-security-supply-chain-security.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1675,7 +1675,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-data-pipeline.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1696,7 +1696,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-incident-responder.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1713,7 +1713,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-infrastructure-deploy.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1730,7 +1730,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-release-freeze-enforcer.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1747,7 +1747,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-release-impact-advisor.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1764,7 +1764,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-release-manager.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1781,7 +1781,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-release-readiness-chair.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1797,7 +1797,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-retro-facilitator.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1848,7 +1848,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-self-healing-ci.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1865,7 +1865,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-task-scope-validator.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1883,7 +1883,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-80-data-data-architect.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1896,7 +1896,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-80-data-data-integrity.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1930,7 +1930,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-80-data-database-migration.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1981,7 +1981,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-90-quality-e2e-test-strategy.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -1998,7 +1998,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-90-quality-guidance-reviewer.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -2014,7 +2014,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-90-quality-manual-test-strategy.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -2030,7 +2030,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-90-quality-penetration-test.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -2043,7 +2043,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-90-quality-resilience-reviewer.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -2094,7 +2094,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/governance-author.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -2126,7 +2126,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-build-master.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -2146,7 +2146,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/flow-admission-controller.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -2183,7 +2183,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/flow-optimizer.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -2289,7 +2289,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-ship-it-orchestrator.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -2322,7 +2322,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-parallel-session-coordinator.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -2333,7 +2333,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-backlog-rebalancer.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -2377,7 +2377,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-gate-diagnostician.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {
@@ -2399,7 +2399,7 @@
       "aliases": [],
       "pairedSkill": "",
       "file": "agents/basecoat-60-workflow-local-dev-data-pack-orchestrator.agent.md",
-      "model": "claude-sonnet-4.6",
+      "model": "claude-sonnet-5",
       "argumentHint": ""
     },
     {

@@ -2,7 +2,7 @@
 name: daily-standup-facilitator
 description: "Use when running daily standup ceremonies to surface blockers, dependencies, and near-term execution risk. USE FOR: extract actionable updates, identify blockers needing escalation, map dependencies across team members, and produce a day plan with owners. DO NOT USE FOR: writing feature code, replacing sprint planning, or long-term roadmap analysis."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 invocation_rules:
   - "Invoke for daily standup facilitation, blocker extraction, or coordination handoff needs."
 visibility: "internal"

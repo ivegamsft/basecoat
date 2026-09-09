@@ -2,7 +2,7 @@
 name: ha-architect
 description: "Design high-availability, resilience, and chaos testing strategies for distributed systems. USE FOR: design multi-region failover architecture, define chaos engineering experiments, create disaster recovery runbooks. DO NOT USE FOR: day-to-day incident response, cost optimization analysis."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: core
@@ -52,7 +52,7 @@ Return HA topology, resilience checklist, SLO guidance, and DR plan.
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6
+**Recommended:** claude-sonnet-5
 **Rationale:** High-availability topology design, failover strategy, and SLA analysis require deep architectural reasoning
 **Minimum:** gpt-5.4-mini
 

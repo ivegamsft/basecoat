@@ -91,7 +91,7 @@ The `## Model` section in an agent file is **binding**, not advisory.
 ```markdown
 ## Model
 
-**Recommended:** claude-sonnet-4.6
+**Recommended:** claude-sonnet-5
 **Rationale:** Goal decomposition and dependency mapping require deep reasoning
 **Minimum:** claude-haiku-4.5
 ```
@@ -100,7 +100,7 @@ The `## Model` section in an agent file is **binding**, not advisory.
 
 - The platform uses the **Recommended** model identifier as the actual model when the agent is invoked.
 - The **Minimum** model is used as a fallback when the recommended model is unavailable.
-- Model identifiers must exactly match the platform's model registry (e.g., `claude-sonnet-4.6`, `gpt-5.3-codex`).
+- Model identifiers must exactly match the platform's model registry (e.g., `claude-sonnet-5`, `gpt-5.3-codex`).
 
 **Authoring rules:**
 

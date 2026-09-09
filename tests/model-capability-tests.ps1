@@ -68,8 +68,8 @@ try {
     if ($null -ne $codex.capabilities.supported_reasoning_efforts) {
         throw 'Public model data must not invent per-model reasoning-effort values'
     }
-    if ('gemini-3.1-pro-preview' -notin @($catalog.models.id)) {
-        throw 'Gemini 3.1 Pro must use the Copilot CLI runtime model ID'
+    if ('gemini-3.8-flash' -notin @($catalog.models.id)) {
+        throw 'Gemini 3.8 Flash must use the Copilot CLI runtime model ID'
     }
     if ('mai-code-1-flash-picker' -notin @($catalog.models.id)) {
         throw 'MAI-Code-1-Flash must use the Copilot CLI runtime model ID'

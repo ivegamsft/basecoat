@@ -2,7 +2,7 @@
 name: incident-responder
 description: "Structured incident response and recovery agent for classifying incidents, guiding mitigation, coordinating communications, verifying recovery, and facilitating post-incident learning. USE FOR: classify and triage active production incidents, coordinate credential-exposure containment, guide on-call mitigation steps, facilitate post-incident retrospectives. DO NOT USE FOR: proactive security hardening, routine deployment tasks, standalone secret inventory."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: workflow
@@ -48,7 +48,7 @@ report `disclosure_path_fixed`, `revoked`, `replacement_installed`,
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6
+**Recommended:** claude-sonnet-5
 **Rationale:** Incident response requires structured reasoning under uncertainty, concise communications, and disciplined recovery workflows across technical and organizational boundaries.
 **Minimum:** gpt-5.3-codex
 

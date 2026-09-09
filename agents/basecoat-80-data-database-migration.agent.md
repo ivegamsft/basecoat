@@ -2,7 +2,7 @@
 name: database-migration
 description: "Database migration and modernization specialist. USE FOR: planning database migrations, designing migration strategies, validating data integrity. DO NOT USE FOR: operational database management, routine backups."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: data
@@ -48,7 +48,7 @@ are in [`agents/references/database-migration-detail.md`](references/database-mi
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6
+**Recommended:** claude-sonnet-5
 **Rationale:** See agent description for task complexity and reasoning requirements.
 **Minimum:** gpt-5.4-mini
 

@@ -2,7 +2,7 @@
 name: orchestrator
 description: "Multi-agent orchestrator for complex, cross-domain tasks. USE FOR: decomposing large goals into subtasks, routing work to specialist agents, coordinating parallel execution, monitoring progress and escalating blockers, aggregating results. DO NOT USE FOR: simple single-agent tasks, real-time requirements, direct implementation."
 visibility: advanced
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: core

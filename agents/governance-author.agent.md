@@ -20,7 +20,7 @@ allowed-tools:
   - git
   - gh
 visibility: specialized
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 allowed_skills:
   - governance
   - governance-audit

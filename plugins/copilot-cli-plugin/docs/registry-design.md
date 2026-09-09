@@ -34,7 +34,7 @@ Agents are described in a single JSON file (`basecoat-registry.json`) that is ge
   "file": "agents/basecoat-10-core-solution-architect.agent.md",
   "keywords": ["architecture", "design", "c4", "adr", "system"],
   "capabilities": ["backend", "frontend", "infrastructure"],
-  "model": "claude-sonnet-4.6",
+  "model": "claude-sonnet-5",
   "maturity": "production",
   "category": "Architecture & Design"
 }

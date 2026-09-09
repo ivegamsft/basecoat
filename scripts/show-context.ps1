@@ -21,7 +21,7 @@
 
 .PARAMETER Model
     Model name for context window budget calculation.
-    Default: claude-sonnet-4.6
+    Default: claude-sonnet-5
 
 .PARAMETER Json
     Output structured JSON instead of terminal-formatted table.
@@ -43,7 +43,7 @@
 param(
     [string]$File,
     [string]$Agent,
-    [string]$Model = "claude-sonnet-4.6",
+    [string]$Model = "claude-sonnet-5",
     [switch]$Json,
     [switch]$Summary
 )
@@ -56,7 +56,7 @@ $ErrorActionPreference = "Stop"
 $ModelRegistry = @{
     "claude-opus-4.7"      = @{ ContextWindow = 200000; Tier = "Premium";  TokenRatio = 3.5 }
     "claude-opus-4.6"      = @{ ContextWindow = 200000; Tier = "Premium";  TokenRatio = 3.5 }
-    "claude-sonnet-4.6"    = @{ ContextWindow = 200000; Tier = "Standard"; TokenRatio = 3.5 }
+    "claude-sonnet-5"    = @{ ContextWindow = 200000; Tier = "Standard"; TokenRatio = 3.5 }
     "claude-sonnet-4.5"    = @{ ContextWindow = 200000; Tier = "Standard"; TokenRatio = 3.5 }
     "claude-haiku-4.5"     = @{ ContextWindow = 200000; Tier = "Fast";     TokenRatio = 3.5 }
     "gpt-5.5"              = @{ ContextWindow = 1000000; Tier = "Premium"; TokenRatio = 4.0 }

@@ -855,13 +855,13 @@ class ReviewVerdict(BaseModel):
 def author_agent(state: GuidanceState) -> GuidanceState:
     """Draft or re-draft guidance based on findings."""
     prompt = build_author_prompt(state)
-    draft = call_llm(model="claude-sonnet-4.6", prompt=prompt)
+    draft = call_llm(model="claude-sonnet-5", prompt=prompt)
     return {**state, "draft_content": draft, "iteration": state["iteration"] + 1}
 
 def reviewer_agent(state: GuidanceState) -> GuidanceState:
     """Validate draft and return structured verdict."""
     prompt = build_reviewer_prompt(state["draft_content"], state["asset_type"])
-    result = call_llm(model="claude-sonnet-4.6", prompt=prompt, response_model=ReviewVerdict)
+    result = call_llm(model="claude-sonnet-5", prompt=prompt, response_model=ReviewVerdict)
     return {**state, "review_verdict": result.verdict, "review_findings": result.findings}
 
 def should_continue(state: GuidanceState) -> str:

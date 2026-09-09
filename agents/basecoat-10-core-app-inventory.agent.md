@@ -2,7 +2,7 @@
 name: app-inventory
 description: "Scans legacy applications to discover dependencies, identify technology stacks, assess migration complexity, and generate architecture diagrams for portfolio analysis. USE FOR: scan legacy app tech stack, assess migration complexity, generate dependency inventory. DO NOT USE FOR: writing new code, live production monitoring."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 tools:
   - grep
   - glob
@@ -55,7 +55,7 @@ and prioritized recommendations. See the detail reference for full schemas.
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6 · **Minimum:** gpt-5.4-mini
+**Recommended:** claude-sonnet-5 · **Minimum:** gpt-5.4-mini
 
 ## Governance
 

@@ -31,7 +31,7 @@ model: claude-haiku-4.5
 name: api-designer
 description: test fixture
 visibility: specialized
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 ---
 '@ | Set-Content -Path (Join-Path $agentsDir 'basecoat-10-core-api-designer.agent.md') -Encoding UTF8
 
@@ -50,7 +50,7 @@ model: claude-sonnet-4.6
         throw 'Expected api-designer model to use the shared reasoning-tier default gpt-5.4'
     }
 
-    if ($apiDesigner -match '(?m)^model:\s*claude-sonnet-4.6\s*$') {
+    if ($apiDesigner -match '(?m)^model:\s*claude-sonnet-5\s*$') {
         throw 'Expected the tier updater to apply the shared reasoning policy'
     }
 
@@ -68,7 +68,7 @@ model: gpt-5.4-mini
 name: basecoat-10-core-orchestrator
 description: test fixture
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 ---
 '@ | Set-Content -Path (Join-Path $agentsDir 'basecoat-10-core-orchestrator.agent.md') -Encoding UTF8
 
@@ -83,8 +83,8 @@ model: claude-sonnet-4.6
     }
 
     $coreOrchestrator = Get-Content -Path (Join-Path $agentsDir 'basecoat-10-core-orchestrator.agent.md') -Raw
-    if ($coreOrchestrator -notmatch '(?m)^model:\s*claude-sonnet-4.6\s*$') {
-        throw 'Expected basecoat-10-core-orchestrator.agent.md to preserve its claude-sonnet-4.6 exact-model override and not collapse into the generic "orchestrator" fast-tier key'
+    if ($coreOrchestrator -notmatch '(?m)^model:\s*claude-sonnet-5\s*$') {
+        throw 'Expected basecoat-10-core-orchestrator.agent.md to preserve its claude-sonnet-5 exact-model override and not collapse into the generic "orchestrator" fast-tier key'
     }
 
     Write-Host 'Update agent metadata tests passed'

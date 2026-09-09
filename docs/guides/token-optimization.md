@@ -90,7 +90,7 @@ Every model has a finite context window. Treating it as unlimited leads to degra
 | Model | Context Window | Effective Limit | Notes |
 |-------|---------------|-----------------|-------|
 | claude-opus-4.6 | 200K tokens | ~160K usable | Reserve 20% for output generation |
-| claude-sonnet-4.6 | 200K tokens | ~160K usable | Same reservation applies |
+| claude-sonnet-5 | 200K tokens | ~160K usable | Same reservation applies |
 | gpt-5.3-codex | 200K tokens | ~160K usable | Code-optimized; large inputs degrade non-code reasoning |
 | claude-haiku-4.5 | 200K tokens | ~160K usable | Fast but quality drops sharply past ~80K input |
 | gpt-5.4-mini | 128K tokens | ~100K usable | Budget model; keep inputs under 60K for reliable output |
@@ -448,7 +448,7 @@ Test results summary:                              300 tokens
 ───────────────────────────────────────────────
 Total input:                                     4,700 tokens
 Output (review comments):                        1,200 tokens
-Model: claude-sonnet-4.6
+Model: claude-sonnet-5
 Estimated cost:                                   ~$0.02
 ```
 
@@ -462,7 +462,7 @@ Full CI log output:                                 8,000 tokens
 ───────────────────────────────────────────────
 Total input:                                      69,500 tokens
 Output (same review comments):                     1,200 tokens
-Model: claude-sonnet-4.6
+Model: claude-sonnet-5
 Estimated cost:                                    ~$0.23
 ```
 
@@ -1049,7 +1049,7 @@ Based on measured BaseCoat sprints:
 
 ### Routine Agents Downshifted to gpt-5.4-mini (Cost: ~$50–100/mo savings)
 
-Based on Sprint 31 empirical testing, the following agent categories are safe to downshift from `claude-sonnet-4.6` to `gpt-5.4-mini`:
+Based on Sprint 31 empirical testing, the following agent categories are safe to downshift from `claude-sonnet-5` to `gpt-5.4-mini`:
 
 | Category | Agents | Rationale | Cost Impact |
 |----------|--------|-----------|-------------|
@@ -1060,11 +1060,11 @@ Based on Sprint 31 empirical testing, the following agent categories are safe to
 
 **Model tier equivalents:**
 
-- `claude-sonnet-4.6` → reasoning/heavy tasks
+- `claude-sonnet-5` → reasoning/heavy tasks
 - `gpt-5.4-mini` → routine triage, audit, cleanup, log parsing
 - `claude-haiku-4.5` → already optimal for fast I/O (keep as-is)
 
-**Exception:** Agents performing novel analysis, security decisions, or architecture work should remain on `claude-sonnet-4.6` or `claude-opus`.
+**Exception:** Agents performing novel analysis, security decisions, or architecture work should remain on `claude-sonnet-5` or `claude-opus`.
 
 ---
 

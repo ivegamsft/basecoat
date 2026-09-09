@@ -88,7 +88,7 @@ First line ≤ 72 characters. Never include secrets or PII.
 ## Model and Token Guidance
 
 - **Premium** (`claude-opus-5`, `claude-opus-4.8`, `claude-opus-4.7`) — architecture, security, compliance
-- **Reasoning/Standard** (`claude-sonnet-4.6`, `gpt-5.4`) — code review, planning, research
+- **Reasoning/Standard** (`claude-sonnet-5`, `gpt-5.4`) — code review, planning, research
 - **Code** (`gpt-5.3-codex`) — implementation, refactoring, generation
 - **Fast** (`gpt-5.4-mini`, `gpt-5-mini`, `mai-code-1-flash-picker`) — scanning, formatting, simple automation
 

@@ -72,7 +72,7 @@ Approximate local equivalents for the cloud tiers in `docs/MODEL_OPTIMIZATION.md
 | Base Coat Tier | Cloud Model | Local Equivalent | Parameters | RAM Required |
 |---|---|---|---|---|
 | Premium | claude-opus-4.6 | Qwen3-Coder-30B, DeepSeek-R1-32B | 30-32B | 32GB+ |
-| Reasoning | claude-sonnet-4.6 | Qwen3-14B, Llama 3.3 70B (quantized) | 14-70B | 16-48GB |
+| Reasoning | claude-sonnet-5 | Qwen3-14B, Llama 3.3 70B (quantized) | 14-70B | 16-48GB |
 | Code | gpt-5.3-codex | Qwen3-Coder-30B, CodeLlama 34B | 30-34B | 32GB+ |
 | Fast | haiku/mini | Qwen3-8B, Phi-4, Gemma-3-4B | 4-8B | 8-16GB |
 

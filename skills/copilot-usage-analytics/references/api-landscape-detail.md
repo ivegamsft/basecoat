@@ -26,8 +26,8 @@ for the 28-day window.
 | Task Complexity | Recommended Model | Rationale |
 |---|---|---|
 | Simple lookup, label assignment, short summarization | `gpt-5.4-mini` / `gpt-5-mini` | Low reasoning demand; high token efficiency; omit `reasoning_effort` |
-| Code generation, refactoring, structured output | `claude-sonnet-4.6` / `gpt-5.4` | Balanced quality-to-cost ratio |
-| Architecture design, multi-file reasoning, threat modeling | `claude-sonnet-4.6` / `gpt-5.4` | High accuracy required; cost justified by complexity |
+| Code generation, refactoring, structured output | `claude-sonnet-5` / `gpt-5.4` | Balanced quality-to-cost ratio |
+| Architecture design, multi-file reasoning, threat modeling | `claude-sonnet-5` / `gpt-5.4` | High accuracy required; cost justified by complexity |
 | Creative or exploratory research | `claude-opus-4.7` | Reserve for tasks where quality difference is measurable |
 | Code-specific tasks (generation, review, migration) | `gpt-5.3-codex` | Specialized code model; optimized for code tasks |
 

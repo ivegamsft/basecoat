@@ -50,7 +50,7 @@ the exact comment template and the risk-level decision table.
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6 · **Minimum:** gpt-5.4-mini
+**Recommended:** claude-sonnet-5 · **Minimum:** gpt-5.4-mini
 
 ## Governance
 

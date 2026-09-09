@@ -2,7 +2,7 @@
 name: production-readiness
 description: "Production Readiness Agent for ensuring applications meet operational requirements before release; coordinates BCP/DRP, incident response, and safety analysis. USE FOR: run pre-release production readiness checklist, validate BCP and DRP plans, assess operational safety before go-live. DO NOT USE FOR: feature development, post-incident root cause analysis."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: core
@@ -55,7 +55,7 @@ Full checklists, YAML templates, success criteria, and references are in
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6 · **Minimum:** gpt-5.4-mini
+**Recommended:** claude-sonnet-5 · **Minimum:** gpt-5.4-mini
 
 ## Governance
 

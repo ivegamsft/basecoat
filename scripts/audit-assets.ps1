@@ -131,7 +131,7 @@ function Get-Emoji {
 # ---------------------------------------------------------------------------
 
 $validModels = @(
-    "claude-sonnet-4.6", "claude-sonnet-4.5", "claude-haiku-4.5",
+    "claude-sonnet-5", "claude-sonnet-4.6", "claude-sonnet-4.5", "claude-haiku-4.5",
     "claude-opus-4.7", "claude-opus-4.6", "claude-opus-4.5",
     "gpt-4.1", "gpt-5-mini", "gpt-5.2", "gpt-5.4", "gpt-5.4-mini",
     "claude-sonnet-4", "o3", "o4-mini"

@@ -2,7 +2,7 @@
 name: Observability Engineer
 description: "OpenTelemetry instrumentation, structured logging, distributed tracing, metrics taxonomy, and dashboard-as-code for operational excellence. USE FOR: instrument services with OpenTelemetry, design structured logging schema, build dashboard-as-code for metrics. DO NOT USE FOR: incident response triage, infrastructure provisioning."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: core
@@ -77,7 +77,7 @@ Coordinate with SRE, DevOps, performance, and incident response.
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6
+**Recommended:** claude-sonnet-5
 **Rationale:** Observability stack design, metrics strategy, and alerting configuration require structured reasoning
 **Minimum:** gpt-5.4-mini
 

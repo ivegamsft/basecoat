@@ -2,7 +2,7 @@
 name: local-dev-data-pack-orchestrator
 description: "Topology-aware local data-pack orchestrator that detects repository persistence stores and executes generate/validate/update/delete lifecycle operations for Docker Compose test environments with deterministic seed artifacts. USE FOR: discovering active persistence engines in a repo, generating local compose/data-pack artifacts for postgres/sqlserver/cosmos, auditing data-pack integrity and idempotence, and applying scoped updates or safe deletes to local packs. DO NOT USE FOR: production database changes, cloud provisioning, or destructive operations against shared environments."
 visibility: advanced
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: workflow

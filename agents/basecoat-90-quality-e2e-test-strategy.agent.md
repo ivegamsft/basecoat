@@ -2,7 +2,7 @@
 name: e2e-test-strategy
 description: "E2E Test Strategy Agent for end-to-end testing orchestration, critical path identification, flakiness prevention, and cross-browser coverage. Covers Playwright, Cypress, Selenium patterns and integration with CI/CD pipelines. USE FOR: design E2E suite, map critical user paths, fix flaky tests. DO NOT USE FOR: unit testing, contract testing."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: quality
@@ -58,7 +58,7 @@ Use repository testing guidance and any existing E2E skill assets.
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6
+**Recommended:** claude-sonnet-5
 **Rationale:** See agent description for task complexity and reasoning requirements.
 **Minimum:** gpt-5.4-mini
 

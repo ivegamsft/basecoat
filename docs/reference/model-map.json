@@ -1,17 +1,17 @@
 {
-  "generated": "2026-09-01T00:44:32Z",
+  "generated": "2026-09-09T15:32:43Z",
   "source": "agents/*.agent.md",
   "models": [
     {
-      "canonical": "claude-sonnet-4.6",
+      "canonical": "claude-sonnet-5",
       "count": 79,
       "aliases": [
-        "claude-sonnet-4.6"
+        "claude-sonnet-5"
       ]
     },
     {
       "canonical": "gpt-5.3-codex",
-      "count": 26,
+      "count": 27,
       "aliases": [
         "gpt-5.3-codex"
       ]

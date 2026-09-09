@@ -73,7 +73,7 @@ plus a `## Model` section with rationale and minimum viable model. Token economi
 instructions guide budget-aware model selection so organizations can optimize cost
 without sacrificing quality.
 
-**Model distribution (v2.1.0):** claude-sonnet-4.6 (28), gpt-5.3-codex (16),
+**Model distribution (v2.1.0):** claude-sonnet-5 (28), gpt-5.3-codex (16),
 claude-haiku-4.5 (3), claude-sonnet-4-5 (2), claude-sonnet-4 (1).
 
 ### 8. Adoption Measurement and Feedback Loops

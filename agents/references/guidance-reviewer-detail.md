@@ -31,7 +31,7 @@ Supporting detail for [`agents/basecoat-90-quality-guidance-reviewer.agent.md`](
 ## BaseCoat Convention Checks
 
 - `##` headings only — no H1 except the file title, no H3+ without an H2 parent
-- `model:` must be a supported value (claude-sonnet-4.6, gpt-5.3-codex, etc.)
+- `model:` must be a supported value (claude-sonnet-5, gpt-5.3-codex, etc.)
 - `metadata.maturity` must be one of: `alpha`, `experimental`, `beta`, `production` (prefer
   `experimental` for new assets — `alpha` is accepted for existing assets not yet migrated)
 - `allowed_skills` entries must reference existing `skills/<name>/` directories
@@ -71,7 +71,7 @@ Supporting detail for [`agents/basecoat-90-quality-guidance-reviewer.agent.md`](
 
 ### Recommended Actions (WARN items)
 
-1. Update `model` to `claude-sonnet-4.6` or another supported value.
+1. Update `model` to `claude-sonnet-5` or another supported value.
 
 ### Verdict Summary
 

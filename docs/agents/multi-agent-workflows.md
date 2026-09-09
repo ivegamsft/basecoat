@@ -334,7 +334,7 @@ When present, `retry_context` should include `attempt`, `failure_class`,
       ],
       "allowed_tools": ["view", "rg", "apply_patch"],
       "allowed_skills": [],
-      "model": "claude-sonnet-4.6"
+      "model": "claude-sonnet-5"
     },
     "output_contract": {
       "format": "response_envelope_v1",

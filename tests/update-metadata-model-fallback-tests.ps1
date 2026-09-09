@@ -49,7 +49,7 @@ try {
 name: alpha
 description: alpha fixture
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 ---
 '@ | Set-Content -Path (Join-Path $agentsDir $alphaFileName) -Encoding UTF8
 
@@ -87,8 +87,8 @@ visibility: basic
 
     $alpha = $updatedMetadata.agents | Where-Object { $_.name -eq $alphaName }
     if (-not $alpha) { throw 'Expected alpha agent entry not found' }
-    if ($alpha.model -ne 'claude-sonnet-4.6') {
-        throw "Expected existing metadata model to synchronize to claude-sonnet-4.6, got '$($alpha.model)'"
+    if ($alpha.model -ne 'claude-sonnet-5') {
+        throw "Expected existing metadata model to synchronize to claude-sonnet-5, got '$($alpha.model)'"
     }
     if ('curated' -notin @($alpha.keywords)) {
         throw 'Existing curated metadata fields must be preserved while synchronizing the model'

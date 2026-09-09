@@ -1,6 +1,6 @@
 ---
 description: "Use when you want an implementation plan before editing code. Helps break down a feature or system change into options, tradeoffs, and execution steps."
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 tools: ["changes", "codebase", "githubRepo"]
 ---
 

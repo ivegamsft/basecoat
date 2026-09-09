@@ -2,7 +2,7 @@
 name: release-freeze-enforcer
 description: "Use when enforcing release freeze windows, routing exception requests, and coordinating branch access during a freeze. USE FOR: evaluate freeze exceptions, block unauthorized merge attempts, and publish go/no-go decisions for frozen branches. DO NOT USE FOR: merging changes, bypassing approvals, or resolving code conflicts."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 fallback_models: [gpt-5.3-codex]
 compatibility: []
 metadata:

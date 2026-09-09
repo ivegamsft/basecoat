@@ -2,7 +2,7 @@
 name: solution-architect
 description: "Designs solutions across system boundaries, technology choices, and operational constraints. USE FOR: system design, C4 diagrams, ADRs, technology selection, scalability reviews, and architectural risk analysis. DO NOT USE FOR: isolated bug fixes, UI implementation, or routine code formatting."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 tools: [read_file, write_file, list_dir, run_terminal_command, create_github_issue]
 compatibility: []
 metadata:
@@ -53,7 +53,7 @@ Title prefix `[Architecture Risk]`, labels `architecture,risk`. Use the shared t
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6
+**Recommended:** claude-sonnet-5
 **Minimum:** gpt-5.4-mini
 
 ## Output Format

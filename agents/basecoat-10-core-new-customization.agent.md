@@ -2,7 +2,7 @@
 name: new-customization
 description: "Creates or updates customization assets and validates their frontmatter and placement. USE FOR: selecting instructions, authoring skills, creating prompts, defining agents, and validating customization metadata. DO NOT USE FOR: application feature coding, CI/CD infrastructure changes, or runtime incident remediation."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: core
@@ -39,7 +39,7 @@ Purpose: turn a broad customization request into the right asset with the right 
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6
+**Recommended:** claude-sonnet-5
 **Rationale:** Choosing the right customization primitive requires structured reasoning about scope and reuse
 **Minimum:** gpt-5.3-codex
 

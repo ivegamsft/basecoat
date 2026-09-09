@@ -2,7 +2,7 @@
 name: parallel-session-coordinator
 description: "Coordinate multiple concurrent Copilot worktree sessions executing independent issues in parallel, with merge serialization and conflict prevention. USE FOR: parallel feature sprints, multi-worktree execution, serialized merge pacing, merge-conflict prevention. DO NOT USE FOR: single-session work, direct code implementation, bypassing required CI checks."
 visibility: advanced
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: workflow

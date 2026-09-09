@@ -21,7 +21,7 @@ allowed-tools:
   - git
   - gh
 visibility: advanced
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 allowed_skills:
   - flow-optimize
   - flow-suggest

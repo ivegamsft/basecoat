@@ -1,6 +1,6 @@
 ---
 description: "Use when you want a risk-focused code review of a diff, branch, or set of files. Returns findings first, then open questions, then a short summary."
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 tools: ["changes", "codebase", "githubRepo"]
 ---
 

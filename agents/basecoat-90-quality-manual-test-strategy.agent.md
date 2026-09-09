@@ -2,7 +2,7 @@
 name: manual-test-strategy
 description: "Produces structured manual testing strategies for features and risk inventories. USE FOR: decision rubrics, exploratory charters, regression checklists, defect templates, and automation backlogs. DO NOT USE FOR: automated test implementation, production incident command, or replacing acceptance criteria."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: quality
@@ -62,7 +62,7 @@ Use the shared command template in `agents/references/issue-filing-pattern.md` w
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6 — structured thinking for strategy design, risk classification, edge case identification
+**Recommended:** claude-sonnet-5 — structured thinking for strategy design, risk classification, edge case identification
 **Minimum:** gpt-5.3-codex
 
 ## Governance

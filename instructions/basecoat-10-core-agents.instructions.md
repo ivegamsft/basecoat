@@ -107,7 +107,7 @@ Choose capabilities based on the agent's workload first, then pin only when just
 When pinning is required, add this block explicitly:
 
 ```yaml
-pinned_model: claude-sonnet-4.6
+pinned_model: claude-sonnet-5
 pin_reason: "Compatibility with an established evaluation baseline."
 ```
 

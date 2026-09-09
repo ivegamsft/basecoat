@@ -83,7 +83,7 @@ model_policy:
   fallback: true
   preferred_families: [claude-sonnet]
   excluded_tiers: [low]
-pinned_model: claude-sonnet-4.6
+pinned_model: claude-sonnet-5
 pin_reason: "Regulated audit baselines require reproducible output against approved evaluation fixtures."
 ---
 ```

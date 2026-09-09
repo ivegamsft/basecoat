@@ -68,7 +68,7 @@ Rough relative cost per million tokens:
 | Tier | Example Model | Relative Cost |
 |---|---|---|
 | Premium | claude-opus-4.7 | 5.0x |
-| Reasoning | claude-sonnet-4.6 | 1.0x (baseline) |
+| Reasoning | claude-sonnet-5 | 1.0x (baseline) |
 | Code | gpt-5.3-codex | ~1.0x |
 | Fast | claude-haiku-4.5 | 0.1x |
 | Fast | gpt-5.4-mini | 0.08x |

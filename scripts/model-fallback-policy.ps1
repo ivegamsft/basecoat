@@ -25,8 +25,10 @@ else {
 $script:FrontmatterModelAliases = @{
     "gpt-5-4-mini" = "gpt-5.4-mini"
     "gpt-5-3-codex" = "gpt-5.3-codex"
-    "claude-sonnet-4" = "claude-sonnet-4.6"
-    "claude-sonnet-4-5" = "claude-sonnet-4.5"
+    "claude-sonnet-4" = "claude-sonnet-5"
+    "claude-sonnet-4.6" = "claude-sonnet-5"
+    "claude-sonnet-4-5" = "claude-sonnet-5"
+    "claude-sonnet-4.5" = "claude-sonnet-5"
 }
 
 $script:TierDefaultFrontmatterModels = @{

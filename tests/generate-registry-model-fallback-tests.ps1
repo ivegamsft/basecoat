@@ -37,7 +37,7 @@ model: gpt-5.4-mini
 ---
 name: mapped-model-agent
 description: "mapped model"
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 ---
 # Mapped
 '@ | Set-Content -Path (Join-Path $agentsPath 'basecoat-10-core-mapped-model-agent.agent.md') -NoNewline
@@ -55,7 +55,7 @@ model: some-private-model
 
     $registry = Get-Content -Path $outputPath -Raw | ConvertFrom-Json -AsHashtable
     Assert-Equal -Actual $registry.agents['allowed-model-agent'].model -Expected 'gpt-5.4-mini' -Message 'Allowed model should remain unchanged'
-    Assert-Equal -Actual $registry.agents['mapped-model-agent'].model -Expected 'claude-sonnet-4.6' -Message 'CLI-supported model should remain unchanged'
+    Assert-Equal -Actual $registry.agents['mapped-model-agent'].model -Expected 'claude-sonnet-5' -Message 'CLI-supported model should remain unchanged'
     Assert-Equal -Actual $registry.agents['unknown-model-agent'].model -Expected 'gpt-5.4-mini' -Message 'Unknown model should resolve to default fallback'
 
     Write-Host 'generate-registry model fallback tests passed'

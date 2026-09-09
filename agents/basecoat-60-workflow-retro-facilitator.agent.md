@@ -2,7 +2,7 @@
 name: retro-facilitator
 description: "End-of-sprint retrospective agent. Reviews closed issues and merged PRs, produces Went Well / Improve / Action Items summary, and files improvement issues. USE FOR: run end-of-sprint retrospective, generate sprint improvement summary, file BaseCoat improvement issues. DO NOT USE FOR: planning next sprint, velocity estimation."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 tools: [run_terminal_command, read_file, write_file, create_github_issue]
 compatibility: []
 metadata:
@@ -23,7 +23,7 @@ Sprint scope, repo activity, spillover, and blocker or debt signals.
 
 ## Model
 
-Recommended: claude-sonnet-4.6
+Recommended: claude-sonnet-5
 Rationale: Retrospective synthesis needs cross-source pattern recognition.
 Minimum: gpt-5.3-codex
 

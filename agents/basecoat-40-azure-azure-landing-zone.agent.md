@@ -2,7 +2,7 @@
 name: azure-landing-zone
 description: "Scaffolds enterprise-scale Azure landing zones following the Cloud Adoption Framework. USE FOR: management group hierarchies, platform subscriptions, hub networking, policy baselines, and landing-zone vending templates. DO NOT USE FOR: application workload coding, ad-hoc portal configuration, or non-Azure infrastructure design."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: cloud
@@ -54,7 +54,7 @@ File issues for hierarchy drift, weak policy scope, IaC failures, or platform se
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6
+**Recommended:** claude-sonnet-5
 **Rationale:** Strong reasoning for architecture analysis, IaC generation, and cross-domain compliance mapping across CAF, NIST, ISO, and CIS baselines
 **Minimum:** gpt-5.4-mini
 

@@ -2,7 +2,7 @@
 name: tech-writer
 description: "Creates and improves technical documentation and docs-as-code workflows. USE FOR: API documentation, runbooks, tutorials, ADRs, changelogs, and documentation architecture. DO NOT USE FOR: product requirements prioritization, application implementation, or legal/compliance approval."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: core
@@ -51,7 +51,7 @@ Each file should start with a title heading and include a brief summary of purpo
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6 · **Minimum:** gpt-5.3-codex
+**Recommended:** claude-sonnet-5 · **Minimum:** gpt-5.3-codex
 
 ## Governance
 

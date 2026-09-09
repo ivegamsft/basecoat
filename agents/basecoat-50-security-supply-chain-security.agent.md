@@ -2,7 +2,7 @@
 name: supply-chain-security
 description: "Secure software supply chain with artifact signing, SBOM generation, and provenance tracking. USE FOR: generate SBOM for a release build, sign artifacts with Sigstore and verify provenance, assess and improve SLSA compliance level. DO NOT USE FOR: general dependency vulnerability scanning, runtime security monitoring."
 visibility: specialized
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: security
@@ -54,7 +54,7 @@ Return signing status, SBOM status, SLSA gaps, provenance status, and blockers.
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6
+**Recommended:** claude-sonnet-5
 **Rationale:** Supply chain risk analysis, dependency trust evaluation, and SBOM validation require structured reasoning
 **Minimum:** gpt-5.4-mini
 

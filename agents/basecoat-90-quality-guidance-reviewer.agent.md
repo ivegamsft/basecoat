@@ -1,6 +1,6 @@
 ---
 name: guidance-reviewer
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 description: "USE FOR: validating a BaseCoat guidance draft before committing, checking lint rules on agent/skill/instruction/prompt files, auditing frontmatter schema compliance, verifying BaseCoat conventions, returning pass/fail verdict with actionable fixes. DO NOT USE FOR: writing new guidance assets, scanning repos for instruction coverage gaps, general code review unrelated to BaseCoat assets."
 visibility: basic
 model_policy:

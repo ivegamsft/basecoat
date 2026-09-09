@@ -1,6 +1,6 @@
 ---
 description: "Prepare a safe, environment-specific GitHub OAuth App configuration for a downstream BaseCoat Portal without exposing credentials or changing settings before approval."
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 tools: ["codebase", "terminal", "githubRepo"]
 ---
 

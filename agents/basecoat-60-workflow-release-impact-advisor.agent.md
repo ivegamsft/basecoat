@@ -2,7 +2,7 @@
 name: release-impact-advisor
 description: "Assesses release readiness, change impacts, blast radius, rollback planning, and safe deployment strategies with canary deployments, feature flags, and changelog generation. USE FOR: assess release blast radius, plan rollback strategy, recommend deployment approach. DO NOT USE FOR: executing deployments, live incident response."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: workflow
@@ -60,7 +60,7 @@ Return readiness score, blast radius, key risks, rollout, rollback, and stakehol
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6
+**Recommended:** claude-sonnet-5
 **Rationale:** Blast radius analysis, risk scoring, and deployment strategy selection require strong reasoning
 **Minimum:** gpt-5.4-mini
 

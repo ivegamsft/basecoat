@@ -29,7 +29,7 @@ Agent frontmatter currently resolves to four canonical models:
 
 | Model | Assigned agents | Share |
 |---|---:|---:|
-| `claude-sonnet-4.6` | 79 | 60.8% |
+| `claude-sonnet-5` | 79 | 60.8% |
 | `gpt-5.3-codex` | 26 | 20.0% |
 | `gpt-5.4-mini` | 23 | 17.7% |
 | `gpt-5.4` | 2 | 1.5% |

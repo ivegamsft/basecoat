@@ -15,12 +15,12 @@ Choosing the right LLM for each agent role is a cost-performance tradeoff. Defau
 |------|------------------|------|-----------|
 | architect | claude-opus-4.7 | Premium | High-stakes design decisions requiring deep, multi-step reasoning |
 | security_analyst | claude-opus-4.7 | Premium | Security analysis requires thorough reasoning and cannot afford shortcuts |
-| reviewer / code-review | claude-sonnet-4.6 | Reasoning | Nuanced code analysis but not premium-tier complexity |
-| researcher | claude-sonnet-4.6 | Reasoning | Analysis and synthesis require good reasoning depth |
-| qa / manual-test-strategy / exploratory-charter / strategy-to-automation | claude-sonnet-4.6 | Reasoning | Structured thinking, edge case identification, test design |
+| reviewer / code-review | claude-sonnet-5 | Reasoning | Nuanced code analysis but not premium-tier complexity |
+| researcher | claude-sonnet-5 | Reasoning | Analysis and synthesis require good reasoning depth |
+| qa / manual-test-strategy / exploratory-charter / strategy-to-automation | claude-sonnet-5 | Reasoning | Structured thinking, edge case identification, test design |
 | backend-dev / frontend-dev / middleware-dev / data-tier / code | gpt-5.3-codex | Code | Code-optimized model tuned for generation, refactoring, and debugging |
-| sprint-planner / release-manager / project-onboarding | claude-sonnet-4.6 | Reasoning | Planning and decomposition need good reasoning, not raw code output |
-| new-customization | claude-sonnet-4.6 | Reasoning | Deciding between customization types requires structured reasoning |
+| sprint-planner / release-manager / project-onboarding | claude-sonnet-5 | Reasoning | Planning and decomposition need good reasoning, not raw code output |
+| new-customization | claude-sonnet-5 | Reasoning | Deciding between customization types requires structured reasoning |
 | merge-coordinator / rollout-basecoat / config-auditor | gpt-5.3-codex | Code | Reliable automation that may inherit a runtime reasoning effort |
 | agent-watchdog / sprint-demo | gpt-5.4-mini | Fast | Simple automation tasks with minimal reasoning requirements |
 
@@ -35,7 +35,7 @@ Use for tasks where a mistake is expensive or irreversible: architecture decisio
 **Cost:** ~5× Sonnet. Use deliberately. Apply a higher `reasoning_effort` only
 when the authenticated runtime reports that effort for the selected model.
 
-### Reasoning — `claude-sonnet-4.6`
+### Reasoning — `claude-sonnet-5`
 
 The workhorse tier. Use for tasks that require genuine analysis — code review, test strategy, planning, research — but where the output will be reviewed by a human or validated by CI before it matters. Good balance of quality and cost.
 
@@ -63,12 +63,12 @@ Override the recommended model when:
 
 | Situation | Override Direction | Example |
 |-----------|-------------------|---------|
-| Task is unusually complex for the role | ↑ Upgrade one tier | A backend-dev task involving a complex distributed transaction → claude-sonnet-4.6 |
+| Task is unusually complex for the role | ↑ Upgrade one tier | A backend-dev task involving a complex distributed transaction → claude-sonnet-5 |
 | Task is unusually simple for the role | ↓ Downgrade one tier | A code-review of a single-line typo fix → gpt-5.4-mini with omitted effort |
 | Output will not be human-reviewed | ↑ Upgrade one tier | Automated security scan running unattended → claude-opus-4.7 |
 | Output will be heavily reviewed | ↓ Downgrade one tier | Draft PR description that a human will rewrite anyway → gpt-5.4-mini with omitted effort |
 | Budget is constrained | ↓ Use minimum viable tier | See the Minimum column in each agent's `## Model` section |
-| Task requires cross-domain reasoning | ↑ Upgrade one tier | A backend-dev task that also requires security analysis → claude-sonnet-4.6 |
+| Task requires cross-domain reasoning | ↑ Upgrade one tier | A backend-dev task that also requires security analysis → claude-sonnet-5 |
 
 ---
 
@@ -105,7 +105,7 @@ Rough relative cost per million tokens (input + output blended):
 | Model | Relative Cost | Best For |
 |-------|--------------|----------|
 | claude-opus-4.7 | 5.0× | Architecture, security, high-stakes reasoning |
-| claude-sonnet-4.6 | 1.0× (baseline) | Analysis, review, planning, test strategy |
+| claude-sonnet-5 | 1.0× (baseline) | Analysis, review, planning, test strategy |
 | gpt-5.3-codex | ~1.0× | Code generation, refactoring, debugging |
 | gpt-5.4-mini | 0.08× | Simple automation, monitoring, formatting |
 | gpt-5-mini | 0.1× | Routine automation, scanning, simple tasks |
@@ -145,7 +145,7 @@ Each agent file includes a `## Model` section:
 
 ```markdown
 ## Model
-**Recommended:** claude-sonnet-4.6
+**Recommended:** claude-sonnet-5
 **Rationale:** Analysis tasks need good reasoning depth
 **Minimum:** gpt-5.3-codex
 ```
@@ -174,7 +174,7 @@ Set model selection via environment variables:
 ```yaml
 env:
   AGENT_MODEL_BACKEND: gpt-5.3-codex
-  AGENT_MODEL_REVIEW: claude-sonnet-4.6
+  AGENT_MODEL_REVIEW: claude-sonnet-5
   AGENT_MODEL_SECURITY: claude-opus-4.6
   AGENT_MODEL_DEFAULT: gpt-5.3-codex
 ```
@@ -197,7 +197,7 @@ Choose the tier based on the cognitive demand of the agent's primary task:
 | Cognitive Demand | Tier | Model |
 |-----------------|------|-------|
 | Deep multi-step reasoning, high-stakes decisions | Premium | claude-opus-4.6 |
-| Analysis, structured thinking, planning | Reasoning | claude-sonnet-4.6 |
+| Analysis, structured thinking, planning | Reasoning | claude-sonnet-5 |
 | Code generation, refactoring, implementation | Code | gpt-5.3-codex |
 | Routine steps, scanning, simple automation | Fast | gpt-5.4-mini with omitted `reasoning_effort` |
 
@@ -231,7 +231,7 @@ feels thin — correct vocabulary, missing substance — it is likely under-tier
 
 ### Sprint 19: Haiku for Scanning, Not for Judgment
 
-**What happened:** A `config-auditor` agent using `claude-sonnet-4.6` was processing
+**What happened:** A `config-auditor` agent using `claude-sonnet-5` was processing
 100+ config files per sprint. The cost was material. Switching to `claude-haiku-4.5`
 produced identical results for the scan phase (does this value match this pattern?)
 but failed on the judgment phase (is this config safe given the deployment context?).

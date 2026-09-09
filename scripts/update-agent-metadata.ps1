@@ -51,8 +51,8 @@ $tierByAgent = @{
 # Agents that require a specific model not covered by tier defaults.
 # Values are resolved through Resolve-FrontmatterModel (aliases apply).
 $exactModelByAgent = @{
-    "parallel-session-coordinator" = "claude-sonnet-4.6"
-    "basecoat-10-core-orchestrator" = "claude-sonnet-4.6"
+    "parallel-session-coordinator" = "claude-sonnet-5"
+    "basecoat-10-core-orchestrator" = "claude-sonnet-5"
 }
 
 function Get-AgentNameFromFile {

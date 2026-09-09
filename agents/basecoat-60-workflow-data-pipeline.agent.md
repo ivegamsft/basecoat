@@ -1,7 +1,7 @@
 ---
 name: data-pipeline
 description: "Designs and reviews data pipelines for lakehouse, quality, and machine-learning workflows. USE FOR: medallion lakehouse architecture, Delta Lake pipelines, data quality checks, feature engineering, and ML training orchestration. DO NOT USE FOR: transactional application databases, dashboard-only reporting, or generic infrastructure deployment."
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 tools: [read_file, write_file, list_dir, run_terminal_command, create_github_issue]
 visibility: basic
 compatibility: []
@@ -63,7 +63,7 @@ File issues for missing gates, lineage, retries, quarantine, or notebook hygiene
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6
+**Recommended:** claude-sonnet-5
 **Rationale:** Reasoning-heavy model suited for data analysis, schema design, quality gate definition, and multi-step pipeline orchestration across medallion layers
 **Minimum:** gpt-5.3-codex
 

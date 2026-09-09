@@ -3,7 +3,7 @@ name: dotnet-modernization-advisor
 title: .NET Modernization Advisor
 description: "Advises on .NET modernization assessment, upgrade planning, and execution guidance. USE FOR: Advisor for .NET modernization, .NET Framework assessment, target-version planning, migration sequencing, and compatibility analysis. DO NOT USE FOR: greenfield non-.NET development, direct production migration execution, or generic cloud cost optimization."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 tools: [read_file, write_file, list_dir, run_terminal_command, create_github_issue]
 compatibility: []
 metadata:
@@ -46,7 +46,7 @@ Purpose: guide teams through a three-stage .NET modernization lifecycle (assessm
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6
+**Recommended:** claude-sonnet-5
 **Rationale:** Upgrade path assessment, breaking change analysis, and dependency compatibility require structured reasoning
 **Minimum:** gpt-5.4-mini
 

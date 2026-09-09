@@ -23,7 +23,7 @@ try {
 ---
 name: one
 description: one
-model: Claude Sonnet 4.6
+model: Claude Sonnet 5
 ---
 '@ | Set-Content -Path (Join-Path $agentsDir 'one.agent.md') -Encoding UTF8
 
@@ -31,7 +31,7 @@ model: Claude Sonnet 4.6
 ---
 name: two
 description: two
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 ---
 '@ | Set-Content -Path (Join-Path $agentsDir 'two.agent.md') -Encoding UTF8
 
@@ -83,14 +83,14 @@ description: five
     if ($fallback.count -ne 3) { throw "Expected count 3 for gpt-5.4-mini, got $($fallback.count)" }
     if (-not ($fallback.aliases -contains 'gpt-5.4-mini')) { throw 'Expected alias gpt-5.4-mini not found for missing-model fallback' }
     if ($fallback.aliases -contains 'internal-preview-model') { throw 'Unsupported model alias should not be persisted in model inventory output' }
-    if ($fallback.aliases -contains 'Claude Sonnet 4.6') {
+    if ($fallback.aliases -contains 'Claude Sonnet 5') {
         throw 'Unsupported display-name alias should not be persisted in model inventory output'
     }
 
-    $sonnet = $map.models | Where-Object { $_.canonical -eq 'claude-sonnet-4.6' }
-    if (-not $sonnet) { throw 'Expected supported canonical key claude-sonnet-4.6 not found' }
-    if ($sonnet.count -ne 1) { throw "Expected count 1 for claude-sonnet-4.6, got $($sonnet.count)" }
-    if (-not ($sonnet.aliases -contains 'claude-sonnet-4.6')) { throw 'Expected supported Sonnet alias not found' }
+    $sonnet = $map.models | Where-Object { $_.canonical -eq 'claude-sonnet-5' }
+    if (-not $sonnet) { throw 'Expected supported canonical key claude-sonnet-5 not found' }
+    if ($sonnet.count -ne 1) { throw "Expected count 1 for claude-sonnet-5, got $($sonnet.count)" }
+    if (-not ($sonnet.aliases -contains 'claude-sonnet-5')) { throw 'Expected supported Sonnet alias not found' }
 
     Write-Host 'Model inventory tests passed'
 }

@@ -2,7 +2,7 @@
 name: contract-testing
 description: "Contract Testing Agent for consumer-driven contracts, E2E testing strategy, and mutation testing for distributed systems. USE FOR: write Pact consumer-driven contracts, design service integration tests, set up contract verification in CI. DO NOT USE FOR: load testing, manual QA workflows."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: core
@@ -63,7 +63,7 @@ Return consumer-provider matrix, failing interactions, quality gaps, and merge o
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6
+**Recommended:** claude-sonnet-5
 **Rationale:** See agent description for task complexity and reasoning requirements.
 **Minimum:** gpt-5.4-mini
 

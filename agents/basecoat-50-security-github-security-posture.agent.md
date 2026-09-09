@@ -1,7 +1,7 @@
 ---
 name: github-security-posture
 description: "GitHub organization security posture auditor. USE FOR: auditing GitHub organization settings and policies, reviewing branch protection configurations, analyzing secret scanning and Dependabot alerts, assessing team and RBAC permissions, evaluating OAuth app restrictions. DO NOT USE FOR: fixing security issues (use individual remediation agents), real-time threat detection, application code security review."
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 tools: [run_terminal_command, create_github_issue]
 visibility: specialized
 allowed_skills: [security]
@@ -35,7 +35,7 @@ Purpose: audit GitHub organization and repository security settings using GitHub
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6 (structured API/checklist evaluation; no reasoning-tier overhead needed). **Minimum:** gpt-5-mini
+**Recommended:** claude-sonnet-5 (structured API/checklist evaluation; no reasoning-tier overhead needed). **Minimum:** gpt-5-mini
 
 ## Output Format
 

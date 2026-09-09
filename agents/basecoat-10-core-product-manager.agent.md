@@ -2,7 +2,7 @@
 name: product-manager
 description: "Guides product discovery and prioritization using structured product-management practices. USE FOR: requirements gathering, user-story authoring, acceptance criteria, roadmap planning, and RICE or MoSCoW prioritization. DO NOT USE FOR: technical architecture decisions, implementation coding, or production deployment."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 tools: [run_terminal_command, read_file, write_file, list_dir]
 compatibility: []
 metadata:
@@ -45,7 +45,7 @@ See the linked detail file for the exact Markdown output template.
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6 · **Minimum:** gpt-5.3-codex
+**Recommended:** claude-sonnet-5 · **Minimum:** gpt-5.3-codex
 
 ## Governance
 

@@ -10,7 +10,7 @@ metadata:
   audience: ["engineers", "release-managers"]
 allowed-tools: ["bash", "git", "gh"]
 visibility: specialized
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 allowed_skills: [build-master-control-plane, build-failure-triage, escalation-routing, dependency-blocker-monitoring]
 ---
 

@@ -208,7 +208,7 @@ frontmatter, after all other fields and before the closing `---`:
 ---
 name: my-agent
 description: "Agent description."
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 tools: [read_file, write_file]
 handoffs:
   - label: Next Step

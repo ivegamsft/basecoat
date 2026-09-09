@@ -1,6 +1,6 @@
 ---
 description: "Integrate BaseCoat into a repository and run a baseline audit. Invoke with a GitHub repo URL or run from inside the target repo. Works in GitHub Copilot CLI, VS Code Copilot Chat, and any editor with Copilot Chat support."
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 tools: ["githubRepo", "codebase", "web", "changes"]
 ---
 

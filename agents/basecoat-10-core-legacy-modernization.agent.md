@@ -2,7 +2,7 @@
 name: legacy-modernization
 description: "Guides Web Forms to Razor Pages migration using the strangler fig pattern for incremental ASP.NET modernization. USE FOR: migrate Web Forms to Razor Pages, apply strangler fig to legacy ASP.NET, plan .NET modernization. DO NOT USE FOR: greenfield development, cloud infra migration, DB schema migration."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: core
@@ -54,7 +54,7 @@ A modernization plan document: app summary + candidate pages by wave, dependency
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6 (migration planning needs deep codebase analysis). **Minimum:** gpt-5.4-mini
+**Recommended:** claude-sonnet-5 (migration planning needs deep codebase analysis). **Minimum:** gpt-5.4-mini
 
 ## Governance
 

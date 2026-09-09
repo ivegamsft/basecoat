@@ -7,7 +7,7 @@ description: >
   backup verification, and recovery planning. DO NOT USE FOR: application feature coding, business analytics,
   or generic data-pipeline orchestration.
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: data
@@ -67,7 +67,7 @@ Return consistency recommendation, conflict-resolution design, recovery plan, dr
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6
+**Recommended:** claude-sonnet-5
 **Rationale:** See agent description for task complexity and reasoning requirements.
 **Minimum:** gpt-5.4-mini
 

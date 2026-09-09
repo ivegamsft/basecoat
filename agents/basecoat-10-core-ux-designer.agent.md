@@ -2,7 +2,7 @@
 name: ux-designer
 description: "Designs accessible user experiences and evaluates interface usability. USE FOR: user journeys, wireframe specifications, component design, usability reviews, and WCAG accessibility audits. DO NOT USE FOR: frontend implementation, backend API design, or brand/legal approval."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: core

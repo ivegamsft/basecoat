@@ -11,7 +11,7 @@ Use this instruction whenever choosing a model, deciding how much context to loa
 ## Model Tier Guidance
 
 - **Premium** (`claude-opus-5`, `claude-opus-4.8`, `claude-opus-4.7`) — architecture direction, security analysis, compliance, irreversible cross-system decisions
-- **Reasoning/Standard** (`claude-sonnet-4.6`, `gpt-5.4`, `gpt-5.3-codex`) — code review, test strategy, planning, research
+- **Reasoning/Standard** (`claude-sonnet-5`, `gpt-5.4`, `gpt-5.3-codex`) — code review, test strategy, planning, research
 - **Code** (`gpt-5.3-codex`) — implementation, refactoring, debugging, code generation
 - **Fast** (`gpt-5.4-mini`, `gpt-5-mini`, `mai-code-1-flash-picker`) — scanning, formatting, status checks, simple transformations
 

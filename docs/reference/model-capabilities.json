@@ -3,12 +3,12 @@
   "source": {
     "repository": "github/docs",
     "files": {
-      "model_release_status": "8474e4d0b26c75fa94932b4aae17eade9f7dd78d",
-      "model_comparison": "7b8a4debe6aeca40b28104ec5e7320252a4270ec",
-      "auto_model_selection": "ef56247b0fa49c5600f6b18928dedb30903b9dcd",
-      "model_supported_clients": "74376d93b7b0b42bc220658cd426e2bd511f23c0",
-      "supported_models": "5f8510fb60c3f181032852ad4cf3435f23e00485",
-      "copilot_variables": "2ca237a8487eff75c3509b97eb33340259131c96"
+      "model_release_status": "e3aed8a2ca9af4eb29b4cdea828e98a01e4a3b68",
+      "model_comparison": "92d71a7cc49992000c65b4ace218efb4836c14ef",
+      "auto_model_selection": "21ddb9b2488d3a5bb270544f12169e4356ce0f4e",
+      "model_supported_clients": "51d50ccc985526e1579e360a5509d1de5dd15b10",
+      "supported_models": "4d67e8352f60d68fc2a82e8cf37a89461b0fc841",
+      "copilot_variables": "d4c9ea0d09dec60fb6a0dee6911538a6ae766404"
     }
   },
   "models": [
@@ -41,6 +41,34 @@
       }
     },
     {
+      "id": "kimi-k3",
+      "name": "Kimi K3",
+      "provider": "Moonshot AI",
+      "release_status": "GA",
+      "task_area": "Agentic coding and long-context work",
+      "excels_at": "Multi-step agent tasks across large codebases",
+      "auto_selection": {
+        "copilot_cli": false,
+        "copilot_chat": false,
+        "cloud_agent": false,
+        "copilot_app": false
+      },
+      "clients": {
+        "copilot_cli": true,
+        "github_dotcom": true,
+        "vscode": true,
+        "visual_studio": true,
+        "eclipse": true,
+        "xcode": true,
+        "jetbrains": true
+      },
+      "capabilities": {
+        "million_token_context": true,
+        "configurable_reasoning": true,
+        "supported_reasoning_efforts": null
+      }
+    },
+    {
       "id": "kimi-k2.7-code",
       "name": "Kimi K2.7 Code",
       "provider": "Moonshot AI",
@@ -69,40 +97,12 @@
       }
     },
     {
-      "id": "raptor-mini",
-      "name": "Raptor mini",
-      "provider": "Fine-tuned GPT-5 mini",
-      "release_status": "GA",
-      "task_area": "General-purpose coding and writing",
-      "excels_at": "Fast, accurate code completions and explanations",
-      "auto_selection": {
-        "copilot_cli": false,
-        "copilot_chat": true,
-        "cloud_agent": false,
-        "copilot_app": false
-      },
-      "clients": {
-        "copilot_cli": false,
-        "github_dotcom": false,
-        "vscode": true,
-        "visual_studio": false,
-        "eclipse": false,
-        "xcode": false,
-        "jetbrains": false
-      },
-      "capabilities": {
-        "million_token_context": false,
-        "configurable_reasoning": false,
-        "supported_reasoning_efforts": []
-      }
-    },
-    {
-      "id": "mai-code-1-flash-picker",
-      "name": "MAI-Code-1-Flash",
+      "id": "mai-code-1.1-flash",
+      "name": "MAI-Code-1.1-Flash",
       "provider": "Microsoft",
       "release_status": "GA",
-      "task_area": "General-purpose coding and writing",
-      "excels_at": "Fast, accurate code completions and explanations",
+      "task_area": "General-purpose coding and writing, image understanding",
+      "excels_at": "Fast code completions and explanations, instruction following, tool use",
       "auto_selection": {
         "copilot_cli": true,
         "copilot_chat": true,
@@ -125,8 +125,36 @@
       }
     },
     {
-      "id": "gemini-3.6-flash",
-      "name": "Gemini 3.6 Flash",
+      "id": "mai-code-1-flash-picker",
+      "name": "MAI-Code-1-Flash",
+      "provider": "Microsoft",
+      "release_status": "GA",
+      "task_area": "General-purpose coding and writing",
+      "excels_at": "Fast, accurate code completions and explanations",
+      "auto_selection": {
+        "copilot_cli": false,
+        "copilot_chat": false,
+        "cloud_agent": false,
+        "copilot_app": false
+      },
+      "clients": {
+        "copilot_cli": true,
+        "github_dotcom": true,
+        "vscode": true,
+        "visual_studio": true,
+        "eclipse": true,
+        "xcode": true,
+        "jetbrains": true
+      },
+      "capabilities": {
+        "million_token_context": false,
+        "configurable_reasoning": false,
+        "supported_reasoning_efforts": []
+      }
+    },
+    {
+      "id": "gemini-3.8-flash",
+      "name": "Gemini 3.8 Flash",
       "provider": "Google",
       "release_status": "GA",
       "task_area": "Fast help with simple or repetitive tasks",
@@ -134,6 +162,62 @@
       "auto_selection": {
         "copilot_cli": false,
         "copilot_chat": false,
+        "cloud_agent": false,
+        "copilot_app": false
+      },
+      "clients": {
+        "copilot_cli": true,
+        "github_dotcom": false,
+        "vscode": true,
+        "visual_studio": true,
+        "eclipse": true,
+        "xcode": true,
+        "jetbrains": true
+      },
+      "capabilities": {
+        "million_token_context": false,
+        "configurable_reasoning": false,
+        "supported_reasoning_efforts": []
+      }
+    },
+    {
+      "id": "gemini-3.7-flash",
+      "name": "Gemini 3.7 Flash",
+      "provider": "Google",
+      "release_status": "GA",
+      "task_area": "Fast help with simple or repetitive tasks",
+      "excels_at": "Fast, reliable answers to lightweight coding questions",
+      "auto_selection": {
+        "copilot_cli": true,
+        "copilot_chat": true,
+        "cloud_agent": false,
+        "copilot_app": false
+      },
+      "clients": {
+        "copilot_cli": true,
+        "github_dotcom": false,
+        "vscode": true,
+        "visual_studio": true,
+        "eclipse": true,
+        "xcode": true,
+        "jetbrains": true
+      },
+      "capabilities": {
+        "million_token_context": false,
+        "configurable_reasoning": false,
+        "supported_reasoning_efforts": []
+      }
+    },
+    {
+      "id": "gemini-3.6-flash",
+      "name": "Gemini 3.6 Flash",
+      "provider": "Google",
+      "release_status": "GA",
+      "task_area": "Fast help with simple or repetitive tasks",
+      "excels_at": "Fast, reliable answers to lightweight coding questions",
+      "auto_selection": {
+        "copilot_cli": true,
+        "copilot_chat": true,
         "cloud_agent": false,
         "copilot_app": false
       },
@@ -181,34 +265,6 @@
       }
     },
     {
-      "id": "gemini-3.1-pro-preview",
-      "name": "Gemini 3.1 Pro",
-      "provider": "Google",
-      "release_status": "Public preview",
-      "task_area": "Deep reasoning and debugging",
-      "excels_at": "Effective and efficient edit-then-test loops with high tool precision",
-      "auto_selection": {
-        "copilot_cli": false,
-        "copilot_chat": false,
-        "cloud_agent": false,
-        "copilot_app": false
-      },
-      "clients": {
-        "copilot_cli": true,
-        "github_dotcom": false,
-        "vscode": true,
-        "visual_studio": true,
-        "eclipse": true,
-        "xcode": true,
-        "jetbrains": true
-      },
-      "capabilities": {
-        "million_token_context": false,
-        "configurable_reasoning": false,
-        "supported_reasoning_efforts": []
-      }
-    },
-    {
       "id": "claude-sonnet-5",
       "name": "Claude Sonnet 5",
       "provider": "Anthropic",
@@ -216,8 +272,8 @@
       "task_area": "General-purpose coding and agent tasks",
       "excels_at": "Complex problem-solving challenges, sophisticated reasoning",
       "auto_selection": {
-        "copilot_cli": false,
-        "copilot_chat": false,
+        "copilot_cli": true,
+        "copilot_chat": true,
         "cloud_agent": false,
         "copilot_app": false
       },
@@ -265,34 +321,6 @@
       }
     },
     {
-      "id": "claude-sonnet-4.5",
-      "name": "Claude Sonnet 4.5",
-      "provider": "Anthropic",
-      "release_status": "GA",
-      "task_area": "General-purpose coding and agent tasks",
-      "excels_at": "Complex problem-solving challenges, sophisticated reasoning",
-      "auto_selection": {
-        "copilot_cli": false,
-        "copilot_chat": false,
-        "cloud_agent": false,
-        "copilot_app": false
-      },
-      "clients": {
-        "copilot_cli": true,
-        "github_dotcom": true,
-        "vscode": true,
-        "visual_studio": true,
-        "eclipse": true,
-        "xcode": true,
-        "jetbrains": true
-      },
-      "capabilities": {
-        "million_token_context": false,
-        "configurable_reasoning": false,
-        "supported_reasoning_efforts": []
-      }
-    },
-    {
       "id": "claude-opus-5",
       "name": "Claude Opus 5",
       "provider": "Anthropic",
@@ -300,8 +328,8 @@
       "task_area": "Deep reasoning and debugging",
       "excels_at": "Complex problem-solving challenges, sophisticated reasoning",
       "auto_selection": {
-        "copilot_cli": false,
-        "copilot_chat": false,
+        "copilot_cli": true,
+        "copilot_chat": true,
         "cloud_agent": false,
         "copilot_app": false
       },
@@ -349,96 +377,12 @@
       }
     },
     {
-      "id": "claude-opus-4.8",
-      "name": "Claude Opus 4.8",
-      "provider": "Anthropic",
+      "id": "grok-4.5",
+      "name": "Grok 4.5",
+      "provider": "xAI",
       "release_status": "GA",
-      "task_area": "Deep reasoning and debugging",
+      "task_area": "General-purpose coding and agent tasks",
       "excels_at": "Complex problem-solving challenges, sophisticated reasoning",
-      "auto_selection": {
-        "copilot_cli": false,
-        "copilot_chat": false,
-        "cloud_agent": false,
-        "copilot_app": false
-      },
-      "clients": {
-        "copilot_cli": true,
-        "github_dotcom": true,
-        "vscode": true,
-        "visual_studio": true,
-        "eclipse": true,
-        "xcode": true,
-        "jetbrains": true
-      },
-      "capabilities": {
-        "million_token_context": true,
-        "configurable_reasoning": true,
-        "supported_reasoning_efforts": null
-      }
-    },
-    {
-      "id": "claude-opus-4.7",
-      "name": "Claude Opus 4.7",
-      "provider": "Anthropic",
-      "release_status": "GA",
-      "task_area": "Deep reasoning and debugging",
-      "excels_at": "Complex problem-solving challenges, sophisticated reasoning",
-      "auto_selection": {
-        "copilot_cli": false,
-        "copilot_chat": false,
-        "cloud_agent": false,
-        "copilot_app": false
-      },
-      "clients": {
-        "copilot_cli": true,
-        "github_dotcom": true,
-        "vscode": true,
-        "visual_studio": true,
-        "eclipse": true,
-        "xcode": true,
-        "jetbrains": true
-      },
-      "capabilities": {
-        "million_token_context": true,
-        "configurable_reasoning": true,
-        "supported_reasoning_efforts": null
-      }
-    },
-    {
-      "id": "claude-opus-4.6",
-      "name": "Claude Opus 4.6",
-      "provider": "Anthropic",
-      "release_status": "GA",
-      "task_area": "Not classified by GitHub Docs",
-      "excels_at": "Not classified by GitHub Docs",
-      "auto_selection": {
-        "copilot_cli": false,
-        "copilot_chat": false,
-        "cloud_agent": false,
-        "copilot_app": false
-      },
-      "clients": {
-        "copilot_cli": true,
-        "github_dotcom": true,
-        "vscode": true,
-        "visual_studio": true,
-        "eclipse": true,
-        "xcode": true,
-        "jetbrains": true
-      },
-      "capabilities": {
-        "million_token_context": true,
-        "configurable_reasoning": true,
-        "supported_reasoning_efforts": null
-      }
-    },
-    {
-      "id": "claude-opus-4.5",
-      "name": "Claude Opus 4.5",
-      "provider": "Anthropic",
-      "release_status": "GA",
-      "task_area": "Not classified by GitHub Docs",
-      "excels_at": "Not classified by GitHub Docs",
       "auto_selection": {
         "copilot_cli": false,
         "copilot_chat": false,
@@ -458,6 +402,34 @@
         "million_token_context": false,
         "configurable_reasoning": false,
         "supported_reasoning_efforts": []
+      }
+    },
+    {
+      "id": "claude-opus-4.8",
+      "name": "Claude Opus 4.8",
+      "provider": "Anthropic",
+      "release_status": "GA",
+      "task_area": "Deep reasoning and debugging",
+      "excels_at": "Complex problem-solving challenges, sophisticated reasoning",
+      "auto_selection": {
+        "copilot_cli": true,
+        "copilot_chat": true,
+        "cloud_agent": false,
+        "copilot_app": false
+      },
+      "clients": {
+        "copilot_cli": true,
+        "github_dotcom": true,
+        "vscode": true,
+        "visual_studio": true,
+        "eclipse": true,
+        "xcode": true,
+        "jetbrains": true
+      },
+      "capabilities": {
+        "million_token_context": true,
+        "configurable_reasoning": true,
+        "supported_reasoning_efforts": null
       }
     },
     {
@@ -489,12 +461,68 @@
       }
     },
     {
+      "id": "claude-fable-5.1",
+      "name": "Claude Fable 5.1",
+      "provider": "Anthropic",
+      "release_status": "GA",
+      "task_area": "Long-horizon, autonomous coding and knowledge-work",
+      "excels_at": "Substantial, long-running coding tasks, including deep codebase research, feature development, and complex agentic workflows",
+      "auto_selection": {
+        "copilot_cli": false,
+        "copilot_chat": false,
+        "cloud_agent": false,
+        "copilot_app": false
+      },
+      "clients": {
+        "copilot_cli": true,
+        "github_dotcom": true,
+        "vscode": true,
+        "visual_studio": true,
+        "eclipse": true,
+        "xcode": true,
+        "jetbrains": true
+      },
+      "capabilities": {
+        "million_token_context": true,
+        "configurable_reasoning": true,
+        "supported_reasoning_efforts": null
+      }
+    },
+    {
       "id": "claude-fable-5",
       "name": "Claude Fable 5",
       "provider": "Anthropic",
       "release_status": "GA",
       "task_area": "Long-horizon, autonomous coding and knowledge-work",
       "excels_at": "First-attempt correctness through upfront reasoning, aggressive parallel tool batching, and proactive verification of pre-existing test state before debugging",
+      "auto_selection": {
+        "copilot_cli": false,
+        "copilot_chat": false,
+        "cloud_agent": false,
+        "copilot_app": false
+      },
+      "clients": {
+        "copilot_cli": true,
+        "github_dotcom": true,
+        "vscode": true,
+        "visual_studio": true,
+        "eclipse": true,
+        "xcode": true,
+        "jetbrains": true
+      },
+      "capabilities": {
+        "million_token_context": true,
+        "configurable_reasoning": true,
+        "supported_reasoning_efforts": null
+      }
+    },
+    {
+      "id": "gpt-6-astra",
+      "name": "GPT-6 Astra",
+      "provider": "OpenAI",
+      "release_status": "GA",
+      "task_area": "Long-horizon, autonomous coding and agentic tasks",
+      "excels_at": "Long-horizon coding tasks with continuous planning, batched diagnosis and verification, and independent result confirmation",
       "auto_selection": {
         "copilot_cli": false,
         "copilot_chat": false,
@@ -524,8 +552,8 @@
       "task_area": "General-purpose coding and agent tasks",
       "excels_at": "Balanced everyday interactive and agentic coding",
       "auto_selection": {
-        "copilot_cli": false,
-        "copilot_chat": false,
+        "copilot_cli": true,
+        "copilot_chat": true,
         "cloud_agent": false,
         "copilot_app": false
       },
@@ -552,8 +580,8 @@
       "task_area": "Deep reasoning and debugging",
       "excels_at": "Complex reasoning over large codebases and long-running agentic work",
       "auto_selection": {
-        "copilot_cli": false,
-        "copilot_chat": false,
+        "copilot_cli": true,
+        "copilot_chat": true,
         "cloud_agent": false,
         "copilot_app": false
       },
@@ -580,8 +608,8 @@
       "task_area": "Fast help with simple or repetitive tasks",
       "excels_at": "Quick, cost-efficient responses for smaller, faster coding tasks",
       "auto_selection": {
-        "copilot_cli": false,
-        "copilot_chat": false,
+        "copilot_cli": true,
+        "copilot_chat": true,
         "cloud_agent": false,
         "copilot_app": false
       },
@@ -608,8 +636,8 @@
       "task_area": "Deep reasoning and debugging",
       "excels_at": "Multi-step problem solving and architecture-level code analysis",
       "auto_selection": {
-        "copilot_cli": false,
-        "copilot_chat": false,
+        "copilot_cli": true,
+        "copilot_chat": true,
         "cloud_agent": false,
         "copilot_app": false
       },
@@ -720,7 +748,7 @@
       "task_area": "Agentic software development",
       "excels_at": "Agentic tasks",
       "auto_selection": {
-        "copilot_cli": true,
+        "copilot_cli": false,
         "copilot_chat": true,
         "cloud_agent": true,
         "copilot_app": true
@@ -741,12 +769,12 @@
       }
     },
     {
-      "id": "kimi-k3",
-      "name": "Kimi K3",
-      "provider": "Moonshot AI",
+      "id": "claude-opus-4.7",
+      "name": "Claude Opus 4.7",
+      "provider": "Anthropic",
       "release_status": "GA",
-      "task_area": "Agentic coding and long-context work",
-      "excels_at": "Multi-step agent tasks across large codebases",
+      "task_area": "Deep reasoning and debugging",
+      "excels_at": "Complex problem-solving challenges, sophisticated reasoning",
       "auto_selection": {
         "copilot_cli": false,
         "copilot_chat": false,
@@ -769,8 +797,8 @@
       }
     },
     {
-      "id": "grok-4.5",
-      "name": "Grok 4.5",
+      "id": "grok-4.6",
+      "name": "Grok 4.6",
       "provider": "xAI",
       "release_status": "GA",
       "task_area": "General-purpose coding and agent tasks",

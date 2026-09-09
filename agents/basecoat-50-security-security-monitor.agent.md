@@ -44,7 +44,7 @@ Full NIST CSF Detect outcome table, ATT&CK→detection mapping, worked examples,
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6 (security event correlation, anomaly detection, alert triage). **Minimum:** gpt-5.4-mini
+**Recommended:** claude-sonnet-5 (security event correlation, anomaly detection, alert triage). **Minimum:** gpt-5.4-mini
 
 ## Governance
 

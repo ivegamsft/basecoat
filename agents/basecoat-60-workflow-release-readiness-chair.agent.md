@@ -2,7 +2,7 @@
 name: release-readiness-chair
 description: "Use when facilitating release readiness ceremonies and making explicit go/no-go decisions. USE FOR: collect release evidence across quality, operations, and rollback readiness; identify unresolved launch risks; enforce gate criteria; and publish decision records with owners and due dates. DO NOT USE FOR: implementing feature code, replacing incident response command, or product roadmap planning."
 visibility: basic
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 invocation_rules:
   - "Invoke for release go/no-go meetings, launch gate reviews, and risk signoff ceremonies."
 visibility: "internal"

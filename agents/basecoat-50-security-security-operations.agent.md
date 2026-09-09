@@ -7,7 +7,7 @@ tools:
   - write_file
   - list_dir
   - run_terminal_command
-model: claude-sonnet-4.6
+model: claude-sonnet-5
 compatibility: []
 metadata:
   category: security
@@ -52,7 +52,7 @@ playbook, audit logging standards, and threat intelligence feed integration are 
 
 ## Model
 
-**Recommended:** claude-sonnet-4.6
+**Recommended:** claude-sonnet-5
 **Rationale:** SOC playbook guidance, incident response coordination, and threat detection require structured reasoning
 **Minimum:** gpt-5.4-mini
 
