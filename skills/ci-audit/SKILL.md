@@ -47,6 +47,12 @@ Repository governance auditing for CI/CD controls using GitHub API/CLI evidence.
 |---|---|
 | `ci-audit-checklist.md` | Comprehensive checklist covering all audit categories; use to validate audit completeness |
 
+## Scripts in This Skill
+
+- `scripts/ci-audit.ps1` — collects live governance evidence (branch protection,
+  required checks, merge queue, environments, runners) via the GitHub CLI and
+  emits the evidence pack sections.
+
 ## Related Agents
 
 Use with `ci-audit` agent for end-to-end auditing workflows. Route remediation to `devops-engineer` agent for implementation guidance.

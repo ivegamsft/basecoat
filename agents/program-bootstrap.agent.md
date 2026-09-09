@@ -51,6 +51,9 @@ specialists. It dispatches and validates:
 
 ## Checkpointing, dry-run behavior, and failure handling
 
+Stage I/O envelopes, session model, and output directory contracts:
+[`docs/agents/program-bootstrap-stage-contracts.md`](../docs/agents/program-bootstrap-stage-contracts.md).
+
 Checkpoint state fields, resume semantics, dry-run side-effect rules, and
 retry/blocker handling for failures:
 [`agents/references/program-bootstrap-detail.md`](references/program-bootstrap-detail.md).

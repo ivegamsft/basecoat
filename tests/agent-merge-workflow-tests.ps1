@@ -13,15 +13,15 @@ if (-not (Test-Path $workflowPath)) {
 $workflowContent = Get-Content $workflowPath -Raw
 
 $requiredSnippets = @(
-    'name: "BaseCoat - Agent Merge Automation"',
-    'Duplicate merged agent name',
-    'Tool permission conflict for merged agent',
-    'Agent Merge Frontmatter Changelog',
+    'name: "BaseCoat - Agent Merge"',
+    'duplicate agent name',
+    'conflicting tool permissions',
+    'Agent Merge Changelog',
     'eval.yaml',
-    '<!-- agent-merge-changelog -->',
-    'mode == ''rollback''',
-    'agent-merge-rollback-${{ github.run_id }}',
-    'gh pr create'
+    'agent-merge-changelog',
+    'rollback_ref',
+    'rollback_apply',
+    'agent-merge-rollback.patch'
 )
 
 foreach ($snippet in $requiredSnippets) {

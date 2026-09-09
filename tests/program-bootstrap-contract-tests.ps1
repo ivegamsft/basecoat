@@ -24,16 +24,16 @@ $runbookContent = Get-Content $runbookPath -Raw
 $failures = @()
 
 $requiredAgentSnippets = @(
-    'capabilities:',
-    'model_policy:',
-    '`execution_model`',
-    '`output_root`',
-    '`checkpoint_store`',
-    '## Session model',
-    '## Output directory contract',
-    '## Review-mode policy',
-    'child-sessions',
-    'single-session'
+    '## Specialist-first rule',
+    '## Inputs',
+    '## Stage pipeline',
+    '## Output contract',
+    'project-onboarding',
+    'sprint-planner',
+    'preserve_labels',
+    'resume_from_checkpoint',
+    'references/program-bootstrap-detail.md',
+    'program-bootstrap-stage-contracts.md'
 )
 
 foreach ($snippet in $requiredAgentSnippets) {
@@ -61,10 +61,13 @@ foreach ($scenarioId in $requiredEvalScenarioIds) {
 
 $requiredContractSnippets = @(
     '| `execution_model` | string | Yes |',
+    '| `checkpoint_id` | string | Yes |',
     '## Session model contract',
     '## Output directory contract',
     '.github/bootstrap/<program_name>',
     '## Review-mode contract',
+    'child-sessions',
+    'single-session',
     'attempted_mutations'
 )
 

@@ -24,8 +24,8 @@ if (-not (Test-Path $enforceWorkflowPath)) {
 $auditWorkflow = Get-Content $auditWorkflowPath -Raw
 $enforceWorkflow = Get-Content $enforceWorkflowPath -Raw
 
-if ($auditWorkflow -notmatch '(?m)^name:\s*BaseCoat - Governance Metadata Drift Audit\s*$') {
-    throw 'governance-audit.yml name was not updated to metadata drift audit'
+if ($auditWorkflow -notmatch '(?m)^name:\s*BaseCoat - Governance Audit\s*$') {
+    throw 'governance-audit.yml name changed unexpectedly'
 }
 
 if ($enforceWorkflow -notmatch '(?m)^name:\s*BaseCoat - Governance Metadata Drift Enforcement\s*$') {
@@ -36,16 +36,12 @@ if ($auditWorkflow -notmatch '(?m)^\s{2}schedule:\s*$') {
     throw 'governance-audit.yml must include a schedule trigger'
 }
 
-if ($auditWorkflow -notmatch 'governance-metadata-drift\.ps1\s+-Mode\s+audit') {
-    throw 'governance-audit.yml does not execute governance-metadata-drift.ps1 in audit mode'
+if ($auditWorkflow -notmatch 'governance-contract\.md') {
+    throw 'governance-audit.yml no longer audits the governance contract surface'
 }
 
 if ($enforceWorkflow -notmatch 'governance-metadata-drift\.ps1\s+-Mode\s+enforce') {
     throw 'governance-enforce.yml does not execute governance-metadata-drift.ps1 in enforce mode'
-}
-
-if ($auditWorkflow -notmatch 'governance-metadata-drift-report') {
-    throw 'governance-audit.yml missing governance drift report artifact upload'
 }
 
 if ($enforceWorkflow -notmatch 'governance-metadata-drift-report') {

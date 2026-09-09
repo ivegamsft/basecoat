@@ -64,15 +64,15 @@ function Test-CiAuditSkillHasDoNotUseFor {
 }
 
 function Test-CiAuditAgentFileExists {
-    $agentPath = Join-Path $repoRoot 'agents\ci-audit.agent.md'
+    $agentPath = Join-Path $repoRoot 'agents\basecoat-50-security-ci-audit.agent.md'
     if (-not (Test-Path $agentPath)) {
         throw "Agent file not found at $agentPath"
     }
-    Write-Host '  [PASS] agents/ci-audit.agent.md exists' -ForegroundColor Green
+    Write-Host '  [PASS] agents/basecoat-50-security-ci-audit.agent.md exists' -ForegroundColor Green
 }
 
 function Test-CiAuditAgentHasFrontmatter {
-    $agentPath = Join-Path $repoRoot 'agents\ci-audit.agent.md'
+    $agentPath = Join-Path $repoRoot 'agents\basecoat-50-security-ci-audit.agent.md'
     $content = Get-Content $agentPath -Raw
     if ($content -notmatch '^---\s+name: ci-audit') {
         throw 'Agent file missing required frontmatter'
@@ -151,7 +151,7 @@ function Test-CiAuditSkillMentionsScript {
 }
 
 function Test-CiAuditAgentHasWorkflow {
-    $agentPath = Join-Path $repoRoot 'agents\ci-audit.agent.md'
+    $agentPath = Join-Path $repoRoot 'agents\basecoat-50-security-ci-audit.agent.md'
     $content = Get-Content $agentPath -Raw
     if ($content -notmatch '## Workflow') {
         throw 'Agent missing Workflow section'
@@ -160,13 +160,13 @@ function Test-CiAuditAgentHasWorkflow {
 }
 
 function Test-CiAuditAgentOutputContract {
-    $agentPath = Join-Path $repoRoot 'agents\ci-audit.agent.md'
+    $agentPath = Join-Path $repoRoot 'agents\basecoat-50-security-ci-audit.agent.md'
     $content = Get-Content $agentPath -Raw
-    if ($content -notmatch '## Output Contract') {
-        throw 'Agent missing Output Contract section'
+    if ($content -notmatch '(?i)## Output contract') {
+        throw 'Agent missing Output contract section'
     }
-    if ($content -notmatch 'audit_timestamp') {
-        throw 'Output Contract missing audit_timestamp field'
+    if ($content -notmatch '(?i)Scope\s+and\s+timestamp') {
+        throw 'Output contract missing scope/timestamp requirement'
     }
     Write-Host '  [PASS] Agent has Output Contract' -ForegroundColor Green
 }

@@ -869,6 +869,51 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running previously unwired contract test suites...'
+$additionalSuites = @(
+    'agent-integration-tests.ps1',
+    'agent-merge-workflow-tests.ps1',
+    'backlog-efficiency-scorecard-tests.ps1',
+    'ci-audit-script-tests.ps1',
+    'failure-pattern-script-tests.ps1',
+    'generate-registry-model-fallback-tests.ps1',
+    'governance-metadata-drift-tests.ps1',
+    'merge-queue-tests.ps1',
+    'pr-flow-hygiene-tests.ps1',
+    'program-bootstrap-contract-tests.ps1',
+    'release-process-doc-tests.ps1',
+    'skill-compatibility-frontmatter-tests.ps1',
+    'update-agent-metadata-tests.ps1',
+    'update-metadata-model-fallback-tests.ps1',
+    'workflow-validate-basecoat-gating-tests.ps1'
+)
+foreach ($suite in $additionalSuites) {
+    Write-Host "  -> $suite"
+    & pwsh -NoProfile -File (Join-Path $PSScriptRoot $suite)
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "$suite failed" -ForegroundColor Red
+        Write-FailureLog ($suite -replace '\.ps1$', '')
+        exit 1
+    }
+}
+
+Write-Host 'Checking every test suite is wired into a runner or workflow...'
+$runnerText = Get-Content (Join-Path $PSScriptRoot 'run-tests.ps1') -Raw
+$workflowDir = Join-Path $repoRoot '.github\workflows'
+$workflowText = if (Test-Path $workflowDir) {
+    (Get-ChildItem $workflowDir -Filter *.yml | Get-Content -Raw) -join "`n"
+} else { '' }
+$orphanedSuites = Get-ChildItem $PSScriptRoot -Filter '*-tests.ps1' |
+    Where-Object { $runnerText -notmatch [regex]::Escape($_.Name) -and $workflowText -notmatch [regex]::Escape($_.Name) } |
+    ForEach-Object { $_.Name }
+if ($orphanedSuites.Count -gt 0) {
+    Write-Host 'Orphaned test suites are not executed by any runner or workflow:' -ForegroundColor Red
+    $orphanedSuites | ForEach-Object { Write-Host "  - tests/$_" -ForegroundColor Red }
+    Write-Host 'Add each suite to $additionalSuites in tests/run-tests.ps1 or invoke it from a workflow.' -ForegroundColor Red
+    Write-FailureLog 'orphaned-test-suite-check' ($orphanedSuites -join ', ')
+    exit 1
+}
+
 Write-Host 'Running coherence check (non-blocking)...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot '..' 'scripts' 'check-coherence.ps1')
 # Non-blocking: coherence issues are warnings, not failures
