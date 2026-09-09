@@ -335,6 +335,7 @@ jobs:
                   repo: context.repo.repo,
                   pull_number: entityNumber
                 });
+                if (shouldSuppress(pr.labels)) return 'pull request carries a watchdog suppression label';
                 if (!pr.merged) return 'pull request was closed without merging';
                 const comments = await github.paginate(github.rest.issues.listComments, {
                   owner: context.repo.owner,
@@ -356,6 +357,7 @@ jobs:
                   repo: context.repo.repo,
                   pull_number: entityNumber
                 });
+                if (shouldSuppress(pr.labels)) return 'pull request carries a watchdog suppression label';
                 if (pr.state !== 'closed') return null;
                 return pr.merged ? 'pull request has merged' : 'pull request was closed';
               }
@@ -366,6 +368,7 @@ jobs:
                   repo: context.repo.repo,
                   issue_number: entityNumber
                 });
+                if (shouldSuppress(issue.labels)) return 'issue carries a watchdog suppression label';
                 if (issue.state === 'closed') return 'issue has been closed';
                 return normalizeLabels(issue.labels).includes('approved')
                   ? null

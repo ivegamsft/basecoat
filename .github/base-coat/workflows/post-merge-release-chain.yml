@@ -346,14 +346,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
       - name: Dispatch chain for merged PRs without evidence
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         env:
           LOOKBACK_DAYS: "7"
           GRACE_MINUTES: "20"
           MAX_BACKFILL: "25"
+          SLA_CONFIG_PATH: .github/governance/automation-stage-slas.json
         with:
           script: |
+            const fs = require('fs');
+
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const marker = 'post-merge-release-chain:v1';
@@ -368,6 +374,24 @@ jobs:
             const maxBackfill = toInt(process.env.MAX_BACKFILL, 25);
             const now = Date.now();
 
+            // Honour the same suppression labels the stuck-state watchdog uses,
+            // read from the shared governance config so the two stay aligned.
+            // Without this a historical backlog of unchained PRs would be
+            // replayed in bulk, dispatching a redundant release gate and
+            // packaging run for every one of them.
+            const configPath = process.env.SLA_CONFIG_PATH || '.github/governance/automation-stage-slas.json';
+            const config = fs.existsSync(configPath)
+              ? JSON.parse(fs.readFileSync(configPath, 'utf8'))
+              : {};
+            const suppressionLabels = new Set(
+              (config?.suppression_labels || ['watchdog:ignore', 'sla:exempt'])
+                .map(value => String(value).toLowerCase())
+            );
+            const isSuppressed = labels =>
+              (labels || [])
+                .map(label => String(typeof label === 'string' ? label : label?.name || '').toLowerCase())
+                .some(name => name && suppressionLabels.has(name));
+
             const since = new Date(now - lookbackDays * 24 * 60 * 60 * 1000)
               .toISOString()
               .slice(0, 10);
@@ -380,6 +404,11 @@ jobs:
             const skipped = [];
             for (const pr of mergedPrs) {
               if (dispatched.length >= maxBackfill) break;
+
+              if (isSuppressed(pr.labels)) {
+                skipped.push(`#${pr.number} (suppressed)`);
+                continue;
+              }
 
               const mergedAtMs = new Date(pr.closed_at || pr.updated_at).getTime();
               if (Number.isFinite(mergedAtMs) && now - mergedAtMs < graceMinutes * 60 * 1000) {

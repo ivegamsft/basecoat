@@ -116,4 +116,11 @@ if ($workflow -notmatch 'group:\s*\$\{\{\s*github\.workflow\s*\}\}-\$\{\{\s*gith
     throw 'Concurrency group must be scoped to the pull request being chained.'
 }
 
+if ($workflow -notmatch 'suppression_labels') {
+    throw 'Backfill sweep must honour the shared governance suppression labels.'
+}
+if ($workflow -notmatch 'isSuppressed') {
+    throw 'Backfill sweep must skip suppressed pull requests to avoid bulk replay.'
+}
+
 Write-Host 'Post-merge release chain workflow tests passed.'

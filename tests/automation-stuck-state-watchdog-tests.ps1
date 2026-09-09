@@ -95,6 +95,11 @@ foreach ($resolvableStage in @('merge_to_release', 'ready_to_merge', 'issue_to_p
         throw "Resolution pass must handle stage '$resolvableStage'."
     }
 }
+# A suppression label is an explicit instruction to stop tracking an entity, so
+# it must also close any escalation already opened against it.
+if (([regex]::Matches($workflow, 'watchdog suppression label')).Count -lt 3) {
+    throw 'Resolution pass must treat suppression labels as resolving every stage.'
+}
 
 if (-not $config.thresholds.issue_to_pr_hours -or -not $config.thresholds.ready_to_merge_hours -or -not $config.thresholds.merge_to_release_hours) {
     throw 'SLA config must define issue_to_pr_hours, ready_to_merge_hours, and merge_to_release_hours.'
