@@ -19,6 +19,7 @@ fleet, wave, and "cut a release".
 | `bug:` | Defect, regression, broken behavior | **Now** | `@code-review`, `@self-healing-ci` |
 | `feature:` | New capability or enhancement | **Backlog** | `@sprint-planner`, `@solution-architect` |
 | `audit:` | Review, assess, validate — no changes | **Now, read-only** | `@security-analyst`, `@config-auditor` |
+| `investigate:` | Diagnose an open-ended concern and report findings — no changes | **Now, read-only** | `@rca`, `@config-auditor`, `@performance-analyst` |
 | `plan:` | Sprint or project planning | **Now, no implementation** | `@sprint-planner`, `@product-manager` |
 | `optimize:` | Normalize composite prompts into an execution packet with scope, stop rules, validation clauses, and routing hints before execution | **Now, advisory-first** | `@task-scope-validator`, `@orchestrator`, `@prompt-coach` |
 | `spike:` | Time-boxed investigation, no deliverable | **Now, research only** | `@solution-architect` |
@@ -61,7 +62,7 @@ fleet, wave, and "cut a release".
 | Backlog batch | `fleet:` whole-repo sprint/backlog operations; `sprint:` one sprint plan/execute/closeout; `wave:` one dependency-ordered batch inside a sprint; `autopilot:` unattended oldest-first burndown; `ship-it:` finish this change | Do not use `fleet:` when you only want the current fix merged |
 | GitHub Actions | `workflow:` failing run triage and repair; `actions:` workflow files, runs, and policy | Do not use `actions:` for a red job that needs RCA |
 | Infra staged | `azure:` Azure-scoped preflight; `infra:` IaC/network/RBAC; `deploy:` staged prepare-validate-deploy | Do not use `deploy:` for a design-only Azure question |
-| Reliability | `bug:` defect/regression; `outage:` service down; `rca:` read-only root cause of a known failure | Do not use `outage:` for a non-user-facing test failure |
+| Reliability | `bug:` defect/regression; `outage:` service down; `rca:` read-only root cause of a known failure; `investigate:` read-only diagnosis of an open-ended concern | Do not use `outage:` for a non-user-facing test failure; do not use `investigate:` when you want the fix applied |
 | Front-end | `ui:` implement components/layout; `ux:` flows and usability; `ia:` content structure and navigation | Do not use `ui:` for taxonomy-only information architecture |
 
 ---
@@ -74,7 +75,7 @@ for selecting chain patterns.
 | Family | Prefixes | Default output type |
 |---|---|---|
 | Delivery | `feature:`, `refactor:`, `deploy:`, `architect:` | implementation plan, code changes, or staged deployment |
-| Reliability | `bug:`, `perf:`, `outage:`, `rca:` | fix, mitigation, incident analysis, or root-cause report |
+| Reliability | `bug:`, `perf:`, `outage:`, `rca:`, `investigate:` | fix, mitigation, incident analysis, or root-cause report |
 | Governance | `audit:`, `security:`, `chore:` | findings, policy action, risk controls |
 | GitHub Operations | `workflow:`, `actions:`, `pr:`, `issue:`, `portfolio:`, `release:`, `version:` | run triage, repo hygiene, release/version decisions |
 | Planning | `plan:`, `spike:`, `sprint:`, `wave:` | prioritized backlog, design notes, decision doc |
@@ -269,6 +270,43 @@ that request to `outage:` and route it to the RCA agent.
 | `nothing works` | `outage:` |
 
 Use `@rca` for the deep-dive investigation after the active incident is stable.
+
+---
+
+## Investigate routing
+
+`investigate:` is **read-only**. It answers "why is this happening" or "how bad
+is this" and delivers findings, evidence, and ranked options — not an
+implementation.
+
+Use it when the problem is open-ended and the right fix is not yet known. Use
+`audit:` instead when you are checking against a known standard, and `rca:` when
+diagnosing a specific known failure.
+
+| Alias | Normalized intent |
+|---|---|
+| `investigate: ...` | `investigate:` |
+| `look into ...` | `investigate:` |
+| `why is X getting worse` | `investigate:` |
+| `X is out of hand` | `investigate:` |
+| `dig into ...` | `investigate:` |
+| `figure out what's driving ...` | `investigate:` |
+
+### What it produces
+
+Findings with measurements, root cause, ranked options with tradeoffs, and a
+recommended next action. Logging issues to capture findings is allowed. Code
+changes, branches, and PRs are **not**.
+
+### Read-only survives autonomy
+
+Autonomous or unattended modes do **not** convert `investigate:` into
+permission to implement. If you ask a clarifying question and no one answers,
+that is a **stop signal** — report findings and end. Autonomy governs how
+thoroughly the investigation runs, not whether changes may begin.
+
+To act on the findings, issue a new intent: `bug:`, `perf:`, `chore:`, or
+`ship-it:`. Saying "investigate and fix" also lifts read-only explicitly.
 
 ---
 
@@ -608,6 +646,7 @@ Use these default chains unless there is a task-specific reason to override.
 | `bug:` | `code-review -> self-healing-ci -> guardrail` | defect isolation and safe fix |
 | `outage:` | `rca -> incident-responder -> sre-engineer` | triage, containment, and reliability follow-up |
 | `rca:` | `rca -> config-auditor` | root-cause diagnosis, execution suspended |
+| `investigate:` | `rca -> config-auditor -> performance-analyst` | read-only diagnosis of an open-ended concern; findings and options, no changes |
 | `azure:` | `azure-preflight -> azure-prepare -> azure-validate -> azure-deploy` | preflight advisory, then staged deployment |
 | `infra:` | `azure-preflight -> azure-prepare -> azure-validate -> azure-deploy` | preflight advisory, then staged deployment |
 | `deploy:` | `azure-prepare -> azure-validate -> azure-deploy` | staged deployment with pre-flight validation |

@@ -33,6 +33,7 @@ Rules:
 | `bug:` | Defect, regression, broken behavior | Now | `@code-review`, `@self-healing-ci`, `@config-auditor` |
 | `feature:` | New capability or enhancement | Later | `@sprint-planner`, `@solution-architect` |
 | `audit:` | Review, assess, validate — no changes | Now | `@security-analyst`, `@config-auditor`, `@github-security-posture` |
+| `investigate:` | Diagnose an open-ended concern and report findings — no changes | Now (read-only) | `@rca`, `@config-auditor`, `@performance-analyst` |
 | `plan:` | Sprint or project planning | Now | `@sprint-planner`, `@product-manager` |
 | `optimize:` | Convert high-entropy requests into normalized execution packets before action | Now | `@task-scope-validator`, `@orchestrator`, `@prompt-coach` |
 | `spike:` | Time-boxed investigation, no deliverable | Now | `@solution-architect` |
@@ -121,6 +122,49 @@ Execution contract:
 
 `audit:` is always read-only unless the user explicitly says "and fix" or
 "resolve."
+
+## Investigate Mode (`investigate:`)
+
+`investigate:` is **read-only**. It asks "why is this happening / how bad is
+it?" and its deliverable is **findings, evidence, and recommended options** —
+never an implementation.
+
+Read-only intents: `audit:`, `investigate:`, `rca:`, `spike:`, `plan:`.
+
+### Contract
+
+1. Gather evidence, quantify the problem, and identify root cause.
+2. Report findings with measurements, ranked options, and a recommended next
+   action.
+3. **Stop.** Do not create branches, edit files, open PRs, or change settings.
+4. Logging issues to capture findings is permitted — it records the
+   investigation rather than acting on it.
+5. To act on the findings, the user issues a **new** intent
+   (`bug:`, `perf:`, `ship-it:`).
+
+### Autonomy does not override read-only
+
+Autonomous, unattended, or "work without me" modes **raise the bar for acting,
+they do not lower it**. If a read-only intent is active and the operator is
+unavailable:
+
+- Do **not** treat unavailability as approval to implement.
+- Do **not** escalate from analysis to implementation because the fix looks
+  obvious, low-risk, or fast.
+- Complete the investigation, report findings, and end the turn.
+
+An unanswered clarifying question is a **stop signal on a read-only intent**,
+not a delegation of authority. Autonomy applies to *how thoroughly you
+investigate*, not to *whether you may start changing things*.
+
+### Scope escalation requires a new intent
+
+| Situation | Correct response |
+|---|---|
+| Investigation reveals an obvious one-line fix | Report it; do not apply it |
+| Investigation reveals a critical security hole | Report immediately with severity; do not patch |
+| Operator unavailable, findings are clear | Report and stop |
+| User says "investigate and fix" | Read-only no longer applies; proceed |
 
 ## Fleet Routing
 

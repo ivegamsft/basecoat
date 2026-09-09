@@ -154,8 +154,8 @@ Return the documented output and any handoff packet
 Before any implementation begins for `bug:`, `feature:`, `chore:`, `refactor:`,
 `test:`, or `deploy:`, the LOG-FIRST gate must be satisfied: the work is
 recorded as a tracked item before code or infrastructure changes are made.
-Read-only and advisory intents such as `audit:`, `spike:`, and `rca:` do not
-enter this gate.
+Read-only and advisory intents such as `audit:`, `investigate:`, `spike:`, and
+`rca:` do not enter this gate.
 
 The gate is defined in
 [basecoat-10-core-intent-routing.instructions.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/basecoat-10-core-intent-routing.instructions.md)
@@ -172,6 +172,7 @@ output for these intents.
 | `- bug: the sync script fails on Windows` | List item | Triage and log; do not implement |
 | `run an audit` followed by `- feature: add retries` | Mixed request | Run the audit; log the feature |
 | `audit: ... read-only` | Read-only modifier | Do not write files, issues, or PRs |
+| `investigate: ...` | Read-only diagnosis | Report findings and stop; do not implement, even when running unattended |
 | `feature: ... no plan needed` | Explicit plan waiver | Record the waiver, then implement |
 | `optimize: ... advisory-only` | Packetization only | Emit the execution packet and stop |
 
@@ -190,6 +191,7 @@ the repository-specific subject, evidence, and acceptance criteria.
 | `bug:` | `bug: the Windows sync script exits 1 when BASECOAT_REPO is unset; reproduce it and fix it` | Evidence first, then targeted fix and tests | Root cause, changed files, reproduction, passing validation |
 | `feature:` | `feature: add audit logging to the orders API; propose the plan before editing` | Plan, confirmation, implementation, tests | Plan, implementation summary, risks, test evidence |
 | `audit:` | `audit: review GitHub Actions for secret exposure; read-only` | Inventory, inspect, classify, no writes | Findings ranked by severity, evidence, remediation |
+| `investigate:` | `investigate: our CI model costs are climbing; find what is driving it` | Quantify, root-cause, rank options, no writes | Measurements, root cause, ranked options with tradeoffs, recommended next intent |
 | `plan:` | `plan: prepare the next sprint from the oldest actionable issues` | Triage, dependency map, ordering | Sprint goal, issue list, dependencies, acceptance criteria |
 | `optimize:` | `optimize: plan, implement, test, and release a cross-domain API change` | Normalize into a bounded packet before action | Objectives, scope, stop rules, validation, routing |
 | `spike:` | `spike: compare two approaches for caching API responses; research only` | Time-boxed investigation | Options, evidence, recommendation, no implementation |

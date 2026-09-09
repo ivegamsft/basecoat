@@ -88,7 +88,7 @@ Use canonical terms in agents, skills, instructions, and prompts.
 | Intent family | Typical prefixes | Primary outcome | Primary agent classes |
 |---|---|---|---|
 | Delivery | `feature:`, `refactor:` | Shipped change set | architect, dev, reviewer |
-| Reliability | `bug:`, `outage:`, `perf:` | Restored stability | diagnostics, responder, SRE |
+| Reliability | `bug:`, `outage:`, `perf:`, `rca:`, `investigate:` | Restored stability | diagnostics, responder, SRE |
 | Governance | `audit:`, `security:`, `chore:` | Risk reduction and compliance | security, policy, release |
 | Planning | `plan:`, `spike:` | Decision artifact or backlog map | planner, product, architect |
 | Quality | `test:`, `docs:` | verification and clarity | test strategy, reviewer, writer |
