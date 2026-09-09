@@ -167,3 +167,27 @@ before re-diagnosing a matching symptom.
   create PRs in selected repos, prefer org/repo-scoped policy alternatives or a
   GitHub App or brokered token design.
 - **evidence:** Issue #3158; Issue #3159.
+
+### orphaned-test-suite-drift
+
+- **id:** `orphaned-test-suite-drift`
+- **symptom:** A `tests/*-tests.ps1` suite fails when run by hand but CI is
+  green, and its assertions pin file paths, workflow `name:` values, or prose
+  that no longer exist anywhere in the repo.
+- **root-cause:** `tests/run-tests.ps1` invokes suites from a hardcoded list, so
+  a suite added to `tests/` without a matching runner entry never executes.
+  Nothing then reports when a rename or a token-budget trim invalidates its
+  expectations, and the rot compounds silently for months.
+- **workaround:** Repair the suite against current reality rather than reverting
+  the product change, and re-home each assertion to wherever the contract now
+  lives. Content moved out of an agent file usually landed in
+  `agents/references/` or `docs/agents/`.
+- **prevention:** `tests/run-tests.ps1` now fails when any `tests/*-tests.ps1`
+  file is reachable from neither the runner nor a workflow, so a new suite
+  cannot be orphaned at birth. When renaming an agent, workflow, or script,
+  grep `tests/` for the old identifier before merging.
+- **evidence:** Issue #3314; PR #3322 — a sweep found 15 orphaned suites, 4 of
+  which had rotted into failure (`program-bootstrap-contract-tests` broken by
+  the #2930 token-budget trim, `agent-merge-workflow-tests` and
+  `governance-metadata-drift-tests` by workflow renames, and
+  `ci-audit-script-tests` by an agent file rename).
