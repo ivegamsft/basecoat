@@ -3,6 +3,7 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
 $triagePath = Join-Path $repoRoot '.github\workflows\issue-triage.md'
 $synthesisPath = Join-Path $repoRoot '.github\workflows\issue-to-spec-synthesis.yml'
+$skillRefPath = Join-Path $repoRoot 'skills\issue-triage\references\triage-workflow.md'
 
 function Assert-Match {
     param([string]$Content, [string]$Pattern, [string]$Message)
@@ -14,9 +15,21 @@ function Assert-Match {
 
 $triage = Get-Content $triagePath -Raw
 $synthesis = Get-Content $synthesisPath -Raw
+$skillRef = Get-Content $skillRefPath -Raw
 
-Assert-Match $triage 'Apply the `synthesize-spec` label' 'Triage must trigger synthesis when it applies needs-prd.'
-Assert-Match $triage 'Only apply `needs-info` when the issue failed' 'Triage must not add needs-info to otherwise actionable issues.'
+# Step 7 only skips the advisory when BOTH a PRD link and a spec link are present.
+# The skill reference decision tree previously said OR, which would let an issue
+# carrying just one of the two artifacts skip synthesis entirely.
+if ($skillRef -match 'contain\s+a\s+PRD\s+link[^\r\n]*\bOR\b') {
+    throw 'Skill reference PRD/spec decision tree must require BOTH links, matching Step 7 of issue-triage.md.'
+}
+Assert-Match $skillRef 'contain\s+BOTH\s+a\s+PRD\s+link' 'Skill reference must state that both a PRD link and a spec link are required.'
+
+# Prompt prose is hard-wrapped, so these contract phrases can legitimately span a
+# line break. Match on \s+ instead of a literal space so re-wrapping the guidance
+# cannot fail the contract while the guidance itself is still present.
+Assert-Match $triage 'Apply\s+the\s+`synthesize-spec`\s+label' 'Triage must trigger synthesis when it applies needs-prd.'
+Assert-Match $triage 'Only\s+apply\s+`needs-info`\s+when\s+the\s+issue\s+failed' 'Triage must not add needs-info to otherwise actionable issues.'
 Assert-Match $synthesis 'const prdPath = `docs/prd/synthesized/' 'Synthesis must generate a PRD artifact.'
 Assert-Match $synthesis 'const specPath = `docs/spec/synthesized/' 'Synthesis must generate a spec artifact.'
 Assert-Match $synthesis 'path: prdPath' 'Synthesis must write the generated PRD.'

@@ -306,16 +306,21 @@ issues whose body references risky paths (`skills/`, `agents/`, `instructions/`,
 
 ```text
 Issue type == enhancement (or body mentions risky paths)?
-├── Yes → does the issue body contain a PRD link (text matching /prd/i) OR a spec link (/\bspec\b|technical specification/i)?
+├── Yes → does the issue body contain BOTH a PRD link (text matching /prd/i) AND a spec link (/\bspec\b|technical specification/i)?
 │   ├── Yes → no action needed; PRD/spec pre-flight passes
-│   └── No → add `needs-prd` label; post advisory comment (see template below)
+│   └── No → add `needs-prd` and `synthesize-spec` labels; embed the advisory below as a section of the triage summary comment
 └── No → skip this check
 ```
 
-### Advisory Comment Template
+> When running as the `issue-triage` agentic workflow, `safeoutputs.add-comment`
+> permits one call per run. The advisory must therefore be a section of the single
+> triage summary comment. Emitting it as its own comment consumes the quota and the
+> triage summary is dropped, failing the run with `report_incomplete`.
+
+### Advisory Section Template
 
 ```markdown
-## PRD/Spec Pre-flight Advisory
+### PRD/Spec pre-flight
 
 This issue is classified as an **enhancement** that is likely to touch risky paths
 (`skills/`, `agents/`, `instructions/`, `scripts/`, or `.github/workflows/`).

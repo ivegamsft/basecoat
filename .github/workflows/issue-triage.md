@@ -44,9 +44,11 @@ This workflow can safely write **labels** and **comments** only. Within this cap
 
 - Treat the canonical type label as the issue "type field" (`bug`, `enhancement`, `documentation`, `chore`, `security`, `question`).
 - Treat the canonical priority label as the issue "priority field" (`priority:critical`, `priority:high`, `priority:medium`, `priority:low`).
-- Use relationship comments (for example `Blocked by #123`, `Depends on #456`, `Related to #789`) to persist issue relationships.
+- Persist issue relationships as markers (for example `Blocked by #123`, `Depends on #456`, `Related to #789`) inside the single triage summary comment.
 - Use `safeoutputs.add-labels` to apply and normalize labels.
-- Use `safeoutputs.add-comment` to post the triage summary and relationship markers.
+- Use `safeoutputs.add-comment` to post the triage summary. It permits **one call per
+  run**, so the summary must carry every comment-borne output: relationship markers,
+  duplicate references, quality-check failures, and the PRD/spec advisory.
 
 Fetch the full issue details using:
 
@@ -66,7 +68,8 @@ Before classifying, perform a minimum-bar quality check per `skills/issue-triage
 - For bugs: expected vs actual behavior or error message is present.
 - For enhancements: a problem statement or user story is present.
 
-If the issue fails the minimum-bar quality check, add `needs-triage` and `needs-info`, then comment listing what is missing.
+If the issue fails the minimum-bar quality check, add `needs-triage` and `needs-info`,
+then list what is missing in the **Quality check** field of the Step 8 triage summary.
 
 ### Step 2 — Classify the Issue Type
 
@@ -116,7 +119,9 @@ issue field by `.github/workflows/issue-field-sync.yml`.
 
 ### Step 6 — Record Relationships
 
-If the issue body references other issues, add relationship comments using explicit markers:
+If the issue body references other issues, record the relationships using explicit
+markers inside the Step 8 triage summary comment (not as separate comments, which
+would exceed the one-comment-per-run limit):
 
 - `Blocked by #N`
 - `Depends on #N`
@@ -141,24 +146,25 @@ If EITHER link is missing:
 2. Apply the `synthesize-spec` label via `safeoutputs.add-labels`. This triggers
    `.github/workflows/issue-to-spec-synthesis.yml`, which generates linked draft
    PRD and spec artifacts for the issue.
-3. Post an advisory comment via `safeoutputs.add-comment` explaining that
-   synthesis has been requested and that any implementation PR must reference the
-   generated PRD and spec:
+3. Record the advisory as the **PRD/Spec pre-flight** section of the single triage
+   summary comment in Step 8. Do **not** emit a separate comment for it:
+   `safeoutputs.add-comment` permits one call per run, so posting the advisory
+   separately consumes the quota and the triage summary is then dropped, failing
+   the run with `report_incomplete`.
 
-```text
-PRD: <link>
-Spec: <link>
-```
-
-Reference `skills/issue-triage/references/triage-workflow.md` Check 10 for the full
-advisory comment template. Only apply `needs-info` when the issue failed the
-minimum-bar quality check or lacks information synthesis cannot infer.
+Reference `skills/issue-triage/references/triage-workflow.md` Check 10 for the
+advisory wording to embed in that section.
+Only apply `needs-info` when the issue failed the minimum-bar quality check or
+lacks information synthesis cannot infer.
 
 If both links are already present in the issue body, no action is needed for this step.
 
 ### Step 8 — Post Triage Summary
 
-Post a comment using this structure:
+Post exactly **one** comment per run. `safeoutputs.add-comment` permits a single
+call, so every output from the preceding steps must be folded into this comment.
+
+Use this structure:
 
 ```markdown
 ## Issue Triage Summary
@@ -175,6 +181,15 @@ Post a comment using this structure:
 - [ ] Step 2
 
 **Duplicate of**: #N (if applicable)
+
+### PRD/Spec pre-flight
+
+Include this section only when Step 7 applied `needs-prd` and `synthesize-spec`.
+State that spec synthesis has been requested and that any implementation PR must
+reference the generated PRD and spec:
+
+PRD: <link>
+Spec: <link>
 ```
 
 Keep the comment factual and professional. Do not speculate beyond what the
