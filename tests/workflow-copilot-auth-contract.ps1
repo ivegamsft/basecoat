@@ -82,6 +82,27 @@ foreach ($name in $workflowNames) {
     }
 }
 
+# Lock files are generated artifacts, so a value that differs between them means
+# they were produced by different compiler versions. That drift surfaces later as
+# an unrelated diff in an unrelated pull request, which is how it was first found.
+$expiryByWorkflow = @{}
+foreach ($name in $workflowNames) {
+    $runtimePath = Join-Path $repoRoot ".github/workflows/$name.lock.yml"
+    if (-not (Test-Path $runtimePath)) { continue }
+    $match = [regex]::Match(
+        (Get-Content $runtimePath -Raw),
+        'GH_AW_ACTION_FAILURE_ISSUE_EXPIRES_HOURS:\s*"([^"]*)"'
+    )
+    if ($match.Success) {
+        $expiryByWorkflow[$name] = $match.Groups[1].Value
+    }
+}
+$distinctExpiry = @($expiryByWorkflow.Values | Sort-Object -Unique)
+if ($distinctExpiry.Count -gt 1) {
+    $detail = ($expiryByWorkflow.GetEnumerator() | Sort-Object Name | ForEach-Object { "$($_.Key)=$($_.Value)" }) -join ', '
+    $failures += "gh-aw lock files disagree on GH_AW_ACTION_FAILURE_ISSUE_EXPIRES_HOURS ($detail); recompile all with 'gh aw compile'."
+}
+
 if ($failures.Count -gt 0) {
     Write-Host 'Copilot authentication workflow contract FAILED.' -ForegroundColor Red
     foreach ($failure in $failures) {
