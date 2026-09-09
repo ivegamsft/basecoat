@@ -127,8 +127,8 @@ before re-diagnosing a matching symptom.
 - **id:** `agent-description-derived-artifacts`
 - **symptom:** Editing an `agents/*.agent.md` frontmatter `description` fails
   `tests/prompt-library-tests.ps1` with either "prompt-library.md is stale" or
-  "Prompt library missing regression example: @<agent> Help me with this task:
-  <phrase>".
+  `Prompt library missing regression example: @<agent> Help me with this task:
+  <phrase>`.
 - **root-cause:** `docs/reference/prompt-library.md` is generated, and it derives
   each agent's example task text from the *first phrase* of that agent's
   description. The test additionally pins a handful of those examples verbatim,
