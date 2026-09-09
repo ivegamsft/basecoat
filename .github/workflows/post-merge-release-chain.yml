@@ -6,11 +6,19 @@ on:
       - main
     types:
       - closed
+  schedule:
+    # Backfill sweep. Merges performed with the built-in GITHUB_TOKEN (the
+    # auto-merge executor uses it) never emit a pull_request event, because
+    # GitHub suppresses event delivery for GITHUB_TOKEN-authored actions to
+    # prevent workflow recursion. The event path alone therefore drops
+    # release-chain evidence for every auto-merged PR, which the stuck-state
+    # watchdog then escalates. This sweep reconciles those PRs.
+    - cron: "5 * * * *"
   workflow_dispatch:
     inputs:
       pr_number:
-        description: "Merged PR number to process"
-        required: true
+        description: "Merged PR number to process. Leave empty to run a backfill sweep."
+        required: false
         type: string
 
 permissions:
@@ -22,7 +30,12 @@ permissions:
   statuses: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # Scope the group to the PR being chained, not the ref. Every merged PR
+  # resolves to the same ref (main), so a ref-scoped group combined with
+  # cancel-in-progress made each merge cancel the previous merge's still-running
+  # chain, silently dropping its release evidence whenever merges landed close
+  # together. The backfill sweep gets its own group via the event-name fallback.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || inputs.pr_number || github.event_name }}
   cancel-in-progress: true
 
 jobs:
@@ -30,7 +43,7 @@ jobs:
     name: Chain merged PR into release gate
     if: |
       (github.event_name == 'pull_request' && github.event.pull_request.merged == true) ||
-      github.event_name == 'workflow_dispatch'
+      (github.event_name == 'workflow_dispatch' && inputs.pr_number != '')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -324,3 +337,89 @@ jobs:
                 `Release gate dispatch failed for PR #${prNumber}; remediation issue opened: ${remediation.data.html_url}`
               );
             }
+
+  reconcile:
+    name: Backfill merged PRs missing release-chain evidence
+    if: |
+      github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' && inputs.pr_number == '')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Dispatch chain for merged PRs without evidence
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        env:
+          LOOKBACK_DAYS: "7"
+          GRACE_MINUTES: "20"
+          MAX_BACKFILL: "25"
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const marker = 'post-merge-release-chain:v1';
+            const toInt = (value, fallback) => {
+              const parsed = Number(value);
+              return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
+            };
+            const lookbackDays = toInt(process.env.LOOKBACK_DAYS, 7);
+            // Leave the event-driven path a head start so a PR merged by a real
+            // user (which does deliver pull_request) is not chained twice.
+            const graceMinutes = toInt(process.env.GRACE_MINUTES, 20);
+            const maxBackfill = toInt(process.env.MAX_BACKFILL, 25);
+            const now = Date.now();
+
+            const since = new Date(now - lookbackDays * 24 * 60 * 60 * 1000)
+              .toISOString()
+              .slice(0, 10);
+            const mergedPrs = await github.paginate(github.rest.search.issuesAndPullRequests, {
+              q: `repo:${owner}/${repo} is:pr is:merged merged:>=${since} sort:updated-desc`,
+              per_page: 100
+            });
+
+            const dispatched = [];
+            const skipped = [];
+            for (const pr of mergedPrs) {
+              if (dispatched.length >= maxBackfill) break;
+
+              const mergedAtMs = new Date(pr.closed_at || pr.updated_at).getTime();
+              if (Number.isFinite(mergedAtMs) && now - mergedAtMs < graceMinutes * 60 * 1000) {
+                skipped.push(`#${pr.number} (within grace window)`);
+                continue;
+              }
+
+              const comments = await github.paginate(github.rest.issues.listComments, {
+                owner,
+                repo,
+                issue_number: pr.number,
+                per_page: 100
+              });
+              const hasEvidence = comments.some(comment =>
+                comment.user?.login === 'github-actions[bot]' &&
+                typeof comment.body === 'string' &&
+                comment.body.includes(marker)
+              );
+              if (hasEvidence) continue;
+
+              try {
+                await github.rest.actions.createWorkflowDispatch({
+                  owner,
+                  repo,
+                  workflow_id: 'post-merge-release-chain.yml',
+                  ref: context.payload.repository?.default_branch || 'main',
+                  inputs: { pr_number: String(pr.number) }
+                });
+                dispatched.push(pr.number);
+                core.info(`Backfilled release chain for merged PR #${pr.number}.`);
+              } catch (error) {
+                core.warning(
+                  `Failed to backfill release chain for PR #${pr.number}: ${String(error?.message || error)}`
+                );
+              }
+            }
+
+            core.summary
+              .addHeading('Post-merge release chain backfill')
+              .addRaw(`\nMerged PRs scanned: ${mergedPrs.length}\n`)
+              .addRaw(`Dispatched: ${dispatched.length}${dispatched.length ? ` (${dispatched.map(n => `#${n}`).join(', ')})` : ''}\n`)
+              .addRaw(`Skipped within grace window: ${skipped.length}\n`)
+              .write();

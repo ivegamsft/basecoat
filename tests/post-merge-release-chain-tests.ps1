@@ -89,4 +89,31 @@ if ($workflow -notmatch "dry_run:\s*'true'") {
     throw 'Post-merge release-gate dispatch must run in dry-run (evidence-only) mode.'
 }
 
+# Merges performed by the auto-merge executor use the built-in GITHUB_TOKEN,
+# and GitHub suppresses pull_request event delivery for GITHUB_TOKEN-authored
+# actions. The event trigger alone therefore never fires for auto-merged PRs,
+# leaving them permanently without release-chain evidence. A scheduled backfill
+# sweep is the only path that covers every merge actor.
+if ($workflow -notmatch '(?ms)schedule:\s*\r?\n(\s*#[^\r\n]*\r?\n)*\s*-\s*cron:\s*"5 \* \* \* \*"') {
+    throw 'Workflow must run a scheduled backfill sweep for merges that emit no pull_request event.'
+}
+if ($workflow -notmatch '(?m)^\s{2}reconcile:') {
+    throw 'Workflow must define the reconcile backfill job.'
+}
+if ($workflow -notmatch "workflow_id:\s*'post-merge-release-chain\.yml'") {
+    throw 'Backfill sweep must re-dispatch this workflow per merged PR lacking evidence.'
+}
+if ($workflow -notmatch '(?m)pr_number:\s*\r?\n\s*description:[^\r\n]*\r?\n\s*required:\s*false') {
+    throw 'pr_number must be optional so an empty dispatch runs a backfill sweep.'
+}
+# A ref-scoped concurrency group collapses every merged PR into one group
+# (all merges resolve to main); combined with cancel-in-progress each merge
+# cancelled the previous merge's still-running chain and dropped its evidence.
+if ($workflow -match '(?m)group:\s*\$\{\{\s*github\.workflow\s*\}\}-\$\{\{\s*github\.ref\s*\}\}') {
+    throw 'Concurrency group must not be ref-scoped; concurrent merges would cancel each other.'
+}
+if ($workflow -notmatch 'group:\s*\$\{\{\s*github\.workflow\s*\}\}-\$\{\{\s*github\.event\.pull_request\.number') {
+    throw 'Concurrency group must be scoped to the pull request being chained.'
+}
+
 Write-Host 'Post-merge release chain workflow tests passed.'

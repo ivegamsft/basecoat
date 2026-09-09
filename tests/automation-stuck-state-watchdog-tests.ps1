@@ -72,6 +72,30 @@ if ($workflow -notmatch '(?m)\*\*Owner\*\*' -or $workflow -notmatch '(?m)\*\*Nex
     throw 'Escalation records must include owner, next action, and evidence.'
 }
 
+# Without a resolution path the watchdog only ever opens escalations, so a
+# single upstream defect accumulates an unbounded backlog of stale remediation
+# issues that stay open long after the condition clears.
+if ($workflow -notmatch 'resolutionReason') {
+    throw 'Workflow must evaluate whether an existing escalation has been resolved.'
+}
+if ($workflow -notmatch "state:\s*'closed'") {
+    throw 'Workflow must close escalation issues whose condition is resolved.'
+}
+if ($workflow -notmatch "state_reason:\s*'completed'") {
+    throw 'Resolved escalations must be closed as completed.'
+}
+if ($workflow -notmatch '(?m)## Escalation resolved') {
+    throw 'Workflow must record a resolution comment before closing an escalation.'
+}
+if ($workflow -notmatch 'activeFingerprints') {
+    throw 'Resolution pass must not close escalations that are still breaching in the current run.'
+}
+foreach ($resolvableStage in @('merge_to_release', 'ready_to_merge', 'issue_to_pr')) {
+    if ($workflow -notmatch "stage === '$resolvableStage'") {
+        throw "Resolution pass must handle stage '$resolvableStage'."
+    }
+}
+
 if (-not $config.thresholds.issue_to_pr_hours -or -not $config.thresholds.ready_to_merge_hours -or -not $config.thresholds.merge_to_release_hours) {
     throw 'SLA config must define issue_to_pr_hours, ready_to_merge_hours, and merge_to_release_hours.'
 }

@@ -81,6 +81,7 @@
 | portal-tests.yml | app-backend-build | public-internet | github-hosted-linux | github-hosted-linux | aligned |
 | portal-tests.yml | app-dashboard-build | public-internet | github-hosted-linux | github-hosted-linux | aligned |
 | post-merge-release-chain.yml | chain | public-internet | github-hosted-linux | github-hosted-linux | aligned |
+| post-merge-release-chain.yml | reconcile | public-internet | github-hosted-linux | github-hosted-linux | aligned |
 | post-onboarding-drift-loop.yml | drift-loop | public-internet | github-hosted-linux | github-hosted-linux | aligned |
 | pr-auto-merge-executor.yml | evaluate | public-internet | github-hosted-linux | github-hosted-linux | aligned |
 | pr-auto-merge-executor.yml | merge | public-internet | github-hosted-linux | github-hosted-linux | aligned |

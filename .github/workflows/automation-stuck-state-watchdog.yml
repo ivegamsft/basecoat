@@ -317,6 +317,120 @@ jobs:
               return acc;
             }, {});
 
+            // Resolution pass. The watchdog previously only ever created or
+            // commented on escalations and had no path back to closed, so an
+            // escalation issue stayed open permanently even after the condition
+            // that produced it cleared. That let a single upstream defect
+            // accumulate an unbounded backlog of stale remediation issues.
+            // Close escalations whose stage condition is verifiably resolved.
+            const fingerprintPattern = /<!-- automation-watchdog:fingerprint:([^:]+):([^:]+):(\d+) -->/;
+            const activeFingerprints = new Set(
+              findings.map(finding => `${finding.stage}:${finding.entityType}:${finding.entityNumber}`)
+            );
+
+            const resolutionReason = async (stage, entityNumber) => {
+              if (stage === 'merge_to_release') {
+                const { data: pr } = await github.rest.pulls.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: entityNumber
+                });
+                if (!pr.merged) return 'pull request was closed without merging';
+                const comments = await github.paginate(github.rest.issues.listComments, {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: entityNumber,
+                  per_page: 100
+                });
+                const hasEvidence = comments.some(comment =>
+                  comment.user?.login === 'github-actions[bot]' &&
+                  typeof comment.body === 'string' &&
+                  comment.body.includes(releaseChainMarker)
+                );
+                return hasEvidence ? 'release-chain evidence is present on the merged pull request' : null;
+              }
+
+              if (stage === 'ready_to_merge') {
+                const { data: pr } = await github.rest.pulls.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: entityNumber
+                });
+                if (pr.state !== 'closed') return null;
+                return pr.merged ? 'pull request has merged' : 'pull request was closed';
+              }
+
+              if (stage === 'issue_to_pr') {
+                const { data: issue } = await github.rest.issues.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: entityNumber
+                });
+                if (issue.state === 'closed') return 'issue has been closed';
+                return normalizeLabels(issue.labels).includes('approved')
+                  ? null
+                  : 'issue no longer carries the approved label';
+              }
+
+              return null;
+            };
+
+            const resolvedEscalations = [];
+            if (!snapshotLoadFailed) {
+              for (const escalationIssue of openRemediationIssues) {
+                if (String(escalationIssue.state || '').toLowerCase() === 'closed') continue;
+                if (typeof escalationIssue.body !== 'string') continue;
+                const match = escalationIssue.body.match(fingerprintPattern);
+                if (!match) continue;
+
+                const [, stage, entityType, entityNumberRaw] = match;
+                const entityNumber = Number(entityNumberRaw);
+                if (!Number.isInteger(entityNumber) || entityNumber <= 0) continue;
+                // Still breaching in this run: leave it open.
+                if (activeFingerprints.has(`${stage}:${entityType}:${entityNumber}`)) continue;
+
+                try {
+                  const reason = await resolutionReason(stage, entityNumber);
+                  if (!reason) continue;
+
+                  await withSecondaryRateLimitRetry(() =>
+                    github.rest.issues.createComment({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: escalationIssue.number,
+                      body: [
+                        marker,
+                        '## Escalation resolved',
+                        '',
+                        `- **Stage**: \`${stage}\``,
+                        `- **Entity**: ${entityType.toUpperCase()} #${entityNumber}`,
+                        `- **Resolution**: ${reason}.`,
+                        '',
+                        'Closed automatically by the automation stuck-state watchdog.'
+                      ].join('\n')
+                    }),
+                  `comment resolution on issue #${escalationIssue.number}`);
+
+                  await withSecondaryRateLimitRetry(() =>
+                    github.rest.issues.update({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: escalationIssue.number,
+                      state: 'closed',
+                      state_reason: 'completed'
+                    }),
+                  `close resolved issue #${escalationIssue.number}`);
+
+                  resolvedEscalations.push(escalationIssue.number);
+                } catch (error) {
+                  core.warning(
+                    `Failed to resolve escalation issue #${escalationIssue.number}: ` +
+                    String(error?.message || error)
+                  );
+                }
+              }
+            }
+
             core.summary
               .addHeading('Automation stuck-state watchdog summary')
               .addTable([
@@ -329,4 +443,6 @@ jobs:
               .addRaw(`Snapshot load: ${snapshotLoadFailed ? 'failed' : 'ok'}\n`)
               .addRaw(`\nEscalations: ${escalations.length}\n`)
               .addRaw(`Escalation failures: ${escalationFailures.length}\n`)
+              .addRaw(`Resolved and closed: ${resolvedEscalations.length}` +
+                `${resolvedEscalations.length ? ` (${resolvedEscalations.map(n => `#${n}`).join(', ')})` : ''}\n`)
               .write();
