@@ -2,6 +2,13 @@
 on:
   pull_request:
     types: [opened]
+    # Cost control: skip agentic review on pure-documentation changes. Functional
+    # markdown (agents/, skills/, prompts/, .github/workflows/) is still reviewed.
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '**/README.md'
+      - '.github/instructions/**'
   workflow_dispatch:
 permissions:
   contents: read
@@ -11,7 +18,8 @@ permissions:
 safe-outputs:
   add-comment:
 engine: copilot
-model: claude-sonnet-5
+# Cost control: advisory blast-radius commentary does not require a frontier model.
+model: gpt-5-mini
 timeout-minutes: 20
 run-name: "Release Impact — PR #${{ github.event.pull_request.number }}"
 ---

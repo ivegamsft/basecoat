@@ -2,6 +2,13 @@
 on:
   pull_request:
     types: [opened, synchronize]
+    # Cost control: skip agentic review on pure-documentation changes. Functional
+    # markdown (agents/, skills/, prompts/, .github/workflows/) is still reviewed.
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '**/README.md'
+      - '.github/instructions/**'
   workflow_dispatch:
     inputs:
       pr_number:

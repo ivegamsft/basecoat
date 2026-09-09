@@ -215,6 +215,60 @@ Measured data from last 30 days: 42.4% gpt-5.3-codex, 24% gpt-5.4-mini, 18.2% Ha
 | File scans, pattern lookups, lightweight triage | gpt-5.4-mini or Haiku | Ambiguous architecture/security tradeoffs |
 | Deep refactor, architecture change, security reasoning | gpt-5.3-codex or stronger | N/A |
 
+## Agentic CI Workflow Costs (GitHub Actions)
+
+Session hygiene above covers interactive CLI spend. **Agentic PR review workflows are a
+separate cost surface** and are billed per pull request, not per session.
+
+### Standing policy
+
+1. **Gate every PR-triggered agent on `paths-ignore`.** Pure-documentation changes must
+   not invoke a model. Use this baseline list:
+
+   ```yaml
+   on:
+     pull_request:
+       types: [opened, synchronize]
+       paths-ignore:
+         - 'docs/**'
+         - '*.md'
+         - '**/README.md'
+         - '.github/instructions/**'
+   ```
+
+   Do **not** blanket-ignore `**/*.md` — `agents/`, `skills/`, `prompts/`, and
+   `.github/workflows/*.md` are functional assets and must still be reviewed.
+
+2. **Match model to consequence.** Advisory agents (release impact, triage, retro) run
+   `gpt-5-mini`. Reserve `claude-sonnet-5` for agents whose false negatives carry real
+   risk — currently only `security-analyst`.
+
+3. **One owner per concern.** Overlapping agent charters double the spend on every PR
+   for one answer. Security analysis belongs to `security-analyst`; `code-review-agent`
+   covers correctness and logic only.
+
+4. **Always set `concurrency.cancel-in-progress: true`** so superseded pushes stop
+   burning tokens.
+
+5. **Keep agents off the required-status-check list.** Required + `paths-ignore` causes
+   PRs to hang waiting on checks that will never report.
+
+### Measured baseline (2026-09-09, issue #3291)
+
+| Agent | Trigger | Model | Rate |
+|---|---|---|---|
+| `code-review-agent` | opened, synchronize | `gpt-5-mini` | ~20 runs/day |
+| `security-analyst` | opened, synchronize | `claude-sonnet-5` | ~20 runs/day |
+| `release-impact-advisor` | opened | `gpt-5-mini` | ~12 runs/day |
+
+Findings that drove the policy: 40% of merged PRs were markdown-only yet triggered all
+three agents; measured 1.54 agent runs per PR from `synchronize` re-reviews; and
+`claude-sonnet-5` accounted for an estimated ~95% of agentic review model spend.
+
+**Unlike interactive sessions — where model choice is secondary — model choice dominates
+here**, because each run carries a similar, small context (one PR diff). Downshifting a
+frontier model to `gpt-5-mini` on a high-frequency agent is a ~10x per-run saving.
+
 ## Fleet Patterns
 
 ### Direct Skill Targeting (Skip the Router)

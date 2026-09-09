@@ -1,9 +1,16 @@
 ---
 name: code-review-agent
-description: "Automated PR code review for bugs, security vulnerabilities, and logic errors. USE FOR: finding correctness issues, security vulnerabilities, data loss risks, logic errors. DO NOT USE FOR: style/formatting feedback, refactoring suggestions, pre-existing issues unrelated to the PR."
+description: "Automated PR code review for bugs, correctness defects, and logic errors. USE FOR: finding correctness issues, data loss risks, logic errors, missing error handling. DO NOT USE FOR: style/formatting feedback, refactoring suggestions, pre-existing issues unrelated to the PR, or security vulnerability analysis (owned by security-analyst)."
 on:
   pull_request:
     types: [opened, synchronize]
+    # Cost control: skip agentic review on pure-documentation changes. Functional
+    # markdown (agents/, skills/, prompts/, .github/workflows/) is still reviewed.
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '**/README.md'
+      - '.github/instructions/**'
   workflow_dispatch:
 permissions:
   contents: read
@@ -25,8 +32,12 @@ run-name: "Code Review — PR #${{ github.event.pull_request.number }}"
 # BaseCoat - Code Review Agent
 
 You are performing an automated code review on a pull request. Your goal is to
-surface genuine issues — bugs, security vulnerabilities, and logic errors —
+surface genuine issues — bugs, correctness defects, and logic errors —
 with high signal-to-noise ratio. Do not comment on style or formatting.
+
+Security vulnerability analysis is **out of scope** for this agent. A dedicated
+`security-analyst` agent runs on the same pull request events and owns that
+analysis. Do not duplicate it.
 
 ## Context
 
@@ -63,7 +74,6 @@ Analyze each changed file for:
 
 #### 🔴 Critical (must fix before merge)
 
-- Security vulnerabilities (injection, auth bypass, secret exposure, XSS)
 - Data loss bugs (missing null checks causing crashes, incorrect destructive operations)
 - Logic errors that change observable behavior in a clearly wrong way
 - Missing error handling on critical paths
@@ -85,6 +95,7 @@ Analyze each changed file for:
 
 **Do NOT comment on:**
 
+- Security vulnerabilities (owned by the `security-analyst` agent — do not duplicate)
 - Code style, formatting, or naming conventions (leave to linters)
 - Missing comments or documentation (unless it's a public API)
 - Personal preference differences
