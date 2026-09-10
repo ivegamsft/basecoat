@@ -3,8 +3,6 @@ name: electron-apps
 compatibility: [github-copilot-cli]
 description: "Use when building secure, production-ready Electron desktop apps with guidance for IPC, preload APIs, packaging, updates, and renderer isolation. USE FOR: secure Electron IPC design, preload script API patterns, package and sign desktop app, implement auto-update flow, review BrowserWindow security settings. DO NOT USE FOR: generic web SPA architecture, mobile app development, browser extension work."
 category: infrastructure
-
-applyTo: agent-electron-developer, agent-desktop-engineer
 metadata:
   category: infrastructure
   maturity: stable
@@ -15,6 +13,10 @@ allowed-tools: []
 # Electron Application Development
 
 Secure IPC design, preload APIs, packaging, and release automation for production Electron apps.
+
+## Agent Pairing
+
+Use with `electron-developer` or `desktop-engineer` agents for Electron-specific implementation and review workflows.
 
 ## Reference Files
 
