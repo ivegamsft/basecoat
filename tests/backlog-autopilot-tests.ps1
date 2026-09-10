@@ -80,6 +80,58 @@ Assert ($dependentWave -gt 1) "dependent #10 lands in a later wave (wave $depend
 Assert ($waves.blocked -contains 50) "dependent on open non-actionable issue (#50) stays blocked"
 Assert (-not ($allWaved -contains 50)) "blocked dependent #50 never waved"
 
+Write-Host "backlog-autopilot: epic sub-issue and parent-ref ordering"
+# Epic #100 has native sub-issues 110/120/130; 130 carries an excluded label so
+# it is never actionable, which must keep the epic blocked. Epic #200 has one
+# actionable child (210) and must land in a LATER wave. Epic #300 has no native
+# sub-issue array; its child #310 declares "Parent: #300", which must still
+# order the epic after the child.
+$epicFixture = @(
+    [pscustomobject]@{ number = 100; createdAt = "2026-07-10T00:00:00Z"; title = "epic native"; body = "Epic umbrella"; labels = @(); subIssues = @(110, 120, 130) },
+    [pscustomobject]@{ number = 110; createdAt = "2026-07-11T00:00:00Z"; title = "child a"; body = "Parent: test/repo#100"; labels = @() },
+    [pscustomobject]@{ number = 120; createdAt = "2026-07-12T00:00:00Z"; title = "child b"; body = "Parent: #100"; labels = @() },
+    [pscustomobject]@{ number = 130; createdAt = "2026-07-13T00:00:00Z"; title = "child needs-info"; body = "Parent: #100"; labels = @([pscustomobject]@{ name = "needs-info" }) },
+    [pscustomobject]@{ number = 200; createdAt = "2026-07-14T00:00:00Z"; title = "epic all-actionable"; body = "umbrella"; labels = @(); subIssues = @(210) },
+    [pscustomobject]@{ number = 210; createdAt = "2026-07-15T00:00:00Z"; title = "child of 200"; body = "no deps"; labels = @() },
+    [pscustomobject]@{ number = 300; createdAt = "2026-07-16T00:00:00Z"; title = "epic parent-ref only"; body = "umbrella no native"; labels = @() },
+    [pscustomobject]@{ number = 310; createdAt = "2026-07-17T00:00:00Z"; title = "child parent-ref"; body = "Parent: #300"; labels = @() },
+    # Finding-3 isolation: epic #400 has NO native subIssues array, and its only
+    # child #410 is excluded (needs-info) so it is absent from $ordered. The sole
+    # signal linking them is #410's "Parent: #400" body reference, which must be
+    # parsed from the full issue set. If it were parsed only from $ordered the
+    # excluded child would vanish and #400 would wrongly schedule.
+    [pscustomobject]@{ number = 400; createdAt = "2026-07-18T00:00:00Z"; title = "epic excluded-child parent-ref"; body = "umbrella no native"; labels = @() },
+    [pscustomobject]@{ number = 410; createdAt = "2026-07-19T00:00:00Z"; title = "excluded child parent-ref only"; body = "Parent: #400"; labels = @([pscustomobject]@{ name = "needs-info" }) }
+)
+$epicPath = Join-Path $temp "epic.json"
+$epicFixture | ConvertTo-Json -Depth 6 | Set-Content -Path $epicPath -Encoding utf8
+$epicWavesPath = Join-Path $temp "epic-waves.json"
+& $waveScript -Repo "test/repo" -WaveSize 5 -InputPath $epicPath -OutputPath $epicWavesPath | Out-Null
+Assert ($LASTEXITCODE -eq 0) "build-waves.ps1 exits 0 (epic fixture)"
+$epicWaves = Get-Content $epicWavesPath -Raw | ConvertFrom-Json
+function Get-WaveOf($waves, $n) {
+    $w = ($waves.waves | Where-Object { $_.issues -contains $n } | Select-Object -First 1)
+    if ($w) { return $w.wave } else { return 0 }
+}
+$epicAllWaved = @($epicWaves.waves | ForEach-Object { $_.issues } | ForEach-Object { $_ })
+# Native sub-issue children order the parent after them.
+Assert ((Get-WaveOf $epicWaves 210) -eq 1) "native child #210 lands in wave 1"
+Assert ((Get-WaveOf $epicWaves 200) -gt (Get-WaveOf $epicWaves 210)) "epic #200 lands after its native child #210"
+# Parent-ref child (no native subIssues array) still orders the epic after it.
+Assert ((Get-WaveOf $epicWaves 310) -eq 1) "parent-ref child #310 lands in wave 1"
+Assert ((Get-WaveOf $epicWaves 300) -gt (Get-WaveOf $epicWaves 310)) "epic #300 lands after its parent-ref child #310"
+# An epic with an open-but-excluded (needs-info) child can never complete.
+Assert ($epicWaves.blocked -contains 100) "epic #100 with needs-info child stays blocked"
+Assert (-not ($epicAllWaved -contains 100)) "blocked epic #100 never waved"
+Assert (-not ($epicAllWaved -contains 130)) "excluded child #130 dropped"
+# Finding-3 isolation: parent linked ONLY via an excluded child's Parent: ref.
+Assert ($epicWaves.blocked -contains 400) "epic #400 blocked by excluded parent-ref-only child #410"
+Assert (-not ($epicAllWaved -contains 400)) "blocked epic #400 never waved"
+Assert (-not ($epicAllWaved -contains 410)) "excluded parent-ref-only child #410 dropped"
+# Negative regression: without sub-issue/parent mapping the epic would wrongly
+# co-schedule with its children; assert it does NOT share a wave with them.
+Assert (-not ($epicWaves.waves | Where-Object { ($_.issues -contains 200) -and ($_.issues -contains 210) })) "epic #200 never shares a wave with its child #210"
+
 Write-Host "backlog-autopilot: dependency-cycle detection"
 $cycleFixture = @(
     [pscustomobject]@{ number = 1; createdAt = "2026-07-18T00:00:00Z"; title = "a"; body = "Depends on #2"; labels = @() },
