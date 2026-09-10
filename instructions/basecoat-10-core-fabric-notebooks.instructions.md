@@ -1,6 +1,6 @@
 ---
 description: Deploy and manage Microsoft Fabric notebooks with CI/CD, lakehouse integration, governance, and production patterns.
-applyTo: "**/*.ipynb", "**/*notebook*"
+applyTo: "**/*.ipynb,**/*notebook*"
 ---
 
 # Fabric Notebook Deployment
@@ -212,4 +212,3 @@ response = requests.get(
 )
 lakehouse_data = response.json()
 ```
-

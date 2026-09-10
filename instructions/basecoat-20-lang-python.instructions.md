@@ -3,9 +3,6 @@ title: Python Coding Standards
 type: instruction
 description: "Conventions for Python-centric projects, including data science and ML pipelines with pandas, scikit-learn, DuckDB, and Jupyter notebooks."
 applyTo: "**/*.py"
-  - pandas
-  - scikit-learn
-  - jupyter
 ---
 
 # Python Coding Standards
@@ -99,7 +96,7 @@ Pinned dependencies ensure deterministic environments across machines and CI/CD 
 
 **requirements.in example:**
 
-```
+```text
 pandas>=2.0,<3.0
 scikit-learn>=1.3
 numpy>=1.24
@@ -208,7 +205,7 @@ Comprehensive tests catch regressions and document expected behavior.
 
 **Project structure:**
 
-```
+```text
 myproject/
 ├── src/
 │   └── myproject/

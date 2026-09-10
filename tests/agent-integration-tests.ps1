@@ -137,6 +137,47 @@ function Get-YamlArrayField {
     return $null  # Field not present
 }
 
+# Helper: strict structural validation of a frontmatter mapping. Returns a list
+# of human-readable errors for malformed YAML that the regex field helpers above
+# silently tolerate. Guards against the two failure modes in issue #3325:
+#   1. Multiple top-level quoted scalars on one field
+#      (e.g. applyTo: "a", "b") — must be a single comma-separated scalar.
+#   2. An orphaned block-sequence item ("- x") appended to a scalar-valued key
+#      (e.g. applyTo: "**/*.py" followed by "  - pandas").
+function Get-FrontmatterStructuralErrors {
+    param([string]$Content)
+
+    $errors = @()
+    $lines = ($Content -replace "`r", '') -split "`n"
+    $lastKey = $null
+    $lastKeyHadValue = $false
+
+    foreach ($line in $lines) {
+        if ([string]::IsNullOrWhiteSpace($line)) { continue }
+
+        if ($line -match '^([A-Za-z0-9_.-]+)\s*:\s*(.*)$') {
+            $key = $matches[1]
+            $value = $matches[2].Trim()
+
+            # A single quoted scalar closes with a matching quote at the very end;
+            # a closing quote followed by a comma means a second scalar follows.
+            if ($value -match '^([''"])[^''"]*\1\s*,\s*[''"]') {
+                $errors += "field '$key' has multiple quoted scalars (use one comma-separated scalar)"
+            }
+
+            $lastKey = $key
+            $lastKeyHadValue = -not [string]::IsNullOrWhiteSpace($value)
+        }
+        elseif ($line -match '^\s*-\s+\S') {
+            if ($lastKeyHadValue) {
+                $errors += "orphaned block-sequence item under scalar key '$lastKey'"
+            }
+        }
+    }
+
+    return $errors
+}
+
 Write-Host 'Starting agent integration tests...' -ForegroundColor Cyan
 
 # ============================================================================
@@ -277,6 +318,10 @@ foreach ($file in $instructionFiles) {
     
     if ($null -eq $applyTo -or [string]::IsNullOrWhiteSpace($applyTo)) {
         $failures += "$($file.Name): Missing or empty 'applyTo' field in frontmatter"
+    }
+
+    foreach ($structuralError in (Get-FrontmatterStructuralErrors $frontmatter)) {
+        $failures += "$($file.Name): $structuralError"
     }
 }
 

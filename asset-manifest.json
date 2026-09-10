@@ -1214,7 +1214,7 @@
     {
       "path": "instructions/basecoat-10-core-fabric-notebooks.instructions.md",
       "type": "instruction",
-      "sha": "86673987fb2488f3713a24a5a8685e21cb2759dc",
+      "sha": "fcdc8785be1cac2e099be4f03fb53b540afc8c70",
       "version": null,
       "effectiveVersion": "4.3.0",
       "versionSource": "library"
@@ -1526,7 +1526,7 @@
     {
       "path": "instructions/basecoat-20-lang-python.instructions.md",
       "type": "instruction",
-      "sha": "413d58a6ecd34d613a662ea2b8acd6e749ff0429",
+      "sha": "8b688ef2ce0e321e1241a5cb5105a3016c0f7b0a",
       "version": null,
       "effectiveVersion": "4.3.0",
       "versionSource": "library"
