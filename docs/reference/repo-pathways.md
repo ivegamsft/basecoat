@@ -191,3 +191,37 @@ before re-diagnosing a matching symptom.
   the #2930 token-budget trim, `agent-merge-workflow-tests` and
   `governance-metadata-drift-tests` by workflow renames, and
   `ci-audit-script-tests` by an agent file rename).
+
+### test-suite-subprocess-tax
+
+- **id:** `test-suite-subprocess-tax`
+- **symptom:** `tests/run-tests.ps1` takes roughly 20 minutes locally and
+  `validate-windows` is the slowest required check in CI, while the suites
+  themselves assert almost entirely against static repository text.
+- **root-cause:** Cost is process creation and per-file copying, not assertion
+  work. The runner starts a cold `pwsh` per suite (411 ms measured) and
+  individual suites shell out again per scenario, so wall time tracks
+  subprocess count rather than test count. The heaviest suite,
+  `sync-tests.ps1`, executes the production `sync.ps1` nine times at ~42 s
+  each; within one run the `--depth 1` clone is only 4.5 s while
+  `Copy-Item -Recurse` over 2,586 tracked files costs ~24 s, because
+  `Copy-Item` runs at ~9.2 ms per file on Windows.
+- **workaround:** Time suites individually before optimising anything. Ten of
+  95 suites account for 78 percent of the runtime, so the remaining 85 are not
+  worth touching. Do not filter a full run through `Select-String` — it buffers
+  all output and the run looks hung for 20 minutes.
+- **prevention:** Measure before proposing a fix. The obvious suspect here —
+  repeated cloning — is only 11 percent of a sync scenario, and an
+  optimisation aimed at it would have recovered almost nothing. New suites
+  should assert against repository text in-process rather than spawning `pwsh`,
+  and should reach for a real git fixture only when the behaviour under test is
+  genuinely git-dependent.
+- **evidence:** Measured per-suite totals ~970 s: `sync-tests` 315 s,
+  `lane-closeout` 126 s, `workflow-guardrails` 60 s,
+  `workflow-action-pinning` 59 s, `quality-gate` 44 s, `cleanup-branches` 37 s.
+  Identical content costs 6m48s on the Linux `test` job but 12m22s on
+  `validate-windows`, matching Windows' higher process-creation cost. Two
+  plausible causes were tested and **refuted**: Defender real-time protection
+  is disabled, and moving the 7,744 gitignored `node_modules`/`dist` files in
+  `skills/operation-context-resolver` aside changed nothing (27.2 s vs 28.3 s,
+  131 s vs 126 s, 36.7 s vs 36.8 s).
