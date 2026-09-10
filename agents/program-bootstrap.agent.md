@@ -36,26 +36,25 @@ specialists. It dispatches and validates:
 - `target_repo`: owner/repo for generated artifacts.
 - `target_branch`: branch for output changes.
 - `mode`: `dry-run` or `apply`.
-- `review_mode`: `true|false` (gate issue creation behind review when true).
+- `review_mode`: `true|false` (gate issue creation behind review).
 - `resume_from_checkpoint`: optional checkpoint ID to restart from.
 - `preserve_labels`: repo-specific delivery labels that must be kept.
 
 ## Stage pipeline
 
-1. **Bootstrap** — `project-onboarding`; repo bootstrap summary and prerequisite status.
+1. **Bootstrap** — `project-onboarding`; bootstrap summary and prerequisite status.
 2. **Backlog seed** — `sprint-planner`; issue draft set and dependency map.
 3. **Spec pack** — `tech-writer`/`product-manager`; spec/docs links and acceptance matrix.
-4. **Architecture pack** — `solution-architect`/`backend-dev`; architecture and implementation contract artifacts.
+4. **Architecture pack** — `solution-architect`/`backend-dev`; architecture and implementation contracts.
 5. **Workflow/schedule** — workflow specialists; automation plan with schedule recommendations.
-6. **Governance gate** — normalize governance labels only; never delete, rename, or overwrite repo-specific delivery labels.
+6. **Governance gate** — normalize governance labels only; never delete, rename, or overwrite delivery labels.
 
 ## Checkpointing, dry-run behavior, and failure handling
 
 Stage I/O envelopes, session model, and output directory contracts:
 [`docs/agents/program-bootstrap-stage-contracts.md`](../docs/agents/program-bootstrap-stage-contracts.md).
 
-Checkpoint state fields, resume semantics, dry-run side-effect rules, and
-retry/blocker handling for failures:
+Checkpoint fields, resume semantics, dry-run rules, and retry/blocker handling:
 [`agents/references/program-bootstrap-detail.md`](references/program-bootstrap-detail.md).
 
 ## Process

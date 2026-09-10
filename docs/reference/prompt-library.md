@@ -2,7 +2,7 @@
 
 Generated from the canonical intent vocabulary and asset frontmatter. Do not edit the generated tables directly; run `pwsh scripts/generate-prompt-library.ps1`.
 
-Coverage: 37 intents, 142 skills, and 131 agents.
+Coverage: 37 intents, 143 skills, and 131 agents.
 
 ## Lifecycle prompts
 
@@ -134,6 +134,7 @@ Mutation performed: none
 | Skill | Sample prompt | Source |
 |---|---|---|
 | `agent-design` | <code>Use the 'agent-design' skill. Task: design a new Copilot agent.</code> | [skills/agent-design/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/agent-design/SKILL.md) |
+| `agentic-cost-audit` | <code>Use the 'agentic-cost-audit' skill. Task: frontier-model spend on high-frequency PR agents.</code> | [skills/agentic-cost-audit/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/agentic-cost-audit/SKILL.md) |
 | `agentic-sdlc-autonomy` | <code>Use the 'agentic-sdlc-autonomy' skill. Task: SDLC governance.</code> | [skills/agentic-sdlc-autonomy/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/agentic-sdlc-autonomy/SKILL.md) |
 | `agentops-audit` | <code>Use the 'agentops-audit' skill. Task: scoring spec quality.</code> | [skills/agentops-audit/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/agentops-audit/SKILL.md) |
 | `api-audit` | <code>Use the 'api-audit' skill. Task: reviewing API endpoint definitions.</code> | [skills/api-audit/SKILL.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/api-audit/SKILL.md) |
