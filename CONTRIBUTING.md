@@ -588,6 +588,7 @@ Sync scripts (`sync.ps1`, `sync.sh`) skip any instruction file containing
 Files currently marked `distribute: false`:
 
 - `instructions/basecoat-20-lang-governance.instructions.md` — BaseCoat repo-governance rules
+- `instructions/governance.instructions.md` — compatibility alias for repo-governance rules
 - `instructions/basecoat-10-core-enterprise-configuration.instructions.md` — enterprise setup guidance
 - `instructions/basecoat-10-core-hrm-execution.instructions.md` — internal execution hierarchy
 - `instructions/basecoat-50-security-token-economics.instructions.md` — cost-routing rules for this repo

@@ -1726,7 +1726,7 @@
     {
       "path": "instructions/governance.instructions.md",
       "type": "instruction",
-      "sha": "d1147a8eb82e2682e76af57107ea99f54711500f",
+      "sha": "26430f7b00bf65d25c5667b24794238797dfc8c5",
       "version": null,
       "effectiveVersion": "4.3.0",
       "versionSource": "library"

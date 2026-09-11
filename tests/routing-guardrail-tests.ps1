@@ -24,6 +24,53 @@ $canonicalRoutingFile = Join-Path $repoRoot 'instructions\basecoat-10-core-inten
 $aliasRoutingFile = Join-Path $repoRoot 'instructions\intent-routing.instructions.md'
 $routingFile = $canonicalRoutingFile
 
+function Get-FrontmatterValue {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $Content,
+        [Parameter(Mandatory = $true)]
+        [string] $Key
+    )
+
+    $frontmatterMatch = [regex]::Match($Content, '(?s)^---\s*(?<frontmatter>.*?)\s*---')
+    if (-not $frontmatterMatch.Success) {
+        return $null
+    }
+
+    $escapedKey = [regex]::Escape($Key)
+    $valueMatch = [regex]::Match($frontmatterMatch.Groups['frontmatter'].Value, "(?m)^$escapedKey\s*:\s*(?<value>[^#\r\n]+?)\s*$")
+    if (-not $valueMatch.Success) {
+        return $null
+    }
+
+    return $valueMatch.Groups['value'].Value.Trim().Trim('"').Trim("'")
+}
+
+function Get-DistributionPosture {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $Content
+    )
+
+    $value = Get-FrontmatterValue -Content $Content -Key 'distribute'
+    if ($null -eq $value) {
+        return 'true'
+    }
+
+    return $value.ToLowerInvariant()
+}
+
+function Test-AliasDistributionPosture {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $AliasContent,
+        [Parameter(Mandatory = $true)]
+        [string] $CanonicalContent
+    )
+
+    return (Get-DistributionPosture -Content $AliasContent) -eq (Get-DistributionPosture -Content $CanonicalContent)
+}
+
 # Test 1: canonical intent-routing instruction contains the routing contract
 Write-Host '  Test 1: Validate plan-first enforcement is present in canonical intent-routing...'
 if (-not (Test-Path $routingFile)) {
@@ -681,6 +728,60 @@ if ($aliasFailures.Count -gt 0) {
 }
 else {
     Write-Host '    PASS compatibility aliases remain pointer stubs'
+}
+
+# Test 24: compatibility alias distribution posture matches canonical targets
+Write-Host '  Test 24: Validate compatibility alias distribution posture matches canonical targets...'
+$aliasDistributionFailures = @()
+foreach ($file in $aliasFiles) {
+    $content = Get-Content $file.FullName -Raw
+    $canonicalTarget = Get-FrontmatterValue -Content $content -Key 'canonicalInstruction'
+    if ([string]::IsNullOrWhiteSpace($canonicalTarget)) {
+        continue
+    }
+
+    $canonicalPath = Join-Path $file.DirectoryName $canonicalTarget
+    if (-not (Test-Path $canonicalPath)) {
+        continue
+    }
+
+    $canonicalContent = Get-Content $canonicalPath -Raw
+    if (-not (Test-AliasDistributionPosture -AliasContent $content -CanonicalContent $canonicalContent)) {
+        $aliasDistributionFailures += "$($file.Name): distribute posture $(Get-DistributionPosture -Content $content) differs from $canonicalTarget posture $(Get-DistributionPosture -Content $canonicalContent)"
+    }
+}
+
+$negativeAliasContent = @'
+---
+description: "Divergent compatibility alias fixture"
+applyTo: "**/*"
+compatibilityAlias: true
+canonicalInstruction: "basecoat-20-lang-governance.instructions.md"
+---
+
+# BaseCoat compatibility alias for governance rules
+
+See `basecoat-20-lang-governance.instructions.md`.
+'@
+$negativeCanonicalContent = @'
+---
+description: "Internal-only canonical fixture"
+applyTo: "**/*"
+distribute: false
+---
+
+# Canonical fixture
+'@
+if (Test-AliasDistributionPosture -AliasContent $negativeAliasContent -CanonicalContent $negativeCanonicalContent) {
+    $aliasDistributionFailures += 'negative fixture: divergent distribute posture was not detected'
+}
+
+if ($aliasDistributionFailures.Count -gt 0) {
+    $failures += 'compatibility-alias-distribute-posture-drift'
+    Write-Host "    FAIL compatibility alias distribution posture drift: $($aliasDistributionFailures -join '; ')" -ForegroundColor Red
+}
+else {
+    Write-Host '    PASS compatibility alias distribution posture matches canonical targets'
 }
 
 if ($failures.Count -gt 0) {

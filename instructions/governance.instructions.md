@@ -3,6 +3,7 @@ description: "BaseCoat compatibility alias for governance rules. Preserves the l
 applyTo: "**/*"
 compatibilityAlias: true
 canonicalInstruction: "basecoat-20-lang-governance.instructions.md"
+distribute: false
 ---
 
 # BaseCoat compatibility alias for governance rules
