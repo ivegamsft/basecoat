@@ -582,8 +582,9 @@ distribute: false
 ---
 ```
 
-Sync scripts (`sync.ps1`, `sync.sh`) skip any instruction file containing
-`distribute: false` when copying assets to downstream repositories.
+The `distribute: false` marker identifies an asset as internal for
+`scripts/show-context.ps1`. Downstream sync, package, and bootstrap paths do not
+yet enforce the marker; enforcement is tracked in #3359.
 
 Files currently marked `distribute: false`:
 
@@ -595,8 +596,8 @@ Files currently marked `distribute: false`:
 - `instructions/basecoat-10-core-memory-index.instructions.md` — hot-cache memory index
 
 When adding a new instruction, ask: "Should downstream repos receive this?" If the
-answer is no (it references BaseCoat tooling, sprints, or internal conventions), add
-`distribute: false`.
+answer is no (it references BaseCoat tooling, sprints, or internal conventions),
+add `distribute: false` to signal internal intent.
 
 ---
 
