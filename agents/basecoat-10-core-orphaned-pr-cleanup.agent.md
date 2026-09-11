@@ -6,7 +6,6 @@ model: gpt-5.4-mini
 invocation_rules:
   - "Invoke when user asks to clean stale PRs, unblock review queues, or close abandoned changes."
   - "Prefer batch triage with explicit status buckets: revive, close, escalate."
-visibility: "internal"
 compatibility: []
 metadata:
   category: core

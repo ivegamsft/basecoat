@@ -5,7 +5,6 @@ visibility: basic
 model: claude-sonnet-5
 invocation_rules:
   - "Invoke for daily standup facilitation, blocker extraction, or coordination handoff needs."
-visibility: "internal"
 compatibility: []
 metadata:
   category: ai

@@ -326,7 +326,7 @@
     {
       "path": "agents/basecoat-10-core-orphaned-pr-cleanup.agent.md",
       "type": "agent",
-      "sha": "c49cf2494da62c0f0e05d75dd95363e12372c79b",
+      "sha": "c2cd5afc4d5cb928d6d7cb2b05f09fc65a073139",
       "version": null,
       "effectiveVersion": "4.3.0",
       "versionSource": "library"
@@ -502,7 +502,7 @@
     {
       "path": "agents/basecoat-30-ai-daily-standup-facilitator.agent.md",
       "type": "agent",
-      "sha": "08f82b2501939f31aef873057d640c6638e3400b",
+      "sha": "6b01c48e4190f76ce6669086f3ac4171be87510f",
       "version": null,
       "effectiveVersion": "4.3.0",
       "versionSource": "library"
@@ -686,7 +686,7 @@
     {
       "path": "agents/basecoat-60-workflow-broken-build-troubleshooter.agent.md",
       "type": "agent",
-      "sha": "26890f19bfa167c11e9e04acfe7dc4714e724e73",
+      "sha": "50be4d053113d09712b8e4b9d61fbbff5267baa1",
       "version": null,
       "effectiveVersion": "4.3.0",
       "versionSource": "library"
@@ -814,7 +814,7 @@
     {
       "path": "agents/basecoat-60-workflow-release-readiness-chair.agent.md",
       "type": "agent",
-      "sha": "9fbe5ee6c38100c0e617607ff85c509afbfa1e4e",
+      "sha": "78275c2cb874ed460b7f416a7433a3bc855cc100",
       "version": null,
       "effectiveVersion": "4.3.0",
       "versionSource": "library"

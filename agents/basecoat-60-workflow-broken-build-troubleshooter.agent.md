@@ -6,7 +6,6 @@ model: gpt-5.4-mini
 invocation_rules:
   - "Invoke when builds are red and the user asks for diagnosis, containment, or rapid recovery."
   - "Prefer smallest safe fix first, then follow with hardening recommendations."
-visibility: "internal"
 compatibility: []
 metadata:
   category: workflow

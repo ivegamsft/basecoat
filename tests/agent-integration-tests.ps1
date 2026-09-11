@@ -142,6 +142,26 @@ function Test-YamlFieldPresent {
     return $false
 }
 
+# Helper: count top-level YAML field declarations in frontmatter.
+function Get-YamlTopLevelFieldCount {
+    param(
+        [string]$Content,
+        [string]$FieldName
+    )
+
+    $normalizedContent = $Content -replace "`r", ""
+    $lines = $normalizedContent -split "`n"
+    $count = 0
+
+    foreach ($line in $lines) {
+        if ($line -match "^$([regex]::Escape($FieldName))\s*:") {
+            $count++
+        }
+    }
+
+    return $count
+}
+
 # Helper: extract inline YAML array items from a field like "tools: [a, b, c]"
 # Also supports multi-line YAML list syntax:
 #   tools:
@@ -260,6 +280,77 @@ foreach ($file in $agentFiles) {
 }
 
 Write-Host "  Checked $($agentFiles.Count) agent files for frontmatter" -ForegroundColor Green
+
+# ============================================================================
+# Test 1a: Agent visibility field must be unique in frontmatter
+# ============================================================================
+Write-Host "`nTest 1a: Agent 'visibility' field duplicate-key validation" -ForegroundColor Yellow
+
+$duplicateVisibilitySample = @'
+name: malformed-agent
+description: "Malformed duplicate visibility sample."
+visibility: basic
+metadata:
+  audience:
+    - developer
+visibility: "internal"
+'@
+$testCount++
+if ((Get-YamlTopLevelFieldCount $duplicateVisibilitySample 'visibility') -lt 2) {
+    $failures += "Negative fixture: duplicate top-level 'visibility' keys were not detected"
+}
+
+$visibilityFixtureExpectations = @(
+    [pscustomobject]@{
+        File = 'basecoat-10-core-orphaned-pr-cleanup.agent.md'
+        Visibility = 'specialized'
+    },
+    [pscustomobject]@{
+        File = 'basecoat-30-ai-daily-standup-facilitator.agent.md'
+        Visibility = 'basic'
+    },
+    [pscustomobject]@{
+        File = 'basecoat-60-workflow-broken-build-troubleshooter.agent.md'
+        Visibility = 'basic'
+    },
+    [pscustomobject]@{
+        File = 'basecoat-60-workflow-release-readiness-chair.agent.md'
+        Visibility = 'basic'
+    },
+    [pscustomobject]@{
+        File = 'basecoat-10-core-sprint-project-mapper.agent.md'
+        Visibility = 'basic'
+    }
+)
+
+foreach ($fixture in $visibilityFixtureExpectations) {
+    $testCount++
+    $fixturePath = Join-Path 'agents' $fixture.File
+    $frontmatter = Get-Frontmatter $fixturePath
+    if ($null -eq $frontmatter) {
+        $failures += "$($fixture.File): Missing YAML frontmatter for visibility fixture"
+        continue
+    }
+
+    $visibilityCount = Get-YamlTopLevelFieldCount $frontmatter 'visibility'
+    $visibility = Get-YamlField $frontmatter 'visibility'
+    if ($visibilityCount -ne 1 -or $visibility -ne $fixture.Visibility) {
+        $failures += "$($fixture.File): Expected exactly one visibility '$($fixture.Visibility)' but found count=$visibilityCount value='$visibility'"
+    }
+}
+
+foreach ($file in $agentFiles) {
+    $testCount++
+    $frontmatter = Get-Frontmatter $file.FullName
+    if ($null -eq $frontmatter) { continue }
+
+    $visibilityCount = Get-YamlTopLevelFieldCount $frontmatter 'visibility'
+    if ($visibilityCount -gt 1) {
+        $failures += "$($file.Name): Duplicate top-level 'visibility' field in frontmatter"
+    }
+}
+
+Write-Host "  Checked duplicate visibility negative fixture, 5 positive fixtures, and $($agentFiles.Count) agent files" -ForegroundColor Green
 
 # ============================================================================
 # Test 1b: Agent tools field must be a valid array when present
