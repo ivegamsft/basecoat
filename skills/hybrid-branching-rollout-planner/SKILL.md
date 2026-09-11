@@ -4,7 +4,7 @@ description: "Creates a dependency-aware rollout plan for adopting hybrid branch
 compatibility:
   - github-copilot-cli
 visibility: public
-category: operations
+category: flow-governance
 metadata:
   category: flow-governance
   domain: branching-strategy

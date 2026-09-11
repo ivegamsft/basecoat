@@ -2510,7 +2510,7 @@
     {
       "path": "skills/hybrid-branching-audit/SKILL.md",
       "type": "skill",
-      "sha": "34b709c858386c990713d30510342e88d0fd0b63",
+      "sha": "7e14fc87ba9f82c4a1a28baccf11ab01e7646cf3",
       "version": null,
       "effectiveVersion": "4.3.0",
       "versionSource": "library"
@@ -2518,7 +2518,7 @@
     {
       "path": "skills/hybrid-branching-rollout-planner/SKILL.md",
       "type": "skill",
-      "sha": "97766ce709e6c644c6ba06b699b5fb3efe7a4649",
+      "sha": "523b2287eaf74e095c44937105cd35522eec96f4",
       "version": null,
       "effectiveVersion": "4.3.0",
       "versionSource": "library"

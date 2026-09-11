@@ -4,7 +4,7 @@ description: "Audits repository readiness for hybrid branching (trunk + release/
 compatibility:
   - github-copilot-cli
 visibility: public
-category: operations
+category: flow-governance
 metadata:
   category: flow-governance
   domain: branching-strategy

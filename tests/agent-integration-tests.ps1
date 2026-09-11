@@ -50,6 +50,17 @@ function Get-ContentAfterFrontmatter {
 }
 
 # Helper function to extract YAML field value
+function ConvertFrom-YamlQuotedScalar {
+    param([string]$Value)
+
+    $trimmed = $Value.Trim()
+    if ($trimmed -match '^([''"])(.*)\1$') {
+        return $matches[2]
+    }
+
+    return $trimmed
+}
+
 function Get-YamlField {
     param(
         [string]$Content,
@@ -62,16 +73,58 @@ function Get-YamlField {
     
     foreach ($line in $lines) {
         if ($line -match "^$([regex]::Escape($FieldName))\s*:\s*(.+)$") {
-            $value = $matches[1].Trim()
-            # Remove surrounding quotes if present
-            $value = $value -replace '^[`"](.+)[`"]$', '$1'
-            return $value
+            return ConvertFrom-YamlQuotedScalar $matches[1]
         }
     }
     return $null
 }
 
 # Helper: check whether a YAML field is present (including with an empty value)
+
+# Helper function to extract a nested scalar value from an indented YAML mapping.
+function Get-YamlNestedField {
+    param(
+        [string]$Content,
+        [string]$ParentField,
+        [string]$ChildField
+    )
+
+    $normalizedContent = $Content -replace "`r", ""
+    $lines = $normalizedContent -split "`n"
+    $inParentBlock = $false
+
+    foreach ($line in $lines) {
+        if ($line -match "^$([regex]::Escape($ParentField))\s*:\s*$") {
+            $inParentBlock = $true
+            continue
+        }
+
+        if ($inParentBlock) {
+            if ($line -match '^\S') {
+                break
+            }
+            if ($line -match "^\s+$([regex]::Escape($ChildField))\s*:\s*(.+)$") {
+                return ConvertFrom-YamlQuotedScalar $matches[1]
+            }
+        }
+    }
+
+    return $null
+}
+
+function Test-SkillCategoryConflict {
+    param([string]$Frontmatter)
+
+    $topLevelCategory = Get-YamlField $Frontmatter 'category'
+    $metadataCategory = Get-YamlNestedField $Frontmatter 'metadata' 'category'
+
+    if ([string]::IsNullOrWhiteSpace($topLevelCategory) -or [string]::IsNullOrWhiteSpace($metadataCategory)) {
+        return $false
+    }
+
+    return $topLevelCategory -ne $metadataCategory
+}
+
 function Test-YamlFieldPresent {
     param(
         [string]$Content,
@@ -366,6 +419,36 @@ foreach ($dir in $skillDirs) {
 }
 
 Write-Host "  Checked $skillCount skill directories for SKILL.md and frontmatter" -ForegroundColor Green
+
+
+Write-Host "  Checking skill category semantics" -ForegroundColor Yellow
+$alignedCategoryFrontmatter = "category: flow-governance`nmetadata:`n  category: flow-governance"
+$singleQuotedAlignedCategoryFrontmatter = "category: 'flow-governance'`nmetadata:`n  category: flow-governance"
+$conflictingCategoryFrontmatter = "category: operations`nmetadata:`n  category: flow-governance"
+
+if (Test-SkillCategoryConflict -Frontmatter $alignedCategoryFrontmatter) {
+    $failures += "Skill category semantics: aligned category and metadata.category values should be accepted"
+}
+if (Test-SkillCategoryConflict -Frontmatter $singleQuotedAlignedCategoryFrontmatter) {
+    $failures += "Skill category semantics: single-quoted aligned category and unquoted metadata.category should be accepted"
+}
+if (-not (Test-SkillCategoryConflict -Frontmatter $conflictingCategoryFrontmatter)) {
+    $failures += "Skill category semantics: conflicting category and metadata.category values should be detected"
+}
+
+foreach ($dir in $skillDirs) {
+    $skillMd = Join-Path $dir.FullName 'SKILL.md'
+    if (-not (Test-Path $skillMd)) { continue }
+
+    $testCount++
+    $frontmatter = Get-Frontmatter $skillMd
+    if ($null -ne $frontmatter -and (Test-SkillCategoryConflict -Frontmatter $frontmatter)) {
+        $topLevelCategory = Get-YamlField $frontmatter 'category'
+        $metadataCategory = Get-YamlNestedField $frontmatter 'metadata' 'category'
+        $failures += "$($dir.Name)/SKILL.md: conflicting category ('$topLevelCategory') and metadata.category ('$metadataCategory') values"
+    }
+}
+
 
 # ============================================================================
 # Test 5: Prompt file frontmatter validation
