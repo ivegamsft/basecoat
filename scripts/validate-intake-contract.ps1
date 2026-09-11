@@ -25,13 +25,13 @@
     Output format: 'text' (default, human-readable) or 'json' (machine-readable).
 
 .EXAMPLE
-    pwsh scripts/validate-intake-contract.ps1 -Repo IBuySpy-Dev/wawkr
+    pwsh scripts/validate-intake-contract.ps1 -Repo example-org/wawkr
 
 .EXAMPLE
-    pwsh scripts/validate-intake-contract.ps1 -Repo IBuySpy-Dev/wawkr -CheckWorkflows
+    pwsh scripts/validate-intake-contract.ps1 -Repo example-org/wawkr -CheckWorkflows
 
 .EXAMPLE
-    pwsh scripts/validate-intake-contract.ps1 -Repo IBuySpy-Dev/wawkr -OutputFormat json
+    pwsh scripts/validate-intake-contract.ps1 -Repo example-org/wawkr -OutputFormat json
 #>
 
 [CmdletBinding()]

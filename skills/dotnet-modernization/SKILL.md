@@ -4,7 +4,7 @@ compatibility: [github-copilot-cli]
 title: .NET Modernization
 description: "Structured guidance for assessing and executing modernization from .NET Framework or older .NET targets to modern .NET. USE FOR: inventory a legacy .NET solution, plan phased .NET upgrade, review NuGet and framework compatibility, define modernization test and release gates, remediate breaking changes during migration. DO NOT USE FOR: brand-new .NET app scaffolding, non-.NET platform migrations, day-to-day feature development unrelated to upgrades."
 
-author: IBuySpy-Shared
+author: BaseCoat contributors
 version: 1.0.0
 category: modernization
 metadata:

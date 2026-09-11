@@ -50,4 +50,4 @@ need an adapter because metric keys differ.
 ## Related
 
 - Template: `templates/coverage-threshold-ratchet/`
-- Downstream proof: IBuySpy-Dev/COECheck#737 and IBuySpy-Dev/COECheck#754
+- Downstream proof: example-org/COECheck#737 and example-org/COECheck#754
