@@ -1,6 +1,6 @@
 ---
 description: "Next.js and React 19 frontend instruction covering Server Components, App Router, streaming, form actions, and modern patterns"
-applyTo: "**/*.tsx,**/*.ts,**/next.config.*"
+applyTo: "next.config.*,apps/*/next.config.*,packages/*/next.config.*,app/**/*.tsx,app/**/*.ts,pages/**/*.tsx,pages/**/*.ts,apps/*/app/**/*.tsx,apps/*/app/**/*.ts,apps/*/pages/**/*.tsx,apps/*/pages/**/*.ts"
 ---
 
 # Next.js and React 19 Instruction

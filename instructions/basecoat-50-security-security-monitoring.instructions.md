@@ -2,7 +2,7 @@
 description: >
   Security monitoring standards for SIEM integration, alert configuration,
   detection rule development, and incident escalation workflows.
-applyTo: agents/basecoat-50-security-security-monitor.agent.md, agents/basecoat-50-security-config-auditor.agent.md, agents/basecoat-60-workflow-incident-responder.agent.md
+applyTo: "monitoring/**/*,observability/**/*,alerts/**/*,detections/**/*,dashboards/**/*,monitoring/**/*.yml,monitoring/**/*.yaml,observability/**/*.yml,observability/**/*.yaml,alerts/**/*.yml,alerts/**/*.yaml,detections/**/*.yml,detections/**/*.yaml,**/*.kql,**/*.spl"
 ---
 
 # Security Monitoring Standards

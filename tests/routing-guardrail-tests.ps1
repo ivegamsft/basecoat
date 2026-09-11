@@ -71,6 +71,71 @@ function Test-AliasDistributionPosture {
     return (Get-DistributionPosture -Content $AliasContent) -eq (Get-DistributionPosture -Content $CanonicalContent)
 }
 
+function Convert-ApplyToGlobToRegex {
+    param([string]$Pattern)
+
+    $normalized = $Pattern.Trim().Trim('"', "'") -replace '\\', '/'
+    $builder = [System.Text.StringBuilder]::new()
+    [void]$builder.Append('^')
+    for ($i = 0; $i -lt $normalized.Length; $i++) {
+        $char = $normalized[$i]
+        if ($char -eq '*') {
+            if (($i + 1) -lt $normalized.Length -and $normalized[$i + 1] -eq '*') {
+                $followedBySlash = ($i + 2) -lt $normalized.Length -and $normalized[$i + 2] -eq '/'
+                if ($followedBySlash) {
+                    [void]$builder.Append('(?:.*/)?')
+                    $i += 2
+                }
+                else {
+                    [void]$builder.Append('.*')
+                    $i++
+                }
+            }
+            else {
+                [void]$builder.Append('[^/]*')
+            }
+        }
+        elseif ($char -eq '?') {
+            [void]$builder.Append('[^/]')
+        }
+        else {
+            [void]$builder.Append([regex]::Escape([string]$char))
+        }
+    }
+    [void]$builder.Append('$')
+    return $builder.ToString()
+}
+
+function Test-ApplyToMatch {
+    param(
+        [string]$ApplyTo,
+        [string]$Path
+    )
+
+    $normalizedPath = $Path -replace '\\', '/'
+    foreach ($pattern in ($ApplyTo -split ',')) {
+        if ([string]::IsNullOrWhiteSpace($pattern)) { continue }
+        if ($normalizedPath -match (Convert-ApplyToGlobToRegex $pattern)) {
+            return $true
+        }
+    }
+    return $false
+}
+
+function Get-InstructionApplyTo {
+    param([string]$RelativePath)
+
+    $path = Join-Path $repoRoot $RelativePath
+    $content = Get-Content $path -Raw
+    if ($content -notmatch '(?ms)^---\s*(?<frontmatter>.*?)\s*---') {
+        throw "$RelativePath missing frontmatter"
+    }
+    if ($Matches['frontmatter'] -notmatch '(?m)^applyTo:\s*(?<applyTo>.+)$') {
+        throw "$RelativePath missing applyTo"
+    }
+    return $Matches['applyTo'].Trim().Trim('"', "'")
+}
+
 # Test 1: canonical intent-routing instruction contains the routing contract
 Write-Host '  Test 1: Validate plan-first enforcement is present in canonical intent-routing...'
 if (-not (Test-Path $routingFile)) {
@@ -318,6 +383,44 @@ if ($broadApplyToFiles.Count -gt 0) {
 }
 else {
     Write-Host '    ✓ All non-guide routing instruction files use scoped applyTo patterns'
+}
+
+# Test 13b: operational instruction applyTo scopes match governed surfaces only
+Write-Host '  Test 13b: Validate operational applyTo scopes avoid agent-definition paths...'
+$surfaceScopeCases = @(
+    @{
+        File      = 'instructions\basecoat-10-core-mutation-testing.instructions.md'
+        Positive  = @('tests\unit\calculator.test.ts', 'src\__tests__\order.spec.ts', 'stryker.conf.json')
+        Negative  = @('agents\basecoat-10-core-contract-testing.agent.md', 'agents\basecoat-90-quality-e2e-test-strategy.agent.md', 'src\plain-node.ts')
+    },
+    @{
+        File      = 'instructions\basecoat-50-security-secrets-management.instructions.md'
+        Positive  = @('.github\base-coat\workflows\secret-scan.yml', '.github\workflows\deploy.yml', 'iac\main.tf', 'k8s\secret-provider.yaml', 'app\.env.example')
+        Negative  = @('agents\basecoat-50-security-secrets-manager.agent.md', 'agents\basecoat-10-core-devops-engineer.agent.md', 'src\components\Login.tsx')
+    },
+    @{
+        File      = 'instructions\basecoat-50-security-security-monitoring.instructions.md'
+        Positive  = @('monitoring\splunk\inputs.conf', 'alerts\impossible-travel.yaml', 'detections\signin.kql', 'dashboards\soc.json')
+        Negative  = @('agents\basecoat-50-security-security-monitor.agent.md', 'agents\basecoat-60-workflow-incident-responder.agent.md', 'config\business-rules.yml', 'src\server.ts')
+    },
+    @{
+        File      = 'instructions\basecoat-10-core-nextjs-react19.instructions.md'
+        Positive  = @('apps\web\next.config.ts', 'apps\web\app\page.tsx', 'apps\web\pages\api\health.ts')
+        Negative  = @('packages\node-service\src\index.ts', 'packages\react-widget\src\pages\Home.tsx', 'services\api\src\app\routes.ts', 'agents\basecoat-10-core-frontend-developer.agent.md')
+    }
+)
+
+foreach ($case in $surfaceScopeCases) {
+    $applyTo = Get-InstructionApplyTo $case.File
+    $missingPositive = @($case.Positive | Where-Object { -not (Test-ApplyToMatch $applyTo $_) })
+    $overMatchedNegative = @($case.Negative | Where-Object { Test-ApplyToMatch $applyTo $_ })
+    if ($missingPositive.Count -gt 0 -or $overMatchedNegative.Count -gt 0) {
+        $failures += "operational-scope-mismatch-$([System.IO.Path]::GetFileName($case.File))"
+        Write-Host "    FAIL: $($case.File) scope mismatch. Missing: $($missingPositive -join ', '); overmatched: $($overMatchedNegative -join ', ')" -ForegroundColor Red
+    }
+    else {
+        Write-Host "    PASS: $($case.File) matches positives and excludes previous overreach"
+    }
 }
 
 # Test 14: source instruction always-on context stays within the token budget

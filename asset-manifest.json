@@ -1286,7 +1286,7 @@
     {
       "path": "instructions/basecoat-10-core-mutation-testing.instructions.md",
       "type": "instruction",
-      "sha": "bef0914e8564e229a32964803fe6de3259df2c03",
+      "sha": "372a039a16bb86ac89ed0fcaae4ab3bad0fd2773",
       "version": null,
       "effectiveVersion": "4.3.0",
       "versionSource": "library"
@@ -1302,7 +1302,7 @@
     {
       "path": "instructions/basecoat-10-core-nextjs-react19.instructions.md",
       "type": "instruction",
-      "sha": "33089137a2f0ab451cadf2d9935c9605f7c67a7b",
+      "sha": "ca3e6757284bb011a1870fcaa1ac01df6b98c338",
       "version": null,
       "effectiveVersion": "4.3.0",
       "versionSource": "library"
@@ -1614,7 +1614,7 @@
     {
       "path": "instructions/basecoat-50-security-secrets-management.instructions.md",
       "type": "instruction",
-      "sha": "ad12286edacd55c693ae04d365a8dbbf52d9aae0",
+      "sha": "454233abbd5cb39594594892b2bb31a1a17ba6e5",
       "version": null,
       "effectiveVersion": "4.3.0",
       "versionSource": "library"
@@ -1622,7 +1622,7 @@
     {
       "path": "instructions/basecoat-50-security-security-monitoring.instructions.md",
       "type": "instruction",
-      "sha": "b81a80e32fc50256379fd8ca79903f3334f132dc",
+      "sha": "3f879569b29a192a27abc4f1f15b1bf8da186948",
       "version": null,
       "effectiveVersion": "4.3.0",
       "versionSource": "library"

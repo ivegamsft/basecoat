@@ -2,7 +2,7 @@
 description: >
   Secrets management standards — never commit secrets to version control,
   use centralized Vault solutions, implement rotation, and audit all access.
-applyTo: agents/basecoat-50-security-secrets-manager.agent.md, agents/basecoat-10-core-devops-engineer.agent.md, agents/basecoat-60-workflow-infrastructure-deploy.agent.md
+applyTo: ".github/base-coat/workflows/secret-scan.yml,.github/workflows/*deploy*.yml,.github/workflows/*deploy*.yaml,.github/workflows/*secret*.yml,.github/workflows/*secret*.yaml,.github/workflows/*scan*.yml,.github/workflows/*scan*.yaml,infra/**/*,iac/**/*,deploy/**/*,deployment/**/*,k8s/**/*,kubernetes/**/*,helm/**/*,charts/**/*,**/*.bicep,**/*.tf,**/*.tfvars,**/.env.example,**/appsettings*.json"
 ---
 
 # Secrets Management Standards
