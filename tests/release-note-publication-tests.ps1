@@ -64,6 +64,108 @@ $heredocBody | python -c 'import sys; compile(sys.stdin.read(), "<changelog-here
 if ($LASTEXITCODE -ne 0) {
     throw 'The changelog heredoc body does not compile (IndentationError regression from #3363).'
 }
+# Behavioral regression guard for the release fail-closed version assertion
+# (issue #3366). The release workflow must refuse to publish when the tagged
+# commit's version.json does not already match the release tag, so a tag can
+# never silently outrun the committed tree. Extract the actual step body from
+# release.yml and execute it against a fixture for a matching and a mismatching
+# tag, asserting the mismatch exits nonzero.
+function Get-WorkflowStepRunBlock {
+    param([string[]]$Lines, [string]$StepName)
+
+    $runIdx = -1
+    for ($i = 0; $i -lt $Lines.Count; $i++) {
+        if ($Lines[$i] -match [regex]::Escape("name: $StepName")) {
+            for ($j = $i; $j -lt $Lines.Count; $j++) {
+                if ($Lines[$j] -match '^\s*run:\s*\|') { $runIdx = $j; break }
+            }
+            break
+        }
+    }
+    if ($runIdx -lt 0) { throw "Could not locate the '$StepName' run block in release.yml." }
+
+    $keyIndent = $Lines[$runIdx].Length - $Lines[$runIdx].TrimStart().Length
+    $blockLines = @()
+    for ($i = $runIdx + 1; $i -lt $Lines.Count; $i++) {
+        $line = $Lines[$i]
+        if ($line.Trim() -eq '') { $blockLines += ''; continue }
+        $lead = $line.Length - $line.TrimStart().Length
+        if ($lead -le $keyIndent) { break }
+        $blockLines += $line
+    }
+    $nonEmpty = $blockLines | Where-Object { $_ -ne '' }
+    $minIndent = ($nonEmpty | ForEach-Object { $_.Length - $_.TrimStart().Length } | Measure-Object -Minimum).Minimum
+    return (@($blockLines | ForEach-Object { if ($_ -eq '') { '' } else { $_.Substring($minIndent) } }) -join "`n")
+}
+
+function Get-WorkingBash {
+    $candidates = @('bash')
+    if ($IsWindows) {
+        $candidates += @(
+            (Join-Path $env:ProgramFiles 'Git\bin\bash.exe'),
+            (Join-Path ${env:ProgramFiles(x86)} 'Git\bin\bash.exe')
+        )
+    }
+    foreach ($candidate in $candidates) {
+        $resolved = (Get-Command $candidate -ErrorAction SilentlyContinue)?.Source
+        if (-not $resolved) { continue }
+        try {
+            & $resolved -c 'exit 0' *> $null
+            if ($LASTEXITCODE -eq 0) { return $resolved }
+        } catch { }
+    }
+    return $null
+}
+
+$bashExe = Get-WorkingBash
+if ($bashExe) {
+    # Every tag publisher must fail closed when version.json does not already
+    # match the release tag (issue #3366). Exercise the extracted step from each
+    # publishing workflow for a matching and a mismatching tag.
+    $tagPublishers = @(
+        $releasePath,
+        (Join-Path $repoRoot '.github\workflows\package-basecoat.yml')
+    )
+
+    function Invoke-ReleaseAssertStep {
+        param([string]$StepBody, [string]$Tag, [string]$Bash)
+
+        $harness = @"
+set -euo pipefail
+export GITHUB_REF_NAME='$Tag'
+work="`$(mktemp -d)"
+cd "`$work"
+printf '%s' '{ "name": "base-coat", "version": "4.4.0" }' > version.json
+$StepBody
+"@
+        & $Bash -c $harness *> $null
+        return $LASTEXITCODE
+    }
+
+    foreach ($publisher in $tagPublishers) {
+        $publisherName = Split-Path $publisher -Leaf
+        $publisherLines = Get-Content $publisher
+        $assertStep = Get-WorkflowStepRunBlock -Lines $publisherLines -StepName 'Assert committed version metadata matches release tag'
+
+        if ($assertStep -notmatch 'committed_version.*!=.*expected_version' -and $assertStep -notmatch 'expected_version.*!=.*committed_version') {
+            throw "$publisherName version-assertion step no longer compares committed version.json against the release tag."
+        }
+
+        $matchExit = Invoke-ReleaseAssertStep -StepBody $assertStep -Tag 'v4.4.0' -Bash $bashExe
+        $mismatchExit = Invoke-ReleaseAssertStep -StepBody $assertStep -Tag 'v4.5.0' -Bash $bashExe
+
+        if ($matchExit -ne 0) {
+            throw "$publisherName version-assertion step failed for a matching tag (exit $matchExit); it must allow release when version.json matches the tag."
+        }
+        if ($mismatchExit -eq 0) {
+            throw "$publisherName version-assertion step passed for a mismatched tag; it must fail closed when version.json does not match the tag."
+        }
+        Write-Host "PASS $publisherName fail-closed version assertion (match=0, mismatch=nonzero)."
+    }
+} else {
+    throw 'A working bash is required to exercise the release fail-closed version assertion.'
+}
+
 Assert-Match $publish "'docs/operations/repo-story\.md'" 'Publication must exclude repo-story because it contains internal chronicle details and issue links.'
 Assert-Match $publish 'https://github\\\.com/IBuySpy-Shared/basecoat/issues/\[0-9\]\+' 'Publication must redact private source issue URLs before generic repo rewrites.'
 Assert-Match $publish 'https://github\\\.com/IBuySpy-Shared/basecoat/pull/\[0-9\]\+' 'Publication must redact private source PR URLs before generic repo rewrites.'

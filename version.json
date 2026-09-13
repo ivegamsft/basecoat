@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "4.3.0",
-  "releaseDate": "2026-09-07",
-  "notes": "Minor release: ships consumer workflow SHA-pin enforcement, dependency/security fixes, PRD/spec synthesis recovery, and governance planning specs for PR controls, standards, licensing, Responsible AI/privacy, and tracker mutation review gates."
+  "version": "4.4.0",
+  "releaseDate": "2026-09-11",
+  "notes": "Minor release: adds the agentic-cost-audit skill, governance tracker mutation gates, task provenance trail, untrusted-content boundary, RAI/privacy and licensing posture reviews, advisory standards mapping, and enforced config secret examples."
 }

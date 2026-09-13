@@ -31,6 +31,28 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
+      - name: Assert committed version metadata matches release tag
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tag="${GITHUB_REF_NAME}"
+          expected_version="${tag#v}"
+          committed_version="$(jq -r '.version' version.json)"
+
+          # Fail closed: the tagged commit must already carry the release version.
+          # Patching version.json only inside the release artifact (see the step
+          # below) leaves the tag's git tree reporting the previous version, which
+          # makes the sync provenance guard reject the tag (issue #3366). The
+          # version bump must land on main before the release tag is pushed.
+          if [[ "$committed_version" != "$expected_version" ]]; then
+            echo "::error title=Version metadata not bumped before tagging::tag=$tag expects version.json version '$expected_version' but the tagged commit has '$committed_version'."
+            echo "::error::Bump version.json (and CHANGELOG.md) to $expected_version on main and merge it before tagging $tag."
+            exit 1
+          fi
+
+          echo "Committed version.json matches release tag: $expected_version"
+
       - name: Update version metadata to match release tag
         shell: bash
         run: |

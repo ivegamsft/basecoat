@@ -28,6 +28,27 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
+      - name: Assert committed version metadata matches release tag
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tag="${GITHUB_REF_NAME}"
+          expected_version="${tag#v}"
+          committed_version="$(jq -r '.version' version.json)"
+
+          # Fail closed: every tag publisher must confirm the tagged commit
+          # already carries the release version before building or uploading a
+          # release, so a mismatched tag can never be published (issue #3366).
+          if [[ "$committed_version" != "$expected_version" ]]; then
+            echo "::error title=Version metadata not bumped before tagging::tag=$tag expects version.json version '$expected_version' but the tagged commit has '$committed_version'."
+            echo "::error::Bump version.json (and CHANGELOG.md) to $expected_version on main and merge it before tagging $tag."
+            exit 1
+          fi
+
+          echo "Committed version.json matches release tag: $expected_version"
+
       - name: Package release artifacts
         run: bash scripts/package-basecoat.sh
 
