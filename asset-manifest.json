@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "libraryVersion": "4.4.0",
-  "generatedAt": "2026-09-13T05:14:09.8229573Z",
+  "generatedAt": "2026-09-13T14:40:20.0361186Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -1854,7 +1854,7 @@
     {
       "path": "scripts/validate-basecoat.ps1",
       "type": "script",
-      "sha": "5c55a84170221fc4c0ba4abc2e4b4eb4ab382f38",
+      "sha": "90e08a2e916cf11448cbfc468f9ca6b8df3ee4e7",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -1862,7 +1862,7 @@
     {
       "path": "scripts/validate-basecoat.sh",
       "type": "script",
-      "sha": "c1c3852ac11ed3ab3a726022aad7c572b63c0a22",
+      "sha": "7bcfe24097eddf7bc7208d34d86a455d94f8ca26",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -1871,6 +1871,14 @@
       "path": "scripts/validate-reusable-workflow-contracts.py",
       "type": "script",
       "sha": "537ca417ddfc039db68d2c36aa9b2d92c136fbd3",
+      "version": null,
+      "effectiveVersion": "4.4.0",
+      "versionSource": "library"
+    },
+    {
+      "path": "scripts/validate-skill-visibility.ps1",
+      "type": "script",
+      "sha": "f7c4260a33a495b2b7301303fdd7e3a217aeab2a",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -2102,7 +2110,7 @@
     {
       "path": "skills/bom-schema/SKILL.md",
       "type": "skill",
-      "sha": "13c912715456101dd3a05f96f4996d3da94999db",
+      "sha": "3f47565ed1987a1eed225696d48536035acd8e12",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -2110,7 +2118,7 @@
     {
       "path": "skills/bom-validation/SKILL.md",
       "type": "skill",
-      "sha": "405a48230de4aafba161944024598dc028fe088b",
+      "sha": "18dcb4fa6ec26a5a6ccec4090d81c486862b6cce",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -2118,7 +2126,7 @@
     {
       "path": "skills/build-failure-triage/SKILL.md",
       "type": "skill",
-      "sha": "c1979d2d5855df230d39ca6226690b63fc00492b",
+      "sha": "9bf82e17fcca28b1a23187ed077f169506f9d750",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -2126,7 +2134,7 @@
     {
       "path": "skills/build-master-control-plane/SKILL.md",
       "type": "skill",
-      "sha": "925fa7c888c72ac09f511eac9c001f634902030e",
+      "sha": "7fbe8d2514af3c5dbffe3d31faee07b0372ae857",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -2158,7 +2166,7 @@
     {
       "path": "skills/ci-flake-quarantine/SKILL.md",
       "type": "skill",
-      "sha": "bc6f4a86dc4871c6cb3ddf629fe2522186d205dc",
+      "sha": "73fcde5636cfea5edd8cabefaec3b8d6676b7f56",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -2278,7 +2286,7 @@
     {
       "path": "skills/decision-log-capture/SKILL.md",
       "type": "skill",
-      "sha": "d60d4a770a62394b59029b047e2cc5a50e20fb14",
+      "sha": "ad7205e2061abf64a6e9799bd8ad98d4536e3092",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -2294,7 +2302,7 @@
     {
       "path": "skills/dependency-blocker-monitoring/SKILL.md",
       "type": "skill",
-      "sha": "51db74266b6a2bc137d90e6f73e3710f8cb1518d",
+      "sha": "020e9961a6d4bba644f2cff4c2cbe413ef378603",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -2398,7 +2406,7 @@
     {
       "path": "skills/escalation-routing/SKILL.md",
       "type": "skill",
-      "sha": "88fe299c74a2c77102d57d44f800ab1b43bf6ae2",
+      "sha": "f88003734d98e6429bc3f7b0281aeb60371d7205",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -2406,7 +2414,7 @@
     {
       "path": "skills/factory-state-machine/SKILL.md",
       "type": "skill",
-      "sha": "13d71d641120bd242a57cd75e55ccc76b524abf4",
+      "sha": "551d1149bb4305a25f320d4cd054e1af67b1260a",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -2414,7 +2422,7 @@
     {
       "path": "skills/failure-pattern-process/SKILL.md",
       "type": "skill",
-      "sha": "453590eedfeb67ca33c9b0f328d7cc58c8b17249",
+      "sha": "8e5615305e299ca9a127010e910cc1f6febb2e01",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -2646,7 +2654,7 @@
     {
       "path": "skills/merge-conflict-mediator/SKILL.md",
       "type": "skill",
-      "sha": "ee39d39bb3c3dcec95ef12d9e93c7e3ace6d2ebb",
+      "sha": "1642cc450e0e71cc8b47c6306f9230570a750bea",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -2678,7 +2686,7 @@
     {
       "path": "skills/orphaned-pr-triage/SKILL.md",
       "type": "skill",
-      "sha": "28c2fc3132761188a3fefb8876fea330abc006d3",
+      "sha": "d6ad030a82e718ceb0e85a628c041bafec01131a",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -2718,7 +2726,7 @@
     {
       "path": "skills/public-safe-sanitization/SKILL.md",
       "type": "skill",
-      "sha": "4401683b396f760558605125710d9bd28cb5a08c",
+      "sha": "4c1b887dd7a3209ed346c756b86b11f0e533725f",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -2742,7 +2750,7 @@
     {
       "path": "skills/rca/SKILL.md",
       "type": "skill",
-      "sha": "a4c4f74ddabab4a82a10c68e15c1dd36e562109c",
+      "sha": "0ea654e6b45d5c1ee6dc26697232c33e098a2d77",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -2806,7 +2814,7 @@
     {
       "path": "skills/s4-deployment-checklist/SKILL.md",
       "type": "skill",
-      "sha": "2199e8484ce4752bc3ba088aad840d0fb9e2f657",
+      "sha": "317b709ee61f04caf0aa68654fa7d3179b6ee28e",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -2814,7 +2822,7 @@
     {
       "path": "skills/s4-rollback-testing/SKILL.md",
       "type": "skill",
-      "sha": "3f2da95b0de51c69fda72019b0cd3df3cc1ab4e9",
+      "sha": "0e7434b2fcf747148d4c7af66912bf5b42dc58f6",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -2894,7 +2902,7 @@
     {
       "path": "skills/sprint-closeout-audit/SKILL.md",
       "type": "skill",
-      "sha": "bb2a5ead00c39a1864eae74cc60d2063dd2712d4",
+      "sha": "a901cfe863775965ef29fd27e3a39c668d29dd20",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -2950,7 +2958,7 @@
     {
       "path": "skills/standup-signal-extraction/SKILL.md",
       "type": "skill",
-      "sha": "3122525af14899a7b83539fad15048914072458c",
+      "sha": "03c5c0e85383edaa19b3d97094dcb2fdf3ba2a84",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -2958,7 +2966,7 @@
     {
       "path": "skills/station-bottleneck-analyzer/SKILL.md",
       "type": "skill",
-      "sha": "536b173084f5bdb20a16f1ba9ba42f738032c494",
+      "sha": "b6e183628b91eb878c8da80542b98b3788709ddf",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -2974,7 +2982,7 @@
     {
       "path": "skills/takt-time-measurement/SKILL.md",
       "type": "skill",
-      "sha": "c651d84f6b478706b05f34600f775738614af9d5",
+      "sha": "e0f8df950a50de32480219da199f65c26eb2e495",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"

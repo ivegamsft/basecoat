@@ -4,7 +4,7 @@ compatibility: [github-copilot-cli]
 description: "Validates Workcell BOMs against plant registry and CAF naming rules. USE FOR: validating BOM completeness before S2, detecting circular dependencies, enforcing CAF naming compliance, checking registry references before handoff. DO NOT USE FOR: approving incomplete BOMs, inferring missing resources, writing application code, running release/deployment tasks."
 category: data
 
-visibility: "internal"
+visibility: public
 metadata:
   category: data
   maturity: stable

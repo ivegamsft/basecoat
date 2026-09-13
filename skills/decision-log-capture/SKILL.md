@@ -5,7 +5,7 @@ description: "Use when capturing ceremony outcomes into durable decision records
 
 invocation_rules:
   - "Use when meeting or ceremony outcomes must be persisted with explicit ownership."
-visibility: "internal"
+visibility: public
 category: architecture
 metadata:
   category: architecture

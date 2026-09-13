@@ -5,7 +5,7 @@ description: "Use when triaging stale pull requests and review backlog to keep r
 
 invocation_rules:
   - "Use when PR queue hygiene, stale PR cleanup, or review ownership drift is requested."
-visibility: "internal"
+visibility: public
 category: operations
 metadata:
   category: operations

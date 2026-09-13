@@ -33,6 +33,7 @@ INSTALL_PATH="$CONSUMER_ROOT/.github/base-coat"
 for validator in \
   validate-basecoat.ps1 \
   validate-basecoat.sh \
+  validate-skill-visibility.ps1 \
   validate-workflow-action-pins.ps1 \
   validate-workflow-action-pins.py; do
   if [[ ! -f "$INSTALL_PATH/scripts/$validator" ]]; then

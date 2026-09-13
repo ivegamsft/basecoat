@@ -77,6 +77,19 @@ while IFS= read -r file; do
       exit 1
     fi
 
+    # Skills: visibility, when present, must be public|private. Agents use a
+    # different routing-tier taxonomy (basic|specialized|advanced|internal),
+    # so this enum check is scoped to SKILL.md only. Kept in sync with
+    # scripts/validate-skill-visibility.ps1.
+    visibility_line="$(awk 'NR==1 && /^---[[:space:]]*$/{inblock=1; next} inblock && /^---[[:space:]]*$/{exit} inblock{print}' "$file" | grep -E '^visibility:\s*' | head -n 1 || true)"
+    if [[ -n "$visibility_line" ]]; then
+      visibility_value="$(echo "$visibility_line" | sed -E 's/^visibility:\s*//; s/^["'"'"']?//; s/["'"'"']?$//' | tr -d '[:space:]')"
+      if [[ "$visibility_value" != "public" && "$visibility_value" != "private" ]]; then
+        echo "Invalid skill visibility '$visibility_value' in $file (expected 'public' or 'private')" >&2
+        exit 1
+      fi
+    fi
+
     token_count=$(python3 - "$file" <<'PY'
 from pathlib import Path
 import re, sys

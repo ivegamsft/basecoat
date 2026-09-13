@@ -372,6 +372,7 @@ jobs:
     Set-Content -Path (Join-Path $installedRoot 'sync.ps1') -Value '$true'
     foreach ($scriptName in @(
             'validate-basecoat.ps1',
+            'validate-skill-visibility.ps1',
             'validate-workflow-action-pins.ps1',
             'validate-workflow-action-pins.py'
         )) {

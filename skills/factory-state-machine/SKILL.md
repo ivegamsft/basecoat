@@ -4,7 +4,7 @@ compatibility: [github-copilot-cli]
 description: "Use when defining factory state transitions, reading or writing .github/factory-state.json, or orchestrating workcell workflow gates. USE FOR: intake/complete/pending transitions, auto-proceed rules, escalation checks, and state validation. DO NOT USE FOR: general app state management or unrelated workflow docs."
 category: architecture
 
-visibility: "internal"
+visibility: public
 metadata:
   category: architecture
   maturity: stable

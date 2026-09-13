@@ -6,7 +6,7 @@ description: "Use when auditing sprint closure readiness with explicit pass/fail
 invocation_rules:
   - "Use when closing a sprint and validating objective completion evidence."
   - "Require all five checklist questions with evidence links in output."
-visibility: "internal"
+visibility: public
 category: operations
 metadata:
   category: operations

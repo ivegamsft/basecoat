@@ -4,7 +4,7 @@ compatibility: [github-copilot-cli]
 description: "Use when routing high-risk decisions to the right human approver with a PR-comment approval trail. USE FOR: release signoff, irreversible changes, compliance gates. DO NOT USE FOR: routine automation."
 category: operations
 
-visibility: "internal"
+visibility: public
 metadata:
   category: operations
   maturity: stable

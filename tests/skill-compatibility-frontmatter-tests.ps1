@@ -126,5 +126,47 @@ if ($invalidApplyTo.Count -gt 0) {
     throw "Skill applyTo pseudo-path check failed: $details"
 }
 
+# Exercise the production skill-visibility validator (scripts/validate-skill-visibility.ps1),
+# not a test-local reimplementation, so this coverage cannot drift from real behavior.
+$visibilityValidator = Join-Path $repoRoot 'scripts/validate-skill-visibility.ps1'
+if (-not (Test-Path $visibilityValidator)) {
+    throw "Skill visibility validator not found: $visibilityValidator"
+}
+
+# Positive: the real repository (post-normalization) must pass the production validator.
+& $visibilityValidator -RootDir $repoRoot | Out-Null
+
+# Positive/negative fixtures run through the same production validator in an isolated temp root.
+$fixtureRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("skill-vis-" + [guid]::NewGuid().ToString('N'))
+try {
+    $goodDir = Join-Path $fixtureRoot 'skills/good-skill'
+    $badDir = Join-Path $fixtureRoot 'skills/bad-skill'
+    New-Item -ItemType Directory -Force -Path $goodDir, $badDir | Out-Null
+
+    Set-Content -Path (Join-Path $goodDir 'SKILL.md') -Value "---`nname: good-skill`ndescription: fixture`nvisibility: public`n---`n"
+    & $visibilityValidator -RootDir $fixtureRoot | Out-Null
+
+    Set-Content -Path (Join-Path $badDir 'SKILL.md') -Value "---`nname: bad-skill`ndescription: fixture`nvisibility: `"internal`"`n---`n"
+    $negativeFailed = $false
+    try { & $visibilityValidator -RootDir $fixtureRoot *> $null } catch { $negativeFailed = $true }
+    if (-not $negativeFailed) {
+        throw "Skill visibility negative fixture failed: invalid 'internal' (agent-only tier) was accepted by the production validator"
+    }
+    Remove-Item -Recurse -Force $badDir
+
+    # Body-scope regression: an invalid visibility line inside a fenced code block
+    # in the BODY must NOT trip the validator, which parses only the frontmatter
+    # block. A first-N-lines heuristic would false-positive here.
+    $bodyDir = Join-Path $fixtureRoot 'skills/body-scope-skill'
+    New-Item -ItemType Directory -Force -Path $bodyDir | Out-Null
+    $bodyContent = "---`nname: body-scope-skill`ndescription: fixture`nvisibility: public`n---`n`nExample frontmatter:`n`n``````yaml`nvisibility: internal`n``````"
+    Set-Content -Path (Join-Path $bodyDir 'SKILL.md') -Value $bodyContent
+    & $visibilityValidator -RootDir $fixtureRoot | Out-Null
+}
+finally {
+    if (Test-Path $fixtureRoot) { Remove-Item -Recurse -Force $fixtureRoot }
+}
+
 Write-Host "Skill compatibility frontmatter tests passed for $((Get-ChildItem -Path $skillsDir -Directory).Count) skills."
 Write-Host 'Skill applyTo pseudo-path tests passed.'
+Write-Host 'Skill visibility enum tests passed (production validator).'

@@ -4,7 +4,7 @@ compatibility: [github-copilot-cli]
 description: "Use when analyzing takt-time JSON to calculate queue length and throughput by station, rank bottlenecks, and draft the weekly bottleneck report issue. USE FOR: station-level queue pressure, throughput trends, bottleneck ranking, and weekly issue filing. DO NOT USE FOR: dispatching work or changing routing policy."
 category: operations
 
-visibility: "internal"
+visibility: public
 metadata:
   category: operations
   maturity: stable

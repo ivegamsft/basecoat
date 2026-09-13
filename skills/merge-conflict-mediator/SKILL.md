@@ -4,7 +4,7 @@ compatibility: [github-copilot-cli]
 description: "Use when a merge conflict needs a deterministic playbook for docs, config, manifests, or release artifacts. USE FOR: classify conflict types, choose a merge policy, and hand a resolution plan to merge-coordinator. DO NOT USE FOR: auto-resolving source code conflicts, silently dropping dependency changes, or bypassing human review."
 category: development
 
-visibility: "internal"
+visibility: public
 metadata:
   category: development
   maturity: stable

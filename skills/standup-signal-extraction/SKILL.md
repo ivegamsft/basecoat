@@ -5,7 +5,7 @@ description: "Use when extracting actionable standup signals from team updates. 
 
 invocation_rules:
   - "Use during daily standups to convert updates into concrete actions."
-visibility: "internal"
+visibility: public
 category: operations
 metadata:
   category: operations

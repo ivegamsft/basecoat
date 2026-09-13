@@ -4,7 +4,7 @@ compatibility: [github-copilot-cli]
 description: "Designs and runs S4 rollback drills and recovery tests. USE FOR: building repeatable rollback rehearsal workflows, verifying rollback activation after soak windows, sequencing deploy/wait/rollback/verify/smoke-test steps, documenting drill outcomes for readiness checks. DO NOT USE FOR: skipping rollback verification, treating deploy success as rollback proof, implementing application features, drafting unrelated communications."
 category: operations
 
-visibility: "internal"
+visibility: public
 metadata:
   category: operations
   maturity: stable

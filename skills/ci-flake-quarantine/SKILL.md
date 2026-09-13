@@ -4,7 +4,7 @@ compatibility: [github-copilot-cli]
 description: "Use when isolating flaky CI tests with evidence-based quarantine windows and expiry policy. USE FOR: confirm flakiness, quarantine only after repeat evidence, and produce owner/expiry tracking. DO NOT USE FOR: hiding failures, permanently disabling tests, or replacing root-cause remediation."
 category: testing
 
-visibility: "internal"
+visibility: public
 metadata:
   category: testing
   maturity: stable

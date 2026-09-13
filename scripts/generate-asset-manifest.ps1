@@ -26,6 +26,7 @@ function Get-AssetType {
     if ($Path -in @(
             'scripts/validate-basecoat.ps1',
             'scripts/validate-basecoat.sh',
+            'scripts/validate-skill-visibility.ps1',
             'scripts/validate-workflow-action-pins.ps1',
             'scripts/validate-workflow-action-pins.py',
             'scripts/validate-reusable-workflow-contracts.py'
@@ -49,6 +50,7 @@ $candidates += Get-ChildItem skills -Recurse -Filter 'SKILL.md' -File | ForEach-
 $candidates += @(
     'scripts/validate-basecoat.ps1',
     'scripts/validate-basecoat.sh',
+    'scripts/validate-skill-visibility.ps1',
     'scripts/validate-workflow-action-pins.ps1',
     'scripts/validate-workflow-action-pins.py',
     'scripts/validate-reusable-workflow-contracts.py'
