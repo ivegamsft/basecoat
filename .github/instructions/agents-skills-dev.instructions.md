@@ -151,11 +151,11 @@ the default; "hide from picker" / "withhold from a consumer" is achieved by
 controlling which assets are physically projected into a target, not by a
 runtime field.
 
-| Field | Values | Default | Meaning |
+| Field | Values | Default | Meaning (target semantics) |
 |---|---|---|---|
-| `ships` | `true\|false` | `true` | Distributed to consumer repositories via `sync.ps1` |
-| `dogfood` | `true\|false` | `false` | Projected into BaseCoat's own local session (#3348) |
-| `status` | `experimental\|active\|deprecated` | `active` | Lifecycle/readiness; gates consumer distribution |
+| `ships` | `true\|false` | `true` | Intended for distribution to consumer repositories |
+| `dogfood` | `true\|false` | `false` | Intended for projection into BaseCoat's own local session (#3348) |
+| `status` | `experimental\|active\|deprecated` | `active` | Lifecycle/readiness signal |
 | `version` | SemVer `X.Y.Z` | inherits library version | Per-asset version (existing field) |
 
 Absent fields take their defaults. An asset that ships nowhere
@@ -166,6 +166,12 @@ of truth) and validated by `scripts/validate-asset-distribution.ps1` (invoked by
 deviates from the defaults** (`ships:true`, `dogfood:false`, `status:active`);
 default-classified assets carry no distribution fields, keeping the manifest and
 its adoption SHAs free of churn.
+
+> **Increment 1 scope:** the fields above are declared, validated, and recorded
+> in the manifest only. `sync.ps1` does **not** yet withhold `ships:false` /
+> non-`active` assets, and `dogfood` does not yet drive #3348 projection — those
+> enforcement behaviors land in later increments. Today the axes are metadata
+> plus conformance checks, not active distribution gates.
 
 ### Compatibility Taxonomy
 

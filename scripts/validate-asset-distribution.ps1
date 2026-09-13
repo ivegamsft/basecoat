@@ -32,8 +32,12 @@ function Get-Frontmatter {
 function Get-FrontmatterField {
     param([string]$Frontmatter, [string]$Name)
     foreach ($line in ($Frontmatter -split "`n")) {
-        if ($line -match "^$([regex]::Escape($Name)):\s*(.+?)\s*$") {
-            return $matches[1].Trim().Trim('"', "'").Trim().ToLowerInvariant()
+        if ($line -match "^$([regex]::Escape($Name)):(.*)$") {
+            # Strip an inline YAML comment ( value # comment ) before trimming so
+            # the documented inline-comment form is accepted; a present-but-empty
+            # field returns '' (distinct from $null absent) so it can be rejected.
+            $raw = $matches[1] -replace '\s+#.*$', ''
+            return ($raw.Trim().Trim('"', "'").Trim()).ToLowerInvariant()
         }
     }
     return $null

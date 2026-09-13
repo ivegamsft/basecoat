@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.1",
   "libraryVersion": "4.4.0",
-  "generatedAt": "2026-09-13T15:48:23.4916492Z",
+  "generatedAt": "2026-09-13T16:11:50.7048369Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -1854,7 +1854,7 @@
     {
       "path": "scripts/validate-asset-distribution.ps1",
       "type": "script",
-      "sha": "230f3a27d4f0d41f1b270ba84d55c09d95f2ecd1",
+      "sha": "b126f394dc4fb0cb96fc66e8056ade9259221eea",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -1870,7 +1870,7 @@
     {
       "path": "scripts/validate-basecoat.sh",
       "type": "script",
-      "sha": "6835ae363e365e78ec19c325ebc666c66e6f4cdd",
+      "sha": "4387a180ff8d2d4e2b5c0f1d1fb8809ccbd2ca6a",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"

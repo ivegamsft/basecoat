@@ -32,9 +32,14 @@ $cases = @(
     @{ fm = "ships: false`ndogfood: false`nstatus: deprecated"; pass = $true; desc = 'neither but deprecated' },
     @{ fm = "ships: false`ndogfood: false`nstatus: experimental"; pass = $true; desc = 'neither but experimental' },
     @{ fm = "status: active"; pass = $true; desc = 'defaults only' },
+    @{ fm = "ships: true            # distributed to consumers"; pass = $true; desc = 'inline comment accepted (spec syntax)' },
+    @{ fm = "dogfood: true # projected locally`nstatus: active # lifecycle"; pass = $true; desc = 'inline comments on multiple fields' },
     @{ fm = "ships: nope"; pass = $false; desc = 'invalid ships value' },
     @{ fm = "dogfood: maybe"; pass = $false; desc = 'invalid dogfood value' },
     @{ fm = "status: draft"; pass = $false; desc = 'invalid status value' },
+    @{ fm = "ships:"; pass = $false; desc = 'present-but-empty ships rejected' },
+    @{ fm = "status: "; pass = $false; desc = 'present-but-empty status rejected' },
+    @{ fm = "ships: t rue"; pass = $false; desc = 'interior whitespace not normalized away' },
     @{ fm = "ships: false`ndogfood: false"; pass = $false; desc = 'neither without staged status' }
 )
 
@@ -78,6 +83,36 @@ finally {
     if (Test-Path $root) { Remove-Item -Recurse -Force $root }
 }
 
+# Generator parsing + label derivation: dot-source the generator's functions and
+# exercise Get-FrontmatterDistribution directly against non-default and
+# inline-comment fixtures (the real repo is all-defaults, so this is the only
+# coverage of non-default emission and the derived label).
+$generator = Join-Path $repoRoot 'scripts/generate-asset-manifest.ps1'
+. $generator -DefineFunctionsOnly
+$genRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("asset-dist-gen-" + [guid]::NewGuid().ToString('N'))
+try {
+    $genCases = @(
+        @{ fm = "ships: true`ndogfood: true`nstatus: active"; ships = $true; dogfood = $true; status = 'active' },
+        @{ fm = "ships: false`ndogfood: true"; ships = $false; dogfood = $true; status = 'active' },
+        @{ fm = "ships: false`ndogfood: false`nstatus: deprecated"; ships = $false; dogfood = $false; status = 'deprecated' },
+        @{ fm = "ships: true            # inline comment"; ships = $true; dogfood = $false; status = 'active' },
+        @{ fm = "dogfood: true # note`nstatus: experimental # staged"; ships = $true; dogfood = $true; status = 'experimental' }
+    )
+    foreach ($gc in $genCases) {
+        $dir = Join-Path $genRoot ("g" + [guid]::NewGuid().ToString('N'))
+        New-Item -ItemType Directory -Force -Path $dir | Out-Null
+        $file = Join-Path $dir 'SKILL.md'
+        Set-Content -Path $file -Value "---`nname: g`ndescription: fixture`n$($gc.fm)`n---`n"
+        $dist = Get-FrontmatterDistribution $file
+        if ($dist.ships -ne $gc.ships -or $dist.dogfood -ne $gc.dogfood -or $dist.status -ne $gc.status) {
+            $failures += "generator parse: '$($gc.fm -replace "`n",' | ')' => ships=$($dist.ships),dogfood=$($dist.dogfood),status=$($dist.status) (expected $($gc.ships)/$($gc.dogfood)/$($gc.status))"
+        }
+    }
+}
+finally {
+    if (Test-Path $genRoot) { Remove-Item -Recurse -Force $genRoot }
+}
+
 # Manifest invariant: the generator must NEVER emit distribution metadata for a
 # default-classified asset (ships:true, dogfood:false, status:active). Emitting
 # defaults for every asset is pure churn and needless adoption-SHA noise. This
@@ -93,7 +128,32 @@ if (Test-Path $manifestPath) {
         if ($isDefault) {
             $failures += "manifest emits default distribution metadata for $($asset.path) (defaults must be omitted)"
         }
+        if ($asset.PSObject.Properties.Name -contains 'distribution' -and $asset.distribution -notin @('shipped', 'internal', 'both', 'neither')) {
+            $failures += "manifest asset $($asset.path) has out-of-enum distribution label '$($asset.distribution)'"
+        }
     }
+}
+
+# Drift check (spec: docs/spec/3374-*.md — "asserts the manifest matches
+# frontmatter"): regenerate the manifest and confirm the committed file is
+# byte-identical modulo the generatedAt timestamp. Catches frontmatter changes
+# that were not accompanied by a regeneration.
+$driftManifest = Join-Path ([System.IO.Path]::GetTempPath()) ("asset-manifest-drift-" + [guid]::NewGuid().ToString('N') + '.json')
+try {
+    & $generator -OutputPath $driftManifest *> $null
+    if (Test-Path $driftManifest) {
+        $committed = (Get-Content -Path $manifestPath -Raw) -replace '"generatedAt":\s*"[^"]*"', '"generatedAt":"X"'
+        $fresh = (Get-Content -Path $driftManifest -Raw) -replace '"generatedAt":\s*"[^"]*"', '"generatedAt":"X"'
+        if ($committed -ne $fresh) {
+            $failures += 'asset-manifest.json is stale: regenerating from frontmatter produces a different manifest (run scripts/generate-asset-manifest.ps1)'
+        }
+    }
+    else {
+        $failures += 'drift check could not produce a manifest'
+    }
+}
+finally {
+    if (Test-Path $driftManifest) { Remove-Item -Force $driftManifest }
 }
 
 if ($failures.Count -gt 0) {
@@ -102,4 +162,4 @@ if ($failures.Count -gt 0) {
     throw "Asset distribution tests failed with $($failures.Count) failure(s)"
 }
 
-Write-Host "Asset distribution tests passed ($($cases.Count) cases + body-scope + real-repo + manifest-omit-defaults)."
+Write-Host "Asset distribution tests passed ($($cases.Count) cases + body-scope + real-repo + generator-units + manifest-omit-defaults + drift-check)."

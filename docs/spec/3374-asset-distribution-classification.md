@@ -104,10 +104,13 @@ does not control and is explicitly out of scope.
 ### Generated manifest
 
 Extend `scripts/generate-asset-manifest.ps1` to record `ships`, `dogfood`, and
-the derived `distribution` label per asset in `asset-manifest.json` (or a
-sibling `distribution-manifest.json` if embedding would churn adoption SHAs —
-decided during implementation). The manifest is regenerated from frontmatter and
-is never hand-edited, mirroring the current manifest contract.
+the derived `distribution` label per asset in `asset-manifest.json`. To avoid
+churning adoption SHAs and inflating diffs, the generator emits these fields
+**only when an asset deviates from the defaults** (`ships:true`,
+`dogfood:false`, `status:active`); a default-classified asset carries no
+distribution fields, and every manifest reader treats their absence as the
+defaults. The manifest is regenerated from frontmatter and is never hand-edited,
+mirroring the current manifest contract.
 
 ### Consumers
 
@@ -132,7 +135,7 @@ legitimately ship nowhere).
 | `dogfood` | boolean | `false` | #3348 self-install projection |
 | `status` | enum `experimental\|active\|deprecated` | `active` | `sync.ps1` readiness gate; reporting |
 | `version` | SemVer string | absent (inherits library version) | manifest `effectiveVersion`; already validated |
-| `distribution` (derived) | enum `shipped\|internal\|both` | derived | manifest/reporting only |
+| `distribution` (derived) | enum `shipped\|internal\|both\|neither` | derived | manifest/reporting only |
 
 Applicability: skills, agents, prompts. `instructions/` classification is an
 open question (they auto-load and #3348 does not project them); the spec's

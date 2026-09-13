@@ -1,7 +1,11 @@
 #!/usr/bin/env pwsh
 [CmdletBinding()]
 param(
-    [string]$OutputPath = "asset-manifest.json"
+    [string]$OutputPath = "asset-manifest.json",
+    # When set, define the module functions and return without generating the
+    # manifest, so tests can dot-source and exercise the parsing/label logic
+    # directly (e.g. with non-default and inline-comment fixtures).
+    [switch]$DefineFunctionsOnly
 )
 
 $ErrorActionPreference = "Stop"
@@ -11,7 +15,7 @@ function Get-FrontmatterVersion {
     $content = Get-Content -Path $Path -Raw
     if ($content -notmatch '^---\r?\n([\s\S]+?)\r?\n---') { return $null }
     $fm = $matches[1]
-    if ($fm -match '(?m)^version:\s*["'']?([0-9]+\.[0-9]+\.[0-9]+)["'']?\s*$') {
+    if ($fm -match '(?m)^version:\s*["'']?([0-9]+\.[0-9]+\.[0-9]+)["'']?\s*(?:#.*)?$') {
         return $matches[1]
     }
     return $null
@@ -27,9 +31,9 @@ function Get-FrontmatterDistribution {
     $content = Get-Content -Path $Path -Raw
     if ($content -match '^---\r?\n([\s\S]+?)\r?\n---') {
         $fm = $matches[1]
-        if ($fm -match '(?m)^ships:\s*["'']?(true|false)["'']?\s*$') { $ships = ($matches[1] -eq 'true') }
-        if ($fm -match '(?m)^dogfood:\s*["'']?(true|false)["'']?\s*$') { $dogfood = ($matches[1] -eq 'true') }
-        if ($fm -match '(?m)^status:\s*["'']?(experimental|active|deprecated)["'']?\s*$') { $status = $matches[1].ToLowerInvariant() }
+        if ($fm -match '(?m)^ships:\s*["'']?(true|false)["'']?\s*(?:#.*)?$') { $ships = ($matches[1] -eq 'true') }
+        if ($fm -match '(?m)^dogfood:\s*["'']?(true|false)["'']?\s*(?:#.*)?$') { $dogfood = ($matches[1] -eq 'true') }
+        if ($fm -match '(?m)^status:\s*["'']?(experimental|active|deprecated)["'']?\s*(?:#.*)?$') { $status = $matches[1].ToLowerInvariant() }
     }
     return [PSCustomObject]@{ ships = $ships; dogfood = $dogfood; status = $status }
 }
@@ -53,6 +57,7 @@ function Get-AssetType {
 }
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
+if ($DefineFunctionsOnly) { return }
 Set-Location $repoRoot
 
 $libraryVersion = (Get-Content version.json -Raw | ConvertFrom-Json).version
@@ -102,7 +107,7 @@ $assets = foreach ($full in $candidates | Sort-Object) {
             $label = if ($dist.ships -and $dist.dogfood) { 'both' }
             elseif ($dist.ships) { 'shipped' }
             elseif ($dist.dogfood) { 'internal' }
-            else { 'none' }
+            else { 'neither' }
             $obj['ships'] = $dist.ships
             $obj['dogfood'] = $dist.dogfood
             $obj['status'] = $dist.status

@@ -30,15 +30,34 @@ frontmatter_field() {
     infm && tolower($0) ~ "^" tolower(field) ":" {
       line = $0
       sub("^[^:]*:[ \t]*", "", line)
+      sub("[ \t]+#.*$", "", line)
       print line
       exit
     }
   ' "$file"
 }
 
-# Normalizes a frontmatter scalar: strips surrounding quotes/space, lowercases.
+# Prints "1" when a top-level field key is present in the YAML frontmatter block
+# (regardless of value), else nothing. Used to distinguish an absent field from
+# a present-but-empty one, so `ships:` with no value is rejected rather than
+# silently defaulted.
+frontmatter_has_field() {
+  local field="$1" file="$2"
+  awk -v field="$field" '
+    NR == 1 && $0 != "---" { exit }
+    NR == 1 { infm = 1; next }
+    infm && $0 == "---" { exit }
+    infm && tolower($0) ~ "^" tolower(field) ":" { print "1"; exit }
+  ' "$file"
+}
+
+# Normalizes a frontmatter scalar: strips surrounding quotes and surrounding
+# whitespace only (never interior whitespace, so a malformed `t rue` stays
+# malformed), then lowercases.
 normalize_scalar() {
-  printf '%s' "$1" | sed -E 's/^["'"'"']?//; s/["'"'"']?[[:space:]]*$//' | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]'
+  printf '%s' "$1" \
+    | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//; s/^["'"'"']//; s/["'"'"']$//; s/^[[:space:]]+//; s/[[:space:]]+$//' \
+    | tr '[:upper:]' '[:lower:]'
 }
 
 # Validates the #3374 asset distribution classification (ships/dogfood/status).
@@ -48,6 +67,19 @@ check_asset_distribution() {
   ships="$(normalize_scalar "$(frontmatter_field ships "$file")")"
   dogfood="$(normalize_scalar "$(frontmatter_field dogfood "$file")")"
   status="$(normalize_scalar "$(frontmatter_field status "$file")")"
+
+  if [[ -z "$ships" && -n "$(frontmatter_has_field ships "$file")" ]]; then
+    echo "Invalid ships '' in $file (expected true or false)" >&2
+    exit 1
+  fi
+  if [[ -z "$dogfood" && -n "$(frontmatter_has_field dogfood "$file")" ]]; then
+    echo "Invalid dogfood '' in $file (expected true or false)" >&2
+    exit 1
+  fi
+  if [[ -z "$status" && -n "$(frontmatter_has_field status "$file")" ]]; then
+    echo "Invalid status '' in $file (expected experimental, active, or deprecated)" >&2
+    exit 1
+  fi
 
   if [[ -n "$ships" && "$ships" != "true" && "$ships" != "false" ]]; then
     echo "Invalid ships '$ships' in $file (expected true or false)" >&2
