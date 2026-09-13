@@ -179,6 +179,54 @@ Assert ($mgBlocked.require_green_checks -eq $true) "green-checks requirement sur
 & pwsh -NoProfile -File $mergeScript -InFlightCount -1 *> $null
 Assert ($LASTEXITCODE -ne 0) "negative in-flight count rejected (validated, non-permissive)"
 
+Write-Host "backlog-autopilot: global sub-issue endpoint failure detection (#3358)"
+# Every online sub-issue lookup failing (transient/auth) must fail loud rather
+# than silently sentinel-blocking every issue and still exiting 0. The
+# `subIssuesStatus` fixture hook models the online outcome deterministically.
+$allErr = @(
+    [pscustomobject]@{ number = 10; createdAt = "2026-07-01T00:00:00Z"; title = "a"; body = ""; labels = @(); subIssuesStatus = "error" },
+    [pscustomobject]@{ number = 20; createdAt = "2026-07-02T00:00:00Z"; title = "b"; body = ""; labels = @(); subIssuesStatus = "error" }
+)
+$allErrPath = Join-Path $temp "all-error.json"
+$allErr | ConvertTo-Json -Depth 6 | Set-Content -Path $allErrPath -Encoding utf8
+$allErrOut = Join-Path $temp "all-error-waves.json"
+& pwsh -NoProfile -File $waveScript -Repo "test/repo" -InputPath $allErrPath -OutputPath $allErrOut 2>$null | Out-Null
+Assert ($LASTEXITCODE -eq 3) "every sub-issue lookup failing exits non-zero (3), not a silent empty wave"
+Assert (-not (Test-Path $allErrOut)) "no wave plan written when the endpoint globally fails"
+
+# Not-all-failed (one transient error, one 404-unsupported) is a per-epic
+# condition, not a global outage: exit 0, the errored epic fails closed
+# (blocked), the unsupported one still schedules from body references.
+$mixed = @(
+    [pscustomobject]@{ number = 10; createdAt = "2026-07-01T00:00:00Z"; title = "a"; body = ""; labels = @(); subIssuesStatus = "error" },
+    [pscustomobject]@{ number = 20; createdAt = "2026-07-02T00:00:00Z"; title = "b"; body = ""; labels = @(); subIssuesStatus = "unsupported" }
+)
+$mixedPath = Join-Path $temp "mixed.json"
+$mixed | ConvertTo-Json -Depth 6 | Set-Content -Path $mixedPath -Encoding utf8
+$mixedOut = Join-Path $temp "mixed-waves.json"
+& $waveScript -Repo "test/repo" -InputPath $mixedPath -OutputPath $mixedOut 2>$null | Out-Null
+Assert ($LASTEXITCODE -eq 0) "partial sub-issue failure does not trip the global gate (exit 0)"
+$mixedWaves = Get-Content $mixedOut -Raw | ConvertFrom-Json
+$mixedWaved = @($mixedWaves.waves | ForEach-Object { $_.issues } | ForEach-Object { $_ })
+Assert ($mixedWaves.blocked -contains 10) "errored epic #10 fails closed (blocked)"
+Assert ($mixedWaved -contains 20) "unsupported epic #20 is scheduled (no sentinel block)"
+
+# Every lookup returning 404 (endpoint unsupported) degrades gracefully: no
+# sentinel-blocking, waves still built from body/Parent references, exit 0.
+$allUnsup = @(
+    [pscustomobject]@{ number = 10; createdAt = "2026-07-01T00:00:00Z"; title = "a"; body = ""; labels = @(); subIssuesStatus = "unsupported" },
+    [pscustomobject]@{ number = 20; createdAt = "2026-07-02T00:00:00Z"; title = "b"; body = ""; labels = @(); subIssuesStatus = "unsupported" }
+)
+$allUnsupPath = Join-Path $temp "all-unsupported.json"
+$allUnsup | ConvertTo-Json -Depth 6 | Set-Content -Path $allUnsupPath -Encoding utf8
+$allUnsupOut = Join-Path $temp "all-unsupported-waves.json"
+& $waveScript -Repo "test/repo" -InputPath $allUnsupPath -OutputPath $allUnsupOut 2>$null | Out-Null
+Assert ($LASTEXITCODE -eq 0) "globally unsupported endpoint degrades gracefully (exit 0)"
+$unsupWaves = Get-Content $allUnsupOut -Raw | ConvertFrom-Json
+$unsupWaved = @($unsupWaves.waves | ForEach-Object { $_.issues } | ForEach-Object { $_ })
+Assert (($unsupWaved -contains 10) -and ($unsupWaved -contains 20)) "unsupported endpoint still schedules independent issues"
+Assert ($unsupWaves.blocked.Count -eq 0) "no issue sentinel-blocked when the endpoint is merely unsupported"
+
 Remove-Item -Path $temp -Recurse -Force
 
 if ($failures -gt 0) {

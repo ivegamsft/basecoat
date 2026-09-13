@@ -127,12 +127,24 @@ function Test-DependencyOpen {
 # dependency of the parent. Offline (-InputPath) mode is authoritative and reads
 # an injectable `subIssues` array on the issue object; online mode queries the
 # native sub-issues endpoint (already filtered to open children). Cached to
-# avoid repeat calls. Returns a wrapper @{ ok = <bool>; children = <int[]> }:
-# ok=$false means the online lookup failed after every retry (callers fail
-# closed). A wrapper is used rather than $null because PowerShell unwraps an
-# empty array return to $null, which would make "no children" indistinguishable
-# from "lookup failed".
+# avoid repeat calls. Returns a wrapper @{ ok = <bool>; status = <string>;
+# children = <int[]> }: status is 'ok' (children enumerated), 'error' (the
+# online lookup failed after every retry — callers fail closed) or 'unsupported'
+# (endpoint 404 — no native sub-issue support, callers skip sentinel-blocking).
+# ok mirrors status -eq 'ok'. A wrapper is used rather than $null because
+# PowerShell unwraps an empty array return to $null, which would make "no
+# children" indistinguishable from "lookup failed".
 $subIssueCache = @{}
+
+# Global sub-issue endpoint health counters (issue #3358). Only ONLINE lookups
+# are counted (offline/injected results never touch the endpoint). They let the
+# script distinguish a per-epic transient failure (some lookups fail) from a
+# global outage (every lookup fails) so a globally unavailable or unauthorized
+# endpoint fails loud instead of silently blocking every issue and exiting 0.
+$script:SubIssueOnlineAttempts = 0
+$script:SubIssueOnlineErrors = 0
+$script:SubIssueUnsupported = 0
+
 function Get-SubIssueChildren {
     param($Issue)
     $num = [int]$Issue.number
@@ -140,12 +152,29 @@ function Get-SubIssueChildren {
 
     $prop = $Issue.PSObject.Properties['subIssues']
     if ($prop -and $null -ne $prop.Value) {
-        $result = @{ ok = $true; children = @($prop.Value | ForEach-Object { [int]$_ }) }
+        $result = @{ ok = $true; status = 'ok'; children = @($prop.Value | ForEach-Object { [int]$_ }) }
         $subIssueCache[$num] = $result
         return $result
     }
+    # Offline simulation hook (mirrors the injectable `subIssues` array): a
+    # fixture may carry `subIssuesStatus` = 'error' or 'unsupported' to model a
+    # failed or 404 online lookup deterministically, so the global-failure gate
+    # (issue #3358) is testable without network access. Counted as an online
+    # attempt because the gate keys off online lookup outcomes; real offline runs
+    # never set this property, so the counters stay zero and the gate never fires.
+    $statusProp = $Issue.PSObject.Properties['subIssuesStatus']
+    if ($statusProp -and $statusProp.Value) {
+        $simStatus = "$($statusProp.Value)".ToLowerInvariant()
+        if ($simStatus -eq 'error' -or $simStatus -eq 'unsupported') {
+            $script:SubIssueOnlineAttempts++
+            if ($simStatus -eq 'error') { $script:SubIssueOnlineErrors++ } else { $script:SubIssueUnsupported++ }
+            $result = @{ ok = $false; status = $simStatus; children = @() }
+            $subIssueCache[$num] = $result
+            return $result
+        }
+    }
     if ($InputPath) {
-        $result = @{ ok = $true; children = @() }
+        $result = @{ ok = $true; status = 'ok'; children = @() }
         $subIssueCache[$num] = $result
         return $result
     }
@@ -153,10 +182,11 @@ function Get-SubIssueChildren {
     # Online lookup. Route through the repository's configured API-burst pacing
     # and exponential backoff (autopilot.config.json -> pacing) so a 500-issue
     # window cannot hammer the sub-issues endpoint past GitHub's secondary
-    # rate-limit thresholds. A lookup that never succeeds returns ok=$false so
-    # callers fail closed instead of erasing an epic's children on a transient or
-    # unauthorized failure. Only a definitive exit-0 response (including a
-    # genuinely empty child set) is cached as authoritative.
+    # rate-limit thresholds. Classify the outcome so callers can distinguish a
+    # successful lookup, a definitive "endpoint unsupported" (HTTP 404 — treat as
+    # "no native sub-issues" and do NOT sentinel-block), and a transient/auth
+    # failure (fail closed per epic). Only a definitive exit-0 response
+    # (including a genuinely empty child set) is cached as authoritative.
     $pacing = $config.pacing
     $burst = if ($pacing -and $pacing.min_seconds_between_api_bursts) { [double]$pacing.min_seconds_between_api_bursts } else { 0 }
     $base = if ($pacing -and $pacing.backoff.base_seconds) { [double]$pacing.backoff.base_seconds } else { 5 }
@@ -164,18 +194,33 @@ function Get-SubIssueChildren {
     $maxBackoff = if ($pacing -and $pacing.backoff.max_seconds) { [double]$pacing.backoff.max_seconds } else { 300 }
     $maxRetries = if ($config.loop -and $config.loop.default_max_retries) { [int]$config.loop.default_max_retries } else { 3 }
 
-    $ok = $false
+    $status = 'error'
     $children = @()
     for ($attempt = 0; $attempt -le $maxRetries; $attempt++) {
         if ($burst -gt 0) { Start-Sleep -Seconds $burst }
-        $cj = & gh api "repos/$Repo/issues/$num/sub_issues" --paginate `
-            --jq '.[] | select(.state=="open") | .number' 2>$null
-        if ($LASTEXITCODE -eq 0) {
-            $ok = $true
+        $errFile = [System.IO.Path]::GetTempFileName()
+        try {
+            $cj = & gh api "repos/$Repo/issues/$num/sub_issues" --paginate `
+                --jq '.[] | select(.state=="open") | .number' 2>$errFile
+            $exitCode = $LASTEXITCODE
+            $stderr = (Get-Content -Path $errFile -Raw -ErrorAction SilentlyContinue)
+        } finally {
+            Remove-Item -Path $errFile -Force -ErrorAction SilentlyContinue
+        }
+        if ($exitCode -eq 0) {
+            $status = 'ok'
             $children = @(@($cj) |
                 ForEach-Object { "$_".Trim() } |
                 Where-Object { $_ -match '^\d+$' } |
                 ForEach-Object { [int]$_ })
+            break
+        }
+        # A 404 means the sub-issues endpoint/feature is unavailable for this
+        # repo or token. Retrying cannot help, and sentinel-blocking every issue
+        # on a repo that simply lacks native sub-issues would erase all waves.
+        # Treat it as "no native sub-issues support" and stop retrying.
+        if ($stderr -match '(?i)(?:HTTP\s*)?404|not found') {
+            $status = 'unsupported'
             break
         }
         if ($attempt -lt $maxRetries) {
@@ -183,7 +228,12 @@ function Get-SubIssueChildren {
             Start-Sleep -Seconds $wait
         }
     }
-    $result = @{ ok = $ok; children = $children }
+
+    $script:SubIssueOnlineAttempts++
+    if ($status -eq 'error') { $script:SubIssueOnlineErrors++ }
+    elseif ($status -eq 'unsupported') { $script:SubIssueUnsupported++ }
+
+    $result = @{ ok = ($status -eq 'ok'); status = $status; children = $children }
     $subIssueCache[$num] = $result
     return $result
 }
@@ -239,13 +289,19 @@ foreach ($issue in $ordered) {
         }
     }
 
-    # Native sub-issues: the parent depends on each still-open child. ok=$false
-    # means the lookup failed after all retries; fail closed so the epic cannot
-    # be scheduled with unfinished children we could not enumerate.
+    # Native sub-issues: the parent depends on each still-open child.
+    #   status 'error'       -> the lookup failed after all retries for a
+    #                           transient/auth reason; fail closed so the epic
+    #                           cannot be scheduled with unfinished children we
+    #                           could not enumerate.
+    #   status 'unsupported' -> the endpoint returned 404 (no native sub-issue
+    #                           support); do NOT sentinel-block. Ordering falls
+    #                           back to body "depends on"/"Parent:" references.
+    #   status 'ok'          -> use the enumerated open children.
     $subResult = Get-SubIssueChildren $issue
-    if (-not $subResult.ok) {
+    if ($subResult.status -eq 'error') {
         [void]$deps.Add($SentinelUnplaceable)
-    } else {
+    } elseif ($subResult.status -eq 'ok') {
         foreach ($child in $subResult.children) {
             if ($child -ne $num -and (Test-DependencyOpen -Dep $child)) {
                 [void]$deps.Add($child)
@@ -266,6 +322,26 @@ foreach ($parent in @($parentLinks.Keys)) {
             [void]$depsByIssue[$parent].Add($child)
         }
     }
+}
+
+# --- Global sub-issue endpoint failure detection (issue #3358) -------------
+# Get-SubIssueChildren runs for every issue. If the sub-issues endpoint is
+# globally unavailable or the token lacks access, EVERY online lookup fails and
+# every issue receives the unplaceable sentinel -> every issue lands in
+# $blocked, yet the script would still exit 0: a silent, empty-wave result
+# indistinguishable from "nothing is ready". Fail loud instead when online
+# lookups were attempted and all of them failed for a transient/auth reason.
+if ($script:SubIssueOnlineAttempts -gt 0 -and
+    $script:SubIssueOnlineErrors -eq $script:SubIssueOnlineAttempts) {
+    [Console]::Error.WriteLine("build-waves: every sub-issue lookup failed ($($script:SubIssueOnlineErrors)/$($script:SubIssueOnlineAttempts)). The GitHub sub-issues endpoint appears globally unavailable or the token lacks access; refusing to emit a wave plan that blocks every issue. Verify authentication and API availability, then re-run.")
+    exit 3
+}
+# A globally 404 endpoint (no native sub-issue support) is a benign degraded
+# mode: sentinel-blocking was skipped and ordering relies on body references.
+# Warn once so the reduced fidelity is visible without failing the run.
+if ($script:SubIssueUnsupported -gt 0 -and
+    $script:SubIssueUnsupported -eq $script:SubIssueOnlineAttempts) {
+    [Console]::Error.WriteLine("build-waves: the GitHub sub-issues endpoint returned 404 for every lookup; native sub-issue dependencies are unavailable. Falling back to body 'depends on' / 'Parent:' references only.")
 }
 
 # --- Topological wave assignment (oldest-first, ready-only) -----------------
