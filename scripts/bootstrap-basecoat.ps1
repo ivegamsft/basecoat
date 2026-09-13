@@ -183,7 +183,7 @@ if (-not $isFresh) {
     }
 }
 
-if (-not (Confirm-Step "  Proceed with $mode?")) {
+if (-not (Confirm-Step "  Proceed with ${mode}?")) {
     Write-Host '  Aborted.' -ForegroundColor Yellow
     exit 0
 }

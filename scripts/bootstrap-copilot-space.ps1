@@ -166,7 +166,7 @@ function Get-FileSha {
         [string]$Ref
     )
 
-    $endpoint = "/repos/$RepoSlug/contents/$Path?ref=$Ref"
+    $endpoint = "/repos/$RepoSlug/contents/${Path}?ref=$Ref"
     $file = Invoke-GhApiJson $endpoint
     return $file.sha
 }
@@ -322,7 +322,7 @@ try {
     )
 
     $defaultBranch = Get-RepoDefaultBranch -RepoSlug $SourceRepo
-    $tree = Invoke-GhApiJson "/repos/$SourceRepo/git/trees/$defaultBranch?recursive=1"
+    $tree = Invoke-GhApiJson "/repos/$SourceRepo/git/trees/${defaultBranch}?recursive=1"
     $guideFiles += @(
         $tree.tree |
             Where-Object { $_.type -eq 'blob' -and $_.path -like 'docs/guides/*.md' } |

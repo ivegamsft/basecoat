@@ -874,6 +874,7 @@ $additionalSuites = @(
     'agent-integration-tests.ps1',
     'agent-merge-workflow-tests.ps1',
     'backlog-efficiency-scorecard-tests.ps1',
+    'bootstrap-strictmode-interpolation-tests.ps1',
     'ci-audit-script-tests.ps1',
     'failure-pattern-script-tests.ps1',
     'generate-registry-model-fallback-tests.ps1',
