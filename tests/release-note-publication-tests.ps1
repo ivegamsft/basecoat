@@ -64,6 +64,77 @@ $heredocBody | python -c 'import sys; compile(sys.stdin.read(), "<changelog-here
 if ($LASTEXITCODE -ne 0) {
     throw 'The changelog heredoc body does not compile (IndentationError regression from #3363).'
 }
+
+# Behavioral regression guard for the changelog insertion logic (issue #3365).
+# Execute the extracted insertion heredoc against a fixture CHANGELOG and a
+# generator-style notes file (which carries its own "## <version>" heading, an
+# Unreleased section with stale body, and a prior release). Assert the result
+# has exactly one dated version heading (no duplicate H2), a reset Unreleased
+# placeholder with the stale body dropped, and preserved prior history.
+$fixtureDir = Join-Path ([System.IO.Path]::GetTempPath()) ("changelog-insert-" + [guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Path $fixtureDir | Out-Null
+try {
+    $changelogFixture = @'
+# Changelog
+
+## Unreleased
+
+- Stale pending note that must not survive insertion.
+
+## 4.4.0 - 2026-09-11
+
+### Fixed
+
+- old fix (#1)
+'@
+    $notesFixture = @'
+## 5.0.0
+
+### Added
+
+- feat: brand new capability (#100)
+'@
+    Set-Content -Path (Join-Path $fixtureDir 'CHANGELOG.md') -Value $changelogFixture -NoNewline
+    $notesPath = Join-Path $fixtureDir 'notes.md'
+    Set-Content -Path $notesPath -Value $notesFixture -NoNewline
+
+    $env:NOTES_FILE = $notesPath
+    $env:VERSION = '5.0.0'
+    $env:DATE_UTC = '2026-10-01'
+    Push-Location $fixtureDir
+    try {
+        $heredocBody | python -
+        if ($LASTEXITCODE -ne 0) { throw 'The changelog insertion heredoc failed to execute against the fixture.' }
+    } finally {
+        Pop-Location
+    }
+
+    $result = ((Get-Content (Join-Path $fixtureDir 'CHANGELOG.md') -Raw) -replace "`r", '')
+
+    $versionHeadingCount = ([regex]::Matches($result, '(?m)^## 5\.0\.0')).Count
+    if ($versionHeadingCount -ne 1) {
+        throw "Changelog insertion produced $versionHeadingCount H2 headings for the new version; expected exactly one (duplicate-heading regression, issue #3365)."
+    }
+    Assert-Match $result '(?m)^## 5\.0\.0 - 2026-10-01$' 'Inserted release section must carry the single dated version heading.'
+    if ($result -match 'Stale pending note that must not survive') {
+        throw 'Changelog insertion re-emitted the previous Unreleased body (stale-Unreleased regression, issue #3365).'
+    }
+    Assert-Match $result '(?m)^- No unreleased changes\.$' 'Insertion must reset the Unreleased section to an empty placeholder.'
+    Assert-Match $result '(?m)^## 4\.4\.0 - 2026-09-11$' 'Insertion must preserve prior release history.'
+
+    $newIdx = $result.IndexOf('## 5.0.0 - 2026-10-01')
+    $oldIdx = $result.IndexOf('## 4.4.0 - 2026-09-11')
+    if ($newIdx -lt 0 -or $oldIdx -lt 0 -or $newIdx -ge $oldIdx) {
+        throw 'The inserted release section must appear above the previous release entry.'
+    }
+    Write-Host 'PASS changelog insertion logic (single dated heading, reset Unreleased, preserved history).'
+} finally {
+    Remove-Item -Path $fixtureDir -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item Env:NOTES_FILE -ErrorAction SilentlyContinue
+    Remove-Item Env:VERSION -ErrorAction SilentlyContinue
+    Remove-Item Env:DATE_UTC -ErrorAction SilentlyContinue
+}
+
 # Behavioral regression guard for the release fail-closed version assertion
 # (issue #3366). The release workflow must refuse to publish when the tagged
 # commit's version.json does not already match the release tag, so a tag can

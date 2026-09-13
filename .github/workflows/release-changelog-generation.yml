@@ -60,7 +60,13 @@ jobs:
           latest_notes_file="reports/release-notes/latest.md"
           scripts/generate-release-notes.sh "$tag" "$version" "$notes_file"
           mkdir -p "$(dirname "$latest_notes_file")"
-          cp "$notes_file" "$latest_notes_file"
+          # The generated notes begin with an "## <version>" heading. Prepend a
+          # single top-level title so the published surface stays MD041-compliant
+          # (first line must be an H1) and matches the committed convention.
+          {
+            printf '# Latest Release Notes\n\n'
+            cat "$notes_file"
+          } > "$latest_notes_file"
 
           if grep -Eq "^## v?${version}\b" CHANGELOG.md; then
             echo "Changelog already contains ${version}; publishing refreshed latest notes only."
@@ -68,18 +74,30 @@ jobs:
             NOTES_FILE="$notes_file" VERSION="$version" DATE_UTC="$date_utc" python - <<'PY'
           from pathlib import Path
           import os
+          import re
 
           changelog = Path("CHANGELOG.md")
           notes = Path(os.environ["NOTES_FILE"]).read_text(encoding="utf-8").strip()
           version = os.environ["VERSION"]
           date_utc = os.environ["DATE_UTC"]
 
+          # The generator emits a body that already starts with its own
+          # "## <version>" heading. Strip that leading heading so the section
+          # carries exactly one "## <version> - <date>" heading (no adjacent
+          # duplicate H2).
+          notes = re.sub(r"^##\s+.*(?:\r?\n)+", "", notes, count=1)
+
           section = f"\n## {version} - {date_utc}\n\n{notes}\n"
           content = changelog.read_text(encoding="utf-8")
           marker = "## Unreleased"
           if marker in content:
             head, tail = content.split(marker, 1)
-            updated = f"{head}{marker}\n\n- No unreleased changes.\n{section}{tail.lstrip()}"
+            # `tail` still begins with the previous Unreleased body. Drop it and
+            # keep only history from the next release heading so the stale body
+            # does not leak in after the new release section.
+            next_heading = re.search(r"(?m)^##\s", tail)
+            history = tail[next_heading.start():] if next_heading else ""
+            updated = f"{head}{marker}\n\n- No unreleased changes.\n{section}\n{history}"
           else:
             updated = f"{content.rstrip()}\n{section}"
           changelog.write_text(updated, encoding="utf-8")
