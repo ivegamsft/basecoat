@@ -1,7 +1,7 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
   "libraryVersion": "4.4.0",
-  "generatedAt": "2026-09-13T14:40:20.0361186Z",
+  "generatedAt": "2026-09-13T15:48:23.4916492Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -1852,9 +1852,17 @@
       "versionSource": "library"
     },
     {
+      "path": "scripts/validate-asset-distribution.ps1",
+      "type": "script",
+      "sha": "230f3a27d4f0d41f1b270ba84d55c09d95f2ecd1",
+      "version": null,
+      "effectiveVersion": "4.4.0",
+      "versionSource": "library"
+    },
+    {
       "path": "scripts/validate-basecoat.ps1",
       "type": "script",
-      "sha": "90e08a2e916cf11448cbfc468f9ca6b8df3ee4e7",
+      "sha": "8adff2d89f15187c2b9bbcf13fdc934fa3f87ec4",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -1862,7 +1870,7 @@
     {
       "path": "scripts/validate-basecoat.sh",
       "type": "script",
-      "sha": "7bcfe24097eddf7bc7208d34d86a455d94f8ca26",
+      "sha": "6835ae363e365e78ec19c325ebc666c66e6f4cdd",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"
@@ -1878,7 +1886,7 @@
     {
       "path": "scripts/validate-skill-visibility.ps1",
       "type": "script",
-      "sha": "f7c4260a33a495b2b7301303fdd7e3a217aeab2a",
+      "sha": "4d26f33b5de65ad929dce1df4e607958717169a2",
       "version": null,
       "effectiveVersion": "4.4.0",
       "versionSource": "library"

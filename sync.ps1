@@ -473,6 +473,7 @@ try {
             'validate-basecoat.ps1',
             'validate-basecoat.sh',
             'validate-skill-visibility.ps1',
+            'validate-asset-distribution.ps1',
             'validate-workflow-action-pins.ps1',
             'validate-workflow-action-pins.py',
             'workflow-ownership.ps1',

@@ -328,6 +328,7 @@ try {
             'scripts/validate-basecoat.ps1',
             'scripts/validate-basecoat.sh',
             'scripts/validate-skill-visibility.ps1',
+            'scripts/validate-asset-distribution.ps1',
             'scripts/validate-workflow-action-pins.ps1',
             'scripts/validate-workflow-action-pins.py',
             'scripts/invoke-basecoat-consumer-update.ps1'

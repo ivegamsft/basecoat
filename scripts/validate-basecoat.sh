@@ -18,6 +18,59 @@ has_frontmatter_field() {
   awk -v field="$field" 'NR <= 20 && tolower($0) ~ "^" tolower(field) ":" { found = 1 } END { exit(found ? 0 : 1) }' "$file"
 }
 
+# Prints the raw scalar value of a top-level field from the YAML frontmatter
+# block only (never the body), or nothing if absent. Scoping to the frontmatter
+# block avoids false positives from fenced code samples elsewhere in the file.
+frontmatter_field() {
+  local field="$1" file="$2"
+  awk -v field="$field" '
+    NR == 1 && $0 != "---" { exit }
+    NR == 1 { infm = 1; next }
+    infm && $0 == "---" { exit }
+    infm && tolower($0) ~ "^" tolower(field) ":" {
+      line = $0
+      sub("^[^:]*:[ \t]*", "", line)
+      print line
+      exit
+    }
+  ' "$file"
+}
+
+# Normalizes a frontmatter scalar: strips surrounding quotes/space, lowercases.
+normalize_scalar() {
+  printf '%s' "$1" | sed -E 's/^["'"'"']?//; s/["'"'"']?[[:space:]]*$//' | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]'
+}
+
+# Validates the #3374 asset distribution classification (ships/dogfood/status).
+# Kept in sync with scripts/validate-asset-distribution.ps1.
+check_asset_distribution() {
+  local file="$1" ships dogfood status eff_ships eff_dogfood eff_status
+  ships="$(normalize_scalar "$(frontmatter_field ships "$file")")"
+  dogfood="$(normalize_scalar "$(frontmatter_field dogfood "$file")")"
+  status="$(normalize_scalar "$(frontmatter_field status "$file")")"
+
+  if [[ -n "$ships" && "$ships" != "true" && "$ships" != "false" ]]; then
+    echo "Invalid ships '$ships' in $file (expected true or false)" >&2
+    exit 1
+  fi
+  if [[ -n "$dogfood" && "$dogfood" != "true" && "$dogfood" != "false" ]]; then
+    echo "Invalid dogfood '$dogfood' in $file (expected true or false)" >&2
+    exit 1
+  fi
+  if [[ -n "$status" && "$status" != "experimental" && "$status" != "active" && "$status" != "deprecated" ]]; then
+    echo "Invalid status '$status' in $file (expected experimental, active, or deprecated)" >&2
+    exit 1
+  fi
+
+  eff_ships="${ships:-true}"
+  eff_dogfood="${dogfood:-false}"
+  eff_status="${status:-active}"
+  if [[ "$eff_ships" == "false" && "$eff_dogfood" == "false" && "$eff_status" != "experimental" && "$eff_status" != "deprecated" ]]; then
+    echo "Invalid distribution in $file: ships:false and dogfood:false requires status experimental or deprecated" >&2
+    exit 1
+  fi
+}
+
 required=(README.md CHANGELOG.md version.json asset-manifest.json instructions skills prompts agents)
 if [[ ! -d workflows || -e .git ]]; then
   required+=(sync.sh sync.ps1)
@@ -48,6 +101,10 @@ while IFS= read -r file; do
     echo "Missing description in frontmatter for $file" >&2
     exit 1
   fi
+
+  case "$(basename "$file")" in
+    *.agent.md | SKILL.md | *.prompt.md) check_asset_distribution "$file" ;;
+  esac
 
   if [[ "$(basename "$file")" == *.agent.md ]]; then
     if ! awk 'NR >= 2 && NR <= 60 && $0 == "---" { found = 1; exit } END { exit(found ? 0 : 1) }' "$file"; then

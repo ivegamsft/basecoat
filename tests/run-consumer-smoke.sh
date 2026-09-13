@@ -169,6 +169,7 @@ if [[ "$ARTIFACT_SOURCE" == "current" ]]; then
     "$INSTALL_PATH/scripts/validate-basecoat.ps1" \
     "$INSTALL_PATH/scripts/validate-basecoat.sh" \
     "$INSTALL_PATH/scripts/validate-skill-visibility.ps1" \
+    "$INSTALL_PATH/scripts/validate-asset-distribution.ps1" \
     "$INSTALL_PATH/scripts/validate-workflow-action-pins.ps1" \
     "$INSTALL_PATH/scripts/validate-workflow-action-pins.py" \
     "$INSTALL_PATH/scripts/validate-reusable-workflow-contracts.py"; do

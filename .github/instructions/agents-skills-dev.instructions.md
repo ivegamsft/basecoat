@@ -116,6 +116,9 @@ name: string (required)
 description: string (required) — USE FOR: [trigger cases]
 compatibility: [list of values] (required) — Each skill must declare all platforms it supports
 visibility: public|private (optional, defaults to public)
+ships: true|false (optional, defaults to true) — distributed to consumer repositories (#3374)
+dogfood: true|false (optional, defaults to false) — projected into BaseCoat's own session (#3374)
+status: experimental|active|deprecated (optional, defaults to active) — lifecycle/readiness (#3374)
 capabilities: (optional, recommended for model-sensitive skills)
 model_policy: (optional)
   fallback: true
@@ -137,6 +140,32 @@ context_policy: (optional)
 pinned_model: string (optional; requires pin_reason)
 pin_reason: string (required when pinned_model is set)
 ```
+
+### Distribution Classification (#3374)
+
+Skills, agents, and prompts carry an optional distribution classification across
+four orthogonal axes. These are **build- and sync-time selectors, not harness
+flags**: the Copilot CLI harness honors only `name` + `description` (the
+always-on picker) and loads skill bodies on demand. "Load on demand" is already
+the default; "hide from picker" / "withhold from a consumer" is achieved by
+controlling which assets are physically projected into a target, not by a
+runtime field.
+
+| Field | Values | Default | Meaning |
+|---|---|---|---|
+| `ships` | `true\|false` | `true` | Distributed to consumer repositories via `sync.ps1` |
+| `dogfood` | `true\|false` | `false` | Projected into BaseCoat's own local session (#3348) |
+| `status` | `experimental\|active\|deprecated` | `active` | Lifecycle/readiness; gates consumer distribution |
+| `version` | SemVer `X.Y.Z` | inherits library version | Per-asset version (existing field) |
+
+Absent fields take their defaults. An asset that ships nowhere
+(`ships:false` and `dogfood:false`) must be explicitly `status:experimental` or
+`status:deprecated`. The classification is authored in frontmatter (the source
+of truth) and validated by `scripts/validate-asset-distribution.ps1` (invoked by
+`validate-basecoat`). It is emitted into `asset-manifest.json` **only when it
+deviates from the defaults** (`ships:true`, `dogfood:false`, `status:active`);
+default-classified assets carry no distribution fields, keeping the manifest and
+its adoption SHAs free of churn.
 
 ### Compatibility Taxonomy
 

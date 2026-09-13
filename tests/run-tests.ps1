@@ -873,6 +873,7 @@ Write-Host 'Running previously unwired contract test suites...'
 $additionalSuites = @(
     'agent-integration-tests.ps1',
     'agent-merge-workflow-tests.ps1',
+    'asset-distribution-tests.ps1',
     'backlog-efficiency-scorecard-tests.ps1',
     'bootstrap-strictmode-interpolation-tests.ps1',
     'ci-audit-script-tests.ps1',

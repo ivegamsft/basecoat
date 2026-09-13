@@ -37,6 +37,8 @@ Write-Host 'Validating immutable workflow action pins...'
 
 Write-Host 'Validating skill visibility values...'
 & (Join-Path $PSScriptRoot 'validate-skill-visibility.ps1') -RootDir $resolvedRoot
+Write-Host 'Validating asset distribution classification...'
+& (Join-Path $PSScriptRoot 'validate-asset-distribution.ps1') -RootDir $resolvedRoot
 
 # INVENTORY.md may be at root or in docs/reference/ (accepts lowercase after Phase 3+4 rename)
 $inventoryPath = if (Test-Path 'INVENTORY.md') { 'INVENTORY.md' } elseif (Test-Path 'docs/reference/INVENTORY.md') { 'docs/reference/INVENTORY.md' } elseif (Test-Path 'docs/reference/inventory.md') { 'docs/reference/inventory.md' } else { $null }

@@ -17,6 +17,23 @@ function Get-FrontmatterVersion {
     return $null
 }
 
+function Get-FrontmatterDistribution {
+    # Reads the #3374 distribution classification from frontmatter, applying
+    # defaults (ships:true, dogfood:false, status:active) for absent fields.
+    # Value validation is the job of validate-asset-distribution; here we only
+    # read well-formed values and fall back to defaults otherwise.
+    param([string]$Path)
+    $ships = $true; $dogfood = $false; $status = 'active'
+    $content = Get-Content -Path $Path -Raw
+    if ($content -match '^---\r?\n([\s\S]+?)\r?\n---') {
+        $fm = $matches[1]
+        if ($fm -match '(?m)^ships:\s*["'']?(true|false)["'']?\s*$') { $ships = ($matches[1] -eq 'true') }
+        if ($fm -match '(?m)^dogfood:\s*["'']?(true|false)["'']?\s*$') { $dogfood = ($matches[1] -eq 'true') }
+        if ($fm -match '(?m)^status:\s*["'']?(experimental|active|deprecated)["'']?\s*$') { $status = $matches[1].ToLowerInvariant() }
+    }
+    return [PSCustomObject]@{ ships = $ships; dogfood = $dogfood; status = $status }
+}
+
 function Get-AssetType {
     param([string]$Path)
     if ($Path -like 'agents/*.agent.md') { return 'agent' }
@@ -27,6 +44,7 @@ function Get-AssetType {
             'scripts/validate-basecoat.ps1',
             'scripts/validate-basecoat.sh',
             'scripts/validate-skill-visibility.ps1',
+            'scripts/validate-asset-distribution.ps1',
             'scripts/validate-workflow-action-pins.ps1',
             'scripts/validate-workflow-action-pins.py',
             'scripts/validate-reusable-workflow-contracts.py'
@@ -51,6 +69,7 @@ $candidates += @(
     'scripts/validate-basecoat.ps1',
     'scripts/validate-basecoat.sh',
     'scripts/validate-skill-visibility.ps1',
+    'scripts/validate-asset-distribution.ps1',
     'scripts/validate-workflow-action-pins.ps1',
     'scripts/validate-workflow-action-pins.py',
     'scripts/validate-reusable-workflow-contracts.py'
@@ -64,7 +83,7 @@ $assets = foreach ($full in $candidates | Sort-Object) {
     if (-not $type) { continue }
     $assetVersion = Get-FrontmatterVersion $full
     $sha = (git hash-object -- $full).Trim()
-    [PSCustomObject]@{
+    $obj = [ordered]@{
         path = $relative
         type = $type
         sha = $sha
@@ -72,10 +91,29 @@ $assets = foreach ($full in $candidates | Sort-Object) {
         effectiveVersion = if ($assetVersion) { $assetVersion } else { $libraryVersion }
         versionSource = if ($assetVersion) { "frontmatter" } else { "library" }
     }
+    if ($type -in @('skill', 'agent', 'prompt')) {
+        $dist = Get-FrontmatterDistribution $full
+        # Only emit distribution metadata when it deviates from the defaults
+        # (ships:true, dogfood:false, status:active). Absent fields already mean
+        # "shipped/active" everywhere that reads the manifest, so emitting them
+        # for every default asset is pure churn and needless adoption-SHA noise.
+        $isDefault = $dist.ships -and (-not $dist.dogfood) -and ($dist.status -eq 'active')
+        if (-not $isDefault) {
+            $label = if ($dist.ships -and $dist.dogfood) { 'both' }
+            elseif ($dist.ships) { 'shipped' }
+            elseif ($dist.dogfood) { 'internal' }
+            else { 'none' }
+            $obj['ships'] = $dist.ships
+            $obj['dogfood'] = $dist.dogfood
+            $obj['status'] = $dist.status
+            $obj['distribution'] = $label
+        }
+    }
+    [PSCustomObject]$obj
 }
 
 $manifest = [PSCustomObject]@{
-    schemaVersion = "1.0"
+    schemaVersion = "1.1"
     libraryVersion = $libraryVersion
     generatedAt = (Get-Date).ToUniversalTime().ToString("o")
     assets = @($assets)
