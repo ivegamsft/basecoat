@@ -353,6 +353,11 @@ if ($scannerContent -notmatch 'basecoat-onboarding-profile\.json' -or
 if ($scannerContent -notmatch 'governance_advisories') {
     throw 'Scanner JSON must expose a governance advisories summary.'
 }
+# #3390: adoption must derive from matched BaseCoat assets, not raw file presence,
+# so custom-only repos are not falsely flagged as ungoverned adopters.
+if ($scannerContent -notmatch '\$assetsAdopted = \(\$totalSynced -gt 0\)') {
+    throw 'Scanner must derive governance adoption from matched BaseCoat assets ($totalSynced), not unconditional presence.'
+}
 Write-Host '    ✓ Governance conformance signal works correctly'
 
 Write-Host 'All adoption scanner tests passed'

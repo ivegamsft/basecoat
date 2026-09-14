@@ -386,7 +386,9 @@ foreach ($repo in $targetRepos) {
 
         # Governance conformance signal (#3387): the repo has adopted assets, so
         # check whether it has also applied a governance profile. Advisory only.
-        $assetsAdopted = $true
+        # Adoption requires at least one matched BaseCoat asset — a repo with only
+        # custom files under the sync dirs is not an adopter (#3390).
+        $assetsAdopted = ($totalSynced -gt 0)
         $hasOnboardingProfile = [bool](Get-ContentMeta -Owner $Org -Repo $repoName -Path '.github/basecoat-onboarding-profile.json')
         $hasExecutorWorkflow = [bool](Get-ContentMeta -Owner $Org -Repo $repoName -Path '.github/workflows/basecoat-pr-auto-merge-executor.yml')
         $hasGovernancePolicyPack = [bool](Get-ContentMeta -Owner $Org -Repo $repoName -Path '.github/governance/policy-packs.json')
