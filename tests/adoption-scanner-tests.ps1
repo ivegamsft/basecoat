@@ -313,5 +313,47 @@ if ($seatInfo[0].login -ne "user1" -or -not $seatInfo[0].last_activity) {
 }
 Write-Host '    ✓ Copilot seat data structure is valid'
 
+# Test 11: Governance conformance signal (#3387)
+Write-Host '  Test 11: Validate governance adoption classification...'
+foreach ($case in @(
+    @{ adopted = $false; profile = $false; exec = $false; pack = $false; state = 'not-adopted'; signal = $false },
+    @{ adopted = $true;  profile = $false; exec = $false; pack = $false; state = 'ungoverned';  signal = $true },
+    @{ adopted = $true;  profile = $true;  exec = $false; pack = $false; state = 'partial';     signal = $true },
+    @{ adopted = $true;  profile = $true;  exec = $true;  pack = $false; state = 'partial';     signal = $true },
+    @{ adopted = $true;  profile = $true;  exec = $true;  pack = $true;  state = 'governed';    signal = $false },
+    @{ adopted = $false; profile = $true;  exec = $true;  pack = $true;  state = 'not-adopted'; signal = $false }
+)) {
+    $result = Get-GovernanceAdoptionState `
+        -AssetsAdopted $case.adopted `
+        -HasOnboardingProfile $case.profile `
+        -HasExecutorWorkflow $case.exec `
+        -HasGovernancePolicyPack $case.pack
+    if ($result.state -ne $case.state -or $result.signal -ne $case.signal) {
+        throw "Governance signal failed for adopted=$($case.adopted),profile=$($case.profile),exec=$($case.exec),pack=$($case.pack): expected state=$($case.state)/signal=$($case.signal), got state=$($result.state)/signal=$($result.signal)"
+    }
+}
+# Missing-evidence list must enumerate exactly the absent governance sources for an adopter.
+$partial = Get-GovernanceAdoptionState -AssetsAdopted $true -HasOnboardingProfile $true -HasExecutorWorkflow $false -HasGovernancePolicyPack $false
+if (@($partial.missing) -join ',' -ne 'executor-workflow,policy-pack') {
+    throw "Governance signal missing-evidence list incorrect: got '$(@($partial.missing) -join ',')'"
+}
+$ungoverned = Get-GovernanceAdoptionState -AssetsAdopted $true -HasOnboardingProfile $false -HasExecutorWorkflow $false -HasGovernancePolicyPack $false
+if (@($ungoverned.missing).Count -ne 3) {
+    throw "Ungoverned adopter must report all three missing evidence sources"
+}
+# Scanner must gather governance evidence and emit advisories.
+if ($scannerContent -notmatch 'Get-GovernanceAdoptionState') {
+    throw 'Scanner must classify governance adoption per repo.'
+}
+if ($scannerContent -notmatch 'basecoat-onboarding-profile\.json' -or
+    $scannerContent -notmatch 'basecoat-pr-auto-merge-executor\.yml' -or
+    $scannerContent -notmatch 'governance/policy-packs\.json') {
+    throw 'Scanner must probe onboarding profile, executor workflow, and policy pack as governance evidence.'
+}
+if ($scannerContent -notmatch 'governance_advisories') {
+    throw 'Scanner JSON must expose a governance advisories summary.'
+}
+Write-Host '    ✓ Governance conformance signal works correctly'
+
 Write-Host 'All adoption scanner tests passed'
 exit 0

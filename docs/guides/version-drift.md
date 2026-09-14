@@ -232,6 +232,27 @@ Each run uploads `basecoat-update-status.json` with:
 
 The adoption scanner exposes the same fields by reading the stable issue marker.
 
+## Governance conformance advisory
+
+Beyond version drift, the adoption scanner emits an advisory governance
+conformance signal for each adopting repository. A consumer can sync the asset
+overlay yet never apply a governance profile, silently reaching an
+"adopted but ungoverned" state. Per repository the scanner probes three
+governance-evidence sources:
+
+- `.github/basecoat-onboarding-profile.json` (committed onboarding contract)
+- `.github/workflows/basecoat-pr-auto-merge-executor.yml` (promoted merge
+  executor)
+- `.github/governance/policy-packs.json` (promoted policy pack)
+
+It then classifies the repository as `governed` (all evidence present),
+`partial` or `ungoverned` (adopted but missing evidence — advisory signal
+raised), or `not-adopted` (no signal). The `json` output includes a
+`governance_advisories` summary and per-repo `governance_state`,
+`governance_signal`, and `governance_missing` fields. The signal is advisory
+only and never fails a run; remediation guidance is
+[Solo-Developer Governance Profile](solo-dev-profile.md).
+
 ## Approval behavior
 
 | Mode | Approval | Result |

@@ -170,6 +170,49 @@ function Get-ConsumerUpdateState {
     return $null
 }
 
+function Get-GovernanceAdoptionState {
+    <#
+    .SYNOPSIS
+        Advisory conformance signal (#3387): classifies whether a consumer that
+        has adopted BaseCoat assets has also applied a governance profile.
+    .DESCRIPTION
+        A consumer can sync the asset overlay yet never run the governance
+        onboarding, silently reaching an "adopted but ungoverned" state. This is
+        a pure function over already-collected evidence so it is deterministic
+        and unit-testable. Governance evidence is any of: a committed onboarding
+        profile, a promoted merge-eligibility executor workflow, or a promoted
+        governance policy pack. The signal is advisory, never a hard failure.
+    #>
+    param(
+        [bool]$AssetsAdopted,
+        [bool]$HasOnboardingProfile,
+        [bool]$HasExecutorWorkflow,
+        [bool]$HasGovernancePolicyPack
+    )
+
+    $evidence = @()
+    if ($HasOnboardingProfile) { $evidence += 'onboarding-profile' }
+    if ($HasExecutorWorkflow) { $evidence += 'executor-workflow' }
+    if ($HasGovernancePolicyPack) { $evidence += 'policy-pack' }
+
+    if (-not $AssetsAdopted) {
+        return [pscustomobject]@{ state = 'not-adopted'; signal = $false; evidence = @(); missing = @() }
+    }
+
+    $missing = @()
+    if (-not $HasOnboardingProfile) { $missing += 'onboarding-profile' }
+    if (-not $HasExecutorWorkflow) { $missing += 'executor-workflow' }
+    if (-not $HasGovernancePolicyPack) { $missing += 'policy-pack' }
+
+    if ($evidence.Count -eq 0) {
+        return [pscustomobject]@{ state = 'ungoverned'; signal = $true; evidence = @($evidence); missing = @($missing) }
+    }
+    if ($missing.Count -gt 0) {
+        return [pscustomobject]@{ state = 'partial'; signal = $true; evidence = @($evidence); missing = @($missing) }
+    }
+    return [pscustomobject]@{ state = 'governed'; signal = $false; evidence = @($evidence); missing = @() }
+}
+
 if ($LibraryOnly) { return }
 
 # --- Main ---
@@ -340,6 +383,19 @@ foreach ($repo in $targetRepos) {
     $totalSynced = $currentCount + $staleCount
     if ($totalSynced -gt 0 -or $foundFiles.Count -gt 0) {
         $nonBasecoat = $foundFiles.Count - $totalSynced
+
+        # Governance conformance signal (#3387): the repo has adopted assets, so
+        # check whether it has also applied a governance profile. Advisory only.
+        $assetsAdopted = $true
+        $hasOnboardingProfile = [bool](Get-ContentMeta -Owner $Org -Repo $repoName -Path '.github/basecoat-onboarding-profile.json')
+        $hasExecutorWorkflow = [bool](Get-ContentMeta -Owner $Org -Repo $repoName -Path '.github/workflows/basecoat-pr-auto-merge-executor.yml')
+        $hasGovernancePolicyPack = [bool](Get-ContentMeta -Owner $Org -Repo $repoName -Path '.github/governance/policy-packs.json')
+        $governance = Get-GovernanceAdoptionState `
+            -AssetsAdopted $assetsAdopted `
+            -HasOnboardingProfile $hasOnboardingProfile `
+            -HasExecutorWorkflow $hasExecutorWorkflow `
+            -HasGovernancePolicyPack $hasGovernancePolicyPack
+
         $adoptionReport += @{
             repo        = $repoName
             visibility  = $repo.visibility
@@ -358,6 +414,9 @@ foreach ($repo in $targetRepos) {
             issue_state = if ($updateState) { $updateState.issue_state } else { '' }
             pr_url = if ($updateState) { $updateState.pr_url } else { '' }
             disposition = if ($updateState) { $updateState.disposition } else { 'unknown' }
+            governance_state = $governance.state
+            governance_signal = $governance.signal
+            governance_missing = @($governance.missing)
         }
     }
 }
@@ -393,8 +452,13 @@ switch ($OutputFormat) {
             source     = "$Org/$BasecoatRepo"
             total_source_assets = $sourceAssets.Count
             repos      = $adoptionReport
+            governance_advisories = @(
+                $adoptionReport | Where-Object { $_.governance_signal } | ForEach-Object {
+                    @{ repo = $_.repo; state = $_.governance_state; missing = @($_.governance_missing) }
+                }
+            )
             copilot_seats = $seatInfo
-        } | ConvertTo-Json -Depth 5
+        } | ConvertTo-Json -Depth 6
     }
     "markdown" {
         Write-Host "`n## Basecoat Adoption — $Org`n"
@@ -404,6 +468,16 @@ switch ($OutputFormat) {
             $issue = if ($r.issue_url) { "[Issue]($($r.issue_url))" } else { "" }
             $pr = if ($r.pr_url) { "[PR]($($r.pr_url))" } else { "" }
             Write-Host "| $($r.repo) | $($r.synced) | $($r.current) | $($r.stale) | $($r.current_version) | $($r.target_version) | $($r.drift_age_days)d | $($r.disposition) | $($r.issue_state) | $issue | $pr | $($r.coverage)% |"
+        }
+        $govAdvisories = @($adoptionReport | Where-Object { $_.governance_signal })
+        if ($govAdvisories.Count -gt 0) {
+            Write-Host "`n### Governance advisories`n"
+            Write-Host "Assets adopted but governance profile not fully applied. Remediation: docs/guides/solo-dev-profile.md`n"
+            Write-Host "| Repo | State | Missing evidence |"
+            Write-Host "|------|-------|------------------|"
+            foreach ($g in $govAdvisories) {
+                Write-Host "| $($g.repo) | $($g.governance_state) | $(@($g.governance_missing) -join ', ') |"
+            }
         }
         if ($seatInfo.Count -gt 0) {
             Write-Host "`n### Copilot Seats`n"
@@ -425,6 +499,14 @@ switch ($OutputFormat) {
                 $color = if ($a.status -eq "current") { "Gray" } else { "DarkYellow" }
                 Write-Host "    $icon $($a.asset) [$($a.status)]" -ForegroundColor $color
             }
+            if ($r.governance_signal) {
+                Write-Host "    [governance] profile not applied ($($r.governance_state); missing: $(@($r.governance_missing) -join ', '))" -ForegroundColor Yellow
+            }
+        }
+        $govAdvisories = @($adoptionReport | Where-Object { $_.governance_signal })
+        if ($govAdvisories.Count -gt 0) {
+            Write-Host "`n  Governance advisories ($($govAdvisories.Count)): assets adopted but governance profile not fully applied." -ForegroundColor Yellow
+            Write-Host "  Remediation: docs/guides/solo-dev-profile.md" -ForegroundColor Yellow
         }
         if ($seatInfo.Count -gt 0) {
             Write-Host "`n  Copilot Seats:" -ForegroundColor Cyan
