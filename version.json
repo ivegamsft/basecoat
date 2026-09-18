@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "4.4.1",
-  "releaseDate": "2026-09-17",
-  "notes": "Patch release: corrects release version metadata so the provenance-guarded sync accepts the tag. Supersedes v4.4.0, whose tagged tree still reported 4.3.0 (issue #3366)."
+  "version": "4.4.2",
+  "releaseDate": "2026-09-18",
+  "notes": "Patch release: sanitize an internal downstream identifier in the re-scope PRD so the provenance-guarded production mirror accepts the tag. Completes the v4.4.1 release integrity line, whose tagged tree still leaked the identifier (issue #3403)."
 }
