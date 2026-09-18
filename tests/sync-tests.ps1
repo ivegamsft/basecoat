@@ -62,21 +62,21 @@ function Invoke-SyncToConsumer {
         [string]$ConsumerPath
     )
 
-    # Create a temporary named branch so git clone --branch works even in
-    # detached-HEAD CI environments (tag checkouts, PR merge commits).
-    $testBranch = "sync-test-" + [System.Guid]::NewGuid().ToString().Substring(0, 8)
-    git -C $repoRoot branch $testBranch HEAD 2>&1 | Out-Null
+    $sourceSha = (git -C $repoRoot rev-parse HEAD).Trim()
 
     Push-Location $ConsumerPath
     try {
         $env:BASECOAT_REPO = "file://$repoRoot"
-        $env:BASECOAT_REF = $testBranch
-        & pwsh -NoProfile -File (Join-Path $repoRoot 'sync.ps1')
+        $env:BASECOAT_REF = $sourceSha
+        $env:BASECOAT_EXPECTED_SHA = $sourceSha
+        $env:BASECOAT_TEST_SOURCE_PATH = $repoRoot
+        & (Join-Path $repoRoot 'sync.ps1')
     }
     finally {
         Remove-Item Env:\BASECOAT_REPO -ErrorAction SilentlyContinue
         Remove-Item Env:\BASECOAT_REF -ErrorAction SilentlyContinue
-        git -C $repoRoot branch -D $testBranch 2>&1 | Out-Null
+        Remove-Item Env:\BASECOAT_EXPECTED_SHA -ErrorAction SilentlyContinue
+        Remove-Item Env:\BASECOAT_TEST_SOURCE_PATH -ErrorAction SilentlyContinue
         Pop-Location
     }
 }
@@ -92,7 +92,7 @@ function Invoke-SyncToConsumerWithSource {
     try {
         $env:BASECOAT_REPO = $SourceRepo
         $env:BASECOAT_REF = $SourceRef
-        & pwsh -NoProfile -File (Join-Path $repoRoot 'sync.ps1')
+        & (Join-Path $repoRoot 'sync.ps1')
     }
     finally {
         Remove-Item Env:\BASECOAT_REPO -ErrorAction SilentlyContinue

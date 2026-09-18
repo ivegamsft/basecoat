@@ -411,23 +411,32 @@ function Assert-SafeWorkflowDirectory {
     }
 }
 
-$tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString())
-$sourcePath = Join-Path $tempRoot 'source'
+$sourcePathOverride = $env:BASECOAT_TEST_SOURCE_PATH
+$tempRoot = $null
+$sourcePath = $null
 
 try {
-    New-Item -ItemType Directory -Path $tempRoot | Out-Null
-    if ($sourceRef -match '^[0-9a-fA-F]{40}$') {
-        $null = Invoke-SyncGit -Arguments @('init', $sourcePath)
-        $null = Invoke-SyncGit -Arguments @('-C', $sourcePath, 'remote', 'add', 'origin', $fetchRepo)
-        $null = Invoke-SyncGitWithAuthRetry -Arguments @(
-            '-C', $sourcePath, 'fetch', '--depth', '1', 'origin', $sourceRef
-        ) -RepoUrl $fetchRepo
-        $null = Invoke-SyncGit -Arguments @('-C', $sourcePath, 'checkout', '--detach', 'FETCH_HEAD')
+    if ($sourcePathOverride) {
+        $sourcePath = (Resolve-Path -LiteralPath $sourcePathOverride).Path
+        Write-Host "Using pre-materialized BaseCoat source at '$sourcePath'"
     }
     else {
-        $null = Invoke-SyncGitWithAuthRetry -Arguments @(
-            'clone', '--depth', '1', '--branch', $sourceRef, $fetchRepo, $sourcePath
-        ) -RepoUrl $fetchRepo
+        $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString())
+        $sourcePath = Join-Path $tempRoot 'source'
+        New-Item -ItemType Directory -Path $tempRoot | Out-Null
+        if ($sourceRef -match '^[0-9a-fA-F]{40}$') {
+            $null = Invoke-SyncGit -Arguments @('init', $sourcePath)
+            $null = Invoke-SyncGit -Arguments @('-C', $sourcePath, 'remote', 'add', 'origin', $fetchRepo)
+            $null = Invoke-SyncGitWithAuthRetry -Arguments @(
+                '-C', $sourcePath, 'fetch', '--depth', '1', 'origin', $sourceRef
+            ) -RepoUrl $fetchRepo
+            $null = Invoke-SyncGit -Arguments @('-C', $sourcePath, 'checkout', '--detach', 'FETCH_HEAD')
+        }
+        else {
+            $null = Invoke-SyncGitWithAuthRetry -Arguments @(
+                'clone', '--depth', '1', '--branch', $sourceRef, $fetchRepo, $sourcePath
+            ) -RepoUrl $fetchRepo
+        }
     }
     $sourceCommit = ((Invoke-SyncGit -Arguments @('-C', $sourcePath, 'rev-parse', 'HEAD')) -join "`n").Trim()
     if ($env:BASECOAT_EXPECTED_SHA -and $sourceCommit -ne $env:BASECOAT_EXPECTED_SHA) {
@@ -647,7 +656,7 @@ try {
     Write-Host "Base Coat synced into $targetDir"
 }
 finally {
-    if (Test-Path -LiteralPath $tempRoot) {
+    if ($tempRoot -and (Test-Path -LiteralPath $tempRoot)) {
         try {
             Remove-PathWithRetry -Path $tempRoot
         }
