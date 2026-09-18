@@ -345,3 +345,89 @@ jobs:
               });
               console.log(`Dispatched merge eligibility evaluation for new review evidence on PR #${pullRequest.number}.`);
             }
+
+  approve-pending-automation-runs:
+    if: github.event_name == 'schedule'
+    name: Approve pending in-repo automation workflow runs
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    permissions:
+      actions: write
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout trusted governance
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Resolve governance policy pack
+        id: policy-pack
+        env:
+          POLICY_PACK: ${{ vars.BASECOAT_POLICY_PACK }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          POLICY_FILE=".github/governance/policy-packs.json"
+          SELECTED_PACK="${POLICY_PACK:-$(jq -r '.default_profile' "${POLICY_FILE}")}"
+          if ! jq -e --arg p "${SELECTED_PACK}" '.profiles[$p]' "${POLICY_FILE}" >/dev/null; then
+            echo "::error::Unknown BASECOAT_POLICY_PACK '${SELECTED_PACK}'."
+            exit 1
+          fi
+          echo "auto_approve=$(jq -r --arg p "${SELECTED_PACK}" '.profiles[$p].cloud_agent.auto_approve_workflow_runs // false' "${POLICY_FILE}")" >> "${GITHUB_OUTPUT}"
+
+      - name: Approve held runs for open same-repo pull requests
+        if: steps.policy-pack.outputs.auto_approve == 'true'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            // A pull_request_target event authored with GITHUB_TOKEN (e.g. the
+            // spec-synthesis or report bots) does not cascade another workflow
+            // run, so the event-driven auto-approve job never fires for those
+            // PRs and their checks pile up as action_required. This trusted
+            // default-branch schedule closes that gap under the solo-dev
+            // auto-approval policy, independent of the PR author.
+            const openPullRequests = await github.paginate(github.rest.pulls.list, {
+              owner,
+              repo,
+              state: 'open',
+              per_page: 100
+            });
+            // Only same-repository (non-fork) heads are eligible; fork runs keep
+            // requiring manual approval as the untrusted-contributor boundary.
+            const headShaToPr = new Map();
+            for (const pullRequest of openPullRequests) {
+              if (pullRequest.head?.repo?.full_name === `${owner}/${repo}`) {
+                headShaToPr.set(pullRequest.head.sha, pullRequest.number);
+              }
+            }
+            if (headShaToPr.size === 0) {
+              console.log('No open same-repo pull requests; nothing to approve.');
+              return;
+            }
+            const heldRuns = await github.paginate(github.rest.actions.listWorkflowRunsForRepo, {
+              owner,
+              repo,
+              status: 'action_required',
+              per_page: 100
+            });
+            let approved = 0;
+            for (const run of heldRuns) {
+              // Exclude fork runs: their head_repository differs from the base.
+              if (run.head_repository?.full_name !== `${owner}/${repo}`) continue;
+              const prNumber = headShaToPr.get(run.head_sha);
+              if (!prNumber) continue;
+              try {
+                await github.rest.actions.approveWorkflowRun({ owner, repo, run_id: run.id });
+                approved += 1;
+                console.log(`Approved run ${run.id} (${run.name}) for PR #${prNumber}.`);
+              } catch (error) {
+                if (error.status === 403) {
+                  console.log(`Cannot approve run ${run.id}: insufficient permissions.`);
+                } else {
+                  throw error;
+                }
+              }
+            }
+            console.log(`Approved ${approved} held workflow run(s) for open same-repo pull requests.`);

@@ -87,6 +87,13 @@ foreach ($entry in @(
     Assert-Match $content "status\.context === 'BaseCoat merge eligibility'" "$name must inspect the latest merge eligibility watermark."
     Assert-Match $content 'new Date\(right\.created_at\) - new Date\(left\.created_at\)' "$name must use REST status timestamps when ordering merge eligibility statuses."
     Assert-Match $content 'new Date\(latestReview\.submitted_at \|\| latestReview\.created_at\) <=' "$name must skip reconciliation when review evidence has already been evaluated."
+
+    Assert-Match $content 'approve-pending-automation-runs:' "$name must sweep held automation workflow runs on schedule."
+    Assert-Match $content "approve-pending-automation-runs:[\s\S]*?if:\s*github\.event_name == 'schedule'" "$name must limit the held-run sweep to schedule events."
+    Assert-Match $content "approve-pending-automation-runs:[\s\S]*?ref:\s*\$\{\{\s*github\.event\.repository\.default_branch\s*\}\}" "$name sweep must load governance only from the trusted default branch."
+    Assert-Match $content "approve-pending-automation-runs:[\s\S]*?if:\s*steps\.policy-pack\.outputs\.auto_approve == 'true'" "$name sweep must honor the cloud-agent auto-approval policy gate."
+    Assert-Match $content "status:\s*'action_required'" "$name sweep must target held (action_required) runs."
+    Assert-Match $content 'run\.head_repository\?\.full_name !==' "$name sweep must exclude fork runs by head repository."
 }
 
 function Get-NormalizedDispatchJob {
