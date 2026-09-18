@@ -2,7 +2,7 @@
 
 Generated as a standalone inventory (no edits to agent/skill/instruction files).
 
-- Generated: 2026-09-07 14:05:04 +0000
+- Generated: 2026-09-14 14:50:54 +0000
 - Estimation method: `approx_tokens = round(word_count × 1.35)` (same heuristic used in `scripts/validate-basecoat.ps1`).
 - Scope: `agents/*.agent.md`, `skills/*/SKILL.md`, `instructions/*.instructions.md`.
 
@@ -10,10 +10,10 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 
 | Type | Count | Total Words | Total Approx Tokens | Avg Approx Tokens |
 |---|---:|---:|---:|---:|
-| Agent | 131 | 40086 | 54116 | 413 |
-| Skill | 139 | 32633 | 44054 | 317 |
-| Instruction | 91 | 49730 | 67135 | 738 |
-| **All** | 361 | 122449 | 165305 | 458 |
+| Agent | 131 | 40079 | 54108 | 413 |
+| Skill | 143 | 33840 | 45685 | 319 |
+| Instruction | 93 | 50636 | 68360 | 735 |
+| **All** | 367 | 124555 | 168153 | 458 |
 
 ## Agents
 
@@ -35,8 +35,8 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | basecoat-10-core-orchestrator | `agents/basecoat-10-core-orchestrator.agent.md` | 370 | 500 |
 | basecoat-60-workflow-backlog-autopilot | `agents/basecoat-60-workflow-backlog-autopilot.agent.md` | 370 | 500 |
 | basecoat-90-quality-manual-test-strategy | `agents/basecoat-90-quality-manual-test-strategy.agent.md` | 370 | 500 |
+| program-bootstrap | `agents/program-bootstrap.agent.md` | 370 | 500 |
 | basecoat-10-core-dependabot-prioritizer | `agents/basecoat-10-core-dependabot-prioritizer.agent.md` | 369 | 498 |
-| program-bootstrap | `agents/program-bootstrap.agent.md` | 369 | 498 |
 | basecoat-10-core-dependency-blocker-monitor | `agents/basecoat-10-core-dependency-blocker-monitor.agent.md` | 368 | 497 |
 | basecoat-50-security-project-rules-drift-auditor | `agents/basecoat-50-security-project-rules-drift-auditor.agent.md` | 368 | 497 |
 | basecoat-60-workflow-parallel-session-coordinator | `agents/basecoat-60-workflow-parallel-session-coordinator.agent.md` | 368 | 497 |
@@ -81,7 +81,7 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | basecoat-10-core-production-readiness | `agents/basecoat-10-core-production-readiness.agent.md` | 334 | 451 |
 | basecoat-30-ai-guardrail | `agents/basecoat-30-ai-guardrail.agent.md` | 334 | 451 |
 | basecoat-10-core-merge-coordinator | `agents/basecoat-10-core-merge-coordinator.agent.md` | 328 | 443 |
-| basecoat-10-core-orphaned-pr-cleanup | `agents/basecoat-10-core-orphaned-pr-cleanup.agent.md` | 327 | 441 |
+| basecoat-10-core-orphaned-pr-cleanup | `agents/basecoat-10-core-orphaned-pr-cleanup.agent.md` | 325 | 439 |
 | basecoat-30-ai-mlops | `agents/basecoat-30-ai-mlops.agent.md` | 323 | 436 |
 | basecoat-10-core-escalation-router | `agents/basecoat-10-core-escalation-router.agent.md` | 322 | 435 |
 | basecoat-10-core-tech-writer | `agents/basecoat-10-core-tech-writer.agent.md` | 322 | 435 |
@@ -119,10 +119,10 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | basecoat-60-workflow-data-pipeline | `agents/basecoat-60-workflow-data-pipeline.agent.md` | 262 | 354 |
 | basecoat-10-core-agentops | `agents/basecoat-10-core-agentops.agent.md` | 259 | 350 |
 | basecoat-50-security-container-security | `agents/basecoat-50-security-container-security.agent.md` | 259 | 350 |
-| basecoat-60-workflow-broken-build-troubleshooter | `agents/basecoat-60-workflow-broken-build-troubleshooter.agent.md` | 259 | 350 |
 | basecoat-10-core-ux-designer | `agents/basecoat-10-core-ux-designer.agent.md` | 258 | 348 |
 | basecoat-10-core-devops-engineer | `agents/basecoat-10-core-devops-engineer.agent.md` | 257 | 347 |
 | basecoat-30-ai-domain-designer | `agents/basecoat-30-ai-domain-designer.agent.md` | 257 | 347 |
+| basecoat-60-workflow-broken-build-troubleshooter | `agents/basecoat-60-workflow-broken-build-troubleshooter.agent.md` | 257 | 347 |
 | basecoat-90-quality-penetration-test | `agents/basecoat-90-quality-penetration-test.agent.md` | 255 | 344 |
 | basecoat-10-core-sre-engineer | `agents/basecoat-10-core-sre-engineer.agent.md` | 252 | 340 |
 | basecoat-10-core-gitops-engineer | `agents/basecoat-10-core-gitops-engineer.agent.md` | 245 | 331 |
@@ -139,9 +139,9 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | orchestrator | `agents/orchestrator.agent.md` | 218 | 294 |
 | flow-optimizer | `agents/flow-optimizer.agent.md` | 215 | 290 |
 | basecoat-90-quality-code-review | `agents/basecoat-90-quality-code-review.agent.md` | 214 | 289 |
-| basecoat-60-workflow-release-readiness-chair | `agents/basecoat-60-workflow-release-readiness-chair.agent.md` | 212 | 286 |
+| basecoat-60-workflow-release-readiness-chair | `agents/basecoat-60-workflow-release-readiness-chair.agent.md` | 210 | 284 |
 | flow-admission-controller | `agents/flow-admission-controller.agent.md` | 206 | 278 |
-| basecoat-30-ai-daily-standup-facilitator | `agents/basecoat-30-ai-daily-standup-facilitator.agent.md` | 205 | 277 |
+| basecoat-30-ai-daily-standup-facilitator | `agents/basecoat-30-ai-daily-standup-facilitator.agent.md` | 203 | 274 |
 | flow-tracker | `agents/flow-tracker.agent.md` | 194 | 262 |
 | basecoat-10-core-definition-of-done | `agents/basecoat-10-core-definition-of-done.agent.md` | 180 | 243 |
 | basecoat-10-core-replanning-engine | `agents/basecoat-10-core-replanning-engine.agent.md` | 162 | 219 |
@@ -155,6 +155,7 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 
 | Name | Location | Words | Approx Tokens |
 |---|---|---:|---:|
+| agentic-cost-audit | `skills/agentic-cost-audit/SKILL.md` | 370 | 500 |
 | lane-closeout | `skills/lane-closeout/SKILL.md` | 369 | 498 |
 | repo-cleanup | `skills/repo-cleanup/SKILL.md` | 369 | 498 |
 | rca | `skills/rca/SKILL.md` | 368 | 497 |
@@ -163,10 +164,12 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | yagni-analysis | `skills/yagni-analysis/SKILL.md` | 366 | 494 |
 | copilot-review-triage | `skills/copilot-review-triage/SKILL.md` | 365 | 493 |
 | workflow-parallelization | `skills/workflow-parallelization/SKILL.md` | 363 | 490 |
+| rai-privacy-review | `skills/rai-privacy-review/SKILL.md` | 361 | 487 |
 | queue-rebalancer | `skills/queue-rebalancer/SKILL.md` | 355 | 479 |
 | sprint-management | `skills/sprint-management/SKILL.md` | 352 | 475 |
 | release-notes | `skills/release-notes/SKILL.md` | 348 | 470 |
 | agentops-audit | `skills/agentops-audit/SKILL.md` | 339 | 458 |
+| ci-audit | `skills/ci-audit/SKILL.md` | 339 | 458 |
 | backlog-rebalance-engine | `skills/backlog-rebalance-engine/SKILL.md` | 337 | 455 |
 | sprint-closeout-audit | `skills/sprint-closeout-audit/SKILL.md` | 335 | 452 |
 | session-analysis | `skills/session-analysis/SKILL.md` | 331 | 447 |
@@ -177,7 +180,6 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | local-dev-data-pack | `skills/local-dev-data-pack/SKILL.md` | 322 | 435 |
 | backend-audit | `skills/backend-audit/SKILL.md` | 314 | 424 |
 | task-decomposition | `skills/task-decomposition/SKILL.md` | 312 | 421 |
-| ci-audit | `skills/ci-audit/SKILL.md` | 309 | 417 |
 | infrastructure-audit | `skills/infrastructure-audit/SKILL.md` | 302 | 408 |
 | mcp-audit | `skills/mcp-audit/SKILL.md` | 301 | 406 |
 | session-optimization | `skills/session-optimization/SKILL.md` | 301 | 406 |
@@ -196,6 +198,7 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | dependency-blocker-monitoring | `skills/dependency-blocker-monitoring/SKILL.md` | 269 | 363 |
 | governance-audit | `skills/governance-audit/SKILL.md` | 266 | 359 |
 | ha-resilience | `skills/ha-resilience/SKILL.md` | 264 | 356 |
+| standards-mapping | `skills/standards-mapping/SKILL.md` | 263 | 355 |
 | twelve-factor | `skills/twelve-factor/SKILL.md` | 260 | 351 |
 | azure-devops-rest | `skills/azure-devops-rest/SKILL.md` | 257 | 347 |
 | ci-flake-quarantine | `skills/ci-flake-quarantine/SKILL.md` | 257 | 347 |
@@ -207,6 +210,7 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | service-bus-migration | `skills/service-bus-migration/SKILL.md` | 248 | 335 |
 | flow-audit | `skills/flow-audit/SKILL.md` | 247 | 333 |
 | operation-context-resolver | `skills/operation-context-resolver/SKILL.md` | 240 | 324 |
+| electron-apps | `skills/electron-apps/SKILL.md` | 239 | 323 |
 | copilot-usage-analytics | `skills/copilot-usage-analytics/SKILL.md` | 238 | 321 |
 | penetration-testing | `skills/penetration-testing/SKILL.md` | 236 | 319 |
 | basecoat | `skills/basecoat/SKILL.md` | 233 | 315 |
@@ -215,7 +219,6 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | identity-migration | `skills/identity-migration/SKILL.md` | 228 | 308 |
 | azure-identity-audit | `skills/azure-identity-audit/SKILL.md` | 227 | 306 |
 | data-tier-audit | `skills/data-tier-audit/SKILL.md` | 227 | 306 |
-| electron-apps | `skills/electron-apps/SKILL.md` | 227 | 306 |
 | gitops | `skills/gitops/SKILL.md` | 226 | 305 |
 | tech-debt | `skills/tech-debt/SKILL.md` | 226 | 305 |
 | landing-zone-audit | `skills/landing-zone-audit/SKILL.md` | 225 | 304 |
@@ -279,6 +282,7 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | architecture | `skills/architecture/SKILL.md` | 172 | 232 |
 | azure-policy | `skills/azure-policy/SKILL.md` | 171 | 231 |
 | takt-time-measurement | `skills/takt-time-measurement/SKILL.md` | 171 | 231 |
+| task-provenance | `skills/task-provenance/SKILL.md` | 171 | 231 |
 | container-build-assessment | `skills/container-build-assessment/SKILL.md` | 170 | 230 |
 | app-inventory | `skills/app-inventory/SKILL.md` | 165 | 223 |
 | frontend-dev | `skills/frontend-dev/SKILL.md` | 165 | 223 |
@@ -299,7 +303,7 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 
 | Name | Location | Words | Approx Tokens |
 |---|---|---:|---:|
-| basecoat-10-core-intent-routing | `instructions/basecoat-10-core-intent-routing.instructions.md` | 3158 | 4263 |
+| basecoat-10-core-intent-routing | `instructions/basecoat-10-core-intent-routing.instructions.md` | 3457 | 4667 |
 | basecoat-50-security-entra-oidc-user-auth | `instructions/basecoat-50-security-entra-oidc-user-auth.instructions.md` | 1604 | 2165 |
 | basecoat-60-workflow-multi-repo-orchestration | `instructions/basecoat-60-workflow-multi-repo-orchestration.instructions.md` | 1324 | 1787 |
 | basecoat-20-lang-ruby-on-rails | `instructions/basecoat-20-lang-ruby-on-rails.instructions.md` | 1233 | 1665 |
@@ -310,11 +314,11 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | basecoat-20-lang-django | `instructions/basecoat-20-lang-django.instructions.md` | 1052 | 1420 |
 | basecoat-10-core-hrm-execution | `instructions/basecoat-10-core-hrm-execution.instructions.md` | 1010 | 1364 |
 | basecoat-10-core-architecture | `instructions/basecoat-10-core-architecture.instructions.md` | 1004 | 1355 |
-| basecoat-20-lang-governance | `instructions/basecoat-20-lang-governance.instructions.md` | 989 | 1335 |
+| basecoat-20-lang-governance | `instructions/basecoat-20-lang-governance.instructions.md` | 996 | 1345 |
 | basecoat-10-core-mcp | `instructions/basecoat-10-core-mcp.instructions.md` | 973 | 1314 |
 | basecoat-20-lang-java-spring-boot | `instructions/basecoat-20-lang-java-spring-boot.instructions.md` | 970 | 1310 |
 | basecoat-10-core-error-kb | `instructions/basecoat-10-core-error-kb.instructions.md` | 929 | 1254 |
-| basecoat-20-lang-python | `instructions/basecoat-20-lang-python.instructions.md` | 919 | 1241 |
+| basecoat-20-lang-python | `instructions/basecoat-20-lang-python.instructions.md` | 913 | 1233 |
 | basecoat-10-core-npm-workspaces | `instructions/basecoat-10-core-npm-workspaces.instructions.md` | 885 | 1195 |
 | basecoat-10-core-development | `instructions/basecoat-10-core-development.instructions.md` | 860 | 1161 |
 | basecoat-40-azure-azure-service-connector | `instructions/basecoat-40-azure-azure-service-connector.instructions.md` | 833 | 1125 |
@@ -334,8 +338,8 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | basecoat-10-core-electron | `instructions/basecoat-10-core-electron.instructions.md` | 577 | 779 |
 | basecoat-10-core-testing | `instructions/basecoat-10-core-testing.instructions.md` | 577 | 779 |
 | basecoat-10-core-runtime-debugging | `instructions/basecoat-10-core-runtime-debugging.instructions.md` | 571 | 771 |
-| basecoat-10-core-fabric-notebooks | `instructions/basecoat-10-core-fabric-notebooks.instructions.md` | 550 | 742 |
 | basecoat-10-core-process | `instructions/basecoat-10-core-process.instructions.md` | 550 | 742 |
+| basecoat-10-core-fabric-notebooks | `instructions/basecoat-10-core-fabric-notebooks.instructions.md` | 549 | 741 |
 | basecoat-10-core-shearing-layers | `instructions/basecoat-10-core-shearing-layers.instructions.md` | 547 | 738 |
 | basecoat-10-core-cpp | `instructions/basecoat-10-core-cpp.instructions.md` | 515 | 695 |
 | basecoat-10-core-session-hygiene | `instructions/basecoat-10-core-session-hygiene.instructions.md` | 507 | 684 |
@@ -346,7 +350,7 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | basecoat-60-workflow-ci-firewall | `instructions/basecoat-60-workflow-ci-firewall.instructions.md` | 464 | 626 |
 | basecoat-10-core-observability | `instructions/basecoat-10-core-observability.instructions.md` | 458 | 618 |
 | basecoat-60-workflow-high-stakes-workflow | `instructions/basecoat-60-workflow-high-stakes-workflow.instructions.md` | 458 | 618 |
-| basecoat-50-security-secrets-management | `instructions/basecoat-50-security-secrets-management.instructions.md` | 455 | 614 |
+| basecoat-50-security-secrets-management | `instructions/basecoat-50-security-secrets-management.instructions.md` | 453 | 612 |
 | basecoat-90-quality-quality | `instructions/basecoat-90-quality-quality.instructions.md` | 450 | 608 |
 | basecoat-50-security-rbac-authentication | `instructions/basecoat-50-security-rbac-authentication.instructions.md` | 443 | 598 |
 | basecoat-50-security-token-economics | `instructions/basecoat-50-security-token-economics.instructions.md` | 426 | 575 |
@@ -357,9 +361,11 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | basecoat-10-core-documentation | `instructions/basecoat-10-core-documentation.instructions.md` | 398 | 537 |
 | basecoat-10-core-bootstrap-autodetect | `instructions/basecoat-10-core-bootstrap-autodetect.instructions.md` | 392 | 529 |
 | basecoat-10-core-capability-frontmatter | `instructions/basecoat-10-core-capability-frontmatter.instructions.md` | 377 | 509 |
-| basecoat-50-security-security-monitoring | `instructions/basecoat-50-security-security-monitoring.instructions.md` | 369 | 498 |
-| basecoat-10-core-mutation-testing | `instructions/basecoat-10-core-mutation-testing.instructions.md` | 336 | 454 |
+| basecoat-50-security-security-monitoring | `instructions/basecoat-50-security-security-monitoring.instructions.md` | 367 | 495 |
+| basecoat-10-core-mutation-testing | `instructions/basecoat-10-core-mutation-testing.instructions.md` | 334 | 451 |
+| basecoat-10-core-licensing-posture | `instructions/basecoat-10-core-licensing-posture.instructions.md` | 316 | 427 |
 | basecoat-10-core-nextjs-react19 | `instructions/basecoat-10-core-nextjs-react19.instructions.md` | 306 | 413 |
+| basecoat-10-core-untrusted-content-boundary | `instructions/basecoat-10-core-untrusted-content-boundary.instructions.md` | 295 | 398 |
 | basecoat-10-core-data-workload-testing | `instructions/basecoat-10-core-data-workload-testing.instructions.md` | 284 | 383 |
 | basecoat-10-core-frontend | `instructions/basecoat-10-core-frontend.instructions.md` | 281 | 379 |
 | basecoat-10-core-verification | `instructions/basecoat-10-core-verification.instructions.md` | 280 | 378 |
@@ -380,8 +386,8 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | basecoat-20-lang-dotnet-dependency-analysis | `instructions/basecoat-20-lang-dotnet-dependency-analysis.instructions.md` | 222 | 300 |
 | basecoat-10-core-backend | `instructions/basecoat-10-core-backend.instructions.md` | 180 | 243 |
 | basecoat-10-core-s4-safety-gates | `instructions/basecoat-10-core-s4-safety-gates.instructions.md` | 157 | 212 |
+| governance | `instructions/governance.instructions.md` | 39 | 53 |
 | intent-routing | `instructions/intent-routing.instructions.md` | 39 | 53 |
-| governance | `instructions/governance.instructions.md` | 37 | 50 |
 | security | `instructions/security.instructions.md` | 37 | 50 |
 | ux | `instructions/ux.instructions.md` | 37 | 50 |
 | ci-firewall | `instructions/ci-firewall.instructions.md` | 36 | 49 |
