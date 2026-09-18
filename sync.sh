@@ -88,8 +88,8 @@ if [[ -z "$SOURCE_REPO" ]]; then
   if [[ -n "$SOURCE_REPO" ]]; then
     SOURCE_REPO_ORIGIN=".basecoat.yml"
   else
-    SOURCE_REPO="https://github.com/YOUR-ORG/basecoat.git"
-    SOURCE_REPO_ORIGIN="default"
+    echo "No BaseCoat source configured. Set 'source:' in .basecoat.yml or the BASECOAT_REPO env var." >&2
+    exit 1
   fi
 fi
 

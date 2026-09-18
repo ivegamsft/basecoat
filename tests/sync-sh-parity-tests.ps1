@@ -26,6 +26,10 @@ Assert-True ($syncShContent -notmatch 'token="\$\{GITHUB_TOKEN:-\$\{GH_TOKEN:-\}
     'Bash source fetch must never reuse consumer GitHub tokens.'
 Assert-True ($syncShContent -match 'sed "1s/\^\$\{bom\}//" "\$config" \| awk') `
     'Bash known-bad map parsing must strip a leading UTF-8 BOM before matching the section.'
+Assert-True ($syncShContent -notmatch 'YOUR-ORG') `
+    'Bash sync must never fall back to a placeholder source URL (issue #3417).'
+Assert-True ($syncShContent -match "No BaseCoat source configured\. Set 'source:' in \.basecoat\.yml or the BASECOAT_REPO env var\.") `
+    'Bash sync must fail fast with an actionable message naming .basecoat.yml and BASECOAT_REPO.'
 if ($IsWindows) {
     Write-Host 'Bash runtime parity skipped on Windows after static corporate-origin checks; Ubuntu CI runs the fixture.'
     exit 0

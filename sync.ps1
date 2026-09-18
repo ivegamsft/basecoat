@@ -15,7 +15,8 @@ if (-not $repoRoot) {
 }
 
 # Resolve the upstream source repo and ref.
-# Precedence: BASECOAT_REPO/BASECOAT_REF env vars > repo-root .basecoat.yml > built-in default.
+# Precedence: BASECOAT_REPO/BASECOAT_REF env vars > repo-root .basecoat.yml.
+# A missing source repo fails fast rather than falling back to a placeholder URL.
 function Get-BasecoatYmlValue {
     param(
         [Parameter(Mandatory)][string]$Key,
@@ -147,8 +148,7 @@ if (-not $sourceRepo) {
         $sourceRepoOrigin = '.basecoat.yml'
     }
     else {
-        $sourceRepo = 'https://github.com/YOUR-ORG/basecoat.git'
-        $sourceRepoOrigin = 'default'
+        throw "No BaseCoat source configured. Set 'source:' in .basecoat.yml or the BASECOAT_REPO env var."
     }
 }
 

@@ -1022,6 +1022,46 @@ catch {
 }
 
 # ============================================================================
+# Test 15: Sync fails fast with no placeholder source (issue #3417)
+# ============================================================================
+Write-Host "`nTest 15: PowerShell sync fails fast when no source is configured" -ForegroundColor Yellow
+
+$consumer = $null
+try {
+    $consumer = New-ConsumerRepo -WithGitHubDir
+    Push-Location $consumer
+    try {
+        Remove-Item Env:\BASECOAT_REPO -ErrorAction SilentlyContinue
+        Remove-Item Env:\BASECOAT_REF -ErrorAction SilentlyContinue
+        $output = & pwsh -NoProfile -File (Join-Path $repoRoot 'sync.ps1') 2>&1 | Out-String
+        $exitCode = $LASTEXITCODE
+    }
+    finally {
+        Pop-Location
+    }
+
+    $testCount++
+    if ($exitCode -eq 0) { throw 'PowerShell sync must fail when no source is configured.' }
+    $testCount++
+    if ($output -match 'YOUR-ORG') {
+        throw "PowerShell sync must never fall back to a placeholder source: $output"
+    }
+    $testCount++
+    if ($output -notmatch '\.basecoat\.yml' -or $output -notmatch 'BASECOAT_REPO') {
+        throw "PowerShell sync error must name '.basecoat.yml' and 'BASECOAT_REPO': $output"
+    }
+    Write-Host '  Passed: PowerShell sync fails fast with an actionable message' -ForegroundColor Green
+}
+catch {
+    $failures += $_.Exception.Message
+}
+finally {
+    if ($consumer -and (Test-Path $consumer)) {
+        Remove-Item -Path $consumer -Recurse -Force
+    }
+}
+
+# ============================================================================
 # Summary
 # ============================================================================
 Write-Host "`n================================================" -ForegroundColor Cyan
