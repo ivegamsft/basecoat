@@ -1062,6 +1062,82 @@ finally {
 }
 
 # ============================================================================
+# Test 16: Sync never wipes co-located overlay files it does not own (#3415)
+# ============================================================================
+Write-Host "`nTest 16: Sync preserves foreign overlay files and only prunes its own stale files (#3415)" -ForegroundColor Yellow
+
+$consumer = $null
+try {
+    $consumer = New-ConsumerRepo -WithGitHubDir
+
+    $foreignPaths = @(
+        '.github/skills/foreign-skill/SKILL.md',
+        '.github/instructions/foreign.instructions.md',
+        '.github/agents/foreign.agent.md',
+        '.agents/skills/foreign-skill/SKILL.md'
+    )
+    foreach ($relPath in $foreignPaths) {
+        $fullPath = Join-Path $consumer $relPath
+        New-Item -ItemType Directory -Force -Path (Split-Path $fullPath -Parent) | Out-Null
+        Set-Content -Path $fullPath -Value '# foreign content owned by another product (e.g. Sheen/Adhesion)' -Encoding UTF8
+    }
+
+    Invoke-SyncToConsumer -ConsumerPath $consumer
+
+    $testCount++
+    foreach ($relPath in $foreignPaths) {
+        Assert-SyncPathExists -Path (Join-Path $consumer $relPath) `
+            -Message "Sync test failed: foreign overlay file '$relPath' was deleted by a wholesale wipe"
+    }
+
+    $testCount++
+    Assert-SyncPathExists -Path (Join-Path $consumer '.github/agents') `
+        -Message 'Sync test failed: BaseCoat agents were not installed alongside foreign files'
+    $agentCount = (Get-ChildItem (Join-Path $consumer '.github/agents') -Filter '*.agent.md' -File).Count
+    if ($agentCount -eq 0) {
+        throw 'Sync test failed: .github/agents/ contains no BaseCoat agent files'
+    }
+
+    $overlayStatePath = Join-Path $consumer '.github/base-coat/.overlay-managed-files'
+    $testCount++
+    Assert-SyncPathExists -Path $overlayStatePath `
+        -Message 'Sync test failed: overlay-managed-files state file was not written'
+
+    # Simulate a BaseCoat file that was managed by a prior sync but is no longer
+    # part of the source (e.g. a retired agent). It should be pruned on the next
+    # sync even though foreign files in the same directories are left alone.
+    $retiredRelPath = '.github/instructions/zzz-retired-basecoat-file.instructions.md'
+    $retiredFullPath = Join-Path $consumer $retiredRelPath
+    Set-Content -Path $retiredFullPath -Value '# retired BaseCoat-managed file' -Encoding UTF8
+
+    $trackedFiles = @(Get-Content -LiteralPath $overlayStatePath | Where-Object { $_ -ne '' })
+    $trackedFiles += $retiredRelPath
+    [System.IO.File]::WriteAllText($overlayStatePath, (($trackedFiles | Sort-Object -Unique) -join "`n") + "`n", [System.Text.UTF8Encoding]::new($false))
+
+    Invoke-SyncToConsumer -ConsumerPath $consumer
+
+    $testCount++
+    Assert-SyncPathNotExists -Path $retiredFullPath `
+        -Message 'Sync test failed: retired BaseCoat-managed overlay file was not pruned'
+
+    $testCount++
+    foreach ($relPath in $foreignPaths) {
+        Assert-SyncPathExists -Path (Join-Path $consumer $relPath) `
+            -Message "Sync test failed: foreign overlay file '$relPath' was deleted while pruning a retired BaseCoat file"
+    }
+
+    Write-Host '  Passed: foreign overlay files preserved across syncs; only retired BaseCoat-managed files pruned' -ForegroundColor Green
+}
+catch {
+    $failures += $_.Exception.Message
+}
+finally {
+    if ($consumer -and (Test-Path $consumer)) {
+        Remove-Item -Path $consumer -Recurse -Force
+    }
+}
+
+# ============================================================================
 # Summary
 # ============================================================================
 Write-Host "`n================================================" -ForegroundColor Cyan

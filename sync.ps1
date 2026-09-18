@@ -411,6 +411,138 @@ function Assert-SafeWorkflowDirectory {
     }
 }
 
+function Get-RepoRelativePath {
+    param(
+        [Parameter(Mandatory)][string]$Path,
+        [Parameter(Mandatory)][string]$RepoRoot
+    )
+
+    $fullPath = (Resolve-Path -LiteralPath $Path).Path
+    $fullRoot = (Resolve-Path -LiteralPath $RepoRoot).Path
+    $relative = $fullPath.Substring($fullRoot.Length).TrimStart('\', '/')
+    return ($relative -replace '\\', '/')
+}
+
+function Get-CanonicalRealPath {
+    <#
+    .SYNOPSIS
+      Resolves symbolic links / junctions on every existing path segment
+      (not just the leaf), so a linked ancestor placed by a co-located
+      overlay (foreign or otherwise) cannot silently redirect a write or
+      delete outside the intended destination (#3415 follow-up hardening).
+    #>
+    param([Parameter(Mandatory)][string]$Path)
+
+    $full = [System.IO.Path]::GetFullPath($Path)
+    $root = [System.IO.Path]::GetPathRoot($full)
+    if ([string]::IsNullOrEmpty($root)) {
+        $root = [string]([System.IO.Path]::DirectorySeparatorChar)
+    }
+    $remainder = $full.Substring($root.Length)
+    $separators = [char[]]@([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
+    $segments = $remainder.Split($separators, [System.StringSplitOptions]::RemoveEmptyEntries)
+    $accumulated = $root
+    foreach ($segment in $segments) {
+        $accumulated = Join-Path $accumulated $segment
+        if (Test-Path -LiteralPath $accumulated) {
+            $item = Get-Item -LiteralPath $accumulated -Force
+            $linkTarget = $item.ResolveLinkTarget($true)
+            if ($null -ne $linkTarget) {
+                $accumulated = $linkTarget.FullName
+            }
+        }
+    }
+    return [System.IO.Path]::GetFullPath($accumulated)
+}
+
+function Test-PathWithinBoundary {
+    <#
+    .SYNOPSIS
+      Returns $true only if canonical $Path (existing segments resolved
+      through symlinks/junctions) is equal to or nested under canonical
+      $BoundaryRoot. Used to enforce that overlay copies/deletes can never
+      escape their intended destination root via a planted symlink.
+    #>
+    param(
+        [Parameter(Mandatory)][string]$Path,
+        [Parameter(Mandatory)][string]$BoundaryRoot
+    )
+
+    $canonicalPath = Get-CanonicalRealPath -Path $Path
+    $canonicalBoundary = (Get-CanonicalRealPath -Path $BoundaryRoot).TrimEnd(
+        [System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar
+    )
+    $boundaryWithSeparator = $canonicalBoundary + [System.IO.Path]::DirectorySeparatorChar
+    $comparison = if ($IsWindows) { [System.StringComparison]::OrdinalIgnoreCase } else { [System.StringComparison]::Ordinal }
+    return $canonicalPath.Equals($canonicalBoundary, $comparison) -or $canonicalPath.StartsWith($boundaryWithSeparator, $comparison)
+}
+
+function Copy-ManagedOverlayTree {
+    <#
+    .SYNOPSIS
+      Copies a BaseCoat-managed directory into a shared Copilot-discoverable
+      path (e.g. .github/skills) without deleting the destination first, so
+      co-located files owned by other overlays (sheen, Adhesion, etc.) are
+      never touched. Every file this function writes is appended to
+      $TrackedPaths (repo-root-relative, forward-slash normalized) so the
+      caller can later prune only the files BaseCoat itself previously
+      placed and no longer manages.
+    #>
+    param(
+        [Parameter(Mandatory)][string]$SourceDir,
+        [Parameter(Mandatory)][string]$DestDir,
+        [Parameter(Mandatory)][string]$RepoRoot,
+        [Parameter(Mandatory)][AllowEmptyCollection()][System.Collections.Generic.List[string]]$TrackedPaths
+    )
+
+    if (-not (Test-Path -LiteralPath $SourceDir)) {
+        return
+    }
+
+    New-Item -ItemType Directory -Force -Path $DestDir | Out-Null
+    $sourceFullPath = (Resolve-Path -LiteralPath $SourceDir).Path
+    # Canonicalize the destination root itself once; every per-file
+    # containment check below is relative to this resolved boundary.
+    $destRootCanonical = Get-CanonicalRealPath -Path $DestDir
+
+    Get-ChildItem -LiteralPath $SourceDir -Recurse -File | ForEach-Object {
+        $relative = $_.FullName.Substring($sourceFullPath.Length).TrimStart('\', '/')
+        $destFile = Join-Path $DestDir $relative
+        $destFileDir = Split-Path -Parent $destFile
+        New-Item -ItemType Directory -Force -Path $destFileDir | Out-Null
+
+        if (-not (Test-PathWithinBoundary -Path $destFileDir -BoundaryRoot $destRootCanonical)) {
+            Write-Warning "Refusing to write through a symlinked overlay path outside '$DestDir': $destFile"
+            return
+        }
+        if (Test-Path -LiteralPath $destFile) {
+            $existingLeaf = Get-Item -LiteralPath $destFile -Force
+            if ($null -ne $existingLeaf.ResolveLinkTarget($false)) {
+                Write-Warning "Refusing to overwrite a symlinked overlay destination file: $destFile"
+                return
+            }
+        }
+
+        Copy-Item -LiteralPath $_.FullName -Destination $destFile -Force
+        $TrackedPaths.Add((Get-RepoRelativePath -Path $destFile -RepoRoot $RepoRoot))
+    }
+}
+
+function Remove-EmptyOverlayParents {
+    param(
+        [Parameter(Mandatory)][string]$Path,
+        [Parameter(Mandatory)][string[]]$StopAt
+    )
+
+    $dir = Split-Path -Path $Path -Parent
+    while ($dir -and (Test-Path -LiteralPath $dir) -and ($StopAt -notcontains $dir)) {
+        $hasChildren = (Get-ChildItem -LiteralPath $dir -Force | Measure-Object).Count -gt 0
+        if ($hasChildren) { break }
+        Remove-Item -LiteralPath $dir -Force
+        $dir = Split-Path -Path $dir -Parent
+    }
+}
+
 $sourcePathOverride = $env:BASECOAT_TEST_SOURCE_PATH
 $tempRoot = $null
 $sourcePath = $null
@@ -445,6 +577,23 @@ try {
 
     $fullTargetDir = Join-Path $repoRoot $targetDir
     New-Item -ItemType Directory -Force -Path $fullTargetDir | Out-Null
+
+    # Capture the PREVIOUS release's asset-manifest.json before it is
+    # overwritten below. If this repo has never run the #3415-fixed sync
+    # before (no .overlay-managed-files state yet), this lets that first
+    # sync still identify and prune shared-overlay files the OLD
+    # wholesale-wipe sync previously installed but this new release retires
+    # — otherwise they would linger in the overlay forever.
+    $previousAssetManifestPath = Join-Path $fullTargetDir 'asset-manifest.json'
+    $previousAssetManifest = $null
+    if (Test-Path -LiteralPath $previousAssetManifestPath) {
+        try {
+            $previousAssetManifest = Get-Content -LiteralPath $previousAssetManifestPath -Raw | ConvertFrom-Json
+        }
+        catch {
+            Write-Warning "Ignoring unreadable previous asset manifest '$previousAssetManifestPath': $($_.Exception.Message)"
+        }
+    }
 
     foreach ($item in @('README.md', 'CHANGELOG.md', 'version.json', 'asset-manifest.json', 'instructions', 'skills', 'prompts', 'agents', 'templates')) {
         $destination = Join-Path $fullTargetDir $item
@@ -551,44 +700,116 @@ try {
         $agentEvalFiles | Remove-Item -Force
     }
 
-    # Copy Copilot-discoverable directories to their standard paths
-    # Only copy flat agent/instruction/prompt/skill files — not taxonomy subdirs
+    # Copy Copilot-discoverable directories to their standard paths.
+    # Only copy flat agent/instruction/prompt/skill files — not taxonomy subdirs.
+    #
+    # These shared paths (.github/instructions, .github/prompts, .github/skills,
+    # .github/agents, .github/agents/references, .agents/skills) can also be
+    # written to by other overlays (e.g. basecoat-sheen, basecoat-adhesion), so
+    # BaseCoat must never wipe the destination directory wholesale — that would
+    # silently delete co-located files it does not own (#3415). Instead, copy
+    # files individually (never deleting anything first) and track every path
+    # BaseCoat writes in $overlayManagedFiles. After all copies, prune only the
+    # files BaseCoat itself previously placed (per the prior sync's tracked
+    # list) that are no longer part of this sync — every other file, whether
+    # foreign or simply untracked, is left untouched.
+    # This state file uses the same plain-text, newline-separated, sorted
+    # format and filename as sync.sh's overlay tracking so a consumer repo
+    # that alternates between sync.ps1 (e.g. local Windows dev) and sync.sh
+    # (e.g. Linux CI) shares one consistent ownership record instead of each
+    # script only ever seeing its own history.
+    $overlayStatePath = Join-Path $fullTargetDir '.overlay-managed-files'
+    $overlayStateExisted = Test-Path -LiteralPath $overlayStatePath
+    $prevOverlayFiles = @()
+    if ($overlayStateExisted) {
+        try {
+            $prevOverlayFiles = @(
+                Get-Content -LiteralPath $overlayStatePath |
+                    ForEach-Object { $_.TrimEnd("`r") } |
+                    Where-Object { $_ -ne '' }
+            )
+        }
+        catch {
+            Write-Warning "Ignoring unreadable overlay state file '$overlayStatePath': $($_.Exception.Message)"
+        }
+    }
+    elseif ($previousAssetManifest -and $previousAssetManifest.assets) {
+        # First sync after upgrading to the #3415 fix: there is no tracked
+        # ownership history yet, but the OLD wholesale-wipe sync logic may
+        # have installed files this new release retires. Reconstruct where
+        # each previously-distributed asset would have landed and, if it
+        # still exists on disk, treat it as BaseCoat-managed so it can be
+        # correctly identified as stale below instead of lingering forever.
+        $seeded = [System.Collections.Generic.List[string]]::new()
+        foreach ($asset in $previousAssetManifest.assets) {
+            if (-not $asset.path) { continue }
+            $assetPath = ($asset.path -replace '\\', '/')
+            $candidateDests = @()
+            if ($assetPath -match '^agents/references/(.+)$') {
+                $candidateDests += ".github/agents/references/$($Matches[1])"
+            }
+            elseif ($assetPath -match '^agents/([^/]+\.agent\.md)$') {
+                $candidateDests += ".github/agents/$($Matches[1])"
+            }
+            elseif ($assetPath -match '^instructions/(.+)$') {
+                $candidateDests += ".github/instructions/$($Matches[1])"
+            }
+            elseif ($assetPath -match '^prompts/(.+)$') {
+                $candidateDests += ".github/prompts/$($Matches[1])"
+            }
+            elseif ($assetPath -match '^skills/(.+)$') {
+                $candidateDests += ".github/skills/$($Matches[1])"
+                $candidateDests += ".agents/skills/$($Matches[1])"
+            }
+            foreach ($candidate in $candidateDests) {
+                if (Test-Path -LiteralPath (Join-Path $repoRoot $candidate) -PathType Leaf) {
+                    $seeded.Add($candidate)
+                }
+            }
+        }
+        if ($seeded.Count -gt 0) {
+            Write-Host "Seeding overlay ownership from $($seeded.Count) previously-distributed file(s) for first sync after #3415 fix."
+            $prevOverlayFiles = @($seeded | Sort-Object -Unique)
+        }
+    }
+    $overlayManagedFiles = [System.Collections.Generic.List[string]]::new()
+
     $githubDir = Join-Path $repoRoot '.github'
     New-Item -ItemType Directory -Force -Path $githubDir | Out-Null
     foreach ($copilotDir in @('instructions', 'prompts', 'skills')) {
         $source = Join-Path $fullTargetDir $copilotDir
         $dest = Join-Path $githubDir $copilotDir
-        if (Test-Path $source) {
-            if (Test-Path $dest) {
-                Remove-Item -Path $dest -Recurse -Force
-            }
-            Copy-Item -Path $source -Destination $dest -Recurse -Force
-        }
+        Copy-ManagedOverlayTree -SourceDir $source -DestDir $dest -RepoRoot $repoRoot -TrackedPaths $overlayManagedFiles
     }
 
     # Also copy skills to .agents/skills/ for cross-client interop (Agent Skills spec)
     $skillsSource = Join-Path $fullTargetDir 'skills'
     $agentSkillsDest = Join-Path $repoRoot '.agents' 'skills'
-    if (Test-Path $skillsSource) {
-        New-Item -ItemType Directory -Force -Path $agentSkillsDest | Out-Null
-        if (Test-Path $agentSkillsDest) {
-            Remove-Item -Path $agentSkillsDest -Recurse -Force
-        }
-        Copy-Item -Path $skillsSource -Destination $agentSkillsDest -Recurse -Force
-    }
+    Copy-ManagedOverlayTree -SourceDir $skillsSource -DestDir $agentSkillsDest -RepoRoot $repoRoot -TrackedPaths $overlayManagedFiles
 
     # Agents: copy only *.agent.md files (skip taxonomy subdirs like models/, tasks/, types/)
     $agentSource = Join-Path $fullTargetDir 'agents'
     $agentDest = Join-Path $githubDir 'agents'
     if (Test-Path $agentSource) {
-        if (Test-Path $agentDest) {
-            Remove-Item -Path $agentDest -Recurse -Force
-        }
         New-Item -ItemType Directory -Force -Path $agentDest | Out-Null
+        $githubDirCanonical = Get-CanonicalRealPath -Path $githubDir
         Get-ChildItem -Path $agentSource -Filter '*.agent.md' | ForEach-Object {
+            $destFile = Join-Path $agentDest $_.Name
+            if (-not (Test-PathWithinBoundary -Path $agentDest -BoundaryRoot $githubDirCanonical)) {
+                Write-Warning "Refusing to write through a symlinked overlay path outside '$githubDir': $destFile"
+                return
+            }
+            if (Test-Path -LiteralPath $destFile) {
+                $existingLeaf = Get-Item -LiteralPath $destFile -Force
+                if ($null -ne $existingLeaf.ResolveLinkTarget($false)) {
+                    Write-Warning "Refusing to overwrite a symlinked overlay destination file: $destFile"
+                    return
+                }
+            }
             $raw = Get-Content -Path $_.FullName -Raw
             $sanitized = Convert-AgentToCliCompatibleContent -Content $raw
-            Set-Content -Path (Join-Path $agentDest $_.Name) -Value $sanitized -Encoding UTF8
+            Set-Content -Path $destFile -Value $sanitized -Encoding UTF8
+            $overlayManagedFiles.Add((Get-RepoRelativePath -Path $destFile -RepoRoot $repoRoot))
         }
     }
 
@@ -596,13 +817,66 @@ try {
     # for overflow content moved out to satisfy the token budget. Copy the whole
     # subtree so those relative links resolve for installed agents.
     $agentReferencesSource = Join-Path $agentSource 'references'
-    if (Test-Path $agentReferencesSource) {
-        $agentReferencesDest = Join-Path $agentDest 'references'
-        if (Test-Path $agentReferencesDest) {
-            Remove-Item -Path $agentReferencesDest -Recurse -Force
+    $agentReferencesDest = Join-Path $agentDest 'references'
+    Copy-ManagedOverlayTree -SourceDir $agentReferencesSource -DestDir $agentReferencesDest -RepoRoot $repoRoot -TrackedPaths $overlayManagedFiles
+
+    # Prune only files BaseCoat previously placed in the shared overlay
+    # directories that are no longer part of the current sync. Anything not
+    # in $prevOverlayFiles (foreign files, or files never tracked) is left
+    # alone, regardless of whether it happens to sit in one of these dirs.
+    $overlayStopDirs = @(
+        (Join-Path $githubDir 'instructions'),
+        (Join-Path $githubDir 'prompts'),
+        (Join-Path $githubDir 'skills'),
+        (Join-Path $githubDir 'agents'),
+        $agentSkillsDest
+    )
+    # Deletion candidates come from a state file (or, for the first sync,
+    # the reconstructed previous manifest) that could in principle contain a
+    # corrupted or maliciously crafted entry (e.g. '../victim' or a path
+    # under .github/workflows). Reject anything that is not a relative path
+    # confined to one of the exact managed overlay prefixes before it is
+    # even joined to $repoRoot, then re-verify containment against the
+    # canonical (symlink-resolved) boundary right before deleting.
+    $allowedOverlayPrefixes = @(
+        '.github/instructions/', '.github/prompts/', '.github/skills/',
+        '.github/agents/', '.agents/skills/'
+    )
+    $repoRootCanonical = Get-CanonicalRealPath -Path $repoRoot
+    $staleOverlayFiles = $prevOverlayFiles | Where-Object { $overlayManagedFiles -notcontains $_ }
+    foreach ($staleRel in $staleOverlayFiles) {
+        $normalizedStaleRel = ($staleRel -replace '\\', '/')
+        $isRooted = $normalizedStaleRel.StartsWith('/') -or [System.IO.Path]::IsPathRooted($normalizedStaleRel)
+        $hasTraversal = $normalizedStaleRel -match '(^|/)\.\.(/|$)'
+        $hasAllowedPrefix = $false
+        foreach ($prefix in $allowedOverlayPrefixes) {
+            if ($normalizedStaleRel.StartsWith($prefix, [System.StringComparison]::Ordinal)) {
+                $hasAllowedPrefix = $true
+                break
+            }
         }
-        Copy-Item -Path $agentReferencesSource -Destination $agentReferencesDest -Recurse -Force
+        if ($isRooted -or $hasTraversal -or -not $hasAllowedPrefix) {
+            Write-Warning "Skipping stale overlay entry outside the managed overlay prefixes: $staleRel"
+            continue
+        }
+
+        $staleFull = Join-Path $repoRoot $normalizedStaleRel
+        if (Test-Path -LiteralPath $staleFull -PathType Leaf) {
+            if (-not (Test-PathWithinBoundary -Path $staleFull -BoundaryRoot $repoRootCanonical)) {
+                Write-Warning "Refusing to delete a stale overlay entry that resolves outside the repository: $staleRel"
+                continue
+            }
+            Remove-Item -LiteralPath $staleFull -Force
+            Remove-EmptyOverlayParents -Path $staleFull -StopAt $overlayStopDirs
+            Write-Host "Removed stale BaseCoat-managed overlay file: $staleRel"
+        }
     }
+
+    # Force LF line endings (not the platform default) so this file stays
+    # byte-compatible with sync.sh's plain `comm`/`sort`-based reader.
+    $sortedOverlayFiles = @($overlayManagedFiles | Sort-Object -Unique)
+    $overlayStateContent = if ($sortedOverlayFiles.Count -gt 0) { ($sortedOverlayFiles -join "`n") + "`n" } else { '' }
+    [System.IO.File]::WriteAllText($overlayStatePath, $overlayStateContent, [System.Text.UTF8Encoding]::new($false))
 
     # Seed release-notes template into downstream-customizable location.
     # Never overwrite local customizations.

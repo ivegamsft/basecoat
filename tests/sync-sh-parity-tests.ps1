@@ -149,6 +149,70 @@ known_bad_releases:
     Assert-True ($failureCode -ne 0) 'sync.sh redaction fixture must fail cloning.'
     Assert-True ($failure -notmatch 'user:password|secret-value|token=') 'sync.sh failure output leaked URL credentials.'
     Assert-True ($failure -match 'https://127\.0\.0\.1:1/basecoat\.git') 'sync.sh redaction removed useful source context.'
+
+    # Regression for #3415: sync.sh must never wipe co-located overlay files
+    # it does not own (e.g. basecoat-sheen/basecoat-adhesion), and must only
+    # ever prune files it previously tracked as its own.
+    $foreignPaths = @(
+        '.github/skills/foreign-skill/SKILL.md',
+        '.github/instructions/foreign.instructions.md',
+        '.github/agents/foreign.agent.md',
+        '.agents/skills/foreign-skill/SKILL.md'
+    )
+    foreach ($relPath in $foreignPaths) {
+        $fullPath = Join-Path $consumer $relPath
+        New-Item -ItemType Directory -Force -Path (Split-Path $fullPath -Parent) | Out-Null
+        '# foreign content owned by another product (e.g. Sheen/Adhesion)' | Set-Content -LiteralPath $fullPath -Encoding utf8NoBOM
+    }
+
+    Push-Location $consumer
+    try {
+        $env:BASECOAT_REPO = "file://$source"
+        $env:BASECOAT_MIRROR = "file://$mirror"
+        $env:BASECOAT_REF = $sha
+        $env:BASECOAT_EXPECTED_SHA = $sha
+        & $bash.Source (Join-Path $repoRoot 'sync.sh')
+        if ($LASTEXITCODE -ne 0) { throw 'sync.sh mixed-overlay run failed.' }
+    }
+    finally {
+        Remove-Item Env:\BASECOAT_REPO,Env:\BASECOAT_MIRROR,Env:\BASECOAT_REF,Env:\BASECOAT_EXPECTED_SHA -ErrorAction SilentlyContinue
+        Pop-Location
+    }
+
+    foreach ($relPath in $foreignPaths) {
+        Assert-True (Test-Path -LiteralPath (Join-Path $consumer $relPath)) `
+            "sync.sh deleted foreign overlay file '$relPath' via a wholesale wipe (#3415)."
+    }
+
+    $overlayStatePath = Join-Path $consumer '.github/base-coat/.overlay-managed-files'
+    Assert-True (Test-Path -LiteralPath $overlayStatePath) 'sync.sh did not write the overlay-managed-files state file.'
+
+    $retiredRelPath = '.github/instructions/zzz-retired-basecoat-file.instructions.md'
+    $retiredFullPath = Join-Path $consumer $retiredRelPath
+    '# retired BaseCoat-managed file' | Set-Content -LiteralPath $retiredFullPath -Encoding utf8NoBOM
+    $trackedFiles = @(Get-Content -LiteralPath $overlayStatePath | Where-Object { $_ -ne '' })
+    $trackedFiles += $retiredRelPath
+    [System.IO.File]::WriteAllText($overlayStatePath, (($trackedFiles | Sort-Object -Unique) -join "`n") + "`n", [System.Text.UTF8Encoding]::new($false))
+
+    Push-Location $consumer
+    try {
+        $env:BASECOAT_REPO = "file://$source"
+        $env:BASECOAT_MIRROR = "file://$mirror"
+        $env:BASECOAT_REF = $sha
+        $env:BASECOAT_EXPECTED_SHA = $sha
+        & $bash.Source (Join-Path $repoRoot 'sync.sh')
+        if ($LASTEXITCODE -ne 0) { throw 'sync.sh mixed-overlay prune run failed.' }
+    }
+    finally {
+        Remove-Item Env:\BASECOAT_REPO,Env:\BASECOAT_MIRROR,Env:\BASECOAT_REF,Env:\BASECOAT_EXPECTED_SHA -ErrorAction SilentlyContinue
+        Pop-Location
+    }
+
+    Assert-True (-not (Test-Path -LiteralPath $retiredFullPath)) 'sync.sh did not prune a retired BaseCoat-managed overlay file.'
+    foreach ($relPath in $foreignPaths) {
+        Assert-True (Test-Path -LiteralPath (Join-Path $consumer $relPath)) `
+            "sync.sh deleted foreign overlay file '$relPath' while pruning a retired BaseCoat file (#3415)."
+    }
 }
 finally {
     Remove-Item -LiteralPath $scratch -Recurse -Force -ErrorAction SilentlyContinue

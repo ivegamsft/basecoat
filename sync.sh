@@ -283,6 +283,18 @@ fi
 
 mkdir -p "$REPO_ROOT/$TARGET_DIR"
 
+# Capture the PREVIOUS release's asset-manifest.json before it is
+# overwritten below. If this repo has never run the #3415-fixed sync
+# before (no .overlay-managed-files state yet), this lets that first sync
+# still identify and prune shared-overlay files the OLD wholesale-wipe
+# sync previously installed but this new release retires — otherwise they
+# would linger in the overlay forever.
+previous_asset_manifest_file=""
+if [[ -f "$REPO_ROOT/$TARGET_DIR/asset-manifest.json" ]]; then
+  previous_asset_manifest_file="$(mktemp)"
+  cp "$REPO_ROOT/$TARGET_DIR/asset-manifest.json" "$previous_asset_manifest_file"
+fi
+
 for item in README.md CHANGELOG.md version.json asset-manifest.json instructions skills prompts agents templates; do
   rm -rf "$REPO_ROOT/$TARGET_DIR/$item"
   if [[ -e "$TMP_DIR/source/$item" ]]; then
@@ -388,37 +400,210 @@ done
 # Remove eval metadata from synced agents to avoid leaking internal test files.
 find "$REPO_ROOT/$TARGET_DIR/agents" -maxdepth 1 -type f -name '*.agent.eval.yaml' -delete
 
-# Copy Copilot-discoverable directories to their standard paths
-# Only copy flat agent/instruction/prompt/skill files — not taxonomy subdirs
+# Copy Copilot-discoverable directories to their standard paths.
+# Only copy flat agent/instruction/prompt/skill files — not taxonomy subdirs.
+#
+# These shared paths (.github/instructions, .github/prompts, .github/skills,
+# .github/agents, .github/agents/references, .agents/skills) can also be
+# written to by other overlays (e.g. basecoat-sheen, basecoat-adhesion), so
+# BaseCoat must never wipe the destination directory wholesale — that would
+# silently delete co-located files it does not own (#3415). Instead, copy
+# files individually (never deleting anything first) and track every path
+# BaseCoat writes in the overlay state file. After all copies, prune only the
+# files BaseCoat itself previously placed that are no longer part of this
+# sync — every other file, whether foreign or simply untracked, is left
+# untouched.
 mkdir -p "$REPO_ROOT/.github"
-for copilot_dir in instructions prompts skills; do
-  if [[ -d "$REPO_ROOT/$TARGET_DIR/$copilot_dir" ]]; then
-    rm -rf "$REPO_ROOT/.github/$copilot_dir"
-    cp -R "$REPO_ROOT/$TARGET_DIR/$copilot_dir" "$REPO_ROOT/.github/$copilot_dir"
+
+# resolve_real_path <path>: resolves symlinks/junctions on an existing path
+# (via coreutils `realpath`) so a linked ancestor placed by a co-located
+# overlay cannot silently redirect a write or delete outside the intended
+# destination.
+resolve_real_path() {
+  realpath "$1"
+}
+
+# path_within_boundary <path> <boundary>: true only if the canonical
+# (symlink-resolved) form of <path> is equal to or nested under the
+# canonical form of <boundary>.
+path_within_boundary() {
+  local path="$1" boundary="$2" real_path real_boundary
+  real_path="$(resolve_real_path "$path")" || return 1
+  real_boundary="$(resolve_real_path "$boundary")" || return 1
+  case "$real_path" in
+    "$real_boundary") return 0 ;;
+    "$real_boundary"/*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+overlay_state_file="$REPO_ROOT/$TARGET_DIR/.overlay-managed-files"
+prev_overlay_file="$(mktemp)"
+if [[ -f "$overlay_state_file" ]]; then
+  sort -u "$overlay_state_file" -o "$prev_overlay_file"
+elif [[ -f "$previous_asset_manifest_file" ]]; then
+  # First sync after upgrading to the #3415 fix: there is no tracked
+  # ownership history yet, but the OLD wholesale-wipe sync logic may have
+  # installed files this new release retires. Reconstruct where each
+  # previously-distributed asset would have landed and, if it still exists
+  # on disk, treat it as BaseCoat-managed so it can be correctly identified
+  # as stale below instead of lingering forever.
+  seeded_overlay_file="$(mktemp)"
+  grep -o '"path"[[:space:]]*:[[:space:]]*"[^"]*"' "$previous_asset_manifest_file" |
+    sed -E 's/.*"path"[[:space:]]*:[[:space:]]*"([^"]*)".*/\1/' |
+    while IFS= read -r asset_path; do
+      case "$asset_path" in
+        agents/references/*)
+          echo ".github/agents/references/${asset_path#agents/references/}"
+          ;;
+        agents/*.agent.md)
+          [[ "$asset_path" == */*/*.agent.md ]] && continue
+          echo ".github/agents/${asset_path#agents/}"
+          ;;
+        instructions/*)
+          echo ".github/instructions/${asset_path#instructions/}"
+          ;;
+        prompts/*)
+          echo ".github/prompts/${asset_path#prompts/}"
+          ;;
+        skills/*)
+          echo ".github/skills/${asset_path#skills/}"
+          echo ".agents/skills/${asset_path#skills/}"
+          ;;
+      esac
+    done > "$seeded_overlay_file"
+  : > "$prev_overlay_file"
+  while IFS= read -r candidate; do
+    [[ -z "$candidate" ]] && continue
+    [[ -f "$REPO_ROOT/$candidate" ]] && echo "$candidate" >> "$prev_overlay_file"
+  done < "$seeded_overlay_file"
+  rm -f "$seeded_overlay_file"
+  sort -u "$prev_overlay_file" -o "$prev_overlay_file"
+  seeded_count="$(wc -l < "$prev_overlay_file" | tr -d ' ')"
+  if [[ "$seeded_count" -gt 0 ]]; then
+    echo "Seeding overlay ownership from $seeded_count previously-distributed file(s) for first sync after #3415 fix."
   fi
+else
+  : > "$prev_overlay_file"
+fi
+[[ -n "$previous_asset_manifest_file" && -f "$previous_asset_manifest_file" ]] && rm -f "$previous_asset_manifest_file"
+new_overlay_file="$(mktemp)"
+: > "$new_overlay_file"
+
+# copy_managed_overlay_tree <source_dir> <dest_dir>: copies every file from
+# source into dest without deleting dest first, recording each written path
+# (repo-relative) into $new_overlay_file.
+copy_managed_overlay_tree() {
+  local src="$1" dest="$2" rel dest_rel dest_dir dest_root_real
+  [[ -d "$src" ]] || return 0
+  mkdir -p "$dest"
+  dest_root_real="$(resolve_real_path "$dest")"
+  while IFS= read -r -d '' f; do
+    rel="${f#"$src"/}"
+    dest_dir="$dest/$(dirname "$rel")"
+    mkdir -p "$dest_dir"
+    if ! path_within_boundary "$dest_dir" "$dest_root_real"; then
+      echo "Refusing to write through a symlinked overlay path outside $dest: $dest/$rel" >&2
+      continue
+    fi
+    if [[ -L "$dest/$rel" ]]; then
+      echo "Refusing to overwrite a symlinked overlay destination file: $dest/$rel" >&2
+      continue
+    fi
+    cp -f "$f" "$dest/$rel"
+    dest_rel="${dest#"$REPO_ROOT"/}/$rel"
+    echo "$dest_rel" >> "$new_overlay_file"
+  done < <(find "$src" -type f -print0)
+}
+
+for copilot_dir in instructions prompts skills; do
+  copy_managed_overlay_tree "$REPO_ROOT/$TARGET_DIR/$copilot_dir" "$REPO_ROOT/.github/$copilot_dir"
 done
 
 # Also copy skills to .agents/skills/ for cross-client interop (Agent Skills spec)
-if [[ -d "$REPO_ROOT/$TARGET_DIR/skills" ]]; then
-  mkdir -p "$REPO_ROOT/.agents"
-  rm -rf "$REPO_ROOT/.agents/skills"
-  cp -R "$REPO_ROOT/$TARGET_DIR/skills" "$REPO_ROOT/.agents/skills"
-fi
+mkdir -p "$REPO_ROOT/.agents"
+copy_managed_overlay_tree "$REPO_ROOT/$TARGET_DIR/skills" "$REPO_ROOT/.agents/skills"
 
 # Agents: copy only *.agent.md files (skip taxonomy subdirs like models/, tasks/, types/)
 if [[ -d "$REPO_ROOT/$TARGET_DIR/agents" ]]; then
-  rm -rf "$REPO_ROOT/.github/agents"
   mkdir -p "$REPO_ROOT/.github/agents"
-  find "$REPO_ROOT/$TARGET_DIR/agents" -maxdepth 1 -name '*.agent.md' -exec cp {} "$REPO_ROOT/.github/agents/" \;
+  agents_dest_real="$(resolve_real_path "$REPO_ROOT/.github/agents")"
+  while IFS= read -r -d '' f; do
+    base="$(basename "$f")"
+    if ! path_within_boundary "$REPO_ROOT/.github/agents" "$agents_dest_real"; then
+      echo "Refusing to write through a symlinked overlay path outside $REPO_ROOT/.github/agents: $base" >&2
+      continue
+    fi
+    if [[ -L "$REPO_ROOT/.github/agents/$base" ]]; then
+      echo "Refusing to overwrite a symlinked overlay destination file: .github/agents/$base" >&2
+      continue
+    fi
+    cp -f "$f" "$REPO_ROOT/.github/agents/$base"
+    echo ".github/agents/$base" >> "$new_overlay_file"
+  done < <(find "$REPO_ROOT/$TARGET_DIR/agents" -maxdepth 1 -name '*.agent.md' -print0)
 fi
 
 # Agent references: agent files may link to agents/references/<name>-detail.md
 # for overflow content moved out to satisfy the token budget. Copy the whole
 # subtree so those relative links resolve for installed agents.
-if [[ -d "$REPO_ROOT/$TARGET_DIR/agents/references" ]]; then
-  rm -rf "$REPO_ROOT/.github/agents/references"
-  cp -R "$REPO_ROOT/$TARGET_DIR/agents/references" "$REPO_ROOT/.github/agents/references"
-fi
+copy_managed_overlay_tree "$REPO_ROOT/$TARGET_DIR/agents/references" "$REPO_ROOT/.github/agents/references"
+
+# Prune only files BaseCoat previously placed in the shared overlay
+# directories that are no longer part of the current sync. Anything not
+# previously tracked (foreign files, or files never tracked) is left alone,
+# regardless of whether it happens to sit in one of these dirs.
+sort -u "$new_overlay_file" -o "$new_overlay_file"
+comm -23 "$prev_overlay_file" "$new_overlay_file" > "${new_overlay_file}.stale" || true
+repo_root_real="$(resolve_real_path "$REPO_ROOT")"
+while IFS= read -r stale_rel; do
+  [[ -z "$stale_rel" ]] && continue
+  # Deletion candidates come from a state file (or, for the first sync, the
+  # reconstructed previous manifest) that could in principle contain a
+  # corrupted or maliciously crafted entry (e.g. '../victim' or a path under
+  # .github/workflows). Reject anything that is not a relative path confined
+  # to one of the exact managed overlay prefixes before it is even joined to
+  # $REPO_ROOT, then re-verify containment against the canonical
+  # (symlink-resolved) boundary right before deleting.
+  case "$stale_rel" in
+    /*|../*|*/../*|*/..|..)
+      echo "Skipping stale overlay entry outside the managed overlay prefixes: $stale_rel" >&2
+      continue
+      ;;
+  esac
+  case "$stale_rel" in
+    .github/instructions/*|.github/prompts/*|.github/skills/*|.github/agents/*|.agents/skills/*) ;;
+    *)
+      echo "Skipping stale overlay entry outside the managed overlay prefixes: $stale_rel" >&2
+      continue
+      ;;
+  esac
+  stale_full="$REPO_ROOT/$stale_rel"
+  if [[ -f "$stale_full" ]]; then
+    if ! path_within_boundary "$stale_full" "$repo_root_real"; then
+      echo "Refusing to delete a stale overlay entry that resolves outside the repository: $stale_rel" >&2
+      continue
+    fi
+    rm -f "$stale_full"
+    echo "Removed stale BaseCoat-managed overlay file: $stale_rel"
+    parent_dir="$(dirname "$stale_full")"
+    while [[ "$parent_dir" == "$REPO_ROOT/.github/instructions"* || \
+             "$parent_dir" == "$REPO_ROOT/.github/prompts"* || \
+             "$parent_dir" == "$REPO_ROOT/.github/skills"* || \
+             "$parent_dir" == "$REPO_ROOT/.github/agents"* || \
+             "$parent_dir" == "$REPO_ROOT/.agents/skills"* ]]; do
+      if [[ -d "$parent_dir" ]] && [[ -z "$(ls -A "$parent_dir" 2>/dev/null)" ]]; then
+        rmdir "$parent_dir"
+        parent_dir="$(dirname "$parent_dir")"
+      else
+        break
+      fi
+    done
+  fi
+done < "${new_overlay_file}.stale"
+rm -f "${new_overlay_file}.stale"
+
+cp "$new_overlay_file" "$overlay_state_file"
+rm -f "$prev_overlay_file" "$new_overlay_file"
 
 # Seed release-notes template into downstream-customizable location.
 # Never overwrite local customizations.
