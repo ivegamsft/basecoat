@@ -291,7 +291,7 @@ When proposing a new label:
 
 ### GitHub Copilot Issue Triage Agent
 
-The `issue-triage` agent uses these labels to classify and prioritize issues automatically. See [`agents/basecoat-10-core-issue-triage.agent.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-issue-triage.agent.md) for details.
+The `issue-triage` agent uses these labels to classify and prioritize issues automatically. See [`agents/basecoat-10-core-issue-triage.agent.md`](https://github.com/ivegamsft/basecoat/blob/main/agents/basecoat-10-core-issue-triage.agent.md) for details.
 
 ### Sprint Planning
 

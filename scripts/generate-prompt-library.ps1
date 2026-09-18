@@ -5,7 +5,7 @@ param(
     [string]$IntentPath = 'instructions/basecoat-10-core-intent-routing.instructions.md',
     [string]$SkillsPath = 'skills',
     [string]$AgentsPath = 'agents',
-    [string]$SourceBaseUrl = 'https://github.com/IBuySpy-Shared/basecoat/blob/main'
+    [string]$SourceBaseUrl = 'https://github.com/ivegamsft/basecoat/blob/main'
 )
 
 $ErrorActionPreference = 'Stop'

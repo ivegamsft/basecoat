@@ -329,7 +329,7 @@ docs/
 
 ### 16.2 References
 
-- Tracking Issue: [IBuySpy-Shared/basecoat#2975](https://github.com/IBuySpy-Shared/basecoat/issues/2975)
+- Tracking Issue: [ivegamsft/basecoat#2975](internal source issue)
 - PRD Template: `docs/templates/prd-template.md`
 - Token Economics Reference: `instructions/references/token-economics/context-routing.md`
 - Session Hygiene Reference: `docs/guides/phase-boundary-session-checklist.md`
