@@ -6,6 +6,12 @@ All notable changes to this repository should be recorded in this file.
 
 No unreleased changes.
 
+## 4.4.1 - 2026-09-17
+
+### Fixed
+
+- fix(release): correct release version metadata so provenance-guarded sync accepts the tag; supersedes the mis-tagged v4.4.0 whose tree still reported 4.3.0 (#3366)
+
 ## 4.4.0 - 2026-09-11
 
 ### Added
