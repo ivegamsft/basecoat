@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import pathlib
 import re
 import sys
@@ -160,6 +161,21 @@ def reusable_jobs(path: pathlib.Path) -> list[tuple[str, str, set[str], set[str]
     return results
 
 
+def redact_secret_names(names: list[str]) -> str:
+    """Return a safe diagnostic form of secret identifiers.
+
+    Undeclared secret names are workflow-caller identifiers, not secret
+    values, but static analysis (and defense in depth) treats anything
+    read from a ``secrets:`` mapping as sensitive. Report a stable,
+    non-reversible short hash per name plus a count instead of the raw
+    identifier so failure output never echoes secret names or values.
+    """
+    digests = sorted(
+        hashlib.sha256(name.encode("utf-8")).hexdigest()[:12] for name in names
+    )
+    return f"{len(names)} secret(s) (sha256 id: {', '.join(digests)})"
+
+
 def validate(caller: pathlib.Path, callable_path: pathlib.Path) -> list[str]:
     declared_inputs, declared_secrets = callable_contract(callable_path)
     failures: list[str] = []
@@ -184,8 +200,8 @@ def validate(caller: pathlib.Path, callable_path: pathlib.Path) -> list[str]:
             )
         if unknown_secrets:
             failures.append(
-                f"{caller}: job '{job_name}' passes undeclared secret(s) to "
-                f"{uses}: {', '.join(unknown_secrets)}"
+                f"{caller}: job '{job_name}' passes undeclared "
+                f"{redact_secret_names(unknown_secrets)} to {uses}"
             )
     return failures
 

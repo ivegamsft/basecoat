@@ -98,10 +98,16 @@ def main() -> None:
             content[:start] + content[end:], encoding="utf-8"
         )
         result = run(incompatible_secret, CURRENT_CALLER)
-        if result.returncode == 0 or "fetch_token" not in result.stderr:
+        expected_digest = hashlib.sha256(b"fetch_token").hexdigest()[:12]
+        if result.returncode == 0 or expected_digest not in result.stderr:
             raise AssertionError(
                 "validator did not reject an undeclared named secret:\n"
                 f"{result.stdout}\n{result.stderr}"
+            )
+        if "fetch_token" in result.stderr:
+            raise AssertionError(
+                "validator must not echo the raw undeclared secret name "
+                f"(CodeQL clear-text secret logging, issue #3420):\n{result.stderr}"
             )
 
         content = CURRENT_CALLER.read_text(encoding="utf-8")

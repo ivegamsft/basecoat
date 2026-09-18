@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.1",
   "libraryVersion": "4.5.0",
-  "generatedAt": "2026-09-18T15:13:38.0427703Z",
+  "generatedAt": "2026-09-18T19:07:37.2815665Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -1878,7 +1878,7 @@
     {
       "path": "scripts/validate-reusable-workflow-contracts.py",
       "type": "script",
-      "sha": "537ca417ddfc039db68d2c36aa9b2d92c136fbd3",
+      "sha": "f19c62154abbe4b56e51aeffbcddd9e540f3f906",
       "version": null,
       "effectiveVersion": "4.5.0",
       "versionSource": "library"
