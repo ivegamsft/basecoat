@@ -1,6 +1,6 @@
 # Dependency Graph
 
-- Generated: 2026-09-07T13:53:36Z
+- Generated: 2026-09-14T14:39:41Z
 - Source workflow: .github/workflows/dependency-graph-pages.yml
 
 ```mermaid
@@ -141,6 +141,7 @@ graph LR
 
     %% Skills (green)
     skill_agent_design((agent-design)):::skill
+    skill_agentic_cost_audit((agentic-cost-audit)):::skill
     skill_agentic_sdlc_autonomy((agentic-sdlc-autonomy)):::skill
     skill_agentops_audit((agentops-audit)):::skill
     skill_api_audit((api-audit)):::skill
@@ -244,6 +245,7 @@ graph LR
     skill_project_rules_drift_audit((project-rules-drift-audit)):::skill
     skill_public_safe_sanitization((public-safe-sanitization)):::skill
     skill_queue_rebalancer((queue-rebalancer)):::skill
+    skill_rai_privacy_review((rai-privacy-review)):::skill
     skill_rca((rca)):::skill
     skill_receiving_code_review((receiving-code-review)):::skill
     skill_refactoring((refactoring)):::skill
@@ -269,11 +271,13 @@ graph LR
     skill_sprint_planner((sprint-planner)):::skill
     skill_sprint_project_mapper((sprint-project-mapper)):::skill
     skill_sprint_retrospective((sprint-retrospective)):::skill
+    skill_standards_mapping((standards-mapping)):::skill
     skill_standup_signal_extraction((standup-signal-extraction)):::skill
     skill_station_bottleneck_analyzer((station-bottleneck-analyzer)):::skill
     skill_supply_chain_security((supply-chain-security)):::skill
     skill_takt_time_measurement((takt-time-measurement)):::skill
     skill_task_decomposition((task-decomposition)):::skill
+    skill_task_provenance((task-provenance)):::skill
     skill_tech_debt((tech-debt)):::skill
     skill_twelve_factor((twelve-factor)):::skill
     skill_ux((ux)):::skill
@@ -281,56 +285,31 @@ graph LR
     skill_yagni_analysis((yagni-analysis)):::skill
 
     %% Edges
+    agent_flow_auditor -.-> skill_flow_audit
+    agent_flow_auditor -.-> skill_flow_track
+    agent_governance_auditor -.-> skill_governance
+    agent_governance_auditor -.-> skill_governance_audit
     agent_agentic_sdlc_autonomy -.-> skill_agentic_sdlc_autonomy
     agent_agentic_sdlc_autonomy -.-> skill_ci_audit
     agent_agentic_sdlc_autonomy -.-> skill_flow_audit
     agent_agentic_sdlc_autonomy -.-> skill_flow_admission_control
     agent_agentic_sdlc_autonomy -.-> skill_human_in_the_loop
-    agent_project_rules_drift_auditor -.-> skill_project_rules_drift_audit
-    agent_project_rules_drift_auditor -.-> skill_governance_audit
+    agent_governance_author -.-> skill_governance
+    agent_governance_author -.-> skill_governance_audit
+    agent_ship_it_control_loop -.-> skill_ship_it
+    agent_ship_it_control_loop -.-> skill_ship_it_control_loop
     agent_agent_designer -.-> skill_agent_design
     agent_agent_designer -.-> skill_agentops_audit
+    agent_project_rules_drift_auditor -.-> skill_project_rules_drift_audit
+    agent_project_rules_drift_auditor -.-> skill_governance_audit
+    agent_github_security_posture -.-> skill_security
     agent_build_master -.-> skill_build_master_control_plane
     agent_build_master -.-> skill_build_failure_triage
     agent_build_master -.-> skill_escalation_routing
     agent_build_master -.-> skill_dependency_blocker_monitoring
-    agent_ship_it_control_loop -.-> skill_ship_it
-    agent_ship_it_control_loop -.-> skill_ship_it_control_loop
     agent_delivery_autopilot -.-> skill_delivery_autopilot
-    agent_backlog_autopilot -.-> skill_backlog_burndown
-    agent_backlog_autopilot -.-> skill_ship_it_control_loop
-    agent_backlog_autopilot -.-> skill_delivery_autopilot
-    agent_backlog_autopilot -.-> skill_issue_triage
-    agent_backlog_autopilot -.-> skill_workflow_parallelization
-    agent_flow_optimizer -.-> skill_flow_optimize
-    agent_flow_optimizer -.-> skill_flow_suggest
-    agent_flow_optimizer -.-> skill_flow_audit
-    agent_github_security_posture -.-> skill_security
-    agent_flow_tracker -.-> skill_flow_track
-    agent_flow_tracker -.-> skill_flow_audit
-    agent_governance_auditor -.-> skill_governance
-    agent_governance_auditor -.-> skill_governance_audit
-    agent_issue_triage -.-> skill_issue_triage
-    agent_issue_triage -.-> skill_backlog_revalidation
     agent_ship_it_orchestrator -.-> skill_ship_it
     agent_ship_it_orchestrator -.-> skill_lane_closeout
-    agent_orphaned_pr_cleanup -.-> skill_orphaned_pr_triage
-    agent_orphaned_pr_cleanup -.-> skill_backlog_revalidation
-    agent_guidance_reviewer -.-> skill_agent_design
-    agent_guidance_reviewer -.-> skill_agentops_audit
-    agent_incident_to_backlog_router -.-> skill_decision_log_capture
-    agent_incident_to_backlog_router -.-> skill_flow_admission_control
-    agent_incident_to_backlog_router -.-> skill_observability
-    agent_incident_to_backlog_router -.-> skill_security_operations
-    agent_incident_to_backlog_router -.-> skill_operation_context_resolver
-    agent_delivery_gap_mapper -.-> skill_issue_triage
-    agent_delivery_gap_mapper -.-> skill_sprint_project_mapper
-    agent_delivery_gap_mapper -.-> skill_flow_audit
-    agent_flow_suggester -.-> skill_flow_suggest
-    agent_flow_suggester -.-> skill_flow_audit
-    agent_governance_author -.-> skill_governance
-    agent_governance_author -.-> skill_governance_audit
-    agent_local_dev_data_pack_orchestrator -.-> skill_local_dev_data_pack
     agent_flow_governance_conductor -.-> skill_flow_audit
     agent_flow_governance_conductor -.-> skill_flow_suggest
     agent_flow_governance_conductor -.-> skill_flow_optimize
@@ -339,20 +318,45 @@ graph LR
     agent_flow_governance_conductor -.-> skill_ci_audit
     agent_flow_governance_conductor -.-> skill_governance_audit
     agent_flow_governance_conductor -.-> skill_agentic_sdlc_autonomy
-    agent_flow_auditor -.-> skill_flow_audit
-    agent_flow_auditor -.-> skill_flow_track
-    agent_copilot_review_triage -.-> skill_copilot_review_triage
-    agent_copilot_review_triage -.-> skill_code_review
+    agent_orphaned_pr_cleanup -.-> skill_orphaned_pr_triage
+    agent_orphaned_pr_cleanup -.-> skill_backlog_revalidation
+    agent_guidance_reviewer -.-> skill_agent_design
+    agent_guidance_reviewer -.-> skill_agentops_audit
     agent_flow_admission_controller -.-> skill_flow_admission_control
     agent_flow_admission_controller -.-> skill_flow_optimize
     agent_instruction_auditor -.-> skill_agent_design
+    agent_local_dev_data_pack_orchestrator -.-> skill_local_dev_data_pack
+    agent_incident_to_backlog_router -.-> skill_decision_log_capture
+    agent_incident_to_backlog_router -.-> skill_flow_admission_control
+    agent_incident_to_backlog_router -.-> skill_observability
+    agent_incident_to_backlog_router -.-> skill_security_operations
+    agent_incident_to_backlog_router -.-> skill_operation_context_resolver
+    agent_delivery_gap_mapper -.-> skill_issue_triage
+    agent_delivery_gap_mapper -.-> skill_sprint_project_mapper
+    agent_delivery_gap_mapper -.-> skill_flow_audit
+    agent_copilot_review_triage -.-> skill_copilot_review_triage
+    agent_copilot_review_triage -.-> skill_code_review
+    agent_flow_optimizer -.-> skill_flow_optimize
+    agent_flow_optimizer -.-> skill_flow_suggest
+    agent_flow_optimizer -.-> skill_flow_audit
+    agent_issue_triage -.-> skill_issue_triage
+    agent_issue_triage -.-> skill_backlog_revalidation
+    agent_backlog_autopilot -.-> skill_backlog_burndown
+    agent_backlog_autopilot -.-> skill_ship_it_control_loop
+    agent_backlog_autopilot -.-> skill_delivery_autopilot
+    agent_backlog_autopilot -.-> skill_issue_triage
+    agent_backlog_autopilot -.-> skill_workflow_parallelization
+    agent_flow_suggester -.-> skill_flow_suggest
+    agent_flow_suggester -.-> skill_flow_audit
+    agent_flow_tracker -.-> skill_flow_track
+    agent_flow_tracker -.-> skill_flow_audit
 
     classDef agent fill:#4a90d9,color:#fff,stroke:#2c5f8a
     classDef skill fill:#5cb85c,color:#fff,stroke:#3a7a3a
     classDef instr fill:#f0ad4e,color:#fff,stroke:#b07a1e
 ```
 
-## Orphaned nodes (210 total — no incoming or outgoing edges)
+## Orphaned nodes (214 total — no incoming or outgoing edges)
 
 - agent:agentops
 - agent:api-designer
@@ -460,6 +464,7 @@ graph LR
 - agent:tech-writer
 - agent:ux-designer
 - agent:workflow-gate-diagnostician
+- skill:agentic-cost-audit
 - skill:api-audit
 - skill:api-design
 - skill:api-security
@@ -535,6 +540,7 @@ graph LR
 - skill:production-readiness
 - skill:public-safe-sanitization
 - skill:queue-rebalancer
+- skill:rai-privacy-review
 - skill:rca
 - skill:receiving-code-review
 - skill:refactoring
@@ -555,14 +561,16 @@ graph LR
 - skill:sprint-management
 - skill:sprint-planner
 - skill:sprint-retrospective
+- skill:standards-mapping
 - skill:standup-signal-extraction
 - skill:station-bottleneck-analyzer
 - skill:supply-chain-security
 - skill:takt-time-measurement
 - skill:task-decomposition
+- skill:task-provenance
 - skill:tech-debt
 - skill:twelve-factor
 - skill:ux
 - skill:yagni-analysis
 
-Graph: 131 agents, 139 skills, 65 edges, 210 orphans
+Graph: 131 agents, 143 skills, 65 edges, 214 orphans
