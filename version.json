@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "4.4.2",
+  "version": "4.5.0",
   "releaseDate": "2026-09-18",
-  "notes": "Patch release: sanitize an internal downstream identifier in the re-scope PRD so the provenance-guarded production mirror accepts the tag. Completes the v4.4.1 release integrity line, whose tagged tree still leaked the identifier (issue #3403)."
+  "notes": "Minor release: Asset Distribution Classification. Adds ships/dogfood/status frontmatter axes with a validator and generator emit (#3379), plus an asset-manifest drift check that catches manifest desync before merge (#3397). Closes #3374."
 }
