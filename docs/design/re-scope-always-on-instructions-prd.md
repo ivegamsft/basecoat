@@ -11,7 +11,7 @@
 
 ## 1. Problem Statement
 
-BaseCoat currently configures 34 of its 91 instruction files with global scope (`applyTo: "**/*"`), causing approximately 39,780 tokens (~133 KB) of instruction content to load unconditionally on every single agent turn. In real-world downstream consumers (such as `IBuySpy-Dev/ibuypets-v3`), the always-on set expands to 43 files (~47.4k tokens, ~43% of the total instruction corpus), polluting context across specialized backend (`.cs`), infrastructure (`.bicep`), and database (`.sql`) edits.
+BaseCoat currently configures 34 of its 91 instruction files with global scope (`applyTo: "**/*"`), causing approximately 39,780 tokens (~133 KB) of instruction content to load unconditionally on every single agent turn. In real-world downstream consumers (such as a representative production consumer repository), the always-on set expands to 43 files (~47.4k tokens, ~43% of the total instruction corpus), polluting context across specialized backend (`.cs`), infrastructure (`.bicep`), and database (`.sql`) edits.
 
 This hot-context overhead contradicts BaseCoat's own token-economics and tool-minimization guidance, inflates per-turn latency and inference costs, and starves agents of working memory for task code. By contrast, the sibling HVE framework maintains only ~5.6k always-on tokens (~3.5% of total corpus) by strictly partitioning instructions by load timing (path/file globs and on-demand skills).
 
@@ -311,7 +311,7 @@ docs/
 | **M2: Core Instruction Re-scoping** | Sprint 2026-W36 | Re-scope 27 non-invariant instruction files to specific globs and skills. |
 | **M3: Universal Invariant Audit** | Sprint 2026-W36 | Streamline retained Tier 0 files (LOG-FIRST, secrets, output style) under 10k tokens total. |
 | **M4: CI Guardrail Implementation** | Sprint 2026-W36 | Add token budget validation script and integrate into `run-tests.ps1`. |
-| **M5: Downstream Verification** | Sprint 2026-W37 | Run consumer smoke tests against `ibuypets-v3` and verify ~40k token savings. |
+| **M5: Downstream Verification** | Sprint 2026-W37 | Run consumer smoke tests against a representative downstream consumer repository and verify ~40k token savings. |
 
 ---
 
