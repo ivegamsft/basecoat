@@ -1,7 +1,8 @@
 # Latest Release Notes
 
-## 4.4.2 - 2026-09-18
+## 4.5.0 - 2026-09-18
 
-### Fixed
+### Added
 
-- fix(release): sanitize internal downstream identifier in the re-scope PRD so the provenance-guarded production mirror accepts the tag; completes the v4.4.1 release-integrity line whose tagged tree still leaked the identifier (#3403)
+- feat(distribution): asset distribution classification — `ships`/`dogfood`/`status` frontmatter axes with a validator and generator emit (#3374, #3379)
+- feat(ci): asset-manifest drift check that regenerates and semantically compares the manifest to catch desync before merge (#3374, #3397)
