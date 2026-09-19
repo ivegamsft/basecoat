@@ -33,7 +33,7 @@
     Optional. GitHub handle for follow-up (e.g., "@alice").
 
 .PARAMETER MemoryRepo
-    Target memory repository. Default: env BASECOAT_SHARED_MEMORY_REPO or IBuySpy-Shared/basecoat-memory.
+    Target memory repository. Provide explicitly or set env BASECOAT_SHARED_MEMORY_REPO.
 
 .PARAMETER DryRun
     Print the candidate file without writing or pushing.
@@ -61,7 +61,7 @@ param(
     [Parameter(Mandatory)][string]$Source,
     [string]$Team    = "",
     [string]$Contact = "",
-    [string]$MemoryRepo = ($env:BASECOAT_SHARED_MEMORY_REPO ?? "IBuySpy-Shared/basecoat-memory"),
+    [string]$MemoryRepo = $env:BASECOAT_SHARED_MEMORY_REPO,
     [switch]$DryRun,
     [switch]$OpenPR
 )
@@ -72,6 +72,7 @@ $ErrorActionPreference = "Stop"
 # ── Validation ────────────────────────────────────────────────────────────────
 
 $errors = [System.Collections.Generic.List[string]]::new()
+if ([string]::IsNullOrWhiteSpace($MemoryRepo)) { $errors.Add("MemoryRepo or BASECOAT_SHARED_MEMORY_REPO is required.") }
 
 # Subject format: domain:key
 if ($Subject -notmatch '^[a-z]+:[a-z][a-z0-9-]+$') {
@@ -224,7 +225,7 @@ Submitted by **$Source** via \`submit-learning.ps1\`.
 - [ ] Delete the candidate entry from \`sweep-candidates/\`
 
 ---
-*Submitted by $Source — see [CONTRIBUTING.md](https://github.com/IBuySpy-Shared/basecoat/blob/main/docs/memory/CONTRIBUTING.md)*" 2>&1
+*Submitted by $Source — see [CONTRIBUTING.md](https://github.com/ivegamsft/basecoat/blob/main/docs/memory/CONTRIBUTING.md)*" 2>&1
 
         Write-Host "🔗 PR opened: $prUrl"
     } else {

@@ -285,7 +285,7 @@ prototype repos), enable at minimum:
 
 After admins apply branch protection, verify all of the following:
 
-1. `gh api /repos/IBuySpy-Shared/basecoat/branches/main/protection` returns `200` (not `404`).
+1. `gh api /repos/ivegamsft/basecoat/branches/main/protection` returns `200` (not `404`).
 2. `required_status_checks.strict` is `true`.
 3. Required checks include: `lint-and-validate`, `test`, `validate-commit-messages`, `validate-unix`, `validate-windows`, `release-label-gate`.
 4. `required_pull_request_reviews.required_approving_review_count` is at least `1`.
