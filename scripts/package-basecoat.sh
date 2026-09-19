@@ -18,7 +18,7 @@ ARCHIVE_BASE="base-coat-$VERSION"
 rm -rf "$DIST_DIR"
 mkdir -p "$STAGE_DIR"
 
-for item in README.md CHANGELOG.md INVENTORY.md version.json asset-manifest.json sync.sh sync.ps1 instructions skills prompts agents scripts templates .githooks docs examples .github; do
+for item in README.md CHANGELOG.md INVENTORY.md version.json asset-manifest.json sync.sh sync.ps1 instructions skills prompts agents scripts schemas templates .githooks docs examples .github; do
   if [[ -e "$item" ]]; then
     cp -R "$item" "$STAGE_DIR/$item"
   fi
@@ -37,6 +37,8 @@ validation_scripts=(
   scripts/validate-workflow-action-pins.ps1
   scripts/validate-workflow-action-pins.py
   scripts/validate-reusable-workflow-contracts.py
+  scripts/guidance-lock.ps1
+  scripts/guidance-lock.sh
 )
 for relative_path in "${validation_scripts[@]}"; do
   if [[ ! -f "$STAGE_DIR/$relative_path" ]]; then
@@ -57,6 +59,11 @@ if missing:
         "Package validation failed: asset-manifest.json is missing " + ", ".join(missing)
     )
 PY
+
+if [[ ! -f "$STAGE_DIR/schemas/guidance-lock-v1.schema.json" ]]; then
+  echo "Package validation failed: missing shared guidance lock schema" >&2
+  exit 1
+fi
 
 packaged_callers=()
 while IFS= read -r packaged_caller; do

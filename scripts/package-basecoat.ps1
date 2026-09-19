@@ -19,7 +19,7 @@ if (Test-Path $distDir) {
 New-Item -ItemType Directory -Force -Path $stageDir | Out-Null
 
 # mkdocs.yml is excluded — it's a docs-site build config, not consumer guidance
-foreach ($item in @('README.md', 'CHANGELOG.md', 'INVENTORY.md', 'version.json', 'asset-manifest.json', 'sync.sh', 'sync.ps1', 'instructions', 'skills', 'prompts', 'agents', 'scripts', 'templates', '.githooks', 'docs', 'examples', '.github')) {
+foreach ($item in @('README.md', 'CHANGELOG.md', 'INVENTORY.md', 'version.json', 'asset-manifest.json', 'sync.sh', 'sync.ps1', 'instructions', 'skills', 'prompts', 'agents', 'scripts', 'schemas', 'templates', '.githooks', 'docs', 'examples', '.github')) {
     if (Test-Path $item) {
         Copy-Item -Path $item -Destination (Join-Path $stageDir $item) -Recurse -Force
     }
@@ -36,11 +36,18 @@ $validationScripts = @(
     'scripts/validate-basecoat.sh',
     'scripts/validate-workflow-action-pins.ps1',
     'scripts/validate-workflow-action-pins.py',
-    'scripts/validate-reusable-workflow-contracts.py'
+    'scripts/validate-reusable-workflow-contracts.py',
+    'scripts/guidance-lock.ps1',
+    'scripts/guidance-lock.sh'
 )
 $manifest = Get-Content (Join-Path $stageDir 'asset-manifest.json') -Raw | ConvertFrom-Json
 if ($manifest.libraryVersion -ne $version) {
     throw "Package validation failed: asset-manifest.json libraryVersion '$($manifest.libraryVersion)' does not match version.json version '$version'"
+}
+
+$guidanceSchema = Join-Path $stageDir 'schemas\guidance-lock-v1.schema.json'
+if (-not (Test-Path -LiteralPath $guidanceSchema -PathType Leaf)) {
+    throw "Package validation failed: missing shared guidance lock schema '$guidanceSchema'"
 }
 $manifestPaths = @($manifest.assets | ForEach-Object { $_.path })
 foreach ($relativePath in $validationScripts) {

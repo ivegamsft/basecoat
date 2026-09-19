@@ -30,6 +30,13 @@ Assert-True ($syncShContent -notmatch 'YOUR-ORG') `
     'Bash sync must never fall back to a placeholder source URL (issue #3417).'
 Assert-True ($syncShContent -match "No BaseCoat source configured\. Set 'source:' in \.basecoat\.yml or the BASECOAT_REPO env var\.") `
     'Bash sync must fail fast with an actionable message naming .basecoat.yml and BASECOAT_REPO.'
+Assert-True ($syncShContent -match 'guidance_lock_file="\$REPO_ROOT/\.github/base-coat/guidance-lock\.json"') `
+    'Bash sync must use the canonical cross-product guidance lock.'
+Assert-True ($syncShContent -match 'GUIDANCE_PATH_COLLISION' -and $syncShContent -match 'GUIDANCE_CONTENT_MODIFIED') `
+    'Bash sync must enforce foreign-owner collisions and consumer-modification hashes.'
+Assert-True ($syncShContent -match 'guidance_write_lock "\$guidance_lock_file"' -and
+    $syncShContent -match 'rm -f "\$legacy_overlay_file"') `
+    'Bash sync must publish guidance-lock/v1 and retire the legacy overlay tracker.'
 if ($IsWindows) {
     Write-Host 'Bash runtime parity skipped on Windows after static corporate-origin checks; Ubuntu CI runs the fixture.'
     exit 0
@@ -184,15 +191,18 @@ known_bad_releases:
             "sync.sh deleted foreign overlay file '$relPath' via a wholesale wipe (#3415)."
     }
 
-    $overlayStatePath = Join-Path $consumer '.github/base-coat/.overlay-managed-files'
-    Assert-True (Test-Path -LiteralPath $overlayStatePath) 'sync.sh did not write the overlay-managed-files state file.'
+    $guidanceLockPath = Join-Path $consumer '.github/base-coat/guidance-lock.json'
+    Assert-True (Test-Path -LiteralPath $guidanceLockPath) 'sync.sh did not write guidance-lock.json.'
 
     $retiredRelPath = '.github/instructions/zzz-retired-basecoat-file.instructions.md'
     $retiredFullPath = Join-Path $consumer $retiredRelPath
     '# retired BaseCoat-managed file' | Set-Content -LiteralPath $retiredFullPath -Encoding utf8NoBOM
-    $trackedFiles = @(Get-Content -LiteralPath $overlayStatePath | Where-Object { $_ -ne '' })
-    $trackedFiles += $retiredRelPath
-    [System.IO.File]::WriteAllText($overlayStatePath, (($trackedFiles | Sort-Object -Unique) -join "`n") + "`n", [System.Text.UTF8Encoding]::new($false))
+    . (Join-Path $repoRoot 'scripts/guidance-lock.ps1')
+    $lock = Read-GuidanceLock -RepoRoot $consumer
+    $retiredEntry = New-GuidanceLockEntry -RepoRoot $consumer -Path $retiredRelPath -Owner basecoat `
+        -GuidanceUnit 'instructions/zzz-retired-basecoat-file.instructions.md' -SourceVersion test `
+        -Sha256 (Get-GuidanceContentHash -Path $retiredFullPath)
+    Write-GuidanceLock -RepoRoot $consumer -Entries (@($lock.entries) + $retiredEntry)
 
     Push-Location $consumer
     try {
@@ -213,6 +223,49 @@ known_bad_releases:
         Assert-True (Test-Path -LiteralPath (Join-Path $consumer $relPath)) `
             "sync.sh deleted foreign overlay file '$relPath' while pruning a retired BaseCoat file (#3415)."
     }
+
+    $managedInstruction = Join-Path $consumer '.github/instructions/example.instructions.md'
+    '# consumer modification' | Set-Content -LiteralPath $managedInstruction -Encoding utf8NoBOM
+    Push-Location $consumer
+    try {
+        $env:BASECOAT_REPO = "file://$source"
+        $env:BASECOAT_MIRROR = "file://$mirror"
+        $env:BASECOAT_REF = $sha
+        $env:BASECOAT_EXPECTED_SHA = $sha
+        $modifiedFailure = & $bash.Source (Join-Path $repoRoot 'sync.sh') 2>&1 | Out-String
+        $modifiedExitCode = $LASTEXITCODE
+    }
+    finally {
+        Remove-Item Env:\BASECOAT_REPO,Env:\BASECOAT_MIRROR,Env:\BASECOAT_REF,Env:\BASECOAT_EXPECTED_SHA -ErrorAction SilentlyContinue
+        Pop-Location
+    }
+    Assert-True ($modifiedExitCode -ne 0 -and $modifiedFailure -match 'GUIDANCE_CONTENT_MODIFIED' -and
+        $modifiedFailure -match "expected='[a-f0-9]{64}'" -and $modifiedFailure -match "actual='[a-f0-9]{64}'") `
+        'sync.sh did not fail closed with expected/actual hashes for consumer-modified managed content.'
+
+    Copy-Item -LiteralPath (Join-Path $source 'instructions/example.instructions.md') -Destination $managedInstruction -Force
+    $lock = Read-GuidanceLock -RepoRoot $consumer
+    $foreignClaim = New-GuidanceLockEntry -RepoRoot $consumer -Path '.github/instructions/example.instructions.md' `
+        -Owner sheen -Sha256 (Get-GuidanceContentHash -Path $managedInstruction)
+    $remainingEntries = @($lock.entries | Where-Object path -ne '.github/instructions/example.instructions.md')
+    Write-GuidanceLock -RepoRoot $consumer -Entries ($remainingEntries + $foreignClaim)
+
+    Push-Location $consumer
+    try {
+        $env:BASECOAT_REPO = "file://$source"
+        $env:BASECOAT_MIRROR = "file://$mirror"
+        $env:BASECOAT_REF = $sha
+        $env:BASECOAT_EXPECTED_SHA = $sha
+        $collisionFailure = & $bash.Source (Join-Path $repoRoot 'sync.sh') 2>&1 | Out-String
+        $collisionExitCode = $LASTEXITCODE
+    }
+    finally {
+        Remove-Item Env:\BASECOAT_REPO,Env:\BASECOAT_MIRROR,Env:\BASECOAT_REF,Env:\BASECOAT_EXPECTED_SHA -ErrorAction SilentlyContinue
+        Pop-Location
+    }
+    Assert-True ($collisionExitCode -ne 0 -and $collisionFailure -match 'GUIDANCE_PATH_COLLISION' -and
+        $collisionFailure -match "owner='sheen'") `
+        'sync.sh did not block a foreign owner before overwrite.'
 }
 finally {
     Remove-Item -LiteralPath $scratch -Recurse -Force -ErrorAction SilentlyContinue

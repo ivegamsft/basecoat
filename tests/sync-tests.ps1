@@ -1098,10 +1098,10 @@ try {
         throw 'Sync test failed: .github/agents/ contains no BaseCoat agent files'
     }
 
-    $overlayStatePath = Join-Path $consumer '.github/base-coat/.overlay-managed-files'
+    $guidanceLockPath = Join-Path $consumer '.github/base-coat/guidance-lock.json'
     $testCount++
-    Assert-SyncPathExists -Path $overlayStatePath `
-        -Message 'Sync test failed: overlay-managed-files state file was not written'
+    Assert-SyncPathExists -Path $guidanceLockPath `
+        -Message 'Sync test failed: guidance-lock.json was not written'
 
     # Simulate a BaseCoat file that was managed by a prior sync but is no longer
     # part of the source (e.g. a retired agent). It should be pruned on the next
@@ -1110,9 +1110,12 @@ try {
     $retiredFullPath = Join-Path $consumer $retiredRelPath
     Set-Content -Path $retiredFullPath -Value '# retired BaseCoat-managed file' -Encoding UTF8
 
-    $trackedFiles = @(Get-Content -LiteralPath $overlayStatePath | Where-Object { $_ -ne '' })
-    $trackedFiles += $retiredRelPath
-    [System.IO.File]::WriteAllText($overlayStatePath, (($trackedFiles | Sort-Object -Unique) -join "`n") + "`n", [System.Text.UTF8Encoding]::new($false))
+    . (Join-Path $repoRoot 'scripts/guidance-lock.ps1')
+    $lock = Read-GuidanceLock -RepoRoot $consumer
+    $retiredEntry = New-GuidanceLockEntry -RepoRoot $consumer -Path $retiredRelPath -Owner basecoat `
+        -GuidanceUnit 'instructions/zzz-retired-basecoat-file.instructions.md' -SourceVersion 'test' `
+        -Sha256 (Get-GuidanceContentHash -Path $retiredFullPath)
+    Write-GuidanceLock -RepoRoot $consumer -Entries (@($lock.entries) + $retiredEntry)
 
     Invoke-SyncToConsumer -ConsumerPath $consumer
 

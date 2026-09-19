@@ -285,7 +285,7 @@ mkdir -p "$REPO_ROOT/$TARGET_DIR"
 
 # Capture the PREVIOUS release's asset-manifest.json before it is
 # overwritten below. If this repo has never run the #3415-fixed sync
-# before (no .overlay-managed-files state yet), this lets that first sync
+# before (no guidance lock or legacy tracker yet), this lets that first sync
 # still identify and prune shared-overlay files the OLD wholesale-wipe
 # sync previously installed but this new release retires — otherwise they
 # would linger in the overlay forever.
@@ -295,7 +295,7 @@ if [[ -f "$REPO_ROOT/$TARGET_DIR/asset-manifest.json" ]]; then
   cp "$REPO_ROOT/$TARGET_DIR/asset-manifest.json" "$previous_asset_manifest_file"
 fi
 
-for item in README.md CHANGELOG.md version.json asset-manifest.json instructions skills prompts agents templates; do
+for item in README.md CHANGELOG.md version.json asset-manifest.json instructions skills prompts agents templates schemas; do
   rm -rf "$REPO_ROOT/$TARGET_DIR/$item"
   if [[ -e "$TMP_DIR/source/$item" ]]; then
     cp -R "$TMP_DIR/source/$item" "$REPO_ROOT/$TARGET_DIR/$item"
@@ -315,11 +315,21 @@ mkdir -p "$REPO_ROOT/$TARGET_DIR/scripts"
 if [[ -d "$TMP_DIR/source/.github/base-coat/scripts" ]]; then
   cp -R "$TMP_DIR/source/.github/base-coat/scripts/." "$REPO_ROOT/$TARGET_DIR/scripts/"
 fi
-for validator in validate-basecoat.ps1 validate-basecoat.sh validate-skill-visibility.ps1 validate-asset-distribution.ps1 validate-workflow-action-pins.ps1 validate-workflow-action-pins.py workflow-ownership.ps1 retire-downstream-workflows.ps1; do
+for validator in validate-basecoat.ps1 validate-basecoat.sh validate-skill-visibility.ps1 validate-asset-distribution.ps1 validate-workflow-action-pins.ps1 validate-workflow-action-pins.py workflow-ownership.ps1 retire-downstream-workflows.ps1 guidance-lock.ps1 guidance-lock.sh; do
   if [[ -f "$TMP_DIR/source/scripts/$validator" ]]; then
     cp "$TMP_DIR/source/scripts/$validator" "$REPO_ROOT/$TARGET_DIR/scripts/$validator"
   fi
 done
+mkdir -p "$REPO_ROOT/.github/base-coat/scripts" "$REPO_ROOT/.github/base-coat/schemas"
+for helper in guidance-lock.ps1 guidance-lock.sh; do
+  if [[ -f "$TMP_DIR/source/scripts/$helper" ]]; then
+    cp -f "$TMP_DIR/source/scripts/$helper" "$REPO_ROOT/.github/base-coat/scripts/$helper"
+  fi
+done
+if [[ -f "$TMP_DIR/source/schemas/guidance-lock-v1.schema.json" ]]; then
+  cp -f "$TMP_DIR/source/schemas/guidance-lock-v1.schema.json" \
+    "$REPO_ROOT/.github/base-coat/schemas/guidance-lock-v1.schema.json"
+fi
 
 json_escape() {
   printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g'
@@ -408,11 +418,9 @@ find "$REPO_ROOT/$TARGET_DIR/agents" -maxdepth 1 -type f -name '*.agent.eval.yam
 # written to by other overlays (e.g. basecoat-sheen, basecoat-adhesion), so
 # BaseCoat must never wipe the destination directory wholesale — that would
 # silently delete co-located files it does not own (#3415). Instead, copy
-# files individually (never deleting anything first) and track every path
-# BaseCoat writes in the overlay state file. After all copies, prune only the
-# files BaseCoat itself previously placed that are no longer part of this
-# sync — every other file, whether foreign or simply untracked, is left
-# untouched.
+# files individually under guidance-lock/v1 ownership. The complete write and
+# stale-removal plan is preflighted before any shared file changes; foreign
+# owners and consumer-modified managed files fail closed.
 mkdir -p "$REPO_ROOT/.github"
 
 # resolve_real_path <path>: resolves symlinks/junctions on an existing path
@@ -437,161 +445,169 @@ path_within_boundary() {
   esac
 }
 
-overlay_state_file="$REPO_ROOT/$TARGET_DIR/.overlay-managed-files"
-prev_overlay_file="$(mktemp)"
-if [[ -f "$overlay_state_file" ]]; then
-  sort -u "$overlay_state_file" -o "$prev_overlay_file"
-elif [[ -f "$previous_asset_manifest_file" ]]; then
-  # First sync after upgrading to the #3415 fix: there is no tracked
-  # ownership history yet, but the OLD wholesale-wipe sync logic may have
-  # installed files this new release retires. Reconstruct where each
-  # previously-distributed asset would have landed and, if it still exists
-  # on disk, treat it as BaseCoat-managed so it can be correctly identified
-  # as stale below instead of lingering forever.
-  seeded_overlay_file="$(mktemp)"
-  grep -o '"path"[[:space:]]*:[[:space:]]*"[^"]*"' "$previous_asset_manifest_file" |
-    sed -E 's/.*"path"[[:space:]]*:[[:space:]]*"([^"]*)".*/\1/' |
-    while IFS= read -r asset_path; do
-      case "$asset_path" in
-        agents/references/*)
-          echo ".github/agents/references/${asset_path#agents/references/}"
-          ;;
-        agents/*.agent.md)
-          [[ "$asset_path" == */*/*.agent.md ]] && continue
-          echo ".github/agents/${asset_path#agents/}"
-          ;;
-        instructions/*)
-          echo ".github/instructions/${asset_path#instructions/}"
-          ;;
-        prompts/*)
-          echo ".github/prompts/${asset_path#prompts/}"
-          ;;
-        skills/*)
-          echo ".github/skills/${asset_path#skills/}"
-          echo ".agents/skills/${asset_path#skills/}"
-          ;;
-      esac
-    done > "$seeded_overlay_file"
-  : > "$prev_overlay_file"
-  while IFS= read -r candidate; do
-    [[ -z "$candidate" ]] && continue
-    [[ -f "$REPO_ROOT/$candidate" ]] && echo "$candidate" >> "$prev_overlay_file"
-  done < "$seeded_overlay_file"
-  rm -f "$seeded_overlay_file"
-  sort -u "$prev_overlay_file" -o "$prev_overlay_file"
-  seeded_count="$(wc -l < "$prev_overlay_file" | tr -d ' ')"
-  if [[ "$seeded_count" -gt 0 ]]; then
-    echo "Seeding overlay ownership from $seeded_count previously-distributed file(s) for first sync after #3415 fix."
-  fi
-else
-  : > "$prev_overlay_file"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+guidance_helper=""
+for candidate in \
+  "$TMP_DIR/source/scripts/guidance-lock.sh" \
+  "$script_dir/scripts/guidance-lock.sh" \
+  "$REPO_ROOT/.github/base-coat/scripts/guidance-lock.sh"; do
+  if [[ -f "$candidate" ]]; then guidance_helper="$candidate"; break; fi
+done
+if [[ -z "$guidance_helper" ]]; then
+  echo "GUIDANCE_LOCK_INVALID reason='source payload is missing scripts/guidance-lock.sh'" >&2
+  exit 1
 fi
-[[ -n "$previous_asset_manifest_file" && -f "$previous_asset_manifest_file" ]] && rm -f "$previous_asset_manifest_file"
-new_overlay_file="$(mktemp)"
-: > "$new_overlay_file"
+# shellcheck source=scripts/guidance-lock.sh
+source "$guidance_helper"
 
-# copy_managed_overlay_tree <source_dir> <dest_dir>: copies every file from
-# source into dest without deleting dest first, recording each written path
-# (repo-relative) into $new_overlay_file.
-copy_managed_overlay_tree() {
-  local src="$1" dest="$2" rel dest_rel dest_dir dest_root_real
+legacy_overlay_file="$REPO_ROOT/$TARGET_DIR/.overlay-managed-files"
+guidance_lock_file="$REPO_ROOT/.github/base-coat/guidance-lock.json"
+lock_tsv="$TMP_DIR/guidance-lock.tsv"
+plan_tsv="$TMP_DIR/guidance-plan.tsv"
+next_lock_tsv="$TMP_DIR/guidance-next.tsv"
+stale_tsv="$TMP_DIR/guidance-stale.tsv"
+: > "$plan_tsv"
+: > "$stale_tsv"
+guidance_read_lock "$guidance_lock_file" "$lock_tsv"
+
+source_version="$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$REPO_ROOT/$TARGET_DIR/version.json" | head -n 1)"
+
+add_guidance_plan_tree() {
+  local src="$1" destination_prefix="$2" unit_prefix="$3" file rel path hash
   [[ -d "$src" ]] || return 0
-  mkdir -p "$dest"
-  dest_root_real="$(resolve_real_path "$dest")"
-  while IFS= read -r -d '' f; do
-    rel="${f#"$src"/}"
-    dest_dir="$dest/$(dirname "$rel")"
-    mkdir -p "$dest_dir"
-    if ! path_within_boundary "$dest_dir" "$dest_root_real"; then
-      echo "Refusing to write through a symlinked overlay path outside $dest: $dest/$rel" >&2
-      continue
-    fi
-    if [[ -L "$dest/$rel" ]]; then
-      echo "Refusing to overwrite a symlinked overlay destination file: $dest/$rel" >&2
-      continue
-    fi
-    cp -f "$f" "$dest/$rel"
-    dest_rel="${dest#"$REPO_ROOT"/}/$rel"
-    echo "$dest_rel" >> "$new_overlay_file"
+  while IFS= read -r -d '' file; do
+    rel="${file#"$src"/}"
+    path="$(guidance_normalize_path "$destination_prefix/$rel")"
+    hash="$(guidance_sha256 "$file")"
+    printf '%s|basecoat|%s|%s|%s|%s\n' "$path" "$unit_prefix/$rel" "$source_version" "$hash" "$file" >> "$plan_tsv"
   done < <(find "$src" -type f -print0)
 }
 
 for copilot_dir in instructions prompts skills; do
-  copy_managed_overlay_tree "$REPO_ROOT/$TARGET_DIR/$copilot_dir" "$REPO_ROOT/.github/$copilot_dir"
+  add_guidance_plan_tree "$REPO_ROOT/$TARGET_DIR/$copilot_dir" ".github/$copilot_dir" "$copilot_dir"
 done
-
-# Also copy skills to .agents/skills/ for cross-client interop (Agent Skills spec)
-mkdir -p "$REPO_ROOT/.agents"
-copy_managed_overlay_tree "$REPO_ROOT/$TARGET_DIR/skills" "$REPO_ROOT/.agents/skills"
-
-# Agents: copy only *.agent.md files (skip taxonomy subdirs like models/, tasks/, types/)
+add_guidance_plan_tree "$REPO_ROOT/$TARGET_DIR/skills" ".agents/skills" "skills"
 if [[ -d "$REPO_ROOT/$TARGET_DIR/agents" ]]; then
-  mkdir -p "$REPO_ROOT/.github/agents"
-  agents_dest_real="$(resolve_real_path "$REPO_ROOT/.github/agents")"
-  while IFS= read -r -d '' f; do
-    base="$(basename "$f")"
-    if ! path_within_boundary "$REPO_ROOT/.github/agents" "$agents_dest_real"; then
-      echo "Refusing to write through a symlinked overlay path outside $REPO_ROOT/.github/agents: $base" >&2
-      continue
-    fi
-    if [[ -L "$REPO_ROOT/.github/agents/$base" ]]; then
-      echo "Refusing to overwrite a symlinked overlay destination file: .github/agents/$base" >&2
-      continue
-    fi
-    cp -f "$f" "$REPO_ROOT/.github/agents/$base"
-    echo ".github/agents/$base" >> "$new_overlay_file"
-  done < <(find "$REPO_ROOT/$TARGET_DIR/agents" -maxdepth 1 -name '*.agent.md' -print0)
+  while IFS= read -r -d '' file; do
+    base="$(basename "$file")"
+    path="$(guidance_normalize_path ".github/agents/$base")"
+    hash="$(guidance_sha256 "$file")"
+    printf '%s|basecoat|agents/%s|%s|%s|%s\n' "$path" "$base" "$source_version" "$hash" "$file" >> "$plan_tsv"
+  done < <(find "$REPO_ROOT/$TARGET_DIR/agents" -maxdepth 1 -name '*.agent.md' -type f -print0)
+fi
+add_guidance_plan_tree "$REPO_ROOT/$TARGET_DIR/agents/references" ".github/agents/references" "agents/references"
+
+if [[ "$(cut -d '|' -f1 "$plan_tsv" | sort | uniq -d | wc -l | tr -d ' ')" -ne 0 ]]; then
+  echo "GUIDANCE_LOCK_INVALID reason='duplicate path in BaseCoat write plan'" >&2
+  exit 1
 fi
 
-# Agent references: agent files may link to agents/references/<name>-detail.md
-# for overflow content moved out to satisfy the token budget. Copy the whole
-# subtree so those relative links resolve for installed agents.
-copy_managed_overlay_tree "$REPO_ROOT/$TARGET_DIR/agents/references" "$REPO_ROOT/.github/agents/references"
-
-# Prune only files BaseCoat previously placed in the shared overlay
-# directories that are no longer part of the current sync. Anything not
-# previously tracked (foreign files, or files never tracked) is left alone,
-# regardless of whether it happens to sit in one of these dirs.
-sort -u "$new_overlay_file" -o "$new_overlay_file"
-comm -23 "$prev_overlay_file" "$new_overlay_file" > "${new_overlay_file}.stale" || true
-repo_root_real="$(resolve_real_path "$REPO_ROOT")"
-while IFS= read -r stale_rel; do
-  [[ -z "$stale_rel" ]] && continue
-  # Deletion candidates come from a state file (or, for the first sync, the
-  # reconstructed previous manifest) that could in principle contain a
-  # corrupted or maliciously crafted entry (e.g. '../victim' or a path under
-  # .github/workflows). Reject anything that is not a relative path confined
-  # to one of the exact managed overlay prefixes before it is even joined to
-  # $REPO_ROOT, then re-verify containment against the canonical
-  # (symlink-resolved) boundary right before deleting.
-  case "$stale_rel" in
-    /*|../*|*/../*|*/..|..)
-      echo "Skipping stale overlay entry outside the managed overlay prefixes: $stale_rel" >&2
-      continue
-      ;;
-  esac
-  case "$stale_rel" in
-    .github/instructions/*|.github/prompts/*|.github/skills/*|.github/agents/*|.agents/skills/*) ;;
-    *)
-      echo "Skipping stale overlay entry outside the managed overlay prefixes: $stale_rel" >&2
-      continue
-      ;;
-  esac
-  stale_full="$REPO_ROOT/$stale_rel"
-  if [[ -f "$stale_full" ]]; then
-    if ! path_within_boundary "$stale_full" "$repo_root_real"; then
-      echo "Refusing to delete a stale overlay entry that resolves outside the repository: $stale_rel" >&2
-      continue
+if [[ ! -f "$guidance_lock_file" ]]; then
+  legacy_candidates="$TMP_DIR/guidance-legacy-paths"
+  : > "$legacy_candidates"
+  if [[ -f "$legacy_overlay_file" ]]; then
+    cat "$legacy_overlay_file" > "$legacy_candidates"
+  elif [[ -f "$previous_asset_manifest_file" ]]; then
+    grep -o '"path"[[:space:]]*:[[:space:]]*"[^"]*"' "$previous_asset_manifest_file" |
+      sed -E 's/.*"path"[[:space:]]*:[[:space:]]*"([^"]*)".*/\1/' |
+      while IFS= read -r asset_path; do
+        case "$asset_path" in
+          agents/references/*) echo ".github/agents/references/${asset_path#agents/references/}" ;;
+          agents/*.agent.md)
+            [[ "$asset_path" == */*/*.agent.md ]] || echo ".github/agents/${asset_path#agents/}"
+            ;;
+          instructions/*) echo ".github/instructions/${asset_path#instructions/}" ;;
+          prompts/*) echo ".github/prompts/${asset_path#prompts/}" ;;
+          skills/*)
+            echo ".github/skills/${asset_path#skills/}"
+            echo ".agents/skills/${asset_path#skills/}"
+            ;;
+        esac
+      done > "$legacy_candidates"
+  fi
+  while IFS= read -r legacy_path; do
+    [[ -z "$legacy_path" ]] && continue
+    normalized="$(guidance_normalize_path "$legacy_path")"
+    if [[ -f "$REPO_ROOT/$normalized" ]]; then
+      printf '%s|basecoat|legacy-overlay-migration|%s|%s\n' \
+        "$normalized" "$source_version" "$(guidance_sha256 "$REPO_ROOT/$normalized")" >> "$lock_tsv"
     fi
+  done < "$legacy_candidates"
+  legacy_count="$(wc -l < "$legacy_candidates" | tr -d ' ')"
+  if [[ "$legacy_count" -gt 0 ]]; then
+    echo "Migrating $legacy_count legacy overlay ownership record(s) to guidance-lock/v1."
+  fi
+fi
+[[ -n "$previous_asset_manifest_file" && -f "$previous_asset_manifest_file" ]] && rm -f "$previous_asset_manifest_file"
+
+repo_root_real="$(resolve_real_path "$REPO_ROOT")"
+while IFS='|' read -r path owner unit version expected_hash source_file; do
+  [[ -z "$path" ]] && continue
+  destination="$REPO_ROOT/$path"
+  existing="$(awk -F '|' -v p="$path" '$1==p { print; exit }' "$lock_tsv")"
+  if [[ -n "$existing" ]]; then
+    IFS='|' read -r _ existing_owner _ _ locked_hash <<< "$existing"
+    if [[ "$existing_owner" != "basecoat" ]]; then
+      echo "GUIDANCE_PATH_COLLISION path='$path' owner='$existing_owner' claimant='basecoat'" >&2
+      exit 1
+    fi
+    if [[ -L "$destination" || ( -e "$destination" && ! -f "$destination" ) ]]; then
+      echo "GUIDANCE_PATH_COLLISION path='$path' owner='invalid-destination' claimant='basecoat'" >&2
+      exit 1
+    fi
+    if [[ -f "$destination" ]]; then
+      actual_hash="$(guidance_sha256 "$destination")"
+      if [[ "$actual_hash" != "$locked_hash" ]]; then
+        echo "GUIDANCE_CONTENT_MODIFIED path='$path' owner='basecoat' expected='$locked_hash' actual='$actual_hash'" >&2
+        exit 1
+      fi
+    fi
+  elif [[ -e "$destination" || -L "$destination" ]]; then
+    echo "GUIDANCE_PATH_COLLISION path='$path' owner='unmanaged' claimant='basecoat'" >&2
+    exit 1
+  fi
+
+  ancestor="$(dirname "$destination")"
+  while [[ ! -e "$ancestor" && "$ancestor" != "$REPO_ROOT" ]]; do ancestor="$(dirname "$ancestor")"; done
+  if ! path_within_boundary "$ancestor" "$repo_root_real"; then
+    echo "GUIDANCE_LOCK_INVALID path='$path' reason='destination resolves outside the repository root'" >&2
+    exit 1
+  fi
+done < "$plan_tsv"
+
+while IFS='|' read -r path owner unit version expected_hash; do
+  [[ "$owner" == "basecoat" ]] || continue
+  if ! awk -F '|' -v p="$path" '$1==p { found=1 } END { exit !found }' "$plan_tsv"; then
+    printf '%s|%s|%s|%s|%s\n' "$path" "$owner" "$unit" "$version" "$expected_hash" >> "$stale_tsv"
+    if [[ -f "$REPO_ROOT/$path" ]]; then
+      actual_hash="$(guidance_sha256 "$REPO_ROOT/$path")"
+      if [[ "$actual_hash" != "$expected_hash" ]]; then
+        echo "GUIDANCE_CONTENT_MODIFIED path='$path' owner='basecoat' expected='$expected_hash' actual='$actual_hash'" >&2
+        exit 1
+      fi
+    fi
+  fi
+done < "$lock_tsv"
+
+while IFS='|' read -r path owner unit version hash source_file; do
+  [[ -z "$path" ]] && continue
+  mkdir -p "$(dirname "$REPO_ROOT/$path")"
+  cp -f "$source_file" "$REPO_ROOT/$path"
+done < "$plan_tsv"
+
+while IFS='|' read -r path _; do
+  [[ -z "$path" ]] && continue
+  stale_full="$REPO_ROOT/$path"
+  if [[ -f "$stale_full" ]]; then
     rm -f "$stale_full"
-    echo "Removed stale BaseCoat-managed overlay file: $stale_rel"
+    echo "Removed stale BaseCoat-managed guidance file: $path"
     parent_dir="$(dirname "$stale_full")"
     while [[ "$parent_dir" == "$REPO_ROOT/.github/instructions"* || \
              "$parent_dir" == "$REPO_ROOT/.github/prompts"* || \
              "$parent_dir" == "$REPO_ROOT/.github/skills"* || \
              "$parent_dir" == "$REPO_ROOT/.github/agents"* || \
              "$parent_dir" == "$REPO_ROOT/.agents/skills"* ]]; do
-      if [[ -d "$parent_dir" ]] && [[ -z "$(ls -A "$parent_dir" 2>/dev/null)" ]]; then
+      if [[ -d "$parent_dir" && -z "$(ls -A "$parent_dir" 2>/dev/null)" ]]; then
         rmdir "$parent_dir"
         parent_dir="$(dirname "$parent_dir")"
       else
@@ -599,11 +615,12 @@ while IFS= read -r stale_rel; do
       fi
     done
   fi
-done < "${new_overlay_file}.stale"
-rm -f "${new_overlay_file}.stale"
+done < "$stale_tsv"
 
-cp "$new_overlay_file" "$overlay_state_file"
-rm -f "$prev_overlay_file" "$new_overlay_file"
+awk -F '|' '$2 != "basecoat"' "$lock_tsv" > "$next_lock_tsv"
+cut -d '|' -f1-5 "$plan_tsv" >> "$next_lock_tsv"
+guidance_write_lock "$guidance_lock_file" "$next_lock_tsv"
+rm -f "$legacy_overlay_file"
 
 # Seed release-notes template into downstream-customizable location.
 # Never overwrite local customizations.

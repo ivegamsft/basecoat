@@ -11,6 +11,7 @@ This directory contains smoke tests for the scaffolding repository.
 - Verify token cost observability thresholds and auto-compact signals
 - Verify model-inventory generation applies shared model fallback policy
 - Verify registry generation resolves unsupported/missing models with safe defaults
+- Verify cross-product shared guidance ownership, content hashes, migration, and collision safety
 - **NEW:** Adoption scanner parameter parsing and output formats (table, json, markdown)
 - **NEW:** Workflow guardrails validation (timeout-minutes, concurrency, SHA pinning)
 - **NEW:** PR flow hygiene workflow guardrails (weekly report + draft-drift nudges)
@@ -31,6 +32,12 @@ bash tests/run-tests.sh
 ```
 
 Both test runners are designed to fail fast with clear messages.
+
+Run the ownership contract scenarios directly:
+
+```powershell
+pwsh tests/guidance-lock-tests.ps1
+```
 
 ## Test Files
 
@@ -76,6 +83,18 @@ Tests the downstream workflow ownership boundary:
 - Retirement rejects repository-owned workflows without deleting them
 - Retirement permits explicitly marked factory-owned workflows
 - The installer preserves unmarked workflows, including managed-looking names
+
+### `guidance-lock-tests.ps1`
+
+Tests `guidance-lock/v1` and BaseCoat sync integration:
+
+- Same-owner content update
+- Foreign-owner and unmanaged path collision blocking
+- Consumer-modified managed content diagnostics with expected/actual hashes
+- Stale BaseCoat-owned removal and foreign stale preservation
+- Malformed JSON and traversal rejection
+- Migration from `.github/base-coat/.overlay-managed-files`
+- Atomic canonical lock publication and structured test telemetry
 
 ### `pr-flow-hygiene-tests.ps1`
 

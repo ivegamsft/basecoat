@@ -149,6 +149,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running shared guidance ownership lock tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'guidance-lock-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Shared guidance ownership lock tests failed' -ForegroundColor Red
+    Write-FailureLog 'guidance-lock-tests'
+    exit 1
+}
+
 Write-Host 'Running Bash sync parity tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'sync-sh-parity-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

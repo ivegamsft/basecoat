@@ -61,14 +61,27 @@ The sync script clones BaseCoat, copies the standard assets into `.github/base-c
 
 The sync script copies these items into `BASECOAT_TARGET_DIR`:
 
-`README.md` · `CHANGELOG.md` · `inventory.md` · `version.json` · `instructions/` · `skills/` · `prompts/` · `agents/` · `templates/`
+`README.md` · `CHANGELOG.md` · `inventory.md` · `version.json` · `instructions/` · `skills/` · `prompts/` · `agents/` · `templates/` · `schemas/`
 
 On first adoption, BaseCoat also seeds intake defaults if they are missing:
 
 - `.github/PULL_REQUEST_TEMPLATE.md`
 - `.github/ISSUE_TEMPLATE/issue.md`
 
-Everything else (tests, scripts, CI workflows, examples) stays in the source repo and is **not** copied into consumers.
+Everything else (tests, non-runtime scripts, CI workflows, examples) stays in
+the source repo and is **not** copied into consumers. Selected runtime helpers
+and validators are installed under `.github/base-coat/scripts/`.
+
+### Shared destination ownership
+
+BaseCoat, Sheen, and Adhesion coordinate physical files in `.github/skills`,
+`.github/agents`, `.github/agents/references`, `.github/instructions`,
+`.github/prompts`, and `.agents/skills` through the versioned lock at
+`.github/base-coat/guidance-lock.json`. Sync blocks foreign ownership
+collisions and consumer-modified managed files before overwrite. The installed
+reference implementation is `.github/base-coat/scripts/guidance-lock.ps1`;
+see [Shared guidance ownership lock](docs/reference/guidance-ownership-lock.md)
+for the schema, migration behavior, and sibling-product integration contract.
 
 ### ⚠️ Do Not Copy Files Manually
 
