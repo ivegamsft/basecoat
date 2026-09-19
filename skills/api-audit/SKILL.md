@@ -29,8 +29,9 @@ Comprehensive auditing of API designs, contracts, error handling strategies, ver
 
 ## DO NOT USE FOR
 
-- Implementing API endpoints (use `api-design` or `backend-dev` skills)
-- Writing backend code
+- Creating or revising API contracts, including design-focused contract reviews (use `api-design`)
+- Implementing API endpoints or request handlers (use `backend-dev`)
+- Writing other backend code
 - Database schema design
 - Frontend development or client implementation
 - Infrastructure provisioning
@@ -50,7 +51,8 @@ Comprehensive auditing of API designs, contracts, error handling strategies, ver
 
 ## Related Skills
 
-- `api-design` — Designing new API contracts and endpoints
+- `api-design` — Designing API contracts and conducting design-focused contract reviews
+- `backend-dev` — Implementing API endpoints, request handlers, and backend services
 - `backend-audit` — Reviewing backend implementation quality
 - `api-security` — Security-focused API assessment
 - `contract-testing` — Contract testing and verification

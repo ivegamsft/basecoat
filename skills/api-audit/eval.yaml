@@ -17,6 +17,9 @@ scenarios:
   - id: "pos-5"
     input: "Assess authentication and authorization patterns in the API"
     expect_activation: true
+  - id: "boundary-contract-audit"
+    input: "Audit this proposed OpenAPI contract for breaking response changes and governance violations"
+    expect_activation: true
   - id: "neg-1"
     input: "Help me implement a new API endpoint"
     expect_activation: false
@@ -28,4 +31,7 @@ scenarios:
     expect_activation: false
   - id: "neg-4"
     input: "Review this pull request for code quality"
+    expect_activation: false
+  - id: "boundary-handler-implementation"
+    input: "Implement the request handler for POST /orders, including validation and the 201 response"
     expect_activation: false
