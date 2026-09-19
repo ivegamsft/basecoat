@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.1",
   "libraryVersion": "4.5.0",
-  "generatedAt": "2026-09-19T03:51:48.9932729Z",
+  "generatedAt": "2026-09-19T04:44:03.1494052Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -1790,7 +1790,7 @@
     {
       "path": "instructions/ux.instructions.md",
       "type": "instruction",
-      "sha": "94f9abe7271a1e59c2d1ac0de56aebde6387e1c0",
+      "sha": "ce027e216a5a816e8898aa662495e3581becd6e4",
       "version": null,
       "effectiveVersion": "4.5.0",
       "versionSource": "library"

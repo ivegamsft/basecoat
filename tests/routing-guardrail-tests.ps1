@@ -833,8 +833,36 @@ else {
     Write-Host '    PASS compatibility aliases remain pointer stubs'
 }
 
-# Test 24: compatibility alias distribution posture matches canonical targets
-Write-Host '  Test 24: Validate compatibility alias distribution posture matches canonical targets...'
+# Test 24: compatibility aliases resolve to their intended semantic targets
+Write-Host '  Test 24: Validate compatibility alias semantic targets...'
+$semanticAliasTargets = @{
+    'ux.instructions.md' = 'basecoat-10-core-ux.instructions.md'
+}
+$semanticAliasFailures = @()
+foreach ($aliasName in $semanticAliasTargets.Keys) {
+    $expectedTarget = $semanticAliasTargets[$aliasName]
+    $aliasPath = Join-Path $repoRoot "instructions\$aliasName"
+    $content = Get-Content $aliasPath -Raw
+    $actualTarget = Get-FrontmatterValue -Content $content -Key 'canonicalInstruction'
+    if ($actualTarget -cne $expectedTarget) {
+        $semanticAliasFailures += "$aliasName`: expected $expectedTarget, found $actualTarget"
+        continue
+    }
+
+    if ($content -notmatch [regex]::Escape("See ``$expectedTarget``.")) {
+        $semanticAliasFailures += "$aliasName`: body does not point to $expectedTarget"
+    }
+}
+if ($semanticAliasFailures.Count -gt 0) {
+    $failures += 'compatibility-alias-semantic-target-drift'
+    Write-Host "    FAIL compatibility alias semantic target drift: $($semanticAliasFailures -join '; ')" -ForegroundColor Red
+}
+else {
+    Write-Host '    PASS compatibility aliases resolve to intended semantic targets'
+}
+
+# Test 25: compatibility alias distribution posture matches canonical targets
+Write-Host '  Test 25: Validate compatibility alias distribution posture matches canonical targets...'
 $aliasDistributionFailures = @()
 foreach ($file in $aliasFiles) {
     $content = Get-Content $file.FullName -Raw
