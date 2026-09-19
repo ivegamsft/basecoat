@@ -890,6 +890,7 @@ $additionalSuites = @(
     'generate-registry-model-fallback-tests.ps1',
     'governance-metadata-drift-tests.ps1',
     'merge-queue-tests.ps1',
+    'onboarding-telemetry-tests.ps1',
     'pr-flow-hygiene-tests.ps1',
     'program-bootstrap-contract-tests.ps1',
     'release-process-doc-tests.ps1',

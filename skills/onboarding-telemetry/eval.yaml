@@ -35,13 +35,29 @@ cases:
   - id: ready-state-validation
     description: "All dependencies present, validate readiness"
     input: |
-      We have set APPLICATIONINSIGHTS_CONNECTION_STRING, COPILOT_METRICS_TOKEN, and
-      DASHBOARD_REPOS for our team-dev repo. How do I confirm telemetry is working?
+      Execute telemetry validation for our team-dev repo. We have set
+      APPLICATIONINSIGHTS_CONNECTION_STRING, COPILOT_METRICS_TOKEN, and DASHBOARD_REPOS.
     expected_behaviors:
-      - guides user to trigger workflow_dispatch run of adoption-metrics.yml
-      - explains how to read telemetry-readiness.json from gh-pages
-      - confirms that BaseCoatTelemetryReadiness event will appear in App Insights
+      - requires authenticated tooling before dispatching adoption-metrics.yml
+      - dispatches adoption-metrics.yml and inspects the terminal workflow run
+      - reports the run URL or run ID and inspected gh-pages artifact source
+      - does not claim completion or readiness verification without execution evidence
       - references the 4 goal-based loop metrics in the scorecard
+    expected_tools:
+      - gh
+
+  - id: advisory-tool-free-readiness
+    description: "Tool-free advisory mode stays separate from execution and does not claim completion"
+    input: |
+      Advisory only; do not use tools. The team-dev workflow file exists,
+      COPILOT_METRICS_TOKEN is set, APPLICATIONINSIGHTS_CONNECTION_STRING is absent,
+      and DASHBOARD_REPOS includes the repo. Tell me what remains.
+    expected_behaviors:
+      - labels the response advisory only
+      - assesses only the supplied evidence and marks unsupplied run or artifact evidence as unknown
+      - provides commands or steps the user can run to dispatch and inspect adoption-metrics.yml
+      - does not claim the workflow was dispatched, completed, generated an artifact, or verified readiness
+    expected_tools: []
 
   - id: connection-string-format
     description: "User asks for the App Insights connection string format"

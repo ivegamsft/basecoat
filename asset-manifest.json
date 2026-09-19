@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.1",
   "libraryVersion": "4.5.0",
-  "generatedAt": "2026-09-19T02:35:08.9653487Z",
+  "generatedAt": "2026-09-19T03:51:48.9932729Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -2694,7 +2694,7 @@
     {
       "path": "skills/onboarding-telemetry/SKILL.md",
       "type": "skill",
-      "sha": "0fff25c09c56beb9ba834330f384b2f544134bf6",
+      "sha": "3c25cb9eee1faa1fc0b7715d7d1e470e93109ee4",
       "version": null,
       "effectiveVersion": "4.5.0",
       "versionSource": "library"
