@@ -311,6 +311,211 @@ jobs:
           echo "::error::If this PR is exempt, apply label: skip-release-label-gate."
           exit 1
 
+  forbidden-internal-identifier-gate:
+    name: Public payload identifier gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          fetch-depth: 0
+
+      - name: Validate public payload stays free of internal identifiers
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tmpdir="$(mktemp -d)"
+          trap 'rm -rf "$tmpdir"' EXIT
+
+          git archive HEAD | tar -x -C "$tmpdir"
+          cd "$tmpdir"
+
+          INTERNAL_PATTERNS=(
+            'SPRINT-*-EXECUTION-SUMMARY.md'
+            'tests/**'
+            ':(glob)**/tests/**'
+            ':(glob)**/*.test.*'
+            'analysis/**'
+            'reports/**'
+            'checks.json'
+            'docs/sprint-plans/**'
+            'docs/prd/synthesized/**'
+            'docs/spec/synthesized/**'
+            'docs/audit/**'
+            'docs/archive/**'
+            '.github/agent-templates/**'
+            '.github/dependabot.yml'
+            '.github/downstream-reviewer-routing-targets.json'
+            '.github/instructions/**'
+            '.github/workflow-templates/**'
+            'docs/design/copilot-extension-prd.md'
+            'docs/guides/PRODUCTION_TOKEN_SETUP.md'
+            'docs/operations/blocked-issues.md'
+            'docs/operations/copilot-extension-*.md'
+            'docs/operations/downstream-intake-pilot-rollout-checklist.md'
+            'docs/operations/github-secrets.md'
+            'docs/operations/intake-pilot-wawkr-results.md'
+            'docs/operations/pr-gate-intake-rollout.md'
+            'docs/operations/repo-story.md'
+            'docs/reference/workflows/pr-flow-hygiene.md'
+            'docs/research/**'
+            'docs/templates/copilot-extension/**'
+            'instructions/references/process/issue-and-pr-workflow.md'
+            'scripts/deploy-merge-queue.ps1'
+            'scripts/deploy-merge-queue.sh'
+            'scripts/validate-production-token.ps1'
+            'scripts/validate-production-token.sh'
+          )
+          PUBLIC_WORKFLOWS=(
+            '.github/workflows/docs.yml'
+          )
+
+          REMOVED=0
+          for pat in "${INTERNAL_PATTERNS[@]}"; do
+            MATCHES=$(git ls-files -- "$pat" 2>/dev/null || true)
+            if [[ -n "$MATCHES" ]]; then
+              echo "$MATCHES" | xargs git rm -f --cached --ignore-unmatch 2>/dev/null || true
+              echo "$MATCHES" | xargs rm -f 2>/dev/null || true
+              REMOVED=$((REMOVED + $(echo "$MATCHES" | wc -l)))
+            fi
+          done
+
+          is_public_workflow() {
+            local candidate="$1"
+            local allowed
+            for allowed in "${PUBLIC_WORKFLOWS[@]}"; do
+              if [[ "$candidate" == "$allowed" ]]; then
+                return 0
+              fi
+            done
+            return 1
+          }
+
+          while IFS= read -r workflow; do
+            [[ -z "$workflow" ]] && continue
+            if is_public_workflow "$workflow"; then
+              continue
+            fi
+            git rm -f -- "$workflow" >/dev/null 2>&1 || true
+            REMOVED=$((REMOVED + 1))
+          done < <(git ls-files -- ':(glob).github/workflows/**')
+
+          if [[ "$REMOVED" -gt 0 ]]; then
+            echo "Removed ${REMOVED} candidate internal file(s) from the public payload simulation."
+          fi
+
+          TEXT_FILES=$(git ls-files -- '*.md' '*.yml' '*.yaml' '*.json' '*.ps1' '*.sh' '*.txt' '*.ts' '*.js' '*.py' '*.html' | grep -v '^$' || true)
+          if [[ -n "$TEXT_FILES" ]]; then
+            TARGETS=$(echo "$TEXT_FILES" | xargs grep -lI -e 'IBuySpy-Shared/basecoat' -e 'ibuyspy-shared\.github\.io/basecoat' 2>/dev/null || true)
+            if [[ -n "$TARGETS" ]]; then
+              echo "$TARGETS" | while IFS= read -r f; do
+                [[ -z "$f" ]] && continue
+                perl -pi -e '
+                  s{https://github\.com/IBuySpy-Shared/basecoat/issues/[0-9]+}{internal source issue}g;
+                  s{https://github\.com/IBuySpy-Shared/basecoat/pull/[0-9]+}{internal source pull request}g;
+                  s{https://github\.com/IBuySpy-Shared/basecoat/actions/runs/[0-9]+(?:/job/[0-9]+)?}{internal source workflow run}g;
+                  s{\QIBuySpy-Shared/basecoat-sheen\E}{ivegamsft/sheen}g;
+                  s{\QIBuySpy-Shared/basecoat.git\E}{ivegamsft/basecoat.git}g;
+                  s{IBuySpy-Shared/basecoat\.(?![A-Za-z0-9_-])}{ivegamsft/basecoat.}g;
+                  s{IBuySpy-Shared/basecoat(?![A-Za-z0-9_.-])}{ivegamsft/basecoat}g;
+                  s{ibuyspy-shared\.github\.io/basecoat}{ivegamsft.github.io/basecoat}g;
+                ' -- "$f"
+              done
+            fi
+          fi
+
+          NEUTRAL_ORG_FILES=(
+            'CONTRIBUTING.md'
+            'docs/architecture/multi-agent-orchestration-patterns.md'
+            'instructions/basecoat-20-lang-ruby-on-rails.instructions.md'
+            'mcp/basecoat-extension/README.md'
+            'mcp/basecoat-extension/scripts/bootstrap-credentials.ps1'
+            'scripts/adoption/detect-basecoat.ps1'
+            'scripts/bootstrap-copilot-space.ps1'
+            'scripts/sweep-enterprise-memory.ps1'
+            'scripts/validate-intake-contract.ps1'
+            'skills/environment-bootstrap/references/oidc-federation.md'
+            'docs/guides/coverage-threshold-ratchet.md'
+            'docs/guides/terraform-plan-destroy-guardrail.md'
+            'templates/coverage-threshold-ratchet/README.md'
+            'templates/terraform-plan-destroy-guardrail/README.md'
+          )
+
+          for f in "${NEUTRAL_ORG_FILES[@]}"; do
+            if git ls-files --error-unmatch "$f" >/dev/null 2>&1; then
+              sed -i \
+                -e 's|IBuySpy-Shared|example-org|g' \
+                -e 's|IBuySpy-Dev|example-org|g' \
+                -- "$f"
+            fi
+          done
+
+          NEUTRAL_MEMORY_FILES=(
+            'CHANGELOG.md'
+            'docs/architecture/multi-agent-orchestration-patterns.md'
+            'docs/architecture/overview.md'
+            'docs/memory/learning-model.md'
+            'docs/memory/shared-memory-guide.md'
+          )
+          for f in "${NEUTRAL_MEMORY_FILES[@]}"; do
+            if git ls-files --error-unmatch "$f" >/dev/null 2>&1; then
+              sed -i 's|IBuySpy-Shared/basecoat-memory|example-org/basecoat-memory|g' "$f"
+            fi
+          done
+
+          if git ls-files --error-unmatch scripts/submit-learning.sh >/dev/null 2>&1; then
+            sed -i \
+              -e 's|default: IBuySpy-Shared/basecoat-memory|requires --memory-repo or BASECOAT_SHARED_MEMORY_REPO|g' \
+              -e 's|MEMORY_REPO="\${BASECOAT_SHARED_MEMORY_REPO:-IBuySpy-Shared/basecoat-memory}"|MEMORY_REPO="\${BASECOAT_SHARED_MEMORY_REPO:-}"|' \
+              -e '/^errors=()$/a [[ -z "$MEMORY_REPO" ]] && errors+=("--memory-repo or BASECOAT_SHARED_MEMORY_REPO is required")' \
+              scripts/submit-learning.sh
+          fi
+          if git ls-files --error-unmatch scripts/submit-learning.ps1 >/dev/null 2>&1; then
+            sed -i \
+              -e 's|Target memory repository\. Default: env BASECOAT_SHARED_MEMORY_REPO or IBuySpy-Shared/basecoat-memory\.|Target memory repository. Provide explicitly or set env BASECOAT_SHARED_MEMORY_REPO.|' \
+              -e 's|\[string\]\$MemoryRepo = (\$env:BASECOAT_SHARED_MEMORY_REPO ?? "IBuySpy-Shared/basecoat-memory"),|[string]$MemoryRepo = $env:BASECOAT_SHARED_MEMORY_REPO,|' \
+              -e '/^\$errors = \[System.Collections.Generic.List\[string\]\]::new()$/a if ([string]::IsNullOrWhiteSpace($MemoryRepo)) { $errors.Add("MemoryRepo or BASECOAT_SHARED_MEMORY_REPO is required.") }' \
+              scripts/submit-learning.ps1
+          fi
+
+          if git ls-files --error-unmatch CHANGELOG.md >/dev/null 2>&1; then
+            sed -i 's|IBuySpy-Shared|source organization|g' CHANGELOG.md
+          fi
+          if git ls-files --error-unmatch docs/architecture/overview.md >/dev/null 2>&1; then
+            sed -i 's|BaseCoat (IBuySpy-Shared)|BaseCoat (public mirror)|g' docs/architecture/overview.md
+          fi
+          if git ls-files --error-unmatch docs/index.md >/dev/null 2>&1; then
+            sed -i \
+              -e '\|operations/blocked-issues\.md|d' \
+              -e '\|operations/copilot-extension-github-app-registration\.md|d' \
+              -e '\|operations/github-secrets\.md|d' \
+              -e '/^## Archive$/,$d' \
+              docs/index.md
+          fi
+          if git ls-files --error-unmatch mkdocs.yml >/dev/null 2>&1; then
+            sed -i \
+              -e 's|IBuySpy-Shared contributors|BaseCoat contributors|g' \
+              -e '\|PR Flow Hygiene: reference/workflows/pr-flow-hygiene\.md|d' \
+              mkdocs.yml
+          fi
+          for f in skills/dotnet-modernization/SKILL.md skills/entity-framework-migration/SKILL.md; do
+            if git ls-files --error-unmatch "$f" >/dev/null 2>&1; then
+              sed -i 's|author: IBuySpy-Shared|author: BaseCoat contributors|g' "$f"
+            fi
+          done
+
+          FORBIDDEN_MATCHES=$(git grep -inI -E 'ibuyspy-shared|ibuyspy-dev' -- . || true)
+          UNEXPECTED_MATCHES=$(printf '%s\n' "$FORBIDDEN_MATCHES" | grep -v -E '^LICENSE:3:Copyright \(c\) 2025 IBuySpy-Shared$' | grep -v '^$' || true)
+          if [[ -n "$UNEXPECTED_MATCHES" ]]; then
+            echo "::error::Public payload simulation still contains forbidden internal identifiers:"
+            echo "$UNEXPECTED_MATCHES"
+            exit 1
+          fi
+
+          echo "Public payload passes the forbidden-identifier gate."
+
   markdown-lint:
     name: Markdown lint
     runs-on: ubuntu-latest
