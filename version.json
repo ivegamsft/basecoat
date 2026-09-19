@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "4.5.0",
-  "releaseDate": "2026-09-18",
-  "notes": "Minor release: Asset Distribution Classification. Adds ships/dogfood/status frontmatter axes with a validator and generator emit (#3379), plus an asset-manifest drift check that catches manifest desync before merge (#3397). Closes #3374."
+  "version": "4.5.1",
+  "releaseDate": "2026-09-19",
+  "notes": "Patch release: bind ship-it execution to the current repository and fail closed on unauthorized cross-repository targets (#3429)."
 }

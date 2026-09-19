@@ -6,6 +6,12 @@ All notable changes to this repository should be recorded in this file.
 
 No unreleased changes.
 
+## 4.5.1 - 2026-09-19
+
+### Fixed
+
+- fix(ship-it): bind dispatch execution to the current repository and require explicit authorization for cross-repository targets (#3429)
+
 ## 4.5.0 - 2026-09-18
 
 ### Added

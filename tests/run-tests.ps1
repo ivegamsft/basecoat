@@ -501,6 +501,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running ship-it target repository tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'ship-it-target-repository-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Ship-it target repository tests failed' -ForegroundColor Red
+    Write-FailureLog 'ship-it-target-repository-tests'
+    exit 1
+}
+
 Write-Host 'Running skill workflow dependency tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'skill-workflow-dependency-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

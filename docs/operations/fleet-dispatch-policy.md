@@ -109,6 +109,10 @@ Fleet dispatch is appropriate when **all** of these are true:
 □ Fallback defined: If N% of agents fail, what's the recovery plan?
 □ Branch synced: git rev-list --count HEAD..origin/main == 0 for all active lanes?
   (Branches >= 50 commits behind origin/main must re-sync before CI fan-out)
+□ Repository boundary: `pwsh scripts/ship-it/validate-target-repository.ps1
+  -TargetRepo <owner/repo>` passes for every lane?
+□ Cross-repository authorization: if the target differs from the current repository,
+  did the user explicitly name and authorize that repository?
 
 → If ANY box is unchecked, defer dispatch.
 ```

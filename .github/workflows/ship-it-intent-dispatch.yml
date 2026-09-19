@@ -284,6 +284,9 @@ jobs:
           if ($dryRun) {
             $params.DryRun = $true
           }
+          if ($env:TARGET_REPO -ne $env:GITHUB_REPOSITORY) {
+            $params.AllowCrossRepository = $true
+          }
 
           .\scripts\ship-it\dispatch-intent.ps1 @params
 

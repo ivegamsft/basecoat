@@ -16,31 +16,19 @@ allowed-tools: [git, gh, powershell, bash]
 
 Turn a delivery goal into a governed execution bundle.
 
-## Shortcut Phrases
-
-- ship it / spec to prod
-
-## Inputs
-
-1. `intent`: `ship-it`, `spec-2-prod`, or `onboarding-conductor`
-2. `goal`, `target_repo` (`owner/repo`), `spec_ref` (optional)
-3. `risk_band`: `low|medium|high|critical`
-4. `profile` (optional, onboarding-conductor): `solo-dev|team-dev|regulated-team|pilot-luxesite`
-5. `dry_run` (default `true`); `max_cycles` (default `10`); `max_retries` (default `2`)
-
 ## Workflow
 
 1. Validate the intent contract.
-2. Preflight: confirm `ship-it-intent-dispatch.yml`, `ship-it-build-guard.yml`,
-   and `ship-it-release-gate.yml` exist under `.github/workflows/`. If any is
-   missing, stop and report it — never substitute `/approve` (full fail-closed
-   contract in References).
-3. Dispatch `ship-it-intent-dispatch.yml`; record its run ID.
-4. Generate parent/child issues with governance checklists.
-5. Label for risk, intent, and control-plane tracking.
-6. Run build-break guard (`ship-it-build-guard.yml`) for failure classification and recovery.
-7. Run release gate (`ship-it-release-gate.yml`) for risk-band gates and promotion.
-8. Report success only with observable run IDs and state transitions.
+2. Run `pwsh scripts/ship-it/validate-target-repository.ps1
+   -TargetRepo <owner/repo>`. The target must match the current repository;
+   cross-repository execution requires explicit user authorization and
+   `-AllowCrossRepository` (see References).
+3. Confirm `ship-it-intent-dispatch.yml`, build-guard, and release-gate
+   workflows exist. If any is missing, stop and report it; never substitute
+   `/approve`.
+4. Dispatch `ship-it-intent-dispatch.yml` and record its run ID.
+5. Create governed issues, apply tracking labels, run build-break and release gates.
+6. Report success only with observable run IDs and state transitions.
 
 ## Persistent Loop Operation
 
@@ -63,13 +51,9 @@ Retry policy: retry only transient failures; escalate after `max_retries`; in `d
 4. Record state transitions and blockers in issues.
 5. Do not complete with required checks pending.
 
-## Output
-
-Emits issue URLs, dispatch/build-break summaries, a promotion-evidence bundle,
-pilot artifacts, a completeness scorecard, spec-drift findings, and per-cycle summaries.
-
 ## References
 
 | File | Contents |
 |---|---|
 | [`references/output-contract.md`](references/output-contract.md) | Output contract: per-producer output schemas, evidence-bundle fields, scorecard and spec-drift shapes, per-cycle summary structure |
+| [`references/repository-boundary.md`](references/repository-boundary.md) | Fail-closed current-repository validation and explicit cross-repository authorization |

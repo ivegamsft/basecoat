@@ -8,6 +8,8 @@ param(
 
   [string]$TargetRepo = $env:GITHUB_REPOSITORY,
 
+  [switch]$AllowCrossRepository,
+
   [string]$SpecRef = "",
 
   [ValidateSet("low", "medium", "high", "critical")]
@@ -30,6 +32,12 @@ $ErrorActionPreference = "Stop"
 if ([string]::IsNullOrWhiteSpace($TargetRepo) -or $TargetRepo -notmatch "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$") {
   throw "TargetRepo must be in owner/repo format."
 }
+
+$targetRepositoryValidator = Join-Path $PSScriptRoot "validate-target-repository.ps1"
+if (-not (Test-Path $targetRepositoryValidator)) {
+  throw "Missing target repository validator: $targetRepositoryValidator"
+}
+& $targetRepositoryValidator -TargetRepo $TargetRepo -AllowCrossRepository:$AllowCrossRepository | Out-Null
 
 $trimmedGoal = $Goal.Trim()
 if ([string]::IsNullOrWhiteSpace($trimmedGoal)) {
