@@ -145,7 +145,7 @@ jobs:
           branch="${{ steps.prepare.outputs.branch_name }}"
           version="${{ steps.prepare.outputs.version }}"
           title="docs(changelog): add release notes for ${version}"
-          body="Automated changelog generation for release \`${version}\`.\n\n- Source tag: \`${version}\`\n- Workflow: \`.github/workflows/release-changelog-generation.yml\`\n\nCloses #183."
+          body="Automated changelog generation for release \`${version}\`.\n\n- Source tag: \`${version}\`\n- Workflow: \`.github/workflows/release-changelog-generation.yml\`"
 
           existing="$(gh pr list --state open --head "$branch" --json number --jq '.[0].number' || true)"
           if [[ -n "$existing" ]]; then

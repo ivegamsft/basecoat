@@ -24,6 +24,9 @@ Assert-Match $changelog 'reports/release-notes/latest\.md' 'Changelog workflow m
 Assert-Match $changelog 'git add CHANGELOG\.md "\$latest_notes_file"' 'Changelog workflow must commit both changelog and latest release notes.'
 Assert-Match $changelog 'git diff --quiet -- CHANGELOG\.md "\$latest_notes_file"' 'Changelog workflow must publish latest notes even when the changelog entry exists.'
 Assert-Match $changelog 'GH_TOKEN:\s*\$\{\{\s*secrets\.GH_AW_GITHUB_TOKEN\s*\|\|\s*github\.token\s*\}\}' 'Changelog PR creation must use the configured write token when available.'
+if ($changelog -match 'Closes #183\.') {
+    throw 'Changelog PR creation must not close unrelated tracking issues from the generated PR body.'
+}
 Assert-Match $changelog '(?m)^[ ]{10}PY\r?$' 'The Python heredoc terminator must align with the run block, producing shell column zero.'
 
 # Reconstruct the 'Generate changelog entry' run script exactly as bash receives

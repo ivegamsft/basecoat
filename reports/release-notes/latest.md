@@ -1,8 +1,8 @@
 # Latest Release Notes
 
-## 4.5.0 - 2026-09-18
+## 4.5.1 - 2026-09-19
 
-### Added
+### Fixed
 
-- feat(distribution): asset distribution classification — `ships`/`dogfood`/`status` frontmatter axes with a validator and generator emit (#3374, #3379)
-- feat(ci): asset-manifest drift check that regenerates and semantically compares the manifest to catch desync before merge (#3374, #3397)
+- fix(ship-it): bind dispatch execution to the current repository and require explicit authorization for cross-repository targets (#3429)
+
