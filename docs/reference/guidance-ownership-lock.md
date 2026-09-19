@@ -39,9 +39,9 @@ Entries are sorted by `path`. Paths must be files, must be under an allowed
 shared destination, and must not be rooted, contain `.` or `..` segments, or
 escape the repository through normalization. Duplicate paths and malformed
 locks fail closed with `GUIDANCE_LOCK_INVALID`.
-Optional metadata uses the portable `[A-Za-z0-9._/+:-]` vocabulary (maximum
-512 characters) so PowerShell and dependency-free Bash readers produce the
-same deterministic representation.
+Paths use the portable `[A-Za-z0-9._/+@()-]` vocabulary. Optional metadata uses
+`[A-Za-z0-9._/+:-]` (maximum 512 characters), so PowerShell and
+dependency-free Bash readers produce the same deterministic representation.
 
 ## Required synchronization behavior
 
@@ -57,9 +57,14 @@ write and removal plan:
 4. A product may remove a stale path only when the lock names that product as
    owner and the installed hash still matches. Foreign stale entries and files
    are preserved.
-5. The lock is written by same-directory temporary file plus rename after all
-   planned file operations succeed. If a file operation fails first, the old
-   lock remains and the next run fails closed on any partial content change.
+5. A cross-platform exclusive lease at
+   `.github/base-coat/guidance-lock.lease/` serializes the read, preflight,
+   shared-file mutation, and lock publication transaction. Contenders wait up
+   to 30 seconds, then fail with `GUIDANCE_LOCK_BUSY`.
+6. The lock is written by same-directory temporary file plus atomic replace
+   after all planned file operations succeed. If a file operation fails first,
+   the old lock remains and the next run fails closed on any partial content
+   change.
 
 Products must retain foreign entries unchanged and must never maintain a
 second ownership tracker.

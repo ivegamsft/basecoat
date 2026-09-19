@@ -134,7 +134,11 @@ if [[ -n "$SOURCE_MIRROR" ]]; then
 fi
 
 TMP_DIR="$(mktemp -d)"
+guidance_lease=""
 cleanup() {
+  if [[ -n "$guidance_lease" ]] && declare -F guidance_exit_lease >/dev/null 2>&1; then
+    guidance_exit_lease "$guidance_lease"
+  fi
   rm -rf "$TMP_DIR"
 }
 trap cleanup EXIT
@@ -462,6 +466,7 @@ source "$guidance_helper"
 
 legacy_overlay_file="$REPO_ROOT/$TARGET_DIR/.overlay-managed-files"
 guidance_lock_file="$REPO_ROOT/.github/base-coat/guidance-lock.json"
+guidance_lease="$(guidance_enter_lease "$REPO_ROOT")"
 lock_tsv="$TMP_DIR/guidance-lock.tsv"
 plan_tsv="$TMP_DIR/guidance-plan.tsv"
 next_lock_tsv="$TMP_DIR/guidance-next.tsv"
@@ -621,6 +626,8 @@ awk -F '|' '$2 != "basecoat"' "$lock_tsv" > "$next_lock_tsv"
 cut -d '|' -f1-5 "$plan_tsv" >> "$next_lock_tsv"
 guidance_write_lock "$guidance_lock_file" "$next_lock_tsv"
 rm -f "$legacy_overlay_file"
+guidance_exit_lease "$guidance_lease"
+guidance_lease=""
 
 # Seed release-notes template into downstream-customizable location.
 # Never overwrite local customizations.

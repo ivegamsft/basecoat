@@ -203,6 +203,18 @@ Invoke-Scenario 'malformed lock' {
         "Malformed lock did not fail closed: $($result.Output)"
 }
 
+Invoke-Scenario 'non-file lock path' {
+    $source = Join-Path $scratch 'lock-directory-source'
+    $consumer = Join-Path $scratch 'lock-directory-consumer'
+    New-TestSource $source
+    New-TestConsumer $consumer
+    New-Item -ItemType Directory -Path (Get-GuidanceLockPath -RepoRoot $consumer) -Force | Out-Null
+    $result = Invoke-TestSync $source $consumer -ExpectFailure
+    Assert-True ($result.ExitCode -ne 0 -and $result.Output -match 'GUIDANCE_LOCK_INVALID' -and
+        $result.Output -match 'regular file') `
+        "Non-file lock path did not fail closed: $($result.Output)"
+}
+
 Invoke-Scenario 'unknown lock property' {
     $source = Join-Path $scratch 'unknown-property-source'
     $consumer = Join-Path $scratch 'unknown-property-consumer'
@@ -217,6 +229,43 @@ Invoke-Scenario 'unknown lock property' {
     Assert-True ($result.ExitCode -ne 0 -and $result.Output -match 'GUIDANCE_LOCK_INVALID' -and
         $result.Output -match 'futureField') `
         "Unknown lock property was not rejected before foreign data could be discarded: $($result.Output)"
+}
+
+Invoke-Scenario 'concurrent writer lease' {
+    $consumer = Join-Path $scratch 'concurrent-consumer'
+    New-TestConsumer $consumer
+    $helperPath = Join-Path $repoRoot 'scripts/guidance-lock.ps1'
+    $readyPath = Join-Path $consumer 'lease-ready'
+    $job = Start-Job -ScriptBlock {
+        param($HelperPath, $ConsumerPath, $ReadyPath)
+        . $HelperPath
+        $lease = Enter-GuidanceLockLease -RepoRoot $ConsumerPath -TimeoutSeconds 2
+        Set-Content -LiteralPath $ReadyPath -Value ready -Encoding utf8NoBOM
+        Start-Sleep -Seconds 3
+        Exit-GuidanceLockLease -LeasePath $lease
+    } -ArgumentList $helperPath, $consumer, $readyPath
+    try {
+        $deadline = [DateTime]::UtcNow.AddSeconds(5)
+        while (-not (Test-Path -LiteralPath $readyPath) -and [DateTime]::UtcNow -lt $deadline) {
+            Start-Sleep -Milliseconds 50
+        }
+        Assert-True (Test-Path -LiteralPath $readyPath) 'Concurrent writer fixture did not acquire its first lease.'
+        $message = $null
+        try {
+            $unexpectedLease = Enter-GuidanceLockLease -RepoRoot $consumer -TimeoutSeconds 1
+            Exit-GuidanceLockLease -LeasePath $unexpectedLease
+        }
+        catch {
+            $message = $_.Exception.Message
+        }
+        Assert-True ($message -match 'GUIDANCE_LOCK_BUSY') `
+            "Second writer was not serialized by the shared lease: $message"
+    }
+    finally {
+        Wait-Job -Job $job -Timeout 10 | Out-Null
+        Receive-Job -Job $job -ErrorAction SilentlyContinue | Out-Null
+        Remove-Job -Job $job -Force -ErrorAction SilentlyContinue
+    }
 }
 
 Invoke-Scenario 'path traversal' {
@@ -259,8 +308,8 @@ Invoke-Scenario 'legacy tracker migration' {
 Remove-Item -LiteralPath $scratch -Recurse -Force -ErrorAction SilentlyContinue
 if ($failures.Count -gt 0) {
     $failures | ForEach-Object { Write-Host "FAILED: $_" -ForegroundColor Red }
-    Write-Host "Guidance lock telemetry: checks=$checks scenarios=10 failures=$($failures.Count)" -ForegroundColor Red
+    Write-Host "Guidance lock telemetry: checks=$checks scenarios=12 failures=$($failures.Count)" -ForegroundColor Red
     exit 1
 }
 
-Write-Host "Guidance lock telemetry: checks=$checks scenarios=10 failures=0" -ForegroundColor Green
+Write-Host "Guidance lock telemetry: checks=$checks scenarios=12 failures=0" -ForegroundColor Green

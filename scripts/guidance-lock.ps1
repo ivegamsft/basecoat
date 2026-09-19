@@ -31,7 +31,8 @@ function Normalize-GuidancePath {
     if (-not $normalized -or
         $normalized.EndsWith('/', [System.StringComparison]::Ordinal) -or
         [System.IO.Path]::IsPathRooted($normalized) -or
-        $normalized -match '(^|/)\.\.?(/|$)') {
+        $normalized -match '(^|/)\.\.?(/|$)' -or
+        $normalized -notmatch '^[A-Za-z0-9._/+@()-]+$') {
         throw "GUIDANCE_LOCK_INVALID path='$Path' reason='path must be a normalized repository-relative file path'"
     }
 
@@ -62,6 +63,44 @@ function Normalize-GuidancePath {
     }
 
     return $normalized
+}
+
+function Enter-GuidanceLockLease {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$RepoRoot,
+        [int]$TimeoutSeconds = 30
+    )
+
+    $leasePath = Join-Path $RepoRoot '.github/base-coat/guidance-lock.lease'
+    New-Item -ItemType Directory -Path (Split-Path -Parent $leasePath) -Force | Out-Null
+    $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
+    do {
+        try {
+            New-Item -ItemType Directory -Path $leasePath -ErrorAction Stop | Out-Null
+            [System.IO.File]::WriteAllText(
+                (Join-Path $leasePath 'owner'),
+                "pid=$PID`nacquired=$([DateTime]::UtcNow.ToString('o'))`n",
+                [System.Text.UTF8Encoding]::new($false)
+            )
+            return $leasePath
+        }
+        catch {
+            if ([DateTime]::UtcNow -ge $deadline) {
+                throw "GUIDANCE_LOCK_BUSY lease='$leasePath' timeoutSeconds='$TimeoutSeconds'"
+            }
+            Start-Sleep -Milliseconds 100
+        }
+    } while ($true)
+}
+
+function Exit-GuidanceLockLease {
+    [CmdletBinding()]
+    param([AllowNull()][string]$LeasePath)
+
+    if ($LeasePath) {
+        Remove-Item -LiteralPath $LeasePath -Recurse -Force -ErrorAction SilentlyContinue
+    }
 }
 
 function Get-GuidanceContentHash {
@@ -127,7 +166,14 @@ function Read-GuidanceLock {
         [string]$LockPath = (Get-GuidanceLockPath -RepoRoot $RepoRoot)
     )
 
-    if (-not (Test-Path -LiteralPath $LockPath -PathType Leaf)) {
+    if (Test-Path -LiteralPath $LockPath) {
+        $lockItem = Get-Item -LiteralPath $LockPath -Force
+        if ($lockItem.PSIsContainer -or $null -ne $lockItem.ResolveLinkTarget($false) -or
+            -not (Test-Path -LiteralPath $LockPath -PathType Leaf)) {
+            throw "GUIDANCE_LOCK_INVALID file='$LockPath' reason='lock path must be a regular file'"
+        }
+    }
+    else {
         return [pscustomobject]@{
             schema = $script:GuidanceLockSchema
             entries = @()

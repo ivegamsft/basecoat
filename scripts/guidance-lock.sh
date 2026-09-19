@@ -7,7 +7,8 @@ guidance_normalize_path() {
 
   if [[ -z "$path" || "$path" == /* || "$path" == */ || "$path" == "." || "$path" == ".." ||
         "$path" == ../* || "$path" == */../* || "$path" == */.. ||
-        "$path" == ./* || "$path" == */./* || "$path" == */. ]]; then
+        "$path" == ./* || "$path" == */./* || "$path" == */. ||
+        ! "$path" =~ ^[A-Za-z0-9._/+@()-]+$ ]]; then
     echo "GUIDANCE_LOCK_INVALID path='$1' reason='path must be a normalized repository-relative file path'" >&2
     return 1
   fi
@@ -48,7 +49,14 @@ guidance_validate_field() {
 guidance_read_lock() {
   local lock_path="$1" output_tsv="$2"
   : > "$output_tsv"
-  [[ -f "$lock_path" ]] || return 0
+  if [[ -e "$lock_path" || -L "$lock_path" ]]; then
+    if [[ -L "$lock_path" || ! -f "$lock_path" ]]; then
+      echo "GUIDANCE_LOCK_INVALID file='$lock_path' reason='lock path must be a regular file'" >&2
+      return 1
+    fi
+  else
+    return 0
+  fi
 
   local compact body
   compact="$(tr -d '\r\n\t ' < "$lock_path")"
@@ -91,6 +99,26 @@ guidance_read_lock() {
     echo "GUIDANCE_LOCK_INVALID file='$lock_path' reason='duplicate path entry'" >&2
     return 1
   fi
+}
+
+guidance_enter_lease() {
+  local repo_root="$1" timeout_seconds="${2:-30}"
+  local lease_path="$repo_root/.github/base-coat/guidance-lock.lease"
+  local deadline=$((SECONDS + timeout_seconds))
+  mkdir -p "$(dirname "$lease_path")"
+  while ! mkdir "$lease_path" 2>/dev/null; do
+    if (( SECONDS >= deadline )); then
+      echo "GUIDANCE_LOCK_BUSY lease='$lease_path' timeoutSeconds='$timeout_seconds'" >&2
+      return 1
+    fi
+    sleep 0.1
+  done
+  printf 'pid=%s\nacquired=%s\n' "$$" "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" > "$lease_path/owner"
+  printf '%s' "$lease_path"
+}
+
+guidance_exit_lease() {
+  [[ -n "${1:-}" ]] && rm -rf "$1"
 }
 
 guidance_write_lock() {

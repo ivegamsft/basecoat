@@ -547,6 +547,7 @@ $sourcePathOverride = $env:BASECOAT_TEST_SOURCE_PATH
 $tempRoot = $null
 $sourcePath = $null
 $guidanceStage = $null
+$guidanceLeasePath = $null
 
 try {
     if ($sourcePathOverride) {
@@ -830,6 +831,7 @@ try {
         -DestinationPrefix '.github/agents/references' -GuidanceUnitPrefix 'agents/references'
 
     $guidanceLockPath = Get-GuidanceLockPath -RepoRoot $repoRoot
+    $guidanceLeasePath = Enter-GuidanceLockLease -RepoRoot $repoRoot
     $guidanceLock = Read-GuidanceLock -RepoRoot $repoRoot -LockPath $guidanceLockPath
     $lockEntries = [System.Collections.Generic.List[object]]::new()
     foreach ($entry in @($guidanceLock.entries)) { $lockEntries.Add($entry) }
@@ -942,6 +944,8 @@ try {
     }
 
     Remove-Item -LiteralPath $guidanceStage -Recurse -Force -ErrorAction SilentlyContinue
+    Exit-GuidanceLockLease -LeasePath $guidanceLeasePath
+    $guidanceLeasePath = $null
 
     # Seed release-notes template into downstream-customizable location.
     # Never overwrite local customizations.
@@ -995,6 +999,9 @@ try {
     Write-Host "Base Coat synced into $targetDir"
 }
 finally {
+    if ($guidanceLeasePath) {
+        Exit-GuidanceLockLease -LeasePath $guidanceLeasePath
+    }
     if ($guidanceStage -and (Test-Path -LiteralPath $guidanceStage)) {
         Remove-Item -LiteralPath $guidanceStage -Recurse -Force -ErrorAction SilentlyContinue
     }
