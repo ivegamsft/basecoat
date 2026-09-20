@@ -40,7 +40,7 @@ Before starting a release, verify:
 - [ ] No secrets, tokens, or PII in any merged content
 - [ ] `gh` CLI is installed and authenticated (`gh auth status`)
 - [ ] Working tree is clean (`git status` shows no changes)
-- [ ] `PRODUCTION_REPO_TOKEN` preflight is green (`gh workflow run token-preflight.yml --repo IBuySpy-Shared/basecoat` then `gh run watch`)
+- [ ] `PRODUCTION_REPO_TOKEN` preflight is green (`gh workflow run token-preflight.yml --repo ivegamsft/basecoat` then `gh run watch`)
 
 `BASECOAT_RELEASE_AUDIT_TOKEN` is not a release prerequisite. BaseCoat is an
 internal repository, and release workflows no longer call the administrative
@@ -209,7 +209,7 @@ whether a full or scoped sync is recommended.
 If neither changelog section nor merged PR list is available, the workflow auto-generates release notes from commit history as a final fallback.
 
 If you need to create the release manually (e.g., workflows are disabled), create
-it in the canonical source repository (`IBuySpy-Shared/basecoat`). The
+it in the canonical source repository (`ivegamsft/basecoat`). The
 production mirror (`ivegamsft/basecoat`) is synchronized by
 `publish-to-production.yml` and should never be targeted directly for manual
 release creation.
@@ -218,7 +218,7 @@ release creation.
 gh release create vX.Y.Z \
   --title "vX.Y.Z" \
   --notes-file release-notes.md \
-  --repo IBuySpy-Shared/basecoat
+  --repo ivegamsft/basecoat
 ```
 
 ### 7. Post-Release Verification

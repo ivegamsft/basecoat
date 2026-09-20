@@ -74,7 +74,7 @@ The Extension backend reads configuration from environment variables. Configure 
 | `BASECOAT_EXTENSION_OAUTH_STATE_TTL_MS` | `600000` | State token TTL (10 minutes) |
 | `BASECOAT_EXTENSION_SESSION_TTL_MS` | `86400000` | User session TTL (24 hours) |
 | `BASECOAT_EXTENSION_SESSION_ROTATION_INTERVAL_MS` | `14400000` | Key rotation interval (4 hours) |
-| `BASECOAT_EXTENSION_ALLOWED_ORG` | `IBuySpy-Shared` | GitHub org for membership check |
+| `BASECOAT_EXTENSION_ALLOWED_ORG` | `example-org` | GitHub org for membership check |
 | `BASECOAT_EXTENSION_OAUTH_CALLBACK_URL` | (auto-inferred) | Explicit callback URL (production use) |
 | `BASECOAT_EXTENSION_ENABLE_OAUTH_TOKEN_EXCHANGE_STUB` | (unset) | Enables temporary callback stub response only when explicitly set to `true` while live token exchange remains blocked by #1073 |
 
@@ -113,7 +113,7 @@ BASECOAT_EXTENSION_PRIVATE_KEY_PEM="-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAK
 BASECOAT_EXTENSION_OAUTH_STATE_TTL_MS=600000
 BASECOAT_EXTENSION_SESSION_TTL_MS=86400000
 BASECOAT_EXTENSION_SESSION_ROTATION_INTERVAL_MS=14400000
-BASECOAT_EXTENSION_ALLOWED_ORG=IBuySpy-Shared
+BASECOAT_EXTENSION_ALLOWED_ORG=example-org
 BASECOAT_EXTENSION_OAUTH_CALLBACK_URL=https://extension.basecoat.dev/api/github/oauth/callback
 ```
 
@@ -162,14 +162,14 @@ The Extension supports three authentication modes. Choose based on your use case
 
 #### Step 1: Create the GitHub App
 
-Visit: [GitHub App settings](https://github.com/organizations/IBuySpy-Shared/settings/apps/new)
+Visit: [GitHub App settings](https://github.com/organizations/example-org/settings/apps/new)
 
 Fill in the form with:
 
 | Field | Value |
 |-------|-------|
 | GitHub App name | `BaseCoat Copilot Extension` |
-| Homepage URL | `https://github.com/IBuySpy-Shared/basecoat` |
+| Homepage URL | `https://github.com/ivegamsft/basecoat` |
 | **User authorization callback URL** | `https://extension.basecoat.dev/api/github/oauth/callback` |
 | Webhook → Active | ✅ Check this |
 | **Webhook URL** | `https://extension.basecoat.dev/api/github/webhook` |
@@ -210,7 +210,7 @@ Expand each section and configure:
 
 1. Click "Create GitHub App"
 2. On the app details page, click "Install App"
-3. Select `IBuySpy-Shared` organization
+3. Select `example-org` organization
 4. Choose repository access: "All repositories" or select specific repos
 5. Authorize installation
 

@@ -8,7 +8,7 @@
 
 ## Overview
 
-This policy establishes mandatory branch protection rules for the `IBuySpy-Shared/basecoat` repository to prevent unauthorized or untested code from reaching the main branch.
+This policy establishes mandatory branch protection rules for the `ivegamsft/basecoat` repository to prevent unauthorized or untested code from reaching the main branch.
 
 ## Scope
 
@@ -88,10 +88,10 @@ To audit branch protection posture and detect unprotected branches:
 
 ```bash
 # Trigger the branch protection drift gate/audit workflow
-gh workflow run branch-protection-enforce.yml --repo IBuySpy-Shared/basecoat
+gh workflow run branch-protection-enforce.yml --repo ivegamsft/basecoat
 
 # Verify active rulesets
-gh api repos/IBuySpy-Shared/basecoat/rulesets --jq '.[] | {name, enforcement}'
+gh api repos/ivegamsft/basecoat/rulesets --jq '.[] | {name, enforcement}'
 ```
 
 ## Exceptions and Waivers
