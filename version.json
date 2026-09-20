@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "4.5.1",
-  "releaseDate": "2026-09-19",
-  "notes": "Patch release: bind ship-it execution to the current repository and fail closed on unauthorized cross-repository targets (#3429)."
+  "version": "4.5.2",
+  "releaseDate": "2026-09-20",
+  "notes": "Patch release: harden guidance ownership leases, Azure deploy authentication, and trusted workflow digest updates (#3423, #3405, #3446)."
 }
