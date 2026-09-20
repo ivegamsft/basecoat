@@ -268,6 +268,25 @@ Invoke-Scenario 'concurrent writer lease' {
     }
 }
 
+Invoke-Scenario 'abandoned writer lease recovery' {
+    $consumer = Join-Path $scratch 'abandoned-consumer'
+    New-TestConsumer $consumer
+    $leasePath = Join-Path $consumer '.github/base-coat/guidance-lock.lease'
+    New-Item -ItemType Directory -Path $leasePath -Force | Out-Null
+    "token=abandoned`npid=0`nacquiredEpoch=1`n" |
+        Set-Content -LiteralPath (Join-Path $leasePath 'owner') -Encoding utf8NoBOM
+    $lease = Enter-GuidanceLockLease -RepoRoot $consumer -TimeoutSeconds 2 -StaleAfterSeconds 1
+    try {
+        $leaseParts = $lease -split '\|', 2
+        Assert-True ($leaseParts[1] -ne 'abandoned' -and (Test-Path -LiteralPath (Join-Path $leaseParts[0] 'owner'))) `
+            'A stale lease was not reclaimed with a new ownership token.'
+    }
+    finally {
+        Exit-GuidanceLockLease -LeasePath $lease
+    }
+    Assert-True (-not (Test-Path -LiteralPath $leasePath)) 'Reclaimed lease was not released by its owner.'
+}
+
 Invoke-Scenario 'path traversal' {
     $source = Join-Path $scratch 'traversal-source'
     $consumer = Join-Path $scratch 'traversal-consumer'
@@ -308,8 +327,8 @@ Invoke-Scenario 'legacy tracker migration' {
 Remove-Item -LiteralPath $scratch -Recurse -Force -ErrorAction SilentlyContinue
 if ($failures.Count -gt 0) {
     $failures | ForEach-Object { Write-Host "FAILED: $_" -ForegroundColor Red }
-    Write-Host "Guidance lock telemetry: checks=$checks scenarios=12 failures=$($failures.Count)" -ForegroundColor Red
+    Write-Host "Guidance lock telemetry: checks=$checks scenarios=13 failures=$($failures.Count)" -ForegroundColor Red
     exit 1
 }
 
-Write-Host "Guidance lock telemetry: checks=$checks scenarios=12 failures=0" -ForegroundColor Green
+Write-Host "Guidance lock telemetry: checks=$checks scenarios=13 failures=0" -ForegroundColor Green

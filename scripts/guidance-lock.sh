@@ -89,7 +89,12 @@ guidance_read_lock() {
       echo "GUIDANCE_LOCK_INVALID file='$lock_path' reason='invalid or non-canonical entry'" >&2
       return 1
     fi
+    local stored_path="$path"
     path="$(guidance_normalize_path "$path")" || return 1
+    if [[ "$path" != "$stored_path" ]]; then
+      echo "GUIDANCE_LOCK_INVALID path='$stored_path' reason='stored paths must already be normalized'" >&2
+      return 1
+    fi
     guidance_validate_field guidanceUnit "$unit" || return 1
     guidance_validate_field sourceVersion "$version" || return 1
     printf '%s|%s|%s|%s|%s\n' "$path" "$owner" "$unit" "$version" "$hash"
@@ -102,23 +107,43 @@ guidance_read_lock() {
 }
 
 guidance_enter_lease() {
-  local repo_root="$1" timeout_seconds="${2:-30}"
+  local repo_root="$1" timeout_seconds="${2:-30}" stale_after_seconds="${3:-600}"
   local lease_path="$repo_root/.github/base-coat/guidance-lock.lease"
+  local token="$$-$(date +%s)-${RANDOM:-0}"
   local deadline=$((SECONDS + timeout_seconds))
   mkdir -p "$(dirname "$lease_path")"
   while ! mkdir "$lease_path" 2>/dev/null; do
+    local owner_file="$lease_path/owner" acquired_epoch="" now_epoch abandoned_path
+    if [[ -f "$owner_file" ]]; then
+      acquired_epoch="$(sed -n 's/^acquiredEpoch=//p' "$owner_file" | head -n 1)"
+      now_epoch="$(date +%s)"
+      if [[ "$acquired_epoch" =~ ^[0-9]+$ ]] && (( now_epoch - acquired_epoch >= stale_after_seconds )); then
+        abandoned_path="$lease_path.abandoned.$token"
+        if mv "$lease_path" "$abandoned_path" 2>/dev/null; then
+          rm -rf "$abandoned_path"
+          continue
+        fi
+      fi
+    fi
     if (( SECONDS >= deadline )); then
       echo "GUIDANCE_LOCK_BUSY lease='$lease_path' timeoutSeconds='$timeout_seconds'" >&2
       return 1
     fi
     sleep 0.1
   done
-  printf 'pid=%s\nacquired=%s\n' "$$" "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" > "$lease_path/owner"
-  printf '%s' "$lease_path"
+  printf 'token=%s\npid=%s\nacquiredEpoch=%s\n' "$token" "$$" "$(date +%s)" > "$lease_path/owner"
+  printf '%s|%s' "$lease_path" "$token"
 }
 
 guidance_exit_lease() {
-  [[ -n "${1:-}" ]] && rm -rf "$1"
+  local lease="${1:-}" lease_path token owner_token
+  [[ -n "$lease" ]] || return 0
+  lease_path="${lease%%|*}"
+  token="${lease#*|}"
+  owner_token="$(sed -n 's/^token=//p' "$lease_path/owner" 2>/dev/null | head -n 1)"
+  if [[ "$owner_token" == "$token" ]]; then
+    rm -rf "$lease_path"
+  fi
 }
 
 guidance_write_lock() {
@@ -131,6 +156,12 @@ guidance_write_lock() {
     printf '{\n  "schema": "guidance-lock/v1",\n  "entries": [\n'
     while IFS='|' read -r path owner unit version hash; do
       [[ -z "$path" ]] && continue
+      local normalized
+      normalized="$(guidance_normalize_path "$path")" || return 1
+      if [[ "$normalized" != "$path" ]]; then
+        echo "GUIDANCE_LOCK_INVALID path='$path' reason='stored paths must already be normalized'" >&2
+        return 1
+      fi
       if [[ "$first" == false ]]; then printf ',\n'; fi
       first=false
       printf '    {"path":"%s","owner":"%s"' "$path" "$owner"

@@ -61,6 +61,28 @@ try {
     Remove-Item -LiteralPath $scratch -Recurse -Force -ErrorAction SilentlyContinue
     New-Item -ItemType Directory -Path $source,$consumer -Force | Out-Null
 
+    $leaseFixture = Join-Path $scratch 'lease-fixture.sh'
+    @'
+#!/usr/bin/env bash
+set -euo pipefail
+source "$1"
+root="$2"
+lease="$(guidance_enter_lease "$root" 2 60)"
+if guidance_enter_lease "$root" 1 60 >/dev/null 2>&1; then
+  echo "second Bash writer unexpectedly acquired an active lease" >&2
+  exit 1
+fi
+guidance_exit_lease "$lease"
+lease2="$(guidance_enter_lease "$root" 2 60)"
+guidance_exit_lease "$lease2"
+mkdir -p "$root/.github/base-coat/guidance-lock.lease"
+printf 'token=abandoned\npid=0\nacquiredEpoch=1\n' > "$root/.github/base-coat/guidance-lock.lease/owner"
+lease3="$(guidance_enter_lease "$root" 2 1)"
+guidance_exit_lease "$lease3"
+'@ | Set-Content -LiteralPath $leaseFixture -Encoding utf8NoBOM
+    & $bash.Source $leaseFixture (Join-Path $repoRoot 'scripts/guidance-lock.sh') $consumer
+    Assert-True ($LASTEXITCODE -eq 0) 'Bash lease contention, release, or abandoned-owner recovery failed.'
+
     git -C $source init | Out-Null
     git -C $source config user.name basecoat-test
     git -C $source config user.email basecoat-test@example.com

@@ -60,7 +60,10 @@ write and removal plan:
 5. A cross-platform exclusive lease at
    `.github/base-coat/guidance-lock.lease/` serializes the read, preflight,
    shared-file mutation, and lock publication transaction. Contenders wait up
-   to 30 seconds, then fail with `GUIDANCE_LOCK_BUSY`.
+   to 30 seconds, then fail with `GUIDANCE_LOCK_BUSY`. The lease contains a
+   unique ownership token and acquisition epoch. A lease older than 10 minutes
+   is reclaimed by atomically renaming it before deletion; release removes a
+   lease only when the token still matches its owner.
 6. The lock is written by same-directory temporary file plus atomic replace
    after all planned file operations succeed. If a file operation fails first,
    the old lock remains and the next run fails closed on any partial content

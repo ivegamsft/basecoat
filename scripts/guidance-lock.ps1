@@ -69,10 +69,12 @@ function Enter-GuidanceLockLease {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)][string]$RepoRoot,
-        [int]$TimeoutSeconds = 30
+        [int]$TimeoutSeconds = 30,
+        [int]$StaleAfterSeconds = 600
     )
 
     $leasePath = Join-Path $RepoRoot '.github/base-coat/guidance-lock.lease'
+    $token = [guid]::NewGuid().ToString('N')
     New-Item -ItemType Directory -Path (Split-Path -Parent $leasePath) -Force | Out-Null
     $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
     do {
@@ -80,12 +82,31 @@ function Enter-GuidanceLockLease {
             New-Item -ItemType Directory -Path $leasePath -ErrorAction Stop | Out-Null
             [System.IO.File]::WriteAllText(
                 (Join-Path $leasePath 'owner'),
-                "pid=$PID`nacquired=$([DateTime]::UtcNow.ToString('o'))`n",
+                "token=$token`npid=$PID`nacquiredEpoch=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())`n",
                 [System.Text.UTF8Encoding]::new($false)
             )
-            return $leasePath
+            return "$leasePath|$token"
         }
         catch {
+            $ownerPath = Join-Path $leasePath 'owner'
+            if (Test-Path -LiteralPath $ownerPath -PathType Leaf) {
+                $owner = @{}
+                foreach ($line in Get-Content -LiteralPath $ownerPath -ErrorAction SilentlyContinue) {
+                    if ($line -match '^([^=]+)=(.*)$') { $owner[$Matches[1]] = $Matches[2] }
+                }
+                $acquiredEpoch = 0L
+                if ([long]::TryParse([string]$owner.acquiredEpoch, [ref]$acquiredEpoch) -and
+                    [DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - $acquiredEpoch -ge $StaleAfterSeconds) {
+                    $abandonedPath = "$leasePath.abandoned.$token"
+                    try {
+                        Move-Item -LiteralPath $leasePath -Destination $abandonedPath -ErrorAction Stop
+                        Remove-Item -LiteralPath $abandonedPath -Recurse -Force -ErrorAction SilentlyContinue
+                        continue
+                    }
+                    catch {
+                    }
+                }
+            }
             if ([DateTime]::UtcNow -ge $deadline) {
                 throw "GUIDANCE_LOCK_BUSY lease='$leasePath' timeoutSeconds='$TimeoutSeconds'"
             }
@@ -99,7 +120,17 @@ function Exit-GuidanceLockLease {
     param([AllowNull()][string]$LeasePath)
 
     if ($LeasePath) {
-        Remove-Item -LiteralPath $LeasePath -Recurse -Force -ErrorAction SilentlyContinue
+        $leaseParts = $LeasePath -split '\|', 2
+        $path = $leaseParts[0]
+        $token = if ($leaseParts.Count -eq 2) { $leaseParts[1] } else { $null }
+        $ownerPath = Join-Path $path 'owner'
+        $ownerToken = if (Test-Path -LiteralPath $ownerPath -PathType Leaf) {
+            (Get-Content -LiteralPath $ownerPath | Where-Object { $_ -like 'token=*' } | Select-Object -First 1) -replace '^token=', ''
+        }
+        else { $null }
+        if ($token -and $ownerToken -eq $token) {
+            Remove-Item -LiteralPath $path -Recurse -Force -ErrorAction SilentlyContinue
+        }
     }
 }
 
