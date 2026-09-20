@@ -552,6 +552,24 @@ jobs:
               }
               return Buffer.from(data.content, data.encoding || 'base64').toString('utf8');
             };
+            const readJsonFromPullRequestHeadOptional = async path => {
+              try {
+                return JSON.parse(await readTextFromPullRequestHead(path));
+              } catch (error) {
+                if (Number(error?.status) === 404) return null;
+                throw error;
+              }
+            };
+            const normalizeProductionDigestPolicy = input => {
+              const normalized = JSON.parse(JSON.stringify(input || {}));
+              const bindings = normalized.production_environment?.workflow_bindings || {};
+              for (const binding of Object.values(bindings)) {
+                if (binding && typeof binding === 'object') {
+                  delete binding.expected_workflow_sha256;
+                }
+              }
+              return normalized;
+            };
             const readWorkflowJobEnvironments = (workflowText, jobId) => {
               let inJobs = false;
               let currentJob = '';
@@ -576,15 +594,36 @@ jobs:
             };
 
             try {
-              const policy = await readJsonFromDefaultBranchOptional('.github/governance/policy-packs.json');
+              const trustedPolicy = await readJsonFromDefaultBranchOptional('.github/governance/policy-packs.json');
               const humanBoundaries = await readJsonFromDefaultBranchOptional('.github/governance/human-approval-boundaries.json');
-              if (!policy || !humanBoundaries) {
+              if (!trustedPolicy || !humanBoundaries) {
                 await publishEligibilityStatus(
                   'success',
                   `BaseCoat governance policy is not yet installed on ${defaultBranch}; skipping merge evaluation.`
                 );
                 return;
               }
+              const pullRequestPolicy = await readJsonFromPullRequestHeadOptional(
+                '.github/governance/policy-packs.json'
+              );
+              if (
+                pullRequestPolicy &&
+                JSON.stringify(normalizeProductionDigestPolicy(pullRequestPolicy)) !==
+                  JSON.stringify(normalizeProductionDigestPolicy(trustedPolicy))
+              ) {
+                throw new Error(
+                  'Pull request governance policy may update production workflow digests only; all other policy fields must remain trusted.'
+                );
+              }
+              const policy = pullRequestPolicy
+                ? {
+                    ...trustedPolicy,
+                    production_environment: {
+                      ...trustedPolicy.production_environment,
+                      workflow_bindings: pullRequestPolicy.production_environment?.workflow_bindings
+                    }
+                  }
+                : trustedPolicy;
               const requestedPack = String(process.env.POLICY_PACK || '').trim();
               const selectedPack = requestedPack || policy.default_profile;
               if (!policy.profiles?.[selectedPack]) {

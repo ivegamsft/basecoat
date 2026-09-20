@@ -221,9 +221,13 @@ if ($workflow -notmatch 'getContent') {
 }
 foreach ($requiredBootstrapPolicyText in @(
     'readJsonFromDefaultBranchOptional',
+    'readJsonFromPullRequestHeadOptional',
+    'normalizeProductionDigestPolicy',
     'Number(error?.status) === 404',
     'BaseCoat governance policy ${path} is not yet present on ${defaultBranch}.',
-    "const policy = await readJsonFromDefaultBranchOptional('.github/governance/policy-packs.json');",
+    "const trustedPolicy = await readJsonFromDefaultBranchOptional('.github/governance/policy-packs.json');",
+    "const pullRequestPolicy = await readJsonFromPullRequestHeadOptional(",
+    'Pull request governance policy may update production workflow digests only',
     "const humanBoundaries = await readJsonFromDefaultBranchOptional('.github/governance/human-approval-boundaries.json');",
     'BaseCoat governance policy is not yet installed on ${defaultBranch}; skipping merge evaluation.'
 )) {
