@@ -185,10 +185,66 @@ jobs:
             echo "| Human approval required | \`${APPROVAL_REQUIRED}\` |"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Azure login
+      - name: Select Azure auth mode
+        id: azure-auth
+        shell: bash
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+        run: |
+          set -euo pipefail
+          if [[ -n "${AZURE_CREDENTIALS}" ]]; then
+            echo "mode=creds" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=oidc" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Validate Azure OIDC configuration
+        if: ${{ steps.azure-auth.outputs.mode == 'oidc' }}
+        shell: bash
+        env:
+          AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          missing=0
+          for required in AZURE_CLIENT_ID AZURE_TENANT_ID AZURE_SUBSCRIPTION_ID; do
+            if [[ -z "${!required:-}" ]]; then
+              echo "::error::Azure OIDC preflight missing ${required}. Configure it as a repository or environment variable."
+              missing=1
+            fi
+          done
+          if [[ ${missing} -ne 0 ]]; then
+            echo "::error::Azure authentication requires either AZURE_CREDENTIALS or all three OIDC variables."
+            exit 1
+          fi
+
+      - name: Azure login (credentials)
+        if: ${{ steps.azure-auth.outputs.mode == 'creds' }}
         uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Azure login (OIDC)
+        if: ${{ steps.azure-auth.outputs.mode == 'oidc' }}
+        uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Validate Azure account context
+        shell: bash
+        env:
+          EXPECTED_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          CURRENT_SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
+          if [[ -n "${EXPECTED_SUBSCRIPTION_ID}" && "${CURRENT_SUBSCRIPTION_ID}" != "${EXPECTED_SUBSCRIPTION_ID}" ]]; then
+            echo "::error::Azure login targeted subscription ${CURRENT_SUBSCRIPTION_ID}, expected ${EXPECTED_SUBSCRIPTION_ID}."
+            echo "::error::Fix AZURE_SUBSCRIPTION_ID or the credentials/identity scope."
+            exit 1
+          fi
 
       - name: Build environment drift auditor
         working-directory: skills/environment-audit-drift

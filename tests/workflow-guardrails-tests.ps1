@@ -1004,10 +1004,10 @@ $expectedPublicContracts = @(
     @{ Workflow = 'docs-production.yml'; Job = 'dispatch-production-docs'; RequiredCapabilities = @('public-api-dispatch') },
     @{ Workflow = 'docs.yml'; Job = 'deploy'; RequiredCapabilities = @('oidc', 'public-pages-deploy') },
     @{ Workflow = 'extension-deploy.yml'; Job = 'build-push'; RequiredCapabilities = @('public-registry-publish') },
-    @{ Workflow = 'extension-deploy.yml'; Job = 'deploy'; RequiredCapabilities = @('credential-auth', 'public-cloud-deploy') },
+    @{ Workflow = 'extension-deploy.yml'; Job = 'deploy'; RequiredCapabilities = @('credential-auth', 'oidc', 'public-cloud-deploy') },
     @{ Workflow = 'mcp-build.yml'; Job = 'build'; RequiredCapabilities = @('public-build') },
     @{ Workflow = 'mcp-deploy.yml'; Job = 'build-push'; RequiredCapabilities = @('public-registry-publish') },
-    @{ Workflow = 'mcp-deploy.yml'; Job = 'deploy'; RequiredCapabilities = @('credential-auth', 'public-cloud-deploy') },
+    @{ Workflow = 'mcp-deploy.yml'; Job = 'deploy'; RequiredCapabilities = @('credential-auth', 'oidc', 'public-cloud-deploy') },
     @{ Workflow = 'package-basecoat.yml'; Job = 'release'; RequiredCapabilities = @('public-release-publish') },
     @{ Workflow = 'portal-deploy.yml'; Job = 'deploy'; RequiredCapabilities = @('credential-auth', 'oidc', 'public-cloud-deploy') },
     @{ Workflow = 'publish-to-production.yml'; Job = 'publish'; RequiredCapabilities = @('public-release-publish') },
@@ -1090,9 +1090,6 @@ foreach ($expectedContract in $expectedPublicContracts) {
         $publicLinuxRoutingViolations += "$expectedKey (required_capabilities changed: '$($actualRequiredCapabilities -join ', ')')"
     }
     $expectedForbiddenCapabilities = @('private-network', 'runner-managed-identity')
-    if ($expectedKey -in @('extension-deploy.yml|deploy', 'mcp-deploy.yml|deploy')) {
-        $expectedForbiddenCapabilities += 'oidc'
-    }
     $actualForbiddenCapabilities = @($target.forbidden_capabilities | Sort-Object)
     $expectedForbiddenCapabilities = @($expectedForbiddenCapabilities | Sort-Object)
     if (($actualForbiddenCapabilities -join ',') -ne ($expectedForbiddenCapabilities -join ',')) {

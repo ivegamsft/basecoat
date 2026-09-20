@@ -29,8 +29,8 @@
       "workflow": "extension-deploy.yml",
       "job": "deploy",
       "allowed_runner_classes": ["github-hosted-linux"],
-      "required_capabilities": ["credential-auth", "public-cloud-deploy"],
-      "forbidden_capabilities": ["oidc", "private-network", "runner-managed-identity"],
+      "required_capabilities": ["credential-auth", "oidc", "public-cloud-deploy"],
+      "forbidden_capabilities": ["private-network", "runner-managed-identity"],
       "max_timeout_minutes": 20
     },
     {
@@ -53,8 +53,8 @@
       "workflow": "mcp-deploy.yml",
       "job": "deploy",
       "allowed_runner_classes": ["github-hosted-linux"],
-      "required_capabilities": ["credential-auth", "public-cloud-deploy"],
-      "forbidden_capabilities": ["oidc", "private-network", "runner-managed-identity"],
+      "required_capabilities": ["credential-auth", "oidc", "public-cloud-deploy"],
+      "forbidden_capabilities": ["private-network", "runner-managed-identity"],
       "max_timeout_minutes": 20
     },
     {
