@@ -28,15 +28,16 @@ sessions.
   assets.
 - Make the projected copies **gitignored** so canonical trees remain the single
   tracked source of truth.
-- Wire the self-install into contributor onboarding (`bootstrap-basecoat.ps1` /
-  a dev-setup target) and make it idempotent.
+- Wire the self-install into Copilot and local contributor setup; make it
+  idempotent and expose a refresh command.
 - Add a staleness self-check to repository validation.
 
 ## Out of Scope
 
 - Consumer distribution via `sync.ps1` (unchanged).
 - Content/frontmatter/behavior of any skill, agent, prompt, or instruction.
-- The asset-manifest contract and manifest regeneration.
+- Changes to the asset-manifest contract; regenerate its selected validator hash
+  as needed without changing the manifest schema.
 - Discoverability for non-Copilot-CLI clients beyond what reading the same
   `.github/` layout provides.
 - **Consumer-facing shipped deliverables** (e.g. `azure-*`, `container-*`,
@@ -56,12 +57,12 @@ sessions.
 2. **Symlink/junction the canonical trees into `.github/`.** Rejected:
    directory symlinks are unreliable across Windows, git, and CI, and are not
    portably checked out.
-3. **Gitignored local self-install wired into bootstrap (recommended).**
+3. **Gitignored local self-install wired into development setup (recommended).**
    Project the canonical trees into `.github/` (and `.agents/skills/`) as
-   gitignored copies, generated idempotently by a script that reuses the
-   `sync.ps1` projection, invoked at onboarding, and validated by a staleness
-   check. Keeps a single tracked source of truth, no tracked duplication, and
-   automatic discoverability.
+   gitignored copies, generated idempotently by a script that reuses the shared
+   `sync.ps1` projection map, invoked by contributor and Copilot setup, and
+   validated by a staleness check. Keeps a single tracked source of truth, no
+   tracked duplication, and automatic discoverability.
 
 This spec implements option 3, scoped to a **curated dev-governance subset**
 (see Scope and Data Model). Consumer shipped deliverables and `instructions/`
@@ -75,35 +76,37 @@ eval pass (see Testing Strategy) rather than by loading them into every session.
 
 Reuse the projection performed by `sync.ps1` (`skills`/`prompts`/`instructions`
 → `.github/`, `skills` → `.agents/skills`, `agents` → `.github/agents`). Factor
-the destination-mapping and copy logic so both the consumer sync and the local
-self-install call one implementation, preventing the two projections from
-drifting.
+the destination mapping into `scripts/dogfood-projection.ps1` so both the
+consumer sync and local self-install use one file-to-destination plan.
+Consumer sync retains its guidance-lock preflight and ownership-aware writes;
+the local self-install applies the same mapping to its curated subset.
 
 ### Local self-install
 
 A script (e.g. `scripts/dogfood-install.ps1`) that:
 
 1. Resolves the BaseCoat repo root.
-2. Projects the canonical `skills/`, `agents/`, `prompts/` trees into the
-   gitignored `.github/` destinations (and `.agents/skills/`), overwriting the
-   projected copies.
+2. Projects the curated canonical `skills/`, `agents/`, `prompts/` entries into
+   the gitignored `.github/` destinations (and `.agents/skills/`), refreshing
+   only files recorded as owned by the previous install.
 3. Removes projected assets whose canonical source no longer exists
-   (idempotent, no orphans).
+   (idempotent, no stale managed files).
 4. Never touches tracked `.github/` repo-meta files (see Data Model exclusions).
 
 ### Ignore rules
 
-`.gitignore` ignores exactly the projected destinations and nothing else. The
-projection must not shadow the small set of already-tracked `.github/` paths
+`.gitignore` ignores exactly the projected destinations plus the install's
+ownership manifest and its temporary manifest file. The projection must not
+shadow the small set of already-tracked `.github/` paths
 (e.g. `.github/instructions/*.instructions.md` repo-meta, workflows). The
 projected skill/agent/prompt directories are additive and disjoint from tracked
 repo-meta.
 
 ### Onboarding wiring
 
-`scripts/bootstrap-basecoat.ps1` (and/or a documented dev-setup target) invokes
-the self-install so a fresh clone becomes self-discoverable without a separate
-remembered step.
+`.github/copilot-setup-steps.yml` invokes the self-install for Copilot coding
+agent sessions, and `scripts/dev-setup.ps1` provides the same install/check
+entry point for local contributors.
 
 ## Data Model
 
@@ -117,9 +120,8 @@ are projected. Selection is metadata-driven and auditable: skills whose
 `category` is a governance/workflow/dev-meta category (`workflow`,
 `flow-governance`, `governance`, `platform-governance`, `sdlc-governance`,
 `agent-development`, `documentation`, `framework`), plus a named allowlist of
-SDLC/authoring skills from mixed categories (see the audit in the reference at
-the end of this spec: 90 dev-governance vs 53 shipped deliverables). Consumer
-shipped deliverables are excluded.
+SDLC/authoring skills from mixed categories. Consumer shipped deliverables are
+excluded; the current selection is listed in the subset audit below.
 
 Projection map (curated canonical subset → gitignored destination):
 
@@ -145,10 +147,11 @@ a local session; a specific instruction is dogfooded by loading it explicitly.
 
 - `scripts/dogfood-install.ps1` — parameterless default installs into the repo
   root; idempotent; exit 0 on success, non-zero on projection failure. Optional
-  `-Check` mode reports drift without writing (used by validation).
-- Shared projection function (extracted from `sync.ps1`) — inputs: canonical
-  source root, destination root; output: deterministic copy of the four
-  destinations.
+  `-Check` mode reports drift without writing (used by validation), and
+  `-RootDir` supports isolated test fixtures.
+- `scripts/dogfood-projection.ps1` — shared deterministic file-to-destination
+  plan used by consumer sync and dogfood self-install.
+- `scripts/dev-setup.ps1` — contributor entry point for install and check.
 
 ## Security and Privacy
 
@@ -191,13 +194,14 @@ onboarding and on demand; cost is negligible and off the hot path.
 
 ## Implementation Plan
 
-1. Extract the `sync.ps1` destination-mapping/copy into a shared function.
-2. Add `scripts/dogfood-install.ps1` (install + `-Check`) calling the shared
-   function against the repo root.
-3. Add `.gitignore` rules for the four projected destinations only.
-4. Wire the self-install into `scripts/bootstrap-basecoat.ps1` / dev-setup.
-5. Add a staleness self-check to `scripts/validate-basecoat.ps1` (or the test
-   suite) using `-Check`.
+1. Extract `sync.ps1` file-to-destination mapping into a shared projection
+   helper.
+2. Add `scripts/dogfood-install.ps1` (install + `-Check`) using the shared plan
+   against the repo root and an ownership manifest for generated files.
+3. Add `.gitignore` rules for the four projected destinations and ownership
+   manifest.
+4. Wire the self-install into Copilot setup steps and `scripts/dev-setup.ps1`.
+5. Add a warning-only staleness self-check to source validation.
 6. Document the refresh command in contributor onboarding.
 
 ## Testing Strategy
@@ -209,8 +213,12 @@ onboarding and on demand; cost is negligible and off the hot path.
   `repo-cleanup` (and a sampled set of governed skills) resolves — 0
   `Skill not found` for BaseCoat-authored assets.
 - **No tracked drift:** after self-install, `git status` reports no new tracked
-  files under the projected destinations.
-- **Staleness:** `-Check` flags an out-of-date install and returns non-zero.
+  files under the projected destinations; the ignored ownership manifest lists
+  only files created by the installer.
+- **Staleness:** `-Check` flags an out-of-date install and returns non-zero;
+  source validation reports the warning without failing clean CI checkouts.
+- **Manifest integrity:** asset distribution tests confirm the regenerated
+  manifest hash for `scripts/validate-basecoat.ps1` matches the tracked file.
 - **Subset selection:** the selector projects the dev-governance subset and
   excludes shipped deliverables, `instructions/`, and any `~/.copilot/` path;
   assert a shipped deliverable (e.g. `azure-landing-zone`) is not projected and
@@ -223,11 +231,11 @@ onboarding and on demand; cost is negligible and off the hot path.
 
 ## Rollout, Migration, and Rollback
 
-- **Rollout:** land behind this spec; contributors pick it up on next bootstrap
-  or by running the refresh command once.
+- **Rollout:** Copilot coding-agent setup performs the first install; local
+  contributors run `pwsh scripts/dev-setup.ps1` once or rerun it to refresh.
 - **Migration:** none — no tracked files change; existing clones run the
   self-install once.
-- **Rollback:** delete `scripts/dogfood-install.ps1`, revert the bootstrap
+- **Rollback:** delete `scripts/dogfood-install.ps1`, revert the setup-step
   wiring and `.gitignore` rules; contributors delete the gitignored projected
   directories. No tracked state or external dependency is affected.
 
@@ -241,52 +249,39 @@ onboarding and on demand; cost is negligible and off the hot path.
 
 | Risk | Mitigation |
 |---|---|
-| Local copy drifts from canonical | Idempotent bootstrap refresh + `-Check` staleness gate |
+| Local copy drifts from canonical | Idempotent dev-setup refresh + `-Check` staleness gate |
 | Projection shadows tracked repo-meta | Disjoint destination set + explicit exclusions |
 | Two projection code paths diverge | Single shared function reused by sync + self-install |
 | Gitignore over-broad, hides tracked assets | Ignore only the projected destinations |
 | Personal `~/.copilot/` assets leak into repo | Projection source is repo tree only; never reads `~/.copilot/` |
 | Curated subset omits a genuinely dev-relevant asset | Metadata-driven, auditable selector; boundary reviewable and adjustable |
 
-## Open Questions
-
-- Where should the staleness check run — session start, pre-commit, dev-setup,
-  or CI only?
-- Exact set of tracked `.github/` paths to exclude/reconcile against the
-  projection.
-- Whether `.agents/skills/` is required for the Copilot CLI or only for
-  cross-client interop, which affects whether it is in scope for discoverability.
-- Subset boundary: the audit classifies 90 dev-governance vs 53 shipped skills.
-  Should the projected subset be tightened further (90 skills is still a
-  meaningful always-on catalog cost), and should selection be encoded as a
-  reusable metadata tag rather than a category+name allowlist?
-
 ## Dogfood Subset Audit (skills)
 
-Classification of the 143 repository skills into the projected dev-governance
-subset vs excluded shipped deliverables. Selection rule: dev-governance
-categories (`workflow`, `flow-governance`, `governance`, `platform-governance`,
-`sdlc-governance`, `agent-development`, `documentation`, `framework`) plus a
-named allowlist of SDLC/authoring skills from mixed categories.
+The catalog currently contains 143 skills. The implementation projects the
+eight governance/workflow/dev-meta categories (`workflow`, `flow-governance`,
+`governance`, `platform-governance`, `sdlc-governance`, `agent-development`,
+`documentation`, `framework`) plus a named SDLC/authoring allowlist.
 
-- **Dev-governance (projected): 90.** Includes `ship-it`/`ship-it-control-loop`,
-  `sprint-*`, `flow-*`, `governance*`, `backlog-*`, `ci-*`, `release-*`,
-  `create-instruction`/`create-skill`/`skill-scripts`, `repo-cleanup`,
-  `git-worktrees`, `rca`, `handoff`, `human-in-the-loop`, `code-review`, and
-  BaseCoat's own security-posture skills.
-- **Shipped deliverables (excluded): 53.** `azure-*`, `container-*`, `bom-*`,
-  data/EF/service-bus migrations, `s4-*`, `station-bottleneck-analyzer`,
-  `takt-time-measurement`, `backend-dev`/`frontend-dev`/`ux`, DDD/CQRS/
-  `twelve-factor`, `api-*`, `penetration-testing`, `observability`,
-  `ha-resilience`, and similar consumer-facing assets.
+- **Dev-governance (projected): 58 skills** in the current catalog.
+- **Not projected: 85 skills**, including shipped deliverables such as
+  `azure-*`, `container-*`, `bom-*`, data/EF/service-bus migrations, `s4-*`,
+  `station-bottleneck-analyzer`, `takt-time-measurement`,
+  `backend-dev`/`frontend-dev`/`ux`, DDD/CQRS/`twelve-factor`, `api-*`,
+  `penetration-testing`, `observability`, and `ha-resilience`.
 
-Boundary calls kept in the dev subset (reviewable): `security`,
-`security-operations`, `refactoring`, `tech-debt`, `docs-site`,
-`ci-flake-quarantine`. Agents and prompts follow the same dev-governance intent.
+The implementation narrows the original 90-skill audit estimate to an explicit
+58-skill selector to keep unrelated operational and consumer-facing assets out
+of BaseCoat authoring sessions. Boundary calls kept in the dev subset include
+`security`, `security-operations`, `refactoring`, `tech-debt`, `docs-site`, and
+`ci-flake-quarantine`. Agents are limited to 20 named
+development/governance agents plus referenced detail files; prompts are limited
+to six authoring prompts. The selector is in
+`scripts/dogfood-projection.ps1` and is covered by fixture tests.
 
 ## References
 
 - PRD: `docs/prd/3348-dogfood-asset-discoverability.md`
 - Issue #3348
 - `sync.ps1` (consumer projection reused by the self-install)
-- `scripts/bootstrap-basecoat.ps1` (onboarding wiring target)
+- `.github/copilot-setup-steps.yml` and `scripts/dev-setup.ps1` (onboarding wiring)

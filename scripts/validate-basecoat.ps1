@@ -562,6 +562,17 @@ if ($effectiveWorkflowValidationMode -eq 'Source') {
     Test-LogFirstGate
     Test-ConfigSecretExamples
     Test-DocsHomepageAssetCounts
+
+    $dogfoodCheckScript = Join-Path $PSScriptRoot 'dogfood-install.ps1'
+    if (Test-Path -LiteralPath $dogfoodCheckScript -PathType Leaf) {
+        $dogfoodCheckOutput = & pwsh -NoProfile -File $dogfoodCheckScript -Check -RootDir $resolvedRoot 2>&1 | Out-String
+        $dogfoodCheckExitCode = $LASTEXITCODE
+        $global:LASTEXITCODE = 0
+        if ($dogfoodCheckExitCode -ne 0) {
+            Write-Host "WARNING: Local Copilot dogfood projection is missing or stale. Run 'pwsh scripts/dev-setup.ps1' to refresh it. $($dogfoodCheckOutput.Trim())" -ForegroundColor Yellow
+            $warnings++
+        }
+    }
 }
 
 if ($errors -gt 0) {

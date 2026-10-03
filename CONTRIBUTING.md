@@ -199,6 +199,20 @@ GitHub search examples:
 
 All new agents, skills, and instructions require an issue before implementation.
 
+## Local Copilot Dogfooding
+
+To discover BaseCoat's development skills, agents, and prompts while working in
+this repository, run:
+
+```powershell
+pwsh scripts/dev-setup.ps1
+```
+
+The command projects a curated subset from this repository's canonical asset
+trees into gitignored `.github/` and `.agents/` paths. It never reads personal
+`~/.copilot/` assets. Refresh the copies by rerunning the command; check for
+missing or stale copies without writing with `pwsh scripts/dev-setup.ps1 -Check`.
+
 ### Internal Operational Workflows
 
 These workflows are **not intended for distribution or consumer use**:

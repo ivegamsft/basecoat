@@ -149,6 +149,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running local Copilot dogfood projection tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'dogfood-install-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Local Copilot dogfood projection tests failed' -ForegroundColor Red
+    Write-FailureLog 'dogfood-install-tests'
+    exit 1
+}
+
 Write-Host 'Running shared guidance ownership lock tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'guidance-lock-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

@@ -576,6 +576,14 @@ try {
     if ($env:BASECOAT_EXPECTED_SHA -and $sourceCommit -ne $env:BASECOAT_EXPECTED_SHA) {
         throw "BaseCoat source provenance check failed: expected commit '$($env:BASECOAT_EXPECTED_SHA)' but fetched '$sourceCommit'."
     }
+    $projectionHelper = Join-Path $sourcePath 'scripts/dogfood-projection.ps1'
+    if (-not (Test-Path -LiteralPath $projectionHelper -PathType Leaf)) {
+        $projectionHelper = Join-Path $PSScriptRoot 'scripts/dogfood-projection.ps1'
+    }
+    if (-not (Test-Path -LiteralPath $projectionHelper -PathType Leaf)) {
+        throw 'This sync script requires scripts/dogfood-projection.ps1 beside the BaseCoat source checkout.'
+    }
+    . $projectionHelper
 
     $fullTargetDir = Join-Path $repoRoot $targetDir
     New-Item -ItemType Directory -Force -Path $fullTargetDir | Out-Null
@@ -777,58 +785,29 @@ try {
     $guidancePlan = [System.Collections.Generic.List[object]]::new()
     $plannedPaths = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
 
-    function Add-GuidancePlanTree {
-        param(
-            [Parameter(Mandatory)][string]$SourceDir,
-            [Parameter(Mandatory)][string]$DestinationPrefix,
-            [Parameter(Mandatory)][string]$GuidanceUnitPrefix
-        )
-        if (-not (Test-Path -LiteralPath $SourceDir -PathType Container)) { return }
-        $sourceRoot = (Resolve-Path -LiteralPath $SourceDir).Path
-        Get-ChildItem -LiteralPath $SourceDir -Recurse -File | ForEach-Object {
-            $relative = $_.FullName.Substring($sourceRoot.Length).TrimStart('\', '/') -replace '\\', '/'
-            $destination = Normalize-GuidancePath -Path "$DestinationPrefix/$relative" -RepoRoot $repoRoot
-            if (-not $plannedPaths.Add($destination)) {
-                throw "GUIDANCE_LOCK_INVALID path='$destination' reason='duplicate path in BaseCoat write plan'"
-            }
-            $guidancePlan.Add([pscustomobject]@{
-                path = $destination
-                source = $_.FullName
-                entry = New-GuidanceLockEntry -RepoRoot $repoRoot -Path $destination -Owner 'basecoat' `
-                    -GuidanceUnit "$GuidanceUnitPrefix/$relative" -SourceVersion $sourceVersion `
-                    -Sha256 (Get-GuidanceContentHash -Path $_.FullName)
-            })
-        }
-    }
-
-    foreach ($copilotDir in @('instructions', 'prompts', 'skills')) {
-        Add-GuidancePlanTree -SourceDir (Join-Path $fullTargetDir $copilotDir) `
-            -DestinationPrefix ".github/$copilotDir" -GuidanceUnitPrefix $copilotDir
-    }
-    Add-GuidancePlanTree -SourceDir (Join-Path $fullTargetDir 'skills') `
-        -DestinationPrefix '.agents/skills' -GuidanceUnitPrefix 'skills'
-
-    $agentSource = Join-Path $fullTargetDir 'agents'
-    if (Test-Path -LiteralPath $agentSource -PathType Container) {
-        Get-ChildItem -LiteralPath $agentSource -Filter '*.agent.md' -File | ForEach-Object {
-            $stagedAgent = Join-Path $guidanceStage $_.Name
-            $sanitized = Convert-AgentToCliCompatibleContent -Content (Get-Content -LiteralPath $_.FullName -Raw)
+    $agentIndex = 0
+    foreach ($projection in Get-BaseCoatProjectionPlan -SourceRoot $fullTargetDir -Mode Consumer) {
+        $plannedSource = $projection.SourcePath
+        if ($projection.Kind -eq 'agent') {
+            $agentIndex++
+            $stagedAgent = Join-Path $guidanceStage "$agentIndex-$([System.IO.Path]::GetFileName($projection.SourcePath))"
+            $sanitized = Convert-AgentToCliCompatibleContent -Content (Get-Content -LiteralPath $projection.SourcePath -Raw)
             Set-Content -LiteralPath $stagedAgent -Value $sanitized -Encoding UTF8
-            $destination = Normalize-GuidancePath -Path ".github/agents/$($_.Name)" -RepoRoot $repoRoot
-            if (-not $plannedPaths.Add($destination)) {
-                throw "GUIDANCE_LOCK_INVALID path='$destination' reason='duplicate path in BaseCoat write plan'"
-            }
-            $guidancePlan.Add([pscustomobject]@{
-                path = $destination
-                source = $stagedAgent
-                entry = New-GuidanceLockEntry -RepoRoot $repoRoot -Path $destination -Owner 'basecoat' `
-                    -GuidanceUnit "agents/$($_.Name)" -SourceVersion $sourceVersion `
-                    -Sha256 (Get-GuidanceContentHash -Path $stagedAgent)
-            })
+            $plannedSource = $stagedAgent
         }
+
+        $destination = Normalize-GuidancePath -Path $projection.DestinationPath -RepoRoot $repoRoot
+        if (-not $plannedPaths.Add($destination)) {
+            throw "GUIDANCE_LOCK_INVALID path='$destination' reason='duplicate path in BaseCoat write plan'"
+        }
+        $guidancePlan.Add([pscustomobject]@{
+            path = $destination
+            source = $plannedSource
+            entry = New-GuidanceLockEntry -RepoRoot $repoRoot -Path $destination -Owner 'basecoat' `
+                -GuidanceUnit $projection.GuidanceUnit -SourceVersion $sourceVersion `
+                -Sha256 (Get-GuidanceContentHash -Path $plannedSource)
+        })
     }
-    Add-GuidancePlanTree -SourceDir (Join-Path $agentSource 'references') `
-        -DestinationPrefix '.github/agents/references' -GuidanceUnitPrefix 'agents/references'
 
     $guidanceLockPath = Get-GuidanceLockPath -RepoRoot $repoRoot
     $guidanceLeasePath = Enter-GuidanceLockLease -RepoRoot $repoRoot

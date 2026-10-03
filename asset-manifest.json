@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.1",
   "libraryVersion": "4.5.2",
-  "generatedAt": "2026-09-20T22:09:07.5043351Z",
+  "generatedAt": "2026-10-03T06:43:47.3551306Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -1878,7 +1878,7 @@
     {
       "path": "scripts/validate-basecoat.ps1",
       "type": "script",
-      "sha": "8adff2d89f15187c2b9bbcf13fdc934fa3f87ec4",
+      "sha": "60f3b59f7f324dd487f77a91d949840c806c5315",
       "version": null,
       "effectiveVersion": "4.5.2",
       "versionSource": "library"

@@ -82,7 +82,7 @@ what to refresh.
 |---|---|
 | FR1 | A local self-install projects a **curated dev-governance subset** of `skills/`, `agents/`, and `prompts/` (from the repository tree only) into the Copilot-discoverable `.github/` layout (and `.agents/skills/` for cross-client interop), reusing the consumer projection `sync.ps1` performs. |
 | FR2 | The projected copies are **gitignored**; the canonical trees remain the single tracked source of truth. No ~1,000-file duplication is committed. |
-| FR3 | The self-install is invoked automatically during contributor onboarding (bootstrap/dev-setup), so discoverability requires no separately remembered step. |
+| FR3 | The self-install is invoked by the Copilot coding-agent setup steps and exposed as `pwsh scripts/dev-setup.ps1` during contributor onboarding. |
 | FR4 | Re-running the self-install is idempotent and refreshes the projection to match the current canonical subset, removing projected assets that no longer exist canonically or have left the subset. |
 | FR5 | A validation/self-check detects a missing or stale local install and reports the exact refresh command; it must not fail unrelated CI for the tracked tree. |
 | FR6 | Invoking a representative BaseCoat-governance skill (e.g. `repo-cleanup`) inside a BaseCoat session resolves and loads it. |
@@ -136,13 +136,13 @@ what to refresh.
 
 - `sync.ps1` projection logic (`skills`/`prompts`/`instructions` → `.github/`,
   `skills` → `.agents/skills`, `agents` → `.github/agents`).
-- `scripts/bootstrap-basecoat.ps1` onboarding flow (self-install wiring).
+- `.github/copilot-setup-steps.yml` and `scripts/dev-setup.ps1` contributor onboarding.
 - Repository validation/test harness (`scripts/validate-basecoat.ps1`,
   `tests/run-tests.ps1`) for the staleness self-check.
 
 ## Rollout and Adoption Plan
 
-1. Land the self-install script + gitignore rules + bootstrap wiring behind the
+1. Land the self-install script + gitignore rules + contributor setup wiring behind the
    spec's implementation plan.
 2. Document the one-line refresh command in contributor onboarding.
 3. Add the staleness self-check to validation.

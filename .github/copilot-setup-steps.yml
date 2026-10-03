@@ -19,6 +19,9 @@ steps:
       echo "Validating basecoat repo structure..."
       ls agents/ instructions/ skills/ prompts/ docs/ || true
 
+  - name: Install BaseCoat dogfood assets
+    run: pwsh -NoProfile -File scripts/dogfood-install.ps1
+
   - name: Run validation suite
     run: |
       if [ -f tests/run-tests.ps1 ]; then

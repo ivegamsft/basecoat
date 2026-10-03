@@ -2,6 +2,13 @@ dist/
 node_modules/
 site/
 
+# Local BaseCoat dogfood projection; canonical assets remain in top-level trees
+/.github/skills/
+/.github/agents/
+/.github/prompts/
+/.agents/skills/
+/.github/.basecoat-dogfood-manifest.json*
+
 # =============================================================================
 # Secret & credential files — NEVER commit these
 # Part of: basecoat Enterprise Governance Framework (Issue #43)
