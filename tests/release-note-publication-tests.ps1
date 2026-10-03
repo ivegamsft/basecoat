@@ -244,6 +244,6 @@ Assert-Match $publish "'docs/operations/repo-story\.md'" 'Publication must exclu
 Assert-Match $publish 'https://github\\\.com/IBuySpy-Shared/basecoat/issues/\[0-9\]\+' 'Publication must redact private source issue URLs before generic repo rewrites.'
 Assert-Match $publish 'https://github\\\.com/IBuySpy-Shared/basecoat/pull/\[0-9\]\+' 'Publication must redact private source PR URLs before generic repo rewrites.'
 Assert-Match $publish 'https://github\\\.com/IBuySpy-Shared/basecoat/actions/runs/\[0-9\]\+' 'Publication must redact private source workflow-run URLs before generic repo rewrites.'
-Assert-Match $publish "git grep -inI -E 'ibuyspy-shared\|ibuyspy-dev'" 'Publication must fail if internal organization identifiers remain in the public payload.'
+Assert-Match $publish "git grep -inI -E 'ibuyspy-shared\|ibuyspy-dev\|@ibuyspy'" 'Publication must fail if internal organization or account identifiers remain in the public payload.'
 
 Write-Host 'PASS release-note publication contract.'

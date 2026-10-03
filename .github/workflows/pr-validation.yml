@@ -506,7 +506,7 @@ jobs:
             fi
           done
 
-          FORBIDDEN_MATCHES=$(git grep -inI -E 'ibuyspy-shared|ibuyspy-dev' -- . || true)
+          FORBIDDEN_MATCHES=$(git grep -inI -E 'ibuyspy-shared|ibuyspy-dev|@ibuyspy' -- . || true)
           UNEXPECTED_MATCHES=$(printf '%s\n' "$FORBIDDEN_MATCHES" | grep -v -E '^LICENSE:3:Copyright \(c\) 2025 IBuySpy-Shared$' | grep -v '^$' || true)
           if [[ -n "$UNEXPECTED_MATCHES" ]]; then
             echo "::error::Public payload simulation still contains forbidden internal identifiers:"

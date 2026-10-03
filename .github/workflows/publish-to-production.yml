@@ -306,7 +306,7 @@ jobs:
 
           # LICENSE retains the legal copyright holder. It is the sole permitted
           # occurrence; every other internal identifier fails the publication.
-          FORBIDDEN_MATCHES=$(git grep -inI -E 'ibuyspy-shared|ibuyspy-dev' -- . || true)
+          FORBIDDEN_MATCHES=$(git grep -inI -E 'ibuyspy-shared|ibuyspy-dev|@ibuyspy' -- . || true)
           UNEXPECTED_MATCHES=$(printf '%s\n' "$FORBIDDEN_MATCHES" \
             | grep -v -E '^LICENSE:3:Copyright \(c\) 2025 IBuySpy-Shared$' \
             | grep -v '^$' || true)

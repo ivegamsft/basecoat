@@ -50,6 +50,9 @@ cat .github/base-coat/version.json
 
 Add the version drift detector to your repo — it opens an issue automatically when BaseCoat has a new release:
 
+Replace `OWNER/REPOSITORY` with the BaseCoat source repository and `COMMIT_SHA`
+with a reviewed commit SHA before using the example.
+
 ```yaml
 # .github/workflows/check-basecoat-version.yml
 name: Check BaseCoat Version
@@ -64,10 +67,10 @@ permissions:
   pull-requests: write
 jobs:
   update:
-    uses: IBuySpy-Shared/basecoat/.github/workflows/check-basecoat-version-callable.yml@9ab8894828e3a887d97c3383e7f23ed892d9a088
+    uses: OWNER/REPOSITORY/.github/workflows/check-basecoat-version-callable.yml@COMMIT_SHA
     with:
       stage_path: .github/base-coat
-      source_repo: IBuySpy-Shared/basecoat
+      source_repo: OWNER/REPOSITORY
       fetch_host: github.com
       update_actor: ${{ vars.BASECOAT_UPDATE_ACTOR }}
     secrets:

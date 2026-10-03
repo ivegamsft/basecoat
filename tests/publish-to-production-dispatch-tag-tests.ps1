@@ -93,7 +93,7 @@ foreach ($requiredInternalPattern in @(
     }
 }
 
-if ($content -notmatch "git grep -inI -E 'ibuyspy-shared\|ibuyspy-dev'") {
+if ($content -notmatch "git grep -inI -E 'ibuyspy-shared\|ibuyspy-dev\|@ibuyspy'") {
     throw 'publish-to-production.yml must scan the generated payload for forbidden internal identifiers'
 }
 
@@ -102,6 +102,20 @@ if (-not $content.Contains('^LICENSE:3:Copyright \(c\) 2025 IBuySpy-Shared$')) {
 }
 if ($content -notmatch 'IBuySpy-Shared/basecoat-sheen.+ivegamsft/sheen') {
     throw 'publish-to-production.yml must rewrite internal basecoat-sheen references to the public catalog'
+}
+
+$prValidationPath = Join-Path $repoRoot '.github\workflows\pr-validation.yml'
+$prValidation = Get-Content $prValidationPath -Raw
+if ($prValidation -notmatch "git grep -inI -E 'ibuyspy-shared\|ibuyspy-dev\|@ibuyspy'") {
+    throw 'pr-validation.yml must reject internal organization and account identifiers in the simulated public payload'
+}
+
+$gettingStartedPath = Join-Path $repoRoot 'docs\getting-started.md'
+$gettingStarted = Get-Content $gettingStartedPath -Raw
+if ($gettingStarted -match 'IBuySpy-Shared/basecoat' -or
+    $gettingStarted -notmatch 'uses:\s*OWNER/REPOSITORY/\.github/workflows/check-basecoat-version-callable\.yml@COMMIT_SHA' -or
+    $gettingStarted -notmatch 'source_repo:\s*OWNER/REPOSITORY') {
+    throw 'docs/getting-started.md must use neutral source-repository placeholders rather than publication-time rewriting'
 }
 
 $removeStepStart = $content.IndexOf('      - name: Remove internal-only content before publish')
@@ -334,6 +348,12 @@ try {
     if ($forbiddenMatches.Count -ne 1 -or
         $forbiddenMatches[0] -ne 'LICENSE:3:Copyright (c) 2025 IBuySpy-Shared') {
         throw "Publish payload identifier allowlist mismatch: $($forbiddenMatches -join '; ')"
+    }
+
+    Add-Content -Path 'docs\public.md' -Value '@IBuySpy'
+    $negativeGuardOutput = & $bashPath '.test-sanitize-identifiers.sh' 2>&1
+    if ($LASTEXITCODE -eq 0 -or ($negativeGuardOutput -join "`n") -notmatch 'docs/public\.md:.*@IBuySpy') {
+        throw 'Publish payload guard must fail and report a case-insensitive internal account handle'
     }
 }
 finally {
