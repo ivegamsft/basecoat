@@ -483,7 +483,7 @@ foreach ($workflowEntry in $workflowMap) {
     $content = Get-Content -Path $sourceFile -Raw
 
     # Ensure downstream-friendly filename and visible naming prefix.
-    $lines = $content -split "`r?`n", -1
+    $lines = $content -split "`r?`n"
     $nameUpdated = $false
     for ($i = 0; $i -lt $lines.Length; $i++) {
         if ($lines[$i] -match '^name:\s*".*"$') {

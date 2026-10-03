@@ -148,6 +148,17 @@ jobs:
         -InstallClass reusable | Out-Null
     Assert-True -Condition ($LASTEXITCODE -eq 0) `
         -Message 'Installer must complete when its ownership manifest is present.'
+    $installedSecretWorkflow = Get-Content -LiteralPath (Join-Path $destinationDir 'basecoat-secret-scan.yml') -Raw
+    $installedTopLevelNames = @(
+        $installedSecretWorkflow -split "`r?`n" |
+            Where-Object { $_ -match '^name:' }
+    )
+    Assert-True -Condition ($installedTopLevelNames.Count -eq 1) `
+        -Message 'Installer must emit exactly one top-level name for a source workflow that already has a name.'
+    Assert-True -Condition ($installedTopLevelNames[0] -eq 'name: "BaseCoat Reusable - Secret Scan"') `
+        -Message 'Installer must replace the source workflow name with the configured downstream name.'
+    Assert-True -Condition ($installedSecretWorkflow -match '(?m)^on:$' -and $installedSecretWorkflow -match '(?m)^jobs:$') `
+        -Message 'Installer must preserve the source workflow YAML structure when replacing its name.'
     Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $destinationDir 'bc-secret-scan.yml'))) `
         -Message 'Installer must retire a legacy workflow marked factory-owned.'
     Assert-True -Condition (Test-Path -LiteralPath (Join-Path $destinationDir 'basecoat-custom-ci.yml')) `
