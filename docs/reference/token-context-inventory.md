@@ -2,7 +2,7 @@
 
 Generated as a standalone inventory (no edits to agent/skill/instruction files).
 
-- Generated: 2026-09-14 14:50:54 +0000
+- Generated: 2026-10-03 01:01:22 -0400
 - Estimation method: `approx_tokens = round(word_count × 1.35)` (same heuristic used in `scripts/validate-basecoat.ps1`).
 - Scope: `agents/*.agent.md`, `skills/*/SKILL.md`, `instructions/*.instructions.md`.
 
@@ -10,15 +10,16 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 
 | Type | Count | Total Words | Total Approx Tokens | Avg Approx Tokens |
 |---|---:|---:|---:|---:|
-| Agent | 131 | 40079 | 54108 | 413 |
-| Skill | 143 | 33840 | 45685 | 319 |
+| Agent | 131 | 40160 | 54218 | 414 |
+| Skill | 143 | 33886 | 45747 | 320 |
 | Instruction | 93 | 50636 | 68360 | 735 |
-| **All** | 367 | 124555 | 168153 | 458 |
+| **All** | 367 | 124682 | 168325 | 459 |
 
 ## Agents
 
 | Name | Location | Words | Approx Tokens |
 |---|---|---:|---:|
+| basecoat-60-workflow-ship-it-control-loop | `agents/basecoat-60-workflow-ship-it-control-loop.agent.md` | 448 | 605 |
 | basecoat-10-core-branch-hygiene-sweeper | `agents/basecoat-10-core-branch-hygiene-sweeper.agent.md` | 413 | 558 |
 | basecoat-10-core-change-isolation-architect | `agents/basecoat-10-core-change-isolation-architect.agent.md` | 390 | 526 |
 | basecoat-20-lang-dotnet-modernization-advisor | `agents/basecoat-20-lang-dotnet-modernization-advisor.agent.md` | 386 | 521 |
@@ -44,7 +45,6 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | basecoat-10-core-middleware-dev | `agents/basecoat-10-core-middleware-dev.agent.md` | 367 | 495 |
 | basecoat-50-security-security-monitor | `agents/basecoat-50-security-security-monitor.agent.md` | 367 | 495 |
 | basecoat-50-security-security-operations | `agents/basecoat-50-security-security-operations.agent.md` | 367 | 495 |
-| basecoat-60-workflow-ship-it-control-loop | `agents/basecoat-60-workflow-ship-it-control-loop.agent.md` | 367 | 495 |
 | basecoat-10-core-dependency-update-advisor | `agents/basecoat-10-core-dependency-update-advisor.agent.md` | 366 | 494 |
 | basecoat-60-workflow-infrastructure-deploy | `agents/basecoat-60-workflow-infrastructure-deploy.agent.md` | 366 | 494 |
 | basecoat-60-workflow-rollout-basecoat | `agents/basecoat-60-workflow-rollout-basecoat.agent.md` | 366 | 494 |
@@ -159,7 +159,6 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | lane-closeout | `skills/lane-closeout/SKILL.md` | 369 | 498 |
 | repo-cleanup | `skills/repo-cleanup/SKILL.md` | 369 | 498 |
 | rca | `skills/rca/SKILL.md` | 368 | 497 |
-| ship-it | `skills/ship-it/SKILL.md` | 367 | 495 |
 | rollout-basecoat | `skills/rollout-basecoat/SKILL.md` | 366 | 494 |
 | yagni-analysis | `skills/yagni-analysis/SKILL.md` | 366 | 494 |
 | copilot-review-triage | `skills/copilot-review-triage/SKILL.md` | 365 | 493 |
@@ -171,6 +170,7 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | agentops-audit | `skills/agentops-audit/SKILL.md` | 339 | 458 |
 | ci-audit | `skills/ci-audit/SKILL.md` | 339 | 458 |
 | backlog-rebalance-engine | `skills/backlog-rebalance-engine/SKILL.md` | 337 | 455 |
+| onboarding-telemetry | `skills/onboarding-telemetry/SKILL.md` | 335 | 452 |
 | sprint-closeout-audit | `skills/sprint-closeout-audit/SKILL.md` | 335 | 452 |
 | session-analysis | `skills/session-analysis/SKILL.md` | 331 | 447 |
 | backlog-revalidation | `skills/backlog-revalidation/SKILL.md` | 326 | 440 |
@@ -178,12 +178,13 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | agentic-sdlc-autonomy | `skills/agentic-sdlc-autonomy/SKILL.md` | 322 | 435 |
 | issue-triage | `skills/issue-triage/SKILL.md` | 322 | 435 |
 | local-dev-data-pack | `skills/local-dev-data-pack/SKILL.md` | 322 | 435 |
+| api-audit | `skills/api-audit/SKILL.md` | 321 | 433 |
 | backend-audit | `skills/backend-audit/SKILL.md` | 314 | 424 |
 | task-decomposition | `skills/task-decomposition/SKILL.md` | 312 | 421 |
+| ship-it | `skills/ship-it/SKILL.md` | 309 | 417 |
 | infrastructure-audit | `skills/infrastructure-audit/SKILL.md` | 302 | 408 |
 | mcp-audit | `skills/mcp-audit/SKILL.md` | 301 | 406 |
 | session-optimization | `skills/session-optimization/SKILL.md` | 301 | 406 |
-| api-audit | `skills/api-audit/SKILL.md` | 295 | 398 |
 | config-secrets-audit | `skills/config-secrets-audit/SKILL.md` | 292 | 394 |
 | project-rules-drift-audit | `skills/project-rules-drift-audit/SKILL.md` | 292 | 394 |
 | release-audit | `skills/release-audit/SKILL.md` | 291 | 393 |
@@ -202,7 +203,6 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | twelve-factor | `skills/twelve-factor/SKILL.md` | 260 | 351 |
 | azure-devops-rest | `skills/azure-devops-rest/SKILL.md` | 257 | 347 |
 | ci-flake-quarantine | `skills/ci-flake-quarantine/SKILL.md` | 257 | 347 |
-| onboarding-telemetry | `skills/onboarding-telemetry/SKILL.md` | 257 | 347 |
 | e2e-testing | `skills/e2e-testing/SKILL.md` | 250 | 338 |
 | frontend-audit | `skills/frontend-audit/SKILL.md` | 250 | 338 |
 | contract-testing | `skills/contract-testing/SKILL.md` | 249 | 336 |
