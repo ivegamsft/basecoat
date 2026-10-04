@@ -156,7 +156,7 @@ DB migration touched
 IaC apply path touched
 workflow permissions changed
 secrets/auth/security touched
-large PR override needed
+oversized batch requires decomposition or a reviewed mechanical exception
 ```
 
 ## 3. WIP Limits
@@ -173,8 +173,9 @@ max open critical-risk plans: 1
 max active PRs per agent: 2
 stale warning: 72 hours
 stale close/regenerate: 7 days
-large PR warning: 300 changed lines
-large PR block: 600 changed lines unless override label exists
+batch PR decomposition: split above 15 files or 300 additions plus deletions
+mechanical batch exception: qualified current-head human review, never a label
+individual PR size: existing risk and XXL human-approval policy; no batch cap
 ```
 
 For tighter review capacity (small team or solo maintainer), reduce to:

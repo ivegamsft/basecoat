@@ -345,6 +345,14 @@ sprint-planning language:
 2. Present the sprint plan and wait for confirmation.
 3. Only then begin execution with the oldest actionable item.
 
+Before implementation, classify each planned delivery as `individual` or
+`batch`. For batches, record source issues, independently deliverable units,
+expected files and additions plus deletions; split estimates above 15 files or
+300 changed lines into dependency-ordered PRs. Obtain a bounded inventory when
+estimates are unknown. Do not apply these batch limits to a cohesive individual
+feature; PR-time GitHub counts and the merge eligibility gate decide actual
+batch size.
+
 ## Azure Preflight Guardrail
 
 For `azure:` and `infra:` work, review these compatibility aliases before

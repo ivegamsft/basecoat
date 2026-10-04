@@ -8,6 +8,12 @@ $workflowPath = Join-Path $repoRoot '.github\workflows\pr-auto-merge-executor.ym
 $templatePath = Join-Path $repoRoot '.github\base-coat\workflows\pr-auto-merge-executor.yml'
 $humanBoundaryPath = Join-Path $repoRoot '.github\governance\human-approval-boundaries.json'
 $prValidationPath = Join-Path $repoRoot '.github\workflows\pr-validation.yml'
+$decompositionEvaluatorPath = Join-Path $repoRoot 'scripts\pr-decomposition-evaluator.cjs'
+$rootPrTemplatePath = Join-Path $repoRoot '.github\PULL_REQUEST_TEMPLATE.md'
+$managedPrTemplatePath = Join-Path $repoRoot 'templates\intake\PULL_REQUEST_TEMPLATE.md'
+$reviewReconcilePath = Join-Path $repoRoot '.github\workflows\merge-eligibility-human-review-reconcile.yml'
+$reviewReconcileTemplatePath = Join-Path $repoRoot '.github\base-coat\workflows\merge-eligibility-human-review-reconcile.yml'
+$sizeLabelerPath = Join-Path $repoRoot '.github\workflows\pr-size-labeler.yml'
 
 if (-not (Test-Path $workflowPath)) {
     throw "Missing workflow file: $workflowPath"
@@ -21,13 +27,92 @@ if (-not (Test-Path $humanBoundaryPath)) {
 if (-not (Test-Path $prValidationPath)) {
     throw "Missing PR validation workflow file: $prValidationPath"
 }
+foreach ($path in @(
+    $decompositionEvaluatorPath,
+    $rootPrTemplatePath,
+    $managedPrTemplatePath,
+    $reviewReconcilePath,
+    $reviewReconcileTemplatePath,
+    $sizeLabelerPath
+)) {
+    if (-not (Test-Path $path)) {
+        throw "Missing decomposition enforcement dependency: $path"
+    }
+}
 
 $workflow = Get-Content -Path $workflowPath -Raw
 $template = Get-Content -Path $templatePath -Raw
 $prValidation = Get-Content -Path $prValidationPath -Raw
+$reviewReconcile = Get-Content -Path $reviewReconcilePath -Raw
+$reviewReconcileTemplate = Get-Content -Path $reviewReconcileTemplatePath -Raw
+$sizeLabeler = Get-Content -Path $sizeLabelerPath -Raw
+$rootPrTemplate = Get-Content -Path $rootPrTemplatePath -Raw
+$managedPrTemplate = Get-Content -Path $managedPrTemplatePath -Raw
+
+foreach ($scopeField in @(
+    'Change scope: TBD',
+    'Source issues: TBD',
+    'Independently deliverable units: TBD',
+    'Expected changed lines (additions + deletions): TBD',
+    'Classification rationale: TBD',
+    'Mechanical batch exception evidence: none',
+    'Batch exception: <40-character-head-sha> <64-character-evidence-sha256>'
+)) {
+    if (
+        $rootPrTemplate -notmatch [regex]::Escape($scopeField) -or
+        $managedPrTemplate -notmatch [regex]::Escape($scopeField)
+    ) {
+        throw "Root and downstream PR templates must keep the batch-scope contract in parity: $scopeField"
+    }
+}
 
 if ($workflow -ne $template) {
     throw 'Workflow template mismatch: .github/workflows and .github/base-coat/workflows copies must be identical.'
+}
+if ($workflow -notmatch "scripts/pr-decomposition-evaluator\.cjs") {
+    throw 'Merge eligibility must invoke the pure decomposition evaluator from the trusted default-branch checkout.'
+}
+if ($workflow -notmatch '(?s)Checkout repository.*?ref:\s*\$\{\{\s*github\.event\.repository\.default_branch\s*\|\|\s*''main''\s*\}\}') {
+    throw 'Privileged evaluation must load trusted code from the default branch, never the pull request head.'
+}
+foreach ($requiredDecompositionText in @(
+    'changedFiles: pr.changed_files',
+    'additions: pr.additions',
+    'deletions: pr.deletions',
+    'files,',
+    'decomposition.reviewPending',
+    'initialSnapshot',
+    'finalSnapshot',
+    'PR metadata changed during evaluation',
+    'pre-merge-snapshot:',
+    'needs: [evaluate, pre-merge-snapshot]',
+    'EXPECTED_BASE_SHA',
+    'EXPECTED_DECOMPOSITION_DIGEST',
+    'EXPECTED_EXCEPTION_REVIEW_ID',
+    'EXPECTED_REVIEW_DIGEST',
+    'approvalsStillSatisfied',
+    'reviewSnapshotDigest',
+    'github.paginate(github.rest.pulls.listFiles',
+    'decomposition.decision === ''pass''',
+    'humanApprovalSizes',
+    'requiresHumanApprovalBySize',
+    'requiredApprovals = Math.max'
+)) {
+    if ($workflow -notmatch [regex]::Escape($requiredDecompositionText)) {
+        throw "Merge eligibility is missing decomposition or snapshot validation: $requiredDecompositionText"
+    }
+}
+foreach ($unchangedSizeBoundary in @(
+    'max: 20',
+    'max: 100',
+    'max: 300',
+    'max: 800',
+    'max: 2000',
+    "label: 'size:XXL'"
+)) {
+    if ($sizeLabeler -notmatch [regex]::Escape($unchangedSizeBoundary)) {
+        throw "PR size-label boundaries must remain unchanged: $unchangedSizeBoundary"
+    }
 }
 foreach ($requiredReleaseLabelPollingText in @(
     'max_label_poll_attempts=10',
@@ -371,6 +456,7 @@ try {
 
     $harness = @"
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
 $($helperMatch.Groups['helper'].Value)
 
 const currentSha = 'a'.repeat(40);
@@ -473,6 +559,359 @@ const evaluate = ({ comments = [], issues = [] } = {}) =>
         throw 'Solo-dev maintainer acknowledgement behavioral contract tests failed.'
     }
 } finally {
+    if (Test-Path $scratchRoot) {
+        Remove-Item -Path $scratchRoot -Recurse -Force
+    }
+}
+
+$decompositionHarnessPath = Join-Path $scratchRoot 'decomposition-contract.cjs'
+try {
+    New-Item -Path $scratchRoot -ItemType Directory -Force | Out-Null
+    $decompositionHarness = @'
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const {
+  MAX_FILES,
+  MAX_LINES,
+  evaluateDecomposition,
+  reviewSnapshotDigest
+} = require(process.env.DECOMPOSITION_EVALUATOR);
+
+const headSha = 'a'.repeat(40);
+const baseSha = 'b'.repeat(40);
+const inputRevision = 'c'.repeat(40);
+const permissionByLogin = {
+  maintainer: { role_name: 'maintain' },
+  writer: { permission: 'write' },
+  reader: { permission: 'read' },
+  'reviewer[bot]': { permission: 'admin' }
+};
+const resolvePermission = async login => permissionByLogin[login] || null;
+const makeFiles = (count, prefix = 'docs/generated') =>
+  Array.from({ length: count }, (_, index) => ({
+    filename: `${prefix}/file-${String(index).padStart(2, '0')}.md`,
+    status: 'modified'
+  }));
+const makeBody = ({
+  scope = 'batch',
+  units = 2,
+  unitInventory = 'work unit A; work unit B',
+  issues = [3475],
+  exception = null,
+  scopeLines = ''
+} = {}) => [
+  '## Intake Contract',
+  '',
+  '### Design',
+  '',
+  `Change scope: ${scope}`,
+  scopeLines,
+  `Source issues: ${issues.map(issue => `#${issue}`).join(', ')}`,
+  `Independently deliverable units: ${units}`,
+  `Unit inventory: ${unitInventory}`,
+  'Expected files: 16',
+  'Expected changed lines (additions + deletions): 301',
+  'Classification rationale: independently deployable work units.',
+  `Mechanical batch exception evidence: ${exception ? 'proposed' : 'none'}`,
+  ...(exception ? ['```json', JSON.stringify(exception, null, 2), '```'] : []),
+  '',
+  '### Debate',
+  '',
+  'Alternatives were considered.'
+].filter(Boolean).join('\n');
+const makeException = (files, updates = {}) => ({
+  command: 'generator --source input.json',
+  tool_version: 'generator 1.2.3',
+  input_revision: inputRevision,
+  file_inventory: files.map(file => ({
+    path: file.filename,
+    status: file.status,
+    previous_path: file.previous_filename || ''
+  })),
+  smaller_batches_not_viable: 'All outputs are generated from one atomic source snapshot.',
+  reproduction_diff_evidence: 'Re-running the declared generator produces an identical diff.',
+  validation_command: 'generator --check',
+  validation_result: 'Passed with no diff.',
+  rollback_procedure: 'Revert the generated-output commit.',
+  source_issues: [3475],
+  head_sha: headSha,
+  base_sha: baseSha,
+  ...updates
+});
+const makeReview = (digest, updates = {}) => ({
+  id: 42,
+  user: { login: 'maintainer', type: 'User' },
+  state: 'APPROVED',
+  commit_id: headSha,
+  body: `Reviewed evidence.\nBatch exception: ${headSha} ${digest}`,
+  submitted_at: '2026-10-04T01:00:00Z',
+  ...updates
+});
+const evaluate = async ({
+  body,
+  exception = null,
+  files = makeFiles(16),
+  changedFiles = files.length,
+  additions = 150,
+  deletions = 151,
+  reviews = [],
+  authorLogin = 'author',
+  ...extra
+} = {}) => evaluateDecomposition({
+  body: body || makeBody({ exception }),
+  changedFiles,
+  additions,
+  deletions,
+  files,
+  headSha,
+  baseSha,
+  reviews,
+  authorLogin,
+  resolvePermission,
+  ...extra
+});
+
+(async () => {
+  assert.equal(MAX_FILES, 15);
+  assert.equal(MAX_LINES, 300);
+  const sizeLabelerText = fs.readFileSync(process.env.SIZE_LABELER_PATH, 'utf8');
+  const thresholdBlock = sizeLabelerText.match(/const thresholds = \[([\s\S]*?)\n\s*\];/)?.[1];
+  assert.ok(thresholdBlock, 'the existing deterministic size-label thresholds must remain present');
+  const sizeThresholds = Array.from(
+    thresholdBlock.matchAll(/\{\s*label:\s*'([^']+)',\s*max:\s*(\d+|Number\.MAX_SAFE_INTEGER)/g),
+    match => ({ label: match[1], max: match[2] === 'Number.MAX_SAFE_INTEGER' ? Number.MAX_SAFE_INTEGER : Number(match[2]) })
+  );
+  const sizeFor = lines => sizeThresholds.find(threshold => lines <= threshold.max)?.label;
+  for (const [lines, expected] of [
+    [20, 'size:XS'], [21, 'size:S'],
+    [100, 'size:S'], [101, 'size:M'],
+    [300, 'size:M'], [301, 'size:L'],
+    [800, 'size:L'], [801, 'size:XL'],
+    [2000, 'size:XL'], [2001, 'size:XXL']
+  ]) {
+    assert.equal(sizeFor(lines), expected, `the existing ${lines}-line size boundary is unchanged`);
+  }
+  assert.equal((await evaluate({
+    files: makeFiles(15),
+    changedFiles: 15,
+    additions: 150,
+    deletions: 150
+  })).decision, 'pass', '15 files and 300 total changed lines are inclusive');
+  assert.equal((await evaluate({
+    files: makeFiles(14),
+    changedFiles: 14,
+    additions: 150,
+    deletions: 149
+  })).decision, 'pass', 'batches below both thresholds pass');
+  assert.equal((await evaluate({
+    files: makeFiles(16),
+    changedFiles: 16,
+    additions: 300,
+    deletions: 0
+  })).decision, 'block', '16 files block even at the inclusive line limit');
+  assert.equal((await evaluate({
+    files: makeFiles(15),
+    changedFiles: 15,
+    additions: 150,
+    deletions: 151
+  })).decision, 'block', '301 lines block even at the inclusive file limit');
+  assert.equal((await evaluate({
+    files: makeFiles(16),
+    changedFiles: 16,
+    additions: 150,
+    deletions: 151
+  })).decision, 'block', 'overflow of both limits requires decomposition');
+  assert.equal((await evaluate({
+    body: makeBody({
+      scope: 'individual',
+      units: 1,
+      unitInventory: 'one cohesive feature'
+    }),
+    files: makeFiles(16),
+    changedFiles: 16,
+    additions: 300,
+    deletions: 1
+  })).decision, 'pass', 'a cohesive individual feature has no batch cap');
+  assert.equal((await evaluate({
+    files: makeFiles(73),
+    changedFiles: 73,
+    additions: 3000,
+    deletions: 3169
+  })).decision, 'block', 'the 73-file/6169-line batch blocks without an exception');
+
+  const batchFiles = makeFiles(16);
+  const exception = makeException(batchFiles);
+  const proposal = await evaluate({ files: batchFiles, exception });
+  assert.equal(proposal.decision, 'pending', `an exception proposal is not authorization: ${proposal.reason}`);
+  assert.match(proposal.evidenceDigest, /^[0-9a-f]{64}$/);
+  const validApproval = makeReview(proposal.evidenceDigest);
+  const approvedException = await evaluate({
+    files: batchFiles,
+    exception,
+    reviews: [validApproval]
+  });
+  assert.equal(approvedException.decision, 'pass');
+  assert.equal(approvedException.reviewId, validApproval.id);
+
+  const mixedBehaviorFiles = makeFiles(16);
+  mixedBehaviorFiles[0].filename = 'scripts/authentication-check.ps1';
+  assert.equal((await evaluate({
+    files: mixedBehaviorFiles,
+    exception: makeException(mixedBehaviorFiles),
+    reviews: [validApproval]
+  })).decision, 'block', 'sensitive auth changes cannot ride a mechanical exception');
+
+  assert.equal((await evaluate({
+    body: '## Intake Contract\n### Design\n\nChange scope: batch',
+    files: makeFiles(16),
+    changedFiles: 16
+  })).decision, 'block', 'missing scope metadata fails closed');
+  assert.equal((await evaluate({
+    body: makeBody({ scopeLines: 'Change scope: batch' }),
+    files: makeFiles(16),
+    changedFiles: 16
+  })).decision, 'block', 'duplicate scope metadata fails closed');
+  assert.equal((await evaluate({
+    body: makeBody({
+      scope: 'individual',
+      units: 2,
+      unitInventory: 'work unit A; work unit B'
+    }),
+    files: makeFiles(16),
+    changedFiles: 16
+  })).decision, 'block', 'individual scope contradicting multiple deliverables fails closed');
+  assert.equal((await evaluate({
+    changedFiles: undefined
+  })).decision, 'block', 'missing authoritative counts do not become zero');
+  assert.equal((await evaluate({
+    additions: -1
+  })).decision, 'block', 'negative authoritative counts fail closed');
+  assert.equal((await evaluate({
+    files: makeFiles(15),
+    changedFiles: 16
+  })).decision, 'block', 'incomplete GitHub file inventory fails closed');
+
+  const editedException = makeException(batchFiles, {
+    command: 'generator --source changed.json'
+  });
+  const changedEvidence = await evaluate({
+    files: batchFiles,
+    exception: editedException,
+    reviews: [validApproval]
+  });
+  assert.equal(changedEvidence.decision, 'pending');
+  assert.notEqual(changedEvidence.evidenceDigest, proposal.evidenceDigest);
+  const changedBase = await evaluate({
+    files: batchFiles,
+    exception: makeException(batchFiles, { base_sha: 'e'.repeat(40) })
+  });
+  assert.equal(changedBase.decision, 'block', 'exception evidence must bind the current base SHA');
+  const duplicateJsonBody = makeBody({ exception }).replace(
+    '"command": "generator --source input.json",',
+    '"command": "generator --source input.json",\n  "command": "generator --source altered.json",'
+  );
+  assert.equal((await evaluate({
+    files: batchFiles,
+    body: duplicateJsonBody
+  })).decision, 'block', 'duplicate JSON keys cannot create ambiguous evidence');
+
+  const unqualified = await evaluate({
+    files: batchFiles,
+    exception,
+    reviews: [makeReview(proposal.evidenceDigest, {
+      user: { login: 'reader', type: 'User' }
+    })]
+  });
+  assert.equal(unqualified.decision, 'pending', 'read-only reviewers cannot authorize exceptions');
+  const botReview = await evaluate({
+    files: batchFiles,
+    exception,
+    reviews: [makeReview(proposal.evidenceDigest, {
+      user: { login: 'reviewer[bot]', type: 'Bot' }
+    })]
+  });
+  assert.equal(botReview.decision, 'pending', 'bot reviews cannot authorize exceptions');
+  const authorReview = await evaluate({
+    files: batchFiles,
+    exception,
+    reviews: [validApproval],
+    authorLogin: 'maintainer'
+  });
+  assert.equal(authorReview.decision, 'pending', 'the PR author cannot authorize an exception');
+  const staleReview = await evaluate({
+    files: batchFiles,
+    exception,
+    reviews: [makeReview(proposal.evidenceDigest, { commit_id: 'd'.repeat(40) })]
+  });
+  assert.equal(staleReview.decision, 'pending', 'reviews on an earlier head cannot authorize an exception');
+  const changedReview = await evaluate({
+    files: batchFiles,
+    exception,
+    reviews: [
+      validApproval,
+      makeReview(proposal.evidenceDigest, {
+        id: 43,
+        state: 'CHANGES_REQUESTED',
+        submitted_at: '2026-10-04T02:00:00Z'
+      })
+    ]
+  });
+  assert.equal(changedReview.decision, 'pending', 'a later non-approval revokes the earlier approval');
+  assert.notEqual(
+    reviewSnapshotDigest([validApproval]),
+    reviewSnapshotDigest([{
+      ...validApproval,
+      body: `${validApproval.body}\nEdited after evaluation`
+    }]),
+    'the pre-merge snapshot changes when review evidence is edited'
+  );
+  const editedAnnotation = await evaluate({
+    files: batchFiles,
+    exception,
+    reviews: [makeReview(proposal.evidenceDigest, {
+      body: 'Reviewed evidence.\nBatch exception: edited'
+    })]
+  });
+  assert.equal(editedAnnotation.decision, 'pending', 'edited annotation invalidates the review binding');
+  const duplicateAnnotation = await evaluate({
+    files: batchFiles,
+    exception,
+    reviews: [makeReview(proposal.evidenceDigest, {
+      body: `Batch exception: ${headSha} ${proposal.evidenceDigest}\nBatch exception: ${headSha} ${proposal.evidenceDigest}`
+    })]
+  });
+  assert.equal(duplicateAnnotation.decision, 'pending', 'annotation must appear exactly once');
+
+  const spoofedLabel = await evaluate({
+    files: makeFiles(16),
+    changedFiles: 16,
+    additions: 300,
+    deletions: 0,
+    labels: ['size:S']
+  });
+  assert.equal(spoofedLabel.decision, 'block', 'size labels do not authorize oversized batches');
+  const unknownPermission = await evaluate({
+    files: batchFiles,
+    exception,
+    reviews: [makeReview(proposal.evidenceDigest)],
+    resolvePermission: async () => { throw new Error('permission API unavailable'); }
+  });
+  assert.equal(unknownPermission.decision, 'pending', 'permission API failures deny exception authorization');
+})().catch(error => {
+  console.error(error);
+  process.exitCode = 1;
+});
+'@
+    Set-Content -Path $decompositionHarnessPath -Value $decompositionHarness -Encoding UTF8
+    $env:DECOMPOSITION_EVALUATOR = $decompositionEvaluatorPath
+    $env:SIZE_LABELER_PATH = $sizeLabelerPath
+    & node $decompositionHarnessPath
+    if ($LASTEXITCODE -ne 0) {
+        throw 'PR decomposition evaluator behavioral contract tests failed.'
+    }
+} finally {
+    Remove-Item Env:\DECOMPOSITION_EVALUATOR -ErrorAction SilentlyContinue
+    Remove-Item Env:\SIZE_LABELER_PATH -ErrorAction SilentlyContinue
     if (Test-Path $scratchRoot) {
         Remove-Item -Path $scratchRoot -Recurse -Force
     }

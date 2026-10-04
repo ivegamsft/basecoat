@@ -6,6 +6,13 @@ Workflow file: `.github/workflows/pr-size-labeler.yml`
 
 Applies deterministic size labels and ensures a release-planning label exists on PRs.
 
+The size label measures line churn only. Batch decomposition is a separate
+merge-eligibility rule: batches over 15 files or 300 additions plus deletions
+must split or obtain the qualified mechanical exception documented in the PR
+template. Cohesive individual features are not capped by that batch rule, and a
+size label never authorizes an exception. The existing XXL qualified-human gate
+is unchanged.
+
 ## Flow
 
 ```mermaid

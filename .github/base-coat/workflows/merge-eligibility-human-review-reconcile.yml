@@ -3,9 +3,9 @@ name: "BaseCoat - Merge eligibility human-review reconcile"
 on:
   # Unprivileged listener only. Never subscribe to submitted/edited:
   # Copilot reviewer has no repository permission, so those events become
-  # action_required before any job `if:` can skip them. That blocks solo-dev
-  # (advisory Copilot review, zero PR approvals). Dismissal is a human action.
-  # Team-dev / regulated-team pick up submitted human approvals on a schedule.
+  # action_required before any job `if:` can skip them. Keep dismissal as the
+  # only review event; scheduled reconciliation also refreshes batch-exception
+  # evidence without making Copilot's submitted reviews a workflow trigger.
   pull_request_review:
     types:
       - dismissed
@@ -140,11 +140,11 @@ jobs:
           echo "selected_pack=${SELECTED_PACK}" >> "${GITHUB_OUTPUT}"
 
       - name: Skip when policy pack does not reconcile human reviews
-        if: steps.policy-pack.outputs.reconcile != 'true'
-        run: echo "Policy pack '${{ steps.policy-pack.outputs.selected_pack }}' does not reconcile merge eligibility after human reviews."
+        if: steps.policy-pack.outputs.reconcile != 'true' && github.event_name != 'schedule' && github.event_name != 'workflow_dispatch'
+        run: echo "Policy pack '${{ steps.policy-pack.outputs.selected_pack }}' does not reconcile merge eligibility after human reviews; scheduled batch-exception refresh remains enabled."
 
       - name: Dispatch executor for current-head human approvals
-        if: steps.policy-pack.outputs.reconcile == 'true'
+        if: steps.policy-pack.outputs.reconcile == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
@@ -175,7 +175,9 @@ jobs:
                 review.user?.type !== 'Bot' &&
                 !botLogins.has(String(review.user?.login || ''))
               );
-              if (!hasCurrentHeadHumanApproval) continue;
+              const hasBatchExceptionEvidence =
+                /Mechanical batch exception evidence:/i.test(String(pullRequest.body || ''));
+              if (!hasCurrentHeadHumanApproval && !hasBatchExceptionEvidence) continue;
               await github.rest.actions.createWorkflowDispatch({
                 owner,
                 repo,
@@ -183,5 +185,8 @@ jobs:
                 ref: defaultBranch,
                 inputs: { pr_number: String(pullRequest.number) }
               });
-              console.log(`Dispatched merge eligibility evaluation for PR #${pullRequest.number} after current-head human approval on ${liveHead}.`);
+              console.log(
+                `Dispatched merge eligibility evaluation for PR #${pullRequest.number} ` +
+                `(${hasBatchExceptionEvidence ? 'batch-exception evidence refresh' : 'current-head human approval'}) on ${liveHead}.`
+              );
             }

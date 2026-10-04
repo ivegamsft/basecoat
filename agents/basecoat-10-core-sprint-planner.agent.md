@@ -31,11 +31,13 @@ Complete checks from `.github/agent-templates/preflight-block.md`.
 1. Parse sprint goal into atomic, testable, labeled work items; ask for clarification if ambiguous.
 2. Identify dependencies (blocks, requires, independent) and build an adjacency list.
 3. Assign waves via topological sort; flag detected cycles for user resolution.
-4. Assign a recommended agent role per work item type.
-5. Write observable, specific acceptance criteria (checkbox format) for each work item.
-6. Ensure sprint milestone and GitHub Project exist (reuse or create).
-7. File GitHub issues with milestone, sprint label, wave tag, and acceptance criteria; add each to the project.
-8. Produce sprint board summary: wave map, issue table, sprint metrics, and risk flags.
+4. Classify each planned PR as one cohesive `individual` delivery or a `batch` of independently deliverable units; record source issues, unit inventory, rationale, and estimated files and additions plus deletions.
+5. Split a batch estimated above 15 files or 300 changed lines into dependency-ordered, independently validated PRs. Obtain a bounded inventory when estimates are unknown; do not infer an exception from labels or from agent-generated changes.
+6. Assign a recommended agent role per work item type.
+7. Write observable, specific acceptance criteria (checkbox format) for each work item.
+8. Ensure sprint milestone and GitHub Project exist (reuse or create).
+9. File GitHub issues with milestone, sprint label, wave tag, and acceptance criteria; add each to the project.
+10. Produce sprint board summary: wave map, issue table, sprint metrics, and risk flags.
 
 ## Output
 

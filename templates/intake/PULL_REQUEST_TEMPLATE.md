@@ -16,6 +16,27 @@ List how you validated the change.
 
 <!-- Proposed design or implementation shape. If not applicable, write N/A and why. -->
 
+Change scope: TBD
+Source issues: TBD
+Independently deliverable units: TBD
+Unit inventory: TBD
+Expected files: TBD
+Expected changed lines (additions + deletions): TBD
+Classification rationale: TBD
+Mechanical batch exception evidence: none
+
+<!--
+For a proposed mechanical batch exception, replace "none" with "proposed" and
+add one JSON code fence with exactly these fields:
+command, tool_version, input_revision, file_inventory, smaller_batches_not_viable,
+reproduction_diff_evidence, validation_command, validation_result,
+rollback_procedure, source_issues, head_sha, base_sha.
+file_inventory entries contain path, status, and previous_path (empty for non-renames).
+After reviewing the evidence, a qualified human must put this exact standalone
+line in their latest APPROVED review on the current head:
+Batch exception: <40-character-head-sha> <64-character-evidence-sha256>
+-->
+
 ### Debate
 
 <!-- Alternatives considered and why this approach won. If not applicable, write N/A and why. -->

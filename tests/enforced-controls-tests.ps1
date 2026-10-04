@@ -21,9 +21,18 @@ if (-not (Test-Path $inventoryPath)) {
     $failures += 'missing docs/reference/governance/enforced-controls.md'
 } else {
     $inventory = Get-Content $inventoryPath -Raw
-    foreach ($control in @('LOG-FIRST issue evidence', 'Routine PR size limit', 'Config secret examples')) {
+    foreach ($control in @('LOG-FIRST issue evidence', 'Batch PR decomposition', 'Config secret examples')) {
         if ($inventory -notmatch [regex]::Escape($control)) {
             $failures += "control inventory missing '$control'"
+        }
+    }
+    foreach ($decompositionContract in @(
+        'individual cohesive features are not capped',
+        'scripts/pr-decomposition-evaluator.cjs',
+        'Existing XXL human approval remains independent'
+    )) {
+        if ($inventory -notmatch [regex]::Escape($decompositionContract)) {
+            $failures += "batch decomposition inventory missing '$decompositionContract'"
         }
     }
 }

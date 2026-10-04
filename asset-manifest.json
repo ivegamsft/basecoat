@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.1",
   "libraryVersion": "4.5.2",
-  "generatedAt": "2026-10-03T06:43:47.3551306Z",
+  "generatedAt": "2026-10-04T04:15:18.3550403Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -414,7 +414,7 @@
     {
       "path": "agents/basecoat-10-core-sprint-planner.agent.md",
       "type": "agent",
-      "sha": "7c2044653982a8876a339f1943bea4c33df79cb1",
+      "sha": "1e24ddaf79602b70fe25b8df655117d9e7b89a2d",
       "version": null,
       "effectiveVersion": "4.5.2",
       "versionSource": "library"
@@ -1238,7 +1238,7 @@
     {
       "path": "instructions/basecoat-10-core-intent-routing.instructions.md",
       "type": "instruction",
-      "sha": "258e2cfa0218f238542e7e95d505fdc1db8adf62",
+      "sha": "02da4d308b4a5d513934c9ef4aa9724c3c1fc349",
       "version": null,
       "effectiveVersion": "4.5.2",
       "versionSource": "library"
@@ -1526,7 +1526,7 @@
     {
       "path": "instructions/basecoat-20-lang-governance.instructions.md",
       "type": "instruction",
-      "sha": "ac8ae1b8f3821c2eb6b36f2e15d5b763c588d176",
+      "sha": "efdd6503396ec95e905a231108ef2432014cad46",
       "version": null,
       "effectiveVersion": "4.5.2",
       "versionSource": "library"

@@ -350,9 +350,23 @@ jobs:
     outputs:
       eligible: ${{ steps.policy.outputs.eligible }}
       pr_number: ${{ steps.policy.outputs.pr_number }}
+      head_sha: ${{ steps.policy.outputs.head_sha }}
+      base_sha: ${{ steps.policy.outputs.base_sha }}
+      snapshot_digest: ${{ steps.policy.outputs.snapshot_digest }}
+      changed_files: ${{ steps.policy.outputs.changed_files }}
+      additions: ${{ steps.policy.outputs.additions }}
+      deletions: ${{ steps.policy.outputs.deletions }}
+      decomposition_digest: ${{ steps.policy.outputs.decomposition_digest }}
+      exception_review_id: ${{ steps.policy.outputs.exception_review_id }}
+      review_digest: ${{ steps.policy.outputs.review_digest }}
+      required_approvals: ${{ steps.policy.outputs.required_approvals }}
+      human_review_required: ${{ steps.policy.outputs.human_review_required }}
+      qualified_approvers: ${{ steps.policy.outputs.qualified_approvers }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: ${{ github.event.repository.default_branch || 'main' }}
 
       - name: Evaluate policy and merge readiness
         id: policy
@@ -360,6 +374,7 @@ jobs:
         env:
           POLICY_PACK: ${{ vars.BASECOAT_POLICY_PACK }}
           PR_NUMBER_INPUT: ${{ inputs.pr_number || '' }}
+          WORKFLOW_REF: ${{ github.workflow_ref }}
         with:
           script: |
             const marker = '<!-- pr-auto-merge-executor:v1 -->';
@@ -370,6 +385,9 @@ jobs:
             const repo = context.repo.repo;
             const workflowUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
             const defaultBranch = context.payload.repository?.default_branch || 'main';
+            const { evaluateDecomposition, reviewSnapshotDigest, sha256 } = require(
+              require('node:path').join(process.env.GITHUB_WORKSPACE, 'scripts/pr-decomposition-evaluator.cjs')
+            );
 
             const resolvePrNumber = () => {
               if (context.payload.pull_request?.number) return Number(context.payload.pull_request.number);
@@ -504,6 +522,26 @@ jobs:
               pull_number: prNumber
             });
             const headSha = pr.head.sha;
+            const baseSha = String(pr.base?.sha || '');
+            const metadataDigest = pullRequest => sha256(JSON.stringify({
+              title: String(pullRequest.title || ''),
+              body: String(pullRequest.body || '')
+            }));
+            const labelDigest = pullRequest => sha256(JSON.stringify(
+              (pullRequest.labels || []).map(label => String(label.name || '').toLowerCase()).sort()
+            ));
+            const initialSnapshot = {
+              headSha: String(pr.head?.sha || ''),
+              baseSha,
+              baseRef: String(pr.base?.ref || ''),
+              state: String(pr.state || ''),
+              draft: Boolean(pr.draft),
+              metadataDigest: metadataDigest(pr),
+              labelDigest: labelDigest(pr),
+              changedFiles: pr.changed_files,
+              additions: pr.additions,
+              deletions: pr.deletions
+            };
             const publishEligibilityStatus = async (state, description) => {
               await github.rest.repos.createCommitStatus({
                 owner,
@@ -841,6 +879,8 @@ jobs:
               pull_number: prNumber,
               per_page: 100
             });
+            const currentReviewDigest = reviewSnapshotDigest(reviews);
+            initialSnapshot.reviewDigest = currentReviewDigest;
             const automatedReviewPolicy = profile.main?.automated_review || {
               required: false,
               reviewer_logins: [],
@@ -908,6 +948,22 @@ jobs:
               blockers.push(
                 `Human review boundary requires at least one approval for risk tier '${riskTier}'.`
               );
+            }
+
+            const decomposition = await evaluateDecomposition({
+              body: pr.body,
+              changedFiles: pr.changed_files,
+              additions: pr.additions,
+              deletions: pr.deletions,
+              files,
+              headSha,
+              baseSha,
+              reviews,
+              authorLogin: pr.user?.login,
+              resolvePermission
+            });
+            if (decomposition.decision !== 'pass') {
+              blockers.push(decomposition.reason);
             }
 
             let maintainerAcknowledgement = {
@@ -1237,15 +1293,82 @@ jobs:
               blockers.push("merge_queue_posture required: auto-merge executor defers to repository merge queue policy.");
             }
 
+            const { data: finalPr } = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: prNumber
+            });
+            const finalReviews = await github.paginate(github.rest.pulls.listReviews, {
+              owner,
+              repo,
+              pull_number: prNumber,
+              per_page: 100
+            });
+            const finalSnapshot = {
+              headSha: String(finalPr.head?.sha || ''),
+              baseSha: String(finalPr.base?.sha || ''),
+              baseRef: String(finalPr.base?.ref || ''),
+              state: String(finalPr.state || ''),
+              draft: Boolean(finalPr.draft),
+              metadataDigest: metadataDigest(finalPr),
+              labelDigest: labelDigest(finalPr),
+              changedFiles: finalPr.changed_files,
+              additions: finalPr.additions,
+              deletions: finalPr.deletions,
+              reviewDigest: reviewSnapshotDigest(finalReviews)
+            };
+            if (JSON.stringify(initialSnapshot) !== JSON.stringify(finalSnapshot)) {
+              const workflowId = String(process.env.WORKFLOW_REF || '')
+                .match(/\.github\/workflows\/([^@]+)@/)?.[1];
+              if (!workflowId || !finalSnapshot.headSha) {
+                throw new Error('Unable to queue re-evaluation after PR metadata changed during eligibility evaluation.');
+              }
+              await github.rest.repos.createCommitStatus({
+                owner,
+                repo,
+                sha: finalSnapshot.headSha,
+                state: 'pending',
+                context: eligibilityStatusContext,
+                description: 'PR metadata changed during evaluation; re-evaluating the current snapshot.',
+                target_url: workflowUrl
+              });
+              await github.rest.actions.createWorkflowDispatch({
+                owner,
+                repo,
+                workflow_id: workflowId,
+                ref: defaultBranch,
+                inputs: { pr_number: String(prNumber) }
+              });
+              core.setOutput('eligible', 'false');
+              core.setOutput('pr_number', String(prNumber));
+              core.setFailed('PR metadata changed during evaluation; queued a fresh evaluation and withheld eligibility.');
+              return;
+            }
+
             const eligible = blockers.length === 0;
+            const pendingCheckBlocker =
+              Boolean(requiredCheckState?.hasPendingChecks) &&
+              unsatisfiedChecks.length > 0 &&
+              blockers.some(reason => String(reason).startsWith('Required checks not satisfied:'));
             const waitingForRequiredChecks =
               Boolean(requiredCheckState?.hasPendingChecks) &&
               unsatisfiedChecks.length > 0 &&
-              blockers.length === 1 &&
-              String(blockers[0]).startsWith('Required checks not satisfied:');
+              blockers.every(reason =>
+                String(reason).startsWith('Required checks not satisfied:') ||
+                (decomposition.reviewPending && reason === decomposition.reason)
+              );
             const waitingForAutomatedReview =
               !automatedReviewSatisfied && blockers.length === 1;
-            const waitingForExternalProgress = waitingForAutomatedReview || waitingForRequiredChecks;
+            const waitingForMechanicalExceptionReview =
+              decomposition.reviewPending &&
+              blockers.every(reason =>
+                reason === decomposition.reason ||
+                (pendingCheckBlocker && String(reason).startsWith('Required checks not satisfied:'))
+              );
+            const waitingForExternalProgress =
+              waitingForAutomatedReview ||
+              waitingForRequiredChecks ||
+              waitingForMechanicalExceptionReview;
             const acknowledgementSummary = requiresMaintainerAcknowledgement
               ? (
                   maintainerAcknowledgement.satisfied
@@ -1271,6 +1394,11 @@ jobs:
                   `- Required approvals: \`${requiredApprovals}\``,
                   `- Automated review: \`${automatedReviewSummary}\``,
                   `- Human review boundary: \`${requiresHumanReviewByBoundary ? 'required' : 'not-required'}\``,
+                  `- Decomposition: \`${decomposition.scope} (${decomposition.counts.changedFiles} files, ${decomposition.counts.changedLines} changed lines)\``,
+                  `- Mechanical exception evidence: \`${decomposition.evidenceDigest || 'not-proposed'}\``,
+                  `- Mechanical exception review ID: \`${decomposition.reviewId || 'not-required'}\``,
+                  `- PR snapshot: \`head ${headSha}; base ${baseSha}\``,
+                  `- Review snapshot digest: \`${currentReviewDigest}\``,
                   `- Maintainer acknowledgement: \`${acknowledgementSummary}\``,
                   `- Production environment boundary: \`${productionEnvironmentBoundary}\``,
                   `- Merge queue posture: \`${mergeQueuePosture}\``,
@@ -1287,6 +1415,11 @@ jobs:
                   `- Required approvals: \`${requiredApprovals}\``,
                   `- Automated review: \`${automatedReviewSummary}\``,
                   `- Human review boundary: \`${requiresHumanReviewByBoundary ? 'required' : 'not-required'}\``,
+                  `- Decomposition: \`${decomposition.scope} (${decomposition.counts.changedFiles} files, ${decomposition.counts.changedLines} changed lines)\``,
+                  `- Mechanical exception evidence: \`${decomposition.evidenceDigest || 'not-proposed'}\``,
+                  `- Mechanical exception review ID: \`${decomposition.reviewId || 'pending'}\``,
+                  `- PR snapshot: \`head ${headSha}; base ${baseSha}\``,
+                  `- Review snapshot digest: \`${currentReviewDigest}\``,
                   `- Maintainer acknowledgement: \`${acknowledgementSummary}\``,
                   `- Production environment boundary: \`${productionEnvironmentBoundary}\``,
                   `- Merge queue posture: \`${mergeQueuePosture}\``,
@@ -1320,6 +1453,22 @@ jobs:
 
             core.setOutput('eligible', eligible ? 'true' : 'false');
             core.setOutput('pr_number', String(prNumber));
+            core.setOutput('head_sha', headSha);
+            core.setOutput('base_sha', baseSha);
+            core.setOutput('snapshot_digest', sha256(JSON.stringify({
+              ...initialSnapshot,
+              metadataDigest: initialSnapshot.metadataDigest,
+              labelDigest: initialSnapshot.labelDigest
+            })));
+            core.setOutput('changed_files', String(pr.changed_files));
+            core.setOutput('additions', String(pr.additions));
+            core.setOutput('deletions', String(pr.deletions));
+            core.setOutput('decomposition_digest', decomposition.evidenceDigest);
+            core.setOutput('exception_review_id', String(decomposition.reviewId || 0));
+            core.setOutput('review_digest', currentReviewDigest);
+            core.setOutput('required_approvals', String(requiredApprovals));
+            core.setOutput('human_review_required', String(requiresHumanReviewByBoundary));
+            core.setOutput('qualified_approvers', JSON.stringify(Array.from(approvedReviewers).sort()));
             core.setOutput('merge_queue_posture', mergeQueuePosture);
             const shouldFailEligibility = !eligible && !waitingForExternalProgress;
             await publishEligibilityStatus(
@@ -1330,6 +1479,8 @@ jobs:
                   ? 'Waiting for required status checks to complete.'
                   : waitingForAutomatedReview
                     ? 'Waiting for the required automated review on the current head.'
+                    : waitingForMechanicalExceptionReview
+                      ? 'Waiting for qualified human review of the mechanical batch exception.'
                     : `Blocked by ${blockers.length} BaseCoat policy condition(s).`
             );
             if (shouldFailEligibility) {
@@ -1340,10 +1491,175 @@ jobs:
               core.setFailed(error instanceof Error ? error.message : String(error));
             }
 
-  merge:
-    name: Enable auto-merge
+  pre-merge-snapshot:
+    name: Revalidate merge snapshot
     needs: evaluate
     if: needs.evaluate.outputs.eligible == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout trusted evaluator from the default branch
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: ${{ github.event.repository.default_branch || 'main' }}
+
+      - name: Re-fetch and compare eligibility snapshot
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        env:
+          WORKFLOW_REF: ${{ github.workflow_ref }}
+          PR_NUMBER: ${{ needs.evaluate.outputs.pr_number }}
+          EXPECTED_HEAD_SHA: ${{ needs.evaluate.outputs.head_sha }}
+          EXPECTED_BASE_SHA: ${{ needs.evaluate.outputs.base_sha }}
+          EXPECTED_SNAPSHOT_DIGEST: ${{ needs.evaluate.outputs.snapshot_digest }}
+          EXPECTED_CHANGED_FILES: ${{ needs.evaluate.outputs.changed_files }}
+          EXPECTED_ADDITIONS: ${{ needs.evaluate.outputs.additions }}
+          EXPECTED_DELETIONS: ${{ needs.evaluate.outputs.deletions }}
+          EXPECTED_DECOMPOSITION_DIGEST: ${{ needs.evaluate.outputs.decomposition_digest }}
+          EXPECTED_EXCEPTION_REVIEW_ID: ${{ needs.evaluate.outputs.exception_review_id }}
+          EXPECTED_REVIEW_DIGEST: ${{ needs.evaluate.outputs.review_digest }}
+          EXPECTED_REQUIRED_APPROVALS: ${{ needs.evaluate.outputs.required_approvals }}
+          EXPECTED_HUMAN_REVIEW_REQUIRED: ${{ needs.evaluate.outputs.human_review_required }}
+          EXPECTED_QUALIFIED_APPROVERS: ${{ needs.evaluate.outputs.qualified_approvers }}
+        with:
+          script: |
+            const { evaluateDecomposition, reviewSnapshotDigest, sha256 } = require(
+              require('node:path').join(process.env.GITHUB_WORKSPACE, 'scripts/pr-decomposition-evaluator.cjs')
+            );
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const prNumber = Number(process.env.PR_NUMBER || 0);
+            const defaultBranch = context.payload.repository?.default_branch || 'main';
+            const workflowId = String(process.env.WORKFLOW_REF || '')
+              .match(/\.github\/workflows\/([^@]+)@/)?.[1] || 'pr-auto-merge-executor.yml';
+            const { data: pr } = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: prNumber
+            });
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner,
+              repo,
+              pull_number: prNumber,
+              per_page: 100
+            });
+            const reviews = await github.paginate(github.rest.pulls.listReviews, {
+              owner,
+              repo,
+              pull_number: prNumber,
+              per_page: 100
+            });
+            const currentReviewDigest = reviewSnapshotDigest(reviews);
+            const labels = (pr.labels || []).map(label => String(label.name || '').toLowerCase()).sort();
+            const snapshot = {
+              headSha: String(pr.head?.sha || ''),
+              baseSha: String(pr.base?.sha || ''),
+              baseRef: String(pr.base?.ref || ''),
+              state: String(pr.state || ''),
+              draft: Boolean(pr.draft),
+              metadataDigest: sha256(JSON.stringify({
+                title: String(pr.title || ''),
+                body: String(pr.body || '')
+              })),
+              labelDigest: sha256(JSON.stringify(labels)),
+              changedFiles: pr.changed_files,
+              additions: pr.additions,
+              deletions: pr.deletions,
+              reviewDigest: currentReviewDigest
+            };
+            const snapshotDigest = sha256(JSON.stringify(snapshot));
+            const { data: repository } = await github.rest.repos.get({
+              owner,
+              repo
+            });
+            const decomposition = await evaluateDecomposition({
+              body: pr.body,
+              changedFiles: pr.changed_files,
+              additions: pr.additions,
+              deletions: pr.deletions,
+              files,
+              headSha: snapshot.headSha,
+              baseSha: snapshot.baseSha,
+              reviews,
+              authorLogin: pr.user?.login,
+              resolvePermission: async login => {
+                const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
+                  owner,
+                  repo,
+                  username: login
+                });
+                return data;
+              }
+            });
+            const expectedApprovers = JSON.parse(process.env.EXPECTED_QUALIFIED_APPROVERS || '[]');
+            if (!Array.isArray(expectedApprovers) || !expectedApprovers.every(login => typeof login === 'string')) {
+              throw new Error('Expected qualified reviewer snapshot is malformed.');
+            }
+            let qualifiedApproverCount = 0;
+            let reviewerPermissionCheckFailed = false;
+            for (const login of expectedApprovers) {
+              try {
+                const { data: permission } = await github.rest.repos.getCollaboratorPermissionLevel({
+                  owner,
+                  repo,
+                  username: login
+                });
+                const levels = [permission.permission, permission.role_name]
+                  .map(level => String(level || '').toLowerCase());
+                if (levels.some(level => ['admin', 'maintain', 'write'].includes(level))) {
+                  qualifiedApproverCount += 1;
+                }
+              } catch {
+                reviewerPermissionCheckFailed = true;
+                core.warning(`Unable to revalidate repository permission for @${login}.`);
+              }
+            }
+            const requiredApprovals = Number(process.env.EXPECTED_REQUIRED_APPROVALS || 0);
+            const humanReviewRequired = process.env.EXPECTED_HUMAN_REVIEW_REQUIRED === 'true';
+            const approvalsStillSatisfied =
+              !reviewerPermissionCheckFailed &&
+              Number.isSafeInteger(requiredApprovals) &&
+              qualifiedApproverCount >= requiredApprovals &&
+              (!humanReviewRequired || qualifiedApproverCount > 0);
+            const unchanged =
+              snapshot.headSha === process.env.EXPECTED_HEAD_SHA &&
+              snapshot.baseSha === process.env.EXPECTED_BASE_SHA &&
+              snapshotDigest === process.env.EXPECTED_SNAPSHOT_DIGEST &&
+              currentReviewDigest === process.env.EXPECTED_REVIEW_DIGEST &&
+              String(snapshot.changedFiles) === process.env.EXPECTED_CHANGED_FILES &&
+              String(snapshot.additions) === process.env.EXPECTED_ADDITIONS &&
+              String(snapshot.deletions) === process.env.EXPECTED_DELETIONS &&
+              decomposition.decision === 'pass' &&
+              decomposition.evidenceDigest === process.env.EXPECTED_DECOMPOSITION_DIGEST &&
+              String(decomposition.reviewId || 0) === process.env.EXPECTED_EXCEPTION_REVIEW_ID &&
+              approvalsStillSatisfied;
+            if (!unchanged) {
+              if (snapshot.headSha) {
+                await github.rest.repos.createCommitStatus({
+                  owner,
+                  repo,
+                  sha: snapshot.headSha,
+                  state: 'pending',
+                  context: 'BaseCoat merge eligibility',
+                  description: 'PR snapshot or exception review changed before auto-merge; re-evaluating.',
+                  target_url: `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`
+                });
+              }
+              await github.rest.actions.createWorkflowDispatch({
+                owner,
+                repo,
+                workflow_id: workflowId,
+                ref: repository.default_branch || defaultBranch,
+                inputs: { pr_number: String(prNumber) }
+              });
+              core.setFailed(`PR snapshot changed or decomposition no longer passes: ${decomposition.reason}`);
+              return;
+            }
+            core.info(`Revalidated PR #${prNumber} at head ${snapshot.headSha} and base ${snapshot.baseSha}.`);
+
+  merge:
+    name: Enable auto-merge
+    needs: [evaluate, pre-merge-snapshot]
+    if: needs.evaluate.outputs.eligible == 'true' && needs.pre-merge-snapshot.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

@@ -66,8 +66,12 @@ the authoritative work record. Logging and implementing must be separate steps.
 - Prefer one issue per PR.
 - Batch only tightly related changes that are reviewable in one pass.
 - Keep batch PRs to **15 files or fewer** and **300 changed lines or fewer** (additions + deletions).
-- If a batch must exceed either limit, split it or document the mechanical reason in the PR description; enforcement surfaces are tracked in [`docs/reference/governance/enforced-controls.md`](../docs/reference/governance/enforced-controls.md).
-- Large mechanical batches should include validation evidence, a rollback note, and PRD/spec links when the change is high-risk or high-change.
+- Classify planned work as `individual` (one cohesive independently deliverable unit) or `batch` (two or more independently deliverable units), even when a batch belongs to one issue. Multiple issue references alone do not make a feature a batch.
+- Before editing a batch, estimate files and additions plus deletions. If either estimate exceeds its limit, split the work into dependency-ordered PRs or propose the narrow mechanical exception below; unknown estimates require a bounded inventory, never an assumed zero.
+- Record scope, source issues, unit count and inventory, file/line estimates, and rationale in the PR Intake Contract's Design section. Do not mark unrelated deliverables as one individual feature to pass the gate.
+- A mechanical exception is only a proposal until an eligible qualified human's latest current-head `APPROVED` review contains the exact line `Batch exception: <40-character-head-sha> <64-character-evidence-sha256>`. Include the canonical JSON evidence fields from the PR template; labels and PR prose alone never authorize an exception.
+- Actual PR-time counts come from GitHub's complete changed-file list and `additions + deletions`. Batches above either limit are blocked unless the exact inventory and exception evidence validate; cohesive individual features are not capped by this rule. Existing size labels and the XXL human approval boundary remain separate and unchanged.
+- Large mechanical batches must include the exact transformation and tool version, source revision, full file inventory, why smaller batches are not viable, reproduction/diff evidence, validation results, and rollback procedure. See [`docs/reference/governance/enforced-controls.md`](../docs/reference/governance/enforced-controls.md).
 
 ## Branch Naming
 

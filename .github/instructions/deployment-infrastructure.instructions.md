@@ -55,8 +55,11 @@ The `prd-spec-gate.yml` workflow blocks PRs with:
 - Merge queue (`merge_group`) checks pass when no pull request payload exists
 - Bot/agent-authored PRs (`ibuyspy` or GitHub Bot accounts) bypass the gate
 
-Contributor guideline: Keep PRs within 15 files or fewer and 300 changed lines or fewer
-unless the PR is a justified mechanical change.
+Contributor guideline: classify a cohesive individual feature separately from a
+batch of independently deliverable units. Enforce the 15-file and 300-additions-
+plus-deletions limits for batches only; oversized batches must split unless the
+qualified, current-head mechanical exception in the PR intake Design section is
+approved. This is separate from deterministic size labels and the XXL human gate.
 
 ## Adoption Metrics Dashboard
 

@@ -54,6 +54,8 @@ foreach ($entry in @(
     Assert-Match $content "github\.actor != 'copilot-pull-request-reviewer\[bot\]'" "$name must skip the Copilot reviewer app actor."
     Assert-Match $content "github\.actor != 'Copilot'" "$name must skip the Copilot actor login observed on action_required review runs."
     Assert-Match $content 'hasCurrentHeadHumanApproval' "$name must dispatch scheduled reconciliation only for current-head human approvals."
+    Assert-Match $content 'hasBatchExceptionEvidence' "$name must refresh exception review evidence without triggering on Copilot review submissions."
+    Assert-Match $content "github\.event_name == 'schedule'" "$name must refresh batch exceptions on the existing scheduled reconciliation."
     Assert-Match $content 'ref:\s*\$\{\{\s*github\.event\.repository\.default_branch\s*\}\}' "$name must load governance only from the trusted default branch."
     Assert-Match $content 'main\.reconcile_merge_eligibility // false' "$name must honor the reconciliation policy pack flag."
     Assert-Match $content 'github\.rest\.pulls\.get' "$name must revalidate the live pull request before dispatch."
