@@ -18,40 +18,41 @@ Turn a delivery goal into a governed execution bundle.
 
 ## Workflow
 
-1. Validate the intent contract.
+1. Accept canonical `ship-it`, `spec-2-prod`, and `onboarding-conductor`.
+   Standalone `ship-it:` / `spec-2-prod:` normalize to those delivery intents;
+   retain raw directive and provenance. Reject malformed, quoted, fenced,
+   bulleted, embedded, deferred, or contradictory directives.
 2. Unattended pre-approval requires both `source_issue_number` and
-   `approval_comment_id`; one alone fails, neither preserves ordinary dispatch.
-   Never accept caller-supplied identity, permission, timestamp, or approval
-   status. The live evidence and scope contract is defined in
-   [output-contract.md](references/output-contract.md).
-3. Run `pwsh scripts/ship-it/validate-target-repository.ps1
-   -TargetRepo <owner/repo>`. Cross-repository execution requires explicit user
-   authorization and `-AllowCrossRepository` (see References).
-4. Verify dispatch, build-guard, and release-gate workflows exist; otherwise
-   stop and report, never substitute `/approve`.
-5. Dispatch `ship-it-intent-dispatch.yml` and record its run ID and receipt.
-6. Revalidate the same receipt before each phase, merge, and release. Missing,
-   changed, revoked, or newly unqualified evidence blocks continuation; never
-   switch approvals. Pass the receipt to the local resolver or in
-   `promotion_context` for the release gate (see output contract).
-7. Create governed issues, apply tracking labels, and run build-break and release gates.
-8. Report success only with observable run IDs and state transitions.
+   `approval_comment_id`; one alone fails, neither means ordinary dispatch.
+   Never accept caller-supplied identity, permission, time, or approval status.
+   Validate live evidence and scope per [output-contract.md](references/output-contract.md).
+3. Validate the target with `pwsh scripts/ship-it/validate-target-repository.ps1
+   -TargetRepo <owner/repo>`; cross-repository execution requires explicit
+   authorization and `-AllowCrossRepository`.
+4. Require dispatch, build-guard, and release-gate workflows; if any is missing,
+   stop and report. Validate source issue, approved scope/spec, authority, and
+   plan confirmation. Issue approval is not delivery consent: never substitute
+   `/approve`, create approval labels, or assign an agent.
+5. Dispatch via `ship-it-intent-dispatch.yml`; record run ID and provenance.
+   Revalidate the same receipt at each phase, merge, and release; changed,
+   revoked, or unqualified evidence blocks continuation. Pass it to the local
+   resolver or release gate's `promotion_context`; never switch approvals.
 
-## Persistent Loop Operation
+Apply the [delivery-intent contract](references/delivery-intent-contract.md)
+to feature-origin handoffs and their independent merge boundary. `feature:`
+and `pr-lifecycle=full` never imply merge or deployment consent.
 
-Use bounded cycles with state carry-forward. Record the cycle, phase, objective,
-stop condition, and limit; summarize actions, status, evidence, blockers, and
-next action. Continue only while convergence is viable. Stop on completion,
-blocker, manual stop, or cycle limit; retry only transient failures up to the
-retry limit. In `dry_run`, report planned actions.
+Use bounded cycles with state carry-forward. Track phase, objective, stop
+condition, and limit; summarize actions, evidence, blockers, and next action.
+Stop on completion, blocker, manual stop, or limit; retry transient failures
+within budget. In `dry_run`, report planned actions.
 
 ## Governance Rules
 
-Keep required checks and spec, test, rollout, and rollback evidence; serialize
-release merges and record transitions and blockers. Do not complete with checks
-pending. Issue pre-approval does not satisfy PR review, XXL, release, or
-production gates or expand scope. Never copy approval to generated issues;
-validate authority against the live source.
+Keep required checks and spec/test/rollout/rollback evidence; serialize release
+merges and record blockers. Do not report success with checks pending.
+Pre-approval does not satisfy PR review, XXL, release, or production gates,
+expand scope, or transfer to generated issues; revalidate live authority.
 
 ## References
 

@@ -62,7 +62,7 @@ on:
         default: true
         type: boolean
       source_issue_number:
-        description: Approved source issue for explicit pre-approval mode
+        description: Approved source issue for explicit pre-approval or delivery mode
         required: false
         type: string
       approval_comment_id:
@@ -96,10 +96,18 @@ jobs:
       dry_run: ${{ steps.resolve.outputs.dry_run }}
       profile: ${{ steps.resolve.outputs.profile }}
       source_issue_number: ${{ steps.resolve.outputs.source_issue_number }}
+      source_issue_url: ${{ steps.resolve.outputs.source_issue_url }}
+      source_scope: ${{ steps.resolve.outputs.source_scope }}
+      feature_origin: ${{ steps.resolve.outputs.feature_origin }}
       requester: ${{ steps.resolve.outputs.requester }}
       approval_source_issue_number: ${{ steps.resolve.outputs.approval_source_issue_number }}
       approval_comment_id: ${{ steps.resolve.outputs.approval_comment_id }}
       approval_receipt_base64: ${{ steps.resolve.outputs.approval_receipt_base64 }}
+      raw_directive: ${{ steps.resolve.outputs.raw_directive }}
+      directive_source: ${{ steps.resolve.outputs.directive_source }}
+      directive_actor: ${{ steps.resolve.outputs.directive_actor }}
+      directive_evidence_url: ${{ steps.resolve.outputs.directive_evidence_url }}
+      directive_timestamp: ${{ steps.resolve.outputs.directive_timestamp }}
     steps:
       - name: Checkout trusted default-branch approval resolver
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v4.1.7
@@ -114,6 +122,75 @@ jobs:
             const preapproval = require(
               `${process.env.GITHUB_WORKSPACE}/.github/base-coat/scripts/ship-it/preapproval-evidence.cjs`
             );
+            // BEGIN SHIP-IT DIRECTIVE CONTRACT
+            const deliveryIntentAliases = Object.freeze({
+              "ship-it": "ship-it",
+              "spec-2-prod": "spec-2-prod"
+            });
+            const classifyDeliveryGoal = goal => {
+              const suppressesSideEffects =
+                /\b(?:later|backlog|next sprint|no changes|read-only|analysis only|log it|file an issue|just document|stop|defer)\b/i
+                  .test(goal);
+              const immediate = /\b(?:now|immediately|urgent)\b/i.test(goal);
+              if (suppressesSideEffects && immediate) return "invalid";
+              if (suppressesSideEffects) return "suppressed";
+              return "delivery";
+            };
+            const isPlaceholderSpecUrl = value => {
+              try {
+                const candidate = String(value || "").trim();
+                const url = new URL(candidate);
+                const host = url.hostname.toLowerCase();
+                return !["http:", "https:"].includes(url.protocol) ||
+                  !host ||
+                  ["example.com", "example.org", "example.net", "localhost"].some(
+                    domain => host === domain || host.endsWith(`.${domain}`)
+                  ) ||
+                  /\.(?:invalid|test|localhost)$/.test(host) ||
+                  /\b(?:placeholder|replace[-_ ]?me|todo|tbd)\b/i.test(candidate);
+              } catch {
+                return true;
+              }
+            };
+            const deliveryCommandLine = /^\s*(?:ship-it|spec-2-prod)\s*:|^\s*\/(?:ship-it|spec-2-prod)(?:[ \t]|$)/i;
+            const parseDeliveryDirective = rawInput => {
+              const rawDirective = String(rawInput || "");
+              const trimmed = rawDirective.trim();
+              if (!trimmed) return { kind: "none" };
+              const lines = trimmed.split(/\r?\n/);
+              const commandLines = lines
+                .map((line, index) => deliveryCommandLine.test(line) ? index : -1)
+                .filter(index => index >= 0);
+              if (commandLines.length !== 1 || commandLines[0] !== 0) {
+                return { kind: commandLines.length ? "invalid" : "none" };
+              }
+
+              const colonMatch = lines[0].match(/^(ship-it|spec-2-prod)\s*:[ \t]*(.*)$/i);
+              const slashMatch = lines[0].match(/^\/(ship-it|spec-2-prod)(?:[ \t]+(.*))?$/i);
+              let intent;
+              let goal;
+              let syntax;
+              if (colonMatch) {
+                intent = deliveryIntentAliases[colonMatch[1].toLowerCase()];
+                goal = [colonMatch[2], ...lines.slice(1)].join("\n").trim();
+                syntax = "colon-alias";
+                if (!goal) return { kind: "invalid" };
+              } else if (slashMatch && lines.length === 1) {
+                intent = deliveryIntentAliases[slashMatch[1].toLowerCase()];
+                goal = (slashMatch[2] || "").trim();
+                syntax = "slash-command";
+              } else {
+                return { kind: "invalid" };
+              }
+
+              const goalKind = classifyDeliveryGoal(goal);
+              if (goalKind !== "delivery") return { kind: goalKind };
+              return { kind: "delivery", intent, goal, rawDirective, syntax };
+            };
+            const isCanonicalWorkflowIntent = intent =>
+              intent === "ship-it" || intent === "spec-2-prod" || intent === "onboarding-conductor";
+            // END SHIP-IT DIRECTIVE CONTRACT
+
             const eventName = context.eventName;
             const result = {
               should_run: "false",
@@ -127,17 +204,43 @@ jobs:
               dry_run: "true",
               profile: "team-dev",
               source_issue_number: "",
+              source_issue_url: "",
+              source_scope: "",
+              feature_origin: "false",
               requester: context.actor,
               approval_source_issue_number: "",
               approval_comment_id: "",
-              approval_receipt_base64: ""
+              approval_receipt_base64: "",
+              raw_directive: "",
+              directive_source: "",
+              directive_actor: "",
+              directive_evidence_url: "",
+              directive_timestamp: ""
             };
 
             if (eventName === "workflow_dispatch") {
               const inputs = context.payload.inputs || {};
+              const requestedIntent = String(inputs.intent || "");
+              if (!isCanonicalWorkflowIntent(requestedIntent)) {
+                core.setFailed(`Unsupported intent '${requestedIntent}'. Use an exact canonical workflow intent.`);
+                return;
+              }
+              const intentGoal = String(inputs.goal || "");
+              if (!intentGoal.trim()) {
+                core.setFailed("Workflow dispatch goal cannot be empty.");
+                return;
+              }
+              if (
+                ["ship-it", "spec-2-prod"].includes(requestedIntent) &&
+                classifyDeliveryGoal(intentGoal) !== "delivery"
+              ) {
+                core.info("Workflow delivery goal is suppressed or contradictory; no dispatch will run.");
+                core.setOutput("should_run", "false");
+                return;
+              }
               result.should_run = "true";
-              result.intent = inputs.intent || "ship-it";
-              result.goal = inputs.goal || "";
+              result.intent = requestedIntent;
+              result.goal = intentGoal.trim();
               result.target_repo = inputs.target_repo || result.target_repo;
               result.spec_ref = inputs.spec_ref || "";
               result.risk_band = inputs.risk_band || "medium";
@@ -145,9 +248,15 @@ jobs:
               result.project_number = inputs.project_number || "";
               result.dry_run = `${inputs.dry_run === true || `${inputs.dry_run}`.toLowerCase() === "true"}`;
               result.profile = inputs.profile || "team-dev";
+              result.raw_directive = `intent=${requestedIntent}`;
+              result.directive_source = "workflow_dispatch";
+              result.directive_actor = context.actor;
+              result.directive_evidence_url = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+              result.directive_timestamp = new Date().toISOString();
+              result.source_issue_number = String(inputs.source_issue_number || "").trim();
               const sourceIssueNumber = String(inputs.source_issue_number || "");
               const approvalCommentId = String(inputs.approval_comment_id || "");
-              if (sourceIssueNumber !== "" || approvalCommentId !== "") {
+              if (approvalCommentId !== "") {
                 if (!sourceIssueNumber || !approvalCommentId) {
                   core.setFailed("Pre-approval mode requires both source_issue_number and approval_comment_id.");
                   return;
@@ -186,11 +295,19 @@ jobs:
               const issue = context.payload.issue;
               const comment = context.payload.comment?.body || "";
               const isPullRequestComment = !!issue.pull_request;
-              const shipItMatch = comment.match(/^\/ship-it(?:\s+(.+))?$/im);
-              const onboardingMatch = comment.match(/^\/onboarding(?:\s+(.+))?$/im);
-              const specToProdMatch = comment.match(/^\/spec-2-prod(?:\s+(.+))?$/im);
-              const commandMatch = onboardingMatch || specToProdMatch || shipItMatch;
-              if (isPullRequestComment || !commandMatch) {
+              const deliveryDirective = parseDeliveryDirective(comment);
+              const onboardingMatch = comment.trim().match(/^\/onboarding(?:[ \t]+(.+))?$/i);
+              if (
+                isPullRequestComment ||
+                deliveryDirective.kind === "suppressed" ||
+                deliveryDirective.kind === "invalid" ||
+                (deliveryDirective.kind !== "delivery" && !onboardingMatch)
+              ) {
+                if (deliveryDirective.kind === "suppressed") {
+                  core.info("Delivery directive includes a read-only, log-only, or deferred modifier; no dispatch will run.");
+                } else if (deliveryDirective.kind === "invalid") {
+                  core.info("Delivery directive is ambiguous or malformed; no dispatch will run.");
+                }
                 core.setOutput("should_run", "false");
                 return;
               }
@@ -207,12 +324,96 @@ jobs:
               }
 
               result.should_run = "true";
-              result.intent = onboardingMatch ? "onboarding-conductor" : specToProdMatch ? "spec-2-prod" : "ship-it";
-              result.goal = commandMatch[1]?.trim() || issue.title;
+              result.intent = deliveryDirective.kind === "delivery"
+                ? deliveryDirective.intent
+                : "onboarding-conductor";
+              result.goal = deliveryDirective.kind === "delivery"
+                ? deliveryDirective.goal || issue.title
+                : (onboardingMatch[1] || "").trim() || issue.title;
               result.source_issue_number = `${issue.number}`;
-              const issueBody = issue.body || "";
-              const firstUrl = issueBody.match(/https?:\/\/\S+/);
-              result.spec_ref = firstUrl ? firstUrl[0] : "";
+              result.source_issue_url = issue.html_url || "";
+              result.raw_directive = String(comment);
+              result.directive_source = deliveryDirective.kind === "delivery"
+                ? `issue_comment:${deliveryDirective.syntax}`
+                : "issue_comment:slash-command";
+              result.directive_actor = context.actor;
+              result.directive_evidence_url = context.payload.comment?.html_url || "";
+              result.directive_timestamp = context.payload.comment?.created_at || "";
+            }
+
+            const deliveryRequested = ["ship-it", "spec-2-prod"].includes(result.intent);
+            if (deliveryRequested) {
+              const sourceIssueNumber = Number(result.source_issue_number);
+              if (!Number.isInteger(sourceIssueNumber) || sourceIssueNumber <= 0) {
+                core.setFailed("Delivery dispatch requires an approved source_issue_number.");
+                return;
+              }
+              const { data: sourceIssue } = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: sourceIssueNumber
+              });
+              if (sourceIssue.pull_request || sourceIssue.state !== "open") {
+                core.setFailed(`Delivery source #${sourceIssueNumber} must be an open issue.`);
+                return;
+              }
+              const labels = (sourceIssue.labels || []).map(label =>
+                String(typeof label === "string" ? label : label.name || "").toLowerCase()
+              );
+              if (!labels.includes("approved")) {
+                core.setFailed(`Delivery source #${sourceIssueNumber} must already carry the approved label.`);
+                return;
+              }
+              const issueBody = String(sourceIssue.body || "");
+              const specMatch = issueBody.match(/^\s*-\s*Spec:\s*(https?:\/\/\S+)\s*$/im);
+              if (!specMatch || isPlaceholderSpecUrl(specMatch[1])) {
+                core.setFailed(`Delivery source #${sourceIssueNumber} must contain a non-placeholder Spec URL.`);
+                return;
+              }
+              const featureOrigin = issueBody.includes("<!-- basecoat-feature-origin:v1 -->");
+              const sourceScope = issueBody.match(/^\s*(?:BaseCoat )?Source scope:\s*(\S.*)$/im)?.[1]?.trim() || "";
+              if (featureOrigin && !sourceScope) {
+                core.setFailed(`Feature-origin delivery source #${sourceIssueNumber} must record its approved Source scope.`);
+                return;
+              }
+              const approvedSpec = specMatch[1];
+              if (result.spec_ref && result.spec_ref !== approvedSpec) {
+                core.setFailed("The supplied spec_ref must match the approved source issue's Spec URL.");
+                return;
+              }
+              result.spec_ref = approvedSpec;
+              result.source_issue_number = String(sourceIssueNumber);
+              result.source_issue_url = sourceIssue.html_url || result.source_issue_url;
+              result.source_scope = sourceScope;
+              result.feature_origin = `${featureOrigin}`;
+              const issueComments = await github.paginate(github.rest.issues.listComments, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: sourceIssueNumber,
+                per_page: 100
+              });
+              let qualifiedIssueApproval = false;
+              for (const approvalComment of issueComments) {
+                if (!/^\/approve$/i.test(String(approvalComment.body || "").trim())) continue;
+                const approvalActor = String(approvalComment.user?.login || "");
+                if (
+                  approvalComment.user?.type === "Bot" ||
+                  approvalActor.toLowerCase().endsWith("[bot]")
+                ) continue;
+                const { data: approvalPermission } = await github.rest.repos.getCollaboratorPermissionLevel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  username: approvalActor
+                });
+                if (["admin", "maintain", "write"].includes(String(approvalPermission.permission || "").toLowerCase())) {
+                  qualifiedIssueApproval = true;
+                  break;
+                }
+              }
+              if (!qualifiedIssueApproval) {
+                core.setFailed(`Delivery source #${sourceIssueNumber} requires current qualified exact /approve evidence.`);
+                return;
+              }
             }
 
             for (const [key, value] of Object.entries(result)) {
@@ -327,6 +528,15 @@ jobs:
           APPROVAL_COMMENT_ID: ${{ needs.resolve-intent.outputs.approval_comment_id }}
           APPROVAL_RECEIPT_BASE64: ${{ needs.resolve-intent.outputs.approval_receipt_base64 }}
           REQUESTER: ${{ needs.resolve-intent.outputs.requester }}
+          SOURCE_ISSUE_NUMBER: ${{ needs.resolve-intent.outputs.source_issue_number }}
+          SOURCE_ISSUE_URL: ${{ needs.resolve-intent.outputs.source_issue_url }}
+          SOURCE_SCOPE: ${{ needs.resolve-intent.outputs.source_scope }}
+          FEATURE_ORIGIN: ${{ needs.resolve-intent.outputs.feature_origin }}
+          RAW_DIRECTIVE: ${{ needs.resolve-intent.outputs.raw_directive }}
+          DIRECTIVE_SOURCE: ${{ needs.resolve-intent.outputs.directive_source }}
+          DIRECTIVE_ACTOR: ${{ needs.resolve-intent.outputs.directive_actor }}
+          DIRECTIVE_EVIDENCE_URL: ${{ needs.resolve-intent.outputs.directive_evidence_url }}
+          DIRECTIVE_TIMESTAMP: ${{ needs.resolve-intent.outputs.directive_timestamp }}
         run: |
           $dryRun = $env:DRY_RUN -eq 'true'
           $projectNumberRaw = $env:PROJECT_NUMBER
@@ -345,6 +555,15 @@ jobs:
             ProjectOwner = $env:PROJECT_OWNER
             Profile = $env:PROFILE
             Requester = $env:REQUESTER
+            SourceIssueNumber = $env:SOURCE_ISSUE_NUMBER
+            SourceIssueUrl = $env:SOURCE_ISSUE_URL
+            SourceScope = $env:SOURCE_SCOPE
+            FeatureOrigin = $env:FEATURE_ORIGIN -eq 'true'
+            RawDirective = $env:RAW_DIRECTIVE
+            DirectiveSource = $env:DIRECTIVE_SOURCE
+            DirectiveActor = $env:DIRECTIVE_ACTOR
+            DirectiveEvidenceUrl = $env:DIRECTIVE_EVIDENCE_URL
+            DirectiveTimestamp = $env:DIRECTIVE_TIMESTAMP
             OutputPath = 'test-results\ship-it\summary.json'
           }
           if (-not [string]::IsNullOrWhiteSpace($env:PREAPPROVAL_SOURCE_ISSUE_NUMBER)) {
@@ -481,6 +700,10 @@ jobs:
           PARENT_ISSUE_URL: ${{ steps.summary.outputs.parent_issue_url }}
           REQUESTER: ${{ needs.resolve-intent.outputs.requester }}
           INTENT: ${{ needs.resolve-intent.outputs.intent }}
+          RAW_DIRECTIVE: ${{ needs.resolve-intent.outputs.raw_directive }}
+          DIRECTIVE_ACTOR: ${{ needs.resolve-intent.outputs.directive_actor }}
+          DIRECTIVE_EVIDENCE_URL: ${{ needs.resolve-intent.outputs.directive_evidence_url }}
+          DIRECTIVE_TIMESTAMP: ${{ needs.resolve-intent.outputs.directive_timestamp }}
         with:
           script: |
             // Read via process.env (not interpolated into this script text) so a
@@ -490,10 +713,18 @@ jobs:
             const parentUrl = process.env.PARENT_ISSUE_URL || "";
             const requester = process.env.REQUESTER || "";
             const intent = process.env.INTENT || "";
+            const rawDirective = process.env.RAW_DIRECTIVE || "";
+            const directiveActor = process.env.DIRECTIVE_ACTOR || "";
+            const evidenceUrl = process.env.DIRECTIVE_EVIDENCE_URL || "";
+            const evidenceTimestamp = process.env.DIRECTIVE_TIMESTAMP || "";
             const message = [
               `@${requester} ${intent} intent accepted.`,
               "",
               `Control-plane parent issue: ${parentUrl}`,
+              `Original directive: ${rawDirective}`,
+              `Original actor: @${directiveActor}`,
+              `Directive evidence: ${evidenceUrl}`,
+              `Directive time: ${evidenceTimestamp}`,
               "",
               "Execution sprint issues were generated with governance checklists."
             ].join("\n");

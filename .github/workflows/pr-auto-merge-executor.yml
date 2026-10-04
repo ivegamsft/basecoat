@@ -537,7 +537,7 @@ jobs:
               }
 
               for (const issue of linkedIssues || []) {
-                if (!issue.approved) continue;
+                if (issue.state !== 'open' || !issue.approved) continue;
                 for (const comment of issue.comments || []) {
                   if (!isExactIssueApproval(comment.body)) continue;
                   const login = comment.user?.login;
@@ -568,6 +568,182 @@ jobs:
               };
             };
             // END SOLO-DEV ACKNOWLEDGEMENT CONTRACT
+
+            // BEGIN FEATURE-ORIGIN DELIVERY CONTRACT
+            const featureOriginIssueMarker = '<!-- basecoat-feature-origin:v1 -->';
+            const isPlaceholderSpecUrl = value => {
+              try {
+                const candidate = String(value || '').trim();
+                const url = new URL(candidate);
+                const host = url.hostname.toLowerCase();
+                return !['http:', 'https:'].includes(url.protocol) ||
+                  !host ||
+                  ['example.com', 'example.org', 'example.net', 'localhost'].some(
+                    domain => host === domain || host.endsWith(`.${domain}`)
+                  ) ||
+                  /\.(?:invalid|test|localhost)$/.test(host) ||
+                  /\b(?:placeholder|replace[-_ ]?me|todo|tbd)\b/i.test(candidate);
+              } catch {
+                return true;
+              }
+            };
+            const parseFeatureHandoffMarkers = body => {
+              const text = String(body || '');
+              return {
+                mentions: [...text.matchAll(/<!--\s*basecoat-feature-handoff:v1\b/gi)],
+                markers: [...text.matchAll(
+                  /<!--\s*basecoat-feature-handoff:v1\s+source-issue:#(\d+)\s*-->/gi
+                )]
+              };
+            };
+            const collectFeatureOriginLinkedIssueNumbers = (title, body) => {
+              const issueNumbers = new Set(
+                collectLinkedIssueNumbers(`${title || ''}\n${body || ''}`)
+              );
+              for (const marker of parseFeatureHandoffMarkers(body).markers) {
+                const issueNumber = Number(marker[1]);
+                if (Number.isInteger(issueNumber) && issueNumber > 0) {
+                  issueNumbers.add(issueNumber);
+                }
+              }
+              return Array.from(issueNumbers);
+            };
+            const parseFeatureDeliveryDirective = body => {
+              const rawDirective = String(body || '');
+              const lines = rawDirective.trim().split(/\r?\n/);
+              const commandLine = /^\s*(?:ship-it|spec-2-prod)\s*:|^\s*\/(?:ship-it|spec-2-prod)(?:[ \t]|$)/i;
+              const commandLines = lines
+                .map((line, index) => commandLine.test(line) ? index : -1)
+                .filter(index => index >= 0);
+              if (!lines[0] || commandLines.length === 0) return { kind: 'none' };
+              if (commandLines.length !== 1 || commandLines[0] !== 0) return { kind: 'invalid' };
+              const colon = lines[0].match(/^(ship-it|spec-2-prod)\s*:[ \t]*(.*)$/i);
+              const slash = lines[0].match(/^\/(ship-it|spec-2-prod)(?:[ \t]+(.*))?$/i);
+              if (!colon && (!slash || lines.length !== 1)) return { kind: 'invalid' };
+              const intent = (colon?.[1] || slash?.[1] || '').toLowerCase();
+              const goal = colon
+                ? [colon[2], ...lines.slice(1)].join('\n').trim()
+                : String(slash?.[2] || '').trim();
+              if (colon && !goal) return { kind: 'invalid' };
+              const suppressesSideEffects =
+                /\b(?:later|backlog|next sprint|no changes|read-only|analysis only|log it|file an issue|just document|stop|defer)\b/i
+                  .test(goal);
+              const immediate = /\b(?:now|immediately|urgent)\b/i.test(goal);
+              if (suppressesSideEffects && immediate) return { kind: 'invalid' };
+              if (suppressesSideEffects) return { kind: 'suppressed' };
+              return { kind: 'delivery', intent, goal, rawDirective };
+            };
+            const evaluateFeatureOriginDelivery = async ({
+              pullRequestBody,
+              linkedIssues,
+              resolvePermission
+            }) => {
+              const prBody = String(pullRequestBody || '');
+              const { mentions: handoffMentions, markers: handoffs } =
+                parseFeatureHandoffMarkers(prBody);
+              const featureIssues = (linkedIssues || []).filter(issue =>
+                String(issue.body || '').includes(featureOriginIssueMarker)
+              );
+              if (featureIssues.length === 0 && handoffMentions.length === 0) {
+                return { isFeatureOrigin: false, satisfied: true, blockers: [], evidence: null };
+              }
+
+              const blockers = [];
+              if (featureIssues.length !== 1) {
+                blockers.push('Feature-origin handoff requires exactly one linked, verified feature source issue.');
+              }
+              if (handoffMentions.length !== 1 || handoffs.length !== 1) {
+                blockers.push('Feature-origin PR must contain exactly one valid source-issue handoff marker.');
+              }
+              const featureIssue = featureIssues.length === 1 ? featureIssues[0] : null;
+              const handoffIssueNumber = handoffs.length === 1 ? Number(handoffs[0][1]) : 0;
+              if (
+                featureIssue &&
+                handoffIssueNumber !== Number(featureIssue.number)
+              ) {
+                blockers.push('Feature-origin handoff marker must identify the linked feature source issue.');
+              }
+
+              let evidence = null;
+              if (featureIssue) {
+                const body = String(featureIssue.body || '');
+                const scope = body.match(/^\s*(?:BaseCoat )?Source scope:\s*(\S.*)$/im)?.[1]?.trim() || '';
+                const spec = body.match(/^\s*-\s*Spec:\s*(https?:\/\/\S+)\s*$/im)?.[1] || '';
+                const labels = (featureIssue.labels || []).map(label =>
+                  String(typeof label === 'string' ? label : label.name || '').toLowerCase()
+                );
+                if (featureIssue.state !== 'open') blockers.push('Feature source issue is not open.');
+                if (!scope) blockers.push('Feature source issue is missing its recorded source scope.');
+                if (!spec || isPlaceholderSpecUrl(spec)) blockers.push('Feature source issue is missing a non-placeholder Spec URL.');
+                if (!labels.includes('approved')) blockers.push('Feature source issue is missing its independent approved label.');
+                const sourceAuthor = featureIssue.user?.login || '';
+
+                let qualifiedApproval = null;
+                for (const comment of featureIssue.comments || []) {
+                  if (!isExactIssueApproval(comment.body) || isBotActor(comment.user)) continue;
+                  const login = comment.user?.login || '';
+                  if (hasQualifiedPermission(await resolvePermission(login))) {
+                    qualifiedApproval = { actor: login, url: comment.html_url || '', at: comment.created_at || '' };
+                    break;
+                  }
+                }
+                if (!qualifiedApproval) blockers.push('Feature source issue lacks current qualified exact /approve evidence.');
+
+                const directives = [];
+                const rejectedDirectives = [];
+                for (const comment of featureIssue.comments || []) {
+                  const directive = parseFeatureDeliveryDirective(comment.body);
+                  if (directive.kind === 'none' || isBotActor(comment.user)) continue;
+                  const login = comment.user?.login || '';
+                  if (!hasQualifiedPermission(await resolvePermission(login))) continue;
+                  if (directive.kind !== 'delivery') {
+                    rejectedDirectives.push(directive.kind);
+                    continue;
+                  }
+                  directives.push({
+                    ...directive,
+                    goal: directive.goal || featureIssue.title || '',
+                    actor: login,
+                    url: comment.html_url || '',
+                    at: comment.created_at || ''
+                  });
+                }
+                const canonicalIntents = new Set(directives.map(directive => directive.intent));
+                const directiveScopes = new Set(directives.map(
+                  directive => `${directive.intent}\n${directive.goal}`
+                ));
+                if (canonicalIntents.size > 1 || directiveScopes.size > 1) {
+                  blockers.push('Feature source issue contains conflicting authoritative delivery directives.');
+                }
+                if (rejectedDirectives.length > 0) {
+                  blockers.push('Feature source issue contains a malformed, suppressed, or contradictory delivery directive.');
+                }
+                directives.sort((left, right) => new Date(right.at || 0) - new Date(left.at || 0));
+                const deliveryDirective = directives[0] || null;
+                if (!deliveryDirective) blockers.push('Feature source issue lacks qualified explicit delivery consent.');
+                evidence = {
+                  source_issue_number: featureIssue.number,
+                  source_issue_url: featureIssue.html_url || '',
+                  source_author: sourceAuthor,
+                  source_scope: scope,
+                  spec_ref: spec,
+                  approved_by: qualifiedApproval?.actor || '',
+                  approval_url: qualifiedApproval?.url || '',
+                  delivery_intent: deliveryDirective?.intent || '',
+                  delivery_goal: deliveryDirective?.goal || featureIssue.title || '',
+                  delivery_actor: deliveryDirective?.actor || '',
+                  delivery_url: deliveryDirective?.url || '',
+                  delivery_timestamp: deliveryDirective?.at || ''
+                };
+              }
+              return {
+                isFeatureOrigin: true,
+                satisfied: blockers.length === 0,
+                blockers,
+                evidence
+              };
+            };
+            // END FEATURE-ORIGIN DELIVERY CONTRACT
 
             const prNumber = resolvePrNumber();
             if (!prNumber) {
@@ -932,6 +1108,40 @@ jobs:
               }
             };
 
+            const linkedIssues = [];
+            for (const issueNumber of collectFeatureOriginLinkedIssueNumbers(pr.title, pr.body)) {
+              const { data: issue } = await github.rest.issues.get({
+                owner,
+                repo,
+                issue_number: issueNumber
+              });
+              if (issue.pull_request) continue;
+              const issueLabels = (issue.labels || []).map(label =>
+                String(typeof label === 'string' ? label : label.name || '').toLowerCase()
+              );
+              const issueComments = await github.paginate(github.rest.issues.listComments, {
+                owner,
+                repo,
+                issue_number: issueNumber,
+                per_page: 100
+              });
+              linkedIssues.push({
+                ...issue,
+                number: issueNumber,
+                approved: issueLabels.includes('approved'),
+                labels: issueLabels,
+                comments: issueComments
+              });
+            }
+            const featureOriginDelivery = await evaluateFeatureOriginDelivery({
+              pullRequestBody: pr.body,
+              linkedIssues,
+              resolvePermission
+            });
+            if (featureOriginDelivery.isFeatureOrigin && !featureOriginDelivery.satisfied) {
+              blockers.push(...featureOriginDelivery.blockers);
+            }
+
             const reviews = await github.paginate(github.rest.pulls.listReviews, {
               owner,
               repo,
@@ -1035,7 +1245,7 @@ jobs:
             if (requiresMaintainerAcknowledgement) {
               const linkedIssues = [];
               const linkedIssueNumbers = new Set();
-              for (const issueNumber of collectLinkedIssueNumbers(`${pr.title || ''}\n${pr.body || ''}`)) {
+              for (const issueNumber of collectFeatureOriginLinkedIssueNumbers(pr.title, pr.body)) {
                 const { data: issue } = await github.rest.issues.get({
                   owner,
                   repo,
@@ -1495,6 +1705,13 @@ jobs:
                     : 'required-missing-current-head'
                 )
               : 'not-required';
+            const featureOriginDeliverySummary = featureOriginDelivery.isFeatureOrigin
+              ? (
+                  featureOriginDelivery.satisfied
+                    ? `validated:#${featureOriginDelivery.evidence.source_issue_number} by @${featureOriginDelivery.evidence.delivery_actor}`
+                    : 'required-missing-or-invalid'
+                )
+              : 'not-applicable';
             const summaryLines = eligible
               ? [
                   `${marker}`,
@@ -1512,6 +1729,7 @@ jobs:
                   `- PR snapshot: \`head ${headSha}; base ${baseSha}\``,
                   `- Review snapshot digest: \`${currentReviewDigest}\``,
                   `- Maintainer acknowledgement: \`${acknowledgementSummary}\``,
+                  `- Feature-origin delivery provenance: \`${featureOriginDeliverySummary}\``,
                   `- Production environment boundary: \`${productionEnvironmentBoundary}\``,
                   `- Merge queue posture: \`${mergeQueuePosture}\``,
                   '',
@@ -1533,6 +1751,7 @@ jobs:
                   `- PR snapshot: \`head ${headSha}; base ${baseSha}\``,
                   `- Review snapshot digest: \`${currentReviewDigest}\``,
                   `- Maintainer acknowledgement: \`${acknowledgementSummary}\``,
+                  `- Feature-origin delivery provenance: \`${featureOriginDeliverySummary}\``,
                   `- Production environment boundary: \`${productionEnvironmentBoundary}\``,
                   `- Merge queue posture: \`${mergeQueuePosture}\``,
                   '',

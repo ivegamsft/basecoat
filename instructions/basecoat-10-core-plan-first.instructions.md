@@ -110,3 +110,9 @@ Do not keep executing against a stale plan.
 ## High-Stakes Changes
 
 Before implementing architectural changes, breaking changes, or other high-impact decisions, confirm the proposed approach with the user or reviewer first.
+
+For `feature:` work, a confirmed plan or explicit waiver authorizes only the
+described implementation scope. It does not authorize a ready-for-review
+handoff, auto-merge, merge, or production deployment. A separate qualified
+`ship-it:` or `spec-2-prod:` directive and the existing delivery evidence gates
+are required to cross that boundary.

@@ -7,6 +7,7 @@ $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
 $dispatchScript = Join-Path $repoRoot "scripts\ship-it\dispatch-intent.ps1"
 $workflowFile = Join-Path $repoRoot ".github\workflows\ship-it-intent-dispatch.yml"
 $packageDispatchScript = Join-Path $repoRoot ".github\base-coat\scripts\ship-it\dispatch-intent.ps1"
+$packageTargetRepositoryValidator = Join-Path $repoRoot ".github\base-coat\scripts\ship-it\validate-target-repository.ps1"
 $packageWorkflowFile = Join-Path $repoRoot ".github\base-coat\workflows\ship-it-intent-dispatch.yml"
 $skillFile = Join-Path $repoRoot "skills\ship-it\SKILL.md"
 $skillEvalFile = Join-Path $repoRoot "skills\ship-it\eval.yaml"
@@ -19,6 +20,9 @@ if (-not (Test-Path $workflowFile)) {
 }
 if (-not (Test-Path $packageDispatchScript)) {
   throw "Missing packaged ship-it dispatch script: $packageDispatchScript"
+}
+if (-not (Test-Path $packageTargetRepositoryValidator)) {
+  throw "Missing packaged target repository validator: $packageTargetRepositoryValidator"
 }
 if (-not (Test-Path $packageWorkflowFile)) {
   throw "Missing packaged ship-it workflow: $packageWorkflowFile"
@@ -200,8 +204,9 @@ if ($workflowContent -notmatch "pilot-work-tracker") {
 if ($workflowContent -notmatch "/spec-2-prod") {
   throw "Ship-it workflow must detect /spec-2-prod comment command."
 }
-if ($workflowContent -notmatch 'result\.intent\b[^=]*=\s*.*"spec-2-prod"') {
-  throw "Ship-it workflow must assign spec-2-prod as an intent result value in the resolver."
+if ($workflowContent -notmatch '"spec-2-prod":\s*"spec-2-prod"' -or
+  $workflowContent -notmatch 'deliveryDirective\.intent') {
+  throw "Ship-it workflow must map spec-2-prod to its canonical intent in the resolver."
 }
 foreach ($workflow in @($workflowContent, $packageWorkflowContent)) {
   foreach ($requiredText in @(
@@ -210,6 +215,7 @@ foreach ($workflow in @($workflowContent, $packageWorkflowContent)) {
     'approval_receipt_base64:',
     'preapproval.resolvePreApproval',
     'workflowRun.created_at',
+    'if (approvalCommentId !== "")',
     'Pre-approval mode requires both source_issue_number and approval_comment_id.',
     'APPROVAL_RECEIPT_BASE64',
     "needs.resolve-intent.outputs.approval_comment_id == ''"
@@ -217,6 +223,9 @@ foreach ($workflow in @($workflowContent, $packageWorkflowContent)) {
     if ($workflow -notmatch [regex]::Escape($requiredText)) {
       throw "Both ship-it workflow surfaces must enforce the explicit pre-approval contract: $requiredText"
     }
+  }
+  if ($workflow -match 'if \(sourceIssueNumber !== "" \|\| approvalCommentId !== ""\)') {
+    throw "A delivery source issue without an approval comment must not activate pre-approval mode."
   }
 }
 
@@ -357,6 +366,192 @@ if ($shipItSummary.child_issues[0].stage_artifact.branch_name -notmatch '^intent
 }
 if ([string]::IsNullOrWhiteSpace($shipItSummary.release_gate_contract.workflow)) {
   throw "Expected release_gate_contract workflow to be present for ship-it."
+}
+
+$provenanceOutputJson = Join-Path $outputDirectory "summary-feature-provenance.json"
+& $dispatchScript `
+  -Intent "ship-it" `
+  -Goal "Deliver approved feature scope" `
+  -TargetRepo "IBuySpy-Shared/basecoat" `
+  -SpecRef "https://example.com/specs/feature" `
+  -RiskBand "medium" `
+  -SourceIssueNumber "3477" `
+  -SourceIssueUrl "https://github.com/IBuySpy-Shared/basecoat/issues/3477" `
+  -SourceScope "Implement approved feature scope only" `
+  -FeatureOrigin $true `
+  -RawDirective "SHIP-IT: Deliver approved feature scope" `
+  -DirectiveSource "issue_comment:colon-alias" `
+  -DirectiveActor "maintainer" `
+  -DirectiveEvidenceUrl "https://github.com/IBuySpy-Shared/basecoat/issues/3477#issuecomment-1" `
+  -DirectiveTimestamp "2026-10-04T00:00:00Z" `
+  -DryRun `
+  -OutputPath $provenanceOutputJson
+
+$provenanceSummary = Get-Content -Raw -Path $provenanceOutputJson | ConvertFrom-Json
+if ($provenanceSummary.source_issue_number -ne "3477" -or
+  $provenanceSummary.source_issue_url -notmatch '/issues/3477$' -or
+  -not $provenanceSummary.feature_origin -or
+  $provenanceSummary.source_scope -ne "Implement approved feature scope only" -or
+  $provenanceSummary.directive_provenance.raw_directive -ne "SHIP-IT: Deliver approved feature scope" -or
+  $provenanceSummary.directive_provenance.normalized_intent -ne "ship-it" -or
+  $provenanceSummary.directive_provenance.original_actor -ne "maintainer" -or
+  $provenanceSummary.directive_provenance.evidence_url -notmatch 'issuecomment-1') {
+  throw "Dispatch summary did not preserve source issue, approved scope, and directive provenance."
+}
+
+$packagedWorkflow = Join-Path $repoRoot ".github\base-coat\workflows\ship-it-intent-dispatch.yml"
+$packagedDispatchScript = Join-Path $repoRoot ".github\base-coat\scripts\ship-it\dispatch-intent.ps1"
+$packagedIssueApproval = Join-Path $repoRoot ".github\base-coat\workflows\issue-approve.yml"
+$directiveContracts = @()
+foreach ($path in @($workflowFile, $packagedWorkflow)) {
+  $content = Get-Content -Raw -Path $path
+  $contractMatch = [regex]::Match(
+    $content,
+    '(?s)// BEGIN SHIP-IT DIRECTIVE CONTRACT\r?\n(?<contract>.*?)\r?\n\s*// END SHIP-IT DIRECTIVE CONTRACT'
+  )
+  if (-not $contractMatch.Success) {
+    throw "$path is missing the tested ship-it directive contract."
+  }
+  $directiveContracts += $contractMatch.Groups["contract"].Value
+  foreach ($required in @(
+    'source_issue_number',
+    'approved',
+    'qualified exact /approve evidence',
+    'isCanonicalWorkflowIntent',
+    'workflow_dispatch'
+  )) {
+    if ($content -notmatch [regex]::Escape($required)) {
+      throw "$path is missing delivery gate contract text: $required"
+    }
+  }
+}
+if ($directiveContracts[0] -ne $directiveContracts[1]) {
+  throw "Canonical and packaged dispatch workflows must share the same tested directive normalizer."
+}
+$packagedDispatchContent = Get-Content -Raw -Path $packagedDispatchScript
+if ($packagedDispatchContent -notmatch 'directive_provenance' -or
+  $packagedDispatchContent -notmatch 'SourceScope' -or
+  $packagedDispatchContent -notmatch '\[switch\]\$AllowCrossRepository' -or
+  $packagedDispatchContent -notmatch 'validate-target-repository\.ps1') {
+  throw "Packaged dispatch script must preserve provenance, source scope, and cross-repository authorization."
+}
+
+$rejectedCrossRepoOutput = Join-Path $outputDirectory "summary-cross-repository-rejected.json"
+$crossRepoRejected = $false
+try {
+  & $packagedDispatchScript `
+    -Intent "onboarding-conductor" `
+    -Goal "Validate packaged cross-repository authorization" `
+    -TargetRepo "IBuySpy-Shared/dispatch-test-target" `
+    -DryRun `
+    -OutputPath $rejectedCrossRepoOutput | Out-Null
+} catch {
+  $crossRepoRejected = $_.Exception.Message -match "Cross-repository dispatch requires explicit"
+}
+if (-not $crossRepoRejected) {
+  throw "Packaged dispatch must reject cross-repository targets without explicit authorization."
+}
+if (Test-Path $rejectedCrossRepoOutput) {
+  throw "Rejected packaged cross-repository dispatch must not create a summary."
+}
+
+$allowedCrossRepoOutput = Join-Path $outputDirectory "summary-cross-repository-allowed.json"
+& $packagedDispatchScript `
+  -Intent "onboarding-conductor" `
+  -Goal "Validate packaged cross-repository authorization" `
+  -TargetRepo "IBuySpy-Shared/dispatch-test-target" `
+  -AllowCrossRepository `
+  -DryRun `
+  -OutputPath $allowedCrossRepoOutput | Out-Null
+$allowedCrossRepoSummary = Get-Content -Raw -Path $allowedCrossRepoOutput | ConvertFrom-Json
+if (-not $allowedCrossRepoSummary.dry_run -or
+  $allowedCrossRepoSummary.target_repo -ne "IBuySpy-Shared/dispatch-test-target") {
+  throw "Explicitly authorized packaged cross-repository dry-run did not complete successfully."
+}
+
+$remoteNormalizationDirectory = Join-Path $outputDirectory "remote-normalization-test"
+New-Item -ItemType Directory -Force -Path $remoteNormalizationDirectory | Out-Null
+try {
+  & git -C $remoteNormalizationDirectory init --quiet
+  if ($LASTEXITCODE -ne 0) { throw "Unable to initialize repository URL normalization fixture." }
+  Push-Location $remoteNormalizationDirectory
+  try {
+    & git remote add origin "ssh://git@github.com/IBuySpy-Shared/basecoat.git"
+    if ($LASTEXITCODE -ne 0) { throw "Unable to configure repository URL normalization fixture." }
+    $remoteUrls = @(
+      "ssh://git@github.com/IBuySpy-Shared/basecoat.git",
+      "git@github.com:IBuySpy-Shared/basecoat.git"
+    )
+    $validators = @(
+      (Join-Path $repoRoot "scripts\ship-it\validate-target-repository.ps1"),
+      $packageTargetRepositoryValidator
+    )
+    foreach ($validator in $validators) {
+      foreach ($remoteUrl in $remoteUrls) {
+        & git remote set-url origin $remoteUrl
+        if ($LASTEXITCODE -ne 0) { throw "Unable to configure repository URL normalization fixture." }
+        & $validator -TargetRepo "IBuySpy-Shared/basecoat" | Out-Null
+      }
+    }
+  } finally {
+    Pop-Location
+  }
+} finally {
+  Remove-Item -LiteralPath $remoteNormalizationDirectory -Recurse -Force
+}
+
+if ((Get-Content -Raw -Path $packagedIssueApproval) -match "contains\(github\.event\.comment\.body,\s*'/spec-2-prod'\)") {
+  throw "Packaged issue-approve workflow must not own /spec-2-prod dispatch."
+}
+
+$directiveContract = $directiveContracts[0]
+$parserHarness = @"
+const assert = require('node:assert/strict');
+$directiveContract
+const cases = [
+  { raw: 'ship-it: Release X', kind: 'delivery', intent: 'ship-it', goal: 'Release X' },
+  { raw: ' \n SHIP-IT:  Keep   this goal  \n', kind: 'delivery', intent: 'ship-it', goal: 'Keep   this goal' },
+  { raw: 'spec-2-prod: Ship spec Y', kind: 'delivery', intent: 'spec-2-prod', goal: 'Ship spec Y' },
+  { raw: '/ship-it', kind: 'delivery', intent: 'ship-it', goal: '' },
+  { raw: '/spec-2-prod Release Y', kind: 'delivery', intent: 'spec-2-prod', goal: 'Release Y' },
+  { raw: 'ship-it:', kind: 'invalid' },
+  { raw: 'ship-it-extra: Release X', kind: 'none' },
+  { raw: '- ship-it: Release X', kind: 'none' },
+  { raw: '> ship-it: Release X', kind: 'none' },
+  { raw: '```text\nship-it: Release X\n```', kind: 'invalid' },
+  { raw: 'We discussed ship-it: Release X', kind: 'none' },
+  { raw: 'feature: ship-it: Release X', kind: 'none' },
+  { raw: 'ship-it: Release X\nspec-2-prod: Release Y', kind: 'invalid' },
+  { raw: 'ship-it: Release X\nship-it: Release Y', kind: 'invalid' },
+  { raw: 'ship-it: Release X\nlater and now', kind: 'invalid' },
+  { raw: 'ship-it: Review release X read-only', kind: 'suppressed' },
+  { raw: 'spec-2-prod: Release X later', kind: 'suppressed' }
+];
+for (const test of cases) {
+  const actual = parseDeliveryDirective(test.raw);
+  assert.equal(actual.kind, test.kind, JSON.stringify(test));
+  if (test.intent) {
+    assert.equal(actual.intent, test.intent, JSON.stringify(test));
+    assert.equal(actual.goal, test.goal, JSON.stringify(test));
+  }
+  if (test.kind === 'delivery') assert.equal(actual.rawDirective, test.raw);
+}
+assert.equal(isCanonicalWorkflowIntent('ship-it'), true);
+assert.equal(isCanonicalWorkflowIntent('spec-2-prod'), true);
+assert.equal(isCanonicalWorkflowIntent('onboarding-conductor'), true);
+assert.equal(isCanonicalWorkflowIntent('SHIP-IT'), false);
+assert.equal(isCanonicalWorkflowIntent('ship-it: Release X'), false);
+assert.equal(classifyDeliveryGoal('Release X read-only'), 'suppressed');
+assert.equal(classifyDeliveryGoal('Release X later and now'), 'invalid');
+assert.equal(classifyDeliveryGoal('Release X now'), 'delivery');
+assert.equal(isPlaceholderSpecUrl('https://example.com/specs/feature'), true);
+assert.equal(isPlaceholderSpecUrl('https://github.com/IBuySpy-Shared/basecoat/blob/main/docs/spec/approved.md'), false);
+"@
+$parserHarnessPath = Join-Path $outputDirectory "directive-contract.cjs"
+Set-Content -Path $parserHarnessPath -Value $parserHarness -Encoding UTF8
+& node $parserHarnessPath
+if ($LASTEXITCODE -ne 0) {
+  throw "Ship-it directive parser behavior tests failed."
 }
 
 Write-Host "Ship-it dispatch tests passed."

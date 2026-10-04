@@ -24,7 +24,10 @@ plan, implement, validate, release, and close out with learnings.
 
 ## Inputs
 
-1. Intent contract (`ship-it`, `spec-2-prod`, or `onboarding-conductor`)
+1. Intent contract (`ship-it`, `spec-2-prod`, or `onboarding-conductor`).
+   Standalone `ship-it:` and `spec-2-prod:` directives normalize to the first
+   two exact canonical values; preserve the raw directive, original actor, and
+   evidence reference. Workflow inputs accept only exact canonical enum values.
 2. Goal statement, repo/branch scope, risk band and required gates
 3. Spec/PRD references
 4. Loop mode options: `dry_run`, `max_cycles`, `max_retries`, `advisory_only`
@@ -54,6 +57,20 @@ contract, including all stop conditions.
 3. No risky deployment without explicit approval artifacts.
 4. Keep serialized merges for release-coupled streams.
 5. Never claim completion while required checks are pending.
+6. `feature:` and plan confirmation authorize implementation only. Keep
+   feature-origin PRs draft until a separate delivery directive, approved issue,
+   spec, actor authority, and current evidence are validated. Never infer
+   delivery consent from green checks or `pr-lifecycle=full`.
+7. Reject quoted, fenced, bulleted, embedded, empty, dual, or conflicting
+   delivery directives. Read-only, log-only, and deferred modifiers suppress
+   side effects; contradictory immediate/stop modifiers block.
+8. Record directive provenance in the existing plan/dispatch summary and
+   feature-to-delivery handoff; do not fabricate user or maintainer comments.
+9. For feature-origin work, preserve the source issue marker
+   `<!-- basecoat-feature-origin:v1 -->`, its approved source scope, and the PR
+   handoff marker `<!-- basecoat-feature-handoff:v1 source-issue:#<number> -->`.
+   The merge evaluator verifies issue approval/spec and independent qualified
+   delivery evidence; never trust the PR body marker alone.
 
 ## Output
 

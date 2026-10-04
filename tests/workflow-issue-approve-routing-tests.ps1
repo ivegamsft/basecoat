@@ -36,8 +36,14 @@ foreach ($entry in $files) {
     if ($content -notmatch 'contains\(github\.event\.comment\.body,\s*''/approve''\)') {
         throw "$name must gate routing and approval jobs on '/approve' comments."
     }
-    if ($content -notmatch 'contains\(github\.event\.comment\.body,\s*''/spec-2-prod''\)') {
-        throw "$name must treat /spec-2-prod as an implementation directive."
+    if ($content -match 'contains\(github\.event\.comment\.body,\s*''/spec-2-prod''\)') {
+        throw "$name must not route /spec-2-prod through issue approval or cloud assignment."
+    }
+    if ($content -match '/approve''\)\s*\|\|[\s\S]{0,120}/spec-2-prod') {
+        throw "$name must keep /spec-2-prod under ship-it intent dispatch only."
+    }
+    if ($content -match 'comment `/approve` or `/spec-2-prod`') {
+        throw "$name must describe only /approve as the issue approval retry command."
     }
     if ($content -notmatch 'hasSpecEvidence' -or
         $content -notmatch 'Spec reference') {

@@ -88,3 +88,75 @@ tests:
     expect:
       decision: no_trigger
       confidence: 0.9
+  - id: ship-it-colon-alias-positive
+    description: Normalizes a standalone ship-it colon directive to the existing delivery skill
+    messages:
+      - role: user
+        content: "  SHIP-IT: Release feature X with required checks  "
+    expect:
+      decision: trigger
+      confidence: 0.9
+  - id: spec-2-prod-colon-alias-positive
+    description: Normalizes a standalone spec-2-prod colon directive to the existing delivery skill
+    messages:
+      - role: user
+        content: "spec-2-prod: Ship approved spec X through the gated release path."
+    expect:
+      decision: trigger
+      confidence: 0.9
+  - id: feature-does-not-authorize-delivery
+    description: Keeps feature implementation intent separate from delivery consent
+    messages:
+      - role: user
+        content: "feature: Implement and validate X; keep its PR draft and do not merge or deploy."
+    expect:
+      decision: trigger
+      confidence: 0.9
+  - id: empty-colon-goal-negative
+    description: Rejects delivery aliases with an empty goal
+    messages:
+      - role: user
+        content: "ship-it:"
+    expect:
+      decision: no_trigger
+      confidence: 0.9
+  - id: delivery-token-lookalike-negative
+    description: Does not treat a longer token as a delivery alias
+    messages:
+      - role: user
+        content: "ship-it-extra: release feature X."
+    expect:
+      decision: no_trigger
+      confidence: 0.9
+  - id: bulleted-delivery-alias-negative
+    description: Treats a bulleted delivery directive as log-only intake
+    messages:
+      - role: user
+        content: "- ship-it: release feature X."
+    expect:
+      decision: no_trigger
+      confidence: 0.9
+  - id: quoted-delivery-alias-negative
+    description: Does not execute a quoted delivery example
+    messages:
+      - role: user
+        content: "> ship-it: release feature X."
+    expect:
+      decision: no_trigger
+      confidence: 0.9
+  - id: conflicting-delivery-aliases-negative
+    description: Rejects conflicting authoritative delivery directives
+    messages:
+      - role: user
+        content: "ship-it: release X\nspec-2-prod: deploy Y"
+    expect:
+      decision: no_trigger
+      confidence: 0.9
+  - id: read-only-delivery-modifier-negative
+    description: Suppresses delivery side effects for read-only requests
+    messages:
+      - role: user
+        content: "ship-it: review release X read-only; do not make changes."
+    expect:
+      decision: no_trigger
+      confidence: 0.9

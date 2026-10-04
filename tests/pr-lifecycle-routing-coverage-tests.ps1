@@ -107,7 +107,16 @@ else {
         @{ id = 'pr-lifecycle-standard-routing'; expectedDecision = 'trigger'; requiredText = 'pr-lifecycle=standard' },
         @{ id = 'pr-lifecycle-full-routing'; expectedDecision = 'trigger'; requiredText = 'pr-lifecycle=full' },
         @{ id = 'pr-lifecycle-dual-prefix-negative'; expectedDecision = 'no_trigger'; requiredText = 'feature: pr:' },
-        @{ id = 'pr-lifecycle-invalid-enum-negative'; expectedDecision = 'no_trigger'; requiredText = 'pr-lifecycle=fast' }
+        @{ id = 'pr-lifecycle-invalid-enum-negative'; expectedDecision = 'no_trigger'; requiredText = 'pr-lifecycle=fast' },
+        @{ id = 'ship-it-colon-alias-positive'; expectedDecision = 'trigger'; requiredText = 'SHIP-IT:' },
+        @{ id = 'spec-2-prod-colon-alias-positive'; expectedDecision = 'trigger'; requiredText = 'spec-2-prod:' },
+        @{ id = 'feature-does-not-authorize-delivery'; expectedDecision = 'trigger'; requiredText = 'feature:' },
+        @{ id = 'empty-colon-goal-negative'; expectedDecision = 'no_trigger'; requiredText = 'ship-it:' },
+        @{ id = 'delivery-token-lookalike-negative'; expectedDecision = 'no_trigger'; requiredText = 'ship-it-extra:' },
+        @{ id = 'bulleted-delivery-alias-negative'; expectedDecision = 'no_trigger'; requiredText = '- ship-it:' },
+        @{ id = 'quoted-delivery-alias-negative'; expectedDecision = 'no_trigger'; requiredText = '> ship-it:' },
+        @{ id = 'conflicting-delivery-aliases-negative'; expectedDecision = 'no_trigger'; requiredText = 'spec-2-prod:' },
+        @{ id = 'read-only-delivery-modifier-negative'; expectedDecision = 'no_trigger'; requiredText = 'read-only' }
     )
 
     foreach ($required in $requiredSkillTests) {
@@ -140,7 +149,10 @@ else {
         @{ id = 'pr-lifecycle-full-required-check-gating'; terms = @('required checks', 'closeout', 'blocked') },
         @{ id = 'pr-lifecycle-full-cleanup-sequencing'; terms = @('cleanup', 'after merge', 'explicitly closed') },
         @{ id = 'pr-lifecycle-full-no-complete-with-wip'; terms = @('WIP', 'uncommitted', 'cannot complete') },
-        @{ id = 'pr-lifecycle-cross-surface-fallback'; terms = @('CLI', 'VS Code', 'cloud', 'fallback') }
+        @{ id = 'pr-lifecycle-cross-surface-fallback'; terms = @('CLI', 'VS Code', 'cloud', 'fallback') },
+        @{ id = 'feature-lifecycle-is-not-delivery-consent'; terms = @('feature-origin', 'draft', 'separate delivery directive', 'cannot authorize merging') },
+        @{ id = 'colon-alias-preserves-delivery-gates'; terms = @('ship-it', 'approved issue', 'spec', 'actor', 'production') },
+        @{ id = 'quoted-delivery-directive-is-data'; terms = @('quoted', 'not a directive', 'no dispatch') }
     )
 
     foreach ($required in $requiredAgentTests) {
@@ -154,6 +166,21 @@ else {
             if ($block -notmatch [regex]::Escape($term)) {
                 Add-Failure "agents/basecoat-60-workflow-ship-it-orchestrator.agent.eval.yaml test $($required.id) missing expect.contains term '$term'"
             }
+        }
+    }
+}
+
+# Test 5: the canonical plan-first instruction distinguishes implementation confirmation from delivery consent.
+Write-Host '  Test 5: Validate plan confirmation does not authorize feature delivery...'
+$planFirstPath = Join-Path $repoRoot 'instructions\basecoat-10-core-plan-first.instructions.md'
+if (-not (Test-Path $planFirstPath)) {
+    Add-Failure 'instructions/basecoat-10-core-plan-first.instructions.md missing'
+}
+else {
+    $planFirstContent = Get-Content -Raw -Path $planFirstPath
+    foreach ($requiredText in @('confirmed plan', 'does not authorize', 'ready-for-review', 'production deployment', 'ship-it:', 'spec-2-prod:')) {
+        if ($planFirstContent -notmatch [regex]::Escape($requiredText)) {
+            Add-Failure "Plan-first delivery boundary missing: $requiredText"
         }
     }
 }

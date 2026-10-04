@@ -165,6 +165,19 @@ else {
     else {
         Write-Host '    ✓ Plan-first affected prefixes referenced'
     }
+    foreach ($deliveryContractText in @(
+        '`ship-it:`',
+        '`spec-2-prod:`',
+        'Feature and Delivery Boundaries',
+        'not delivery consent',
+        'conflicting authoritative prefixes',
+        'exact canonical enum values'
+    )) {
+        if ($content -notmatch [regex]::Escape($deliveryContractText)) {
+            $failures += "delivery-routing-contract-missing:$deliveryContractText"
+            Write-Host "    ✗ Missing delivery-routing contract: $deliveryContractText" -ForegroundColor Red
+        }
+    }
 }
 
 # Test 2: intent-routing instruction contains sprint-style nudge
@@ -224,6 +237,8 @@ if (Test-Path $routingFile) {
     if ($content -notmatch '`architect:`') { $missingPrefixes += 'architect:' }
     if ($content -notmatch '`optimize:`') { $missingPrefixes += 'optimize:' }
     if ($content -notmatch '`chronicle:`') { $missingPrefixes += 'chronicle:' }
+    if ($content -notmatch '`ship-it:`') { $missingPrefixes += 'ship-it:' }
+    if ($content -notmatch '`spec-2-prod:`') { $missingPrefixes += 'spec-2-prod:' }
     if ($missingPrefixes.Count -gt 0) {
         $failures += 'new-prefixes-missing'
         Write-Host "    ✗ Prefix vocabulary missing: $($missingPrefixes -join ', ')" -ForegroundColor Red
@@ -294,7 +309,16 @@ if (Test-Path $prefixGuide) {
         Write-Host "    ✗ intent-prefixes guide missing: $($missingPrefixes -join ', ')" -ForegroundColor Red
     }
     else {
-        Write-Host '    ✓ portfolio:, azure:, infra:, optimize:, and chronicle: prefixes in intent-prefixes guide'
+        Write-Host '    ✓ routing prefixes in intent-prefixes guide'
+    }
+    foreach ($deliveryGuideText in @(
+        'feature:` routes design/implementation and validation only',
+        'basecoat-feature-origin:v1',
+        'basecoat-feature-handoff:v1'
+    )) {
+        if ($content -notmatch [regex]::Escape($deliveryGuideText)) {
+            $failures += "intent-prefix-delivery-contract-missing:$deliveryGuideText"
+        }
     }
 }
 else {

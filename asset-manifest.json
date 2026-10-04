@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.1",
   "libraryVersion": "4.5.2",
-  "generatedAt": "2026-10-04T06:35:53.8765046Z",
+  "generatedAt": "2026-10-04T08:16:43.2570202Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -862,7 +862,7 @@
     {
       "path": "agents/basecoat-60-workflow-ship-it-orchestrator.agent.md",
       "type": "agent",
-      "sha": "9b404defb98b7588c39878d967cc0c790f2a4b98",
+      "sha": "4220a2d2177c12dd66306561391877366609e6cd",
       "version": null,
       "effectiveVersion": "4.5.2",
       "versionSource": "library"
@@ -1238,7 +1238,7 @@
     {
       "path": "instructions/basecoat-10-core-intent-routing.instructions.md",
       "type": "instruction",
-      "sha": "02da4d308b4a5d513934c9ef4aa9724c3c1fc349",
+      "sha": "39b04483a70c2f86caf467d032bbfae1fa817e7f",
       "version": null,
       "effectiveVersion": "4.5.2",
       "versionSource": "library"
@@ -1342,7 +1342,7 @@
     {
       "path": "instructions/basecoat-10-core-plan-first.instructions.md",
       "type": "instruction",
-      "sha": "61ef4f939d8a9377c67d8ae92dc14840e5588ac1",
+      "sha": "bb9092f6718d89dcd08717167f438ffacca68c92",
       "version": null,
       "effectiveVersion": "4.5.2",
       "versionSource": "library"
@@ -2910,7 +2910,7 @@
     {
       "path": "skills/ship-it/SKILL.md",
       "type": "skill",
-      "sha": "d212647cbaa34d1734cdd402972c8a067c9e6593",
+      "sha": "8b0ef6782d3b82d35363bd8bcd08683dcbe2ae80",
       "version": null,
       "effectiveVersion": "4.5.2",
       "versionSource": "library"

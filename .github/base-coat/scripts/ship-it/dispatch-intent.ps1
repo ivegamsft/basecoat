@@ -8,6 +8,8 @@ param(
 
   [string]$TargetRepo = $env:GITHUB_REPOSITORY,
 
+  [switch]$AllowCrossRepository,
+
   [string]$SpecRef = "",
 
   [ValidateSet("low", "medium", "high", "critical")]
@@ -24,6 +26,22 @@ param(
 
   [string]$SourceIssueNumber = "",
 
+  [string]$SourceIssueUrl = "",
+
+  [string]$SourceScope = "",
+
+  [bool]$FeatureOrigin = $false,
+
+  [string]$RawDirective = "",
+
+  [string]$DirectiveSource = "",
+
+  [string]$DirectiveActor = "",
+
+  [string]$DirectiveEvidenceUrl = "",
+
+  [string]$DirectiveTimestamp = "",
+
   [string]$ApprovalCommentId = "",
 
   [string]$ApprovalReceiptBase64 = $env:APPROVAL_RECEIPT_BASE64,
@@ -39,6 +57,12 @@ if ([string]::IsNullOrWhiteSpace($TargetRepo) -or $TargetRepo -notmatch "^[A-Za-
   throw "TargetRepo must be in owner/repo format."
 }
 
+$targetRepositoryValidator = Join-Path $PSScriptRoot "validate-target-repository.ps1"
+if (-not (Test-Path $targetRepositoryValidator)) {
+  throw "Missing target repository validator: $targetRepositoryValidator"
+}
+& $targetRepositoryValidator -TargetRepo $TargetRepo -AllowCrossRepository:$AllowCrossRepository | Out-Null
+
 $trimmedGoal = $Goal.Trim()
 if ([string]::IsNullOrWhiteSpace($trimmedGoal)) {
   throw "Goal cannot be empty."
@@ -48,8 +72,14 @@ if ($ProjectNumber -gt 0 -and [string]::IsNullOrWhiteSpace($ProjectOwner)) {
   throw "ProjectOwner is required when ProjectNumber is provided."
 }
 
-$preApprovalMode = -not [string]::IsNullOrEmpty($SourceIssueNumber) -or
-  -not [string]::IsNullOrEmpty($ApprovalCommentId)
+$normalizedSourceIssueNumber = $SourceIssueNumber.Trim()
+if (-not [string]::IsNullOrWhiteSpace($normalizedSourceIssueNumber) -and
+  $normalizedSourceIssueNumber -notmatch "^\d+$") {
+  throw "SourceIssueNumber must be a positive issue number."
+}
+
+$preApprovalMode = -not [string]::IsNullOrEmpty($ApprovalCommentId) -or
+  -not [string]::IsNullOrEmpty($ApprovalReceiptBase64)
 $approvalHelper = Join-Path $PSScriptRoot "preapproval-evidence.cjs"
 $approvalReceipt = $null
 
@@ -168,7 +198,6 @@ function Assert-PreApprovalCurrent {
     throw "Live pre-approval receipt changed during dispatch; no further side effects are allowed."
   }
 }
-
 $repoName = $TargetRepo.Split("/")[1]
 $commonLabels = @("intent-control-plane", $Intent, "risk-$RiskBand")
 
@@ -759,7 +788,7 @@ function Find-ExistingIssueByMarker {
 $sprints = Get-IntentPhases -IntentName $Intent
 $desiredStateDiff = Get-DesiredStateDiff -IntentName $Intent -ProfileName $Profile
 $releaseGateContract = Get-ReleaseGateContract
-$runKey = "$Intent|$TargetRepo|$trimmedGoal|$Profile"
+$runKey = "$Intent|$TargetRepo|$trimmedGoal|$Profile|$normalizedSourceIssueNumber"
 if ($preApprovalMode) {
   $runKey += "|preapproval:$($approvalReceipt.scope_sha256)"
 }
@@ -875,6 +904,18 @@ $approvalProvenance
 This issue is the control-plane parent for a governed multi-sprint execution loop.
 Child sprint issues are generated automatically and must remain linked.
 
+## Directive Provenance
+
+- Source issue: $SourceIssueUrl (#$normalizedSourceIssueNumber)
+- Feature-origin handoff: ``$FeatureOrigin``
+- Approved source scope: $SourceScope
+- Normalized intent: ``$Intent``
+- Raw directive: $RawDirective
+- Directive source: ``$DirectiveSource``
+- Original actor: $DirectiveActor
+- Evidence: $DirectiveEvidenceUrl
+- Evidence time: $DirectiveTimestamp
+
 ## Desired-State Diff
 
 The flow below emits actionable desired-state changes.
@@ -904,6 +945,19 @@ $summary = [ordered]@{
   profile = $Profile
   requester = $Requester
   spec_ref = $SpecRef
+  source_issue_number = $normalizedSourceIssueNumber
+  source_issue_url = $SourceIssueUrl
+  feature_origin = $FeatureOrigin
+  source_scope = $SourceScope
+  directive_provenance = [ordered]@{
+    raw_directive = $RawDirective
+    normalized_intent = $Intent
+    source = $DirectiveSource
+    original_actor = $DirectiveActor
+    evidence_url = $DirectiveEvidenceUrl
+    evidence_timestamp = $DirectiveTimestamp
+    source_scope = $SourceScope
+  }
   started_at = $timestamp
   dry_run = [bool]$DryRun
   run_key = $runKey
@@ -1210,6 +1264,14 @@ $markdown = @"
 - Repository: $($summary.target_repo)
 - Risk band: ``$($summary.risk_band)``
 - Profile: ``$($summary.profile)``
+- Source issue: $($summary.source_issue_url) (#$($summary.source_issue_number))
+- Feature-origin handoff: ``$($summary.feature_origin)``
+- Approved source scope: $($summary.source_scope)
+- Original directive: $($summary.directive_provenance.raw_directive)
+- Directive source: ``$($summary.directive_provenance.source)``
+- Original actor: $($summary.directive_provenance.original_actor)
+- Directive evidence: $($summary.directive_provenance.evidence_url)
+- Directive time: $($summary.directive_provenance.evidence_timestamp)
 - Dry run: ``$($summary.dry_run)``
 - Parent issue: $($summary.parent_issue_url)
 - Parent issue reused: ``$($summary.parent_issue_reused)``

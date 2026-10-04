@@ -320,8 +320,7 @@ jobs:
   approve:
     if: |
       !github.event.issue.pull_request &&
-      (contains(github.event.comment.body, '/approve') ||
-       contains(github.event.comment.body, '/spec-2-prod'))
+      contains(github.event.comment.body, '/approve')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -448,7 +447,7 @@ jobs:
                 '',
                 checklist,
                 '',
-                'Once the missing information is added, comment `/approve` or `/spec-2-prod` again to retry.',
+                'Once the missing information is added, comment `/approve` again to retry.',
               ].join('\n');
 
               await github.rest.issues.createComment({
@@ -618,8 +617,7 @@ jobs:
       - approve
     if: |
       always() &&
-      (contains(github.event.comment.body, '/approve') ||
-       contains(github.event.comment.body, '/spec-2-prod'))
+      contains(github.event.comment.body, '/approve')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

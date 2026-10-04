@@ -469,6 +469,27 @@ $helperMatch = [regex]::Match(
 if (-not $helperMatch.Success) {
     throw 'Workflow must expose the acknowledgement helper contract for behavioral tests.'
 }
+$featureOriginMatch = [regex]::Match(
+    $workflow,
+    '(?s)// BEGIN FEATURE-ORIGIN DELIVERY CONTRACT\r?\n(?<helper>.*?)\r?\n\s*// END FEATURE-ORIGIN DELIVERY CONTRACT'
+)
+if (-not $featureOriginMatch.Success) {
+    throw 'Workflow must expose feature-origin delivery eligibility for behavioral tests.'
+}
+foreach ($requiredFeatureDeliveryText in @(
+    'basecoat-feature-origin:v1',
+    'basecoat-feature-handoff:v1',
+    'approved label',
+    'non-placeholder Spec URL',
+    'qualified exact /approve evidence',
+    'qualified explicit delivery consent',
+    'Feature-origin delivery provenance',
+    'collectFeatureOriginLinkedIssueNumbers(pr.title, pr.body)'
+)) {
+    if ($workflow -notmatch [regex]::Escape($requiredFeatureDeliveryText)) {
+        throw "Workflow is missing feature-origin delivery enforcement: $requiredFeatureDeliveryText"
+    }
+}
 
 $scratchRoot = Join-Path $repoRoot 'test-results\pr-auto-merge-executor-contract'
 $harnessPath = Join-Path $scratchRoot 'acknowledgement-contract.cjs'
@@ -483,6 +504,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const preapproval = require('../../.github/base-coat/scripts/ship-it/preapproval-evidence.cjs');
 $($helperMatch.Groups['helper'].Value)
+$($featureOriginMatch.Groups['helper'].Value)
 
 const currentSha = 'a'.repeat(40);
 const staleSha = 'b'.repeat(40);
@@ -510,6 +532,33 @@ const evaluate = ({ comments = [], issues = [] } = {}) =>
     linkedIssues: issues,
     resolvePermission
   });
+const featurePrBody = '<!-- basecoat-feature-handoff:v1 source-issue:#3477 -->\nCloses #3477';
+const markerOnlyFeaturePrBody = '<!-- basecoat-feature-handoff:v1 source-issue:#3477 -->';
+const featureIssue = ({
+  labels = ['approved'],
+  spec = 'https://github.com/IBuySpy-Shared/basecoat/blob/main/docs/spec/synthesized/feature.spec.md',
+  comments = [
+    prComment('maintainer', '/approve'),
+    { ...prComment('writer', 'SHIP-IT: Deliver the approved feature scope'), html_url: 'https://example.com/ship', created_at: afterPush }
+  ]
+} = {}) => ({
+  number: 3477,
+  title: 'Deliver the approved feature scope',
+  state: 'open',
+  html_url: 'https://example.com/issues/3477',
+  body: '<!-- basecoat-feature-origin:v1 -->\nBaseCoat Source scope: Deliver feature X only\n- Spec: ' + spec,
+  labels,
+  user: { login: 'author', type: 'User' },
+  comments
+});
+const evaluateFeature = async ({
+  body = featurePrBody,
+  issues = [featureIssue()]
+} = {}) => evaluateFeatureOriginDelivery({
+  pullRequestBody: body,
+  linkedIssues: issues,
+  resolvePermission
+});
 
 (async () => {
   const author = await evaluate({
@@ -553,6 +602,7 @@ const evaluate = ({ comments = [], issues = [] } = {}) =>
 
   const linkedIssue = await evaluate({
     issues: [{
+      state: 'open',
       number: 2809,
       approved: true,
       comments: [prComment('maintainer', '/approve')]
@@ -563,6 +613,7 @@ const evaluate = ({ comments = [], issues = [] } = {}) =>
 
   const unlabeledIssue = await evaluate({
     issues: [{
+      state: 'open',
       number: 2809,
       approved: false,
       comments: [prComment('maintainer', '/approve')]
@@ -570,9 +621,173 @@ const evaluate = ({ comments = [], issues = [] } = {}) =>
   });
   assert.equal(unlabeledIssue.satisfied, false, 'linked issue must also carry the approved label');
 
+  const closedApprovalIssue = await evaluate({
+    issues: [{
+      state: 'closed',
+      number: 2809,
+      approved: true,
+      comments: [prComment('maintainer', '/approve')]
+    }]
+  });
+  assert.equal(closedApprovalIssue.satisfied, false, 'closed linked issue must not satisfy maintainer acknowledgement');
+
   assert.deepEqual(collectLinkedIssueNumbers('Fixes #2809\nCloses #42'), [2809, 42]);
+  assert.deepEqual(
+    collectFeatureOriginLinkedIssueNumbers('Feature delivery', markerOnlyFeaturePrBody),
+    [3477],
+    'handoff marker must load its source issue even without a closing keyword'
+  );
+  assert.deepEqual(
+    collectFeatureOriginLinkedIssueNumbers('Feature delivery', markerOnlyFeaturePrBody + '\nCloses #42'),
+    [42, 3477],
+    'marker and closing-keyword issue references must both load once'
+  );
   assert.equal(parseCriticalAcknowledgement('/acknowledge-critical ' + currentSha), currentSha);
   assert.equal(parseCriticalAcknowledgement('note\n/acknowledge-critical ' + currentSha), '');
+
+  const validFeatureHandoff = await evaluateFeature();
+  assert.equal(validFeatureHandoff.isFeatureOrigin, true);
+  assert.equal(
+    validFeatureHandoff.satisfied,
+    true,
+    'qualified delivery and approval evidence must validate a feature handoff: ' +
+      JSON.stringify(validFeatureHandoff.blockers)
+  );
+  assert.equal(validFeatureHandoff.evidence.delivery_intent, 'ship-it');
+  assert.equal(validFeatureHandoff.evidence.delivery_actor, 'writer');
+  assert.equal(validFeatureHandoff.evidence.approved_by, 'maintainer');
+  assert.equal(
+    validFeatureHandoff.evidence.spec_ref,
+    'https://github.com/IBuySpy-Shared/basecoat/blob/main/docs/spec/synthesized/feature.spec.md'
+  );
+
+  const specToProdHandoff = await evaluateFeature({
+    issues: [featureIssue({
+      comments: [
+        prComment('maintainer', '/approve'),
+        { ...prComment('writer', 'spec-2-prod: Deliver the approved feature scope'), html_url: 'https://example.com/spec2prod', created_at: afterPush }
+      ]
+    })]
+  });
+  assert.equal(specToProdHandoff.satisfied, true);
+  assert.equal(specToProdHandoff.evidence.delivery_intent, 'spec-2-prod');
+
+  const legacySlashHandoff = await evaluateFeature({
+    issues: [featureIssue({
+      comments: [
+        prComment('maintainer', '/approve'),
+        { ...prComment('writer', '/ship-it'), html_url: 'https://example.com/slash', created_at: afterPush }
+      ]
+    })]
+  });
+  assert.equal(legacySlashHandoff.satisfied, true, 'legacy slash directive must retain its title fallback');
+  assert.equal(legacySlashHandoff.evidence.delivery_goal, 'Deliver the approved feature scope');
+
+  const missingHandoffMarker = await evaluateFeature({ body: 'Closes #3477' });
+  assert.equal(missingHandoffMarker.satisfied, false, 'feature-origin PR must retain the verified source handoff marker');
+  assert.ok(missingHandoffMarker.blockers.some(item => item.includes('valid source-issue handoff marker')));
+
+  const mismatchedHandoff = await evaluateFeature({
+    body: '<!-- basecoat-feature-handoff:v1 source-issue:#3478 -->\nCloses #3477'
+  });
+  assert.equal(mismatchedHandoff.satisfied, false, 'a PR body marker alone cannot change source-issue provenance');
+
+  const unapprovedIssue = await evaluateFeature({ issues: [featureIssue({ labels: [] })] });
+  assert.equal(unapprovedIssue.satisfied, false, 'feature-origin promotion requires independent issue approval');
+
+  const missingSpec = await evaluateFeature({
+    issues: [featureIssue({ spec: 'N/A' })]
+  });
+  assert.equal(missingSpec.satisfied, false, 'feature-origin promotion requires a non-placeholder spec URL');
+
+  const placeholderSpec = await evaluateFeature({
+    issues: [featureIssue({ spec: 'https://example.com/specs/feature' })]
+  });
+  assert.equal(placeholderSpec.satisfied, false, 'example-domain specs must not count as source evidence');
+  assert.ok(placeholderSpec.blockers.some(item => item.includes('non-placeholder Spec URL')));
+
+  const missingApproval = await evaluateFeature({
+    issues: [featureIssue({
+      comments: [{ ...prComment('writer', 'ship-it: Deliver feature X'), created_at: afterPush }]
+    })]
+  });
+  assert.equal(missingApproval.satisfied, false, 'delivery directive cannot replace exact /approve evidence');
+
+  const unqualifiedDelivery = await evaluateFeature({
+    issues: [featureIssue({
+      comments: [
+        prComment('maintainer', '/approve'),
+        { ...prComment('reader', 'ship-it: Deliver feature X'), created_at: afterPush }
+      ]
+    })]
+  });
+  assert.equal(unqualifiedDelivery.satisfied, false, 'read-only actor cannot authorize feature delivery');
+
+  const botDelivery = await evaluateFeature({
+    issues: [featureIssue({
+      comments: [
+        prComment('maintainer', '/approve'),
+        { ...prComment('automation[bot]', 'ship-it: Deliver feature X', afterPush, 'Bot'), created_at: afterPush }
+      ]
+    })]
+  });
+  assert.equal(botDelivery.satisfied, false, 'bot text cannot authorize feature delivery');
+
+  const conflictingDirectives = await evaluateFeature({
+    issues: [featureIssue({
+      comments: [
+        prComment('maintainer', '/approve'),
+        { ...prComment('writer', 'ship-it: Deliver feature X'), created_at: afterPush },
+        { ...prComment('maintainer', 'spec-2-prod: Deliver feature X'), created_at: afterPush }
+      ]
+    })]
+  });
+  assert.equal(conflictingDirectives.satisfied, false, 'conflicting canonical delivery intents must block promotion');
+
+  const conflictingDirectiveBody = await evaluateFeature({
+    issues: [featureIssue({
+      comments: [
+        prComment('maintainer', '/approve'),
+        { ...prComment('writer', 'ship-it: Deliver feature X\nspec-2-prod: Deploy it'), created_at: afterPush }
+      ]
+    })]
+  });
+  assert.equal(conflictingDirectiveBody.satisfied, false, 'two directives in one comment must not use parser precedence');
+
+  const changedDirectiveScope = await evaluateFeature({
+    issues: [featureIssue({
+      comments: [
+        prComment('maintainer', '/approve'),
+        { ...prComment('writer', 'ship-it: Deliver feature X'), created_at: afterPush },
+        { ...prComment('maintainer', 'SHIP-IT: Deliver unrelated feature Y'), created_at: afterPush }
+      ]
+    })]
+  });
+  assert.equal(changedDirectiveScope.satisfied, false, 'changed delivery scope must not silently replace prior consent');
+
+  const deferredDelivery = await evaluateFeature({
+    issues: [featureIssue({
+      comments: [
+        prComment('maintainer', '/approve'),
+        { ...prComment('writer', 'ship-it: Deliver feature X later'), created_at: afterPush }
+      ]
+    })]
+  });
+  assert.equal(deferredDelivery.satisfied, false, 'deferred modifier must suppress feature delivery consent');
+
+  const spoofedFeatureMarker = await evaluateFeature({
+    issues: [{
+      ...featureIssue(),
+      body: 'Ordinary issue with no verified feature-origin marker'
+    }]
+  });
+  assert.equal(spoofedFeatureMarker.satisfied, false, 'PR body handoff marker cannot authorize a non-feature issue');
+
+  const unrelatedIssue = await evaluateFeature({
+    body: 'Closes #42',
+    issues: [{ number: 42, body: 'Ordinary bug fix', labels: [], comments: [] }]
+  });
+  assert.equal(unrelatedIssue.isFeatureOrigin, false, 'unrelated PRs keep their existing merge-policy path');
 })().catch(error => {
   console.error(error);
   process.exitCode = 1;

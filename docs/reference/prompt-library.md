@@ -2,7 +2,7 @@
 
 Generated from the canonical intent vocabulary and asset frontmatter. Do not edit the generated tables directly; run `pwsh scripts/generate-prompt-library.ps1`.
 
-Coverage: 37 intents, 143 skills, and 131 agents.
+Coverage: 39 intents, 143 skills, and 131 agents.
 
 ## Lifecycle prompts
 
@@ -93,6 +93,8 @@ Mutation performed: none
 |---|---|
 | `bug:` | <code>bug: Defect, regression, broken behavior in this repository. Include scope, evidence, and the next safe action.</code> |
 | `feature:` | <code>feature: New capability or enhancement in this repository. Include scope, evidence, and the next safe action.</code> |
+| `ship-it:` | <code>ship-it: Explicit governed delivery request in this repository. Include scope, evidence, and the next safe action.</code> |
+| `spec-2-prod:` | <code>spec-2-prod: Explicit governed spec-to-production request in this repository. Include scope, evidence, and the next safe action.</code> |
 | `audit:` | <code>audit: Review, assess, validate — no changes in this repository. Include scope, evidence, and the next safe action.</code> |
 | `investigate:` | <code>investigate: Diagnose an open-ended concern and report findings — no changes in this repository. Include scope, evidence, and the next safe action.</code> |
 | `plan:` | <code>plan: Sprint or project planning in this repository. Include scope, evidence, and the next safe action.</code> |
