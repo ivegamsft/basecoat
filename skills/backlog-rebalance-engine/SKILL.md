@@ -13,7 +13,7 @@ capabilities:
   safety_level: standard
 model_policy:
   fallback: true
-  preferred_families: [sonnet, haiku]
+  preferred_families: [claude-sonnet, claude-haiku]
   upshift:
     allowed: true
     owner: runtime

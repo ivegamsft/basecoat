@@ -22,6 +22,12 @@ own guidance that Auto must not silently select Opus.
 Do not pin a calendar version in this file. Use `model_policy.preferred_families`
 on assets (ADR-002). Named examples in the playbook are illustrations.
 
+For the canonical family tokens, exact runtime-ID rules, alias normalization,
+pin and legacy-model precedence, ordered fallback, and explicit inheritance
+contract, see the repository authoring contract in
+`instructions/basecoat-10-core-capability-frontmatter.instructions.md` under
+"Selector Normalization and Precedence."
+
 ## Premium opt-in
 
 Use premium only when at least one trigger is true and recorded in the

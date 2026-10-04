@@ -36,10 +36,39 @@ Use these normalized values:
 ## Model Policy Fields
 
 - `model_policy.fallback`: `true` for safe fallback behavior
-- `model_policy.preferred_families`: ordered family preferences
+- `model_policy.preferred_families`: ordered selectors; each is a canonical
+  family token or an exact runtime model ID from
+  `docs/reference/model-capabilities.json`
 - `model_policy.excluded_tiers`: optional disallowed tiers
 - `pinned_model`: optional explicit model identifier
 - `pin_reason`: required when `pinned_model` is set
+
+## Selector Normalization and Precedence
+
+Use lowercase canonical family tokens: `claude`, `claude-fable`,
+`claude-haiku`, `claude-opus`, `claude-sonnet`, `gemini`, `gpt`, `grok`,
+`kimi`, or `mai-code`. The short aliases `sonnet`, `haiku`, and `opus` are
+accepted by the normalization helper but are not valid in committed
+frontmatter; write their `claude-*` canonical forms. Exact runtime model IDs
+are case-sensitive in frontmatter and must exist in the capability catalog.
+
+Resolve selectors in this order:
+
+1. `pinned_model` takes precedence over all other selectors, requires a
+   non-empty `pin_reason`, and is never substituted or given model fallback.
+2. A local legacy `model` field remains authoritative during migration.
+3. Otherwise, use local `model_policy.preferred_families` in declared order.
+   With `fallback: true`, try each selector in sequence; with `fallback: false`,
+   only the first selector is eligible.
+4. Inherited selectors may be used only when explicitly supplied by the
+   caller and no local `model` or `preferred_families` is declared. Parent
+   agent models are not implicitly inherited.
+5. If no selector is available, use the requested tier default, then the
+   standard default when the tier is unknown.
+
+Within a preferred selector, a family token describes a family and an exact
+runtime model ID describes only that model; exact IDs are never reinterpreted
+as family names. Unknown aliases and unsupported exact IDs fail validation.
 
 ## Compatibility and Migration
 
@@ -63,7 +92,7 @@ capabilities:
   safety_level: standard
 model_policy:
   fallback: true
-  preferred_families: [claude-sonnet, gpt-5]
+  preferred_families: [claude-sonnet, gpt]
 ---
 ```
 

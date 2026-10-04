@@ -221,6 +221,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running model policy contract tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'model-policy-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Model policy contract tests failed' -ForegroundColor Red
+    Write-FailureLog 'model-policy-tests'
+    exit 1
+}
+
 Write-Host 'Running A/B experiment harness tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'ab-experiment-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.1",
   "libraryVersion": "4.5.2",
-  "generatedAt": "2026-10-04T08:16:43.2570202Z",
+  "generatedAt": "2026-10-04T21:55:29.2914192Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -1126,7 +1126,7 @@
     {
       "path": "instructions/basecoat-10-core-capability-frontmatter.instructions.md",
       "type": "instruction",
-      "sha": "74a711b1940067de331a7e2a3b993d7f780d3110",
+      "sha": "d014e17a4cb84bf089ed2094fa6e904dfa4a7f88",
       "version": null,
       "effectiveVersion": "4.5.2",
       "versionSource": "library"
@@ -1868,6 +1868,22 @@
       "versionSource": "library"
     },
     {
+      "path": "scripts/model-fallback-policy.ps1",
+      "type": "script",
+      "sha": "7b089cbf3c48efd55b5844cff3bcf1199604a4d8",
+      "version": null,
+      "effectiveVersion": "4.5.2",
+      "versionSource": "library"
+    },
+    {
+      "path": "scripts/model-policy-contract.ps1",
+      "type": "script",
+      "sha": "dad4b5caf5963fb21ddc67c0ec8d39f9fe546d17",
+      "version": null,
+      "effectiveVersion": "4.5.2",
+      "versionSource": "library"
+    },
+    {
       "path": "scripts/validate-asset-distribution.ps1",
       "type": "script",
       "sha": "b126f394dc4fb0cb96fc66e8056ade9259221eea",
@@ -1878,7 +1894,7 @@
     {
       "path": "scripts/validate-basecoat.ps1",
       "type": "script",
-      "sha": "afcd36effe55d611d6858c61a39e6d211b8e824b",
+      "sha": "e19198decb5b02626ef31effe20ff81effc16018",
       "version": null,
       "effectiveVersion": "4.5.2",
       "versionSource": "library"
@@ -1887,6 +1903,14 @@
       "path": "scripts/validate-basecoat.sh",
       "type": "script",
       "sha": "4387a180ff8d2d4e2b5c0f1d1fb8809ccbd2ca6a",
+      "version": null,
+      "effectiveVersion": "4.5.2",
+      "versionSource": "library"
+    },
+    {
+      "path": "scripts/validate-model-policy.ps1",
+      "type": "script",
+      "sha": "9133de6e999e13dbdc308cde3af36254ac68b0c7",
       "version": null,
       "effectiveVersion": "4.5.2",
       "versionSource": "library"
@@ -2102,7 +2126,7 @@
     {
       "path": "skills/backlog-rebalance-engine/SKILL.md",
       "type": "skill",
-      "sha": "842a241f22cda1c9db19bc36f0632141c1eebb4a",
+      "sha": "d98629b4a384f5e064a14d94e42eca0abf3c7a43",
       "version": null,
       "effectiveVersion": "4.5.2",
       "versionSource": "library"

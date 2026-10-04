@@ -34,6 +34,9 @@ Copy-Item -Path $distributedWorkflows -Destination (Join-Path $stageDir 'workflo
 $validationScripts = @(
     'scripts/validate-basecoat.ps1',
     'scripts/validate-basecoat.sh',
+    'scripts/validate-model-policy.ps1',
+    'scripts/model-policy-contract.ps1',
+    'scripts/model-fallback-policy.ps1',
     'scripts/validate-workflow-action-pins.ps1',
     'scripts/validate-workflow-action-pins.py',
     'scripts/validate-reusable-workflow-contracts.py',

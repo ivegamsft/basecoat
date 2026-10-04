@@ -31,6 +31,25 @@ $script:FrontmatterModelAliases = @{
     "claude-sonnet-4.5" = "claude-sonnet-5"
 }
 
+$script:PreferredModelFamilyAliases = @{
+    "sonnet" = "claude-sonnet"
+    "haiku" = "claude-haiku"
+    "opus" = "claude-opus"
+}
+
+$script:CanonicalPreferredModelFamilies = @(
+    "claude",
+    "claude-fable",
+    "claude-haiku",
+    "claude-opus",
+    "claude-sonnet",
+    "gemini",
+    "gpt",
+    "grok",
+    "kimi",
+    "mai-code"
+)
+
 $script:TierDefaultFrontmatterModels = @{
     "fast" = "gpt-5.4-mini"
     "balanced" = "gpt-5.3-codex"

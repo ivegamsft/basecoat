@@ -209,6 +209,9 @@ try {
             '.github/base-coat/scripts/validate-basecoat.sh',
             '.github/base-coat/scripts/validate-skill-visibility.ps1',
             '.github/base-coat/scripts/validate-asset-distribution.ps1',
+            '.github/base-coat/scripts/validate-model-policy.ps1',
+            '.github/base-coat/scripts/model-policy-contract.ps1',
+            '.github/base-coat/scripts/model-fallback-policy.ps1',
             '.github/base-coat/scripts/validate-workflow-action-pins.ps1',
             '.github/base-coat/scripts/validate-workflow-action-pins.py',
             '.github/base-coat/scripts/validate-reusable-workflow-contracts.py'

@@ -374,6 +374,9 @@ jobs:
             'validate-basecoat.ps1',
             'validate-skill-visibility.ps1',
             'validate-asset-distribution.ps1',
+            'validate-model-policy.ps1',
+            'model-policy-contract.ps1',
+            'model-fallback-policy.ps1',
             'validate-workflow-action-pins.ps1',
             'validate-workflow-action-pins.py'
         )) {
