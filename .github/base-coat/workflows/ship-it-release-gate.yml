@@ -80,6 +80,9 @@ on:
           maps spec_goals, docs_goals, tests_goals, runbook_goals,
           release_notes_goals (pipe-separated; each defaults to goal_ids).
           Optional source_sha pins the promoted commit (defaults to GITHUB_SHA).
+          For a pre-approved ship-it run, pass its current
+          source_approval_receipt_base64 as preapproval_receipt to revalidate
+          the same source before this release-gate boundary.
           Values are split on the first '='. Unknown or duplicate keys are
           rejected.
         required: false
@@ -97,13 +100,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
+      actions: read
       contents: read
       deployments: read
+      issues: read
       pull-requests: read
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: ${{ contains(inputs.promotion_context, 'preapproval_receipt=') && github.event.repository.default_branch || github.ref }}
 
       - name: Log gate inputs
         env:
@@ -142,7 +149,31 @@ jobs:
           ARTIFACT_STATUS: ${{ inputs.artifact_status }}
           PROMOTION_CONTEXT: ${{ inputs.promotion_context }}
           DRY_RUN: ${{ inputs.dry_run }}
+          GH_TOKEN: ${{ github.token }}
         run: |
+          $contextTokens = @($env:PROMOTION_CONTEXT -split ',')
+          $receiptTokens = @($contextTokens | Where-Object { $_ -match '^preapproval_receipt=' })
+          if ($receiptTokens.Count -gt 1) {
+            throw "Promotion context contains duplicate preapproval_receipt values."
+          }
+          if ($receiptTokens.Count -eq 1) {
+            $receipt = $receiptTokens[0].Substring("preapproval_receipt=".Length)
+            if ([string]::IsNullOrWhiteSpace($receipt)) {
+              throw "Pre-approved release boundary requires a non-empty preapproval_receipt."
+            }
+            if ($env:TARGET_REPO -ine $env:GITHUB_REPOSITORY) {
+              throw "Pre-approval release validation is limited to the current target repository."
+            }
+            $env:BASECOAT_APPROVAL_RECEIPT_BASE64 = $receipt
+            & node .github/base-coat/scripts/ship-it/preapproval-evidence.cjs revalidate
+            if ($LASTEXITCODE -ne 0) {
+              throw "Live pre-approval validation failed before release-gate evaluation."
+            }
+            $env:PROMOTION_CONTEXT = @(
+              $contextTokens | Where-Object { $_ -notmatch '^preapproval_receipt=' }
+            ) -join ','
+          }
+
           ./.github/base-coat/scripts/ship-it/invoke-release-gate.ps1 `
             -TargetRepo $env:TARGET_REPO `
             -TargetBranch $env:TARGET_BRANCH `

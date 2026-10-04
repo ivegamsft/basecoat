@@ -60,6 +60,14 @@ on:
         required: true
         default: true
         type: boolean
+      source_issue_number:
+        description: Approved source issue for explicit pre-approval mode
+        required: false
+        type: string
+      approval_comment_id:
+        description: Existing qualified /approve comment ID for pre-approval mode
+        required: false
+        type: string
 
 permissions:
   actions: read
@@ -88,12 +96,23 @@ jobs:
       profile: ${{ steps.resolve.outputs.profile }}
       source_issue_number: ${{ steps.resolve.outputs.source_issue_number }}
       requester: ${{ steps.resolve.outputs.requester }}
+      approval_source_issue_number: ${{ steps.resolve.outputs.approval_source_issue_number }}
+      approval_comment_id: ${{ steps.resolve.outputs.approval_comment_id }}
+      approval_receipt_base64: ${{ steps.resolve.outputs.approval_receipt_base64 }}
     steps:
+      - name: Checkout trusted default-branch approval resolver
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v4.1.7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
       - name: Resolve inputs from event
         id: resolve
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
+            const preapproval = require(
+              `${process.env.GITHUB_WORKSPACE}/.github/base-coat/scripts/ship-it/preapproval-evidence.cjs`
+            );
             const eventName = context.eventName;
             const result = {
               should_run: "false",
@@ -107,7 +126,10 @@ jobs:
               dry_run: "true",
               profile: "team-dev",
               source_issue_number: "",
-              requester: context.actor
+              requester: context.actor,
+              approval_source_issue_number: "",
+              approval_comment_id: "",
+              approval_receipt_base64: ""
             };
 
             if (eventName === "workflow_dispatch") {
@@ -122,6 +144,43 @@ jobs:
               result.project_number = inputs.project_number || "";
               result.dry_run = `${inputs.dry_run === true || `${inputs.dry_run}`.toLowerCase() === "true"}`;
               result.profile = inputs.profile || "team-dev";
+              const sourceIssueNumber = String(inputs.source_issue_number || "");
+              const approvalCommentId = String(inputs.approval_comment_id || "");
+              if (sourceIssueNumber !== "" || approvalCommentId !== "") {
+                if (!sourceIssueNumber || !approvalCommentId) {
+                  core.setFailed("Pre-approval mode requires both source_issue_number and approval_comment_id.");
+                  return;
+                }
+                if (result.project_owner || result.project_number) {
+                  core.setFailed("Pre-approval does not authorize project synchronization; omit project_owner and project_number.");
+                  return;
+                }
+                const { data: workflowRun } = await github.rest.actions.getWorkflowRun({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  run_id: context.runId
+                });
+                const receipt = await preapproval.resolvePreApproval({
+                  api: preapproval.createOctokitApi(github),
+                  sourceRepo: `${context.repo.owner}/${context.repo.repo}`,
+                  targetRepo: result.target_repo,
+                  sourceIssueNumber,
+                  approvalCommentId,
+                  intent: result.intent,
+                  goal: result.goal,
+                  specRef: result.spec_ref,
+                  riskBand: result.risk_band,
+                  profile: result.profile,
+                  executionPrincipal: context.actor,
+                  runId: workflowRun.id,
+                  runStartedAt: workflowRun.created_at,
+                  selectedPolicy: `${result.profile}/${result.risk_band}`
+                });
+                result.approval_source_issue_number = sourceIssueNumber;
+                result.approval_comment_id = approvalCommentId;
+                result.approval_receipt_base64 = preapproval.encodeReceipt(receipt);
+                if (!result.source_issue_number) result.source_issue_number = sourceIssueNumber;
+              }
             } else {
               const issue = context.payload.issue;
               const comment = context.payload.comment?.body || "";
@@ -168,6 +227,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v4.1.7
+        with:
+          ref: ${{ needs.resolve-intent.outputs.approval_comment_id != '' && github.event.repository.default_branch || github.ref }}
 
       - name: Preflight ship-it workflow dependencies
         shell: pwsh
@@ -261,6 +322,10 @@ jobs:
           PROJECT_NUMBER: ${{ needs.resolve-intent.outputs.project_number }}
           DRY_RUN: ${{ needs.resolve-intent.outputs.dry_run }}
           PROFILE: ${{ needs.resolve-intent.outputs.profile }}
+          PREAPPROVAL_SOURCE_ISSUE_NUMBER: ${{ needs.resolve-intent.outputs.approval_source_issue_number }}
+          APPROVAL_COMMENT_ID: ${{ needs.resolve-intent.outputs.approval_comment_id }}
+          APPROVAL_RECEIPT_BASE64: ${{ needs.resolve-intent.outputs.approval_receipt_base64 }}
+          REQUESTER: ${{ needs.resolve-intent.outputs.requester }}
         run: |
           $dryRun = $env:DRY_RUN -eq 'true'
           $projectNumberRaw = $env:PROJECT_NUMBER
@@ -278,7 +343,12 @@ jobs:
             ProjectNumber = $projectNumber
             ProjectOwner = $env:PROJECT_OWNER
             Profile = $env:PROFILE
+            Requester = $env:REQUESTER
             OutputPath = 'test-results\ship-it\summary.json'
+          }
+          if (-not [string]::IsNullOrWhiteSpace($env:PREAPPROVAL_SOURCE_ISSUE_NUMBER)) {
+            $params.SourceIssueNumber = $env:PREAPPROVAL_SOURCE_ISSUE_NUMBER
+            $params.ApprovalCommentId = $env:APPROVAL_COMMENT_ID
           }
           if ($dryRun) {
             $params.DryRun = $true
@@ -290,7 +360,7 @@ jobs:
           .\.github\base-coat\scripts\ship-it\dispatch-intent.ps1 @params
 
       - name: Create remediation issue when dispatch fails
-        if: steps.dispatch.outcome == 'failure'
+        if: steps.dispatch.outcome == 'failure' && needs.resolve-intent.outputs.approval_comment_id == '' && needs.resolve-intent.outputs.dry_run != 'true'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           INTENT: ${{ needs.resolve-intent.outputs.intent }}
@@ -376,7 +446,7 @@ jobs:
       - name: Fail after remediation issue creation
         if: steps.dispatch.outcome == 'failure'
         run: |
-          echo "Dispatch failed. Remediation issue generated or updated."
+          echo "Dispatch failed; no approval evidence was granted."
           exit 1
 
       - name: Export parent issue URL
@@ -397,7 +467,13 @@ jobs:
           retention-days: 7
 
       - name: Comment back on source issue
-        if: needs.resolve-intent.outputs.source_issue_number != '' && steps.dispatch.outcome == 'success'
+        if: |
+          needs.resolve-intent.outputs.source_issue_number != '' &&
+          steps.dispatch.outcome == 'success' &&
+          (
+            needs.resolve-intent.outputs.approval_comment_id == '' ||
+            needs.resolve-intent.outputs.dry_run != 'true'
+          )
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           SOURCE_ISSUE_NUMBER: ${{ needs.resolve-intent.outputs.source_issue_number }}

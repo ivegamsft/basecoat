@@ -6,6 +6,8 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
 $dispatchScript = Join-Path $repoRoot "scripts\ship-it\dispatch-intent.ps1"
 $workflowFile = Join-Path $repoRoot ".github\workflows\ship-it-intent-dispatch.yml"
+$packageDispatchScript = Join-Path $repoRoot ".github\base-coat\scripts\ship-it\dispatch-intent.ps1"
+$packageWorkflowFile = Join-Path $repoRoot ".github\base-coat\workflows\ship-it-intent-dispatch.yml"
 $skillFile = Join-Path $repoRoot "skills\ship-it\SKILL.md"
 $skillEvalFile = Join-Path $repoRoot "skills\ship-it\eval.yaml"
 
@@ -14,6 +16,12 @@ if (-not (Test-Path $dispatchScript)) {
 }
 if (-not (Test-Path $workflowFile)) {
   throw "Missing ship-it workflow: $workflowFile"
+}
+if (-not (Test-Path $packageDispatchScript)) {
+  throw "Missing packaged ship-it dispatch script: $packageDispatchScript"
+}
+if (-not (Test-Path $packageWorkflowFile)) {
+  throw "Missing packaged ship-it workflow: $packageWorkflowFile"
 }
 if (-not (Test-Path $skillFile)) {
   throw "Missing ship-it skill file: $skillFile"
@@ -137,6 +145,7 @@ if ($pilotSummary.release_gate_contract.lane_profiles.'pilot-luxesite'.required_
 }
 
 $workflowContent = Get-Content -Raw -Path $workflowFile
+$packageWorkflowContent = Get-Content -Raw -Path $packageWorkflowFile
 $skillContent = Get-Content -Raw -Path $skillFile
 $outputContractPath = Join-Path $repoRoot "skills\ship-it\references\output-contract.md"
 if (-not (Test-Path $outputContractPath)) {
@@ -193,6 +202,22 @@ if ($workflowContent -notmatch "/spec-2-prod") {
 }
 if ($workflowContent -notmatch 'result\.intent\b[^=]*=\s*.*"spec-2-prod"') {
   throw "Ship-it workflow must assign spec-2-prod as an intent result value in the resolver."
+}
+foreach ($workflow in @($workflowContent, $packageWorkflowContent)) {
+  foreach ($requiredText in @(
+    'source_issue_number:',
+    'approval_comment_id:',
+    'approval_receipt_base64:',
+    'preapproval.resolvePreApproval',
+    'workflowRun.created_at',
+    'Pre-approval mode requires both source_issue_number and approval_comment_id.',
+    'APPROVAL_RECEIPT_BASE64',
+    "needs.resolve-intent.outputs.approval_comment_id == ''"
+  )) {
+    if ($workflow -notmatch [regex]::Escape($requiredText)) {
+      throw "Both ship-it workflow surfaces must enforce the explicit pre-approval contract: $requiredText"
+    }
+  }
 }
 
 $wawkrOutputJson = Join-Path $outputDirectory "summary-pilot-wawkr.json"
@@ -260,11 +285,29 @@ if ($workTrackerSummary.release_gate_contract.lane_profiles.'pilot-work-tracker'
 }
 
 $dispatchScriptContent = Get-Content -Raw -Path $dispatchScript
+$packageDispatchScriptContent = Get-Content -Raw -Path $packageDispatchScript
 if ($dispatchScriptContent -notmatch 'return\s+,\$issues') {
   throw "Get-OpenIntentIssues must return a wrapped array so empty issue sets do not collapse to null."
 }
 if ($dispatchScriptContent -notmatch '\[array\]\$Issues\s*=\s*@\(\)') {
   throw "Find-ExistingIssueByMarker must accept empty issue collections without mandatory-array binding failures."
+}
+foreach ($scriptContent in @($dispatchScriptContent, $packageDispatchScriptContent)) {
+  foreach ($requiredText in @(
+    'Assert-PreApprovalCurrent',
+    'source_approval_receipt',
+    'source_approval_receipt_base64',
+    'basecoat-preapproval-receipt:v1',
+    'ProjectOwner and ProjectNumber',
+    'runKey += "|preapproval:'
+  )) {
+    if ($scriptContent -notmatch [regex]::Escape($requiredText)) {
+      throw "Both ship-it dispatch scripts must preserve and revalidate pre-approval evidence: $requiredText"
+    }
+  }
+  if ($scriptContent -match 'commonLabels\s*=\s*@\([^)]*"approved"') {
+    throw "Dispatch scripts must never copy the approved label onto generated issues."
+  }
 }
 
 $shipItOutputJson = Join-Path $outputDirectory "summary-ship-it.json"

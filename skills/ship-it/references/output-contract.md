@@ -37,6 +37,27 @@ transitions — creating a comment or issue is not itself evidence of execution.
 | `remediation_tasks[]` | `{ name, owner, status }`. |
 | `parent_issue_url`, `parent_issue_number`, `parent_issue_reused` | Parent goal issue. |
 | `child_issues[]` | `{ sprint, phase, url, number, reused, stage_artifact }` — one per stage. |
+| `requester` | Execution requestor, kept distinct from the source human approver. |
+| `source_approval_receipt` | `null` for ordinary dispatch; otherwise the live-validated source issue/comment, actor permissions, approval/run timestamps, body and spec hashes, scope, selected policy, execution principal, and deterministic receipt hash. |
+| `source_approval_receipt_base64` | Encoded receipt used to revalidate the same evidence at later phase, merge, and release boundaries; not an independent authority. |
+
+Pre-approval is selected only when both `source_issue_number` and
+`approval_comment_id` are supplied. A receipt must be revalidated from the live
+source issue/comment before each phase and before merge/release. If evidence or
+current permission is unavailable or changed, stop; never switch to another
+comment or infer approval from a generated child issue. Issue approval does not
+replace PR review, XXL approval, or production environment approval.
+For `ship-it-release-gate.yml`, include the dispatch summary's
+`source_approval_receipt_base64` as `preapproval_receipt=<value>` in
+`promotion_context`; the workflow validates it before evaluating the independent
+release contract.
+
+Generated parent and child issue bodies retain the explicit source reference
+and a machine-readable receipt marker. The merge eligibility executor follows
+that reference only from a directly linked generated child, then re-fetches and
+validates the source evidence; copied labels, text, and hashes alone are not
+authority. Comment deletion/edit, source label removal, or source-body edits
+route affected open PRs for reevaluation.
 
 `stage_artifact` (lines 374-394) carries the lane-aware execution contract:
 `{ stage, execution_lane, branch_name, pr_title, pr_search_query,

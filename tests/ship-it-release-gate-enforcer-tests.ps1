@@ -6,6 +6,7 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
 $enforcerScript = Join-Path $repoRoot "scripts\ship-it\release-gate-enforcer.ps1"
 $workflowFile = Join-Path $repoRoot ".github\workflows\ship-it-release-gate.yml"
+$packageWorkflowFile = Join-Path $repoRoot ".github\base-coat\workflows\ship-it-release-gate.yml"
 
 if (-not (Test-Path $enforcerScript)) {
   throw "Missing release-gate enforcer script: $enforcerScript"
@@ -220,6 +221,35 @@ Invoke-Scenario -Name "production-approved-and-validated-pass" -Params @{
   RunbookGoalIds = "GOAL-1,GOAL-2"
   ReleaseNotesGoalIds = "GOAL-1,GOAL-2"
 } -ExpectedAllowed $true
+
+Invoke-Scenario -Name "issue-preapproval-does-not-replace-production-environment-protection" -Params @{
+  RiskBand = "critical"
+  PromotionStage = "production"
+  ChangeType = "release"
+  PreviousStageStatus = "pass"
+  LintStatus = "pass"
+  BuildStatus = "pass"
+  TypeStatus = "pass"
+  E2eStatus = "pass"
+  SecurityStatus = "pass"
+  SmokeStatus = "pass"
+  EnvironmentProtectionStatus = "missing"
+  RequireApproval = $true
+  ApprovalStatus = "approved"
+  RollbackRunbookRef = "https://example.com/runbooks/rollback"
+  RollbackValidationStatus = "validated"
+  GoalIds = "GOAL-1,GOAL-2"
+  SpecGoalIds = "GOAL-1,GOAL-2"
+  SpecStatus = "present"
+  DocsStatus = "present"
+  TestsStatus = "present"
+  RunbookStatus = "present"
+  ReleaseNotesStatus = "present"
+  DocsGoalIds = "GOAL-1,GOAL-2"
+  TestsGoalIds = "GOAL-1,GOAL-2"
+  RunbookGoalIds = "GOAL-1,GOAL-2"
+  ReleaseNotesGoalIds = "GOAL-1,GOAL-2"
+} -ExpectedAllowed $false -ExpectedBlockerContains "environment-protection-missing"
 
 Invoke-Scenario -Name "missing-required-artifact-blocks" -Params @{
   RiskBand = "medium"
@@ -549,6 +579,21 @@ Invoke-Scenario -Name "pilot-work-tracker-lane-missing-artifacts-blocks" -Params
 } -ExpectedAllowed $false -ExpectedBlockerContains "artifact-missing:tests"
 
 $workflowContent = Get-Content -Raw -Path $workflowFile
+$packageWorkflowContent = Get-Content -Raw -Path $packageWorkflowFile
+foreach ($workflow in @($workflowContent, $packageWorkflowContent)) {
+  foreach ($requiredPreApprovalText in @(
+    'preapproval_receipt',
+    'BASECOAT_APPROVAL_RECEIPT_BASE64',
+    'preapproval-evidence.cjs revalidate',
+    'Pre-approval release validation is limited to the current target repository.',
+    'actions: read',
+    'issues: read'
+  )) {
+    if ($workflow -notmatch [regex]::Escape($requiredPreApprovalText)) {
+      throw "Both release gate workflows must revalidate supplied pre-approval before gating: $requiredPreApprovalText"
+    }
+  }
+}
 if ($workflowContent -notmatch "workflow_dispatch:") {
   throw "Ship-it release gate workflow must include workflow_dispatch trigger."
 }

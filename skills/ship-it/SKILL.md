@@ -19,37 +19,39 @@ Turn a delivery goal into a governed execution bundle.
 ## Workflow
 
 1. Validate the intent contract.
-2. Run `pwsh scripts/ship-it/validate-target-repository.ps1
-   -TargetRepo <owner/repo>`. The target must match the current repository;
-   cross-repository execution requires explicit user authorization and
-   `-AllowCrossRepository` (see References).
-3. Confirm `ship-it-intent-dispatch.yml`, build-guard, and release-gate
-   workflows exist. If any is missing, stop and report it; never substitute
-   `/approve`.
-4. Dispatch `ship-it-intent-dispatch.yml` and record its run ID.
-5. Create governed issues, apply tracking labels, run build-break and release gates.
-6. Report success only with observable run IDs and state transitions.
+2. Unattended pre-approval requires both `source_issue_number` and
+   `approval_comment_id`; one alone fails, neither preserves ordinary dispatch.
+   Never accept caller-supplied identity, permission, timestamp, or approval
+   status. The live evidence and scope contract is defined in
+   [output-contract.md](references/output-contract.md).
+3. Run `pwsh scripts/ship-it/validate-target-repository.ps1
+   -TargetRepo <owner/repo>`. Cross-repository execution requires explicit user
+   authorization and `-AllowCrossRepository` (see References).
+4. Verify dispatch, build-guard, and release-gate workflows exist; otherwise
+   stop and report, never substitute `/approve`.
+5. Dispatch `ship-it-intent-dispatch.yml` and record its run ID and receipt.
+6. Revalidate the same receipt before each phase, merge, and release. Missing,
+   changed, revoked, or newly unqualified evidence blocks continuation; never
+   switch approvals. Pass the receipt to the local resolver or in
+   `promotion_context` for the release gate (see output contract).
+7. Create governed issues, apply tracking labels, and run build-break and release gates.
+8. Report success only with observable run IDs and state transitions.
 
 ## Persistent Loop Operation
 
-Operate as bounded cycles with state carry-forward:
-
-1. Record `cycle_id`, `phase`, `objective`, `stop_condition`, `max_cycles`.
-2. Emit a per-cycle summary (full structure in References).
-3. Continue only while the stop condition is unmet and convergence is viable.
-4. Stop and escalate when blocked or `max_cycles` is reached.
-
-Stop conditions: unresolved dependency/policy gate; in-scope PRs merged/closed with checks green; manual stop.
-
-Retry policy: retry only transient failures; escalate after `max_retries`; in `dry_run`, output planned actions.
+Use bounded cycles with state carry-forward. Record the cycle, phase, objective,
+stop condition, and limit; summarize actions, status, evidence, blockers, and
+next action. Continue only while convergence is viable. Stop on completion,
+blocker, manual stop, or cycle limit; retry only transient failures up to the
+retry limit. In `dry_run`, report planned actions.
 
 ## Governance Rules
 
-1. Never bypass required checks for high/critical goals.
-2. Require evidence links for spec, tests, rollout, rollback.
-3. Use serialized merges for release work.
-4. Record state transitions and blockers in issues.
-5. Do not complete with required checks pending.
+Keep required checks and spec, test, rollout, and rollback evidence; serialize
+release merges and record transitions and blockers. Do not complete with checks
+pending. Issue pre-approval does not satisfy PR review, XXL, release, or
+production gates or expand scope. Never copy approval to generated issues;
+validate authority against the live source.
 
 ## References
 

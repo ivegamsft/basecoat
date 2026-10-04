@@ -413,6 +413,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running ship-it pre-approval evidence boundary tests...'
+& node --test (Join-Path $PSScriptRoot 'ship-it-preapproval-tests.cjs')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Ship-it pre-approval evidence tests failed' -ForegroundColor Red
+    Write-FailureLog 'ship-it-preapproval-tests'
+    exit 1
+}
+
 Write-Host 'Running solo-dev profile guidance tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'solo-dev-profile-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

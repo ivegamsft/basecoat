@@ -194,8 +194,19 @@ foreach ($requiredPrRoutingText in @(
 foreach ($requiredLinkedIssueRoutingText in @(
     'route-linked-issue-evidence',
     "github.event_name == 'issues'",
-    "github.event.label.name == 'approved'",
+    'approvedLabelChanged',
+    "String(context.payload.label?.name || '').toLowerCase() === 'approved'",
+    "github.event.action == 'edited' && github.event.changes.body",
     'exactIssueApproval',
+    'approvalRevoked',
+    'issueBodyChanged',
+    'linksThroughReceipt',
+    'preapproval.extractReceipt',
+    'reevaluating the PR fail-closed',
+    'escapedRepository',
+    'preapproval.isExactIssueApproval',
+    'preapproval.hasQualifiedPermission',
+    'Checkout trusted default-branch approval resolver',
     'github.rest.actions.createWorkflowDispatch',
     'github.workflow_ref',
     'Linked issue #${issueNumber} acknowledgement evidence changed.',
@@ -203,6 +214,19 @@ foreach ($requiredLinkedIssueRoutingText in @(
 )) {
     if ($workflow -notmatch [regex]::Escape($requiredLinkedIssueRoutingText)) {
         throw "Workflow is missing linked issue evidence routing: $requiredLinkedIssueRoutingText"
+    }
+}
+foreach ($requiredPreApprovalEvaluationText in @(
+    'preapproval.validateLiveReceipt',
+    'preapproval.matchesReceiptScope',
+    'preapproval.expectedIntentRunHash',
+    'preapproval.createOctokitApi(github)',
+    'Live source approval for linked issue',
+    'const approvedReviewers = new Set(qualifiedApprovers.filter(Boolean));',
+    'const productionApprovalRequired ='
+)) {
+    if ($workflow -notmatch [regex]::Escape($requiredPreApprovalEvaluationText)) {
+        throw "Workflow must revalidate source receipts without replacing independent PR or production gates: $requiredPreApprovalEvaluationText"
     }
 }
 if ($workflow -match '(?m)check_suite:') {
@@ -359,8 +383,8 @@ if ($workflow -notmatch 'isBotActor\(review\.user\)') {
 if ($workflow -notmatch 'github\.rest\.repos\.getCollaboratorPermissionLevel') {
     throw 'Workflow must verify repository permission before counting an approval.'
 }
-if ($workflow -notmatch "new Set\(\['admin', 'maintain', 'write'\]\)") {
-    throw 'Workflow must restrict qualified approvers to write, maintain, or admin permission.'
+if ($workflow -notmatch 'const hasQualifiedPermission = preapproval\.hasQualifiedPermission;') {
+    throw 'Workflow must reuse the shared write, maintain, or admin permission resolver.'
 }
 if ($workflow -notmatch 'const requiresHumanReviewByBoundary\s*=\s*\r?\n\s*requiresHumanReviewByRisk \|\| requiresHumanApprovalBySize;') {
     throw 'Workflow must define the reported human review boundary from risk and size policy.'
@@ -374,7 +398,7 @@ foreach ($requiredAcknowledgementText in @(
     'linked-approved-issue',
     'stale-sha',
     'stale-time',
-    "user?.type === 'Bot'",
+    'preapproval.isBotActor',
     'issueLabels.includes(''approved'')',
     'isExactIssueApproval'
 )) {
@@ -457,6 +481,7 @@ try {
     $harness = @"
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const preapproval = require('../../.github/base-coat/scripts/ship-it/preapproval-evidence.cjs');
 $($helperMatch.Groups['helper'].Value)
 
 const currentSha = 'a'.repeat(40);
