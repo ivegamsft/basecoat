@@ -246,4 +246,51 @@ Assert-Match $publish 'https://github\\\.com/IBuySpy-Shared/basecoat/pull/\[0-9\
 Assert-Match $publish 'https://github\\\.com/IBuySpy-Shared/basecoat/actions/runs/\[0-9\]\+' 'Publication must redact private source workflow-run URLs before generic repo rewrites.'
 Assert-Match $publish "git grep -inI -E 'ibuyspy-shared\|ibuyspy-dev\|@ibuyspy'" 'Publication must fail if internal organization or account identifiers remain in the public payload.'
 
+# Exercise the report formatter with an isolated repository and a deterministic
+# empty PR result so the generated Markdown contract does not depend on GitHub.
+$reportFixtureDir = Join-Path ([System.IO.Path]::GetTempPath()) ("release-report-" + [guid]::NewGuid().ToString('N'))
+$reportOutputDir = Join-Path $reportFixtureDir 'output'
+$validatorScriptPath = Join-Path $repoRoot 'scripts\validate-release-notes.ps1'
+New-Item -ItemType Directory -Path $reportFixtureDir | Out-Null
+try {
+    & git -C $reportFixtureDir init --quiet
+    if ($LASTEXITCODE -ne 0) { throw 'Could not initialize the release-report fixture repository.' }
+    & git -C $reportFixtureDir config user.name 'BaseCoat Test'
+    & git -C $reportFixtureDir config user.email 'basecoat-test@example.invalid'
+    Set-Content -Path (Join-Path $reportFixtureDir 'fixture.txt') -Value 'fixture' -NoNewline
+    & git -C $reportFixtureDir add fixture.txt
+    & git -C $reportFixtureDir commit --quiet -m 'fixture'
+    if ($LASTEXITCODE -ne 0) { throw 'Could not commit the release-report fixture.' }
+    & git -C $reportFixtureDir tag v1.0.0
+    & git -C $reportFixtureDir tag v1.1.0
+    & git -C $reportFixtureDir remote add origin 'https://example.invalid/owner/repo.git'
+    if ($LASTEXITCODE -ne 0) { throw 'Could not configure the release-report fixture remote.' }
+
+    function gh {
+        '[]'
+    }
+
+    Push-Location $reportFixtureDir
+    try {
+        . $validatorScriptPath -ReleaseCount 1 -OutputDir $reportOutputDir
+    } finally {
+        Pop-Location
+    }
+
+    $reportPath = Join-Path $reportOutputDir 'latest.md'
+    $reportContent = [System.IO.File]::ReadAllText($reportPath)
+    if ($reportContent -match '(?:\r?\n){3,}') {
+        throw 'Release-notes validation report contains multiple consecutive blank lines (issue #3412).'
+    }
+    if (-not $reportContent.EndsWith("`n") -or $reportContent.EndsWith("`n`n")) {
+        throw 'Release-notes validation report must end with exactly one newline (issue #3412).'
+    }
+    Assert-Match $reportContent '(?m)^Repository: `repo`$' 'Release report must show a safe repository name instead of a credential-bearing remote URL.'
+    Assert-Match $reportContent '(?m)^### Highlights\r?\n\r?\n- None identified$' 'Highlights heading must be separated from its list.'
+    Assert-Match $reportContent '(?m)^### Fixes and improvements\r?\n\r?\n- None identified$' 'Fixes heading must be separated from its list.'
+    Write-Host 'PASS release-notes validation report formatting (issue #3412).'
+} finally {
+    Remove-Item -Path $reportFixtureDir -Recurse -Force -ErrorAction SilentlyContinue
+}
+
 Write-Host 'PASS release-note publication contract.'

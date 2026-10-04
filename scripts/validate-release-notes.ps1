@@ -38,7 +38,13 @@ $lines = [System.Collections.Generic.List[string]]::new()
 $lines.Add('# Release Notes Validation Report')
 $lines.Add('')
 $lines.Add("Generated: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ssK')")
-$lines.Add("Repository: $(git remote get-url origin 2>$null)")
+$remoteUrl = git remote get-url origin 2>$null
+$repositoryName = if ($remoteUrl) {
+    [System.IO.Path]::GetFileNameWithoutExtension(($remoteUrl -split '[:/]')[-1])
+} else {
+    'unknown'
+}
+$lines.Add("Repository: ``$repositoryName``")
 $lines.Add('')
 
 foreach ($r in $ranges) {
@@ -60,6 +66,7 @@ foreach ($r in $ranges) {
     $lines.Add("- Binding status: $(if ($waveLabels.Count -or $sprintLabels.Count) { 'OK' } else { 'Needs confirmation' })")
     $lines.Add('')
     $lines.Add('### Highlights')
+    $lines.Add('')
     if ($highlights.Count) {
         foreach ($pr in $highlights) {
             $lines.Add("- $($pr.title) (PR #$($pr.number))")
@@ -69,6 +76,7 @@ foreach ($r in $ranges) {
     }
     $lines.Add('')
     $lines.Add('### Fixes and improvements')
+    $lines.Add('')
     if ($fixes.Count) {
         foreach ($pr in $fixes) {
             $lines.Add("- $($pr.title) (PR #$($pr.number))")
@@ -79,8 +87,11 @@ foreach ($r in $ranges) {
     $lines.Add('')
 }
 
-Set-Content -Path $reportPath -Value ($lines -join "`n") -NoNewline
-Set-Content -Path $latestPath -Value ($lines -join "`n") -NoNewline
+$reportContent = [regex]::Replace(($lines -join "`n"), '(?:\r?\n){3,}', "`n`n")
+$reportContent = $reportContent.TrimEnd([char[]]@("`r", "`n")) + "`n"
+
+Set-Content -Path $reportPath -Value $reportContent -NoNewline
+Set-Content -Path $latestPath -Value $reportContent -NoNewline
 
 Write-Host "Release-note validation report written:"
 Write-Host " - $reportPath"
