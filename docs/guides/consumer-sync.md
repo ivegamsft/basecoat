@@ -10,7 +10,16 @@ The sync script copies all distributable assets to `.github/base-coat/` in your 
 - `skills/` — all skill directories
 - `instructions/` — all instruction files
 - `prompts/` — prompt templates
+- `workflows/` and runtime scripts — staged source workflows, ownership metadata,
+  targeted installer, and installed-payload validators
 - `version.json` — version metadata
+
+Syncing only updates the staged payload. It does not automatically install new
+active workflows. For an existing installation, capture and refresh only the
+factory-owned workflows already present, then validate before creating an
+upgrade PR; see [Downstream Workflows Setup](downstream-workflows-setup.md#refresh-after-a-basecoat-sync).
+When no workflows are active, keep the payload staged and leave first-time
+activation opt-in.
 
 Files that are **not** synced: `basecoat-metadata.json` (internal portal index), test scripts, CI workflows, and internal tooling. Selected documentation content is synced under `.github/base-coat/docs/`, but not the full source `docs/` tree.
 

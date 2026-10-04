@@ -644,6 +644,7 @@ try {
             'validate-asset-distribution.ps1',
             'validate-workflow-action-pins.ps1',
             'validate-workflow-action-pins.py',
+            'configure-downstream-workflows.ps1',
             'workflow-ownership.ps1',
             'retire-downstream-workflows.ps1',
             'guidance-lock.ps1',

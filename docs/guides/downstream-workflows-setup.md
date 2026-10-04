@@ -34,6 +34,42 @@ The installer supports five classes:
 
 By default, `reusable` and `ship-it` workflows are installed.
 
+## Refresh after a BaseCoat sync
+
+Syncing refreshes the staged payload; it does not by itself update active
+`.github/workflows` files. For an existing installation, capture the exact
+factory-owned workflow selection before sync, then pass those targets to the
+installer after sync. This refreshes active BaseCoat workflows without enabling
+new templates or overwriting consumer-owned workflows:
+
+```powershell
+$Selection = pwsh .github/base-coat/scripts/invoke-basecoat-consumer-update.ps1 `
+  -CaptureWorkflowSelection -StagePath .github/base-coat | ConvertFrom-Json
+if ($Selection.state -eq 'partial') {
+  throw "Partial ship-it install; missing: $($Selection.missing_dependencies -join ', ')"
+}
+
+# Run your normal sync command here.
+
+if ($Selection.workflow_targets.Count -gt 0) {
+  pwsh .github/base-coat/scripts/configure-downstream-workflows.ps1 `
+    -SourceDir .github/base-coat/workflows `
+    -DestinationDir .github/workflows `
+    -Workflow $Selection.workflow_targets
+}
+pwsh .github/base-coat/scripts/validate-basecoat.ps1 `
+  -RootDir .github/base-coat `
+  -WorkflowValidationMode Consumer `
+  -ConsumerRoot .
+```
+
+If the selection is `staged-only`, do not install defaults as part of refresh.
+For a deliberate first activation, inspect the workflow permissions and triggers,
+then run the explicit activation command printed by the selection tool. This
+changes repository workflow files only; GitHub Actions settings, secrets, and
+credentials remain unchanged. Missing ownership evidence, a partial ship-it
+installation, or a failed install/validation blocks delivery.
+
 ## Onboarding prerequisites
 
 Before installing workflows in a consumer repository, run the BaseCoat

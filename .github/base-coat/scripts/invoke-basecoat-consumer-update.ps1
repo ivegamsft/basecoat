@@ -12,6 +12,7 @@ param(
     [string]$StatusPath = 'basecoat-update-status.json',
     [string]$ReleaseJson = '',
     [switch]$PlanOnly,
+    [switch]$CaptureWorkflowSelection,
     [switch]$LibraryOnly
 )
 
@@ -20,6 +21,7 @@ $ErrorActionPreference = 'Stop'
 
 $script:IssueMarkerPrefix = '<!-- basecoat-consumer-update:'
 $script:PrMarker = '<!-- basecoat-consumer-update-pr:v1 -->'
+$script:WorkflowRefreshState = $null
 
 function Get-ConfigLines {
     param([string]$RepoRoot)
@@ -722,6 +724,18 @@ function New-Status {
         pr_url = $PrUrl
         release_notes_url = $ReleaseNotesUrl
         disposition = $Disposition
+        workflow_refresh = [ordered]@{
+            state = 'not-assessed'
+            source_version = ''
+            source_ref = ''
+            workflow_targets = @()
+            refreshed_destinations = @()
+            missing_dependencies = @()
+            activation_command = ''
+            permission_effects = ''
+            installer_validation = 'not-run'
+            installed_validation = 'not-run'
+        }
     }
 }
 
@@ -929,6 +943,132 @@ function Find-SyncScript {
     return $candidates | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
 }
 
+function Get-LegacyWorkflowCanonicalName {
+    param([string]$WorkflowName)
+
+    $legacyWorkflowMap = @{
+        'bc-check-health.yml' = 'basecoat-upstream-version-drift.yml'
+        'bc-version-check.yml' = 'basecoat-version-check.yml'
+        'bc-secret-scan.yml' = 'basecoat-secret-scan.yml'
+        'bc-dependency-update-advisor.yml' = 'basecoat-dependency-update-advisor.yml'
+        'bc-sprint-closeout-branch-audit.yml' = 'basecoat-sprint-closeout-branch-audit.yml'
+    }
+    if ($legacyWorkflowMap.ContainsKey($WorkflowName)) {
+        return $legacyWorkflowMap[$WorkflowName]
+    }
+    return $null
+}
+
+function Get-InstalledWorkflowSelection {
+    param(
+        [Parameter(Mandatory)][string]$RepoRoot,
+        [Parameter(Mandatory)][string]$StagePath
+    )
+
+    $versionPath = Join-Path $RepoRoot "$StagePath/version.json"
+    $provenancePath = Join-Path $RepoRoot "$StagePath/.source-provenance.json"
+    $manifestPath = Join-Path $RepoRoot "$StagePath/workflows/workflow-ownership-manifest.json"
+    $activeWorkflowPath = Join-Path $RepoRoot '.github/workflows'
+    $sourceVersion = ''
+    $sourceRef = ''
+    $sourceSha = ''
+
+    if (Test-Path -LiteralPath $versionPath -PathType Leaf) {
+        $sourceVersion = [string](Get-Content -LiteralPath $versionPath -Raw | ConvertFrom-Json).version
+    }
+    if (Test-Path -LiteralPath $provenancePath -PathType Leaf) {
+        $sourceProvenance = Get-Content -LiteralPath $provenancePath -Raw | ConvertFrom-Json
+        $sourceSha = [string]$sourceProvenance.commit
+        $sourceRef = [string]$sourceProvenance.requestedRef
+    }
+    $configuredRef = Get-YamlScalar -Lines (Get-ConfigLines -RepoRoot $RepoRoot) -Key 'ref'
+    if ($configuredRef) { $sourceRef = $configuredRef }
+
+    $activeFiles = @()
+    if (Test-Path -LiteralPath $activeWorkflowPath -PathType Container) {
+        $activeFiles = @(Get-ChildItem -LiteralPath $activeWorkflowPath -File |
+            Where-Object { $_.Extension -in @('.yml', '.yaml') })
+    }
+
+    $selection = [ordered]@{
+        state = 'staged-only'
+        source_version = $sourceVersion
+        source_ref = $sourceRef
+        source_sha = $sourceSha
+        workflow_targets = @()
+        refreshed_destinations = @()
+        missing_dependencies = @()
+        activation_command = 'pwsh .github/base-coat/scripts/configure-downstream-workflows.ps1'
+        permission_effects = 'Explicitly installs the reusable and ship-it classes; inspect their workflow permissions and triggers before activation. It does not enable templates, internal workflows, or onboarding telemetry, and does not change GitHub Actions settings.'
+        installer_validation = 'not-run'
+        installed_validation = 'not-run'
+    }
+
+    if ($activeFiles.Count -eq 0) {
+        return [pscustomobject]$selection
+    }
+    if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) {
+        throw "Cannot safely refresh active workflows: ownership evidence is missing at '$manifestPath'. Resolve an explicit workflow selection before updating."
+    }
+
+    try {
+        $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
+    }
+    catch {
+        throw "Cannot safely refresh active workflows: ownership manifest is invalid JSON at '$manifestPath' ($($_.Exception.Message))."
+    }
+    if ($manifest.schemaVersion -ne 1 -or
+        $manifest.defaultOwnership -ne 'repo-owned' -or
+        $null -eq $manifest.workflows) {
+        throw "Cannot safely refresh active workflows: ownership manifest has an unsupported schema at '$manifestPath'."
+    }
+
+    $ownedNames = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    foreach ($entry in @($manifest.workflows)) {
+        $name = [string]$entry.file
+        if ([string]::IsNullOrWhiteSpace($name) -or
+            (Split-Path -Path $name -Leaf) -ne $name -or
+            [System.IO.Path]::GetExtension($name) -notin @('.yml', '.yaml') -or
+            $entry.ownership -ne 'factory-owned' -or
+            -not $ownedNames.Add($name)) {
+            throw "Cannot safely refresh active workflows: ownership manifest contains an invalid or duplicate entry at '$manifestPath'."
+        }
+    }
+
+    $targets = @(
+        foreach ($activeFile in $activeFiles) {
+            $canonicalName = Get-LegacyWorkflowCanonicalName -WorkflowName $activeFile.Name
+            if (
+                $ownedNames.Contains($activeFile.Name) -or
+                ($canonicalName -and $ownedNames.Contains($canonicalName))
+            ) {
+                $activeFile.Name
+            }
+        }
+    ) | Sort-Object -Unique
+    $targets = @($targets)
+    if ($targets.Count -gt 0) {
+        $selection.state = 'installed'
+        $selection.workflow_targets = $targets
+        $selection.activation_command = ''
+        $selection.permission_effects = 'Only the already installed factory-owned workflows are refreshed. Consumer-owned workflows and GitHub Actions settings, secrets, and credentials are not changed.'
+        $shipItNames = @(
+            'ship-it-intent-dispatch.yml',
+            'ship-it-build-guard.yml',
+            'ship-it-release-gate.yml'
+        )
+        $installedShipIt = @($targets | Where-Object { $_ -in $shipItNames })
+        if ($installedShipIt.Count -gt 0 -and $installedShipIt.Count -ne $shipItNames.Count) {
+            $selection.state = 'partial'
+            $selection.missing_dependencies = @($shipItNames | Where-Object { $_ -notin $installedShipIt })
+            $selection.activation_command = ''
+            $selection.permission_effects = 'No workflow changes are made automatically. Complete the ship-it set or offboard the partial install; GitHub Actions settings, secrets, and credentials are not changed.'
+        }
+    }
+
+    return [pscustomobject]$selection
+}
+
 function Get-DefaultBranch {
     $result = Invoke-Native -Command 'gh' -Arguments @(
         'repo', 'view', $env:GITHUB_REPOSITORY, '--json', 'defaultBranchRef', '--jq', '.defaultBranchRef.name'
@@ -947,10 +1087,37 @@ function Get-PrMarkerValue {
 }
 
 function Test-ManagedUpgradePath {
-    param([string]$Path, [string]$StagePath)
+    param(
+        [string]$Path,
+        [string]$StagePath,
+        [string]$RepoRoot = '.'
+    )
 
     $normalized = $Path -replace '\\', '/'
     $stage = ($StagePath -replace '\\', '/').TrimEnd('/')
+    if ($normalized.StartsWith('.github/workflows/')) {
+        $workflowName = $normalized.Substring('.github/workflows/'.Length)
+        if ((Split-Path -Path $workflowName -Leaf) -ne $workflowName) { return $false }
+        $manifestPath = Join-Path $RepoRoot "$StagePath/workflows/workflow-ownership-manifest.json"
+        if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) { return $false }
+        try {
+            $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
+        }
+        catch {
+            return $false
+        }
+        $isExplicitlyOwned = @($manifest.workflows | Where-Object {
+            $_.file -ieq $workflowName -and $_.ownership -eq 'factory-owned'
+        }).Count -eq 1
+        if ($isExplicitlyOwned) { return $true }
+
+        $canonicalName = Get-LegacyWorkflowCanonicalName -WorkflowName $workflowName
+        if (-not $canonicalName) { return $false }
+        return @($manifest.workflows | Where-Object {
+            $_.file -ieq $canonicalName -and $_.ownership -eq 'factory-owned'
+        }).Count -eq 1
+    }
+
     return (
         $normalized -eq '.basecoat.yml' -or
         $normalized.StartsWith("$stage/") -or
@@ -1004,7 +1171,7 @@ function Test-TrustedGeneratedPr {
             '--jq', '.[].filename'
         )
         if ($files.Output.Count -eq 0 -or @($files.Output | Where-Object {
-            -not (Test-ManagedUpgradePath -Path $_ -StagePath $StagePath)
+            -not (Test-ManagedUpgradePath -Path $_ -StagePath $StagePath -RepoRoot $RepoRoot)
         }).Count -gt 0) { return $false }
 
         $head = [string]$Pr.headRefName
@@ -1223,6 +1390,37 @@ function Wait-ForRequiredChecks {
     throw 'Consumer required checks did not run and pass before the automatic-update timeout.'
 }
 
+function Invoke-InstalledPayloadValidation {
+    param(
+        [Parameter(Mandatory = $true)][string]$ValidatorPath,
+        [Parameter(Mandatory = $true)][string]$PayloadRoot,
+        [Parameter(Mandatory = $true)][string]$ConsumerRoot
+    )
+
+    $oldChildGhToken = $env:GH_TOKEN
+    $oldChildUpdateToken = $env:BASECOAT_UPDATE_TOKEN
+    $oldChildFetchToken = $env:BASECOAT_FETCH_TOKEN
+    $oldChildMirrorFetchToken = $env:BASECOAT_MIRROR_FETCH_TOKEN
+    try {
+        $env:GH_TOKEN = $null
+        $env:BASECOAT_UPDATE_TOKEN = $null
+        $env:BASECOAT_FETCH_TOKEN = $null
+        $env:BASECOAT_MIRROR_FETCH_TOKEN = $null
+        Invoke-Native -Command 'pwsh' -Arguments @(
+            '-NoProfile', '-File', $ValidatorPath,
+            '-RootDir', $PayloadRoot,
+            '-WorkflowValidationMode', 'Consumer',
+            '-ConsumerRoot', $ConsumerRoot
+        )
+    }
+    finally {
+        $env:GH_TOKEN = $oldChildGhToken
+        $env:BASECOAT_UPDATE_TOKEN = $oldChildUpdateToken
+        $env:BASECOAT_FETCH_TOKEN = $oldChildFetchToken
+        $env:BASECOAT_MIRROR_FETCH_TOKEN = $oldChildMirrorFetchToken
+    }
+}
+
 function Invoke-UpgradePullRequest {
     param(
         [string]$RepoRoot,
@@ -1231,7 +1429,8 @@ function Invoke-UpgradePullRequest {
         [string]$CurrentVersion,
         [string]$IssueUrl,
         [string]$EffectiveApproval,
-        [AllowNull()][object[]]$GeneratedPrs = $null
+        [AllowNull()][object[]]$GeneratedPrs = $null,
+        [System.Collections.IDictionary]$Status = $null
     )
 
     if (-not $env:BASECOAT_UPDATE_TOKEN) {
@@ -1291,6 +1490,12 @@ function Invoke-UpgradePullRequest {
 
         try {
             $worktreeConfig = Get-ConfigLines -RepoRoot $worktreePath
+        $workflowRefresh = Get-InstalledWorkflowSelection -RepoRoot $worktreePath -StagePath $StagePath
+        $script:WorkflowRefreshState = $workflowRefresh
+        if ($Status) { $Status.workflow_refresh = $workflowRefresh }
+        if ($workflowRefresh.state -eq 'partial') {
+            throw "Partial ship-it installation cannot be refreshed automatically. Missing workflow(s): $($workflowRefresh.missing_dependencies -join ', '). Complete the ship-it install explicitly or offboard the partial installation, then retry."
+        }
         $previousRef = Get-YamlScalar -Lines $worktreeConfig -Key 'ref'
         if (-not $previousRef) { $previousRef = '<unset>' }
         $previousSource = Get-YamlScalar -Lines $worktreeConfig -Key 'source'
@@ -1382,6 +1587,63 @@ function Invoke-UpgradePullRequest {
             throw "Sync source provenance mismatch: synced '$($provenance.commit)', resolved '$($Release.Sha)'."
         }
 
+        $workflowRefresh.source_version = [string]$installed
+        $workflowRefresh.source_ref = [string]$Release.Tag
+        $workflowRefresh.source_sha = [string]$provenance.commit
+        if ($workflowRefresh.workflow_targets.Count -gt 0) {
+            $installerPath = Join-Path $worktreePath "$StagePath/scripts/configure-downstream-workflows.ps1"
+            if (-not (Test-Path -LiteralPath $installerPath -PathType Leaf)) {
+                throw "Refreshed downstream workflow installer is missing: $installerPath"
+            }
+            $installerArguments = @(
+                '-NoProfile',
+                '-File', $installerPath,
+                '-SourceDir', (Join-Path $StagePath 'workflows'),
+                '-DestinationDir', '.github/workflows',
+                '-Workflow'
+            ) + @($workflowRefresh.workflow_targets)
+            Push-Location $worktreePath
+            try {
+                $installerResult = Invoke-Native -Command 'pwsh' -Arguments $installerArguments
+            }
+            finally {
+                Pop-Location
+            }
+            $workflowRefresh.refreshed_destinations = @(
+                $installerResult.Output |
+                    ForEach-Object {
+                        if ($_ -match 'Installed workflow:\s*(.+)$') { $Matches[1].Trim() }
+                    } |
+                    Where-Object { $_ } |
+                    Sort-Object -Unique
+            )
+            if ($workflowRefresh.refreshed_destinations.Count -eq 0) {
+                throw 'The workflow installer reported success without refreshing any selected destination.'
+            }
+            $workflowRefresh.installer_validation = 'passed'
+        }
+        if ($Status) { $Status.workflow_refresh = $workflowRefresh }
+
+        $workflowValidatorPath = Join-Path $worktreePath "$StagePath/scripts/validate-basecoat.ps1"
+        if (-not (Test-Path -LiteralPath $workflowValidatorPath -PathType Leaf)) {
+            throw "Refreshed installed-payload validator is missing: $workflowValidatorPath"
+        }
+        $workflowRefresh.installed_validation = 'running'
+        if ($Status) { $Status.workflow_refresh = $workflowRefresh }
+        try {
+            $null = Invoke-InstalledPayloadValidation `
+                -ValidatorPath $workflowValidatorPath `
+                -PayloadRoot (Join-Path $worktreePath $StagePath) `
+                -ConsumerRoot $worktreePath
+            $workflowRefresh.installed_validation = 'passed'
+        }
+        catch {
+            $workflowRefresh.installed_validation = 'failed'
+            if ($Status) { $Status.workflow_refresh = $workflowRefresh }
+            throw
+        }
+        if ($Status) { $Status.workflow_refresh = $workflowRefresh }
+
         foreach ($persistentSource in @($Policy.Source, $Policy.Mirror) | Where-Object { $_ }) {
             if ((Protect-SensitiveText $persistentSource) -ne $persistentSource) {
                 throw 'Source and mirror URLs persisted in .basecoat.yml must not contain userinfo or query credentials. Configure authentication separately.'
@@ -1416,6 +1678,21 @@ function Invoke-UpgradePullRequest {
             '-C', $worktreePath, 'diff', '--check', "origin/$defaultBranch...HEAD"
         ) -AllowFailure
         if ($diffCheck.ExitCode -ne 0) { throw "Post-rebase git diff --check failed: $($diffCheck.Output -join "`n")" }
+        $workflowRefresh.installed_validation = 'running'
+        if ($Status) { $Status.workflow_refresh = $workflowRefresh }
+        try {
+            $null = Invoke-InstalledPayloadValidation `
+                -ValidatorPath $workflowValidatorPath `
+                -PayloadRoot (Join-Path $worktreePath $StagePath) `
+                -ConsumerRoot $worktreePath
+            $workflowRefresh.installed_validation = 'passed'
+        }
+        catch {
+            $workflowRefresh.installed_validation = 'failed'
+            if ($Status) { $Status.workflow_refresh = $workflowRefresh }
+            throw
+        }
+        if ($Status) { $Status.workflow_refresh = $workflowRefresh }
         if ($Policy.Validation) {
             Push-Location $worktreePath
             try {
@@ -1455,7 +1732,7 @@ function Invoke-UpgradePullRequest {
         )
         $changed = @($changedResult.Output | Where-Object { $_ })
         $unmanaged = @($changed | Where-Object {
-            -not (Test-ManagedUpgradePath -Path $_ -StagePath $StagePath)
+            -not (Test-ManagedUpgradePath -Path $_ -StagePath $StagePath -RepoRoot $worktreePath)
         })
         if ($unmanaged.Count -gt 0) {
             throw "Sync changed unmanaged consumer paths: $($unmanaged -join ', ')."
@@ -1481,6 +1758,7 @@ $script:PrMarker
 - Release notes: $($Release.Url)
 - Tracking issue: $IssueUrl
 - Approval policy: ``$EffectiveApproval``
+- Workflow source version/ref: ``$($workflowRefresh.source_version)`` / ``$($workflowRefresh.source_ref)``
 
 ### Changed assets
 
@@ -1488,6 +1766,13 @@ $changedList
 
 ### Validation
 
+- Installed workflow state: ``$($workflowRefresh.state)``
+- Selected workflow targets: ``$($workflowRefresh.workflow_targets -join ', ')``
+- Refreshed workflow destinations: ``$($workflowRefresh.refreshed_destinations -join ', ')``
+- Missing workflow dependencies: ``$($workflowRefresh.missing_dependencies -join ', ')``
+- Workflow installer validation: ``$($workflowRefresh.installer_validation)``
+- Installed payload validation: ``$($workflowRefresh.installed_validation)``
+$(if ($workflowRefresh.state -eq 'staged-only') { "- Workflows remain staged-only; first-time activation is opt-in: ``$($workflowRefresh.activation_command)```n- Activation effects: $($workflowRefresh.permission_effects)" } elseif ($workflowRefresh.state -eq 'partial') { "- Refresh blocked: $($workflowRefresh.permission_effects)" } else { "- Workflow effects: $($workflowRefresh.permission_effects)" })
 - ``git diff --check``
   (post-rebase against ``origin/$defaultBranch...HEAD``)
 $(if ($Policy.Validation) { "- ``$($Policy.Validation)``" } else { '- Consumer required checks and branch protection must pass.' })
@@ -1567,6 +1852,14 @@ function Write-Status {
 - Issue: $($Status.issue_url)
 - PR: $($Status.pr_url)
 - Source SHA: ``$($Status.target_sha)``
+- Workflow state: ``$($Status.workflow_refresh.state)``
+- Workflow source: ``$($Status.workflow_refresh.source_version)`` / ``$($Status.workflow_refresh.source_ref)``
+- Selected workflows: ``$($Status.workflow_refresh.workflow_targets -join ', ')``
+- Refreshed destinations: ``$($Status.workflow_refresh.refreshed_destinations -join ', ')``
+- Missing workflow dependencies: ``$($Status.workflow_refresh.missing_dependencies -join ', ')``
+- Installer validation: ``$($Status.workflow_refresh.installer_validation)``
+- Installed validation: ``$($Status.workflow_refresh.installed_validation)``
+$(if ($Status.workflow_refresh.state -eq 'staged-only') { "- First-time activation remains opt-in: ``$($Status.workflow_refresh.activation_command)```n- Activation effects: $($Status.workflow_refresh.permission_effects)" } elseif ($Status.workflow_refresh.state -eq 'partial') { "- Refresh blocked: $($Status.workflow_refresh.permission_effects)" } else { "- Workflow effects: $($Status.workflow_refresh.permission_effects)" })
 "@ | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
     }
 }
@@ -1575,6 +1868,11 @@ if ($LibraryOnly) { return }
 
 $repoRootResult = Invoke-Native -Command 'git' -Arguments @('rev-parse', '--show-toplevel')
 $repoRoot = ($repoRootResult.Output | Select-Object -First 1).Trim()
+if ($CaptureWorkflowSelection) {
+    Get-InstalledWorkflowSelection -RepoRoot $repoRoot -StagePath $StagePath |
+        ConvertTo-Json -Depth 5
+    exit 0
+}
 $configLines = Get-ConfigLines -RepoRoot $repoRoot
 $policy = Get-UpdatePolicy -Lines $configLines -Overrides @{
     Mode = $Mode
@@ -1630,10 +1928,21 @@ if ($PlanOnly) {
 }
 
 if (-not $env:GITHUB_REPOSITORY) { throw 'GITHUB_REPOSITORY is required for issue and pull-request operations.' }
+$currentWorkflowSelection = $null
+if ($comparison -eq 0) {
+    $currentWorkflowSelection = Get-InstalledWorkflowSelection -RepoRoot $repoRoot -StagePath $StagePath
+}
+$sameVersionWorkflowRefresh = (
+    $comparison -eq 0 -and
+    $currentWorkflowSelection.state -eq 'installed' -and
+    $currentWorkflowSelection.workflow_targets.Count -gt 0
+)
 $eligiblePrTarget = if (
     $policy.Mode -eq 'pull-request' -and
-    $comparison -lt 0 -and
-    $bump -in $policy.AllowedBumps
+    (
+        ($comparison -lt 0 -and $bump -in $policy.AllowedBumps) -or
+        $sameVersionWorkflowRefresh
+    )
 ) { $release.Tag } else { '' }
 $defaultBranch = Get-DefaultBranch
 $configuredUpdateActors = @(Get-ConfiguredUpdateActors)
@@ -1674,6 +1983,55 @@ if ($existingIssue -and $existingIssue.PSObject.Properties['marker'] -and $exist
 
 if ($comparison -ge 0) {
     $status.disposition = if ($comparison -eq 0) { 'current' } else { 'ahead-of-target' }
+    if ($comparison -eq 0) {
+        $workflowSelection = $currentWorkflowSelection
+        $status.workflow_refresh = $workflowSelection
+        $script:WorkflowRefreshState = $workflowSelection
+        if ($workflowSelection.state -eq 'partial') {
+            $status.disposition = 'workflow-refresh-blocked'
+            Write-Status -Status $status -Path (Join-Path $repoRoot $StatusPath)
+            throw "Partial ship-it installation cannot be refreshed automatically. Missing workflow(s): $($workflowSelection.missing_dependencies -join ', '). Complete the ship-it install explicitly or offboard the partial installation, then retry."
+        }
+        if ($workflowSelection.workflow_targets.Count -gt 0 -and $policy.Mode -eq 'pull-request') {
+            $missingRefreshConfiguration = @(Get-MissingPullRequestDeliveryConfiguration `
+                -EligiblePrTarget $eligiblePrTarget `
+                -UpdateToken $env:BASECOAT_UPDATE_TOKEN `
+                -UpdateActors $configuredUpdateActors)
+            if ($missingRefreshConfiguration.Count -gt 0 -or $updateActorVerificationFailure) {
+                $status.disposition = 'credential-required'
+                Write-Status -Status $status -Path (Join-Path $repoRoot $StatusPath)
+                $requiredRefreshConfiguration = if ($missingRefreshConfiguration.Count -gt 0) {
+                    $missingRefreshConfiguration -join ' and '
+                } else {
+                    'a verified update_actor binding'
+                }
+                $refreshVerificationNote = if ($updateActorVerificationFailure) {
+                    " $updateActorVerificationFailure"
+                } else {
+                    ''
+                }
+                throw "Workflow refresh requires $requiredRefreshConfiguration.$refreshVerificationNote"
+            }
+            try {
+                $workflowPrUrl = Invoke-UpgradePullRequest -RepoRoot $repoRoot -Policy $policy `
+                    -Release $release -CurrentVersion $current.Text -IssueUrl '' `
+                    -EffectiveApproval $effectiveApproval -Status $status
+                $status.pr_url = $workflowPrUrl
+                $status.disposition = if ($workflowPrUrl) { 'workflow-refresh-pr' } else { 'current' }
+            }
+            catch {
+                if ($_.Exception.Data.Contains('BasecoatPrUrl')) {
+                    $status.pr_url = [string]$_.Exception.Data['BasecoatPrUrl']
+                }
+                $status.disposition = 'delivery-failed'
+                Write-Status -Status $status -Path (Join-Path $repoRoot $StatusPath)
+                throw
+            }
+        }
+        elseif ($workflowSelection.workflow_targets.Count -gt 0) {
+            $status.disposition = 'workflow-refresh-available'
+        }
+    }
     if ($existingIssue) {
         $status.issue_url = [string]$existingIssue.url
         $status.drift_started_at = $existingDriftStartedAt
@@ -1729,7 +2087,7 @@ if ($policy.Mode -eq 'pull-request' -and $bump -in $policy.AllowedBumps) {
     try {
         $prUrl = Invoke-UpgradePullRequest -RepoRoot $repoRoot -Policy $policy -Release $release `
             -CurrentVersion $current.Text -IssueUrl $status.issue_url -EffectiveApproval $effectiveApproval `
-            -GeneratedPrs $generatedPrs
+            -GeneratedPrs $generatedPrs -Status $status
         $status.pr_url = $prUrl
         $status.disposition = if ($prUrl) {
             if ($effectiveApproval -eq 'automatic') { 'auto-merge-pending' } else { 'approval-required' }

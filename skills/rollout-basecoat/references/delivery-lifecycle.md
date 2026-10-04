@@ -44,6 +44,48 @@ new branch.
 
 ## 2. Sync inside the worktree
 
+### Capture and refresh installed workflows
+
+Before syncing, record the exact factory-owned workflows already active in
+`.github/workflows`. The updater uses the staged ownership manifest; it refuses
+to guess when active workflows have no ownership evidence.
+
+PowerShell:
+
+```powershell
+$WorkflowSelection = pwsh .github/base-coat/scripts/invoke-basecoat-consumer-update.ps1 `
+  -CaptureWorkflowSelection -StagePath .github/base-coat | ConvertFrom-Json
+if ($WorkflowSelection.state -eq 'partial') {
+  throw "Partial ship-it install; missing: $($WorkflowSelection.missing_dependencies -join ', ')"
+}
+```
+
+After sync and provenance verification, refresh only the captured targets and
+validate both the installed payload and the consumer repository's active
+workflows:
+
+```powershell
+if ($WorkflowSelection.workflow_targets.Count -gt 0) {
+  pwsh .github/base-coat/scripts/configure-downstream-workflows.ps1 `
+    -SourceDir .github/base-coat/workflows `
+    -DestinationDir .github/workflows `
+    -Workflow $WorkflowSelection.workflow_targets
+}
+pwsh .github/base-coat/scripts/validate-basecoat.ps1 `
+  -RootDir .github/base-coat `
+  -WorkflowValidationMode Consumer `
+  -ConsumerRoot .
+```
+
+For `staged-only`, do not run the installer: syncing the payload does not
+activate workflows. Report the explicit opt-in command from
+`$WorkflowSelection.activation_command` and the workflow permission/trigger
+effects before a maintainer chooses to install them. Never activate GitHub
+Actions settings, secrets, or credentials; the installer changes repository
+files only. A missing, malformed, or unsupported ownership selection, partial
+ship-it install, installer error, or failed installed validation blocks commit
+and delivery.
+
 ### Discover the sync entrypoint
 
 Do **not** assume a root `sync.ps1`/`sync.sh`. Real consumers vendor the script

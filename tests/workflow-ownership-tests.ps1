@@ -25,6 +25,13 @@ function Assert-True {
     }
 }
 
+function Assert-Equal {
+    param($Actual, $Expected, [string]$Message)
+    if ($Actual -ne $Expected) {
+        throw "$Message Expected '$Expected', got '$Actual'."
+    }
+}
+
 foreach ($path in @($manifestPath, $installerPath, $retirementPath, $syncScriptPath)) {
     Assert-True -Condition (Test-Path -LiteralPath $path -PathType Leaf) `
         -Message "Missing workflow ownership asset: $path"
@@ -163,6 +170,101 @@ jobs:
         -Message 'Installer must retire a legacy workflow marked factory-owned.'
     Assert-True -Condition (Test-Path -LiteralPath (Join-Path $destinationDir 'basecoat-custom-ci.yml')) `
         -Message 'Installer must preserve an unmarked workflow even with a BaseCoat-like prefix.'
+
+    $targetedSourceDir = Join-Path $scratch 'targeted-source'
+    $targetedDestinationDir = Join-Path $scratch 'targeted-destination'
+    $targetedGovernanceDir = Join-Path $scratch 'targeted-governance'
+    New-Item -ItemType Directory -Force -Path $targetedSourceDir, $targetedDestinationDir, $targetedGovernanceDir | Out-Null
+    Copy-Item -LiteralPath $manifestPath -Destination (Join-Path $targetedSourceDir 'workflow-ownership-manifest.json')
+    Copy-Item -LiteralPath (Join-Path $repoRoot '.github\base-coat\workflows\version-check.yml') `
+        -Destination (Join-Path $targetedSourceDir 'version-check.yml')
+    Copy-Item -LiteralPath (Join-Path $repoRoot '.github\base-coat\workflows\dependency-update-advisor.yml') `
+        -Destination (Join-Path $targetedSourceDir 'dependency-update-advisor.yml')
+    'legacy factory workflow' | Set-Content -LiteralPath (Join-Path $targetedDestinationDir 'bc-version-check.yml') -Encoding utf8NoBOM
+    'consumer-owned prefix collision' | Set-Content -LiteralPath (Join-Path $targetedDestinationDir 'basecoat-custom.yml') -Encoding utf8NoBOM
+    '{"consumer":"policy"}' | Set-Content -LiteralPath (Join-Path $targetedGovernanceDir 'policy-packs.json') -Encoding utf8NoBOM
+
+    & pwsh -NoProfile -File $installerPath `
+        -SourceDir $targetedSourceDir `
+        -DestinationDir $targetedDestinationDir `
+        -GovernanceDestinationDir $targetedGovernanceDir `
+        -Workflow bc-version-check.yml | Out-Null
+    Assert-True -Condition ($LASTEXITCODE -eq 0) `
+        -Message 'Installer must resolve a selected legacy destination to its registered source mapping.'
+    Assert-True -Condition (Test-Path -LiteralPath (Join-Path $targetedDestinationDir 'basecoat-version-check.yml')) `
+        -Message 'Targeted refresh must install the canonical destination for a captured legacy workflow.'
+    Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $targetedDestinationDir 'bc-version-check.yml'))) `
+        -Message 'Targeted refresh must retire only the mapped legacy factory-owned workflow.'
+    Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $targetedDestinationDir 'basecoat-upstream-version-drift.yml'))) `
+        -Message 'Targeted refresh must not enable an unselected workflow from the same class.'
+    Assert-True -Condition ((Get-Content -LiteralPath (Join-Path $targetedDestinationDir 'basecoat-custom.yml') -Raw).Trim() -eq 'consumer-owned prefix collision') `
+        -Message 'Targeted refresh must preserve consumer-owned prefix collisions.'
+    Assert-True -Condition ((Get-Content -LiteralPath (Join-Path $targetedGovernanceDir 'policy-packs.json') -Raw).Trim() -eq '{"consumer":"policy"}') `
+        -Message 'Targeted refresh must preserve consumer governance files.'
+
+    $versionWorkflowHash = (Get-FileHash -LiteralPath (Join-Path $targetedDestinationDir 'basecoat-version-check.yml')).Hash
+    & pwsh -NoProfile -File $installerPath `
+        -SourceDir $targetedSourceDir `
+        -DestinationDir $targetedDestinationDir `
+        -GovernanceDestinationDir $targetedGovernanceDir `
+        -Workflow basecoat-version-check.yml | Out-Null
+    Assert-True -Condition ($LASTEXITCODE -eq 0) -Message 'Repeated targeted refresh must succeed.'
+    Assert-Equal (Get-FileHash -LiteralPath (Join-Path $targetedDestinationDir 'basecoat-version-check.yml')).Hash `
+        $versionWorkflowHash 'Repeated targeted refresh must be idempotent.'
+
+    & pwsh -NoProfile -File $installerPath `
+        -SourceDir $targetedSourceDir `
+        -DestinationDir $targetedDestinationDir `
+        -GovernanceDestinationDir $targetedGovernanceDir `
+        -Workflow bc-dependency-update-advisor.yml | Out-Null
+    Assert-True -Condition ($LASTEXITCODE -eq 0) `
+        -Message 'Targeted template refresh must resolve legacy names and preserve governance.'
+    Assert-True -Condition (Test-Path -LiteralPath (Join-Path $targetedDestinationDir 'basecoat-dependency-update-advisor.yml')) `
+        -Message 'Targeted template refresh must install only its selected destination.'
+    Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $targetedDestinationDir 'basecoat-sprint-closeout-branch-audit.yml'))) `
+        -Message 'Targeted template refresh must not enable other template workflows.'
+    Assert-True -Condition ((Get-Content -LiteralPath (Join-Path $targetedGovernanceDir 'policy-packs.json') -Raw).Trim() -eq '{"consumer":"policy"}') `
+        -Message 'Targeted template refresh must preserve existing governance files.'
+
+    $targetedManifestPath = Join-Path $targetedSourceDir 'workflow-ownership-manifest.json'
+    $heldManifestPath = "$targetedManifestPath.held"
+    Move-Item -LiteralPath $targetedManifestPath -Destination $heldManifestPath
+    try {
+        $ownershipConflictOutput = & pwsh -NoProfile -File $installerPath `
+            -SourceDir $targetedSourceDir `
+            -DestinationDir $targetedDestinationDir `
+            -Workflow basecoat-version-check.yml 2>&1 | Out-String -Width 4096
+        Assert-True -Condition ($LASTEXITCODE -ne 0 -and $ownershipConflictOutput -match 'without an ownership manifest') `
+            -Message 'Targeted refresh must refuse to overwrite an existing file without ownership evidence.'
+    }
+    finally {
+        Move-Item -LiteralPath $heldManifestPath -Destination $targetedManifestPath
+    }
+
+    $partialShipItOutput = & pwsh -NoProfile -File $installerPath `
+        -SourceDir $targetedSourceDir `
+        -DestinationDir $targetedDestinationDir `
+        -Workflow ship-it-intent-dispatch.yml 2>&1 | Out-String
+    Assert-True -Condition ($LASTEXITCODE -ne 0 -and $partialShipItOutput -match 'Partial ship-it workflow selection') `
+        -Message 'Installer must reject a partial ship-it capability and name its missing members.'
+    $unsupportedOutput = & pwsh -NoProfile -File $installerPath `
+        -SourceDir $targetedSourceDir `
+        -DestinationDir $targetedDestinationDir `
+        -Workflow auto-approve-cloud-agent-workflows.yml 2>&1 | Out-String -Width 4096
+    Assert-True -Condition ($LASTEXITCODE -ne 0 -and $unsupportedOutput -match 'unsupported') `
+        -Message 'Installer must report explicitly selected unsupported workflows as blockers.'
+    $missingSourceOutput = & pwsh -NoProfile -File $installerPath `
+        -SourceDir $targetedSourceDir `
+        -DestinationDir $targetedDestinationDir `
+        -Workflow check-version.yml 2>&1 | Out-String -Width 4096
+    Assert-True -Condition ($LASTEXITCODE -ne 0 -and $missingSourceOutput -match 'Selected workflow source is missing') `
+        -Message 'Installer must fail when a selected workflow source is missing.'
+    $unknownSelectorOutput = & pwsh -NoProfile -File $installerPath `
+        -SourceDir $targetedSourceDir `
+        -DestinationDir $targetedDestinationDir `
+        -Workflow unknown-consumer.yml 2>&1 | Out-String -Width 4096
+    Assert-True -Condition ($LASTEXITCODE -ne 0 -and $unknownSelectorOutput -match 'Unknown workflow selector') `
+        -Message 'Installer must fail closed on an unsupported selected mapping.'
 
     & pwsh -NoProfile -File $retirementPath `
         -SourceDir $sourceDir `

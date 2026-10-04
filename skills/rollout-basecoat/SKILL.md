@@ -14,39 +14,37 @@ allowed-tools: []
 ---
 # Rollout BaseCoat Skill
 
-Refresh a consumer repository to the latest BaseCoat build or a pinned release.
+Refresh a consumer repository to the latest or pinned BaseCoat build.
 
 ## Shortcut Phrases
 
 - refresh basecoat
 - update basecoat
-- sync basecoat to latest
 - upgrade basecoat in this repo
-- notify me when BaseCoat updates are available
 - open guarded BaseCoat upgrade PRs
 
 ## Workflow
 
-Run the upgrade inside an **isolated worktree** and always finish the delivery
-lifecycle. Never leave the sync uncommitted — an upgrade that stops at "here is
-what changed" is an incomplete run.
+Use an **isolated worktree** and complete delivery; do not leave sync changes
+uncommitted.
 
-1. Read `.basecoat.yml` (if present) for `source` and `ref`.
-2. Create an isolated worktree on a fresh, uniquely-named
-   `chore/basecoat-upgrade-<ref>-<timestamp>` branch from the consumer's default
-   branch (resolve it — it is not always `main`) so the primary tree stays
-   untouched and re-runs for a moving ref never collide.
-3. Discover the sync entrypoint (`sync.script` from `.basecoat.yml`, else root
-   `sync.ps1`/`sync.sh`, else search — see reference) and run it **inside the
-   worktree**.
-4. Verify `.github/base-coat/version.json`. When `ref` is a semver tag, sync
-   enforces provenance and fails on mismatch; known-bad tags auto-remap to the
-   first corrected release with a warning to update the pin.
-5. Compare with the latest release:
+1. Read `.basecoat.yml` for `source`/`ref`; create a fresh worktree and branch
+   from the resolved default branch.
+2. Before sync, capture factory-owned active workflow targets with
+   `.github/base-coat/scripts/invoke-basecoat-consumer-update.ps1
+   -CaptureWorkflowSelection`. Stop on partial ship-it or missing/invalid
+   ownership evidence.
+3. Resolve `sync.script` or the canonical sync entrypoint and run it in the
+   worktree. Verify version and provenance; sync rejects mismatched semver pins.
+4. Refresh only captured targets with the staged targeted installer, then
+   validate the staged payload and consumer workflows. Never enable defaults.
+   Staged-only consumers remain opt-in; report the activation command and
+   permission/trigger effects. Do not deliver after installer or validation
+   failure.
+5. Commit, push, and open a PR; if there are no changes, report "already up to
+   date." Compare releases with
    `gh release list --repo SOURCE-ORG/basecoat --limit 1`.
-6. Commit, push, open a PR, then remove the worktree and prune. If the sync
-   produced no changes, skip the PR and report "already up to date."
-7. Report what changed, the PR URL, and any follow-up steps.
+6. Report changes, PR URL, readiness, and follow-up steps.
 
 For recurring consumer-owned updates, configure `.basecoat.yml` `updates` policy
 and install the distributed check workflow. Defaults remain notify plus required

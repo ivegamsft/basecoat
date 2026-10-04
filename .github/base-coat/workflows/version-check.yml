@@ -67,4 +67,3 @@ jobs:
 
           print(f'Version consistency check passed: {version}')
           PY
-

@@ -396,7 +396,9 @@ if ($targetedInstall) {
     foreach ($selector in $workflowSelectors) {
         $matched = @(
             $workflowMap | Where-Object {
-                $_.Source -eq $selector -or $_.Destination -eq $selector
+                $_.Source -eq $selector -or
+                $_.Destination -eq $selector -or
+                $_.LegacyDestinations -contains $selector
             }
         )
         if ($matched.Count -eq 0) {
@@ -406,6 +408,45 @@ if ($targetedInstall) {
                     Sort-Object -Unique
             ) -join ', '
             throw "Unknown workflow selector '$selector'. Valid source or destination names: $validSelectors"
+        }
+    }
+}
+
+if ($targetedInstall) {
+    $selectedEntries = @(
+        $workflowMap | Where-Object {
+            $workflowSelectors.Contains($_.Source) -or
+            $workflowSelectors.Contains($_.Destination) -or
+            @($_.LegacyDestinations | Where-Object { $workflowSelectors.Contains($_) }).Count -gt 0
+        }
+    )
+    $selectedShipIt = @($selectedEntries | Where-Object { $_.Class -eq 'ship-it' })
+    $shipItEntries = @($workflowMap | Where-Object { $_.Class -eq 'ship-it' })
+    if ($selectedShipIt.Count -gt 0 -and $selectedShipIt.Count -ne $shipItEntries.Count) {
+        $selectedShipItNames = @($selectedShipIt | ForEach-Object { $_.Destination })
+        $missingShipIt = @($shipItEntries | Where-Object { $_.Destination -notin $selectedShipItNames } |
+            ForEach-Object { $_.Destination })
+        throw "Partial ship-it workflow selection is unsupported. Missing required workflow(s): $($missingShipIt -join ', '). Select the full ship-it class or offboard the partial installation."
+    }
+
+    foreach ($workflowEntry in $selectedEntries) {
+        if (-not $workflowEntry.Supported -and -not $IncludeUnsupported) {
+            throw "Selected workflow '$($workflowEntry.Destination)' is unsupported by the consumer installer. Remove it from the selection or explicitly install it with -IncludeUnsupported."
+        }
+
+        $sourceFile = Join-Path $resolvedSource $workflowEntry.Source
+        if (-not (Test-Path -LiteralPath $sourceFile -PathType Leaf)) {
+            throw "Selected workflow source is missing: $sourceFile"
+        }
+
+        $destinationPath = Join-Path $resolvedDest $workflowEntry.Destination
+        if (Test-Path -LiteralPath $destinationPath -PathType Leaf) {
+            if (-not $hasOwnershipManifest) {
+                throw "Refusing to overwrite selected workflow '$($workflowEntry.Destination)' without an ownership manifest."
+            }
+            [void](Assert-FactoryOwnedWorkflow `
+                    -WorkflowName $workflowEntry.Destination `
+                    -OwnershipManifestPath $ownershipManifestPath)
         }
     }
 }
@@ -433,7 +474,8 @@ $skipped = 0
 
 foreach ($workflowEntry in $workflowMap) {
     $isTargetedWorkflow = $workflowSelectors.Contains($workflowEntry.Source) -or
-        $workflowSelectors.Contains($workflowEntry.Destination)
+        $workflowSelectors.Contains($workflowEntry.Destination) -or
+        @($workflowEntry.LegacyDestinations | Where-Object { $workflowSelectors.Contains($_) }).Count -gt 0
 
     if ($targetedInstall -and -not $isTargetedWorkflow) {
         Write-Info "Skipping non-selected workflow: $($workflowEntry.Source)"
@@ -496,7 +538,7 @@ foreach ($workflowEntry in $workflowMap) {
     if (-not $nameUpdated) {
         $lines = @("name: `"$($workflowEntry.Name)`"") + $lines
     }
-    $content = [string]::Join("`n", $lines)
+    $content = [string]::Join("`n", $lines).TrimEnd()
 
     if ($DryRun) {
         Write-Info "Would copy $($workflowEntry.Source) -> $($workflowEntry.Destination)"

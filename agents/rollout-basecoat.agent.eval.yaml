@@ -11,6 +11,12 @@ scenarios:
   - id: "pos-3"
     input: "Please use the rollout-basecoat agent for onboarding a repository to BaseCoat in an enterprise setting. Focuses on pinned versions, safe rollout, installation method, and validation steps."
     expect_activation: true
+  - id: "pos-4"
+    input: "The BaseCoat payload is already current, but our installed workflows are stale. Refresh only the workflows we already selected and validate before opening a PR."
+    expect_activation: true
+  - id: "pos-5"
+    input: "Sync BaseCoat into a staged-only repository, but do not activate any GitHub Actions workflows without maintainer consent."
+    expect_activation: true
   - id: "neg-1"
     input: "Write a haiku about programming."
     expect_activation: false

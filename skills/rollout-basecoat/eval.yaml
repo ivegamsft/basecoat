@@ -23,6 +23,12 @@ scenarios:
   - id: "pos-7"
     input: "Enable guarded automatic BaseCoat upgrade pull requests without bypassing branch protection."
     expect_activation: true
+  - id: "pos-8"
+    input: "Our BaseCoat payload is already current, but an installed workflow is stale. Refresh the existing selection and validate it before opening a PR."
+    expect_activation: true
+  - id: "pos-9"
+    input: "Sync BaseCoat into a staged-only consumer, but do not activate any workflows without maintainer consent."
+    expect_activation: true
   - id: "neg-1"
     input: "Write a new custom agent for threat modeling."
     expect_activation: false

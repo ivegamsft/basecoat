@@ -321,9 +321,80 @@ $generatedPrIndex = $updater.IndexOf('$generatedPrs = @(Get-GeneratedUpgradePrs 
 $currentExitIndex = $updater.IndexOf('if ($comparison -ge 0)')
 Assert-True ($generatedPrIndex -ge 0 -and $currentExitIndex -ge 0 -and $generatedPrIndex -lt $currentExitIndex) `
     'Stale generated PRs must be reconciled before current/ahead early exits.'
+$sameVersionRefreshIndex = $updater.IndexOf('$workflowSelection = $currentWorkflowSelection')
+Assert-True ($sameVersionRefreshIndex -gt $currentExitIndex -and $updater.IndexOf('workflow-refresh-available') -gt $sameVersionRefreshIndex) `
+    'An already-current version must assess the captured workflow selection before exiting.'
 
 New-Item -ItemType Directory -Path $scratch -Force | Out-Null
 try {
+    Write-Host 'Running installed workflow selection fixtures...'
+    $selectionRoot = Join-Path $scratch 'workflow-selection'
+    $selectionStage = '.config/basecoat'
+    $selectionWorkflows = Join-Path $selectionRoot '.github/workflows'
+    $selectionManagedWorkflows = Join-Path $selectionRoot "$selectionStage/workflows"
+    New-Item -ItemType Directory -Path $selectionWorkflows, $selectionManagedWorkflows -Force | Out-Null
+    '{"version":"4.1.0"}' | Set-Content -LiteralPath (Join-Path $selectionRoot "$selectionStage/version.json") -Encoding utf8NoBOM
+    '{"requestedRef":"v4.1.0","commit":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}' |
+        Set-Content -LiteralPath (Join-Path $selectionRoot "$selectionStage/.source-provenance.json") -Encoding utf8NoBOM
+    'ref: v4.1.0' | Set-Content -LiteralPath (Join-Path $selectionRoot '.basecoat.yml') -Encoding utf8NoBOM
+
+    $stagedOnly = Get-InstalledWorkflowSelection -RepoRoot $selectionRoot -StagePath $selectionStage
+    Assert-Equal $stagedOnly.state 'staged-only' 'A consumer with staged sources and no active workflows must remain staged-only.'
+    Assert-Equal $stagedOnly.workflow_targets.Count 0 'Staged-only capture must not select defaults.'
+    Assert-True ($stagedOnly.activation_command -match 'configure-downstream-workflows\.ps1') `
+        'Staged-only capture must provide an explicit activation command.'
+    Assert-True ($stagedOnly.permission_effects -match 'does not change GitHub Actions settings') `
+        'Staged-only readiness must distinguish local files from GitHub Actions settings.'
+
+    Copy-Item -LiteralPath (Join-Path $repoRoot '.github/base-coat/workflows/workflow-ownership-manifest.json') `
+        -Destination (Join-Path $selectionManagedWorkflows 'workflow-ownership-manifest.json')
+    'managed old workflow' | Set-Content -LiteralPath (Join-Path $selectionWorkflows 'basecoat-version-check.yml') -Encoding utf8NoBOM
+    'consumer-owned prefix collision' | Set-Content -LiteralPath (Join-Path $selectionWorkflows 'basecoat-custom.yml') -Encoding utf8NoBOM
+    $installedSelection = Get-InstalledWorkflowSelection -RepoRoot $selectionRoot -StagePath $selectionStage
+    Assert-Equal $installedSelection.state 'installed' 'A complete managed workflow must be captured as installed.'
+    Assert-Equal ($installedSelection.workflow_targets -join ',') 'basecoat-version-check.yml' `
+        'Capture must use the ownership manifest, not a filename prefix, to select installed workflows.'
+    Assert-Equal (Get-Content -LiteralPath (Join-Path $selectionWorkflows 'basecoat-custom.yml') -Raw).Trim() `
+        'consumer-owned prefix collision' 'An unlisted consumer workflow must be preserved.'
+
+    $legacySelectionRoot = Join-Path $scratch 'legacy-workflow-selection'
+    $legacySelectionWorkflows = Join-Path $legacySelectionRoot '.github/workflows'
+    $legacySelectionManagedWorkflows = Join-Path $legacySelectionRoot "$selectionStage/workflows"
+    New-Item -ItemType Directory -Path $legacySelectionWorkflows, $legacySelectionManagedWorkflows -Force | Out-Null
+    '{"schemaVersion":1,"defaultOwnership":"repo-owned","workflows":[{"file":"basecoat-version-check.yml","ownership":"factory-owned"}]}' |
+        Set-Content -LiteralPath (Join-Path $legacySelectionManagedWorkflows 'workflow-ownership-manifest.json') -Encoding utf8NoBOM
+    'legacy factory workflow' |
+        Set-Content -LiteralPath (Join-Path $legacySelectionWorkflows 'bc-version-check.yml') -Encoding utf8NoBOM
+    $legacySelection = Get-InstalledWorkflowSelection -RepoRoot $legacySelectionRoot -StagePath $selectionStage
+    Assert-Equal $legacySelection.state 'installed' 'A known legacy workflow alias with canonical ownership evidence must be installed state.'
+    Assert-Equal ($legacySelection.workflow_targets -join ',') 'bc-version-check.yml' `
+        'Capture must target a recognized legacy alias when its canonical destination is factory-owned.'
+    Assert-True (Test-ManagedUpgradePath -Path '.github/workflows/bc-version-check.yml' `
+        -StagePath $selectionStage -RepoRoot $legacySelectionRoot) `
+        'A recognized legacy alias path must pass the managed-path gate when its canonical destination is factory-owned.'
+    Assert-True (-not (Test-ManagedUpgradePath -Path '.github/workflows/bc-custom.yml' `
+        -StagePath $selectionStage -RepoRoot $legacySelectionRoot)) `
+        'An unrecognized legacy-looking workflow must remain outside the managed-path gate.'
+
+    foreach ($shipItWorkflow in @('ship-it-intent-dispatch.yml', 'ship-it-build-guard.yml')) {
+        'partial ship-it fixture' | Set-Content -LiteralPath (Join-Path $selectionWorkflows $shipItWorkflow) -Encoding utf8NoBOM
+    }
+    $partialSelection = Get-InstalledWorkflowSelection -RepoRoot $selectionRoot -StagePath $selectionStage
+    Assert-Equal $partialSelection.state 'partial' 'An incomplete ship-it capability must be reported as partial.'
+    Assert-Equal ($partialSelection.missing_dependencies -join ',') 'ship-it-release-gate.yml' `
+        'Partial ship-it readiness must identify the exact missing workflow.'
+
+    $malformedManifestPath = Join-Path $selectionManagedWorkflows 'workflow-ownership-manifest.json'
+    '{malformed' | Set-Content -LiteralPath $malformedManifestPath -Encoding utf8NoBOM
+    $malformedSelectionRejected = $false
+    try {
+        Get-InstalledWorkflowSelection -RepoRoot $selectionRoot -StagePath $selectionStage | Out-Null
+    }
+    catch {
+        $malformedSelectionRejected = $_.Exception.Message -match 'ownership manifest is invalid JSON'
+    }
+    Assert-True $malformedSelectionRejected 'Malformed ownership evidence must block automatic selection.'
+
     Push-Location $repoRoot
     & $scriptPath -PlanOnly -StagePath . `
         -ReleaseJson (@{
@@ -804,7 +875,14 @@ try {
     git init --bare $origin | Out-Null
     git clone $origin $consumer | Out-Null
     $customStage = '.config/basecoat'
-    New-Item -ItemType Directory -Path (Join-Path $consumer $customStage) -Force | Out-Null
+    $initialWorkflows = Join-Path $consumer '.github/workflows'
+    $initialStage = Join-Path $consumer $customStage
+    New-Item -ItemType Directory -Path $initialWorkflows, $initialStage, `
+        (Join-Path $initialStage 'workflows') -Force | Out-Null
+    Copy-Item -LiteralPath (Join-Path $repoRoot '.github/base-coat/workflows/workflow-ownership-manifest.json') `
+        -Destination (Join-Path $initialStage 'workflows/workflow-ownership-manifest.json')
+    'old factory version-check' | Set-Content -LiteralPath (Join-Path $initialWorkflows 'basecoat-version-check.yml') -Encoding utf8NoBOM
+    'consumer-owned workflow' | Set-Content -LiteralPath (Join-Path $initialWorkflows 'basecoat-custom.yml') -Encoding utf8NoBOM
     '{"version":"4.1.0"}' | Set-Content -LiteralPath (Join-Path $consumer "$customStage/version.json") -Encoding utf8NoBOM
     @'
 sync:
@@ -829,6 +907,21 @@ $version = $releaseTag -replace '^v', ''
 @{ version = $version } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $target 'version.json') -Encoding utf8NoBOM
 @{ commit = $env:BASECOAT_EXPECTED_SHA } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $target '.source-provenance.json') -Encoding utf8NoBOM
 "updated $version" | Set-Content -LiteralPath (Join-Path $target 'smoke.txt') -Encoding utf8NoBOM
+$sourceWorkflows = Join-Path $env:BASECOAT_TEST_SOURCE_ROOT '.github/base-coat/workflows'
+$sourceScripts = Join-Path $env:BASECOAT_TEST_SOURCE_ROOT 'scripts'
+$workflows = Join-Path $target 'workflows'
+$scripts = Join-Path $target 'scripts'
+New-Item -ItemType Directory -Path $workflows, $scripts -Force | Out-Null
+Copy-Item -LiteralPath (Join-Path $sourceWorkflows 'workflow-ownership-manifest.json') -Destination $workflows
+Copy-Item -LiteralPath (Join-Path $sourceWorkflows 'version-check.yml') -Destination $workflows
+Copy-Item -LiteralPath (Join-Path $sourceScripts 'configure-downstream-workflows.ps1') -Destination $scripts
+Copy-Item -LiteralPath (Join-Path $sourceScripts 'workflow-ownership.ps1') -Destination $scripts
+@(
+    'param([string]$RootDir, [string]$WorkflowValidationMode, [string]$ConsumerRoot)'
+    'if ($WorkflowValidationMode -ne "Consumer" -or -not (Test-Path -LiteralPath $ConsumerRoot)) { throw "Installed payload validation arguments are invalid." }'
+    'if ($env:BASECOAT_TEST_VALIDATOR_FAIL) { throw "Installed validator fixture failed." }'
+    'Add-Content -LiteralPath $env:BASECOAT_TEST_CREDENTIAL_LOG -Value "installed-validation|$env:GH_TOKEN|$env:BASECOAT_UPDATE_TOKEN|$env:BASECOAT_FETCH_TOKEN|$env:BASECOAT_MIRROR_FETCH_TOKEN"'
+) | Set-Content -LiteralPath (Join-Path $scripts 'validate-basecoat.ps1') -Encoding utf8NoBOM
 '@ | Set-Content -LiteralPath (Join-Path $consumer 'sync.ps1') -Encoding utf8NoBOM
     '# consumer' | Set-Content -LiteralPath (Join-Path $consumer 'README.md') -Encoding utf8NoBOM
     git -C $consumer add -A
@@ -859,6 +952,7 @@ $version = $releaseTag -replace '^v', ''
     $env:GH_TOKEN = 'workflow-token'
     $env:BASECOAT_FETCH_TOKEN = 'source-read-token'
     $env:BASECOAT_MIRROR_FETCH_TOKEN = 'mirror-read-token'
+    $env:BASECOAT_TEST_SOURCE_ROOT = $repoRoot
     $env:BASECOAT_TEST_CREDENTIAL_LOG = $credentialLog
     $escapedCredentialLog = $credentialLog.Replace("'", "''")
     $smokePolicy = [pscustomobject]@{
@@ -889,10 +983,14 @@ $version = $releaseTag -replace '^v', ''
     Assert-True ((Get-Content -LiteralPath $ghLog -Raw) -match 'pr checks 7 .* --required') 'Automatic mode must wait for consumer required checks to run.'
     Assert-True ((Get-Content -LiteralPath $ghLog -Raw) -match 'pr merge 7 .* --auto --squash') 'Automatic smoke test did not request policy-respecting auto-merge.'
     $childCredentialLines = @(Get-Content -LiteralPath $credentialLog)
-    Assert-Equal $childCredentialLines.Count 2 'Sync and validation must both record credential isolation evidence.'
+    Assert-Equal $childCredentialLines.Count 4 'Sync, both installed-validation passes, and consumer validation must all record credential isolation evidence.'
     Assert-Equal $childCredentialLines[0] 'sync||||mirror-read-token' `
         'Mirror sync must receive only its authority-bound source credential.'
-    Assert-Equal $childCredentialLines[1] 'validation||||' `
+    Assert-Equal $childCredentialLines[1] 'installed-validation||||' `
+        'Installed-payload validation must not inherit delivery or source credentials.'
+    Assert-Equal $childCredentialLines[2] 'installed-validation||||' `
+        'Post-rebase installed-payload validation must not inherit delivery or source credentials.'
+    Assert-Equal $childCredentialLines[3] 'validation||||' `
         'Consumer-controlled validation must not inherit delivery or source credentials.'
     Assert-True (-not (Test-Path -LiteralPath (Join-Path $e2eRoot 'consumer-wt-basecoat-2765-attempt-2'))) 'Successful delivery must remove its attempt-specific worktree.'
     $remoteBranch = git -C $consumer branch -r --list 'origin/chore/basecoat-update-v4.1.1-2765-attempt-2'
@@ -903,12 +1001,100 @@ $version = $releaseTag -replace '^v', ''
     Assert-True (($pinnedConfig -join "`n") -match '(?m)^ref:\s*v4\.1\.1$') 'Generated PR must persist the new top-level ref pin.'
     $customVersion = git -C $consumer show "origin/chore/basecoat-update-v4.1.1-2765-attempt-2`:$customStage/version.json"
     Assert-True (($customVersion -join "`n") -match '"version":\s*"4\.1\.1"') 'Generated PR must sync and validate the configured custom stage path.'
+    $refreshedWorkflow = git -C $consumer show 'origin/chore/basecoat-update-v4.1.1-2765-attempt-2:.github/workflows/basecoat-version-check.yml'
+    Assert-True (($refreshedWorkflow -join "`n") -match 'name:\s*"BaseCoat Reusable - Version Check"') `
+        'Generated PR must refresh the selected installed workflow using the targeted installer.'
+    $preservedWorkflow = git -C $consumer show 'origin/chore/basecoat-update-v4.1.1-2765-attempt-2:.github/workflows/basecoat-custom.yml'
+    Assert-Equal ($preservedWorkflow -join "`n").Trim() 'consumer-owned workflow' `
+        'Generated PR must preserve unlisted consumer-owned workflows.'
+    $unselectedWorkflow = git -C $consumer ls-tree -r --name-only 'origin/chore/basecoat-update-v4.1.1-2765-attempt-2'
+    Assert-True (($unselectedWorkflow -join "`n") -notmatch 'basecoat-secret-scan\.yml') `
+        'Generated PR must not enable unselected reusable workflows.'
     Assert-True (($pinnedConfig -join "`n") -match '(?m)^source:\s*https://github\.com/example/basecoat\.git$') `
         'Generated PR must persist a usable canonical clone URL with the ref pin.'
     Assert-True (($pinnedConfig -join "`n") -match '(?m)^mirror:\s*https://github\.com/example/basecoat-mirror\.git$') `
         'Generated PR must persist a usable mirror clone URL with the ref pin.'
     Assert-True ((Get-Content -LiteralPath $ghLog -Raw) -match 'source: <unset>') `
         'Generated PR rollback instructions must preserve the previous source.'
+
+    Write-Host 'Running same-version stale-workflow refresh fixture...'
+    $sameVersionConsumer = Join-Path $e2eRoot 'same-version-consumer'
+    git clone $origin $sameVersionConsumer | Out-Null
+    $sameVersionWorkflows = Join-Path $sameVersionConsumer '.github/workflows'
+    $sameVersionStage = Join-Path $sameVersionConsumer $customStage
+    New-Item -ItemType Directory -Path $sameVersionWorkflows, $sameVersionStage, `
+        (Join-Path $sameVersionStage 'workflows') -Force | Out-Null
+    Copy-Item -LiteralPath (Join-Path $repoRoot '.github/base-coat/workflows/workflow-ownership-manifest.json') `
+        -Destination (Join-Path $sameVersionStage 'workflows/workflow-ownership-manifest.json')
+    'old factory version-check' | Set-Content -LiteralPath (Join-Path $sameVersionWorkflows 'basecoat-version-check.yml') -Encoding utf8NoBOM
+    'consumer-owned workflow' | Set-Content -LiteralPath (Join-Path $sameVersionWorkflows 'basecoat-custom.yml') -Encoding utf8NoBOM
+    '{"version":"4.1.0"}' | Set-Content -LiteralPath (Join-Path $sameVersionStage 'version.json') -Encoding utf8NoBOM
+    Copy-Item -LiteralPath (Join-Path $consumer '.basecoat.yml') -Destination (Join-Path $sameVersionConsumer '.basecoat.yml')
+    Copy-Item -LiteralPath (Join-Path $consumer 'sync.ps1') -Destination (Join-Path $sameVersionConsumer 'sync.ps1')
+    git -C $sameVersionConsumer add -A
+    git -C $sameVersionConsumer -c user.name=basecoat-updater-test `
+        -c user.email=basecoat-updater-test@example.com commit -m 'initial same-version consumer' | Out-Null
+    git -C $sameVersionConsumer push origin main | Out-Null
+    $oldRunId = $env:GITHUB_RUN_ID
+    $oldRunAttempt = $env:GITHUB_RUN_ATTEMPT
+    $env:GITHUB_RUN_ID = '2766'
+    $env:GITHUB_RUN_ATTEMPT = '1'
+    $sameVersionRelease = [pscustomobject]@{
+        Tag = 'v4.1.0'
+        Sha = '0123456789abcdef0123456789abcdef01234567'
+        Url = 'https://example.test/releases/v4.1.0'
+    }
+    try {
+        $script:StagePath = $customStage
+        $sameVersionPr = Invoke-UpgradePullRequest -RepoRoot $sameVersionConsumer -Policy $smokePolicy `
+            -Release $sameVersionRelease -CurrentVersion '4.1.0' `
+            -IssueUrl '' -EffectiveApproval 'required'
+    }
+    finally {
+        $script:StagePath = $oldScriptStagePath
+        $env:GITHUB_RUN_ID = $oldRunId
+        $env:GITHUB_RUN_ATTEMPT = $oldRunAttempt
+    }
+    Assert-Equal $sameVersionPr 'https://github.com/example/consumer/pull/7' `
+        'An already-current consumer with a stale active workflow must still produce a refresh PR.'
+    $sameVersionBranch = 'origin/chore/basecoat-update-v4.1.0-2766-attempt-1'
+    $sameVersionWorkflow = git -C $sameVersionConsumer show "$sameVersionBranch`:.github/workflows/basecoat-version-check.yml"
+    Assert-True (($sameVersionWorkflow -join "`n") -match 'name:\s*"BaseCoat Reusable - Version Check"') `
+        'Same-version refresh must update the selected installed workflow.'
+    $sameVersionCustom = git -C $sameVersionConsumer show "$sameVersionBranch`:.github/workflows/basecoat-custom.yml"
+    Assert-Equal ($sameVersionCustom -join "`n").Trim() 'consumer-owned workflow' `
+        'Same-version refresh must preserve consumer-owned workflows.'
+    $sameVersionPaths = git -C $sameVersionConsumer ls-tree -r --name-only $sameVersionBranch
+    Assert-True (($sameVersionPaths -join "`n") -notmatch 'basecoat-secret-scan\.yml') `
+        'Same-version refresh must not enable workflows that were not installed.'
+
+    $oldRunId = $env:GITHUB_RUN_ID
+    $oldRunAttempt = $env:GITHUB_RUN_ATTEMPT
+    $env:GITHUB_RUN_ID = '2767'
+    $env:GITHUB_RUN_ATTEMPT = '1'
+    $env:BASECOAT_TEST_VALIDATOR_FAIL = '1'
+    $validatorFailure = $false
+    try {
+        Invoke-UpgradePullRequest -RepoRoot $sameVersionConsumer -Policy $smokePolicy `
+            -Release $sameVersionRelease -CurrentVersion '4.1.0' `
+            -IssueUrl '' -EffectiveApproval 'required' | Out-Null
+    }
+    catch {
+        $validatorFailure = $true
+    }
+    finally {
+        $env:GITHUB_RUN_ID = $oldRunId
+        $env:GITHUB_RUN_ATTEMPT = $oldRunAttempt
+        Remove-Item Env:\BASECOAT_TEST_VALIDATOR_FAIL -ErrorAction SilentlyContinue
+    }
+    Assert-True $validatorFailure 'Installed-payload validator failures must stop delivery.'
+    Assert-Equal ([regex]::Matches((Get-Content -LiteralPath $ghLog -Raw), ':: pr create').Count) 2 `
+        'Failed installed validation must not create an upgrade PR.'
+    $failedWorktree = Join-Path $e2eRoot 'same-version-consumer-wt-basecoat-2767-attempt-1'
+    Assert-True (Test-Path -LiteralPath $failedWorktree) `
+        'Failed validation must preserve its isolated worktree for diagnosis.'
+    git -C $sameVersionConsumer worktree remove --force $failedWorktree | Out-Null
+    git -C $sameVersionConsumer branch -D chore/basecoat-update-v4.1.0-2767-attempt-1 | Out-Null
 
     git -C $consumer checkout -B verify-pin 'origin/chore/basecoat-update-v4.1.1-2765-attempt-2' | Out-Null
     Push-Location $consumer
@@ -932,6 +1118,7 @@ finally {
     Remove-Item Env:\BASECOAT_UPDATE_TOKEN -ErrorAction SilentlyContinue
     Remove-Item Env:\BASECOAT_FETCH_TOKEN -ErrorAction SilentlyContinue
     Remove-Item Env:\BASECOAT_MIRROR_FETCH_TOKEN -ErrorAction SilentlyContinue
+    Remove-Item Env:\BASECOAT_TEST_SOURCE_ROOT -ErrorAction SilentlyContinue
     Remove-Item Env:\BASECOAT_TEST_CREDENTIAL_LOG -ErrorAction SilentlyContinue
     Remove-Item Env:\GH_TOKEN -ErrorAction SilentlyContinue
     Remove-Variable BasecoatUpdaterGhLog -Scope Global -ErrorAction SilentlyContinue

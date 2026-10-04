@@ -331,11 +331,42 @@ try {
             'scripts/validate-asset-distribution.ps1',
             'scripts/validate-workflow-action-pins.ps1',
             'scripts/validate-workflow-action-pins.py',
+            'scripts/configure-downstream-workflows.ps1',
+            'scripts/workflow-ownership.ps1',
             'scripts/invoke-basecoat-consumer-update.ps1'
         )) {
         $testCount++
         Assert-SyncPathExists -Path (Join-Path $targetDir $runtimeScript) `
             -Message "Sync test failed: distributed runtime '$runtimeScript' not found"
+    }
+
+    Push-Location $repoRoot
+    try {
+        $consumerValidator = & (Join-Path $targetDir 'scripts/validate-basecoat.ps1') `
+            -RootDir $targetDir -WorkflowValidationMode Consumer -ConsumerRoot $consumer 2>&1 | Out-String
+        if ($LASTEXITCODE -ne 0 -or $consumerValidator -notmatch "mode 'consumer'") {
+            throw "Sync test failed: staged-only consumer validation must pass.`n$consumerValidator"
+        }
+
+        New-Item -ItemType Directory -Path (Join-Path $consumer '.github/workflows') -Force | Out-Null
+        Set-Content -Path (Join-Path $consumer '.github/workflows/sync-test-unpinned.yml') `
+            -Value "jobs:`n  validate:`n    steps:`n      - uses: actions/checkout@v4"
+        $consumerWorkflowRejected = $false
+        try {
+            $consumerInvalidOutput = & (Join-Path $targetDir 'scripts/validate-basecoat.ps1') `
+                -RootDir $targetDir -WorkflowValidationMode Consumer -ConsumerRoot $consumer 2>&1 | Out-String
+        }
+        catch {
+            $consumerInvalidOutput = $_.Exception.Message
+            $consumerWorkflowRejected = $LASTEXITCODE -ne 0
+        }
+        Remove-Item (Join-Path $consumer '.github/workflows/sync-test-unpinned.yml') -Force
+        if (-not $consumerWorkflowRejected) {
+            throw 'Sync test failed: Consumer mode must validate the consumer repository workflows.'
+        }
+    }
+    finally {
+        Pop-Location
     }
 
     $invalidWorkflow = Join-Path $targetDir 'workflows/sync-test-unpinned.yml'

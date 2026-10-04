@@ -3,6 +3,7 @@ param(
     [string]$RootDir = (Get-Location).Path,
     [ValidateSet('Auto', 'Source', 'Installed', 'Consumer')]
     [string]$WorkflowValidationMode = 'Auto',
+    [string]$ConsumerRoot = '',
     [switch]$Strict,
     [switch]$FailOnWarning
 )
@@ -33,7 +34,16 @@ foreach ($item in $required) {
 }
 
 Write-Host 'Validating immutable workflow action pins...'
-& (Join-Path $PSScriptRoot 'validate-workflow-action-pins.ps1') -RootDir $resolvedRoot -Mode $effectiveWorkflowValidationMode
+$workflowValidationRoot = $resolvedRoot
+if ($effectiveWorkflowValidationMode -eq 'Consumer') {
+    if (-not $ConsumerRoot) {
+        throw "Consumer workflow validation requires -ConsumerRoot to identify the consumer repository."
+    }
+    $workflowValidationRoot = (Resolve-Path -LiteralPath $ConsumerRoot).Path
+}
+& (Join-Path $PSScriptRoot 'validate-workflow-action-pins.ps1') `
+    -RootDir $workflowValidationRoot `
+    -Mode $effectiveWorkflowValidationMode
 
 Write-Host 'Validating skill visibility values...'
 & (Join-Path $PSScriptRoot 'validate-skill-visibility.ps1') -RootDir $resolvedRoot

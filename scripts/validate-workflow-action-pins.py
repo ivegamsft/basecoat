@@ -115,7 +115,7 @@ def installed_workflow_files(root: Path) -> list[Path]:
 def consumer_workflow_files(root: Path) -> list[Path]:
     scope = root / CONSUMER_SCOPE
     if not scope.is_dir():
-        raise ScopeError(f"Required workflow validation scope is missing: {CONSUMER_SCOPE.as_posix()}")
+        return []
     return workflow_files(scope, root)
 
 
