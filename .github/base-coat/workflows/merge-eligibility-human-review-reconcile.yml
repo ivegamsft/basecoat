@@ -175,9 +175,11 @@ jobs:
                 review.user?.type !== 'Bot' &&
                 !botLogins.has(String(review.user?.login || ''))
               );
-              const hasBatchExceptionEvidence =
-                /Mechanical batch exception evidence:/i.test(String(pullRequest.body || ''));
-              if (!hasCurrentHeadHumanApproval && !hasBatchExceptionEvidence) continue;
+              function hasBatchExceptionEvidence(body) {
+                return /^Mechanical batch exception evidence:\s*proposed\s*$/im.test(String(body || ''));
+              }
+              const hasBatchExceptionEvidenceForPr = hasBatchExceptionEvidence(pullRequest.body);
+              if (!hasCurrentHeadHumanApproval && !hasBatchExceptionEvidenceForPr) continue;
               await github.rest.actions.createWorkflowDispatch({
                 owner,
                 repo,
@@ -187,6 +189,6 @@ jobs:
               });
               console.log(
                 `Dispatched merge eligibility evaluation for PR #${pullRequest.number} ` +
-                `(${hasBatchExceptionEvidence ? 'batch-exception evidence refresh' : 'current-head human approval'}) on ${liveHead}.`
+                `(${hasBatchExceptionEvidenceForPr ? 'batch-exception evidence refresh' : 'current-head human approval'}) on ${liveHead}.`
               );
             }

@@ -55,6 +55,7 @@ foreach ($entry in @(
     Assert-Match $content "github\.actor != 'Copilot'" "$name must skip the Copilot actor login observed on action_required review runs."
     Assert-Match $content 'hasCurrentHeadHumanApproval' "$name must dispatch scheduled reconciliation only for current-head human approvals."
     Assert-Match $content 'hasBatchExceptionEvidence' "$name must refresh exception review evidence without triggering on Copilot review submissions."
+    Assert-Match $content ([regex]::Escape('Mechanical batch exception evidence:\s*proposed')) "$name must schedule refresh only when exception evidence is explicitly proposed."
     Assert-Match $content "github\.event_name == 'schedule'" "$name must refresh batch exceptions on the existing scheduled reconciliation."
     Assert-Match $content 'ref:\s*\$\{\{\s*github\.event\.repository\.default_branch\s*\}\}' "$name must load governance only from the trusted default branch."
     Assert-Match $content 'main\.reconcile_merge_eligibility // false' "$name must honor the reconciliation policy pack flag."
@@ -64,6 +65,41 @@ foreach ($entry in @(
     Assert-Match $content ([regex]::Escape("workflow_id: '$($entry.WorkflowId)'")) "$name must dispatch the installed executor by filename."
     Assert-Match $content "ref: defaultBranch" "$name must dispatch the executor from the trusted default branch."
 }
+
+$exceptionEvidenceHelper = [regex]::Match(
+    $runtime,
+    '(?ms)function hasBatchExceptionEvidence\(body\)\s*\{\s*return [^\r\n]+\s*\}'
+)
+if (-not $exceptionEvidenceHelper.Success) {
+    throw 'Reconciliation must expose the batch-exception marker predicate for behavioral tests.'
+}
+$env:BATCH_EXCEPTION_EVIDENCE_HELPER = $exceptionEvidenceHelper.Value
+$reconcileHarness = @'
+const assert = require('node:assert/strict');
+const hasBatchExceptionEvidence = new Function(
+  `${process.env.BATCH_EXCEPTION_EVIDENCE_HELPER}; return hasBatchExceptionEvidence;`
+)();
+assert.equal(
+  hasBatchExceptionEvidence('Mechanical batch exception evidence: none'),
+  false,
+  'the default template marker must not schedule exception refreshes'
+);
+assert.equal(
+  hasBatchExceptionEvidence('Mechanical batch exception evidence: proposed'),
+  true,
+  'an explicitly proposed exception must schedule evidence refreshes'
+);
+assert.equal(
+  hasBatchExceptionEvidence('Classification rationale: proposed batch exception'),
+  false,
+  'unrelated PR text must not schedule exception refreshes'
+);
+'@
+& node -e $reconcileHarness
+if ($LASTEXITCODE -ne 0) {
+    throw 'Batch-exception reconciliation predicate behavioral tests failed.'
+}
+Remove-Item Env:\BATCH_EXCEPTION_EVIDENCE_HELPER -ErrorAction SilentlyContinue
 
 if ($runtime -match '(?m)^\s*contents:\s*write\s*$' -or $template -match '(?m)^\s*contents:\s*write\s*$') {
     throw 'Human-review reconcile workflows must not request contents: write.'

@@ -28,7 +28,7 @@ if (-not (Test-Path $inventoryPath)) {
     }
     foreach ($decompositionContract in @(
         'individual cohesive features are not capped',
-        'scripts/pr-decomposition-evaluator.cjs',
+        '.github/base-coat/scripts/pr-decomposition-evaluator.cjs',
         'Existing XXL human approval remains independent'
     )) {
         if ($inventory -notmatch [regex]::Escape($decompositionContract)) {

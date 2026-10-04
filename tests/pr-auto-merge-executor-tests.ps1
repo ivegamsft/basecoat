@@ -8,7 +8,7 @@ $workflowPath = Join-Path $repoRoot '.github\workflows\pr-auto-merge-executor.ym
 $templatePath = Join-Path $repoRoot '.github\base-coat\workflows\pr-auto-merge-executor.yml'
 $humanBoundaryPath = Join-Path $repoRoot '.github\governance\human-approval-boundaries.json'
 $prValidationPath = Join-Path $repoRoot '.github\workflows\pr-validation.yml'
-$decompositionEvaluatorPath = Join-Path $repoRoot 'scripts\pr-decomposition-evaluator.cjs'
+$decompositionEvaluatorPath = Join-Path $repoRoot '.github\base-coat\scripts\pr-decomposition-evaluator.cjs'
 $rootPrTemplatePath = Join-Path $repoRoot '.github\PULL_REQUEST_TEMPLATE.md'
 $managedPrTemplatePath = Join-Path $repoRoot 'templates\intake\PULL_REQUEST_TEMPLATE.md'
 $reviewReconcilePath = Join-Path $repoRoot '.github\workflows\merge-eligibility-human-review-reconcile.yml'
@@ -69,8 +69,8 @@ foreach ($scopeField in @(
 if ($workflow -ne $template) {
     throw 'Workflow template mismatch: .github/workflows and .github/base-coat/workflows copies must be identical.'
 }
-if ($workflow -notmatch "scripts/pr-decomposition-evaluator\.cjs") {
-    throw 'Merge eligibility must invoke the pure decomposition evaluator from the trusted default-branch checkout.'
+if ($workflow -notmatch "\.github/base-coat/scripts/pr-decomposition-evaluator\.cjs") {
+    throw 'Merge eligibility must invoke the distributed decomposition evaluator from the trusted default-branch checkout.'
 }
 if ($workflow -notmatch '(?s)Checkout repository.*?ref:\s*\$\{\{\s*github\.event\.repository\.default_branch\s*\|\|\s*''main''\s*\}\}') {
     throw 'Privileged evaluation must load trusted code from the default branch, never the pull request head.'
@@ -567,9 +567,35 @@ const evaluate = ({ comments = [], issues = [] } = {}) =>
 $decompositionHarnessPath = Join-Path $scratchRoot 'decomposition-contract.cjs'
 try {
     New-Item -Path $scratchRoot -ItemType Directory -Force | Out-Null
+    $installedConsumerRoot = Join-Path $scratchRoot 'installed-consumer'
+    $installedScripts = Join-Path $installedConsumerRoot '.github\base-coat\scripts'
+    $installedWorkflows = Join-Path $installedConsumerRoot '.github\workflows'
+    New-Item -Path $installedScripts, $installedWorkflows -ItemType Directory -Force | Out-Null
+    Copy-Item -LiteralPath $decompositionEvaluatorPath -Destination $installedScripts
+    $installedExecutorPath = Join-Path $installedWorkflows 'basecoat-pr-auto-merge-executor.yml'
+    Copy-Item -LiteralPath $templatePath -Destination $installedExecutorPath
+    $previousGitHubWorkspace = $env:GITHUB_WORKSPACE
+    $env:GITHUB_WORKSPACE = $installedConsumerRoot
+    $env:INSTALLED_EXECUTOR_PATH = $installedExecutorPath
     $decompositionHarness = @'
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const path = require('node:path');
+const installedWorkflow = fs.readFileSync(process.env.INSTALLED_EXECUTOR_PATH, 'utf8');
+const evaluatorPaths = Array.from(
+  installedWorkflow.matchAll(/require\(\s*require\('node:path'\)\.join\(process\.env\.GITHUB_WORKSPACE,\s*'([^']+)'\)\s*\)/g),
+  match => match[1]
+);
+assert.deepEqual(
+  evaluatorPaths,
+  [
+    '.github/base-coat/scripts/pr-decomposition-evaluator.cjs',
+    '.github/base-coat/scripts/pr-decomposition-evaluator.cjs'
+  ],
+  'the installed executor jobs must load the evaluator from the managed runtime payload'
+);
+const installedEvaluator = require(path.join(process.env.GITHUB_WORKSPACE, evaluatorPaths[0]));
+assert.equal(installedEvaluator.MAX_FILES, 15, 'the installed evaluator dependency must load successfully');
 const {
   MAX_FILES,
   MAX_LINES,
@@ -596,6 +622,7 @@ const makeBody = ({
   scope = 'batch',
   units = 2,
   unitInventory = 'work unit A; work unit B',
+  rationale = 'independently deployable work units.',
   issues = [3475],
   exception = null,
   scopeLines = ''
@@ -611,7 +638,7 @@ const makeBody = ({
   `Unit inventory: ${unitInventory}`,
   'Expected files: 16',
   'Expected changed lines (additions + deletions): 301',
-  'Classification rationale: independently deployable work units.',
+  `Classification rationale: ${rationale}`,
   `Mechanical batch exception evidence: ${exception ? 'proposed' : 'none'}`,
   ...(exception ? ['```json', JSON.stringify(exception, null, 2), '```'] : []),
   '',
@@ -780,6 +807,31 @@ const evaluate = async ({
     files: makeFiles(16),
     changedFiles: 16
   })).decision, 'block', 'individual scope contradicting multiple deliverables fails closed');
+  for (const placeholder of ['TBD', 'TODO', 'N/A', '<unit description>']) {
+    assert.equal((await evaluate({
+      body: makeBody({
+        scope: 'individual',
+        units: 1,
+        unitInventory: placeholder
+      }),
+      files: makeFiles(1),
+      changedFiles: 1,
+      additions: 1,
+      deletions: 0
+    })).decision, 'block', `individual scope rejects placeholder unit inventory '${placeholder}'`);
+    assert.equal((await evaluate({
+      body: makeBody({
+        scope: 'individual',
+        units: 1,
+        unitInventory: 'one cohesive feature',
+        rationale: placeholder
+      }),
+      files: makeFiles(1),
+      changedFiles: 1,
+      additions: 1,
+      deletions: 0
+    })).decision, 'block', `individual scope rejects placeholder rationale '${placeholder}'`);
+  }
   assert.equal((await evaluate({
     changedFiles: undefined
   })).decision, 'block', 'missing authoritative counts do not become zero');
@@ -910,6 +962,12 @@ const evaluate = async ({
         throw 'PR decomposition evaluator behavioral contract tests failed.'
     }
 } finally {
+    if ($null -eq $previousGitHubWorkspace) {
+        Remove-Item Env:\GITHUB_WORKSPACE -ErrorAction SilentlyContinue
+    } else {
+        $env:GITHUB_WORKSPACE = $previousGitHubWorkspace
+    }
+    Remove-Item Env:\INSTALLED_EXECUTOR_PATH -ErrorAction SilentlyContinue
     Remove-Item Env:\DECOMPOSITION_EVALUATOR -ErrorAction SilentlyContinue
     Remove-Item Env:\SIZE_LABELER_PATH -ErrorAction SilentlyContinue
     if (Test-Path $scratchRoot) {

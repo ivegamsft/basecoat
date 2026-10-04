@@ -144,6 +144,11 @@ function uniqueField(section, label) {
   return values[0];
 }
 
+function isPlaceholderText(value) {
+  return /^(?:tbd|to be determined|todo|to do|n\/a|na|not applicable|none|null|unknown|placeholder(?: text)?)(?:$|[\s:,-])|^<[^>]+>$/i
+    .test(value.trim());
+}
+
 function parseInteger(value, label, minimum = 0) {
   if (!/^(?:0|[1-9]\d*)$/.test(value)) {
     throw new Error(`'${label}' must be a nonnegative integer.`);
@@ -189,7 +194,10 @@ function parseScope(body) {
     1
   );
   const unitInventory = uniqueField(section, 'Unit inventory');
-  const unitsListed = unitInventory.split(';').map(value => value.trim()).filter(Boolean);
+  const unitsListed = unitInventory.split(';').map(value => value.trim());
+  if (unitsListed.some(value => !value || isPlaceholderText(value))) {
+    throw new Error("'Unit inventory' must list a meaningful name for every deliverable unit.");
+  }
   if (unitsListed.length !== units) {
     throw new Error("'Unit inventory' entries must match the independently deliverable unit count.");
   }
@@ -202,6 +210,9 @@ function parseScope(body) {
     'Expected changed lines (additions + deletions)'
   );
   const rationale = uniqueField(section, 'Classification rationale');
+  if (isPlaceholderText(rationale)) {
+    throw new Error("'Classification rationale' must explain the scope classification.");
+  }
 
   const exceptionHeadings = Array.from(
     section.matchAll(/^Mechanical batch exception evidence:\s*(.*?)\s*$/gim)
