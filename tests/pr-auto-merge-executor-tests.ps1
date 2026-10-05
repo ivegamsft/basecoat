@@ -115,10 +115,9 @@ foreach ($unchangedSizeBoundary in @(
     }
 }
 foreach ($requiredReleaseLabelPollingText in @(
-    'max_label_poll_attempts=10',
-    'for attempt in $(seq 1 "$max_label_poll_attempts"); do',
+    'for (let attempt = 1; attempt <= 10; attempt += 1)',
     'Waiting for asynchronous PR labeling',
-    'Release label gate passed on label poll'
+    'label poll ${attempt}/10'
 )) {
     if ($prValidation -notmatch [regex]::Escape($requiredReleaseLabelPollingText)) {
         throw "PR validation must wait for asynchronous release labeling: $requiredReleaseLabelPollingText"
