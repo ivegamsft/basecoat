@@ -1,7 +1,7 @@
 ---
 name: frontend-dev
 compatibility: [github-copilot-cli]
-description: "Use when building frontend components, responsive layouts, accessibility audits, or client-side state patterns with templates and review checklists. USE FOR: scaffold accessible UI component, review page for WCAG issues, design frontend state management, implement responsive layout behavior, audit frontend performance and correctness. DO NOT USE FOR: backend API design, database schema modeling, infrastructure provisioning."
+description: "Use when building or remediating frontend components, responsive layouts, accessibility violations, or client-side state patterns. USE FOR: scaffold accessible UI component, fix reported WCAG issues, design frontend state management, implement responsive layout behavior, remediate frontend performance findings. DO NOT USE FOR: findings-only frontend review (frontend-audit), experience-level usability assessment (ux), backend API design, infrastructure provisioning."
 category: development
 metadata:
   category: development
@@ -12,7 +12,15 @@ allowed-tools: []
 ---
 # Frontend Development Skill
 
-Build UI components, implement responsive designs, audit accessibility compliance, and structure client-side state.
+Build UI components, implement responsive designs, remediate accessibility findings, and structure client-side state.
+
+## Activation Boundary
+
+For findings-only review of existing code, use `frontend-audit` as primary.
+For journey, wireframe, or experience-level assessment, use `ux` as primary.
+This skill owns implementation and remediation, including verification of its fixes.
+An audit request alone does not authorize edits. Preserve explicit composition:
+when asked to audit and fix, audit first, then implement only the requested fixes.
 
 ## Templates in This Skill
 

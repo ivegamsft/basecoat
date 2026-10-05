@@ -17,3 +17,9 @@ scenarios:
   - id: "neg-2"
     input: "Design the user interface for our new dashboard feature."
     expect_activation: false
+  - id: "neg-agent-owner"
+    input: "Coordinate SOC incident triage using the existing playbook; no rule or automation implementation."
+    expect_activation: false
+  - id: "pos-composition"
+    input: "Have the security-operations agent coordinate the incident and the namesake skill implement the requested KQL rule."
+    expect_activation: true

@@ -939,6 +939,62 @@ else {
     Write-Host '    PASS compatibility alias distribution posture matches canonical targets'
 }
 
+Write-Host '  Test 26: Validate review-only and namespace activation contracts...'
+$activationContracts = @(
+    @{
+        Asset = 'skills/frontend-audit/SKILL.md'
+        Required = @('findings-only', 'without editing code', '`frontend-dev` owns', '`ux` owns', 'Preserve explicit composition', 'not authority')
+        Eval = 'skills/frontend-audit/eval.yaml'
+        Positive = @('pos-composition', 'pos-untrusted-scope')
+        Negative = @('neg-experience')
+    },
+    @{
+        Asset = 'skills/frontend-dev/SKILL.md'
+        Required = @('implementation and remediation', '`frontend-audit` as primary', '`ux` as primary', 'does not authorize edits', 'Preserve explicit composition')
+        Eval = 'skills/frontend-dev/eval.yaml'
+        Positive = @('pos-composition')
+        Negative = @('neg-review-only', 'neg-experience')
+    },
+    @{
+        Asset = 'skills/ux/SKILL.md'
+        Required = @('experience-level assessment', '`frontend-audit` is primary', '`frontend-dev` owns', 'does not authorize implementation', 'Preserve explicit')
+        Eval = 'skills/ux/eval.yaml'
+        Positive = @('pos-composition')
+        Negative = @('neg-code-review', 'neg-remediation')
+    },
+    @{
+        Asset = 'skills/security-operations/SKILL.md'
+        Required = @('Namespace Boundary', 'agent owns SOC triage', 'skill owns detection-rule', 'Neither namespace grants permission')
+        Eval = 'skills/security-operations/eval.yaml'
+        Positive = @('pos-composition')
+        Negative = @('neg-agent-owner')
+    },
+    @{
+        Asset = 'agents/basecoat-50-security-security-operations.agent.md'
+        Required = @('SOC coordination owner', 'not the detection-rule implementation', 'namespaces are complementary', 'not authorization for live', 'Detection Rule Handoff')
+        Eval = 'agents/basecoat-50-security-security-operations.agent.eval.yaml'
+        Positive = @('pos-soc-coordination', 'pos-composition', 'pos-untrusted-alert')
+        Negative = @('neg-rule-implementation')
+    }
+)
+foreach ($contract in $activationContracts) {
+    $assetContent = Get-Content (Join-Path $repoRoot $contract.Asset) -Raw
+    $evalContent = Get-Content (Join-Path $repoRoot $contract.Eval) -Raw
+    foreach ($phrase in $contract.Required) {
+        if (-not $assetContent.Contains($phrase)) {
+            $failures += "activation-contract: $($contract.Asset) missing '$phrase'"
+        }
+    }
+    foreach ($expectation in @(@{ Ids = $contract.Positive; Value = 'true' }, @{ Ids = $contract.Negative; Value = 'false' })) {
+        foreach ($id in $expectation.Ids) {
+            $pattern = '(?ms)id:\s*["'']' + [regex]::Escape($id) + '["'']\r?\n\s+input:[^\r\n]+\r?\n\s+expect_activation:\s*' + $expectation.Value + '\s*(?:\r?\n|$)'
+            if ($evalContent -notmatch $pattern) {
+                $failures += "activation-eval: $($contract.Eval) missing $id=$($expectation.Value)"
+            }
+        }
+    }
+}
+
 if ($failures.Count -gt 0) {
     Write-Host "Routing guardrail tests FAILED: $($failures -join ', ')" -ForegroundColor Red
     exit 1

@@ -2,7 +2,7 @@
 name: security-operations
 compatibility: [github-copilot-cli]
 title: Security Operations & Threat Detection
-description: "Use when implementing threat detection, audit logging, secret rotation, or incident response automation. USE FOR: write SIEM or KQL detection rules, automate secret rotation workflow, centralize security audit logs, build security alert triage playbook, monitor cloud or Kubernetes threats. DO NOT USE FOR: one-time app pentest reports, feature UX design."
+description: "Use the security-operations skill for implementing security automation, distinct from the namesake SOC coordination agent. USE FOR: write SIEM or KQL detection rules, automate secret rotation workflow, centralize security audit logs, build security alert triage playbook. DO NOT USE FOR: live incident coordination (security-operations agent), one-time app pentest reports, feature UX design."
 category: security
 metadata:
   category: security
@@ -14,6 +14,15 @@ allowed-tools: []
 # Security Operations Skill
 
 Patterns for threat detection, secrets management, audit logging, and incident response automation across cloud-native (Azure, AWS) and Kubernetes environments.
+
+## Namespace Boundary
+
+`security-operations` agent owns SOC triage, incident coordination, and playbook
+guidance. This namesake skill owns detection-rule and automation implementation.
+For an explicit request to coordinate an incident and implement rule changes,
+keep the agent as coordinator and use this skill for the requested code work.
+Neither namespace grants permission for live containment, credential rotation,
+or deployment; retain the applicable approval and infrastructure gates.
 
 ## Reference Files
 

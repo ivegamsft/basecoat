@@ -1,7 +1,7 @@
 ---
 name: ux
 compatibility: [github-copilot-cli]
-description: "Use when defining user journeys, wireframes, component behavior, or accessibility expectations for a product experience. USE FOR: map end-to-end user journey, create wireframe spec for new screen, review component states and interactions, run WCAG accessibility audit, evaluate usability of a workflow. DO NOT USE FOR: backend infrastructure design, low-level API performance tuning."
+description: "Use when defining or assessing user journeys, wireframes, component behavior, or accessibility expectations at the experience level. USE FOR: map end-to-end user journey, create wireframe spec for new screen, assess design states and interactions, assess journey accessibility, evaluate usability of a workflow. DO NOT USE FOR: findings-only code or PR review (frontend-audit), frontend implementation or remediation (frontend-dev), backend infrastructure design."
 category: development
 metadata:
   category: development
@@ -13,6 +13,15 @@ allowed-tools: []
 # UX Design Skill
 
 Design user experiences, map user journeys, specify UI wireframes and components, and audit designs for accessibility and usability.
+
+## Activation Boundary
+
+This skill is primary for experience-level assessment, including usability and
+accessibility of journeys or wireframes. `frontend-audit` is primary for
+findings-only review of implemented code; `frontend-dev` owns code changes.
+Assessment alone does not authorize implementation. Preserve explicit
+composition when the user asks for experience assessment and implementation:
+produce the experience findings or spec, then hand off the requested code work.
 
 ## Templates in This Skill
 

@@ -17,3 +17,12 @@ scenarios:
   - id: "neg-2"
     input: "Investigate why our API endpoint has high latency and tune its performance."
     expect_activation: false
+  - id: "neg-code-review"
+    input: "Review this frontend PR for keyboard support; findings only, no journey assessment."
+    expect_activation: false
+  - id: "neg-remediation"
+    input: "Implement fixes for the reported WCAG violations in this React component."
+    expect_activation: false
+  - id: "pos-composition"
+    input: "Assess this checkout journey with ux, then hand the requested implementation to frontend-dev."
+    expect_activation: true

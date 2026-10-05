@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.1",
   "libraryVersion": "4.5.2",
-  "generatedAt": "2026-10-04T21:55:29.2914192Z",
+  "generatedAt": "2026-10-05T05:03:37.7110767Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -646,7 +646,7 @@
     {
       "path": "agents/basecoat-50-security-security-operations.agent.md",
       "type": "agent",
-      "sha": "b71fd6f312a44dfda76992601efd86df070c900c",
+      "sha": "4b8196a5c01f4fb1d098c7f0992f78d47159ecfc",
       "version": null,
       "effectiveVersion": "4.5.2",
       "versionSource": "library"
@@ -2518,7 +2518,7 @@
     {
       "path": "skills/frontend-audit/SKILL.md",
       "type": "skill",
-      "sha": "44fcf3ae94b9ed64f8d6bc558c764e284805c709",
+      "sha": "6e766c0f7893984b030e70fc8be2dd8d0fe3b10a",
       "version": null,
       "effectiveVersion": "4.5.2",
       "versionSource": "library"
@@ -2526,7 +2526,7 @@
     {
       "path": "skills/frontend-dev/SKILL.md",
       "type": "skill",
-      "sha": "5c8262b458e90bc84633beda1e47006ad536aed0",
+      "sha": "3cf158d845a16939df675a60988b97dd78ad5bb9",
       "version": null,
       "effectiveVersion": "4.5.2",
       "versionSource": "library"
@@ -2886,7 +2886,7 @@
     {
       "path": "skills/security-operations/SKILL.md",
       "type": "skill",
-      "sha": "a06644cf42dbb7c26630b62edeb4971d8c64d1a9",
+      "sha": "b38b271278f6f9758a139ef1f3cc7fd4ce85acf1",
       "version": null,
       "effectiveVersion": "4.5.2",
       "versionSource": "library"
@@ -3070,7 +3070,7 @@
     {
       "path": "skills/ux/SKILL.md",
       "type": "skill",
-      "sha": "0001bb8971e2d167ca63e4bfe5a11ef656e94edd",
+      "sha": "04757c748c81ca0434b669e88021ea25a0fb2f8d",
       "version": null,
       "effectiveVersion": "4.5.2",
       "versionSource": "library"
