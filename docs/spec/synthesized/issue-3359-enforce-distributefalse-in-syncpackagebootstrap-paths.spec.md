@@ -79,7 +79,8 @@ The PowerShell and Bash implementations must satisfy the same behavior:
 | Leading frontmatter without `distribute` | Include |
 | `distribute: true` | Include |
 | `distribute: false` | Exclude |
-| Quoted or mixed-case boolean scalar | Normalize, then include/exclude |
+| Quoted scalar such as `"false"` or `'false'` | Include (YAML string) |
+| YAML boolean spellings `False`/`FALSE` and `True`/`TRUE` | Exclude/include |
 | Scalar followed by an inline YAML comment | Ignore the comment |
 | `distribute` only in body or code fence | Include |
 | Duplicate `distribute` key | Error |
@@ -93,9 +94,9 @@ Detailed rules:
 - Match the exact lower-case key `distribute`; differently cased keys are not
   aliases and should be rejected as likely metadata mistakes if they normalize
   to the same name.
-- Trim surrounding whitespace and matching single or double quotes from the
-  scalar, remove a trailing inline comment, and compare `true`/`false`
-  case-insensitively.
+- Trim surrounding whitespace and remove a trailing inline comment. Recognize
+  only unquoted YAML boolean spellings; quoted values are strings, not boolean
+  exclusions. This narrows the earlier draft to the authorized #3359 scope.
 - Parse only the first leading fenced block. Never scan the Markdown body.
 - Emit a non-zero, path-specific error for ambiguous explicit metadata.
 - Do not add a runtime YAML-library dependency solely for this scalar.
@@ -129,9 +130,14 @@ tools.
 
 ### Bootstrap
 
+Live installs delegate to `sync.ps1` to share the ownership-aware write/stale
+plan. Windows PowerShell 5.1 rejects linked ancestors it cannot resolve safely;
+regular paths use the same content-hash protections as PowerShell 7.
+
 `scripts/bootstrap-basecoat.ps1` must materialize filtered instruction trees in
-both `.github/base-coat/instructions/` and `.github/instructions/`. Dry-run
-output and final asset counts must represent the included set. Existing
+both `.github/base-coat/instructions/` and `.github/instructions/`. Final live
+asset counts represent the included set. Dry-run retains the existing no-fetch,
+operation-only preview (it does not claim source-dependent counts). Existing
 behavior for prompts, skills, agents, and templates remains unchanged.
 
 ### Package Scripts
@@ -144,6 +150,7 @@ included instruction paths and no excluded paths.
 The GHCP stage in `.github/workflows/package-basecoat.yml` must use the same
 filtered source set rather than copying the repository directory wholesale.
 `basecoat-ghcp.zip` is subject to the same exclusion assertion.
+The stage reuses `dist/stage/base-coat/instructions/` from main packaging.
 
 ### Consumer Manifest
 
@@ -256,6 +263,8 @@ repository gates:
 
 ```powershell
 pwsh tests/sync-tests.ps1
+pwsh tests/distribution-exclusion-tests.ps1
+pwsh tests/distribution-exclusion-tests.ps1 -PowerShell powershell
 pwsh tests/sync-sh-parity-tests.ps1
 pwsh tests/run-consumer-smoke.ps1 -ArtifactSource Current
 pwsh scripts/validate-basecoat.ps1

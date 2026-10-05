@@ -14,6 +14,8 @@ fi
 DIST_DIR="$ROOT_DIR/dist"
 STAGE_DIR="$DIST_DIR/stage/base-coat"
 ARCHIVE_BASE="base-coat-$VERSION"
+source "$ROOT_DIR/scripts/distribution-filter.sh"
+basecoat_validate_distribution "$ROOT_DIR"
 
 rm -rf "$DIST_DIR"
 mkdir -p "$STAGE_DIR"
@@ -25,6 +27,8 @@ for item in README.md CHANGELOG.md INVENTORY.md version.json asset-manifest.json
 done
 
 distributed_workflows="$STAGE_DIR/.github/base-coat/workflows"
+basecoat_filter_distribution "$STAGE_DIR"
+
 if [[ ! -d "$distributed_workflows" ]]; then
   echo "Package validation failed: missing distributed workflows '$distributed_workflows'" >&2
   exit 1
@@ -51,7 +55,7 @@ import json
 import sys
 
 manifest_path, *required_paths = sys.argv[1:]
-with open(manifest_path, encoding="utf-8") as handle:
+with open(manifest_path, encoding="utf-8-sig") as handle:
     manifest_paths = {asset["path"] for asset in json.load(handle)["assets"]}
 missing = [path for path in required_paths if path not in manifest_paths]
 if missing:

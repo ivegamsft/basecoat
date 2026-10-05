@@ -582,7 +582,7 @@ Always inspect these headers after API calls, especially in automation:
 
 ## Asset Distribution
 
-When an instruction or prompt file is maintained for BaseCoat's own internal use only
+When an instruction file is maintained for BaseCoat's own internal use only
 (governance rules, framework-specific patterns, memory indexes), it should **not** be
 distributed to repos that adopt BaseCoat as a foundation.
 
@@ -596,9 +596,16 @@ distribute: false
 ---
 ```
 
-The `distribute: false` marker identifies an asset as internal for
-`scripts/show-context.ps1`. Downstream sync, package, and bootstrap paths do not
-yet enforce the marker; enforcement is tracked in #3359.
+The boolean `distribute: false` excludes an instruction from downstream sync,
+bootstrap, release ZIP/tar payloads, and the GHCP ZIP. Absent metadata and
+`distribute: true` continue to ship; quoted `"false"` is a YAML string and does
+not exclude the instruction. Whitespace, inline comments, BOM, and CRLF are
+supported. Invalid or duplicate boolean metadata stops distribution.
+
+The source inventory retains internal instructions; consumer manifests omit
+them. On upgrade, unchanged BaseCoat-owned discoverable copies are pruned using
+the guidance lock. Modified or foreign-owned consumer content is not deleted.
+This instruction-only contract does not change the `ships`/`dogfood` axes.
 
 Files currently marked `distribute: false`:
 

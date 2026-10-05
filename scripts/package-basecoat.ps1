@@ -11,6 +11,8 @@ if (-not $version) {
 $distDir = Join-Path $rootDir 'dist'
 $stageDir = Join-Path $distDir 'stage\base-coat'
 $archiveBase = "base-coat-$version"
+. (Join-Path $PSScriptRoot 'distribution-filter.ps1')
+Get-BaseCoatDistributionExclusions -Root $rootDir | Out-Null
 
 if (Test-Path $distDir) {
     Remove-Item -Path $distDir -Recurse -Force
@@ -24,6 +26,8 @@ foreach ($item in @('README.md', 'CHANGELOG.md', 'INVENTORY.md', 'version.json',
         Copy-Item -Path $item -Destination (Join-Path $stageDir $item) -Recurse -Force
     }
 }
+
+Remove-BaseCoatDistributionExcluded -Root $stageDir
 
 $distributedWorkflows = Join-Path $stageDir '.github\base-coat\workflows'
 if (-not (Test-Path $distributedWorkflows -PathType Container)) {

@@ -56,7 +56,9 @@ jobs:
         run: |
           rm -rf dist/ghcp-stage
           mkdir -p dist/ghcp-stage
-          cp -R agents skills instructions prompts dist/ghcp-stage/
+          cp -R agents skills prompts dist/ghcp-stage/
+          # Reuse the filtered instruction set from the main package stage.
+          cp -R dist/stage/base-coat/instructions dist/ghcp-stage/
           cp basecoat-metadata.json dist/ghcp-stage/
           if [[ -f CATALOG.md ]]; then
             cp CATALOG.md dist/ghcp-stage/

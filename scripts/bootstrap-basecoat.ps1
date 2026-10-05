@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Adopt or refresh the BaseCoat overlay in a consumer repository.
 
@@ -155,7 +155,7 @@ if (-not $BasecoatRepo) {
 }
 
 # Normalise: slug -> HTTPS URL
-if ($BasecoatRepo -notmatch '^https?://') {
+if ($BasecoatRepo -notmatch '^(https?://|file://)') {
     $BasecoatRepoUrl = "https://github.com/$BasecoatRepo.git"
 } else {
     $BasecoatRepoUrl = $BasecoatRepo
@@ -199,7 +199,7 @@ try {
     if (-not $DryRun) {
         New-Item -ItemType Directory -Path $tempRoot | Out-Null
         Write-Info "Cloning $BasecoatRepoUrl ($Ref)..."
-        $cloneResult = git clone --depth 1 --branch $Ref $BasecoatRepoUrl $sourcePath 2>&1
+        $cloneResult = git clone --quiet --depth 1 --branch $Ref $BasecoatRepoUrl $sourcePath 2>&1
         if ($LASTEXITCODE -ne 0) {
             Write-Fail "git clone failed: $cloneResult"
             exit 1
@@ -223,7 +223,29 @@ try {
     # ── Phase 3: copy overlay files ──────────────────────────────────────────
 
     Write-Header 'Phase 4 — Installing Overlay'
+    $githubDir = Join-Path $repoRoot '.github'
 
+    if (-not $DryRun) {
+        # Use the same ownership-aware install and stale-file preflight as sync.
+        $savedSource = $env:BASECOAT_TEST_SOURCE_PATH
+        $savedRepo = $env:BASECOAT_REPO
+        $savedRef = $env:BASECOAT_REF
+        $savedTarget = $env:BASECOAT_TARGET_DIR
+        try {
+            $env:BASECOAT_TEST_SOURCE_PATH = $sourcePath
+            $env:BASECOAT_REPO = $BasecoatRepoUrl
+            $env:BASECOAT_REF = $Ref
+            $env:BASECOAT_TARGET_DIR = $TargetDir
+            & (Join-Path $sourcePath 'sync.ps1')
+        }
+        finally {
+            $env:BASECOAT_TEST_SOURCE_PATH = $savedSource
+            $env:BASECOAT_REPO = $savedRepo
+            $env:BASECOAT_REF = $savedRef
+            $env:BASECOAT_TARGET_DIR = $savedTarget
+        }
+    }
+    if ($DryRun) {
     # Helper: copy a single source item (file or dir) to dest, tracking add vs update
     function Copy-OverlayItem {
         param(
@@ -428,7 +450,7 @@ try {
         -DestDir (Join-Path $githubDir 'agents')
 
     # 4. Cross-client Agent Skills interop (.agents/skills/)
-    $agentSkillsDest = Join-Path $repoRoot '.agents' 'skills'
+    $agentSkillsDest = Join-Path $repoRoot '.agents/skills'
     $skillsSrc       = Join-Path $sourcePath 'skills'
     if (Test-Path $skillsSrc) {
         Copy-OverlayItem -Src $skillsSrc -Dest $agentSkillsDest -Label '.agents/skills'
@@ -442,12 +464,14 @@ try {
     }
 
     $managedIssueTemplate = Join-Path $sourcePath 'templates/intake/issue.md'
-    $customIssueTemplate = Join-Path $githubDir 'ISSUE_TEMPLATE' 'issue.md'
+    $customIssueTemplate = Join-Path $githubDir 'ISSUE_TEMPLATE/issue.md'
     if ((Test-Path $managedIssueTemplate) -and -not (Test-Path $customIssueTemplate)) {
         if (-not $DryRun) {
             New-Item -ItemType Directory -Force -Path (Split-Path -Parent $customIssueTemplate) | Out-Null
         }
         Copy-OverlayItem -Src $managedIssueTemplate -Dest $customIssueTemplate -Label '.github/ISSUE_TEMPLATE/issue.md'
+    }
+
     }
 
     # ── Phase 4: validate ─────────────────────────────────────────────────────
@@ -483,9 +507,9 @@ try {
     }
 
     # Run validate-basecoat.ps1 if present in the overlay
-    $validateScript = Join-Path $overlayDir 'scripts' 'validate-basecoat.ps1'
+    $validateScript = Join-Path $overlayDir 'scripts/validate-basecoat.ps1'
     if (-not (Test-Path $validateScript)) {
-        $validateScript = Join-Path $repoRoot 'scripts' 'validate-basecoat.ps1'
+        $validateScript = Join-Path $repoRoot 'scripts/validate-basecoat.ps1'
     }
     if (-not $DryRun -and (Test-Path $validateScript)) {
         Write-Info "Running validate-basecoat.ps1..."

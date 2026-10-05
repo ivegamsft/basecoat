@@ -454,7 +454,7 @@ finally {
 $sync = Get-Content -LiteralPath (Join-Path $repoRoot 'sync.ps1') -Raw
 Assert-True ($sync -match 'BASECOAT_MIRROR') 'Sync must support corporate mirrors.'
 Assert-True ($sync -match 'known_bad_releases') 'Sync must support configurable known-bad remapping.'
-Assert-True ($sync -match "base-coat' 'scripts") 'Sync must distribute consumer updater scripts.'
+Assert-True ($sync -match '\.github/base-coat/scripts') 'Sync must distribute consumer updater scripts.'
 
 $openIssue = [pscustomobject]@{
     state = 'OPEN'

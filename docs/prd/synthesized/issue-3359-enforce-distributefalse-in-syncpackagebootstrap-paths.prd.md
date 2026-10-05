@@ -91,8 +91,9 @@ consumer-visible payload:
   `instructions/*.instructions.md` file is authoritative.
 - A UTF-8 BOM and CRLF or LF line endings are supported.
 - The key is the exact lower-case scalar key `distribute`.
-- Boolean `false`, including quoted and case-insensitive scalar spellings after
-  trimming whitespace and an inline comment, means exclude.
+- Boolean `false` (`false`, `False`, or `FALSE`), after trimming whitespace
+  and an inline comment, means exclude. Quoted scalars remain strings and
+  do not exclude instructions, per the authorized #3359 execution contract.
 - Boolean `true` means include.
 - No frontmatter or no `distribute` key means include for backward
   compatibility.

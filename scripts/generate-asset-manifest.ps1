@@ -56,7 +56,9 @@ function Get-AssetType {
             'scripts/validate-workflow-action-pins.py',
             'scripts/validate-reusable-workflow-contracts.py',
             'scripts/guidance-lock.ps1',
-            'scripts/guidance-lock.sh'
+            'scripts/guidance-lock.sh',
+            'scripts/distribution-filter.ps1',
+            'scripts/distribution-filter.sh'
         )) { return 'script' }
     return $null
 }
@@ -87,7 +89,9 @@ $candidates += @(
     'scripts/validate-workflow-action-pins.py',
     'scripts/validate-reusable-workflow-contracts.py',
     'scripts/guidance-lock.ps1',
-    'scripts/guidance-lock.sh'
+    'scripts/guidance-lock.sh',
+    'scripts/distribution-filter.ps1',
+    'scripts/distribution-filter.sh'
 ) | ForEach-Object { (Resolve-Path $_).Path }
 
 $assets = foreach ($full in $candidates | Sort-Object) {

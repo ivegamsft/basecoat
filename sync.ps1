@@ -101,7 +101,14 @@ function Protect-SyncSensitiveText {
 function Invoke-SyncGit {
     param([Parameter(Mandatory)][string[]]$Arguments)
 
-    $output = & git @Arguments 2>&1
+    # Windows PowerShell treats redirected native stderr as an ErrorRecord.
+    # Git progress is not a failure; decide using its exit code after capture.
+    $savedPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = 'Continue'
+        $output = & git @Arguments 2>&1
+    }
+    finally { $ErrorActionPreference = $savedPreference }
     $exitCode = $LASTEXITCODE
     $safeArguments = @($Arguments | ForEach-Object { Protect-SyncSensitiveText $_ })
     $safeOutput = @($output | ForEach-Object { Protect-SyncSensitiveText $_ })
@@ -446,9 +453,12 @@ function Get-CanonicalRealPath {
         $accumulated = Join-Path $accumulated $segment
         if (Test-Path -LiteralPath $accumulated) {
             $item = Get-Item -LiteralPath $accumulated -Force
-            $linkTarget = $item.ResolveLinkTarget($true)
-            if ($null -ne $linkTarget) {
-                $accumulated = $linkTarget.FullName
+            if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+                if (-not $item.PSObject.Methods['ResolveLinkTarget']) {
+                    throw "Refusing a linked overlay ancestor on Windows PowerShell 5.1: $accumulated"
+                }
+                $linkTarget = $item.ResolveLinkTarget($true)
+                if ($null -ne $linkTarget) { $accumulated = $linkTarget.FullName }
             }
         }
     }
@@ -473,7 +483,7 @@ function Test-PathWithinBoundary {
         [System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar
     )
     $boundaryWithSeparator = $canonicalBoundary + [System.IO.Path]::DirectorySeparatorChar
-    $comparison = if ($IsWindows) { [System.StringComparison]::OrdinalIgnoreCase } else { [System.StringComparison]::Ordinal }
+    $comparison = if ([IO.Path]::DirectorySeparatorChar -eq '\') { [System.StringComparison]::OrdinalIgnoreCase } else { [System.StringComparison]::Ordinal }
     return $canonicalPath.Equals($canonicalBoundary, $comparison) -or $canonicalPath.StartsWith($boundaryWithSeparator, $comparison)
 }
 
@@ -517,7 +527,7 @@ function Copy-ManagedOverlayTree {
         }
         if (Test-Path -LiteralPath $destFile) {
             $existingLeaf = Get-Item -LiteralPath $destFile -Force
-            if ($null -ne $existingLeaf.ResolveLinkTarget($false)) {
+            if (($existingLeaf.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
                 Write-Warning "Refusing to overwrite a symlinked overlay destination file: $destFile"
                 return
             }
@@ -585,6 +595,14 @@ try {
     }
     . $projectionHelper
 
+    $distributionHelper = @(
+        (Join-Path $sourcePath 'scripts/distribution-filter.ps1'),
+        (Join-Path $PSScriptRoot 'scripts/distribution-filter.ps1'),
+        (Join-Path $repoRoot '.github/base-coat/scripts/distribution-filter.ps1')
+    ) | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
+    if (-not $distributionHelper) { throw 'Missing scripts/distribution-filter.ps1 distribution helper.' }
+    . $distributionHelper
+    $distributionExcludedPaths = @(Get-BaseCoatDistributionExclusions -Root $sourcePath)
     $fullTargetDir = Join-Path $repoRoot $targetDir
     New-Item -ItemType Directory -Force -Path $fullTargetDir | Out-Null
 
@@ -616,8 +634,10 @@ try {
         }
     }
 
+    Remove-BaseCoatDistributionExcluded -Root $fullTargetDir
+
     # Copy workflows from .github/base-coat/workflows/
-    $workflowsSource = Join-Path $sourcePath '.github' 'base-coat' 'workflows'
+    $workflowsSource = Join-Path $sourcePath '.github/base-coat/workflows'
     $workflowsDest = Join-Path $fullTargetDir 'workflows'
     if (Test-Path $workflowsSource) {
         Assert-SafeWorkflowDirectory -WorkflowsPath $workflowsSource
@@ -628,7 +648,7 @@ try {
     }
 
     # Copy runtime scripts and installed-payload validators.
-    $runtimeScriptsSource = Join-Path $sourcePath '.github' 'base-coat' 'scripts'
+    $runtimeScriptsSource = Join-Path $sourcePath '.github/base-coat/scripts'
     $runtimeScriptsDest = Join-Path $fullTargetDir 'scripts'
     if (Test-Path $runtimeScriptsDest) {
         Remove-Item -Path $runtimeScriptsDest -Recurse -Force
@@ -649,6 +669,8 @@ try {
             'validate-workflow-action-pins.py',
             'configure-downstream-workflows.ps1',
             'workflow-ownership.ps1',
+            'distribution-filter.ps1',
+            'distribution-filter.sh',
             'retire-downstream-workflows.ps1',
             'guidance-lock.ps1',
             'guidance-lock.sh'
@@ -776,6 +798,13 @@ try {
             }
             foreach ($candidate in $candidateDests) {
                 if (Test-Path -LiteralPath (Join-Path $repoRoot $candidate) -PathType Leaf) {
+                    if ($distributionExcludedPaths -contains $assetPath -and $asset.sha) {
+                        $actualBlob = (& git hash-object -- (Join-Path $repoRoot $candidate)).Trim()
+                        if ($actualBlob -ne $asset.sha) {
+                            Write-Warning "Preserving modified legacy instruction: $candidate"
+                            continue
+                        }
+                    }
                     $seeded.Add($candidate)
                 }
             }
@@ -824,6 +853,18 @@ try {
             $normalizedLegacyPath = Normalize-GuidancePath -Path $legacyPath -RepoRoot $repoRoot
             $legacyFullPath = Join-Path $repoRoot $normalizedLegacyPath
             if (Test-Path -LiteralPath $legacyFullPath -PathType Leaf) {
+                $legacyAssetPath = $normalizedLegacyPath -replace '^\.github/', ''
+                if ($distributionExcludedPaths -contains $legacyAssetPath) {
+                    $previousAsset = $null
+                    if ($previousAssetManifest) {
+                        $previousAsset = @($previousAssetManifest.assets | Where-Object { $_.path -eq $legacyAssetPath }) | Select-Object -First 1
+                    }
+                    if (-not $previousAsset -or -not $previousAsset.sha -or
+                        (& git hash-object -- $legacyFullPath).Trim() -ne $previousAsset.sha) {
+                        Write-Warning "Preserving unverified or modified legacy instruction: $normalizedLegacyPath"
+                        continue
+                    }
+                }
                 $lockEntries.Add((New-GuidanceLockEntry -RepoRoot $repoRoot -Path $normalizedLegacyPath `
                     -Owner 'basecoat' -GuidanceUnit 'legacy-overlay-migration' -SourceVersion $sourceVersion `
                     -Sha256 (Get-GuidanceContentHash -Path $legacyFullPath)))
@@ -850,7 +891,7 @@ try {
         }
         if (Test-Path -LiteralPath $destination) {
             $leaf = Get-Item -LiteralPath $destination -Force
-            if ($null -ne $leaf.ResolveLinkTarget($false)) {
+            if (($leaf.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
                 throw "GUIDANCE_PATH_COLLISION path='$($planned.path)' owner='symlink' claimant='basecoat'"
             }
             if (-not $leaf.PSIsContainer -and -not (Test-Path -LiteralPath $destination -PathType Leaf)) {

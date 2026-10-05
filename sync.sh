@@ -285,6 +285,16 @@ if [[ -n "${BASECOAT_EXPECTED_SHA:-}" && "$SOURCE_COMMIT" != "$BASECOAT_EXPECTED
   exit 1
 fi
 
+distribution_helper="$TMP_DIR/source/scripts/distribution-filter.sh"
+if [[ ! -f "$distribution_helper" ]]; then
+  distribution_helper="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/scripts/distribution-filter.sh"
+fi
+if [[ ! -f "$distribution_helper" ]]; then
+  echo "Missing scripts/distribution-filter.sh distribution helper." >&2
+  exit 1
+fi
+source "$distribution_helper"
+basecoat_validate_distribution "$TMP_DIR/source"
 mkdir -p "$REPO_ROOT/$TARGET_DIR"
 
 # Capture the PREVIOUS release's asset-manifest.json before it is
@@ -307,6 +317,8 @@ for item in README.md CHANGELOG.md version.json asset-manifest.json instructions
 done
 
 # Copy workflows from .github/base-coat/workflows/ in source
+basecoat_filter_distribution "$REPO_ROOT/$TARGET_DIR"
+
 if [[ -d "$TMP_DIR/source/.github/base-coat/workflows" ]]; then
   validate_workflow_directory "$TMP_DIR/source/.github/base-coat/workflows"
   rm -rf "$REPO_ROOT/$TARGET_DIR/workflows"
@@ -319,7 +331,7 @@ mkdir -p "$REPO_ROOT/$TARGET_DIR/scripts"
 if [[ -d "$TMP_DIR/source/.github/base-coat/scripts" ]]; then
   cp -R "$TMP_DIR/source/.github/base-coat/scripts/." "$REPO_ROOT/$TARGET_DIR/scripts/"
 fi
-for validator in validate-basecoat.ps1 validate-basecoat.sh validate-skill-visibility.ps1 validate-asset-distribution.ps1 validate-model-policy.ps1 model-policy-contract.ps1 model-fallback-policy.ps1 validate-workflow-action-pins.ps1 validate-workflow-action-pins.py workflow-ownership.ps1 retire-downstream-workflows.ps1 guidance-lock.ps1 guidance-lock.sh; do
+for validator in validate-basecoat.ps1 validate-basecoat.sh validate-skill-visibility.ps1 validate-asset-distribution.ps1 validate-model-policy.ps1 model-policy-contract.ps1 model-fallback-policy.ps1 validate-workflow-action-pins.ps1 validate-workflow-action-pins.py workflow-ownership.ps1 retire-downstream-workflows.ps1 guidance-lock.ps1 guidance-lock.sh distribution-filter.ps1 distribution-filter.sh; do
   if [[ -f "$TMP_DIR/source/scripts/$validator" ]]; then
     cp "$TMP_DIR/source/scripts/$validator" "$REPO_ROOT/$TARGET_DIR/scripts/$validator"
   fi
@@ -529,11 +541,52 @@ if [[ ! -f "$guidance_lock_file" ]]; then
             ;;
         esac
       done > "$legacy_candidates"
+    # The previous source inventory is evidence of the bytes we installed,
+    # not authority to claim a consumer's subsequently modified instruction.
+    while IFS= read -r legacy_path; do
+      case "$legacy_path" in
+        .github/instructions/*)
+          asset_path="instructions/${legacy_path#.github/instructions/}"
+          expected_blob="$(awk -v path="$asset_path" '
+            /"path"[[:space:]]*:/ { matched=index($0, "\"" path "\"") > 0 }
+            matched && /"sha"[[:space:]]*:/ {
+              line=$0; sub(/.*"sha"[[:space:]]*:[[:space:]]*"/, "", line); sub(/".*/, "", line); print line; exit
+            }
+          ' "$previous_asset_manifest_file")"
+          if [[ -f "$TMP_DIR/source/$asset_path" ]] && basecoat_distribution_excluded "$TMP_DIR/source/$asset_path" &&
+             [[ -f "$REPO_ROOT/$legacy_path" && -n "$expected_blob" &&
+                "$(git hash-object -- "$REPO_ROOT/$legacy_path")" != "$expected_blob" ]]; then
+            echo "Preserving modified legacy instruction: $legacy_path" >&2
+            continue
+          fi
+          ;;
+      esac
+      echo "$legacy_path"
+    done < "$legacy_candidates" > "$legacy_candidates.filtered"
+    mv "$legacy_candidates.filtered" "$legacy_candidates"
   fi
   while IFS= read -r legacy_path; do
     [[ -z "$legacy_path" ]] && continue
     normalized="$(guidance_normalize_path "$legacy_path")"
     if [[ -f "$REPO_ROOT/$normalized" ]]; then
+      if [[ "$normalized" == .github/instructions/* ]]; then
+        asset_path="instructions/${normalized#.github/instructions/}"
+        if [[ -f "$TMP_DIR/source/$asset_path" ]] && basecoat_distribution_excluded "$TMP_DIR/source/$asset_path"; then
+          expected_blob=""
+          if [[ -f "$previous_asset_manifest_file" ]]; then
+            expected_blob="$(awk -v path="$asset_path" '
+              /"path"[[:space:]]*:/ { matched=index($0, "\"" path "\"") > 0 }
+              matched && /"sha"[[:space:]]*:/ {
+                line=$0; sub(/.*"sha"[[:space:]]*:[[:space:]]*"/, "", line); sub(/".*/, "", line); print line; exit
+              }
+            ' "$previous_asset_manifest_file")"
+          fi
+          if [[ -z "$expected_blob" || "$(git hash-object -- "$REPO_ROOT/$normalized")" != "$expected_blob" ]]; then
+            echo "Preserving unverified or modified legacy instruction: $normalized" >&2
+            continue
+          fi
+        fi
+      fi
       printf '%s|basecoat|legacy-overlay-migration|%s|%s\n' \
         "$normalized" "$source_version" "$(guidance_sha256 "$REPO_ROOT/$normalized")" >> "$lock_tsv"
     fi
