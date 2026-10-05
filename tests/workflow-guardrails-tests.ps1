@@ -455,12 +455,13 @@ $agentMergeWorkflow = Get-Content $agentMergeWorkflowPath -Raw
 $mergeQueuePsPath = 'scripts/deploy-merge-queue.ps1'
 $mergeQueueShPath = 'scripts/deploy-merge-queue.sh'
 $branchProtectionDocPath = 'docs/operations/security/branch-protection.md'
-$requiredAgentMergeContext = 'BaseCoat - Agent Merge / Agent merge guardrails'
+$requiredAgentMergeContext = 'Agent merge guardrails'
 
 $agentMergeHasGlobalPrTrigger = $agentMergeWorkflow -notmatch '(?ms)pull_request:\s*\r?\n\s+paths:'
 $agentMergeHasEvalStep = $agentMergeWorkflow -match '(?m)^\s+- name:\s+Validate eval companions\s*$'
 $rulesetPsWired = (Get-Content $mergeQueuePsPath -Raw) -match [regex]::Escape($requiredAgentMergeContext)
-$rulesetShWired = (Get-Content $mergeQueueShPath -Raw) -match [regex]::Escape($requiredAgentMergeContext)
+$mergeQueueSh = Get-Content $mergeQueueShPath -Raw
+$rulesetShWired = $mergeQueueSh -match 'deploy-merge-queue\.ps1' -and $mergeQueueSh -match '\-Apply'
 $branchProtectionDocWired = (Get-Content $branchProtectionDocPath -Raw) -match [regex]::Escape($requiredAgentMergeContext)
 
 if ($agentMergeHasGlobalPrTrigger -and $agentMergeHasEvalStep -and $rulesetPsWired -and $rulesetShWired -and $branchProtectionDocWired) {

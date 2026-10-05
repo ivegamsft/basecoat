@@ -1,215 +1,115 @@
-# Merge Queue and Required Checks Enforcement — Sprint 36
+# Native merge queue enforcement
 
-> **Part of:** Sprint 36 Execution Plan · Issue #1548 · BaseCoat Enterprise Governance Framework
+## Purpose
 
----
+The native GitHub merge queue serializes merges to `main` and runs required
+checks against generated merge-group commits. It supplements, but does not
+replace, existing repository, organization, or enterprise governance.
 
-## Overview
+## Required check contexts
 
-This document defines the merge queue enforcement policy for **basecoat** and companion repositories. The merge queue provides a modern alternative to traditional branch protection by:
+The repository ruleset requires the six current solo-dev main checks plus the
+cloud-agent guard. These names are sourced from
+`.github/governance/policy-packs.json` and verified against the live branch
+protection state during preflight.
 
-- **Reducing merge conflicts:** Tests run against the exact merge state
-- **Enabling automation:** CI can safely merge PRs without manual coordination
-- **Enforcing required checks:** All status checks must pass before queuing
-- **Preventing race conditions:** Sequential merge processing prevents simultaneous conflicts
+| Check context | Source |
+|---|---|
+| `lint-and-validate` | `ci.yml` |
+| `test` | `ci.yml` |
+| `validate-commit-messages` | `validate-basecoat.yml` |
+| `validate-unix` | `validate-basecoat.yml` |
+| `validate-windows` | `validate-basecoat.yml` |
+| `release-label-gate` | `pr-validation.yml` |
+| `Agent merge guardrails` | `agent-merge.yml` |
 
----
+The cloud-agent context is the job name reported by a successful GitHub Actions
+check run on readiness PR #3506; its integration is bound to GitHub Actions app
+ID `15368`. The ruleset uses `ALLGREEN`, squash, one entry to build and merge,
+and zero bypass actors. It contains no pull-request rule, so it does not set or
+change approval counts.
 
-## Configuration
+## Validate, preflight, apply, and rollback
 
-### Enable Merge Queue on `main`
+Local validation has no network or write side effects:
 
-GitHub Merge Queues are configured via Repository Rulesets API. This is the recommended approach for enterprise repositories.
-
-**Prerequisites:**
-
-- GitHub Advanced Security (Enterprise or Pro plan)
-- Write access to repository settings
-- Enable merge queue in repository settings:
-  - Settings → Branch protection rules OR
-  - Settings → Rulesets (new UI)
-
-**JSON Ruleset Configuration:**
-
-```json
-{
-  "name": "main-merge-queue-enforcement",
-  "target": "branch",
-  "enforcement": "active",
-  "conditions": {
-    "ref_name": {
-      "include": ["refs/heads/main"],
-      "exclude": []
-    }
-  },
-  "rules": [
-    {
-      "type": "pull_request",
-      "parameters": {
-        "required_approving_review_count": 1,
-        "dismiss_stale_reviews_on_push": true,
-        "require_code_owner_review": false,
-        "require_last_push_approval": false
-      }
-    },
-    {
-      "type": "required_status_checks",
-      "parameters": {
-        "strict_required_status_checks_policy": true,
-        "do_not_enforce_on_create": false,
-        "required_status_checks": [
-          {
-            "context": "validate-commit-messages",
-            "integration_id": null
-          },
-          {
-            "context": "validate-unix",
-            "integration_id": null
-          },
-          {
-            "context": "validate-windows",
-            "integration_id": null
-          }
-        ]
-      }
-    },
-    {
-      "type": "merge_queue",
-      "parameters": {
-        "check_response_timeout_minutes": 60,
-        "grouping_strategy": "headCommit",
-        "max_entries_to_build": 5,
-        "max_entries_to_merge": 1,
-        "merge_method": "squash",
-        "min_entries_to_merge": 1,
-        "min_entries_to_merge_wait_minutes": 5
-      }
-    }
-  ],
-  "bypass_actors": []
-}
+```powershell
+pwsh scripts/deploy-merge-queue.ps1 -DryRun
 ```
 
-**CLI Deployment:**
+After the queue configuration PR has merged, run a read-only live preflight:
 
-```bash
-#!/bin/bash
-set -euo pipefail
-
-OWNER="YOUR-ORG"
-REPO="basecoat"
-
-# Create merge queue ruleset
-gh api \
-  --method POST \
-  -H "Accept: application/vnd.github+json" \
-  "/repos/${OWNER}/${REPO}/rulesets" \
-  --input merge-queue-ruleset.json
-
-echo "Merge queue enforcement ruleset created successfully."
+```powershell
+pwsh scripts/deploy-merge-queue.ps1 -Preflight
 ```
 
----
+Only the authorized operator should apply, after the readiness and
+configuration changes are merged and the parent explicitly authorizes
+activation:
 
-## Required Status Checks
+```powershell
+pwsh scripts/deploy-merge-queue.ps1 -Apply
+```
 
-The following checks **must pass** before a PR can enter the merge queue:
+Apply verifies that #3506 is merged, required merge-group workflows and the
+declarative ruleset are present on live `main`, the observed cloud-agent check
+passed on the readiness head, branch protection remains strict and contains
+every existing required context, squash merging is allowed, and the target
+ruleset is repository-owned. It writes only through the repository rulesets
+API. Organization- or enterprise-owned rulesets and branch protection are
+never modified.
 
-| Check Name | Workflow | Purpose |
-|-----------|----------|---------|
-| `validate-commit-messages` | `validate-basecoat.yml` | Enforce conventional commit format |
-| `validate-unix` | `validate-basecoat.yml` | Bash/Unix-style linting and validation |
-| `validate-windows` | `validate-basecoat.yml` | PowerShell/Windows validation suite |
+Apply prints a unique rollback snapshot path outside the repository. Preserve
+that file and pass it explicitly if rollback is needed:
 
-**Additional governance checks (enable where intake policy is enforced):**
+```powershell
+pwsh scripts/deploy-merge-queue.ps1 -Rollback -BackupPath <snapshot-path>
+```
 
-| Check Name | Workflow | Purpose |
-|-----------|----------|---------|
-| `prd-spec-gate` | `prd-spec-gate.yml` | Enforce PRD/spec intake contract for high-change PRs; advisory for risky-path-only PRs |
-| `code-review-agent` | `code-review-agent.md` | Security & code quality analysis |
+Rollback restores the previous repository-owned ruleset or deletes the ruleset
+created by this apply. It refuses to overwrite the target if its identity or
+post-apply fingerprint changed. A failed verification is an explicit blocker;
+do not use a direct merge or bypass as a recovery shortcut.
 
----
-
-## Merge Queue Behavior
-
-### Parameters Explained
-
-| Parameter | Value | Rationale |
-|-----------|-------|-----------|
-| `grouping_strategy` | `headCommit` | Group multiple PRs by their most recent commit; prevents redundant CI runs |
-| `check_response_timeout_minutes` | `60` | Allow up to 1 hour for status checks to complete |
-| `max_entries_to_build` | `5` | Build up to 5 PRs concurrently for efficiency |
-| `max_entries_to_merge` | `1` | Merge one PR at a time to preserve linear history |
-| `merge_method` | `squash` | Squash commits for cleaner main branch |
-| `min_entries_to_merge_wait_minutes` | `5` | Wait up to 5 minutes to batch merges for efficiency |
-| `min_entries_to_merge` | `1` | Merge immediately if queue has 1+ ready PR |
-
-### Merge Queue Workflow
+The Bash entry point accepts matching modes:
 
 ```text
-PR submitted → Status checks run → PR enters merge queue
-                                   ↓
-                          Check grouping strategy
-                                   ↓
-                    Build merge candidate (PR + main)
-                                   ↓
-                         All checks pass?
-                            ├─ YES → Squash merge to main
-                            └─ NO  → Remove from queue, notify author
+scripts/deploy-merge-queue.sh --dry-run
+scripts/deploy-merge-queue.sh --preflight
+scripts/deploy-merge-queue.sh --apply
+scripts/deploy-merge-queue.sh --rollback <snapshot-path>
 ```
 
----
+## Preserved governance
 
-## Developer Experience
+- `.github/governance/policy-packs.json` remains unchanged; solo-dev queue
+  posture remains `deferred`.
+- The existing zero-approval-through-XL posture and qualified-human XXL
+  approval boundary remain unchanged.
+- Existing strict required checks, signed-commit rules, organization/enterprise
+  rulesets, the `prd-spec-gate.yml` high-change intake contract, issue/spec
+  authorization, and production environment approvals remain in force.
+- The declarative ruleset targets only `refs/heads/main`; it has no bypass
+  actors and adds no pull-request approval rule.
+- Neither this configuration nor queue activation authorizes direct merging.
 
-### For PR Authors
+## Rollout and verification
 
-1. **Automatic merging:** Once approved and in merge queue, the PR will merge automatically (no manual action needed)
-2. **Queue status:** GitHub shows merge queue position on the PR
-3. **Failure handling:** If checks fail in the queue, the PR is removed and you get a notification
-4. **Re-queue:** Push new commits to retry; the PR re-enters the queue automatically
+1. Land readiness PR #3506 through its governed merge path.
+2. Land the declarative queue configuration PR through the parent-owned
+   serialized merge path.
+3. Obtain explicit parent authorization, run the live preflight, then apply.
+4. Verify the active repository-owned ruleset and its required check contexts.
+5. Put an already authorized PR into the queue and verify every required check
+   on its generated merge-group commit before treating queue delivery as ready.
 
-### For Maintainers
+Do not report the queue as enabled or verified until the live ruleset and
+generated merge-group checks have both been observed.
 
-1. **Monitor queue health:** Use GitHub's Merge Queue dashboard in repository settings
-2. **Manual intervention:** Can remove PRs from queue via UI if needed
-3. **Bypass (admins only):** Can skip queue for emergency merges (discouraged)
+## References
 
----
-
-## Acceptance Criteria
-
-- [x] Merge queue configuration documented (this file)
-- [x] JSON ruleset template provided for deployment
-- [x] Required checks clearly specified
-- [x] Merge queue parameters explained with rationale
-- [x] CLI deployment script included
-- [ ] Deploy ruleset to main branch (manual step via GitHub UI or API)
-- [ ] Enable merge queue on `release/*` branches (optional, future PR)
-- [ ] Publish deployment guide to team wiki
-
----
-
-## Next Steps
-
-1. **Review ruleset configuration** with security team
-2. **Deploy to staging branch** (e.g., `release/*`) for testing
-3. **Monitor merge queue metrics** (throughput, check pass rate, avg queue length)
-4. **Adjust parameters** based on metrics (typically after 2 weeks)
-5. **Deploy to main** once stable
-
----
-
-## Related Documentation
-
-- **Branch Protection:** `docs/operations/security/branch-protection.md`
-- **Governance Contract:** `docs/reference/governance-contract.md`
-- **CI/CD Workflows:** `.github/workflows/validate-basecoat.yml`
-- **GitHub Merge Queues API:** [GitHub Docs](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue)
-- **Loop architecture diagram:** [`docs/diagrams/workflow-loop-architecture-and-control-points.md`](../diagrams/workflow-loop-architecture-and-control-points.md) — merge/queue loop with full timeout and retry boundaries
-
----
-
-**Owner:** BaseCoat Platform Team  
-**Last Updated:** 2026-06-14  
-**Next Review:** 2026-07-14 (Sprint 37)
+- [Queue activation PRD](../prd/synthesized/issue-3499-queue-activation.prd.md)
+- [Queue activation specification](../spec/synthesized/issue-3499-queue-activation.spec.md)
+- [Readiness PR #3506](https://github.com/IBuySpy-Shared/basecoat/pull/3506)
+- [Issue #3499](https://github.com/IBuySpy-Shared/basecoat/issues/3499)
+- [Governance contract](../reference/governance-contract.md)

@@ -1,161 +1,73 @@
 #!/usr/bin/env pwsh
 
-<#
-.SYNOPSIS
-Test merge queue enforcement configuration
-
-.DESCRIPTION
-Validates that merge queue configuration meets Sprint 36 acceptance criteria
-
-.EXAMPLE
-.\merge-queue-tests.ps1
-#>
-
 $ErrorActionPreference = 'Stop'
-$testResults = @()
+$repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
+Set-Location $repoRoot
 
-function Test-Result {
-    param(
-        [string]$TestName,
-        [bool]$Pass,
-        [string]$Details = ''
-    )
-
-    $result = @{
-        Test    = $TestName
-        Status  = if ($Pass) { 'PASS' } else { 'FAIL' }
-        Details = $Details
-    }
-
-    $testResults += $result
-
-    if ($Pass) {
-        Write-Host "✓ $TestName" -ForegroundColor Green
-    } else {
-        Write-Host "✗ $TestName" -ForegroundColor Red
-        if ($Details) {
-            Write-Host "  └─ $Details" -ForegroundColor Yellow
-        }
+function Assert-True {
+    param([bool]$Condition, [string]$Message)
+    if (-not $Condition) {
+        throw $Message
     }
 }
 
-# Test 1: Documentation exists
-Write-Host 'Running merge queue enforcement tests...' -ForegroundColor Blue
-Write-Host ''
-
+$rulesetPath = '.github/governance/rulesets/main-merge-queue.json'
+$scriptPath = 'scripts/deploy-merge-queue.ps1'
 $docPath = 'docs/operations/merge-queue-enforcement.md'
-Test-Result 'Merge queue documentation exists' `
-    (Test-Path $docPath) `
-    "Expected: $docPath"
+$ruleset = Get-Content -LiteralPath $rulesetPath -Raw | ConvertFrom-Json
+$policy = Get-Content -LiteralPath '.github/governance/policy-packs.json' -Raw | ConvertFrom-Json
+$script = Get-Content -LiteralPath $scriptPath -Raw
+$doc = Get-Content -LiteralPath $docPath -Raw
 
-# Test 2: Documentation contains required sections
-if (Test-Path $docPath) {
-    $docContent = Get-Content -Path $docPath -Raw
+Assert-True ($ruleset.name -eq 'main-merge-queue-enforcement') 'Ruleset name must match the controlled deployment target.'
+Assert-True ($ruleset.target -eq 'branch' -and $ruleset.enforcement -eq 'active') 'Ruleset must be an active branch ruleset.'
+Assert-True (@($ruleset.conditions.ref_name.include).Count -eq 1 -and $ruleset.conditions.ref_name.include[0] -eq 'refs/heads/main') 'Ruleset must target main only.'
+Assert-True (@($ruleset.bypass_actors).Count -eq 0) 'Ruleset must not allow bypass actors.'
+Assert-True (@($ruleset.rules | Where-Object type -eq 'pull_request').Count -eq 0) 'Queue ruleset must not alter review or approval requirements.'
+Assert-True ($policy.profiles.'solo-dev'.main.merge_queue_posture -eq 'deferred') 'Queue activation must not change trusted policy-pack posture.'
 
-    Test-Result 'Documentation contains Configuration section' `
-        ($docContent -match '## Configuration') `
-        'Missing: ## Configuration'
-
-    Test-Result 'Documentation contains merge queue parameters' `
-        ($docContent -match 'grouping_strategy|max_entries_to_build|merge_method') `
-        'Missing: merge queue parameters'
-
-    Test-Result 'Documentation contains required status checks' `
-        ($docContent -match 'validate-commit-messages|validate-unix|validate-windows') `
-        'Missing: required status checks list'
-
-    Test-Result 'Documentation contains acceptance criteria' `
-        ($docContent -match '## Acceptance Criteria') `
-        'Missing: ## Acceptance Criteria'
+$expectedContexts = @($policy.profiles.'solo-dev'.main.required_checks) +
+    @($policy.profiles.'solo-dev'.cloud_agent.required_status_checks)
+$statusRule = @($ruleset.rules | Where-Object type -eq 'required_status_checks')
+$queueRule = @($ruleset.rules | Where-Object type -eq 'merge_queue')
+Assert-True ($statusRule.Count -eq 1 -and $queueRule.Count -eq 1) 'Ruleset must contain exactly one required-check rule and one queue rule.'
+Assert-True ($statusRule[0].parameters.strict_required_status_checks_policy) 'Ruleset must retain strict required-check enforcement.'
+$configuredContexts = @($statusRule[0].parameters.required_status_checks | ForEach-Object { [string]$_.context })
+Assert-True ($configuredContexts.Count -eq $expectedContexts.Count) 'Ruleset must require exactly the policy and cloud-agent status contexts.'
+foreach ($context in $expectedContexts) {
+    Assert-True ($context -in $configuredContexts) "Ruleset is missing canonical required context '$context'."
+}
+Assert-True ('Agent merge guardrails' -in $configuredContexts) 'Cloud-agent context must use the observed check-run job name.'
+foreach ($check in $statusRule[0].parameters.required_status_checks) {
+    Assert-True ([int]$check.integration_id -eq 15368) "Check '$($check.context)' must be bound to the observed GitHub Actions app."
 }
 
-# Test 3: Deployment scripts exist
-Test-Result 'Bash deployment script exists' `
-    (Test-Path 'scripts/deploy-merge-queue.sh') `
-    'Expected: scripts/deploy-merge-queue.sh'
+Assert-True ($queueRule[0].parameters.grouping_strategy -eq 'ALLGREEN') 'Queue must require every grouped entry to pass.'
+Assert-True ($queueRule[0].parameters.merge_method -eq 'SQUASH') 'Queue must use squash merging.'
+Assert-True ($queueRule[0].parameters.max_entries_to_build -eq 1 -and $queueRule[0].parameters.max_entries_to_merge -eq 1) 'Queue must serialize build and merge to one entry.'
 
-Test-Result 'PowerShell deployment script exists' `
-    (Test-Path 'scripts/deploy-merge-queue.ps1') `
-    'Expected: scripts/deploy-merge-queue.ps1'
-
-# Test 4: Scripts have proper headers
-$bashScript = Get-Content -Path 'scripts/deploy-merge-queue.sh' -Raw -ErrorAction SilentlyContinue
-if ($bashScript) {
-    Test-Result 'Bash script has proper shebang' `
-        ($bashScript -match '^#!/usr/bin/env bash') `
-        'Missing: #!/usr/bin/env bash'
-
-    Test-Result 'Bash script has usage documentation' `
-        ($bashScript -match '# Usage:') `
-        'Missing: Usage documentation'
-
-    Test-Result 'Bash script has error handling' `
-        ($bashScript -match 'set -euo pipefail') `
-        'Missing: error handling'
+foreach ($path in @(
+    '.github/workflows/ci.yml',
+    '.github/workflows/validate-basecoat.yml',
+    '.github/workflows/pr-validation.yml',
+    '.github/workflows/agent-merge.yml'
+)) {
+    $content = Get-Content -LiteralPath $path -Raw
+    Assert-True ($content -match '(?m)^\s{2}merge_group:\s*$') "$path must run on merge_group."
 }
+$agentWorkflow = Get-Content -LiteralPath '.github/workflows/agent-merge.yml' -Raw
+Assert-True ($agentWorkflow -match '(?m)^\s{4}name:\s*Agent merge guardrails\s*$') 'Configured cloud-agent status context must match the actual workflow job name.'
 
-$psScript = Get-Content -Path 'scripts/deploy-merge-queue.ps1' -Raw -ErrorAction SilentlyContinue
-if ($psScript) {
-    Test-Result 'PowerShell script has help' `
-        ($psScript -match '\<#' -and $psScript -match 'SYNOPSIS') `
-        'Missing: PowerShell help'
+Assert-True ($script -match '\[switch\]\$Apply' -and $script -match '\[switch\]\$Preflight' -and $script -match '\[switch\]\$Rollback') 'Deployment must expose explicit apply, read-only preflight, and rollback modes.'
+Assert-True ($script -match 'ReadinessPrNumber = 3506' -and $script -match "state -ne 'MERGED'") 'Apply must require the readiness bootstrap PR to be merged.'
+Assert-True ($script -match 'required_status_checks\.strict' -and $script -match 'missingExisting') 'Apply must preserve live strict protection and every existing required context.'
+Assert-True ($script -match 'api.*repos/\$RepositorySlug/rulesets' -and $script -notmatch 'api.*orgs/') 'All ruleset writes must be repository-scoped, never organization-scoped.'
+Assert-True ($script -match 'applied_fingerprint' -and $script -match 'Rollback refused: target ruleset changed') 'Rollback must refuse to overwrite post-apply ruleset changes.'
+Assert-True ($script -match 'Agent merge guardrails' -and $script -match 'app_id -eq \$GitHubActionsAppId') 'Cloud-agent context must be checked against an actual GitHub Actions run.'
+Assert-True ($script -notmatch 'merge_queue_posture -ne .required.') 'Queue apply must not require changing trusted policy-pack posture.'
 
-    Test-Result 'PowerShell script has DryRun parameter' `
-        ($psScript -match 'param\(.*DryRun') `
-        'Missing: DryRun parameter'
+Assert-True ($doc -match 'zero bypass actors' -and $doc -match 'read-only live preflight' -and $doc -match 'Rollback') 'Operator documentation must cover bypass, preflight, and rollback constraints.'
+Assert-True ($doc -match 'Agent merge guardrails' -and $doc -match '15368') 'Operator documentation must identify the observed check context and app binding.'
+Assert-True ($doc -match 'Organization- or enterprise-owned rulesets and branch protection are\s+never modified') 'Operator documentation must state inherited rules are not modified.'
 
-    Test-Result 'PowerShell script has prerequisite validation' `
-        ($psScript -match 'Test-Prerequisites|Test-GitHubAuth') `
-        'Missing: prerequisite validation functions'
-}
-
-# Test 5: Validate JSON ruleset structure
-$docContent = Get-Content -Path $docPath -Raw -ErrorAction SilentlyContinue
-if ($docContent) {
-    # Extract JSON from code block
-    $jsonMatch = $docContent -match '```json\s(.*?)```'
-    if ($jsonMatch) {
-        $jsonContent = $Matches[1]
-        try {
-            $ruleset = $jsonContent | ConvertFrom-Json
-            Test-Result 'Ruleset JSON is valid' $true ''
-            
-            Test-Result 'Ruleset has merge_queue rule' `
-                ($ruleset.rules | Where-Object { $_.type -eq 'merge_queue' } | Measure-Object).Count -gt 0 `
-                'Missing: merge_queue rule'
-
-            Test-Result 'Ruleset has required_status_checks' `
-                ($ruleset.rules | Where-Object { $_.type -eq 'required_status_checks' } | Measure-Object).Count -gt 0 `
-                'Missing: required_status_checks rule'
-
-            Test-Result 'Ruleset has pull_request rule' `
-                ($ruleset.rules | Where-Object { $_.type -eq 'pull_request' } | Measure-Object).Count -gt 0 `
-                'Missing: pull_request rule'
-        } catch {
-            Test-Result 'Ruleset JSON is valid' $false "JSON parse error: $_"
-        }
-    }
-}
-
-# Summary
-Write-Host ''
-Write-Host '=== Test Summary ===' -ForegroundColor Blue
-$passed = ($testResults | Where-Object { $_.Status -eq 'PASS' } | Measure-Object).Count
-$failed = ($testResults | Where-Object { $_.Status -eq 'FAIL' } | Measure-Object).Count
-$total = $testResults.Count
-
-Write-Host "Passed: $passed/$total" -ForegroundColor Green
-if ($failed -gt 0) {
-    Write-Host "Failed: $failed/$total" -ForegroundColor Red
-}
-
-# Exit with appropriate code
-if ($failed -eq 0) {
-    Write-Host ''
-    Write-Host 'All tests passed! ✓' -ForegroundColor Green
-    exit 0
-} else {
-    Write-Host ''
-    Write-Host "Test failures detected. Fix above issues before proceeding." -ForegroundColor Red
-    exit 1
-}
+Write-Host 'Native merge-queue activation contract tests passed.'
