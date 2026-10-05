@@ -23,7 +23,7 @@ handoffs:
 | Field | Required | Description |
 |---|---|---|
 | `label` | Yes | Text shown on the transition button |
-| `agent` | Yes | `name` field of the target agent (matches filename without `.agent.md`) |
+| `agent` | Yes | Target agent's `name`: bare filename or prefixed short-name suffix, without `.agent.md` |
 | `prompt` | Yes | Pre-filled context sent to the target agent |
 | `send` | No | `false` (default) lets the user review/edit; `true` auto-sends immediately |
 

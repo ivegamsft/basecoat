@@ -17,7 +17,7 @@ BaseCoat gives your organization one place to manage agents, skills, instruction
 |---|---|---|
 | **Agents** | 131 | End-to-end task executors — sprint planners, code reviewers, security analysts, and more |
 | **Skills** | 143 | Reusable domain capabilities invoked by agents |
-| **Instructions** | 93 | Copilot behavior rules scoped by file path pattern |
+| **Instructions** | 94 | Copilot behavior rules scoped by file path pattern |
 | **Prompts** | 7 | Structured templates for repeatable tasks |
 
 ---
@@ -63,6 +63,7 @@ flowchart LR
 - [reference/goals.md](reference/goals.md) — Project goals and OKRs
 - [reference/ai-sdlc-operating-model.md](reference/ai-sdlc-operating-model.md) — Canonical Guardrails vs Visibility operating model
 - [reference/scoped-instructions.md](reference/scoped-instructions.md) — Scoped instruction authoring guide
+- [reference/frontmatter-host-contract.md](reference/frontmatter-host-contract.md) — Versioned artifact/host schema boundaries
 - [reference/label-taxonomy.md](reference/label-taxonomy.md) — GitHub label taxonomy
 - [reference/prompt-registry.md](reference/prompt-registry.md) — Prompt catalog and registry
 - [reference/prompt-library.md](reference/prompt-library.md) — Generated examples for every intent, skill, and agent

@@ -2,7 +2,7 @@
 
 ## Validation Checklist (Before Merging)
 
-1. **Frontmatter valid** — YAML parses without errors. `name` matches filename. `description` is a single sentence. `tools` is a valid array.
+1. **Frontmatter valid** — YAML parses without errors. `name` matches the bare filename or prefixed short-name suffix. Optional `tools` uses the target host vocabulary; `[]` is valid for text-only work. Follow `basecoat-10-core-host-frontmatter.instructions.md` contract v1.0.
 2. **All required sections present** — Title, Purpose, Inputs, Workflow, Domain sections, GitHub Issue Filing, Model, Output Format.
 3. **Skill references resolve** — every path referenced exists on disk; every name in `allowed_skills` has a directory under `skills/`.
 4. **Issue filing template works** — copy the `gh issue create` block, substitute sample values, confirm valid command.
@@ -26,8 +26,9 @@
 ---
 name: example-agent
 description: "Example agent. Use when creating a new agent from scratch."
-tools: [read_file, write_file, list_dir, run_terminal_command, create_github_issue]
-allowed_skills: [example-skill]
+visibility: specialized
+tools: [read, edit, search, execute]
+allowed_skills: []
 ---
 
 # Example Agent
@@ -72,4 +73,7 @@ Purpose: demonstrate the required structure.
 *(none)*
 ```
 
-Refer to `agents/basecoat-10-core-backend-dev.agent.md` and `agents/basecoat-50-security-security-analyst.agent.md` for fully fleshed-out examples.
+The skeleton declares no skills and its Allowed Skills body agrees. Tool
+selection is host-specific; GitHub mutations still require tracker approval
+and actual available tools. Refer to `agents/basecoat-10-core-backend-dev.agent.md`
+and `agents/basecoat-50-security-security-analyst.agent.md` for full examples.

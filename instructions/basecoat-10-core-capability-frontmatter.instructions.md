@@ -81,8 +81,10 @@ as family names. Unknown aliases and unsupported exact IDs fail validation.
 ## Canonical Example (Capability-First)
 
 ```yaml
+---
 name: example-agent
 description: "Use when coordinating a bounded workflow across multiple files."
+visibility: specialized
 capabilities:
   reasoning_depth: medium
   tool_use: required
@@ -99,8 +101,10 @@ model_policy:
 ## Canonical Example (Pinned With Justification)
 
 ```yaml
+---
 name: regulated-audit-agent
 description: "Use when producing reproducible audit artifacts for regulated workflows."
+visibility: specialized
 capabilities:
   reasoning_depth: high
   tool_use: required

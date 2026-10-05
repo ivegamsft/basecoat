@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.1",
   "libraryVersion": "4.5.2",
-  "generatedAt": "2026-10-05T05:03:37.7110767Z",
+  "generatedAt": "2026-10-05T18:30:24.3964561Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -1078,7 +1078,7 @@
     {
       "path": "instructions/basecoat-10-core-agents.instructions.md",
       "type": "instruction",
-      "sha": "ec52c3cc2b90077999ae30418a4c02e11281e5e5",
+      "sha": "920fec2ae324d42e7cd818bdb6ac21f6d8c26403",
       "version": null,
       "effectiveVersion": "4.5.2",
       "versionSource": "library"
@@ -1126,7 +1126,7 @@
     {
       "path": "instructions/basecoat-10-core-capability-frontmatter.instructions.md",
       "type": "instruction",
-      "sha": "d014e17a4cb84bf089ed2094fa6e904dfa4a7f88",
+      "sha": "dba4993828d75197c1f81e6261bb9ead192b09a9",
       "version": null,
       "effectiveVersion": "4.5.2",
       "versionSource": "library"
@@ -1223,6 +1223,14 @@
       "path": "instructions/basecoat-10-core-frontend.instructions.md",
       "type": "instruction",
       "sha": "aa3efe3923cd040dbfab5e593a2246b836ecda90",
+      "version": null,
+      "effectiveVersion": "4.5.2",
+      "versionSource": "library"
+    },
+    {
+      "path": "instructions/basecoat-10-core-host-frontmatter.instructions.md",
+      "type": "instruction",
+      "sha": "cf8e5a30e2074a4d5b399fa8a177e7bec0ed980e",
       "version": null,
       "effectiveVersion": "4.5.2",
       "versionSource": "library"

@@ -167,6 +167,34 @@ finally {
     if (Test-Path $fixtureRoot) { Remove-Item -Recurse -Force $fixtureRoot }
 }
 
+$hostContract = Get-Content (Join-Path $repoRoot 'instructions/basecoat-10-core-host-frontmatter.instructions.md') -Raw
+foreach ($required in @(
+    'Contract Version 1.0', 'not a live loader experiment',
+    'Agent `tools` is the native tool selector', 'does not override or merge',
+    'compatibility` lists intended tested hosts', 'not a dependency or entitlement list',
+    'Neither is an access-control or authorization boundary', 'short-name suffix',
+    'fail closed', 'host/version', 'tools: []', 'allowed_skills: []',
+    'compatibility: [github-copilot-cli]', 'compatibility: Designed for GitHub Copilot CLI.'
+)) {
+    if (-not $hostContract.Contains($required)) {
+        throw "Host frontmatter contract missing required boundary: $required"
+    }
+}
+$agentGuide = Get-Content (Join-Path $repoRoot 'instructions/basecoat-10-core-agents.instructions.md') -Raw
+if ($agentGuide -match '\| `tools` \| Yes \|' -or $agentGuide.Contains('The platform injects only the skills')) {
+    throw 'Agent guidance still claims tools are universally required or native allowed_skills enforcement'
+}
+$lifecycle = Get-Content (Join-Path $repoRoot 'instructions/references/agents/lifecycle.md') -Raw
+if (-not $lifecycle.Contains('allowed_skills: []') -or -not $lifecycle.Contains('*(none)*') -or $lifecycle.Contains('allowed_skills: [example-skill]')) {
+    throw 'Copyable lifecycle skeleton skill policy contradicts its Allowed Skills body'
+}
+$index = Get-Content (Join-Path $repoRoot 'docs/agents/agent-skill-map.md') -Raw
+if ($index.Contains('The following compatibility alias formats are accepted:') -or
+    -not $index.Contains('Host Compatibility and Dependencies')) {
+    throw 'Agent/skill index still confuses host compatibility with dependencies'
+}
+
+Write-Host 'Host-aware frontmatter contract documentation tests passed (not live host enforcement).'
 Write-Host "Skill compatibility frontmatter tests passed for $((Get-ChildItem -Path $skillsDir -Directory).Count) skills."
 Write-Host 'Skill applyTo pseudo-path tests passed.'
 Write-Host 'Skill visibility enum tests passed (production validator).'

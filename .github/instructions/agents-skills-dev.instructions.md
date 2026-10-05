@@ -7,6 +7,13 @@ applyTo: "agents/**/*,skills/**/*"
 
 ## Agent Frontmatter
 
+Apply BaseCoat host-aware frontmatter contract v1.0 in
+`instructions/basecoat-10-core-host-frontmatter.instructions.md`.
+`tools` is optional and host-native; agent `allowed-tools` does not override it.
+`allowed_skills`, capabilities, visibility, and nested/list metadata are
+BaseCoat policy extensions, not proof of native runtime enforcement.
+Agent visibility is discovery classification, not access control.
+
 All agents require:
 
 ```yaml
@@ -174,6 +181,10 @@ its adoption SHAs free of churn.
 > plus conformance checks, not active distribution gates.
 
 ### Compatibility Taxonomy
+
+This required list is the BaseCoat source schema, not the native Agent Skills
+optional string. Dependencies belong in body references, not host values.
+Native projections require host-specific conversion and loader verification.
 
 Skill compatibility declares the platforms and execution contexts where the skill is designed to operate. Use the canonical values listed below; no other values are permitted.
 

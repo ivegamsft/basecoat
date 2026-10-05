@@ -326,19 +326,18 @@ Valid values for `metadata.maturity` are:
 | `beta` | Stabilizing, minor breaking changes possible |
 | `production` | Stable, semver-governed changes |
 
-### Compatibility Aliases
+### Host Compatibility and Dependencies
 
-The following compatibility alias formats are accepted:
+BaseCoat skill source `compatibility` lists tested hosts only:
+`copilot-chat`, `copilot-coding-agent`, `github-copilot-cli`, `vscode-chat`,
+`mcp`, `github-actions`. Historical `GHCP`, `agent:<name>`, and `skill:<name>`
+values are not canonical host values. Keep dependency references in the body;
+`allowed_skills` is BaseCoat invocation policy, not host compatibility.
 
-| Format | Meaning | Example |
-|--------|---------|---------|
-| `GHCP` | GitHub Copilot (any surface) | `compatibility: [GHCP]` |
-| `agent:<name>` | Consumed by a specific agent | `compatibility: [agent:agent-designer]` |
-| `skill:<name>` | Depends on a specific skill | `compatibility: [skill:agent-design]` |
-
-Platform-only compatibility (`GHCP` alone) is acceptable for skills with broad applicability.
-Skills used by specific agents should add `agent:<name>` entries so the compatibility
-graph is traversable.
+BaseCoat's list form differs from the native Agent Skills optional string.
+Use host-specific projection and verify loader behavior before claiming support.
+Agent discovery tiers and skill public/private classification are not access
+control. See [host-aware contract](../reference/frontmatter-host-contract.md).
 
 ### Migration Plan
 
@@ -373,5 +372,5 @@ See [CONTRIBUTING.md](../../CONTRIBUTING.md) for detailed guidelines.
 ---
 
 **Last Updated:** 2026-06-24
-**Spec Version:** Agent Skills v1.0
+**Spec Version:** BaseCoat host-aware frontmatter contract v1.0
 **Maintainer:** Base Coat Team

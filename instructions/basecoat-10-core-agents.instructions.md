@@ -11,19 +11,22 @@ Use this instruction as the definitive guide for creating, modifying, or reviewi
 
 - All agent files live in the `agents/` directory at the repository root.
 - Use **kebab-case** with the `.agent.md` suffix: `backend-dev.agent.md`, `security-analyst.agent.md`.
-- The file name must match the `name` field in the YAML frontmatter.
+- Bare filenames match `name`; `basecoat-NN-<category>-<name>.agent.md`
+  matches the short-name suffix, not the full prefixed filename.
 - Choose names that describe the **role**, not the task: `release-manager` (role) over `cut-release` (task).
 
 ## YAML Frontmatter
 
-Every agent file must start with a YAML frontmatter block containing these fields:
+Every agent starts with YAML frontmatter. The example includes optional fields;
+see [host contract v1.0](basecoat-10-core-host-frontmatter.instructions.md) for
+BaseCoat versus native host requirements.
 
 ```yaml
 ---
 name: kebab-case-agent-name
 description: "One-sentence description of the agent's purpose. Start with the role noun and state when to invoke it."
 visibility: internal
-tools: [read_file, write_file, list_dir, run_terminal_command, create_github_issue]
+tools: [read, edit, search, execute]
 allowed_skills: [skill-name-a, skill-name-b]
 capabilities:
   reasoning_depth: medium
@@ -34,7 +37,7 @@ capabilities:
   safety_level: standard
 model_policy:
   fallback: true
-  preferred_families: [claude-sonnet, gpt-5]
+  preferred_families: [claude-sonnet, gpt]
 handoffs:
   - label: Next Step
     agent: next-agent-name
@@ -45,10 +48,10 @@ handoffs:
 
 | Field | Required | Notes |
 |---|---|---|
-| `name` | Yes | Must match the filename (without `.agent.md`). |
+| `name` | Yes | BaseCoat short name; matches bare filename or prefixed short-name suffix. Native GitHub agent `name` is optional display metadata. |
 | `description` | Yes | One sentence. Begin with the role, end with trigger guidance ("Use when …"). |
-| `tools` | Yes | Array of tool identifiers the agent needs. Enforced at runtime — the agent cannot call any tool not in this list. Follow least-privilege — include only tools the agent actually uses. |
-| `allowed_skills` | No | Array of skill folder names the agent may invoke. When omitted, the agent inherits all available skills (legacy behavior). Use `allowed_skills: []` to block all skill invocations. When present, the runtime filters the `<available_skills>` list to this allow-list before injecting it into the agent context. |
+| `tools` | No | Native host selector. Omitted means all available tools in documented GitHub semantics; `[]` means none. Use host aliases and least privilege. |
+| `allowed_skills` | No | BaseCoat invocation policy, not a documented native host filter. `[]` forbids skill invocation by policy; enforcement requires a verified adapter. |
 | `capabilities` | Recommended | Capability profile used for routing policy: `reasoning_depth`, `tool_use`, `context_window`, `latency_profile`, `cost_tier`, `safety_level`. |
 | `model_policy` | Recommended | Routing and fallback policy. Include `fallback: true` and `preferred_families` for safe defaults. |
 | `pinned_model` | Conditional | Only for reproducibility/compliance, model-specific dependency, or strict compatibility constraints. |
@@ -58,8 +61,11 @@ handoffs:
 
 ### Runtime Enforcement Semantics
 
-- **`tools:` is a whitelist.** At runtime the agent session is restricted to exactly the tools declared. Any tool not listed is unavailable, regardless of what the parent session has enabled.
-- **`allowed_skills:` is a filter.** The platform injects only the skills named in this list into `<available_skills>`. An agent with `allowed_skills: []` receives an empty skill catalog and must stop immediately if its workflow depends on a skill.
+- **`tools:` is host-specific.** Use the documented native selector and aliases.
+  Legacy `allowed-tools` never overrides agent `tools`; do not assume an adapter.
+- **`allowed_skills:` is BaseCoat policy.** Do not claim the host filters its
+  catalog without a verified adapter. Stop if the workflow requires a skill
+  forbidden by policy or unavailable in the actual catalog.
 - **Capability-first policy applies by default.** New and updated agents should drive routing from `capabilities` and `model_policy`.
 - **Pinned model policy is exception-only.** If `pinned_model` is used, `pin_reason` is mandatory and must document one of the approved pinning justifications.
 - **Legacy model binding remains compatible.** Existing assets that rely on the `## Model` section and/or `model` frontmatter remain valid during migration.
