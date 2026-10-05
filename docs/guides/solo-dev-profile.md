@@ -128,6 +128,12 @@ Create `.github/basecoat-onboarding-profile.json`:
 
 Validate the selection through the existing bootstrap entrypoint:
 
+This root bootstrap command is for a BaseCoat source/release payload obtained
+through the [supported setup flow](../getting-started.md), not a synced
+consumer overlay. `scripts/bootstrap.ps1` is not installed by content sync.
+For an existing consumer, use the installed workflow tooling below and keep
+profile/settings changes explicit; content sync is not governance onboarding.
+
 ```powershell
 pwsh scripts/bootstrap.ps1 `
   -OnboardingContractPath .github\basecoat-onboarding-profile.json `
@@ -140,7 +146,9 @@ Use the downstream workflow installer rather than writing another auto-merge
 implementation:
 
 ```powershell
-pwsh scripts/configure-downstream-workflows.ps1 `
+pwsh .github/base-coat/scripts/configure-downstream-workflows.ps1 `
+  -SourceDir .github/base-coat/workflows `
+  -DestinationDir .github/workflows `
   -Workflow pr-auto-merge-executor.yml `
   -KeepUnknownBc
 ```
@@ -154,7 +162,9 @@ This installs:
 To use the approved-spec directive, also install the issue approval workflow:
 
 ```powershell
-pwsh scripts/configure-downstream-workflows.ps1 `
+pwsh .github/base-coat/scripts/configure-downstream-workflows.ps1 `
+  -SourceDir .github/base-coat/workflows `
+  -DestinationDir .github/workflows `
   -Workflow issue-approve.yml `
   -KeepUnknownBc
 ```

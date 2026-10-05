@@ -15,6 +15,21 @@ foreach ($path in @($validatorPath, $installerPath, $managedWorkflowsDir, $known
     }
 }
 
+foreach ($guide in @('agent-examples.md', 'solo-dev-profile.md', 'downstream-workflows-setup.md')) {
+    $guideContent = Get-Content (Join-Path $repoRoot "docs/guides/$guide") -Raw
+    if (-not $guideContent.Contains('supported setup flow') -or
+        $guideContent -notmatch 'content[-\s]+sync') {
+        throw "Onboarding guide $guide must distinguish source/release bootstrap from synced tooling."
+    }
+}
+foreach ($guide in @('solo-dev-profile.md', 'downstream-workflows-setup.md')) {
+    $guideContent = Get-Content (Join-Path $repoRoot "docs/guides/$guide") -Raw
+    if ($guideContent -match '(?m)^pwsh scripts/configure-downstream-workflows\.ps1' -or
+        -not $guideContent.Contains('pwsh .github/base-coat/scripts/configure-downstream-workflows.ps1')) {
+        throw "Synced consumer guide $guide must use the installed workflow installer."
+    }
+}
+
 # Regression for #2919: ship-it's SKILL.md promises three executable
 # workflows. Each must now be distributable to a downstream consumer,
 # without relying on the known-gaps allowlist.

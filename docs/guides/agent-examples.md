@@ -302,13 +302,22 @@ mirror at artifacts.myorg.internal/basecoat.
 - Version pinning instructions
 - Upgrade path for future releases
 
-Or run the bootstrap script directly:
+For first-time onboarding, obtain the matching BaseCoat source or release
+payload through the [supported setup flow](../getting-started.md), then run
+the bootstrap script from that payload's root. `scripts/bootstrap-basecoat.ps1`
+is not installed by content sync into `.github/base-coat/scripts`; do not run
+this command from a synced consumer and assume the file exists:
 
 ```powershell
 pwsh scripts/bootstrap-basecoat.ps1 `
   -BasecoatRepo https://artifacts.myorg.internal/basecoat.git `
   -Ref v4.2.1
 ```
+
+For an already synced consumer, use the
+[selection-preserving workflow refresh](downstream-workflows-setup.md#refresh-after-a-basecoat-sync)
+with the installed `.github/base-coat/scripts` tooling. Content sync alone
+does not activate governance workflows or configure GitHub settings.
 
 ---
 

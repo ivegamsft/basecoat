@@ -1,7 +1,10 @@
 # Downstream Workflows Setup Guide
 
 This guide explains how consumer repositories install and manage BaseCoat workflows
-using `scripts/configure-downstream-workflows.ps1`.
+using the installed `.github/base-coat/scripts/configure-downstream-workflows.ps1`
+entrypoint. A BaseCoat source/release checkout also has the root
+`scripts/configure-downstream-workflows.ps1`; synced consumers must not assume
+that root copy or root bootstrap scripts exist.
 
 For cross-repo detection/escalation of reviewer-routing failures, see
 `docs/guides/downstream-reviewer-routing-audit.md`.
@@ -78,6 +81,13 @@ single-maintainer repositories, follow the
 [Solo-Developer Governance Profile](solo-dev-profile.md); for team-owned repos,
 use the profile selected by `.github/basecoat-onboarding-profile.json`.
 
+Root `scripts/bootstrap.ps1` and `scripts/bootstrap-basecoat.ps1` are
+source/release bootstrap tools, not content-sync payloads. Obtain them through
+the [supported setup flow](../getting-started.md) for first-time onboarding.
+For an already onboarded consumer, use the selection-preserving refresh above;
+do not install default workflow classes merely to replace missing bootstrap
+files. Sync does not apply GitHub governance settings.
+
 Keep the repository default workflow permission set to **Read repository
 contents and packages permissions**. Workflows that need write access declare
 their own `permissions:` blocks. If a selected workflow creates pull requests
@@ -94,10 +104,13 @@ narrowed safely.
 
 ## Quick start
 
-Run from repository root:
+For deliberate first activation, run from the synced consumer repository root.
+Preview the selected classes with `-DryRun` and review their triggers/permissions
+before installing. For an existing installation, use the refresh procedure
+above instead of reinstalling defaults:
 
 ```bash
-pwsh scripts/configure-downstream-workflows.ps1
+pwsh .github/base-coat/scripts/configure-downstream-workflows.ps1 -SourceDir .github/base-coat/workflows -DestinationDir .github/workflows
 ```
 
 Default install (reusable + ship-it classes) includes:
@@ -115,7 +128,7 @@ Default install (reusable + ship-it classes) includes:
 To install only the reusable class (skip ship-it):
 
 ```bash
-pwsh scripts/configure-downstream-workflows.ps1 -InstallClass reusable
+pwsh .github/base-coat/scripts/configure-downstream-workflows.ps1 -SourceDir .github/base-coat/workflows -DestinationDir .github/workflows -InstallClass reusable
 ```
 
 ## Include templates and internal workflows
@@ -123,13 +136,13 @@ pwsh scripts/configure-downstream-workflows.ps1 -InstallClass reusable
 Install reusable + templates:
 
 ```bash
-pwsh scripts/configure-downstream-workflows.ps1 -IncludeTemplates
+pwsh .github/base-coat/scripts/configure-downstream-workflows.ps1 -SourceDir .github/base-coat/workflows -DestinationDir .github/workflows -IncludeTemplates
 ```
 
 Install reusable + templates + internal:
 
 ```bash
-pwsh scripts/configure-downstream-workflows.ps1 -IncludeTemplates -IncludeInternal -IncludeUnsupported
+pwsh .github/base-coat/scripts/configure-downstream-workflows.ps1 -SourceDir .github/base-coat/workflows -DestinationDir .github/workflows -IncludeTemplates -IncludeInternal -IncludeUnsupported
 ```
 
 Install reusable, ship-it, templates, and internal workflows, including
@@ -137,7 +150,7 @@ advanced/unsupported workflows. Onboarding telemetry (`adoption-metrics.yml`) is
 a separate opt-in class and is not included:
 
 ```bash
-pwsh scripts/configure-downstream-workflows.ps1 -IncludeTemplates -IncludeInternal -IncludeUnsupported
+pwsh .github/base-coat/scripts/configure-downstream-workflows.ps1 -SourceDir .github/base-coat/workflows -DestinationDir .github/workflows -IncludeTemplates -IncludeInternal -IncludeUnsupported
 ```
 
 ## Dry-run mode
@@ -145,7 +158,7 @@ pwsh scripts/configure-downstream-workflows.ps1 -IncludeTemplates -IncludeIntern
 Preview without changing files:
 
 ```bash
-pwsh scripts/configure-downstream-workflows.ps1 -DryRun
+pwsh .github/base-coat/scripts/configure-downstream-workflows.ps1 -SourceDir .github/base-coat/workflows -DestinationDir .github/workflows -DryRun
 ```
 
 ## Migration notes
@@ -186,9 +199,9 @@ sync flow first. If your sync stages to a different path, pass that custom sourc
 directory:
 
 ```bash
-pwsh scripts/configure-downstream-workflows.ps1 -SourceDir ".github/base-coat/workflows"
+pwsh .github/base-coat/scripts/configure-downstream-workflows.ps1 -SourceDir ".github/base-coat/workflows" -DestinationDir ".github/workflows"
 # or, if your sync process stages elsewhere:
-pwsh scripts/configure-downstream-workflows.ps1 -SourceDir ".github/basecoat-sync/workflows"
+pwsh .github/basecoat-sync/scripts/configure-downstream-workflows.ps1 -SourceDir ".github/basecoat-sync/workflows" -DestinationDir ".github/workflows"
 ```
 
 ### Unmarked workflows were preserved
