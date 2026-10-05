@@ -70,4 +70,19 @@ Assert-True ($doc -match 'zero bypass actors' -and $doc -match 'read-only live p
 Assert-True ($doc -match 'Agent merge guardrails' -and $doc -match '15368') 'Operator documentation must identify the observed check context and app binding.'
 Assert-True ($doc -match 'Organization- or enterprise-owned rulesets and branch protection are\s+never modified') 'Operator documentation must state inherited rules are not modified.'
 
+. (Join-Path $repoRoot $scriptPath) -DryRun
+$desired = Get-Content -LiteralPath $rulesetPath -Raw | ConvertFrom-Json -AsHashtable
+$apiResponse = Get-Content -LiteralPath $rulesetPath -Raw | ConvertFrom-Json -AsHashtable
+$apiResponse.Remove('description')
+$apiResponse.id = 12345
+$apiResponse.source = 'IBuySpy-Shared/basecoat'
+$payload = Get-RulesetApiPayload $desired
+Assert-True (-not $payload.Contains('description')) 'Ruleset API payload must exclude the unsupported description field.'
+Assert-True ((Get-RulesetFingerprint $desired) -eq (Get-RulesetFingerprint $apiResponse)) 'GitHub response metadata and omitted description must not cause false verification failures.'
+$apiResponse.rules[0].parameters.required_status_checks[0].context = 'different-required-check'
+Assert-True ((Get-RulesetFingerprint $desired) -ne (Get-RulesetFingerprint $apiResponse)) 'Changing a required enforcement context must fail exact verification.'
+$apiResponse = Get-Content -LiteralPath $rulesetPath -Raw | ConvertFrom-Json -AsHashtable
+$apiResponse.bypass_actors = @(@{ actor_id = 1; actor_type = 'Team'; bypass_mode = 'always' })
+Assert-True ((Get-RulesetFingerprint $desired) -ne (Get-RulesetFingerprint $apiResponse)) 'Adding a bypass actor must fail exact verification.'
+
 Write-Host 'Native merge-queue activation contract tests passed.'

@@ -215,6 +215,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          fetch-depth: 0
 
       - name: Validate current PR or every merge-group constituent
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
@@ -321,17 +323,32 @@ jobs:
               );
             }
 
-            const openPullRequests = await github.paginate(github.rest.pulls.list, {
-              owner,
-              repo,
-              state: 'open',
-              base: baseRef,
-              per_page: 100
-            });
+            if (commitShas.length !== 1 || commitShas[0] !== headSha) {
+              throw new Error('Release-label gate supports only serialized single-commit squash groups.');
+            }
+            const queueResponse = await github.graphql(`
+              query($owner: String!, $repo: String!, $branch: String!) {
+                repository(owner: $owner, name: $repo) {
+                  mergeQueue(branch: $branch) {
+                    entries(first: 100) {
+                      pageInfo { hasNextPage }
+                      nodes {
+                        state
+                        headCommit { oid }
+                        pullRequest { number state baseRefName headRefOid }
+                      }
+                    }
+                  }
+                }
+              }`, { owner, repo, branch: baseRef });
+            const queueEntries = queueResponse.repository?.mergeQueue?.entries;
+            if (!queueEntries || queueEntries.pageInfo.hasNextPage) {
+              throw new Error('Live queue membership is missing or truncated.');
+            }
             const constituents = labelGate.selectCurrentMergeGroupPullRequests({
               baseRef,
-              commitShas,
-              pullRequests: openPullRequests
+              groupHeadSha: headSha,
+              queueEntries: queueEntries.nodes
             });
 
             for (const candidate of constituents) {
@@ -344,14 +361,18 @@ jobs:
               if (
                 currentPullRequest.state !== 'open' ||
                 currentPullRequest.base.ref !== baseRef ||
-                currentPullRequest.head.sha !== candidate.head.sha ||
-                !commitShas.some(sha => sha.toLowerCase() === currentPullRequest.head.sha.toLowerCase())
+                currentPullRequest.head.sha !== candidate.head.sha
               ) {
                 throw new Error(
                   `PR #${candidate.number} changed state, target, or head after merge-group ` +
                   'construction; refusing to validate stale membership.'
                 );
               }
+              labelGate.verifyCurrentSquashMergeTree({
+                baseSha,
+                groupHeadSha: headSha,
+                pullRequestHeadSha: currentPullRequest.head.sha
+              });
               validateLabels(currentPullRequest, `merge group ${headSha}`);
             }
             core.info(

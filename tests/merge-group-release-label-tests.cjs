@@ -3,11 +3,14 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const os = require('node:os');
+const { execFileSync } = require('node:child_process');
 const test = require('node:test');
 const {
   evaluatePullRequestLabels,
   isReleaseLabel,
-  selectCurrentMergeGroupPullRequests
+  selectCurrentMergeGroupPullRequests,
+  verifyCurrentSquashMergeTree
 } = require('../scripts/merge-group-release-labels.cjs');
 
 test('release-label matcher accepts only documented formats', () => {
@@ -35,55 +38,81 @@ test('explicit supported exemptions are checked on each pull request', () => {
   assert.throws(() => evaluatePullRequestLabels(null), /label data is incomplete/);
 });
 
-test('merge-group membership requires current open heads targeting the event base', () => {
-  const pullRequests = [
-    { number: 10, state: 'open', base: { ref: 'main' }, head: { sha: 'head-a' } },
-    { number: 11, state: 'open', base: { ref: 'main' }, head: { sha: 'head-b' } },
-    { number: 12, state: 'open', base: { ref: 'main' }, head: { sha: 'stale-head' } },
-    { number: 13, state: 'closed', base: { ref: 'main' }, head: { sha: 'head-c' } },
-    { number: 14, state: 'open', base: { ref: 'release' }, head: { sha: 'head-d' } }
-  ];
+const groupHeadSha = 'a'.repeat(40);
+const queueEntry = () => ({
+  state: 'AWAITING_CHECKS',
+  headCommit: { oid: groupHeadSha },
+  pullRequest: { number: 3496, state: 'OPEN', baseRefName: 'main', headRefOid: 'b'.repeat(40) }
+});
 
+test('squash membership comes from live queue identity, not original head ancestry', () => {
   assert.deepEqual(
     selectCurrentMergeGroupPullRequests({
       baseRef: 'main',
-      commitShas: ['base', 'head-a', 'head-b'],
-      pullRequests
+      groupHeadSha,
+      queueEntries: [queueEntry()]
     }).map(pullRequest => pullRequest.number),
-    [10, 11]
+    [3496]
   );
 });
 
 test('unresolvable, stale, or duplicate membership fails closed', () => {
-  assert.throws(
-    () => selectCurrentMergeGroupPullRequests({
-      baseRef: 'main',
-      commitShas: ['stale-head'],
-      pullRequests: [
-        { number: 10, state: 'open', base: { ref: 'main' }, head: { sha: 'current-head' } }
-      ]
-    }),
-    /No open main-targeting pull request/
-  );
-  assert.throws(
-    () => selectCurrentMergeGroupPullRequests({
-      baseRef: 'main',
-      commitShas: [],
-      pullRequests: null
-    }),
-    /data is incomplete/
-  );
-  assert.throws(
-    () => selectCurrentMergeGroupPullRequests({
-      baseRef: 'main',
-      commitShas: ['head-a'],
-      pullRequests: [
-        { number: 10, state: 'open', base: { ref: 'main' }, head: { sha: 'head-a' } },
-        { number: 10, state: 'open', base: { ref: 'main' }, head: { sha: 'head-a' } }
-      ]
-    }),
-    /identities are ambiguous/
-  );
+  for (const entries of [[], [queueEntry(), queueEntry()]]) {
+    assert.throws(() => selectCurrentMergeGroupPullRequests({
+      baseRef: 'main', groupHeadSha, queueEntries: entries
+    }), /exactly one live queue entry/);
+  }
+  for (const mutate of [
+    entry => { entry.pullRequest.state = 'CLOSED'; },
+    entry => { entry.pullRequest.baseRefName = 'release'; },
+    entry => { entry.pullRequest.headRefOid = ''; },
+    entry => { entry.state = 'QUEUED'; }
+  ]) {
+    const entry = queueEntry();
+    mutate(entry);
+    assert.throws(() => selectCurrentMergeGroupPullRequests({
+      baseRef: 'main', groupHeadSha, queueEntries: [entry]
+    }), /stale or incomplete/);
+  }
+  assert.throws(() => selectCurrentMergeGroupPullRequests({
+    baseRef: 'main', groupHeadSha, queueEntries: null
+  }), /data is incomplete/);
+});
+
+test('real synthetic squash tree verifies current source head and rejects changed heads/base', () => {
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'basecoat-queue-tree-'));
+  const git = args => execFileSync('git', args, {
+    cwd: fixture, encoding: 'utf8',
+    env: { ...process.env, GIT_AUTHOR_NAME: 'Test', GIT_AUTHOR_EMAIL: 'test@example.invalid',
+      GIT_COMMITTER_NAME: 'Test', GIT_COMMITTER_EMAIL: 'test@example.invalid' }
+  }).trim();
+  try {
+    git(['init', '--quiet']);
+    fs.writeFileSync(path.join(fixture, 'base.txt'), 'base');
+    git(['add', '.']);
+    git(['commit', '--quiet', '-m', 'base']);
+    const baseSha = git(['rev-parse', 'HEAD']);
+    fs.writeFileSync(path.join(fixture, 'feature.txt'), 'feature');
+    git(['add', '.']);
+    git(['commit', '--quiet', '-m', 'feature']);
+    const sourceHead = git(['rev-parse', 'HEAD']);
+    const tree = git(['rev-parse', 'HEAD^{tree}']);
+    const squashSha = git(['commit-tree', tree, '-p', baseSha, '-m', 'synthetic queue squash']);
+    const runGit = args => args[0] === 'fetch' ? '' : git(args);
+    verifyCurrentSquashMergeTree({ baseSha, groupHeadSha: squashSha, pullRequestHeadSha: sourceHead, runGit });
+    fs.writeFileSync(path.join(fixture, 'feature.txt'), 'changed head');
+    git(['add', '.']);
+    git(['commit', '--quiet', '-m', 'changed']);
+    const changedHead = git(['rev-parse', 'HEAD']);
+    assert.throws(() => verifyCurrentSquashMergeTree({
+      baseSha, groupHeadSha: squashSha, pullRequestHeadSha: changedHead, runGit
+    }), /refusing stale membership/);
+    assert.throws(() => verifyCurrentSquashMergeTree({
+      baseSha: sourceHead, groupHeadSha: squashSha, pullRequestHeadSha: sourceHead, runGit
+    }), /refusing stale membership/);
+  } finally {
+    fs.rmSync(fixture, { recursive: true, force: true });
+  }
 });
 
 test('every selected constituent must independently satisfy the release-label gate', () => {
@@ -112,5 +141,7 @@ test('required workflows are wired to merge-group validation without a silent sk
   assert.match(prValidation, /currentPullRequest\.head\.sha !== candidate\.head\.sha/);
   assert.match(prValidation, /refusing to validate stale membership/);
   assert.match(prValidation, /baseRef !== 'main'/);
-  assert.match(helper, /No open \$\{baseRef\}-targeting pull request/);
+  assert.match(prValidation, /github\.graphql/);
+  assert.match(prValidation, /verifyCurrentSquashMergeTree/);
+  assert.match(helper, /exactly one live queue entry/);
 });

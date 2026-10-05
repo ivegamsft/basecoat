@@ -99,7 +99,7 @@ function Get-RulesetApiPayload {
     param([System.Collections.IDictionary]$Ruleset)
 
     $payload = [ordered]@{}
-    foreach ($key in @('name', 'description', 'target', 'enforcement', 'conditions', 'rules', 'bypass_actors')) {
+    foreach ($key in @('name', 'target', 'enforcement', 'conditions', 'rules', 'bypass_actors')) {
         if ($Ruleset.Contains($key)) {
             $payload[$key] = $Ruleset[$key]
         }

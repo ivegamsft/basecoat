@@ -1,5 +1,8 @@
 'use strict';
 
+const { execFileSync } = require('node:child_process');
+const isSha = value => /^[0-9a-f]{40}$/i.test(String(value || ''));
+
 const isReleaseLabel = label => {
   const normalized = String(label || '').toLowerCase();
   return /^(wave:|sprint:|wave-|sprint-).+/.test(normalized) ||
@@ -31,36 +34,52 @@ const evaluatePullRequestLabels = pullRequest => {
 
 const selectCurrentMergeGroupPullRequests = ({
   baseRef,
-  commitShas,
-  pullRequests
+  groupHeadSha,
+  queueEntries
 }) => {
-  if (!baseRef || !Array.isArray(commitShas) || !Array.isArray(pullRequests)) {
-    throw new Error('Merge-group comparison or pull-request data is incomplete.');
+  if (!baseRef || !isSha(groupHeadSha) || !Array.isArray(queueEntries)) {
+    throw new Error('Merge-group queue data is incomplete.');
   }
 
-  const commits = new Set(commitShas.map(sha => String(sha).toLowerCase()));
-  const constituents = pullRequests.filter(pullRequest =>
-    pullRequest.state === 'open' &&
-    pullRequest.base?.ref === baseRef &&
-    commits.has(String(pullRequest.head?.sha || '').toLowerCase())
+  const entries = queueEntries.filter(entry =>
+    String(entry.headCommit?.oid || '').toLowerCase() === groupHeadSha.toLowerCase()
   );
-
-  if (constituents.length === 0) {
-    throw new Error(
-      `No open ${baseRef}-targeting pull request has a current head in the merge-group commit range.`
-    );
+  if (entries.length !== 1) {
+    throw new Error('Serialized merge group must resolve to exactly one live queue entry.');
   }
-
-  const distinctNumbers = new Set(constituents.map(pullRequest => pullRequest.number));
-  if (distinctNumbers.size !== constituents.length) {
-    throw new Error('Merge-group constituent pull-request identities are ambiguous.');
+  const entry = entries[0];
+  const pullRequest = entry.pullRequest;
+  if (entry.state !== 'AWAITING_CHECKS' || pullRequest?.state !== 'OPEN' ||
+      pullRequest.baseRefName !== baseRef || !isSha(pullRequest.headRefOid) ||
+      !Number.isSafeInteger(pullRequest.number) || pullRequest.number < 1) {
+    throw new Error('Merge-group queue entry has stale or incomplete pull-request membership.');
   }
+  return [{
+    number: pullRequest.number,
+    state: 'open',
+    base: { ref: pullRequest.baseRefName },
+    head: { sha: pullRequest.headRefOid }
+  }];
+};
 
-  return constituents;
+const verifyCurrentSquashMergeTree = ({ baseSha, groupHeadSha, pullRequestHeadSha, runGit }) => {
+  if (![baseSha, groupHeadSha, pullRequestHeadSha].every(isSha)) {
+    throw new Error('Merge-group tree verification requires complete commit SHAs.');
+  }
+  const git = runGit || (args => execFileSync('git', args, { encoding: 'utf8' }).trim());
+  git(['fetch', '--no-tags', 'origin', pullRequestHeadSha]);
+  const expectedTree = git(['merge-tree', '--write-tree', baseSha, pullRequestHeadSha]).split(/\r?\n/)[0];
+  const groupTree = git(['rev-parse', `${groupHeadSha}^{tree}`]);
+  const parents = git(['rev-list', '--parents', '-n', '1', groupHeadSha]).split(/\s+/);
+  if (!isSha(expectedTree) || expectedTree !== groupTree ||
+      parents.length !== 2 || parents[1] !== baseSha) {
+    throw new Error('Generated squash group does not match the current PR head and event base; refusing stale membership.');
+  }
 };
 
 module.exports = {
   evaluatePullRequestLabels,
   isReleaseLabel,
-  selectCurrentMergeGroupPullRequests
+  selectCurrentMergeGroupPullRequests,
+  verifyCurrentSquashMergeTree
 };

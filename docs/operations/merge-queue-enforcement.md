@@ -26,7 +26,13 @@ protection state during preflight.
 The cloud-agent context is the job name reported by a successful GitHub Actions
 check run on readiness PR #3506; its integration is bound to GitHub Actions app
 ID `15368`. The ruleset uses `ALLGREEN`, squash, one entry to build and merge,
-and zero bypass actors. It contains no pull-request rule, so it does not set or
+and zero bypass actors. The release-label gate resolves the generated head from
+the live queue, refetches the current PR labels and source head, and verifies its
+merge tree with the event base against the synthetic squash tree. It fails closed
+on stale content, missing/ambiguous membership, or unsupported multi-commit groups.
+Original PR commits need not be ancestors of a squash group.
+
+It contains no pull-request rule, so it does not set or
 change approval counts.
 
 ## Validate, preflight, apply, and rollback
@@ -58,6 +64,12 @@ every existing required context, squash merging is allowed, and the target
 ruleset is repository-owned. It writes only through the repository rulesets
 API. Organization- or enterprise-owned rulesets and branch protection are
 never modified.
+
+Verification fingerprints all supported writable enforcement fields: name,
+target, enforcement, conditions, rules, and bypass actors. The local descriptive
+annotation is not a GitHub ruleset API field and is neither sent nor compared;
+server-generated metadata is also excluded. Required checks and bypass changes
+still fail exact verification.
 
 Apply prints a unique rollback snapshot path outside the repository. Preserve
 that file and pass it explicitly if rollback is needed:
