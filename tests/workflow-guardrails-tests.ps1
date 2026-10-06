@@ -543,6 +543,40 @@ else {
     $guardrailFailures += 'merge-queue-trigger-missing'
 }
 
+$validateBasecoatWorkflowPath = Join-Path $workflowDir 'validate-basecoat.yml'
+$validateBasecoatWorkflow = Get-Content $validateBasecoatWorkflowPath -Raw
+$requiredValidateBasecoatJobs = @(
+    'validate-workflow-syntax',
+    'validate-commit-messages',
+    'validate-unix',
+    'validate-windows'
+)
+$validateBasecoatIssues = @()
+foreach ($jobId in $requiredValidateBasecoatJobs) {
+    if ($validateBasecoatWorkflow -notmatch "(?m)^  $([regex]::Escape($jobId)):\s*$") {
+        $validateBasecoatIssues += "validate-basecoat.yml (missing stable job id: $jobId)"
+    }
+}
+if ($validateBasecoatWorkflow -notmatch '(?m)^  merge_group:\s*$') {
+    $validateBasecoatIssues += 'validate-basecoat.yml (missing merge_group trigger for syntax check)'
+}
+if ($validateBasecoatWorkflow -match '(?ms)pull_request:\s*\r?\n\s+paths:') {
+    $validateBasecoatIssues += 'validate-basecoat.yml (pull_request path filter could suppress required checks on non-workflow PRs)'
+}
+if ($validateBasecoatWorkflow -notmatch '(?ms)^  validate-unix:\s*\r?\n\s+needs:\s*validate-workflow-syntax\s*\r?\n\s+runs-on:' -or
+    $validateBasecoatWorkflow -notmatch '(?ms)^  validate-windows:\s*\r?\n\s+needs:\s*validate-workflow-syntax\s*\r?\n\s+runs-on:') {
+    $validateBasecoatIssues += 'validate-basecoat.yml (expensive validation jobs must depend on validate-workflow-syntax)'
+}
+if ($validateBasecoatIssues.Count -eq 0) {
+    Write-Host '    PASS validate-basecoat required check identities and syntax sequencing are stable'
+}
+else {
+    foreach ($issue in $validateBasecoatIssues) {
+        Write-Host "    FAIL $issue" -ForegroundColor Red
+    }
+    $guardrailFailures += 'validate-basecoat-required-syntax'
+}
+
 $prdSpecWorkflowPath = Join-Path $workflowDir 'prd-spec-gate.yml'
 $prdSpecDocPath = 'docs/operations/security/branch-protection.md'
 $mergeQueueDocPath = 'docs/operations/merge-queue-enforcement.md'

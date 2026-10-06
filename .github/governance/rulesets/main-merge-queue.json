@@ -31,6 +31,10 @@
             "integration_id": 15368
           },
           {
+            "context": "validate-workflow-syntax",
+            "integration_id": 15368
+          },
+          {
             "context": "validate-unix",
             "integration_id": 15368
           },

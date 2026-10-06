@@ -164,6 +164,7 @@ jobs:
           bash scripts/scan-commit-messages.sh "$range"
 
   validate-unix:
+    needs: validate-workflow-syntax
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -177,6 +178,7 @@ jobs:
         run: bash tests/run-tests.sh
 
   validate-windows:
+    needs: validate-workflow-syntax
     runs-on: windows-latest
     timeout-minutes: 30
     steps:

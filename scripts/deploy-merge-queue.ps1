@@ -72,6 +72,7 @@ function Get-ExpectedChecks {
     }
 
     $contexts = @($profile.main.required_checks | ForEach-Object { [string]$_ })
+    $contexts += 'validate-workflow-syntax'
     $knownCloudChecks = @{
         'Agent merge guardrails' = 'Agent merge guardrails'
     }
@@ -170,7 +171,7 @@ function Assert-LocalContract {
     $missing = @($expectedChecks | Where-Object { $_ -notin $contexts })
     $unexpected = @($contexts | Where-Object { $_ -notin $expectedChecks })
     if ($missing.Count -gt 0 -or $unexpected.Count -gt 0 -or $contexts.Count -ne $expectedChecks.Count) {
-        throw "Required status contexts must match the solo-dev main and cloud-agent contracts exactly. Missing: $($missing -join ', '); unexpected: $($unexpected -join ', ')."
+        throw "Required status contexts must match the solo-dev main checks, queue-only syntax gate, and cloud-agent contracts exactly. Missing: $($missing -join ', '); unexpected: $($unexpected -join ', ')."
     }
     foreach ($entry in $entries) {
         if ([int]$entry.integration_id -ne $GitHubActionsAppId) {
@@ -192,7 +193,7 @@ function Assert-LocalContract {
 
     $workflowContracts = @{
         '.github\workflows\ci.yml' = @('lint-and-validate:', 'test:')
-        '.github\workflows\validate-basecoat.yml' = @('validate-commit-messages:', 'validate-unix:', 'validate-windows:')
+        '.github\workflows\validate-basecoat.yml' = @('validate-workflow-syntax:', 'validate-commit-messages:', 'validate-unix:', 'validate-windows:')
         '.github\workflows\pr-validation.yml' = @('release-label-gate:', 'scripts/merge-group-release-labels.cjs')
         '.github\workflows\agent-merge.yml' = @('name: Agent merge guardrails')
     }

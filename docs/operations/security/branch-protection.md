@@ -84,6 +84,7 @@ These are the minimum checks required for readiness gating on `main`:
 | `lint-and-validate` | `ci.yml` | CI lint and validation gate |
 | `test` | `ci.yml` | CI test gate |
 | `validate-commit-messages` | `validate-basecoat.yml` | Commit message format |
+| `validate-workflow-syntax` | `validate-basecoat.yml` | Workflow syntax validation before expensive validation |
 | `validate-unix` | `validate-basecoat.yml` | Bash validation suite |
 | `validate-windows` | `validate-basecoat.yml` | PowerShell validation suite |
 | `release-label-gate` | `pr-validation.yml` | PR release-label readiness gate |
@@ -166,6 +167,10 @@ Save this as `branch-protection-ruleset.json` and import via CLI (see next secti
             "integration_id": null
           },
           {
+            "context": "validate-workflow-syntax",
+            "integration_id": null
+          },
+          {
             "context": "validate-unix",
             "integration_id": null
           },
@@ -241,7 +246,7 @@ gh api \
   --method PUT \
   -H "Accept: application/vnd.github+json" \
   /repos/{OWNER}/{REPO}/branches/main/protection \
-  --field required_status_checks='{"strict":true,"contexts":["validate-commit-messages","validate-unix","validate-windows","Agent merge guardrails","prd-spec-gate"]}' \
+  --field required_status_checks='{"strict":true,"contexts":["validate-commit-messages","validate-workflow-syntax","validate-unix","validate-windows","Agent merge guardrails","prd-spec-gate"]}' \
   --field enforce_admins=true \
   --field required_pull_request_reviews='{"required_approving_review_count":1,"dismiss_stale_reviews":true}' \
   --field restrictions=null \
@@ -287,7 +292,7 @@ After admins apply branch protection, verify all of the following:
 
 1. `gh api /repos/IBuySpy-Shared/basecoat/branches/main/protection` returns `200` (not `404`).
 2. `required_status_checks.strict` is `true`.
-3. Required checks include: `lint-and-validate`, `test`, `validate-commit-messages`, `validate-unix`, `validate-windows`, `release-label-gate`.
+3. Required checks include: `lint-and-validate`, `test`, `validate-commit-messages`, `validate-workflow-syntax`, `validate-unix`, `validate-windows`, `release-label-gate`.
 4. `required_pull_request_reviews.required_approving_review_count` is at least `1`.
 5. `required_conversation_resolution.enabled` is `true`.
 6. `enforce_admins.enabled` is `true` (recommended).

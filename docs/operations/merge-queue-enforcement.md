@@ -8,16 +8,18 @@ replace, existing repository, organization, or enterprise governance.
 
 ## Required check contexts
 
-The repository ruleset requires the six current solo-dev main checks plus the
-cloud-agent guard. These names are sourced from
-`.github/governance/policy-packs.json` and verified against the live branch
-protection state during preflight.
+The repository ruleset requires the current solo-dev main checks plus the
+workflow syntax gate and cloud-agent guard. The solo-dev and cloud-agent
+checks are sourced from `.github/governance/policy-packs.json`;
+`validate-workflow-syntax` is a queue-specific addition verified with them
+against the live branch protection state during preflight.
 
 | Check context | Source |
 |---|---|
 | `lint-and-validate` | `ci.yml` |
 | `test` | `ci.yml` |
 | `validate-commit-messages` | `validate-basecoat.yml` |
+| `validate-workflow-syntax` | `validate-basecoat.yml` |
 | `validate-unix` | `validate-basecoat.yml` |
 | `validate-windows` | `validate-basecoat.yml` |
 | `release-label-gate` | `pr-validation.yml` |
@@ -34,6 +36,15 @@ Original PR commits need not be ancestors of a squash group.
 
 It contains no pull-request rule, so it does not set or
 change approval counts.
+
+It intentionally does not require `BaseCoat merge eligibility` on the native
+merge queue ruleset. That context is a commit status reported on PR head SHAs
+by `pr-auto-merge-executor.yml`; until the executor also reports the same
+context on merge-group SHAs, making it required on the queue would create a
+pending required context that the queue cannot satisfy. Eligibility therefore
+remains enforced before enqueue by the executor, and adding merge-group
+reporting for that status is a follow-up before considering it as a native
+queue requirement.
 
 ## Validate, preflight, apply, and rollback
 
@@ -94,8 +105,9 @@ scripts/deploy-merge-queue.sh --rollback <snapshot-path>
 
 ## Preserved governance
 
-- `.github/governance/policy-packs.json` remains unchanged; solo-dev queue
-  posture remains `deferred`.
+- `.github/governance/policy-packs.json` remains trusted policy state; the
+  queue-only `validate-workflow-syntax` addition lives in the declarative
+  ruleset/deployment contract, and solo-dev queue posture remains `deferred`.
 - The existing zero-approval-through-XL posture and qualified-human XXL
   approval boundary remain unchanged.
 - Existing strict required checks, signed-commit rules, organization/enterprise

@@ -27,6 +27,7 @@ Assert-True (@($ruleset.rules | Where-Object type -eq 'pull_request').Count -eq 
 Assert-True ($policy.profiles.'solo-dev'.main.merge_queue_posture -eq 'deferred') 'Queue activation must not change trusted policy-pack posture.'
 
 $expectedContexts = @($policy.profiles.'solo-dev'.main.required_checks) +
+    @('validate-workflow-syntax') +
     @($policy.profiles.'solo-dev'.cloud_agent.required_status_checks)
 $statusRule = @($ruleset.rules | Where-Object type -eq 'required_status_checks')
 $queueRule = @($ruleset.rules | Where-Object type -eq 'merge_queue')
@@ -38,6 +39,7 @@ foreach ($context in $expectedContexts) {
     Assert-True ($context -in $configuredContexts) "Ruleset is missing canonical required context '$context'."
 }
 Assert-True ('Agent merge guardrails' -in $configuredContexts) 'Cloud-agent context must use the observed check-run job name.'
+Assert-True ('validate-workflow-syntax' -in $configuredContexts) 'Workflow syntax validation must be a required queue context.'
 foreach ($check in $statusRule[0].parameters.required_status_checks) {
     Assert-True ([int]$check.integration_id -eq 15368) "Check '$($check.context)' must be bound to the observed GitHub Actions app."
 }
@@ -55,6 +57,9 @@ foreach ($path in @(
     $content = Get-Content -LiteralPath $path -Raw
     Assert-True ($content -match '(?m)^\s{2}merge_group:\s*$') "$path must run on merge_group."
 }
+$validateWorkflow = Get-Content -LiteralPath '.github/workflows/validate-basecoat.yml' -Raw
+Assert-True ($validateWorkflow -match '(?m)^  validate-workflow-syntax:\s*$') 'validate-basecoat.yml must publish the validate-workflow-syntax check context.'
+Assert-True ($validateWorkflow -match '(?ms)^  validate-unix:\s*\r?\n\s+needs:\s*validate-workflow-syntax\s*\r?\n\s+runs-on:' -and $validateWorkflow -match '(?ms)^  validate-windows:\s*\r?\n\s+needs:\s*validate-workflow-syntax\s*\r?\n\s+runs-on:') 'Expensive validation jobs must depend on the syntax check without renaming job IDs.'
 $agentWorkflow = Get-Content -LiteralPath '.github/workflows/agent-merge.yml' -Raw
 Assert-True ($agentWorkflow -match '(?m)^\s{4}name:\s*Agent merge guardrails\s*$') 'Configured cloud-agent status context must match the actual workflow job name.'
 
