@@ -43,7 +43,7 @@ foreach ($entry in @(
     Assert-Match $content 'new Map\(' "$name must de-duplicate requested workflow runs."
     Assert-Match $content 'ref:\s*\$\{\{\s*github\.event\.repository\.default_branch\s*\}\}' "$name must load governance only from the trusted default branch."
     Assert-Match $content "if:\s*steps\.policy-pack\.outputs\.auto_approve != 'true'" "$name must record an explicit policy-pack approval skip."
-    Assert-Match $content ("workflow_run:\s*\r?\n(?:\s*#[^\r\n]*\r?\n)*\s*workflows:\s*\[" + [regex]::Escape('"' + $entry.ReviewWorkflow + '"') + "\]\s*\r?\n\s*types:\s*\[completed\]") "$name must react to completed installed code-review workflow runs."
+    Assert-Match $content ("workflow_run:[\s\S]*?workflows:[\s\S]*?" + [regex]::Escape('"' + $entry.ReviewWorkflow + '"') + "[\s\S]*?types:\s*\[completed\]") "$name must react to completed installed code-review workflow runs."
     if ($content -match 'BaseCoat (Template - )?PR Auto Merge Executor') {
         throw "$name must not trigger on PR Auto Merge Executor workflow_run events; the unprivileged review actor makes those runs action_required."
     }
@@ -89,7 +89,23 @@ foreach ($entry in @(
     Assert-Match $content 'new Date\(latestReview\.submitted_at \|\| latestReview\.created_at\) <=' "$name must skip reconciliation when review evidence has already been evaluated."
 
     Assert-Match $content 'approve-pending-automation-runs:' "$name must sweep held automation workflow runs on schedule."
-    Assert-Match $content "approve-pending-automation-runs:[\s\S]*?if:\s*github\.event_name == 'schedule'" "$name must limit the held-run sweep to schedule events."
+    $sweep = ($content -split '  approve-pending-automation-runs:', 2)[1]
+    foreach ($required in @(
+        "github.event_name == 'schedule'", "github.event_name == 'workflow_dispatch'",
+        "github.event_name == 'workflow_run'", "github.event_name == 'pull_request_target'",
+        'currentPullRequest.head.sha !== run.head_sha',
+        "currentRun.conclusion !== 'action_required'",
+        "run.event !== 'pull_request'", 'run.pull_requests?.find',
+        'core.setFailed(`Cannot approve run'
+    )) {
+        if (-not $sweep.Contains($required)) { throw "$name missing approval recovery contract: $required" }
+    }
+    foreach ($producer in @('Issue to Spec Synthesis', 'Dependency Graph to Pages', 'Refresh Model Capability Catalog')) {
+        Assert-Match $content ([regex]::Escape('"' + "BaseCoat - $producer" + '"')) "$name must recover after $producer completes."
+    }
+    $tokenName = if ($entry.ReviewWorkflow -eq 'code-review-agent') { 'BaseCoat - Token Context Inventory' } else { 'BaseCoat Template - Token Inventory' }
+    Assert-Match $content ([regex]::Escape('"' + $tokenName + '"')) "$name must use the installed token inventory name."
+    Assert-Match $content 'workflow_dispatch:' "$name must allow explicit trusted recovery without waiting for cron."
     Assert-Match $content "approve-pending-automation-runs:[\s\S]*?ref:\s*\$\{\{\s*github\.event\.repository\.default_branch\s*\}\}" "$name sweep must load governance only from the trusted default branch."
     Assert-Match $content "approve-pending-automation-runs:[\s\S]*?if:\s*steps\.policy-pack\.outputs\.auto_approve == 'true'" "$name sweep must honor the cloud-agent auto-approval policy gate."
     Assert-Match $content "status:\s*'action_required'" "$name sweep must target held (action_required) runs."
@@ -102,6 +118,7 @@ function Get-NormalizedDispatchJob {
     $job = ($Content -split 're-evaluate-after-automated-review:', 2)[1]
     $job = $job -replace "workflow_id: '(?:pr-auto-merge-executor|basecoat-pr-auto-merge-executor)\.yml'", "workflow_id: '<normalized>'"
     $job = $job -replace "workflow_id: '(?:code-review-agent\.lock|basecoat-agent-code-review)\.yml'", "workflow_id: '<review-normalized>'"
+    $job = $job -replace "github.event.workflow_run.name == '(?:code-review-agent|BaseCoat Agent Template - Code Review)'", "github.event.workflow_run.name == '<review-normalized>'"
     return (($job -split "\r?\n" | Where-Object { $_.TrimStart() -notmatch '^(#|//)' }) -join "`n")
 }
 
@@ -110,3 +127,5 @@ if ((Get-NormalizedDispatchJob $runtime) -ne (Get-NormalizedDispatchJob $templat
 }
 
 Write-Host 'Auto-approve cloud-agent workflows tests passed.'
+& node --test (Join-Path $PSScriptRoot 'automation-approval-recovery-tests.cjs')
+if ($LASTEXITCODE -ne 0) { throw 'Automation approval recovery behavior tests failed.' }

@@ -62,6 +62,28 @@ ruleset together. Do not delete checks from only one surface.
 
 ## Self-merge policy
 
+GitHub Actions execution approval (`action_required`) is separate from PR
+review approval. The trusted auto-approver uses
+`cloud_agent.auto_approve_workflow_runs` from default-branch governance.
+Copilot PR events retain their immediate approval path; other same-repository
+PR events and completion of spec synthesis, token inventory, dependency graph,
+or model catalog automation trigger a held-run sweep. The 15-minute schedule
+is a fallback, not a delivery guarantee: GitHub can delay scheduled execution.
+The sweep revalidates open PR membership, repository, and current head before
+approving; fork runs remain held. Approval permission errors fail the workflow
+rather than reporting a successful recovery.
+
+To recover without waiting for cron, dispatch the installed auto-approval
+workflow on the trusted default branch, for example:
+
+```bash
+gh workflow run auto-approve-cloud-agent-workflows.yml --ref main
+```
+
+Downstream installations use the installed filename, normally
+`basecoat-internal-auto-approve-cloud-agent-workflows.yml`. This starts execution
+approval reconciliation only; it does not approve PR reviews or bypass checks.
+
 `solo-dev` PRs through `size:XL` use zero independent PR approvals. The
 accountable maintainer may author and merge after required checks and the
 `BaseCoat merge eligibility` status pass. A `size:XXL` PR requires one qualified

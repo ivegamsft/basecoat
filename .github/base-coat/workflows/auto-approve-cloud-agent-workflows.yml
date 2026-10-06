@@ -9,8 +9,14 @@ on:
   workflow_run:
     # The downstream installer renames the code-review workflow, so listen to
     # its installed workflow name rather than the canonical source filename.
-    workflows: ["BaseCoat Agent Template - Code Review"]
+    workflows:
+      - "BaseCoat Agent Template - Code Review"
+      - "BaseCoat - Issue to Spec Synthesis"
+      - "BaseCoat Template - Token Inventory"
+      - "BaseCoat - Dependency Graph to Pages"
+      - "BaseCoat - Refresh Model Capability Catalog"
     types: [completed]
+  workflow_dispatch:
   schedule:
     - cron: "*/15 * * * *"
 
@@ -20,7 +26,7 @@ permissions:
   actions: write
 
 concurrency:
-  group: cloud-agent-${{ github.event.pull_request.number || github.event.workflow_run.id }}
+  group: cloud-agent-${{ github.event.pull_request.number || github.event.workflow_run.id || github.event_name }}
   cancel-in-progress: true
 
 jobs:
@@ -134,7 +140,7 @@ jobs:
                 console.log(`✓ Approved workflow run ${run.id}: ${run.name}`);
               } catch (error) {
                 if (error.status === 403) {
-                  console.log(`⚠ Cannot approve workflow run ${run.id} — insufficient permissions`);
+                  core.setFailed(`Cannot approve workflow run ${run.id}: insufficient permissions`);
                   console.log(`  This may require manual approval via GitHub UI`);
                 } else {
                   throw error;
@@ -150,7 +156,7 @@ jobs:
           echo "Skipping auto-approval because policy pack '${SELECTED_PACK}' disables cloud-agent auto-approval." >> "$GITHUB_STEP_SUMMARY"
 
   re-evaluate-after-automated-review:
-    if: github.event_name == 'workflow_run'
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.name == 'BaseCoat Agent Template - Code Review'
     name: Re-evaluate merge eligibility after automated review
     runs-on: ubuntu-latest
     timeout-minutes: 7
@@ -347,7 +353,11 @@ jobs:
             }
 
   approve-pending-automation-runs:
-    if: github.event_name == 'schedule'
+    if: |
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.head_repository.full_name == github.repository) ||
+      (github.event_name == 'pull_request_target' && github.event.pull_request.user.id != 198982749 && github.event.pull_request.head.repo.full_name == github.repository)
     name: Approve pending in-repo automation workflow runs
     runs-on: ubuntu-latest
     timeout-minutes: 7
@@ -386,8 +396,8 @@ jobs:
             // spec-synthesis or report bots) does not cascade another workflow
             // run, so the event-driven auto-approve job never fires for those
             // PRs and their checks pile up as action_required. This trusted
-            // default-branch schedule closes that gap under the solo-dev
-            // auto-approval policy, independent of the PR author.
+            // Producer completion and manual recovery supplement the schedule,
+            // which GitHub may delay. Never check out PR content for approval.
             const openPullRequests = await github.paginate(github.rest.pulls.list, {
               owner,
               repo,
@@ -396,13 +406,13 @@ jobs:
             });
             // Only same-repository (non-fork) heads are eligible; fork runs keep
             // requiring manual approval as the untrusted-contributor boundary.
-            const headShaToPr = new Map();
+            const openPrHeads = new Map();
             for (const pullRequest of openPullRequests) {
               if (pullRequest.head?.repo?.full_name === `${owner}/${repo}`) {
-                headShaToPr.set(pullRequest.head.sha, pullRequest.number);
+                openPrHeads.set(pullRequest.number, pullRequest.head.sha);
               }
             }
-            if (headShaToPr.size === 0) {
+            if (openPrHeads.size === 0) {
               console.log('No open same-repo pull requests; nothing to approve.');
               return;
             }
@@ -416,15 +426,31 @@ jobs:
             for (const run of heldRuns) {
               // Exclude fork runs: their head_repository differs from the base.
               if (run.head_repository?.full_name !== `${owner}/${repo}`) continue;
-              const prNumber = headShaToPr.get(run.head_sha);
+              if (run.event !== 'pull_request') continue;
+              const prNumber = run.pull_requests?.find(pr =>
+                openPrHeads.get(pr.number) === run.head_sha)?.number;
               if (!prNumber) continue;
+              const { data: currentPullRequest } = await github.rest.pulls.get({
+                owner, repo, pull_number: prNumber
+              });
+              if (currentPullRequest.state !== 'open' ||
+                  currentPullRequest.head?.repo?.full_name !== `${owner}/${repo}` ||
+                  currentPullRequest.head.sha !== run.head_sha) continue;
+              const { data: currentRun } = await github.rest.actions.getWorkflowRun({
+                owner, repo, run_id: run.id
+              });
+              if (currentRun.conclusion !== 'action_required' ||
+                  currentRun.event !== 'pull_request' ||
+                  !currentRun.pull_requests?.some(pr => pr.number === prNumber) ||
+                  currentRun.head_sha !== run.head_sha ||
+                  currentRun.head_repository?.full_name !== `${owner}/${repo}`) continue;
               try {
                 await github.rest.actions.approveWorkflowRun({ owner, repo, run_id: run.id });
                 approved += 1;
                 console.log(`Approved run ${run.id} (${run.name}) for PR #${prNumber}.`);
               } catch (error) {
                 if (error.status === 403) {
-                  console.log(`Cannot approve run ${run.id}: insufficient permissions.`);
+                  core.setFailed(`Cannot approve run ${run.id}: insufficient permissions.`);
                 } else {
                   throw error;
                 }
