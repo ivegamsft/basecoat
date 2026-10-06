@@ -82,12 +82,12 @@ jobs:
             END { print files, lines }
           ')
           body_file=.automation-pr-body.md
-          sed 's/^          //' > "$body_file" <<EOF
+          body_template="$(cat <<'PR_BODY'
           # Summary
 
           Automated refresh of the public GitHub Copilot model baseline, capability comparison, and BaseCoat assignment audit from canonical GitHub Docs sources. Effective organization and user entitlement still requires authenticated runtime verification.
 
-          Linked issue / spec: #${SOURCE_ISSUE}
+          Linked issue / spec: #__SOURCE_ISSUE__
 
           ## Validation
 
@@ -104,11 +104,11 @@ jobs:
           | 1 | `docs/reference/model-capabilities.json`, `docs/reference/model-capabilities.md`, `docs/reference/model-assignment-audit.md` | Refresh generated model capability catalog, comparison documentation, and assignment audit. |
 
           Change scope: individual
-          Source issues: #${SOURCE_ISSUE}
+          Source issues: #__SOURCE_ISSUE__
           Independently deliverable units: 1
           Unit inventory: model capability catalog refresh
-          Expected files: ${expected_files}
-          Expected changed lines (additions + deletions): ${expected_lines}
+          Expected files: __EXPECTED_FILES__
+          Expected changed lines (additions + deletions): __EXPECTED_LINES__
           Classification rationale: Single generated model capability refresh produced by the scheduled model capability workflow.
           Mechanical batch exception evidence: none
 
@@ -125,7 +125,12 @@ jobs:
           - Risks / blast radius: Generated model capability reference documentation and catalog refresh.
           - Rollout plan: Merge after required checks pass.
           - Rollback plan: Revert the generated catalog refresh commit.
-          EOF
+          PR_BODY
+          )"
+          body_template="${body_template//__SOURCE_ISSUE__/$SOURCE_ISSUE}"
+          body_template="${body_template//__EXPECTED_FILES__/$expected_files}"
+          body_template="${body_template//__EXPECTED_LINES__/$expected_lines}"
+          printf '%s\n' "$body_template" | sed 's/^          //' > "$body_file"
           gh label create skip-release-label-gate --color ededed --description "Exempt automation-only PRs from release label gate" --force || true
 
           existing="$(gh pr list --state open --head "$BRANCH" --json number --jq '.[0].number')"

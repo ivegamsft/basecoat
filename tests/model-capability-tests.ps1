@@ -117,6 +117,21 @@ try {
     if ($workflow -notmatch [regex]::Escape('GH_TOKEN: ${{ secrets.GH_AW_GITHUB_TOKEN || github.token }}')) {
         throw 'Model refresh workflow must use GH_AW_GITHUB_TOKEN fallback convention for PR operations'
     }
+    if ($workflow -notmatch [regex]::Escape("cat <<'PR_BODY'")) {
+        throw 'Model refresh workflow PR body heredoc must use a quoted literal delimiter'
+    }
+    if ($workflow -match '<<EOF') {
+        throw 'Model refresh workflow PR body must not use an unquoted EOF heredoc'
+    }
+    foreach ($safeSubstitution in @(
+        '${body_template//__SOURCE_ISSUE__/$SOURCE_ISSUE}',
+        '${body_template//__EXPECTED_FILES__/$expected_files}',
+        '${body_template//__EXPECTED_LINES__/$expected_lines}'
+    )) {
+        if ($workflow -notmatch [regex]::Escape($safeSubstitution)) {
+            throw "Model refresh workflow PR body must safely substitute $safeSubstitution"
+        }
+    }
 
     $malformedCatalog = Join-Path $tempRoot 'malformed.json'
     '{"schema_version":1,"models":[]}' | Set-Content -LiteralPath $malformedCatalog -Encoding UTF8

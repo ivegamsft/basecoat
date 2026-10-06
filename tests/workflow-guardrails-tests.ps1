@@ -881,11 +881,11 @@ else {
 
     foreach ($requiredField in @(
         'Change scope: individual',
-        'Source issues: #${SOURCE_ISSUE}',
+        'Source issues: #__SOURCE_ISSUE__',
         'Independently deliverable units: 1',
         'Unit inventory: model capability catalog refresh',
-        'Expected files: ${expected_files}',
-        'Expected changed lines (additions + deletions): ${expected_lines}',
+        'Expected files: __EXPECTED_FILES__',
+        'Expected changed lines (additions + deletions): __EXPECTED_LINES__',
         'Classification rationale:',
         'Mechanical batch exception evidence: none'
     )) {
@@ -894,6 +894,20 @@ else {
         }
     }
 
+    foreach ($requiredSubstitution in @(
+        '${body_template//__SOURCE_ISSUE__/$SOURCE_ISSUE}',
+        '${body_template//__EXPECTED_FILES__/$expected_files}',
+        '${body_template//__EXPECTED_LINES__/$expected_lines}'
+    )) {
+        if ($modelCapabilityWorkflow -notmatch [regex]::Escape($requiredSubstitution)) {
+            $stabilizationGuardrailIssues += "model-capability-refresh.yml (missing safe automation PR body substitution: $requiredSubstitution)"
+        }
+    }
+
+    if ($modelCapabilityWorkflow -notmatch [regex]::Escape("cat <<'PR_BODY'") -or
+        $modelCapabilityWorkflow -match '<<EOF') {
+        $stabilizationGuardrailIssues += 'model-capability-refresh.yml (automation PR body heredoc must use a quoted literal delimiter)'
+    }
     if ($modelCapabilityWorkflow -match '\[skip ci\]') {
         $stabilizationGuardrailIssues += 'model-capability-refresh.yml (automation commit message must not suppress CI)'
     }
