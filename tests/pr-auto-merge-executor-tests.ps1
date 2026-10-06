@@ -153,6 +153,9 @@ foreach ($requiredLockfileSizingText in @(
         throw "PR size labeler must exclude generated lockfile churn from sized changes: $requiredLockfileSizingText"
     }
 }
+if ($sizeLabeler -notmatch [regex]::Escape('group: ${{ github.workflow }}-${{ github.event.pull_request.number || inputs.pr_number || github.ref }}')) {
+    throw 'PR size labeler dispatches must use a per-PR concurrency group so sequential dispatches do not cancel each other.'
+}
 foreach ($requiredReleaseLabelPollingText in @(
     'for (let attempt = 1; attempt <= 10; attempt += 1)',
     'Waiting for asynchronous PR labeling',
