@@ -445,6 +445,7 @@ jobs:
             );
             const marker = '<!-- pr-auto-merge-executor:v1 -->';
             const eligibilityStatusContext = 'BaseCoat merge eligibility';
+            const deliveryHoldLabel = 'delivery-hold';
             const githubActionsIntegrationId = 15368;
             const { createHash } = require('crypto');
             const owner = context.repo.owner;
@@ -920,6 +921,12 @@ jobs:
 
             const blockers = [];
             const labelNames = (pr.labels || []).map(label => String(label.name || '').toLowerCase());
+            const deliveryHoldActive = labelNames.includes(deliveryHoldLabel);
+            if (deliveryHoldActive) {
+              blockers.push(
+                `delivery_hold: ${deliveryHoldLabel} label is active; delivery is intentionally held until the label is removed.`
+              );
+            }
 
             if (pr.draft) blockers.push('PR is draft.');
             if (pr.state !== 'open') blockers.push(`PR state is '${pr.state}', expected 'open'.`);
@@ -1199,6 +1206,23 @@ jobs:
             const approvalCandidates = Array.from(latestReviewByUser.values())
               .filter(review => review.state === 'APPROVED' && review.commit_id === headSha)
               .map(review => review.user.login);
+            const unresolvedChangeRequestCandidates = Array.from(latestReviewByUser.values())
+              .filter(review => review.state === 'CHANGES_REQUESTED' && review.commit_id === headSha)
+              .map(review => review.user.login);
+            const qualifiedChangeRequesters = await Promise.all(
+              unresolvedChangeRequestCandidates.map(async login => {
+                const reviewerPermission = await resolvePermission(login);
+                if (hasQualifiedPermission(reviewerPermission)) return login;
+                core.info(`Ignoring changes-requested review from @${login}; reviewer does not have write, maintain, or admin permission.`);
+                return null;
+              })
+            );
+            const unresolvedChangeRequesters = Array.from(new Set(qualifiedChangeRequesters.filter(Boolean))).sort();
+            if (unresolvedChangeRequesters.length > 0) {
+              blockers.push(
+                `Unresolved changes-requested review on current head by ${unresolvedChangeRequesters.map(login => `@${login}`).join(', ')}.`
+              );
+            }
             const qualifiedApprovers = await Promise.all(
               approvalCandidates.map(async login => {
                 const reviewerPermission = await resolvePermission(login);
@@ -1732,6 +1756,7 @@ jobs:
                   `- Feature-origin delivery provenance: \`${featureOriginDeliverySummary}\``,
                   `- Production environment boundary: \`${productionEnvironmentBoundary}\``,
                   `- Merge queue posture: \`${mergeQueuePosture}\``,
+                  `- Delivery hold: \`${deliveryHoldActive ? `active:${deliveryHoldLabel}` : 'clear'}\``,
                   '',
                   `Run: ${workflowUrl}`
                 ]
@@ -1754,6 +1779,7 @@ jobs:
                   `- Feature-origin delivery provenance: \`${featureOriginDeliverySummary}\``,
                   `- Production environment boundary: \`${productionEnvironmentBoundary}\``,
                   `- Merge queue posture: \`${mergeQueuePosture}\``,
+                  `- Delivery hold: \`${deliveryHoldActive ? `active:${deliveryHoldLabel}` : 'clear'}\``,
                   '',
                   ...blockers.map(reason => `- ${reason}`),
                   '',
@@ -1806,8 +1832,10 @@ jobs:
               eligible ? 'success' : waitingForExternalProgress ? 'pending' : 'failure',
               eligible
                 ? `Eligible under ${selectedPack}/${riskTier}.`
-                : waitingForRequiredChecks
-                  ? 'Waiting for required status checks to complete.'
+                : deliveryHoldActive
+                  ? `Delivery hold label active: ${deliveryHoldLabel}.`
+                  : waitingForRequiredChecks
+                    ? 'Waiting for required status checks to complete.'
                   : waitingForAutomatedReview
                     ? 'Waiting for the required automated review on the current head.'
                     : waitingForMechanicalExceptionReview
@@ -1862,6 +1890,7 @@ jobs:
             const defaultBranch = context.payload.repository?.default_branch || 'main';
             const workflowId = String(process.env.WORKFLOW_REF || '')
               .match(/\.github\/workflows\/([^@]+)@/)?.[1] || 'pr-auto-merge-executor.yml';
+            const deliveryHoldLabel = 'delivery-hold';
             const { data: pr } = await github.rest.pulls.get({
               owner,
               repo,
@@ -1881,6 +1910,23 @@ jobs:
             });
             const currentReviewDigest = reviewSnapshotDigest(reviews);
             const labels = (pr.labels || []).map(label => String(label.name || '').toLowerCase()).sort();
+            if (labels.includes(deliveryHoldLabel)) {
+              await github.rest.repos.createCommitStatus({
+                owner,
+                repo,
+                sha: String(pr.head?.sha || ''),
+                state: 'failure',
+                context: 'BaseCoat merge eligibility',
+                description: `Delivery hold label active: ${deliveryHoldLabel}.`,
+                target_url: `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`
+              });
+              await core.summary
+                .addHeading('Delivery hold active')
+                .addRaw(`PR #${prNumber} has the ${deliveryHoldLabel} label; auto-merge remains disabled.`)
+                .write();
+              core.setFailed(`Delivery hold active: ${deliveryHoldLabel} label is present on PR #${prNumber}.`);
+              return;
+            }
             const snapshot = {
               headSha: String(pr.head?.sha || ''),
               baseSha: String(pr.base?.sha || ''),
@@ -1999,9 +2045,21 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
           PR_NUMBER: ${{ needs.evaluate.outputs.pr_number }}
+          HEAD_SHA: ${{ needs.evaluate.outputs.head_sha }}
         shell: bash
         run: |
           set -euo pipefail
+          hold_label="delivery-hold"
+          if gh pr view "${PR_NUMBER}" --repo "${REPOSITORY}" --json labels --jq '.labels[].name | ascii_downcase' | grep -Fx "${hold_label}" >/dev/null; then
+            gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --disable-auto >/dev/null 2>&1 || true
+            gh api --method POST "repos/${REPOSITORY}/statuses/${HEAD_SHA}" \
+              -f state=failure \
+              -f context='BaseCoat merge eligibility' \
+              -f description="Delivery hold label active: ${hold_label}." \
+              -f target_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" >/dev/null
+            echo "Delivery hold '${hold_label}' is active; auto-merge disabled and not re-enabled." | tee -a "${GITHUB_STEP_SUMMARY}"
+            exit 1
+          fi
           gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash --delete-branch
           echo "Auto-merge enabled for PR #${PR_NUMBER}."
           merge_state=$(gh pr view "${PR_NUMBER}" --repo "${REPOSITORY}" --json mergeStateStatus --jq '.mergeStateStatus')

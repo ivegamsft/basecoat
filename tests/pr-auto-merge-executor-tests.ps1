@@ -284,6 +284,23 @@ if ($workflow -notmatch 'core\.setFailed\(`Merge eligibility gate blocked:') {
 if ($workflow -notmatch "eligibilityStatusContext = 'BaseCoat merge eligibility'") {
     throw 'Workflow must use the stable PR-head eligibility status context.'
 }
+foreach ($requiredDeliveryHoldText in @(
+    "const deliveryHoldLabel = 'delivery-hold';",
+    'const deliveryHoldActive = labelNames.includes(deliveryHoldLabel);',
+    'delivery_hold: ${deliveryHoldLabel} label is active',
+    'Delivery hold label active: ${deliveryHoldLabel}.',
+    'labels.includes(deliveryHoldLabel)',
+    'gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --disable-auto'
+)) {
+    if (-not $workflow.Contains($requiredDeliveryHoldText)) {
+        throw "Workflow is missing explicit delivery-hold enforcement: $requiredDeliveryHoldText"
+    }
+}
+$deliveryHoldDisableIndex = $workflow.IndexOf('gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --disable-auto')
+$autoMergeEnableIndex = $workflow.IndexOf('gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash --delete-branch')
+if ($deliveryHoldDisableIndex -lt 0 -or $autoMergeEnableIndex -lt 0 -or $deliveryHoldDisableIndex -gt $autoMergeEnableIndex) {
+    throw 'Regression guard failed: delivery-hold must disable and stop auto-merge before any queued executor merge command.'
+}
 if ($workflow -notmatch 'github\.rest\.repos\.createCommitStatus') {
     throw 'Workflow must publish merge eligibility as a commit status.'
 }
@@ -385,6 +402,14 @@ if ($workflow -notmatch 'always_human_required') {
 }
 if ($workflow -notmatch 'latestReviewByUser') {
     throw 'Workflow must reduce reviews to each reviewer''s latest state before counting approvals.'
+}
+foreach ($requiredChangesRequestedText in @(
+    "review.state === 'CHANGES_REQUESTED' && review.commit_id === headSha",
+    'Unresolved changes-requested review on current head'
+)) {
+    if (-not $workflow.Contains($requiredChangesRequestedText)) {
+        throw "Workflow must fail closed on unresolved current-head review findings: $requiredChangesRequestedText"
+    }
 }
 foreach ($requiredAutomatedReviewText in @(
     'profile.main?.automated_review',

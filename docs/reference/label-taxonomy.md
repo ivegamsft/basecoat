@@ -136,6 +136,7 @@ These labels indicate blocking conditions or special handling requirements.
 | `spec-required` | Issue needs a PRD, spec, or design doc before implementation can start | Do not start work until spec is linked and reviewed |
 | `governance` | Issue relates to repository governance, standards, or process | Follows governance change approval process |
 | `approved` | Issue has been approved for implementation by appropriate stakeholder | OK to start work |
+| `delivery-hold` | PR delivery is intentionally paused even if all automated gates pass | Remove only when the hold owner is ready for the auto-merge executor or merge queue to proceed |
 
 **When to use:**
 

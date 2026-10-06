@@ -186,6 +186,12 @@ The executor evaluates an existing PR and enables GitHub-native auto-merge with
 updates or create upgrade PRs. Keep consumer update detection and PR creation in
 the consumer updater lifecycle; do not duplicate that implementation here.
 
+To pause delivery without changing eligibility logic, add the `delivery-hold`
+label to the PR. The executor reports the hold in the
+`BaseCoat merge eligibility` status and job summary, rechecks it immediately
+before auto-merge, disables any existing auto-merge request, and will not
+re-enable delivery until the label is removed.
+
 ### 3. Set repository options
 
 In GitHub:
