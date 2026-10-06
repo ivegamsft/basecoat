@@ -114,8 +114,8 @@ try {
     }
 
     $workflow = Get-Content -LiteralPath $workflowPath -Raw
-    if ($workflow -notmatch 'GH_TOKEN:\s*\$\{\{\s*github\.token\s*\}\}') {
-        throw 'Model refresh workflow must authenticate gh api with github.token'
+    if ($workflow -notmatch [regex]::Escape('GH_TOKEN: ${{ secrets.GH_AW_GITHUB_TOKEN || github.token }}')) {
+        throw 'Model refresh workflow must use GH_AW_GITHUB_TOKEN fallback convention for PR operations'
     }
 
     $malformedCatalog = Join-Path $tempRoot 'malformed.json'

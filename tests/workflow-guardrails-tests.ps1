@@ -862,6 +862,55 @@ else {
     }
 }
 
+$modelCapabilityWorkflowPath = Join-Path $workflowDir 'model-capability-refresh.yml'
+if (-not (Test-Path $modelCapabilityWorkflowPath)) {
+    $stabilizationGuardrailIssues += 'model-capability-refresh.yml (missing file)'
+}
+else {
+    $modelCapabilityWorkflow = Get-Content $modelCapabilityWorkflowPath -Raw
+
+    if ($modelCapabilityWorkflow -notmatch 'BRANCH:\s*\$\{\{\s*steps\.drift\.outputs\.branch\s*\}\}' -or
+        $modelCapabilityWorkflow -notmatch '\$branch = ''automation/model-capability-refresh''') {
+        $stabilizationGuardrailIssues += 'model-capability-refresh.yml (missing stable automation/model-capability-refresh branch name)'
+    }
+
+    if ($modelCapabilityWorkflow -notmatch 'cleanup-automation-branch' -or
+        $modelCapabilityWorkflow -notmatch 'git/refs/heads/') {
+        $stabilizationGuardrailIssues += 'model-capability-refresh.yml (missing closed-PR cleanup for automation/model-capability-refresh)'
+    }
+
+    foreach ($requiredField in @(
+        'Change scope: individual',
+        'Source issues: #${SOURCE_ISSUE}',
+        'Independently deliverable units: 1',
+        'Unit inventory: model capability catalog refresh',
+        'Expected files: ${expected_files}',
+        'Expected changed lines (additions + deletions): ${expected_lines}',
+        'Classification rationale:',
+        'Mechanical batch exception evidence: none'
+    )) {
+        if ($modelCapabilityWorkflow -notmatch [regex]::Escape($requiredField)) {
+            $stabilizationGuardrailIssues += "model-capability-refresh.yml (missing automation PR Intake Contract field: $requiredField)"
+        }
+    }
+
+    if ($modelCapabilityWorkflow -match '\[skip ci\]') {
+        $stabilizationGuardrailIssues += 'model-capability-refresh.yml (automation commit message must not suppress CI)'
+    }
+
+    if ($modelCapabilityWorkflow -notmatch [regex]::Escape('GH_TOKEN: ${{ secrets.GH_AW_GITHUB_TOKEN || github.token }}') -or
+        $modelCapabilityWorkflow -notmatch [regex]::Escape('token: ${{ secrets.GH_AW_GITHUB_TOKEN || github.token }}')) {
+        $stabilizationGuardrailIssues += 'model-capability-refresh.yml (automation must use GH_AW_GITHUB_TOKEN fallback convention for PR-triggering writes)'
+    }
+
+    if ($modelCapabilityWorkflow -notmatch [regex]::Escape('git diff --numstat origin/main...HEAD') -or
+        $modelCapabilityWorkflow -notmatch 'body-file' -or
+        $modelCapabilityWorkflow -notmatch 'gh pr edit .*--body-file' -or
+        $modelCapabilityWorkflow -notmatch 'skip-release-label-gate') {
+        $stabilizationGuardrailIssues += 'model-capability-refresh.yml (automation PR create/edit must compute counts, refresh body, and add skip-release-label-gate)'
+    }
+}
+
 $assetHealthWorkflowPath = Join-Path $workflowDir 'asset-health.yml'
 if (-not (Test-Path $assetHealthWorkflowPath)) {
     $stabilizationGuardrailIssues += 'asset-health.yml (missing file)'
