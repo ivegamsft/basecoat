@@ -696,7 +696,7 @@ Write-Header "Phase 1 — Repo Setup"
 # Detect fork vs origin
 $remoteUrl = git remote get-url origin 2>$null
 $isFork    = $false
-if ($remoteUrl -match 'IBuySpy-Shared/basecoat') {
+if ($remoteUrl -match 'ivegamsft/basecoat') {
     Write-Check "Remote is upstream BaseCoat (not a fork)" $true "consider forking for org-specific customizations"
 } else {
     $isFork = $true

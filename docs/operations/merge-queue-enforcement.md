@@ -122,6 +122,6 @@ generated merge-group checks have both been observed.
 
 - [Queue activation PRD](../prd/synthesized/issue-3499-queue-activation.prd.md)
 - [Queue activation specification](../spec/synthesized/issue-3499-queue-activation.spec.md)
-- [Readiness PR #3506](https://github.com/IBuySpy-Shared/basecoat/pull/3506)
-- [Issue #3499](https://github.com/IBuySpy-Shared/basecoat/issues/3499)
+- [Readiness PR #3506](internal source pull request)
+- [Issue #3499](internal source issue)
 - [Governance contract](../reference/governance-contract.md)
