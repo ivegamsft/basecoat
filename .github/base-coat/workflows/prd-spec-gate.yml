@@ -20,13 +20,18 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   prd-spec-gate:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: Coalesce metadata notifications
+        if: contains(fromJSON('["labeled","unlabeled","edited"]'), github.event.action)
+        shell: bash
+        run: sleep 10
+
       - name: Enforce PRD and spec links for risky or large changes
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
@@ -36,7 +41,11 @@ jobs:
               return;
             }
 
-            const pr = context.payload.pull_request;
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number
+            });
             const labels = (pr.labels || []).map(l => l.name);
 
             if (labels.includes('skip-prd-spec-check')) {

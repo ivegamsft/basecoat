@@ -52,9 +52,9 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'workflow_run' && format('workflow-run-{0}', github.event.workflow_run.id) || github.event_name == 'issues' && format('issue-{0}', github.event.issue.number) || github.event_name == 'issue_comment' && format('comment-{0}', github.event.comment.id) || format('pr-{0}', github.event.pull_request.number || inputs.pr_number || github.ref) }}
-  # Cancel only when the PR head changes. Label/edit storms must not abort
-  # eligibility publication for the current snapshot.
-  cancel-in-progress: ${{ github.event_name == 'pull_request_target' && contains(fromJSON('["opened","reopened","synchronize"]'), github.event.action) }}
+  # Keep one running and one replaceable pending notification per PR. Every
+  # survivor reads current evidence; no head, approval, or hold decision is cached.
+  cancel-in-progress: false
 
 jobs:
   route-ci-completion:
@@ -429,6 +429,10 @@ jobs:
       human_review_required: ${{ steps.policy.outputs.human_review_required }}
       qualified_approvers: ${{ steps.policy.outputs.qualified_approvers }}
     steps:
+      - name: Coalesce eligibility notifications
+        shell: bash
+        run: sleep 10
+
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
@@ -1575,7 +1579,11 @@ jobs:
                 });
                 for (const status of combined.statuses || []) {
                   if (!status?.context || status.creator?.login !== 'github-actions[bot]') continue;
-                  statusByContext.set(status.context, String(status.state || '').toLowerCase());
+                  statusByContext.set(status.context, {
+                    state: String(status.state || '').toLowerCase(),
+                    id: status.id,
+                    updatedAt: status.updated_at
+                  });
                 }
 
                 const checkRuns = await listCheckRunsForRef(ref);
@@ -1592,9 +1600,11 @@ jobs:
                   const startedAt = Date.parse(check.started_at || '') || 0;
                   if (existing && existing.startedAt > startedAt) continue;
                   checkByName.set(check.name, {
+                    id: check.id,
                     status: String(check.status || '').toLowerCase(),
                     conclusion: String(check.conclusion || '').toLowerCase(),
-                    startedAt
+                    startedAt,
+                    completedAt: check.completed_at
                   });
                 }
               }
@@ -1602,7 +1612,7 @@ jobs:
               const unsatisfiedChecks = [];
               let hasPendingChecks = false;
               for (const checkName of requiredChecks) {
-                const statusState = statusByContext.get(checkName);
+                const statusState = statusByContext.get(checkName)?.state;
                 const checkState = checkByName.get(checkName);
                 const statusSucceeded = statusState === 'success';
                 const checkSucceeded = checkState?.conclusion === 'success';
@@ -1616,7 +1626,10 @@ jobs:
                   );
                 }
               }
-              return { unsatisfiedChecks, hasPendingChecks };
+              const evidence = JSON.stringify(requiredChecks.map(name => ({
+                name, status: statusByContext.get(name), check: checkByName.get(name)
+              })));
+              return { unsatisfiedChecks, hasPendingChecks, evidence };
             };
 
             const requiredCheckState = await readRequiredCheckState();
@@ -1652,7 +1665,11 @@ jobs:
               deletions: finalPr.deletions,
               reviewDigest: reviewSnapshotDigest(finalReviews)
             };
-            if (JSON.stringify(initialSnapshot) !== JSON.stringify(finalSnapshot)) {
+            const finalRequiredCheckState = await readRequiredCheckState();
+            if (
+              JSON.stringify(initialSnapshot) !== JSON.stringify(finalSnapshot) ||
+              requiredCheckState.evidence !== finalRequiredCheckState.evidence
+            ) {
               const workflowId = String(process.env.WORKFLOW_REF || '')
                 .match(/\.github\/workflows\/([^@]+)@/)?.[1];
               if (!workflowId || !finalSnapshot.headSha) {

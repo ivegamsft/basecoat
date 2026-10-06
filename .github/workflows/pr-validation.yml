@@ -21,12 +21,14 @@ permissions:
   pull-requests: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Metadata notifications must never cancel validation of the current code.
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ contains(fromJSON('["labeled","unlabeled"]'), github.event.action) && 'metadata' || 'code' }}
+  cancel-in-progress: ${{ !contains(fromJSON('["labeled","unlabeled"]'), github.event.action) }}
 
 jobs:
   main-branch-protection-readiness:
     name: Main branch protection readiness gate
+    if: ${{ !contains(fromJSON('["labeled","unlabeled"]'), github.event.action) }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -213,6 +215,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Coalesce release-label notifications
+        if: contains(fromJSON('["labeled","unlabeled"]'), github.event.action)
+        shell: bash
+        run: sleep 10
+
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
@@ -382,6 +389,7 @@ jobs:
 
   forbidden-internal-identifier-gate:
     name: Public payload identifier gate
+    if: ${{ !contains(fromJSON('["labeled","unlabeled"]'), github.event.action) }}
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -595,6 +603,7 @@ jobs:
 
   markdown-lint:
     name: Markdown lint
+    if: ${{ !contains(fromJSON('["labeled","unlabeled"]'), github.event.action) }}
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
@@ -652,6 +661,7 @@ jobs:
 
   gitleaks-scan:
     name: Gitleaks secret scan (warn only)
+    if: ${{ !contains(fromJSON('["labeled","unlabeled"]'), github.event.action) }}
     runs-on: ubuntu-latest
     timeout-minutes: 13
     steps:
@@ -712,6 +722,7 @@ jobs:
 
   validate-agent-files:
     name: Validate agent file structure
+    if: ${{ !contains(fromJSON('["labeled","unlabeled"]'), github.event.action) }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -763,6 +774,7 @@ jobs:
 
   sync-dry-run:
     name: Sync script dry-run
+    if: ${{ !contains(fromJSON('["labeled","unlabeled"]'), github.event.action) }}
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:

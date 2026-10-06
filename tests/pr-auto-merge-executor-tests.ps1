@@ -8,6 +8,10 @@ $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
 if ($LASTEXITCODE -ne 0) {
     throw 'Merge latency completion routing and check-state regressions failed.'
 }
+& node --test (Join-Path $PSScriptRoot 'pr-evaluation-burst-tests.cjs')
+if ($LASTEXITCODE -ne 0) {
+    throw 'PR evaluation burst and fresh-evidence regressions failed.'
+}
 $workflowPath = Join-Path $repoRoot '.github\workflows\pr-auto-merge-executor.yml'
 $templatePath = Join-Path $repoRoot '.github\base-coat\workflows\pr-auto-merge-executor.yml'
 $humanBoundaryPath = Join-Path $repoRoot '.github\governance\human-approval-boundaries.json'
@@ -528,8 +532,8 @@ if ($workflow -notmatch 'waitingForRequiredChecks' -or
     $workflow -notmatch [regex]::Escape('Waiting for required status checks to complete.')) {
     throw 'Workflow must keep merge eligibility pending while required checks are still running.'
 }
-if ($workflow -notmatch [regex]::Escape('contains(fromJSON(''["opened","reopened","synchronize"]''), github.event.action)')) {
-    throw 'Workflow must cancel in-progress eligibility only when the pull request head changes.'
+if ($workflow -notmatch '(?m)^  cancel-in-progress: false\s*$') {
+    throw 'Workflow must finish the active fresh evaluation and retain one pending PR notification.'
 }
 if ($workflow -match '(?m)^\s*cancel-in-progress:\s*true\s*$') {
     throw 'Workflow must not cancel in-progress eligibility on label or edit storms.'
