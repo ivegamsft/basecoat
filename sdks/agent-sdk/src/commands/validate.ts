@@ -14,7 +14,7 @@ export async function validateCommand(argv: any): Promise<void> {
     const fullPath = path.resolve(inputPath);
     const stat = await fs.lstat(fullPath);
 
-    let results: any[] = [];
+    const results: any[] = [];
 
     if (stat.isDirectory()) {
       // Validate all .agent.md files in directory
