@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "4.6.1",
+  "version": "4.6.2",
   "releaseDate": "2026-10-06",
-  "notes": "Patch release: sanitize internal handles from the public mirror payload so v4.6.x publication succeeds, and harden release-notes automation and approval sweeps."
+  "notes": "Patch release: dependency vulnerability remediation, a non-vacuous public payload gate, lockfile-aware PR sizing, faster Windows validation, and truthful downstream drift reporting."
 }
