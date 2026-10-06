@@ -30,7 +30,7 @@ az ad sp create --id $APP_ID
 ```bash
 # Set variables
 TENANT_ID=$(az account show --query tenantId -o tsv)
-REPO_OWNER="IBuySpy-Shared"
+REPO_OWNER="example-org"
 REPO_NAME="basecoat"
 GITHUB_OIDC_ISSUER="https://token.actions.githubusercontent.com"
 # If enterprise custom issuer policy is enabled, use:

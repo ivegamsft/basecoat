@@ -1,7 +1,7 @@
 # Terraform plan destroy guardrail (optional)
 
 Opt-in guardrail that reads `terraform show -json` output and surfaces
-deletes and replaces before apply. Downstream origin: IBuySpy-Dev/COECheck#771.
+deletes and replaces before apply. Downstream origin: example-org/COECheck#771.
 
 This template is not enabled by default. Copy the workflow (or its inspect
 step) into the consumer repository after a plan job writes `tfplan.json`.

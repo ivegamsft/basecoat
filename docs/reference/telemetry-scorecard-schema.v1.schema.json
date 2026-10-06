@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/IBuySpy-Shared/basecoat/blob/main/docs/reference/telemetry-scorecard-schema.v1.schema.json",
+  "$id": "https://github.com/ivegamsft/basecoat/blob/main/docs/reference/telemetry-scorecard-schema.v1.schema.json",
   "title": "BaseCoat onboarding telemetry scorecard v1",
   "description": "Reusable scorecard schema for goal-based loop metrics. Emitted by onboarded repos during the weekly adoption-metrics run.",
   "type": "object",
