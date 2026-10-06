@@ -1,7 +1,13 @@
 name: "BaseCoat - Package Base Coat"
+run-name: Package Base Coat ${{ inputs.target_sha || github.sha }}
 
 on:
   workflow_dispatch:
+    inputs:
+      target_sha:
+        description: "Immutable merged commit SHA to validate and package"
+        required: false
+        type: string
   push:
     tags:
       - "v*.*.*"
@@ -10,23 +16,89 @@ permissions:
   contents: write
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: basecoat-package-${{ inputs.target_sha || github.sha }}
+  cancel-in-progress: false
 
 jobs:
+  resolve-target:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      target_sha: ${{ steps.target.outputs.sha }}
+      target_tree: ${{ steps.target.outputs.tree }}
+    steps:
+      - name: Validate immutable target input
+        id: requested
+        env:
+          TARGET_SHA: ${{ inputs.target_sha || github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! "$TARGET_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::Package target must be a lowercase, full 40-character commit SHA; received '$TARGET_SHA'."
+            exit 1
+          fi
+          echo "sha=${TARGET_SHA,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Check out immutable package target
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: ${{ steps.requested.outputs.sha }}
+          fetch-depth: 1
+
+      - name: Record package target tree
+        id: target
+        env:
+          TARGET_SHA: ${{ steps.requested.outputs.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          if [[ "$actual_sha" != "$TARGET_SHA" ]]; then
+            echo "::error::Requested package target $TARGET_SHA resolved to $actual_sha."
+            exit 1
+          fi
+          echo "sha=$actual_sha" >> "$GITHUB_OUTPUT"
+          echo "tree=$(git rev-parse 'HEAD^{tree}')" >> "$GITHUB_OUTPUT"
+
   validate:
+    needs: resolve-target
     uses: ./.github/workflows/validate-basecoat.yml
     with:
-      concurrency_group: "Package-Base-Coat-validate-${{ github.ref }}"
+      target_sha: ${{ needs.resolve-target.outputs.target_sha }}
+      concurrency_group: "Package-Base-Coat-validate-${{ needs.resolve-target.outputs.target_sha }}-${{ github.run_id }}"
       fail_on_guidance_audit_errors: false
 
   package:
-    needs: validate
+    needs: [resolve-target, validate]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: ${{ needs.resolve-target.outputs.target_sha }}
+
+      - name: Assert package target matches validated source
+        env:
+          TARGET_SHA: ${{ needs.resolve-target.outputs.target_sha }}
+          TARGET_TREE: ${{ needs.resolve-target.outputs.target_tree }}
+          VALIDATED_SHA: ${{ needs.validate.outputs.validated_sha }}
+          VALIDATED_TREE: ${{ needs.validate.outputs.validated_tree }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          actual_tree="$(git rev-parse 'HEAD^{tree}')"
+          if [[ "$actual_sha" != "$TARGET_SHA" ]] || [[ "$actual_sha" != "$VALIDATED_SHA" ]]; then
+            echo "::error::Package checkout SHA $actual_sha does not match requested $TARGET_SHA and validated $VALIDATED_SHA."
+            exit 1
+          fi
+          if [[ "$actual_tree" != "$TARGET_TREE" ]] || [[ "$actual_tree" != "$VALIDATED_TREE" ]]; then
+            echo "::error::Package tree $actual_tree does not match requested $TARGET_TREE and validated $VALIDATED_TREE."
+            exit 1
+          fi
+          echo "Validation and packaging are bound to $actual_sha ($actual_tree)."
 
       - name: Assert committed version metadata matches release tag
         if: startsWith(github.ref, 'refs/tags/')

@@ -402,6 +402,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running package-basecoat immutable-target workflow tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'package-basecoat-workflow-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Package BaseCoat immutable-target workflow tests failed' -ForegroundColor Red
+    Write-FailureLog 'package-basecoat-workflow-tests'
+    exit 1
+}
+
 Write-Host 'Running delivery-autopilot tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'delivery-autopilot-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

@@ -3,6 +3,10 @@ name: "BaseCoat - Validate BaseCoat"
 on:
   workflow_call:
     inputs:
+      target_sha:
+        description: "Immutable commit SHA to validate"
+        required: false
+        type: string
       concurrency_group:
         description: 'Concurrency group override — callers can pass a distinct value to avoid collisions with push-to-main validate runs'
         required: false
@@ -13,6 +17,13 @@ on:
         required: false
         type: boolean
         default: true
+    outputs:
+      validated_sha:
+        description: "Commit SHA validated by this workflow"
+        value: ${{ jobs.validate-workflow-syntax.outputs.target_sha }}
+      validated_tree:
+        description: "Git tree validated by this workflow"
+        value: ${{ jobs.validate-workflow-syntax.outputs.target_tree }}
   workflow_dispatch:
   push:
     branches:
@@ -31,13 +42,25 @@ concurrency:
 
 jobs:
   validate-workflow-syntax:
+    outputs:
+      target_sha: ${{ steps.target.outputs.sha }}
+      target_tree: ${{ steps.target.outputs.tree }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
+          ref: ${{ inputs.target_sha || github.sha }}
           fetch-depth: 0
+
+      - name: Record validated source identity
+        id: target
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "tree=$(git rev-parse 'HEAD^{tree}')" >> "$GITHUB_OUTPUT"
 
       - name: Select workflow files to lint
         id: workflow-files
@@ -147,6 +170,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
+          ref: ${{ inputs.target_sha || github.sha }}
           fetch-depth: 0
 
       - name: Scan commit messages for secrets and PII
@@ -170,6 +194,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: ${{ inputs.target_sha || github.sha }}
 
       - name: Validate with bash
         run: bash scripts/validate-basecoat.sh
@@ -184,6 +210,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: ${{ inputs.target_sha || github.sha }}
 
       - name: Run isolated Windows validation lanes
         shell: pwsh
