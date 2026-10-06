@@ -2049,8 +2049,10 @@ jobs:
             echo "Delivery hold '${hold_label}' is active; auto-merge disabled and not re-enabled." | tee -a "${GITHUB_STEP_SUMMARY}"
             exit 1
           fi
-          gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash --delete-branch
-          echo "Auto-merge enabled for PR #${PR_NUMBER}."
+          # Queue-enabled path: omit --delete-branch because gh rejects it when native merge queue is enabled.
+          # Queue-disabled path: rely on repository delete_branch_on_merge so cleanup occurs only after a verified merge.
+          gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash
+          echo "Auto-merge enabled or queued for PR #${PR_NUMBER}."
           merge_state=$(gh pr view "${PR_NUMBER}" --repo "${REPOSITORY}" --json mergeStateStatus --jq '.mergeStateStatus')
           if [[ "${merge_state}" == "BEHIND" ]]; then
             gh api --method PUT "repos/${REPOSITORY}/pulls/${PR_NUMBER}/update-branch" >/dev/null

@@ -289,8 +289,21 @@ if ($workflow -notmatch '(?m)^permissions:\s*\r?\n\s*actions:\s*write\s*\r?\n\s*
 if ($workflow -notmatch 'pr-auto-merge-executor:v1') {
     throw 'Workflow must include the stable marker for idempotent status comments.'
 }
-if ($workflow -notmatch 'gh pr merge "\$\{PR_NUMBER\}" --repo "\$\{REPOSITORY\}" --auto --squash --delete-branch') {
-    throw 'Workflow must use gh pr merge with --auto --squash --delete-branch.'
+$queueCompatibleMergeCommand = 'gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash'
+if ($workflow -notmatch [regex]::Escape($queueCompatibleMergeCommand)) {
+    throw 'Workflow must use a queue-compatible gh pr merge command with --auto --squash.'
+}
+if ($workflow -match 'gh pr merge "\$\{PR_NUMBER\}" --repo "\$\{REPOSITORY\}" --auto --squash --delete-branch') {
+    throw 'Workflow must not pass --delete-branch while enabling auto-merge because native merge queues reject it.'
+}
+foreach ($requiredQueueCompatibleMergeText in @(
+    'Queue-enabled path: omit --delete-branch because gh rejects it when native merge queue is enabled.',
+    'Queue-disabled path: rely on repository delete_branch_on_merge so cleanup occurs only after a verified merge.',
+    'Auto-merge enabled or queued for PR #${PR_NUMBER}.'
+)) {
+    if (-not $workflow.Contains($requiredQueueCompatibleMergeText)) {
+        throw "Workflow is missing queue-compatible merge command coverage: $requiredQueueCompatibleMergeText"
+    }
 }
 if ($workflow -notmatch 'mergeStateStatus' -or
     $workflow -notmatch 'pulls/\$\{PR_NUMBER\}/update-branch') {
@@ -318,7 +331,7 @@ foreach ($requiredDeliveryHoldText in @(
     }
 }
 $deliveryHoldDisableIndex = $workflow.IndexOf('gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --disable-auto')
-$autoMergeEnableIndex = $workflow.IndexOf('gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash --delete-branch')
+$autoMergeEnableIndex = $workflow.IndexOf($queueCompatibleMergeCommand)
 if ($deliveryHoldDisableIndex -lt 0 -or $autoMergeEnableIndex -lt 0 -or $deliveryHoldDisableIndex -gt $autoMergeEnableIndex) {
     throw 'Regression guard failed: delivery-hold must disable and stop auto-merge before any queued executor merge command.'
 }
