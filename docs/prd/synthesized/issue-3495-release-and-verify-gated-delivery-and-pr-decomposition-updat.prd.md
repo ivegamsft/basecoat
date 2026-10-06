@@ -13,7 +13,7 @@ labels: ["enhancement", "priority:medium", "needs-prd", "synthesize-spec"]
 
 Consumers pinned to a published release cannot receive fixes present only on
 `main`. The downstream readiness report
-[ss-control#189](https://github.com/IBuySpy-Dev/ss-control/issues/189) observed
+`IBuySpy-Dev/ss-control#189` (internal) observed
 feature intake treated as delivery consent and an oversized, single-PR batch
 while pinned to `v4.5.1`. Source #3495 requests release and installed-consumer
 verification, not another implementation of the already-merged fixes.
