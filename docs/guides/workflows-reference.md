@@ -518,8 +518,11 @@ inputs:
   - reviewer-routing automation effectiveness in live ready PRs
   - metadata hygiene surfaces
 - Opens/updates one remediation issue per repo when drift is present
-- Closes remediation issues when the repo returns to healthy state
-- Publishes an aggregate + per-repo scorecard issue with trend classification (`regression`, `improvement`, `stable`, `new`)
+- Keeps remediation issues open while any surface is unreadable or has an API error
+- Publishes measured drift and unknown-surface counts separately; unknown measurements produce an `unknown` trend rather than `stable`
+- Publishes an aggregate + per-repo scorecard issue with trend classification (`regression`, `improvement`, `stable`, `new`, `unknown`)
+
+**Downstream read access:** By default, the workflow uses its source-repository `GITHUB_TOKEN`; downstream 401/403/hidden-repo 404 results are reported as inaccessible, and other API errors are reported as unknown. To read targets across repositories, optionally configure `POST_ONBOARDING_DRIFT_READ_TOKEN` as a fine-grained PAT with read-only access to the target repositories: **Administration: read** (branch protection/rulesets), **Contents: read**, and **Pull requests: read**. Repository metadata read is implicit. The token is used only for downstream reads; source-repository scorecard and remediation issue writes remain on `GITHUB_TOKEN`. No token is created or granted automatically.
 
 **Configuration:**
 
