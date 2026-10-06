@@ -227,6 +227,9 @@ foreach ($workflow in @($workflowContent, $packageWorkflowContent)) {
   if ($workflow -match 'if \(sourceIssueNumber !== "" \|\| approvalCommentId !== ""\)') {
     throw "A delivery source issue without an approval comment must not activate pre-approval mode."
   }
+  if ($workflow -notmatch 'result\.should_run = "true";\s*result\.dry_run = "false";\s*result\.intent = deliveryDirective\.kind === "delivery"') {
+    throw "Accepted issue_comment intent directives must override the resolver default and run live."
+  }
 }
 
 $wawkrOutputJson = Join-Path $outputDirectory "summary-pilot-wawkr.json"

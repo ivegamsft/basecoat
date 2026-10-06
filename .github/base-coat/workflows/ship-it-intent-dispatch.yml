@@ -323,6 +323,7 @@ jobs:
               }
 
               result.should_run = "true";
+              result.dry_run = "false";
               result.intent = deliveryDirective.kind === "delivery"
                 ? deliveryDirective.intent
                 : "onboarding-conductor";
