@@ -77,6 +77,7 @@ nav:
     - Quickstart: getting-started.md
     - Enterprise Setup: guides/enterprise-setup.md
     - Solo-Developer Profile: guides/solo-dev-profile.md
+    - Spec-to-Production Pipeline: guides/spec-to-production.md
     - Consumer Sync Guide: guides/consumer-sync.md
     - Workflow Offboarding: guides/downstream-workflow-offboarding.md
     - Product Definition: reference/product.md

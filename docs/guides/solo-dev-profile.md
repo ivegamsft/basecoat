@@ -6,6 +6,9 @@ status checks, protected `main`, advisory automated feedback, and an auditable
 merge path. It simplifies operations; it does not weaken team profiles or
 authorize administrator bypass.
 
+For implemented transitions, labels, release tags, recovery cadence, measured
+delays and dated live-policy gaps, see [Spec-to-Production Pipeline](spec-to-production.md).
+
 ## Choose the right profile
 
 | Signal | `solo-dev` | `team-dev` | `regulated-team` |
@@ -13,7 +16,7 @@ authorize administrator bypass.
 | Active maintainers | One accountable maintainer | Two or more regular contributors | Any team with mandated separation of duties |
 | Routine independent review | Not required through `size:XL`; checks remain required | Required for medium and higher risk | Required for every risk tier |
 | XXL PR intent | One qualified human approval | Independent PR approval | Two independent PR approvals |
-| Merge queue | Deferred | Deferred | Required |
+| Merge queue | Deferred by default; may be enabled locally | Deferred | Required |
 | Production deployment | Autonomous after merge and required checks | Protected GitHub environment approval | Protected GitHub environment approval |
 | Best fit | True single-owner service with reliable CI | Shared ownership and normal team delivery | Regulated, security-sensitive, or audited delivery |
 
@@ -196,10 +199,12 @@ pwsh .github/base-coat/scripts/configure-downstream-workflows.ps1 `
   -KeepUnknownBc
 ```
 
-That workflow validates the supplied spec reference, applies the
-repository-standard `approved` label for a qualified `/approve` or
-`/spec-2-prod` directive, assigns the coding agent, and dispatches
-merge-eligibility reevaluation after the label is finalized.
+That workflow validates the supplied spec reference on the issue-side
+`/approve` path, applies `approved` and `copilot-agent`, attempts coding-agent
+assignment, and dispatches linked-PR reevaluation after labels are finalized.
+Verify the assignee: labels alone do not prove implementation started.
+`/spec-2-prod` belongs to `ship-it-intent-dispatch.yml` and requires an already
+approved source issue; it does not approve the issue itself.
 
 The exact `-Workflow` selector installs only the executor and its governance
 contracts. Targeted mode preserves every non-selected workflow; `-KeepUnknownBc`
@@ -208,8 +213,11 @@ mode also preserves existing consumer governance files so local check names and
 production paths are not overwritten. Review upstream governance changes and
 merge them into the consumer policy deliberately.
 
-The executor evaluates an existing PR and enables GitHub-native auto-merge with
-`gh pr merge --auto --squash --delete-branch`. It does not discover BaseCoat
+The executor evaluates an existing PR and requests GitHub-native auto-merge.
+At the 2026-10-06 audit baseline, its `--delete-branch` option is incompatible
+with an enabled native merge queue (tracked in #3574). Do not treat that command
+as a queue-compatible recipe; repository automatic branch deletion is a
+separate post-merge setting. It does not discover BaseCoat
 updates or create upgrade PRs. Keep consumer update detection and PR creation in
 the consumer updater lifecycle; do not duplicate that implementation here.
 

@@ -24,6 +24,8 @@ both remain valid.
 
 ## Related operational workflows
 
+- [Spec-to-Production Pipeline](./spec-to-production.md) for transition owners,
+  triage labels, approval directives, release tags, recovery timing and live gaps.
 - [Portfolio Audit Workflow](./portfolio-audit-workflow.md) for issue/PR dedupe, dependency traceability, feature grouping, and active project-link verification.
 - [Downstream Reviewer-Routing Audit](./downstream-reviewer-routing-audit.md) for cross-repo detection and escalation of missing or ineffective reviewer-routing automation.
 
@@ -42,7 +44,7 @@ testing and uses pinned action SHAs.
 | #185 | `.github/workflows/docs-link-checker.yml` | Nightly external docs link checks with report artifacts and issue updates |
 | #186 | `.github/workflows/skill-coverage-report.yml` | Scheduled report of skills missing `eval.yaml` coverage |
 | #187 | `.github/workflows/repo-health-check.yml` | Scheduled lint/validate/test health run with badge-ready status |
-| #188 | `.github/workflows/pr-size-labeler.yml` | Automatic PR size labels (`size:XS`..`size:XL`) from diff size |
+| #188 | `.github/workflows/pr-size-labeler.yml` | Automatic PR size labels (`size:XS`..`size:XXL`), excluding generated lockfile churn, and same-repo sprint coverage |
 | #189 | `.github/workflows/dependency-graph-pages.yml` | Generate dependency graph report and publish via docs PR flow |
 | #190 | `.github/workflows/reviewer-autoassign.yml` | Auto-request reviewers using changed-path commit history |
 | #1557 | `.github/workflows/pr-flow-hygiene.yml` | Event-driven PR readiness routing (`ready_for_review` + metadata transitions) plus weekly PR lifecycle audit summary |
