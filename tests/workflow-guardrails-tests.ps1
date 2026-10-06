@@ -783,6 +783,35 @@ else {
         $dependencyGraphWorkflow -notmatch 'git/refs/heads/') {
         $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (missing closed-PR cleanup for automation/dependency-graph branches)'
     }
+
+    foreach ($requiredField in @(
+        'Change scope: individual',
+        'Source issues: #${SOURCE_ISSUE}',
+        'Independently deliverable units: 1',
+        'Unit inventory: dependency graph report refresh',
+        'Expected files: ${expected_files}',
+        'Expected changed lines (additions + deletions): ${expected_lines}',
+        'Classification rationale:',
+        'Mechanical batch exception evidence: none'
+    )) {
+        if ($dependencyGraphWorkflow -notmatch [regex]::Escape($requiredField)) {
+            $stabilizationGuardrailIssues += "dependency-graph-pages.yml (missing automation PR Intake Contract field: $requiredField)"
+        }
+    }
+
+    if ($dependencyGraphWorkflow -notmatch [regex]::Escape('git diff --numstat origin/main...HEAD')) {
+        $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (automation PR body must compute intake counts from git diff --numstat)'
+    }
+
+    if ($dependencyGraphWorkflow -notmatch 'body-file' -or
+        $dependencyGraphWorkflow -notmatch 'gh pr edit .*--body-file' -or
+        $dependencyGraphWorkflow -notmatch 'skip-release-label-gate') {
+        $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (automation PR create/edit must use body-file and skip-release-label-gate)'
+    }
+
+    if ($dependencyGraphWorkflow -match 'Closes #189') {
+        $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (must not close merged PR #189 from automation PR body)'
+    }
 }
 
 $tokenInventoryWorkflowPath = Join-Path $workflowDir 'token-inventory.yml'
@@ -799,6 +828,37 @@ else {
     if ($tokenInventoryWorkflow -notmatch 'cleanup-automation-branch' -or
         $tokenInventoryWorkflow -notmatch 'git/refs/heads/') {
         $stabilizationGuardrailIssues += 'token-inventory.yml (missing closed-PR cleanup for automation/token-inventory)'
+    }
+
+    foreach ($requiredField in @(
+        'Change scope: individual',
+        'Source issues: #${SOURCE_ISSUE}',
+        'Independently deliverable units: 1',
+        'Unit inventory: token context inventory refresh',
+        'Expected files: ${EXPECTED_FILES}',
+        'Expected changed lines (additions + deletions): ${EXPECTED_LINES}',
+        'Classification rationale:',
+        'Mechanical batch exception evidence: none'
+    )) {
+        if ($tokenInventoryWorkflow -notmatch [regex]::Escape($requiredField)) {
+            $stabilizationGuardrailIssues += "token-inventory.yml (missing automation PR Intake Contract field: $requiredField)"
+        }
+    }
+
+    if ($tokenInventoryWorkflow -match '\[skip ci\]') {
+        $stabilizationGuardrailIssues += 'token-inventory.yml (automation commit message must not suppress CI)'
+    }
+
+    if ($tokenInventoryWorkflow -notmatch [regex]::Escape('GH_TOKEN: ${{ secrets.GH_AW_GITHUB_TOKEN || github.token }}') -or
+        $tokenInventoryWorkflow -notmatch [regex]::Escape('token: ${{ secrets.GH_AW_GITHUB_TOKEN || github.token }}')) {
+        $stabilizationGuardrailIssues += 'token-inventory.yml (automation must use GH_AW_GITHUB_TOKEN fallback convention for PR-triggering writes)'
+    }
+
+    if ($tokenInventoryWorkflow -notmatch [regex]::Escape('git diff --numstat origin/main...HEAD') -or
+        $tokenInventoryWorkflow -notmatch 'body-file' -or
+        $tokenInventoryWorkflow -notmatch 'gh pr edit .*--body-file' -or
+        $tokenInventoryWorkflow -notmatch 'skip-release-label-gate') {
+        $stabilizationGuardrailIssues += 'token-inventory.yml (automation PR create/edit must compute counts, refresh body, and add skip-release-label-gate)'
     }
 }
 

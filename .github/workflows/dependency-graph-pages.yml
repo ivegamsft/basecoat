@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
   pull-requests: write
 
 concurrency:
@@ -29,6 +30,7 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 0
+          token: ${{ secrets.GH_AW_GITHUB_TOKEN || github.token }}
 
       - name: Generate dependency graph report
         id: prepare
@@ -88,18 +90,73 @@ jobs:
         if: steps.prepare.outputs.should_open_pr == 'true'
         env:
           GH_TOKEN: ${{ secrets.GH_AW_GITHUB_TOKEN || github.token }}
+          SOURCE_ISSUE: "3528"
         shell: bash
         run: |
           set -euo pipefail
           branch="${{ steps.prepare.outputs.branch_name }}"
           title="docs(graph): refresh dependency graph report"
-          body="Automated refresh of \`docs/reports/dependency-graph.md\`.\n\nThis report is published to Pages via the docs deployment workflow after merge.\n\nCloses #189."
+          git fetch --no-tags origin main
+          read -r expected_files expected_lines < <(git diff --numstat origin/main...HEAD | awk '
+            BEGIN { files=0; lines=0 }
+            { files++; if ($1 ~ /^[0-9]+$/) lines += $1; if ($2 ~ /^[0-9]+$/) lines += $2 }
+            END { print files, lines }
+          ')
+          body_file=.automation-pr-body.md
+          sed 's/^          //' > "$body_file" <<EOF
+          # Summary
+
+          Automated refresh of \`docs/reports/dependency-graph.md\`. This report is published to Pages via the docs deployment workflow after merge.
+
+          Linked issue / spec: #${SOURCE_ISSUE}
+
+          ## Validation
+
+          | Proof / verification command or artifact | Result | Requirement covered |
+          |---|---|---|
+          | \`.github/workflows/dependency-graph-pages.yml\` generated \`docs/reports/dependency-graph.md\` | pending CI | Dependency graph report refreshed |
+
+          ## Intake Contract
+
+          ### Design
+
+          | Order of work | Files that change | Planned change / acceptance |
+          |---|---|---|
+          | 1 | \`docs/reports/dependency-graph.md\` | Refresh the generated dependency graph report. |
+
+          Change scope: individual
+          Source issues: #${SOURCE_ISSUE}
+          Independently deliverable units: 1
+          Unit inventory: dependency graph report refresh
+          Expected files: ${expected_files}
+          Expected changed lines (additions + deletions): ${expected_lines}
+          Classification rationale: Single generated documentation report refresh produced by the scheduled dependency graph workflow.
+          Mechanical batch exception evidence: none
+
+          ### Derived Classification
+
+          Use the current machine-derived labels/check output.
+
+          ## Governance
+
+          Governance reference: \`docs/reference/governance-contract.md\`
+
+          ## Risk and Rollout
+
+          - Risks / blast radius: Generated documentation-only report update.
+          - Rollout plan: Merge after required checks pass.
+          - Rollback plan: Revert the generated report refresh commit.
+
+          Related: #189
+          EOF
+          gh label create skip-release-label-gate --color ededed --description "Exempt automation-only PRs from release label gate" --force || true
 
           existing="$(gh pr list --state open --head "$branch" --json number --jq '.[0].number' || true)"
           if [[ -n "$existing" ]]; then
-            echo "PR #$existing already exists for branch $branch"
+            echo "Updating existing PR #$existing for branch $branch"
+            gh pr edit "$existing" --body-file "$body_file" --add-label skip-release-label-gate
           else
-            gh pr create --base main --head "$branch" --title "$title" --body "$body"
+            gh pr create --base main --head "$branch" --title "$title" --body-file "$body_file" --label skip-release-label-gate
           fi
 
           while read -r _ref; do
