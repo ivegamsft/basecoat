@@ -202,6 +202,10 @@ jobs:
             exit 0
           fi
 
+          if git ls-files --error-unmatch .github/CODEOWNERS >/dev/null 2>&1; then
+            printf '* @ivegamsft\n' > .github/CODEOWNERS
+          fi
+
           TARGETS=$(echo "$TEXT_FILES" | xargs grep -lI \
             -e 'IBuySpy-Shared/basecoat' \
             -e 'ibuyspy-shared\.github\.io/basecoat' \

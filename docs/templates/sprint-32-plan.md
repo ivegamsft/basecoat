@@ -24,14 +24,14 @@ description: "Sprint 32: Docs deduplication and cleanup"
 Must complete in sequence (Phase 1):
 
 - **#1368**: Fix 13 broken cross-references (BEFORE deleting redirects)
-  - Owner: @ibuyspy
+  - Owner: maintainer
   - Files: docs/agents/agents.md, behavioral-eval.md, agent-testing-harness.md (5 agents), docs/memory/index.md, shared-memory.md, triage.md, CONTRIBUTING.md, docs/operations/telemetry-adoption.md
   - Refs: Update UPPERCASE filename refs to lowercase
   - Est. effort: 30 min (find/replace + verification)
   - Verification: `python -m mkdocs build --strict` must pass
 
 - **#1367**: Delete 18 UPPERCASE redirect files
-  - Owner: @ibuyspy
+  - Owner: maintainer
   - Files: MODEL_OPTIMIZATION.md, RELEASE_PROCESS.md, TELEMETRY_ADOPTION_PHASE1.md, OPERATIONAL_RUNBOOK.md, SECRET_SCANNING.md, BRANCH_PROTECTION.md, ENTERPRISE_SECURITY_HARDENING.md, SQLITE_MEMORY.md, MEMORY_DESIGN.md, LEARNING_MODEL.md, SHARED_MEMORY_GUIDE.md, QUICK_REFERENCE.md, TOKEN_CONTEXT_INVENTORY.md, AGENT_TESTING_HARNESS.md, CONTEXT_ASSEMBLY_CONTRACT.md, BEHAVIORAL_EVAL.md, VS_CODE_HARNESS_BENCHMARKS.md, TOOLS_UI_CHAT_DEBUG_RUNBOOK.md
   - Est. effort: 15 min (git rm 18 files + verification)
   - Verification: `python -m mkdocs build --strict` must pass
@@ -43,13 +43,13 @@ Must complete in sequence (Phase 1):
 Unblock after Phase 1:
 
 - **#1369**: Rename 8 UPPERCASE reference files to lowercase
-  - Owner: @ibuyspy
+  - Owner: maintainer
   - Files: AGENTS.md→agents.md, TAXONOMY.md→taxonomy.md, MODEL-DISTRIBUTION.md→model-distribution.md, AGENT_RUNTIME_ENFORCEMENT.md→agent-runtime-enforcement.md, INVENTORY.md→inventory.md, GOVERNANCE.md→governance.md, DISTRIBUTION.md→distribution.md, HOOKS.md→hooks.md, PRODUCT.md→product.md
   - Est. effort: 20 min (git mv × 8 + verification)
   - Verification: `python -m mkdocs build --strict` must pass
 
 - **#1370**: Clarify and reorganize templates vs. examples taxonomy
-  - Owner: @ibuyspy
+  - Owner: maintainer
   - Issue: docs/templates/ has project scaffolds (basecoat-memory, repo-template) mixed with file templates
   - Actions:
     1. Document distinction in docs/templates/README.md and docs/examples/README.md
@@ -64,7 +64,7 @@ Unblock after Phase 1:
 After Phase 2:
 
 - **#1371**: Rename remaining generic README.md files to be descriptive
-  - Owner: @ibuyspy
+  - Owner: maintainer
   - Files:
     - .github/template-repos/basecoat-memory/basecoat-shared-memory-setup.md
     - docs/archive/repo_history/repo-history-index.md

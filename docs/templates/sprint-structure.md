@@ -20,17 +20,23 @@ This template enables sprint-planner agents to load backlog state once and reuse
 Use these sections to organize issues for consistent triaging:
 
 ### P1 Blockers (Release/Security)
+
 **Criteria**: Blocks release, breaks production, or is a security fix.
+
 - Template: `#NNNN: [fix|security] description (owner)`
 - Typical: 0–3 issues per sprint
 
 ### P2 Medium (Features/Docs/Refactor)
+
 **Criteria**: Improves experience, reduces technical debt, or enables future work.
+
 - Template: `#NNNN: [docs|refactor|chore] description (team)`
 - Typical: 8–15 issues per sprint
 
 ### P3 Low (Nice-to-have)
+
 **Criteria**: Hygiene, cleanup, or optimization without blocking value delivery.
+
 - Template: `#NNNN: [chore|docs] description (owner)`
 - Typical: 0–5 issues per sprint
 
@@ -38,7 +44,7 @@ Use these sections to organize issues for consistent triaging:
 
 Instead of re-listing 50+ issues, track **delta from prior sprint**:
 
-```
+```text
 ## Changes from Prior Sprint
 
 ### Moved In (new priorities):
@@ -111,20 +117,23 @@ Workflow:
 
 ## Sample Sprint (Reference)
 
-**Sprint 31: Cost Optimization Focus**
+### Sprint 31: Cost Optimization Focus
 
-### P1 Blockers:
+### P1 Blockers
+
 - #1352: fix: Restore PRODUCTION_REPO_TOKEN permissions (owner: infra team)
 
-### P2 Medium:
-- #1362: Create persistent sprint template (owner: @ibuyspy)
+### P2 Medium
+
+- #1362: Create persistent sprint template (owner: maintainer)
 - #1363: Add cost-tracking observability (owner: copilot-cli team)
-- #1361: Efficiency target tracking (owner: @ibuyspy)
+- #1361: Efficiency target tracking (owner: maintainer)
 - #1337: Add USE FOR / DO NOT USE FOR scope docs (~40 agents)
 - #1339: Downshift 20+ routine agents to gpt-5.4-mini
 - #1338: Remove /basecoat skill refs (~45 agents)
 
-### P3 Low:
+### P3 Low
+
 - #1340: Commit .vscode/settings.json (owner: dev-env team)
 - #1341: Add preflight template for long-run agents (docs)
 - #1342: Improve sprint-closeout-auditor instructions (docs)
@@ -142,12 +151,14 @@ Workflow:
 **How to Reference This Template in Future Sessions**:
 
 Instead of:
-```
+
+```text
 I need to plan the next sprint. Here's the full backlog [170k chars of issue titles]...
 ```
 
 Do:
-```
+
+```text
 /sprint-planner
 See: docs/templates/sprint-structure.md
 Apply delta from prior sprint: [issue list delta only, ~10 lines]

@@ -110,6 +110,14 @@ if ($prValidation -notmatch "git grep -inI -E 'ibuyspy-shared\|ibuyspy-dev\|@ibu
     throw 'pr-validation.yml must reject internal organization and account identifiers in the simulated public payload'
 }
 
+$sourceHandleMatches = @(
+    Get-ChildItem -Path (Join-Path $repoRoot 'docs\operations'), (Join-Path $repoRoot 'docs\templates') -Filter '*.md' -File -Recurse |
+        Select-String -Pattern '@ibuyspy'
+)
+if ($sourceHandleMatches.Count -ne 0) {
+    throw "docs/operations and docs/templates must not contain internal @ibuyspy handles: $($sourceHandleMatches -join '; ')"
+}
+
 $gettingStartedPath = Join-Path $repoRoot 'docs\getting-started.md'
 $gettingStarted = Get-Content $gettingStartedPath -Raw
 if ($gettingStarted -match 'IBuySpy-Shared/basecoat' -or
@@ -172,6 +180,7 @@ $sanitizeScriptLines = @(
 $scratchRoot = Join-Path $repoRoot ('test-results\publish-payload-' + [Guid]::NewGuid().ToString('N'))
 $locationPushed = $false
 try {
+    New-Item -ItemType Directory -Path (Join-Path $scratchRoot '.github') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $scratchRoot '.github\workflows') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $scratchRoot '.github\workflows\nested') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $scratchRoot '.github\instructions') -Force | Out-Null
@@ -182,6 +191,10 @@ try {
     New-Item -ItemType Directory -Path (Join-Path $scratchRoot 'instructions') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $scratchRoot 'scripts\adoption') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $scratchRoot 'skills\dotnet-modernization') -Force | Out-Null
+    Set-Content -Path (Join-Path $scratchRoot '.github\CODEOWNERS') -Value @(
+        '* @ibuyspy',
+        'docs/ @ibuyspy @ivegamsft'
+    )
     Set-Content -Path (Join-Path $scratchRoot '.github\workflows\docs.yml') -Value 'name: Public docs'
     Set-Content -Path (Join-Path $scratchRoot '.github\workflows\internal.yml') -Value 'name: Internal automation'
     Set-Content -Path (Join-Path $scratchRoot '.github\workflows\internal.md') -Value 'Internal agentic workflow source'
@@ -284,6 +297,10 @@ try {
     if ($mirroredWorkflows.Count -ne 1 -or $mirroredWorkflows[0] -ne '.github/workflows/docs.yml') {
         throw "Publish payload retained unexpected workflows: $($mirroredWorkflows -join ', ')"
     }
+    $publicCodeowners = Get-Content '.github\CODEOWNERS' -Raw
+    if ($publicCodeowners.Trim() -ne '* @ivegamsft') {
+        throw "Publish payload did not replace CODEOWNERS with the public owner: $publicCodeowners"
+    }
     if (Test-Path '.github\dependabot.yml') {
         throw 'Publish payload retained .github/dependabot.yml'
     }
@@ -344,7 +361,7 @@ try {
         throw 'Publish payload did not neutralize public skill attribution'
     }
 
-    $forbiddenMatches = @(git grep -inI -E 'ibuyspy-shared|ibuyspy-dev' -- .)
+    $forbiddenMatches = @(git grep -inI -E 'ibuyspy-shared|ibuyspy-dev|@ibuyspy' -- .)
     if ($forbiddenMatches.Count -ne 1 -or
         $forbiddenMatches[0] -ne 'LICENSE:3:Copyright (c) 2025 IBuySpy-Shared') {
         throw "Publish payload identifier allowlist mismatch: $($forbiddenMatches -join '; ')"

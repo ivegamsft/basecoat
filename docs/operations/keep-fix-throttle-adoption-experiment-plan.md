@@ -2,7 +2,7 @@
 
 **Issue:** [#2051](https://github.com/IBuySpy-Shared/basecoat/issues/2051)  
 **Parent Epic:** [#1452](https://github.com/IBuySpy-Shared/basecoat/issues/1452)  
-**Owner:** @ibuyspy  
+**Owner:** maintainer  
 **Experiment Window:** 4–6 weeks (2026-06-25 to 2026-08-06)
 
 ## Objective
