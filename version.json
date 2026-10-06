@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "4.5.2",
-  "releaseDate": "2026-09-20",
-  "notes": "Patch release: harden guidance ownership leases, Azure deploy authentication, and trusted workflow digest updates (#3423, #3405, #3446)."
+  "version": "4.6.0",
+  "releaseDate": "2026-10-06",
+  "notes": "Minor release candidate: separate feature intake from gated delivery, enforce batch decomposition, refresh installed consumer workflows, activate guarded merge-queue readiness, and harden distribution, ship-it, and automation refresh paths. Publication remains gated."
 }
