@@ -136,6 +136,18 @@ if ($workflowContent -notmatch "workflow_dispatch:") {
 if ($workflowContent -notmatch "ship-it-build-summary.json|build-break-summary.json") {
   throw "Build guard workflow should emit build-break summary artifacts."
 }
+if ($workflowContent -notmatch '\$\{\{ needs\.resolve-inputs\.outputs\.target_repo == github\.repository && github\.token \|\| secrets\.SHIP_IT_CROSS_REPO_TOKEN \}\}') {
+  throw "Build guard workflow must use github.token for same-repository targets and SHIP_IT_CROSS_REPO_TOKEN only for cross-repository targets."
+}
+if ($workflowContent -notmatch "HAS_CROSS_REPO_TOKEN: \$\{\{ secrets\.SHIP_IT_CROSS_REPO_TOKEN != '' \}\}") {
+  throw "Build guard workflow must expose whether SHIP_IT_CROSS_REPO_TOKEN is configured."
+}
+if ($workflowContent -notmatch '\$targetRepo -ne \$hostRepo -and -not \$hasCrossRepoToken') {
+  throw "Build guard workflow must fail fast when a cross-repository target lacks a cross-repo token."
+}
+if ($workflowContent -notmatch 'github\.token is scoped to \$hostRepo only') {
+  throw "Build guard workflow must explain why github.token cannot be used for cross-repository targets."
+}
 
 $detectorContent = Get-Content -Raw -Path $detectorScript
 if ($detectorContent -notmatch '\[AllowEmptyCollection\(\)\]\s*\r?\n\s*\[array\]\$FailureTrend') {

@@ -136,7 +136,11 @@ jobs:
       - name: Run build-break detector
         shell: pwsh
         env:
-          GH_TOKEN: ${{ github.token }}
+          # Always use the host github.token for same-repository targets.
+          # Cross-repository targets require the dedicated ship-it credential;
+          # if it is absent, GH_TOKEN is empty and the guard fails closed below.
+          GH_TOKEN: ${{ needs.resolve-inputs.outputs.target_repo == github.repository && github.token || secrets.SHIP_IT_CROSS_REPO_TOKEN }}
+          HAS_CROSS_REPO_TOKEN: ${{ secrets.SHIP_IT_CROSS_REPO_TOKEN != '' }}
           TARGET_REPO: ${{ needs.resolve-inputs.outputs.target_repo }}
           TARGET_BRANCH: ${{ needs.resolve-inputs.outputs.target_branch }}
           WORKFLOW_NAME: ${{ needs.resolve-inputs.outputs.workflow_name }}
@@ -145,8 +149,17 @@ jobs:
           CURRENT_RETRY_COUNT: ${{ needs.resolve-inputs.outputs.current_retry_count }}
           DRY_RUN: ${{ needs.resolve-inputs.outputs.dry_run }}
         run: |
+          $targetRepo = $env:TARGET_REPO
+          $hostRepo = $env:GITHUB_REPOSITORY
+          $hasCrossRepoToken = $env:HAS_CROSS_REPO_TOKEN -eq 'true'
+
+          if ($targetRepo -ne $hostRepo -and -not $hasCrossRepoToken) {
+            Write-Host "::error::Cross-repository ship-it build guard for $targetRepo requires the SHIP_IT_CROSS_REPO_TOKEN secret (a GitHub App or PAT with access to $targetRepo). github.token is scoped to $hostRepo only and cannot inspect runs, rerun workflows, or create escalation issues there. Configure SHIP_IT_CROSS_REPO_TOKEN, or dispatch with target_repo left as $hostRepo."
+            exit 1
+          }
+
           $params = @{
-            TargetRepo = $env:TARGET_REPO
+            TargetRepo = $targetRepo
             MaxAutoRetries = [int]$env:MAX_AUTO_RETRIES
             CurrentRetryCount = [int]$env:CURRENT_RETRY_COUNT
             OutputPath = 'test-results\ship-it\build-break-summary.json'
