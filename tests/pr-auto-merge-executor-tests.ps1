@@ -143,6 +143,16 @@ foreach ($unchangedSizeBoundary in @(
         throw "PR size-label boundaries must remain unchanged: $unchangedSizeBoundary"
     }
 }
+foreach ($requiredLockfileSizingText in @(
+    "const generatedLockfileNames = new Set(['package-lock.json']);",
+    'github.paginate(github.rest.pulls.listFiles',
+    'const totalChanges = Math.max(0, rawTotalChanges - lockfileChanges);',
+    "'Excluded generated lockfile changes'"
+)) {
+    if ($sizeLabeler -notmatch [regex]::Escape($requiredLockfileSizingText)) {
+        throw "PR size labeler must exclude generated lockfile churn from sized changes: $requiredLockfileSizingText"
+    }
+}
 foreach ($requiredReleaseLabelPollingText in @(
     'for (let attempt = 1; attempt <= 10; attempt += 1)',
     'Waiting for asynchronous PR labeling',

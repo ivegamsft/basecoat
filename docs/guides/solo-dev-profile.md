@@ -34,6 +34,9 @@ branch:
 - the auto-merge workflow uses GitHub auto-merge, never `--admin`
 - XS through XL pull requests require zero independent PR approvals
 - `size:XXL` pull requests require one qualified human approval
+- size labels exclude generated lockfile churn (`package-lock.json`,
+  `npm-shrinkwrap.json`, `yarn.lock`, `pnpm-lock.yaml`), which is gated by
+  `scripts/npm-lock-integrity.mjs` instead
 - governance policy, human-boundary, and canonical/distributed/downstream
   executor changes are always classified as critical
 - the executor's `BaseCoat merge eligibility` status is required as a
