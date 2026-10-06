@@ -48,13 +48,42 @@ if ($validateContent -notmatch 'fail_on_guidance_audit_errors:[\s\S]*?default:\s
 }
 
 # Contract 3: run-tests step must pass GuidanceAuditFailOnError explicitly.
-if ($validateContent -notmatch 'GuidanceAuditFailOnError:\$failOnGuidanceAuditErrors') {
+if ($validateContent -notmatch 'GuidanceAuditFailOnError:\$guidanceAuditArgument' -or
+    $validateContent -notmatch '\$guidanceAuditArgument = if \(\$failOnGuidanceAuditErrors\)') {
     $failures += 'validate-basecoat run-tests step must pass -GuidanceAuditFailOnError using workflow input'
 }
 
 # Contract 4: workflow_call path must branch on github.event_name.
 if ($validateContent -notmatch "if \('\$\{\{ github\.event_name \}\}' -eq 'workflow_call'\)") {
     $failures += 'validate-basecoat must branch workflow_call behavior for guidance audit gating'
+}
+
+$runnerContent = Get-Content (Join-Path $repoRoot 'tests\run-tests.ps1') -Raw
+foreach ($requiredText in @(
+    '  validate-windows:',
+    'runs-on: windows-latest',
+    'Run isolated Windows validation lanes',
+    '$guidanceAuditArgument = if ($failOnGuidanceAuditErrors)',
+    '-GuidanceAuditFailOnError:$guidanceAuditArgument -SkipSyncProcessTests',
+    '& pwsh -NoProfile -File tests/sync-tests.ps1',
+    'if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }',
+    "Name = 'core'",
+    "Name = 'sync'",
+    'Start-Process -FilePath pwsh',
+    'Wait-Process -Id ($processes.Process.Id)',
+    'Windows validation failed:',
+    'exit 1'
+)) {
+    if (-not $validateContent.Contains($requiredText)) {
+        $failures += "Windows sharding must preserve fail-closed coverage: $requiredText"
+    }
+}
+if ($validateContent.Contains('  windows-core:') -or $validateContent.Contains('  windows-sync:')) {
+    $failures += 'Windows validation must not depend on extra Windows jobs that can be abandoned before runner acquisition.'
+}
+if (-not $runnerContent.Contains('[switch]$SkipSyncProcessTests') -or
+    -not $runnerContent.Contains('if (-not $SkipSyncProcessTests) {')) {
+    $failures += 'The default local/full runner must continue to include sync process tests.'
 }
 
 if ($failures.Count -gt 0) {

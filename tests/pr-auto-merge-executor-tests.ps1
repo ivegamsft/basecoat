@@ -4,6 +4,10 @@ param()
 $ErrorActionPreference = 'Stop'
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
+& node --test (Join-Path $PSScriptRoot 'merge-latency-tests.cjs')
+if ($LASTEXITCODE -ne 0) {
+    throw 'Merge latency completion routing and check-state regressions failed.'
+}
 $workflowPath = Join-Path $repoRoot '.github\workflows\pr-auto-merge-executor.yml'
 $templatePath = Join-Path $repoRoot '.github\base-coat\workflows\pr-auto-merge-executor.yml'
 $humanBoundaryPath = Join-Path $repoRoot '.github\governance\human-approval-boundaries.json'
@@ -161,12 +165,16 @@ if ($workflow -notmatch '(?ms)pull_request_target:\s*\r?\n\s*branches:\s*\r?\n\s
 if ($workflow -notmatch '(?ms)pull_request_target:.*?types:.*?-\s*edited') {
     throw 'Workflow must reevaluate when PR title/body edits change linked issue evidence.'
 }
-if ($workflow -notmatch '(?ms)workflow_run:\s*\r?\n\s*workflows:\s*\r?\n\s*-\s*"BaseCoat - CI"\s*\r?\n\s*types:\s*\r?\n\s*-\s*completed') {
-    throw 'Workflow must reroute successful BaseCoat CI completion events to merge eligibility evaluation.'
+foreach ($workflowName in @(
+    'BaseCoat - CI', 'BaseCoat - Validate BaseCoat', 'BaseCoat - PR Validation',
+    'BaseCoat - Agent Merge', 'BaseCoat - PRD and Spec Gate'
+)) {
+    if ($workflow -notmatch ('(?ms)workflow_run:\s*\r?\n\s*workflows:.*?-\s*"' + [regex]::Escape($workflowName) + '".*?types:\s*\r?\n\s*-\s*completed')) {
+        throw "Workflow must reroute required workflow completion: $workflowName"
+    }
 }
 foreach ($requiredCiCompletionRoutingText in @(
     'route-ci-completion',
-    "github.event.workflow_run.conclusion == 'success'",
     "github.event.workflow_run.event == 'pull_request'",
     'github.event.workflow_run.head_repository.full_name == github.repository',
     'github.paginate(',
@@ -479,10 +487,9 @@ if ($workflow -notmatch "status\.creator\?\.login !== 'github-actions\[bot\]'" -
     $workflow -notmatch "check\.app\?\.id === githubActionsIntegrationId") {
     throw 'Workflow must accept required-check evidence only from the trusted GitHub Actions integration.'
 }
-if ($workflow -notmatch 'maxCheckPollAttempts\s*=\s*60' -or
-    $workflow -notmatch 'checkPollIntervalMs\s*=\s*15000' -or
-    $workflow -notmatch 'await new Promise\(resolve => setTimeout\(resolve, checkPollIntervalMs\)\)') {
-    throw 'Workflow must wait for pending required checks before publishing a terminal eligibility result.'
+if ($workflow -notmatch [regex]::Escape('const requiredCheckState = await readRequiredCheckState();') -or
+    $workflow -match 'maxCheckPollAttempts|checkPollIntervalMs|github\.event\.workflow_run\.conclusion == ''success''') {
+    throw 'Workflow must evaluate checks once and route both successful and failed completion events without long polling.'
 }
 if ($workflow -notmatch [regex]::Escape('if (existing && existing.startedAt > startedAt) continue;')) {
     throw 'Workflow must keep only the most recently started check run per name so a stale cancelled/failed rerun cannot clobber a newer passing result.'

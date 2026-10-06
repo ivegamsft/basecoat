@@ -1,5 +1,6 @@
 param(
-    [bool]$GuidanceAuditFailOnError = $true
+    [bool]$GuidanceAuditFailOnError = $true,
+    [switch]$SkipSyncProcessTests
 )
 
 $ErrorActionPreference = 'Stop'
@@ -141,12 +142,16 @@ finally {
     }
 }
 
-Write-Host 'Running sync process tests...'
-& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'sync-tests.ps1')
-if ($LASTEXITCODE -ne 0) {
-    Write-Host 'Sync process tests failed' -ForegroundColor Red
-    Write-FailureLog 'sync-tests'
-    exit 1
+if (-not $SkipSyncProcessTests) {
+    Write-Host 'Running sync process tests...'
+    & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'sync-tests.ps1')
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host 'Sync process tests failed' -ForegroundColor Red
+        Write-FailureLog 'sync-tests'
+        exit 1
+    }
+} else {
+    Write-Host 'Sync process tests run in the separate CI shard.'
 }
 
 Write-Host 'Running local Copilot dogfood projection tests...'

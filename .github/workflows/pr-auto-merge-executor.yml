@@ -28,6 +28,10 @@ on:
   workflow_run:
     workflows:
       - "BaseCoat - CI"
+      - "BaseCoat - Validate BaseCoat"
+      - "BaseCoat - PR Validation"
+      - "BaseCoat - Agent Merge"
+      - "BaseCoat - PRD and Spec Gate"
     types:
       - completed
   workflow_dispatch:
@@ -48,16 +52,15 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'workflow_run' && format('workflow-run-{0}', github.event.workflow_run.id) || github.event_name == 'issues' && format('issue-{0}', github.event.issue.number) || github.event_name == 'issue_comment' && format('comment-{0}', github.event.comment.id) || format('pr-{0}', github.event.pull_request.number || inputs.pr_number || github.ref) }}
-  # Cancel only when the PR head changes. Label/edit storms must not abort a
-  # live eligibility poll and leave BaseCoat merge eligibility unpublished.
+  # Cancel only when the PR head changes. Label/edit storms must not abort
+  # eligibility publication for the current snapshot.
   cancel-in-progress: ${{ github.event_name == 'pull_request_target' && contains(fromJSON('["opened","reopened","synchronize"]'), github.event.action) }}
 
 jobs:
   route-ci-completion:
-    name: Route successful CI completion
+    name: Route required workflow completion
     if: |
       github.event_name == 'workflow_run' &&
-      github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'pull_request' &&
       github.event.workflow_run.head_repository.full_name == github.repository
     runs-on: ubuntu-latest
@@ -1616,21 +1619,7 @@ jobs:
               return { unsatisfiedChecks, hasPendingChecks };
             };
 
-            const maxCheckPollAttempts = 60;
-            const checkPollIntervalMs = 15000;
-            let requiredCheckState;
-            for (let attempt = 1; attempt <= maxCheckPollAttempts; attempt += 1) {
-              requiredCheckState = await readRequiredCheckState();
-              if (requiredCheckState.unsatisfiedChecks.length === 0 || !requiredCheckState.hasPendingChecks) {
-                break;
-              }
-              if (attempt < maxCheckPollAttempts) {
-                core.info(
-                  `Waiting for required checks (${attempt}/${maxCheckPollAttempts}): ${requiredCheckState.unsatisfiedChecks.join('; ')}`
-                );
-                await new Promise(resolve => setTimeout(resolve, checkPollIntervalMs));
-              }
-            }
+            const requiredCheckState = await readRequiredCheckState();
             const unsatisfiedChecks = requiredCheckState?.unsatisfiedChecks || requiredChecks;
             if (unsatisfiedChecks.length > 0) {
               blockers.push(`Required checks not satisfied: ${unsatisfiedChecks.join('; ')}`);

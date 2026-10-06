@@ -183,27 +183,75 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
-      - name: Validate with PowerShell
-        shell: pwsh
-        run: ./scripts/validate-basecoat.ps1
-
-      - name: Run PowerShell test suite
+      - name: Run isolated Windows validation lanes
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Path test-results -Force | Out-Null
+
           $failOnGuidanceAuditErrors = $true
           if ('${{ github.event_name }}' -eq 'workflow_call') {
             $failOnGuidanceAuditErrors = [System.Convert]::ToBoolean('${{ inputs.fail_on_guidance_audit_errors }}')
           } elseif ('${{ github.event_name }}' -eq 'pull_request' -or ('${{ github.event_name }}' -eq 'workflow_dispatch' -and '${{ github.ref_name }}' -ne 'main')) {
             $failOnGuidanceAuditErrors = $false
           }
-          ./tests/run-tests.ps1 -GuidanceAuditFailOnError:$failOnGuidanceAuditErrors
+          $guidanceAuditArgument = if ($failOnGuidanceAuditErrors) { '$true' } else { '$false' }
 
-      - name: Registry metadata freshness check (blocking)
-        shell: pwsh
-        run: ./scripts/validate-basecoat.ps1 -Strict
+          @"
+          `$ErrorActionPreference = 'Stop'
+          ./scripts/validate-basecoat.ps1
+          ./tests/run-tests.ps1 -GuidanceAuditFailOnError:$guidanceAuditArgument -SkipSyncProcessTests
+          ./scripts/validate-basecoat.ps1 -Strict
+          ./scripts/check-coherence.ps1 -Strict -Category conflicts
+          "@ | Set-Content -Path test-results/windows-core.ps1 -Encoding UTF8
 
-      - name: Coherence check (blocking)
-        shell: pwsh
-        run: ./scripts/check-coherence.ps1 -Strict -Category conflicts
+          @'
+          $ErrorActionPreference = 'Stop'
+          & pwsh -NoProfile -File tests/sync-tests.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          '@ | Set-Content -Path test-results/windows-sync.ps1 -Encoding UTF8
+
+          $lanes = @(
+            @{ Name = 'core'; Script = 'test-results/windows-core.ps1'; Output = 'test-results/windows-core.out.log'; Error = 'test-results/windows-core.err.log' },
+            @{ Name = 'sync'; Script = 'test-results/windows-sync.ps1'; Output = 'test-results/windows-sync.out.log'; Error = 'test-results/windows-sync.err.log' }
+          )
+          $processes = foreach ($lane in $lanes) {
+            $process = Start-Process -FilePath pwsh -ArgumentList @('-NoProfile', '-File', $lane.Script) `
+              -RedirectStandardOutput $lane.Output `
+              -RedirectStandardError $lane.Error `
+              -NoNewWindow `
+              -PassThru
+            [PSCustomObject]@{
+              Name = $lane.Name
+              Process = $process
+              Output = $lane.Output
+              Error = $lane.Error
+            }
+          }
+
+          Wait-Process -Id ($processes.Process.Id)
+          $failed = @()
+          foreach ($lane in $processes) {
+            Write-Host "::group::Windows $($lane.Name) lane output"
+            if (Test-Path $lane.Output) { Get-Content $lane.Output }
+            if (Test-Path $lane.Error) { Get-Content $lane.Error }
+            Write-Host "::endgroup::"
+            if ($lane.Process.ExitCode -ne 0) {
+              $failed += "$($lane.Name)=$($lane.Process.ExitCode)"
+            }
+          }
+          if ($failed.Count -gt 0) {
+            Write-Host "::error::Windows validation failed: $($failed -join ', ')"
+            exit 1
+          }
+
+      - name: Upload Windows failure evidence
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: windows-validation-failure
+          path: test-results/*.log
+          retention-days: 7
+          if-no-files-found: warn

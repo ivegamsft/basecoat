@@ -21,7 +21,7 @@ Establish a consistent, auditable baseline for main branch protection that preve
 The following status checks **must pass** before a pull request can be merged to `main`:
 
 | Check | Description | Purpose |
-|-------|-------------|---------|
+| --- | --- | --- |
 | `lint-and-validate` | Linting and repository validation | Catch lint errors and enforce repo standards |
 | `test` | Test suite | Catch regressions and quality issues |
 | `validate-commit-messages` | Commit message format validation | Enforce conventional commits |
@@ -31,6 +31,20 @@ The following status checks **must pass** before a pull request can be merged to
 
 Additional checks may run and fail without blocking merge (advisory-only checks), but the
 above six are required for all PRs to `main`.
+
+`validate-windows` is a fail-closed Windows job that starts isolated core and
+sync validation lanes on one Windows runner. It succeeds only when both lanes
+succeed, including on merge-group commits. Failed lanes block the required
+check, while avoiding a second Windows-hosted runner acquisition that can be
+abandoned before tests start. The normal `pwsh tests/run-tests.ps1` command
+still includes all suites; `-SkipSyncProcessTests` is reserved for the core CI
+lane, paired with the concurrent `tests/sync-tests.ps1` lane.
+
+Merge eligibility evaluates the current checks once rather than occupying a
+runner while checks finish. Completion of CI, Validate BaseCoat, PR Validation,
+Agent Merge, or PRD and Spec Gate reroutes eligible current-head PRs for a fresh
+evaluation, including failed completions. Pending checks remain pending; no
+required checks or exact merge-group validation are bypassed.
 
 Repositories enabling `solo-dev` self-merge must additionally require the
 `BaseCoat merge eligibility` commit status. They must not require an
