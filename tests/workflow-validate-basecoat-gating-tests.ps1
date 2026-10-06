@@ -59,14 +59,16 @@ if ($validateContent -notmatch "if \('\$\{\{ github\.event_name \}\}' -eq 'workf
 }
 
 $runnerContent = Get-Content (Join-Path $repoRoot 'tests\run-tests.ps1') -Raw
+$laneRunnerContent = Get-Content (Join-Path $repoRoot 'scripts\run-windows-validation-lane.ps1') -Raw
 foreach ($requiredText in @(
     '  validate-windows:',
     'runs-on: windows-latest',
     'Run isolated Windows validation lanes',
     '$guidanceAuditArgument = if ($failOnGuidanceAuditErrors)',
-    '-GuidanceAuditFailOnError:$guidanceAuditArgument -SkipSyncProcessTests',
-    '& pwsh -NoProfile -File tests/sync-tests.ps1',
-    'if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }',
+    '-LaneName core -GuidanceAuditFailOnError:$guidanceAuditArgument',
+    '-LaneName sync',
+    'scripts/run-windows-validation-lane.ps1',
+    'exit $LASTEXITCODE',
     "Name = 'core'",
     "Name = 'sync'",
     'Start-Process -FilePath pwsh',
@@ -84,6 +86,18 @@ if ($validateContent.Contains('  windows-core:') -or $validateContent.Contains('
 if (-not $runnerContent.Contains('[switch]$SkipSyncProcessTests') -or
     -not $runnerContent.Contains('if (-not $SkipSyncProcessTests) {')) {
     $failures += 'The default local/full runner must continue to include sync process tests.'
+}
+foreach ($requiredText in @(
+    '& .\scripts\validate-basecoat.ps1',
+    '& .\tests\run-tests.ps1 -GuidanceAuditFailOnError:$GuidanceAuditFailOnError -SkipSyncProcessTests',
+    '& .\scripts\validate-basecoat.ps1 -Strict',
+    '& .\scripts\check-coherence.ps1 -Strict -Category conflicts',
+    '& pwsh -NoProfile -File tests\sync-tests.ps1',
+    'exit $result.ExitCode'
+)) {
+    if (-not $laneRunnerContent.Contains($requiredText)) {
+        $failures += "Windows lane runner must preserve validation command: $requiredText"
+    }
 }
 
 if ($failures.Count -gt 0) {

@@ -943,6 +943,7 @@ $additionalSuites = @(
     'skill-compatibility-frontmatter-tests.ps1',
     'update-agent-metadata-tests.ps1',
     'update-metadata-model-fallback-tests.ps1',
+    'validate-windows-lane-exit-tests.ps1',
     'workflow-validate-basecoat-gating-tests.ps1'
 )
 foreach ($suite in $additionalSuites) {

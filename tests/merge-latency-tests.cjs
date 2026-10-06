@@ -9,6 +9,8 @@ const workflow = fs.readFileSync(path.join(root, '.github/workflows/pr-auto-merg
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 const validation = fs.readFileSync(path.join(root, '.github/workflows/validate-basecoat.yml'), 'utf8')
   .replace(/\r\n/g, '\n');
+const windowsLaneRunner = fs.readFileSync(path.join(root, 'scripts/run-windows-validation-lane.ps1'), 'utf8')
+  .replace(/\r\n/g, '\n');
 
 test('Windows validation keeps the required check on one Windows runner', () => {
   const validateWindows = validation.split('  validate-windows:')[1];
@@ -19,8 +21,11 @@ test('Windows validation keeps the required check on one Windows runner', () => 
   assert.ok(validateWindows.includes("Name = 'sync'"));
   assert.ok(validateWindows.includes('Start-Process -FilePath pwsh'));
   assert.ok(validateWindows.includes('Wait-Process -Id ($processes.Process.Id)'));
-  assert.ok(validateWindows.includes('-SkipSyncProcessTests'));
-  assert.ok(validateWindows.includes('tests/sync-tests.ps1'));
+  assert.ok(validateWindows.includes('scripts/run-windows-validation-lane.ps1'));
+  assert.ok(validateWindows.includes('-LaneName core'));
+  assert.ok(validateWindows.includes('-LaneName sync'));
+  assert.ok(windowsLaneRunner.includes('-SkipSyncProcessTests'));
+  assert.ok(windowsLaneRunner.includes('tests\\sync-tests.ps1'));
   assert.ok(validateWindows.includes('Windows validation failed:'));
 });
 const routing = workflow.split('  route-ci-completion:')[1].split('  route-pr-acknowledgement:')[0];

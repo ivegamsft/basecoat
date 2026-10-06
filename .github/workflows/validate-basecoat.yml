@@ -201,16 +201,14 @@ jobs:
 
           @"
           `$ErrorActionPreference = 'Stop'
-          ./scripts/validate-basecoat.ps1
-          ./tests/run-tests.ps1 -GuidanceAuditFailOnError:$guidanceAuditArgument -SkipSyncProcessTests
-          ./scripts/validate-basecoat.ps1 -Strict
-          ./scripts/check-coherence.ps1 -Strict -Category conflicts
+          & pwsh -NoProfile -File scripts/run-windows-validation-lane.ps1 -LaneName core -GuidanceAuditFailOnError:$guidanceAuditArgument
+          exit `$LASTEXITCODE
           "@ | Set-Content -Path test-results/windows-core.ps1 -Encoding UTF8
 
           @'
           $ErrorActionPreference = 'Stop'
-          & pwsh -NoProfile -File tests/sync-tests.ps1
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & pwsh -NoProfile -File scripts/run-windows-validation-lane.ps1 -LaneName sync
+          exit $LASTEXITCODE
           '@ | Set-Content -Path test-results/windows-sync.ps1 -Encoding UTF8
 
           $lanes = @(
