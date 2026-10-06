@@ -4,9 +4,13 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
   issues: read
   pull-requests: read
   copilot-requests: write
+tools:
+  github:
+    toolsets: [default, actions]
 safe-outputs:
   create-issue:
     max: 1
@@ -32,19 +36,24 @@ that the team can use to celebrate wins and drive improvement.
 
 ### Step 1 — Gather Data
 
-Collect the following from the past 7 days using `gh` CLI:
+Collect the following from the past 7 days using the GitHub MCP tools
+(the `gh` CLI is not authenticated inside the agent sandbox). Compute the
+cutoff date as today minus 7 days in `YYYY-MM-DD` form:
 
-1. **Merged PRs** — `gh pr list --state merged --search "merged:>$(date -d '7 days ago' +%Y-%m-%d)" --json number,title,author,mergedAt,additions,deletions`
-2. **Closed issues** — `gh issue list --state closed --search "closed:>$(date -d '7 days ago' +%Y-%m-%d)" --json number,title,labels,closedAt`
-3. **New issues opened** — `gh issue list --state open --search "created:>$(date -d '7 days ago' +%Y-%m-%d)" --json number,title,labels,createdAt`
+1. **Merged PRs** — search pull requests with `repo:${{ github.repository }} is:pr is:merged merged:>CUTOFF`; record number, title, author, merged date, additions, deletions
+2. **Closed issues** — search issues with `repo:${{ github.repository }} is:issue is:closed closed:>CUTOFF`; record number, title, labels, closed date
+3. **New issues opened** — search issues with `repo:${{ github.repository }} is:issue created:>CUTOFF`; record number, title, labels, created date
 4. **CI status** — Compute pass rate from recent workflow runs:
-   - Fetch runs: `gh run list --limit 20 --json status,conclusion,name,createdAt`
+   - Fetch runs: use the `actions` toolset to list the 20 most recent workflow runs for the repository (status, conclusion, name, created date)
    - Measurable runs are those with `status == "completed"` and non-empty `conclusion`
    - Successful runs are measurable runs with `conclusion == "success"`
    - **Pass-rate formula**: `CI pass rate = successful_runs / measurable_runs * 100`
    - Round to the nearest whole percent and report as `X/Y (Z%)` where `X=successful_runs` and `Y=measurable_runs`
    - If `Y = 0`, report `0/0 (N/A)` (do not report "Not available" when run data exists)
-5. **Releases** — `gh release list --limit 5 --json tagName,publishedAt,name`
+5. **Releases** — list the 5 most recent releases (tag, name, published date) with the GitHub MCP tools
+
+If a data source cannot be read, state that it is unavailable in the
+retrospective instead of reporting zero values.
 
 ### Step 2 — Synthesize the Retrospective
 
