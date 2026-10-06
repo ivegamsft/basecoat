@@ -18,7 +18,7 @@ for (const file of [
   for (const scenario of [
     'eligible', 'shared-head', 'fork', 'stale', 'closed', 'advanced', 'unassociated',
     'wrong-event', 'already-approved', 'changed-run-head', 'changed-association',
-    'removed-association', 'changed-event', 'forbidden', 'api-error'
+    'removed-association', 'changed-event', 'forbidden', 'approved-race', 'api-error'
   ]) {
     test(`${file}: ${scenario}`, async () => {
       const approvals = [];
@@ -49,9 +49,10 @@ for (const file of [
             listWorkflowRunsForRepo() {},
             getWorkflowRun: async () => ({ data: currentRun }),
             approveWorkflowRun: async ({ run_id }) => {
-              if (scenario === 'forbidden' || scenario === 'api-error') {
+              if (scenario === 'forbidden' || scenario === 'approved-race' || scenario === 'api-error') {
+                if (scenario === 'approved-race') currentRun.conclusion = 'success';
                 throw Object.assign(new Error('approval failed'), {
-                  status: scenario === 'forbidden' ? 403 : 500
+                  status: scenario === 'api-error' ? 500 : 403
                 });
               }
               approvals.push(run_id);
@@ -62,7 +63,7 @@ for (const file of [
           ? (scenario === 'shared-head' ? [pr, { ...pr, number: 3533 }] : [pr]) : [run]
       };
       const invocation = () => execute(github, { repo: { owner: 'owner', repo: 'repo' } },
-        { setFailed: message => failures.push(message) });
+        { setFailed: message => failures.push(message), info() {} });
       if (scenario === 'api-error') {
         await assert.rejects(invocation, /approval failed/);
       } else {

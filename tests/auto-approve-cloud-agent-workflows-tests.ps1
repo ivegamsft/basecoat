@@ -96,7 +96,10 @@ foreach ($entry in @(
         'currentPullRequest.head.sha !== run.head_sha',
         "currentRun.conclusion !== 'action_required'",
         "run.event !== 'pull_request'", 'run.pull_requests?.find',
-        'core.setFailed(`Cannot approve run'
+        'core.setFailed(`Cannot approve run',
+        'group: approval-recovery-${{ github.repository }}',
+        'cancel-in-progress: false',
+        "afterFailure.conclusion !== 'action_required'"
     )) {
         if (-not $sweep.Contains($required)) { throw "$name missing approval recovery contract: $required" }
     }

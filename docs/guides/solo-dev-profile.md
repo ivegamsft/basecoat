@@ -70,8 +70,10 @@ PR events and completion of spec synthesis, token inventory, dependency graph,
 or model catalog automation trigger a held-run sweep. The 15-minute schedule
 is a fallback, not a delivery guarantee: GitHub can delay scheduled execution.
 The sweep revalidates open PR membership, repository, and current head before
-approving; fork runs remain held. Approval permission errors fail the workflow
-rather than reporting a successful recovery.
+approving; fork runs remain held. Sweeps share a repository-wide concurrency
+group to avoid duplicate approval requests. A rejected request is rechecked:
+if the run still requires approval, permission errors fail the workflow rather
+than reporting a successful recovery.
 
 To recover without waiting for cron, dispatch the installed auto-approval
 workflow on the trusted default branch, for example:

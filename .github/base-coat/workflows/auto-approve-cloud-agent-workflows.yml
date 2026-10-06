@@ -353,6 +353,9 @@ jobs:
             }
 
   approve-pending-automation-runs:
+    concurrency:
+      group: approval-recovery-${{ github.repository }}
+      cancel-in-progress: false
     if: |
       github.event_name == 'schedule' ||
       github.event_name == 'workflow_dispatch' ||
@@ -450,7 +453,14 @@ jobs:
                 console.log(`Approved run ${run.id} (${run.name}) for PR #${prNumber}.`);
               } catch (error) {
                 if (error.status === 403) {
-                  core.setFailed(`Cannot approve run ${run.id}: insufficient permissions.`);
+                  const { data: afterFailure } = await github.rest.actions.getWorkflowRun({
+                    owner, repo, run_id: run.id
+                  });
+                  if (afterFailure.conclusion !== 'action_required') {
+                    core.info(`Run ${run.id} no longer requires approval; another reconciler completed it.`);
+                  } else {
+                    core.setFailed(`Cannot approve run ${run.id}: insufficient permissions.`);
+                  }
                 } else {
                   throw error;
                 }
