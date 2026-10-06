@@ -2,19 +2,26 @@
 
 Describe the change and user impact.
 
+Linked issue / spec: TBD
+<!-- Link the source issue and its approved spec. Intent, RCA, alternatives, and priority live there; do not copy them into this PR. -->
+
 ## Validation
 
-List how you validated the change.
+| Proof / verification command or artifact | Result | Requirement covered |
+|---|---|---|
+| | | |
+
+<!-- Include exact commands and outcomes or artifact links. State what was not run and why; do not claim source tests prove deployed behavior. -->
 
 ## Intake Contract
 
-### RCA
-
-<!-- Root cause or failure mode that justified the change. If not applicable, write N/A and why. -->
-
 ### Design
 
-<!-- Proposed design or implementation shape. If not applicable, write N/A and why. -->
+<!-- Plan and diff contract only. The scope fields below remain required by automated decomposition validation. -->
+
+| Order of work | Files that change | Planned change / acceptance |
+|---|---|---|
+| 1 | | |
 
 Change scope: TBD
 Source issues: TBD
@@ -37,23 +44,11 @@ line in their latest APPROVED review on the current head:
 Batch exception: <40-character-head-sha> <64-character-evidence-sha256>
 -->
 
-### Debate
+### Derived Classification
 
-<!-- Alternatives considered and why this approach won. If not applicable, write N/A and why. -->
-
-### PRD and Spec References
-
-- PRD: <link or N/A with rationale>
-- Spec: <link or N/A with rationale>
-
-### Planning Metadata
-
-| Field | Value |
-|---|---|
-| Target sprint | |
-| Priority | |
-| Expected change size | small / medium / large |
-| Risky-path indicator | yes / no |
+Use the current machine-derived `size:*`, `type:*`, `priority:*`, and risk-tier
+labels/check output. Do not retype their values or select a manual change-size
+or risk-tier value here; source planning metadata remains in the linked issue.
 
 ## Governance
 
@@ -63,6 +58,6 @@ Batch exception: <40-character-head-sha> <64-character-evidence-sha256>
 
 ## Risk and Rollout
 
-- Risk level:
+- Risks / blast radius:
 - Rollout plan:
 - Rollback plan:

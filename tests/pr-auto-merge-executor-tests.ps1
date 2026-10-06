@@ -66,6 +66,31 @@ foreach ($scopeField in @(
     }
 }
 
+foreach ($prTemplate in @($rootPrTemplate, $managedPrTemplate)) {
+    foreach ($planField in @(
+        'Linked issue / spec: TBD',
+        'Order of work',
+        'Files that change',
+        'Proof / verification command or artifact',
+        'Requirement covered',
+        'Risks / blast radius:',
+        'machine-derived `size:*`, `type:*`, `priority:*`, and risk-tier'
+    )) {
+        if (-not $prTemplate.Contains($planField)) {
+            throw "PR plan/proof contract is missing: $planField"
+        }
+    }
+    if ($prTemplate -match '(?m)^### (RCA|Debate|Planning Metadata|PRD and Spec References)\s*$') {
+        throw 'PR templates must link source intent rather than re-collect issue planning fields.'
+    }
+    if ([regex]::Matches($prTemplate, '(?m)^### Design\s*$').Count -ne 1) {
+        throw 'PR templates must retain exactly one machine-consumed Design section.'
+    }
+}
+if ($rootPrTemplate.Replace('docs/reference/governance-contract.md', '.github/base-coat/docs/reference/governance-contract.md') -ne $managedPrTemplate) {
+    throw 'Root and distributed PR plan/proof templates must differ only by installed governance reference.'
+}
+
 if ($workflow -ne $template) {
     throw 'Workflow template mismatch: .github/workflows and .github/base-coat/workflows copies must be identical.'
 }
@@ -839,8 +864,24 @@ const {
   MAX_FILES,
   MAX_LINES,
   evaluateDecomposition,
+  parseScope,
   reviewSnapshotDigest
 } = require(process.env.DECOMPOSITION_EVALUATOR);
+
+for (const templatePath of [process.env.ROOT_PR_TEMPLATE, process.env.MANAGED_PR_TEMPLATE]) {
+  const body = fs.readFileSync(templatePath, 'utf8')
+    .replace('Change scope: TBD', 'Change scope: individual')
+    .replace('Source issues: TBD', 'Source issues: #3399')
+    .replace('Independently deliverable units: TBD', 'Independently deliverable units: 1')
+    .replace('Unit inventory: TBD', 'Unit inventory: linked PR plan and proof')
+    .replace('Expected files: TBD', 'Expected files: 3')
+    .replace('Expected changed lines (additions + deletions): TBD', 'Expected changed lines (additions + deletions): 120')
+    .replace('Classification rationale: TBD', 'Classification rationale: one plan/proof contract with regression coverage');
+  const scope = parseScope(body);
+  assert.equal(scope.scope, 'individual', 'filled plan/proof template must retain the decomposition contract');
+  assert.deepEqual(scope.sourceIssues, [3399]);
+  assert.equal(scope.units, 1);
+}
 
 const headSha = 'a'.repeat(40);
 const baseSha = 'b'.repeat(40);
@@ -1195,6 +1236,8 @@ const evaluate = async ({
 '@
     Set-Content -Path $decompositionHarnessPath -Value $decompositionHarness -Encoding UTF8
     $env:DECOMPOSITION_EVALUATOR = $decompositionEvaluatorPath
+    $env:ROOT_PR_TEMPLATE = $rootPrTemplatePath
+    $env:MANAGED_PR_TEMPLATE = $managedPrTemplatePath
     $env:SIZE_LABELER_PATH = $sizeLabelerPath
     & node $decompositionHarnessPath
     if ($LASTEXITCODE -ne 0) {
@@ -1208,6 +1251,8 @@ const evaluate = async ({
     }
     Remove-Item Env:\INSTALLED_EXECUTOR_PATH -ErrorAction SilentlyContinue
     Remove-Item Env:\DECOMPOSITION_EVALUATOR -ErrorAction SilentlyContinue
+    Remove-Item Env:\ROOT_PR_TEMPLATE -ErrorAction SilentlyContinue
+    Remove-Item Env:\MANAGED_PR_TEMPLATE -ErrorAction SilentlyContinue
     Remove-Item Env:\SIZE_LABELER_PATH -ErrorAction SilentlyContinue
     if (Test-Path $scratchRoot) {
         Remove-Item -Path $scratchRoot -Recurse -Force
