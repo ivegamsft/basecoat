@@ -12,42 +12,42 @@ export enum UserRole {
 @Entity('users')
 export class User {
   @PrimaryColumn('uuid')
-  id: string = uuidv4();
+    id: string = uuidv4();
 
   @Column('varchar', { unique: true })
-  email: string;
+    email: string;
 
   @Column('varchar')
-  name: string;
+    name: string;
 
   @Column('varchar')
-  passwordHash: string;
+    passwordHash: string;
 
   @Column({
     type: 'enum',
     enum: UserRole,
     default: UserRole.VIEWER,
   })
-  role: UserRole;
+    role: UserRole;
 
   @Column('varchar', { nullable: true })
-  avatarUrl: string;
+    avatarUrl: string;
 
   @Column('boolean', { default: false })
-  emailVerified: boolean;
+    emailVerified: boolean;
 
   @Column('varchar', { nullable: true })
-  githubId: string;
+    githubId: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+    createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+    updatedAt: Date;
 
   @Column('timestamp', { nullable: true })
-  lastLoginAt: Date;
+    lastLoginAt: Date;
 
   @OneToMany(() => Audit, (audit) => audit.createdBy)
-  audits: Audit[];
+    audits: Audit[];
 }

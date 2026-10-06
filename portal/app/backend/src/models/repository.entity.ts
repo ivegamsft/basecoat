@@ -13,42 +13,42 @@ export enum ComplianceLevel {
 @Entity('repositories')
 export class Repository {
   @PrimaryColumn('uuid')
-  id: string = uuidv4();
+    id: string = uuidv4();
 
   @Column('varchar')
-  name: string;
+    name: string;
 
   @Column('varchar')
-  url: string;
+    url: string;
 
   @Column('uuid')
-  teamId: string;
+    teamId: string;
 
   @ManyToOne(() => Team)
-  team: Team;
+    team: Team;
 
   @Column('boolean', { default: false })
-  isPrivate: boolean;
+    isPrivate: boolean;
 
   @Column('varchar', { nullable: true })
-  language: string;
+    language: string;
 
   @Column({
     type: 'enum',
     enum: ComplianceLevel,
     default: ComplianceLevel.LEVEL1,
   })
-  complianceLevel: ComplianceLevel;
+    complianceLevel: ComplianceLevel;
 
   @Column('timestamp', { nullable: true })
-  lastAuditAt: Date;
+    lastAuditAt: Date;
 
   @CreateDateColumn()
-  createdAt: Date;
+    createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+    updatedAt: Date;
 
   @OneToMany(() => Audit, (audit) => audit.repository)
-  audits: Audit[];
+    audits: Audit[];
 }

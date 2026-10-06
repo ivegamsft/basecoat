@@ -173,7 +173,7 @@ export class AuditService {
     reference?: string;
   }) {
     try {
-      const audit = await this.getAudit(auditId);
+      await this.getAudit(auditId);
 
       const finding = this.findingRepository.create({
         auditId,

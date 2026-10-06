@@ -1,6 +1,6 @@
 import { AuditService } from '@services/audit.service';
 import { AppDataSource } from '@config/database';
-import { NotFoundError, ValidationError } from '@utils/errors';
+import { NotFoundError } from '@utils/errors';
 import { Audit, AuditStatus, AuditType } from '@models/audit.entity';
 import { User, UserRole } from '@models/user.entity';
 import { Repository as RepositoryEntity, ComplianceLevel } from '@models/repository.entity';

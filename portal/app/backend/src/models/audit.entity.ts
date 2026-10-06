@@ -21,48 +21,48 @@ export enum AuditStatus {
 @Entity('audits')
 export class Audit {
   @PrimaryColumn('uuid')
-  id: string = uuidv4();
+    id: string = uuidv4();
 
   @Column('uuid')
-  repositoryId: string;
+    repositoryId: string;
 
   @ManyToOne(() => Repository, (repo) => repo.audits)
-  repository: Repository;
+    repository: Repository;
 
   @Column('uuid')
-  createdById: string;
+    createdById: string;
 
   @ManyToOne(() => User, (user) => user.audits)
-  createdBy: User;
+    createdBy: User;
 
   @Column({
     type: 'enum',
     enum: AuditType,
   })
-  type: AuditType;
+    type: AuditType;
 
   @Column({
     type: 'enum',
     enum: AuditStatus,
     default: AuditStatus.PENDING,
   })
-  status: AuditStatus;
+    status: AuditStatus;
 
   @Column('jsonb', { nullable: true })
-  metadata: Record<string, unknown>;
+    metadata: Record<string, unknown>;
 
   @Column('text', { nullable: true })
-  summary: string;
+    summary: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+    createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+    updatedAt: Date;
 
   @Column('timestamp', { nullable: true })
-  completedAt: Date;
+    completedAt: Date;
 
   @OneToMany(() => Finding, (finding) => finding.audit, { cascade: true })
-  findings: Finding[];
+    findings: Finding[];
 }

@@ -124,7 +124,7 @@ export class App {
 
       // Start server
       this.app.listen(this.port, () => {
-        logger.info(`Server started`, {
+        logger.info('Server started', {
           port: this.port,
           env: process.env.NODE_ENV || 'development',
           apiPrefix: process.env.API_PREFIX || '/api/v1',

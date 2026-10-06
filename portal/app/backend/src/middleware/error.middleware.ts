@@ -15,7 +15,7 @@ export const errorHandler = (
   error: Error | AppError,
   req: AuthRequest,
   res: Response,
-  next: NextFunction,
+  _next: NextFunction,
 ) => {
   const timestamp = new Date().toISOString();
   const requestId = req.requestId ?? 'unknown';

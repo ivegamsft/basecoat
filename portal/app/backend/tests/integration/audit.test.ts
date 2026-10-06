@@ -128,7 +128,7 @@ describe('Audit API Integration Tests', () => {
 
     it('should return 404 for non-existent audit', async () => {
       const response = await request(server)
-        .get(`/api/v1/audits/00000000-0000-0000-0000-000000000000`)
+        .get('/api/v1/audits/00000000-0000-0000-0000-000000000000')
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(404);

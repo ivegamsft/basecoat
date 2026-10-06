@@ -20,42 +20,42 @@ export enum FindingStatus {
 @Entity('findings')
 export class Finding {
   @PrimaryColumn('uuid')
-  id: string = uuidv4();
+    id: string = uuidv4();
 
   @Column('uuid')
-  auditId: string;
+    auditId: string;
 
   @ManyToOne(() => Audit, (audit) => audit.findings, { onDelete: 'CASCADE' })
-  audit: Audit;
+    audit: Audit;
 
   @Column({
     type: 'enum',
     enum: Severity,
   })
-  severity: Severity;
+    severity: Severity;
 
   @Column('varchar')
-  category: string;
+    category: string;
 
   @Column('text')
-  description: string;
+    description: string;
 
   @Column('text', { nullable: true })
-  remediation: string;
+    remediation: string;
 
   @Column({
     type: 'enum',
     enum: FindingStatus,
     default: FindingStatus.OPEN,
   })
-  status: FindingStatus;
+    status: FindingStatus;
 
   @Column('varchar', { nullable: true })
-  reference: string;
+    reference: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+    createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+    updatedAt: Date;
 }

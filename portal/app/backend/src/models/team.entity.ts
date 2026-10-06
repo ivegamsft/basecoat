@@ -4,20 +4,20 @@ import { v4 as uuidv4 } from 'uuid';
 @Entity('teams')
 export class Team {
   @PrimaryColumn('uuid')
-  id: string = uuidv4();
+    id: string = uuidv4();
 
   @Column('varchar')
-  name: string;
+    name: string;
 
   @Column('text', { nullable: true })
-  description: string;
+    description: string;
 
   @Column('simple-array', { nullable: true })
-  members: string[]; // Array of user IDs
+    members: string[]; // Array of user IDs
 
   @CreateDateColumn()
-  createdAt: Date;
+    createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+    updatedAt: Date;
 }
