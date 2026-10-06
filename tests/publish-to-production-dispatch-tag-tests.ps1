@@ -109,6 +109,12 @@ $prValidation = Get-Content $prValidationPath -Raw
 if ($prValidation -notmatch "git grep -inI -E 'ibuyspy-shared\|ibuyspy-dev\|@ibuyspy'") {
     throw 'pr-validation.yml must reject internal organization and account identifiers in the simulated public payload'
 }
+if ($prValidation -notmatch '(?s)git archive HEAD \| tar -x -C "\$tmpdir"\s+cd "\$tmpdir".*?git init -q\s+git add -A') {
+    throw 'pr-validation.yml must initialize a git index in the extracted payload; otherwise git commands fail silently and the identifier gate passes vacuously'
+}
+if ($prValidation -notmatch "printf '\* @ivegamsft\\n' > \.github/CODEOWNERS") {
+    throw 'pr-validation.yml must mirror the publish CODEOWNERS public-owner rewrite in its payload simulation'
+}
 
 $sourceHandleMatches = @(
     Get-ChildItem -Path (Join-Path $repoRoot 'docs\operations'), (Join-Path $repoRoot 'docs\templates') -Filter '*.md' -File -Recurse |

@@ -400,6 +400,11 @@ jobs:
 
           git archive HEAD | tar -x -C "$tmpdir"
           cd "$tmpdir"
+          # The extracted payload must be a git repository; otherwise every git
+          # command below fails, is swallowed by `|| true`, and the gate passes vacuously.
+          git init -q
+          git add -A
+          git rev-parse --git-dir >/dev/null
 
           INTERNAL_PATTERNS=(
             'SPRINT-*-EXECUTION-SUMMARY.md'
@@ -476,6 +481,9 @@ jobs:
           fi
 
           TEXT_FILES=$(git ls-files -- '*.md' '*.yml' '*.yaml' '*.json' '*.ps1' '*.sh' '*.txt' '*.ts' '*.js' '*.py' '*.html' | grep -v '^$' || true)
+          if git ls-files --error-unmatch .github/CODEOWNERS >/dev/null 2>&1; then
+            printf '* @ivegamsft\n' > .github/CODEOWNERS
+          fi
           if [[ -n "$TEXT_FILES" ]]; then
             TARGETS=$(echo "$TEXT_FILES" | xargs grep -lI -e 'IBuySpy-Shared/basecoat' -e 'ibuyspy-shared\.github\.io/basecoat' 2>/dev/null || true)
             if [[ -n "$TARGETS" ]]; then
