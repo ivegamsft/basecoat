@@ -23,6 +23,7 @@ Assert-Match $release '-f "tag=\$\{GITHUB_REF_NAME\}"' 'Release workflow must di
 Assert-Match $changelog 'reports/release-notes/latest\.md' 'Changelog workflow must publish the latest release notes surface.'
 Assert-Match $changelog 'git add CHANGELOG\.md "\$latest_notes_file"' 'Changelog workflow must commit both changelog and latest release notes.'
 Assert-Match $changelog 'git diff --quiet -- CHANGELOG\.md "\$latest_notes_file"' 'Changelog workflow must publish latest notes even when the changelog entry exists.'
+Assert-Match $changelog 'rstrip\(\) \+ "\\n"' 'Latest release notes publication must normalize the output to exactly one trailing newline.'
 Assert-Match $changelog 'GH_TOKEN:\s*\$\{\{\s*secrets\.GH_AW_GITHUB_TOKEN\s*\|\|\s*github\.token\s*\}\}' 'Changelog PR creation must use the configured write token when available.'
 if ($changelog -match 'Closes #183\.') {
     throw 'Changelog PR creation must not close unrelated tracking issues from the generated PR body.'
@@ -57,11 +58,38 @@ $nonEmpty = $runLines | Where-Object { $_ -ne '' }
 $minIndent = ($nonEmpty | ForEach-Object { $_.Length - $_.TrimStart().Length } | Measure-Object -Minimum).Minimum
 $dedented = @($runLines | ForEach-Object { if ($_ -eq '') { '' } else { $_.Substring($minIndent) } })
 $startIdx = -1
-for ($i = 0; $i -lt $dedented.Count; $i++) { if ($dedented[$i] -match "<<'PY'") { $startIdx = $i; break } }
+for ($i = 0; $i -lt $dedented.Count; $i++) { if ($dedented[$i] -match 'python - "\$latest_notes_file" <<''PY''') { $startIdx = $i; break } }
 if ($startIdx -lt 0) { throw 'Could not locate the Python heredoc opener.' }
 $endIdx = -1
 for ($i = $startIdx + 1; $i -lt $dedented.Count; $i++) { if ($dedented[$i] -eq 'PY') { $endIdx = $i; break } }
 if ($endIdx -lt 0) { throw 'Could not locate the Python heredoc terminator.' }
+$latestNotesNormalizerBody = ($dedented[($startIdx + 1)..($endIdx - 1)] -join "`n")
+$latestNotesNormalizerBody | python -c 'import sys; compile(sys.stdin.read(), "<latest-notes-normalizer>", "exec")'
+if ($LASTEXITCODE -ne 0) {
+    throw 'The latest release notes newline normalizer heredoc body does not compile.'
+}
+$latestNotesFixtureDir = Join-Path ([System.IO.Path]::GetTempPath()) ("latest-notes-" + [guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Path $latestNotesFixtureDir | Out-Null
+try {
+    $latestNotesPath = Join-Path $latestNotesFixtureDir 'latest.md'
+    Set-Content -Path $latestNotesPath -Value "# Latest Release Notes`n`n## 5.0.0`n`n- entry`n`n" -NoNewline
+    $latestNotesNormalizerBody | python - $latestNotesPath
+    if ($LASTEXITCODE -ne 0) { throw 'The latest release notes newline normalizer failed to execute against the fixture.' }
+    $latestNotesBytes = [System.IO.File]::ReadAllBytes($latestNotesPath)
+    if ($latestNotesBytes.Length -lt 2 -or $latestNotesBytes[-1] -ne 10 -or $latestNotesBytes[-2] -eq 10) {
+        throw 'Latest release notes normalizer must leave exactly one trailing newline.'
+    }
+    Write-Host 'PASS latest release notes newline normalization (exactly one trailing newline).'
+} finally {
+    Remove-Item -Path $latestNotesFixtureDir -Recurse -Force -ErrorAction SilentlyContinue
+}
+
+$startIdx = -1
+for ($i = 0; $i -lt $dedented.Count; $i++) { if ($dedented[$i] -match 'NOTES_FILE=.*<<''PY''') { $startIdx = $i; break } }
+if ($startIdx -lt 0) { throw 'Could not locate the changelog insertion Python heredoc opener.' }
+$endIdx = -1
+for ($i = $startIdx + 1; $i -lt $dedented.Count; $i++) { if ($dedented[$i] -eq 'PY') { $endIdx = $i; break } }
+if ($endIdx -lt 0) { throw 'Could not locate the changelog insertion Python heredoc terminator.' }
 $heredocBody = ($dedented[($startIdx + 1)..($endIdx - 1)] -join "`n")
 $heredocBody | python -c 'import sys; compile(sys.stdin.read(), "<changelog-heredoc>", "exec")'
 if ($LASTEXITCODE -ne 0) {

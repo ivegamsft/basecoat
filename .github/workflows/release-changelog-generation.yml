@@ -9,9 +9,12 @@ on:
         description: "Release tag to generate changelog for (e.g., v3.30.7)"
         type: string
         required: true
+  pull_request:
+    types: [closed]
 
 permissions:
   contents: write
+  issues: write
   pull-requests: write
 
 concurrency:
@@ -20,6 +23,7 @@ concurrency:
 
 jobs:
   generate:
+    if: github.event_name != 'pull_request'
     name: Generate changelog section from release
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -32,6 +36,7 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 0
+          token: ${{ secrets.GH_AW_GITHUB_TOKEN || github.token }}
 
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
@@ -67,6 +72,13 @@ jobs:
             printf '# Latest Release Notes\n\n'
             cat "$notes_file"
           } > "$latest_notes_file"
+          python - "$latest_notes_file" <<'PY'
+          from pathlib import Path
+          import sys
+
+          path = Path(sys.argv[1])
+          path.write_text(path.read_text(encoding="utf-8").rstrip() + "\n", encoding="utf-8")
+          PY
 
           if grep -Eq "^## v?${version}\b" CHANGELOG.md; then
             echo "Changelog already contains ${version}; publishing refreshed latest notes only."
@@ -135,22 +147,92 @@ jobs:
           retention-days: 14
           if-no-files-found: warn
 
-      - name: Open changelog pull request
+      - name: Open or update changelog pull request
         if: steps.prepare.outputs.should_open_pr == 'true'
         env:
           GH_TOKEN: ${{ secrets.GH_AW_GITHUB_TOKEN || github.token }}
+          SOURCE_ISSUE: "3541"
         shell: bash
         run: |
           set -euo pipefail
           branch="${{ steps.prepare.outputs.branch_name }}"
           version="${{ steps.prepare.outputs.version }}"
           title="docs(changelog): add release notes for ${version}"
-          body="Automated changelog generation for release \`${version}\`.\n\n- Source tag: \`${version}\`\n- Workflow: \`.github/workflows/release-changelog-generation.yml\`"
+          git fetch --no-tags origin main
+          read -r expected_files expected_lines < <(git diff --numstat origin/main...HEAD | awk '
+            BEGIN { files=0; lines=0 }
+            { files++; if ($1 ~ /^[0-9]+$/) lines += $1; if ($2 ~ /^[0-9]+$/) lines += $2 }
+            END { print files, lines }
+          ')
+          body_file=.automation-pr-body.md
+          sed 's/^          //' > "$body_file" <<EOF
+          # Summary
+
+          Automated changelog generation for release \`${version}\`.
+
+          Linked issue / spec: #${SOURCE_ISSUE}
+
+          ## Validation
+
+          | Proof / verification command or artifact | Result | Requirement covered |
+          |---|---|---|
+          | \`.github/workflows/release-changelog-generation.yml\` generated \`CHANGELOG.md\` and \`reports/release-notes/latest.md\` | pending CI | Release changelog and latest release notes refreshed |
+
+          ## Intake Contract
+
+          ### Design
+
+          | Order of work | Files that change | Planned change / acceptance |
+          |---|---|---|
+          | 1 | \`CHANGELOG.md\`, \`reports/release-notes/latest.md\` | Publish the generated changelog section and latest release notes for the release. |
+
+          Change scope: individual
+          Source issues: #${SOURCE_ISSUE}
+          Independently deliverable units: 1
+          Unit inventory: release changelog and latest notes refresh
+          Expected files: ${expected_files}
+          Expected changed lines (additions + deletions): ${expected_lines}
+          Classification rationale: Single generated release documentation refresh produced by the release changelog workflow.
+          Mechanical batch exception evidence: none
+
+          ### Derived Classification
+
+          Use the current machine-derived labels/check output.
+
+          ## Governance
+
+          Governance reference: \`docs/reference/governance-contract.md\`
+
+          ## Risk and Rollout
+
+          - Risks / blast radius: Generated release documentation update only.
+          - Rollout plan: Merge after required checks pass.
+          - Rollback plan: Revert the generated release documentation refresh commit.
+          EOF
+          gh label create skip-release-label-gate --color ededed --description "Exempt automation-only PRs from release label gate" --force || true
 
           existing="$(gh pr list --state open --head "$branch" --json number --jq '.[0].number' || true)"
           if [[ -n "$existing" ]]; then
-            echo "PR #$existing already exists for branch $branch"
-            exit 0
+            echo "Updating existing changelog PR #$existing for branch $branch"
+            gh pr edit "$existing" --title "$title" --body-file "$body_file" --add-label skip-release-label-gate
+          else
+            gh pr create --base main --head "$branch" --title "$title" --body-file "$body_file" --label skip-release-label-gate
           fi
 
-          gh pr create --base main --head "$branch" --title "$title" --body "$body"
+  cleanup-automation-branch:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && startsWith(github.head_ref, 'automation/changelog-')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Delete closed changelog automation branch
+        env:
+          GH_TOKEN: ${{ secrets.GH_AW_GITHUB_TOKEN || github.token }}
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          open_count="$(gh pr list --state open --head "$BRANCH" --json number --jq 'length')"
+          if [[ "$open_count" != "0" ]]; then
+            echo "Open PR still uses $BRANCH; leaving branch in place"
+            exit 0
+          fi
+          gh api -X DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${BRANCH}" || true

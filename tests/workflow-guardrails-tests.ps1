@@ -911,6 +911,54 @@ else {
     }
 }
 
+$releaseChangelogWorkflowPath = Join-Path $workflowDir 'release-changelog-generation.yml'
+if (-not (Test-Path $releaseChangelogWorkflowPath)) {
+    $stabilizationGuardrailIssues += 'release-changelog-generation.yml (missing file)'
+}
+else {
+    $releaseChangelogWorkflow = Get-Content $releaseChangelogWorkflowPath -Raw
+
+    if ($releaseChangelogWorkflow -notmatch 'branch_name="automation/changelog-\$\{version\}-\$\{GITHUB_RUN_ID\}"') {
+        $stabilizationGuardrailIssues += 'release-changelog-generation.yml (missing stable automation/changelog branch naming pattern)'
+    }
+
+    if ($releaseChangelogWorkflow -notmatch 'cleanup-automation-branch' -or
+        $releaseChangelogWorkflow -notmatch 'git/refs/heads/') {
+        $stabilizationGuardrailIssues += 'release-changelog-generation.yml (missing closed-PR cleanup for automation/changelog branches)'
+    }
+
+    foreach ($requiredField in @(
+        'Change scope: individual',
+        'Source issues: #${SOURCE_ISSUE}',
+        'Independently deliverable units: 1',
+        'Unit inventory: release changelog and latest notes refresh',
+        'Expected files: ${expected_files}',
+        'Expected changed lines (additions + deletions): ${expected_lines}',
+        'Classification rationale:',
+        'Mechanical batch exception evidence: none'
+    )) {
+        if ($releaseChangelogWorkflow -notmatch [regex]::Escape($requiredField)) {
+            $stabilizationGuardrailIssues += "release-changelog-generation.yml (missing automation PR Intake Contract field: $requiredField)"
+        }
+    }
+
+    if ($releaseChangelogWorkflow -match '\[skip ci\]') {
+        $stabilizationGuardrailIssues += 'release-changelog-generation.yml (automation commit message must not suppress CI)'
+    }
+
+    if ($releaseChangelogWorkflow -notmatch [regex]::Escape('GH_TOKEN: ${{ secrets.GH_AW_GITHUB_TOKEN || github.token }}') -or
+        $releaseChangelogWorkflow -notmatch [regex]::Escape('token: ${{ secrets.GH_AW_GITHUB_TOKEN || github.token }}')) {
+        $stabilizationGuardrailIssues += 'release-changelog-generation.yml (automation must use GH_AW_GITHUB_TOKEN fallback convention for PR-triggering writes)'
+    }
+
+    if ($releaseChangelogWorkflow -notmatch [regex]::Escape('git diff --numstat origin/main...HEAD') -or
+        $releaseChangelogWorkflow -notmatch 'body-file' -or
+        $releaseChangelogWorkflow -notmatch 'gh pr edit .*--body-file' -or
+        $releaseChangelogWorkflow -notmatch 'skip-release-label-gate') {
+        $stabilizationGuardrailIssues += 'release-changelog-generation.yml (automation PR create/edit must compute counts, refresh body, and add skip-release-label-gate)'
+    }
+}
+
 $assetHealthWorkflowPath = Join-Path $workflowDir 'asset-health.yml'
 if (-not (Test-Path $assetHealthWorkflowPath)) {
     $stabilizationGuardrailIssues += 'asset-health.yml (missing file)'
