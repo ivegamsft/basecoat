@@ -92,5 +92,5 @@ discoverable on a later trusted producer sweep.
 ## References
 
 - PRD: `docs/prd/synthesized/issue-3579-perfactions-filter-irrelevant-housekeeping-triggers-before-a.prd.md`
-- Issue: https://github.com/IBuySpy-Shared/basecoat/issues/3579
-- Draft spec source: https://github.com/IBuySpy-Shared/basecoat/pull/3588
+- Issue: <https://github.com/IBuySpy-Shared/basecoat/issues/3579>
+- Draft spec source: <https://github.com/IBuySpy-Shared/basecoat/pull/3588>

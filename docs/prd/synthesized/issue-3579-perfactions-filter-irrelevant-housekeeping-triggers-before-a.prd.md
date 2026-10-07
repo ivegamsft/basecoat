@@ -63,4 +63,4 @@ not available for those 335 executions.
 ## References
 
 - Spec: `docs/spec/synthesized/issue-3579-perfactions-filter-irrelevant-housekeeping-triggers-before-a.spec.md`
-- Issue: https://github.com/IBuySpy-Shared/basecoat/issues/3579
+- Issue: <https://github.com/IBuySpy-Shared/basecoat/issues/3579>
