@@ -26,15 +26,28 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Checkout trusted approval contract
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
       - name: Route /approve comment on PR to linked issues
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
+            const approval = require(`${process.env.GITHUB_WORKSPACE}/.github/base-coat/scripts/approval-contract.cjs`);
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const prNumber = context.payload.issue.number;
+            const directive = await approval.qualifiedDirective({
+              github, owner, repo, commentId: context.payload.comment.id, issueNumber: prNumber
+            });
+            if (!directive) {
+              core.setFailed('Approval requires a current qualified exact /approve directive.');
+              return;
+            }
             const marker = `<!-- issue-approve-forward:v1 pr:${prNumber} comment:${context.payload.comment.id} -->`;
-            const originalActor = context.payload.comment.user.login;
+            const originalActor = directive.user.login;
             const prComments = await github.paginate(github.rest.issues.listComments, {
               owner,
               repo,
@@ -59,20 +72,6 @@ jobs:
               });
             };
 
-            const { data: permission } = await github.rest.repos.getCollaboratorPermissionLevel({
-              owner,
-              repo,
-              username: originalActor
-            });
-            const canApprove = ['admin', 'write'].includes(permission.permission);
-            if (!canApprove) {
-              await publishPrStatus([
-                `Issue approval was not processed because @${originalActor} does not have write access.`,
-                'Issue approval automation requires an author with write or admin permission.',
-              ]);
-              return;
-            }
-
             const { data: pr } = await github.rest.pulls.get({
               owner,
               repo,
@@ -80,15 +79,7 @@ jobs:
             });
 
             const text = `${pr.title || ''}\n${pr.body || ''}`;
-            const issueRefs = new Set();
-            const pattern = /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)\b/gim;
-            let match;
-            while ((match = pattern.exec(text)) !== null) {
-              const issueNumber = Number(match[1]);
-              if (Number.isInteger(issueNumber) && issueNumber > 0) {
-                issueRefs.add(issueNumber);
-              }
-            }
+            const issueRefs = approval.closingIssueNumbers(text);
 
             if (issueRefs.size === 0) {
               await publishPrStatus([
@@ -100,80 +91,8 @@ jobs:
               return;
             }
 
-            const TYPE_LABELS = ['bug', 'enhancement', 'documentation', 'chore', 'security', 'question'];
-            const PRIORITY_LABELS = ['priority:critical', 'priority:high', 'priority:medium', 'priority:low'];
-            const BLOCKING_LABELS = ['duplicate', 'invalid', 'wontfix'];
-            const DEPENDENCY_REGEX = /(?:^|\n)\s*(Blocked by|Depends on)\s+(?:#(\d+)|https?:\/\/github\.com\/[^/\s]+\/[^/\s]+\/(?:issues|pull)\/(\d+))/gim;
-
             const approveIssue = async issueNumber => {
-              const { data: issue } = await github.rest.issues.get({
-                owner,
-                repo,
-                issue_number: issueNumber
-              });
-              const labels = issue.labels.map(l => l.name);
-              const missing = [];
-
-              const hasType = TYPE_LABELS.some(l => labels.includes(l));
-              if (!hasType) missing.push('Type label — add one of: bug, enhancement, documentation, chore, security, question');
-
-              const hasPriority = PRIORITY_LABELS.some(l => labels.includes(l));
-              if (!hasPriority) missing.push('Priority label — add one of: priority:critical, priority:high, priority:medium, priority:low');
-
-              const hasBlocker = BLOCKING_LABELS.some(l => labels.includes(l));
-              if (hasBlocker) {
-                const blocker = BLOCKING_LABELS.find(l => labels.includes(l));
-                missing.push(`Blocking label present — remove ${blocker} before approving, or close the issue instead`);
-              }
-
-              const dependencyRefs = new Set();
-              const collectRefs = text => {
-                if (!text || typeof text !== 'string') return;
-                DEPENDENCY_REGEX.lastIndex = 0;
-                let match;
-                while ((match = DEPENDENCY_REGEX.exec(text)) !== null) {
-                  const ref = Number(match[2] || match[3]);
-                  if (Number.isInteger(ref) && ref > 0) dependencyRefs.add(ref);
-                }
-              };
-
-              collectRefs(issue.body || '');
-              const comments = await github.paginate(github.rest.issues.listComments, {
-                owner,
-                repo,
-                issue_number: issue.number,
-                per_page: 100
-              });
-              for (const comment of comments) {
-                collectRefs(comment.body || '');
-              }
-
-              const unresolvedDependencies = [];
-              for (const ref of dependencyRefs) {
-                const { data: linked } = await github.rest.issues.get({
-                  owner,
-                  repo,
-                  issue_number: ref
-                });
-                let resolved = linked.state === 'closed';
-                let status = linked.state;
-                if (linked.pull_request) {
-                  const { data: linkedPr } = await github.rest.pulls.get({
-                    owner,
-                    repo,
-                    pull_number: ref
-                  });
-                  resolved = Boolean(linkedPr.merged);
-                  status = linkedPr.merged ? 'merged' : linkedPr.state;
-                }
-                if (!resolved) {
-                  unresolvedDependencies.push(`#${ref} (${status})`);
-                }
-              }
-
-              if (unresolvedDependencies.length > 0) {
-                missing.push(`Unresolved dependencies — resolve ${unresolvedDependencies.join(', ')} before approving`);
-              }
+              const { issue, missing } = await approval.validateIssue({ github, owner, repo, issueNumber });
 
               if (missing.length > 0) {
                 try {
@@ -204,6 +123,11 @@ jobs:
                 });
                 return { issueNumber, approved: false };
               }
+
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: issueNumber,
+                body: approval.forwardReceipt(prNumber, directive, issueNumber)
+              });
 
               try {
                 await github.rest.issues.removeLabel({
@@ -324,19 +248,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: Checkout trusted approval contract
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
       - name: Verify commenter has write access
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         id: check-access
         with:
           script: |
-            const { data: perm } = await github.rest.repos.getCollaboratorPermissionLevel({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              username: context.payload.comment.user.login
+            const approval = require(`${process.env.GITHUB_WORKSPACE}/.github/base-coat/scripts/approval-contract.cjs`);
+            const directive = await approval.qualifiedDirective({
+              github, ...context.repo, commentId: context.payload.comment.id,
+              issueNumber: context.payload.issue.number
             });
-            const allowed = ['admin', 'write'].includes(perm.permission);
+            const allowed = Boolean(directive);
             if (!allowed) {
-              core.setFailed(`User ${context.payload.comment.user.login} does not have write access`);
+              core.setFailed('Approval requires a current qualified exact /approve directive.');
             }
             return allowed;
 
@@ -346,85 +275,10 @@ jobs:
         id: validate-metadata
         with:
           script: |
-            const issue = context.payload.issue;
-            const labels = issue.labels.map(l => l.name);
-
-            const TYPE_LABELS = ['bug', 'enhancement', 'documentation', 'chore', 'security', 'question'];
-            const PRIORITY_LABELS = ['priority:critical', 'priority:high', 'priority:medium', 'priority:low'];
-            const BLOCKING_LABELS = ['duplicate', 'invalid', 'wontfix'];
-            const DEPENDENCY_REGEX = /(?:^|\n)\s*(Blocked by|Depends on)\s+(?:#(\d+)|https?:\/\/github\.com\/[^/\s]+\/[^/\s]+\/(?:issues|pull)\/(\d+))/gim;
-
-            const missing = [];
-
-            const hasType = TYPE_LABELS.some(l => labels.includes(l));
-            if (!hasType) missing.push('**Type label** — add one of: `bug`, `enhancement`, `documentation`, `chore`, `security`, `question`');
-
-            const hasPriority = PRIORITY_LABELS.some(l => labels.includes(l));
-            if (!hasPriority) missing.push('**Priority label** — add one of: `priority:critical`, `priority:high`, `priority:medium`, `priority:low`');
-
-            const hasSpecEvidence = /(?:^|\n)\s*-\s*Spec:\s*(?!<|N\/?A\b)\S+/im.test(issue.body || '');
-            if (!hasSpecEvidence) {
-              missing.push('**Spec reference** — add a non-placeholder `Spec:` link under `PRD and Spec References`');
-            }
-
-            const hasBlocker = BLOCKING_LABELS.some(l => labels.includes(l));
-            if (hasBlocker) {
-              const blocker = BLOCKING_LABELS.find(l => labels.includes(l));
-              missing.push(`**Blocking label present** — remove \`${blocker}\` before approving, or close the issue instead`);
-            }
-
-            const dependencyRefs = new Set();
-            const collectRefs = text => {
-              if (!text || typeof text !== 'string') {
-                return;
-              }
-              DEPENDENCY_REGEX.lastIndex = 0;
-              let match;
-              while ((match = DEPENDENCY_REGEX.exec(text)) !== null) {
-                const ref = Number(match[2] || match[3]);
-                if (Number.isInteger(ref) && ref > 0) {
-                  dependencyRefs.add(ref);
-                }
-              }
-            };
-
-            collectRefs(issue.body || '');
-            const comments = await github.paginate(github.rest.issues.listComments, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issue.number,
-              per_page: 100
+            const approval = require(`${process.env.GITHUB_WORKSPACE}/.github/base-coat/scripts/approval-contract.cjs`);
+            const { issue, missing } = await approval.validateIssue({
+              github, ...context.repo, issueNumber: context.payload.issue.number
             });
-            for (const comment of comments) {
-              collectRefs(comment.body || '');
-            }
-
-            const unresolvedDependencies = [];
-            for (const ref of dependencyRefs) {
-              const { data: linked } = await github.rest.issues.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: ref
-              });
-              let resolved = linked.state === 'closed';
-              let status = linked.state;
-              if (linked.pull_request) {
-                const { data: linkedPr } = await github.rest.pulls.get({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  pull_number: ref
-                });
-                resolved = Boolean(linkedPr.merged);
-                status = linkedPr.merged ? 'merged' : linkedPr.state;
-              }
-              if (!resolved) {
-                unresolvedDependencies.push(`#${ref} (${status})`);
-              }
-            }
-
-            if (unresolvedDependencies.length > 0) {
-              missing.push(`**Unresolved dependencies** — resolve ${unresolvedDependencies.join(', ')} before approving`);
-            }
 
             if (missing.length > 0) {
               // Add a human-waiting label to surface for cleanup
@@ -621,41 +475,26 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Checkout trusted approval contract
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
       - name: Dispatch merge eligibility after approval labels settle
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
+            const approval = require(`${process.env.GITHUB_WORKSPACE}/.github/base-coat/scripts/approval-contract.cjs`);
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const actor = context.payload.comment?.user;
-            const actorLogin = String(actor?.login || '');
-            if (actor?.type === 'Bot' || actorLogin.toLowerCase().endsWith('[bot]')) {
-              core.info(`Ignoring issue approval finalization from bot @${actorLogin || 'unknown'}.`);
-              return;
-            }
-            const { data: actorPermission } = await github.rest.repos.getCollaboratorPermissionLevel({
-              owner,
-              repo,
-              username: actorLogin
+            const directive = await approval.qualifiedDirective({
+              github, owner, repo, commentId: context.payload.comment.id,
+              issueNumber: context.payload.issue.number
             });
-            const actorPermissionLevels = [
-              actorPermission.permission,
-              actorPermission.role_name
-            ].map(level => String(level || '').toLowerCase());
-            if (!actorPermissionLevels.some(level => ['admin', 'maintain', 'write'].includes(level))) {
-              core.info(`Ignoring issue approval finalization from unqualified user @${actorLogin}.`);
-              return;
-            }
+            if (!directive) return;
             const issueNumbers = new Set();
             const collectClosingIssues = text => {
-              const pattern = /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)\b/gim;
-              let match;
-              while ((match = pattern.exec(String(text || ''))) !== null) {
-                const issueNumber = Number(match[1]);
-                if (Number.isInteger(issueNumber) && issueNumber > 0) {
-                  issueNumbers.add(issueNumber);
-                }
-              }
+              for (const issueNumber of approval.closingIssueNumbers(text)) issueNumbers.add(issueNumber);
             };
 
             if (context.payload.issue?.pull_request) {
@@ -671,15 +510,11 @@ jobs:
 
             const approvedIssueNumbers = new Set();
             for (const issueNumber of issueNumbers) {
-              const { data: issue } = await github.rest.issues.get({
-                owner,
-                repo,
-                issue_number: issueNumber
+              const contract = await approval.validateIssue({ github, owner, repo, issueNumber });
+              const evidence = await approval.findApproval({
+                github, owner, repo, issueNumber, comments: contract.comments
               });
-              const labels = (issue.labels || []).map(label =>
-                String(typeof label === 'string' ? label : label.name || '').toLowerCase()
-              );
-              if (labels.includes('approved')) {
+              if (!contract.missing.length && evidence) {
                 approvedIssueNumbers.add(issueNumber);
               }
             }
@@ -712,11 +547,9 @@ jobs:
             const routedPrNumbers = new Set();
             for (const pullRequest of openPullRequests) {
               const text = `${pullRequest.title || ''}\n${pullRequest.body || ''}`;
+              const closingIssues = approval.closingIssueNumbers(text);
               const closesApprovedIssue = Array.from(approvedIssueNumbers).some(
-                issueNumber => new RegExp(
-                  `\\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\\s+#${issueNumber}\\b`,
-                  'i'
-                ).test(text)
+                issueNumber => closingIssues.has(issueNumber)
               );
               if (!closesApprovedIssue || routedPrNumbers.has(pullRequest.number)) continue;
               routedPrNumbers.add(pullRequest.number);

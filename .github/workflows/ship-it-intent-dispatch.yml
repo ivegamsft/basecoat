@@ -74,6 +74,7 @@ permissions:
   actions: read
   contents: read
   issues: write
+  pull-requests: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -119,6 +120,9 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
+            const approval = require(
+              `${process.env.GITHUB_WORKSPACE}/.github/base-coat/scripts/approval-contract.cjs`
+            );
             const preapproval = require(
               `${process.env.GITHUB_WORKSPACE}/.github/base-coat/scripts/ship-it/preapproval-evidence.cjs`
             );
@@ -137,20 +141,7 @@ jobs:
               return "delivery";
             };
             const isPlaceholderSpecUrl = value => {
-              try {
-                const candidate = String(value || "").trim();
-                const url = new URL(candidate);
-                const host = url.hostname.toLowerCase();
-                return !["http:", "https:"].includes(url.protocol) ||
-                  !host ||
-                  ["example.com", "example.org", "example.net", "localhost"].some(
-                    domain => host === domain || host.endsWith(`.${domain}`)
-                  ) ||
-                  /\.(?:invalid|test|localhost)$/.test(host) ||
-                  /\b(?:placeholder|replace[-_ ]?me|todo|tbd)\b/i.test(candidate);
-              } catch {
-                return true;
-              }
+              return approval.isPlaceholderSpecUrl(value);
             };
             const deliveryCommandLine = /^\s*(?:ship-it|spec-2-prod)\s*:|^\s*\/(?:ship-it|spec-2-prod)(?:[ \t]|$)/i;
             const parseDeliveryDirective = rawInput => {
@@ -238,6 +229,13 @@ jobs:
                 core.setOutput("should_run", "false");
                 return;
               }
+              const { data: executionPermission } = await github.rest.repos.getCollaboratorPermissionLevel({
+                ...context.repo, username: context.actor
+              });
+              if (!approval.hasQualifiedPermission(executionPermission)) {
+                core.setFailed(`@${context.actor} lacks current write, maintain, or admin permission.`);
+                return;
+              }
               result.should_run = "true";
               result.intent = requestedIntent;
               result.goal = intentGoal.trim();
@@ -317,7 +315,7 @@ jobs:
                 repo: context.repo.repo,
                 username: context.actor
               });
-              const allowed = ["admin", "maintain", "write"].includes(perm.data.permission);
+              const allowed = approval.hasQualifiedPermission(perm.data);
               if (!allowed) {
                 core.setFailed(`@${context.actor} does not have write permission for intent commands (/ship-it, /onboarding, /spec-2-prod).`);
                 return;
@@ -349,26 +347,13 @@ jobs:
                 core.setFailed("Delivery dispatch requires an approved source_issue_number.");
                 return;
               }
-              const { data: sourceIssue } = await github.rest.issues.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: sourceIssueNumber
+              const contract = await approval.validateIssue({
+                github, ...context.repo, issueNumber: sourceIssueNumber
               });
-              if (sourceIssue.pull_request || sourceIssue.state !== "open") {
-                core.setFailed(`Delivery source #${sourceIssueNumber} must be an open issue.`);
-                return;
-              }
-              const labels = (sourceIssue.labels || []).map(label =>
-                String(typeof label === "string" ? label : label.name || "").toLowerCase()
-              );
-              if (!labels.includes("approved")) {
-                core.setFailed(`Delivery source #${sourceIssueNumber} must already carry the approved label.`);
-                return;
-              }
+              const sourceIssue = contract.issue;
               const issueBody = String(sourceIssue.body || "");
-              const specMatch = issueBody.match(/^\s*-\s*Spec:\s*(https?:\/\/\S+)\s*$/im);
-              if (!specMatch || isPlaceholderSpecUrl(specMatch[1])) {
-                core.setFailed(`Delivery source #${sourceIssueNumber} must contain a non-placeholder Spec URL.`);
+              if (contract.missing.length) {
+                core.setFailed(`Delivery source #${sourceIssueNumber}: ${contract.missing.join("; ")}`);
                 return;
               }
               const featureOrigin = issueBody.includes("<!-- basecoat-feature-origin:v1 -->");
@@ -377,7 +362,7 @@ jobs:
                 core.setFailed(`Feature-origin delivery source #${sourceIssueNumber} must record its approved Source scope.`);
                 return;
               }
-              const approvedSpec = specMatch[1];
+              const approvedSpec = contract.specRef;
               if (result.spec_ref && result.spec_ref !== approvedSpec) {
                 core.setFailed("The supplied spec_ref must match the approved source issue's Spec URL.");
                 return;
@@ -387,30 +372,9 @@ jobs:
               result.source_issue_url = sourceIssue.html_url || result.source_issue_url;
               result.source_scope = sourceScope;
               result.feature_origin = `${featureOrigin}`;
-              const issueComments = await github.paginate(github.rest.issues.listComments, {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: sourceIssueNumber,
-                per_page: 100
+              const qualifiedIssueApproval = await approval.findApproval({
+                github, ...context.repo, issueNumber: sourceIssueNumber, comments: contract.comments
               });
-              let qualifiedIssueApproval = false;
-              for (const approvalComment of issueComments) {
-                if (!/^\/approve$/i.test(String(approvalComment.body || "").trim())) continue;
-                const approvalActor = String(approvalComment.user?.login || "");
-                if (
-                  approvalComment.user?.type === "Bot" ||
-                  approvalActor.toLowerCase().endsWith("[bot]")
-                ) continue;
-                const { data: approvalPermission } = await github.rest.repos.getCollaboratorPermissionLevel({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  username: approvalActor
-                });
-                if (["admin", "maintain", "write"].includes(String(approvalPermission.permission || "").toLowerCase())) {
-                  qualifiedIssueApproval = true;
-                  break;
-                }
-              }
               if (!qualifiedIssueApproval) {
                 core.setFailed(`Delivery source #${sourceIssueNumber} requires current qualified exact /approve evidence.`);
                 return;

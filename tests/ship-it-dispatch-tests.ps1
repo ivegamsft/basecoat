@@ -510,6 +510,7 @@ if ((Get-Content -Raw -Path $packagedIssueApproval) -match "contains\(github\.ev
 $directiveContract = $directiveContracts[0]
 $parserHarness = @"
 const assert = require('node:assert/strict');
+const approval = require('../../.github/base-coat/scripts/approval-contract.cjs');
 $directiveContract
 const cases = [
   { raw: 'ship-it: Release X', kind: 'delivery', intent: 'ship-it', goal: 'Release X' },

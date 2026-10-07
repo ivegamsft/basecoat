@@ -51,11 +51,13 @@ rename them or omit source-only release jobs.
 | `intent-control-plane`, `ship-it`, `spec-2-prod`, `risk-*` | Governed intent artifacts; not substitutes for source approval |
 | `vX.Y.Z` | Release version tag; must identify a commit already carrying the matching `version.json` |
 
-Post exact `/approve` on the source issue with a real `- Spec:` reference.
-The issue approval workflow checks write/admin permission and uses a substring
-command match; the delivery dispatcher is stricter: it requires a current
-qualified exact `/approve` comment and an HTTP(S) Spec URL. Avoid extra text in
-the approval command and use a real URL to satisfy both surfaces.
+Approval contract update (2026-10-07, #3591): post exact `/approve` on the
+source issue or a PR that closes it, with a real HTTP(S) `- Spec:` URL on the
+issue. All three approval/delivery routes now share current write/maintain/admin
+authority, spec validation, metadata, and live dependency checks. Case and
+surrounding whitespace are accepted; quoted, incidental, or suffixed commands
+are not. An `approved` label is not authority. Other audit snapshots in this
+guide retain their dated baseline.
 
 `/spec-2-prod` is handled by `ship-it-intent-dispatch.yml`, not by
 `issue-approve.yml`. It requires an already approved open source issue, matching
@@ -63,9 +65,11 @@ spec, and qualified approval evidence. It does not apply `approved` by itself.
 Governed intent generation and a delivery control loop are distinct from the
 issue-assignment workflow; generating phase issues is not proof they executed.
 
-PR-side `/approve` forwarding resolves closing keywords and validates
-type/priority/dependencies, but does not repeat the issue-side spec-reference
-check. Prefer issue-side approval; this asymmetry needs implementation review.
+PR-side forwarding records the original qualified human directive, actor, and
+comment URL. Delivery re-fetches that comment and current permissions and
+verifies the PR still closes the issue; the forwarding bot cannot approve.
+For migration from incidental commands, relative specs, or older bot-only
+acknowledgements, see the [shared approval contract](../spec/issue-3591-approval-contract.spec.md).
 
 The PR release-label gate accepts the two exemptions above. Separately,
 `release.yml` counts merged PRs missing actual wave/sprint coverage and fails

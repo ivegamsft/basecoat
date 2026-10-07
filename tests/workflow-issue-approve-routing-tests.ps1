@@ -45,16 +45,17 @@ foreach ($entry in $files) {
     if ($content -match 'comment `/approve` or `/spec-2-prod`') {
         throw "$name must describe only /approve as the issue approval retry command."
     }
-    if ($content -notmatch 'hasSpecEvidence' -or
-        $content -notmatch 'Spec reference') {
-        throw "$name must require supplied spec evidence before agent assignment."
+    if ($content -notmatch 'approval\.validateIssue' -or
+        $content -notmatch 'approval\.qualifiedDirective' -or
+        $content -notmatch 'approval\.forwardReceipt') {
+        throw "$name must use the shared issue contract and original qualified directive before assignment."
     }
     if ($content -notmatch 'Open a ready-for-review implementation PR \(not a draft\)' -or
         $content -notmatch 'Closes #') {
         throw "$name must require a ready, issue-closing implementation PR from the coding agent."
     }
-    if ($content -notmatch 'getCollaboratorPermissionLevel') {
-        throw "$name must verify the original commenter can approve issues."
+    if ($content -notmatch 'approval\.findApproval') {
+        throw "$name must revalidate real authority before linked PR reevaluation."
     }
 
     if ($files[0].Content -ne $files[1].Content) {
