@@ -195,6 +195,11 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host 'Running adoption metrics parser tests...'
+& python (Join-Path $PSScriptRoot 'delivery-report-tests.py')
+if ($LASTEXITCODE -ne 0) {
+    Write-FailureLog 'delivery-report-tests'
+    exit 1
+}
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'adoption-metrics-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
     Write-Host 'Adoption metrics parser tests failed' -ForegroundColor Red
