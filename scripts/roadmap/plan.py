@@ -9,7 +9,7 @@ from pathlib import Path
 
 CONFIG = json.loads((Path(__file__).parents[1] / "backlog-autopilot" /
                      "autopilot.config.json").read_text(encoding="utf-8-sig"))
-MARKER = re.compile(r"<!-- basecoat-roadmap:v1 key=(v\d+\.\d+\.\d+) -->")
+MARKER = re.compile(r"<!-- basecoat-roadmap:v1 key=(v[0-9]+\.[0-9]+\.[0-9]+) -->")
 PIN = "<!-- basecoat-roadmap-pin:v1 -->"
 
 
@@ -29,7 +29,7 @@ def number(value):
 
 def version(value):
     require(isinstance(value, str) and
-            re.fullmatch(r"v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)", value),
+            re.fullmatch(r"v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)", value),
             "invalid-version")
     return tuple(int(n) for n in value[1:].split("."))
 
@@ -78,7 +78,10 @@ def inventory(snapshot):
     keys = {}
     for n, milestone in milestones.items():
         require(milestone["state"] in ("open", "closed"), "invalid-milestone-state")
-        text = milestone.get("description") or ""
+        description = milestone.get("description")
+        require(description is None or isinstance(description, str),
+                "invalid-milestone-description")
+        text = description or ""
         matches = MARKER.findall(text)
         require("basecoat-roadmap:v1" not in text or
                 (len(matches) == 1 and text.count("basecoat-roadmap:v1") == 1),
@@ -91,7 +94,37 @@ def inventory(snapshot):
             keys[key] = n
         milestone = {**milestone, "key": key, "pinned": PIN in text}
         milestones[n] = milestone
-    return milestones, keys, index(snapshot["items"])
+    items = index(snapshot["items"])
+    for item in items.values():
+        labels = item.get("labels")
+        require(isinstance(labels, list) and all(isinstance(s, str) for s in labels),
+                "invalid-label-evidence")
+        require("milestone" in item, "missing-milestone-evidence")
+        assigned = item["milestone"]
+        if assigned is not None:
+            number(assigned)
+            require(assigned in milestones, "missing-milestone")
+    return milestones, keys, items
+
+
+def release_baseline(current_version, snapshot):
+    current = version(current_version)
+    tags = snapshot["tags"]
+    require(isinstance(tags, list) and all(isinstance(t, str) and t and
+            not any(c.isspace() or ord(c) < 32 for c in t) for t in tags),
+            "invalid-tag-evidence")
+    normalized = set()
+    for tag in tags:
+        prefix = tag[1:2] if tag.startswith("v") else tag[:1]
+        if prefix.isdecimal():
+            require(tag.isascii(), "invalid-version")
+        if re.match(r"v?[0-9]", tag):
+            key = tag if tag.startswith("v") else "v" + tag
+            version(key)
+            normalized.add(key)
+    require(not normalized or current >= max(version(t) for t in normalized),
+            "stale-release-baseline")
+    return current, normalized
 
 
 def build_plan(proposal, snapshot):
@@ -125,8 +158,7 @@ def build_plan(proposal, snapshot):
                     if selector[6:] in [s.lower() for s in i.get("labels", [])]}
     else:
         selected = set(issues)
-    current = version(proposal["current_version"])
-    tags = set(snapshot["tags"])
+    current, tags = release_baseline(proposal["current_version"], snapshot)
     releases, assignments, residuals, pins, guards = [], {}, {}, [], []
     for n, item in sorted(items.items()):
         if item["state"] != "open":
@@ -191,6 +223,9 @@ def build_plan(proposal, snapshot):
 
 def storage_steps(plan, snapshot):
     milestones, keys, items = inventory(snapshot)
+    current, tags = release_baseline(plan["current_version"], snapshot)
+    for key in plan["releases"]:
+        require(version(key) > current and key not in tags, "existing-or-old-version")
     steps = [{"operation": "create", "key": k,
               "marker": f"<!-- basecoat-roadmap:v1 key={k} -->"}
              for k in plan["releases"] if k not in keys]

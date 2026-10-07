@@ -123,6 +123,7 @@ class PlanTests(unittest.TestCase):
             with self.assertRaises(P.Conflict, msg=field):
                 P.build_plan({**self.proposal, field: value}, self.snapshot)
         self.snapshot["tags"].append("v1.2.0")
+        self.proposal["current_version"] = "v1.2.0"
         with self.assertRaisesRegex(P.Conflict, "existing-or-old-version"):
             self.plan()
 
@@ -155,6 +156,94 @@ class PlanTests(unittest.TestCase):
         self.snapshot["milestones"] = []
         self.snapshot["items"][0].update(milestone=None, labels=["roadmap:pinned"])
         self.assertIn(1, self.plan()["plan"]["pins"])
+
+    def test_malformed_pin_and_assignment_evidence_fails_before_storage(self):
+        plan = self.plan()["plan"]
+        cases = [("labels", value, "invalid-label-evidence") for value in
+                 ("roadmap:pinned", None, False, {}, [None], [42], [{"name": "roadmap:pinned"}])]
+        cases += [("milestone", value, "invalid-number") for value in
+                  (False, True, 0, -1, "10", 10.0, [], {})]
+        for field, value, code in cases:
+            for kind in ("issue", "pr"):
+                snapshot = copy.deepcopy(self.snapshot)
+                item = next(i for i in snapshot["items"] if i["kind"] == kind)
+                item[field] = value
+                for call in (lambda: P.build_plan(self.proposal, snapshot),
+                             lambda: P.storage_steps(plan, snapshot)):
+                    with self.subTest(field=field, value=value, kind=kind):
+                        with self.assertRaisesRegex(P.Conflict, code):
+                            call()
+        for field, code in (("labels", "invalid-label-evidence"),
+                            ("milestone", "missing-milestone-evidence")):
+            snapshot = copy.deepcopy(self.snapshot)
+            del snapshot["items"][0][field]
+            with self.assertRaisesRegex(P.Conflict, code):
+                P.build_plan(self.proposal, snapshot)
+        self.snapshot["items"][0]["milestone"] = 99
+        with self.assertRaisesRegex(P.Conflict, "missing-milestone"):
+            P.storage_steps(plan, self.snapshot)
+        self.snapshot["items"][0]["milestone"] = None
+        self.snapshot["milestones"] = [milestone(description=False)]
+        with self.assertRaisesRegex(P.Conflict, "invalid-milestone-description"):
+            self.plan()
+
+    def test_highest_live_semver_tag_is_authoritative_for_plan_and_storage(self):
+        plan = self.plan()["plan"]
+        for tags in (["v1.0.0", "v2.0.0"], ["v2.0.0", "v1.0.0"],
+                     ["v1.0.0", "2.0.0"], ["v1.0.0", "v1.10.0", "v1.2.0"]):
+            self.snapshot["tags"] = tags
+            for call in (self.plan, lambda: P.storage_steps(plan, self.snapshot)):
+                with self.subTest(tags=tags):
+                    with self.assertRaisesRegex(P.Conflict, "stale-release-baseline"):
+                        call()
+        self.proposal["current_version"] = "v2.0.0"
+        self.proposal["groups"] = [{"issues": [1, 2], "significant": True, "release": "v2.1.0"}]
+        self.snapshot["tags"] = ["v1.0.0", "2.0.0", "archive-snapshot"]
+        self.assertEqual(self.plan()["plan"]["releases"], ["v2.1.0"])
+        self.proposal["current_version"] = "v2.0.1"
+        self.assertEqual(self.plan()["plan"]["releases"], ["v2.1.0"])
+        self.proposal["groups"][0]["release"] = "v1.9.0"
+        with self.assertRaisesRegex(P.Conflict, "existing-or-old-version"):
+            self.plan()
+
+    def test_malformed_or_unsupported_version_tag_evidence_fails_closed(self):
+        for tags in ("v2.0.0", None, {}, [False], [42], [None], [""], ["v2.0.0\n"]):
+            self.snapshot["tags"] = tags
+            with self.subTest(tags=tags):
+                with self.assertRaisesRegex(P.Conflict, "invalid-tag-evidence"):
+                    self.plan()
+        for tag in ("v02.0.0", "v2.0", "v2.0.0-rc.1", "2.0.0+build"):
+            self.snapshot["tags"] = [tag]
+            with self.subTest(tag=tag):
+                with self.assertRaisesRegex(P.Conflict, "invalid-version"):
+                    self.plan()
+        self.snapshot["tags"] = ["archive-snapshot", "component-release"]
+        self.assertTrue(self.plan()["steps"])
+
+    def test_unicode_decimal_versions_fail_closed_in_every_version_entry(self):
+        malformed = ("v1.2\u0662.3", "v\u0661.2.3", "v1.\uff12.3", "v1.2.\u0969")
+        for value in malformed:
+            with self.subTest(value=value):
+                with self.assertRaisesRegex(P.Conflict, "invalid-version"):
+                    P.version(value)
+                with self.assertRaisesRegex(P.Conflict, "invalid-version"):
+                    P.build_plan({**self.proposal, "current_version": value}, self.snapshot)
+                changed = copy.deepcopy(self.proposal)
+                changed["groups"][0]["release"] = value
+                with self.assertRaisesRegex(P.Conflict, "invalid-version"):
+                    P.build_plan(changed, self.snapshot)
+                # A high baseline cannot turn malformed tag evidence into a valid version.
+                high = {**self.proposal, "current_version": "v99.0.0", "groups": []}
+                for tag in (value, value[1:]):
+                    snapshot = {**self.snapshot, "tags": [tag]}
+                    with self.assertRaisesRegex(P.Conflict, "invalid-version"):
+                        P.build_plan(high, snapshot)
+                    with self.assertRaisesRegex(P.Conflict, "invalid-version"):
+                        P.storage_steps(P.build_plan(high, self.snapshot)["plan"], snapshot)
+                snapshot = {**self.snapshot, "milestones": [milestone(key=value)]}
+                with self.assertRaisesRegex(P.Conflict, "ambiguous-managed-marker"):
+                    P.build_plan(self.proposal, snapshot)
+        self.assertEqual(P.version("v1.22.3"), (1, 22, 3))
 
     def test_duplicate_and_malformed_marker_and_missing_evidence(self):
         for records in ([milestone(), milestone(11)],

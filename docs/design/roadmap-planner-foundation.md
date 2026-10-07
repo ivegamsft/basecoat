@@ -36,6 +36,15 @@ Snapshot JSON contains `repository`, `complete: true`, `errors: []`, `tags`,
 Items have `number`, `kind: issue|pr`, `state`, `labels` (names), `milestone`
 (number or null), and optional `linked_issues` (numeric IDs). Captured snapshots
 must be complete; the CLI obtains the paginated live inventory automatically.
+Labels must be a list of strings and each item must supply a milestone value
+that is null or a positive integer referencing the milestone inventory.
+Malformed assignment/pin evidence fails closed, including storage-step previews.
+Tag evidence must be a list of nonempty strings without whitespace. Existing
+stable SemVer tags (with or without `v`) establish the minimum current-version
+baseline; a lower proposal baseline is rejected before evaluating releases.
+Non-version tag names are preserved but do not establish a baseline.
+Version-shaped malformed, prerelease or build-metadata tags fail closed because
+this foundation does not yet support their release ordering semantics.
 
 Supported scopes are `all`, `label:<name>` and `issue-set:#N,#M`. Theme
 classification, custom pace/stop semantics and prerelease versions are explicitly
