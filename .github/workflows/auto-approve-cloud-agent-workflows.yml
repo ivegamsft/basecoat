@@ -266,13 +266,20 @@ jobs:
             console.log(`Dispatched merge eligibility evaluation for PR #${prNumber} after successful automated review.`);
 
   reconcile-open-auto-merge-pull-requests:
-    if: github.event_name == 'schedule'
-    name: Reconcile open auto-merge pull requests
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    name: Recover missed current-head eligibility
+    timeout-minutes: 7
+    concurrency:
+      group: eligibility-recovery-${{ github.repository }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     permissions:
       actions: write
       contents: read
       pull-requests: read
+      statuses: read
+      checks: read
+      issues: read
     steps:
       - name: Checkout trusted governance
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
@@ -294,64 +301,84 @@ jobs:
           fi
           echo "auto_approve=$(jq -r --arg p "${SELECTED_PACK}" '.profiles[$p].cloud_agent.auto_approve_workflow_runs // false' "${POLICY_FILE}")" >> "${GITHUB_OUTPUT}"
           echo "reconcile=$(jq -r --arg p "${SELECTED_PACK}" '.profiles[$p].main.reconcile_merge_eligibility // false' "${POLICY_FILE}")" >> "${GITHUB_OUTPUT}"
+          echo "selected_pack=${SELECTED_PACK}" >> "${GITHUB_OUTPUT}"
 
       - name: Dispatch current eligibility evaluations
-        if: steps.policy-pack.outputs.reconcile == 'true'
+        # The existing flag controls review-driven discovery. Solo-dev recovery
+        # needs no human review; only the unchanged executor grants eligibility.
+        if: steps.policy-pack.outputs.reconcile == 'true' || steps.policy-pack.outputs.selected_pack == 'solo-dev'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        env:
+          SELECTED_PACK: ${{ steps.policy-pack.outputs.selected_pack }}
         with:
           script: |
             const { owner, repo } = context.repo;
             const defaultBranch = context.payload.repository.default_branch;
-            const openPullRequests = await github.paginate(github.rest.pulls.list, {
+            const workflowId = 'pr-auto-merge-executor.yml';
+            const { recoveryEvidence } = require(
+              `${process.env.GITHUB_WORKSPACE}/.github/base-coat/scripts/delivery-recovery-evidence.cjs`
+            );
+            // Conservative global backpressure; event-driven races still use
+            // the executor's serialized per-PR mailbox, never a second evaluator.
+            for (const status of ['queued', 'in_progress', 'waiting', 'pending', 'requested']) {
+              const { data } = await github.rest.actions.listWorkflowRuns({
+                owner, repo, workflow_id: workflowId, status, per_page: 1
+              });
+              if (data.total_count > 0) {
+                core.info(`Recovery deferred: executor has ${status} work.`);
+                return;
+              }
+            }
+            const now = Date.now();
+            const page = Math.floor(now / (15 * 60 * 1000)) % 10 + 1;
+            const query = {
               owner,
               repo,
               state: 'open',
               base: defaultBranch,
-              per_page: 100
-            });
-            for (const pullRequest of openPullRequests) {
-              const reviews = await github.paginate(github.rest.pulls.listReviews, {
-                owner,
-                repo,
-                pull_number: pullRequest.number,
-                per_page: 100
+              sort: 'created', direction: 'asc', per_page: 100, page
+            };
+            let { data: openPullRequests } = await github.rest.pulls.list(query);
+            // Small repositories should recover every tick, not only once per
+            // ten-page rotation. At most one additional bounded query.
+            if (page !== 1 && openPullRequests.length === 0) {
+              ({ data: openPullRequests } = await github.rest.pulls.list({ ...query, page: 1 }));
+            }
+            const ready = pr => pr.state === 'open' && !pr.draft &&
+              pr.base?.ref === defaultBranch && pr.head?.sha &&
+              pr.head?.repo?.full_name === `${owner}/${repo}` &&
+              !(pr.labels || []).some(label =>
+                String(label.name || '').toLowerCase() === 'delivery-hold');
+            let dispatched = 0;
+            const offset = Math.floor(now / (150 * 60 * 1000)) % 20 * 5;
+            const candidates = openPullRequests.slice(offset).concat(openPullRequests.slice(0, offset));
+            for (const pullRequest of candidates.slice(0, 20)) {
+              if (!ready(pullRequest)) continue;
+              const fingerprint = await recoveryEvidence({
+                github, owner, repo, pr: pullRequest, defaultBranch,
+                selectedPack: process.env.SELECTED_PACK
               });
-              const latestReview = [...reviews].sort(
-                (left, right) =>
-                  new Date(right.submitted_at || right.created_at || 0) -
-                  new Date(left.submitted_at || left.created_at || 0)
-              )[0];
-              if (!latestReview) continue;
-
-              const statuses = await github.paginate(github.rest.repos.listCommitStatusesForRef, {
-                owner,
-                repo,
-                ref: pullRequest.head.sha,
-                per_page: 100
+              if (!fingerprint) continue;
+              const { data: live } = await github.rest.pulls.get({
+                owner, repo, pull_number: pullRequest.number
               });
-              const eligibilityStatuses =
-                (statuses || []).filter(
-                  status => status.context === 'BaseCoat merge eligibility'
-                ) || [];
-              const latestEligibility = eligibilityStatuses.sort(
-                (left, right) => new Date(right.created_at) - new Date(left.created_at)
-              )[0];
-              if (
-                latestEligibility &&
-                new Date(latestReview.submitted_at || latestReview.created_at) <=
-                  new Date(latestEligibility.created_at)
-              ) {
-                continue;
-              }
+              if (!ready(live) || live.head.sha !== pullRequest.head.sha) continue;
               await github.rest.actions.createWorkflowDispatch({
                 owner,
                 repo,
-                workflow_id: 'pr-auto-merge-executor.yml',
+                workflow_id: workflowId,
                 ref: defaultBranch,
-                inputs: { pr_number: String(pullRequest.number) }
+                inputs: { pr_number: String(pullRequest.number), recovery_fingerprint: fingerprint }
               });
-              console.log(`Dispatched merge eligibility evaluation for new review evidence on PR #${pullRequest.number}.`);
+              core.info(`Requested fresh evaluation for PR #${live.number} at ${live.head.sha}; queue admission not observed.`);
+              if (++dispatched === 5) break;
             }
+            await core.summary.addRaw(
+              `Recovery page ${page}: ${dispatched} evaluation request(s), not queue success. ` +
+              'Authorization/reviews/checks remain with the executor. Known #3604: ' +
+              'GITHUB_TOKEN automatic queue admission suppresses merge-group CI; ' +
+              'this recovery does not repair that unavailable delivery path.'
+            ).write();
 
   approve-pending-automation-runs:
     concurrency:

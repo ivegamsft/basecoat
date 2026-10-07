@@ -77,16 +77,14 @@ foreach ($entry in @(
     if ($content -match 'github\.graphql') {
         throw "$name must not use GitHub GraphQL for scheduled reconciliation; GITHUB_TOKEN cannot read every requested field there."
     }
-    Assert-Match $content 'github\.paginate\(github\.rest\.pulls\.list' "$name must page through open pull requests with REST."
+    Assert-Match $content 'github\.rest\.pulls\.list\(' "$name must use a bounded REST page for recovery."
     Assert-Match $content "base:\s*defaultBranch" "$name must limit scheduled reconciliation to the protected default branch."
     Assert-Match $content 'github\.paginate\(github\.rest\.pulls\.listReviews' "$name must inspect review evidence with REST."
     if ($content -match 'getCombinedStatusForRef') {
         throw "$name must not use combined status for reconciliation; it collapses the status timeline and weakens the watermark."
     }
-    Assert-Match $content 'github\.paginate\(github\.rest\.repos\.listCommitStatusesForRef' "$name must inspect merge eligibility status timeline with REST."
-    Assert-Match $content "status\.context === 'BaseCoat merge eligibility'" "$name must inspect the latest merge eligibility watermark."
-    Assert-Match $content 'new Date\(right\.created_at\) - new Date\(left\.created_at\)' "$name must use REST status timestamps when ordering merge eligibility statuses."
-    Assert-Match $content 'new Date\(latestReview\.submitted_at \|\| latestReview\.created_at\) <=' "$name must skip reconciliation when review evidence has already been evaluated."
+    Assert-Match $content 'recoveryEvidence\(' "$name must use bounded evidence deduplication rather than infinite timed retries."
+    Assert-Match $content 'statuses:\s*read' "$name must be able to read current-head eligibility statuses."
 
     Assert-Match $content 'approve-pending-automation-runs:' "$name must sweep held automation workflow runs on schedule."
     $sweep = ($content -split '  approve-pending-automation-runs:', 2)[1]
@@ -120,6 +118,7 @@ function Get-NormalizedDispatchJob {
 
     $job = ($Content -split 're-evaluate-after-automated-review:', 2)[1]
     $job = $job -replace "workflow_id: '(?:pr-auto-merge-executor|basecoat-pr-auto-merge-executor)\.yml'", "workflow_id: '<normalized>'"
+    $job = $job -replace "const workflowId = '(?:pr-auto-merge-executor|basecoat-pr-auto-merge-executor)\.yml'", "const workflowId = '<normalized>'"
     $job = $job -replace "workflow_id: '(?:code-review-agent\.lock|basecoat-agent-code-review)\.yml'", "workflow_id: '<review-normalized>'"
     $job = $job -replace "github.event.workflow_run.name == '(?:code-review-agent|BaseCoat Agent Template - Code Review)'", "github.event.workflow_run.name == '<review-normalized>'"
     return (($job -split "\r?\n" | Where-Object { $_.TrimStart() -notmatch '^(#|//)' }) -join "`n")
@@ -132,3 +131,5 @@ if ((Get-NormalizedDispatchJob $runtime) -ne (Get-NormalizedDispatchJob $templat
 Write-Host 'Auto-approve cloud-agent workflows tests passed.'
 & node --test (Join-Path $PSScriptRoot 'automation-approval-recovery-tests.cjs')
 if ($LASTEXITCODE -ne 0) { throw 'Automation approval recovery behavior tests failed.' }
+& node --test (Join-Path $PSScriptRoot 'delivery-recovery-tests.cjs')
+if ($LASTEXITCODE -ne 0) { throw 'Delivery recovery behavior tests failed.' }

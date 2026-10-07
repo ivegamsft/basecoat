@@ -4,13 +4,11 @@ on:
   # Unprivileged listener only. Never subscribe to submitted/edited:
   # Copilot reviewer has no repository permission, so those events become
   # action_required before any job `if:` can skip them. Keep dismissal as the
-  # only review event; scheduled reconciliation also refreshes batch-exception
-  # evidence without making Copilot's submitted reviews a workflow trigger.
+  # only review event. Bounded scheduled discovery is owned by the trusted
+  # auto-approve workflow; keep this explicit review/exception refresh listener.
   pull_request_review:
     types:
       - dismissed
-  schedule:
-    - cron: "*/10 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -106,7 +104,7 @@ jobs:
 
   reconcile-open-human-approvals:
     name: Reconcile open PRs with current-head human approval
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -140,11 +138,11 @@ jobs:
           echo "selected_pack=${SELECTED_PACK}" >> "${GITHUB_OUTPUT}"
 
       - name: Skip when policy pack does not reconcile human reviews
-        if: steps.policy-pack.outputs.reconcile != 'true' && github.event_name != 'schedule' && github.event_name != 'workflow_dispatch'
-        run: echo "Policy pack '${{ steps.policy-pack.outputs.selected_pack }}' does not reconcile merge eligibility after human reviews; scheduled batch-exception refresh remains enabled."
+        if: steps.policy-pack.outputs.reconcile != 'true' && github.event_name != 'workflow_dispatch'
+        run: echo "Policy pack '${{ steps.policy-pack.outputs.selected_pack }}' does not reconcile merge eligibility after human reviews; explicit batch-exception refresh remains enabled."
 
       - name: Dispatch executor for current-head human approvals
-        if: steps.policy-pack.outputs.reconcile == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        if: steps.policy-pack.outputs.reconcile == 'true' || github.event_name == 'workflow_dispatch'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
