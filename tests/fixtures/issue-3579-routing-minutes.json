@@ -1,0 +1,33 @@
+{
+  "description": "Deterministic test fixture only. Minutes are explicit test inputs, not production telemetry or claimed savings.",
+  "buildGuard": [
+    {
+      "name": "successful producer",
+      "event": "workflow_run",
+      "conclusion": "success",
+      "resolverMinutes": 2,
+      "detectorMinutes": 5
+    },
+    {
+      "name": "cancelled producer",
+      "event": "workflow_run",
+      "conclusion": "cancelled",
+      "resolverMinutes": 1,
+      "detectorMinutes": 5
+    },
+    {
+      "name": "failed producer",
+      "event": "workflow_run",
+      "conclusion": "failure",
+      "resolverMinutes": 2,
+      "detectorMinutes": 5
+    },
+    {
+      "name": "manual dispatch",
+      "event": "workflow_dispatch",
+      "conclusion": null,
+      "resolverMinutes": 2,
+      "detectorMinutes": 5
+    }
+  ]
+}

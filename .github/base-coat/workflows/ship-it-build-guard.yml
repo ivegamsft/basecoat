@@ -58,6 +58,7 @@ concurrency:
 jobs:
   resolve-inputs:
     name: Resolve build-guard inputs
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:

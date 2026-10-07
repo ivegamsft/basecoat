@@ -442,6 +442,22 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running issue-3579 workflow trigger filter tests...'
+& node --test (Join-Path $PSScriptRoot 'issue-3579-trigger-filter-tests.cjs')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Issue-3579 workflow trigger filter tests failed' -ForegroundColor Red
+    Write-FailureLog 'issue-3579-trigger-filter-tests'
+    exit 1
+}
+
+Write-Host 'Running automation approval recovery tests...'
+& node --test (Join-Path $PSScriptRoot 'automation-approval-recovery-tests.cjs')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Automation approval recovery tests failed' -ForegroundColor Red
+    Write-FailureLog 'automation-approval-recovery-tests'
+    exit 1
+}
+
 Write-Host 'Running merge-group release-label contract tests...'
 & node --test (Join-Path $PSScriptRoot 'merge-group-release-label-tests.cjs')
 if ($LASTEXITCODE -ne 0) {

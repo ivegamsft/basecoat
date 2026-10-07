@@ -206,6 +206,7 @@ function Get-RunsFromGitHub {
 function Get-FailureClassification {
   param(
     [Parameter(Mandatory)]
+    [AllowEmptyString()]
     [string]$LogText
   )
 

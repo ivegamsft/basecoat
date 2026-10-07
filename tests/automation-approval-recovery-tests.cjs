@@ -14,11 +14,18 @@ for (const file of [
   const script = job.split('          script: |\n')[1]
     .split('\n').map(line => line.replace(/^ {12}/, '')).join('\n');
   const execute = new AsyncFunction('github', 'context', 'core', script);
+  const predicateStart = job.indexOf('    if: |\n');
+  const predicateEnd = job.indexOf('\n    name: Approve pending in-repo automation workflow runs', predicateStart);
+  assert.ok(predicateStart >= 0 && predicateEnd > predicateStart,
+    `${file}: recovery job must retain its job-level event filter`);
+  const condition = job.slice(predicateStart + '    if: |\n'.length, predicateEnd)
+    .split('\n').map(line => line.replace(/^ {6}/, '')).join(' ').trim();
 
   for (const scenario of [
     'eligible', 'shared-head', 'fork', 'stale', 'closed', 'advanced', 'unassociated',
     'wrong-event', 'already-approved', 'changed-run-head', 'changed-association',
-    'removed-association', 'changed-event', 'forbidden', 'approved-race', 'api-error'
+    'removed-association', 'changed-event', 'delayed-hold-after-producer',
+    'forbidden', 'approved-race', 'api-error'
   ]) {
     test(`${file}: ${scenario}`, async () => {
       const approvals = [];
@@ -68,9 +75,24 @@ for (const file of [
         await assert.rejects(invocation, /approval failed/);
       } else {
         await invocation();
-        assert.deepEqual(approvals, ['eligible', 'shared-head'].includes(scenario) ? [123] : []);
+        assert.deepEqual(approvals, ['eligible', 'shared-head', 'delayed-hold-after-producer'].includes(scenario) ? [123] : []);
         assert.equal(failures.length, scenario === 'forbidden' ? 1 : 0);
       }
     });
   }
+
+  test(`${file}: recovery event predicate retains trusted producer and manual triggers`, () => {
+    const evaluate = (eventName, event) => {
+      const github = { event_name: eventName, event, repository: 'owner/repo' };
+      return Function('github', `return (${condition});`)(github);
+    };
+    assert.equal(evaluate('schedule', {}), true);
+    assert.equal(evaluate('workflow_dispatch', {}), true);
+    assert.equal(evaluate('workflow_run', { workflow_run: {
+      head_repository: { full_name: 'owner/repo' }
+    } }), true);
+    assert.equal(evaluate('workflow_run', { workflow_run: {
+      head_repository: { full_name: 'fork/repo' }
+    } }), false);
+  });
 }

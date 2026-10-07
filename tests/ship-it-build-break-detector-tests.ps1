@@ -30,6 +30,7 @@ function Invoke-Scenario {
     [string]$ExpectedAction,
     [Parameter(Mandatory)]
     [string]$ExpectedReason,
+    [string]$ExpectedClassifier = "",
     [int]$CurrentRetryCount = 0,
     [int]$MaxAutoRetries = 2
   )
@@ -58,6 +59,9 @@ function Invoke-Scenario {
   }
   if ($summary.reason -ne $ExpectedReason) {
     throw "Scenario '$Name' expected reason '$ExpectedReason' but found '$($summary.reason)'."
+  }
+  if ($ExpectedClassifier -and $summary.classifier.category -ne $ExpectedClassifier) {
+    throw "Scenario '$Name' expected classifier '$ExpectedClassifier' but found '$($summary.classifier.category)'."
   }
 
   $markdownPath = [System.IO.Path]::ChangeExtension($summaryPath, ".md")
@@ -121,10 +125,46 @@ Invoke-Scenario `
   -Name "no-failures-clear" `
   -Runs @(
     (New-Run -RunId 1004 -Conclusion "success" -MinutesAgo 1 -LogExcerpt ""),
-    (New-Run -RunId 1005 -Conclusion "neutral" -MinutesAgo 2 -LogExcerpt "")
+    (New-Run -RunId 1005 -Conclusion "neutral" -MinutesAgo 2 -LogExcerpt ""),
+    (New-Run -RunId 1006 -Conclusion "cancelled" -MinutesAgo 3 -LogExcerpt "")
   ) `
   -ExpectedAction "no_action" `
   -ExpectedReason "no-failures-detected"
+
+Invoke-Scenario `
+  -Name "failure-with-missing-log" `
+  -Runs @(
+    (New-Run -RunId 1007 -Conclusion "failure" -MinutesAgo 1 -LogExcerpt "")
+  ) `
+  -ExpectedAction "escalate" `
+  -ExpectedReason "nonrecoverable-unknown" `
+  -ExpectedClassifier "unknown"
+
+function gh {
+  if ($args -contains "--json") {
+    $global:LASTEXITCODE = 0
+    return '{"databaseId":1008,"workflowName":"BaseCoat - PR Validation","headBranch":"intent/ship-it/demo","conclusion":"failure","createdAt":"2026-10-06T12:00:00Z","url":"https://github.com/IBuySpy-Shared/basecoat/actions/runs/1008"}'
+  }
+
+  $global:LASTEXITCODE = 1
+  return "workflow log service unavailable"
+}
+
+$logApiFailureVisible = $false
+try {
+  & $detectorScript `
+    -TargetRepo "IBuySpy-Shared/basecoat" `
+    -SourceRunId 1008 `
+    -DryRun `
+    -OutputPath (Join-Path $outputDirectory "missing-log-api-summary.json")
+} catch {
+  $logApiFailureVisible = $_.Exception.Message -match "gh command failed: gh run view 1008 .*--log"
+} finally {
+  Remove-Item Function:\gh -ErrorAction SilentlyContinue
+}
+if (-not $logApiFailureVisible) {
+  throw "A failed log API lookup must fail visibly instead of producing a success-shaped summary."
+}
 
 $workflowContent = Get-Content -Raw -Path $workflowFile
 if ($workflowContent -notmatch "workflow_run:") {
@@ -132,6 +172,9 @@ if ($workflowContent -notmatch "workflow_run:") {
 }
 if ($workflowContent -notmatch "workflow_dispatch:") {
   throw "Build guard workflow must include workflow_dispatch trigger."
+}
+if ($workflowContent -notmatch "(?m)^\s+if: github\.event_name == 'workflow_dispatch' \|\| \(github\.event_name == 'workflow_run' && github\.event\.workflow_run\.conclusion == 'failure'\)\s*$") {
+  throw "Build guard resolver must filter successful and cancelled completions before runner allocation while preserving manual dispatch and failure recovery."
 }
 if ($workflowContent -notmatch "ship-it-build-summary.json|build-break-summary.json") {
   throw "Build guard workflow should emit build-break summary artifacts."
