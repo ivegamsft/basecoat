@@ -99,6 +99,13 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running read-only roadmap grouping and checkpoint tests...'
+& python (Join-Path $PSScriptRoot 'roadmap-preview-tests.py')
+if ($LASTEXITCODE -ne 0) {
+    Write-FailureLog 'roadmap-preview-tests'
+    exit 1
+}
+
 $version = (Get-Content version.json -Raw | ConvertFrom-Json).version
 Assert-PathExists -Path "dist/base-coat-$version.zip" -Message 'Packaging test failed: zip artifact missing'
 Assert-PathExists -Path "dist/base-coat-$version.tar.gz" -Message 'Packaging test failed: tar.gz artifact missing'

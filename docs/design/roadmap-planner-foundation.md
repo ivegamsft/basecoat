@@ -77,7 +77,11 @@ dependency order remains exclusively `build-waves.ps1`; no execution is enabled.
 
 - [#3616](https://github.com/IBuySpy-Shared/basecoat/issues/3616): mapper/advisor
   integration, race-safe persistence, authenticated approval, checkpoints,
-  canonical roadmap artifact PR.
+  canonical roadmap artifact PR. The additive
+  [grouping/checkpoint preview](roadmap-grouping-preview.md) validates supplied
+  normalized mapper/advisor evidence and stores a local read-only artifact.
+  Live CAS, authenticated approval consumption and remote writes remain blocked;
+  this does not complete #3616.
 - [#3617](https://github.com/IBuySpy-Shared/basecoat/issues/3617): intent/routing,
   triggers, bounded resume and autopilot roadmap-order integration, dependency
   failure/fallback coverage using existing topology helpers.
