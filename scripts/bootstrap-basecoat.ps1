@@ -17,13 +17,13 @@
         .agents/skills/             -- Cross-client Agent Skills interop
 
     Environment variables (all optional):
-        BASECOAT_REPO       GitHub repo slug or HTTPS URL  (default: IBuySpy-Shared/basecoat)
+        BASECOAT_REPO       GitHub repo slug or HTTPS URL  (default: ivegamsft/basecoat)
         BASECOAT_REF        Branch/tag to pull from         (default: main)
         BASECOAT_TARGET_DIR Path inside consumer repo       (default: .github/base-coat)
 
 .PARAMETER BasecoatRepo
     GitHub repo (org/name or full HTTPS URL).
-    Defaults to BASECOAT_REPO env var, then 'IBuySpy-Shared/basecoat'.
+    Defaults to BASECOAT_REPO env var, then 'ivegamsft/basecoat'.
 
 .PARAMETER Ref
     Branch or tag to pull from BaseCoat. Defaults to 'main'.
@@ -146,11 +146,11 @@ Write-Header 'Phase 2 — BaseCoat Source'
 
 if (-not $BasecoatRepo) {
     if ($Silent) {
-        $BasecoatRepo = 'IBuySpy-Shared/basecoat'
+        $BasecoatRepo = 'ivegamsft/basecoat'
         Write-Info "Defaulting to $BasecoatRepo (set -BasecoatRepo or BASECOAT_REPO to override)"
     } else {
-        $BasecoatRepo = Read-Host "  BaseCoat repo [IBuySpy-Shared/basecoat]"
-        if (-not $BasecoatRepo) { $BasecoatRepo = 'IBuySpy-Shared/basecoat' }
+        $BasecoatRepo = Read-Host "  BaseCoat repo [ivegamsft/basecoat]"
+        if (-not $BasecoatRepo) { $BasecoatRepo = 'ivegamsft/basecoat' }
     }
 }
 

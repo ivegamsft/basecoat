@@ -15,7 +15,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$REPO = "IBuySpy-Shared/basecoat"
+$REPO = "ivegamsft/basecoat"
 
 function Get-CurrentRepos {
     $raw = gh secret list --repo $REPO 2>&1 | Select-String "DASHBOARD_REPOS"

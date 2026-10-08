@@ -158,7 +158,7 @@ function Build-Scorecard {
             unit = "merged_prs_per_week"
             higherIsBetter = $true
             threshold = 1.0
-            remediation = "https://github.com/IBuySpy-Shared/basecoat/issues/2046"
+            remediation = "internal source issue"
         },
         @{
             name = "failure_rate"
@@ -166,7 +166,7 @@ function Build-Scorecard {
             unit = "ratio"
             higherIsBetter = $false
             threshold = 0.02
-            remediation = "https://github.com/IBuySpy-Shared/basecoat/issues/2047"
+            remediation = "internal source issue"
         },
         @{
             name = "mttr_hours"
@@ -174,7 +174,7 @@ function Build-Scorecard {
             unit = "hours"
             higherIsBetter = $false
             threshold = 4.0
-            remediation = "https://github.com/IBuySpy-Shared/basecoat/issues/2047"
+            remediation = "internal source issue"
         },
         @{
             name = "manual_intervention_rate"
@@ -182,7 +182,7 @@ function Build-Scorecard {
             unit = "ratio"
             higherIsBetter = $false
             threshold = 0.05
-            remediation = "https://github.com/IBuySpy-Shared/basecoat/issues/2049"
+            remediation = "internal source issue"
         }
     )
 
@@ -309,7 +309,7 @@ function Convert-ScorecardToMarkdown {
 
 if ([string]::IsNullOrWhiteSpace($Repository)) {
     $Repository = if ([string]::IsNullOrWhiteSpace($env:GITHUB_REPOSITORY)) {
-        "IBuySpy-Shared/basecoat"
+        "ivegamsft/basecoat"
     } else {
         $env:GITHUB_REPOSITORY
     }

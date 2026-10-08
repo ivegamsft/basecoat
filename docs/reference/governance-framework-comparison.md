@@ -73,14 +73,14 @@ Areas where basecoat could adopt or strengthen HVE-style governance strengths. E
 
 | Candidate | Issue |
 |---|---|
-| Security/compliance standards-mapping layer (OWASP/NIST/AI-RMF/WAF/CAF) | [#3114](https://github.com/IBuySpy-Shared/basecoat/issues/3114) |
-| IP/licensing posture (paraphrase-first, THIRD-PARTY-NOTICES, cite-only) | [#3115](https://github.com/IBuySpy-Shared/basecoat/issues/3115) |
-| Responsible-AI + privacy planning/review agents | [#3116](https://github.com/IBuySpy-Shared/basecoat/issues/3116) |
-| Untrusted-content / prompt-injection boundary instruction | [#3117](https://github.com/IBuySpy-Shared/basecoat/issues/3117) |
-| Durable per-task provenance/evidence trail | [#3118](https://github.com/IBuySpy-Shared/basecoat/issues/3118) |
-| Human-review gates / autonomy tiers on tracker-bound mutations | [#3119](https://github.com/IBuySpy-Shared/basecoat/issues/3119) |
+| Security/compliance standards-mapping layer (OWASP/NIST/AI-RMF/WAF/CAF) | [#3114](internal source issue) |
+| IP/licensing posture (paraphrase-first, THIRD-PARTY-NOTICES, cite-only) | [#3115](internal source issue) |
+| Responsible-AI + privacy planning/review agents | [#3116](internal source issue) |
+| Untrusted-content / prompt-injection boundary instruction | [#3117](internal source issue) |
+| Durable per-task provenance/evidence trail | [#3118](internal source issue) |
+| Human-review gates / autonomy tiers on tracker-bound mutations | [#3119](internal source issue) |
 
-Tracking issue: [#3113](https://github.com/IBuySpy-Shared/basecoat/issues/3113).
+Tracking issue: [#3113](internal source issue).
 
 ## References
 

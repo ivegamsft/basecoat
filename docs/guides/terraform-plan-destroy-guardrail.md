@@ -50,4 +50,4 @@ adapter because the plan schema differs.
 ## Related
 
 - Template: `templates/terraform-plan-destroy-guardrail/`
-- Downstream incident: IBuySpy-Dev/COECheck#771
+- Downstream incident: example-org/COECheck#771

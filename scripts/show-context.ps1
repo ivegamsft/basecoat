@@ -36,7 +36,7 @@
     pwsh scripts/show-context.ps1 -Json | ConvertFrom-Json
 
 .LINK
-    https://github.com/IBuySpy-Shared/basecoat/issues/1033
+    internal source issue
 #>
 
 [CmdletBinding()]
