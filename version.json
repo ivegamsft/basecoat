@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "4.6.2",
-  "releaseDate": "2026-10-06",
-  "notes": "Patch release: dependency vulnerability remediation, a non-vacuous public payload gate, lockfile-aware PR sizing, faster Windows validation, and truthful downstream drift reporting."
+  "version": "4.6.3",
+  "releaseDate": "2026-10-08",
+  "notes": "Patch release: portable shared-guidance ownership hashes and bounded migration of canonically identical legacy locks."
 }

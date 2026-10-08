@@ -4,6 +4,10 @@ All notable changes to this repository should be recorded in this file.
 
 ## Unreleased
 
+No unreleased changes.
+
+## 4.6.3 - 2026-10-08
+
 ### Fixed
 
 - Canonicalize shared-guidance text hashes across LF and CRLF checkouts and
