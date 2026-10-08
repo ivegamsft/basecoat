@@ -33,7 +33,8 @@ Each entry records:
   `adhesion`)
 - `guidanceUnit`: optional source unit or source-relative asset path
 - `sourceVersion`: optional product or unit version
-- `sha256`: lowercase SHA-256 of the installed bytes
+- `sha256`: lowercase SHA-256 of UTF-8 text with CRLF and CR line endings
+  canonicalized to LF
 
 Entries are sorted by `path`. Paths must be files, must be under an allowed
 shared destination, and must not be rooted, contain `.` or `..` segments, or
@@ -52,8 +53,10 @@ write and removal plan:
    `GUIDANCE_PATH_COLLISION`; no planned shared file is changed.
 2. An existing unclaimed path also blocks as owner `unmanaged`.
 3. A same-owner update is allowed only when the installed SHA-256 equals the
-   lock's expected hash. A mismatch blocks with
-   `GUIDANCE_CONTENT_MODIFIED`, including expected and actual hashes.
+   lock's expected hash. A legacy raw-byte hash may migrate only when the
+   current destination is canonically identical to the exact planned owner
+   payload. Every other mismatch blocks with `GUIDANCE_CONTENT_MODIFIED`,
+   including expected and actual hashes.
 4. A product may remove a stale path only when the lock names that product as
    owner and the installed hash still matches. Foreign stale entries and files
    are preserved.

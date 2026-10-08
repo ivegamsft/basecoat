@@ -909,7 +909,10 @@ try {
             if (Test-Path -LiteralPath $destination -PathType Leaf) {
                 $actualHash = Get-GuidanceContentHash -Path $destination
                 if ($actualHash -ne $existingEntry.sha256) {
-                    throw "GUIDANCE_CONTENT_MODIFIED path='$($planned.path)' owner='basecoat' expected='$($existingEntry.sha256)' actual='$actualHash'"
+                    if ($actualHash -ne $planned.entry.sha256) {
+                        throw "GUIDANCE_CONTENT_MODIFIED path='$($planned.path)' owner='basecoat' expected='$($existingEntry.sha256)' actual='$actualHash'"
+                    }
+                    Write-Host "Migrating canonical guidance hash for unchanged BaseCoat content: $($planned.path)"
                 }
             }
         }

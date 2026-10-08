@@ -4,7 +4,11 @@ All notable changes to this repository should be recorded in this file.
 
 ## Unreleased
 
-No unreleased changes.
+### Fixed
+
+- Canonicalize shared-guidance text hashes across LF and CRLF checkouts and
+  migrate an existing raw-byte lock only when the installed content is
+  canonically identical to the exact planned BaseCoat payload (#3608).
 
 ## 4.6.2 - 2026-10-06
 
@@ -1680,4 +1684,3 @@ None — v3.0.0 maintains backward compatibility with v2.x patterns.
 - Added sync scripts for PowerShell and bash consumers
 - Added starter instructions, prompts, skills, and agent files
 - Added inventory and version metadata
-

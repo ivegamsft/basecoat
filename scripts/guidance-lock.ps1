@@ -141,7 +141,16 @@ function Get-GuidanceContentHash {
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
         throw "GUIDANCE_LOCK_INVALID path='$Path' reason='content hash requires an existing file'"
     }
-    return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
+    $content = [System.IO.File]::ReadAllText($Path)
+    $canonical = $content.Replace("`r`n", "`n").Replace("`r", "`n")
+    $bytes = [System.Text.UTF8Encoding]::new($false).GetBytes($canonical)
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        return ([BitConverter]::ToString($sha.ComputeHash($bytes))).Replace('-', '').ToLowerInvariant()
+    }
+    finally {
+        $sha.Dispose()
+    }
 }
 
 function Get-GuidanceOptionalProperty {

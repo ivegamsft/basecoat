@@ -89,6 +89,13 @@ Remove-Item -LiteralPath $scratch -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Path $scratch -Force | Out-Null
 . (Join-Path $repoRoot 'scripts/guidance-lock.ps1')
 
+$canonicalLf = Join-Path $scratch 'canonical-lf.md'
+$canonicalCrlf = Join-Path $scratch 'canonical-crlf.md'
+[IO.File]::WriteAllText($canonicalLf, "line one`nline two`n", [Text.UTF8Encoding]::new($false))
+[IO.File]::WriteAllText($canonicalCrlf, "line one`r`nline two`r`n", [Text.UTF8Encoding]::new($false))
+Assert-True ((Get-GuidanceContentHash -Path $canonicalLf) -eq (Get-GuidanceContentHash -Path $canonicalCrlf)) `
+    'Guidance hashes must be stable across LF and CRLF checkouts.'
+
 Invoke-Scenario 'same-owner update' {
     $source = Join-Path $scratch 'same-owner-source'
     $consumer = Join-Path $scratch 'same-owner-consumer'

@@ -616,8 +616,11 @@ while IFS='|' read -r path owner unit version expected_hash source_file; do
     if [[ -f "$destination" ]]; then
       actual_hash="$(guidance_sha256 "$destination")"
       if [[ "$actual_hash" != "$locked_hash" ]]; then
-        echo "GUIDANCE_CONTENT_MODIFIED path='$path' owner='basecoat' expected='$locked_hash' actual='$actual_hash'" >&2
-        exit 1
+        if [[ "$actual_hash" != "$expected_hash" ]]; then
+          echo "GUIDANCE_CONTENT_MODIFIED path='$path' owner='basecoat' expected='$locked_hash' actual='$actual_hash'" >&2
+          exit 1
+        fi
+        echo "Migrating canonical guidance hash for unchanged BaseCoat content: $path"
       fi
     fi
   elif [[ -e "$destination" || -L "$destination" ]]; then

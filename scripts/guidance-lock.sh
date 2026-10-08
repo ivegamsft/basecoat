@@ -23,16 +23,16 @@ guidance_normalize_path() {
 }
 
 guidance_sha256() {
-  if command -v sha256sum >/dev/null 2>&1; then
-    sha256sum "$1" | awk '{print tolower($1)}'
-  elif command -v shasum >/dev/null 2>&1; then
-    shasum -a 256 "$1" | awk '{print tolower($1)}'
-  elif command -v openssl >/dev/null 2>&1; then
-    openssl dgst -sha256 "$1" | sed -E 's/^.*= //' | tr '[:upper:]' '[:lower:]'
+  local python_cmd=""
+  if command -v python3 >/dev/null 2>&1; then
+    python_cmd="python3"
+  elif command -v python >/dev/null 2>&1; then
+    python_cmd="python"
   else
-    echo "GUIDANCE_LOCK_INVALID reason='sha256sum, shasum, or openssl is required'" >&2
+    echo "GUIDANCE_LOCK_INVALID reason='python3 or python is required for canonical guidance hashing'" >&2
     return 1
   fi
+  "$python_cmd" -c 'import hashlib, pathlib, sys; data = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"); canonical = data.replace("\r\n", "\n").replace("\r", "\n").encode("utf-8"); print(hashlib.sha256(canonical).hexdigest())' "$1"
 }
 
 guidance_validate_field() {
