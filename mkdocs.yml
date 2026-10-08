@@ -82,6 +82,7 @@ nav:
     - Workflow Offboarding: guides/downstream-workflow-offboarding.md
     - Product Definition: reference/product.md
     - Design Debate Format: reference/design-debate-format.md
+    - AI SDLC Work Units: design/ai-sdlc-work-units.md
   - Asset Reference:
     - Overview: reference/quick-reference.md
     - Inventory: reference/inventory.md

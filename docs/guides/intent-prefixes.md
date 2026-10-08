@@ -90,6 +90,15 @@ for selecting chain patterns.
 
 ## Syntax matters as much as the prefix
 
+For a proposed outcome-oriented vocabulary and a comparison of planning
+cadences with completion-based delivery, see
+[AI SDLC Work Units](../design/ai-sdlc-work-units.md).
+The proposed prefixes there are not supported aliases. Its
+[lifecycle/control verbs](../design/ai-sdlc-work-units.md#lifecycle-and-control-verbs)
+and [keyword index](../design/ai-sdlc-work-units.md#keyword-index) distinguish
+supported `learn:` from candidate `verify:`, `resume:` and `reconcile:`.
+Search keywords do not register parser tokens or authorize side effects.
+
 `feature:` routes design/implementation and validation only; it never implies
 delivery consent. An approved plan, issue approval, green CI, or
 `pr-lifecycle=full` does not authorize making a feature-origin PR ready,
