@@ -35,6 +35,13 @@ gh pr merge --squash --admin
 
 Use `--admin` to bypass CI wait when change is pre-validated locally.
 
+Before creating or updating a delivery PR, render its body to a file and run
+`node scripts/validate-pr-intake-preflight.cjs <body-file> origin/main HEAD`.
+The preflight uses the shared decomposition evaluator and checks that the
+declared scope and diff counts match the current branch. Do not publish when it
+fails; fix the body or split the change first. Coding-agent PR completion and
+ready promotion are separately governed by issue #3669.
+
 ## CLI session transition policy
 
 For long runs, enforce context transitions explicitly:

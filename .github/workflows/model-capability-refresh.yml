@@ -131,6 +131,7 @@ jobs:
           body_template="${body_template//__EXPECTED_FILES__/$expected_files}"
           body_template="${body_template//__EXPECTED_LINES__/$expected_lines}"
           printf '%s\n' "$body_template" | sed 's/^          //' > "$body_file"
+          node scripts/validate-pr-intake-preflight.cjs "$body_file" origin/main HEAD
           gh label create skip-release-label-gate --color ededed --description "Exempt automation-only PRs from release label gate" --force || true
 
           existing="$(gh pr list --state open --head "$BRANCH" --json number --jq '.[0].number')"

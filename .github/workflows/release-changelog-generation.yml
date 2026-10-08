@@ -209,6 +209,7 @@ jobs:
           - Rollout plan: Merge after required checks pass.
           - Rollback plan: Revert the generated release documentation refresh commit.
           EOF
+          node scripts/validate-pr-intake-preflight.cjs "$body_file" origin/main HEAD
           gh label create skip-release-label-gate --color ededed --description "Exempt automation-only PRs from release label gate" --force || true
 
           existing="$(gh pr list --state open --head "$branch" --json number --jq '.[0].number' || true)"

@@ -133,6 +133,7 @@ jobs:
 
           Related: #1049
           EOF
+          node scripts/validate-pr-intake-preflight.cjs "${PR_BODY_FILE}" origin/main HEAD
           gh label create skip-release-label-gate --color ededed --description "Exempt automation-only PRs from release label gate" --force || true
 
           # Enterprise policies can block GitHub Actions from creating or editing PRs.

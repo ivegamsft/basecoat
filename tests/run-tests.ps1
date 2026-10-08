@@ -8,6 +8,12 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
 Set-Location $repoRoot
 
+Write-Host 'Running PR intake preflight tests...'
+& node --test (Join-Path $PSScriptRoot 'pr-intake-preflight-tests.cjs')
+if ($LASTEXITCODE -ne 0) {
+    throw 'PR intake metadata preflight regressions failed.'
+}
+
 $testResultsDir = Join-Path $repoRoot 'test-results'
 
 function Write-FailureLog {

@@ -296,22 +296,139 @@ jobs:
               });
             }
 
+            const branchRef = await github.rest.git.getRef({
+              owner,
+              repo,
+              ref: `heads/${branchName}`,
+            });
+            const comparison = await github.rest.repos.compareCommits({
+              owner,
+              repo,
+              base: baseSha,
+              head: branchRef.data.object.sha,
+            });
+            const changedFiles = comparison.data.files;
+            if (
+              comparison.data.status !== 'ahead' ||
+              !Array.isArray(changedFiles) ||
+              changedFiles.length !== 2 ||
+              !changedFiles.some(file => file.filename === prdPath) ||
+              !changedFiles.some(file => file.filename === specPath)
+            ) {
+              throw new Error(`Unable to resolve a complete generated-file diff for #${issueNum}.`);
+            }
+
+            const templateResponse = await github.rest.repos.getContent({
+              owner,
+              repo,
+              path: '.github/PULL_REQUEST_TEMPLATE.md',
+              ref: baseSha,
+            });
+            if (Array.isArray(templateResponse.data) || templateResponse.data.type !== 'file') {
+              throw new Error('Trusted pull request template is unavailable at the synthesis base.');
+            }
+            let prBody = Buffer.from(templateResponse.data.content, 'base64').toString('utf8');
+            const replaceOnce = (source, placeholder, replacement) => {
+              const index = source.indexOf(placeholder);
+              if (index < 0 || source.indexOf(placeholder, index + placeholder.length) >= 0) {
+                throw new Error(`Pull request template placeholder is missing or duplicated: ${placeholder}`);
+              }
+              return `${source.slice(0, index)}${replacement}${source.slice(index + placeholder.length)}`;
+            };
+            const expectedLines = comparison.data.additions + comparison.data.deletions;
+            prBody = replaceOnce(
+              prBody,
+              'Describe the change and user impact.',
+              `Propose a draft PRD/spec for #${issueNum}; it is a design artifact only and does not authorize implementation.`
+            );
+            prBody = replaceOnce(
+              prBody,
+              'Linked issue / spec: TBD',
+              `Linked issue / spec: #${issueNum} (generated PRD/spec proposal; owner review required before implementation)`
+            );
+            prBody = replaceOnce(
+              prBody,
+              '| | | |',
+              '| `.github/workflows/issue-to-spec-synthesis.yml` | pending PR checks | Generated design artifacts are validated before publication |'
+            );
+            prBody = replaceOnce(prBody, '| 1 | | |', `| 1 | \`${prdPath}\`, \`${specPath}\` | Generate a reviewable PRD/spec proposal from issue #${issueNum}. |`);
+            prBody = replaceOnce(prBody, 'Change scope: TBD', 'Change scope: individual');
+            prBody = replaceOnce(prBody, 'Source issues: TBD', `Source issues: #${issueNum}`);
+            prBody = replaceOnce(prBody, 'Independently deliverable units: TBD', 'Independently deliverable units: 1');
+            prBody = replaceOnce(prBody, 'Unit inventory: TBD', 'Unit inventory: synthesized PRD and spec proposal');
+            prBody = replaceOnce(prBody, 'Expected files: TBD', `Expected files: ${changedFiles.length}`);
+            prBody = replaceOnce(
+              prBody,
+              'Expected changed lines (additions + deletions): TBD',
+              `Expected changed lines (additions + deletions): ${expectedLines}`
+            );
+            prBody = replaceOnce(
+              prBody,
+              'Classification rationale: TBD',
+              'The generated PRD and spec are one review unit for one source issue and are not implementation authorization.'
+            );
+            prBody = replaceOnce(
+              prBody,
+              '## Governance\n\n> [!IMPORTANT]',
+              '## Governance\n\nDraft design only; no implementation, approval, or release authorization is implied. Migration notes: none; generated assets remain proposals.\n\n> [!IMPORTANT]'
+            );
+            prBody = replaceOnce(prBody, '- Risks / blast radius:', '- Risks / blast radius: Incorrect generated scope could mislead later implementation; draft status and source-owner review remain required.');
+            prBody = replaceOnce(prBody, '- Rollout plan:', '- Rollout plan: Keep as draft until the source issue owner reviews the proposed PRD/spec.');
+            prBody = replaceOnce(prBody, '- Rollback plan:', '- Rollback plan: Close the draft PR and remove or regenerate its proposal branch.');
+
+            const evaluatorResponse = await github.rest.repos.getContent({
+              owner,
+              repo,
+              path: '.github/base-coat/scripts/pr-decomposition-evaluator.cjs',
+              ref: baseSha,
+            });
+            if (Array.isArray(evaluatorResponse.data) || evaluatorResponse.data.type !== 'file') {
+              throw new Error('Trusted PR decomposition evaluator is unavailable at the synthesis base.');
+            }
+            const evaluatorModule = { exports: {} };
+            const loadEvaluator = new Function('require', 'module', 'exports',
+              Buffer.from(evaluatorResponse.data.content, 'base64').toString('utf8'));
+            loadEvaluator(require, evaluatorModule, evaluatorModule.exports);
+            const { evaluateDecomposition, parseScope } = evaluatorModule.exports;
+            const scope = parseScope(prBody);
+            if (
+              scope.expectedFiles !== changedFiles.length ||
+              scope.expectedLines !== expectedLines
+            ) {
+              throw new Error(`Generated PR body counts do not match the current source diff for #${issueNum}.`);
+            }
+            const preflight = await evaluateDecomposition({
+              body: prBody,
+              changedFiles: changedFiles.length,
+              additions: comparison.data.additions,
+              deletions: comparison.data.deletions,
+              files: changedFiles.map(file => ({
+                filename: file.filename,
+                status: file.status,
+                previous_filename: file.previous_filename || '',
+              })),
+              headSha: branchRef.data.object.sha,
+              baseSha,
+              reviews: [],
+            });
+            if (preflight.decision !== 'pass') {
+              throw new Error(`Generated PR intake preflight ${preflight.decision}: ${preflight.reason}`);
+            }
+            const currentMain = await github.rest.git.getRef({
+              owner,
+              repo,
+              ref: 'heads/main',
+            });
+            if (currentMain.data.object.sha !== baseSha) {
+              throw new Error('Main advanced during synthesis; refusing to publish a PR with stale diff counts.');
+            }
+
             // Open PR
             const { data: pr } = await writeGithub.rest.pulls.create({
               owner,
               repo,
               title: `spec: synthesize spec for issue #${issueNum} — ${title}`,
-              body: [
-                `Auto-generated spec from approved issue #${issueNum}.`,
-                '',
-                `**Source issue:** #${issueNum}`,
-                `**PRD path:** \`${prdPath}\``,
-                `**Spec path:** \`${specPath}\``,
-                '',
-                'Review and edit the spec before merging. Implementation PRs should reference this spec.',
-                '',
-                `Refs #${issueNum}`,
-              ].join('\n'),
+              body: prBody,
               head: branchName,
               base: 'main',
               draft: true,
