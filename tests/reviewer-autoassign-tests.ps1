@@ -112,6 +112,25 @@ if ($failures.Count -eq 0 -or (-not ($failures | Where-Object { $_ -match 'trigg
     Write-Host '    ✓ Structural guardrails intact' -ForegroundColor Green
 }
 
+# Test 7: Respect solo-dev's no-review-request policy using trusted base governance
+Write-Host '  Test 7: Solo-dev profile skips path-based reviewer requests...'
+$soloDevRoutingPassed = $true
+if ($content -notmatch 'POLICY_PACK:\s*\$\{\{\s*vars\.BASECOAT_POLICY_PACK\s*\}\}') {
+    $failures += 'Workflow does not read the configured BASECOAT_POLICY_PACK variable'
+    $soloDevRoutingPassed = $false
+}
+if ($content -notmatch "path:\s*'\.github/governance/policy-packs\.json'[\s\S]*?ref:\s*pr\.data\.base\.sha") {
+    $failures += 'Workflow does not resolve policy from the trusted pull request base'
+    $soloDevRoutingPassed = $false
+}
+if ($content -notmatch "selectedPack\s*===\s*'solo-dev'[\s\S]*?Skipping path-based reviewer requests under the solo-dev profile") {
+    $failures += 'Workflow does not skip path-based reviewer requests for solo-dev'
+    $soloDevRoutingPassed = $false
+}
+if ($soloDevRoutingPassed) {
+    Write-Host '    ✓ Solo-dev reviewer routing is disabled' -ForegroundColor Green
+}
+
 if ($failures.Count -gt 0) {
     Write-Host "`nReviewer autoassign test FAILURES:" -ForegroundColor Red
     foreach ($f in $failures) {

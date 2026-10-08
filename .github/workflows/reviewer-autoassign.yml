@@ -28,6 +28,7 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         env:
           PR_NUMBER_INPUT: ${{ inputs.pr_number || '' }}
+          POLICY_PACK: ${{ vars.BASECOAT_POLICY_PACK }}
         with:
           script: |
             const prNumber = context.payload.pull_request?.number || Number(process.env.PR_NUMBER_INPUT || '0');
@@ -41,6 +42,28 @@ jobs:
               repo: context.repo.repo,
               pull_number: prNumber
             });
+
+            const policyResponse = await github.rest.repos.getContent({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: '.github/governance/policy-packs.json',
+              ref: pr.data.base.sha
+            });
+            if (Array.isArray(policyResponse.data) || policyResponse.data.type !== 'file') {
+              throw new Error('Trusted governance policy file is unavailable at the pull request base.');
+            }
+            const policy = JSON.parse(
+              Buffer.from(policyResponse.data.content, 'base64').toString('utf8')
+            );
+            const selectedPack = String(process.env.POLICY_PACK || policy.default_profile || '').trim();
+            if (!policy.profiles?.[selectedPack]) {
+              throw new Error(`Unknown governance policy pack '${selectedPack}'.`);
+            }
+            if (selectedPack === 'solo-dev') {
+              core.info('Skipping path-based reviewer requests under the solo-dev profile.');
+              return;
+            }
+
             const prAuthor = pr.data.user?.login || '';
 
             const changedFiles = await github.paginate(github.rest.pulls.listFiles, {
