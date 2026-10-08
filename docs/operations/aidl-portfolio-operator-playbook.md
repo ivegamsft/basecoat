@@ -242,12 +242,12 @@ This playbook delegates to BaseCoat specialist agents and skills at key workflow
 
 | Workflow | Agent/Skill | Trigger | Output |
 | --- | --- | --- | --- |
-| Intake & Triage | [`issue-triage`](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-issue-triage.agent.md) | New issues, unclassified backlog | Priority, labels, type, SLA |
-| Sprint Planning | [`sprint-planner`](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-sprint-planner.agent.md) | Planning ceremony start | Sprint scope, dependency map, risk summary |
-| PR/Review Gates | [`release-audit`](https://github.com/IBuySpy-Shared/basecoat/blob/main/skills/release-audit/SKILL.md) | PR review gate trigger | Conformance pass/fail, waiver decision |
-| Release Readiness | [`release-readiness-chair`](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-release-readiness-chair.agent.md) | Sprint closeout, release prepare | Release checklist, gate decisions, rollback plan |
-| Incident Response | [`incident-responder`](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-incident-responder.agent.md) | Incident creation, escalation | Triage, mitigation, post-incident learning |
-| Learning Capture | [`feedback-loop`](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-feedback-loop.agent.md) | Retrospective or closeout | Memory artifact promotion, decision log updates |
+| Intake & Triage | [`issue-triage`](https://github.com/ivegamsft/basecoat/blob/main/agents/basecoat-10-core-issue-triage.agent.md) | New issues, unclassified backlog | Priority, labels, type, SLA |
+| Sprint Planning | [`sprint-planner`](https://github.com/ivegamsft/basecoat/blob/main/agents/basecoat-10-core-sprint-planner.agent.md) | Planning ceremony start | Sprint scope, dependency map, risk summary |
+| PR/Review Gates | [`release-audit`](https://github.com/ivegamsft/basecoat/blob/main/skills/release-audit/SKILL.md) | PR review gate trigger | Conformance pass/fail, waiver decision |
+| Release Readiness | [`release-readiness-chair`](https://github.com/ivegamsft/basecoat/blob/main/agents/basecoat-60-workflow-release-readiness-chair.agent.md) | Sprint closeout, release prepare | Release checklist, gate decisions, rollback plan |
+| Incident Response | [`incident-responder`](https://github.com/ivegamsft/basecoat/blob/main/agents/basecoat-60-workflow-incident-responder.agent.md) | Incident creation, escalation | Triage, mitigation, post-incident learning |
+| Learning Capture | [`feedback-loop`](https://github.com/ivegamsft/basecoat/blob/main/agents/basecoat-10-core-feedback-loop.agent.md) | Retrospective or closeout | Memory artifact promotion, decision log updates |
 
 ## GitHub Visibility and Status Transparency
 

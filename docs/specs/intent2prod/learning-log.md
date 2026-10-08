@@ -1,6 +1,6 @@
 # Intent2Prod Learning Log
 
-**Control Plane Issue**: [#1874](https://github.com/IBuySpy-Shared/basecoat/issues/1874)  
+**Control Plane Issue**: [#1874](internal source issue)  
 **Program**: Intent2Prod — contract-driven, governed execution loop for ship-it automation
 
 ---

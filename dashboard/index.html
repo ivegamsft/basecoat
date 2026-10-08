@@ -207,7 +207,7 @@ gh workflow run adoption-metrics.yml</code></pre>
 
         const allRepos = [...currentRepos, repo];
         const json = JSON.stringify(allRepos);
-        const command = `echo '${json}' | gh secret set DASHBOARD_REPOS --repo IBuySpy-Shared/basecoat\ngh workflow run adoption-metrics.yml`;
+        const command = `echo '${json}' | gh secret set DASHBOARD_REPOS --repo ivegamsft/basecoat\ngh workflow run adoption-metrics.yml`;
 
         document.getElementById('onboard-command').textContent = command;
         document.getElementById('onboard-output').style.display = 'block';

@@ -60,23 +60,23 @@ especially when writing docs, issues, and summaries for adoption telemetry:
 
 Use this flow to opt a repository into dashboard monitoring.
 
-1. Configure monitored repos via `DASHBOARD_REPOS` in `IBuySpy-Shared/basecoat`.
+1. Configure monitored repos via `DASHBOARD_REPOS` in `ivegamsft/basecoat`.
 
 ```bash
-echo '["IBuySpy-Shared/basecoat","org/repo1","org/repo2"]' | gh secret set DASHBOARD_REPOS --repo IBuySpy-Shared/basecoat
+echo '["ivegamsft/basecoat","org/repo1","org/repo2"]' | gh secret set DASHBOARD_REPOS --repo ivegamsft/basecoat
 ```
 
 1. Run the workflow.
 
 ```bash
-gh workflow run adoption-metrics.yml --repo IBuySpy-Shared/basecoat
+gh workflow run adoption-metrics.yml --repo ivegamsft/basecoat
 ```
 
 1. Verify dashboard outputs.
 
 ```bash
-gh run list --workflow adoption-metrics.yml --repo IBuySpy-Shared/basecoat --limit 1
-gh run watch --repo IBuySpy-Shared/basecoat
+gh run list --workflow adoption-metrics.yml --repo ivegamsft/basecoat --limit 1
+gh run watch --repo ivegamsft/basecoat
 ```
 
 Then confirm updated files under `dashboard/metrics/` on `gh-pages`
@@ -90,5 +90,5 @@ Then confirm updated files under `dashboard/metrics/` on `gh-pages`
 
 | Need | Use | Config location | Trigger |
 |---|---|---|---|
-| Include repositories in adoption dashboard metrics | Dashboard monitored repos | `DASHBOARD_REPOS` secret in `IBuySpy-Shared/basecoat` | `adoption-metrics.yml` (schedule or manual run) |
+| Include repositories in adoption dashboard metrics | Dashboard monitored repos | `DASHBOARD_REPOS` secret in `ivegamsft/basecoat` | `adoption-metrics.yml` (schedule or manual run) |
 | Include repositories in weekly memory candidate sweep | Memory-sweep enlistment | GitHub topic `basecoat-enabled` on each repository | `memory-sweep.yml` (Monday schedule) |

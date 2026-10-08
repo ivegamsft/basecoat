@@ -36,7 +36,7 @@ preflight before any write-capable lane starts.
 ## Building a wave
 
 ```powershell
-pwsh scripts/backlog-autopilot/build-waves.ps1 -Repo IBuySpy-Shared/basecoat -WaveSize 5
+pwsh scripts/backlog-autopilot/build-waves.ps1 -Repo ivegamsft/basecoat -WaveSize 5
 ```
 
 Pass `-InputPath issues.json` to run against a fixed issue list (offline or test

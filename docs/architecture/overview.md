@@ -15,7 +15,7 @@ C4Context
     System(bc, "BaseCoat", "Enterprise Copilot customization library: agents, skills, instructions, prompts")
     System_Ext(copilot, "GitHub Copilot", "AI coding assistant")
     System_Ext(cr, "Consumer Repo", "Team's application repository")
-    System_Ext(mem, "BaseCoat Memory", "IBuySpy-Shared/basecoat-memory: curated patterns")
+    System_Ext(mem, "BaseCoat Memory", "example-org/basecoat-memory: curated patterns")
 
     Rel(dev, copilot, "Uses")
     Rel(copilot, cr, "Reads assets from")
@@ -66,7 +66,7 @@ flowchart TD
 sequenceDiagram
     participant Dev as Developer
     participant CR as Consumer Repo
-    participant BC as BaseCoat (IBuySpy-Shared)
+    participant BC as BaseCoat (public mirror)
     participant CP as GitHub Copilot
 
     Dev->>CR: git clone / open repo

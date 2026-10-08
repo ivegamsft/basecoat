@@ -34,7 +34,7 @@ Memory workflows are **operational/infrastructure workflows** distinct from cons
    - **Answer**: Moderate. Enterprises might build their own org learning repos similar to basecoat-memory (e.g., "company-learnings"). Phase 3 could provide templates, but demand is uncertain. Current focus should remain on agentic workflows (#1305).
 
 4. **Can fork-import.yml be generalized for consumer fork workflows?**
-   - **Answer**: Partially. The workflow is specific to BaseCoat's dual-repo model (ivegamsft/basecoat fork + IBuySpy-Shared/basecoat main). Generalization would require significant parameterization and is low-value for consumers.
+   - **Answer**: Partially. The workflow is specific to BaseCoat's dual-repo model (ivegamsft/basecoat fork + ivegamsft/basecoat main). Generalization would require significant parameterization and is low-value for consumers.
 
 5. **Can adoption-metrics.yml work with consumer custom metrics?**
    - **Answer**: No. The workflow is tightly coupled to BaseCoat's metrics collection infrastructure (Python scripts, MCP server, dashboard design). Consumer metrics would need entirely different collection logic.
@@ -181,7 +181,7 @@ Both workflows are part of BaseCoat's internal development workflow and not suit
 
 #### fork-import.yml (Internal-only)
 
-- **Purpose**: Maintain dual-repo strategy (ivegamsft/basecoat fork + IBuySpy-Shared/basecoat main)
+- **Purpose**: Maintain dual-repo strategy (ivegamsft/basecoat fork + ivegamsft/basecoat main)
 - **Consumer Value**: None. Consumers do not maintain development forks of BaseCoat.
 - **Not Templatizable**: Logic is specific to BaseCoat's fork maintenance model.
 
