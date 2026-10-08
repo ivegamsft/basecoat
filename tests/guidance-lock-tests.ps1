@@ -48,6 +48,20 @@ function New-TestConsumer {
     git -C $Path commit -m seed | Out-Null
 }
 
+function Set-LockedGuidanceHash {
+    param(
+        [string]$Consumer,
+        [string]$Path,
+        [string]$Sha256
+    )
+
+    $lock = Read-GuidanceLock -RepoRoot $Consumer
+    $entry = @($lock.entries | Where-Object path -CEQ $Path) | Select-Object -First 1
+    if (-not $entry) { throw "Fixture lock entry not found: $Path" }
+    $entry.sha256 = $Sha256
+    Write-GuidanceLock -RepoRoot $Consumer -Entries @($lock.entries)
+}
+
 function Invoke-TestSync {
     param(
         [string]$Source,
@@ -110,6 +124,109 @@ Invoke-Scenario 'same-owner update' {
         'Same-owner update did not replace the managed file.'
 }
 
+Invoke-Scenario 'normal idempotence' {
+    $source = Join-Path $scratch 'idempotent-source'
+    $consumer = Join-Path $scratch 'idempotent-consumer'
+    New-TestSource $source
+    New-TestConsumer $consumer
+    Invoke-TestSync $source $consumer
+    $before = Get-Content -LiteralPath (Get-GuidanceLockPath -RepoRoot $consumer) -Raw
+    Invoke-TestSync $source $consumer
+    $after = Get-Content -LiteralPath (Get-GuidanceLockPath -RepoRoot $consumer) -Raw
+    Assert-True ($after -ceq $before) 'An idempotent sync changed the guidance lock.'
+}
+
+Invoke-Scenario 'approved Adhesion v0.7.1 predecessor' {
+    $source = Join-Path $scratch 'approved-predecessor-source'
+    $consumer = Join-Path $scratch 'approved-predecessor-consumer'
+    New-TestSource $source
+    "---`nname: agentic-sdlc-autonomy`ndescription: fixture`n---`n# Canonical BaseCoat payload" |
+        Set-Content -LiteralPath (Join-Path $source 'agents/agentic-sdlc-autonomy.agent.md') -Encoding utf8NoBOM
+    git -C $source add -A
+    git -C $source commit -m add-agent | Out-Null
+    New-TestConsumer $consumer
+    Invoke-TestSync $source $consumer
+    $path = '.github/agents/agentic-sdlc-autonomy.agent.md'
+    Set-LockedGuidanceHash -Consumer $consumer -Path $path `
+        -Sha256 '2487c414f197e0e999164c6da9a6254417eeb317c6442000b868184dccee45ea'
+    Invoke-TestSync $source $consumer
+    $entry = @((Read-GuidanceLock -RepoRoot $consumer).entries | Where-Object path -CEQ $path) | Select-Object -First 1
+    Assert-True ($entry.sha256 -eq (Get-GuidanceContentHash -Path (Join-Path $consumer $path))) `
+        'The exact approved predecessor path/hash was not migrated to the canonical BaseCoat hash.'
+}
+
+Invoke-Scenario 'modified approved Adhesion predecessor is rejected' {
+    $source = Join-Path $scratch 'modified-approved-predecessor-source'
+    $consumer = Join-Path $scratch 'modified-approved-predecessor-consumer'
+    New-TestSource $source
+    "---`nname: agentic-sdlc-autonomy`ndescription: fixture`n---`n# Canonical BaseCoat payload" |
+        Set-Content -LiteralPath (Join-Path $source 'agents/agentic-sdlc-autonomy.agent.md') -Encoding utf8NoBOM
+    git -C $source add -A
+    git -C $source commit -m add-agent | Out-Null
+    New-TestConsumer $consumer
+    Invoke-TestSync $source $consumer
+    $path = '.github/agents/agentic-sdlc-autonomy.agent.md'
+    Set-LockedGuidanceHash -Consumer $consumer -Path $path `
+        -Sha256 '2487c414f197e0e999164c6da9a6254417eeb317c6442000b868184dccee45ea'
+    '# consumer modification' | Set-Content -LiteralPath (Join-Path $consumer $path) -Encoding utf8NoBOM
+    $result = Invoke-TestSync $source $consumer -ExpectFailure
+    Assert-True ($result.ExitCode -ne 0 -and $result.Output -match 'GUIDANCE_CONTENT_MODIFIED') `
+        "Modified content was accepted under the approved predecessor path/hash: $($result.Output)"
+}
+
+Invoke-Scenario 'approved predecessor hash at another path is rejected' {
+    $source = Join-Path $scratch 'wrong-path-predecessor-source'
+    $consumer = Join-Path $scratch 'wrong-path-predecessor-consumer'
+    New-TestSource $source
+    New-TestConsumer $consumer
+    Invoke-TestSync $source $consumer
+    $path = '.github/instructions/example.instructions.md'
+    Set-LockedGuidanceHash -Consumer $consumer -Path $path `
+        -Sha256 '2487c414f197e0e999164c6da9a6254417eeb317c6442000b868184dccee45ea'
+    $result = Invoke-TestSync $source $consumer -ExpectFailure
+    Assert-True ($result.ExitCode -ne 0 -and $result.Output -match 'GUIDANCE_CONTENT_MODIFIED') `
+        "The approved predecessor hash was accepted at another path: $($result.Output)"
+}
+
+Invoke-Scenario 'case-variant predecessor path is rejected' {
+    $source = Join-Path $scratch 'case-variant-predecessor-source'
+    $consumer = Join-Path $scratch 'case-variant-predecessor-consumer'
+    New-TestSource $source
+    "---`nname: agentic-sdlc-autonomy`ndescription: fixture`n---`n# Canonical BaseCoat payload" |
+        Set-Content -LiteralPath (Join-Path $source 'agents/agentic-sdlc-autonomy.agent.md') -Encoding utf8NoBOM
+    git -C $source add -A
+    git -C $source commit -m add-agent | Out-Null
+    New-TestConsumer $consumer
+    Invoke-TestSync $source $consumer
+    $path = '.github/agents/agentic-sdlc-autonomy.agent.md'
+    $lock = Read-GuidanceLock -RepoRoot $consumer
+    $entry = @($lock.entries | Where-Object path -CEQ $path) | Select-Object -First 1
+    $entry.path = '.github/agents/Agentic-sdlc-autonomy.agent.md'
+    $entry.sha256 = '2487c414f197e0e999164c6da9a6254417eeb317c6442000b868184dccee45ea'
+    Write-GuidanceLock -RepoRoot $consumer -Entries @($lock.entries)
+    $result = Invoke-TestSync $source $consumer -ExpectFailure
+    Assert-True ($result.ExitCode -ne 0 -and $result.Output -match 'GUIDANCE_CONTENT_MODIFIED') `
+        "A case-variant predecessor lock path was accepted: $($result.Output)"
+}
+
+Invoke-Scenario 'unknown predecessor hash at target path is rejected' {
+    $source = Join-Path $scratch 'unknown-target-predecessor-source'
+    $consumer = Join-Path $scratch 'unknown-target-predecessor-consumer'
+    New-TestSource $source
+    "---`nname: agentic-sdlc-autonomy`ndescription: fixture`n---`n# Canonical BaseCoat payload" |
+        Set-Content -LiteralPath (Join-Path $source 'agents/agentic-sdlc-autonomy.agent.md') -Encoding utf8NoBOM
+    git -C $source add -A
+    git -C $source commit -m add-agent | Out-Null
+    New-TestConsumer $consumer
+    Invoke-TestSync $source $consumer
+    $path = '.github/agents/agentic-sdlc-autonomy.agent.md'
+    Set-LockedGuidanceHash -Consumer $consumer -Path $path `
+        -Sha256 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+    $result = Invoke-TestSync $source $consumer -ExpectFailure
+    Assert-True ($result.ExitCode -ne 0 -and $result.Output -match 'GUIDANCE_CONTENT_MODIFIED') `
+        "An unknown predecessor hash was accepted at the target path: $($result.Output)"
+}
+
 Invoke-Scenario 'foreign-owner collision' {
     $source = Join-Path $scratch 'foreign-source'
     $consumer = Join-Path $scratch 'foreign-consumer'
@@ -155,7 +272,7 @@ Invoke-Scenario 'directory destination collision' {
         "Directory destination did not block before applying the write plan: $($result.Output)"
 }
 
-Invoke-Scenario 'consumer modification' {
+Invoke-Scenario 'generic unknown modification' {
     $source = Join-Path $scratch 'modified-source'
     $consumer = Join-Path $scratch 'modified-consumer'
     New-TestSource $source
@@ -334,8 +451,8 @@ Invoke-Scenario 'legacy tracker migration' {
 Remove-Item -LiteralPath $scratch -Recurse -Force -ErrorAction SilentlyContinue
 if ($failures.Count -gt 0) {
     $failures | ForEach-Object { Write-Host "FAILED: $_" -ForegroundColor Red }
-    Write-Host "Guidance lock telemetry: checks=$checks scenarios=13 failures=$($failures.Count)" -ForegroundColor Red
+    Write-Host "Guidance lock telemetry: checks=$checks scenarios=19 failures=$($failures.Count)" -ForegroundColor Red
     exit 1
 }
 
-Write-Host "Guidance lock telemetry: checks=$checks scenarios=13 failures=0" -ForegroundColor Green
+Write-Host "Guidance lock telemetry: checks=$checks scenarios=19 failures=0" -ForegroundColor Green

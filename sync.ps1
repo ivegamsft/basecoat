@@ -883,6 +883,8 @@ try {
         $lockByPath[$entry.path] = $entry
     }
 
+    $approvedPredecessorPath = '.github/agents/agentic-sdlc-autonomy.agent.md'
+    $approvedPredecessorSha256 = '2487c414f197e0e999164c6da9a6254417eeb317c6442000b868184dccee45ea'
     $repoRootCanonical = Get-CanonicalRealPath -Path $repoRoot
     foreach ($planned in $guidancePlan) {
         $destination = Join-Path $repoRoot $planned.path
@@ -909,10 +911,16 @@ try {
             if (Test-Path -LiteralPath $destination -PathType Leaf) {
                 $actualHash = Get-GuidanceContentHash -Path $destination
                 if ($actualHash -ne $existingEntry.sha256) {
-                    if ($actualHash -ne $planned.entry.sha256) {
+                    $isApprovedPredecessor = (
+                        $planned.path -ceq $approvedPredecessorPath -and
+                        $existingEntry.path -ceq $approvedPredecessorPath -and
+                        $existingEntry.sha256 -ceq $approvedPredecessorSha256 -and
+                        $actualHash -ceq $planned.entry.sha256
+                    )
+                    if (-not $isApprovedPredecessor) {
                         throw "GUIDANCE_CONTENT_MODIFIED path='$($planned.path)' owner='basecoat' expected='$($existingEntry.sha256)' actual='$actualHash'"
                     }
-                    Write-Host "Migrating canonical guidance hash for unchanged BaseCoat content: $($planned.path)"
+                    Write-Host "Migrating approved Adhesion v0.7.1 predecessor hash: $($planned.path)"
                 }
             }
         }

@@ -599,6 +599,8 @@ fi
 [[ -n "$previous_asset_manifest_file" && -f "$previous_asset_manifest_file" ]] && rm -f "$previous_asset_manifest_file"
 
 repo_root_real="$(resolve_real_path "$REPO_ROOT")"
+approved_predecessor_path=".github/agents/agentic-sdlc-autonomy.agent.md"
+approved_predecessor_sha256="2487c414f197e0e999164c6da9a6254417eeb317c6442000b868184dccee45ea"
 while IFS='|' read -r path owner unit version expected_hash source_file; do
   [[ -z "$path" ]] && continue
   destination="$REPO_ROOT/$path"
@@ -616,11 +618,13 @@ while IFS='|' read -r path owner unit version expected_hash source_file; do
     if [[ -f "$destination" ]]; then
       actual_hash="$(guidance_sha256 "$destination")"
       if [[ "$actual_hash" != "$locked_hash" ]]; then
-        if [[ "$actual_hash" != "$expected_hash" ]]; then
+        if [[ "$path" != "$approved_predecessor_path" ||
+              "$locked_hash" != "$approved_predecessor_sha256" ||
+              "$actual_hash" != "$expected_hash" ]]; then
           echo "GUIDANCE_CONTENT_MODIFIED path='$path' owner='basecoat' expected='$locked_hash' actual='$actual_hash'" >&2
           exit 1
         fi
-        echo "Migrating canonical guidance hash for unchanged BaseCoat content: $path"
+        echo "Migrating approved Adhesion v0.7.1 predecessor hash: $path"
       fi
     fi
   elif [[ -e "$destination" || -L "$destination" ]]; then

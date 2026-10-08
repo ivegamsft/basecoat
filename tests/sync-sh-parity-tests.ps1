@@ -34,6 +34,12 @@ Assert-True ($syncShContent -match 'guidance_lock_file="\$REPO_ROOT/\.github/bas
     'Bash sync must use the canonical cross-product guidance lock.'
 Assert-True ($syncShContent -match 'GUIDANCE_PATH_COLLISION' -and $syncShContent -match 'GUIDANCE_CONTENT_MODIFIED') `
     'Bash sync must enforce foreign-owner collisions and consumer-modification hashes.'
+Assert-True ($syncShContent -match 'approved_predecessor_path="\.github/agents/agentic-sdlc-autonomy\.agent\.md"' -and
+    $syncShContent -match 'approved_predecessor_sha256="2487c414f197e0e999164c6da9a6254417eeb317c6442000b868184dccee45ea"' -and
+    $syncShContent -match '"\$path" != "\$approved_predecessor_path"' -and
+    $syncShContent -match '"\$locked_hash" != "\$approved_predecessor_sha256"' -and
+    $syncShContent -match '"\$actual_hash" != "\$expected_hash"') `
+    'Bash sync must allow only the exact Adhesion v0.7.1 predecessor path/hash pair.'
 Assert-True ($syncShContent -match 'guidance_write_lock "\$guidance_lock_file"' -and
     $syncShContent -match 'rm -f "\$legacy_overlay_file"') `
     'Bash sync must publish guidance-lock/v1 and retire the legacy overlay tracker.'
@@ -93,6 +99,8 @@ guidance_exit_lease "$lease3"
     '# source' | Set-Content -LiteralPath (Join-Path $source 'README.md') -Encoding utf8NoBOM
     '# changes' | Set-Content -LiteralPath (Join-Path $source 'CHANGELOG.md') -Encoding utf8NoBOM
     "---`nname: example`ndescription: example`n---" | Set-Content -LiteralPath (Join-Path $source 'agents/example.agent.md') -Encoding utf8NoBOM
+    "---`nname: agentic-sdlc-autonomy`ndescription: fixture`n---`n# Canonical BaseCoat payload" |
+        Set-Content -LiteralPath (Join-Path $source 'agents/agentic-sdlc-autonomy.agent.md') -Encoding utf8NoBOM
     New-Item -ItemType Directory -Path (Join-Path $source 'agents/references') -Force | Out-Null
     '# example detail reference' | Set-Content -LiteralPath (Join-Path $source 'agents/references/example-detail.md') -Encoding utf8NoBOM
     "---`ndescription: example`napplyTo: '**/*'`n---" | Set-Content -LiteralPath (Join-Path $source 'instructions/example.instructions.md') -Encoding utf8NoBOM
@@ -288,6 +296,62 @@ known_bad_releases:
     Assert-True ($collisionExitCode -ne 0 -and $collisionFailure -match 'GUIDANCE_PATH_COLLISION' -and
         $collisionFailure -match "owner='sheen'") `
         'sync.sh did not block a foreign owner before overwrite.'
+
+    $lock = Read-GuidanceLock -RepoRoot $consumer
+    $basecoatClaim = New-GuidanceLockEntry -RepoRoot $consumer -Path '.github/instructions/example.instructions.md' `
+        -Owner basecoat -GuidanceUnit 'instructions/example.instructions.md' -SourceVersion '1.0.1' `
+        -Sha256 (Get-GuidanceContentHash -Path $managedInstruction)
+    $remainingEntries = @($lock.entries | Where-Object path -ne '.github/instructions/example.instructions.md')
+    Write-GuidanceLock -RepoRoot $consumer -Entries ($remainingEntries + $basecoatClaim)
+
+    $predecessorPath = '.github/agents/agentic-sdlc-autonomy.agent.md'
+    $predecessorHash = '2487c414f197e0e999164c6da9a6254417eeb317c6442000b868184dccee45ea'
+    $predecessorFile = Join-Path $consumer $predecessorPath
+    $lock = Read-GuidanceLock -RepoRoot $consumer
+    $predecessorEntry = @($lock.entries | Where-Object path -eq $predecessorPath) | Select-Object -First 1
+    $predecessorEntry.sha256 = $predecessorHash
+    Write-GuidanceLock -RepoRoot $consumer -Entries @($lock.entries)
+
+    Push-Location $consumer
+    try {
+        $env:BASECOAT_REPO = "file://$source"
+        $env:BASECOAT_MIRROR = "file://$mirror"
+        $env:BASECOAT_REF = $sha
+        $env:BASECOAT_EXPECTED_SHA = $sha
+        & $bash.Source (Join-Path $repoRoot 'sync.sh')
+        if ($LASTEXITCODE -ne 0) { throw 'sync.sh rejected the exact approved predecessor path/hash.' }
+    }
+    finally {
+        Remove-Item Env:\BASECOAT_REPO,Env:\BASECOAT_MIRROR,Env:\BASECOAT_REF,Env:\BASECOAT_EXPECTED_SHA -ErrorAction SilentlyContinue
+        Pop-Location
+    }
+
+    $migratedEntry = @((Read-GuidanceLock -RepoRoot $consumer).entries |
+        Where-Object path -eq $predecessorPath) | Select-Object -First 1
+    Assert-True ($migratedEntry.sha256 -eq (Get-GuidanceContentHash -Path $predecessorFile)) `
+        'sync.sh did not migrate the exact approved predecessor to the canonical payload hash.'
+
+    $lock = Read-GuidanceLock -RepoRoot $consumer
+    $predecessorEntry = @($lock.entries | Where-Object path -eq $predecessorPath) | Select-Object -First 1
+    $predecessorEntry.sha256 = $predecessorHash
+    Write-GuidanceLock -RepoRoot $consumer -Entries @($lock.entries)
+    '# consumer modification' | Set-Content -LiteralPath $predecessorFile -Encoding utf8NoBOM
+
+    Push-Location $consumer
+    try {
+        $env:BASECOAT_REPO = "file://$source"
+        $env:BASECOAT_MIRROR = "file://$mirror"
+        $env:BASECOAT_REF = $sha
+        $env:BASECOAT_EXPECTED_SHA = $sha
+        $predecessorFailure = & $bash.Source (Join-Path $repoRoot 'sync.sh') 2>&1 | Out-String
+        $predecessorExitCode = $LASTEXITCODE
+    }
+    finally {
+        Remove-Item Env:\BASECOAT_REPO,Env:\BASECOAT_MIRROR,Env:\BASECOAT_REF,Env:\BASECOAT_EXPECTED_SHA -ErrorAction SilentlyContinue
+        Pop-Location
+    }
+    Assert-True ($predecessorExitCode -ne 0 -and $predecessorFailure -match 'GUIDANCE_CONTENT_MODIFIED') `
+        'sync.sh accepted modified content under the exact approved predecessor path/hash.'
 }
 finally {
     Remove-Item -LiteralPath $scratch -Recurse -Force -ErrorAction SilentlyContinue
