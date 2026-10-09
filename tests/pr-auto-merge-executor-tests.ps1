@@ -1039,6 +1039,46 @@ const makeBody = ({
   '',
   'Alternatives were considered.'
 ].filter(Boolean).join('\n');
+const commentTestBody = makeBody({
+  scope: 'individual',
+  units: 1,
+  unitInventory: 'one cohesive feature'
+});
+const hiddenDuplicateFields = '\n<!--\nChange scope: batch\nSource issues: #999\n';
+const closedCommentBody = commentTestBody.replace(
+  '\n### Debate',
+  `${hiddenDuplicateFields}-->\n### Debate`
+);
+const unterminatedCommentBody = commentTestBody.replace(
+  '\n### Debate',
+  `${hiddenDuplicateFields}### Debate`
+);
+for (const [body, description] of [
+  [closedCommentBody, 'complete HTML comments'],
+  [unterminatedCommentBody, 'unterminated trailing HTML comments']
+]) {
+  const parsed = parseScope(body);
+  assert.equal(parsed.scope, 'individual', `${description} must not alter visible change scope`);
+  assert.deepEqual(parsed.sourceIssues, [3475], `${description} must not inject source issues`);
+}
+const hiddenDesignHeadingBody = commentTestBody.replace(
+  '\n### Design\n',
+  '\n<!--\n### Design\n-->\n'
+);
+assert.throws(
+  () => parseScope(hiddenDesignHeadingBody),
+  /PR body must contain exactly one Intake Contract Design section/,
+  'a Design heading inside a comment must not satisfy the required section'
+);
+const hiddenDesignHeadingBeforeVisible = commentTestBody.replace(
+  '\n### Design\n',
+  '\n<!--\n### Design\n-->\n### Design\n'
+);
+assert.equal(
+  parseScope(hiddenDesignHeadingBeforeVisible).scope,
+  'individual',
+  'commented headings before the real Design section must be ignored'
+);
 const makeException = (files, updates = {}) => ({
   command: 'generator --source input.json',
   tool_version: 'generator 1.2.3',

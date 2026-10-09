@@ -149,6 +149,24 @@ function isPlaceholderText(value) {
     .test(value.trim());
 }
 
+function stripHtmlComments(text) {
+  const source = String(text || '');
+  const visible = [];
+  let cursor = 0;
+  while (cursor < source.length) {
+    const commentStart = source.indexOf('<!--', cursor);
+    if (commentStart < 0) {
+      visible.push(source.slice(cursor));
+      break;
+    }
+    visible.push(source.slice(cursor, commentStart));
+    const commentEnd = source.indexOf('-->', commentStart + 4);
+    if (commentEnd < 0) break;
+    cursor = commentEnd + 3;
+  }
+  return visible.join('');
+}
+
 function parseInteger(value, label, minimum = 0) {
   if (!/^(?:0|[1-9]\d*)$/.test(value)) {
     throw new Error(`'${label}' must be a nonnegative integer.`);
@@ -161,7 +179,7 @@ function parseInteger(value, label, minimum = 0) {
 }
 
 function parseScope(body) {
-  const text = String(body || '');
+  const text = stripHtmlComments(String(body || ''));
   const headings = Array.from(text.matchAll(/^### Design[ \t]*$/gim));
   if (headings.length !== 1) {
     throw new Error('PR body must contain exactly one Intake Contract Design section.');
@@ -169,8 +187,7 @@ function parseScope(body) {
   const start = headings[0].index + headings[0][0].length;
   const remainder = text.slice(start).replace(/^\r?\n/, '');
   const nextHeading = remainder.search(/^#{1,3}\s/m);
-  const section = (nextHeading < 0 ? remainder : remainder.slice(0, nextHeading))
-    .replace(/<!--[\s\S]*?-->/g, '');
+  const section = nextHeading < 0 ? remainder : remainder.slice(0, nextHeading);
   const scope = uniqueField(section, 'Change scope').toLowerCase();
   if (!['individual', 'batch'].includes(scope)) {
     throw new Error("'Change scope' must be 'individual' or 'batch'.");
