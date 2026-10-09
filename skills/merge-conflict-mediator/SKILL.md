@@ -44,6 +44,19 @@ applies them. It is intentionally conservative: if the policy is unclear, escala
 | src/app.ts | source | manual review | escalate |
 ```
 
+## PR Conflict Recovery
+
+PR conflict routing automation labels open PRs with `mergeable_state=dirty` as `needs-conflict-fix`
+and comments an agent instruction. The agent:
+
+1. Use an isolated worktree on the PR branch; merge base into it.
+2. Take the base version of `asset-manifest.json` and regenerate it with
+   `pwsh scripts/generate-asset-manifest.ps1`; never hand-edit it.
+3. Merge docs and config keeping both sides; hand ambiguous source conflicts to
+   `merge-coordinator`.
+4. Push with an attributed commit so the merge executor re-evaluates the new head.
+5. Never bypass required checks, size:XXL approval, or no-merge holds.
+
 ## Guardrails
 
 - Never silently discard dependency changes.

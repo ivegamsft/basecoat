@@ -1,0 +1,72 @@
+name: "BaseCoat - PR Conflict Routing"
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: pr-conflict-routing
+  cancel-in-progress: false
+
+jobs:
+  route-conflicts:
+    name: Route conflicted PRs to an agent
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Label and instruct conflicted PRs
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        with:
+          script: |
+            const marker = '<!-- pr-conflict-routing:v1';
+            const label = 'needs-conflict-fix';
+            const { owner, repo } = context.repo;
+            const prs = await github.paginate(github.rest.pulls.list, { owner, repo, state: 'open', per_page: 100 });
+            for (const item of prs) {
+              if (item.draft) continue;
+              const labels = item.labels.map(l => l.name);
+              if (labels.includes('size:XXL') || labels.includes('no-merge')) continue;
+              let pr = item;
+              for (let i = 0; i < 3 && pr.mergeable === null; i++) {
+                await new Promise(r => setTimeout(r, 3000));
+                pr = (await github.rest.pulls.get({ owner, repo, pull_number: item.number })).data;
+              }
+              const dirty = pr.mergeable_state === 'dirty';
+              if (!dirty) {
+                if (labels.includes(label)) {
+                  await github.rest.issues.removeLabel({ owner, repo, issue_number: pr.number, name: label }).catch(() => {});
+                }
+                continue;
+              }
+              const tag = `${marker} head=${pr.head.sha} -->`;
+              const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number: pr.number, per_page: 100 });
+              if (comments.some(c => c.body && c.body.includes(tag))) continue;
+              await github.rest.issues.addLabels({ owner, repo, issue_number: pr.number, labels: [label] }).catch(async () => {
+                await github.rest.issues.createLabel({ owner, repo, name: label, color: 'b60205', description: 'PR has merge conflicts awaiting agent resolution' });
+                await github.rest.issues.addLabels({ owner, repo, issue_number: pr.number, labels: [label] });
+              });
+              const body = [
+                tag,
+                '## Merge conflict: agent action required',
+                '',
+                `This PR conflicts with \`${pr.base.ref}\` (mergeable_state=dirty) at head \`${pr.head.sha}\`.`,
+                '',
+                '@copilot resolve the conflicts using `skills/merge-conflict-mediator/SKILL.md` (PR Conflict Recovery), escalating to `merge-coordinator` for ambiguous source conflicts:',
+                `1. Merge or rebase \`${pr.base.ref}\` into the PR branch in an isolated worktree.`,
+                '2. If `asset-manifest.json` conflicts, take the base version and regenerate it with `pwsh scripts/generate-asset-manifest.ps1`.',
+                '3. Preserve the PR intent; do not drop base changes or bypass required checks.',
+                '4. Push with an attributed commit so the merge executor re-evaluates the new head.',
+                '',
+                'The label is removed automatically once the PR is mergeable. XXL approval and no-merge holds are unaffected.'
+              ].join('\n');
+              await github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body });
+              core.info(`Routed PR #${pr.number}`);
+            }

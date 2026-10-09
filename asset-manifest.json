@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.1",
   "libraryVersion": "4.6.4",
-  "generatedAt": "2026-10-09T11:11:08.6741306Z",
+  "generatedAt": "2026-10-09T15:21:29.1959323Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -2726,7 +2726,7 @@
     {
       "path": "skills/merge-conflict-mediator/SKILL.md",
       "type": "skill",
-      "sha": "1642cc450e0e71cc8b47c6306f9230570a750bea",
+      "sha": "4156a089ffc8b337e871477c9bf1ac9f6ac46433",
       "version": null,
       "effectiveVersion": "4.6.4",
       "versionSource": "library"
