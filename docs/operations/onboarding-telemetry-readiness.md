@@ -78,6 +78,8 @@ Use this checklist before the first `adoption-metrics` run on a newly onboarded 
 After the first successful run:
 
 - [ ] `dashboard/metrics/latest.json` is present on `gh-pages`.
+- [ ] For branch-backed Pages, `dashboard/index.html` matches the source
+      dashboard in the collector revision; fresh JSON alone does not refresh HTML.
 - [ ] `dashboard/metrics/scorecard-<repo-slug>.json` is present on `gh-pages`.
 - [ ] All four goal-based loop metrics have non-null values in the scorecard.
 - [ ] `readiness.overall` is `ready` in the scorecard.

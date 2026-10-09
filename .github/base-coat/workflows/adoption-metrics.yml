@@ -88,9 +88,16 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Stash metrics output before switching branches
-          mkdir -p /tmp/metrics-output
-          cp -r dashboard/metrics/. /tmp/metrics-output/
+          # Keep this run's consumer and data together across the branch switch.
+          DEPLOY_INPUT="$(mktemp -d)"
+          trap 'rm -rf "$DEPLOY_INPUT"' EXIT
+          mkdir -p "$DEPLOY_INPUT/metrics"
+          cp -r dashboard/metrics/. "$DEPLOY_INPUT/metrics/"
+          if [ -f docs/dashboard/index.html ]; then
+            cp docs/dashboard/index.html "$DEPLOY_INPUT/index.html"
+          else
+            echo "::notice::No source dashboard HTML; publishing metrics only."
+          fi
           rm -rf dashboard/metrics
 
           # Create or switch to gh-pages branch
@@ -101,11 +108,15 @@ jobs:
             git rm -rf . 2>/dev/null
           fi
 
-          # Deploy metrics JSON (HTML is served by MkDocs via docs/dashboard/)
+          # Branch-backed Pages also needs the current source consumer.
           mkdir -p dashboard/metrics
-          cp -r /tmp/metrics-output/. dashboard/metrics/
+          cp -r "$DEPLOY_INPUT/metrics/." dashboard/metrics/
+          git add -- dashboard/metrics
+          if [ -f "$DEPLOY_INPUT/index.html" ]; then
+            cp "$DEPLOY_INPUT/index.html" dashboard/index.html
+            git add -- dashboard/index.html
+          fi
 
-          git add -A
           git diff --cached --quiet || git commit -m "chore: update adoption metrics [skip ci]"
           git push origin gh-pages
 

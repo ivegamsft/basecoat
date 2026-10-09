@@ -26,6 +26,74 @@ if ((Get-Content $collectorPath -Raw) -cne (Get-Content $distributedCollector -R
     throw 'Source and distributed adoption collectors must remain identical'
 }
 
+$publicationTests = @'
+import os
+import re
+import shutil
+import subprocess
+import tempfile
+from pathlib import Path
+
+root = Path.cwd()
+git_bash = Path(os.environ.get("ProgramFiles", "")) / "Git/bin/bash.exe"
+bash = str(git_bash) if os.name == "nt" and git_bash.is_file() else shutil.which("bash")
+assert bash, "Bash is required to exercise the actual publication step"
+scripts = []
+for name in [".github/workflows/adoption-metrics.yml", ".github/base-coat/workflows/adoption-metrics.yml"]:
+    source = (root / name).read_text(encoding="utf-8")
+    block = re.search(r"      - name: Deploy to gh-pages\n        run: \|\n(.*?)(?=\n      - name:)", source, re.S)
+    assert block, name
+    scripts.append("\n".join(line[10:] for line in block[1].splitlines()))
+assert scripts[0] == scripts[1], "Source and distributed publishers must match"
+
+(root / "test-results").mkdir(exist_ok=True)
+for with_html in [True, False]:
+    with tempfile.TemporaryDirectory(prefix="adoption-publish-", dir=root / "test-results") as temporary:
+        workspace = Path(temporary)
+        remote = workspace / "remote.git"
+        repo = workspace / "repo"
+        env = {**os.environ, "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": os.devnull}
+        def git(*args):
+            return subprocess.check_output(["git", "-C", str(repo), *args], env=env, text=True, stderr=subprocess.STDOUT)
+        subprocess.run(["git", "init", "--bare", str(remote)], env=env, check=True, capture_output=True)
+        subprocess.run(["git", "init", "-b", "main", str(repo)], env=env, check=True, capture_output=True)
+        git("config", "user.name", "Fixture")
+        git("config", "user.email", "fixture@example.invalid")
+        git("remote", "add", "origin", str(remote))
+        (repo / "source.txt").write_text("source")
+        if with_html:
+            (repo / "docs/dashboard").mkdir(parents=True)
+            (repo / "docs/dashboard/index.html").write_text("new unavailable consumer")
+        git("add", ".")
+        git("commit", "-m", "fixture source")
+        git("push", "origin", "main")
+        git("checkout", "--orphan", "gh-pages")
+        git("rm", "-rf", ".")
+        (repo / "dashboard").mkdir()
+        (repo / "dashboard/index.html").write_text("stale consumer")
+        (repo / "unrelated.txt").write_text("keep")
+        git("add", ".")
+        git("commit", "-m", "fixture stale Pages")
+        git("push", "origin", "gh-pages")
+        git("checkout", "main")
+        (repo / "dashboard/metrics").mkdir(parents=True)
+        (repo / "dashboard/metrics/latest.json").write_text('{"available":false}')
+        result = subprocess.run([bash, "-c", scripts[0]], cwd=repo, env=env, text=True, capture_output=True)
+        assert result.returncode == 0, result.stdout + result.stderr
+        assert git("show", "origin/gh-pages:dashboard/index.html") == (
+            "new unavailable consumer" if with_html else "stale consumer")
+        assert git("show", "origin/gh-pages:dashboard/metrics/latest.json") == '{"available":false}'
+        assert git("show", "origin/gh-pages:unrelated.txt") == "keep"
+        if not with_html:
+            assert "No source dashboard HTML; publishing metrics only." in result.stdout
+        assert git("status", "--porcelain").strip() == ""
+print("Actual Pages publisher refreshed consumer/data and preserved metrics-only consumer files.")
+'@
+$publicationTests | python -
+if ($LASTEXITCODE -ne 0) {
+    throw 'Adoption dashboard publication regression failed'
+}
+
 $testScript = @"
 import importlib.util
 import copy
