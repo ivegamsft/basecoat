@@ -214,10 +214,16 @@ production paths are not overwritten. Review upstream governance changes and
 merge them into the consumer policy deliberately.
 
 The executor evaluates an existing PR and requests GitHub-native auto-merge.
-At the 2026-10-06 audit baseline, its `--delete-branch` option is incompatible
-with an enabled native merge queue (tracked in #3574). Do not treat that command
-as a queue-compatible recipe; repository automatic branch deletion is a
-separate post-merge setting. It does not discover BaseCoat
+Current source, reverified on 2026-10-09, uses an exact-head queue-enabled
+command without `--delete-branch`; #3574 closed on 2026-10-06. It also requires
+the configured event-generating admission credential so downstream checks can
+run. A missing credential fails closed; do not copy an interactive token or
+switch to an administrator bypass. Repository automatic branch deletion is a
+separate post-merge setting. Older consumers must inspect their installed
+workflow/version rather than assume this source correction is deployed there.
+The 2026-10-06 incompatible-command observation remains historical evidence in
+[the dated pipeline audit](spec-to-production.md#measured-timing-and-gaps),
+not a current operating recipe. The executor does not discover BaseCoat
 updates or create upgrade PRs. Keep consumer update detection and PR creation in
 the consumer updater lifecycle; do not duplicate that implementation here.
 
