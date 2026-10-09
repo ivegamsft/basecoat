@@ -6,6 +6,7 @@ import json
 import sqlite3
 import subprocess
 import sys
+import threading
 import unittest
 import uuid
 from concurrent.futures import ThreadPoolExecutor
@@ -44,6 +45,179 @@ def fixture():
                                 {"group": "ui", "release": "v1.1.0", "risks": "Supplied risk.",
                                  "rollout": "Feature flag.", "rollback": "Revert."}]}}
     return evidence, snapshot
+
+
+class MockConditionalPersistence:
+    """Test-only atomic read-set model; not a GitHub adapter or capability proof."""
+
+    def __init__(self, snapshot):
+        self.snapshot = copy.deepcopy(snapshot)
+        self.receipts = {}
+        self.lock = threading.Lock()
+
+    def apply(self, run_id, result, expected, lose_response=False):
+        binding = P.digest({"result": result, "expected": expected})
+        with self.lock:
+            P.require(result["dry_run"] is True and
+                      result["digest"] == P.digest(result["plan"]), "invalid-plan")
+            receipt = self.receipts.get(run_id)
+            if receipt:
+                P.require(receipt["binding"] == binding, "replay-binding-conflict")
+                P.require(V.snapshot_digest(self.snapshot) == receipt["after"],
+                          "replay-state-conflict")
+                return copy.deepcopy(receipt)
+            P.require(V.snapshot_digest(self.snapshot) == V.snapshot_digest(expected),
+                      "stale-read-set")
+            P.require(result["plan"]["repository"] == self.snapshot["repository"],
+                      "repository-mismatch")
+            steps = P.storage_steps(result["plan"], self.snapshot)
+            P.require(steps == result["steps"], "changed-storage-steps")
+            candidate = copy.deepcopy(self.snapshot)
+            for step in steps:
+                if step["operation"] == "create":
+                    n = max((m["number"] for m in candidate["milestones"]), default=0) + 1
+                    candidate["milestones"].append({
+                        "number": n, "state": "open", "description": step["marker"]})
+                else:
+                    _, keys, items = P.inventory(candidate)
+                    items[step["number"]]["milestone"] = keys[step["key"]]
+            P.inventory(candidate)
+            receipt = {"binding": binding, "after": V.snapshot_digest(candidate),
+                       "completed_steps": copy.deepcopy(steps)}
+            self.snapshot = candidate
+            self.receipts[run_id] = receipt
+        if lose_response:
+            raise TimeoutError("mock-response-lost-after-commit")
+        return copy.deepcopy(receipt)
+
+
+class ConditionalPersistenceModelTests(unittest.TestCase):
+    def setUp(self):
+        self.evidence, self.snapshot = fixture()
+        self.result = V.normalize(self.evidence, self.snapshot)
+        self.store = MockConditionalPersistence(self.snapshot)
+
+    def assert_stale_without_writes(self):
+        before = copy.deepcopy(self.store.snapshot)
+        with self.assertRaisesRegex(P.Conflict, "stale-read-set"):
+            self.store.apply("run", self.result, self.snapshot)
+        self.assertEqual(self.store.snapshot, before)
+        self.assertEqual(self.store.receipts, {})
+
+    def test_item_pin_or_assignment_changed_between_read_and_write(self):
+        for change in ("pin", "assignment"):
+            with self.subTest(change=change):
+                self.setUp()
+                item = self.store.snapshot["items"][0]
+                if change == "pin":
+                    item["labels"].append("roadmap:pinned")
+                else:
+                    self.store.snapshot["milestones"].append({
+                        "number": 10, "state": "open", "description": "Human owned"})
+                    item["milestone"] = 10
+                self.assert_stale_without_writes()
+
+    def test_source_and_target_milestone_pin_or_ownership_race(self):
+        for target in (False, True):
+            for change in ("pin", "ownership"):
+                with self.subTest(target=target, change=change):
+                    self.setUp()
+                    key = "v1.1.0" if target else "v1.0.1"
+                    milestone = {"number": 10, "state": "open",
+                                 "description": f"<!-- basecoat-roadmap:v1 key={key} -->"}
+                    self.snapshot["milestones"].append(milestone)
+                    if not target:
+                        self.snapshot["items"][0]["milestone"] = 10
+                    self.evidence["snapshot_digest"] = V.snapshot_digest(self.snapshot)
+                    self.result = V.normalize(self.evidence, self.snapshot)
+                    self.store = MockConditionalPersistence(self.snapshot)
+                    observed = self.store.snapshot["milestones"][0]
+                    observed["description"] = (observed["description"] + P.PIN
+                                               if change == "pin" else "Human owned")
+                    self.assert_stale_without_writes()
+
+    def test_duplicate_marker_create_race_is_rejected_before_assignment(self):
+        self.store.snapshot["milestones"].append({
+            "number": 10, "state": "open",
+            "description": "<!-- basecoat-roadmap:v1 key=v1.1.0 -->"})
+        self.assert_stale_without_writes()
+
+    def test_lost_response_replays_once_and_preserves_exact_assignments(self):
+        with self.assertRaisesRegex(TimeoutError, "response-lost"):
+            self.store.apply("run", self.result, self.snapshot, lose_response=True)
+        after = copy.deepcopy(self.store.snapshot)
+        receipt = self.store.apply("run", self.result, self.snapshot)
+        self.assertEqual(self.store.snapshot, after)
+        self.assertEqual(len(self.store.receipts), 1)
+        self.assertEqual(len(after["milestones"]), 1)
+        assigned = [i["number"] for i in after["items"] if i["milestone"] == 1]
+        self.assertEqual(assigned, [1, 2, 3, 4, 5, 7])
+        self.assertEqual(receipt["completed_steps"], self.result["steps"])
+        self.assertIsNone(after["items"][5]["milestone"])
+
+    def test_replay_refuses_changed_binding_and_post_commit_human_edit(self):
+        self.store.apply("run", self.result, self.snapshot)
+        changed = copy.deepcopy(self.result)
+        changed["plan"]["scope"] = "label:area:ui"
+        changed["digest"] = P.digest(changed["plan"])
+        with self.assertRaisesRegex(P.Conflict, "replay-binding-conflict"):
+            self.store.apply("run", changed, self.snapshot)
+        self.store.snapshot["items"][0]["labels"].append("roadmap:pinned")
+        before = copy.deepcopy(self.store.snapshot)
+        with self.assertRaisesRegex(P.Conflict, "replay-state-conflict"):
+            self.store.apply("run", self.result, self.snapshot)
+        self.assertEqual(self.store.snapshot, before)
+
+    def test_concurrent_same_observation_allows_only_one_writer(self):
+        def save(run_id):
+            try:
+                self.store.apply(run_id, self.result, self.snapshot)
+                return "committed"
+            except P.Conflict as error:
+                return str(error)
+
+        with ThreadPoolExecutor(max_workers=2) as workers:
+            results = list(workers.map(save, ["first", "second"]))
+        self.assertCountEqual(results, ["committed", "stale-read-set"])
+        self.assertEqual(len(self.store.snapshot["milestones"]), 1)
+        self.assertEqual(len(self.store.receipts), 1)
+
+    def test_mock_capability_never_authorizes_live_write_gate(self):
+        self.store.apply("run", self.result, self.snapshot)
+        with self.assertRaisesRegex(P.Conflict, "live-writes-disabled"):
+            V.write_gate(self.store)
+
+    def test_invalid_or_tampered_steps_never_commit(self):
+        for change in ("digest", "steps"):
+            with self.subTest(change=change):
+                result = copy.deepcopy(self.result)
+                if change == "digest":
+                    result["digest"] = "0" * 64
+                else:
+                    result["steps"][0]["marker"] = "Human owned"
+                with self.assertRaises(P.Conflict):
+                    self.store.apply("run", result, self.snapshot)
+                self.assertEqual(self.store.snapshot, self.snapshot)
+                self.assertEqual(self.store.receipts, {})
+
+    def test_candidate_failure_has_no_partial_commit_before_one_explicit_retry(self):
+        inventory, calls = P.inventory, []
+
+        def fail_after_create(snapshot):
+            calls.append(snapshot)
+            if len(calls) == 2:
+                self.assertEqual(len(snapshot["milestones"]), 1)
+                raise P.Conflict("mock-storage-failure")
+            return inventory(snapshot)
+
+        with patch.object(P, "inventory", side_effect=fail_after_create):
+            with self.assertRaisesRegex(P.Conflict, "mock-storage-failure"):
+                self.store.apply("run", self.result, self.snapshot)
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(self.store.snapshot, self.snapshot)
+        self.assertEqual(self.store.receipts, {})
+        self.store.apply("run", self.result, self.snapshot)
+        self.assertEqual(len(self.store.receipts), 1)
 
 
 class PreviewTests(unittest.TestCase):

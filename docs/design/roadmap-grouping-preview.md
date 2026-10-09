@@ -144,3 +144,20 @@ Never repair a detected post-write race by overwriting the human change.
 Do not close #3616 or #3400, enqueue execution, or describe this increment as
 complete live persistence. Future artifact publication must use a stable bot PR
 and the existing merge gates, never direct-main writes.
+
+## Mocked persistence race contract
+
+The existing `tests/roadmap-preview-tests.py` suite includes a test-only atomic
+read-set persistence model using the production planner's storage steps.
+It rejects changed item assignments/pins, source or target milestone
+ownership/pins, and managed-marker creation between observation and commit.
+It also covers concurrent writers, lost-response replay, changed replay binding,
+and post-commit human edits without compensating overwrites.
+
+This model assumes a single atomic comparison covering the entire observed
+read set and commit. GitHub's separate milestone/item APIs do not establish that
+primitive or a cross-resource transaction. These are candidate contract oracles,
+not API-contract proof, a production adapter, authenticated approval consumption,
+or remote durable recovery. A real adapter needs per-step race/replay and partial
+failure tests against its actual supported preconditions. The test explicitly
+asserts that successful mock persistence cannot open the live-write gate.
