@@ -47,6 +47,7 @@ def normalize_sessions(source: dict) -> list[dict]:
                 "tokens": session["tokens"],
                 "events": session["events"],
                 "ratio": session["ratio"],
+                "baselineComparable": session.get("baselineComparable", True),
                 "phaseCompactions": session["phaseCompactions"],
                 "maxPromptKb": session["maxPromptKb"],
                 "usedSprintTemplate": session["usedSprintTemplate"],
@@ -64,15 +65,23 @@ def summarize(source: dict, sessions: list[dict]) -> dict:
     tracking_window = source["trackingWindow"]
     tracked = sessions[:tracking_window]
     count = len(tracked)
+    baseline_sessions = [
+        session for session in sessions if session["baselineComparable"]
+    ][:tracking_window]
+    baseline_count = len(baseline_sessions)
     baseline_midpoint = (
         baseline["expensiveTokensMin"] + baseline["expensiveTokensMax"]
     ) / 2
     in_target = [
         session
-        for session in tracked
+        for session in baseline_sessions
         if baseline["targetTokensMin"] <= session["tokens"] <= baseline["targetTokensMax"]
     ]
-    avg_tokens = round(sum(session["tokens"] for session in tracked) / count) if count else None
+    avg_tokens = (
+        round(sum(session["tokens"] for session in baseline_sessions) / baseline_count)
+        if baseline_count
+        else None
+    )
     avg_events = round(sum(session["events"] for session in tracked) / count, 1) if count else None
     avg_ratio = round(sum(session["ratio"] for session in tracked) / count, 1) if count else None
     avg_compactions = (
@@ -88,7 +97,7 @@ def summarize(source: dict, sessions: list[dict]) -> dict:
     )
 
     def adoption_count(key: str, predicate=None) -> str:
-        if count == 0:
+        if not tracked:
             return "0/0"
         if predicate is None:
             matches = sum(1 for session in tracked if session[key])
@@ -96,27 +105,29 @@ def summarize(source: dict, sessions: list[dict]) -> dict:
             matches = sum(1 for session in tracked if predicate(session))
         return f"{matches}/{count}"
 
-    if count == 0:
+    if not tracked:
         status = "No backlog sessions have been recorded yet."
-    elif count < tracking_window:
+    elif baseline_count < tracking_window:
         status = (
-            f"Tracking in progress: {count}/{tracking_window} session(s) recorded; "
-            f"{len(in_target)} in the target band so far."
+            f"Tracking in progress: {baseline_count}/{tracking_window} baseline-comparable "
+            f"session(s) recorded; {len(in_target)}/{baseline_count} in the target band so far."
         )
-    elif len(in_target) == count:
-        status = "On track: every tracked session is inside the 35-45M target band."
+    elif len(in_target) == baseline_count:
+        status = "On track: every baseline-comparable session is inside the 35-45M target band."
     else:
         status = (
-            f"Off track: {len(in_target)}/{count} tracked session(s) are inside the "
+            f"Off track: {len(in_target)}/{baseline_count} baseline-comparable session(s) "
+            "are inside the "
             "35-45M target band."
         )
 
     return {
         "tracked": tracked,
         "count": count,
+        "baselineCount": baseline_count,
         "status": status,
-        "remaining": max(0, tracking_window - count),
-        "inTarget": f"{len(in_target)}/{count}" if count else "0/0",
+        "remaining": max(0, tracking_window - baseline_count),
+        "inTarget": f"{len(in_target)}/{baseline_count}" if baseline_count else "0/0",
         "avgTokens": avg_tokens,
         "avgEvents": avg_events,
         "avgRatio": avg_ratio,
@@ -157,7 +168,11 @@ def render_markdown(source_file: Path, source_path: Path, output_path: Path, sou
         f"- Source data: `{source_path.as_posix()}`",
         f"- Output: `{output_path.as_posix()}`",
         "- Refresh command: `python scripts/generate-backlog-efficiency-scorecard.py`",
-        f"- Tracking window: latest {source['trackingWindow']} recorded backlog sessions",
+        (
+            f"- Tracking window: latest {source['trackingWindow']} recorded entries for "
+            f"practice metrics and ledger; latest {source['trackingWindow']} "
+            "baseline-comparable sessions for target and savings"
+        ),
         (
             f"- Target band: {format_int(baseline['targetTokensMin'])}-"
             f"{format_int(baseline['targetTokensMax'])} tokens"
@@ -177,15 +192,21 @@ def render_markdown(source_file: Path, source_path: Path, output_path: Path, sou
         "",
         "| Metric | Value |",
         "|---|---|",
-        f"| Sessions recorded | {summary['count']} |",
-        f"| Sessions remaining to fill window | {summary['remaining']} |",
-        f"| Sessions in 35-45M target band | {summary['inTarget']} |",
-        f"| Average tokens | {format_int(summary['avgTokens'])} |",
+        f"| Recent ledger entries | {summary['count']} |",
+        f"| Baseline-comparable sessions | {summary['baselineCount']} |",
+        f"| Comparable sessions remaining to fill window | {summary['remaining']} |",
+        f"| Baseline-comparable sessions in target band | {summary['inTarget']} |",
+        f"| Average tokens (baseline-comparable) | {format_int(summary['avgTokens'])} |",
         f"| Average events | {format_decimal(summary['avgEvents'])} |",
         f"| Average ratio | {format_decimal(summary['avgRatio'], 'x')} |",
-        f"| Average savings vs 76M midpoint | {format_decimal(summary['avgSavingsPct'], '%')} |",
+        f"| Average savings vs 76M midpoint (baseline-comparable) | {format_decimal(summary['avgSavingsPct'], '%')} |",
         f"| Average phase compactions | {format_decimal(summary['avgCompactions'])} |",
-        f"| Average max prompt size | {format_decimal(summary['avgPromptKb'], ' KB')} |",
+        f"| Average max captured user-message size | {format_decimal(summary['avgPromptKb'], ' KB')} |",
+        "",
+        "Baseline target-band and savings calculations use only sessions marked",
+        "`baselineComparable: true`. Other entries remain visible in the ledger but are",
+        "excluded from single-wave comparisons. Prompt-size values are captured user-message",
+        "measurements; check each entry's notes for coverage limitations.",
         "",
         "## Policy Adoption",
         "",
@@ -195,7 +216,7 @@ def render_markdown(source_file: Path, source_path: Path, output_path: Path, sou
         f"| Sprint template reuse | `usedSprintTemplate = true` | {summary['templateReuse']} |",
         f"| File-reference-only prompts | `usedFileReferencesOnly = true` | {summary['fileRefsOnly']} |",
         f"| Delegated scan work | `delegatedScanWork = true` | {summary['delegatedScan']} |",
-        f"| Max prompt size budget | <= {thresholds['maxPromptKb']} KB | {summary['promptBudget']} |",
+        f"| Max captured user-message size | <= {thresholds['maxPromptKb']} KB | {summary['promptBudget']} |",
         "",
         "## Session Ledger",
         "",
@@ -204,8 +225,8 @@ def render_markdown(source_file: Path, source_path: Path, output_path: Path, sou
     if summary["tracked"]:
         lines.extend(
             [
-                "| Date | Session | Tokens | Events | Ratio | Compactions | Max Prompt | Template | File Refs | Delegated Scan | Notes |",
-                "|---|---|---:|---:|---:|---:|---:|---|---|---|---|",
+                "| Date | Session | Tokens | Events | Ratio | Baseline Comparable | Compactions | Max Captured User Message | Template | File Refs | Delegated Scan | Notes |",
+                "|---|---|---:|---:|---:|---|---:|---:|---|---|---|---|",
             ]
         )
         for session in summary["tracked"]:
@@ -218,6 +239,7 @@ def render_markdown(source_file: Path, source_path: Path, output_path: Path, sou
                         format_int(session["tokens"]),
                         format_int(session["events"]),
                         format_decimal(session["ratio"], "x"),
+                        format_bool(session["baselineComparable"]),
                         format_int(session["phaseCompactions"]),
                         format_decimal(session["maxPromptKb"], " KB"),
                         format_bool(session["usedSprintTemplate"]),
@@ -250,6 +272,7 @@ def render_markdown(source_file: Path, source_path: Path, output_path: Path, sou
             '  "tokens": 41200000,',
             '  "events": 188,',
             '  "ratio": 233,',
+            '  "baselineComparable": true,',
             '  "phaseCompactions": 2,',
             '  "maxPromptKb": 6.4,',
             '  "usedSprintTemplate": true,',
@@ -258,6 +281,10 @@ def render_markdown(source_file: Path, source_path: Path, output_path: Path, sou
             '  "notes": "Compact at triage->implementation and implementation->merge-waiting."' ,
             "}",
             "```",
+            "",
+            "Entries that omit `baselineComparable` are treated as comparable for",
+            "backward compatibility; mark umbrella or otherwise non-like-for-like runs",
+            "`false` so they remain visible without affecting baseline calculations.",
             "",
             "Use this scorecard together with `docs/templates/sprint-structure.md` and",
             "`.github/instructions/cost-optimization.instructions.md` to keep the next",
