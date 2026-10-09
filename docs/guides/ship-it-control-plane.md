@@ -68,9 +68,18 @@ Run **BaseCoat - Ship-it Intent Dispatch** with:
 - `target_repo`: `owner/repo`
 - `risk_band`: `low|medium|high|critical`
 - `profile`: `solo-dev|team-dev|regulated-team|pilot-luxesite|pilot-wawkr` (used by onboarding-conductor)
-- `spec_ref` (optional)
+- `source_issue_number`: approved source for delivery intents
+- `approval_comment_id`: qualified prior approval for explicit pre-approval mode
 - `project_owner` + `project_number` (optional)
 - `dry_run`: `false` for live side effects
+
+The manual workflow has ten inputs. `spec_ref` is not a manual input: ordinary
+delivery derives it from the approved source issue's `- Spec:` field; explicit
+pre-approval derives the pinned reference from its `## Intent Contract` and
+revalidates it with the original approval receipt. Existing callers must omit
+`-f spec_ref=...` when dispatching the workflow. The local PowerShell `-SpecRef`
+parameter and internal spec outputs remain available; their contracts are
+unchanged. Refresh installed workflows before using this interface.
 
 > Project sync is optional. Local or CLI-authenticated runs can add generated issues
 > to a GitHub Project immediately. Workflow runs may need a token with project scope

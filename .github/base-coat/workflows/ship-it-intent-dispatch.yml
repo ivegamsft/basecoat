@@ -21,10 +21,6 @@ on:
         description: Repository in owner/repo format (defaults to this repository)
         required: false
         type: string
-      spec_ref:
-        description: Optional spec or PRD reference
-        required: false
-        type: string
       risk_band:
         description: Risk classification
         required: true
@@ -239,7 +235,6 @@ jobs:
               result.intent = requestedIntent;
               result.goal = intentGoal.trim();
               result.target_repo = inputs.target_repo || result.target_repo;
-              result.spec_ref = inputs.spec_ref || "";
               result.risk_band = inputs.risk_band || "medium";
               result.project_owner = inputs.project_owner || "";
               result.project_number = inputs.project_number || "";
@@ -262,6 +257,10 @@ jobs:
                   core.setFailed("Pre-approval does not authorize project synchronization; omit project_owner and project_number.");
                   return;
                 }
+                const { data: approvedIssue } = await github.rest.issues.get({
+                  ...context.repo, issue_number: Number(sourceIssueNumber)
+                });
+                result.spec_ref = preapproval.parseIntentContract(approvedIssue.body).spec_ref;
                 const { data: workflowRun } = await github.rest.actions.getWorkflowRun({
                   owner: context.repo.owner,
                   repo: context.repo.repo,

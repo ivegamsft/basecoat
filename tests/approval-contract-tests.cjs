@@ -20,6 +20,15 @@ for (const name of ["issue-approve.yml", "ship-it-intent-dispatch.yml"]) {
       ".\\scripts\\ship-it\\dispatch-intent.ps1");
   }
   assert.equal(source, distributed);
+  if (name === "ship-it-intent-dispatch.yml") {
+    const dispatch = source.match(/^  workflow_dispatch:\n([\s\S]*?)(?=^\S)/m)[1];
+    const inputs = Array.from(dispatch.matchAll(/^      ([a-z_]+):$/gm), match => match[1]);
+    assert.equal(inputs.length, 10, "Manual dispatch must respect GitHub's ten-input limit");
+    assert.ok(!inputs.includes("spec_ref"), "The source issue owns the workflow spec reference");
+    for (const required of ["source_issue_number", "approval_comment_id", "target_repo", "dry_run"]) {
+      assert.ok(inputs.includes(required), `Required boundary input retained: ${required}`);
+    }
+  }
 }
 function workflowScripts(source, jobName, expectedCount) {
   const job = source.match(new RegExp(`^  ${jobName}:\\n([\\s\\S]*?)(?=^  [\\w-]+:|$(?![\\s\\S]))`, "m"));

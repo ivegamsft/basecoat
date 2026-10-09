@@ -130,6 +130,88 @@ async function makeReceipt(fixture = makeFixture()) {
   return preapproval.resolvePreApproval(fixture.args);
 }
 
+async function runManualWorkflow(fixture) {
+  fixture.issue.labels.push({ name: "bug" }, { name: "priority:high" });
+  const path = require("node:path");
+  const root = path.resolve(__dirname, "..");
+  const source = fs.readFileSync(path.join(root, ".github", "workflows", "ship-it-intent-dispatch.yml"), "utf8")
+    .replace(/\r\n/g, "\n");
+  const job = source.match(/^  resolve-intent:\n([\s\S]*?)(?=^  [\w-]+:)/m)[1];
+  const script = job.match(/^          script: \|\n((?: {12}[^\n]*(?:\n|$)|[ \t]*\n)*)/m)[1]
+    .split("\n").map(line => line.replace(/^ {12}/, "")).join("\n");
+  const api = fixture.api;
+  const github = {
+    rest: {
+      issues: {
+        get: async ({ owner, repo, issue_number }) => ({ data: await api.getIssue(owner, repo, issue_number) }),
+        getComment: async ({ owner, repo, comment_id }) => ({ data: await api.getIssueComment(owner, repo, comment_id) }),
+        listComments: async () => ({ data: [fixture.comment] })
+      },
+      repos: {
+        getCollaboratorPermissionLevel: async ({ owner, repo, username }) =>
+          ({ data: await api.getPermission(owner, repo, username) }),
+        getContent: async ({ owner, repo, path, ref }) => ({ data: await api.getSpec(owner, repo, path, ref) })
+      },
+      actions: {
+        getWorkflowRun: async ({ owner, repo, run_id }) => ({ data: await api.getWorkflowRun(owner, repo, run_id) })
+      }
+    },
+    graphql: async () => ({ repository: { issue: await api.getIssueBodyEditTime() } }),
+    paginate: async (fn, args) => (await fn(args)).data
+  };
+  const outputs = {}, failures = [];
+  const context = {
+    repo: { owner, repo }, actor: "runner", eventName: "workflow_dispatch",
+    serverUrl: "https://github.com", runId,
+    payload: { inputs: {
+      intent: "ship-it", goal: fixture.args.goal, target_repo: sourceRepo,
+      risk_band: "medium", profile: "team-dev", dry_run: "true",
+      source_issue_number: "99", approval_comment_id: "7001"
+    } }
+  };
+  const core = {
+    setOutput: (key, value) => { outputs[key] = value; },
+    setFailed: message => failures.push(message), info() {}
+  };
+  const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+  await new AsyncFunction("github", "context", "core", "require", script)(
+    github, context, core, modulePath => require(modulePath.replace(
+      `${process.env.GITHUB_WORKSPACE}/`, `${root}/`
+    ))
+  );
+  return { outputs, failures };
+}
+
+test("manual preapproval derives pinned spec without a spec_ref input", async () => {
+  const fixture = makeFixture();
+  fixture.issue.body += `\n- Spec: ${specRef}\n`;
+  const result = await runManualWorkflow(fixture);
+  assert.deepEqual(result.failures, []);
+  assert.equal(result.outputs.should_run, "true");
+  assert.equal(result.outputs.spec_ref, specRef);
+  assert.equal(preapproval.decodeReceipt(result.outputs.approval_receipt_base64).spec_ref, specRef);
+});
+
+test("manual preapproval fails closed on missing spec, revoked approval or source race", async t => {
+  for (const mutation of ["missing", "revoked", "race"]) {
+    await t.test(mutation, async () => {
+      const fixture = makeFixture();
+      fixture.issue.body += `\n- Spec: ${specRef}\n`;
+      if (mutation === "missing") fixture.issue.body = fixture.issue.body.replace(`- Spec reference: ${specRef}`, "");
+      if (mutation === "revoked") fixture.permissions.set("maintainer", { permission: "read" });
+      if (mutation === "race") {
+        const getIssue = fixture.api.getIssue;
+        let reads = 0;
+        fixture.api.getIssue = async (...args) => {
+          const issue = await getIssue(...args);
+          return ++reads > 1 ? { ...issue, body: issue.body.replace(specRef, specRef.replace(specCommit, "f".repeat(40))) } : issue;
+        };
+      }
+      await assert.rejects(runManualWorkflow(fixture));
+    });
+  }
+});
+
 test("accepts a prior exact approval with current role-name permission fallback", async () => {
   const fixture = makeFixture();
   fixture.permissions.set("maintainer", { permission: "read", role_name: "write" });
