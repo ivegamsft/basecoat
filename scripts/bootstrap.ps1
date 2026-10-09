@@ -328,9 +328,26 @@ function Get-OnboardingProfileSelection(
     return [pscustomobject]$profiles[$candidateProfile]
 }
 
+function Test-OnboardingMergeExecutorWorkflow {
+    param([Parameter(Mandatory = $true)][string]$RepositoryRoot)
+
+    foreach ($workflowName in @(
+        'pr-auto-merge-executor.yml',
+        'basecoat-pr-auto-merge-executor.yml'
+    )) {
+        $workflowPath = Join-Path $RepositoryRoot ".github\workflows\$workflowName"
+        if (Test-Path -LiteralPath $workflowPath -PathType Leaf) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
 function Get-OnboardingSecretVariableRequirements(
     [pscustomobject]$profileSelection,
     [bool]$hasPublishWorkflow,
+    [bool]$hasMergeExecutorWorkflow,
     [bool]$hasPortalDeployWorkflow
 ) {
     $requirements = [System.Collections.Generic.List[object]]::new()
@@ -350,6 +367,15 @@ function Get-OnboardingSecretVariableRequirements(
             Kind = 'secret'
             Remediation = "Set with 'gh secret set PRODUCTION_REPO_TOKEN --repo <repo>' after creating PAT on ivegamsft/basecoat with Contents/Admin/Workflows read-write."
             Rotation = 'Rotate before PAT expiration; keep expiration <=30 days where possible.'
+        })
+    }
+
+    if ($hasMergeExecutorWorkflow) {
+        $requirements.Add([pscustomobject]@{
+            Name = 'BASECOAT_MERGE_QUEUE_TOKEN'
+            Kind = 'secret'
+            Remediation = "Set with 'gh secret set BASECOAT_MERGE_QUEUE_TOKEN -R <repo>' using a fine-grained PAT limited to this repository with Pull requests, Contents, and Workflows read/write."
+            Rotation = 'Rotate every 30 days (set PAT expiration <=30 days).'
         })
     }
 
@@ -824,6 +850,7 @@ try {
 }
 
 $publishWorkflow = Join-Path $repoRoot '.github\workflows\publish-to-production.yml'
+$hasMergeExecutorWorkflow = Test-OnboardingMergeExecutorWorkflow -RepositoryRoot $repoRoot
 $portalDeployWorkflow = Join-Path $repoRoot '.github\workflows\portal-deploy.yml'
 $script:portalDeployReady = $false
 if ((Test-Path $portalDeployWorkflow) -and $profileSelection -and $profileSelection.profile -ne 'solo-dev' -and $repoSlug) {
@@ -877,6 +904,7 @@ if ($repoSlug -and $profileSelection) {
     $requirements = Get-OnboardingSecretVariableRequirements `
         -profileSelection $profileSelection `
         -hasPublishWorkflow (Test-Path $publishWorkflow) `
+        -hasMergeExecutorWorkflow $hasMergeExecutorWorkflow `
         -hasPortalDeployWorkflow (Test-Path $portalDeployWorkflow)
     Test-OnboardingSecretVariableRequirements `
         -repoSlug $repoSlug `

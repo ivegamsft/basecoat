@@ -2096,6 +2096,7 @@ jobs:
       - name: Enable auto-merge for eligible pull request
         env:
           GH_TOKEN: ${{ github.token }}
+          MERGE_QUEUE_EVENT_TOKEN: ${{ secrets.BASECOAT_MERGE_QUEUE_TOKEN }}
           REPOSITORY: ${{ github.repository }}
           PR_NUMBER: ${{ needs.evaluate.outputs.pr_number }}
           HEAD_SHA: ${{ needs.evaluate.outputs.head_sha }}
@@ -2113,12 +2114,34 @@ jobs:
             echo "Delivery hold '${hold_label}' is active; auto-merge disabled and not re-enabled." | tee -a "${GITHUB_STEP_SUMMARY}"
             exit 1
           fi
+          current_head=$(gh pr view "${PR_NUMBER}" --repo "${REPOSITORY}" --json headRefOid --jq '.headRefOid')
+          if [[ "${current_head}" != "${HEAD_SHA}" ]]; then
+            description="PR head changed after eligibility validation; refusing stale queue admission."
+            gh api --method POST "repos/${REPOSITORY}/statuses/${HEAD_SHA}" \
+              -f state=failure \
+              -f context='BaseCoat merge eligibility' \
+              -f description="${description}" \
+              -f target_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" >/dev/null
+            echo "::error::${description} Expected ${HEAD_SHA}, found ${current_head}."
+            exit 1
+          fi
+          if [[ -z "${MERGE_QUEUE_EVENT_TOKEN:-}" ]]; then
+            description="BASECOAT_MERGE_QUEUE_TOKEN is required for event-generating merge-queue admission; refusing to use GITHUB_TOKEN because it suppresses downstream workflow events."
+            gh api --method POST "repos/${REPOSITORY}/statuses/${HEAD_SHA}" \
+              -f state=failure \
+              -f context='BaseCoat merge eligibility' \
+              -f description="Merge-queue event token is not configured." \
+              -f target_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" >/dev/null
+            echo "::error::${description}"
+            exit 1
+          fi
           # Queue-enabled path: omit --delete-branch because gh rejects it when native merge queue is enabled.
           # Queue-disabled path: rely on repository delete_branch_on_merge so cleanup occurs only after a verified merge.
-          gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash
+          GH_TOKEN="${MERGE_QUEUE_EVENT_TOKEN}" gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash --match-head-commit "${HEAD_SHA}"
           echo "Auto-merge enabled or queued for PR #${PR_NUMBER}."
           merge_state=$(gh pr view "${PR_NUMBER}" --repo "${REPOSITORY}" --json mergeStateStatus --jq '.mergeStateStatus')
           if [[ "${merge_state}" == "BEHIND" ]]; then
-            gh api --method PUT "repos/${REPOSITORY}/pulls/${PR_NUMBER}/update-branch" >/dev/null
+            GH_TOKEN="${MERGE_QUEUE_EVENT_TOKEN}" gh api --method PUT "repos/${REPOSITORY}/pulls/${PR_NUMBER}/update-branch" \
+              -f expected_head_sha="${HEAD_SHA}" >/dev/null
             echo "Updated PR #${PR_NUMBER} from the protected base branch; CI will re-evaluate the new head."
           fi

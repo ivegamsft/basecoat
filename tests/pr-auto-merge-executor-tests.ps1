@@ -304,12 +304,42 @@ if ($workflow -notmatch '(?m)^permissions:\s*\r?\n\s*actions:\s*write\s*\r?\n\s*
 if ($workflow -notmatch 'pr-auto-merge-executor:v1') {
     throw 'Workflow must include the stable marker for idempotent status comments.'
 }
-$queueCompatibleMergeCommand = 'gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash'
+$queueCompatibleMergeCommand = 'gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash --match-head-commit "${HEAD_SHA}"'
 if ($workflow -notmatch [regex]::Escape($queueCompatibleMergeCommand)) {
-    throw 'Workflow must use a queue-compatible gh pr merge command with --auto --squash.'
+    throw 'Workflow must bind queue admission atomically to the validated head SHA.'
+}
+if ($workflow -notmatch 'MERGE_QUEUE_EVENT_TOKEN:\s*\$\{\{\s*secrets\.BASECOAT_MERGE_QUEUE_TOKEN\s*\}\}') {
+    throw 'Workflow must provide the dedicated event-generating merge-queue credential.'
+}
+if ($workflow -notmatch 'GH_TOKEN:\s*\$\{\{\s*github\.token\s*\}\}') {
+    throw 'Workflow must retain GITHUB_TOKEN for eligibility reads and status reporting.'
+}
+foreach ($requiredEventTokenText in @(
+    'current_head=$(gh pr view "${PR_NUMBER}" --repo "${REPOSITORY}" --json headRefOid --jq ''.headRefOid'')',
+    'PR head changed after eligibility validation; refusing stale queue admission.',
+    'if [[ -z "${MERGE_QUEUE_EVENT_TOKEN:-}" ]]; then',
+    'BASECOAT_MERGE_QUEUE_TOKEN is required for event-generating merge-queue admission',
+    'because it suppresses downstream workflow events.',
+    'GH_TOKEN="${MERGE_QUEUE_EVENT_TOKEN}" gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash --match-head-commit "${HEAD_SHA}"',
+    'GH_TOKEN="${MERGE_QUEUE_EVENT_TOKEN}" gh api --method PUT "repos/${REPOSITORY}/pulls/${PR_NUMBER}/update-branch"',
+    '-f expected_head_sha="${HEAD_SHA}"'
+)) {
+    if (-not $workflow.Contains($requiredEventTokenText)) {
+        throw "Workflow is missing event-generating queue admission or stale-head protection: $requiredEventTokenText"
+    }
+}
+$staleHeadGuardIndex = $workflow.IndexOf('if [[ "${current_head}" != "${HEAD_SHA}" ]]; then')
+$missingTokenGuardIndex = $workflow.IndexOf('if [[ -z "${MERGE_QUEUE_EVENT_TOKEN:-}" ]]; then')
+$autoMergeEnableIndex = $workflow.IndexOf('GH_TOKEN="${MERGE_QUEUE_EVENT_TOKEN}" gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash --match-head-commit "${HEAD_SHA}"')
+if ($staleHeadGuardIndex -lt 0 -or $missingTokenGuardIndex -lt 0 -or $autoMergeEnableIndex -lt 0 -or
+    $staleHeadGuardIndex -gt $missingTokenGuardIndex -or $missingTokenGuardIndex -gt $autoMergeEnableIndex) {
+    throw 'Regression guard failed: verify the evaluated head and event-generating token before enabling auto-merge.'
 }
 if ($workflow -match 'gh pr merge "\$\{PR_NUMBER\}" --repo "\$\{REPOSITORY\}" --auto --squash --delete-branch') {
     throw 'Workflow must not pass --delete-branch while enabling auto-merge because native merge queues reject it.'
+}
+if ($workflow -match '(?m)^\s+gh pr merge "\$\{PR_NUMBER\}" --repo "\$\{REPOSITORY\}" --auto --squash\s*$') {
+    throw 'Workflow must not fall back to GITHUB_TOKEN for merge-queue admission.'
 }
 foreach ($requiredQueueCompatibleMergeText in @(
     'Queue-enabled path: omit --delete-branch because gh rejects it when native merge queue is enabled.',
@@ -346,7 +376,6 @@ foreach ($requiredDeliveryHoldText in @(
     }
 }
 $deliveryHoldDisableIndex = $workflow.IndexOf('gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --disable-auto')
-$autoMergeEnableIndex = $workflow.IndexOf($queueCompatibleMergeCommand)
 if ($deliveryHoldDisableIndex -lt 0 -or $autoMergeEnableIndex -lt 0 -or $deliveryHoldDisableIndex -gt $autoMergeEnableIndex) {
     throw 'Regression guard failed: delivery-hold must disable and stop auto-merge before any queued executor merge command.'
 }

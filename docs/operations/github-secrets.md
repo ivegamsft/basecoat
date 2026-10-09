@@ -60,9 +60,48 @@ the corresponding workflow file is present in the repo (any profile, including
 | --- | --- |
 | `.github/workflows/publish-to-production.yml` | `PRODUCTION_REPO_TOKEN` |
 | `.github/workflows/portal-deploy.yml` (skipped for `solo-dev`) | Portal variables and `GHCR_PULL_TOKEN` |
+| `.github/workflows/pr-auto-merge-executor.yml` (BaseCoat repo) or `.github/workflows/basecoat-pr-auto-merge-executor.yml` (downstream install) | `BASECOAT_MERGE_QUEUE_TOKEN` |
 
 Bootstrap output includes token rotation/expiration guidance and never writes
 plaintext secrets to repository files.
+
+### `BASECOAT_MERGE_QUEUE_TOKEN`
+
+**Used by:** `.github/workflows/pr-auto-merge-executor.yml` and its
+distributed `.github/base-coat/workflows/pr-auto-merge-executor.yml` template,
+which downstream installation renames to
+`.github/workflows/basecoat-pr-auto-merge-executor.yml`.
+
+**Purpose:** Event-generating credential for native merge-queue admission and
+PR branch updates. GitHub suppresses downstream Actions events caused by the
+built-in `GITHUB_TOKEN`; the executor fails closed instead of using that token
+when this secret is unavailable.
+
+**Required permissions:** Create a fine-grained PAT with repository access
+limited to `IBuySpy-Shared/basecoat`, with **Pull requests: Read and write**,
+**Contents: Read and write**, and **Workflows: Read and write**, and
+owned by an account with ordinary write access that is not a repository
+administrator or ruleset-bypass actor. Repository metadata access is granted
+automatically. Set the token expiration to **30 days or less** and rotate it
+monthly.
+
+Pull requests covers admission and branch updates; Contents covers merges and
+branch writes. Workflows is necessary when those writes include changes under
+`.github/workflows`. Actions write and Administration permissions are not
+required for this credential. Organization policy may require token approval.
+
+Configure the secret at repository scope:
+
+```powershell
+gh secret set BASECOAT_MERGE_QUEUE_TOKEN --repo IBuySpy-Shared/basecoat
+```
+
+The repository bootstrap check reports this secret as required whenever the
+BaseCoat merge executor workflow is present. Each downstream repository that
+installs the distributed executor must configure its own secret with a token
+scoped only to that repository. Do not share a cross-repository token,
+substitute `GITHUB_TOKEN`, or reuse the BaseCoat extension app credentials;
+none is an approved fallback for queue admission.
 
 ### Portal deploy bootstrap order (staging)
 
