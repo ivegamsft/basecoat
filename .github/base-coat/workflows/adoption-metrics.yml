@@ -18,6 +18,8 @@ on:
 
 permissions:
   contents: write
+  pull-requests: read
+  actions: read
   pages: write
   issues: write
 
@@ -144,4 +146,3 @@ jobs:
               --body "$ALERT_BODY" \
               --label "metrics,degradation"
           fi
-

@@ -82,6 +82,21 @@ After the first successful run:
 - [ ] All four goal-based loop metrics have non-null values in the scorecard.
 - [ ] `readiness.overall` is `ready` in the scorecard.
 
+The adoption workflow also needs `pull-requests: read` and `actions: read` on its
+source-repository `GITHUB_TOKEN`. A readable repository does not prove that its
+pulls or workflow runs are readable. Failed PR/CI collection has `available:
+false`, an error reason, and null measurements; an empty/non-measurable CI sample
+also has no percentage. These are unknown measurements, not zero success rates.
+Incomplete PR/CI repository samples are excluded from dashboard aggregates and
+degradation comparisons. Successfully collected zero merges or all-failed CI
+runs remain valid measured zeros. Cross-repository targets require separately
+approved read access; adding source workflow permissions does not grant it.
+
+PR velocity uses the 50 most recently updated closed PRs, explicitly ordered
+descending, and filters their merge times to 28 days. It is a bounded sample,
+not an exhaustive repository-wide merge count; older history must not replace
+that recent sample because of an implicit API sort direction.
+
 ### Step 4 — App Insights validation (when connected)
 
 - [ ] At least one `BaseCoatScorecardSnapshot` event appears in the Application Insights

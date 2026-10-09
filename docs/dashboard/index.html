@@ -225,13 +225,15 @@ gh workflow run adoption-metrics.yml</code></pre>
         const availableRepos = repos.filter(([, data]) => data.available !== false);
         const copilot = latest.copilot;
 
-        const totalPRs = availableRepos.reduce((s, [, d]) => s + d.pull_requests.prs_merged_28d, 0);
+        const totalPRs = availableRepos.length > 0
+            ? availableRepos.reduce((s, [, d]) => s + d.pull_requests.prs_merged_28d, 0)
+            : null;
         const avgCI = availableRepos.length > 0
             ? (availableRepos.reduce((s, [, d]) => s + d.ci.success_rate, 0) / availableRepos.length).toFixed(1)
-            : 0;
+            : null;
         const avgCoverage = availableRepos.length > 0
             ? (availableRepos.reduce((s, [, d]) => s + d.basecoat_coverage.percentage, 0) / availableRepos.length).toFixed(1)
-            : 0;
+            : null;
 
         let html = `
         <div class="grid">
@@ -242,17 +244,17 @@ gh workflow run adoption-metrics.yml</code></pre>
             </div>
             <div class="card">
                 <h2>PRs Merged (28d)</h2>
-                <div class="value">${totalPRs}</div>
+                <div class="value">${totalPRs === null ? 'unavailable' : totalPRs}</div>
                 <div class="delta">across ${availableRepos.length} active repos${repos.length !== availableRepos.length ? `, ${repos.length - availableRepos.length} unavailable` : ''}</div>
             </div>
             <div class="card">
                 <h2>CI Success Rate</h2>
-                <div class="value">${avgCI}%</div>
-                <div class="delta ${avgCI >= 90 ? 'positive' : avgCI >= 75 ? '' : 'negative'}">average</div>
+                <div class="value">${avgCI === null ? 'unavailable' : `${avgCI}%`}</div>
+                <div class="delta ${avgCI === null ? '' : avgCI >= 90 ? 'positive' : avgCI >= 75 ? '' : 'negative'}">average</div>
             </div>
             <div class="card">
                 <h2>BaseCoat Coverage</h2>
-                <div class="value">${avgCoverage}%</div>
+                <div class="value">${avgCoverage === null ? 'unavailable' : `${avgCoverage}%`}</div>
                 <div class="delta">assets synced</div>
             </div>
         </div>`;
@@ -277,7 +279,7 @@ gh workflow run adoption-metrics.yml</code></pre>
                     <td><strong>${label}</strong></td>
                     <td>${unavailable ? '—' : data.pull_requests.prs_merged_28d}</td>
                     <td>${unavailable ? '—' : `${data.pull_requests.cycle_time_median_hours}h`}</td>
-                    <td><span class="badge ${ciBadge}">${ci}%</span></td>
+                    <td><span class="badge ${ciBadge}">${unavailable ? 'unavailable' : `${ci}%`}</span></td>
                     <td>${unavailable ? '—' : data.issues.issues_closed_28d}</td>
                     <td>${unavailable ? '—' : `${data.basecoat_coverage.percentage}%`}</td>
                 </tr>`;
@@ -300,12 +302,11 @@ gh workflow run adoption-metrics.yml</code></pre>
             const labels = history.map(h => h.collected_at.slice(0, 10));
             const ciData = history.map(h => {
                 const r = Object.values(h.repos).filter((d) => d.available !== false);
-                return r.length > 0 ? (r.reduce((s, d) => s + d.ci.success_rate, 0) / r.length).toFixed(1) : 0;
+                return r.length > 0 ? (r.reduce((s, d) => s + d.ci.success_rate, 0) / r.length).toFixed(1) : null;
             });
             const prData = history.map(h => {
-                return Object.values(h.repos)
-                    .filter((d) => d.available !== false)
-                    .reduce((s, d) => s + d.pull_requests.prs_merged_28d, 0);
+                const r = Object.values(h.repos).filter((d) => d.available !== false);
+                return r.length > 0 ? r.reduce((s, d) => s + d.pull_requests.prs_merged_28d, 0) : null;
             });
 
             new Chart(document.getElementById('trendChart'), {

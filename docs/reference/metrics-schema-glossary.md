@@ -1,6 +1,6 @@
 # Dashboard Metrics Schema and Glossary
 
-Schema version: **1.0.0**
+Schema version: **2.0.0**
 
 This document defines the published contract for dashboard output artifacts under
 `dashboard/metrics/` on `gh-pages`.
@@ -28,9 +28,15 @@ Usage rules:
 ## Compatibility policy
 
 - Additive changes (new fields) are backward-compatible.
-- Renaming or removing existing fields requires a major schema version bump.
+- Renaming/removing fields or changing their allowed value types requires a
+  major schema version bump.
 - Existing compatibility aliases (for example `ci.success_rate` and
   `ci.pass_rate`) remain available through all `1.x` versions.
+- Version 2 retains those aliases but makes unknown PR/CI measurements nullable.
+  Consumers must check availability and null before numeric operations; a null
+  is not a measured zero. Historical version-1 snapshots without nested
+  availability fields remain readable, but failed collection must not be
+  inferred as healthy from their zero-valued placeholders.
 
 ## Artifact schema
 
@@ -55,18 +61,24 @@ Top-level object:
 
 Each `repos["owner/repo"]` object contains:
 
+- `available` (boolean; false for inaccessible repositories or incomplete PR/CI samples)
+- `error` (string, present when unavailable)
 - `pull_requests`
-  - `prs_merged_28d` (number)
-  - `cycle_time_median_hours` (number)
-  - `cycle_time_p95_hours` (number)
+  - `available` (boolean)
+  - `error` (string, present when unavailable)
+  - `prs_merged_28d` (number or null; merges within 28 days in the 50 most recently updated closed PRs, ordered descending)
+  - `cycle_time_median_hours` (number or null)
+  - `cycle_time_p95_hours` (number or null)
 - `ci`
-  - `success_rate` (number, pass rate over last 100 measurable runs)
-  - `pass_rate` (number, alias of `success_rate`)
-  - `ci_pass_rate_last_20_runs` (number, pass rate over last 20 measurable runs)
-  - `ci_pass_rate_last_100_runs` (number, pass rate over last 100 measurable runs)
-  - `total_runs_sampled` (number, measurable runs in 100-run window)
-  - `runs_sampled_last_20` (number, measurable runs in 20-run window)
-  - `successful_runs_last_20` (number)
+  - `available` (boolean)
+  - `error` (string, present when unavailable)
+  - `success_rate` (number or null, pass rate over last 100 measurable runs)
+  - `pass_rate` (number or null, alias of `success_rate`)
+  - `ci_pass_rate_last_20_runs` (number or null, pass rate over last 20 measurable runs)
+  - `ci_pass_rate_last_100_runs` (number or null, pass rate over last 100 measurable runs)
+  - `total_runs_sampled` (number or null, measurable runs in 100-run window)
+  - `runs_sampled_last_20` (number or null, measurable runs in 20-run window)
+  - `successful_runs_last_20` (number or null)
 - `issues`
   - `issues_closed_28d` (number)
   - `resolution_time_median_hours` (number)
@@ -76,6 +88,15 @@ Each `repos["owner/repo"]` object contains:
   - `skills` (number of entries found in `.github/skills`)
   - `prompts` (number of entries found in `.github/prompts`)
   - `percentage` (number)
+
+PR/CI endpoint failures emit null measurements and a stable surface error:
+`inaccessible_repo`, `pr_collection_failed`, or `ci_collection_failed`.
+`no_measurable_runs` has null CI percentages but known zero sample counts.
+An otherwise readable repository with either PR/CI surface unavailable has
+`available: false` and `error: incomplete_pr_ci_metrics`; verified fields are
+retained, but the sample is excluded from dashboard aggregates and both sides
+of degradation comparisons. A successful zero-merge sample or all-failed
+measurable CI sample remains available and numeric.
 
 ## `history.json`
 

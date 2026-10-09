@@ -95,19 +95,20 @@ def unavailable_repo_metrics(error):
         "pull_requests": {
             "available": False,
             "error": error,
-            "prs_merged_28d": 0,
-            "cycle_time_median_hours": 0,
+            "prs_merged_28d": None,
+            "cycle_time_median_hours": None,
+            "cycle_time_p95_hours": None,
         },
         "ci": {
             "available": False,
             "error": error,
-            "success_rate": 0,
-            "pass_rate": 0,
-            "ci_pass_rate_last_20_runs": 0,
-            "ci_pass_rate_last_100_runs": 0,
-            "total_runs_sampled": 0,
-            "runs_sampled_last_20": 0,
-            "successful_runs_last_20": 0,
+            "success_rate": None,
+            "pass_rate": None,
+            "ci_pass_rate_last_20_runs": None,
+            "ci_pass_rate_last_100_runs": None,
+            "total_runs_sampled": None,
+            "runs_sampled_last_20": None,
+            "successful_runs_last_20": None,
         },
         "issues": {
             "available": False,
@@ -181,15 +182,18 @@ def collect_pr_metrics(repo, token):
     """Collect PR velocity metrics for a repo."""
     print(f"  Collecting PR metrics for {repo}...")
     if not repo_is_accessible(repo, token):
-        return unavailable_repo_metrics("inaccessible_repo")
+        return unavailable_repo_metrics("inaccessible_repo")["pull_requests"]
 
     since_dt = datetime.now(timezone.utc) - timedelta(days=28)
 
     # Get recently closed PRs
     prs = github_api(
-        f"https://api.github.com/repos/{repo}/pulls?state=closed&sort=updated&per_page=50",
+        f"https://api.github.com/repos/{repo}/pulls?state=closed&sort=updated&direction=desc&per_page=50",
         token
-    ) or []
+    )
+    if not isinstance(prs, list):
+        print(f"  WARNING: PR measurements unavailable for {repo}", file=sys.stderr)
+        return unavailable_repo_metrics("pr_collection_failed")["pull_requests"]
 
     cycle_times = []
     for pr in prs:
@@ -211,6 +215,7 @@ def collect_pr_metrics(repo, token):
         p95 = 0
 
     return {
+        "available": True,
         "prs_merged_28d": len(cycle_times),
         "cycle_time_median_hours": round(median, 1),
         "cycle_time_p95_hours": round(p95, 1)
@@ -221,22 +226,15 @@ def collect_ci_metrics(repo, token):
     """Collect CI pass-rate metrics for a repo."""
     print(f"  Collecting CI metrics for {repo}...")
     if not repo_is_accessible(repo, token):
-        return unavailable_repo_metrics("inaccessible_repo")
+        return unavailable_repo_metrics("inaccessible_repo")["ci"]
 
     runs = github_api(
         f"https://api.github.com/repos/{repo}/actions/runs?per_page=100&status=completed",
         token
     )
-    if not runs or "workflow_runs" not in runs:
-        return {
-            "success_rate": 0,
-            "pass_rate": 0,
-            "ci_pass_rate_last_20_runs": 0,
-            "ci_pass_rate_last_100_runs": 0,
-            "total_runs_sampled": 0,
-            "runs_sampled_last_20": 0,
-            "successful_runs_last_20": 0,
-        }
+    if not isinstance(runs, dict) or not isinstance(runs.get("workflow_runs"), list):
+        print(f"  WARNING: CI measurements unavailable for {repo}", file=sys.stderr)
+        return unavailable_repo_metrics("ci_collection_failed")["ci"]
 
     workflow_runs = runs["workflow_runs"][:100]
 
@@ -256,10 +254,17 @@ def collect_ci_metrics(repo, token):
     total = len(measurable_runs)
     total_20 = len(measurable_20)
 
-    pass_rate_100 = round(success_total / total * 100, 1) if total > 0 else 0
-    pass_rate_20 = round(success_20 / total_20 * 100, 1) if total_20 > 0 else 0
+    if total == 0:
+        print(f"  WARNING: No measurable CI runs for {repo}", file=sys.stderr)
+        unavailable = unavailable_repo_metrics("no_measurable_runs")["ci"]
+        unavailable.update(total_runs_sampled=0, runs_sampled_last_20=0, successful_runs_last_20=0)
+        return unavailable
+
+    pass_rate_100 = round(success_total / total * 100, 1)
+    pass_rate_20 = round(success_20 / total_20 * 100, 1)
 
     return {
+        "available": True,
         "success_rate": pass_rate_100,  # Backward-compatible field.
         "pass_rate": pass_rate_100,
         "ci_pass_rate_last_20_runs": pass_rate_20,
@@ -355,14 +360,17 @@ def render_summary(metrics):
         if data.get("available") is False:
             lines.append(f"| {repo} | unavailable | unavailable | unavailable | unavailable | unavailable |")
             continue
-        ci_success = ci.get("success_rate", 0)
+        pr_available = pr.get("available") is not False
+        ci_available = ci.get("available") is not False
+        ci_success = ci.get("success_rate")
         ci_pass_20 = ci.get("ci_pass_rate_last_20_runs", ci_success)
         sampled_20 = ci.get("runs_sampled_last_20", 0)
         success_20 = ci.get("successful_runs_last_20", 0)
-        lines.append(
-            f"| {repo} | {pr.get('prs_merged_28d', 0)} | {pr.get('cycle_time_median_hours', 0)}h | "
-            f"{ci_success}% | {ci_pass_20}% ({success_20}/{sampled_20}) | {cov.get('percentage', 0)}% |"
-        )
+        prs_text = str(pr.get("prs_merged_28d", "unknown")) if pr_available else "unknown"
+        cycle_text = f"{pr['cycle_time_median_hours']}h" if pr_available and pr.get("cycle_time_median_hours") is not None else "unknown"
+        ci_text = f"{ci_success}%" if ci_available and ci_success is not None else "unknown"
+        ci_20_text = f"{ci_pass_20}% ({success_20}/{sampled_20})" if ci_available and ci_pass_20 is not None else "unknown"
+        lines.append(f"| {repo} | {prs_text} | {cycle_text} | {ci_text} | {ci_20_text} | {cov.get('percentage', 0)}% |")
     lines.append("")
     return "\n".join(lines)
 
@@ -393,9 +401,14 @@ def detect_degradation(current, history):
         if data.get("available") is False:
             continue
         prev_repo = prev.get("repos", {}).get(repo, {})
-        curr_ci = data.get("ci", {}).get("pass_rate", data.get("ci", {}).get("success_rate", 100))
-        prev_ci = prev_repo.get("ci", {}).get("pass_rate", prev_repo.get("ci", {}).get("success_rate", 100))
-        if prev_ci > 0 and curr_ci < prev_ci - 15:
+        if prev_repo.get("available") is False:
+            continue
+        curr_ci_data = data.get("ci", {})
+        prev_ci_data = prev_repo.get("ci", {})
+        curr_ci = curr_ci_data.get("pass_rate", curr_ci_data.get("success_rate"))
+        prev_ci = prev_ci_data.get("pass_rate", prev_ci_data.get("success_rate"))
+        ci_available = curr_ci_data.get("available") is not False and prev_ci_data.get("available") is not False
+        if ci_available and curr_ci is not None and prev_ci is not None and prev_ci > 0 and curr_ci < prev_ci - 15:
             alerts.append({
                 "type": "ci_success_drop",
                 "severity": "warning",
@@ -406,9 +419,12 @@ def detect_degradation(current, history):
             })
 
         # Check PR cycle time increase (>50% slower)
-        curr_cycle = data.get("pull_requests", {}).get("cycle_time_median_hours", 0)
-        prev_cycle = prev_repo.get("pull_requests", {}).get("cycle_time_median_hours", 0)
-        if prev_cycle > 0 and curr_cycle > prev_cycle * 1.5:
+        curr_pr = data.get("pull_requests", {})
+        prev_pr = prev_repo.get("pull_requests", {})
+        curr_cycle = curr_pr.get("cycle_time_median_hours")
+        prev_cycle = prev_pr.get("cycle_time_median_hours")
+        pr_available = curr_pr.get("available") is not False and prev_pr.get("available") is not False
+        if pr_available and curr_cycle is not None and prev_cycle is not None and prev_cycle > 0 and curr_cycle > prev_cycle * 1.5:
             alerts.append({
                 "type": "cycle_time_increase",
                 "severity": "info",
@@ -455,6 +471,10 @@ def main():
             "issues": collect_issue_metrics(repo, token),
             "basecoat_coverage": collect_basecoat_coverage(repo, token)
         }
+        if any(metrics["repos"][repo][surface].get("available") is False for surface in ("pull_requests", "ci")):
+            metrics["repos"][repo]["available"] = False
+            metrics["repos"][repo]["error"] = "incomplete_pr_ci_metrics"
+            print(f"  WARNING: Excluding incomplete PR/CI sample for {repo} from aggregates", file=sys.stderr)
 
     # Output
     output_dir = os.environ.get("OUTPUT_DIR", "metrics")
