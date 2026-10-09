@@ -151,6 +151,27 @@ Detector outputs:
 
 Action policy:
 
+The policy below describes the enforcer's decision, not every caller's delivery
+behavior. A successful dispatch means a run was requested; a successful dry-run
+means evidence was recorded, not that promotion was allowed or performed.
+
+| Caller / mode | Decision behavior | What it does not establish |
+|---|---|---|
+| `post-merge-release-chain.yml`: `dry_run=true`, `promotion_stage=validate` | Records commit-bound evaluation; packaging dispatched independently | No enforced production barrier, tag creation or deployment completion |
+| Release-gate caller with `dry_run=true` | Writes the evidence bundle, including rejection reasons; rejection alone does not produce the live-mode nonzero exit | Green run is not `promotion_allowed=true` |
+| Release-gate caller with `dry_run=false` | Enforcer exits nonzero on a denied promotion decision | A permitted decision is not a deployment; the caller must honor it and retain current authority |
+| Package/tag/publish workflows | Validate and publish their exact selected target under their own controls | Packaging is not automatic release-tag ownership or proof of runtime health |
+
+Read `promotion_allowed` and blockers from the bundle, not only run conclusion.
+Missing/failed required gate or artifact evidence denies the live decision;
+unavailable evidence cannot be fabricated as pass. Source SHA, repository,
+branch, destination and applicable approval context must remain bound to the
+intended scope. A generic dispatch receipt is not reusable authorization.
+Automatic tag ownership remains a separate contract tracked in #3594;
+see [spec-to-production stage boundaries](spec-to-production.md).
+Verify exact tag/release, assets, public publication and required target
+checks before calling production complete. The enforcer itself does not deploy.
+
 - **Recoverable + retry budget available**: `action=retry`, rerun failed jobs
 - **Non-recoverable**: `action=escalate`, open or update a remediation issue
 - **Recoverable + retry budget exhausted**: `action=escalate`, stop retries and require fix-forward intervention
