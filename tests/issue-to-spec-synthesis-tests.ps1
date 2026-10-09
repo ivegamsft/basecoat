@@ -17,6 +17,39 @@ $triage = Get-Content $triagePath -Raw
 $synthesis = Get-Content $synthesisPath -Raw
 $skillRef = Get-Content $skillRefPath -Raw
 
+$compileScripts = @'
+const fs = require('node:fs');
+const assert = require('node:assert/strict');
+const source = fs.readFileSync(process.argv[2], 'utf8').replace(/\r\n/g, '\n');
+const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+const blocks = [...source.matchAll(/^(\s*)script: \|\n((?:\1  .*(?:\n|$)|\s*\n)+)/gm)];
+if (blocks.length === 0) throw new Error('No github-script bodies found.');
+for (const [, indent, body] of blocks) {
+  const script = body.split('\n').map(line => line.slice(indent.length + 2)).join('\n');
+  new AsyncFunction('github', 'context', 'core', 'require', 'getOctokit', script);
+  const start = script.indexOf('const normalizeSection =');
+  const end = script.indexOf('const problem =', start);
+  assert.ok(start >= 0 && end > start, 'Normalization helper must be exercised.');
+  const normalize = new Function(script.slice(start, end) + 'return normalizeSection;')();
+  assert.equal(normalize('## Description\nText\n### RCA\nCause'),
+    '## Description\n\nText\n\n### RCA\n\nCause');
+  const valid = '## Description\n\nText\n\n### RCA\n\nCause';
+  assert.equal(normalize(valid), valid);
+  for (const marker of ['```', '~~~', '````']) {
+    const fenced = `${marker}text\n# not a heading\ncontent\n${marker}`;
+    assert.equal(normalize(fenced), fenced);
+  }
+  assert.equal(normalize('````text\n```\n# code\n```\n````'),
+    '````text\n```\n# code\n```\n````');
+  assert.equal(normalize('## Description\r\nText'), '## Description\n\nText');
+}
+console.log(`Compiled ${blocks.length} synthesis script bodies.`);
+'@
+$compileScripts | node - $synthesisPath
+if ($LASTEXITCODE -ne 0) {
+    throw 'Synthesis github-script bodies must compile before workflow execution.'
+}
+
 # Step 7 only skips the advisory when BOTH a PRD link and a spec link are present.
 # The skill reference decision tree previously said OR, which would let an issue
 # carrying just one of the two artifacts skip synthesis entirely.
