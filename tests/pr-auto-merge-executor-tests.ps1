@@ -17,6 +17,7 @@ $templatePath = Join-Path $repoRoot '.github\base-coat\workflows\pr-auto-merge-e
 $humanBoundaryPath = Join-Path $repoRoot '.github\governance\human-approval-boundaries.json'
 $prValidationPath = Join-Path $repoRoot '.github\workflows\pr-validation.yml'
 $decompositionEvaluatorPath = Join-Path $repoRoot '.github\base-coat\scripts\pr-decomposition-evaluator.cjs'
+$mergeEligibilityPolicyPath = Join-Path $repoRoot '.github\base-coat\scripts\merge-eligibility-policy.cjs'
 $rootPrTemplatePath = Join-Path $repoRoot '.github\PULL_REQUEST_TEMPLATE.md'
 $managedPrTemplatePath = Join-Path $repoRoot 'templates\intake\PULL_REQUEST_TEMPLATE.md'
 $reviewReconcilePath = Join-Path $repoRoot '.github\workflows\merge-eligibility-human-review-reconcile.yml'
@@ -50,6 +51,7 @@ foreach ($path in @(
 
 $workflow = Get-Content -Path $workflowPath -Raw
 $template = Get-Content -Path $templatePath -Raw
+$mergeEligibilityPolicy = Get-Content -Path $mergeEligibilityPolicyPath -Raw
 $prValidation = Get-Content -Path $prValidationPath -Raw
 $reviewReconcile = Get-Content -Path $reviewReconcilePath -Raw
 $reviewReconcileTemplate = Get-Content -Path $reviewReconcileTemplatePath -Raw
@@ -127,12 +129,21 @@ foreach ($requiredDecompositionText in @(
     'reviewSnapshotDigest',
     'github.paginate(github.rest.pulls.listFiles',
     'decomposition.decision === ''pass''',
-    'humanApprovalSizes',
+    'resolveApprovalRequirements',
     'requiresHumanApprovalBySize',
-    'requiredApprovals = Math.max'
+    'requiresHumanReviewByRisk'
 )) {
     if ($workflow -notmatch [regex]::Escape($requiredDecompositionText)) {
         throw "Merge eligibility is missing decomposition or snapshot validation: $requiredDecompositionText"
+    }
+    foreach ($requiredApprovalPolicyText in @(
+        'humanApprovalRequiredSizes',
+        'requiredApprovals = Math.max',
+        'minimumQualifiedApprovalsForHumanSize'
+    )) {
+        if ($mergeEligibilityPolicy -notmatch [regex]::Escape($requiredApprovalPolicyText)) {
+            throw "Approval policy helper is missing configured risk-tier or size logic: $requiredApprovalPolicyText"
+        }
     }
 }
 foreach ($unchangedSizeBoundary in @(
@@ -532,6 +543,12 @@ if ($workflow -notmatch 'waitingForRequiredChecks' -or
     $workflow -notmatch [regex]::Escape('Waiting for required status checks to complete.')) {
     throw 'Workflow must keep merge eligibility pending while required checks are still running.'
 }
+if ($workflow -notmatch 'waitingForHumanReview' -or
+    $workflow -notmatch 'human_review_hold' -or
+    $workflow -notmatch [regex]::Escape('Waiting for qualified human review; merge eligibility remains pending.') -or
+    $workflow -notmatch 'hasFailedChecks') {
+    throw 'Workflow must distinguish human-review holds from failed policy/build checks without making eligibility successful.'
+}
 if ($workflow -notmatch '(?m)^  cancel-in-progress: false\s*$') {
     throw 'Workflow must finish the active fresh evaluation and retain one pending PR notification.'
 }
@@ -898,6 +915,7 @@ try {
     $installedWorkflows = Join-Path $installedConsumerRoot '.github\workflows'
     New-Item -Path $installedScripts, $installedWorkflows -ItemType Directory -Force | Out-Null
     Copy-Item -LiteralPath $decompositionEvaluatorPath -Destination $installedScripts
+    Copy-Item -LiteralPath $mergeEligibilityPolicyPath -Destination $installedScripts
     $installedExecutorPath = Join-Path $installedWorkflows 'basecoat-pr-auto-merge-executor.yml'
     Copy-Item -LiteralPath $templatePath -Destination $installedExecutorPath
     $previousGitHubWorkspace = $env:GITHUB_WORKSPACE
@@ -908,20 +926,24 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const installedWorkflow = fs.readFileSync(process.env.INSTALLED_EXECUTOR_PATH, 'utf8');
-const evaluatorPaths = Array.from(
+const runtimeScriptPaths = Array.from(
   installedWorkflow.matchAll(/require\(\s*require\('node:path'\)\.join\(process\.env\.GITHUB_WORKSPACE,\s*'([^']+)'\)\s*\)/g),
   match => match[1]
 );
 assert.deepEqual(
-  evaluatorPaths,
+  runtimeScriptPaths,
   [
     '.github/base-coat/scripts/pr-decomposition-evaluator.cjs',
+    '.github/base-coat/scripts/merge-eligibility-policy.cjs',
     '.github/base-coat/scripts/pr-decomposition-evaluator.cjs'
   ],
-  'the installed executor jobs must load the evaluator from the managed runtime payload'
+  'the installed executor jobs must load all helpers from the managed runtime payload'
 );
-const installedEvaluator = require(path.join(process.env.GITHUB_WORKSPACE, evaluatorPaths[0]));
+const installedEvaluator = require(path.join(process.env.GITHUB_WORKSPACE, runtimeScriptPaths[0]));
 assert.equal(installedEvaluator.MAX_FILES, 15, 'the installed evaluator dependency must load successfully');
+const installedPolicy = require(path.join(process.env.GITHUB_WORKSPACE, runtimeScriptPaths[1]));
+assert.equal(typeof installedPolicy.isOnlyHumanReviewHold, 'function', 'the installed policy dependency must load successfully');
+assert.equal(typeof installedPolicy.resolveApprovalRequirements, 'function', 'the installed approval resolver must load successfully');
 const {
   MAX_FILES,
   MAX_LINES,

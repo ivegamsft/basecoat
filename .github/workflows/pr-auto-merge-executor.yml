@@ -431,6 +431,8 @@ jobs:
       review_digest: ${{ steps.policy.outputs.review_digest }}
       required_approvals: ${{ steps.policy.outputs.required_approvals }}
       human_review_required: ${{ steps.policy.outputs.human_review_required }}
+      human_review_hold: ${{ steps.policy.outputs.human_review_hold }}
+      eligibility_state: ${{ steps.policy.outputs.eligibility_state }}
       qualified_approvers: ${{ steps.policy.outputs.qualified_approvers }}
     steps:
       - name: Coalesce eligibility notifications
@@ -469,6 +471,9 @@ jobs:
             const defaultBranch = context.payload.repository?.default_branch || 'main';
             const { evaluateDecomposition, reviewSnapshotDigest, sha256 } = require(
               require('node:path').join(process.env.GITHUB_WORKSPACE, '.github/base-coat/scripts/pr-decomposition-evaluator.cjs')
+            );
+            const { isOnlyHumanReviewHold, resolveApprovalRequirements } = require(
+              require('node:path').join(process.env.GITHUB_WORKSPACE, '.github/base-coat/scripts/merge-eligibility-policy.cjs')
             );
 
             const resolvePrNumber = () => {
@@ -935,6 +940,7 @@ jobs:
               }
 
             const blockers = [];
+            const humanReviewBlockers = [];
             const labelNames = (pr.labels || []).map(label => String(label.name || '').toLowerCase());
             const deliveryHoldActive = labelNames.includes(deliveryHoldLabel);
             if (deliveryHoldActive) {
@@ -1002,18 +1008,19 @@ jobs:
             if (!sizeLabel) {
               blockers.push('PR is missing a canonical size label.');
             }
-            const humanApprovalSizes = new Set(
-              (profile.main?.human_approval_required_sizes || []).map(size =>
-                String(size || '').toUpperCase()
-              )
-            );
-            const requiresHumanApprovalBySize = humanApprovalSizes.has(sizeLabel);
-            const requiredApprovals = Math.max(
-              Number(profile.main?.required_approvals_by_risk_tier?.[riskTier] || 0),
-              requiresHumanApprovalBySize
-                ? Number(profile.main?.minimum_qualified_approvals_for_human_size || 1)
-                : 0
-            );
+            const approvalRequirements = resolveApprovalRequirements({
+              riskTier,
+              sizeLabel,
+              requiredApprovalsByRiskTier: profile.main?.required_approvals_by_risk_tier,
+              humanApprovalRequiredSizes: profile.main?.human_approval_required_sizes,
+              minimumQualifiedApprovalsForHumanSize: profile.main?.minimum_qualified_approvals_for_human_size,
+              approvalRequiredByRisk: boundaryProfile.pr_approval_required_by_risk
+            });
+            const {
+              requiredApprovals,
+              requiresHumanApprovalBySize,
+              requiresHumanReviewByRisk
+            } = approvalRequirements;
             const acknowledgementRequiredByPolicy = Boolean(
               profile.main?.required_maintainer_acknowledgement_by_risk_tier?.[riskTier]
             );
@@ -1049,9 +1056,6 @@ jobs:
               acknowledgementReasons.push('security_incident_override');
             }
             const requiresMaintainerAcknowledgement = acknowledgementReasons.length > 0;
-            const requiresHumanReviewByRisk = Boolean(
-              boundaryProfile.pr_approval_required_by_risk?.[riskTier]
-            );
             const requiresHumanReviewByBoundary =
               requiresHumanReviewByRisk || requiresHumanApprovalBySize;
             if (
@@ -1234,9 +1238,10 @@ jobs:
             );
             const unresolvedChangeRequesters = Array.from(new Set(qualifiedChangeRequesters.filter(Boolean))).sort();
             if (unresolvedChangeRequesters.length > 0) {
-              blockers.push(
+              const humanReviewBlocker =
                 `Unresolved changes-requested review on current head by ${unresolvedChangeRequesters.map(login => `@${login}`).join(', ')}.`
-              );
+              blockers.push(humanReviewBlocker);
+              humanReviewBlockers.push(humanReviewBlocker);
             }
             const qualifiedApprovers = await Promise.all(
               approvalCandidates.map(async login => {
@@ -1248,14 +1253,16 @@ jobs:
             );
             const approvedReviewers = new Set(qualifiedApprovers.filter(Boolean));
             if (approvedReviewers.size < requiredApprovals) {
-              blockers.push(
+              const humanReviewBlocker =
                 `Insufficient approvals for risk tier '${riskTier}' (${approvedReviewers.size}/${requiredApprovals}).`
-              );
+              blockers.push(humanReviewBlocker);
+              humanReviewBlockers.push(humanReviewBlocker);
             }
             if (requiresHumanReviewByRisk && approvedReviewers.size === 0) {
-              blockers.push(
+              const humanReviewBlocker =
                 `Human review boundary requires at least one approval for risk tier '${riskTier}'.`
-              );
+              blockers.push(humanReviewBlocker);
+              humanReviewBlockers.push(humanReviewBlocker);
             }
 
             const decomposition = await evaluateDecomposition({
@@ -1366,11 +1373,12 @@ jobs:
                 resolvePermission
               });
               if (!maintainerAcknowledgement.satisfied) {
-                blockers.push(
+                const humanReviewBlocker =
                   `Maintainer acknowledgement required (${acknowledgementReasons.join(', ')}). Comment ` +
                   `\`${criticalAcknowledgementCommand} ${headSha}\` after the latest push, ` +
                   'or link an issue labeled approved with an exact `/approve` comment from a qualified maintainer.'
-                );
+                blockers.push(humanReviewBlocker);
+                humanReviewBlockers.push(humanReviewBlocker);
               }
             }
 
@@ -1550,13 +1558,17 @@ jobs:
               acknowledgementBoundaryAllowlist.has('policy_exception_override') &&
               maintainerAcknowledgement.satisfied
             )) {
-              blockers.push('policy_exception_override: policy-exception changes require explicit human approval.');
+              const humanReviewBlocker = 'policy_exception_override: policy-exception changes require explicit human approval.';
+              blockers.push(humanReviewBlocker);
+              humanReviewBlockers.push(humanReviewBlocker);
             }
             if (securityIncidentBoundaryActive && approvedReviewers.size === 0 && !(
               acknowledgementBoundaryAllowlist.has('security_incident_override') &&
               maintainerAcknowledgement.satisfied
             )) {
-              blockers.push('security_incident_override: incident/security-incident changes require explicit human approval.');
+              const humanReviewBlocker = 'security_incident_override: incident/security-incident changes require explicit human approval.';
+              blockers.push(humanReviewBlocker);
+              humanReviewBlockers.push(humanReviewBlocker);
             }
 
             const readRequiredCheckState = async () => {
@@ -1619,6 +1631,7 @@ jobs:
 
               const unsatisfiedChecks = [];
               let hasPendingChecks = false;
+              let hasFailedChecks = false;
               for (const checkName of requiredChecks) {
                 const statusState = statusByContext.get(checkName)?.state;
                 const checkState = checkByName.get(checkName);
@@ -1629,6 +1642,8 @@ jobs:
                   const statusPending = statusState === 'pending';
                   const checkPending = Boolean(checkState && checkState.status !== 'completed');
                   hasPendingChecks ||= noCheckSignal || statusPending || checkPending;
+                  hasFailedChecks ||= ['failure', 'error'].includes(statusState) ||
+                    Boolean(checkState && checkState.status === 'completed' && checkState.conclusion !== 'success');
                   unsatisfiedChecks.push(
                     `${checkName} (status=${statusState || 'pending'}, check=${checkState?.conclusion || checkState?.status || 'pending'})`
                   );
@@ -1637,13 +1652,15 @@ jobs:
               const evidence = JSON.stringify(requiredChecks.map(name => ({
                 name, status: statusByContext.get(name), check: checkByName.get(name)
               })));
-              return { unsatisfiedChecks, hasPendingChecks, evidence };
+              return { unsatisfiedChecks, hasPendingChecks, hasFailedChecks, evidence };
             };
 
             const requiredCheckState = await readRequiredCheckState();
             const unsatisfiedChecks = requiredCheckState?.unsatisfiedChecks || requiredChecks;
+            let requiredChecksBlocker = '';
             if (unsatisfiedChecks.length > 0) {
-              blockers.push(`Required checks not satisfied: ${unsatisfiedChecks.join('; ')}`);
+              requiredChecksBlocker = `Required checks not satisfied: ${unsatisfiedChecks.join('; ')}`;
+              blockers.push(requiredChecksBlocker);
             }
             if (mergeQueuePosture === 'required') {
               blockers.push("merge_queue_posture required: auto-merge executor defers to repository merge queue policy.");
@@ -1701,6 +1718,8 @@ jobs:
               });
               core.setOutput('eligible', 'false');
               core.setOutput('pr_number', String(prNumber));
+              core.setOutput('human_review_hold', 'false');
+              core.setOutput('eligibility_state', 'reevaluation_pending');
               core.setFailed('PR metadata changed during evaluation; queued a fresh evaluation and withheld eligibility.');
               return;
             }
@@ -1708,15 +1727,24 @@ jobs:
             const eligible = blockers.length === 0;
             const pendingCheckBlocker =
               Boolean(requiredCheckState?.hasPendingChecks) &&
+              !Boolean(requiredCheckState?.hasFailedChecks) &&
               unsatisfiedChecks.length > 0 &&
               blockers.some(reason => String(reason).startsWith('Required checks not satisfied:'));
             const waitingForRequiredChecks =
               Boolean(requiredCheckState?.hasPendingChecks) &&
+              !Boolean(requiredCheckState?.hasFailedChecks) &&
               unsatisfiedChecks.length > 0 &&
               blockers.every(reason =>
                 String(reason).startsWith('Required checks not satisfied:') ||
                 (decomposition.reviewPending && reason === decomposition.reason)
               );
+            const waitingForHumanReview = isOnlyHumanReviewHold({
+              blockers,
+              humanReviewBlockers,
+              requiredChecksBlocker,
+              hasPendingChecks: Boolean(requiredCheckState?.hasPendingChecks),
+              hasFailedChecks: Boolean(requiredCheckState?.hasFailedChecks)
+            });
             const waitingForAutomatedReview =
               !automatedReviewSatisfied && blockers.length === 1;
             const waitingForMechanicalExceptionReview =
@@ -1726,6 +1754,7 @@ jobs:
                 (pendingCheckBlocker && String(reason).startsWith('Required checks not satisfied:'))
               );
             const waitingForExternalProgress =
+              waitingForHumanReview ||
               waitingForAutomatedReview ||
               waitingForRequiredChecks ||
               waitingForMechanicalExceptionReview;
@@ -1839,6 +1868,14 @@ jobs:
             core.setOutput('review_digest', currentReviewDigest);
             core.setOutput('required_approvals', String(requiredApprovals));
             core.setOutput('human_review_required', String(requiresHumanReviewByBoundary));
+            core.setOutput('human_review_hold', String(waitingForHumanReview));
+            core.setOutput(
+              'eligibility_state',
+              eligible ? 'eligible' : waitingForHumanReview ? 'waiting_for_human_review' :
+                waitingForRequiredChecks ? 'waiting_for_required_checks' :
+                  waitingForAutomatedReview ? 'waiting_for_automated_review' :
+                    waitingForMechanicalExceptionReview ? 'waiting_for_exception_review' : 'blocked'
+            );
             core.setOutput('qualified_approvers', JSON.stringify(Array.from(approvedReviewers).sort()));
             core.setOutput('merge_queue_posture', mergeQueuePosture);
             const shouldFailEligibility = !eligible && !waitingForExternalProgress;
@@ -1850,6 +1887,8 @@ jobs:
                   ? `Delivery hold label active: ${deliveryHoldLabel}.`
                   : waitingForRequiredChecks
                     ? 'Waiting for required status checks to complete.'
+                  : waitingForHumanReview
+                    ? 'Waiting for qualified human review; merge eligibility remains pending.'
                   : waitingForAutomatedReview
                     ? 'Waiting for the required automated review on the current head.'
                     : waitingForMechanicalExceptionReview

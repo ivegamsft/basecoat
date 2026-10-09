@@ -281,11 +281,27 @@ for (const scenario of ['solo-zero-review', 'solo-feature-approved', 'team-zero-
       assert.equal(statuses.at(-1).state, 'failure');
       return;
     }
-    assert.equal(outputs.eligible, ['solo-zero-review', 'solo-feature-approved', 'team-approved', 'production-digest-updated'].includes(scenario) ? 'true' : 'false',
+    const eligibleScenarios = ['solo-zero-review', 'solo-feature-approved', 'team-approved', 'production-digest-updated'];
+    const humanReviewHoldScenarios = ['team-zero-review', 'changes-requested', 'stale-review'];
+    assert.equal(outputs.eligible, eligibleScenarios.includes(scenario) ? 'true' : 'false',
       failures.join('\n'));
-    assert.equal(statuses.at(-1).state, ['solo-zero-review', 'solo-feature-approved', 'team-approved', 'production-digest-updated'].includes(scenario) ? 'success' :
-      ['missing-check', 'untrusted-check', 'changed-head'].includes(scenario) ? 'pending' : 'failure');
-    if (scenario === 'team-zero-review') assert.match(failures.join('\n'), /Insufficient approvals/);
+    assert.equal(outputs.human_review_hold, humanReviewHoldScenarios.includes(scenario) ? 'true' : 'false');
+    assert.equal(outputs.eligibility_state, eligibleScenarios.includes(scenario) ? 'eligible' :
+      humanReviewHoldScenarios.includes(scenario) ? 'waiting_for_human_review' :
+        scenario === 'changed-head' ? 'reevaluation_pending' :
+          ['missing-check', 'untrusted-check'].includes(scenario) ? 'waiting_for_required_checks' : 'blocked');
+    assert.equal(statuses.at(-1).state, eligibleScenarios.includes(scenario) ? 'success' :
+      humanReviewHoldScenarios.includes(scenario) || ['missing-check', 'untrusted-check', 'changed-head'].includes(scenario)
+        ? 'pending' : 'failure');
+    if (scenario === 'team-zero-review') {
+      assert.equal(outputs.required_approvals, '1');
+      assert.match(statuses.at(-1).description, /Waiting for qualified human review/);
+      assert.equal(failures.length, 0);
+    }
+    if (scenario === 'regulated-zero-review') {
+      assert.equal(outputs.human_review_hold, 'false', 'mixed boundary failures must not be classified as a human-only hold');
+      assert.equal(statuses.at(-1).state, 'failure');
+    }
     if (scenario === 'unauthorized-feature') assert.match(failures.join('\n'), /approval|approved/i);
     if (scenario === 'missing-spec') assert.match(failures.join('\n'), /Spec URL/);
     if (scenario === 'production-digest-mismatch') assert.match(failures.join('\n'), /trusted full-workflow digest/);

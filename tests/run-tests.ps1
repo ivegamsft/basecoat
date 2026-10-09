@@ -14,6 +14,11 @@ if ($LASTEXITCODE -ne 0) {
     throw 'PR intake metadata preflight regressions failed.'
 }
 
+Write-Host 'Running merge eligibility policy tests...'
+& node --test (Join-Path $PSScriptRoot 'merge-eligibility-policy-tests.cjs')
+if ($LASTEXITCODE -ne 0) {
+    throw 'Merge eligibility policy regressions failed.'
+}
 $testResultsDir = Join-Path $repoRoot 'test-results'
 
 function Write-FailureLog {
