@@ -75,6 +75,7 @@ Rules:
 | `sprint:` | Sprint planning, execution, or closeout | Now | `@sprint-planner`, `@sprint-closeout-auditor` |
 | `wave:` | Dependency-ordered batch within a sprint (issues and PRs) | Now | `@sprint-planner`, `@parallel-session-coordinator` |
 | `autopilot:` | Continuous oldest-to-newest backlog burndown in dependency-ordered waves, unattended until stopped or blocked | Now | `@backlog-autopilot`, `@parallel-session-coordinator`, `@ship-it-control-loop`, `@delivery-autopilot` |
+| `roadmap:` | Human-kicked, bounded multi-release plan-through-ship; dry-run first and exact-plan approval before execution | Now (dry-run; approval required) | `@sprint-project-mapper`, `@release-impact-advisor`, `@sprint-planner`, `@backlog-autopilot`, `@release-manager` |
 
 ## Feature and Delivery Boundaries
 
@@ -298,6 +299,39 @@ Execution contract:
    (`max_cycles`, `max_retries`, `dry_run`, `stop_conditions`) and advance to
    the next wave. Stop on empty backlog, blocking dependency or policy gate,
    max-cycle exhaustion, repeated deploy-gate failure, or manual stop.
+
+## Roadmap Program Routing (`roadmap:`)
+
+`roadmap:` is the top-level intent for a bounded, multi-release program. It
+composes existing grouping, release classification, planning, wave execution,
+and release assets; it does not replace their gates.
+
+Execution contract:
+
+1. Parse `all`, `label:<name>`, `theme:<text>`, or `issue-set:#N,#M` scope and
+   enforce `max_releases`, `concurrency`, `pace`, and `stop_conditions`. Default
+   to `dry_run=true`; a dry run is read-only.
+2. Use `@sprint-project-mapper` for clustering, split/merge debate, significance,
+   and residuals; use `@release-impact-advisor` for SemVer recommendations; and
+   use `@sprint-planner` to map the bounded release plan.
+3. Present the computed roadmap and digest for one explicit human approval tied
+   to the repository, run ID, and exact plan. Fail closed if approval is absent,
+   stale, or mismatched. Scheduled reconciliation never creates or consumes
+   approval.
+4. After approval, process releases earliest-to-latest with
+   `@backlog-autopilot` in roadmap-order mode, building dependency waves through
+   the existing ship-it control loop. Keep merges serialized and retain all
+   current merge-eligibility, release-freeze, release-gate, and XXL boundaries.
+5. Cut at most one release at a time through the existing release chain and
+   `@release-manager`; verify the scoped release before marking it shipped or
+   advancing. Reconcile the remaining in-scope work after each verified release.
+6. Checkpoint by run ID so bounded runs can resume. Stop on a blocker, unmet
+   dependency, changed plan, failed gate, or exhausted bound; never skip an
+   earlier blocked release.
+
+Until the roadmap runtime and its approval/persistence contracts are available,
+`roadmap:` requests are read-only previews: do not claim milestone writes,
+roadmap-order execution, or release cuts have occurred.
 
 ## GitHub-Native Routing
 
@@ -528,6 +562,7 @@ removal.
 | `close sprint` / `sprint closeout` / `sprint retro` | `sprint:` | `@sprint-closeout-auditor` |
 | `wave` | `wave:` | `@sprint-planner`, `@parallel-session-coordinator` |
 | `burn the backlog` / `work the backlog` / `backlog autopilot` / `continuous delivery loop` | `autopilot:` | `@backlog-autopilot`, `@ship-it-control-loop`, `@delivery-autopilot` |
+| `plan and ship a multi-release program` / `roadmap` | `roadmap:` | `@sprint-project-mapper`, `@release-impact-advisor`, `@sprint-planner`, `@backlog-autopilot`, `@release-manager` |
 
 Burn-down and wave execution include open PRs, not just issues. Decomposition
 hierarchy: **sprint -> wave -> issue -> task**.

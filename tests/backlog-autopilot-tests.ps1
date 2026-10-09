@@ -13,6 +13,7 @@ $paceScript     = Join-Path $repoRoot "scripts\backlog-autopilot\pace-gate.ps1"
 $mergeScript    = Join-Path $repoRoot "scripts\backlog-autopilot\merge-gate.ps1"
 $designDoc      = Join-Path $repoRoot "docs\design\backlog-autopilot-intent.md"
 $guideDoc       = Join-Path $repoRoot "docs\guides\backlog-autopilot-integration.md"
+$prefixGuide    = Join-Path $repoRoot "docs\guides\intent-prefixes.md"
 $canonRouting   = Join-Path $repoRoot "instructions\basecoat-10-core-intent-routing.instructions.md"
 $aliasRouting   = Join-Path $repoRoot "instructions\intent-routing.instructions.md"
 
@@ -35,6 +36,21 @@ Write-Host "backlog-autopilot: routing registration"
 $canonicalText = Get-Content $canonRouting -Raw
 Assert ($canonicalText -match '\|\s*`autopilot:`') "autopilot: prefix row in $(Split-Path $canonRouting -Leaf)"
 Assert ($canonicalText -match 'Backlog Autopilot Routing') "autopilot routing section in $(Split-Path $canonRouting -Leaf)"
+$roadmapGuideText = Get-Content $prefixGuide -Raw
+$roadmapRoutes = @($roadmapGuideText, $canonicalText)
+foreach ($routeText in $roadmapRoutes) {
+    Assert ($routeText -match '\|\s*`roadmap:`') "roadmap: prefix registered"
+    foreach ($agent in @('@sprint-project-mapper', '@release-impact-advisor', '@sprint-planner', '@backlog-autopilot', '@release-manager')) {
+        Assert ($routeText -match [regex]::Escape($agent)) "roadmap route includes $agent"
+    }
+}
+Assert ($canonicalText -match 'dry_run=true') "roadmap execution defaults to dry-run"
+Assert ($canonicalText -match 'exact plan') "roadmap execution requires approval of the exact plan"
+Assert ($canonicalText -match 'max_releases.*concurrency.*pace.*stop_conditions') "roadmap execution declares all run bounds"
+Assert ($canonicalText -match 'Scheduled reconciliation never creates or consumes') "scheduled roadmap reconciliation cannot approve"
+Assert ($canonicalText -match 'earliest-to-latest') "roadmap execution preserves release order"
+Assert ($canonicalText -match 'at most one release at a time') "roadmap release cuts are serialized"
+Assert ($canonicalText -match 'read-only previews') "roadmap runtime absence remains fail-closed"
 $aliasText = Get-Content $aliasRouting -Raw
 Assert ($aliasText -match 'canonicalInstruction:\s*"basecoat-10-core-intent-routing\.instructions\.md"') "intent-routing compatibility alias identifies canonical routing"
 Assert ($aliasText -match 'See `basecoat-10-core-intent-routing\.instructions\.md`') "intent-routing compatibility alias points to canonical routing"

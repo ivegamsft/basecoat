@@ -2,7 +2,7 @@
 
 Generated from the canonical intent vocabulary and asset frontmatter. Do not edit the generated tables directly; run `pwsh scripts/generate-prompt-library.ps1`.
 
-Coverage: 39 intents, 143 skills, and 131 agents.
+Coverage: 40 intents, 143 skills, and 131 agents.
 
 ## Lifecycle prompts
 
@@ -130,6 +130,7 @@ Mutation performed: none
 | `sprint:` | <code>sprint: Sprint planning, execution, or closeout in this repository. Include scope, evidence, and the next safe action.</code> |
 | `wave:` | <code>wave: Dependency-ordered batch within a sprint (issues and PRs) in this repository. Include scope, evidence, and the next safe action.</code> |
 | `autopilot:` | <code>autopilot: Continuous oldest-to-newest backlog burndown in dependency-ordered waves, unattended until stopped or blocked in this repository. Include scope, evidence, and the next safe action.</code> |
+| `roadmap:` | <code>roadmap: Human-kicked, bounded multi-release plan-through-ship; dry-run first and exact-plan approval before execution in this repository. Include scope, evidence, and the next safe action.</code> |
 
 ## Skill prompts
 

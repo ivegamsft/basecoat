@@ -52,15 +52,21 @@ fleet, wave, and "cut a release".
 | `sprint:` | Sprint planning, execution, or closeout | **Now** | `@sprint-planner`, `@sprint-closeout-auditor` |
 | `wave:` | Dependency-ordered batch within a sprint (issues and PRs) | **Now** | `@sprint-planner`, `@parallel-session-coordinator` |
 | `autopilot:` | Continuous oldest-to-newest backlog burndown in dependency-ordered waves, unattended until stopped or blocked | **Now** | `@backlog-autopilot`, `@parallel-session-coordinator`, `@ship-it-control-loop`, `@delivery-autopilot` |
+| `roadmap:` | Human-kicked, bounded multi-release program; dry-run first and exact-plan approval before execution | **Now** — dry-run; approval required | `@sprint-project-mapper`, `@release-impact-advisor`, `@sprint-planner`, `@backlog-autopilot`, `@release-manager` |
 | `ship-it:` | Explicitly request governed delivery of one goal through the existing ship-it control plane; routing is not a gate waiver | **Now** | `ship-it` skill, `@ship-it-orchestrator` |
 | `spec-2-prod:` | Explicitly request governed spec-to-production delivery through the existing ship-it control plane; routing is not a gate waiver | **Now** | `ship-it` skill, `@ship-it-orchestrator` |
 | `learn:` | Opt-in extract or consult of recurring CI/workflow signatures in `docs/reference/repo-pathways.md`. Not a post-merge daemon | **Now** | `repo-learning` skill, `@rca`, `@self-healing-ci`, `@ci-failure-escalation` |
 
 ### Prefix disambiguation
 
+`roadmap:` currently routes to a read-only preview proposal. Its future execution
+contract does not authorize milestone writes, approval consumption, roadmap-order
+execution, release cuts, or completion of the roadmap parent issue.
+
 | Cluster | Use this | Not that |
 |---|---|---|
-| Backlog batch | `fleet:` whole-repo sprint/backlog operations; `sprint:` one sprint plan/execute/closeout; `wave:` one dependency-ordered batch inside a sprint; `autopilot:` unattended oldest-first burndown | Do not use `fleet:` when you only want one governed delivery |
+| Backlog batch | `fleet:` whole-repo sprint/backlog operations; `sprint:` one sprint plan/execute/closeout; `wave:` one dependency-ordered batch inside a sprint; `autopilot:` unattended oldest-first burndown; `roadmap:` a bounded, multi-release program | Do not use `roadmap:` for a single batch or ordinary oldest-first burndown |
+| Roadmap release program | `roadmap:` computes a dry-run plan, requires approval of its exact digest, then orders releases earliest-to-latest through existing merge and release gates | Do not treat roadmap approval as approval to bypass per-PR merge or release gates |
 | GitHub Actions | `workflow:` failing run triage and repair; `actions:` workflow files, runs, and policy | Do not use `actions:` for a red job that needs RCA |
 | Infra staged | `azure:` Azure-scoped preflight; `infra:` IaC/network/RBAC; `deploy:` staged prepare-validate-deploy | Do not use `deploy:` for a design-only Azure question |
 | Reliability | `bug:` defect/regression; `outage:` service down; `rca:` read-only root cause of a known failure; `investigate:` read-only diagnosis of an open-ended concern | Do not use `outage:` for a non-user-facing test failure; do not use `investigate:` when you want the fix applied |
@@ -80,7 +86,7 @@ for selecting chain patterns.
 | Governance | `audit:`, `security:`, `chore:` | findings, policy action, risk controls |
 | GitHub Operations | `workflow:`, `actions:`, `pr:`, `issue:`, `portfolio:`, `release:`, `version:` | run triage, repo hygiene, release/version decisions |
 | Planning | `plan:`, `spike:`, `sprint:`, `wave:` | prioritized backlog, design notes, decision doc |
-| Continuous delivery | `autopilot:`, `ship-it:`, `spec-2-prod:` | unattended multi-wave burndown, or explicitly request one governed delivery |
+| Continuous delivery | `autopilot:`, `roadmap:`, `ship-it:`, `spec-2-prod:` | unattended multi-wave burndown, bounded multi-release program, or explicitly request one governed delivery |
 | Packetization | `optimize:` | normalized execution packet and optional execution chain |
 | Quality | `test:`, `docs:`, `ui:`, `ux:`, `ia:`, `design:` | tests, documentation, or design artifacts |
 | Knowledge capture | `chronicle:`, `learn:` | story/update packet, follow-up issue bundle, optional memory suggestions, or opt-in repo pathway extract/consult |
@@ -451,6 +457,7 @@ than delegating to `@branch-hygiene-sweeper`, and orchestrates only the
 | `close sprint` / `sprint closeout` / `sprint retro` | `sprint:` | `@sprint-closeout-auditor` |
 | `wave` | `wave:` | `@sprint-planner`, `@parallel-session-coordinator` |
 | `burn the backlog` / `work the backlog` / `backlog autopilot` / `continuous delivery loop` | `autopilot:` | `@backlog-autopilot`, `@ship-it-control-loop`, `@delivery-autopilot` |
+| `plan and ship a multi-release program` / `roadmap` | `roadmap:` | `@sprint-project-mapper`, `@release-impact-advisor`, `@sprint-planner`, `@backlog-autopilot`, `@release-manager` |
 
 Burn-down and wave execution include open PRs, not just issues. Decomposition
 hierarchy: **sprint -> wave -> issue -> task**.
