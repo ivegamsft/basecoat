@@ -1,9 +1,9 @@
 # Latest Release Notes
 
-## 4.6.3 - 2026-10-08
+## 4.6.4 - 2026-10-08
 
 ### Fixed
 
-- Canonicalize shared-guidance text hashes across LF and CRLF checkouts and
-  migrate an existing raw-byte lock only when the installed content is
-  canonically identical to the exact planned BaseCoat payload (#3608).
+- Restrict the Adhesion guidance-lock migration to the exact approved v0.7.1
+  predecessor path and SHA-256; case variants, unknown hashes, other paths, and
+  modified content remain fail-closed (#3677, #3678).
