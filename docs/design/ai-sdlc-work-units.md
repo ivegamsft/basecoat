@@ -93,10 +93,38 @@ The current routing disallows dual authoritative prefixes. Do not use
 Any future parallelism option must be orthogonal to outcome, preserve separate
 branch/worktree lanes, and keep dependent and release-affecting merges serialized.
 
+## Canonical naming and decision matrix
+
+This matrix owns naming/status decisions within this proposal. The supported
+routes remain defined by [the intent guide](../guides/intent-prefixes.md).
+The contracts and lifecycle vocabulary below elaborate outcomes, not additional
+aliases. Candidate names are not preferred or supported merely because their
+design documents have merged; distinctness and adoption remain separate.
+
+| Concept | Supported route today | Candidate / alternative | Distinct boundary to establish | Decision status / owner |
+| --- | --- | --- | --- | --- |
+| Preparation | `plan:`, `issue:`, `portfolio:` | `prepare:` | Bounded evidence/authority packet, not approval | Unresolved distinctness; #3626 |
+| Specification | PRD/spec synthesis; `design:` debate | `spec:` / conceptual verb specify | Testable specification, not approval or assignment | No token selected; #3627 |
+| Implementation | `feature:` | `build:` / `implement:` | Approved implementation versus compile-only artifact production | Alternative unresolved; #3628 |
+| Review | `audit:` and advisory review | `review:` | Findings/disposition, not an APPROVED GitHub review | Distinctness unresolved; #3629 |
+| Delivery | `ship-it:`, `spec-2-prod:` | `deliver:` | Verified authorized end-to-end target outcome | Rename/alias/new-route decision unresolved; #3630 |
+| Publication | `release:`, staged `deploy:` | `ship:` / `publish:` | Immutable publication versus deployment and later runtime verification | Alternative/distinctness unresolved; #3631 |
+| Verification | `test:`, `audit:`, release checks | `verify:` | Fresh revision/target evidence without automatic correction | Concept only; no adoption decision |
+| Continuation | Existing bounded control loops | `resume:` | Current authority and checkpoint revalidation | Concept only; no adoption decision |
+| Reconciliation | Drift/governance assessment | `reconcile:` | Report differences; writes need separate authority | Concept only; no adoption decision |
+| Learning | `learn:` | No new token | Existing opt-in durable learning contract | Supported; retain current route |
+
+Preferred policy is reuse of existing routes unless a distinct contract is
+demonstrated, not a preferred candidate spelling. Do not create another issue
+for an alternative already owned by #3626-#3631. Review is assessment;
+approval is an authenticated decision. Publish is release availability;
+verify is evidence for an exact target and observation window.
+
 ## Proposed intent contracts
 
 Each issue is a design proposal, not a mandate to add another prefix.
-Naming overlap must be resolved before routing implementation.
+Naming/status decisions are centralized in the matrix above; overlap must be
+resolved before routing implementation.
 
 | Proposal | Requested outcome and completion unit | Default boundary | Existing overlap / open decision | Issue |
 | --- | --- | --- | --- | --- |
@@ -215,7 +243,8 @@ Do not create aliases solely to replace one ambiguous word with another.
 ### Keyword index
 
 These are documentation/search keywords, not parser tokens, routing aliases
-or delivery directives.
+or delivery directives. Use the canonical naming/decision matrix for status;
+this index cannot select a preferred name or register a synonym.
 
 | Search concept | Keywords |
 | --- | --- |
