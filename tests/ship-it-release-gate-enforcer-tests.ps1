@@ -586,12 +586,19 @@ foreach ($workflow in @($workflowContent, $packageWorkflowContent)) {
     'BASECOAT_APPROVAL_RECEIPT_BASE64',
     'preapproval-evidence.cjs revalidate',
     'Pre-approval release validation is limited to the current target repository.',
+    '$targetRepo = if ([string]::IsNullOrWhiteSpace($env:TARGET_REPO))',
+    'if ($targetRepo -ine $env:GITHUB_REPOSITORY)',
+    '-TargetRepo $targetRepo',
     'actions: read',
     'issues: read'
   )) {
     if ($workflow -notmatch [regex]::Escape($requiredPreApprovalText)) {
       throw "Both release gate workflows must revalidate supplied pre-approval before gating: $requiredPreApprovalText"
     }
+  }
+  if ($workflow -match [regex]::Escape('if ($env:TARGET_REPO -ine $env:GITHUB_REPOSITORY)') -or
+      $workflow -match [regex]::Escape('-TargetRepo $env:TARGET_REPO')) {
+    throw "Release gate pre-approval must use the normalized target repository consistently."
   }
 }
 if ($workflowContent -notmatch "workflow_dispatch:") {

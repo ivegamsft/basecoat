@@ -156,12 +156,17 @@ jobs:
           if ($receiptTokens.Count -gt 1) {
             throw "Promotion context contains duplicate preapproval_receipt values."
           }
+          $targetRepo = if ([string]::IsNullOrWhiteSpace($env:TARGET_REPO)) {
+            $env:GITHUB_REPOSITORY
+          } else {
+            $env:TARGET_REPO
+          }
           if ($receiptTokens.Count -eq 1) {
             $receipt = $receiptTokens[0].Substring("preapproval_receipt=".Length)
             if ([string]::IsNullOrWhiteSpace($receipt)) {
               throw "Pre-approved release boundary requires a non-empty preapproval_receipt."
             }
-            if ($env:TARGET_REPO -ine $env:GITHUB_REPOSITORY) {
+            if ($targetRepo -ine $env:GITHUB_REPOSITORY) {
               throw "Pre-approval release validation is limited to the current target repository."
             }
             $env:BASECOAT_APPROVAL_RECEIPT_BASE64 = $receipt
@@ -175,7 +180,7 @@ jobs:
           }
 
           ./.github/base-coat/scripts/ship-it/invoke-release-gate.ps1 `
-            -TargetRepo $env:TARGET_REPO `
+            -TargetRepo $targetRepo `
             -TargetBranch $env:TARGET_BRANCH `
             -RiskBand $env:RISK_BAND `
             -PromotionStage $env:PROMOTION_STAGE `
