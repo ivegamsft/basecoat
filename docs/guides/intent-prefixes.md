@@ -17,7 +17,7 @@ fleet, wave, and "cut a release".
 | Prefix | Means | Timing | Routes to |
 |---|---|---|---|
 | `bug:` | Defect, regression, broken behavior | **Now** | `@code-review`, `@self-healing-ci` |
-| `feature:` | New capability or enhancement | **Backlog** | `@sprint-planner`, `@solution-architect` |
+| `feature:` | New capability or enhancement | **Now if standalone; backlog if bulleted/deferred** | `@sprint-planner`, `@solution-architect` |
 | `audit:` | Review, assess, validate — no changes | **Now, read-only** | `@security-analyst`, `@config-auditor` |
 | `investigate:` | Diagnose an open-ended concern and report findings — no changes | **Now, read-only** | `@rca`, `@config-auditor`, `@performance-analyst` |
 | `plan:` | Sprint or project planning | **Now, no implementation** | `@sprint-planner`, `@product-manager` |
@@ -75,7 +75,7 @@ for selecting chain patterns.
 
 | Family | Prefixes | Default output type |
 |---|---|---|
-| Delivery | `feature:`, `refactor:`, `deploy:`, `architect:` | implementation plan, code changes, or staged deployment |
+| Implementation and infrastructure | `feature:`, `refactor:`, `deploy:`, `architect:` | implementation plan, code changes, or separately authorized staged deployment; family membership does not grant delivery consent |
 | Reliability | `bug:`, `perf:`, `outage:`, `rca:`, `investigate:` | fix, mitigation, incident analysis, or root-cause report |
 | Governance | `audit:`, `security:`, `chore:` | findings, policy action, risk controls |
 | GitHub Operations | `workflow:`, `actions:`, `pr:`, `issue:`, `portfolio:`, `release:`, `version:` | run triage, repo hygiene, release/version decisions |
@@ -178,11 +178,23 @@ These words in a message override the default timing of any prefix:
 
 | Word | Effect |
 |---|---|
-| `now`, `immediately`, `urgent` | Promote to immediate, even `feature:` |
+| `now`, `immediately`, `urgent` | Execute a standalone request now after its gates; a bullet remains triage unless separately directed |
 | `later`, `backlog`, `next sprint` | Defer, even `bug:` |
 | `no changes`, `read-only` | Analysis only, suppress all implementation |
 | `log it`, `file an issue` | Log and stop; do not implement |
 | `just document` | Documentation output only; no code changes |
+
+Conflicting immediate and defer/stop modifiers block rather than select one.
+The authoritative contract is
+[Intent Prefix Routing](https://github.com/IBuySpy-Shared/basecoat/blob/main/instructions/basecoat-10-core-intent-routing.instructions.md).
+
+| Example | Deterministic outcome |
+| --- | --- |
+| `feature: add an export` | Log, plan, implement approved scope and validate now; draft handoff only |
+| `- feature: add an export` | Triage/log backlog only |
+| `feature: add an export next sprint` | Defer; no implementation |
+| `feature: add an export now` | Same gated standalone implementation; no merge/deploy consent |
+| `feature: add an export now, no changes` | Block conflicting directions |
 
 ---
 

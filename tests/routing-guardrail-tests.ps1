@@ -24,6 +24,23 @@ $canonicalRoutingFile = Join-Path $repoRoot 'instructions\basecoat-10-core-inten
 $aliasRoutingFile = Join-Path $repoRoot 'instructions\intent-routing.instructions.md'
 $routingFile = $canonicalRoutingFile
 
+foreach ($timingPath in @($canonicalRoutingFile, (Join-Path $repoRoot 'docs\guides\intent-prefixes.md'))) {
+    $timingContent = Get-Content $timingPath -Raw
+    $featureRow = [regex]::Match($timingContent, '(?m)^\| `feature:` \|.*$').Value
+    if ($featureRow -notmatch '(?i)now if standalone; backlog if bulleted/deferred') {
+        throw "$timingPath must distinguish standalone feature work from bulleted/deferred backlog."
+    }
+    if ($timingContent -match 'Promote any prefix to immediate action') {
+        throw "$timingPath must not override bullet triage with blanket timing promotion."
+    }
+}
+$timingGuide = Get-Content (Join-Path $repoRoot 'docs\guides\intent-prefixes.md') -Raw
+if ($timingGuide -match '(?m)^\| Delivery \| `feature:`' -or
+    $timingGuide -notmatch 'Conflicting immediate and defer/stop modifiers block' -or
+    $timingGuide -notmatch 'family membership does not grant delivery consent') {
+    throw 'Feature timing/family guidance must not imply delivery authority or choose conflicting modifiers.'
+}
+
 function Get-FrontmatterValue {
     param(
         [Parameter(Mandatory = $true)]

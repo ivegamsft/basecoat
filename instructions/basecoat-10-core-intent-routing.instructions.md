@@ -19,7 +19,9 @@ Rules:
 1. Parse the prefix first.
 2. A recognized prefix overrides any other reading of the request.
 3. `bug:` routes immediately to the defect workflow.
-4. `feature:` routes immediately to the implementation/design workflow.
+4. Standalone `feature:` routes immediately to design/implementation after
+   LOG-FIRST and plan-first gates; bulleted or explicitly deferred items are
+   triage/backlog only. Timing never grants delivery consent.
 5. Any agent or pipeline that ignores a recognized prefix is in violation of
    this contract.
 6. Before any implementation begins for a recognized implementation prefix
@@ -35,7 +37,7 @@ Rules:
 | Prefix | Intent | Default timing | Primary agents |
 |---|---|---|---|
 | `bug:` | Defect, regression, broken behavior | Now | `@code-review`, `@self-healing-ci`, `@config-auditor` |
-| `feature:` | New capability or enhancement | Later | `@sprint-planner`, `@solution-architect` |
+| `feature:` | New capability or enhancement | Now if standalone; backlog if bulleted/deferred | `@sprint-planner`, `@solution-architect` |
 | `ship-it:` | Explicit governed delivery request | Now | `ship-it` skill, `@ship-it-orchestrator` |
 | `spec-2-prod:` | Explicit governed spec-to-production request | Now | `ship-it` skill, `@ship-it-orchestrator` |
 | `audit:` | Review, assess, validate — no changes | Now | `@security-analyst`, `@config-auditor`, `@github-security-posture` |
@@ -148,7 +150,7 @@ These words override the default timing of a prefix:
 
 | Modifier | Effect |
 |---|---|
-| `now`, `immediately`, `urgent` | Promote any prefix to immediate action |
+| `now`, `immediately`, `urgent` | Execute standalone work now after its gates; bulleted items remain triage unless separately directed |
 | `later`, `backlog`, `next sprint` | Defer any prefix, even `bug:` |
 | `no changes`, `read-only`, `analysis only` | Suppress implementation even for `bug:` |
 | `log it`, `file an issue` | Log only; do not implement |
