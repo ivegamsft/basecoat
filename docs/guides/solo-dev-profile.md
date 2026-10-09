@@ -98,6 +98,13 @@ accountable maintainer may author and merge after required checks and the
 approval on its current head. This autonomous path applies only to `solo-dev`;
 team and regulated profiles retain their independent-review requirements.
 
+Zero routine PR review is not zero authorization. Issue approval authorizes
+its approved implementation scope; feature-origin delivery separately requires
+current delivery consent. Actions execution approval only permits a held
+workflow to run. None substitutes for source/spec authority, exact-head
+eligibility, protected integration checks, or applicable production controls.
+Missing evidence remains a hold even for an XS through XL change.
+
 Explicit policy-exception, security-incident, and incident boundaries remain
 human-controlled. They are exceptions to the normal feature-delivery size
 policy, not routine review gates.
@@ -446,13 +453,19 @@ Open a non-draft test PR and confirm:
 2. auto-merge remains pending while any required check is missing or failing
 3. an XXL test PR remains blocked until a qualified reviewer approves its
    current head
-4. a linked issue with a supplied spec reference and qualified `/approve` or
-   `/spec-2-prod` directive assigns the coding agent
-5. the coding agent opens a ready implementation PR with a closing reference
-   to the approved issue
-6. production deployment continues after a validated merge without a separate
-   environment-review wait
-7. no run or command uses an administrator bypass
+4. the issue-side qualified `/approve` path validates its supplied spec and
+   attempts coding-agent assignment; verify the persisted assignee and actual
+   execution evidence, not just `approved` / `copilot-agent` labels
+5. `/spec-2-prod` routes delivery for an already approved source; it does not
+   approve the issue or serve as an issue-assignment directive
+6. the coding agent opens its draft implementation handoff; ready promotion
+   requires completed source acceptance, current-head validation and delivery
+   authority. Missing completion handoff is tracked in #3669, not proven by a
+   draft PR or an unrelated successful workflow
+7. production deployment follows its actual authorized release path and
+   configured environment policy; validated merge alone does not establish
+   tag creation, publication or production verification
+8. no run or command uses an administrator bypass
 
 ## Rollback
 
