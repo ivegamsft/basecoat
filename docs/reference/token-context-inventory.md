@@ -2,7 +2,7 @@
 
 Generated as a standalone inventory (no edits to agent/skill/instruction files).
 
-- Generated: 2026-10-09 11:09:21 +0000
+- Generated: 2026-10-09 17:58:45 +0000
 - Estimation method: `approx_tokens = round(word_count × 1.35)` (same heuristic used in `scripts/validate-basecoat.ps1`).
 - Scope: `agents/*.agent.md`, `skills/*/SKILL.md`, `instructions/*.instructions.md`.
 
@@ -11,9 +11,9 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | Type | Count | Total Words | Total Approx Tokens | Avg Approx Tokens |
 |---|---:|---:|---:|---:|
 | Agent | 131 | 40459 | 54622 | 417 |
-| Skill | 143 | 34160 | 46115 | 322 |
-| Instruction | 94 | 52306 | 70613 | 751 |
-| **All** | 368 | 126925 | 171350 | 466 |
+| Skill | 143 | 34249 | 46235 | 323 |
+| Instruction | 94 | 52593 | 71000 | 755 |
+| **All** | 368 | 127301 | 171857 | 467 |
 
 ## Agents
 
@@ -160,6 +160,7 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | repo-cleanup | `skills/repo-cleanup/SKILL.md` | 369 | 498 |
 | ship-it | `skills/ship-it/SKILL.md` | 369 | 498 |
 | rca | `skills/rca/SKILL.md` | 368 | 497 |
+| merge-conflict-mediator | `skills/merge-conflict-mediator/SKILL.md` | 366 | 494 |
 | yagni-analysis | `skills/yagni-analysis/SKILL.md` | 366 | 494 |
 | copilot-review-triage | `skills/copilot-review-triage/SKILL.md` | 365 | 493 |
 | workflow-parallelization | `skills/workflow-parallelization/SKILL.md` | 363 | 490 |
@@ -194,7 +195,6 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | devops-audit | `skills/devops-audit/SKILL.md` | 287 | 387 |
 | failure-pattern-process | `skills/failure-pattern-process/SKILL.md` | 285 | 385 |
 | documentation | `skills/documentation/SKILL.md` | 278 | 375 |
-| merge-conflict-mediator | `skills/merge-conflict-mediator/SKILL.md` | 277 | 374 |
 | ship-it-control-loop | `skills/ship-it-control-loop/SKILL.md` | 274 | 370 |
 | api-security | `skills/api-security/SKILL.md` | 273 | 369 |
 | dependency-blocker-monitoring | `skills/dependency-blocker-monitoring/SKILL.md` | 269 | 363 |
@@ -303,7 +303,7 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 
 | Name | Location | Words | Approx Tokens |
 |---|---|---:|---:|
-| basecoat-10-core-intent-routing | `instructions/basecoat-10-core-intent-routing.instructions.md` | 3968 | 5357 |
+| basecoat-10-core-intent-routing | `instructions/basecoat-10-core-intent-routing.instructions.md` | 4255 | 5744 |
 | basecoat-50-security-entra-oidc-user-auth | `instructions/basecoat-50-security-entra-oidc-user-auth.instructions.md` | 1604 | 2165 |
 | basecoat-60-workflow-multi-repo-orchestration | `instructions/basecoat-60-workflow-multi-repo-orchestration.instructions.md` | 1324 | 1787 |
 | basecoat-20-lang-ruby-on-rails | `instructions/basecoat-20-lang-ruby-on-rails.instructions.md` | 1233 | 1665 |
