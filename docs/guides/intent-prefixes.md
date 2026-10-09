@@ -546,6 +546,37 @@ choose either `feature:` or `pr:`.
 
 ## Fleet routing
 
+### Scope and execution-mode decision table
+
+Choose the explicit prefix first; natural-language continuation retains the
+legacy normalization below. These are supported routing boundaries, not new
+aliases or permission to merge, deploy, or assign an implementation agent.
+
+| Request | Scope / supported path | Mode and stopping boundary |
+|---|---|---|
+| `sprint: plan the next sprint` | Calendar priority/capacity review; sprint planner first | Plan only; execution requires the plan confirmation described above |
+| `sprint: execute the approved sprint` | Selected sprint scope | Bounded sprint work; report incomplete outcomes rather than infer delivery |
+| `wave: execute this batch` | Explicit dependency-ordered batch | One bounded batch; checkpoint remaining work, no automatic next batch |
+| `fleet: close and plan the sprint` | Sprint lifecycle bundle; coordinator and latest-main preflight | One lifecycle pass unless continuation was requested |
+| `plan and execute the next wave` | Legacy `fleet:` normalization; same coordinator preflight | Bounded control-loop continuation, not a new `wave:` alias |
+| `autopilot: work the backlog in waves` | Authorized backlog; prerequisite ordering before age within ready work | Multiple waves with explicit scope, retry/cycle budgets and stop conditions |
+| `ship-it: continue this delivery` | Governed delivery scope and live authority evidence | Bounded delivery loop; topology is not delivery consent |
+
+`fleet:` describes the lifecycle bundle; continuation language selects its
+bounded loop mode. `wave:` explicitly selects one batch. Thus the legacy phrase
+"next wave" and explicit `wave:` intentionally have different scope; changing
+that normalization is a separate routing proposal, not a documentation fix.
+
+Continuing mode carries forward its plan and checkpoint instead of repeating
+full sprint planning each turn. Before fan-out, validate repository scope,
+latest main, exact branch/worktree isolation and coordinator preflight.
+Record the batch members, verified prerequisite edges, cycle/retry limits,
+stop conditions and merge owner. A blocked branch pauses its dependents;
+independent ready branches continue only within the authorized scope and bounds.
+Stop when that scope is complete, no ready action remains, a scope-wide policy
+gate prevents continuation, a bound expires, or the user stops execution.
+Do not invent dependency edges or infer that a blocked issue ends every branch.
+
 `fleet:` is the shortcut intent for a sprint-execution batch that combines closeout, planning, oldest-first issue triage, PR/build auditing, and branch cleanup. It must start with the parallel-session coordinator and a latest-main sync preflight before fan-out.
 
 ### Normalized examples
