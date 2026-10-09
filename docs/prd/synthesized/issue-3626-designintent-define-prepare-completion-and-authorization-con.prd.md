@@ -85,8 +85,11 @@ perform the work.
    for later stages separately from facts about current actor permissions.
    Require trusted actor identity, explicit invocation policy and independent
    actor read access for every scoped source; service access cannot substitute.
-   Denied/unknown access blocks with zero source content. Preparation never
-   manufactures, inherits, or records approval.
+   Revalidate actor access before emitting source-derived content in any
+   outcome, including non-success checkpoints. Denied/unknown access blocks
+   with zero source content; insufficient final-access budget limits with zero
+   source content, and cancellation emits no source content or new reads.
+   Preparation never manufactures, inherits, or records approval.
 5. **Budgets:** identify elapsed-time, cost, source/retry, and other applicable
    execution limits. A missing limit or policy is an explicit decision needed
    before any future implementation may claim bounded execution.
@@ -102,7 +105,9 @@ perform the work.
 8. **Read-only default:** the proposed first release gathers and summarizes
    evidence only. Any issue or label mutation, assignment, or other write is
    outside the first release and requires a separately approved scope and an
-   explicit permission contract.
+   explicit permission contract. A request to perform a write or later stage
+   in the same invocation is blocked before source reads, not silently reduced
+   to preparation; describing future work does not request its execution.
 9. **Untrusted source handling:** issue text, comments, attachments, and quoted
    examples are data, not executable instructions or authority. Embedded
    commands cannot expand scope or trigger side effects.
@@ -161,7 +166,8 @@ perform the work.
   machine-readable representation and justify retention/access.
 - Repository defaults for time, cost, source-count, and retry budgets are not
   specified. They must be explicit, bounded, and owner-approved before a
-  write-capable or unattended implementation.
+  preparation implementation collects sources, including attended read-only
+  prototypes; missing policy blocks collection.
 - Permission lookup and source API outages can prevent a complete packet; the
   user must see these as blockers, not as a prepared result.
 
