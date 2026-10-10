@@ -106,6 +106,14 @@ if ($content -notmatch 'IBuySpy-Shared/basecoat-sheen.+ivegamsft/sheen') {
 
 $prValidationPath = Join-Path $repoRoot '.github\workflows\pr-validation.yml'
 $prValidation = Get-Content $prValidationPath -Raw
+foreach ($specName in @('API', 'MCP')) {
+    $rule = @($content -split '\r?\n' | Where-Object {
+        $_.Contains("}{${specName} specification (internal contract source)}g;")
+    })
+    if ($rule.Count -ne 1 -or -not $prValidation.Contains($rule[0].Trim())) {
+        throw "Public simulation and production must share the exact $specName specification redaction rule"
+    }
+}
 if ($prValidation -notmatch "git grep -inI -E 'ibuyspy-shared\|ibuyspy-dev\|@ibuyspy'") {
     throw 'pr-validation.yml must reject internal organization and account identifiers in the simulated public payload'
 }
@@ -214,6 +222,11 @@ try {
     Set-Content -Path (Join-Path $scratchRoot 'instructions\basecoat-10-core-intent-routing.instructions.md') `
         -Value 'Delegate to IBuySpy-Shared/basecoat-sheen for design work.'
     Set-Content -Path (Join-Path $scratchRoot 'docs\public.md') -Value 'Install from https://github.com/IBuySpy-Shared/basecoat.'
+    Set-Content -Path (Join-Path $scratchRoot 'README.md') -Value @(
+        '[API specification](https://github.com/IBuySpy-Shared/basecoat-api-spec)',
+        '[MCP specification](https://github.com/IBuySpy-Shared/basecoat-mcp-spec)',
+        'These are initial directions, not approved contracts.'
+    )
     Set-Content -Path (Join-Path $scratchRoot 'SPRINT-99-EXECUTION-SUMMARY.md') -Value 'Internal summary'
     Set-Content -Path (Join-Path $scratchRoot 'CHANGELOG.md') -Value @(
         'IBuySpy-Shared repos received this feature.',
@@ -297,6 +310,20 @@ try {
     & $bashPath '.test-sanitize-identifiers.sh'
     if ($LASTEXITCODE -ne 0) {
         throw "Identifier sanitization script failed with exit code $LASTEXITCODE"
+    }
+    $publicReadme = Get-Content 'README.md' -Raw
+    foreach ($specName in @('API', 'MCP')) {
+        if (-not $publicReadme.Contains("$specName specification (internal contract source)")) {
+            throw "Public README must describe the internal $specName contract source without inventing a public link"
+        }
+    }
+    if ($publicReadme -match 'IBuySpy-Shared|ivegamsft/basecoat-(api|mcp)-spec' -or
+        -not $publicReadme.Contains('initial directions, not approved contracts')) {
+        throw 'Public README redaction must preserve proposal status and omit private or invented contract links'
+    }
+    & $bashPath '.test-sanitize-identifiers.sh'
+    if ($LASTEXITCODE -ne 0 -or (Get-Content 'README.md' -Raw) -ne $publicReadme) {
+        throw 'Public README specification-link redaction must be idempotent'
     }
 
     $mirroredWorkflows = @(git ls-files -- '.github/workflows/*')

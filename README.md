@@ -319,6 +319,26 @@ Full reference: [`docs/reference/governance.md`](docs/reference/governance.md) Â
 
 ---
 
+## Platform interfaces
+
+BaseCoat is the controls source for the AI-SDLC governance family. Contracts are
+defined in the family's internal [API specification](https://github.com/IBuySpy-Shared/basecoat-api-spec)
+and [MCP specification](https://github.com/IBuySpy-Shared/basecoat-mcp-spec) repositories;
+shared IDs and schemas come from Binder. BaseCoat stays Git-native: releases,
+`sync.ps1`/`sync.sh`, and the files in this repository remain the source of truth,
+and the API is a read adapter over them rather than a separate service of record.
+
+| Interface | Direction |
+| --- | --- |
+| Authorization | Controls are readable by any family product and consumer; publishing or changing controls follows the PR-only governance above. Access to customer repos stays with the caller's identity. |
+| API | Controls and policy catalog: versioned agents, skills, instructions, guardrails, and release metadata, served through an adapter over Git releases. |
+| MCP | Read-only: `list_controls`, `get_control`, `explain_control`. Control changes are proposed as PRs, not executed through MCP. |
+| Integrated graph | Contributes control and release-version nodes; Batchbook records which repos have adopted which versions. |
+
+These are initial directions, not approved contracts.
+
+---
+
 ## Repository Layout
 
 ```text

@@ -498,6 +498,8 @@ jobs:
               echo "$TARGETS" | while IFS= read -r f; do
                 [[ -z "$f" ]] && continue
                 perl -pi -e '
+                  s{\[API specification\]\(https://github\.com/IBuySpy-Shared/basecoat-api-spec\)}{API specification (internal contract source)}g;
+                  s{\[MCP specification\]\(https://github\.com/IBuySpy-Shared/basecoat-mcp-spec\)}{MCP specification (internal contract source)}g;
                   s{https://github\.com/IBuySpy-Shared/basecoat/issues/[0-9]+}{internal source issue}g;
                   s{https://github\.com/IBuySpy-Shared/basecoat/pull/[0-9]+}{internal source pull request}g;
                   s{https://github\.com/IBuySpy-Shared/basecoat/actions/runs/[0-9]+(?:/job/[0-9]+)?}{internal source workflow run}g;
