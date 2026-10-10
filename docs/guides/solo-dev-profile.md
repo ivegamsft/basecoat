@@ -182,6 +182,108 @@ pwsh scripts/bootstrap.ps1 `
 Use the downstream workflow installer rather than writing another auto-merge
 implementation:
 
+#### Provision labels before enabling the gates
+
+Content sync and workflow installation do not provision repository labels.
+The shell onboarding script creates memory labels only. With an account that
+can manage issues in the **consumer** repository, run this PowerShell example
+before activating the ruleset or issuing `/approve`. Replace `OWNER/REPO`;
+do not run it against the BaseCoat source repository.
+
+Names and meanings follow [Label Taxonomy](../reference/label-taxonomy.md).
+Size colors/descriptions match the source `pr-size-labeler.yml`; other colors
+below are presentation defaults, not authorization or priority evidence.
+Existing labels and their customized colors/descriptions are preserved.
+
+```powershell
+$repo = 'OWNER/REPO'
+if ($repo -eq 'OWNER/REPO') { throw 'Set the consumer repository first.' }
+$labels = @(
+    @('priority:critical', 'b60205', 'Service down, data loss, active security breach, CVE'),
+    @('priority:high', 'd93f0b', 'Major feature broken, significant user impact, no workaround'),
+    @('priority:medium', 'fbca04', 'Minor feature issue, workaround exists, moderate user impact'),
+    @('priority:low', 'd4c5f9', 'Cosmetic issue, nice-to-have enhancement, minor improvement'),
+    @('size:XS', '0e8a16', 'Small PR (<=20 changed lines)'),
+    @('size:S', '1d76db', 'Small-medium PR (<=100 changed lines)'),
+    @('size:M', 'fbca04', 'Medium PR (<=300 changed lines)'),
+    @('size:L', 'd93f0b', 'Large PR (<=800 changed lines)'),
+    @('size:XL', 'b60205', 'Extra large PR (801-2000 changed lines)'),
+    @('size:XXL', '5319e7', 'XXL PR (>2000 changed lines; qualified approval required)'),
+    @('approved', 'bfdadc', 'Issue approved for implementation by a qualified stakeholder'),
+    @('copilot-agent', 'e99695', 'Coding-agent assignment workflow marker; verify assignee'),
+    @('needs-triage', 'ededed', 'Issue needs type and priority triage'),
+    @('needs-info', 'ededed', 'Additional details required before implementation'),
+    @('delivery-hold', 'b60205', 'PR delivery paused by the hold owner'),
+    @('bug', 'd73a4a', 'Unexpected behavior, error, regression or defect'),
+    @('enhancement', 'a2eeef', 'New feature or capability improvement'),
+    @('documentation', '0075ca', 'Missing or incorrect documentation'),
+    @('question', 'd876e3', 'Question or clarification request'),
+    @('chore', 'ededed', 'Maintenance, refactoring or housekeeping'),
+    @('security', 'b60205', 'Security concern or hardening work')
+)
+$existing = @(gh api --paginate "repos/$repo/labels?per_page=100" --jq '.[].name')
+if ($LASTEXITCODE -ne 0) { throw 'Cannot read consumer labels; check repository access.' }
+foreach ($label in $labels) {
+    if ($existing -contains $label[0]) { continue }
+    gh label create $label[0] --repo $repo --color $label[1] --description $label[2]
+    if ($LASTEXITCODE -ne 0) { throw "Failed to create label $($label[0]); resolve before continuing." }
+}
+gh label list --repo $repo --limit 1000
+if ($LASTEXITCODE -ne 0) { throw 'Cannot verify consumer labels.' }
+```
+
+This creates label **definitions only**. It does not apply priority, approve
+issues, assign an agent, remove holds, enable auto-merge or authorize releases.
+If a creation fails, stop and reconcile access or concurrent changes; rerunning
+reads the current definitions and skips those already present.
+
+#### Choose a producer or an explicit labeling owner
+
+| Installed gate / flow | Required label evidence | Producer or manual/agent path |
+| --- | --- | --- |
+| `basecoat-issue-approve.yml` | Primary type and canonical `priority:*` on the source issue, normalized to one of each by triage | A qualified triager applies type/priority from issue evidence before `/approve`; the approval workflow applies `approved`/`copilot-agent` only after its checks |
+| `basecoat-pr-auto-merge-executor.yml` | Exactly one current `size:XS` through `size:XXL` on the PR | Deterministic PR size labeler, or a human/agent calculating current additions + deletions minus generated `package-lock.json` churn |
+| `release-label-gate` | A planning label such as `wave:1` or `sprint:42` on the PR | Planning owner chooses the actual wave/sprint; the size labeler can assign an ISO-week sprint to same-repository PRs without existing coverage |
+| Delivery pause | `delivery-hold` when intentionally paused | Only the hold owner removes it; provisioning never changes a hold |
+
+Do not select a priority just to pass approval or label a large PR XS to escape
+the XXL boundary. Issue labels do not automatically satisfy PR label gates.
+On the manual size path, read the current PR head and complete file list,
+calculate the reviewable churn, remove every prior `size:*` label, then apply
+exactly one canonical label using the source thresholds: XS <=20, S <=100,
+M <=300, L <=800, XL <=2000, otherwise XXL. Recheck the head and labels after
+writing; if the head changed, recalculate before requesting eligibility.
+Adding a new size label without removing the old one leaves duplicate evidence
+and must be reconciled before requesting eligibility. Older executors may check
+only label presence; do not rely on them to detect duplicates. The current-size
+validation repair is tracked separately in #3738 / #3739, so inspect the
+installed version rather than assume that repair is available.
+For example, a triager can apply `bug` and `priority:high` after confirming a
+major broken feature; a planning owner then creates/applies the real sprint or
+wave label separately. Do not invent `approved` or `copilot-agent` as a shortcut.
+
+The source producer is `.github/workflows/pr-size-labeler.yml`; consumer
+installation uses `basecoat-pr-size-labeler.yml` **only if that template is
+present and supported in the selected release**. Check the installed inventory.
+Older overlays without it need an explicit labeling owner until a supported
+update is installed; copying the source runtime or bypassing the gate is not
+an onboarding step. Existing PRs need a producer event or its manual
+`workflow_dispatch` with the PR number; external PRs need their planning owner
+to supply sprint/wave coverage.
+
+Source issue triage runs via `issue-triage.md` / `issue-triage.lock.yml`.
+The consumer installer currently marks its
+`basecoat-agent-issue-triage.yml` mapping unsupported; do not enable compiled
+agent templates by hand or assume opt-in selection makes them runnable.
+Until a supported triage producer is configured, name a human or load the
+`issue-triage` agent to review evidence and apply type/priority. Example prompt:
+`@issue-triage Triage issue 12: apply one primary type and one canonical priority,
+explain the evidence, and report missing spec details. Do not approve or assign it.`
+Expected result: a triage explanation and labels, or `needs-info` with the
+missing details, not delivery consent.
+
+#### Install and verify the selected workflows
+
 ```powershell
 pwsh .github/base-coat/scripts/configure-downstream-workflows.ps1 `
   -SourceDir .github/base-coat/workflows `
