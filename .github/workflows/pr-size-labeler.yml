@@ -11,13 +11,14 @@ on:
         required: true
 
 permissions:
+  actions: write
   contents: read
   issues: write
   pull-requests: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || inputs.pr_number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   label:
@@ -95,7 +96,7 @@ jobs:
               return /^(wave:|sprint:|wave-|sprint-).+/.test(normalized) || normalized === 'wave/sprint';
             });
 
-            const isForkPR = context.payload.pull_request?.head?.repo?.fork === true;
+            const isForkPR = !pr.data.head.repo || pr.data.head.repo.id !== pr.data.base.repo.id;
 
             if (!hasReleaseLabel && !isForkPR) {
               // Default to current sprint based on ISO week (ISO-8601)
@@ -137,6 +138,29 @@ jobs:
               issue_number: prNumber,
               labels: labelsToAdd
             });
+
+            const executorWorkflows = await github.paginate(github.rest.actions.listRepoWorkflows, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+            const executorWorkflow = executorWorkflows.find(workflow =>
+              workflow.state === 'active' &&
+              ['.github/workflows/pr-auto-merge-executor.yml',
+               '.github/workflows/basecoat-pr-auto-merge-executor.yml'].includes(workflow.path)
+            );
+            if (executorWorkflow) {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: executorWorkflow.id,
+                ref: context.payload.repository?.default_branch || 'main',
+                inputs: { pr_number: String(prNumber) }
+              });
+              core.info(`Queued post-label merge eligibility reevaluation for PR #${prNumber}.`);
+            } else {
+              core.info('Skipping post-label merge reevaluation: the merge executor is not installed.');
+            }
 
             core.summary
               .addHeading('PR size and sprint labeling result')

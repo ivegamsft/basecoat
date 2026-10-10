@@ -24,6 +24,37 @@ both remain valid.
 
 ## Related operational workflows
 
+### Consumer PR metadata producer
+
+The supported default install includes `basecoat-pr-size-labeler.yml`, sourced
+from `.github/base-coat/workflows/pr-size-labeler.yml`. Targeted installation of
+`basecoat-pr-auto-merge-executor.yml` also includes this dependency. It preserves
+the source size thresholds and generated-lockfile exclusion, and assigns sprint
+coverage only to same-repository PRs lacking an existing release label.
+
+The labeler uses the trusted `pull_request_target` workflow with API reads/writes
+only: it does not check out or execute PR-head content. Installing it does not
+approve a PR, satisfy XXL review, or bypass any admission check. It runs on new
+PR events; existing PRs can be selected through its `pr_number` manual input.
+Cross-repository detection uses the fetched head/base repository IDs, including
+manual dispatch; a repository being a fork does not itself make its PR external.
+An existing exact-name workflow is accepted only when its normalized content
+matches the current producer or a recognized predecessor SHA-256 in the trusted
+source ownership manifest. Hashes normalize line endings, the installed display
+name and trailing whitespace; retain known predecessor hashes when updating the
+producer so unmodified factory versions remain upgradable. Unknown or customized content
+blocks both dry-run and installation with explicit migration guidance; preserve
+that file and reconcile it deliberately rather than overwrite a consumer fix.
+Reconciliation runs are serialized without in-progress cancellation. The merge
+executor independently rejects missing, duplicate, incomplete or stale size
+evidence using the current PR totals and generated-lockfile exclusion; a label
+from an older head cannot weaken the current XXL approval boundary.
+
+This producer distribution is scoped by #3738. The revised #3735 requests
+explicit solo-dev label provisioning and gate/producer/manual-path documentation,
+not automatic triage installation or a release. Compiled issue-triage
+templates are not silently enabled.
+
 - [Spec-to-Production Pipeline](./spec-to-production.md) for transition owners,
   triage labels, approval directives, release tags, recovery timing and live gaps.
 - [Portfolio Audit Workflow](./portfolio-audit-workflow.md) for issue/PR dedupe, dependency traceability, feature grouping, and active project-link verification.

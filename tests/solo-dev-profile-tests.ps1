@@ -414,6 +414,7 @@ try {
             Where-Object {
                 $_.Name -notin @(
                     'basecoat-pr-auto-merge-executor.yml',
+                    'basecoat-pr-size-labeler.yml',
                     'basecoat-consumer-owned.yml'
                 )
             }

@@ -11,7 +11,7 @@ Supported distributable workflows by class:
 
 | Class | Installed by default | Workflows |
 | --- | --- | --- |
-| **Reusable** | Yes | `basecoat-upstream-version-drift.yml`, `basecoat-version-check.yml`, `basecoat-secret-scan.yml` |
+| **Reusable** | Yes | `basecoat-upstream-version-drift.yml`, `basecoat-version-check.yml`, `basecoat-secret-scan.yml`, `basecoat-intake-contract-check.yml`, `basecoat-prd-spec-gate.yml`, `basecoat-pr-size-labeler.yml` |
 | **Ship-it** | Yes | `ship-it-intent-dispatch.yml`, `ship-it-build-guard.yml`, `ship-it-release-gate.yml` (all three install together per the skill's fail-closed contract; see issue #2943) |
 | **Onboarding-telemetry** | No (`-InstallClass onboarding-telemetry`) | `adoption-metrics.yml` (autonomous, scheduled, write-permission workflow -- opt-in) |
 | **Templates** | No (`-IncludeTemplates`) | `basecoat-dependency-update-advisor.yml`, `basecoat-issue-approve.yml`, `basecoat-pr-auto-merge-executor.yml`, `basecoat-sprint-closeout-branch-audit.yml`, `basecoat-token-inventory.yml` |
@@ -32,6 +32,9 @@ This installs (default reusable + ship-it classes):
 - `basecoat-upstream-version-drift.yml`
 - `basecoat-version-check.yml`
 - `basecoat-secret-scan.yml`
+- `basecoat-intake-contract-check.yml`
+- `basecoat-prd-spec-gate.yml`
+- `basecoat-pr-size-labeler.yml`
 - `ship-it-intent-dispatch.yml`
 - `ship-it-build-guard.yml`
 - `ship-it-release-gate.yml`

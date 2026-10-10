@@ -187,6 +187,14 @@ $workflowMap = @(
         Class = 'reusable'
     }
     [pscustomobject]@{
+        Source = 'pr-size-labeler.yml'
+        Destination = 'basecoat-pr-size-labeler.yml'
+        LegacyDestinations = @()
+        Name = 'BaseCoat Reusable - PR Size and Sprint Labeler'
+        Supported = $true
+        Class = 'reusable'
+    }
+    [pscustomobject]@{
         Source = 'dependency-update-advisor.yml'
         Destination = 'basecoat-dependency-update-advisor.yml'
         LegacyDestinations = @('bc-dependency-update-advisor.yml')
@@ -211,6 +219,7 @@ $workflowMap = @(
         Name = 'BaseCoat Template - PR Auto Merge Executor'
         Supported = $true
         Class = 'templates'
+        Dependencies = @('pr-size-labeler.yml')
     }
     [pscustomobject]@{
         Source = 'sprint-closeout-branch-audit.yml'
@@ -503,6 +512,49 @@ if ($hasOwnershipManifest) {
     Assert-FactoryOwnershipManifestCoverage `
         -WorkflowNames ($knownManagedFiles + $factoryOnlyWorkflowFiles) `
         -OwnershipManifestPath $ownershipManifestPath
+}
+
+foreach ($entry in $workflowMap | Where-Object { $_.Source -eq 'pr-size-labeler.yml' }) {
+    $selectedSizeProducer = if ($targetedInstall) {
+        $workflowSelectors.Contains($entry.Source) -or $workflowSelectors.Contains($entry.Destination)
+    } else { $installClasses.Contains($entry.Class) }
+    $sizeDestination = Join-Path $resolvedDest $entry.Destination
+    $sizeSource = Join-Path $resolvedSource $entry.Source
+    if ($selectedSizeProducer -and (Test-Path -LiteralPath $sizeDestination -PathType Leaf)) {
+        if (-not (Test-Path -LiteralPath $sizeSource -PathType Leaf)) {
+            throw "Selected workflow source is missing: $sizeSource"
+        }
+        $expectedSizeContent = (Get-Content -LiteralPath $sizeSource -Raw) -replace "`r`n", "`n"
+        $existingSizeContent = (Get-Content -LiteralPath $sizeDestination -Raw) -replace "`r`n", "`n"
+        $namePattern = '(?m)^name:\s*"[^"]*"$'
+        $normalizedName = "name: `"$($entry.Name)`""
+        $normalizedExisting = ($existingSizeContent -replace $namePattern, $normalizedName).TrimEnd()
+        $recognizedPredecessor = $false
+        if ($hasOwnershipManifest) {
+            $sizeOwnership = (Get-Content -LiteralPath $ownershipManifestPath -Raw | ConvertFrom-Json).workflows |
+                Where-Object { $_.file -eq $entry.Destination }
+            $hashProperty = $sizeOwnership.PSObject.Properties['recognized_content_sha256']
+            if ($null -ne $hashProperty) {
+                $knownHashes = @($hashProperty.Value)
+                if (@($knownHashes | Where-Object { $_ -notmatch '^[a-f0-9]{64}$' }).Count -gt 0) {
+                    throw 'Invalid recognized size-labeler hash in trusted ownership manifest.'
+                }
+                $sha256 = [System.Security.Cryptography.SHA256]::Create()
+                try {
+                    $existingHash = ([BitConverter]::ToString(
+                        $sha256.ComputeHash([Text.Encoding]::UTF8.GetBytes($normalizedExisting))
+                    )).Replace('-', '').ToLowerInvariant()
+                } finally {
+                    $sha256.Dispose()
+                }
+                $recognizedPredecessor = $existingHash -in $knownHashes
+            }
+        }
+        if (-not $recognizedPredecessor -and
+            ($expectedSizeContent -replace $namePattern, $normalizedName).TrimEnd() -ne $normalizedExisting) {
+            throw "Refusing to overwrite unrecognized PR size labeler '$sizeDestination'. Preserve or explicitly migrate the existing consumer workflow before installing."
+        }
+    }
 }
 
 $copied = 0

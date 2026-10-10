@@ -15,6 +15,14 @@
     { "file": "basecoat-issue-approve.yml", "ownership": "factory-owned" },
     { "file": "agent-assignment-worker.yml", "ownership": "factory-owned" },
     { "file": "basecoat-pr-auto-merge-executor.yml", "ownership": "factory-owned" },
+    {
+      "file": "basecoat-pr-size-labeler.yml",
+      "ownership": "factory-owned",
+      "recognized_content_sha256": [
+        "223b3c704d9282699ac0b9e0e650fedcc42a772d7b1560f4ee9fa519a52cedbc",
+        "ae9a39cd4e9bfeec3bba0c9816a02f89e9016d15bef3a035fa92651bdc28c4d2"
+      ]
+    },
     { "file": "basecoat-sprint-closeout-branch-audit.yml", "ownership": "factory-owned" },
     { "file": "bc-sprint-closeout-branch-audit.yml", "ownership": "factory-owned" },
     { "file": "basecoat-token-inventory.yml", "ownership": "factory-owned" },

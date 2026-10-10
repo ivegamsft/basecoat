@@ -305,6 +305,159 @@ jobs:
     Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $destinationDir 'basecoat-secret-scan.yml'))) `
         -Message 'Retirement command must remove the approved factory-owned workflow.'
 
+    $sizeTemplatePath = Join-Path $repoRoot '.github\base-coat\workflows\pr-size-labeler.yml'
+    $sizeRuntimePath = Join-Path $repoRoot '.github\workflows\pr-size-labeler.yml'
+    $sizeTemplate = (Get-Content -LiteralPath $sizeTemplatePath -Raw) -replace "`r`n", "`n"
+    $sizeRuntime = (Get-Content -LiteralPath $sizeRuntimePath -Raw) -replace "`r`n", "`n"
+    Assert-Equal $sizeTemplate $sizeRuntime 'Size labeler template must preserve the production algorithm exactly.'
+    Assert-True -Condition ($sizeTemplate -match 'pull_request_target:' -and
+        $sizeTemplate -notmatch '(?m)actions/checkout|^\s*(?:-\s*)?run:' ) `
+        -Message 'Privileged size labeling must remain API-only without PR-head execution.'
+    Assert-True -Condition ($sizeTemplate -match '(?m)^  actions: write$') `
+        -Message 'Size labeling must have permission to dispatch post-label merge reevaluation.'
+    Assert-True -Condition (@($manifest.workflows | Where-Object {
+        $_.file -eq 'basecoat-pr-size-labeler.yml'
+    }).Count -eq 1) -Message 'Distributed size labeler must have factory ownership.'
+    foreach ($mode in @('default', 'executor')) {
+        $metadataDestination = Join-Path $scratch "metadata-$mode"
+        New-Item -ItemType Directory -Path $metadataDestination -Force | Out-Null
+        $consumerOwned = Join-Path $metadataDestination 'consumer-ci.yml'
+        'consumer-owned metadata fixture' | Set-Content -LiteralPath $consumerOwned
+        $installArguments = @{
+            SourceDir = (Join-Path $repoRoot '.github\base-coat\workflows')
+            DestinationDir = $metadataDestination
+            GovernanceDestinationDir = (Join-Path $scratch "metadata-governance-$mode")
+        }
+        if ($mode -eq 'executor') { $installArguments.Workflow = 'pr-auto-merge-executor.yml' }
+        & $installerPath @installArguments | Out-Null
+        $installedSizePath = Join-Path $metadataDestination 'basecoat-pr-size-labeler.yml'
+        Assert-True -Condition (Test-Path -LiteralPath $installedSizePath -PathType Leaf) `
+            -Message "$mode install must include the deterministic size producer."
+        $installedSize = (Get-Content -LiteralPath $installedSizePath -Raw) -replace "`r`n", "`n"
+        $expectedSize = $sizeTemplate -replace 'BaseCoat - PR Size and Sprint Labeler',
+            'BaseCoat Reusable - PR Size and Sprint Labeler'
+        Assert-Equal $installedSize $expectedSize "$mode install must preserve the trusted source script."
+        Assert-Equal (Get-Content -LiteralPath $consumerOwned -Raw).Trim() `
+            'consumer-owned metadata fixture' 'Metadata install must preserve consumer-owned workflows.'
+        $upgradeSource = Join-Path $scratch "metadata-upgrade-source-$mode"
+        Copy-Item -LiteralPath $installArguments.SourceDir -Destination $upgradeSource -Recurse
+        $upgradeSizePath = Join-Path $upgradeSource 'pr-size-labeler.yml'
+        Add-Content -LiteralPath $upgradeSizePath -Value '# Future factory release fixture'
+        $upgradeArguments = $installArguments.Clone()
+        $upgradeArguments.SourceDir = $upgradeSource
+        & $installerPath @upgradeArguments -DryRun | Out-Null
+        Assert-Equal (Get-Content -LiteralPath $installedSizePath -Raw).TrimEnd() `
+            $expectedSize.TrimEnd() 'Recognized predecessor dry run must preserve installed bytes.'
+        & $installerPath @upgradeArguments | Out-Null
+        Assert-True -Condition ((Get-Content -LiteralPath $installedSizePath -Raw) -match
+            '# Future factory release fixture') -Message "$mode install must upgrade a recognized unmodified predecessor."
+        'consumer-authored exact-name workflow' | Set-Content -LiteralPath $installedSizePath
+        $earlierPath = Join-Path $metadataDestination 'basecoat-secret-scan.yml'
+        'earlier workflow must not change on failed preflight' | Set-Content -LiteralPath $earlierPath
+        $collisionArguments = @(
+            '-NoProfile', '-File', $installerPath,
+            '-SourceDir', $installArguments.SourceDir,
+            '-DestinationDir', $metadataDestination,
+            '-GovernanceDestinationDir', $installArguments.GovernanceDestinationDir
+        )
+        if ($mode -eq 'executor') { $collisionArguments += @('-Workflow', 'pr-auto-merge-executor.yml') }
+        foreach ($dry in @($true, $false)) {
+            $arguments = @($collisionArguments)
+            if ($dry) { $arguments += '-DryRun' }
+            $collisionOutput = & pwsh @arguments 2>&1 | Out-String -Width 4096
+            Assert-True -Condition ($LASTEXITCODE -ne 0 -and
+                $collisionOutput -match 'Refusing to overwrite unrecognized PR size labeler') `
+                -Message "$mode install must explicitly reject exact-name consumer collisions."
+            Assert-Equal (Get-Content -LiteralPath $installedSizePath -Raw).Trim() `
+                'consumer-authored exact-name workflow' 'Collision must preserve exact consumer file.'
+            Assert-Equal (Get-Content -LiteralPath $earlierPath -Raw).Trim() `
+                'earlier workflow must not change on failed preflight' 'Collision must precede all workflow writes.'
+        }
+    }
+
+    @'
+const assert = require('node:assert/strict');
+const source = require('node:fs').readFileSync(process.argv[2], 'utf8').replace(/\r\n/g, '\n');
+const match = source.match(/^          script: \|\n((?: {12}[^\n]*(?:\n|$)|[ \t]*\n)*)/m);
+assert.ok(match, 'Extract actual size labeler script.');
+const script = match[1].split('\n').map(line => line.replace(/^ {12}/, '')).join('\n');
+assert.match(source, /^  cancel-in-progress: false$/m, 'Finish serialized label reconciliation.');
+const executor = require('node:fs').readFileSync(process.argv[3], 'utf8').replace(/\r\n/g, '\n');
+const sizeContract = executor.match(/\/\/ BEGIN CURRENT PR SIZE CONTRACT\n([\s\S]*?)\/\/ END CURRENT PR SIZE CONTRACT/);
+assert.ok(sizeContract, 'Extract actual current-head executor size validation.');
+const checkSize = new Function('pr', 'files', 'labelNames',
+  `const blockers = []; ${sizeContract[1]} return blockers;`);
+const pr = { additions: 2001, deletions: 0, changed_files: 1 };
+const files = [{ filename: 'source.cjs', additions: 2001, deletions: 0 }];
+assert.deepEqual(checkSize(pr, files, ['size:XXL']), []);
+for (const labels of [[], ['size:XS'], ['size:XS', 'size:XXL']]) {
+  assert.ok(checkSize(pr, files, labels).length, 'Reject missing, stale or duplicate label evidence.');
+}
+assert.ok(checkSize(pr, [], ['size:XXL']).length, 'Reject incomplete file enumeration.');
+assert.deepEqual(checkSize(
+  { additions: 3001, deletions: 0, changed_files: 1 },
+  [{ filename: 'package-lock.json', additions: 3001, deletions: 0 }], ['size:XS']), []);
+const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+async function run(headId, baseId, expectedSprint, additions, files, expectedSize, hasExecutor = true) {
+  const added = [];
+  const removed = [];
+  const dispatched = [];
+  const operationOrder = [];
+  const github = {
+    rest: {
+      pulls: { async get() { return { data: {
+        additions, deletions: 0, head: { repo: headId === null ? null : { id: headId, fork: true } },
+        base: { repo: { id: baseId } }
+      } }; }, async listFiles() { return { data: files }; } },
+      actions: {
+        async listRepoWorkflows() { return { data: [
+          { id: 15, name: 'BaseCoat Template - PR Auto Merge Executor', state: 'active', path: '.github/workflows/unrelated.yml' },
+          { id: 16, state: 'disabled_manually', path: '.github/workflows/pr-auto-merge-executor.yml' },
+          ...(hasExecutor ? [{ id: 17, name: 'Customized display name', state: 'active',
+            path: '.github/workflows/basecoat-pr-auto-merge-executor.yml' }] : [])
+        ] }; },
+        async createWorkflowDispatch(args) { dispatched.push(args); operationOrder.push('dispatch'); }
+      },
+      issues: {
+        async listLabelsOnIssue() { return { data: [{ name: 'size:XXL' }] }; },
+        async removeLabel(args) { removed.push(args.name); },
+        async getLabel() {}, async createLabel() {},
+        async addLabels(args) { added.push(...args.labels); operationOrder.push('labels'); }
+      }
+    },
+    async paginate(method) { return (await method()).data; }
+  };
+  const core = {
+    info() {}, setFailed(message) { throw new Error(message); },
+    summary: { addHeading() { return this; }, addTable() { return this; }, async write() {} }
+  };
+  await new AsyncFunction('github', 'context', 'core', 'process', script)(
+    github, { repo: { owner: 'fixture', repo: 'consumer' }, payload: { repository: { default_branch: 'trunk' } } },
+    core, { env: { PR_NUMBER_INPUT: '42' } }
+  );
+  assert.ok(added.includes(expectedSize), 'Preserve actual size/lockfile thresholds.');
+  assert.equal(added.some(label => label.startsWith('sprint:')), expectedSprint,
+    'Manual dispatch derives cross-repo status from fetched repositories.');
+  assert.deepEqual(removed, ['size:XXL']);
+  assert.deepEqual(operationOrder, hasExecutor ? ['labels', 'dispatch'] : ['labels'],
+    'Dispatch only an active installed executor, after labels are applied.');
+  assert.deepEqual(dispatched, hasExecutor ? [{
+    owner: 'fixture', repo: 'consumer', workflow_id: 17, ref: 'trunk', inputs: { pr_number: '42' }
+  }] : [], 'Match installed path, not display names or disabled executors.');
+}
+(async () => {
+  await run(1, 2, false, 20, [], 'size:XS');
+  await run(null, 2, false, 20, [], 'size:XS');
+  await run(1, 2, false, 20, [], 'size:XS', false);
+  await run(1, 1, true, 21, [], 'size:S');
+  await run(1, 1, true, 5000,
+    [{ filename: 'nested/package-lock.json', additions: 4990, deletions: 0 }], 'size:XS');
+  console.log('Actual size labeler and executor dispatch, fork, threshold and lockfile fixtures passed.');
+})().catch(error => { console.error(error); process.exitCode = 1; });
+'@ | & node - $sizeRuntimePath (Join-Path $repoRoot '.github\workflows\pr-auto-merge-executor.yml')
+    Assert-True -Condition ($LASTEXITCODE -eq 0) `
+        -Message 'Actual manual size-label dispatch fixtures must pass.'
+
     Write-Host 'Workflow ownership tests passed.'
 }
 finally {

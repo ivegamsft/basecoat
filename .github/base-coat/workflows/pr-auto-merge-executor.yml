@@ -1002,12 +1002,25 @@ jobs:
               return 'low';
             };
             const riskTier = classifyRiskTier();
-            const sizeLabel = labelNames
+            // BEGIN CURRENT PR SIZE CONTRACT
+            const sizeLabels = labelNames
               .map(label => label.match(/^size:(xs|s|m|l|xl|xxl)$/i)?.[1]?.toUpperCase() || '')
-              .find(Boolean) || '';
+              .filter(Boolean);
+            const sizeLabel = sizeLabels[0] || '';
             if (!sizeLabel) {
               blockers.push('PR is missing a canonical size label.');
             }
+            const sizedChanges = Math.max(0, pr.additions + pr.deletions - files
+              .filter(file => String(file.filename).split('/').pop() === 'package-lock.json')
+              .reduce((sum, file) => sum + file.additions + file.deletions, 0));
+            const expectedSize = sizedChanges <= 20 ? 'XS' : sizedChanges <= 100 ? 'S'
+              : sizedChanges <= 300 ? 'M' : sizedChanges <= 800 ? 'L'
+                : sizedChanges <= 2000 ? 'XL' : 'XXL';
+            if (files.length !== pr.changed_files || sizeLabels.length !== 1 ||
+                sizeLabel !== expectedSize) {
+              blockers.push('PR size evidence is duplicate, incomplete, or stale for the current head.');
+            }
+            // END CURRENT PR SIZE CONTRACT
             const approvalRequirements = resolveApprovalRequirements({
               riskTier,
               sizeLabel,

@@ -19,7 +19,7 @@ is unchanged.
 flowchart TD
   A[PR event or manual dispatch] --> B[Resolve PR number]
   B --> C[Read additions and deletions]
-  C --> D[Select one size label: XS/S/M/L/XL]
+  C --> D[Exclude package-lock churn and select XS/S/M/L/XL/XXL]
   D --> E[Remove prior size labels]
   E --> F{Release label already present?}
   F -->|Yes| G[Do not add sprint label]
@@ -29,7 +29,11 @@ flowchart TD
   G --> K[Apply labels]
   I --> K
   J --> K
-  K --> L[Write step summary]
+  K --> L{Active executor at a known installed path?}
+  L -->|Yes| M[Dispatch fresh eligibility for this PR]
+  L -->|No| N[Skip optional executor dispatch]
+  M --> O[Write step summary]
+  N --> O
 ```
 
 ## Entrance
@@ -38,8 +42,8 @@ flowchart TD
 |---|---|
 | Trigger | `pull_request_target` (`opened`, `synchronize`, `reopened`, `ready_for_review`) |
 | Manual trigger | `workflow_dispatch` with `pr_number` |
-| Concurrency | `${{ github.workflow }}-${{ github.event.pull_request.number or github.ref }}` |
-| Permissions | `contents: read`, `issues: write`, `pull-requests: write` |
+| Concurrency | Workflow name + PR number, manual `inputs.pr_number`, or ref; `cancel-in-progress: false` finishes label reconciliation |
+| Permissions | `actions: write`, `contents: read`, `issues: write`, `pull-requests: write` |
 
 ## Exit
 
@@ -47,7 +51,14 @@ flowchart TD
 |---|---|
 | Pass | Size label reconciled and optional sprint label logic completed |
 | No-op | PR already has release label; sprint auto-label skipped |
-| Fail | PR number cannot be resolved or label API calls fail |
+| Fail | PR number cannot be resolved, label API calls fail, or active executor dispatch fails |
+
+After applying labels, the workflow requests fresh eligibility for the single
+labeled PR on the default branch. It recognizes only active executors at
+`.github/workflows/pr-auto-merge-executor.yml` or
+`.github/workflows/basecoat-pr-auto-merge-executor.yml`, not display names.
+Absent or disabled executors are skipped; actual dispatch errors fail the run.
+This notification does not approve, merge, or bypass any executor gate.
 
 ## Schedule
 

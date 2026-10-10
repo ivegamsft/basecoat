@@ -187,7 +187,7 @@ for (const scenario of ['solo-zero-review', 'solo-feature-approved', 'team-zero-
     process.env.WORKFLOW_REF = 'owner/repo/.github/workflows/pr-auto-merge-executor.yml@refs/heads/main';
     const pr = { ...fresh(), user: { login: 'author', type: 'User' }, title: 'Recovery fixture',
       changed_files: 1, additions: 5, deletions: 0, mergeable_state: 'clean',
-      labels: [{ name: 'size:S' }],
+      labels: [{ name: 'size:XS' }],
       body: '## Intake Contract\n\n### Design\n\nChange scope: individual\nSource issues: #1\nIndependently deliverable units: 1\n' +
         'Unit inventory: 1 recovery\nExpected files: 1\nExpected changed lines (additions + deletions): 5\n' +
         'Classification rationale: One cohesive fix.\nMechanical batch exception evidence: none\n\n### Derived Classification\n' };
