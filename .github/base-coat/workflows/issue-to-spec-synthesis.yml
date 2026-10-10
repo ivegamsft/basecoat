@@ -42,6 +42,14 @@ jobs:
       github.event_name == 'workflow_dispatch'
 
     steps:
+      - name: Set up Markdown validation
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+
+      - name: Install pinned PR Markdown validator
+        run: npm install --global markdownlint-cli@0.39.0
+
       - name: Synthesize spec and open PR
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v7.0.1
         env:
@@ -143,17 +151,112 @@ jobs:
             const specPath = `docs/spec/synthesized/issue-${issueNum}-${slug}.spec.md`;
             const branchName = `spec/issue-${issueNum}-${slug}`;
 
-            // Extract sections from issue body
-            const problemMatch = body.match(/##\s*Problem(?:\s+Statement)?\s*\n([\s\S]*?)(?=##|$)/i);
-            const scopeMatch   = body.match(/##\s*(?:Suggested\s+)?[Ss]cope\s*\n([\s\S]*?)(?=##|$)/i);
-            const whyMatch     = body.match(/##\s*Why\s+this\s+matters\s*\n([\s\S]*?)(?=##|$)/i);
-            const refsMatch    = body.match(/##\s*References?\s*\n([\s\S]*?)(?=##|$)/i);
+            const extractSection = (source, names) => {
+              const lines = source.replace(/\r\n?/g, '\n').split('\n');
+              // Classify once: headings inside fences or HTML comments are not source sections.
+              const headings = [];
+              const headingPattern = /^ {0,3}(#{1,6})(?:[ \t]+(.*?))?[ \t]*$/;
+              const fencePattern = /^ {0,3}(`{3,}(?=[^`]*$)|~{3,})(.*)$/;
+              // Blank, heading, fence, and HTML-block lines end a paragraph and any open code span.
+              const endsParagraph = line => !line.trim() || headingPattern.test(line) || fencePattern.test(line) || /^ {0,3}<!--/.test(line);
+              const exactRun = run => new RegExp('(?<!`)' + run + '(?!`)', 'g');
+              let fence;
+              let comment = false;
+              let code;
+              for (let index = 0; index < lines.length; index++) {
+                const line = lines[index];
+                let heading = null;
+                if (code && endsParagraph(line)) code = undefined;
+                const marker = !comment && !code && line.match(fencePattern);
+                if (marker) {
+                  if (!fence) fence = marker[1];
+                  else if (marker[1][0] === fence[0] && marker[1].length >= fence.length && !marker[2].trim()) fence = undefined;
+                } else if (!fence) {
+                  if (!comment && !code) heading = line.match(headingPattern);
+                  // Empty ATX headings count; closing hashes need whitespace; closed inline comments are not visible text.
+                  if (heading) heading[2] = (heading[2] ?? '').replace(/(?:^|[ \t]+)#+$/, '').replace(/<!--[\s\S]*?-->/g, '').trim();
+                  // Comment delimiters count anywhere outside code spans, which may cross paragraph lines.
+                  for (let at = 0; at < line.length;) {
+                    const pattern = comment ? /-->/g : code ? exactRun(code) : /\\[\s\S]|<!--|`+/g;
+                    pattern.lastIndex = at;
+                    const found = pattern.exec(line);
+                    if (!found) break;
+                    at = found.index + found[0].length;
+                    if (comment || code) {
+                      comment = false;
+                      code = undefined;
+                    } else if (found[0] === '<!--') {
+                      comment = true;
+                    } else if (found[0][0] === '`') {
+                      // Matched backslash escapes are literal; only unescaped backtick runs may open a span.
+                      let rest = line.slice(at);
+                      for (let next = index + 1; !heading && next < lines.length && !endsParagraph(lines[next]); next++) rest += '\n' + lines[next];
+                      if (exactRun(found[0]).test(rest)) code = found[0];
+                    }
+                  }
+                }
+                headings.push(heading);
+              }
+              if (fence) throw new Error(`Synthesis source #${issueNum} has an unclosed fenced block.`);
+              if (comment) throw new Error(`Synthesis source #${issueNum} has an unclosed HTML comment.`);
+              let start;
+              let depth;
+              if (names === null) {
+                // Full-source fallback: nest every heading beneath the generated section.
+                const depths = headings.filter(Boolean).map(heading => heading[1].length);
+                start = 0;
+                depth = depths.length ? Math.min(...depths) - 1 : 0;
+              }
+              for (let index = 0; index < lines.length; index++) {
+                const heading = headings[index];
+                if (!heading) continue;
+                if (start !== undefined && heading[1].length <= depth) {
+                  return lines.slice(start, index).join('\n');
+                }
+                if (start !== undefined) {
+                  const nestedDepth = 2 + heading[1].length - depth;
+                  if (nestedDepth > 6) throw new Error(`Synthesis section hierarchy is unsupported for #${issueNum}.`);
+                  lines[index] = lines[index].replace(heading[1], '#'.repeat(nestedDepth));
+                }
+                if (start === undefined && names.includes(heading[2].toLowerCase().replace(/\s+/g, ' '))) {
+                  start = index + 1;
+                  depth = heading[1].length;
+                }
+              }
+              return start === undefined ? undefined : lines.slice(start).join('\n');
+            };
+            // Scan the complete source before selecting sections; never truncate a fence.
+            extractSection(body, []);
 
-            const normalizeSection = value => value.trim().replace(/\n{3,}/g, '\n\n');
-            const problem = normalizeSection(problemMatch ? problemMatch[1] : body.trim().split('\n').slice(0, 8).join('\n'));
-            const scope   = normalizeSection(scopeMatch ? scopeMatch[1] : '*Not specified.*');
-            const why     = normalizeSection(whyMatch ? whyMatch[1] : '*Not specified.*');
-            const refs    = normalizeSection(refsMatch ? refsMatch[1] : `- Refs #${issueNum}`);
+            const normalizeSection = value => {
+              const lines = value.trim().replace(/\r\n?/g, '\n').split('\n');
+              const output = [];
+              let fence;
+              for (let index = 0; index < lines.length; index++) {
+                const line = lines[index];
+                const marker = line.match(/^ {0,3}(`{3,}(?=[^`]*$)|~{3,})(.*)$/);
+                if (marker) {
+                  if (!fence) {
+                    fence = marker[1];
+                  } else if (
+                    marker[1][0] === fence[0] &&
+                    marker[1].length >= fence.length &&
+                    !marker[2].trim()
+                  ) {
+                    fence = undefined;
+                  }
+                }
+                const heading = !fence && /^ {0,3}#{1,6}(?:\s+|$)/.test(line);
+                if (heading && output.length && output.at(-1).trim()) output.push('');
+                output.push(line);
+                if (heading && lines[index + 1]?.trim()) output.push('');
+              }
+              return output.join('\n');
+            };
+            const problem = normalizeSection(extractSection(body, ['problem', 'problem statement']) ?? extractSection(body, ['description']) ?? extractSection(body, null));
+            const scope   = normalizeSection(extractSection(body, ['scope', 'suggested scope']) ?? extractSection(body, ['design']) ?? '*Not specified.*');
+            const why     = normalizeSection(extractSection(body, ['why this matters']) ?? extractSection(body, ['rca']) ?? '*Not specified.*');
+            const refs    = normalizeSection(extractSection(body, ['reference', 'references']) ?? `- Refs #${issueNum}`);
             const now     = new Date().toISOString().split('T')[0];
 
             const prdContent = [
@@ -163,7 +266,7 @@ jobs:
               'status: draft',
               `author: ${author}`,
               `created: ${now}`,
-              `labels: [${labels.map(l => `"${l}"`).join(', ')}]`,
+              `labels: ${JSON.stringify(labels)}`,
               '---',
               '',
               `# PRD: ${title}`,
@@ -199,7 +302,7 @@ jobs:
               `status: draft`,
               `author: ${author}`,
               `created: ${now}`,
-              `labels: [${labels.map(l => `"${l}"`).join(', ')}]`,
+              `labels: ${JSON.stringify(labels)}`,
               '---',
               '',
               `# Spec: ${title}`,
@@ -237,6 +340,42 @@ jobs:
               ref: 'heads/main',
             });
             const baseSha = ref.object.sha;
+
+            const configResponse = await github.rest.repos.getContent({
+              owner, repo, path: '.markdownlint.json', ref: baseSha,
+            });
+            if (Array.isArray(configResponse.data) || configResponse.data.type !== 'file') {
+              throw new Error('Trusted Markdown configuration is unavailable at the synthesis base.');
+            }
+            const fs = require('node:fs/promises');
+            const os = require('node:os');
+            const path = require('node:path');
+            const { promisify } = require('node:util');
+            const execFile = promisify(require('node:child_process').execFile);
+            const workspace = await fs.mkdtemp(path.join(os.tmpdir(), 'basecoat-synthesis-'));
+            const validateArtifacts = async artifacts => {
+              try {
+                await fs.writeFile(path.join(workspace, '.markdownlint.json'),
+                  Buffer.from(configResponse.data.content, 'base64'));
+                for (const [filename, content] of artifacts) {
+                  await fs.writeFile(path.join(workspace, filename), content);
+                }
+                // Inline directives from untrusted source text must not weaken the trusted configuration.
+                if (artifacts.some(([, content]) => /<!--\s*markdownlint-/i.test(content))) {
+                  throw new Error('Inline markdownlint directives are not allowed in synthesized artifacts.');
+                }
+                await execFile('markdownlint', [
+                  '--config', '.markdownlint.json',
+                  ...artifacts.map(([filename]) => filename),
+                ], { cwd: workspace, timeout: 30000, maxBuffer: 65536 });
+              } catch {
+                // CLI output can contain source text; do not echo untrusted or secret-bearing content.
+                throw new Error(`Markdown validation failed for synthesis source #${issueNum}; no PR published. Validate both artifacts with markdownlint-cli@0.39.0 and the configuration at ${baseSha}.`);
+              } finally {
+                await fs.rm(workspace, { recursive: true, force: true });
+              }
+            };
+            await validateArtifacts([['proposal.prd.md', prdContent], ['proposal.spec.md', specContent]]);
 
             // Create the synthesis branch. A prior attempt can create the branch
             // and then fail before opening its PR, so recover that state below.
@@ -294,6 +433,42 @@ jobs:
                 content: Buffer.from(specContent).toString('base64'),
                 branch: branchName,
               });
+            }
+
+            const publicationRef = await github.rest.git.getRef({
+              owner, repo, ref: `heads/${branchName}`,
+            });
+            if (branchExists) {
+              for (const [artifactPath, expected] of [[prdPath, prdContent], [specPath, specContent]]) {
+                const artifact = await github.rest.repos.getContent({
+                  owner, repo, path: artifactPath, ref: publicationRef.data.object.sha,
+                });
+                if (Array.isArray(artifact.data) || artifact.data.type !== 'file' ||
+                    Buffer.from(artifact.data.content, 'base64').toString('utf8') !== expected) {
+                  throw new Error(`Existing synthesis artifact conflicts with generated content for #${issueNum}; preserving branch edits.`);
+                }
+              }
+            }
+            const comparison = await github.rest.repos.compareCommits({
+              owner, repo, base: baseSha, head: publicationRef.data.object.sha,
+            });
+            const changedFiles = comparison.data.files;
+            if (comparison.data.status !== 'ahead' || !Array.isArray(changedFiles) ||
+                changedFiles.length !== 2 ||
+                !changedFiles.some(file => file.filename === prdPath) ||
+                !changedFiles.some(file => file.filename === specPath)) {
+              throw new Error(`Unable to resolve a complete generated-file diff for #${issueNum}.`);
+            }
+            const currentMain = await github.rest.git.getRef({
+              owner, repo, ref: 'heads/main',
+            });
+            if (currentMain.data.object.sha !== baseSha) {
+              throw new Error('Main advanced during synthesis; refusing to publish a PR with stale artifacts.');
+            }
+            // Publish only the validated head; concurrent pushes are preserved for reconciliation.
+            const headRef = await github.rest.git.getRef({ owner, repo, ref: `heads/${branchName}` });
+            if (headRef.data.object.sha !== publicationRef.data.object.sha) {
+              throw new Error(`Synthesis branch changed after validation for #${issueNum}; preserving branch edits for reconciliation.`);
             }
 
             // Open PR

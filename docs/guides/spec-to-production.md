@@ -30,6 +30,19 @@ rename them or omit source-only release jobs.
 | Production verification | Successful publish plus `docs-production.yml` | Public tag/payload and documentation dispatch evidence | Internal release alone is not proof of mirror/docs delivery |
 | Closeout | Implementation PR merge with closing keywords; explicit delivery verification | GitHub closes linked issue at merge; operator records release/tag/production evidence | Issue closure does not imply production completion; public cleanup workflow is separate manual maintenance |
 
+Synthesis validation update (#3660): source sections are extracted outside
+fenced blocks and HTML comments. Canonical Problem/Scope/Why headings take
+priority over Description and Intake Contract/RCA/Design aliases.
+The fallback preserves the complete source instead of truncating at eight lines;
+unclosed fences and HTML comments fail explicitly. Both generated artifacts must pass
+`markdownlint-cli@0.39.0` with `.markdownlint.json` fetched at the pinned main
+revision before any branch is created. Invalid Markdown (including unsupported
+bare URLs or inline markdownlint directives from source text) blocks publication
+without exposing raw source text in diagnostics.
+Orphaned-branch recovery requires both stored artifacts to match generated
+content; conflicting edits are preserved, not overwritten. These checks do not
+approve incomplete specifications or promote their draft PRs.
+
 ## Labels, directives and tags
 
 | Signal | Meaning and authority |
