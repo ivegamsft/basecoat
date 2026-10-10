@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.1",
   "libraryVersion": "4.6.4",
-  "generatedAt": "2026-10-09T15:21:29.1959323Z",
+  "generatedAt": "2026-10-10T12:22:42.9709530Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -1246,7 +1246,7 @@
     {
       "path": "instructions/basecoat-10-core-intent-routing.instructions.md",
       "type": "instruction",
-      "sha": "0806ddbac288bcd5f56f9e3a9406c9b5234e22f3",
+      "sha": "05b04cff9817804cf0ea99e9cd5908bfe64f0198",
       "version": null,
       "effectiveVersion": "4.6.4",
       "versionSource": "library"

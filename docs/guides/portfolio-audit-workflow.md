@@ -120,15 +120,45 @@ Primary route: `@sprint-planner`
 Goals:
 
 - Reuse or create canonical `Sprint <N>` milestone and project.
+- Create projects at the right scope and link every project to its repository.
+- Assign each grouped issue to a repository milestone (sprint or version).
 - Add grouped issues to project and initialize status.
 - Ensure the active project link is present in repo docs.
+
+Project scope rules:
+
+- Single-repo work uses a project created under the owner and linked to that
+  repository. Never leave it as an unlinked owner-level project.
+- Cross-repo portfolios use one owner-level project linked to every
+  participating repository.
+- Reuse an existing project when its title and scope match; do not create
+  duplicates. Name wave projects `Wave <N> - <theme>`.
+- A project created with `gh project create` is not linked automatically.
+  Linking is a required step, not optional cleanup.
+- Milestones are separate repository objects; project membership never sets
+  them. Use existing `Sprint <N>` or `v<version>` milestones by due date and
+  wave order.
 
 Suggested commands:
 
 ```bash
 gh project list --owner <owner> --limit 200 --format json
 gh project view <number> --owner <owner> --format json
+gh project create --owner <owner> --title "<title>" --format json
+gh project link <number> --owner <owner> --repo <owner>/<repo>
+gh project item-add <number> --owner <owner> --url <issue-url>
+gh issue edit <issue> --milestone "<milestone>"
 ```
+
+Verification (required before reporting success):
+
+```bash
+gh api graphql -f query='{repository(owner:"<owner>",name:"<repo>"){projectsV2(first:50){nodes{number title}}}}'
+gh api repos/<owner>/<repo>/milestones --jq '.[]|"\(.title) open=\(.open_issues)"'
+```
+
+Every created project must appear in the repository `projectsV2` list and every
+grouped issue must have a milestone, or the run reports a blocking gap.
 
 Required doc check:
 
@@ -142,7 +172,7 @@ Return a single report with:
 1. Summary counts (issues scanned, PRs scanned, duplicates closed, dependencies linked, groups finalized).
 2. Feature group table (`Group`, `Issues`, `PRs`, `LOC`, `Median Cycle Time`).
 3. Dependency table (`Issue`, `Depends On`, `Blocked By`, `Status`).
-4. Project tracking section (milestone name, project name, project-link doc path).
+4. Project tracking section (milestone name, project name, project scope, repo-link verification result, project-link doc path).
 5. Carry-forward queue for unresolved ambiguities.
 
 ## Failure handling
@@ -150,4 +180,5 @@ Return a single report with:
 - If duplicate confidence is below threshold, do not auto-close.
 - If dependency direction is ambiguous, mark for human triage.
 - If no project exists and creation is disallowed, report as blocking gap.
+- If a project cannot be linked to the repository or an issue has no milestone, report as blocking gap.
 - If required metadata conventions are missing, log a governance issue and stop before final grouping.

@@ -347,8 +347,9 @@ Execution contracts:
    stale ownership, review blockers) before any broad repo analysis.
 3. `issue:` routes to issue quality/label/backlog triage first.
 4. `portfolio:` routes to issue/PR hygiene and grouping workflow first: dedupe,
-   categorize, wire dependencies, cluster by feature, then ensure a canonical
-   sprint/project link is captured in repo docs.
+   categorize, wire dependencies, cluster by feature, create projects at the
+   right scope, link them and milestones to the repo, then capture the canonical
+   sprint/project link in repo docs.
 5. `release:` routes to release workflow (version source, changelog, tag/release
    operations) first.
 
