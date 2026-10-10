@@ -4,6 +4,10 @@ Status: read-only proposal for #3530, dated 2026-10-09. No dashboard, workflow,
 threshold, automated issue closure or delivery policy is implemented here.
 The original 2026-09-29 through 2026-10-06 retrospective remains historical.
 
+A [dated read-only CI observation](../reference/ci-trend-observation-2026-10-10.md)
+records complete pagination and nullable/excluded sample meanings. It does not
+implement the fixed-population dashboard or enable any proposed automation.
+
 ## Existing Ownership and Meaning
 
 Its 14/15 calculation included a skipped run. That figure is a dated
