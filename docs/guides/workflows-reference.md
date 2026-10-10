@@ -24,6 +24,16 @@ both remain valid.
 
 ## Related operational workflows
 
+### Conflict-router label failures
+
+`pr-conflict-routing.yml` tolerates only a missing-label `404` during clean-PR
+cleanup and reports that no-op explicitly. Permission, rate-limit and server
+errors fail the run. Before notifying a dirty PR, it looks up the conflict label,
+creates its definition only on lookup `404`, then applies it. Definition creation,
+label application and comment failures propagate rather than report a routed
+success; rerun after resolving access or API availability. No failure fallback
+changes a delivery hold, approval or merge decision.
+
 ### Consumer PR metadata producer
 
 The supported default install includes `basecoat-pr-size-labeler.yml`, sourced

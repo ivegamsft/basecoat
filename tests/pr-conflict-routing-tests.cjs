@@ -42,13 +42,22 @@ function fixture(options = {}) {
         },
         async addLabels(args) {
           record("addLabels", args);
+          if (options.addError) throw options.addError;
           if (!state.pr.labels.some(label => label.name === args.labels[0])) {
             state.pr.labels.push({ name: args.labels[0] });
           }
         },
-        async createLabel(args) { record("createLabel", args); },
+        async getLabel(args) {
+          record("getLabel", args);
+          if (options.lookupError) throw options.lookupError;
+        },
+        async createLabel(args) {
+          record("createLabel", args);
+          if (options.createError) throw options.createError;
+        },
         async removeLabel(args) {
           record("removeLabel", args);
+          if (options.removeError) throw options.removeError;
           state.pr.labels = state.pr.labels.filter(label => label.name !== args.name);
         },
         async createComment(args) {
@@ -176,4 +185,67 @@ test("notification failure never emits routed success; retry can recover", async
   await f.run();
   assert.equal(f.state.comments.length, 1);
   assert.equal(f.state.messages.length, 1);
+});
+
+for (const status of [403, 429, 500]) {
+  test(`cleanup ${status} fails explicitly without routing success`, async () => {
+    const error = Object.assign(new Error("Cleanup API failed"), { status });
+    const f = fixture({
+      pr: { mergeable: true, mergeable_state: "clean", labels: [{ name: "needs-conflict-fix" }] },
+      removeError: error
+    });
+    await assert.rejects(f.run(), error);
+    assert.equal(calls(f, "createComment").length, 0);
+    assert.equal(f.state.messages.length, 0);
+  });
+  test(`label-add ${status} does not attempt missing-label recovery`, async () => {
+    const error = Object.assign(new Error("Label add failed"), { status });
+    const f = fixture({ addError: error });
+    await assert.rejects(f.run(), error);
+    assert.equal(calls(f, "createLabel").length, 0);
+    assert.equal(calls(f, "createComment").length, 0);
+    assert.equal(f.state.messages.length, 0);
+  });
+}
+
+test("already-absent cleanup label is an explicit no-op", async () => {
+  const f = fixture({
+    pr: { mergeable: true, mergeable_state: "clean", labels: [{ name: "needs-conflict-fix" }] },
+    removeError: Object.assign(new Error("Label absent"), { status: 404 })
+  });
+  await f.run();
+  assert.deepEqual(f.state.messages, ["Conflict label already absent on PR #42."]);
+  assert.equal(calls(f, "createComment").length, 0);
+});
+
+test("only lookup 404 provisions the missing label before routing", async () => {
+  const f = fixture({ lookupError: Object.assign(new Error("Definition missing"), { status: 404 }) });
+  await f.run();
+  assert.deepEqual(f.state.calls.map(call => call.name),
+    ["list", "listComments", "getLabel", "createLabel", "addLabels", "createComment"]);
+  assert.equal(calls(f, "createLabel")[0].args.name, "needs-conflict-fix");
+});
+
+test("lookup denial fails without label creation or notification", async () => {
+  const error = Object.assign(new Error("Lookup denied"), { status: 403 });
+  const f = fixture({ lookupError: error });
+  await assert.rejects(f.run(), error);
+  assert.equal(calls(f, "createLabel").length, 0);
+  assert.equal(calls(f, "addLabels").length, 0);
+  assert.equal(calls(f, "createComment").length, 0);
+});
+
+test("definition creation failure surfaces and retry can recover", async () => {
+  const options = {
+    lookupError: Object.assign(new Error("Definition missing"), { status: 404 }),
+    createError: Object.assign(new Error("Create denied"), { status: 403 })
+  };
+  const f = fixture(options);
+  await assert.rejects(f.run(), options.createError);
+  assert.equal(calls(f, "addLabels").length, 0);
+  assert.equal(f.state.messages.length, 0);
+  options.lookupError = null;
+  options.createError = null;
+  await f.run();
+  assert.equal(f.state.comments.length, 1);
 });
