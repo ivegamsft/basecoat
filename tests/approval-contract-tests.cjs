@@ -48,6 +48,12 @@ const scripts = {
   reevaluate: workflowScripts(issueWorkflow, "reevaluate-linked-prs", 1)[0],
   delivery: workflowScripts(workflows["ship-it-intent-dispatch.yml"], "resolve-intent", 1)[0]
 };
+const directiveContract = scripts.delivery.match(
+  /\/\/ BEGIN SHIP-IT DIRECTIVE CONTRACT([\s\S]*?)\/\/ END SHIP-IT DIRECTIVE CONTRACT/
+);
+assert.ok(directiveContract, "Production directive extractor markers must exist");
+const parseDeliveryDirective = new Function("approval",
+  `${directiveContract[1]}\nreturn parseDeliveryDirective;`)(approval);
 assert.match(scripts.access, /approval\.qualifiedDirective/);
 assert.match(scripts.metadata, /approval\.validateIssue/);
 const human = { login: "maintainer", type: "User" };
@@ -136,6 +142,77 @@ async function approveRoute(f, route) {
   return access.value ? run(scripts.metadata, f, route) : access;
 }
 async function main() {
+  const preparationCases = [];
+  const addCase = (id, body, kind, intent) => preparationCases.push({ id, body, kind, intent });
+  for (const intent of ["ship-it", "spec-2-prod"]) {
+    addCase(`P3725-positive-${intent}`, `${intent}: Deliver feature now`, "delivery", intent);
+    for (const [shape, body, kind] of [
+      ["quoted", `> ${intent}: Deliver feature`, "none"],
+      ["fenced", `\`\`\`text\n${intent}: Deliver feature\n\`\`\``, "invalid"],
+      ["bulleted", `- ${intent}: Deliver feature`, "none"],
+      ["embedded", `Discuss ${intent}: Deliver feature`, "none"]
+    ]) addCase(`P3725-supported-${intent}-${shape}`, body, kind);
+    for (const modifier of ["defer", "later", "stop", "read-only"]) {
+      addCase(`P3725-modifier-${intent}-${modifier}`,
+        `${intent}: Deliver feature ${modifier}`, "suppressed");
+      addCase(`P3725-conflict-${intent}-${modifier}`,
+        `${intent}: Deliver feature now ${modifier}`, "invalid");
+    }
+  }
+  for (const token of ["prepare", "spec", "build", "review", "deliver", "ship"]) {
+    for (const [shape, body] of [
+      ["leading", `${token}: Deliver feature now`],
+      ["quoted", `> ${token}: Deliver feature now`],
+      ["fenced", `\`\`\`text\n${token}: Deliver feature now\n\`\`\``],
+      ["bulleted", `- ${token}: Deliver feature now`],
+      ["embedded", `Discuss ${token}: Deliver feature now`],
+      ["collision", `${token}: ship-it: Deliver feature now`]
+    ]) addCase(`P3725-candidate-${token}-${shape}`, body, "none");
+  }
+  addCase("P3725-dual-lines", "ship-it: Deliver feature\nspec-2-prod: Deliver feature", "invalid");
+  addCase("P3725-dual-lines-reversed", "spec-2-prod: Deliver feature\nship-it: Deliver feature", "invalid");
+  addCase("P3725-candidate-before-supported", "prepare: Bound work\nship-it: Deliver feature", "invalid");
+  // Same-line tokens are goal text, not a second authoritative command line.
+  addCase("P3725-dual-inline", "ship-it: spec-2-prod: Deliver feature", "delivery", "ship-it");
+  addCase("P3725-supported-before-candidate", "ship-it: prepare: Bound work", "delivery", "ship-it");
+  for (const { id, body, kind, intent } of preparationCases) {
+    const parsed = parseDeliveryDirective(body);
+    assert.equal(parsed.kind, kind, id);
+    if (kind === "delivery") {
+      assert.deepEqual(parsed, { kind, intent, goal: body.slice(body.indexOf(":") + 1).trim(),
+        rawDirective: body, syntax: "colon-alias" }, id);
+    } else {
+      assert.deepEqual(parsed, { kind }, `${id}: no normalized delivery fields`);
+    }
+    const f = fixture();
+    const result = await run(scripts.delivery, f, "delivery", body);
+    assert.deepEqual(result.failures, [], id);
+    assert.equal(result.outputs.should_run, kind === "delivery" ? "true" : "false", id);
+    assert.equal(result.outputs.intent, intent, id);
+    assert.deepEqual(f.state.written, [], id);
+    assert.deepEqual(f.state.dispatched, [], id);
+  }
+  for (const mutation of ["actor-read", "approval-read", "approval-missing", "approval-inaccessible"]) {
+    const id = `P3725-authority-${mutation}`;
+    const f = fixture();
+    if (mutation === "actor-read") f.state.permissions.writer = { permission: "read" };
+    if (mutation === "approval-read") f.state.permissions.maintainer = { permission: "read" };
+    if (mutation === "approval-missing") f.state.comments[1] = [];
+    if (mutation === "approval-inaccessible") {
+      f.github.rest.issues.getComment = async () => {
+        throw Object.assign(new Error("Approval inaccessible"), { status: 403 });
+      };
+      await assert.rejects(run(scripts.delivery, f, "delivery", "ship-it: Deliver feature"),
+        error => error.status === 403, id);
+    } else {
+      const result = await run(scripts.delivery, f, "delivery", "ship-it: Deliver feature");
+      assert.ok(result.failures.length, id);
+      assert.notEqual(result.outputs.should_run, "true", id);
+    }
+    assert.deepEqual(f.state.written, [], id);
+    assert.deepEqual(f.state.dispatched, [], id);
+  }
+  console.log(`Preparation baseline: ${preparationCases.length} actual-parser/resolver fixtures + 4 authority fixtures passed.`);
   for (const command of ["/approve", "/APPROVE", " \r\n /Approve \t\r\n"]) {
     for (const route of ["issue", "forward"]) {
       const f = fixture();

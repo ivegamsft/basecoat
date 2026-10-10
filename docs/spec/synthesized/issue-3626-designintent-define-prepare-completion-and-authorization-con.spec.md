@@ -321,6 +321,46 @@ absence of a prepared result.
 
 ### Routing and distribution boundary
 
+#### Executed disabled-baseline evidence (#3725)
+
+The wired [approval contract suite](../../../tests/approval-contract-tests.cjs)
+extracts the production `SHIP-IT DIRECTIVE CONTRACT` from the canonical workflow
+and executes its actual `parseDeliveryDirective`, then runs that workflow's
+complete `resolve-intent` script with isolated standard approval/API fixtures.
+The suite also checks canonical/distributed workflow parity. It does not add a
+parser, token, packet producer, dispatch, or approval policy.
+
+| Source clause / fixture IDs | Exact asserted baseline evidence |
+|---|---|
+| Positive routes: `P3725-positive-{ship-it,spec-2-prod}` | `delivery` with exact intent, goal, raw directive and `colon-alias` syntax; resolver `should_run=true` |
+| Candidate collisions: `P3725-candidate-{prepare,spec,build,review,deliver,ship}-{leading,quoted,fenced,bulleted,embedded,collision}` | `none` only, no normalized delivery fields; resolver `should_run=false`, no intent output |
+| Untrusted presentation: `P3725-supported-{ship-it,spec-2-prod}-{quoted,fenced,bulleted,embedded}` | Quoted/bulleted/embedded: `none`; fenced: `invalid` because a supported command line occurs after line zero; resolver does not run |
+| Dual prefixes: `P3725-dual-lines`, `P3725-dual-lines-reversed`, `P3725-candidate-before-supported` | `invalid` only; resolver does not run |
+| Modifier boundaries: `P3725-modifier-{ship-it,spec-2-prod}-{defer,later,stop,read-only}` | `suppressed` only; resolver does not run, not a preparation cancellation/packet |
+| Conflicting modifiers: `P3725-conflict-{ship-it,spec-2-prod}-{defer,later,stop,read-only}` | Adding `now` yields `invalid` only; resolver does not run |
+| Observed limitation: `P3725-dual-inline`, `P3725-supported-before-candidate` | Same-line second tokens remain goal text; first supported route is `delivery`, resolver runs with valid existing approval |
+| Existing authority: `P3725-authority-{actor-read,approval-read,approval-missing,approval-inaccessible}` | Current initiator/approver read-only permission or missing approval fails resolution; inaccessible approval throws status 403; no success output is accepted |
+
+All fixtures assert zero comment writes and workflow dispatches in this isolated
+resolver execution; this does not prove downstream execution is read-only.
+Unsupported candidates are never normalized to governed immediate delivery.
+It does **not** mean they produce a read-only packet or enforce preparation
+authority. `should_run=false` returns without normalized intent fields; the
+resolver's internal default `intent=ship-it` is not an emitted route.
+
+Executed evidence: `pwsh -NoProfile -File tests\approval-contract-tests.ps1`
+passed (67 parser/resolver fixtures and four authority fixtures, plus existing
+approval regressions). Fixture IDs above map the source's disabled-baseline
+requirement only. #3626 remains open for distinctness and adoption decisions.
+
+Future, unimplemented assertions remain gated: trusted preparation provenance,
+missing actor/repository/source fields, per-source read authorization, packet
+outcomes, freshness, budgets, zero source disclosure and producer write counts.
+The existing text parser accepts only raw text and has no provenance/source
+fields; no missing-field or source-access behavior is invented here. Its
+same-line dual-token acceptance is a recorded limitation, not proof of the
+proposal's future ambiguous-prefix blocking. This is not enabled-mode evidence.
+
 No instruction, skill, workflow, or downstream mapping is added by this proposal.
 The current canonical routing instruction remains
 `instructions/basecoat-10-core-intent-routing.instructions.md`; the existing
