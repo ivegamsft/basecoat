@@ -116,6 +116,42 @@ function forwardReceipt(prNumber, comment, issueNumber) {
   ].join("\n");
 }
 
+function approvedScopeReceipt(issueNumber, comment, specRef) {
+  return [
+    "<!-- basecoat-approved-scope:v1",
+    JSON.stringify({ issueNumber: Number(issueNumber), approvalId: Number(comment.id), specRef }),
+    "-->"
+  ].join("\n");
+}
+
+function findApprovedSpecRef({ comments, evidence, issueNumber }) {
+  const matches = [];
+  for (const comment of comments || []) {
+    if (comment.user?.login !== "github-actions[bot]" || comment.user?.type !== "Bot") continue;
+    const match = String(comment.body || "").match(
+      /<!-- basecoat-approved-scope:v1\s*\n([\s\S]*?)\n-->/
+    );
+    if (!match) continue;
+    let receipt;
+    try {
+      receipt = JSON.parse(match[1]);
+    } catch {
+      throw new Error("Approved specification scope receipt is invalid.");
+    }
+    if (Number(receipt.issueNumber) === Number(issueNumber) &&
+        Number(receipt.approvalId) === Number(evidence?.id)) {
+      if (typeof receipt.specRef !== "string" || !receipt.specRef) {
+        throw new Error("Approved specification scope receipt has no specification reference.");
+      }
+      matches.push(receipt.specRef);
+    }
+  }
+  if (new Set(matches).size > 1) {
+    throw new Error("Conflicting approved specification scope receipts exist for this approval.");
+  }
+  return matches[0] || null;
+}
+
 async function findApproval({ github, owner, repo, issueNumber, comments }) {
   for (const comment of comments) {
     if (isExactIssueApproval(comment.body) && !isBotActor(comment.user)) {
@@ -143,5 +179,34 @@ async function findApproval({ github, owner, repo, issueNumber, comments }) {
   return null;
 }
 
+async function findLatestApproval({ github, owner, repo, issueNumber, comments }) {
+  for (const comment of [...comments].reverse()) {
+    if (isExactIssueApproval(comment.body) && !isBotActor(comment.user)) {
+      const original = await qualifiedDirective({
+        github, owner, repo, commentId: comment.id, issueNumber
+      });
+      if (original) return original;
+      continue;
+    }
+    if (comment.user?.login !== "github-actions[bot]" || comment.user?.type !== "Bot") continue;
+    const receipt = String(comment.body || "").match(
+      /^<!-- basecoat-approval-forward:v1 pr:(\d+) comment:(\d+) issue:(\d+) -->\r?\n/
+    );
+    if (!receipt || Number(receipt[3]) !== Number(issueNumber)) continue;
+    const original = await qualifiedDirective({
+      github, owner, repo, commentId: receipt[2], issueNumber: receipt[1]
+    });
+    if (!original) continue;
+    const { data: pr } = await github.rest.pulls.get({
+      owner, repo, pull_number: Number(receipt[1])
+    });
+    if (closingIssueNumbers(`${pr.title || ""}\n${pr.body || ""}`).has(Number(issueNumber))) {
+      return original;
+    }
+  }
+  return null;
+}
+
 module.exports = { isExactIssueApproval, hasQualifiedPermission, isPlaceholderSpecUrl,
-  closingIssueNumbers, qualifiedDirective, validateIssue, forwardReceipt, findApproval };
+  closingIssueNumbers, qualifiedDirective, validateIssue, forwardReceipt, findApproval,
+  findLatestApproval, approvedScopeReceipt, findApprovedSpecRef };

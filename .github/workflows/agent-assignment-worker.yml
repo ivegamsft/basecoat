@@ -1,0 +1,67 @@
+name: "BaseCoat - Serialized Coding-Agent Assignment Worker"
+
+on:
+  workflow_call:
+    inputs:
+      issue_number:
+        description: Open issue to validate and assign
+        required: true
+        type: number
+      recovery:
+        description: Whether this invocation is watchdog recovery
+        required: false
+        default: false
+        type: boolean
+      approved_spec_ref:
+        description: Specification captured during the approval step
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  assignment:
+    name: Validate and reconcile one issue assignment
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    concurrency:
+      group: basecoat-agent-assignment-${{ github.repository_id }}-${{ inputs.issue_number }}
+      cancel-in-progress: false
+    steps:
+      - name: Checkout trusted default-branch contract
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Validate authority and reconcile assignment state
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        env:
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          RECOVERY: ${{ inputs.recovery }}
+          RECOVERY_WRITES_ENABLED: ${{ vars.BASECOAT_AGENT_ASSIGNMENT_RECOVERY_ENABLED || 'false' }}
+          MAX_ASSIGNMENT_ATTEMPTS: ${{ vars.BASECOAT_AGENT_ASSIGNMENT_MAX_ATTEMPTS || '3' }}
+          APPROVED_SPEC_REF: ${{ inputs.approved_spec_ref }}
+        with:
+          script: |
+            const approval = require(`${process.env.GITHUB_WORKSPACE}/.github/base-coat/scripts/approval-contract.cjs`);
+            const assignment = require(`${process.env.GITHUB_WORKSPACE}/.github/base-coat/scripts/agent-assignment.cjs`);
+            const state = await assignment.runAssignmentWorker({
+              github,
+              ...context.repo,
+              issueNumber: Number(process.env.ISSUE_NUMBER),
+              recovery: process.env.RECOVERY === 'true',
+              approvedSpecRef: process.env.APPROVED_SPEC_REF,
+              recoveryWritesEnabled: process.env.RECOVERY_WRITES_ENABLED === 'true',
+              maxAttempts: process.env.MAX_ASSIGNMENT_ATTEMPTS,
+              approval
+            });
+            core.info(
+              `Issue #${state.issueNumber}: ${state.state}; ` +
+              `${state.attemptsConsumed}/${state.maxAttempts} assignment requests consumed.`
+            );
+            if (state.ownerAction) {
+              core.warning(`Issue #${state.issueNumber} owner action: ${state.ownerAction}`);
+            }

@@ -376,6 +376,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running serialized agent assignment tests...'
+& node --test (Join-Path $PSScriptRoot 'agent-assignment-tests.cjs')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Serialized agent assignment tests failed' -ForegroundColor Red
+    Write-FailureLog 'agent-assignment-tests'
+    exit 1
+}
+
 Write-Host 'Running issue-triage lock refresh tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'issue-triage-lock-refresh-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
