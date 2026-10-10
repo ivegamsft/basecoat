@@ -97,6 +97,13 @@ branch naming or commit-message parsing alone is insufficient.
    prior success. Missing/revoked evidence, missing member, failed query or cancelled run
    must not yield a green barrier. An active hold after admission must block fresh group
    eligibility; separately authorized reconciliation owns queue cleanup, not this proposal.
+   Revocation after an already-green group must not wait for a `merge_group` rebuild:
+   require a trusted default-branch event consumer for hold, approval/permission, policy
+   and candidate-index changes plus a poller that covers missed events and API outages.
+   Track every active group affected by changed constituent evidence. Advance its durable
+   evidence revision, fence superseded evaluators, and publish non-success on the exact
+   group head or use separately authorized queue removal before final merge.
+   Verify the observed blocking/removal effect; issuing an API request is not proof.
 6. Finalization of a protected stack uses the aggregate manifest and exact final tree.
    Prior layer approval/checks cannot substitute for current main-bound eligibility.
    Keep existing native queue exact-tree validation; no unprotected finalization shortcut.
@@ -126,6 +133,17 @@ verification narrow races but do not prove atomic mutation.
 Durable decision storage, writer fencing and platform status ordering remain prerequisites.
 The admission writer's serialization does not itself fence independent status writers.
 
+Plain events, polling and status/removal APIs cannot atomically order revocation against
+native final merge. An old green may be consumed before failure/removal becomes effective;
+post-merge detection cannot satisfy "holds remain effective." Before activation, owners
+must choose an actually supported primitive that fences finalization against the evidence
+revision, or a verified platform timing/control bound with explicit accepted residual
+limitations that still satisfies the source contract. Prove worker fencing, event/poller
+coverage, detection/publication latency and effective blocking before final merge.
+No current API primitive, CAS, guaranteed grace period or atomic revocation is asserted.
+If the required before-final-merge guarantee cannot be demonstrated, enforcement activation
+remains blocked/default-off; a fast poller or measured average latency is not sufficient.
+
 Proposed retry budget: three evaluations per unchanged identity with backoff; exhausting
 that budget stops retries without redefining the controlling hybrid escalation policy:
 
@@ -151,6 +169,8 @@ Static ruleset/YAML assertions alone cannot prove the boundary.
 | Same context from wrong app / untrusted fork | Rejected; no privileged PR-code execution |
 | Old green plus new head/base/policy | Re-evaluate; no stale green reuse |
 | Hold/revocation after admission / API failure | Group cannot succeed on stale constituent evidence |
+| Hold/approval revoked after group green without rebuild | Trusted event/poller fences stale workers and blocks/removes before final merge, or activation stays blocked |
+| Delayed event / outage / stale worker green races failure | Proven primitive/bound prevents stale finalization; unsupported guarantee blocks activation |
 | Rebuilt group / changed member / multiple-member test | Exact complete membership recomputed despite current group-of-one setting |
 | Protected stack finalization | Aggregate manifest authorized; current exact-tree group succeeds |
 | PR barrier then group barrier | No circular wait or recursive queue request |
@@ -167,6 +187,8 @@ Do not enable a required status before its trusted producers and group triggers 
 Missing: finalized approved contract, required intake artifacts, implemented readiness/hold
 identities, stack manifest where applicable, complete group lookup, installed producer
 choice, effective live-policy inventory, revocation/fencing proof and hosted fixtures.
+After-green revocation coverage and a supported verified before-final-merge primitive/bound
+are still missing activation prerequisites, not capabilities implemented by this proposal.
 Stop on stale green, bypass admission, untrusted producer, deadlock or missing constituent.
 Rollback through separately authorized declarative governance changes; preserve existing
 queue/checks and fail closed by pausing new admissions rather than silently removing
