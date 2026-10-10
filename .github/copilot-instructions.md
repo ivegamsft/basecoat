@@ -77,3 +77,28 @@ Target: Reduce expensive backlog runs from 68–84M tokens to 35–45M tokens (4
 Record each long backlog run in `.github/backlog-session-metrics.json`, then regenerate
 `docs/reference/BACKLOG_SESSION_SCORECARD.md` with
 `python scripts/generate-backlog-efficiency-scorecard.py`.
+
+## Session-Learned Guardrails
+
+1. **Issue first, isolated worktree**: log a GitHub issue before implementing. Never edit the
+   main worktree; create a branch plus a separate worktree (`<repo>-wt-<id>`) and open a PR.
+2. **Commit identity**: commit as `Copilot <198982749+Copilot@users.noreply.github.com>` with
+   trailers `Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>` and
+   `Copilot-Session: <session-id>`. Unattributed commits can force manual approval.
+3. **Merge admission**: PRs merge through the native merge queue; never bypass required checks.
+   Bot-authored PRs may lack a size label: run `gh workflow run pr-size-labeler.yml -f pr_number=N`,
+   then `gh workflow run pr-auto-merge-executor.yml --ref main -f pr_number=N`.
+4. **PR size and intake**: size thresholds are S 100, M 300, L 800, XL 2000 changed lines; XXL
+   needs a qualified approval and self-approval is impossible, so split into stacked PRs instead.
+   Use the full `.github/PULL_REQUEST_TEMPLATE.md` and run
+   `node scripts/validate-pr-intake-preflight.cjs <body> origin/main HEAD` after committing.
+   Regenerate `asset-manifest.json` (`pwsh scripts/generate-asset-manifest.ps1`) when agents,
+   instructions, prompts or skills change.
+5. **Windows and tooling pitfalls**:
+   - Docs and instruction files use CRLF; normalize to LF before string edits, then restore.
+   - `gh project link` can fail with "unknown owner type"; use the GraphQL
+     `linkProjectV2ToRepository` mutation with back-off for rate limits.
+   - Skills must stay under about 630 tokens and must not reference workflows that are not
+     distributed downstream.
+   - `tests/run-tests.ps1` has intermittent Windows temp-directory lock failures in
+     `sync-tests.ps1`; CI is authoritative.
