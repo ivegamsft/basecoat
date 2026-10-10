@@ -81,11 +81,13 @@ test("dirty PR routes exact head with shared procedure and no bypass", async () 
   await f.run();
   assert.equal(calls(f, "createComment").length, 1);
   assert.equal(calls(f, "addLabels").length, 1);
+  assert.deepEqual(calls(f, "addLabels")[0].args.labels, ["needs-conflict-fix"]);
   const body = f.state.comments[0].body;
   assert.ok(body.includes(`<!-- pr-conflict-routing:v1 head=${head} -->`));
   assert.ok(body.includes("`main` (mergeable_state=dirty)"));
   for (const text of [
-    "skills/merge-conflict-mediator/SKILL.md", "merge-coordinator", "isolated worktree",
+    "@copilot resolve the conflicts", "skills/merge-conflict-mediator/SKILL.md",
+    "merge-coordinator", "isolated worktree",
     "take the base version", "pwsh scripts/generate-asset-manifest.ps1",
     "Preserve the PR intent", "do not drop base changes or bypass required checks",
     "attributed commit", "XXL approval and no-merge holds are unaffected"
@@ -153,6 +155,7 @@ test("mergeable PR removes obsolete conflict label without notification", async 
   });
   await f.run();
   assert.equal(calls(f, "removeLabel").length, 1);
+  assert.equal(calls(f, "removeLabel")[0].args.name, "needs-conflict-fix");
   assert.equal(calls(f, "createComment").length, 0);
 });
 
