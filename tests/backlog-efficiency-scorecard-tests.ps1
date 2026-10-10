@@ -113,6 +113,26 @@ $status = Invoke-Scorecard -Sessions @(
 Assert-True (-not $status.allPracticesCompliant) 'Expected allPracticesCompliant false when one practice flag is false'
 Assert-True (-not $status.overallPass) 'Expected overallPass false when practice compliance is incomplete'
 
+@'
+import importlib.util
+import pathlib
+import tempfile
+root = pathlib.Path.cwd()
+spec = importlib.util.spec_from_file_location("generator", root / "scripts" / "generate-backlog-efficiency-scorecard.py")
+generator = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(generator)
+source = generator.load_source(root / ".github" / "backlog-session-metrics.json")
+with tempfile.TemporaryDirectory() as directory:
+    capture = pathlib.Path(directory) / "nonexistent-source.json"
+    rendered = generator.render_markdown(capture, pathlib.Path("source.json"), pathlib.Path("scorecard.md"), source)
+    assert f"- Generated: {source['generatedAt']}" in rendered
+    source.pop("generatedAt")
+    fallback = generator.render_markdown(capture, pathlib.Path("source.json"), pathlib.Path("scorecard.md"), source)
+    assert "- Generated: " + max(session["date"] for session in source["sessions"]) in fallback
+print("Scorecard generation uses tracked cut, not filesystem timestamps.")
+'@ | python -
+Assert-True ($LASTEXITCODE -eq 0) 'Tracked timestamp generator must not depend on filesystem mtime.'
+
 if ($failures.Count -gt 0) {
     Write-Host "backlog-efficiency-scorecard tests FAILED ($($failures.Count) issue(s))" -ForegroundColor Red
     foreach ($failure in $failures) {

@@ -3,7 +3,7 @@
 Generated from a repository-tracked measurement ledger so issue #1361 has
 operational data instead of an advisory-only target.
 
-- Generated: 2026-10-10 08:56:17 -0400
+- Generated: 2026-10-10T12:53:23.888Z
 - Source data: `.github/backlog-session-metrics.json`
 - Output: `docs/reference/BACKLOG_SESSION_SCORECARD.md`
 - Refresh command: `python scripts/generate-backlog-efficiency-scorecard.py`

@@ -154,8 +154,8 @@ def render_markdown(source_file: Path, source_path: Path, output_path: Path, sou
     thresholds = source["policyThresholds"]
     sessions = normalize_sessions(source)
     summary = summarize(source, sessions)
-    generated = datetime.fromtimestamp(source_file.stat().st_mtime).astimezone().strftime(
-        "%Y-%m-%d %H:%M:%S %z"
+    generated = source.get("generatedAt") or (
+        max(session["date"] for session in sessions) if sessions else "unavailable"
     )
 
     lines = [
