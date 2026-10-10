@@ -84,6 +84,11 @@ if ($doc -notmatch 'post-merge-release-chain\.yml') {
 if ($doc -notmatch 'automation-stuck-state-watchdog\.yml') {
   throw "Integration guide must reference automation-stuck-state-watchdog.yml."
 }
+if ($doc -notmatch 'BASECOAT_AGENT_ASSIGNMENT_RECOVERY_ENABLED' -or
+  $doc -notmatch 'read-only by default' -or
+  $doc -notmatch 'live acceptance as blocked') {
+  throw "Integration guide must document the assignment recovery rollout gate."
+}
 
 $workflowsGuide = Get-Content -Raw -Path $workflowsGuidePath
 if ($workflowsGuide -notmatch 'basecoat-pr-auto-merge-executor\.yml') {

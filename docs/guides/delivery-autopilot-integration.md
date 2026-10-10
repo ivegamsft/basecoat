@@ -22,7 +22,26 @@ guarantee that every handoff is automatic.
    evidence-only, dry-run validation gate plus source-repository packaging.
    Dispatch evidence is not production completion or release-tag creation.
 3. `automation-stuck-state-watchdog.yml` scans stalled stages and opens/updates
-   escalation issues. It does not itself implement repairs or deploy releases.
+   escalation issues. It does not deploy releases.
+
+## Approved-Issue Assignment Recovery
+
+Approved issues use one serialized worker for direct approval, forwarded
+approval, and watchdog recovery. The worker records assignment attempts and
+observed state in the issue's status comment; that comment and labels are not
+approval evidence. Watchdog recovery is read-only by default. Do not set
+`BASECOAT_AGENT_ASSIGNMENT_RECOVERY_ENABLED` to `true` until a genuinely
+authorized, controlled assignment test is available and explicitly in scope.
+Do not create an approval or assign a test issue merely to exercise recovery.
+Without that live acceptance evidence, keep recovery writes disabled and report
+the live acceptance as blocked.
+
+The worker requires `pull-requests: read` to revalidate forwarded approvals and
+read genuine execution evidence. Repeated sweeps preserve the first verified
+assignment timestamp within the approval epoch; unrelated activity cannot
+postpone the assignment-to-execution SLA. Once execution is observed, that
+stage no longer escalates (and its existing escalation resolves); PR readiness
+and release progress remain tracked by their separate stages.
 
 ## Validation
 

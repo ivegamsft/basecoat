@@ -13,6 +13,7 @@
     { "file": "basecoat-dependency-update-advisor.yml", "ownership": "factory-owned" },
     { "file": "bc-dependency-update-advisor.yml", "ownership": "factory-owned" },
     { "file": "basecoat-issue-approve.yml", "ownership": "factory-owned" },
+    { "file": "agent-assignment-worker.yml", "ownership": "factory-owned" },
     { "file": "basecoat-pr-auto-merge-executor.yml", "ownership": "factory-owned" },
     { "file": "basecoat-sprint-closeout-branch-audit.yml", "ownership": "factory-owned" },
     { "file": "bc-sprint-closeout-branch-audit.yml", "ownership": "factory-owned" },

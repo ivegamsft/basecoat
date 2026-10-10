@@ -180,10 +180,16 @@ async function main() {
   assert.equal(assignment, distributedAssignment, "Source and packaged assignment helpers must resolve to one adapter.");
 
   const readWorkflow = file => fs.readFileSync(file, "utf8").replace(/\r\n/g, "\n");
+  const issueWorkflow = readWorkflow(path.join(root, ".github", "workflows", "issue-approve.yml"));
+  const issueTemplate = readWorkflow(path.join(root, ".github", "base-coat", "workflows", "issue-approve.yml"));
+  const watchdogWorkflow = readWorkflow(path.join(root, ".github", "workflows", "automation-stuck-state-watchdog.yml"));
+  const watchdogTemplate = readWorkflow(path.join(root, ".github", "base-coat", "workflows", "automation-stuck-state-watchdog.yml"));
   const workerWorkflow = readWorkflow(path.join(root, ".github", "workflows", "agent-assignment-worker.yml"));
   const workerTemplate = readWorkflow(path.join(root, ".github", "base-coat", "workflows", "agent-assignment-worker.yml"));
   const helperSource = fs.readFileSync(path.join(root, ".github", "base-coat", "scripts", "agent-assignment.cjs"), "utf8");
   const approvalSource = fs.readFileSync(path.join(root, ".github", "base-coat", "scripts", "approval-contract.cjs"), "utf8");
+  assert.equal(issueWorkflow, issueTemplate);
+  assert.equal(watchdogWorkflow, watchdogTemplate);
   assert.equal(workerWorkflow, workerTemplate);
   for (const workflow of [workerWorkflow, workerTemplate]) {
     assert.match(workflow, /^permissions:\n  contents: read\n  issues: write\n  pull-requests: read\n/m,
@@ -191,9 +197,16 @@ async function main() {
   }
   assert.match(workerWorkflow, /group: basecoat-agent-assignment-\$\{\{ github\.repository_id \}\}-\$\{\{ inputs\.issue_number \}\}/);
   assert.match(workerWorkflow, /cancel-in-progress:\s*false/);
+  assert.match(issueWorkflow, /uses: \.\/\.github\/workflows\/agent-assignment-worker\.yml/);
+  assert.match(watchdogWorkflow, /uses: \.\/\.github\/workflows\/agent-assignment-worker\.yml/);
+  assert.match(watchdogWorkflow, /recovery: true/);
+  assert.doesNotMatch(issueWorkflow, /POST \/repos\/\{owner\}\/\{repo\}\/issues\/\{issue_number\}\/assignees/);
+  assert.doesNotMatch(watchdogWorkflow, /POST \/repos\/\{owner\}\/\{repo\}\/issues\/\{issue_number\}\/assignees/);
   assert.match(helperSource, /request: \{ retryCount: 0 \}/);
   assert.match(workerWorkflow, /RECOVERY_WRITES_ENABLED: \$\{\{ vars\.BASECOAT_AGENT_ASSIGNMENT_RECOVERY_ENABLED \|\| 'false' \}\}/);
   assert.match(workerWorkflow, /APPROVED_SPEC_REF: \$\{\{ inputs\.approved_spec_ref \}\}/);
+  assert.match(issueWorkflow, /approved_spec_ref: \$\{\{ needs\.approve\.outputs\.approved_spec_ref \}\}/);
+  assert.match(issueWorkflow, /assignment_targets/);
   assert.match(approvalSource, /basecoat-approved-scope:v1/);
 
   const forwardedApproval = fixture({ approval: false });
@@ -220,9 +233,52 @@ async function main() {
   assert.ok(approvalPrReads >= 2, "Forwarded authority must reread its original PR before assignment.");
   assert.equal(forwardedApproval.state.writes, 1);
 
+  const discovered = fixture();
+  discovered.github.rest.search = {
+    async issuesAndPullRequests() { return { data: [{ number: issueNumber }] }; }
+  };
+  const discoveryScript = extractScript(watchdogWorkflow, "discover-agent-assignments");
+  const selected = await executeWorkflowScript(discoveryScript, discovered, {
+    MAX_ITEMS: "200", RUN_NUMBER: "1"
+  });
+  assert.deepEqual(JSON.parse(selected.issue_numbers), [issueNumber]);
+  const labelsOnly = fixture({ approval: false });
+  labelsOnly.github.rest.search = discovered.github.rest.search;
+  const excluded = await executeWorkflowScript(discoveryScript, labelsOnly, {
+    MAX_ITEMS: "200", RUN_NUMBER: "1"
+  });
+  assert.deepEqual(JSON.parse(excluded.issue_numbers), [], "Labels alone must never select authorized recovery work.");
+  const unscopedApproval = fixture();
+  unscopedApproval.state.issue.body =
+    "- Spec: https://github.com/IBuySpy-Shared/basecoat/blob/main/docs/spec/changed.spec.md";
+  unscopedApproval.github.rest.search = discovered.github.rest.search;
+  const scopeMismatch = await executeWorkflowScript(discoveryScript, unscopedApproval, {
+    MAX_ITEMS: "200", RUN_NUMBER: "1"
+  });
+  assert.deepEqual(JSON.parse(scopeMismatch.issue_numbers), [],
+    "Untracked recovery must not bind an old approval to a changed specification.");
   const legacyApproval = fixture();
   legacyApproval.state.comments = legacyApproval.state.comments.filter(comment =>
     !String(comment.body || "").includes("basecoat-approved-scope:v1"));
+  legacyApproval.github.rest.search = discovered.github.rest.search;
+  const legacySelection = await executeWorkflowScript(discoveryScript, legacyApproval, {
+    MAX_ITEMS: "200", RUN_NUMBER: "1"
+  });
+  assert.deepEqual(JSON.parse(legacySelection.issue_numbers), [issueNumber],
+    "An exact legacy approval without a scope receipt must reach the worker for an actionable migration state.");
+
+  const trackedFailure = fixture({
+    requestBehavior() { throw Object.assign(new Error("temporary"), { status: 503 }); }
+  });
+  await run(trackedFailure);
+  trackedFailure.state.dependency = Object.assign(new Error("dependency read denied"), { status: 403 });
+  trackedFailure.state.issue.body += "\nDepends on #99";
+  trackedFailure.github.rest.search = discovered.github.rest.search;
+  const trackedAfterValidationFailure = await executeWorkflowScript(discoveryScript, trackedFailure, {
+    MAX_ITEMS: "200", RUN_NUMBER: "1"
+  });
+  assert.deepEqual(JSON.parse(trackedAfterValidationFailure.issue_numbers), [issueNumber],
+    "A tracked failure must still reach the worker when discovery validation fails.");
 
   const workerScript = extractScript(workerWorkflow, "assignment");
   const legacyResult = await executeWorkflowScript(workerScript, legacyApproval, {
@@ -315,6 +371,56 @@ async function main() {
   assert.equal(executionState.executionState, "observed");
   assert.equal(executionState.executionUrl, `https://github.com/${owner}/${repo}/pull/777`);
 
+  const watchdogScript = extractScript(watchdogWorkflow, "watchdog");
+  async function checkExecutionEscalation(f, expectBreach) {
+    const escalations = [];
+    const resolutions = [];
+    f.github.rest.search = {
+      async issuesAndPullRequests({ q }) {
+        return { data: q.includes("is:issue") ? [f.state.issue] : [] };
+      }
+    };
+    f.github.rest.pulls.list = async () => ({ data: [] });
+    f.github.rest.issues.listForRepo = async () => ({ data: [{
+      number: 888, state: "open",
+      body: `<!-- automation-watchdog:fingerprint:issue_to_pr:issue:${issueNumber} -->`
+    }] });
+    f.github.rest.issues.createComment = async args => {
+      escalations.push(args.body);
+      return { data: { id: 889 } };
+    };
+    f.github.rest.issues.update = async args => {
+      resolutions.push(args);
+      return { data: args };
+    };
+    f.github.rest.issues.create = async () => {
+      assert.fail("An existing escalation must be reused.");
+    };
+    class WatchdogClock extends Date {
+      constructor(...args) {
+        super(...(args.length ? args : [
+          Date.parse(statusFromComments(f.state.comments).verifiedAt) + 48 * 60 * 60 * 1000
+        ]));
+      }
+    }
+    await executeWorkflowScript(watchdogScript, f, {
+      SLA_CONFIG_PATH: path.join(root, ".github", "governance", "automation-stage-slas.json")
+    }, WatchdogClock);
+    if (expectBreach) {
+      assert.equal(escalations.length, 1);
+      assert.match(escalations[0], /automation-watchdog:fingerprint:issue_to_pr/);
+      assert.equal(resolutions.length, 0, "Unobserved execution must continue to breach.");
+    } else {
+      assert.equal(escalations.length, 1);
+      assert.match(escalations[0], /Escalation resolved/);
+      assert.match(escalations[0], /execution evidence has been observed/);
+      assert.equal(resolutions.length, 1);
+      assert.equal(resolutions[0].state, "closed");
+      assert.equal(resolutions[0].state_reason, "completed");
+    }
+  }
+  await checkExecutionEscalation(normalApproval, true);
+  await checkExecutionEscalation(execution, false);
 
   const untrustedExecution = fixture({
     assignees: [{ login: agentLogin, type: "Bot" }],
@@ -655,6 +761,10 @@ async function main() {
   assert.equal(newEpoch.attemptsConsumed, 1);
   assert.equal(newEpoch.previousEpochs.length, 1);
 
+  const racingApproval = issueWorkflow;
+  assert.match(racingApproval, /assign-approved-issue:[\s\S]*?uses: \.\/\.github\/workflows\/agent-assignment-worker\.yml/);
+  assert.match(racingApproval, /assign-approved-pr-issues:[\s\S]*?uses: \.\/\.github\/workflows\/agent-assignment-worker\.yml/);
+  assert.match(watchdogWorkflow, /reconcile-agent-assignments:[\s\S]*?uses: \.\/\.github\/workflows\/agent-assignment-worker\.yml/);
   console.log("Agent assignment adapter, workflow extraction, and bounded recovery tests passed.");
 }
 

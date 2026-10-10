@@ -6,6 +6,8 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
 $workflowPath = Join-Path $repoRoot '.github\workflows\issue-approve.yml'
 $templatePath = Join-Path $repoRoot '.github\base-coat\workflows\issue-approve.yml'
+$workerPath = Join-Path $repoRoot '.github\workflows\agent-assignment-worker.yml'
+$assignmentHelperPath = Join-Path $repoRoot '.github\base-coat\scripts\agent-assignment.cjs'
 
 if (-not (Test-Path $workflowPath)) {
     throw "Missing workflow file: $workflowPath"
@@ -13,6 +15,14 @@ if (-not (Test-Path $workflowPath)) {
 if (-not (Test-Path $templatePath)) {
     throw "Missing template workflow file: $templatePath"
 }
+if (-not (Test-Path $workerPath)) {
+    throw "Missing serialized assignment worker: $workerPath"
+}
+if (-not (Test-Path $assignmentHelperPath)) {
+    throw "Missing shared assignment state adapter: $assignmentHelperPath"
+}
+$workerContent = Get-Content -Path $workerPath -Raw
+$assignmentHelperContent = Get-Content -Path $assignmentHelperPath -Raw
 
 $files = @(
     @{ Name = '.github/workflows/issue-approve.yml'; Content = (Get-Content -Path $workflowPath -Raw) },
@@ -50,9 +60,9 @@ foreach ($entry in $files) {
         $content -notmatch 'approval\.forwardReceipt') {
         throw "$name must use the shared issue contract and original qualified directive before assignment."
     }
-    if ($content -notmatch 'Open a ready-for-review implementation PR \(not a draft\)' -or
-        $content -notmatch 'Closes #') {
-        throw "$name must require a ready, issue-closing implementation PR from the coding agent."
+    if ($assignmentHelperContent -notmatch 'Open a ready-for-review implementation PR \(not a draft\)' -or
+        $assignmentHelperContent -notmatch 'Closes #') {
+        throw 'Serialized worker must require a ready, issue-closing implementation PR from the coding agent.'
     }
     if ($content -notmatch 'approval\.findApproval') {
         throw "$name must revalidate real authority before linked PR reevaluation."
@@ -63,6 +73,11 @@ foreach ($entry in $files) {
     }
     if ($content -notmatch 'copilot-agent') {
         throw "$name must still apply approved/copilot-agent labels."
+    }
+    if ($content -notmatch 'assign-approved-issue' -or
+        $content -notmatch 'assign-approved-pr-issues' -or
+        $content -notmatch 'agent-assignment-worker\.yml') {
+        throw "$name must route both direct and PR-forwarded approval to the shared assignment worker."
     }
     if ($content -notmatch 'Processed /approve') {
         throw "$name must document direct /approve processing in the PR response."
@@ -85,6 +100,11 @@ foreach ($entry in $files) {
     if ($content -match '⚠️|✅|⛔') {
         throw "$name must not use emoji in user-facing comments."
     }
+}
+
+if ($workerContent -notmatch 'basecoat-agent-assignment-\$\{\{\s*github\.repository_id\s*\}\}-\$\{\{\s*inputs\.issue_number\s*\}\}' -or
+    $workerContent -notmatch 'cancel-in-progress:\s*false') {
+    throw 'Shared assignment worker must serialize by repository and issue without cancelling active work.'
 }
 
 Write-Host 'Issue-approve routing workflow tests passed.'

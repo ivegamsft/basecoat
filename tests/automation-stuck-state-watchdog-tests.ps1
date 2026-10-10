@@ -6,6 +6,8 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
 $workflowPath = Join-Path $repoRoot '.github\workflows\automation-stuck-state-watchdog.yml'
 $templatePath = Join-Path $repoRoot '.github\base-coat\workflows\automation-stuck-state-watchdog.yml'
+$workerPath = Join-Path $repoRoot '.github\workflows\agent-assignment-worker.yml'
+$workerTemplatePath = Join-Path $repoRoot '.github\base-coat\workflows\agent-assignment-worker.yml'
 $configPath = Join-Path $repoRoot '.github\governance\automation-stage-slas.json'
 
 if (-not (Test-Path $workflowPath)) {
@@ -14,16 +16,48 @@ if (-not (Test-Path $workflowPath)) {
 if (-not (Test-Path $templatePath)) {
     throw "Missing template workflow file: $templatePath"
 }
+if (-not (Test-Path $workerPath) -or -not (Test-Path $workerTemplatePath)) {
+    throw 'Both production and distributed serialized assignment worker workflows are required.'
+}
 if (-not (Test-Path $configPath)) {
     throw "Missing SLA config file: $configPath"
 }
 
 $workflow = Get-Content -Path $workflowPath -Raw
 $template = Get-Content -Path $templatePath -Raw
+$worker = Get-Content -Path $workerPath -Raw
+$workerTemplate = Get-Content -Path $workerTemplatePath -Raw
 $config = Get-Content -Path $configPath -Raw | ConvertFrom-Json
 
 if ($workflow -ne $template) {
     throw 'automation-stuck-state-watchdog workflow and template must be identical.'
+}
+if ($worker -ne $workerTemplate) {
+    throw 'Serialized assignment worker workflow and template must be identical.'
+}
+foreach ($requiredAssignmentText in @(
+    'discover-agent-assignments',
+    'reconcile-agent-assignments',
+    'approval.findLatestApproval',
+    'approval.findApprovedSpecRef',
+    'executionState === ''observed''',
+    'recovery: true'
+)) {
+    if ($workflow -notmatch [regex]::Escape($requiredAssignmentText)) {
+        throw "Watchdog must discover authorized unresolved assignments and invoke the shared worker: $requiredAssignmentText"
+    }
+}
+if ($workflow -match 'hoursSince\(issue\.updated_at\)' -or
+    $workflow -notmatch 'hoursSince\(observed\.state\.verifiedAt\)' -or
+    $workflow -notmatch 'currentIssue\.assignees') {
+    throw 'Issue execution escalation must use a verified coding-agent assignee timestamp, not unrelated issue updates.'
+}
+$discoveryBlock = [regex]::Match(
+    $workflow,
+    '(?ms)^  discover-agent-assignments:\s*\r?\n(?<body>[\s\S]*?)(?=^  reconcile-agent-assignments:)'
+).Groups['body'].Value
+if (-not $discoveryBlock -or $discoveryBlock -match 'label:approved') {
+    throw 'Recovery discovery must query live open issues and qualify original approval evidence instead of trusting labels.'
 }
 
 if ($workflow -notmatch '(?m)name:\s*"BaseCoat - Automation Stuck-State Watchdog"') {

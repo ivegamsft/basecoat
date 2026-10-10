@@ -43,6 +43,99 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  discover-agent-assignments:
+    name: Find unresolved authorized assignments
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      issue_numbers: ${{ steps.discover.outputs.issue_numbers }}
+    steps:
+      - name: Checkout trusted default-branch contract
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Select bounded unresolved assignments from live evidence
+        id: discover
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        env:
+          MAX_ITEMS: ${{ inputs.max_items || '200' }}
+          RUN_NUMBER: ${{ github.run_number }}
+        with:
+          script: |
+            const approval = require(`${process.env.GITHUB_WORKSPACE}/.github/base-coat/scripts/approval-contract.cjs`);
+            const assignment = require(`${process.env.GITHUB_WORKSPACE}/.github/base-coat/scripts/agent-assignment.cjs`);
+            const configured = Number(process.env.MAX_ITEMS);
+            if (!Number.isSafeInteger(configured) || configured < 1) {
+              throw new Error('MAX_ITEMS must be a positive integer.');
+            }
+            const maxItems = Math.min(configured, 200);
+            const runNumber = Number(process.env.RUN_NUMBER);
+            if (!Number.isSafeInteger(runNumber) || runNumber < 1) {
+              throw new Error('RUN_NUMBER must be a positive integer.');
+            }
+            const approvedIssues = await github.paginate(github.rest.search.issuesAndPullRequests, {
+              q: `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open sort:updated-asc`,
+              per_page: 100
+            });
+            const batchSize = Math.min(maxItems, 200);
+            const pageCount = Math.max(1, Math.ceil(approvedIssues.length / batchSize));
+            const pageIndex = (runNumber - 1) % pageCount;
+            const candidates = approvedIssues.slice(pageIndex * batchSize, (pageIndex + 1) * batchSize);
+            const selected = [];
+            for (const candidate of candidates) {
+              if (selected.length >= maxItems) break;
+              let priorState;
+              try {
+                const observed = await assignment.readStatus({
+                  github, ...context.repo, issueNumber: candidate.number
+                });
+                priorState = observed?.state || null;
+              } catch (error) {
+                core.warning(`Could not read owned assignment status for #${candidate.number}: ${error.message}`);
+                continue;
+              }
+              if (priorState) {
+                const agentAssigned = (candidate.assignees || []).some(assignment.isAgentAssignee);
+                if (priorState.state === 'assigned' && agentAssigned &&
+                    priorState.executionState === 'observed') continue;
+                selected.push(Number(candidate.number));
+                continue;
+              }
+              try {
+                const current = await approval.validateIssue({
+                  github, ...context.repo, issueNumber: candidate.number
+                });
+                if (current.issue.state !== 'open' || current.issue.pull_request || current.missing.length) continue;
+                const evidence = await approval.findLatestApproval({
+                  github, ...context.repo, issueNumber: candidate.number, comments: current.comments
+                });
+                if (!evidence) continue;
+                const approvedSpecRef = approval.findApprovedSpecRef({
+                  comments: current.comments, evidence, issueNumber: candidate.number
+                });
+                if (approvedSpecRef && approvedSpecRef !== current.specRef) continue;
+                selected.push(Number(candidate.number));
+              } catch (error) {
+                core.warning(`Could not validate untracked assignment #${candidate.number}: ${error.message}`);
+              }
+            }
+            core.setOutput('issue_numbers', JSON.stringify(selected));
+            core.info(`Selected ${selected.length} authorized unresolved assignment(s) for serialized workers.`);
+
+  reconcile-agent-assignments:
+    name: Reconcile one authorized issue assignment
+    needs: discover-agent-assignments
+    if: needs.discover-agent-assignments.outputs.issue_numbers != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        issue_number: ${{ fromJSON(needs.discover-agent-assignments.outputs.issue_numbers) }}
+    uses: ./.github/workflows/agent-assignment-worker.yml
+    with:
+      issue_number: ${{ matrix.issue_number }}
+      recovery: true
+
   watchdog:
     name: Detect and escalate stuck delivery states
     runs-on: ubuntu-latest
@@ -63,6 +156,7 @@ jobs:
         with:
           script: |
             const fs = require('fs');
+            const assignment = require(`${process.env.GITHUB_WORKSPACE}/.github/base-coat/scripts/agent-assignment.cjs`);
 
             const marker = '<!-- automation-watchdog:v1 -->';
             const releaseChainMarker = 'post-merge-release-chain:v1';
@@ -135,17 +229,31 @@ jobs:
 
             for (const issue of approvedIssues.slice(0, maxItems)) {
               if (shouldSuppress(issue.labels)) continue;
-              const staleHours = hoursSince(issue.updated_at);
+              const { data: currentIssue } = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number
+              });
+              const observed = await assignment.readStatus({
+                github, ...context.repo, issueNumber: issue.number
+              });
+              if (observed?.state?.state !== 'assigned' ||
+                  !(currentIssue.assignees || []).some(assignment.isAgentAssignee) ||
+                  !observed.state.verifiedAt ||
+                  observed.state.executionState === 'observed') continue;
+              const staleHours = hoursSince(observed.state.verifiedAt);
               if (staleHours <= stageThresholds.issue_to_pr_hours) continue;
               findings.push({
                 stage: 'issue_to_pr',
-                stageLabel: 'Issue approved -> execution progress',
+                stageLabel: 'Coding-agent assignment observed -> execution evidence',
                 entityType: 'issue',
                 entityNumber: issue.number,
-                owner: issue.assignee?.login || issue.user?.login || 'unassigned',
+                owner: observed.state.verifiedAssignee || 'unverified',
                 staleHours,
-                nextAction: 'Route to execution owner, confirm assignment, or move to blocked queue with reason.',
-                evidenceUrl: issue.html_url
+                nextAction: observed.state.executionUrl
+                  ? 'Review the verified coding-agent execution evidence and report progress.'
+                  : 'Assignment is observed, but execution remains unobserved; confirm a genuine PR/session URL before claiming work started.',
+                evidenceUrl: observed.state.executionUrl || issue.html_url
               });
             }
 
@@ -370,6 +478,12 @@ jobs:
                 });
                 if (shouldSuppress(issue.labels)) return 'issue carries a watchdog suppression label';
                 if (issue.state === 'closed') return 'issue has been closed';
+                const observed = await assignment.readStatus({
+                  github, ...context.repo, issueNumber: entityNumber
+                });
+                if (observed?.state?.executionState === 'observed') {
+                  return 'coding-agent execution evidence has been observed';
+                }
                 return normalizeLabels(issue.labels).includes('approved')
                   ? null
                   : 'issue no longer carries the approved label';

@@ -49,6 +49,7 @@ Assert-True -Condition (@($manifest.workflows | Where-Object { $_.ownership -ne 
 
 foreach ($requiredFactoryWorkflow in @(
         'basecoat-secret-scan.yml',
+        'agent-assignment-worker.yml',
         'ship-it-intent-dispatch.yml',
         'basecoat-internal-database-ci-cd.yml'
     )) {
@@ -225,6 +226,35 @@ jobs:
         -Message 'Targeted template refresh must not enable other template workflows.'
     Assert-True -Condition ((Get-Content -LiteralPath (Join-Path $targetedGovernanceDir 'policy-packs.json') -Raw).Trim() -eq '{"consumer":"policy"}') `
         -Message 'Targeted template refresh must preserve existing governance files.'
+
+    $assignmentSourceDir = Join-Path $scratch 'assignment-source'
+    $assignmentGovernanceDir = Join-Path $scratch 'assignment-governance'
+    New-Item -ItemType Directory -Force -Path $assignmentSourceDir, $assignmentGovernanceDir | Out-Null
+    Copy-Item -LiteralPath $manifestPath -Destination (Join-Path $assignmentSourceDir 'workflow-ownership-manifest.json')
+    foreach ($assignmentWorkflow in @(
+            'agent-assignment-worker.yml',
+            'issue-approve.yml',
+            'automation-stuck-state-watchdog.yml'
+        )) {
+        Copy-Item -LiteralPath (Join-Path $repoRoot ".github\base-coat\workflows\$assignmentWorkflow") `
+            -Destination $assignmentSourceDir
+    }
+    foreach ($caller in @('issue-approve.yml', 'automation-stuck-state-watchdog.yml')) {
+        $callerDestinationDir = Join-Path $scratch "assignment-destination-$($caller -replace '\.yml$', '')"
+        New-Item -ItemType Directory -Force -Path $callerDestinationDir | Out-Null
+        & pwsh -NoProfile -File $installerPath `
+            -SourceDir $assignmentSourceDir `
+            -DestinationDir $callerDestinationDir `
+            -GovernanceDestinationDir $assignmentGovernanceDir `
+            -Workflow $caller | Out-Null
+        Assert-True -Condition ($LASTEXITCODE -eq 0) `
+            -Message "Targeted install of $caller must include the reusable worker dependency."
+        $callerDestination = if ($caller -eq 'issue-approve.yml') { 'basecoat-issue-approve.yml' } else { $caller }
+        Assert-True -Condition (Test-Path -LiteralPath (Join-Path $callerDestinationDir $callerDestination)) `
+            -Message "Targeted install must install caller $caller."
+        Assert-True -Condition (Test-Path -LiteralPath (Join-Path $callerDestinationDir 'agent-assignment-worker.yml')) `
+            -Message "Targeted install of $caller must install agent-assignment-worker.yml."
+    }
 
     $targetedManifestPath = Join-Path $targetedSourceDir 'workflow-ownership-manifest.json'
     $heldManifestPath = "$targetedManifestPath.held"

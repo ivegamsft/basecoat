@@ -202,6 +202,7 @@ $workflowMap = @(
         # Uses Copilot cloud-agent assignment flow: suggestedActors -> copilot-swe-agent[bot] + agent_assignment.
         Supported = $true
         Class = 'templates'
+        Dependencies = @('agent-assignment-worker.yml')
     }
     [pscustomobject]@{
         Source = 'pr-auto-merge-executor.yml'
@@ -321,12 +322,21 @@ $workflowMap = @(
         Class = 'templates'
     }
     [pscustomobject]@{
+        Source = 'agent-assignment-worker.yml'
+        Destination = 'agent-assignment-worker.yml'
+        LegacyDestinations = @()
+        Name = 'BaseCoat - Serialized Coding-Agent Assignment Worker'
+        Supported = $true
+        Class = 'templates'
+    }
+    [pscustomobject]@{
         Source = 'automation-stuck-state-watchdog.yml'
         Destination = 'automation-stuck-state-watchdog.yml'
         LegacyDestinations = @()
         Name = 'BaseCoat Template - Automation Stuck-state Watchdog'
         Supported = $true
         Class = 'templates'
+        Dependencies = @('agent-assignment-worker.yml')
     }
     [pscustomobject]@{
         # Destination preserves the source filename: the security drift-auditor
@@ -408,6 +418,33 @@ if ($targetedInstall) {
                     Sort-Object -Unique
             ) -join ', '
             throw "Unknown workflow selector '$selector'. Valid source or destination names: $validSelectors"
+        }
+    }
+
+    $dependenciesExpanded = $true
+    while ($dependenciesExpanded) {
+        $dependenciesExpanded = $false
+        $selectedEntries = @(
+            $workflowMap | Where-Object {
+                $workflowSelectors.Contains($_.Source) -or
+                $workflowSelectors.Contains($_.Destination) -or
+                @($_.LegacyDestinations | Where-Object { $workflowSelectors.Contains($_) }).Count -gt 0
+            }
+        )
+        foreach ($workflowEntry in $selectedEntries) {
+            $dependencyProperty = $workflowEntry.PSObject.Properties['Dependencies']
+            if ($null -eq $dependencyProperty) { continue }
+            foreach ($dependency in $workflowEntry.Dependencies) {
+                $dependencyEntry = @($workflowMap | Where-Object {
+                    $_.Source -eq $dependency -or $_.Destination -eq $dependency
+                }) | Select-Object -First 1
+                if ($null -eq $dependencyEntry) {
+                    throw "Workflow '$($workflowEntry.Source)' declares an unknown dependency '$dependency'."
+                }
+                if ($workflowSelectors.Add($dependencyEntry.Source)) {
+                    $dependenciesExpanded = $true
+                }
+            }
         }
     }
 }

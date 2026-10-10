@@ -23,6 +23,9 @@ jobs:
     if: |
       github.event.issue.pull_request &&
       contains(github.event.comment.body, '/approve')
+    outputs:
+      assignment_issues: ${{ steps.route.outputs.assignment_issues }}
+      assignment_targets: ${{ steps.route.outputs.assignment_targets }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -32,6 +35,7 @@ jobs:
           ref: ${{ github.event.repository.default_branch }}
 
       - name: Route /approve comment on PR to linked issues
+        id: route
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
@@ -39,6 +43,8 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const prNumber = context.payload.issue.number;
+            core.setOutput('assignment_issues', '[]');
+            core.setOutput('assignment_targets', '[]');
             const directive = await approval.qualifiedDirective({
               github, owner, repo, commentId: context.payload.comment.id, issueNumber: prNumber
             });
@@ -92,7 +98,8 @@ jobs:
             }
 
             const approveIssue = async issueNumber => {
-              const { issue, missing } = await approval.validateIssue({ github, owner, repo, issueNumber });
+              const contract = await approval.validateIssue({ github, owner, repo, issueNumber });
+              const { issue, missing } = contract;
 
               if (missing.length > 0) {
                 try {
@@ -124,9 +131,23 @@ jobs:
                 return { issueNumber, approved: false };
               }
 
+              const approvedSpecRef = approval.findApprovedSpecRef({
+                comments: contract.comments, evidence: directive, issueNumber
+              });
+              if (approvedSpecRef && approvedSpecRef !== contract.specRef) {
+                await github.rest.issues.createComment({
+                  owner, repo, issue_number: issueNumber,
+                  body: 'BLOCKED: The specification changed after this approval scope was captured. Post a fresh `/approve` after reviewing the current specification.'
+                });
+                return { issueNumber, approved: false };
+              }
+
               await github.rest.issues.createComment({
                 owner, repo, issue_number: issueNumber,
-                body: approval.forwardReceipt(prNumber, directive, issueNumber)
+                body: [
+                  approval.forwardReceipt(prNumber, directive, issueNumber),
+                  approval.approvedScopeReceipt(issueNumber, directive, contract.specRef)
+                ].join('\n')
               });
 
               try {
@@ -136,8 +157,8 @@ jobs:
                   issue_number: issue.number,
                   name: 'triage'
                 });
-              } catch (e) {
-                // Label might not exist
+              } catch (error) {
+                if (error.status !== 404) throw error;
               }
 
               await github.rest.issues.addLabels({
@@ -147,83 +168,7 @@ jobs:
                 labels: ['approved', 'copilot-agent']
               });
 
-              let copilotActor;
-              let assigned = false;
-              try {
-                const { repository } = await github.graphql(
-                  `
-                  query($owner: String!, $repo: String!) {
-                    repository(owner: $owner, name: $repo) {
-                      suggestedActors(capabilities: [CAN_BE_ASSIGNED], first: 100) {
-                        nodes {
-                          login
-                          ... on Bot { id }
-                        }
-                      }
-                    }
-                  }
-                  `,
-                  {
-                    owner,
-                    repo,
-                  }
-                );
-
-                copilotActor = repository?.suggestedActors?.nodes?.find(actor =>
-                  actor?.login === 'copilot-swe-agent'
-                );
-              } catch (e) {
-                core.warning(`Could not query Copilot suggestedActors: ${e.message}`);
-              }
-
-              if (copilotActor) {
-                try {
-                  await github.request('POST /repos/{owner}/{repo}/issues/{issue_number}/assignees', {
-                    owner,
-                    repo,
-                    issue_number: issue.number,
-                    assignees: ['copilot-swe-agent[bot]'],
-                    agent_assignment: {
-                      target_repo: `${owner}/${repo}`,
-                      base_branch: 'main',
-                      custom_instructions: "Fix the issue using the repository's existing conventions.",
-                      custom_agent: '',
-                      model: '',
-                    },
-                  });
-                  const { data: updated } = await github.rest.issues.get({
-                    owner,
-                    repo,
-                    issue_number: issue.number
-                  });
-                  assigned = updated.assignees.some(a => a.login === 'copilot-swe-agent[bot]' || a.login === 'copilot-swe-agent');
-                } catch (e) {
-                  core.warning(`Could not assign to Copilot cloud agent: ${e.message}`);
-                }
-              }
-
-              const body = assigned
-                ? [
-                    'Approved. Issue assigned to the Copilot coding agent.',
-                    '',
-                    'Copilot will analyze this issue and open a draft PR with the implementation.',
-                    'Review the PR when ready and merge after CI passes.',
-                  ].join('\n')
-                : [
-                    'Approved. Labels `approved` + `copilot-agent` applied.',
-                    '',
-                    'Copilot assignment is not available in this repository right now.',
-                    'Enable the Copilot cloud agent in organization settings and assign the issue to @Copilot when available.',
-                  ].join('\n');
-
-              await github.rest.issues.createComment({
-                owner,
-                repo,
-                issue_number: issue.number,
-                body
-              });
-
-              return { issueNumber, approved: true, assigned };
+              return { issueNumber, approved: true, specRef: contract.specRef };
             };
 
             const approvals = [];
@@ -236,12 +181,22 @@ jobs:
               if (!approvedIssues.includes(`#${issueNumber}`)) continue;
             }
 
+            core.setOutput('assignment_issues', JSON.stringify(
+              approvals.filter(result => result.approved).map(result => result.issueNumber)
+            ));
+            core.setOutput('assignment_targets', JSON.stringify(
+              approvals.filter(result => result.approved).map(result => ({
+                issue_number: result.issueNumber, approved_spec_ref: result.specRef
+              }))
+            ));
             await publishPrStatus([
               `Processed /approve from @${originalActor} for linked issue(s): ${Array.from(issueRefs).map(n => `#${n}`).join(', ')}.`,
               'Approval logic ran directly against the issue(s).',
             ]);
 
   approve:
+    outputs:
+      approved_spec_ref: ${{ steps.validate-metadata.outputs.spec_ref }}
     if: |
       !github.event.issue.pull_request &&
       contains(github.event.comment.body, '/approve')
@@ -276,9 +231,10 @@ jobs:
         with:
           script: |
             const approval = require(`${process.env.GITHUB_WORKSPACE}/.github/base-coat/scripts/approval-contract.cjs`);
-            const { issue, missing } = await approval.validateIssue({
+            const contract = await approval.validateIssue({
               github, ...context.repo, issueNumber: context.payload.issue.number
             });
+            const { issue, missing } = contract;
 
             if (missing.length > 0) {
               // Add a human-waiting label to surface for cleanup
@@ -315,6 +271,30 @@ jobs:
               return false;
             }
 
+            const directive = await approval.qualifiedDirective({
+              github, ...context.repo, commentId: context.payload.comment.id,
+              issueNumber: issue.number
+            });
+            if (!directive) {
+              core.setFailed('Approval requires a current qualified exact /approve directive.');
+              return false;
+            }
+            const approvedSpecRef = approval.findApprovedSpecRef({
+              comments: contract.comments, evidence: directive, issueNumber: issue.number
+            });
+            if (approvedSpecRef && approvedSpecRef !== contract.specRef) {
+              core.setFailed('The specification changed after this approval scope was captured; post a fresh /approve.');
+              return false;
+            }
+            if (!approvedSpecRef) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: approval.approvedScopeReceipt(issue.number, directive, contract.specRef)
+              });
+            }
+            core.setOutput('spec_ref', contract.specRef);
             return true;
 
       - name: Assign to Copilot and update labels
@@ -332,8 +312,8 @@ jobs:
                 issue_number: issue.number,
                 name: 'triage'
               });
-            } catch (e) {
-              // Label might not exist
+            } catch (error) {
+              if (error.status !== 404) throw error;
             }
 
             await github.rest.issues.addLabels({
@@ -343,132 +323,37 @@ jobs:
               labels: ['approved', 'copilot-agent']
             });
 
-            // Pre-flight: check whether Copilot cloud agent is available for this repo.
-            // suggestedActors returns copilot-swe-agent when the agent can be assigned.
-            let copilotActor;
-            let assigned = false;
-            let preflightErrorMessage = null;
-            let assignmentErrorMessage = null;
-            try {
-              const { repository } = await github.graphql(
-                `
-                query($owner: String!, $repo: String!) {
-                  repository(owner: $owner, name: $repo) {
-                    suggestedActors(capabilities: [CAN_BE_ASSIGNED], first: 100) {
-                      nodes {
-                        login
-                        ... on Bot { id }
-                      }
-                    }
-                  }
-                }
-                `,
-                {
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                }
-              );
+  assign-approved-issue:
+    name: Run serialized assignment worker for approved issue
+    needs: approve
+    if: needs.approve.result == 'success' && !github.event.issue.pull_request
+    uses: ./.github/workflows/agent-assignment-worker.yml
+    with:
+      issue_number: ${{ github.event.issue.number }}
+      recovery: false
+      approved_spec_ref: ${{ needs.approve.outputs.approved_spec_ref }}
 
-              copilotActor = repository?.suggestedActors?.nodes?.find(actor =>
-                actor?.login === 'copilot-swe-agent'
-              );
-            } catch (e) {
-              preflightErrorMessage = e.message;
-              core.warning(`Could not query Copilot suggestedActors: ${e.message}`);
-            }
-
-            // Assign to Copilot cloud agent when the actor is available.
-            if (copilotActor) {
-              try {
-                await github.request('POST /repos/{owner}/{repo}/issues/{issue_number}/assignees', {
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: issue.number,
-                  assignees: ['copilot-swe-agent[bot]'],
-                  agent_assignment: {
-                    target_repo: `${context.repo.owner}/${context.repo.repo}`,
-                    base_branch: 'main',
-                    custom_instructions: `Implement the approved specification in issue #${issue.number} using the repository's existing conventions. Open a ready-for-review implementation PR (not a draft) with \`Closes #${issue.number}\` in its body. Required CI and the merge executor own merge eligibility; do not request a human review for XS through XL changes.`,
-                    custom_agent: '',
-                    model: '',
-                  },
-                });
-                const { data: updated } = await github.rest.issues.get({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: issue.number
-                });
-                assigned = updated.assignees.some(a => a.login === 'copilot-swe-agent[bot]' || a.login === 'copilot-swe-agent');
-                if (!assigned) {
-                  assignmentErrorMessage = 'GitHub did not persist the Copilot assignee after the assignment request.';
-                }
-              } catch (e) {
-                assignmentErrorMessage = e.message;
-                core.warning(`Could not assign to Copilot cloud agent: ${e.message}`);
-              }
-            }
-
-            // Org-level settings URL for enabling Copilot cloud agent (Business/Enterprise default: off)
-            const orgSettingsUrl = `https://github.com/organizations/${context.repo.owner}/settings/copilot`;
-            const enableDocsUrl = 'https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-for-organization/add-copilot-cloud-agent';
-
-            // Acknowledge with honest status
-            const body = assigned
-              ? [
-                  'Approved. Issue assigned to the Copilot coding agent.',
-                  '',
-                  'Copilot will implement the supplied specification and open a ready implementation PR.',
-                  'Required CI and the merge executor will progress an eligible XS-XL PR without a review handoff.',
-                ].join('\n')
-              : preflightErrorMessage
-              ? [
-                  'Approved. Labels `approved` + `copilot-agent` applied.',
-                  '',
-                  `WARNING: Agent pre-flight failed. ${preflightErrorMessage}`,
-                  '',
-                  'Retry the workflow after confirming GitHub is healthy and the workflow token still has the required access.',
-                ].join('\n')
-              : assignmentErrorMessage
-              ? [
-                  'Approved. Labels `approved` + `copilot-agent` applied.',
-                  '',
-                  `WARNING: Agent assignment failed after pre-flight succeeded. ${assignmentErrorMessage}`,
-                  '',
-                  'Retry the workflow after confirming GitHub is healthy, or assign this issue to **@Copilot** manually once the service is available.',
-                ].join('\n')
-              : [
-                  'Approved. Labels `approved` + `copilot-agent` applied.',
-                  '',
-                  'WARNING: Agent assignment failed. `@Copilot` is not a valid assignee for this repository.',
-                  '',
-                  'The **Copilot cloud agent** (Copilot Business/Enterprise) is disabled by default and must',
-                  `be enabled by an org admin at [Organization Settings > Copilot](${orgSettingsUrl}).`,
-                  `See the [enablement guide](${enableDocsUrl}) for step-by-step instructions.`,
-                  '',
-                  'Once enabled, assign this issue to **@Copilot** in the sidebar to trigger the agent,',
-                  'or implement the changes manually following the triage plan above.',
-                ].join('\n');
-
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issue.number,
-              body
-            });
-
-            if (preflightErrorMessage) {
-              core.setFailed(`Copilot suggestedActors pre-flight failed: ${preflightErrorMessage}`);
-            }
-
-            if (assignmentErrorMessage) {
-              core.setFailed(`Copilot cloud agent assignment failed: ${assignmentErrorMessage}`);
-            }
+  assign-approved-pr-issues:
+    name: Run serialized assignment worker for PR-approved issues
+    needs: route-pr-approve
+    if: needs.route-pr-approve.result == 'success' && needs.route-pr-approve.outputs.assignment_issues != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJSON(needs.route-pr-approve.outputs.assignment_targets) }}
+    uses: ./.github/workflows/agent-assignment-worker.yml
+    with:
+      issue_number: ${{ matrix.target.issue_number }}
+      recovery: false
+      approved_spec_ref: ${{ matrix.target.approved_spec_ref }}
 
   reevaluate-linked-prs:
     name: Reevaluate PRs linked to approved issues
     needs:
       - route-pr-approve
       - approve
+      - assign-approved-issue
+      - assign-approved-pr-issues
     if: |
       always() &&
       contains(github.event.comment.body, '/approve')
