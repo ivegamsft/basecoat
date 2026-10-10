@@ -384,6 +384,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running deployed PR conflict routing tests...'
+& node --test (Join-Path $PSScriptRoot 'pr-conflict-routing-tests.cjs')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'PR conflict routing tests failed' -ForegroundColor Red
+    Write-FailureLog 'pr-conflict-routing-tests'
+    exit 1
+}
+
 Write-Host 'Running issue-triage lock refresh tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'issue-triage-lock-refresh-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
