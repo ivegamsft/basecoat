@@ -1791,6 +1791,22 @@ else {
     $guardrailFailures += 'runner-capability-separation'
 }
 
+# Test 23: pull_request_target runs share github.ref (the base branch), so a
+# cancelling group keyed only on the ref cancels routing for unrelated PRs (#3791).
+Write-Host '  Test 23: Validate dependency routing concurrency is per issue/PR...'
+$routingWorkflow = Get-Content (Join-Path $workflowDir 'dependency-relationship-routing.yml') -Raw
+$routingGroup = [regex]::Match($routingWorkflow, '(?m)^concurrency:\s*\r?\n(?:\s*#.*\r?\n)*\s+group:\s*(.+?)\s*$').Groups[1].Value
+# github.ref is always populated, so it must be the last fallback after the item numbers.
+if ($routingGroup -match '^\$\{\{\s*github\.workflow\s*\}\}-\$\{\{\s*github\.event\.(?:issue|pull_request)\.number\s*\|\|\s*github\.event\.(?:issue|pull_request)\.number\s*\|\|\s*github\.ref\s*\}\}$' -and
+    $routingGroup -match 'github\.event\.issue\.number' -and
+    $routingGroup -match 'github\.event\.pull_request\.number') {
+    Write-Host '    PASS Dependency routing concurrency is keyed per issue/PR'
+}
+else {
+    Write-Host "    FAIL Dependency routing concurrency group must be keyed per issue/PR, not github.ref alone: $routingGroup" -ForegroundColor Red
+    $guardrailFailures += 'dependency-routing-concurrency'
+}
+
 if ($guardrailFailures.Count -gt 0) {
     Write-Host "Workflow guardrails failed: $($guardrailFailures -join ', ')" -ForegroundColor Red
     exit 1
