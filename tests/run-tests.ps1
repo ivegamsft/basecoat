@@ -528,6 +528,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running release-owner window inventory tests...'
+& node --test (Join-Path $PSScriptRoot 'release-owner-inventory-tests.cjs')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Release-owner window inventory tests failed' -ForegroundColor Red
+    Write-FailureLog 'release-owner-inventory-tests'
+    exit 1
+}
+
 Write-Host 'Running release-owner ruleset definition tests...'
 & node --test (Join-Path $PSScriptRoot 'release-owner-rulesets-tests.cjs')
 if ($LASTEXITCODE -ne 0) {
