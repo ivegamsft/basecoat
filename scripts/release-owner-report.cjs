@@ -222,7 +222,11 @@ function deriveWindowReport(input) {
   return report;
 }
 
-module.exports = { deriveWindowReport, parseReceipt, receiptDigest, selectBaseline };
+const RECEIPT_FIELD_NAMES = Object.freeze(RECEIPT_FIELDS.map(([name]) => name));
+
+module.exports = {
+  RECEIPT_FIELD_NAMES, deriveWindowReport, parseReceipt, receiptDigest, selectBaseline
+};
 
 if (require.main === module) {
   const [inputPath] = process.argv.slice(2);

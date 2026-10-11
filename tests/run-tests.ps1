@@ -536,6 +536,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running release-owner delivery-receipt tests...'
+& node --test (Join-Path $PSScriptRoot 'release-owner-receipt-tests.cjs')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Release-owner delivery-receipt tests failed' -ForegroundColor Red
+    Write-FailureLog 'release-owner-receipt-tests'
+    exit 1
+}
+
 Write-Host 'Running release-owner ruleset definition tests...'
 & node --test (Join-Path $PSScriptRoot 'release-owner-rulesets-tests.cjs')
 if ($LASTEXITCODE -ne 0) {
