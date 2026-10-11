@@ -76,6 +76,34 @@ jobs:
               return data;
             }
 
+            const CONFLICT_LABEL = 'synthesis-conflict';
+            const hasLabel = (candidate, name) => candidate.labels.some(label => (label.name ?? label) === name);
+
+            // Fail closed: if closing-PR state cannot be read, treat the issue as ineligible.
+            async function hasMergedClosingPr(issueNumber) {
+              try {
+                const result = await github.graphql(`query($owner: String!, $repo: String!, $number: Int!) {
+                  repository(owner: $owner, name: $repo) {
+                    issue(number: $number) {
+                      closedByPullRequestsReferences(first: 25, includeClosedPrs: true) { nodes { merged } }
+                    }
+                  }
+                }`, { owner, repo, number: Number(issueNumber) });
+                return (result.repository?.issue?.closedByPullRequestsReferences?.nodes ?? []).some(pr => pr?.merged);
+              } catch (err) {
+                core.warning(`Could not read closing PRs for #${issueNumber}: ${err.message}`);
+                return true;
+              }
+            }
+
+            // Returns why an issue must not be synthesized, or null when it is eligible.
+            async function skipReason(candidate) {
+              if (candidate.state === 'closed') return 'issue is closed';
+              if (hasLabel(candidate, CONFLICT_LABEL)) return `issue is labelled ${CONFLICT_LABEL}`;
+              if (await hasMergedClosingPr(candidate.number)) return 'issue is already closed by a merged PR';
+              return null;
+            }
+
             async function findPendingIssue() {
               const candidates = await github.paginate(github.rest.issues.listForRepo, {
                 owner,
@@ -84,10 +112,17 @@ jobs:
                 labels: 'needs-prd',
                 per_page: 100,
               });
-              return candidates
+              const ordered = candidates
                 .filter(candidate => !candidate.pull_request)
-                .filter(candidate => !candidate.labels.some(label => label.name === 'approved'))
-                .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))[0];
+                .filter(candidate => !hasLabel(candidate, 'approved'))
+                .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+              // One blocked issue must not stall the queue: skip ineligible issues and keep looking.
+              for (const candidate of ordered) {
+                const reason = await skipReason(candidate);
+                if (!reason) return candidate;
+                core.notice(`Skipping #${candidate.number}: ${reason}.`);
+              }
+              return undefined;
             }
 
             const dispatchIssueNumber = context.eventName === 'workflow_dispatch'
@@ -111,6 +146,13 @@ jobs:
             if (!issue) {
               core.notice('No open needs-prd issues require synthesis.');
               return;
+            }
+            if (context.eventName === 'issues' || dispatchIssueNumber) {
+              const reason = await skipReason(issue);
+              if (reason) {
+                core.notice(`Skipping #${issue.number}: ${reason}.`);
+                return;
+              }
             }
 
             const issueNum = issue.number;
@@ -136,6 +178,39 @@ jobs:
                 }
               }
               core.notice(`Cleared stale intake labels for #${issueNum}: ${reason}`);
+            }
+
+            // Terminal state: label before commenting so repeated triggers record at most one comment.
+            async function recordSynthesisConflict() {
+              const message = `Existing synthesis artifact conflicts with generated content for #${issueNum}; preserving branch edits.`;
+              const current = await fetchIssue(issueNum);
+              if (!hasLabel(current, CONFLICT_LABEL)) {
+                try {
+                  await writeGithub.rest.issues.createLabel({
+                    owner, repo, name: CONFLICT_LABEL, color: 'b60205',
+                    description: 'Spec synthesis skipped: existing branch conflicts with generated content',
+                  });
+                } catch (err) {
+                  if (err.status !== 422) throw err;
+                }
+                await writeGithub.rest.issues.addLabels({ owner, repo, issue_number: issueNum, labels: [CONFLICT_LABEL] });
+                const created = await writeGithub.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: issueNum,
+                  body: `${message}\n\nBranch \`${branchName}\` was left unchanged and no PR was opened. ` +
+                    `Synthesis skips this issue while it has the \`${CONFLICT_LABEL}\` label. ` +
+                    'Reconcile or delete the branch, then remove the label to retry.',
+                });
+                // Concurrent runs can both pass the label check; keep only the earliest same-author record.
+                const records = (await github.paginate(github.rest.issues.listComments, {
+                  owner, repo, issue_number: issueNum, per_page: 100,
+                })).filter(comment => comment.user?.login === created.data.user?.login && comment.body?.startsWith(message));
+                if (records.some(comment => comment.id < created.data.id)) {
+                  await writeGithub.rest.issues.deleteComment({ owner, repo, comment_id: created.data.id });
+                }
+              }
+              core.warning(message);
             }
 
             // Derive slug from issue title; fall back to 'untitled' if title is all punctuation/emoji
@@ -447,7 +522,8 @@ jobs:
                 });
                 if (Array.isArray(artifact.data) || artifact.data.type !== 'file' ||
                     Buffer.from(artifact.data.content, 'base64').toString('utf8') !== expected) {
-                  throw new Error(`Existing synthesis artifact conflicts with generated content for #${issueNum}; preserving branch edits.`);
+                  await recordSynthesisConflict();
+                  return;
                 }
               }
             }

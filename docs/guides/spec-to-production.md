@@ -17,7 +17,7 @@ rename them or omit source-only release jobs.
 | Intake | Issue opened; `issue-triage.lock.yml` executes `issue-triage.md` | Type/priority labels and one triage comment; incomplete PRD/spec evidence requests synthesis | Poor quality adds `needs-info`; duplicate/type conflicts need normalization |
 | Field sync | Open/reopen/label changes; `issue-field-sync.yml` | Mirrors labels into native Type/Priority fields | Token/org-field API access; field sync is not implementation authorization |
 | Dependency routing | Issue/PR/comment changes; `dependency-relationship-routing.yml` | Parses body/comments; issues get `blocked`, PRs `dependency-blocked` | Open issue dependencies or unmerged PR dependencies |
-| Spec fallback | `synthesize-spec` label, successful Issue Triage Agent completion, or manual dispatch; `issue-to-spec-synthesis.yml` | Creates draft PRD/spec on `spec/issue-N-slug`, adds `documentation`/`spec`, copies a sprint label if present, clears intake labels | Draft remains draft; synthesis does not approve the issue, assign implementation, or mark the PR ready |
+| Spec fallback | `synthesize-spec` label, successful Issue Triage Agent completion, or manual dispatch; `issue-to-spec-synthesis.yml` | Creates draft PRD/spec on `spec/issue-N-slug`, adds `documentation`/`spec`, copies a sprint label if present, clears intake labels; an existing branch that conflicts with generated content is preserved and the issue gets one comment plus `synthesis-conflict` | Draft remains draft; synthesis does not approve the issue, assign implementation, or mark the PR ready |
 | Approve supplied spec | Qualified `/approve` issue comment; `issue-approve.yml` | Checks metadata/dependencies/spec, adds `approved`/`copilot-agent`, attempts assignment, then reevaluates linked PRs | Missing type/priority/spec, blocker labels, unresolved dependencies, permission or agent availability |
 | Implement | Assigned Copilot coding agent or explicitly authorized local delivery execution | Ready implementation PR with `Closes #N`, valid intake contract, spec and validation evidence | Assignment failure can leave approval labels present without an active agent |
 | Label/readiness | PR open/sync/reopen/ready; `pr-size-labeler.yml`; metadata changes also drive `pr-flow-hygiene.yml` | Deterministic size and same-repo sprint labeling; hygiene reports readiness/ownership issues | Hygiene does not turn draft spec PRs into ready implementation PRs |
@@ -50,6 +50,7 @@ approve incomplete specifications or promote their draft PRs.
 | `bug`, `enhancement`, `documentation`, `chore`, `security`, `question` | Canonical type; triage and approval metadata |
 | `priority:critical/high/medium/low` | Planning priority, not approval or bypass |
 | `needs-triage`, `needs-info`, `needs-prd`, `synthesize-spec` | Intake states; synthesis clears the latter three after producing or finding a spec PR |
+| `synthesis-conflict` | Terminal synthesis state: existing spec branch conflicts with generated content; synthesis skips the issue until the branch is reconciled and the label removed |
 | `duplicate`, `invalid`, `wontfix` | Block issue approval; classification is not authorization |
 | `blocked`, `dependency-blocked` | Dependency routing state; authoritative dependency checks also read relationships |
 | `approved`, `copilot-agent` | Accepted issue directive and assignment intent; verify persisted assignee separately |
@@ -114,7 +115,7 @@ approval rule.
 | Job | Configured cadence / trigger | What recovery actually does |
 | --- | --- | --- |
 | Issue triage | Opened issue, manual dispatch | Labels/comments; no automatic implementation approval |
-| Spec synthesis | Label, triage completion, manual | Selects explicit issue or oldest open unapproved `needs-prd` issue; completion is not necessarily one-to-one with intake |
+| Spec synthesis | Label, triage completion, manual | Selects explicit issue or oldest open unapproved `needs-prd` issue, skipping closed, `synthesis-conflict`, and merged-PR-closed issues; completion is not necessarily one-to-one with intake |
 | Dependency routing | Events; Monday 09:00 UTC | Recomputes blockers; shared-ref cancellation can supersede evaluations |
 | Issue metadata hygiene | Monday 07:00 UTC, manual | Metadata remediation, not agent execution |
 | Auto-approval sweep | Same-repo PR events, selected producer completions, manual; every 15 minutes | Rechecks held run membership/head and approves execution; scheduled timing is not guaranteed |

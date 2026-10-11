@@ -109,10 +109,13 @@ assert.equal(extract('Plain text', null), 'Plain text');
   assert.equal(extract('## Pro<!-- x -->blem\nJoined\n## Description\nLower', ['problem']), 'Joined');
   assert.equal(extract('## Problem<!-- x -->Statement\nWrong', ['problem', 'problem statement']) ?? null, null);
 
+  const noClosingPrs = async () => ({ repository: { issue: { closedByPullRequestsReferences: { nodes: [] } } } });
   for (const scenario of ['valid', 'invalid', 'conflicting-retry', 'priority', 'directive']) {
     const failure = ['invalid', 'directive'].includes(scenario);
     const artifacts = new Map();
     const writes = [];
+    const comments = [];
+    let staleReads = false;
     let cleaned = false;
     let linted = false;
     const mocks = {
@@ -150,6 +153,25 @@ assert.equal(extract('Plain text', null), 'Plain text');
         },
       },
       pulls: { list: async () => ({ data: [] }) },
+      issues: {
+        get: async () => ({ data: { ...issue, labels: staleReads ? [] : issue.labels } }),
+        listComments: async () => {},
+        createLabel: async () => { writes.push('create-label'); },
+        addLabels: async request => {
+          writes.push('label');
+          issue.labels.push(...request.labels.map(name => ({ name })));
+        },
+        createComment: async request => {
+          writes.push('comment');
+          const comment = { id: comments.length + 1, user: { login: 'bot' }, body: request.body };
+          comments.push(comment);
+          return { data: comment };
+        },
+        deleteComment: async request => {
+          writes.push('delete');
+          comments.splice(comments.findIndex(comment => comment.id === request.comment_id), 1);
+        },
+      },
       repos: {
         getContent: async request => {
           if (request.path !== '.markdownlint.json') {
@@ -172,15 +194,54 @@ assert.equal(extract('Plain text', null), 'Plain text');
           (scenario === 'directive' ? '<!-- markdownlint-disable -->\n' : '') + '## Intake Contract\n### Design\nPlan',
     };
     const run = new AsyncFunction('github', 'context', 'core', 'require', 'getOctokit', script);
-    await assert.rejects(run({ rest: api },
-      { repo: { owner: 'owner', repo: 'repo' }, eventName: 'issues', payload: { issue } },
-      { notice: () => {} }, name => mocks[name] || require(name), () => { throw new Error('Unexpected write token'); }),
-      failure ? /Markdown validation failed.*#3660/ :
-        scenario === 'conflicting-retry' ? /conflicts with generated content/ : /stop after validation/);
+    const trigger = eventName => run({ rest: api, graphql: noClosingPrs,
+      paginate: async fn => fn === api.issues.listComments ? [...comments] : [issue] },
+      { repo: { owner: 'owner', repo: 'repo' }, eventName, payload: { issue } },
+      { notice: () => {}, warning: () => {} }, name => mocks[name] || require(name),
+      () => { throw new Error('Unexpected write token'); });
+    if (scenario === 'conflicting-retry') {
+      // Concurrent runs that both miss the label keep one comment; later triggers skip without lint or writes.
+      staleReads = true;
+      await Promise.all([trigger('issues'), trigger('issues')]);
+      staleReads = false;
+      assert.equal(comments.length, 1);
+      assert.equal(writes.filter(write => write === 'delete').length, 1);
+      const recorded = writes.length;
+      linted = false;
+      await trigger('workflow_run');
+      await trigger('issues');
+      assert.equal(linted, false);
+      assert.equal(writes.length, recorded);
+      assert.equal(comments.length, 1);
+      continue;
+    }
+    await assert.rejects(trigger('issues'),
+      failure ? /Markdown validation failed.*#3660/ : /stop after validation/);
     assert.ok(cleaned);
     assert.equal(linted, scenario !== 'directive');
     assert.deepEqual(writes, ['valid', 'priority'].includes(scenario) ? ['branch'] : []);
   }
+
+  // The oldest-first picker skips conflicted, closed, and already-delivered issues.
+  const picked = [];
+  const queue = [
+    { number: 1, state: 'open', labels: [{ name: 'synthesis-conflict' }], created_at: '2026-01-01' },
+    { number: 2, state: 'closed', labels: [], created_at: '2026-01-02' },
+    { number: 3, state: 'open', labels: [], created_at: '2026-01-03' },
+    { number: 4, state: 'open', labels: [], created_at: '2026-01-04', title: 'Next', user: { login: 'o' },
+      body: '## Description\nProblem' },
+  ];
+  const pickerRun = new AsyncFunction('github', 'context', 'core', 'require', 'getOctokit', script);
+  await assert.rejects(pickerRun({
+    graphql: async (query, vars) => ({ repository: { issue: { closedByPullRequestsReferences: {
+      nodes: vars.number === 3 ? [{ merged: true }] : [] } } } }),
+    paginate: async () => [...queue].reverse(),
+    rest: { issues: {}, repos: { getContent: async () => { picked.push('content'); throw new Error('picked'); } },
+      git: { getRef: async () => ({ data: { object: { sha: 'a'.repeat(40) } } }) } },
+  }, { repo: { owner: 'owner', repo: 'repo' }, eventName: 'workflow_run', payload: {} },
+  { notice: message => picked.push(message), warning: () => {} }, require, () => {}), /picked/);
+  assert.deepEqual(picked, ['Skipping #1: issue is labelled synthesis-conflict.',
+    'Skipping #2: issue is closed.', 'Skipping #3: issue is already closed by a merged PR.', 'content']);
 }
 console.log(`Compiled ${blocks.length} synthesis script bodies.`);
 }
