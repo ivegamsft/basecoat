@@ -64,6 +64,12 @@ foreach ($entry in $files) {
         $assignmentHelperContent -notmatch 'Closes #') {
         throw 'Serialized worker must require a ready, issue-closing implementation PR from the coding agent.'
     }
+    if ($content -notmatch '(?m)^\s+group:\s*issue-approve-\$\{\{\s*github\.event\.comment\.body\s*==\s*''/approve''\s*&&\s*github\.event\.issue\.number\s*\|\|\s*format\(''comment-\{0\}'',\s*github\.event\.comment\.id\)\s*\}\}\s*\r?\n\s+cancel-in-progress:\s*false\s*$') {
+        throw "$name must serialize exact /approve comments per issue, isolate other comments by comment id, and not cancel queued approvals."
+    }
+    if ($content -match '(?m)group:\s*cloud-agent-execution\s*$') {
+        throw "$name must not use the global cloud-agent-execution concurrency group."
+    }
     if ($content -notmatch 'approval\.findApproval') {
         throw "$name must revalidate real authority before linked PR reevaluation."
     }

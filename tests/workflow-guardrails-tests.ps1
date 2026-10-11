@@ -109,7 +109,7 @@ foreach ($file in $workflowFiles) {
     
     if ($content -match 'concurrency:') {
         # Accept: ${{ github.workflow }}-${{ github.ref }}, format() variants, entity-scoped patterns,
-        # and intentional static singleton groups (e.g. publish-production, cloud-agent-execution)
+        # and intentional static singleton groups (e.g. publish-production)
         $hasValidGroup = $content -match 'group:\s*\$\{\{\s*github\.workflow' -or
                          $content -match '(?m)group:\s*\$\{\{[^}]*format\([^)]*github\.workflow' -or
                          $content -match 'group:\s*\$\{\{\s*inputs\.' -or

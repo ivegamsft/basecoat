@@ -12,7 +12,10 @@ permissions:
   statuses: write
 
 concurrency:
-  group: cloud-agent-execution
+  # Exact /approve comments (case-insensitive, as the approval contract requires) serialize per
+  # issue; every other comment gets a unique group so it cannot replace a pending approval run
+  # (GitHub keeps only the latest pending run per group).
+  group: issue-approve-${{ github.event.comment.body == '/approve' && github.event.issue.number || format('comment-{0}', github.event.comment.id) }}
   cancel-in-progress: false
 
 env:
