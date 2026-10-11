@@ -108,6 +108,18 @@ assert.equal(extract('Plain text', null), 'Plain text');
   assert.equal(extract('## Problem <!-- note -->\nCanonical\n## Description\nLower', ['problem']), 'Canonical');
   assert.equal(extract('## Pro<!-- x -->blem\nJoined\n## Description\nLower', ['problem']), 'Joined');
   assert.equal(extract('## Problem<!-- x -->Statement\nWrong', ['problem', 'problem statement']) ?? null, null);
+  // Indented code is literal after a blank line or heading, including tab indentation.
+  assert.equal(extract('## Description\nExample:\n\n    <!-- literal code text\n## Scope\nPlan', ['description']), 'Example:\n\n    <!-- literal code text');
+  assert.equal(extract('## Description\nExample:\n\n    <!-- literal code text\n## Scope\nPlan', ['scope']), 'Plan');
+  assert.equal(extract('## Description\n\t<!-- tab code\n\n    ``` not a fence\n## Scope\nPlan', ['scope']), 'Plan');
+  // Fail closed: list continuation and paragraph continuation are not indented code.
+  for (const unsafe of ['- item\n\n    <!--\n## Problem Statement\nHidden\n-->', '1. item\n   more\n\n    <!--\n## Problem Statement\nHidden\n-->',
+    '- item\n\n  text\n\n    <!--\n## Problem Statement\nHidden\n-->', 'Text\n    <!--\n## Problem Statement\nHidden\n-->']) {
+    assert.equal(extract(unsafe + '\n## Description\nActual', ['problem statement']), undefined);
+    assert.throws(() => extract(unsafe.slice(0, unsafe.lastIndexOf('\n')), []), /unclosed HTML comment/);
+  }
+  assert.equal(extract('- item\n\nAfter list\n\n    <!-- code\n## Scope\nPlan', ['scope']), 'Plan');
+  assert.equal(extract('- item\n## Description\n    <!-- literal\n## Scope\nPlan', ['scope']), 'Plan');
 
   const noClosingPrs = async () => ({ repository: { issue: { closedByPullRequestsReferences: { nodes: [] } } } });
   for (const scenario of ['valid', 'invalid', 'conflicting-retry', 'priority', 'directive']) {
