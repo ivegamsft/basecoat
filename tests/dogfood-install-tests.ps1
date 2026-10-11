@@ -117,7 +117,7 @@ name: branch-hygiene-sweeper
             '.github/skills/agentic-sdlc-autonomy/SKILL.md',
             '.github/agents/basecoat-10-core-branch-hygiene-sweeper.agent.md',
             '.github/agents/flow-governance-conductor.agent.md',
-            '.github/agents/references/branch-hygiene-detail.md',
+            '.github/agent-references/branch-hygiene-detail.md',
             '.github/prompts/code-review.prompt.md'
         )) {
         Assert-True -Condition (Test-Path -LiteralPath (Join-Path $fixtureRoot $destination)) `

@@ -174,14 +174,24 @@ try {
         -Message 'Sync test failed: .github/ISSUE_TEMPLATE/issue.md not seeded'
 
     $testCount++
-    Assert-SyncPathExists -Path (Join-Path $consumer '.github/agents/references') `
-        -Message 'Sync test failed: .github/agents/references/ not created (agent detail overflow files are not distributed)'
+    Assert-SyncPathExists -Path (Join-Path $consumer '.github/agent-references') `
+        -Message 'Sync test failed: .github/agent-references/ not created (agent detail overflow files are not distributed)'
 
     $testCount++
     $agentReferenceSourceCount = (Get-ChildItem (Join-Path $repoRoot 'agents/references') -Filter '*.md' -File).Count
-    $agentReferenceCount = (Get-ChildItem (Join-Path $consumer '.github/agents/references') -Filter '*.md' -File).Count
+    $agentReferenceCount = (Get-ChildItem (Join-Path $consumer '.github/agent-references') -Filter '*.md' -File).Count
     if ($agentReferenceCount -ne $agentReferenceSourceCount) {
-        throw "Sync test failed: .github/agents/references/ has $agentReferenceCount files, expected $agentReferenceSourceCount (source agents/references/)"
+        throw "Sync test failed: .github/agent-references/ has $agentReferenceCount files, expected $agentReferenceSourceCount (source agents/references/)"
+    }
+
+    $testCount++
+    $brokenReferenceLinks = @(foreach ($reference in Get-ChildItem (Join-Path $consumer '.github/agent-references') -Filter '*.md' -File) {
+        foreach ($match in [regex]::Matches((Get-Content -LiteralPath $reference.FullName -Raw), '\]\((\.\./[^)#\s]+)')) {
+            if (-not (Test-Path -LiteralPath (Join-Path $reference.DirectoryName $match.Groups[1].Value))) { "$($reference.Name) -> $($match.Groups[1].Value)" }
+        }
+    })
+    if ($brokenReferenceLinks.Count) {
+        throw "Sync test failed: broken relative links in .github/agent-references: $($brokenReferenceLinks -join '; ')"
     }
 
     Write-Host "  Passed: agents($agentCount), instructions($instrCount), prompts($promptCount) synced" -ForegroundColor Green

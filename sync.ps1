@@ -781,6 +781,8 @@ try {
             if (-not $asset.path) { continue }
             $assetPath = ($asset.path -replace '\\', '/')
             $candidateDests = @()
+            # Pre-lock releases installed references only under .github/agents/references;
+            # never claim the new .github/agent-references path from that evidence (#3766).
             if ($assetPath -match '^agents/references/(.+)$') {
                 $candidateDests += ".github/agents/references/$($Matches[1])"
             }
@@ -813,19 +815,37 @@ try {
         $legacyOverlayFiles = @($seeded | Sort-Object -Unique)
     }
 
+    # Legacy references (from the tracker or the manifest) are claimed only when their
+    # bytes match the previous manifest SHA or the current source; edits are preserved (#3766).
+    $legacyOverlayFiles = @($legacyOverlayFiles | Where-Object {
+        $legacyFile = Join-Path $repoRoot $_
+        if ($_ -notlike '.github/agents/references/*' -or -not (Test-Path -LiteralPath $legacyFile -PathType Leaf)) { return $true }
+        $assetPath = 'agents/references/' + $_.Substring('.github/agents/references/'.Length)
+        $knownBlobs = @()
+        if ($previousAssetManifest -and $previousAssetManifest.assets) {
+            $knownBlobs += @($previousAssetManifest.assets | Where-Object { $_.path -and ($_.path -replace '\\', '/') -ceq $assetPath -and $_.sha } | ForEach-Object { $_.sha })
+        }
+        $sourceFile = Join-Path $fullTargetDir $assetPath
+        if (Test-Path -LiteralPath $sourceFile -PathType Leaf) { $knownBlobs += (& git hash-object -- $sourceFile).Trim() }
+        if ($knownBlobs -ccontains (& git hash-object -- $legacyFile).Trim()) { return $true }
+        Write-Warning "Preserving modified legacy reference: $_"
+        return $false
+    })
+
     $sourceVersion = [string](Get-Content -LiteralPath (Join-Path $fullTargetDir 'version.json') -Raw | ConvertFrom-Json).version
     $guidanceStage = Join-Path $fullTargetDir ".guidance-overlay-stage-$([guid]::NewGuid().ToString('N'))"
     New-Item -ItemType Directory -Path $guidanceStage -Force | Out-Null
     $guidancePlan = [System.Collections.Generic.List[object]]::new()
     $plannedPaths = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
 
+    $referenceDocsPrefix = if ([System.IO.Path]::IsPathRooted($targetDir)) { $null } else { "../../$($targetDir.Replace('\', '/').TrimEnd('/'))/docs/" }
     $agentIndex = 0
     foreach ($projection in Get-BaseCoatProjectionPlan -SourceRoot $fullTargetDir -Mode Consumer) {
         $plannedSource = $projection.SourcePath
-        if ($projection.Kind -eq 'agent') {
+        if ($projection.Kind -in @('agent', 'reference')) {
             $agentIndex++
             $stagedAgent = Join-Path $guidanceStage "$agentIndex-$([System.IO.Path]::GetFileName($projection.SourcePath))"
-            $sanitized = Convert-AgentToCliCompatibleContent -Content (Get-Content -LiteralPath $projection.SourcePath -Raw)
+            $sanitized = Get-Content -LiteralPath $projection.SourcePath -Raw; if ($projection.Kind -eq 'agent') { $sanitized = Convert-AgentToCliCompatibleContent -Content $sanitized }; $sanitized = Convert-BaseCoatProjectedText -Content $sanitized -Kind $projection.Kind -DocsPrefix $referenceDocsPrefix
             Set-Content -LiteralPath $stagedAgent -Value $sanitized -Encoding UTF8
             $plannedSource = $stagedAgent
         }
@@ -935,6 +955,7 @@ try {
         (Join-Path $repoRoot '.github/prompts'),
         (Join-Path $repoRoot '.github/skills'),
         (Join-Path $repoRoot '.github/agents'),
+        (Join-Path $repoRoot '.github/agent-references'),
         (Join-Path $repoRoot '.agents/skills')
     )
     $staleBasecoatEntries = @($lockEntries | Where-Object {

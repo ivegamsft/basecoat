@@ -430,7 +430,7 @@ find "$REPO_ROOT/$TARGET_DIR/agents" -maxdepth 1 -type f -name '*.agent.eval.yam
 # Only copy flat agent/instruction/prompt/skill files — not taxonomy subdirs.
 #
 # These shared paths (.github/instructions, .github/prompts, .github/skills,
-# .github/agents, .github/agents/references, .agents/skills) can also be
+# .github/agents, .github/agent-references, .agents/skills) can also be
 # written to by other overlays (e.g. basecoat-sheen, basecoat-adhesion), so
 # BaseCoat must never wipe the destination directory wholesale — that would
 # silently delete co-located files it does not own (#3415). Instead, copy
@@ -489,14 +489,34 @@ guidance_read_lock "$guidance_lock_file" "$lock_tsv"
 
 source_version="$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$REPO_ROOT/$TARGET_DIR/version.json" | head -n 1)"
 
+# Copilot CLI parses every markdown file under .github/agents as a custom agent,
+# so agent detail references are projected to .github/agent-references and the
+# agent <-> reference relative links are rewritten to match (staged copies).
+# Reference links to BaseCoat docs point at the docs installed under TARGET_DIR.
+reference_docs_prefix="../../docs/"
+[[ "$TARGET_DIR" == /* ]] || reference_docs_prefix="../../${TARGET_DIR%/}/docs/"
+project_agent_link() {
+  local file="$1" kind="$2" staged
+  staged="$TMP_DIR/projected/$kind/$(basename "$file")"
+  mkdir -p "$(dirname "$staged")"
+  if [[ "$kind" == "agent" ]]; then
+    sed 's#\](references/#](../agent-references/#g' "$file" > "$staged"
+  else
+    sed -E -e 's#\]\(\.\./([A-Za-z0-9._-]+\.agent\.md)#](../agents/\1#g' -e "s#\\]\\(\\.\\./\\.\\./docs/#](${reference_docs_prefix}#g" "$file" > "$staged"
+  fi
+  printf '%s' "$staged"
+}
+
 add_guidance_plan_tree() {
-  local src="$1" destination_prefix="$2" unit_prefix="$3" file rel path hash
+  local src="$1" destination_prefix="$2" unit_prefix="$3" kind="${4:-}" file rel path hash source_file
   [[ -d "$src" ]] || return 0
   while IFS= read -r -d '' file; do
     rel="${file#"$src"/}"
     path="$(guidance_normalize_path "$destination_prefix/$rel")"
-    hash="$(guidance_sha256 "$file")"
-    printf '%s|basecoat|%s|%s|%s|%s\n' "$path" "$unit_prefix/$rel" "$source_version" "$hash" "$file" >> "$plan_tsv"
+    source_file="$file"
+    [[ -n "$kind" ]] && source_file="$(project_agent_link "$file" "$kind")"
+    hash="$(guidance_sha256 "$source_file")"
+    printf '%s|basecoat|%s|%s|%s|%s\n' "$path" "$unit_prefix/$rel" "$source_version" "$hash" "$source_file" >> "$plan_tsv"
   done < <(find "$src" -type f -print0)
 }
 
@@ -508,11 +528,12 @@ if [[ -d "$REPO_ROOT/$TARGET_DIR/agents" ]]; then
   while IFS= read -r -d '' file; do
     base="$(basename "$file")"
     path="$(guidance_normalize_path ".github/agents/$base")"
-    hash="$(guidance_sha256 "$file")"
-    printf '%s|basecoat|agents/%s|%s|%s|%s\n' "$path" "$base" "$source_version" "$hash" "$file" >> "$plan_tsv"
+    staged_agent="$(project_agent_link "$file" agent)"
+    hash="$(guidance_sha256 "$staged_agent")"
+    printf '%s|basecoat|agents/%s|%s|%s|%s\n' "$path" "$base" "$source_version" "$hash" "$staged_agent" >> "$plan_tsv"
   done < <(find "$REPO_ROOT/$TARGET_DIR/agents" -maxdepth 1 -name '*.agent.md' -type f -print0)
 fi
-add_guidance_plan_tree "$REPO_ROOT/$TARGET_DIR/agents/references" ".github/agents/references" "agents/references"
+add_guidance_plan_tree "$REPO_ROOT/$TARGET_DIR/agents/references" ".github/agent-references" "agents/references" reference
 
 if [[ "$(cut -d '|' -f1 "$plan_tsv" | sort | uniq -d | wc -l | tr -d ' ')" -ne 0 ]]; then
   echo "GUIDANCE_LOCK_INVALID reason='duplicate path in BaseCoat write plan'" >&2
@@ -529,7 +550,10 @@ if [[ ! -f "$guidance_lock_file" ]]; then
       sed -E 's/.*"path"[[:space:]]*:[[:space:]]*"([^"]*)".*/\1/' |
       while IFS= read -r asset_path; do
         case "$asset_path" in
-          agents/references/*) echo ".github/agents/references/${asset_path#agents/references/}" ;;
+          agents/references/*)
+            # Pre-lock releases installed references only under .github/agents/references (#3766).
+            echo ".github/agents/references/${asset_path#agents/references/}"
+            ;;
           agents/*.agent.md)
             [[ "$asset_path" == */*/*.agent.md ]] || echo ".github/agents/${asset_path#agents/}"
             ;;
@@ -569,6 +593,27 @@ if [[ ! -f "$guidance_lock_file" ]]; then
     [[ -z "$legacy_path" ]] && continue
     normalized="$(guidance_normalize_path "$legacy_path")"
     if [[ -f "$REPO_ROOT/$normalized" ]]; then
+      # Legacy references (tracker or manifest) are claimed only when their bytes
+      # match the previous manifest SHA or the current source; edits are preserved (#3766).
+      if [[ "$normalized" == .github/agents/references/* ]]; then
+        asset_path="agents/references/${normalized#.github/agents/references/}"
+        actual_blob="$(git hash-object -- "$REPO_ROOT/$normalized")"
+        expected_blob=""
+        source_blob=""
+        if [[ -f "$previous_asset_manifest_file" ]]; then
+          expected_blob="$(awk -v path="$asset_path" '
+            /"path"[[:space:]]*:/ { matched=index($0, "\"" path "\"") > 0 }
+            matched && /"sha"[[:space:]]*:/ {
+              line=$0; sub(/.*"sha"[[:space:]]*:[[:space:]]*"/, "", line); sub(/".*/, "", line); print line; exit
+            }
+          ' "$previous_asset_manifest_file")"
+        fi
+        [[ -f "$TMP_DIR/source/$asset_path" ]] && source_blob="$(git hash-object -- "$TMP_DIR/source/$asset_path")"
+        if [[ "$actual_blob" != "$expected_blob" && "$actual_blob" != "$source_blob" ]]; then
+          echo "Preserving modified legacy reference: $normalized" >&2
+          continue
+        fi
+      fi
       if [[ "$normalized" == .github/instructions/* ]]; then
         asset_path="instructions/${normalized#.github/instructions/}"
         if [[ -f "$TMP_DIR/source/$asset_path" ]] && basecoat_distribution_excluded "$TMP_DIR/source/$asset_path"; then
@@ -671,6 +716,7 @@ while IFS='|' read -r path _; do
              "$parent_dir" == "$REPO_ROOT/.github/prompts"* || \
              "$parent_dir" == "$REPO_ROOT/.github/skills"* || \
              "$parent_dir" == "$REPO_ROOT/.github/agents"* || \
+             "$parent_dir" == "$REPO_ROOT/.github/agent-references"* || \
              "$parent_dir" == "$REPO_ROOT/.agents/skills"* ]]; do
       if [[ -d "$parent_dir" && -z "$(ls -A "$parent_dir" 2>/dev/null)" ]]; then
         rmdir "$parent_dir"

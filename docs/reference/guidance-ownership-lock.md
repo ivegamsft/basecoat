@@ -16,13 +16,17 @@ The lock covers files below these physical shared destinations:
 
 - `.github/skills/`
 - `.github/agents/`
-- `.github/agents/references/`
+- `.github/agent-references/`
 - `.github/instructions/`
 - `.github/prompts/`
 - `.agents/skills/`
 
-`.github/agents/references/` is listed explicitly as a shared destination and
-is also structurally contained by `.github/agents/`.
+`.github/agent-references/` is listed explicitly as a shared destination, outside
+`.github/agents/` because Copilot CLI parses every markdown file under that tree as a
+custom agent (#3766). Sync removes a legacy `.github/agents/references/` file only
+when it can verify the file is unchanged BaseCoat content, by matching the previous
+asset-manifest SHA or the current source. Modified or unverifiable files are kept and
+left unmanaged, so Copilot CLI may still warn about them until you remove or move them.
 
 ## Contract
 

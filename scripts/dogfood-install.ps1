@@ -12,6 +12,13 @@ function Get-Sha256 {
     (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
 }
 
+function Get-TextSha256 {
+    param([Parameter(Mandatory = $true)][string]$Text)
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    try { ([BitConverter]::ToString($sha.ComputeHash([System.Text.UTF8Encoding]::new($false).GetBytes($Text)))).Replace('-', '').ToLowerInvariant() }
+    finally { $sha.Dispose() }
+}
+
 function Assert-NoReparsePoint {
     param(
         [Parameter(Mandatory = $true)][string]$Root,
@@ -69,7 +76,7 @@ function Read-ProjectionManifest {
     }
     foreach ($entry in $manifest.entries) {
         $segments = ([string]$entry.path -split '/')
-        if ($entry.path -cnotmatch '^(?:\.github/(?:skills|agents|prompts)|\.agents/skills)/[A-Za-z0-9._ -]+(?:/[A-Za-z0-9._ -]+)*$' -or
+        if ($entry.path -cnotmatch '^(?:\.github/(?:skills|agents|agent-references|prompts)|\.agents/skills)/[A-Za-z0-9._ -]+(?:/[A-Za-z0-9._ -]+)*$' -or
             @($segments | Where-Object { $_ -in @('', '.', '..') }).Count -gt 0 -or
             $entry.sha256 -cnotmatch '^[0-9a-f]{64}$') {
             throw "Dogfood projection manifest contains an invalid entry: '$($entry.path)'"
@@ -88,7 +95,7 @@ try {
 
     $manifestRelativePath = '.github/.basecoat-dogfood-manifest.json'
     $manifestPath = Join-Path $resolvedRoot ($manifestRelativePath -replace '/', [System.IO.Path]::DirectorySeparatorChar)
-    $targets = @('.github/skills', '.github/agents', '.github/prompts', '.agents/skills')
+    $targets = @('.github/skills', '.github/agents', '.github/agent-references', '.github/prompts', '.agents/skills')
     foreach ($target in $targets) {
         Assert-NoReparsePoint -Root $resolvedRoot -Path (Join-Path $resolvedRoot ($target -replace '/', [System.IO.Path]::DirectorySeparatorChar))
     }
@@ -104,7 +111,8 @@ try {
                 path = $relativePath
                 sourcePath = $item.SourcePath
                 destinationPath = $destination
-                sha256 = Get-Sha256 -Path $item.SourcePath
+                kind = $item.Kind
+                sha256 = if ($item.Kind -in @('agent', 'reference')) { Get-TextSha256 -Text (Convert-BaseCoatProjectedText -Content (Get-Content -LiteralPath $item.SourcePath -Raw) -Kind $item.Kind) } else { Get-Sha256 -Path $item.SourcePath }
             }
         }
     )
@@ -147,7 +155,7 @@ try {
     if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
         throw 'Git is required to verify that dogfood projection destinations contain no tracked files.'
     }
-    $tracked = @(git -C $resolvedRoot ls-files -- '.github/skills' '.github/agents' '.github/prompts' '.agents/skills' $manifestRelativePath 2>$null)
+    $tracked = @(git -C $resolvedRoot ls-files -- '.github/skills' '.github/agents' '.github/agent-references' '.github/prompts' '.agents/skills' $manifestRelativePath 2>$null)
     if ($LASTEXITCODE -ne 0) {
         throw "Unable to verify tracked projection paths under '$resolvedRoot'."
     }
@@ -187,7 +195,13 @@ try {
     foreach ($entry in $currentEntries) {
         $parent = Split-Path -Parent $entry.destinationPath
         New-Item -ItemType Directory -Path $parent -Force | Out-Null
-        Copy-Item -LiteralPath $entry.sourcePath -Destination $entry.destinationPath -Force
+        if ($entry.kind -in @('agent', 'reference')) {
+            $text = Convert-BaseCoatProjectedText -Content (Get-Content -LiteralPath $entry.sourcePath -Raw) -Kind $entry.kind
+            [System.IO.File]::WriteAllText($entry.destinationPath, $text, [System.Text.UTF8Encoding]::new($false))
+        }
+        else {
+            Copy-Item -LiteralPath $entry.sourcePath -Destination $entry.destinationPath -Force
+        }
     }
     foreach ($path in $orphaned) {
         $destination = Join-Path $resolvedRoot ($path -replace '/', [System.IO.Path]::DirectorySeparatorChar)

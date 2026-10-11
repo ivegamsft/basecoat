@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.1",
   "libraryVersion": "4.6.4",
-  "generatedAt": "2026-10-11T15:07:48.7496802Z",
+  "generatedAt": "2026-10-11T20:26:45.3413748Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -1878,7 +1878,7 @@
     {
       "path": "scripts/guidance-lock.ps1",
       "type": "script",
-      "sha": "240ecaadbc3056e6bfd9fefcc5dad76cee19a964",
+      "sha": "92d7df56b93e4573741bd456a382c4f1dc253cca",
       "version": null,
       "effectiveVersion": "4.6.4",
       "versionSource": "library"
@@ -1886,7 +1886,7 @@
     {
       "path": "scripts/guidance-lock.sh",
       "type": "script",
-      "sha": "c8b1bc2989ac1d62ce3d5b3d51f7ffd0e4e5f2e5",
+      "sha": "041cdda6eda6f639d3c2d37b18b087ce48883b22",
       "version": null,
       "effectiveVersion": "4.6.4",
       "versionSource": "library"

@@ -5,6 +5,7 @@ site/
 # Local BaseCoat dogfood projection; canonical assets remain in top-level trees
 /.github/skills/
 /.github/agents/
+/.github/agent-references/
 /.github/prompts/
 /.agents/skills/
 /.github/.basecoat-dogfood-manifest.json*

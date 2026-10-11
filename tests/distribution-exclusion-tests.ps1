@@ -94,7 +94,9 @@ try {
         Remove-Item (Join-Path $source $directory) -Recurse -Force
         New-Item -ItemType Directory -Force -Path (Join-Path $source $directory) | Out-Null
     }
-    Set-Content (Join-Path $source 'agents\fixture.agent.md') "---`nname: fixture`ndescription: fixture`ndistribute: false`n---`n`n# Fixture"
+    Set-Content (Join-Path $source 'agents\fixture.agent.md') "---`nname: fixture`ndescription: fixture`ndistribute: false`n---`n`n# Fixture`n`n[detail](references/fixture-detail.md)"
+    New-Item -ItemType Directory -Force -Path (Join-Path $source 'agents\references') | Out-Null
+    Set-Content (Join-Path $source 'agents\references\fixture-detail.md') "# Detail`n`n[agent](../fixture.agent.md)`n[doc](../../docs/guides/operation-context-resolver.md)"
     Set-Content (Join-Path $source 'prompts\fixture.prompt.md') "---`ndescription: fixture`ndistribute: false`n---`n`n# Fixture"
     New-Item -ItemType Directory -Force -Path (Join-Path $source 'skills\fixture') | Out-Null
     Set-Content (Join-Path $source 'skills\fixture\SKILL.md') "---`nname: fixture`ndescription: fixture`ndistribute: false`n---`n`n# Fixture"
@@ -213,6 +215,7 @@ try {
         $packagedManifest = Get-Content (Join-Path $stage 'asset-manifest.json') -Raw | ConvertFrom-Json
         Assert-True (-not @($packagedManifest.assets | Where-Object path -Match 'fixture-hidden').Count) "$packager manifest leaked internal instruction"
         Assert-True (Test-Path (Join-Path $stage 'instructions\fixture-quoted.instructions.md')) "$packager wrongly excluded quoted false"
+        Assert-True (Test-Path (Join-Path $stage 'agents\references\fixture-detail.md')) "$packager stage omitted the agents/references source sync projects to .github/agent-references"
         $zip = Get-ChildItem (Join-Path $source 'dist') -Filter '*.zip' | Select-Object -First 1
         Add-Type -AssemblyName System.IO.Compression.FileSystem
         $archive = [IO.Compression.ZipFile]::OpenRead($zip.FullName)
@@ -248,6 +251,14 @@ try {
     try {
         Assert-True (-not @($ghcpArchive.Entries | Where-Object FullName -Match 'fixture-hidden').Count) 'GHCP ZIP leaked internal instruction'
         Assert-True (@($ghcpArchive.Entries | Where-Object FullName -Match 'fixture-true').Count -eq 1) 'GHCP ZIP dropped true instruction'
+        $ghcpNames = @($ghcpArchive.Entries | ForEach-Object { ($_.FullName -replace '\\', '/') -replace '^\./', '' })
+        Assert-True ($ghcpNames -contains 'agent-references/fixture-detail.md') 'GHCP ZIP omitted agent-references/'
+        Assert-True (-not @($ghcpNames | Where-Object { $_ -like 'agents/references/*' }).Count) 'GHCP ZIP shipped references under agents/ (#3766)'
+        $readEntry = { param($name) $reader = [IO.StreamReader]::new(($ghcpArchive.Entries | Where-Object { (($_.FullName -replace '\\', '/') -replace '^\./', '') -eq $name }).Open()); try { $reader.ReadToEnd() } finally { $reader.Dispose() } }
+        Assert-True ((& $readEntry 'agents/fixture.agent.md').Contains('](../agent-references/fixture-detail.md)')) 'GHCP agent link not rewritten to ../agent-references/'
+        Assert-True ((& $readEntry 'agent-references/fixture-detail.md').Contains('](../agents/fixture.agent.md)')) 'GHCP reference link not rewritten to ../agents/'
+        Assert-True ((& $readEntry 'agent-references/fixture-detail.md').Contains('](../docs/guides/operation-context-resolver.md)')) 'GHCP reference docs link not rewritten to ../docs/'
+        Assert-True ($ghcpNames -contains 'docs/guides/operation-context-resolver.md') 'GHCP ZIP omitted a doc linked from agent-references/'
     }
     finally { $ghcpArchive.Dispose() }
     Write-Host 'Distribution exclusion tests passed: sync retirement, consumer safety, bootstrap refresh, manifest and PS/Bash archives.'

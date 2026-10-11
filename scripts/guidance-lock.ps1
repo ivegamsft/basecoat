@@ -4,6 +4,7 @@ $script:GuidanceLockSchema = 'guidance-lock/v1'
 $script:GuidanceSharedPrefixes = @(
     '.github/skills/',
     '.github/agents/',
+    '.github/agent-references/',
     '.github/instructions/',
     '.github/prompts/',
     '.agents/skills/'

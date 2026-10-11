@@ -139,6 +139,18 @@ jobs:
           fi
           find dist/ghcp-stage/skills -type f -name 'eval.yaml' -delete
           find dist/ghcp-stage/agents -type f -name '*.agent.eval.yaml' -delete
+          # Copilot CLI parses every markdown file under agents/ as a custom agent (#3766):
+          # ship detail references beside agents/ and rewrite the links between them.
+          if [[ -d dist/ghcp-stage/agents/references ]]; then
+            mv dist/ghcp-stage/agents/references dist/ghcp-stage/agent-references
+            find dist/ghcp-stage/agents -maxdepth 1 -name '*.agent.md' -exec sed -i 's#\](references/#](../agent-references/#g' {} +
+            find dist/ghcp-stage/agent-references -name '*.md' -exec sed -i -E 's#\]\(\.\./([A-Za-z0-9._-]+\.agent\.md)#](../agents/\1#g' {} +
+            # Ship the BaseCoat docs that references link to and point the links at them.
+            grep -rhoE '\]\(\.\./\.\./docs/[^)#]+' dist/ghcp-stage/agent-references | sed 's#^](\.\./\.\./##' | sort -u | while read -r doc; do
+              mkdir -p "dist/ghcp-stage/$(dirname "$doc")" && cp "$doc" "dist/ghcp-stage/$doc"
+            done
+            find dist/ghcp-stage/agent-references -name '*.md' -exec sed -i 's#\](\.\./\.\./docs/#](../docs/#g' {} +
+          fi
           (cd dist/ghcp-stage && zip -r ../basecoat-ghcp.zip .)
 
       - name: Verify no eval metadata in install artifacts

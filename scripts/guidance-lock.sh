@@ -13,7 +13,7 @@ guidance_normalize_path() {
     return 1
   fi
   case "$path" in
-    .github/skills/*|.github/agents/*|.github/instructions/*|.github/prompts/*|.agents/skills/*) ;;
+    .github/skills/*|.github/agents/*|.github/agent-references/*|.github/instructions/*|.github/prompts/*|.agents/skills/*) ;;
     *)
       echo "GUIDANCE_LOCK_INVALID path='$1' reason='path is outside the shared guidance destinations'" >&2
       return 1

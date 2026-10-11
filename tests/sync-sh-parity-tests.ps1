@@ -43,6 +43,11 @@ Assert-True ($syncShContent -match 'approved_predecessor_path="\.github/agents/a
 Assert-True ($syncShContent -match 'guidance_write_lock "\$guidance_lock_file"' -and
     $syncShContent -match 'rm -f "\$legacy_overlay_file"') `
     'Bash sync must publish guidance-lock/v1 and retire the legacy overlay tracker.'
+Assert-True ($syncShContent -notmatch 'echo "\.github/agent-references/\$\{asset_path' -and
+    $syncShContent -match '"\$normalized" == \.github/agents/references/\* \]\]; then\s+asset_path="agents/references/' -and
+    $syncShContent -match 'Preserving modified legacy reference') `
+    'Bash pre-lock migration must claim only legacy .github/agents/references paths whose bytes match the previous manifest (#3766).'
+Assert-True ($syncShContent -match 'reference_docs_prefix="\.\./\.\./\$\{TARGET_DIR%/\}/docs/"') 'Bash reference projection must point docs links at the docs installed under TARGET_DIR.'
 if ($IsWindows) {
     Write-Host 'Bash runtime parity skipped on Windows after static corporate-origin checks; Ubuntu CI runs the fixture.'
     exit 0
@@ -102,7 +107,8 @@ guidance_exit_lease "$lease3"
     "---`nname: agentic-sdlc-autonomy`ndescription: fixture`n---`n# Canonical BaseCoat payload" |
         Set-Content -LiteralPath (Join-Path $source 'agents/agentic-sdlc-autonomy.agent.md') -Encoding utf8NoBOM
     New-Item -ItemType Directory -Path (Join-Path $source 'agents/references') -Force | Out-Null
-    '# example detail reference' | Set-Content -LiteralPath (Join-Path $source 'agents/references/example-detail.md') -Encoding utf8NoBOM
+    "# example detail reference`n[guide](../../docs/guides/example-guide.md)" | Set-Content -LiteralPath (Join-Path $source 'agents/references/example-detail.md') -Encoding utf8NoBOM
+    '# guide' | Set-Content -LiteralPath (Join-Path $source 'docs/guides/example-guide.md') -Encoding utf8NoBOM
     "---`ndescription: example`napplyTo: '**/*'`n---" | Set-Content -LiteralPath (Join-Path $source 'instructions/example.instructions.md') -Encoding utf8NoBOM
     "---`nname: example`ndescription: example`n---" | Set-Content -LiteralPath (Join-Path $source 'prompts/example.prompt.md') -Encoding utf8NoBOM
     'Write-Host updater' | Set-Content -LiteralPath (Join-Path $source '.github/base-coat/scripts/invoke-basecoat-consumer-update.ps1') -Encoding utf8NoBOM
@@ -124,6 +130,20 @@ known_bad_releases:
     $consumerConfig.Replace('__TRAILING__', '  ') |
         Set-Content -LiteralPath (Join-Path $consumer '.basecoat.yml') -Encoding utf8BOM
     '# consumer' | Set-Content -LiteralPath (Join-Path $consumer 'README.md') -Encoding utf8NoBOM
+    # Pre-lock upgrade (#3766): legacy references are claimed only when unchanged,
+    # and the new .github/agent-references path is never claimed from old evidence.
+    $legacyRefs = Join-Path $consumer '.github/agents/references'
+    New-Item -ItemType Directory -Path $legacyRefs, (Join-Path $consumer '.github/agent-references') -Force | Out-Null
+    '# example detail v0' | Set-Content -LiteralPath (Join-Path $legacyRefs 'example-detail.md') -Encoding utf8NoBOM
+    '# modified detail v0' | Set-Content -LiteralPath (Join-Path $legacyRefs 'modified-detail.md') -Encoding utf8NoBOM
+    'foreign overlay' | Set-Content -LiteralPath (Join-Path $consumer '.github/agent-references/foreign-detail.md') -Encoding utf8NoBOM
+    $legacyAssets = @(foreach ($name in @('example-detail', 'modified-detail', 'foreign-detail')) {
+        $file = if ($name -eq 'foreign-detail') { Join-Path $consumer '.github/agent-references/foreign-detail.md' } else { Join-Path $legacyRefs "$name.md" }
+        [ordered]@{ path = "agents/references/$name.md"; sha = (git hash-object -- $file).Trim() }
+    })
+    Add-Content -LiteralPath (Join-Path $legacyRefs 'modified-detail.md') 'consumer edit'
+    @{ assets = $legacyAssets } | ConvertTo-Json -Depth 4 |
+        Set-Content -LiteralPath (Join-Path $consumer '.github/base-coat/asset-manifest.json') -Encoding utf8NoBOM
     git -C $consumer add -A
     git -C $consumer commit -m initial | Out-Null
 
@@ -139,7 +159,11 @@ known_bad_releases:
     $installed = (Get-Content -LiteralPath (Join-Path $consumer '.github/base-coat/version.json') -Raw | ConvertFrom-Json).version
     Assert-True ($installed -eq '1.0.0') 'sync.sh did not parse a BOM-prefixed config and literally match its SemVer build-metadata known-bad key.'
     Assert-True (Test-Path -LiteralPath (Join-Path $consumer '.github/base-coat/scripts/invoke-basecoat-consumer-update.ps1')) 'sync.sh did not distribute managed updater scripts.'
-    Assert-True (Test-Path -LiteralPath (Join-Path $consumer '.github/agents/references/example-detail.md')) 'sync.sh did not distribute the agents/references subtree into .github/agents/references.'
+    Assert-True (Test-Path -LiteralPath (Join-Path $consumer '.github/agent-references/example-detail.md')) 'sync.sh did not distribute the agents/references subtree into .github/agent-references.'
+    Assert-True ((Get-Content -LiteralPath (Join-Path $consumer '.github/agent-references/example-detail.md') -Raw).Contains('](../../.github/base-coat/docs/guides/example-guide.md)') -and (Test-Path -LiteralPath (Join-Path $consumer '.github/base-coat/docs/guides/example-guide.md'))) 'sync.sh did not point reference docs links at the installed BaseCoat docs.'
+    Assert-True (-not (Test-Path -LiteralPath (Join-Path $legacyRefs 'example-detail.md'))) 'sync.sh did not remove the unchanged legacy reference.'
+    Assert-True ((Get-Content -LiteralPath (Join-Path $legacyRefs 'modified-detail.md') -Raw) -match 'consumer edit') 'sync.sh deleted a consumer-modified legacy reference.'
+    Assert-True ((Get-Content -LiteralPath (Join-Path $consumer '.github/agent-references/foreign-detail.md') -Raw).Trim() -eq 'foreign overlay') 'sync.sh claimed a pre-existing .github/agent-references file.'
     $tagSha = (git -C $source rev-list -n 1 v1.0.0).Trim()
     $provenance = Get-Content -LiteralPath (Join-Path $consumer '.github/base-coat/.source-provenance.json') -Raw | ConvertFrom-Json
     Assert-True ($provenance.commit -eq $tagSha) 'sync.sh provenance did not record the fetched commit.'

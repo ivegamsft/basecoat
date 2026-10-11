@@ -448,11 +448,69 @@ Invoke-Scenario 'legacy tracker migration' {
         'Atomic lock publication left a temporary file behind.'
 }
 
+Invoke-Scenario 'legacy reference manifest migration preserves modified and foreign files' {
+    $source = Join-Path $scratch 'reference-migration-source'
+    $consumer = Join-Path $scratch 'reference-migration-consumer'
+    New-TestSource $source
+    foreach ($name in @('unchanged-detail', 'modified-detail')) {
+        "# $name v2" | Set-Content -LiteralPath (Join-Path $source "agents/references/$name.md") -Encoding utf8NoBOM
+    }
+    git -C $source add -A
+    git -C $source commit -m references | Out-Null
+    New-TestConsumer $consumer
+    $legacyDir = Join-Path $consumer '.github/agents/references'
+    $newDir = Join-Path $consumer '.github/agent-references'
+    New-Item -ItemType Directory -Path $legacyDir, $newDir, (Join-Path $consumer '.github/base-coat') -Force | Out-Null
+    $assets = @(foreach ($name in @('unchanged-detail', 'modified-detail')) {
+        $legacy = Join-Path $legacyDir "$name.md"
+        "# $name v1" | Set-Content -LiteralPath $legacy -Encoding utf8NoBOM
+        @{ path = "agents/references/$name.md"; sha = (git hash-object -- $legacy).Trim() }
+    })
+    Add-Content -LiteralPath (Join-Path $legacyDir 'modified-detail.md') 'consumer edit'
+    $foreign = Join-Path $newDir 'foreign-detail.md'
+    'foreign overlay' | Set-Content -LiteralPath $foreign -Encoding utf8NoBOM
+    $assets += @{ path = 'agents/references/foreign-detail.md'; sha = (git hash-object -- $foreign).Trim() }
+    @{ assets = $assets } | ConvertTo-Json -Depth 4 |
+        Set-Content -LiteralPath (Join-Path $consumer '.github/base-coat/asset-manifest.json') -Encoding utf8NoBOM
+
+    Invoke-TestSync $source $consumer
+    Assert-True (-not (Test-Path -LiteralPath (Join-Path $legacyDir 'unchanged-detail.md'))) 'Unchanged legacy reference was not removed.'
+    Assert-True ((Get-Content -LiteralPath (Join-Path $legacyDir 'modified-detail.md') -Raw) -match 'consumer edit') 'Consumer-modified legacy reference was deleted.'
+    Assert-True ((Get-Content -LiteralPath $foreign -Raw).Trim() -eq 'foreign overlay') 'Pre-existing .github/agent-references file was claimed by the legacy migration.'
+    Assert-True ((Get-Content -LiteralPath (Join-Path $newDir 'modified-detail.md') -Raw).Trim() -eq '# modified-detail v2') 'Reference was not projected to .github/agent-references.'
+    $lockPath = Get-GuidanceLockPath -RepoRoot $consumer
+    $lock = Read-GuidanceLock -RepoRoot $consumer
+    Assert-True (-not @($lock.entries | Where-Object { $_.path -in @('.github/agent-references/foreign-detail.md', '.github/agents/references/modified-detail.md') }).Count) 'Unverified reference paths were recorded as BaseCoat-owned.'
+    Assert-True (Test-Json -Json (Get-Content -LiteralPath $lockPath -Raw) -SchemaFile (Join-Path $repoRoot 'schemas/guidance-lock-v1.schema.json') -ErrorAction SilentlyContinue) 'Lock with .github/agent-references entries violates guidance-lock-v1 schema.'
+}
+
+Invoke-Scenario 'legacy tracker reference migration preserves modified files' {
+    $source = Join-Path $scratch 'reference-tracker-source'
+    $consumer = Join-Path $scratch 'reference-tracker-consumer'
+    New-TestSource $source
+    foreach ($name in @('unchanged-detail', 'modified-detail')) {
+        "# $name v2" | Set-Content -LiteralPath (Join-Path $source "agents/references/$name.md") -Encoding utf8NoBOM
+    }
+    git -C $source add -A
+    git -C $source commit -m references | Out-Null
+    New-TestConsumer $consumer
+    $legacyDir = Join-Path $consumer '.github/agents/references'
+    New-Item -ItemType Directory -Path $legacyDir, (Join-Path $consumer '.github/base-coat') -Force | Out-Null
+    '# unchanged-detail v2' | Set-Content -LiteralPath (Join-Path $legacyDir 'unchanged-detail.md') -Encoding utf8NoBOM
+    "# modified-detail v2`nconsumer edit" | Set-Content -LiteralPath (Join-Path $legacyDir 'modified-detail.md') -Encoding utf8NoBOM
+    ".github/agents/references/unchanged-detail.md`n.github/agents/references/modified-detail.md`n" |
+        Set-Content -LiteralPath (Join-Path $consumer '.github/base-coat/.overlay-managed-files') -NoNewline -Encoding utf8NoBOM
+
+    Invoke-TestSync $source $consumer
+    Assert-True (-not (Test-Path -LiteralPath (Join-Path $legacyDir 'unchanged-detail.md'))) 'Tracker-owned unchanged legacy reference was not removed.'
+    Assert-True ((Get-Content -LiteralPath (Join-Path $legacyDir 'modified-detail.md') -Raw) -match 'consumer edit') 'Tracker-owned consumer-modified legacy reference was deleted.'
+}
+
 Remove-Item -LiteralPath $scratch -Recurse -Force -ErrorAction SilentlyContinue
 if ($failures.Count -gt 0) {
     $failures | ForEach-Object { Write-Host "FAILED: $_" -ForegroundColor Red }
-    Write-Host "Guidance lock telemetry: checks=$checks scenarios=19 failures=$($failures.Count)" -ForegroundColor Red
+    Write-Host "Guidance lock telemetry: checks=$checks scenarios=21 failures=$($failures.Count)" -ForegroundColor Red
     exit 1
 }
 
-Write-Host "Guidance lock telemetry: checks=$checks scenarios=19 failures=0" -ForegroundColor Green
+Write-Host "Guidance lock telemetry: checks=$checks scenarios=21 failures=0" -ForegroundColor Green

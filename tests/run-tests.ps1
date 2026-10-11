@@ -187,6 +187,13 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running agent reference layout tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'agent-reference-layout-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-FailureLog 'agent-reference-layout-tests'
+    exit 1
+}
+
 Write-Host 'Running shared guidance ownership lock tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'guidance-lock-tests.ps1')
 if ($LASTEXITCODE -ne 0) {

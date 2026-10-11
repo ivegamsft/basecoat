@@ -377,7 +377,7 @@ try {
                 if ($existed) { $script:updatedCount++ } else { $script:addedCount++ }
             } else {
                 $raw = Get-Content -Path $agent.FullName -Raw
-                $sanitized = Convert-AgentToCliCompatibleContent -Content $raw
+                $sanitized = (Convert-AgentToCliCompatibleContent -Content $raw).Replace('](references/', '](../agent-references/')
                 Set-Content -Path $dest -Value $sanitized -Encoding UTF8
                 if ($existed) {
                     Write-Ok "Updated agent: $($agent.Name)"
@@ -389,19 +389,18 @@ try {
             }
         }
 
-        # Agent references: agent files may link to references/<name>-detail.md for
-        # overflow content moved out to satisfy the token budget. Copy the whole
-        # subtree so those relative links resolve for installed agents.
+        # Agent references: agents link to ../agent-references/<name>-detail.md for
+        # overflow content. They live outside .github/agents because Copilot CLI
+        # parses every markdown file under that tree as a custom agent; the legacy
+        # .github/agents/references copy is migrated by sync, which removes only
+        # verified unchanged BaseCoat files. Copy-AgentFiles runs only for -DryRun;
+        # real installs delegate to sync.
         $referencesSrc = Join-Path $SrcDir 'references'
         if (Test-Path $referencesSrc) {
-            $referencesDest = Join-Path $DestDir 'references'
-            if ($DryRun) {
-                Write-Info "[DRY RUN] Would sync agent references subtree"
-            } else {
-                if (Test-Path $referencesDest) { Remove-Item -Path $referencesDest -Recurse -Force }
-                Copy-Item -Path $referencesSrc -Destination $referencesDest -Recurse -Force
-                Write-Ok "Synced agent references subtree"
-            }
+            Write-Info "[DRY RUN] Would sync agent references subtree to .github/agent-references"
+        }
+        if (Test-Path (Join-Path $DestDir 'references')) {
+            Write-Info "[DRY RUN] Would remove verified unchanged legacy .github/agents/references files"
         }
     }
 

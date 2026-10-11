@@ -75,7 +75,7 @@ and validators are installed under `.github/base-coat/scripts/`.
 ### Shared destination ownership
 
 BaseCoat, Sheen, and Adhesion coordinate physical files in `.github/skills`,
-`.github/agents`, `.github/agents/references`, `.github/instructions`,
+`.github/agents`, `.github/agent-references`, `.github/instructions`,
 `.github/prompts`, and `.agents/skills` through the versioned lock at
 `.github/base-coat/guidance-lock.json`. Sync blocks foreign ownership
 collisions and consumer-modified managed files before overwrite. The installed

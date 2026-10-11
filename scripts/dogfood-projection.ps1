@@ -141,6 +141,24 @@ function Test-BaseCoatDogfoodSkill {
     return $false
 }
 
+# Copilot CLI parses every markdown file under .github/agents as a custom agent,
+# so agent detail references are projected to .github/agent-references and the
+# relative links between agents and references are rewritten to match.
+function Convert-BaseCoatProjectedText {
+    param([string]$Content, [string]$Kind, [string]$DocsPrefix)
+
+    switch ($Kind) {
+        'agent' { return $Content.Replace('](references/', '](../agent-references/') }
+        'reference' {
+            $text = [regex]::Replace($Content, '\]\(\.\./([A-Za-z0-9._-]+\.agent\.md)', '](../agents/$1')
+            # Consumers install BaseCoat docs under the sync target, not the repo root.
+            if ($DocsPrefix) { $text = $text.Replace('](../../docs/', "]($DocsPrefix") }
+            return $text
+        }
+        default { return $Content }
+    }
+}
+
 function Get-BaseCoatProjectionPlan {
     [CmdletBinding()]
     param(
@@ -207,8 +225,9 @@ function Get-BaseCoatProjectionPlan {
             }
             Add-ProjectionTree `
                 -SourceDirectory (Join-Path $agentsRoot 'references') `
-                -DestinationPrefix '.github/agents/references' `
-                -GuidanceUnitPrefix 'agents/references'
+                -DestinationPrefix '.github/agent-references' `
+                -GuidanceUnitPrefix 'agents/references' `
+                -Kind 'reference'
         }
     }
     else {
@@ -297,9 +316,9 @@ function Get-BaseCoatProjectionPlan {
                 }
                 $entries.Add([pscustomobject]@{
                     SourcePath = $reference.FullName
-                    DestinationPath = ".github/agents/references/$referencePath"
+                    DestinationPath = ".github/agent-references/$referencePath"
                     GuidanceUnit = "agents/references/$referencePath"
-                    Kind = 'file'
+                    Kind = 'reference'
                 })
             }
         }
