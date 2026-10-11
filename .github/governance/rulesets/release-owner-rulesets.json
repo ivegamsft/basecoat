@@ -1,0 +1,59 @@
+{
+  "description": "Layered single-writer rulesets for #3594 release state. Each writer-admission ruleset lists only its writer App as a bypass actor; each history ruleset has no bypass actors. Writer App IDs are unprovisioned until the per-writer Apps and OIDC broker exist, so these definitions must not be applied before then.",
+  "spec": "docs/spec/synthesized/issue-3594-featrelease-establish-governed-automatic-version-tag-ownership.spec.md",
+  "writers": {
+    "release-owner": { "app_id": null },
+    "merge-eligibility": { "app_id": null },
+    "publisher": { "app_id": null }
+  },
+  "rulesets": [
+    {
+      "name": "release-state-writer-admission",
+      "ref": "refs/heads/release-state",
+      "writer": "release-owner",
+      "rules": ["creation", "update"]
+    },
+    {
+      "name": "release-state-immutable-history",
+      "ref": "refs/heads/release-state",
+      "writer": null,
+      "rules": ["non_fast_forward", "deletion"]
+    },
+    {
+      "name": "release-receipts-writer-admission",
+      "ref": "refs/heads/release-receipts",
+      "writer": "merge-eligibility",
+      "rules": ["creation", "update"]
+    },
+    {
+      "name": "release-receipts-immutable-history",
+      "ref": "refs/heads/release-receipts",
+      "writer": null,
+      "rules": ["non_fast_forward", "deletion"]
+    },
+    {
+      "name": "release-publication-writer-admission",
+      "ref": "refs/heads/release-publication",
+      "writer": "publisher",
+      "rules": ["creation", "update"]
+    },
+    {
+      "name": "release-publication-immutable-history",
+      "ref": "refs/heads/release-publication",
+      "writer": null,
+      "rules": ["non_fast_forward", "deletion"]
+    },
+    {
+      "name": "release-mirror-creation-admission",
+      "ref": "refs/heads/release-mirror/*",
+      "writer": "publisher",
+      "rules": ["creation"]
+    },
+    {
+      "name": "release-mirror-immutable",
+      "ref": "refs/heads/release-mirror/*",
+      "writer": null,
+      "rules": ["update", "non_fast_forward", "deletion"]
+    }
+  ]
+}
