@@ -373,6 +373,7 @@ jobs:
     foreach ($scriptName in @(
             'validate-basecoat.ps1',
             'validate-skill-visibility.ps1',
+            'validate-skill-frontmatter.ps1',
             'validate-asset-distribution.ps1',
             'validate-model-policy.ps1',
             'model-policy-contract.ps1',

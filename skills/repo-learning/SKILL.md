@@ -1,7 +1,7 @@
 ---
 name: repo-learning
 description: "Opt-in mining of recurring CI and workflow failure signatures into docs/reference/repo-pathways.md. USE FOR: learn: prefix, extract repo pathways, consult known CI gotchas before re-diagnosing. DO NOT USE FOR: unattended mining, storing secrets or PII, general RCA without a pathway match."
-compatibility: copilot-chat, copilot-coding-agent, github-copilot-cli, vscode-chat
+compatibility: [copilot-chat, copilot-coding-agent, github-copilot-cli, vscode-chat]
 metadata:
   category: knowledge
   audience:

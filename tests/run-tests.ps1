@@ -1053,6 +1053,7 @@ $additionalSuites = @(
     'program-bootstrap-contract-tests.ps1',
     'release-process-doc-tests.ps1',
     'skill-compatibility-frontmatter-tests.ps1',
+    'skill-frontmatter-validation-tests.ps1',
     'update-agent-metadata-tests.ps1',
     'update-metadata-model-fallback-tests.ps1',
     'validate-windows-lane-exit-tests.ps1',

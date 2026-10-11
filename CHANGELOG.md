@@ -4,7 +4,12 @@ All notable changes to this repository should be recorded in this file.
 
 ## Unreleased
 
-No unreleased changes.
+### Fixed
+
+- Validate skill frontmatter with a fail-closed YAML subset reader and separate
+  source/portable skill profiles: `name` and `description` must be strings
+  within limits, `name` must match the skill directory, and agent files no
+  longer receive skill-only optional-field warnings (#3655).
 
 ## 4.6.4 - 2026-10-08
 

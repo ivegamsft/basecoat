@@ -34,6 +34,7 @@ for validator in \
   validate-basecoat.ps1 \
   validate-basecoat.sh \
   validate-skill-visibility.ps1 \
+  validate-skill-frontmatter.ps1 \
   validate-asset-distribution.ps1 \
   validate-workflow-action-pins.ps1 \
   validate-workflow-action-pins.py; do

@@ -47,6 +47,8 @@ if ($effectiveWorkflowValidationMode -eq 'Consumer') {
 
 Write-Host 'Validating skill visibility values...'
 & (Join-Path $PSScriptRoot 'validate-skill-visibility.ps1') -RootDir $resolvedRoot
+Write-Host 'Validating Agent Skills required frontmatter fields...'
+& (Join-Path $PSScriptRoot 'validate-skill-frontmatter.ps1') -RootDir $resolvedRoot
 Write-Host 'Validating asset distribution classification...'
 & (Join-Path $PSScriptRoot 'validate-asset-distribution.ps1') -RootDir $resolvedRoot
 Write-Host 'Validating model policy selectors...'
@@ -395,8 +397,8 @@ foreach ($file in $files) {
         }
     }
 
-    # Agents and Skills require name
-    if (($file.Name -eq 'SKILL.md' -or $file.Name -like '*.agent.md') -and -not ($lines | Select-String -Pattern '^name:' -Quiet)) {
+    # Agents require name; SKILL.md name/description are enforced by validate-skill-frontmatter.ps1
+    if ($file.Name -like '*.agent.md' -and -not ($lines | Select-String -Pattern '^name:' -Quiet)) {
         Write-Host "ERROR: $($file.Name) missing 'name' in frontmatter" -ForegroundColor Red
         $errors++
     }
@@ -439,34 +441,13 @@ foreach ($file in $files) {
         $errors++
     }
 
-    # Agent Skills spec: SKILL.md and .agent.md should have compatibility, metadata, allowed-tools
+    # Shared SKILL.md/.agent.md authoring checks. Agent Skills required fields are validated
+    # per profile by validate-skill-frontmatter.ps1; optional portable fields are not required.
     if ($file.Name -eq 'SKILL.md' -or $file.Name -like '*.agent.md') {
-        # Check for spec compliance (optional but encouraged)
-        if (-not ($lines | Select-String -Pattern '^compatibility:' -Quiet)) {
-            Write-Host "WARNING: $($file.FullName) missing 'compatibility' in Agent Skills spec" -ForegroundColor Yellow
-            $warnings++
-        }
-        if (-not ($lines | Select-String -Pattern '^metadata:' -Quiet)) {
-            Write-Host "WARNING: $($file.FullName) missing 'metadata' in Agent Skills spec" -ForegroundColor Yellow
-            $warnings++
-        }
-        if (-not ($lines | Select-String -Pattern '^allowed-tools:' -Quiet)) {
-            Write-Host "WARNING: $($file.FullName) missing 'allowed-tools' in Agent Skills spec" -ForegroundColor Yellow
-            $warnings++
-        }
-
-        # Validate skill name format (lowercase, hyphens/numbers only)
-        $skillName = $lines | Select-String -Pattern '^name:\s*"?([a-z0-9\-]+)"?' | ForEach-Object { $_.Matches.Groups[1].Value.Trim() }
-        if ($skillName -and -not ($skillName -match '^[a-z0-9\-]{1,64}$')) {
-            Write-Host "ERROR: $($file.Name) skill name '$skillName' is invalid (must be lowercase alphanumeric with hyphens, max 64 chars)" -ForegroundColor Red
-            $errors++
-        }
-
-        # Check that skill directory name matches skill name
-        if ($file.Name -eq 'SKILL.md') {
-            $dirName = Split-Path -Leaf (Split-Path $file.FullName)
-            if ($skillName -and $dirName -ne $skillName) {
-                Write-Host "ERROR: $($file.FullName) skill name '$skillName' does not match directory name '$dirName'" -ForegroundColor Red
+        if ($file.Name -like '*.agent.md') {
+            $agentName = $lines | Select-String -Pattern '^name:\s*"?([a-z0-9\-]+)"?' | ForEach-Object { $_.Matches.Groups[1].Value.Trim() }
+            if ($agentName -and -not ($agentName -match '^[a-z0-9\-]{1,64}$')) {
+                Write-Host "ERROR: $($file.Name) agent name '$agentName' is invalid (must be lowercase alphanumeric with hyphens, max 64 chars)" -ForegroundColor Red
                 $errors++
             }
         }
@@ -482,7 +463,7 @@ foreach ($file in $files) {
 
         # Validate description length
         $descLine = $lines | Select-String -Pattern '^description:\s*'
-        if ($descLine) {
+        if ($descLine -and $file.Name -like '*.agent.md') {
             $descContent = $lines | Select-String -Pattern '^description:' | ForEach-Object { $_ -replace 'description:\s*' }
             if ($descContent.Length -lt 1 -or $descContent.Length -gt 1024) {
                 Write-Host "ERROR: $($file.Name) description must be 1-1024 characters (found {$($descContent.Length)})" -ForegroundColor Red

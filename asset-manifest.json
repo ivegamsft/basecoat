@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.1",
   "libraryVersion": "4.6.4",
-  "generatedAt": "2026-10-10T12:22:42.9709530Z",
+  "generatedAt": "2026-10-11T15:07:48.7496802Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -1918,7 +1918,7 @@
     {
       "path": "scripts/validate-basecoat.ps1",
       "type": "script",
-      "sha": "e19198decb5b02626ef31effe20ff81effc16018",
+      "sha": "dcb1d06a0987be38710a008cb30212ec1da6dd2d",
       "version": null,
       "effectiveVersion": "4.6.4",
       "versionSource": "library"
@@ -1943,6 +1943,14 @@
       "path": "scripts/validate-reusable-workflow-contracts.py",
       "type": "script",
       "sha": "f19c62154abbe4b56e51aeffbcddd9e540f3f906",
+      "version": null,
+      "effectiveVersion": "4.6.4",
+      "versionSource": "library"
+    },
+    {
+      "path": "scripts/validate-skill-frontmatter.ps1",
+      "type": "script",
+      "sha": "e659b017ea298633e30a39c81b04ed76f3566494",
       "version": null,
       "effectiveVersion": "4.6.4",
       "versionSource": "library"
@@ -2870,7 +2878,7 @@
     {
       "path": "skills/repo-learning/SKILL.md",
       "type": "skill",
-      "sha": "208fe4dd4a35d8fc6c5544d61062f41c4295505f",
+      "sha": "71fda346b6fa05482b9a421e4ddcb2f919ec7e78",
       "version": null,
       "effectiveVersion": "4.6.4",
       "versionSource": "library"

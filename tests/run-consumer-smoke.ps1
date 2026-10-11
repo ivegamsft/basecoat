@@ -208,6 +208,7 @@ try {
             '.github/base-coat/scripts/validate-basecoat.ps1',
             '.github/base-coat/scripts/validate-basecoat.sh',
             '.github/base-coat/scripts/validate-skill-visibility.ps1',
+            '.github/base-coat/scripts/validate-skill-frontmatter.ps1',
             '.github/base-coat/scripts/validate-asset-distribution.ps1',
             '.github/base-coat/scripts/validate-model-policy.ps1',
             '.github/base-coat/scripts/model-policy-contract.ps1',

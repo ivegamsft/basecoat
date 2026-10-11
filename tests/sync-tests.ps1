@@ -328,6 +328,7 @@ try {
             'scripts/validate-basecoat.ps1',
             'scripts/validate-basecoat.sh',
             'scripts/validate-skill-visibility.ps1',
+            'scripts/validate-skill-frontmatter.ps1',
             'scripts/validate-asset-distribution.ps1',
             'scripts/validate-model-policy.ps1',
             'scripts/model-policy-contract.ps1',
