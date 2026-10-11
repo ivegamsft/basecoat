@@ -520,6 +520,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running release-owner report-only window tests...'
+& node --test (Join-Path $PSScriptRoot 'release-owner-report-tests.cjs')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Release-owner report-only window tests failed' -ForegroundColor Red
+    Write-FailureLog 'release-owner-report-tests'
+    exit 1
+}
+
 Write-Host 'Running solo-dev profile guidance tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'solo-dev-profile-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
