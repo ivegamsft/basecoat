@@ -233,6 +233,8 @@ for (const scenario of ['solo-zero-review', 'solo-feature-approved', 'team-zero-
     const files = [{ filename: scenario.startsWith('production-')
       ? productionPath : 'scripts/recovery-fixture.ps1', status: 'modified', additions: 5, deletions: 0 }];
     const comment = async args => ({ data: { ...args, id: 123 } });
+    let threadMode = 'as-evaluated';
+    const dispatches = [];
     const github = { rest: {
       pulls: { get: async () => ({ data: scenario === 'changed-head' && ++reads > 1
         ? { ...pr, head: { ...pr.head, sha: 'c'.repeat(40) } } : pr }), listFiles() {}, listReviews() {} },
@@ -257,18 +259,20 @@ for (const scenario of ['solo-zero-review', 'solo-feature-approved', 'team-zero-
           deployment_branch_policy: { protected_branches: true }
         } }),
         getCollaboratorPermissionLevel: async () => ({ data: { permission: 'write' } }),
+        get: async () => ({ data: { default_branch: 'main' } }),
         getCombinedStatusForRef: async () => ({ data: { statuses: [] } }),
         createCommitStatus: async args => { statuses.push(args); }
       },
-      actions: { createWorkflowDispatch: async () => {} },
+      actions: { createWorkflowDispatch: async args => { dispatches.push(args); } },
       checks: { listForRef: async () => ({ data: { check_runs:
         scenario === 'missing-check' ? [] : profile.main.required_checks.map((name, id) => ({
           name, id, app: { id: scenario === 'untrusted-check' ? 999 : 15368 },
           status: 'completed', conclusion: 'success', started_at: '2026-10-07T13:00:00Z'
         })) } }) }
     }, graphql: async () => {
-      if (scenario === 'thread-api-error') throw new Error('GraphQL 502');
-      const thread = { path: 'sync.ps1', isResolved: scenario === 'resolved-thread', isOutdated: scenario === 'outdated-thread',
+      if (scenario === 'thread-api-error' || threadMode === 'error') throw new Error('GraphQL 502');
+      const thread = { path: 'sync.ps1', isResolved: scenario === 'resolved-thread' && threadMode !== 'reopened',
+        isOutdated: scenario === 'outdated-thread',
         comments: { nodes: [{ url: 'https://github.com/o/r/pull/42#discussion_r7', author: { login: 'copilot' } }] } };
       return { repository: { pullRequest: { reviewThreads: { pageInfo: { hasNextPage: false, endCursor: null },
         nodes: scenario.endsWith('-thread') ? [thread] : [] } } } };
@@ -310,6 +314,29 @@ for (const scenario of ['solo-zero-review', 'solo-feature-approved', 'team-zero-
       humanReviewHoldScenarios.includes(scenario) || ['missing-check', 'untrusted-check', 'changed-head'].includes(scenario)
         ? 'pending' : 'failure');
     if (scenario === 'changed-head') assert.equal(failures.length, 0, 'metadata drift must not fail the run');
+    if (scenario === 'resolved-thread') {
+      // Feed the real evaluator outputs into the real pre-merge revalidation, then
+      // change thread state between evaluation and queue admission.
+      const preMerge = new AsyncFunction('github', 'context', 'core', 'require',
+        script(`${prefix}pr-auto-merge-executor.yml`, 'Re-fetch and compare eligibility snapshot'));
+      for (const [key, output] of Object.entries({ PR_NUMBER: 'pr_number', EXPECTED_HEAD_SHA: 'head_sha',
+        EXPECTED_BASE_SHA: 'base_sha', EXPECTED_SNAPSHOT_DIGEST: 'snapshot_digest',
+        EXPECTED_CHANGED_FILES: 'changed_files', EXPECTED_ADDITIONS: 'additions', EXPECTED_DELETIONS: 'deletions',
+        EXPECTED_DECOMPOSITION_DIGEST: 'decomposition_digest', EXPECTED_EXCEPTION_REVIEW_ID: 'exception_review_id',
+        EXPECTED_REVIEW_DIGEST: 'review_digest', EXPECTED_REQUIRED_APPROVALS: 'required_approvals',
+        EXPECTED_HUMAN_REVIEW_REQUIRED: 'human_review_hold', EXPECTED_QUALIFIED_APPROVERS: 'qualified_approvers' })) {
+        process.env[key] = String(outputs[output] ?? (output === 'qualified_approvers' ? '[]' : ''));
+      }
+      process.env.EXPECTED_HUMAN_REVIEW_REQUIRED = 'false';
+      for (const mode of ['as-evaluated', 'reopened', 'error']) {
+        threadMode = mode;
+        failures.length = 0;
+        dispatches.length = 0;
+        await preMerge(github, context, core, require);
+        assert.equal(failures.length, mode === 'as-evaluated' ? 0 : 1, `${mode}: ${failures.join('\n')}`);
+        assert.equal(dispatches.length, mode === 'as-evaluated' ? 0 : 1, `${mode} must re-dispatch evaluation`);
+      }
+    }
     if (scenario === 'team-zero-review') {
       assert.equal(outputs.required_approvals, '1');
       assert.match(statuses.at(-1).description, /Waiting for qualified human review/);

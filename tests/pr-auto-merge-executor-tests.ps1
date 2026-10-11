@@ -201,6 +201,28 @@ foreach ($workflowName in @(
         throw "Workflow must reroute required workflow completion: $workflowName"
     }
 }
+# Downstream installs rename workflows (#3758); the executor must also listen for installed names.
+$installerText = Get-Content -Path (Join-Path $repoRoot 'scripts\configure-downstream-workflows.ps1') -Raw
+$workflowRunBlock = [regex]::Match($workflow, '(?ms)^  workflow_run:\s*\r?\n.*?^    types:').Value
+$listenedNames = @([regex]::Matches($workflowRunBlock, '(?m)^\s*-\s*"([^"]+)"') | ForEach-Object { $_.Groups[1].Value })
+$installedNames = @('BaseCoat Reusable - Version Check', 'CodeQL')
+foreach ($entry in [regex]::Matches($installerText, "(?s)Source = '([^']+)'\s*\r?\n\s*Destination = '[^']+'\s*\r?\n\s*LegacyDestinations = [^\r\n]*\r?\n\s*Name = '([^']+)'")) {
+    $sourcePath = Join-Path $repoRoot ".github\base-coat\workflows\$($entry.Groups[1].Value)"
+    if (-not (Test-Path $sourcePath)) { continue }
+    $sourceName = [regex]::Match((Get-Content -Path $sourcePath -Raw), '(?m)^name:\s*"([^"]+)"').Groups[1].Value
+    if ($listenedNames -contains $sourceName) { $installedNames += $entry.Groups[2].Value }
+}
+if ($installedNames.Count -lt 3) {
+    throw 'Executor workflow_run installed-name mapping must resolve at least one renamed source workflow.'
+}
+foreach ($installedName in $installedNames) {
+    if ($listenedNames -notcontains $installedName) {
+        throw "Executor workflow_run must also listen for the downstream-installed workflow name: $installedName"
+    }
+}
+if ($workflow -match "\|\|\s*'pr-auto-merge-executor\.yml'") {
+    throw 'Executor self-dispatch must derive its filename from github.workflow_ref, not assume the source filename.'
+}
 foreach ($requiredCiCompletionRoutingText in @(
     'route-ci-completion',
     "github.event.workflow_run.event == 'pull_request'",

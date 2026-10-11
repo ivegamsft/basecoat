@@ -25,6 +25,8 @@ on:
       - labeled
       - unlabeled
       - edited
+  # Source-repo names plus the names configure-downstream-workflows.ps1
+  # assigns on install; unknown names are ignored by GitHub.
   workflow_run:
     workflows:
       - "BaseCoat - CI"
@@ -32,6 +34,9 @@ on:
       - "BaseCoat - PR Validation"
       - "BaseCoat - Agent Merge"
       - "BaseCoat - PRD and Spec Gate"
+      - "BaseCoat Reusable - PRD and Spec Gate"
+      - "BaseCoat Reusable - Version Check"
+      - "CodeQL"
     types:
       - completed
   workflow_dispatch:
@@ -2022,7 +2027,10 @@ jobs:
             const prNumber = Number(process.env.PR_NUMBER || 0);
             const defaultBranch = context.payload.repository?.default_branch || 'main';
             const workflowId = String(process.env.WORKFLOW_REF || '')
-              .match(/\.github\/workflows\/([^@]+)@/)?.[1] || 'pr-auto-merge-executor.yml';
+              .match(/\.github\/workflows\/([^@]+)@/)?.[1];
+            if (!workflowId) {
+              throw new Error(`Unable to resolve workflow filename from '${process.env.WORKFLOW_REF || ''}'.`);
+            }
             const deliveryHoldLabel = 'delivery-hold';
             const { data: pr } = await github.rest.pulls.get({
               owner,
