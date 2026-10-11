@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" id="asset-taxonomy-root" viewBox="0 0 960 600" role="img" aria-labelledby="asset-taxonomy-title asset-taxonomy-desc" style="--cp-bg: #f7f4ef; --cp-surface: #ffffff; --cp-text: #242424; --cp-text-muted: #5c5c5c; --cp-accent: #b11f4b; --cp-accent-soft: rgba(177, 31, 75, 0.08);">
+        <title id="asset-taxonomy-title">BaseCoat asset taxonomy</title>
+        <desc id="asset-taxonomy-desc">BaseCoat has four asset families: agents execute tasks, skills package capabilities, instructions scope rules, and prompts provide repeatable entry points.</desc>
+        <defs>
+      <style>#asset-taxonomy-root text { fill: var(--cp-text); font-family: "Segoe UI", Aptos, Calibri, sans-serif; font-size: 14px; }
+      #asset-taxonomy-root .name { font-size: 18px; font-weight: 600; }
+      #asset-taxonomy-root .technical { font-family: Consolas, "Courier New", monospace; font-size: 12px; fill: var(--cp-text-muted); }</style>
+          <style>
+            #asset-taxonomy text { fill: var(--cp-text); font-family: "Segoe UI", Aptos, Calibri, sans-serif; font-size: 14px; }
+            #asset-taxonomy .name { font-size: 18px; font-weight: 600; }
+            #asset-taxonomy .technical { font-family: Consolas, "Courier New", monospace; font-size: 12px; fill: var(--cp-text-muted); }
+          </style>
+          <marker id="asset-taxonomy-taxonomy-arrow" viewBox="0 0 8 8" refX="8" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L8 4 L0 8" style="fill: var(--cp-text-muted);"/></marker>
+        </defs>
+        <rect width="960" height="600" style="fill: var(--cp-bg);"/>
+        <text x="40" y="64" style="font-size: 28px; font-family: Georgia, serif;">Four families, four responsibilities</text>
+        <text x="40" y="96">Source locations describe authored assets, not their consumer projections.</text>
+        <g style="fill: none; stroke: var(--cp-text-muted); stroke-width: 1.5;" marker-end="url(#asset-taxonomy-taxonomy-arrow)">
+          <path d="M404 200 V220 Q404 228 396 228 H146 Q138 228 138 236 V300"/>
+          <path d="M452 200 V248 Q452 256 444 256 H374 Q366 256 366 264 V300"/>
+          <path d="M504 200 V248 Q504 256 512 256 H586 Q594 256 594 264 V300"/>
+          <path d="M552 200 V220 Q552 228 560 228 H814 Q822 228 822 236 V300"/>
+        </g>
+        <rect x="364" y="128" width="232" height="72" rx="6" style="fill: var(--cp-accent-soft); stroke: var(--cp-accent); stroke-width: 2;"/>
+        <text x="480" y="160" text-anchor="middle" class="name">BaseCoat library</text>
+        <text x="480" y="184" text-anchor="middle">Reusable Copilot guidance</text>
+        <g style="fill: var(--cp-surface); stroke: var(--cp-text-muted);">
+          <rect x="40" y="304" width="196" height="176" rx="6"/><rect x="268" y="304" width="196" height="176" rx="6"/>
+          <rect x="496" y="304" width="196" height="176" rx="6"/><rect x="724" y="304" width="196" height="176" rx="6"/>
+        </g>
+        <g transform="translate(56 336)"><text class="name">Agents</text><text y="32">Task identity and workflow</text><text y="56">Compose skills and tools</text><text y="96" class="technical">agents/</text><text y="116" class="technical">*.agent.md</text></g>
+        <g transform="translate(284 336)"><text class="name">Skills</text><text y="32">Reusable capabilities</text><text y="56">Instructions and templates</text><text y="96" class="technical">skills/&lt;name&gt;/</text><text y="116" class="technical">SKILL.md</text></g>
+        <g transform="translate(512 336)"><text class="name">Instructions</text><text y="32">Scoped behavior rules</text><text y="56">File matching via applyTo</text><text y="96" class="technical">instructions/</text><text y="116" class="technical">*.instructions.md</text></g>
+        <g transform="translate(740 336)"><text class="name">Prompts</text><text y="32">Repeatable entry points</text><text y="56">User-invoked templates</text><text y="96" class="technical">prompts/</text><text y="116" class="technical">*.prompt.md</text></g>
+        <text x="40" y="536">Family membership is shown by arrows; the accent marks the library root, not priority.</text>
+        <text x="40" y="564" class="technical">Consumer installation: sync.ps1 / sync.sh project guidance into Copilot-readable locations.</text>
+      </svg>

@@ -8,6 +8,17 @@ Most whiteboard-style diagrams are authored in
 The Markdown pages in this index use live Mermaid blocks and render directly in the
 docs site.
 
+## Refreshed inline diagrams
+
+The first [diagram-design migration](diagram-authoring.md) adds static, offline-safe
+previews. Open an image for full-size text, or use the [editable HTML](diagram-design.html).
+Original Excalidraw boards below remain available; they are historical sketches,
+not the source of the new SVG exports.
+
+[![BaseCoat taxonomy: agents execute tasks, skills package capabilities, instructions scope rules, and prompts provide repeatable entry points.](asset-taxonomy.svg)](asset-taxonomy.svg)
+
+[![Bootstrap core flow: repository setup, memory, profile-driven secrets and configuration, and validation lead to an error decision; no errors exits zero, errors exits one.](bootstrap-flow.svg)](bootstrap-flow.svg)
+
 ## Start here
 
 If you only need the gist, read these three first:

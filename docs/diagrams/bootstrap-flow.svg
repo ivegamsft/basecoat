@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" id="bootstrap-flow-root" viewBox="0 0 960 600" role="img" aria-labelledby="bootstrap-flow-title bootstrap-flow-desc" style="--cp-bg: #f7f4ef; --cp-surface: #ffffff; --cp-text: #242424; --cp-text-muted: #5c5c5c; --cp-accent: #b11f4b; --cp-accent-soft: rgba(177, 31, 75, 0.08);">
+        <title id="bootstrap-flow-title">BaseCoat bootstrap core flow</title>
+        <desc id="bootstrap-flow-desc">Bootstrap checks repository setup, memory, profile-driven secrets and configuration, then validation; its final error collection determines exit zero or exit one.</desc>
+        <defs>
+      <style>#bootstrap-flow-root text { fill: var(--cp-text); font-family: "Segoe UI", Aptos, Calibri, sans-serif; font-size: 14px; }
+      #bootstrap-flow-root .name { font-size: 18px; font-weight: 600; }
+      #bootstrap-flow-root .technical { font-family: Consolas, "Courier New", monospace; font-size: 12px; fill: var(--cp-text-muted); }</style>
+          <style>
+            #bootstrap-flow text { fill: var(--cp-text); font-family: "Segoe UI", Aptos, Calibri, sans-serif; font-size: 14px; }
+            #bootstrap-flow .name { font-size: 18px; font-weight: 600; }
+            #bootstrap-flow .technical { font-family: Consolas, "Courier New", monospace; font-size: 12px; fill: var(--cp-text-muted); }
+          </style>
+          <marker id="bootstrap-flow-bootstrap-arrow" viewBox="0 0 8 8" refX="8" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L8 4 L0 8" style="fill: var(--cp-text-muted);"/></marker>
+        </defs>
+        <rect width="960" height="600" style="fill: var(--cp-bg);"/>
+        <text x="40" y="64" style="font-size: 28px; font-family: Georgia, serif;">Bootstrap: checks before readiness</text>
+        <text x="40" y="96">Four core phases; optional deployment branches are outside this overview.</text>
+        <g style="fill: none; stroke: var(--cp-text-muted); stroke-width: 1.5;" marker-end="url(#bootstrap-flow-bootstrap-arrow)">
+          <path d="M200 164 H260"/><path d="M544 164 H620"/><path d="M764 200 V264"/>
+          <path d="M624 304 H548"/><path d="M404 340 V368"/>
+          <path d="M340 420 H204"/><path d="M468 420 H620"/>
+        </g>
+        <g style="fill: var(--cp-bg);"><rect x="252" y="428" width="64" height="20"/><rect x="504" y="428" width="80" height="20"/></g>
+        <text x="284" y="442" text-anchor="middle" class="technical">NO ERRORS</text><text x="544" y="442" text-anchor="middle" class="technical">ERRORS</text>
+        <g style="fill: var(--cp-surface); stroke: var(--cp-text-muted);">
+          <rect x="40" y="136" width="160" height="56" rx="20"/>
+          <rect x="264" y="128" width="280" height="72" rx="6"/><rect x="624" y="128" width="280" height="72" rx="6"/>
+          <rect x="624" y="268" width="280" height="72" rx="6"/><rect x="264" y="268" width="280" height="72" rx="6"/>
+          <rect x="40" y="392" width="160" height="56" rx="20"/><rect x="624" y="392" width="280" height="56" rx="20"/>
+        </g>
+        <path d="M404 372 L468 420 L404 468 L340 420 Z" style="fill: var(--cp-accent-soft); stroke: var(--cp-accent); stroke-width: 2;"/>
+        <text x="120" y="160" text-anchor="middle" class="name">Start</text><text x="120" y="180" text-anchor="middle" class="technical">bootstrap.ps1</text>
+        <text x="280" y="160" class="name">1. Repository setup</text><text x="280" y="184">GitHub settings and gh aw</text>
+        <text x="640" y="160" class="name">2. Memory layer</text><text x="640" y="184">SQLite and optional shared sync</text>
+        <text x="640" y="300" class="name">3. Secrets and configuration</text><text x="640" y="324">Requirements follow onboarding profile</text>
+        <text x="280" y="300" class="name">4. Validation</text><text x="280" y="324">Structure checks and test suite</text>
+        <text x="404" y="424" text-anchor="middle">Errors?</text>
+        <text x="120" y="416" text-anchor="middle" class="name">Exit 0</text><text x="120" y="436" text-anchor="middle">Warnings may remain</text>
+        <text x="764" y="416" text-anchor="middle" class="name">Exit 1: fix errors</text><text x="764" y="436" text-anchor="middle">Inspect the audit log, then rerun</text>
+        <text x="40" y="512" class="technical">Audit: .memory/bootstrap-audit.json | -Silent | -SkipTests | -SharedMemoryRepo</text>
+        <text x="40" y="540">Exit 0 with skipped tests is not evidence of full verification.</text>
+        <text x="40" y="568">Rounded endpoints mark start/exit; rectangles are checks; the diamond branches on errors.</text>
+      </svg>
