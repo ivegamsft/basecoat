@@ -8,7 +8,7 @@
     resources are detected and skipped.
 
 .PARAMETER Org
-    GitHub organization that will own the Space. Defaults to IBuySpy-Shared.
+    GitHub organization that will own the Space. Defaults to example-org.
 
 .PARAMETER SpaceName
     Copilot Space name. Defaults to base-coat.
@@ -17,7 +17,7 @@
     Human-readable description for the Space.
 
 .PARAMETER SourceRepo
-    Source repository to index. Defaults to IBuySpy-Shared/basecoat.
+    Source repository to index. Defaults to ivegamsft/basecoat.
 
 .PARAMETER SourceRef
     Branch or tag to read source files from. Defaults to main.
@@ -41,15 +41,15 @@
     pwsh scripts/bootstrap-copilot-space.ps1 -SpaceNumber 2
 
 .EXAMPLE
-    pwsh scripts/bootstrap-copilot-space.ps1 -Org "IBuySpy-Shared" -DryRun
+    pwsh scripts/bootstrap-copilot-space.ps1 -Org "example-org" -DryRun
 #>
 
 [CmdletBinding()]
 param(
-    [string]$Org = 'IBuySpy-Shared',
+    [string]$Org = 'example-org',
     [string]$SpaceName = 'base-coat',
     [string]$Description = 'BaseCoat guidance, reference docs, and bootstrap context.',
-    [string]$SourceRepo = 'IBuySpy-Shared/basecoat',
+    [string]$SourceRepo = 'ivegamsft/basecoat',
     [string]$SourceRef = 'main',
     [int]$SpaceNumber = 0,
     [switch]$DryRun

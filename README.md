@@ -322,8 +322,8 @@ Full reference: [`docs/reference/governance.md`](docs/reference/governance.md) Â
 ## Platform interfaces
 
 BaseCoat is the controls source for the AI-SDLC governance family. Contracts are
-defined in the family's internal [API specification](https://github.com/IBuySpy-Shared/basecoat-api-spec)
-and [MCP specification](https://github.com/IBuySpy-Shared/basecoat-mcp-spec) repositories;
+defined in the family's internal API specification (internal contract source)
+and MCP specification (internal contract source) repositories;
 shared IDs and schemas come from Binder. BaseCoat stays Git-native: releases,
 `sync.ps1`/`sync.sh`, and the files in this repository remain the source of truth,
 and the API is a read adapter over them rather than a separate service of record.

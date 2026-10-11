@@ -1,6 +1,6 @@
 # Roadmap planner foundation
 
-This is **only spec step 1** of [#3400](https://github.com/IBuySpy-Shared/basecoat/issues/3400).
+This is **only spec step 1** of [#3400](internal source issue).
 It does not implement the `roadmap:` intent, milestone persistence, execution,
 workflow triggers, roadmap artifact PR, or release cuts. Parent #3400 remains open.
 The approved [spec](../spec/synthesized/issue-3400-roadmap-synthesizer-auto-group-issuesprs-into-release-milest.spec.md)
@@ -75,16 +75,16 @@ dependency order remains exclusively `build-waves.ps1`; no execution is enabled.
 
 ## Remaining linked delivery
 
-- [#3616](https://github.com/IBuySpy-Shared/basecoat/issues/3616): mapper/advisor
+- [#3616](internal source issue): mapper/advisor
   integration, race-safe persistence, authenticated approval, checkpoints,
   canonical roadmap artifact PR. The additive
   [grouping/checkpoint preview](roadmap-grouping-preview.md) validates supplied
   normalized mapper/advisor evidence and stores a local read-only artifact.
   Live CAS, authenticated approval consumption and remote writes remain blocked;
   this does not complete #3616.
-- [#3617](https://github.com/IBuySpy-Shared/basecoat/issues/3617): intent/routing,
+- [#3617](internal source issue): intent/routing,
   triggers, bounded resume and autopilot roadmap-order integration, dependency
   failure/fallback coverage using existing topology helpers.
-- [#3618](https://github.com/IBuySpy-Shared/basecoat/issues/3618): exact scoped
+- [#3618](internal source issue): exact scoped
   release-set/version validation, existing gates, verified shipped state,
   serialized advance and full end-to-end shadow validation.

@@ -2,13 +2,13 @@
 
 ## Status and prerequisites
 
-Proposal only, related to [source #3670](https://github.com/IBuySpy-Shared/basecoat/issues/3670).
+Proposal only, related to [source #3670](internal source issue).
 This document does not implement a stack, approve a source, or select production rules.
 Merging a proposal is not runtime acceptance or authority to merge any layer.
 No new command or label alias is supported.
 
 The prerequisite readiness identity is proposed in
-[completion readiness proposal #3718](https://github.com/IBuySpy-Shared/basecoat/pull/3718)
+[completion readiness proposal #3718](internal source pull request)
 for source #3669; publication is not proof that its runtime exists.
 [Stack integration](../guides/stacked-pr-integration.md),
 [hybrid branching](../operations/hybrid-branching-policy-contract.md), and
