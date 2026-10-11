@@ -44,6 +44,10 @@ on:
         description: "Optional notification deduplication marker; never authorizes delivery"
         required: false
         type: string
+      reevaluation_attempt:
+        description: "Metadata-drift re-evaluation counter; caps self-dispatch, never authorizes delivery"
+        required: false
+        type: string
 
 permissions:
   actions: write
@@ -437,7 +441,11 @@ jobs:
     steps:
       - name: Coalesce eligibility notifications
         shell: bash
-        run: sleep 10
+        env:
+          REEVALUATION_ATTEMPT: ${{ inputs.reevaluation_attempt || '0' }}
+        # Drift re-evaluations wait longer so label/readiness workflows settle; the
+        # per-PR concurrency group replaces duplicate pending runs meanwhile.
+        run: if [[ "$REEVALUATION_ATTEMPT" =~ ^[1-9][0-9]*$ ]]; then sleep 30; else sleep 10; fi
 
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
@@ -451,6 +459,7 @@ jobs:
           POLICY_PACK: ${{ vars.BASECOAT_POLICY_PACK }}
           PR_NUMBER_INPUT: ${{ inputs.pr_number || '' }}
           RECOVERY_FINGERPRINT: ${{ inputs.recovery_fingerprint || '' }}
+          REEVALUATION_ATTEMPT: ${{ inputs.reevaluation_attempt || '0' }}
           WORKFLOW_REF: ${{ github.workflow_ref }}
         with:
           script: |
@@ -1713,27 +1722,39 @@ jobs:
               if (!workflowId || !finalSnapshot.headSha) {
                 throw new Error('Unable to queue re-evaluation after PR metadata changed during eligibility evaluation.');
               }
+              // Drift is expected while label workflows settle: withhold eligibility as
+              // pending (not failure) and cap self-dispatch to avoid an endless re-queue.
+              const maxReevaluationAttempts = 3;
+              const attemptInput = String(process.env.REEVALUATION_ATTEMPT || '0');
+              const reevaluationAttempt = /^\d{1,3}$/.test(attemptInput) ? Number(attemptInput) : maxReevaluationAttempts;
+              const requeue = reevaluationAttempt < maxReevaluationAttempts;
               await github.rest.repos.createCommitStatus({
                 owner,
                 repo,
                 sha: finalSnapshot.headSha,
                 state: 'pending',
                 context: eligibilityStatusContext,
-                description: 'PR metadata changed during evaluation; re-evaluating the current snapshot.',
+                description: requeue
+                  ? 'PR metadata changed during evaluation; re-evaluating after label workflows settle.'
+                  : 'PR metadata kept changing; eligibility withheld until the next PR event.',
                 target_url: workflowUrl
               });
-              await github.rest.actions.createWorkflowDispatch({
-                owner,
-                repo,
-                workflow_id: workflowId,
-                ref: defaultBranch,
-                inputs: { pr_number: String(prNumber) }
-              });
+              if (requeue) {
+                await github.rest.actions.createWorkflowDispatch({
+                  owner,
+                  repo,
+                  workflow_id: workflowId,
+                  ref: defaultBranch,
+                  inputs: { pr_number: String(prNumber), reevaluation_attempt: String(reevaluationAttempt + 1) }
+                });
+              }
               core.setOutput('eligible', 'false');
               core.setOutput('pr_number', String(prNumber));
               core.setOutput('human_review_hold', 'false');
               core.setOutput('eligibility_state', 'reevaluation_pending');
-              core.setFailed('PR metadata changed during evaluation; queued a fresh evaluation and withheld eligibility.');
+              core.info(requeue
+                ? `PR metadata changed during evaluation; queued re-evaluation ${reevaluationAttempt + 1}/${maxReevaluationAttempts} and withheld eligibility.`
+                : `PR metadata changed during evaluation; re-evaluation cap ${maxReevaluationAttempts} reached, eligibility withheld.`);
               return;
             }
 

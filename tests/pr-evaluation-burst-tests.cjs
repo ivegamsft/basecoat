@@ -97,7 +97,7 @@ function replayCodeValidation(metadataLane) {
 test('burst retains a final evaluation without caching any authorization decision', async () => {
   assert.match(executor, /format\('pr-\{0\}', github.event.pull_request.number \|\| inputs.pr_number/);
   assert.match(executor, /cancel-in-progress: false/);
-  assert.match(executor, /name: Coalesce eligibility notifications\n\s+shell: bash\n\s+run: sleep 10/);
+  assert.match(executor, /name: Coalesce eligibility notifications\n\s+shell: bash\n[\s\S]{0,400}?run: if .*then sleep 30; else sleep 10; fi/);
   const baseline = replay(0);
   const coalesced = replay(10);
   assert.equal(baseline.evaluations.length, 8);
@@ -186,7 +186,7 @@ test('metadata lane cannot cancel code validation; merge-group/manual code valid
   console.log(JSON.stringify({ fixture: 'opened+labeled+unlabeled / 10s code service', baseline, coalesced }));
 });
 
-for (const [name, mutate] of [
+for (const [name, mutate, attempt = '0'] of [
   ['equivalent evidence', () => {}],
   ['head', state => { state.pr.head.sha = 'c'.repeat(40); }],
   ['base', state => { state.pr.base.sha = 'c'.repeat(40); }],
@@ -199,14 +199,16 @@ for (const [name, mutate] of [
   ['check failure', state => { state.checks[0].conclusion = 'failure'; }],
   ['check rerun', state => { state.checks[0].id = 100; }],
   ['check pending', state => { state.checks[0].status = 'in_progress'; state.checks[0].conclusion = null; }],
-  ['check disappeared', state => { state.checks = []; }]
+  ['check disappeared', state => { state.checks = []; }],
+  ['metadata at re-evaluation cap', state => { state.pr.labels.push({ name: 'size:S' }); }, '3']
 ]) {
   test(`fresh final authorization guard: ${name}`, async () => {
     const state = { pr: pr(), reviews: [review()], checks: checkRuns() };
     if (name === 'hold removed') state.pr.labels = [{ name: 'delivery-hold' }];
     const originalReviews = structuredClone(state.reviews);
     let reads = 0;
-    let dispatches = 0;
+    const dispatches = [];
+    const failures = [];
     const statuses = [];
     const outputs = {};
     const github = { rest: {
@@ -220,21 +222,29 @@ for (const [name, mutate] of [
         if (++reads === 1) mutate(state);
         return { data: { check_runs: result } };
       } },
-      actions: { createWorkflowDispatch: async () => { dispatches++; } }
+      actions: { createWorkflowDispatch: async value => { dispatches.push(value); } }
     }, paginate: async () => state.reviews };
     await new AsyncFunction('github', 'core', 'process', 'owner', 'repo', 'prNumber', 'pr', 'baseSha',
       'headSha', 'requiredChecks', 'githubActionsIntegrationId', 'sha256', 'reviewSnapshotDigest',
       'reviews', 'workflowUrl', 'eligibilityStatusContext', 'defaultBranch',
       snapshot + '\ninitialSnapshot.reviewDigest = reviewSnapshotDigest(reviews);\n' + checks + guard)(
-      github, { info() {}, setFailed() {}, setOutput: (key, value) => { outputs[key] = value; } },
-      { env: { WORKFLOW_REF: 'owner/repo/.github/workflows/pr-auto-merge-executor.yml@main' } },
+      github, { info() {}, setFailed: value => failures.push(value), setOutput: (key, value) => { outputs[key] = value; } },
+      { env: { WORKFLOW_REF: 'owner/repo/.github/workflows/basecoat-pr-auto-merge-executor.yml@main', REEVALUATION_ATTEMPT: attempt } },
       'owner', 'repo', 3577, structuredClone(state.pr), state.pr.base.sha, state.pr.head.sha,
       requiredChecks, 15368, sha256, reviewSnapshotDigest, originalReviews, 'run-url',
       'BaseCoat merge eligibility', 'main');
     assert.equal(reads, 2);
-    assert.equal(dispatches, name === 'equivalent evidence' ? 0 : 1);
-    if (dispatches) {
+    assert.deepEqual(failures, [], 'metadata drift must report pending, not fail the run');
+    const drifted = name !== 'equivalent evidence';
+    assert.equal(dispatches.length, drifted && attempt === '0' ? 1 : 0, 'drift queues one re-evaluation until the cap');
+    if (dispatches.length) {
+      assert.equal(dispatches[0].workflow_id, 'basecoat-pr-auto-merge-executor.yml');
+      assert.deepEqual(dispatches[0].inputs, { pr_number: '3577', reevaluation_attempt: '1' });
+    }
+    if (drifted) {
       assert.equal(outputs.eligible, 'false');
+      assert.equal(outputs.eligibility_state, 'reevaluation_pending');
+      assert.equal(statuses.length, 1);
       assert.equal(statuses[0].state, 'pending');
       assert.equal(statuses[0].sha, state.pr.head.sha);
     }

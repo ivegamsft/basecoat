@@ -293,6 +293,7 @@ for (const scenario of ['solo-zero-review', 'solo-feature-approved', 'team-zero-
     assert.equal(statuses.at(-1).state, eligibleScenarios.includes(scenario) ? 'success' :
       humanReviewHoldScenarios.includes(scenario) || ['missing-check', 'untrusted-check', 'changed-head'].includes(scenario)
         ? 'pending' : 'failure');
+    if (scenario === 'changed-head') assert.equal(failures.length, 0, 'metadata drift must not fail the run');
     if (scenario === 'team-zero-review') {
       assert.equal(outputs.required_approvals, '1');
       assert.match(statuses.at(-1).description, /Waiting for qualified human review/);
