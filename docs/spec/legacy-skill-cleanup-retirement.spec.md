@@ -1,7 +1,7 @@
 # Spec: Retire destructive skill frontmatter cleanup
 
-Status: proposal for #3656, implementation disabled. No script or source asset
-is modified by this PR. This contract chooses deprecation, not a replacement
+Status: implemented for #3656. The script is now a deprecation guard and no
+skill asset was modified. This contract chooses deprecation, not a replacement
 exporter or schema-aware mutation engine.
 
 ## Design and Alternatives

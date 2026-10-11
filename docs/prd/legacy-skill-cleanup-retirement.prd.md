@@ -1,7 +1,9 @@
 # PRD: Retire destructive skill frontmatter cleanup
 
-Status: proposal for #3656. This documentation does not authorize script changes,
-source migration, portable export or assignment.
+Status: implemented for #3656 as a non-mutating guard in
+`scripts/fix-skill-frontmatter.ps1`, covered by
+`tests/fix-skill-frontmatter-retirement-tests.ps1`. This does not authorize
+source migration or portable export.
 
 ## Problem
 
@@ -19,7 +21,7 @@ guard: read-only invocation reports why the operation is unsupported; `-Fix`
 returns nonzero before any source read/write or traversal. It must not report
 zero repairs as successful schema validation.
 
-This is a proposed runtime change, not current behavior. Current callers must
+This runtime change is now current behavior. Callers must
 not run the legacy helper as a migration tool. Future validation and export
 belong to #3655 and #3654 respectively; retirement must not implement either
 contract partially or imply that those tools already exist.

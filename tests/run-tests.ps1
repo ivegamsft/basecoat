@@ -1044,6 +1044,7 @@ $additionalSuites = @(
     'bootstrap-strictmode-interpolation-tests.ps1',
     'ci-audit-script-tests.ps1',
     'failure-pattern-script-tests.ps1',
+    'fix-skill-frontmatter-retirement-tests.ps1',
     'generate-registry-model-fallback-tests.ps1',
     'governance-metadata-drift-tests.ps1',
     'merge-queue-tests.ps1',

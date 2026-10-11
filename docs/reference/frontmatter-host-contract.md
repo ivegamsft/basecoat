@@ -71,9 +71,12 @@ universally enforced.
 | --- | --- |
 | Portable export and host verification, preserving source contracts and companion files | #3654 |
 | Validator conflates skill/agent schemas, treats optional fields as specification expectations and uses incomplete name extraction | #3655 |
-| Legacy `fix-skill-frontmatter.ps1` classifies supported fields as unsupported and can remove source contracts with `-Fix` | #3656 |
+| Legacy `fix-skill-frontmatter.ps1` classified supported fields as unsupported and could remove source contracts with `-Fix`; retired to a non-mutating guard | #3656 |
 
-Do not use the legacy cleanup helper as a portable migration procedure. These
+The legacy cleanup helper is retired. Without flags it prints a deprecation
+notice and reads or writes no files; `-Fix` is refused with exit code 2 before
+any file access. Callers relying on `-Fix` must handle that failure explicitly
+and must not treat it as a completed migration. These
 follow-ups do not approve an asset migration or install an enforcement adapter.
 
 ## Authoring and Evaluation Guidance
