@@ -17,7 +17,11 @@ Linked issue / spec: TBD
 
 ### Design
 
-<!-- Plan and diff contract only. The scope fields below remain required by automated decomposition validation. -->
+<!-- Plan and diff contract only. The scope fields below remain required by automated decomposition validation.
+Replace every TBD before opening the PR; automated intake checks reject placeholders.
+Use individual or batch for the scope, and #123, #456 style source issues.
+Independently deliverable units, Expected files, and Expected changed lines must be plain integers
+(for example 224, not ~250 or 200-250). Unit inventory: one name per unit, separated by ";". -->
 
 | Order of work | Files that change | Planned change / acceptance |
 |---|---|---|

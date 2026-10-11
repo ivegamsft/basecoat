@@ -12,6 +12,7 @@ const {
   parseNumstat,
   validateBody
 } = require('../scripts/validate-pr-intake-preflight.cjs');
+const { checkBody } = require('../scripts/check-pr-intake-metadata.cjs');
 
 function git(cwd, ...args) {
   return execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();
@@ -176,4 +177,88 @@ test('synthesized draft PRs use the trusted template and pass evaluator before c
   assert.match(workflow, /path:\s*'\.github\/base-coat\/scripts\/pr-decomposition-evaluator\.cjs'[\s\S]*?ref:\s*baseSha/);
   assert.match(workflow, /compareCommits\(\{[\s\S]*?base:\s*baseSha,[\s\S]*?head:\s*branchRef\.data\.object\.sha/);
   assert.match(workflow, /currentMain\.data\.object\.sha !== baseSha/);
+});
+
+test('author-time check names every invalid template field with its expected format', () => {
+  const template = fs.readFileSync(path.resolve(__dirname, '..', '.github/PULL_REQUEST_TEMPLATE.md'), 'utf8');
+  const result = checkBody(template);
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.errors.map(error => error.field), [
+    'Change scope',
+    'Source issues',
+    'Independently deliverable units',
+    'Unit inventory',
+    'Expected files',
+    'Expected changed lines (additions + deletions)',
+    'Classification rationale'
+  ]);
+  assert.ok(result.errors.every(error => error.format.startsWith(`${error.field}: `)));
+});
+
+test('author-time check rejects approximate counts and accepts plain integers', () => {
+  const approximate = checkBody(body({ lines: '~250' }));
+  assert.equal(approximate.ok, false);
+  assert.equal(approximate.errors.length, 1);
+  assert.equal(approximate.errors[0].field, 'Expected changed lines (additions + deletions)');
+  assert.match(approximate.errors[0].format, /plain integer/);
+
+  const valid = checkBody(body(), { changedFiles: 2, additions: 1, deletions: 1 });
+  assert.equal(valid.ok, true);
+  assert.deepEqual(valid.warnings, []);
+
+  const stale = checkBody(body(), { changedFiles: 3, additions: 5, deletions: 0 });
+  assert.equal(stale.ok, true);
+  assert.equal(stale.warnings.length, 2);
+});
+
+test('author-time check keeps scope relationships intact while collecting every bad field', () => {
+  const batch = checkBody(body({
+    scope: 'batch',
+    units: 'TBD',
+    unitInventory: 'unit A; unit B',
+    files: 'TBD',
+    lines: '~250',
+    rationale: 'TBD'
+  }));
+  assert.deepEqual(batch.errors.map(error => error.field), [
+    'Independently deliverable units',
+    'Expected files',
+    'Expected changed lines (additions + deletions)',
+    'Classification rationale'
+  ]);
+
+  const missing = checkBody(body().replace(/^Expected files: .*$/m, '').replace(/^Classification rationale: .*$/m, 'Classification rationale: TBD'));
+  assert.deepEqual(missing.errors.map(error => error.field), ['Expected files', 'Classification rationale']);
+
+  const largeBatch = checkBody(body({ scope: 'batch', units: 101, unitInventory: 'TBD', files: 'TBD' }));
+  assert.deepEqual(largeBatch.errors.map(error => error.field), ['Unit inventory', 'Expected files']);
+
+  const contradiction = checkBody(body({
+    units: 2,
+    unitInventory: 'unit A; unit B',
+    files: 'TBD',
+    lines: '~250',
+    rationale: 'TBD'
+  }));
+  assert.match(contradiction.errors[0].message, /'individual' scope contradicts/);
+  assert.deepEqual(contradiction.errors.slice(1).map(error => error.field), [
+    'Expected files',
+    'Expected changed lines (additions + deletions)',
+    'Classification rationale'
+  ]);
+});
+
+test('author-time workflow runs on body edits and passes the body only through env', () => {
+  const workflow = fs.readFileSync(
+    path.resolve(__dirname, '..', '.github/workflows/pr-intake-metadata.yml'),
+    'utf8'
+  );
+  for (const type of ['opened', 'edited', 'synchronize']) {
+    assert.match(workflow, new RegExp(`^\\s+- ${type}$`, 'm'));
+  }
+  assert.doesNotMatch(workflow, /pull_request_target/);
+  assert.match(workflow, /^permissions:\s*\n\s+contents: read\s*\n\s*\n/m);
+  assert.match(workflow, /PR_BODY: \$\{\{ github\.event\.pull_request\.body \}\}/);
+  const runLines = workflow.split('\n').filter(line => /^\s+run:/.test(line));
+  assert.deepEqual(runLines.map(line => line.trim()), ['run: node scripts/check-pr-intake-metadata.cjs']);
 });

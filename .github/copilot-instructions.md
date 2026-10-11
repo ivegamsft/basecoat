@@ -92,6 +92,7 @@ Record each long backlog run in `.github/backlog-session-metrics.json`, then reg
    needs a qualified approval and self-approval is impossible, so split into stacked PRs instead.
    Use the full `.github/PULL_REQUEST_TEMPLATE.md` and run
    `node scripts/validate-pr-intake-preflight.cjs <body> origin/main HEAD` after committing.
+   Replace every Design `TBD`; counts are plain integers (`224`, not `~250`).
    Regenerate `asset-manifest.json` (`pwsh scripts/generate-asset-manifest.ps1`) when agents,
    instructions, prompts or skills change.
 5. **Windows and tooling pitfalls**:

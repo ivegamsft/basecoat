@@ -39,7 +39,11 @@ Before creating or updating a delivery PR, render its body to a file and run
 `node scripts/validate-pr-intake-preflight.cjs <body-file> origin/main HEAD`.
 The preflight uses the shared decomposition evaluator and checks that the
 declared scope and diff counts match the current branch. Do not publish when it
-fails; fix the body or split the change first. Coding-agent PR completion and
+fails; fix the body or split the change first. The `PR intake metadata`
+check (`.github/workflows/pr-intake-metadata.yml`) re-validates the Design
+fields whenever a PR is opened, edited, or pushed and names each invalid field
+with its expected format. Count fields must be plain integers (`224`, not
+`~250`), and `Change scope` must be `individual` or `batch`. Coding-agent PR completion and
 ready promotion are separately governed by issue #3669.
 
 ## CLI session transition policy
