@@ -68,6 +68,8 @@ jobs:
             --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
             --github-token "${{ secrets.GITHUB_TOKEN }}" \
             --output drift-report.json \
+            --markdown-output drift-report.md \
+            --critical-comment-output drift-critical-comment.md \
             $([ "$STRICT_MODE" = "true" ] && echo "--strict" || echo "")
           
           # Parse report and set outputs
@@ -77,19 +79,22 @@ jobs:
           echo "drift_status=$DRIFT_STATUS" >> $GITHUB_OUTPUT
           echo "findings_count=$FINDINGS" >> $GITHUB_OUTPUT
           
-          echo "### Environment Drift Report" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Status:** \`$DRIFT_STATUS\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Findings:** $FINDINGS" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          jq -r '.findings[] | "- [\(.severity | ascii_upcase)] \(.finding) (*\(.resource // "N/A")*)"' drift-report.json >> $GITHUB_STEP_SUMMARY || echo "No findings" >> $GITHUB_STEP_SUMMARY
+          # Untrusted finding text is only written via the CLI's escaping renderer
+          {
+            echo "**Status:** \`$DRIFT_STATUS\`"
+            echo "**Findings:** $FINDINGS"
+            echo ""
+            cat drift-report.md
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload drift report
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: drift-report
-          path: drift-report.json
+          path: |
+            drift-report.json
+            drift-report.md
           retention-days: 30
 
       - name: Comment on issues (if critical)
@@ -98,22 +103,9 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const report = JSON.parse(fs.readFileSync('drift-report.json', 'utf-8'));
             
-            const findings = report.findings
-              .filter(f => f.severity === 'critical')
-              .map(f => `- **${f.environment}**: ${f.finding}\n  Remediation: ${f.remediation}`)
-              .join('\n');
-            
-            const body = `## Critical Environment Drift Detected
-            
-            ${findings}
-            
-            **Action Required**: Review and resolve critical drifts before proceeding with deployments.
-            
-            See drift report artifact for full details.
-            `;
-            
+            const body = fs.readFileSync('drift-critical-comment.md', 'utf-8');
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,

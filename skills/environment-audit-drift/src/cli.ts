@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { auditEnvironmentDrift } from './drift';
+import { toCriticalCommentMarkdown, toMarkdown } from './markdown';
 import { DriftAuditInput, DriftReport } from './types';
 
 interface CliOptions {
@@ -12,6 +13,8 @@ interface CliOptions {
   skipDeploymentCheck: boolean;
   skipTagCheck: boolean;
   outputFormat: 'json' | 'markdown' | 'junit';
+  markdownOutput?: string;
+  criticalCommentOutput?: string;
 }
 
 function parseArgs(argv: string[]): CliOptions {
@@ -48,6 +51,16 @@ function parseArgs(argv: string[]): CliOptions {
         options.output = next;
         i += 1;
         break;
+      case '--markdown-output':
+        if (!next) throw new Error('Missing value for --markdown-output');
+        options.markdownOutput = next;
+        i += 1;
+        break;
+      case '--critical-comment-output':
+        if (!next) throw new Error('Missing value for --critical-comment-output');
+        options.criticalCommentOutput = next;
+        i += 1;
+        break;
       case '--strict':
         options.strict = true;
         break;
@@ -71,27 +84,6 @@ function parseArgs(argv: string[]): CliOptions {
   }
 
   return options;
-}
-
-function toMarkdown(report: DriftReport): string {
-  const rows = report.findings.map(finding =>
-    `| ${finding.severity} | ${finding.category} | ${finding.environment} | ${finding.finding.replace(/\|/g, '\\|')} |`
-  );
-
-  return [
-    '# Environment Drift Report',
-    '',
-    `- Total drifts: ${report.total_drifts}`,
-    `- Critical: ${report.severity_summary.critical}`,
-    `- High: ${report.severity_summary.high}`,
-    `- Medium: ${report.severity_summary.medium}`,
-    `- Low: ${report.severity_summary.low}`,
-    '',
-    '| Severity | Category | Environment | Finding |',
-    '|---|---|---|---|',
-    ...rows,
-    '',
-  ].join('\n');
 }
 
 function toJunit(report: DriftReport): string {
@@ -143,6 +135,13 @@ async function main(): Promise<void> {
     fs.writeFileSync(options.output, toJunit(report), 'utf-8');
   } else {
     fs.writeFileSync(options.output, JSON.stringify(report, null, 2), 'utf-8');
+  }
+
+  for (const [file, render] of [[options.markdownOutput, toMarkdown], [options.criticalCommentOutput, toCriticalCommentMarkdown]] as const) {
+    if (file) {
+      fs.mkdirSync(path.dirname(path.resolve(file)), { recursive: true });
+      fs.writeFileSync(file, render(report), 'utf-8');
+    }
   }
 
   console.log(`Drift report written to ${options.output}`);
