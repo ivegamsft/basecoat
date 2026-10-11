@@ -58,8 +58,9 @@ The six canonical validation checks come from
 The ruleset must also require `BaseCoat merge eligibility`. The trusted executor
 publishes that commit status directly against the pull request head SHA. Pin the
 required context to GitHub Actions integration ID `15368` for provenance.
-Copilot review feedback is advisory for `solo-dev`; it never becomes a merge
-blocker or requires conversation resolution. Pending validation, a missing
+Copilot review approval is not required for `solo-dev`, and the native ruleset
+does not require conversation resolution. The executor still withholds
+eligibility while any non-outdated review thread is unresolved. Pending validation, a missing
 qualified `size:XXL` approval, or policy violations keep the status red and
 prevent both manual and automatic merge.
 
@@ -104,6 +105,13 @@ current delivery consent. Actions execution approval only permits a held
 workflow to run. None substitutes for source/spec authority, exact-head
 eligibility, protected integration checks, or applicable production controls.
 Missing evidence remains a hold even for an XS through XL change.
+
+Under every profile, the executor also withholds eligibility while the PR has
+any unresolved review thread that is not outdated. Outdated threads on
+superseded diffs do not block, and eligibility fails closed if thread state
+cannot be read. GitHub Actions has no review-thread resolution trigger, so the
+next push, PR edit, required-check completion, or a manual
+`workflow_dispatch` of the executor with `pr_number` re-evaluates the PR.
 
 Explicit policy-exception, security-incident, and incident boundaries remain
 human-controlled. They are exceptions to the normal feature-delivery size
@@ -366,7 +374,8 @@ In GitHub:
    - create an active branch ruleset targeting the default branch
    - require zero approving reviews
    - do not require extra approval for unattributed changes
-   - do not require conversation resolution; Copilot feedback is advisory
+   - do not require conversation resolution; the executor enforces unresolved,
+     non-outdated review threads instead
    - require all six validation checks plus `BaseCoat merge eligibility`
    - require branches to be up to date
    - block deletion and non-fast-forward pushes
@@ -551,7 +560,7 @@ gh workflow list --repo $repository
 Open a non-draft test PR and confirm:
 
 1. an XS through XL PR reports zero required approvals and becomes eligible
-   after required checks pass; Copilot review feedback remains advisory
+   after required checks pass and every non-outdated review thread is resolved
 2. auto-merge remains pending while any required check is missing or failing
 3. an XXL test PR remains blocked until a qualified reviewer approves its
    current head

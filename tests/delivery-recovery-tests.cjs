@@ -177,7 +177,8 @@ for (const scenario of ['solo-zero-review', 'solo-feature-approved', 'team-zero-
   'team-approved', 'held', 'draft', 'changed-head', 'missing-check', 'untrusted-check',
   'changes-requested', 'stale-review', 'unauthorized-feature', 'missing-spec',
   'candidate-reconcile-drift', 'candidate-approval-drift', 'candidate-binding-drift',
-  'production-digest-updated', 'production-digest-mismatch', 'production-binding-mismatch']) {
+  'production-digest-updated', 'production-digest-mismatch', 'production-binding-mismatch',
+  'unresolved-thread', 'resolved-thread', 'outdated-thread', 'thread-api-error']) {
   test(`${prefix} existing evaluator: ${scenario}`, async () => {
     process.env.GITHUB_WORKSPACE = root;
     process.env.PR_NUMBER_INPUT = '42';
@@ -265,6 +266,12 @@ for (const scenario of ['solo-zero-review', 'solo-feature-approved', 'team-zero-
           name, id, app: { id: scenario === 'untrusted-check' ? 999 : 15368 },
           status: 'completed', conclusion: 'success', started_at: '2026-10-07T13:00:00Z'
         })) } }) }
+    }, graphql: async () => {
+      if (scenario === 'thread-api-error') throw new Error('GraphQL 502');
+      const thread = { path: 'sync.ps1', isResolved: scenario === 'resolved-thread', isOutdated: scenario === 'outdated-thread',
+        comments: { nodes: [{ url: 'https://github.com/o/r/pull/42#discussion_r7', author: { login: 'copilot' } }] } };
+      return { repository: { pullRequest: { reviewThreads: { pageInfo: { hasNextPage: false, endCursor: null },
+        nodes: scenario.endsWith('-thread') ? [thread] : [] } } } };
     }, paginate: async (endpoint, args) => endpoint === github.rest.pulls.listFiles ? files :
       endpoint === github.rest.pulls.listReviews ? reviews :
         args.issue_number === 1 && ['missing-spec', 'solo-feature-approved'].includes(scenario)
@@ -281,7 +288,16 @@ for (const scenario of ['solo-zero-review', 'solo-feature-approved', 'team-zero-
       assert.equal(statuses.at(-1).state, 'failure');
       return;
     }
-    const eligibleScenarios = ['solo-zero-review', 'solo-feature-approved', 'team-approved', 'production-digest-updated'];
+    if (['unresolved-thread', 'thread-api-error'].includes(scenario)) {
+      const unresolved = scenario === 'unresolved-thread';
+      assert.equal(outputs.eligible, 'false');
+      assert.equal(outputs.eligibility_state, unresolved ? 'waiting_for_review_thread_resolution' : 'blocked');
+      assert.equal(statuses.at(-1).state, unresolved ? 'pending' : 'failure');
+      assert.equal(failures.length, unresolved ? 0 : 1);
+      return;
+    }
+    const eligibleScenarios = ['solo-zero-review', 'solo-feature-approved', 'team-approved', 'production-digest-updated',
+      'resolved-thread', 'outdated-thread'];
     const humanReviewHoldScenarios = ['team-zero-review', 'changes-requested', 'stale-review'];
     assert.equal(outputs.eligible, eligibleScenarios.includes(scenario) ? 'true' : 'false',
       failures.join('\n'));

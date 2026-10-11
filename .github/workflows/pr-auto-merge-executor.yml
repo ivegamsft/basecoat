@@ -481,7 +481,7 @@ jobs:
             const { evaluateDecomposition, reviewSnapshotDigest, sha256 } = require(
               require('node:path').join(process.env.GITHUB_WORKSPACE, '.github/base-coat/scripts/pr-decomposition-evaluator.cjs')
             );
-            const { isOnlyHumanReviewHold, resolveApprovalRequirements } = require(
+            const { isOnlyHumanReviewHold, resolveApprovalRequirements, summarizeReviewThreads } = require(
               require('node:path').join(process.env.GITHUB_WORKSPACE, '.github/base-coat/scripts/merge-eligibility-policy.cjs')
             );
 
@@ -1233,6 +1233,42 @@ jobs:
                 `${Array.from(automatedReviewerLogins).join(' or ')}.`
               );
             }
+            const reviewThreadState = await (async () => {
+              const threads = [];
+              try {
+                let cursor = null;
+                for (let page = 0; page < 20; page += 1) {
+                  const result = await github.graphql(
+                    `query($owner: String!, $repo: String!, $number: Int!, $cursor: String) {
+                      repository(owner: $owner, name: $repo) {
+                        pullRequest(number: $number) {
+                          reviewThreads(first: 100, after: $cursor) {
+                            pageInfo { hasNextPage endCursor }
+                            nodes { isResolved isOutdated path comments(first: 1) { nodes { url author { login } } } }
+                          }
+                        }
+                      }
+                    }`,
+                    { owner, repo, number: prNumber, cursor }
+                  );
+                  const connection = result?.repository?.pullRequest?.reviewThreads;
+                  if (!connection || !Array.isArray(connection.nodes)) {
+                    throw new Error('reviewThreads connection missing from GraphQL response');
+                  }
+                  threads.push(...connection.nodes);
+                  if (!connection.pageInfo?.hasNextPage) {
+                    return summarizeReviewThreads({ threads, complete: true });
+                  }
+                  cursor = connection.pageInfo.endCursor;
+                }
+                return summarizeReviewThreads({ threads, complete: false });
+              } catch (error) {
+                return summarizeReviewThreads({ threads, complete: false, error });
+              }
+            })();
+            if (reviewThreadState.blocker) {
+              blockers.push(reviewThreadState.blocker);
+            }
             const latestReviewByUser = new Map();
             for (const review of reviews) {
               const login = review.user?.login;
@@ -1781,6 +1817,10 @@ jobs:
             });
             const waitingForAutomatedReview =
               !automatedReviewSatisfied && blockers.length === 1;
+            const waitingForReviewThreadResolution =
+              reviewThreadState.readable &&
+              reviewThreadState.unresolved.length > 0 &&
+              blockers.every(reason => reason === reviewThreadState.blocker);
             const waitingForMechanicalExceptionReview =
               decomposition.reviewPending &&
               blockers.every(reason =>
@@ -1790,6 +1830,7 @@ jobs:
             const waitingForExternalProgress =
               waitingForHumanReview ||
               waitingForAutomatedReview ||
+              waitingForReviewThreadResolution ||
               waitingForRequiredChecks ||
               waitingForMechanicalExceptionReview;
             const acknowledgementSummary = requiresMaintainerAcknowledgement
@@ -1823,6 +1864,7 @@ jobs:
                   `- Risk tier: \`${riskTier}\``,
                   `- Required approvals: \`${requiredApprovals}\``,
                   `- Automated review: \`${automatedReviewSummary}\``,
+                  `- Review threads: \`${reviewThreadState.summary}\``,
                   `- Human review boundary: \`${requiresHumanReviewByBoundary ? 'required' : 'not-required'}\``,
                   `- Decomposition: \`${decomposition.scope} (${decomposition.counts.changedFiles} files, ${decomposition.counts.changedLines} changed lines)\``,
                   `- Mechanical exception evidence: \`${decomposition.evidenceDigest || 'not-proposed'}\``,
@@ -1846,6 +1888,7 @@ jobs:
                   `- Risk tier: \`${riskTier}\``,
                   `- Required approvals: \`${requiredApprovals}\``,
                   `- Automated review: \`${automatedReviewSummary}\``,
+                  `- Review threads: \`${reviewThreadState.summary}\``,
                   `- Human review boundary: \`${requiresHumanReviewByBoundary ? 'required' : 'not-required'}\``,
                   `- Decomposition: \`${decomposition.scope} (${decomposition.counts.changedFiles} files, ${decomposition.counts.changedLines} changed lines)\``,
                   `- Mechanical exception evidence: \`${decomposition.evidenceDigest || 'not-proposed'}\``,
@@ -1908,6 +1951,7 @@ jobs:
               eligible ? 'eligible' : waitingForHumanReview ? 'waiting_for_human_review' :
                 waitingForRequiredChecks ? 'waiting_for_required_checks' :
                   waitingForAutomatedReview ? 'waiting_for_automated_review' :
+                    waitingForReviewThreadResolution ? 'waiting_for_review_thread_resolution' :
                     waitingForMechanicalExceptionReview ? 'waiting_for_exception_review' : 'blocked'
             );
             core.setOutput('qualified_approvers', JSON.stringify(Array.from(approvedReviewers).sort()));
@@ -1925,6 +1969,8 @@ jobs:
                     ? 'Waiting for qualified human review; merge eligibility remains pending.'
                   : waitingForAutomatedReview
                     ? 'Waiting for the required automated review on the current head.'
+                  : waitingForReviewThreadResolution
+                    ? `Waiting for ${reviewThreadState.unresolved.length} unresolved review thread(s); resolve, then re-run evaluation.`
                     : waitingForMechanicalExceptionReview
                       ? 'Waiting for qualified human review of the mechanical batch exception.'
                     : `Blocked by ${blockers.length} BaseCoat policy condition(s).`
@@ -2084,6 +2130,45 @@ jobs:
               Number.isSafeInteger(requiredApprovals) &&
               qualifiedApproverCount >= requiredApprovals &&
               (!humanReviewRequired || qualifiedApproverCount > 0);
+            // Re-query review threads right before enabling auto-merge so a thread
+            // reopened after evaluation cannot ride on stale eligibility.
+            let reviewThreadsClear = false;
+            try {
+              let unresolvedThreads = 0;
+              let cursor = null;
+              let complete = false;
+              for (let page = 0; page < 20; page += 1) {
+                const result = await github.graphql(
+                  `query($owner: String!, $repo: String!, $number: Int!, $cursor: String) {
+                    repository(owner: $owner, name: $repo) {
+                      pullRequest(number: $number) {
+                        reviewThreads(first: 100, after: $cursor) {
+                          nodes { isResolved isOutdated }
+                          pageInfo { hasNextPage endCursor }
+                        }
+                      }
+                    }
+                  }`,
+                  { owner, repo, number: prNumber, cursor }
+                );
+                const connection = result?.repository?.pullRequest?.reviewThreads;
+                if (!connection || !Array.isArray(connection.nodes)) {
+                  throw new Error('reviewThreads connection missing from GraphQL response');
+                }
+                unresolvedThreads += connection.nodes.filter(thread => thread && !thread.isResolved && !thread.isOutdated).length;
+                if (!connection.pageInfo?.hasNextPage) {
+                  complete = true;
+                  break;
+                }
+                cursor = connection.pageInfo.endCursor;
+              }
+              reviewThreadsClear = complete && unresolvedThreads === 0;
+              if (!reviewThreadsClear) {
+                core.warning(`Review threads are not clear before auto-merge (unresolved=${unresolvedThreads}, complete=${complete}).`);
+              }
+            } catch (error) {
+              core.warning(`Unable to re-read review threads before auto-merge: ${error.message}`);
+            }
             const unchanged =
               snapshot.headSha === process.env.EXPECTED_HEAD_SHA &&
               snapshot.baseSha === process.env.EXPECTED_BASE_SHA &&
@@ -2095,7 +2180,8 @@ jobs:
               decomposition.decision === 'pass' &&
               decomposition.evidenceDigest === process.env.EXPECTED_DECOMPOSITION_DIGEST &&
               String(decomposition.reviewId || 0) === process.env.EXPECTED_EXCEPTION_REVIEW_ID &&
-              approvalsStillSatisfied;
+              approvalsStillSatisfied &&
+              reviewThreadsClear;
             if (!unchanged) {
               if (snapshot.headSha) {
                 await github.rest.repos.createCommitStatus({

@@ -6,7 +6,8 @@ const path = require('node:path');
 const { test } = require('node:test');
 const {
   isOnlyHumanReviewHold,
-  resolveApprovalRequirements
+  resolveApprovalRequirements,
+  summarizeReviewThreads
 } = require('../.github/base-coat/scripts/merge-eligibility-policy.cjs');
 
 const approvalHold = 'Insufficient approvals for risk tier high (0/1).';
@@ -133,5 +134,57 @@ test('wires structured human-hold state to both trusted executor copies', () => 
     assert.match(content, /human_review_hold: \$\{\{ steps\.policy\.outputs\.human_review_hold \}\}/);
     assert.match(content, /eligibility_state: \$\{\{ steps\.policy\.outputs\.eligibility_state \}\}/);
     assert.match(content, /Waiting for qualified human review/);
+  }
+});
+
+const thread = (overrides = {}) => ({
+  isResolved: false,
+  isOutdated: false,
+  path: 'sync.ps1',
+  comments: { nodes: [{ url: 'https://github.com/o/r/pull/1#discussion_r1', author: { login: 'copilot-pull-request-reviewer' } }] },
+  ...overrides
+});
+
+test('unresolved current review thread blocks eligibility with count and link', () => {
+  const state = summarizeReviewThreads({ threads: [thread()], complete: true });
+  assert.equal(state.readable, true);
+  assert.equal(state.summary, 'unresolved:1');
+  assert.match(state.blocker, /^Unresolved review threads: 1; .*discussion_r1$/);
+});
+
+test('resolved and outdated review threads do not block eligibility', () => {
+  const state = summarizeReviewThreads({
+    threads: [thread({ isResolved: true }), thread({ isOutdated: true })],
+    complete: true
+  });
+  assert.deepEqual([state.readable, state.summary, state.blocker], [true, 'clear', '']);
+});
+
+test('review thread read failures and truncated pagination fail closed', () => {
+  for (const input of [
+    { threads: [], complete: false, error: new Error('GraphQL 502') },
+    { threads: [thread({ isResolved: true })], complete: false },
+    { threads: null, complete: true }
+  ]) {
+    const state = summarizeReviewThreads(input);
+    assert.equal(state.readable, false);
+    assert.match(state.blocker, /could not be read; eligibility fails closed/);
+  }
+});
+
+test('wires review-thread gate to both executor copies', () => {
+  const root = path.resolve(__dirname, '..');
+  for (const workflow of [
+    '.github/workflows/pr-auto-merge-executor.yml',
+    '.github/base-coat/workflows/pr-auto-merge-executor.yml'
+  ]) {
+    const content = fs.readFileSync(path.join(root, workflow), 'utf8');
+    assert.match(content, /reviewThreads\(first: 100, after: \$cursor\)/);
+    assert.match(content, /blockers\.push\(reviewThreadState\.blocker\)/);
+    assert.match(content, /- Review threads: /);
+    assert.match(content, /waiting_for_review_thread_resolution/);
+    const preMerge = content.slice(content.indexOf('Re-fetch and compare eligibility snapshot'));
+    assert.match(preMerge, /approvalsStillSatisfied &&\s+reviewThreadsClear;/, 'pre-merge revalidation must re-check threads');
+    assert.match(preMerge, /!thread\.isResolved && !thread\.isOutdated/);
   }
 });
