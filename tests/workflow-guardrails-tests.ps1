@@ -1894,6 +1894,52 @@ else {
     $guardrailFailures += 'event-concurrency-per-item'
 }
 
+# Test 25: secret-scan must not report green when gitleaks never ran (#3758).
+Write-Host '  Test 25: Validate secret-scan gitleaks exit-code and config handling...'
+$secretScanTests = @'
+import os, re, shutil, subprocess, sys, tempfile; from pathlib import Path; root = Path.cwd()
+git_bash = Path(os.environ.get("ProgramFiles", "")) / "Git/bin/bash.exe"
+bash = str(git_bash) if os.name == "nt" and git_bash.is_file() else shutil.which("bash"); assert bash, "Bash is required to exercise the secret-scan step"
+scripts = []
+for name in [".github/workflows/secret-scan.yml", ".github/base-coat/workflows/secret-scan.yml"]:
+    source = (root / name).read_text(encoding="utf-8").replace("\r\n", "\n")
+    block = re.search(r"      - name: Run gitleaks scan\n.*?        run: \|\n(.*?)(?=\n\n      # -+\n)", source, re.S)
+    assert block, f"{name}: Run gitleaks scan step not found"
+    scripts.append("\n".join(line[10:] for line in block[1].splitlines()))
+    assert re.search(r"Post PR comment\n        if: \$\{\{ !cancelled\(\) &&.*?status !== 'findings'\) \{\n +body = \['## Secret Scanning \S+ Scan Failed'", source, re.S), f"{name}: PR comment must report scanner errors"
+assert scripts[0] == scripts[1], "Source and distributed secret-scan steps must match"
+fake = r'''python3() { "$FAKE_PYTHON" "$@"; }; gitleaks() { printf '%s\n' "$@" > "$FAKE_ARGS"; if [[ -n "$FAKE_REPORT" ]]; then printf '%s' "$FAKE_REPORT" > gitleaks-report.json; fi; return "$FAKE_EXIT"; }'''
+# (has .gitleaks.toml, gitleaks exit, report, expected status, expected count); only clean/findings may pass
+cases = [(False, 0, "", "clean", "0"), (True, 1, '[{"RuleID":"a"},{"RuleID":"b"}]', "findings", "2"),
+         (False, 1, "", "error", "0"), (False, 1, "[]", "error", "0"), (False, 2, '[{"RuleID":"a"}]', "error", "0")]
+cases += [(False, 0, "", "clean", "0", "first"), (False, 0, "", "clean", "0", "f" * 40)]  # push with a valid / force-pushed-away before SHA
+(root / "test-results").mkdir(exist_ok=True)
+for has_config, exit_code, report, status, count, *before in cases:
+    with tempfile.TemporaryDirectory(prefix="secret-scan-", dir=root / "test-results") as temporary:
+        repo, output, args = (Path(temporary) / name for name in ("repo", "output.txt", "args.txt"))
+        env = {**os.environ, "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": os.devnull}
+        subprocess.run(["git", "init", "-q", str(repo)], env=env, check=True)
+        if has_config:
+            (repo / ".gitleaks.toml").write_text("[extend]\nuseDefault = true\n")
+        for message in ("one", "two"): subprocess.run(["git", "-C", str(repo), "-c", "user.name=t", "-c", "user.email=t@example.invalid", "commit", "-q", "--allow-empty", "-m", message], env=env, check=True)
+        first, head = subprocess.run(["git", "-C", str(repo), "rev-parse", "HEAD~1", "HEAD"], env=env, capture_output=True, text=True, check=True).stdout.split()
+        push_before = (first if before[0] == "first" else before[0]) if before else ""
+        env.update({"EVENT_NAME": "push" if before else "workflow_dispatch", "BEFORE_SHA": push_before, "HEAD_SHA": head, "GITHUB_OUTPUT": output.as_posix(), "FAKE_ARGS": args.as_posix(),
+                    "FAKE_PYTHON": sys.executable.replace("\\", "/"), "FAKE_EXIT": str(exit_code), "FAKE_REPORT": report})
+        result = subprocess.run([bash, "--noprofile", "--norc", "-eo", "pipefail", "-c", fake + "\n" + scripts[0]],
+                                cwd=repo, env=env, text=True, encoding="utf-8", errors="replace", capture_output=True)
+        label = f"config={has_config} exit={exit_code} report={report!r} before={push_before}: rc={result.returncode}\n{result.stdout}{result.stderr}"
+        assert (result.returncode == 0) == (status != "error"), label
+        outputs = dict(line.split("=", 1) for line in output.read_text().splitlines())
+        assert (outputs.get("scan_status"), outputs.get("finding_count"), outputs.get("config")) == (status, count, ".gitleaks.toml" if has_config else "gitleaks built-in defaults"), f"{outputs} {label}"
+        argv = args.read_text().splitlines()
+        assert ("--config" in argv) == has_config and argv[argv.index("--log-opts") + 1] == (f"{first}..{head}" if push_before == first else "HEAD"), f"{argv} {label}"
+print("secret-scan distinguishes clean, findings, and scanner errors with or without .gitleaks.toml")
+'@
+$secretScanTests | python -
+if ($LASTEXITCODE -eq 0) { Write-Host '    PASS secret-scan fails loudly on scanner errors and falls back to default rules' }
+else { Write-Host '    FAIL secret-scan exit-code/config handling regression' -ForegroundColor Red; $guardrailFailures += 'secret-scan-exit-codes' }
+
 if ($guardrailFailures.Count -gt 0) {
     Write-Host "Workflow guardrails failed: $($guardrailFailures -join ', ')" -ForegroundColor Red
     exit 1

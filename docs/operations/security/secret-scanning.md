@@ -23,7 +23,7 @@ Basecoat implements a **defence-in-depth** approach to secret scanning:
 | Layer | Tool | Enforcement | Description |
 |-------|------|-------------|-------------|
 | **Local pre-commit** | gitleaks | 🔴 **Blocks commit** | First line of defence — scans staged changes before commit reaches the remote |
-| **CI / PR scan** | gitleaks (GitHub Actions) | 🟡 **Warn only** | Annotates PRs and surfaces findings; never blocks a merge |
+| **CI / PR scan** | gitleaks (GitHub Actions) | 🟡 **Warn only** | Annotates PRs and surfaces findings; findings never block a merge, scanner errors fail the check |
 
 > **Why warn-only CI?**
 > Enterprise GitHub policy may override required status checks or the
@@ -157,9 +157,9 @@ File: `.github/workflows/secret-scan.yml`
 1. **Checkout** full history (needed for commit-range diffing).
 2. **Install gitleaks** (pinned version for reproducibility).
 3. **Run scan** over the PR's commit range (or pushed range on `main`).
-4. **Post PR comment** with a summary — either ✅ all-clear or ⚠️ findings.
+4. **Post PR comment** with a summary — ✅ all-clear, ⚠️ findings, or a Scan Failed notice on scanner errors.
 5. **Upload `gitleaks-report.json`** as a workflow artifact (90-day retention).
-6. **Exit 0** unconditionally — this check **never** blocks a merge.
+6. **Exit 0** on a clean scan or findings (findings **never** block a merge); a gitleaks error fails the job. Without `.gitleaks.toml`, gitleaks default rules apply.
 
 ### Reading the report
 
