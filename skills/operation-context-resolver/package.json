@@ -32,6 +32,9 @@
   "overrides": {
     "@typescript-eslint/typescript-estree": {
       "minimatch": "9.0.7"
+    },
+    "@istanbuljs/load-nyc-config": {
+      "js-yaml": "^4.1.1"
     }
   },
   "devDependencies": {
