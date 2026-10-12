@@ -7,6 +7,7 @@ const { isAgentAssignee, readStatus } = require("./agent-assignment.cjs");
 const HOLD_LABELS = ["blocked", "deferred", "delivery-hold", "needs-info", "duplicate", "invalid", "wontfix"];
 const READY_STATUSES = new Set(["reviewed", "implementation-ready"]);
 const HANDOFF_MARKER = "<!-- basecoat-spec-handoff:v1 -->";
+const NOISE_REASONS = ["directive-not-exact", "directive-edited", "directive-actor-unqualified"];
 const CANARY_FIELDS = ["issue", "directiveId", "specPr", "approvedHead", "mergeCommit", "specBlob", "prdBlob"];
 
 function sourceIssues(body) {
@@ -108,9 +109,7 @@ async function resolveInto({ github, owner, repo, issueNumber, commentId, approv
     return finish("authorization-invalid", "directive-stale", "The source changed or a dependency cleared after the directive; post a fresh qualified directive.");
   const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: directive.prNumber });
   const sources = sourceIssues(approval.visibleSpecText(pr.body));
-  if (pr.head?.repo?.id !== pr.base?.repo?.id || pr.base?.repo?.full_name?.toLowerCase() !== `${owner}/${repo}`.toLowerCase() ||
-      pr.base?.ref !== pr.base?.repo?.default_branch || sources.length !== 1 ||
-      !new RegExp(`^#?${Number(issueNumber)}$`).test(sources[0])) {
+  if (!boundSpecPr(pr, owner, repo) || sources.length !== 1 || !new RegExp(`^#?${Number(issueNumber)}$`).test(sources[0])) {
     return finish("authorization-invalid", "spec-pr-not-bound", "The spec PR must be same-repository, target the default branch, and declare exactly this source issue.");
   }
   if (String(pr.head?.sha || "").toLowerCase() !== directive.headSha)
@@ -146,28 +145,52 @@ async function resolveInto({ github, owner, repo, issueNumber, commentId, approv
     "Read-only discovery: assignment writes stay disabled until the trusted canary is configured.");
 }
 
-async function discoverMergedSpec({ github, owner, repo, pr, approval }) {
+function boundSpecPr(pr, owner, repo) {
+  return pr?.head?.repo?.id === pr?.base?.repo?.id && pr?.base?.ref === pr?.base?.repo?.default_branch &&
+    pr?.base?.repo?.full_name?.toLowerCase() === `${owner}/${repo}`.toLowerCase();
+}
+
+// Issue-scoped lock key for the handoff workflow, using the same visible-text and binding rules as the resolver.
+function routeIssue({ eventName, payload, owner, repo, approval }) {
+  if (eventName === "workflow_dispatch") return Number(payload?.inputs?.issue_number) || null;
+  if (eventName === "issue_comment") return !payload?.issue?.pull_request && !isBotActor(payload?.comment?.user) &&
+    parseSpecDirective(payload?.comment?.body) ? Number(payload.issue.number) : null;
+  const pr = payload?.pull_request;
   const sources = sourceIssues(approval.visibleSpecText(pr?.body));
-  if (!pr?.merged || sources.length !== 1 || !/^#?[1-9]\d{0,9}$/.test(sources[0])) return null;
+  return eventName === "pull_request" && pr?.merged && pr.merge_commit_sha && boundSpecPr(pr, owner, repo) &&
+    sources.length === 1 && /^#?[1-9]\d{0,9}$/.test(sources[0]) ? Number(sources[0].replace("#", "")) : null;
+}
+
+async function discoverMergedSpec({ github, owner, repo, pr, approval }) {
+  const issueNumber = routeIssue({ eventName: "pull_request", payload: { pull_request: pr }, owner, repo, approval });
+  if (!issueNumber) return null;
   const files = await github.paginate(github.rest.pulls.listFiles, { owner, repo, pull_number: pr.number, per_page: 100 });
   if (!files.some(file => /^docs\/spec\/[\w./-]+\.spec\.md$/.test(file.filename) && file.status !== "removed")) return null;
-  const issueNumber = Number(sources[0].replace("#", ""));
   const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number: issueNumber, per_page: 100 });
-  const directive = comments.filter(comment => !isBotActor(comment.user) &&
-    parseSpecDirective(comment.body)?.prNumber === Number(pr.number)).pop();
-  if (directive) return resolveSpecHandoff({ github, owner, repo, issueNumber, commentId: directive.id, approval });
+  for (const directive of comments.filter(comment => !isBotActor(comment.user) &&
+    parseSpecDirective(comment.body)?.prNumber === Number(pr.number)).reverse()) {
+    const record = await resolveSpecHandoff({ github, owner, repo, issueNumber, commentId: directive.id, approval });
+    if (!NOISE_REASONS.includes(record.reason)) return record;
+  }
   return { issueNumber, directiveId: null, state: "awaiting-directive", reason: "directive-missing",
-    ownerAction: `Review the merged spec, then post /approve-spec ${Number(pr.number)} <approved-head-sha> on the source issue.`,
+    ownerAction: `Review the merged spec, then post \`/approve-spec ${Number(pr.number)} <approved-head-sha>\` on the source issue.`,
     writesEnabled: false, identity: null, evidence: { specPr: Number(pr.number), mergeCommit: pr.merge_commit_sha || null } };
 }
 
-function parseCanary(value) {
-  try {
-    const tuple = JSON.parse(String(value || ""));
-    return tuple && typeof tuple === "object" && CANARY_FIELDS.every(key => ![undefined, null, ""].includes(tuple[key])) ? tuple : null;
-  } catch {
-    return null;
+// The handoff lock keeps one pending run, so every surviving run reconciles the newest qualified directive, not just its trigger.
+async function latestQualifiedHandoff({ github, owner, repo, issueNumber, approval }) {
+  const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number: issueNumber, per_page: 100 });
+  for (const comment of comments.filter(item => !isBotActor(item.user) && parseSpecDirective(item.body)).reverse()) {
+    const record = await resolveSpecHandoff({ github, owner, repo, issueNumber, commentId: comment.id, approval });
+    if (!NOISE_REASONS.includes(record.reason)) return record;
   }
+  return null;
+}
+
+function parseCanary(value) {
+  let tuple = null;
+  try { tuple = JSON.parse(String(value || "")); } catch { return null; }
+  return tuple && typeof tuple === "object" && CANARY_FIELDS.every(key => ![undefined, null, ""].includes(tuple[key])) ? tuple : null;
 }
 
 function matchesCanary(tuple, record) {
@@ -208,14 +231,22 @@ async function readHandoffRecord({ github, owner, repo, issueNumber }) {
 }
 
 async function writeHandoffRecord({ github, owner, repo, record, gate }) {
-  if (["directive-not-exact", "directive-edited", "directive-actor-unqualified"].includes(record.reason)) return null;
+  if (NOISE_REASONS.includes(record.reason)) return null;
   const body = serializeHandoff(record, gate);
   const current = await readHandoffRecord({ github, owner, repo, issueNumber: record.issueNumber });
-  if (current?.comment.body === body) return current.comment;
+  if (current?.comment.body === body || (current?.record && regressive(current.record, record))) return current.comment;
   const { data } = current
     ? await github.rest.issues.updateComment({ owner, repo, comment_id: current.comment.id, body })
     : await github.rest.issues.createComment({ owner, repo, issue_number: record.issueNumber, body });
   return data;
+}
+
+// Writers race across workflows, so an older directive or a pre-assignment snapshot never replaces newer evidence.
+function regressive(prior, next) {
+  const id = value => Number(value) || 0;
+  if (id(next.directiveId) ? id(prior.directiveId) > id(next.directiveId)
+    : id(prior.directiveId) && id(next.evidence?.specPr) === id(prior.evidence?.specPr)) return true;
+  return prior.state === "assigned" && next.state === "handoff-pending" && next.identity === prior.identity;
 }
 
 async function verifyCanary({ github, owner, repo, canary }) {
@@ -253,19 +284,20 @@ function handoffApproval({ github, owner, repo, issueNumber, commentId, approval
 }
 
 async function priorSpecDirective({ github, owner, repo, status }) {
-  const id = Number(status?.originalApprovalId);
-  if (!Number.isSafeInteger(id) || id < 1) return null;
-  try {
-    const { data } = await github.rest.issues.getComment({ owner, repo, comment_id: id });
-    return parseSpecDirective(data.body) ? id : null;
-  } catch (error) {
-    if (error.status === 404) return null;
-    throw error;
-  }
+  if (!status) return null;
+  const id = Number(status.originalApprovalId);
+  const valid = Number.isSafeInteger(id) && id > 0;
+  const comment = valid ? await github.rest.issues.getComment({ owner, repo, comment_id: id })
+    .then(response => response.data, error => { if (error.status === 404) return null; throw error; }) : null;
+  if (comment && parseSpecDirective(comment.body)) return id;
+  // The bot-owned handoff record is the durable spec-origin discriminator: a dispatched directive newer than the persisted
+  // approval, or a deleted/edited directive matching the record, keeps recovery on the spec contract so it fails closed.
+  const stored = await readHandoffRecord({ github, owner, repo, issueNumber: Number(status.issueNumber) });
+  const directiveId = Number(stored?.record?.directiveId) || 0;
+  if (directiveId && ["canary-match", "general"].includes(stored.record.gate) && (!valid || id < directiveId)) return directiveId;
+  if (!valid || (comment && (!comment.updated_at || comment.updated_at === comment.created_at))) return null;
+  return directiveId === id ? id : null;
 }
 
-module.exports = {
-  HOLD_LABELS, HANDOFF_MARKER, parseSpecDirective, deliveryIntent, parseSpecUrl, resolveSpecHandoff,
-  discoverMergedSpec, parseCanary, handoffWriteGate, readHandoffRecord, writeHandoffRecord,
-  verifyCanary, checkWriteGate, handoffApproval, priorSpecDirective
-};
+module.exports = { HOLD_LABELS, HANDOFF_MARKER, parseSpecDirective, deliveryIntent, parseSpecUrl, resolveSpecHandoff, routeIssue,
+  discoverMergedSpec, latestQualifiedHandoff, parseCanary, handoffWriteGate, readHandoffRecord, writeHandoffRecord, verifyCanary, checkWriteGate, handoffApproval, priorSpecDirective };
