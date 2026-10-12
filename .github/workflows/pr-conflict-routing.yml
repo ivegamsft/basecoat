@@ -12,6 +12,7 @@ permissions:
   pull-requests: write
   issues: write
 
+# Repository-wide group (not github.ref): every run scans all PRs, so runs must never overlap.
 concurrency:
   group: pr-conflict-routing
   cancel-in-progress: false
@@ -29,6 +30,23 @@ jobs:
             const marker = '<!-- pr-conflict-routing:v1';
             const label = 'needs-conflict-fix';
             const { owner, repo } = context.repo;
+            // PR authors and commenters can paste the marker text; only comments written by this workflow count.
+            const trustedAuthor = 'github-actions[bot]';
+            const trustedMarker = (c, tag) => Boolean(c && c.user && c.user.login === trustedAuthor
+              && c.user.type === 'Bot' && typeof c.body === 'string' && c.body.startsWith(tag));
+            // Keep the oldest trusted marker for this head and delete any duplicates left by concurrent or interrupted runs.
+            const reconcile = async (number, tag) => {
+              const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number: number, per_page: 100 });
+              const markers = comments.filter(c => trustedMarker(c, tag)).sort((a, b) => a.id - b.id);
+              for (const extra of markers.slice(1)) {
+                try {
+                  await github.rest.issues.deleteComment({ owner, repo, comment_id: extra.id });
+                } catch (error) {
+                  if (error.status !== 404) throw error;
+                }
+              }
+              return markers[0] || null;
+            };
             const prs = await github.paginate(github.rest.pulls.list, { owner, repo, state: 'open', per_page: 100 });
             for (const item of prs) {
               if (item.draft) continue;
@@ -52,8 +70,7 @@ jobs:
                 continue;
               }
               const tag = `${marker} head=${pr.head.sha} -->`;
-              const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number: pr.number, per_page: 100 });
-              if (comments.some(c => c.body && c.body.includes(tag))) continue;
+              if (await reconcile(pr.number, tag)) continue;
               try {
                 await github.rest.issues.getLabel({ owner, repo, name: label });
               } catch (error) {
@@ -75,6 +92,12 @@ jobs:
                 '',
                 'The label is removed automatically once the PR is mergeable. XXL approval and no-merge holds are unaffected.'
               ].join('\n');
-              await github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body });
+              const created = (await github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body })).data;
+              // Revalidate after writing: a concurrent run may have routed the same head first.
+              const winner = await reconcile(pr.number, tag);
+              if (winner && created && winner.id !== created.id) {
+                core.info(`PR #${pr.number} already routed for head ${pr.head.sha}; removed duplicate notification.`);
+                continue;
+              }
               core.info(`Routed PR #${pr.number}`);
             }

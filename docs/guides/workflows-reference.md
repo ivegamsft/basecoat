@@ -34,6 +34,14 @@ label application and comment failures propagate rather than report a routed
 success; rerun after resolving access or API availability. No failure fallback
 changes a delivery hold, approval or merge decision.
 
+Routing markers are trusted only when the comment is authored by
+`github-actions[bot]` (type `Bot`) and starts with the exact head marker, so
+PR authors or commenters cannot suppress routing by pasting marker text. Runs
+share one repository-wide concurrency group (not keyed on `github.ref`). Before
+and after posting, the router keeps the oldest trusted marker for the head and
+deletes newer duplicates, so concurrent or interrupted runs converge on exactly
+one notification.
+
 ### Consumer PR metadata producer
 
 The supported default install includes `basecoat-pr-size-labeler.yml`, sourced

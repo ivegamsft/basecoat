@@ -13,13 +13,14 @@ const script = match[1].split("\n").map(line => line.replace(/^ {12}/, "")).join
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 const execute = new AsyncFunction("github", "context", "core", "setTimeout", script);
 const head = "a".repeat(40);
+const bot = { login: "github-actions[bot]", type: "Bot" };
 
 function fixture(options = {}) {
   const pr = {
     number: 42, draft: false, labels: [], mergeable: false, mergeable_state: "dirty",
     head: { sha: head }, base: { ref: "main" }, ...options.pr
   };
-  const state = { pr, comments: [], calls: [], messages: [], delays: [], reads: 0 };
+  const state = { pr, comments: [...(options.comments || [])], calls: [], messages: [], delays: [], reads: 0, nextId: 100 };
   const record = (name, args) => state.calls.push({ name, args });
   const github = {
     rest: {
@@ -38,7 +39,7 @@ function fixture(options = {}) {
       issues: {
         async listComments(args) {
           record("listComments", args);
-          return { data: state.comments };
+          return { data: [...state.comments] };
         },
         async addLabels(args) {
           record("addLabels", args);
@@ -63,7 +64,13 @@ function fixture(options = {}) {
         async createComment(args) {
           record("createComment", args);
           if (options.commentError) throw options.commentError;
-          state.comments.push({ body: args.body });
+          const comment = { id: state.nextId++, user: bot, body: args.body };
+          state.comments.push(comment);
+          return { data: comment };
+        },
+        async deleteComment(args) {
+          record("deleteComment", args);
+          state.comments = state.comments.filter(comment => comment.id !== args.comment_id);
         }
       }
     },
@@ -222,7 +229,7 @@ test("only lookup 404 provisions the missing label before routing", async () => 
   const f = fixture({ lookupError: Object.assign(new Error("Definition missing"), { status: 404 }) });
   await f.run();
   assert.deepEqual(f.state.calls.map(call => call.name),
-    ["list", "listComments", "getLabel", "createLabel", "addLabels", "createComment"]);
+    ["list", "listComments", "getLabel", "createLabel", "addLabels", "createComment", "listComments"]);
   assert.equal(calls(f, "createLabel")[0].args.name, "needs-conflict-fix");
 });
 
@@ -248,4 +255,56 @@ test("definition creation failure surfaces and retry can recover", async () => {
   options.createError = null;
   await f.run();
   assert.equal(f.state.comments.length, 1);
+});
+
+test("spoofed marker from a non-automation author does not suppress routing", async () => {
+  const tag = `<!-- pr-conflict-routing:v1 head=${head} -->`;
+  const f = fixture({ comments: [
+    { id: 1, user: { login: "attacker", type: "User" }, body: tag },
+    { id: 2, user: { login: "github-actions", type: "User" }, body: tag },
+    { id: 3, user: bot, body: `> quoted\n${tag}` }
+  ] });
+  await f.run();
+  assert.equal(calls(f, "createComment").length, 1);
+  assert.equal(calls(f, "addLabels").length, 1);
+  assert.deepEqual(f.state.messages, ["Routed PR #42"]);
+});
+
+test("marker authored by automation suppresses re-routing", async () => {
+  const f = fixture({ comments: [{ id: 1, user: bot, body: `<!-- pr-conflict-routing:v1 head=${head} -->\nrouted` }] });
+  await f.run();
+  assert.equal(calls(f, "createComment").length, 0);
+  assert.equal(calls(f, "addLabels").length, 0);
+});
+
+test("concurrent revalidation of the same head leaves one assignment", async () => {
+  const f = fixture();
+  await Promise.all([f.run(), f.run()]);
+  const markers = f.state.comments.filter(c => c.body.startsWith(`<!-- pr-conflict-routing:v1 head=${head} -->`));
+  assert.equal(markers.length, 1);
+  assert.equal(markers[0].id, 100);
+  assert.ok(calls(f, "deleteComment").length >= 1);
+  assert.ok(calls(f, "deleteComment").every(call => call.args.comment_id === 101));
+  assert.deepEqual(f.state.pr.labels, [{ name: "needs-conflict-fix" }]);
+  assert.equal(f.state.messages.filter(m => m === "Routed PR #42").length, 1);
+});
+
+test("workflow concurrency is repository-wide, not keyed on github.ref", () => {
+  const block = source.match(/^concurrency:\n((?: {2}[^\n]*\n)+)/m);
+  assert.ok(block, "Workflow must declare concurrency.");
+  assert.match(block[1], /^ {2}group: pr-conflict-routing$/m);
+  assert.doesNotMatch(block[1], /github\.ref/);
+  assert.match(block[1], /cancel-in-progress: false/);
+});
+test("retry reconciles duplicate markers left by an interrupted run", async () => {
+  const tag = `<!-- pr-conflict-routing:v1 head=${head} -->`;
+  const f = fixture({ comments: [
+    { id: 7, user: bot, body: `${tag}\nfirst` },
+    { id: 9, user: bot, body: `${tag}\nsecond` },
+    { id: 8, user: { login: "attacker", type: "User" }, body: tag }
+  ] });
+  await f.run();
+  assert.deepEqual(calls(f, "deleteComment").map(call => call.args.comment_id), [9]);
+  assert.deepEqual(f.state.comments.map(c => c.id), [7, 8]);
+  assert.equal(calls(f, "createComment").length, 0);
 });
