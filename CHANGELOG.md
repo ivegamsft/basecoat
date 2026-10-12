@@ -4,7 +4,10 @@ All notable changes to this repository should be recorded in this file.
 
 ## Unreleased
 
-No unreleased changes.
+### Fixed
+
+- `rollback.ps1` replays `sync.ps1` for the tag under the guidance-lock lease, so projections and `guidance-lock/v1` match a fresh sync;
+  failures restore the prior install and pin, except `GUIDANCE_LOCK_BUSY` (lease reclaimed as stale), which keeps the backup instead (#3776).
 
 ## 4.6.5 - 2026-10-11
 

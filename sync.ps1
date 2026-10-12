@@ -603,6 +603,12 @@ try {
     if (-not $distributionHelper) { throw 'Missing scripts/distribution-filter.ps1 distribution helper.' }
     . $distributionHelper
     $distributionExcludedPaths = @(Get-BaseCoatDistributionExclusions -Root $sourcePath)
+    # rollback.ps1 holds the lease across this sync and its restore; verify and renew it before the first write, never release it.
+    $inheritedLease = "$env:BASECOAT_GUIDANCE_LEASE" -split '\|', 2
+    if ($env:BASECOAT_GUIDANCE_LEASE -and ($inheritedLease.Count -ne 2 -or [System.IO.Path]::GetFullPath($inheritedLease[0]) -ne [System.IO.Path]::GetFullPath((Join-Path $repoRoot '.github/base-coat/guidance-lock.lease')) -or
+        -not (Select-String -LiteralPath (Join-Path $inheritedLease[0] 'owner') -Pattern "^token=$([regex]::Escape($inheritedLease[1]))$" -Quiet -ErrorAction SilentlyContinue))) {
+        throw "GUIDANCE_LOCK_BUSY lease='$($inheritedLease[0])' reason='inherited lease is not held'"
+    } elseif ($env:BASECOAT_GUIDANCE_LEASE) { [System.IO.File]::WriteAllText((Join-Path $inheritedLease[0] 'owner'), "token=$($inheritedLease[1])`npid=$PID`nacquiredEpoch=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())`n", [System.Text.UTF8Encoding]::new($false)) }
     $fullTargetDir = Join-Path $repoRoot $targetDir
     New-Item -ItemType Directory -Force -Path $fullTargetDir | Out-Null
 
@@ -864,7 +870,7 @@ try {
     }
 
     $guidanceLockPath = Get-GuidanceLockPath -RepoRoot $repoRoot
-    $guidanceLeasePath = Enter-GuidanceLockLease -RepoRoot $repoRoot
+    if (-not $env:BASECOAT_GUIDANCE_LEASE) { $guidanceLeasePath = Enter-GuidanceLockLease -RepoRoot $repoRoot }
     $guidanceLock = Read-GuidanceLock -RepoRoot $repoRoot -LockPath $guidanceLockPath
     $lockEntries = [System.Collections.Generic.List[object]]::new()
     foreach ($entry in @($guidanceLock.entries)) { $lockEntries.Add($entry) }

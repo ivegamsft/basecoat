@@ -1186,6 +1186,150 @@ finally {
 }
 
 # ============================================================================
+# Test: rollback replays projections and guidance-lock/v1 (#3776)
+# ============================================================================
+Write-Host "`nTest: Rollback restores projections and guidance lock to a fresh sync of the ref" -ForegroundColor Yellow
+
+function New-RollbackSourceCommit {
+    param([string]$Path, [string]$Version, [hashtable]$Files, [string]$TagName = "v$Version")
+    Get-ChildItem -LiteralPath $Path -Force | Where-Object { $_.Name -ne '.git' } | Remove-Item -Recurse -Force
+    $base = @{
+        'README.md' = '# Source Repo'; 'CHANGELOG.md' = '# Changelog'
+        'version.json' = "{ ""version"": ""$Version"" }"
+        'asset-manifest.json' = '{ "schemaVersion": "1", "assets": [] }'
+        'docs/reference/README.md' = '# Reference'; 'docs/guides/README.md' = '# Guides'
+    }
+    foreach ($table in @($base, $Files)) {
+        foreach ($rel in $table.Keys) {
+            $full = Join-Path $Path $rel
+            New-Item -ItemType Directory -Force -Path (Split-Path -Parent $full) | Out-Null
+            Set-Content -LiteralPath $full -Value $table[$rel] -Encoding UTF8
+        }
+    }
+    git -C $Path add -A | Out-Null
+    git -C $Path commit -q -m "release $Version" | Out-Null
+    git -C $Path tag $TagName
+}
+
+function Get-RollbackState {
+    param([string]$Consumer)
+    $lock = Get-Content -LiteralPath (Join-Path $Consumer '.github/base-coat/guidance-lock.json') -Raw | ConvertFrom-Json
+    $files = foreach ($dir in '.github/agents', '.github/instructions', '.github/prompts', '.github/skills', '.agents/skills') {
+        Get-ChildItem -LiteralPath (Join-Path $Consumer $dir) -Recurse -File -ErrorAction SilentlyContinue |
+            ForEach-Object { "$($_.FullName.Substring($Consumer.Length).Replace('\', '/'))=$(Get-FileSha256 -Path $_.FullName)" }
+    }
+    return [pscustomobject]@{
+        Lock = (@($lock.entries | Where-Object { $_.owner -eq 'basecoat' }) | ConvertTo-Json -Depth 4 -Compress)
+        Files = (@($files | Sort-Object) -join "`n")
+    }
+}
+
+function Invoke-RollbackToConsumer {
+    param([string]$Consumer, [string]$SourceRepo, [string]$Tag)
+    Push-Location $Consumer
+    try {
+        $output = & pwsh -NoProfile -File (Join-Path $repoRoot 'rollback.ps1') -Tag $Tag -Repo "file://$SourceRepo" 2>&1 | Out-String
+        return [pscustomobject]@{ ExitCode = $LASTEXITCODE; Output = $output }
+    }
+    finally { Pop-Location }
+}
+
+$rollbackSource = $null
+$rollbackConsumers = @()
+try {
+    $rollbackSource = Join-Path ([System.IO.Path]::GetTempPath()) ("basecoat-rollback-source-" + [System.Guid]::NewGuid().ToString())
+    New-Item -ItemType Directory -Path $rollbackSource | Out-Null
+    git -C $rollbackSource init -q
+    git -C $rollbackSource config user.name 'basecoat-test'
+    git -C $rollbackSource config user.email 'basecoat-test@example.com'
+    $skillV1 = "---`nname: rollback-skill`ndescription: v1`ncompatibility: [github-copilot-cli]`n---`n"
+    New-RollbackSourceCommit -Path $rollbackSource -Version '1.0.0' -Files @{
+        'agents/rollback.agent.md' = "---`nname: rollback`ndescription: v1 agent`n---`nv1 body"
+        'instructions/retired.instructions.md' = "---`ndescription: retired in v1.1`napplyTo: ""**/*""`n---`n"
+        'skills/rollback-skill/SKILL.md' = $skillV1
+    }
+    New-RollbackSourceCommit -Path $rollbackSource -Version '1.1.0' -Files @{
+        'agents/rollback.agent.md' = "---`nname: rollback`ndescription: v1.1 agent`n---`nv1.1 body"
+        'instructions/added.instructions.md' = "---`ndescription: added in v1.1`napplyTo: ""**/*""`n---`n"
+        'skills/rollback-skill/SKILL.md' = $skillV1.Replace('v1', 'v1.1')
+    }
+    # v1.2.0 carries a drifted version.json, so sync fails only after projections and lock are written.
+    New-RollbackSourceCommit -Path $rollbackSource -Version '9.9.9' -TagName 'v1.2.0' -Files @{
+        'agents/rollback.agent.md' = "---`nname: rollback`ndescription: drifted agent`n---`ndrifted body"
+        'instructions/drifted.instructions.md' = "---`ndescription: drifted`napplyTo: ""**/*""`n---`n"
+    }
+
+    $fresh = New-ConsumerRepo -WithGitHubDir; $rollbackConsumers += $fresh
+    Invoke-SyncToConsumerWithSource -ConsumerPath $fresh -SourceRepo "file://$rollbackSource" -SourceRef 'v1.0.0'
+    $expected = Get-RollbackState -Consumer $fresh
+
+    $rolled = New-ConsumerRepo -WithGitHubDir; $rollbackConsumers += $rolled
+    Set-Content -LiteralPath (Join-Path $rolled '.basecoat.yml') -Value "source: file://$rollbackSource`nref: v1.0.0" -Encoding UTF8
+    Invoke-SyncToConsumerWithSource -ConsumerPath $rolled -SourceRepo "file://$rollbackSource" -SourceRef 'v1.0.0'
+    $foreignRel = '.github/instructions/adhesion-owned.instructions.md'
+    Set-Content -LiteralPath (Join-Path $rolled $foreignRel) -Value '# adhesion' -Encoding UTF8
+    . (Join-Path $repoRoot 'scripts/guidance-lock.ps1')
+    $foreignEntry = New-GuidanceLockEntry -RepoRoot $rolled -Path $foreignRel -Owner 'adhesion' `
+        -Sha256 (Get-GuidanceContentHash -Path (Join-Path $rolled $foreignRel))
+    Write-GuidanceLock -RepoRoot $rolled -Entries (@((Read-GuidanceLock -RepoRoot $rolled).entries) + $foreignEntry)
+    Invoke-SyncToConsumerWithSource -ConsumerPath $rolled -SourceRepo "file://$rollbackSource" -SourceRef 'v1.1.0'
+    Set-Content -LiteralPath (Join-Path $rolled '.basecoat.yml') -Value "source: file://$rollbackSource`nref: v1.1.0" -Encoding UTF8
+
+    $result = Invoke-RollbackToConsumer -Consumer $rolled -SourceRepo $rollbackSource -Tag 'v1.0.0'; $testCount++
+    if ($result.ExitCode -ne 0) { throw "Rollback test failed: rollback.ps1 exited $($result.ExitCode): $($result.Output)" }
+    $actual = Get-RollbackState -Consumer $rolled; $testCount++
+    $actualOwnedFiles = (($actual.Files -split "`n") | Where-Object { $_ -notlike '*adhesion-owned*' }) -join "`n"
+    if ($actualOwnedFiles -ne $expected.Files) { throw "Rollback test failed: projections differ from a fresh v1.0.0 sync.`nExpected:`n$($expected.Files)`nActual:`n$actualOwnedFiles" }; $testCount++
+    if ($actual.Lock -ne $expected.Lock) { throw "Rollback test failed: basecoat lock entries differ from a fresh v1.0.0 sync.`nExpected: $($expected.Lock)`nActual: $($actual.Lock)" }; $testCount++
+    $foreignAfter = @((Read-GuidanceLock -RepoRoot $rolled).entries | Where-Object { $_.owner -eq 'adhesion' })
+    if ($foreignAfter.Count -ne 1 -or $foreignAfter[0].sha256 -ne $foreignEntry.sha256 -or -not (Test-Path -LiteralPath (Join-Path $rolled $foreignRel))) {
+        throw 'Rollback test failed: foreign-owned lock entry or file was changed'
+    }; $testCount++
+    $pinState = { "$((Get-Content -LiteralPath (Join-Path $rolled '.basecoat.yml') -Raw).Trim())|$((Get-Content -LiteralPath (Join-Path $rolled '.github/base-coat/.source-provenance.json') -Raw | ConvertFrom-Json).requestedRef)" }
+    if ((& $pinState) -notmatch '(?m)^ref: v1\.0\.0\|v1\.0\.0$') { throw "Rollback test failed: pin/provenance not v1.0.0 after success: $(& $pinState)" }
+
+    $leaseDir = Join-Path $rolled '.github/base-coat/guidance-lock.lease'; New-Item -ItemType Directory -Path $leaseDir | Out-Null
+    Set-Content -LiteralPath (Join-Path $leaseDir 'owner') -Value "token=held`nacquiredEpoch=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - 598)" -Encoding ASCII
+    $env:BASECOAT_GUIDANCE_LEASE = "$leaseDir|other"; $busy = try { Invoke-SyncToConsumerWithSource -ConsumerPath $rolled -SourceRepo "file://$rollbackSource" -SourceRef 'v1.1.0'; 'ran' } catch { "$_" } finally { Remove-Item Env:\BASECOAT_GUIDANCE_LEASE }; $testCount++
+    if ($busy -notmatch 'GUIDANCE_LOCK_BUSY' -or (Get-Content -LiteralPath (Join-Path $rolled '.github/base-coat/version.json') -Raw) -notmatch '1\.0\.0') { throw "Rollback test failed: sync wrote the staged payload before rejecting a foreign inherited lease: $busy" }
+    $env:BASECOAT_GUIDANCE_LEASE = "$leaseDir|held"; try { Invoke-SyncToConsumerWithSource -ConsumerPath $rolled -SourceRepo "file://$rollbackSource" -SourceRef 'v1.0.0' } finally { Remove-Item Env:\BASECOAT_GUIDANCE_LEASE }
+    Start-Sleep -Seconds 3; $takeover = try { Enter-GuidanceLockLease -RepoRoot $rolled -TimeoutSeconds 0 } catch { 'busy' }; Remove-Item -LiteralPath $leaseDir -Recurse -Force; $testCount++
+    if ($takeover -ne 'busy') { throw 'Rollback test failed: sync did not renew an aged inherited lease, so another writer could reclaim it mid-sync' }
+    $beforeLateFailure = "$((Get-RollbackState -Consumer $rolled).Files)|$(Get-Content -LiteralPath (Join-Path $rolled '.github/base-coat/guidance-lock.json') -Raw)|$(& $pinState)"
+    $result = Invoke-RollbackToConsumer -Consumer $rolled -SourceRepo $rollbackSource -Tag 'v1.2.0'; $testCount++
+    if ($result.ExitCode -eq 0 -or $result.Output -notmatch 'provenance check failed') { throw "Rollback test failed: drifted v1.2.0 rollback did not fail late in sync: $($result.Output)" }; $testCount++
+    if ("$((Get-RollbackState -Consumer $rolled).Files)|$(Get-Content -LiteralPath (Join-Path $rolled '.github/base-coat/guidance-lock.json') -Raw)|$(& $pinState)" -ne $beforeLateFailure -or (Test-Path -LiteralPath (Join-Path $rolled '.github/base-coat/guidance-lock.lease'))) {
+        throw 'Rollback test failed: a late sync failure left projections, lock, provenance, or pin changed, or leaked the lease'
+    }
+    Set-ItemProperty -LiteralPath (Join-Path $rolled '.basecoat.yml') -Name IsReadOnly -Value $true
+    $result = Invoke-RollbackToConsumer -Consumer $rolled -SourceRepo $rollbackSource -Tag 'v1.1.0'; $testCount++
+    if ($result.ExitCode -eq 0 -or "$((Get-RollbackState -Consumer $rolled).Files)|$(Get-Content -LiteralPath (Join-Path $rolled '.github/base-coat/guidance-lock.json') -Raw)|$(& $pinState)" -ne $beforeLateFailure) { throw "Rollback test failed: a failed .basecoat.yml pin write did not restore the prior install: $($result.Output)" }
+
+    $edited = New-ConsumerRepo -WithGitHubDir; $rollbackConsumers += $edited
+    Set-Content -LiteralPath (Join-Path $edited '.basecoat.yml') -Value "source: file://$rollbackSource`nref: v1.1.0" -Encoding UTF8
+    Invoke-SyncToConsumerWithSource -ConsumerPath $edited -SourceRepo "file://$rollbackSource" -SourceRef 'v1.1.0'
+    Add-Content -LiteralPath (Join-Path $edited '.github/instructions/added.instructions.md') -Value 'local edit'
+    $result = Invoke-RollbackToConsumer -Consumer $edited -SourceRepo $rollbackSource -Tag 'v1.0.0'; $testCount++
+    if ($result.ExitCode -eq 0 -or $result.Output -notmatch 'GUIDANCE_CONTENT_MODIFIED') {
+        throw "Rollback test failed: modified BaseCoat-owned file did not stop rollback: $($result.Output)"
+    }; $testCount++
+    $stagedVersion = (Get-Content -LiteralPath (Join-Path $edited '.github/base-coat/version.json') -Raw | ConvertFrom-Json).version
+    if ($stagedVersion -ne '1.1.0' -or (Get-Content -LiteralPath (Join-Path $edited '.basecoat.yml') -Raw) -notmatch 'ref: v1\.1\.0') {
+        throw "Rollback test failed: failed rollback changed the staged payload ($stagedVersion) or the pin"
+    }
+
+    Write-Host '  Passed: rollback matches a fresh sync, preserves foreign entries, and fails closed on local edits' -ForegroundColor Green
+}
+catch {
+    $failures += $_.Exception.Message
+}
+finally {
+    foreach ($path in @($rollbackConsumers) + @($rollbackSource)) {
+        if ($path -and (Test-Path -LiteralPath $path)) { Remove-Item -LiteralPath $path -Recurse -Force }
+    }
+}
+
+# ============================================================================
 # Summary
 # ============================================================================
 Write-Host "`n================================================" -ForegroundColor Cyan
