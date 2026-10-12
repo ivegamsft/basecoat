@@ -7,8 +7,12 @@ const os = require('node:os');
 const { execFileSync } = require('node:child_process');
 const test = require('node:test');
 const {
+  classifyPullRequestLabels,
   evaluatePullRequestLabels,
+  evaluateReleaseCoverage,
   isReleaseLabel,
+  parseReleaseCommits,
+  runReleaseCoverage,
   selectCurrentMergeGroupPullRequests,
   verifyCurrentSquashMergeTree
 } = require('../scripts/merge-group-release-labels.cjs');
@@ -36,6 +40,76 @@ test('explicit supported exemptions are checked on each pull request', () => {
     { valid: false, reason: 'missing release label' }
   );
   assert.throws(() => evaluatePullRequestLabels(null), /label data is incomplete/);
+  assert.throws(() => evaluatePullRequestLabels({ labels: [{ name: '' }] }), /nonempty name/);
+});
+
+test('one classifier yields the same per-PR result at every stage', () => {
+  const cases = [
+    [['WAVE:5'], 'release-label'], [['Sprint-2026-10'], 'release-label'],
+    [['wave/sprint', 'dependencies'], 'release-label'],
+    [['Skip-Release-Label-Gate'], 'explicit-exemption'], [['dependencies'], 'dependency-exemption'],
+    [['size:S'], 'uncovered'], [[], 'uncovered']
+  ];
+  cases.forEach(([labels, reason], index) => {
+    const fork = { number: index + 1, labels, head: { repo: { fork: true } } };
+    const classified = classifyPullRequestLabels(fork);
+    assert.equal(classified.reason, reason, labels.join(','));
+    assert.equal(evaluatePullRequestLabels(fork).valid, classified.covered);
+    assert.deepEqual(evaluateReleaseCoverage([fork]).results[0], { number: index + 1, ...classified });
+  });
+});
+
+const window = (covered, uncovered, exempt = 0) => [
+  ...Array.from({ length: covered }, (_, i) => ({ number: i + 1, labels: ['sprint:1'] })),
+  ...Array.from({ length: exempt }, (_, i) => ({ number: 100 + i, labels: [{ name: 'dependencies' }] })),
+  ...Array.from({ length: uncovered }, (_, i) => ({ number: 200 + i, labels: [] }))
+];
+
+test('release coverage counts exemptions as covered and enforces the 10% boundary', () => {
+  assert.equal(evaluateReleaseCoverage([]).status, 'empty');
+  assert.equal(evaluateReleaseCoverage(window(10, 0)).status, 'pass');
+  const exact = evaluateReleaseCoverage(window(9, 1));
+  assert.equal(exact.status, 'partial');
+  assert.deepEqual(exact.uncoveredNumbers, [200]);
+  assert.equal(evaluateReleaseCoverage(window(8, 2)).status, 'fail');
+  const mixed = evaluateReleaseCoverage(window(2, 1, 7));
+  assert.deepEqual(
+    [mixed.status, mixed.total, mixed.releaseLabelCovered, mixed.exemptCovered, mixed.uncovered],
+    ['partial', 10, 2, 7, 1]
+  );
+  assert.equal(evaluateReleaseCoverage(window(0, 0, 3)).status, 'pass');
+});
+
+test('release coverage rejects malformed or duplicate inventory', () => {
+  assert.throws(() => evaluateReleaseCoverage(null), /inventory is incomplete/);
+  assert.throws(() => evaluateReleaseCoverage([{ number: 0, labels: [] }]), /malformed PR number/);
+  assert.throws(() => evaluateReleaseCoverage([{ number: 1, labels: [] }, { number: 1, labels: [] }]), /duplicate PR #1/);
+  assert.throws(() => evaluateReleaseCoverage([{ number: 1 }]), /label data is incomplete/);
+});
+
+test('release membership comes from the exact range and fails closed', () => {
+  const [prev, tag, c7, c8] = ['1', '2', '7', '8'].map(digit => digit.repeat(40));
+  assert.deepEqual(
+    parseReleaseCommits([`${c7}\tfix: a (#3808) (#7)`, `${c8}\tMerge pull request #8 from x/y`]),
+    [{ sha: c7, number: 7 }, { sha: c8, number: 8 }]
+  );
+  assert.throws(() => parseReleaseCommits([`${c7}\tchore: direct push`]), /no pull-request association/);
+  const labels = { 7: ['sprint:1'], 8: ['skip-release-label-gate'] };
+  const runCommand = (cmd, args) => {
+    if (args[0] === 'rev-parse') return args[1].startsWith('v1') ? prev : tag;
+    if (args[0] === 'merge-base') return '';
+    if (args[0] === 'log') return `${c7}\tfeat: x (#7)\n${c8}\tci: y (#8)`;
+    const number = Number(args[1].split('/').pop());
+    return JSON.stringify({ number, merged: true, mergeCommitSha: number === 8 ? c8 : c7, labels: labels[number] || [] });
+  };
+  const run = command => runReleaseCoverage({ repository: 'o/r', previousTag: 'v1.0.0', tag: 'v2.0.0', runCommand: command, log: () => {} });
+  const result = run(runCommand);
+  assert.deepEqual([result.status, result.previousSha, result.tagSha, result.exemptCovered], ['pass', prev, tag, 1]);
+  assert.throws(() => run((cmd, args) => {
+    if (args[0] === 'merge-base') throw new Error('exit 1');
+    return runCommand(cmd, args);
+  }), /not an ancestor/);
+  assert.throws(() => run((cmd, args) => (args[0] === 'log' ? `${c8}\tborrowed (#9)` : runCommand(cmd, args))), /did not produce release range commit/);
 });
 
 const groupHeadSha = 'a'.repeat(40);

@@ -57,7 +57,7 @@ approve incomplete specifications or promote their draft PRs.
 | `documentation`, `spec` on a synthesis PR | Draft artifact classification, not implementation approval |
 | `size:XS/S/M/L/XL/XXL` | Changed-line boundaries: 20/100/300/800/2000/greater than 2000; generated lockfile churn excluded; XXL requires qualified approval |
 | `wave:*`, `sprint:*`, `wave-*`, `sprint-*`, `wave/sprint` | Release grouping; labeler supplies `sprint:YYYY-Www` to same-repo PRs lacking coverage |
-| `skip-release-label-gate`, `dependencies` | Supported PR release-label exemptions, not exemptions from every release workflow |
+| `skip-release-label-gate`, `dependencies` | Supported release-label exemptions; the PR, merge-group and tag release coverage gates share one classifier (`scripts/merge-group-release-labels.cjs`), so exempt PRs count as covered (release fails only above 10% uncovered) |
 | `delivery-hold` | Explicit pause; executor disables/refuses auto-merge until removed |
 | `skip-prd-spec-check` | Spec-gate exception only; does not satisfy executor authorization |
 | `remediation`, `escalated`, `automation` | Watchdog escalation tracking; does not repair or approve automatically |

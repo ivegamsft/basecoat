@@ -160,6 +160,7 @@ jobs:
           echo "notes_file=${notes_file}" >> "${GITHUB_OUTPUT}"
 
       - name: Validate wave/sprint label coverage for release PRs
+        id: coverage
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -167,55 +168,41 @@ jobs:
           set -euo pipefail
 
           tag="${GITHUB_REF_NAME}"
-          prev_tag="$(git --no-pager tag --sort=-creatordate | grep '^v' | grep -Fxv "${tag}" | head -n1 || true)"
+          # The tag checkout is shallow; fetch full history and tags so the
+          # exact previous..tag range and tag ancestry can be proven.
+          git fetch --quiet --force --tags --unshallow origin 2>/dev/null || git fetch --quiet --force --tags origin
+          prev_tag="$(git --no-pager tag --list 'v*.*.*' --sort=-v:refname | grep -Fxv "${tag}" | head -n1 || true)"
 
           if [[ -z "${prev_tag}" ]]; then
             echo "::warning::No previous semver tag found; skipping wave/sprint label coverage gate."
             exit 0
           fi
+          echo "prev_tag=${prev_tag}" >> "${GITHUB_OUTPUT}"
 
-          base_date="$(git --no-pager log -1 --format=%cI "${prev_tag}")"
-          head_date="$(git --no-pager log -1 --format=%cI "${tag}")"
-          search="base:main merged:>=${base_date} merged:<=${head_date}"
-
-          pr_json="$(gh pr list --repo "${GITHUB_REPOSITORY}" --state merged --limit 500 --search "${search}" --json number,title,author,labels)"
-          total="$(jq 'length' <<<"${pr_json}")"
-          unlabeled="$(jq '[.[] | select((.labels | map(.name | test("^(wave:|sprint:|wave-|sprint-).+|^wave/sprint$"; "i")) | any) | not)]' <<<"${pr_json}")"
-          unlabeled_count="$(jq 'length' <<<"${unlabeled}")"
-
-          echo "Release label coverage window: ${prev_tag}..${tag}"
-          echo "Merged PRs in scope: ${total}"
-          echo "Merged PRs missing wave/sprint labels: ${unlabeled_count}"
-
-          if [[ "${total}" -eq 0 ]]; then
-            echo "::warning::No merged PRs found in release window."
-            exit 0
-          fi
-
-          if [[ "${unlabeled_count}" -eq 0 ]]; then
-            echo "Wave/sprint label coverage gate passed."
-            exit 0
-          fi
-
-          ratio_times_100=$(( unlabeled_count * 100 ))
-          threshold_times_100=$(( total * 10 ))
-          jq -r '.[] | "- PR #\(.number): \(.title)"' <<<"${unlabeled}" | head -n 30
-
-          if (( ratio_times_100 > threshold_times_100 )); then
-            echo "::error::Wave/sprint label coverage below threshold: ${unlabeled_count}/${total} unlabeled (>10%)."
-            exit 1
-          fi
-
-          echo "::warning::Wave/sprint label coverage is partial: ${unlabeled_count}/${total} unlabeled (<=10%)."
+          # Same classifier as the PR and merge-group release-label-gate:
+          # release labels, skip-release-label-gate and dependencies count as
+          # covered; >10% uncovered fails, exactly 10% warns.
+          node scripts/merge-group-release-labels.cjs release-coverage "${prev_tag}" "${tag}" release-label-coverage.json
 
       - name: Create or update GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
+          PREV_TAG: ${{ steps.coverage.outputs.prev_tag }}
         shell: bash
         run: |
           set -euo pipefail
 
           tag="${GITHUB_REF_NAME}"
+          if [[ -n "${PREV_TAG}" ]]; then
+            # Refresh tags, then revalidate tag targets, scope and labels at the publication boundary.
+            git fetch --quiet --force --tags origin
+            node scripts/merge-group-release-labels.cjs release-coverage "${PREV_TAG}" "${tag}" release-label-coverage-recheck.json
+            if [[ "$(git rev-parse "${tag}^{commit}")" != "${GITHUB_SHA}" ]] || ! jq -e --slurpfile before release-label-coverage.json \
+              '[.previousSha, .tagSha, .results] == [$before[0] | .previousSha, .tagSha, .results]' release-label-coverage-recheck.json >/dev/null; then
+              echo "::error::Release tag target, scope or PR labels changed after the coverage gate; re-run the release to re-evaluate."
+              exit 1
+            fi
+          fi
           artifact="${{ steps.package.outputs.artifact_name }}"
           notes="${{ steps.notes.outputs.notes_file }}"
            
@@ -244,6 +231,13 @@ jobs:
             echo "::error::Sync scripts not found in release assets"
             exit 1
           }
+
+      - name: Upload release label coverage inventory
+        if: always() && steps.coverage.outputs.prev_tag != ''
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: release-label-coverage
+          path: release-label-coverage*.json
 
       # Events created with GITHUB_TOKEN do not start another workflow. Dispatch
       # changelog publication explicitly after the release has been updated.
