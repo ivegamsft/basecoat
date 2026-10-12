@@ -67,9 +67,11 @@ function Resolve-YamlScalar([string]$Raw) {
     return @{ Type = 'string'; Value = $v }
 }
 
-function Read-SkillFrontmatter([string]$FilePath) {
+function Read-SkillFrontmatter([string]$FilePath) { return Read-SkillFrontmatterText ([IO.File]::ReadAllText($FilePath, [Text.Encoding]::UTF8)) }
+
+function Read-SkillFrontmatterText([string]$Text) {
     $result = @{ Fields = [ordered]@{}; Error = $null }
-    $lines = [IO.File]::ReadAllText($FilePath, [Text.Encoding]::UTF8).TrimStart([char]0xFEFF) -split '\r?\n'
+    $lines = $Text.TrimStart([char]0xFEFF) -split '\r?\n'
     if ($lines.Count -lt 2 -or $lines[0] -notmatch '^---\s*$') { $result.Error = 'missing opening frontmatter delimiter'; return $result }
     $end = -1
     for ($i = 1; $i -lt $lines.Count; $i++) { if ($lines[$i] -match '^---\s*$') { $end = $i; break } }
@@ -157,15 +159,17 @@ function Test-SkillFile([string]$ProfileId, [IO.FileInfo]$File, [string]$RelPath
     if ($linked) { Write-SkillError $ProfileId $RelPath 'routing' 'symlinked skill paths are not allowed'; return }
     $parsed = Read-SkillFrontmatter $File.FullName
     if ($parsed.Error) { Write-SkillError $ProfileId $RelPath 'frontmatter' $parsed.Error; return }
-    $fields = $parsed.Fields
+    Test-SkillFields $ProfileId $parsed.Fields $File.Directory.Name $RelPath
+}
 
+function Test-SkillFields([string]$ProfileId, $Fields, [string]$DirName, [string]$RelPath) {
     $name = if ($fields.Contains('name')) { $fields['name'] } else { $null }
     if (-not $name) { Write-SkillError $ProfileId $RelPath 'name' 'required field is missing' }
     elseif ($name.Type -ne 'string') { Write-SkillError $ProfileId $RelPath 'name' "must be a string (found $($name.Type))" }
     elseif ($name.Value.Length -lt 1 -or $name.Value.Length -gt 64 -or $name.Value -cnotmatch $namePattern) {
         Write-SkillError $ProfileId $RelPath 'name' 'must be 1-64 lowercase letters/digits separated by single hyphens'
     }
-    elseif ($name.Value -cne $File.Directory.Name) { Write-SkillError $ProfileId $RelPath 'name' 'must match the skill directory name' }
+    elseif ($name.Value -cne $DirName) { Write-SkillError $ProfileId $RelPath 'name' 'must match the skill directory name' }
 
     $desc = if ($fields.Contains('description')) { $fields['description'] } else { $null }
     if (-not $desc) { Write-SkillError $ProfileId $RelPath 'description' 'required field is missing' }
@@ -202,6 +206,9 @@ function Test-SkillFile([string]$ProfileId, [IO.FileInfo]$File, [string]$RelPath
         }
     }
 }
+
+# Dot-sourcing (for example by preview-portable-skill-export.ps1) loads the parser and field checks only.
+if ($MyInvocation.InvocationName -eq '.') { return }
 
 $root = (Resolve-Path -LiteralPath $RootDir).Path
 $rootPaths = @{}

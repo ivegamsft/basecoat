@@ -114,6 +114,16 @@ source lint and reference validation are not substitutes for loader evidence.
 directory mandated by the portable specification. Preserve host-specific
 locations and explicitly test precedence and project trust.
 
+Before an exporter exists, preview the field projection for explicitly named
+source skills with
+`pwsh scripts/preview-portable-skill-export.ps1 -Skill <name>[,<name>...]`.
+It validates the source profile, projects only `name` and `description`,
+re-validates the projection with the portable profile, proves the Markdown body
+bytes are unchanged and lists each omitted source field with its reason. It
+writes no files and reports companions as `not-evaluated`, reference
+validation as `not-run` and the host as `unverified`; a `projectable` result is
+not a published or supported export (#3654).
+
 ## Upstream References
 
 - [Specification](https://agentskills.io/specification)

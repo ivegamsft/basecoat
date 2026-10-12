@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.1",
   "libraryVersion": "4.6.5",
-  "generatedAt": "2026-10-11T22:04:14.5543612Z",
+  "generatedAt": "2026-10-12T02:28:44.8418133Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -1950,7 +1950,7 @@
     {
       "path": "scripts/validate-skill-frontmatter.ps1",
       "type": "script",
-      "sha": "e659b017ea298633e30a39c81b04ed76f3566494",
+      "sha": "766169a898a2ff318f513adbee075607d4396b3b",
       "version": null,
       "effectiveVersion": "4.6.5",
       "versionSource": "library"

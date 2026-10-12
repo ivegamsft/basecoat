@@ -4,6 +4,14 @@ All notable changes to this repository should be recorded in this file.
 
 ## Unreleased
 
+### Added
+
+- `scripts/preview-portable-skill-export.ps1` previews the portable Agent Skills
+  projection of named source skills without writing files: it validates the
+  source and portable profiles independently, projects only `name` and
+  `description`, proves body bytes are unchanged and reports omitted source
+  fields with reasons (#3654, part 1).
+
 ### Fixed
 
 - `rollback.ps1` replays `sync.ps1` for the tag under the guidance-lock lease, so projections and `guidance-lock/v1` match a fresh sync;
