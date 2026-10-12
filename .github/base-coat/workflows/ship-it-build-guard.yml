@@ -52,7 +52,10 @@ permissions:
   issues: write
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # Key per source run: github.ref is the default branch for workflow_run, so a
+  # ref-keyed group let a later completion displace a pending failure run (#3808).
+  # Reruns keep the same workflow_run.id, so identical retriggers still serialize.
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.id || inputs.source_run_id || github.ref }}
   cancel-in-progress: false
 
 jobs:

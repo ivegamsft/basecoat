@@ -18,6 +18,9 @@ All notable changes to this repository should be recorded in this file.
   failures restore the prior install and pin, except `GUIDANCE_LOCK_BUSY` (lease reclaimed as stale), which keeps the backup instead (#3776).
 - Key `pr-flow-hygiene` and `ship-it-intent-dispatch` concurrency per issue/PR so runs for one item no longer cancel
   or displace runs for another; a workflow guardrail now rejects `github.ref`-only groups under PR-target/issue triggers (#3803).
+- Key `ship-it-build-guard` concurrency per source `workflow_run` so a later completion can no longer displace a pending
+  failure run before its retry/escalation; the guardrail now also covers `workflow_run` triggers, with `adoption-metrics`
+  and `post-onboarding-drift-loop` explicitly exempted as intentionally serialized aggregates (#3808).
 
 ## 4.6.5 - 2026-10-11
 
