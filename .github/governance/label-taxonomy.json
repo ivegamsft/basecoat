@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "description": "Canonical BaseCoat label taxonomy. Source of truth for docs/reference/label-taxonomy.md and scripts/label-taxonomy-audit.ps1. Scoped dimensions use the ':' separator; every other label is a single lowercase kebab-case word, except the GitHub community labels 'good first issue' and 'help wanted'.",
+  "separator": ":",
+  "dimensions": {
+    "type": {
+      "exclusive": true,
+      "labels": ["bug", "enhancement", "documentation", "chore", "security", "question"]
+    },
+    "priority": {
+      "exclusive": true,
+      "labels": ["priority:critical", "priority:high", "priority:medium", "priority:low"]
+    },
+    "size": {
+      "exclusive": true,
+      "labels": ["size:XS", "size:S", "size:M", "size:L", "size:XL", "size:XXL"]
+    },
+    "risk": {
+      "exclusive": true,
+      "labels": ["risk:low", "risk:medium", "risk:high", "risk:critical"]
+    },
+    "resolution": {
+      "exclusive": false,
+      "labels": ["duplicate", "invalid", "wontfix"]
+    },
+    "sprint": {
+      "exclusive": true,
+      "pattern": "^sprint:(\\d+|\\d{4}-W(0[1-9]|[1-4]\\d|5[0-3]))$"
+    },
+    "wave": {
+      "exclusive": true,
+      "pattern": "^wave:\\d+$"
+    }
+  },
+  "labels": [
+    "agent", "agentic-workflows", "approved", "automated-report", "automation", "azure", "backlog", "basecoat",
+    "blocked", "build-break", "ci", "copilot", "copilot-agent", "daisy-chain", "degradation",
+    "dependencies", "drift-loop", "drift-remediation", "enterprise", "environment-routing", "escalated",
+    "github-actions", "good first issue", "governance", "guardrail", "help wanted", "hybrid",
+    "infrastructure", "instruction", "intent-control-plane", "javascript", "maintenance",
+    "memory-contribution", "memory-sweep", "metrics", "migration-stack", "model-config",
+    "modernization", "needs-info", "needs-prd", "needs-triage", "needs-verification", "observability",
+    "onboarding-conductor", "platform", "pr-flow", "pr-readiness-blocked", "process", "prompt",
+    "publish-workflow", "reliability", "remediation", "requires-harness-eval", "retrospective",
+    "safety-critical", "ship-it", "skill", "skip-docs-validate", "skip-markdown-lint",
+    "skip-prd-spec-check", "skip-release-label-gate", "sla:exempt", "spec", "spec-2-prod",
+    "spec-required", "sprint", "stale", "supply-chain", "synthesis-conflict", "synthesize-spec",
+    "tech-debt", "testing", "tracking", "triage", "v1.0.0", "validation", "watchdog:ignore"
+  ],
+  "onDemand": ["delivery-hold", "dependency-blocked", "needs-conflict-fix"],
+  "protectedLegacy": [
+    {
+      "name": "wave/sprint",
+      "reason": "Accepted as planning metadata by pr-size-labeler, pr-flow-hygiene and pr-validation; retire only after those readers stop matching it."
+    }
+  ],
+  "deprecated": [
+    { "name": "size/xs", "replacement": "size:XS", "operation": "migrate-delete" },
+    { "name": "size/s", "replacement": "size:S", "operation": "migrate-delete" },
+    { "name": "size/m", "replacement": "size:M", "operation": "migrate-delete" },
+    { "name": "size/l", "replacement": "size:L", "operation": "migrate-delete" },
+    { "name": "size/xl", "replacement": "size:XL", "operation": "migrate-delete" },
+    { "name": "P0-critical", "replacement": "priority:critical", "operation": "migrate-delete" },
+    { "name": "P1-high", "replacement": "priority:high", "operation": "migrate-delete" },
+    { "name": "P2-medium", "replacement": "priority:medium", "operation": "migrate-delete" },
+    { "name": "P3-low", "replacement": "priority:low", "operation": "migrate-delete" },
+    { "name": "priority/critical", "replacement": "priority:critical", "operation": "migrate-delete" },
+    { "name": "priority/high", "replacement": "priority:high", "operation": "migrate-delete" },
+    { "name": "priority/medium", "replacement": "priority:medium", "operation": "migrate-delete" },
+    { "name": "priority/low", "replacement": "priority:low", "operation": "migrate-delete" },
+    { "name": "risk-low", "replacement": "risk:low", "operation": "migrate-delete" },
+    { "name": "risk-medium", "replacement": "risk:medium", "operation": "migrate-delete" },
+    { "name": "risk-high", "replacement": "risk:high", "operation": "rename" },
+    { "name": "risk-critical", "replacement": "risk:critical", "operation": "rename" },
+    { "name": "docs", "replacement": "documentation", "operation": "migrate-delete" },
+    { "name": "[documentation", "replacement": "documentation", "operation": "migrate-delete" },
+    { "name": "area/docs", "replacement": "documentation", "operation": "migrate-delete" },
+    { "name": "feature", "replacement": "enhancement", "operation": "migrate-delete" },
+    { "name": "feature-tracker", "replacement": "tracking", "operation": "migrate-delete" },
+    { "name": "duplicate-candidate", "replacement": "needs-triage", "operation": "migrate-delete" },
+    { "name": "ci-cd", "replacement": "ci", "operation": "migrate-delete" },
+    { "name": "ci/cd", "replacement": "ci", "operation": "migrate-delete" },
+    { "name": "area/ci", "replacement": "ci", "operation": "migrate-delete" },
+    { "name": "ci-failure", "replacement": "ci", "operation": "migrate-delete" },
+    { "name": "area/infra", "replacement": "infrastructure", "operation": "migrate-delete" },
+    { "name": "good-first-issue", "replacement": "good first issue", "operation": "migrate-delete" },
+    { "name": "dependency", "replacement": "dependencies", "operation": "migrate-delete" },
+    { "name": "agents", "replacement": "agent", "operation": "migrate-delete" },
+    { "name": "agent-governance", "replacement": "governance", "operation": "migrate-delete" },
+    { "name": "[retrospective", "replacement": "retrospective", "operation": "migrate-delete" },
+    { "name": "process]", "replacement": "process", "operation": "migrate-delete" },
+    { "name": "automated-report]", "replacement": "automated-report", "operation": "migrate-delete" },
+    { "name": "sprint:41]", "replacement": "sprint:41", "operation": "migrate-delete" },
+    { "name": "sprint-2026-07", "replacement": null, "operation": "remove" }
+  ],
+  "deprecatedPatterns": [
+    { "pattern": "^sprint-(\\d+)$", "replacement": "sprint:$1", "operation": "rename" }
+  ]
+}

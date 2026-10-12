@@ -11,10 +11,39 @@ BaseCoat uses a dual taxonomy:
 | Namespace | Examples | Cleanup rule |
 |---|---|---|
 | Governance/shared | `bug`, `enhancement`, `security`, `priority:critical`, `needs-triage`, `agent`, `skill` | May be normalized across repos |
-| Delivery/repo-specific | `sprint:35`, `sprint:36`, `backlog`, `area/*`, repo-local tracking labels | Preserve unless the repo owner approves removal or rename |
-| Migration-only | `P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/critical`, `priority/high`, `priority/medium`, `priority/low` | Normalize to canonical priority labels during triage |
+| Delivery/repo-specific | `sprint:35`, `sprint:2026-W41`, `wave:2`, `backlog`, repo-local tracking labels | Preserve unless the repo owner approves removal or rename (BaseCoat has approved retiring its `area/*` labels) |
+| Migration-only | `P0-critical`, `priority/high`, `size/m`, `risk-high`, `docs`, `ci/cd`, `sprint-24` (full list in [Deprecated Labels](#deprecated-labels)) | Migrate to the canonical label, then delete |
 
 Shared tooling should never remove a delivery label just because another repo does not use it.
+
+---
+
+## Canonical Scheme
+
+The machine-readable source of truth is
+[`.github/governance/label-taxonomy.json`](../../.github/governance/label-taxonomy.json).
+This page explains it; when they disagree, the JSON registry wins and this page is fixed.
+
+- **One separator.** Scoped dimensions use `<dimension>:<value>` (`size:M`, `priority:high`,
+  `risk:low`, `sprint:2026-W41`, `wave:2`). The `/` and `-` separators (`size/m`,
+  `priority/high`, `risk-low`, `sprint-24`) are deprecated.
+- **One label per dimension.** An item carries at most one `type`, `priority`, `size`, `risk`,
+  `sprint`, and `wave` label.
+- **Unscoped labels** are a single lowercase kebab-case name (`needs-triage`, `build-break`).
+  The GitHub community labels `good first issue` and `help wanted` keep their default names
+  because GitHub surfaces them to new contributors.
+- **Workflow-read labels are protected.** A label that a workflow, script, or ruleset still
+  reads is never deleted; `wave/sprint` is retained for that reason until its readers change.
+
+| Dimension | Canonical labels | Primary consumers |
+|---|---|---|
+| Type | `bug`, `enhancement`, `documentation`, `chore`, `security`, `question` | `approval-contract.cjs`, `issue-field-sync.yml`, issue triage |
+| Priority | `priority:critical`, `priority:high`, `priority:medium`, `priority:low` | `approval-contract.cjs`, `issue-field-sync.yml`, release chain |
+| Size | `size:XS`, `size:S`, `size:M`, `size:L`, `size:XL`, `size:XXL` | `pr-size-labeler.yml`, `pr-auto-merge-executor.yml` (XXL approval boundary) |
+| Risk | `risk:low`, `risk:medium`, `risk:high`, `risk:critical` | ship-it `dispatch-intent.ps1`, `post-merge-release-chain.yml`, portfolio KPIs |
+| Resolution | `duplicate`, `invalid`, `wontfix` | `approval-contract.cjs` (blocking labels) |
+| Sprint | `sprint:<YYYY>-W<ww>` (applied by `pr-size-labeler.yml`), legacy `sprint:<number>` | Release readiness checks |
+| Wave | `wave:<number>` | Release readiness checks, `release-train.yml` |
 
 ---
 
@@ -72,7 +101,8 @@ These labels classify the nature or category of the issue work.
 **Rules:**
 
 - Every issue should have exactly one primary issue type label
-- Combine with other labels as needed (e.g., `bug` + `security` for a security bug)
+- A security bug uses `security` alone (not `bug` + `security`); combine the type label with
+  other dimensions as needed (e.g., `security` + `priority:high`)
 
 ---
 
@@ -88,6 +118,10 @@ These labels indicate urgency and define service level agreements (SLAs) for res
 | `priority:low` | 1 week | Cosmetic issue, nice-to-have enhancement, minor improvement | Typo in documentation, minor UI improvement |
 
 Canonical priorities should be used for new triage. Legacy labels (`P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/critical`, `priority/high`, `priority/medium`, `priority/low`) are migration-only and should be normalized to canonical labels by triage automation.
+
+Size (`size:*`) and risk (`risk:*`) labels are machine-derived: `pr-size-labeler.yml` applies
+the size label that the merge executor reads, and ship-it intent runs apply `risk:<band>`.
+Do not apply them by hand.
 
 **Escalation signals** (auto-elevate to `priority:high` or `priority:medium`):
 
@@ -110,6 +144,7 @@ These labels indicate which sprint (if any) an issue is assigned to.
 
 | Label | Meaning |
 |---|---|
+| `sprint:<YYYY>-W<ww>` | Merged in the named ISO week; applied automatically by `pr-size-labeler.yml` |
 | `sprint:<number>` | Assigned to the named sprint (for example, `sprint:35`) |
 | `backlog` | Not yet assigned to a sprint |
 
@@ -120,7 +155,7 @@ These labels indicate which sprint (if any) an issue is assigned to.
 - Remove `backlog` when assigning to a sprint
 - If moved between sprints, update the label accordingly
 - Cleanup automation must preserve sprint labels unless the repo owner explicitly declares them obsolete.
-- Legacy `sprint-<number>` labels are tolerated during migration, but new sprint assignment should use `sprint:<number>`.
+- Legacy `sprint-<number>` labels are tolerated by readers during migration, but new sprint assignment should use `sprint:<number>`; each `sprint-<number>` label is renamed to `sprint:<number>`.
 
 ---
 
@@ -267,6 +302,46 @@ When reviewing a PR:
 
 ## Label Maintenance
 
+### Deprecated Labels
+
+Each deprecated label maps to one canonical label. The registry lists every name.
+
+| Deprecated | Canonical |
+|---|---|
+| `size/xs`, `size/s`, `size/m`, `size/l`, `size/xl` | `size:XS`, `size:S`, `size:M`, `size:L`, `size:XL` |
+| `P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/<level>` | `priority:<level>` |
+| `risk-low`, `risk-medium`, `risk-high`, `risk-critical` | `risk:<band>` |
+| `docs`, `[documentation`, `area/docs` | `documentation` |
+| `feature` / `feature-tracker` | `enhancement` / `tracking` |
+| `duplicate-candidate` | `needs-triage` (apply `duplicate` only once confirmed) |
+| `ci-cd`, `ci/cd`, `area/ci`, `ci-failure` | `ci` |
+| `area/infra` | `infrastructure` |
+| `good-first-issue` | `good first issue` |
+| `dependency` / `agents` / `agent-governance` | `dependencies` / `agent` / `governance` |
+| `sprint-<number>` | `sprint:<number>` |
+| `[retrospective`, `process]`, `automated-report]`, `sprint:41]` (malformed) | the name without the bracket |
+| `sprint-2026-07` | removed (no replacement) |
+
+Readers that normalize historical items (for example `post-merge-release-chain.yml` and
+`skills/issue-triage/scripts/triage-issues.ps1`) may keep matching deprecated names; writers
+must apply only canonical labels.
+
+### Migration Procedure
+
+Migration must be reversible and logged; never delete a label before its references are updated.
+
+1. Merge the code, workflow, and doc changes that stop writing the deprecated label.
+2. Export every issue and pull request that carries it, using a filesystem-safe log name
+   (replace `/` and spaces with `_`, for example `size_xs`):
+   `gh issue list --label "<old>" --state all --limit 5000 --json number,title,labels > issues-<safe>.json`
+   and `gh pr list --label "<old>" --state all --limit 5000 --json number,title,labels > prs-<safe>.json`.
+3. If the canonical label does not exist yet, rename in place (`gh label edit "<old>" --name "<new>"`);
+   rename keeps every association and is reversed by renaming back.
+4. Otherwise add `<new>` to each logged item, remove `<old>`, then delete `<old>`. For every
+   exclusive dimension (`type`, `priority`, `size`, `risk`, `sprint`, `wave`), skip adding
+   `<new>` when the item already carries a different canonical label in that dimension, and
+   record the skip in the log. Reverse by recreating `<old>` and replaying the log.
+
 ### Retiring Labels
 
 When a label is no longer needed:
@@ -282,7 +357,8 @@ When proposing a new label:
 
 1. **Create an issue** explaining why the new label is needed
 2. **Propose the label name and criteria** in the issue description
-3. **Discuss and document** the label in this taxonomy reference
+3. **Discuss and document** the label in this taxonomy reference and add it to
+   `.github/governance/label-taxonomy.json`
 4. **Create the label** in the repository
 5. **Communicate** the new label to the team via a comment on the issue or in sprint notes
 

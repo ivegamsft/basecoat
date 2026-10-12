@@ -14,6 +14,10 @@ All notable changes to this repository should be recorded in this file.
 
 ### Fixed
 
+- Record the canonical label taxonomy in `.github/governance/label-taxonomy.json`: one `:` separator per
+  dimension, one label per dimension, and a deprecated-to-canonical map for the duplicate `size/*`, `risk-*`,
+  `priority/*`, docs, CI, and malformed labels, with a reversible, logged migration procedure in
+  `docs/reference/label-taxonomy.md` (#3740, part 1).
 - `rollback.ps1` replays `sync.ps1` for the tag under the guidance-lock lease, so projections and `guidance-lock/v1` match a fresh sync;
   failures restore the prior install and pin, except `GUIDANCE_LOCK_BUSY` (lease reclaimed as stale), which keeps the backup instead (#3776).
 - Key `pr-flow-hygiene` and `ship-it-intent-dispatch` concurrency per issue/PR so runs for one item no longer cancel
