@@ -59,6 +59,12 @@ assert.equal(extract('Plain text', null), 'Plain text');
     '````text\n```\n# code\n```\n````');
   assert.equal(normalize('## Description\r\nText'), '## Description\n\nText');
   assert.equal(normalize('```bad`\n## Scope\nPlan'), '```bad`\n\n## Scope\n\nPlan');
+  assert.equal(normalize('Result:\n- one\n  more\n- two\nlazy\n1. three'), 'Result:\n\n- one\n  more\n- two\nlazy\n1. three');
+  assert.equal(normalize('Text\n1) first\n\n- after blank'), 'Text\n\n1) first\n\n- after blank');
+  assert.equal(normalize('Intro\n\n    - code\nText\n- one'), 'Intro\n\n    - code\nText\n\n- one');
+  for (const literal of ['Version\n2. not a list', 'Rule\n- - -', '<div>\n- inside html\n</div>', '```md\nText\n- in fence\n```']) {
+    assert.equal(normalize(literal), literal);
+  }
 
   const publicationStart = script.indexOf('const publicationRef =');
   if (publicationStart >= 0) {

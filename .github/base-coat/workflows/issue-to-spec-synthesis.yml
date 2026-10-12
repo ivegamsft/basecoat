@@ -324,8 +324,11 @@ jobs:
               const lines = value.trim().replace(/\r\n?/g, '\n').split('\n');
               const output = [];
               let fence;
+              let list = false;
+              let html = false;
               for (let index = 0; index < lines.length; index++) {
                 const line = lines[index];
+                const previous = output.at(-1);
                 const marker = line.match(/^ {0,3}(`{3,}(?=[^`]*$)|~{3,})(.*)$/);
                 if (marker) {
                   if (!fence) {
@@ -339,9 +342,19 @@ jobs:
                   }
                 }
                 const heading = !fence && /^ {0,3}#{1,6}(?:\s+|$)/.test(line);
-                if (heading && output.length && output.at(-1).trim()) output.push('');
+                const block = !fence && !marker && line.trim();
+                const anyItem = block && (list || /^ {0,3}\S/.test(line)) && /^\s*(?:[-*+]|\d{1,9}[.)])(?:[ \t]|$)/.test(line) &&
+                  !/^ {0,3}([-*_])(?:[ \t]*\1){2,}[ \t]*$/.test(line);
+                // Only bullets and "1." items can interrupt a paragraph, so a blank line before them preserves meaning (MD032).
+                const listStart = anyItem && !list && !html && /^ {0,3}(?:[-*+]|1[.)])[ \t]+\S/.test(line);
+                if ((heading || listStart) && previous?.trim()) output.push('');
                 output.push(line);
                 if (heading && lines[index + 1]?.trim()) output.push('');
+                if (!line.trim()) html = false;
+                else if (block && !previous?.trim() && /^ {0,3}<[A-Za-z/!?]/.test(line)) html = true;
+                if (heading) list = false;
+                else if (anyItem) list = true;
+                else if (block && !previous?.trim() && !/^\s{2,}/.test(line)) list = false;
               }
               return output.join('\n');
             };
