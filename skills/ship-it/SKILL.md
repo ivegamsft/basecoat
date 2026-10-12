@@ -18,10 +18,9 @@ Turn a delivery goal into a governed execution bundle.
 
 ## Workflow
 
-1. Accept canonical `ship-it`, `spec-2-prod`, and `onboarding-conductor`.
-   Standalone `ship-it:` / `spec-2-prod:` normalize to those delivery intents;
-   retain raw directive and provenance. Reject malformed, quoted, fenced,
-   bulleted, embedded, deferred, or contradictory directives.
+1. Normalize standalone `ship-it:` / `spec-2-prod:` to their canonical intents;
+   also accept `onboarding-conductor`. Retain raw directive and provenance.
+   Reject malformed, embedded, deferred, or contradictory directives.
 2. Unattended pre-approval requires both `source_issue_number` and
    `approval_comment_id`; one alone fails, neither means ordinary dispatch.
    Never accept caller-supplied identity, permission, time, or approval status.
@@ -32,20 +31,21 @@ Turn a delivery goal into a governed execution bundle.
 4. Require dispatch, build-guard, and release-gate workflows; if any is missing,
    stop and report. Validate source issue, approved scope/spec, authority, and
    plan confirmation. Issue approval is not delivery consent: never substitute
-   `/approve`, create approval labels, or assign an agent.
+   `/approve`, approval labels, or agent assignment for delivery authorization.
+   Explicit owner-delegated posting follows the
+   [delegation contract](references/delivery-intent-contract.md#explicit-owner-delegation);
+   no second manual instruction is required.
 5. Dispatch via `ship-it-intent-dispatch.yml`; record run ID and provenance.
    Revalidate the same receipt at each phase, merge, and release; changed,
    revoked, or unqualified evidence blocks continuation. Pass it to the local
    resolver or release gate's `promotion_context`; never switch approvals.
 
-Apply the [delivery-intent contract](references/delivery-intent-contract.md)
-to feature-origin handoffs and their independent merge boundary. `feature:`
-and `pr-lifecycle=full` never imply merge or deployment consent.
+Apply the [delivery contract](references/delivery-intent-contract.md).
+`feature:` and `pr-lifecycle=full` never imply merge or deployment consent.
 
-Use bounded cycles with state carry-forward. Track phase, objective, stop
-condition, and limit; summarize actions, evidence, blockers, and next action.
-Stop on completion, blocker, manual stop, or limit; retry transient failures
-within budget. In `dry_run`, report planned actions.
+Track bounded cycles, evidence, blockers, and next action. Stop on completion,
+blocker, manual stop, or limit; retry transient failures within budget.
+In `dry_run`, report planned actions.
 
 ## Governance Rules
 
@@ -58,5 +58,5 @@ expand scope, or transfer to generated issues; revalidate live authority.
 
 | File | Contents |
 |---|---|
-| [`references/output-contract.md`](references/output-contract.md) | Output contract: per-producer output schemas, evidence-bundle fields, scorecard and spec-drift shapes, per-cycle summary structure |
-| [`references/repository-boundary.md`](references/repository-boundary.md) | Fail-closed current-repository validation and explicit cross-repository authorization |
+| [`references/output-contract.md`](references/output-contract.md) | Producer schemas, evidence, and cycle summaries |
+| [`references/repository-boundary.md`](references/repository-boundary.md) | Repository validation and cross-repository authorization |

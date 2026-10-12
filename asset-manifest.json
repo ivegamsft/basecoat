@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.1",
   "libraryVersion": "4.6.5",
-  "generatedAt": "2026-10-12T02:28:44.8418133Z",
+  "generatedAt": "2026-10-12T06:47:50.6633803Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -2966,7 +2966,7 @@
     {
       "path": "skills/ship-it/SKILL.md",
       "type": "skill",
-      "sha": "8b0ef6782d3b82d35363bd8bcd08683dcbe2ae80",
+      "sha": "22dc0007b90f29c46b1170fe56b53af9e8853465",
       "version": null,
       "effectiveVersion": "4.6.5",
       "versionSource": "library"
