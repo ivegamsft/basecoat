@@ -33,7 +33,7 @@ foreach ($entry in $files) {
     $name = $entry.Name
     $content = $entry.Content
 
-    if ($content -notmatch '(?ms)route-pr-approve:\s*\r?\n\s*if:\s*\|\s*\r?\n\s*github\.event\.issue\.pull_request') {
+    if ($content -notmatch '(?ms)route-pr-approve:\s*\r?\n\s*needs:\s*classify-directive\s*\r?\n(?:\s*#[^\r\n]*\r?\n)*\s*concurrency:\s*\r?\n\s*group:[^\r\n]*\r?\n\s*cancel-in-progress:\s*false\s*\r?\n\s*if:\s*\|\s*\r?\n\s*github\.event\.issue\.pull_request') {
         throw "$name must include route-pr-approve job for PR comment routing."
     }
     if ($content -notmatch '(?m)pull-requests:\s*read') {
@@ -101,6 +101,31 @@ foreach ($entry in $files) {
         }
         if ($content -match "throw new Error\('Unable to find the installed PR auto-merge executor workflow") {
             throw "$name must remain independently installable when the optional executor is absent."
+        }
+    }
+    # Issue #3825: mention-only comments must end skipped, never at the fail-closed directive gate.
+    if ($content -notmatch '(?ms)^  classify-directive:\s*\r?\n\s*if:\s*contains\(github\.event\.comment\.body,\s*''/approve''\)\s*\r?\n.*?approval\.isExactIssueApproval\(context\.payload\.comment\.body\)') {
+        throw "$name must classify exact /approve directives with the shared isExactIssueApproval contract."
+    }
+    $jobBlocks = [regex]::Split(($content -replace '\r\n', "`n"), '(?m)^(?=  [a-z][a-z0-9-]*:\s*$)')
+    foreach ($block in $jobBlocks) {
+        $jobName = ([regex]::Match($block, '^  ([a-z][a-z0-9-]*):')).Groups[1].Value
+        if (-not $jobName -or $jobName -eq 'classify-directive') { continue }
+        if ($block -match 'contains\(github\.event\.comment\.body') {
+            throw "$name job '$jobName' must not gate on a /approve substring match."
+        }
+        $usesFailingGate = $block -match 'Approval requires a current qualified exact /approve directive' -or
+            $jobName -eq 'reevaluate-linked-prs'
+        if ($usesFailingGate -and $block -notmatch "(?ms)needs:.*?classify-directive.*?if:.*?needs\.classify-directive\.outputs\.exact == 'true'") {
+            throw "$name job '$jobName' must only run for exact /approve directives classified by classify-directive."
+        }
+        if ($jobName -eq 'reevaluate-linked-prs' -and
+            $block -notmatch '(?m)^    concurrency:\s*\r?\n\s+group:\s*issue-approve-reevaluate-\$\{\{\s*github\.event\.issue\.number\s*\}\}\s*\r?\n\s+cancel-in-progress:\s*false') {
+            throw "$name job '$jobName' must serialize linked PR reevaluation per issue."
+        }
+        if ($jobName -in @('approve', 'route-pr-approve') -and
+            $block -notmatch '(?m)^    concurrency:\s*\r?\n\s+group:\s*issue-approve-directive-\$\{\{\s*github\.event\.issue\.number\s*\}\}\s*\r?\n\s+cancel-in-progress:\s*false') {
+            throw "$name job '$jobName' must serialize whitespace-variant exact directives per issue."
         }
     }
     if ($content -match '⚠️|✅|⛔') {

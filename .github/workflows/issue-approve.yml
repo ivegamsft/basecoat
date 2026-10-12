@@ -22,10 +22,44 @@ env:
   MAX_CONCURRENT_AGENTS: 4
 
 jobs:
+  # Comments that merely mention /approve (for example approval provenance notes) must not reach
+  # the fail-closed directive checks. This cheap classifier reuses isExactIssueApproval (trimmed,
+  # case-insensitive body equal to /approve) so non-exact mentions skip every approval job.
+  classify-directive:
+    if: contains(github.event.comment.body, '/approve')
+    outputs:
+      exact: ${{ steps.classify.outputs.exact }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Checkout trusted approval contract
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          sparse-checkout: .github/base-coat/scripts
+
+      - name: Classify exact /approve directive
+        id: classify
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        with:
+          script: |
+            const approval = require(`${process.env.GITHUB_WORKSPACE}/.github/base-coat/scripts/approval-contract.cjs`);
+            const exact = approval.isExactIssueApproval(context.payload.comment.body);
+            core.setOutput('exact', String(exact));
+            if (!exact) {
+              core.notice('Comment mentions /approve but is not an exact directive; approval jobs skipped.');
+            }
+
   route-pr-approve:
+    needs: classify-directive
+    # Whitespace variants pass isExactIssueApproval but miss the literal workflow-level group above,
+    # so serialize the side-effecting approval jobs per issue as well.
+    concurrency:
+      group: issue-approve-directive-${{ github.event.issue.number }}
+      cancel-in-progress: false
     if: |
       github.event.issue.pull_request &&
-      contains(github.event.comment.body, '/approve')
+      needs.classify-directive.outputs.exact == 'true'
     outputs:
       assignment_issues: ${{ steps.route.outputs.assignment_issues }}
       assignment_targets: ${{ steps.route.outputs.assignment_targets }}
@@ -198,11 +232,17 @@ jobs:
             ]);
 
   approve:
+    needs: classify-directive
+    # Whitespace variants pass isExactIssueApproval but miss the literal workflow-level group above,
+    # so serialize the side-effecting approval jobs per issue as well.
+    concurrency:
+      group: issue-approve-directive-${{ github.event.issue.number }}
+      cancel-in-progress: false
     outputs:
       approved_spec_ref: ${{ steps.validate-metadata.outputs.spec_ref }}
     if: |
       !github.event.issue.pull_request &&
-      contains(github.event.comment.body, '/approve')
+      needs.classify-directive.outputs.exact == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -353,13 +393,17 @@ jobs:
   reevaluate-linked-prs:
     name: Reevaluate PRs linked to approved issues
     needs:
+      - classify-directive
       - route-pr-approve
       - approve
       - assign-approved-issue
       - assign-approved-pr-issues
     if: |
       always() &&
-      contains(github.event.comment.body, '/approve')
+      needs.classify-directive.outputs.exact == 'true'
+    concurrency:
+      group: issue-approve-reevaluate-${{ github.event.issue.number }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

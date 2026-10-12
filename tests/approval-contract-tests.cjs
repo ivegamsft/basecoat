@@ -141,7 +141,25 @@ async function approveRoute(f, route) {
   const access = await run(scripts.access, f, route);
   return access.value ? run(scripts.metadata, f, route) : access;
 }
+async function classifyDirective(body) {
+  const outputs = {}, failures = [];
+  const core = { setOutput: (key, value) => { outputs[key] = value; },
+    setFailed: message => failures.push(message), notice() {}, info() {}, warning() {} };
+  await new AsyncFunction("github", "context", "core", "require",
+    workflowScripts(issueWorkflow, "classify-directive", 1)[0])(
+    {}, { payload: { comment: { id: 1, body } } }, core, require);
+  assert.deepEqual(failures, [], `Classifier must never fail: ${JSON.stringify(body)}`);
+  return outputs.exact;
+}
 async function main() {
+  for (const body of ["/approve", " /APPROVE \r\n", "\r\n/approve\r\n", "\t/Approve\n"]) {
+    assert.equal(await classifyDirective(body), "true", `Exact directive: ${JSON.stringify(body)}`);
+  }
+  for (const body of ["Approved via /approve on #12.", "/approve\r\nprovenance note",
+    "> /approve", "/approved", "please /approve", "",
+    "/approve-spec 3849 0123456789abcdef0123456789abcdef01234567"]) {
+    assert.equal(await classifyDirective(body), "false", `Mention-only comment: ${JSON.stringify(body)}`);
+  }
   const preparationCases = [];
   const addCase = (id, body, kind, intent) => preparationCases.push({ id, body, kind, intent });
   for (const intent of ["ship-it", "spec-2-prod"]) {
