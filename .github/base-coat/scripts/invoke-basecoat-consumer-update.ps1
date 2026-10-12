@@ -959,6 +959,23 @@ function Get-LegacyWorkflowCanonicalName {
     return $null
 }
 
+function ConvertTo-RepoRelativeStagePath {
+    param(
+        [Parameter(Mandatory)][string]$RepoRoot,
+        [Parameter(Mandatory)][string]$StagePath
+    )
+
+    if (-not [System.IO.Path]::IsPathRooted($StagePath)) { return $StagePath }
+    $root = [System.IO.Path]::GetFullPath($RepoRoot).TrimEnd('\', '/')
+    $stage = [System.IO.Path]::GetFullPath($StagePath).TrimEnd('\', '/')
+    $comparison = if ($env:OS -eq 'Windows_NT') { [System.StringComparison]::OrdinalIgnoreCase } else { [System.StringComparison]::Ordinal }
+    if ($stage.Equals($root, $comparison)) { return '.' }
+    if (-not $stage.StartsWith($root + [System.IO.Path]::DirectorySeparatorChar, $comparison)) {
+        throw "StagePath '$StagePath' must be inside the repository root '$RepoRoot'."
+    }
+    return ($stage.Substring($root.Length + 1) -replace '\\', '/')
+}
+
 function Get-InstalledWorkflowSelection {
     param(
         [Parameter(Mandatory)][string]$RepoRoot,
@@ -1866,13 +1883,26 @@ $(if ($Status.workflow_refresh.state -eq 'staged-only') { "- First-time activati
 
 if ($LibraryOnly) { return }
 
-$repoRootResult = Invoke-Native -Command 'git' -Arguments @('rev-parse', '--show-toplevel')
-$repoRoot = ($repoRootResult.Output | Select-Object -First 1).Trim()
 if ($CaptureWorkflowSelection) {
-    Get-InstalledWorkflowSelection -RepoRoot $repoRoot -StagePath $StagePath |
-        ConvertTo-Json -Depth 5
+    # Callers check $LASTEXITCODE, so report failure with an exit code instead of a throw.
+    try {
+        $repoRootResult = Invoke-Native -Command 'git' -Arguments @('rev-parse', '--show-toplevel')
+        $repoRoot = ($repoRootResult.Output | Select-Object -First 1).Trim()
+        $StagePath = ConvertTo-RepoRelativeStagePath -RepoRoot $repoRoot -StagePath $StagePath
+        $selectionJson = Get-InstalledWorkflowSelection -RepoRoot $repoRoot -StagePath $StagePath |
+            ConvertTo-Json -Depth 5
+    }
+    catch {
+        [Console]::Error.WriteLine("Workflow selection capture failed: $($_.Exception.Message)")
+        exit 1
+    }
+    $selectionJson
     exit 0
 }
+
+$repoRootResult = Invoke-Native -Command 'git' -Arguments @('rev-parse', '--show-toplevel')
+$repoRoot = ($repoRootResult.Output | Select-Object -First 1).Trim()
+$StagePath = ConvertTo-RepoRelativeStagePath -RepoRoot $repoRoot -StagePath $StagePath
 $configLines = Get-ConfigLines -RepoRoot $repoRoot
 $policy = Get-UpdatePolicy -Lines $configLines -Overrides @{
     Mode = $Mode

@@ -395,6 +395,32 @@ try {
     }
     Assert-True $malformedSelectionRejected 'Malformed ownership evidence must block automatic selection.'
 
+    $captureRoot = Join-Path $scratch 'capture-selection'
+    $captureManagedWorkflows = Join-Path $captureRoot '.github/base-coat/workflows'
+    New-Item -ItemType Directory -Path (Join-Path $captureRoot '.github/workflows'), $captureManagedWorkflows -Force | Out-Null
+    git init -q $captureRoot
+    Copy-Item -LiteralPath (Join-Path $repoRoot '.github/base-coat/workflows/workflow-ownership-manifest.json') `
+        -Destination (Join-Path $captureManagedWorkflows 'workflow-ownership-manifest.json')
+    'managed workflow' | Set-Content -LiteralPath (Join-Path $captureRoot '.github/workflows/basecoat-version-check.yml') -Encoding utf8NoBOM
+    Push-Location $captureRoot
+    try {
+        Assert-Equal (ConvertTo-RepoRelativeStagePath -RepoRoot $captureRoot -StagePath $captureRoot) '.' `
+            'An absolute StagePath equal to the repository root must resolve to ".".'
+        $outsideRejected = $false; try { ConvertTo-RepoRelativeStagePath -RepoRoot $captureRoot -StagePath "$captureRoot-outside/.github/base-coat" | Out-Null } catch { $outsideRejected = $true }
+        Assert-True $outsideRejected 'An absolute StagePath outside the repository (including a prefix-sharing sibling) must be rejected.'
+        $capturedJson = & $scriptPath -CaptureWorkflowSelection -StagePath (Join-Path $captureRoot '.github/base-coat')
+        Assert-Equal $LASTEXITCODE 0 'Capture with an absolute in-repo StagePath must succeed.'
+        Assert-Equal (($capturedJson | Out-String | ConvertFrom-Json).workflow_targets -join ',') 'basecoat-version-check.yml' `
+            'An absolute StagePath must resolve against the repository, not be joined onto it.'
+        '{malformed' | Set-Content -LiteralPath (Join-Path $captureManagedWorkflows 'workflow-ownership-manifest.json') -Encoding utf8NoBOM
+        $failedCaptureJson = & $scriptPath -CaptureWorkflowSelection -StagePath .github/base-coat 2>$null
+        Assert-Equal $LASTEXITCODE 1 'A failed workflow selection capture must exit nonzero.'
+        Assert-True (-not $failedCaptureJson) 'A failed workflow selection capture must not emit selection JSON.'
+    }
+    finally {
+        Pop-Location
+    }
+
     Push-Location $repoRoot
     & $scriptPath -PlanOnly -StagePath . `
         -ReleaseJson (@{

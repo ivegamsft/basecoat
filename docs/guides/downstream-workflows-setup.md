@@ -48,6 +48,7 @@ new templates or overwriting consumer-owned workflows:
 ```powershell
 $Selection = pwsh .github/base-coat/scripts/invoke-basecoat-consumer-update.ps1 `
   -CaptureWorkflowSelection -StagePath .github/base-coat | ConvertFrom-Json
+if ($LASTEXITCODE -ne 0) { throw 'Workflow selection capture failed; see the error above.' }
 if ($Selection.state -eq 'partial') {
   throw "Partial ship-it install; missing: $($Selection.missing_dependencies -join ', ')"
 }
