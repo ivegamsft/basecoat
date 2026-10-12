@@ -193,3 +193,11 @@ Stop on stale green, bypass admission, untrusted producer, deadlock or missing c
 Rollback through separately authorized declarative governance changes; preserve existing
 queue/checks and fail closed by pausing new admissions rather than silently removing
 authority enforcement. Keep evidence for recovery; documentation rollback is a PR revert.
+
+## Implementation status
+
+Stage 1 shadow decision logic lives in `.github/base-coat/scripts/eligibility-barrier.cjs`
+with regression coverage in `tests/eligibility-barrier-tests.cjs`. It evaluates per-PR and
+group barriers, trusted producer acceptance, stale-worker fencing and bounded retries without
+API writes or enqueue. `enforcementActivation()` stays inactive until every prerequisite above
+is proven; no workflow, ruleset or required status consumes it yet.

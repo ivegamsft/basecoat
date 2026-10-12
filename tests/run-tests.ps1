@@ -19,6 +19,12 @@ Write-Host 'Running merge eligibility policy tests...'
 if ($LASTEXITCODE -ne 0) {
     throw 'Merge eligibility policy regressions failed.'
 }
+
+Write-Host 'Running protected-main eligibility barrier tests...'
+& node --test (Join-Path $PSScriptRoot 'eligibility-barrier-tests.cjs')
+if ($LASTEXITCODE -ne 0) {
+    throw 'Protected-main eligibility barrier regressions failed.'
+}
 $testResultsDir = Join-Path $repoRoot 'test-results'
 
 function Write-FailureLog {
