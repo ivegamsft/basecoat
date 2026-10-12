@@ -89,6 +89,27 @@ assert.equal(extract('Plain text', null), 'Plain text');
     }
   }
 
+  const countStart = script.indexOf('const branchRef =');
+  if (countStart >= 0) {
+    // Compare-commits responses carry only per-file line counts (#3857).
+    const countEnd = script.indexOf('const templateResponse =', countStart);
+    assert.ok(countEnd > countStart, 'Changed-line computation must precede the PR template read.');
+    const countLines = new AsyncFunction('github', 'owner', 'repo', 'branchName', 'baseSha', 'prdPath', 'specPath', 'issueNum',
+      'branchExists', 'prdContent', 'specContent', 'recordSynthesisConflict',
+      script.slice(countStart, countEnd) + 'return { additions, deletions, expectedLines };');
+    const compare = data => countLines({ rest: {
+      git: { getRef: async () => ({ data: { object: { sha: 'a'.repeat(40) } } }) },
+      repos: { compareCommits: async () => ({ data }) },
+    } }, 'owner', 'repo', 'branch', 'b'.repeat(40), 'prd.md', 'spec.md', 3748, false, '', '', async () => {});
+    const files = [{ filename: 'prd.md', additions: 57, deletions: 0 }, { filename: 'spec.md', additions: 59, deletions: 2 }];
+    assert.deepEqual(await compare({ status: 'ahead', files }), { additions: 116, deletions: 2, expectedLines: 118 });
+    await assert.rejects(compare({ status: 'ahead', files: [{ filename: 'prd.md' }, files[1]] }), /lacks per-file line counts/);
+    await assert.rejects(compare({ status: 'ahead', files: [{ ...files[0], additions: -1 }, files[1]] }), /lacks per-file line counts/);
+    await assert.rejects(compare({ status: 'ahead', additions: 116, deletions: 2 }), /complete generated-file diff/);
+    const truncated = [...files, ...Array.from({ length: 298 }, (_, i) => ({ filename: `f${i}`, additions: 1, deletions: 0 }))];
+    await assert.rejects(compare({ status: 'ahead', files: truncated }), /complete generated-file diff/);
+  }
+
   assert.equal(extract('## Problem \t Statement\nSpaced', ['problem statement']), 'Spaced');
   const hidden = '<!--\n## Problem Statement\nCopied approval text\n-->\n## Description\nActual problem';
   assert.equal(extract(hidden, ['problem statement']), undefined);

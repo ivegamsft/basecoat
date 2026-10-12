@@ -573,6 +573,14 @@ jobs:
             ) {
               throw new Error(`Unable to resolve a complete generated-file diff for #${issueNum}.`);
             }
+            // Compare responses expose line counts only per file; never read top-level totals.
+            const lineCount = value => Number.isSafeInteger(value) && value >= 0;
+            if (!changedFiles.every(file => lineCount(file.additions) && lineCount(file.deletions))) {
+              throw new Error(`Compare response for #${issueNum} lacks per-file line counts; refusing to publish unverified PR counts.`);
+            }
+            const additions = changedFiles.reduce((total, file) => total + file.additions, 0);
+            const deletions = changedFiles.reduce((total, file) => total + file.deletions, 0);
+            const expectedLines = additions + deletions;
 
             const templateResponse = await github.rest.repos.getContent({
               owner,
@@ -591,7 +599,6 @@ jobs:
               }
               return `${source.slice(0, index)}${replacement}${source.slice(index + placeholder.length)}`;
             };
-            const expectedLines = comparison.data.additions + comparison.data.deletions;
             prBody = replaceOnce(
               prBody,
               'Describe the change and user impact.',
@@ -656,8 +663,8 @@ jobs:
             const preflight = await evaluateDecomposition({
               body: prBody,
               changedFiles: changedFiles.length,
-              additions: comparison.data.additions,
-              deletions: comparison.data.deletions,
+              additions,
+              deletions,
               files: changedFiles.map(file => ({
                 filename: file.filename,
                 status: file.status,
