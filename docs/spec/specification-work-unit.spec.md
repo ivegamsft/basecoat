@@ -157,11 +157,18 @@ that disables only the new route and retains existing artifacts.
 
 ## Verification and References
 
-For this proposal: lint both files, verify links/traceability and inspect the
-two-file docs-only diff. Runtime tests cannot prove an unimplemented router;
+For this proposal: lint the PRD, this spec and the shared
+[contract summary](../reference/intent-work-unit-contracts.md#spec-specification),
+verify links/traceability and run
+`pwsh -NoProfile -File tests/intent-work-unit-contract-tests.ps1`. That suite
+checks the summary's required sections, outcome states and prohibited effects,
+and that `spec:` stays in the disabled-baseline parser fixtures and out of
+the supported route tables. It preserves the unsupported baseline; it does not
+prove an activated route. Runtime tests cannot prove an unimplemented router;
 required hosted PR checks remain separate.
 
 - [PRD and R1-R6 traceability](../prd/specification-work-unit.prd.md).
+- [Shared contract summary](../reference/intent-work-unit-contracts.md#spec-specification).
 - [Naming decision matrix](../design/ai-sdlc-work-units.md#canonical-naming-and-decision-matrix).
 - [Supported intents](../guides/intent-prefixes.md).
 - [Existing handoff proposal](synthesized/issue-3593-featintake-define-an-approved-spec-handoff-from-synthesized-.spec.md).

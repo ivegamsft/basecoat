@@ -1055,6 +1055,7 @@ $additionalSuites = @(
     'fix-skill-frontmatter-retirement-tests.ps1',
     'generate-registry-model-fallback-tests.ps1',
     'governance-metadata-drift-tests.ps1',
+    'intent-work-unit-contract-tests.ps1',
     'merge-queue-tests.ps1',
     'onboarding-telemetry-tests.ps1',
     'portable-skill-export-preview-tests.ps1',

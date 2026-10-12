@@ -124,7 +124,10 @@ verify is evidence for an exact target and observation window.
 
 Each issue is a design proposal, not a mandate to add another prefix.
 Naming/status decisions are centralized in the matrix above; overlap must be
-resolved before routing implementation.
+resolved before routing implementation. Per-verb inputs, completion evidence,
+authorization boundaries, hold states and handoffs live in the shared
+[intent work-unit contracts](../reference/intent-work-unit-contracts.md)
+reference.
 
 | Proposal | Requested outcome and completion unit | Default boundary | Existing overlap / open decision | Issue |
 | --- | --- | --- | --- | --- |
