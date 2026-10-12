@@ -19,6 +19,7 @@ rename them or omit source-only release jobs.
 | Dependency routing | Issue/PR/comment changes; `dependency-relationship-routing.yml` | Parses body/comments; issues get `blocked`, PRs `dependency-blocked` | Open issue dependencies or unmerged PR dependencies |
 | Spec fallback | `synthesize-spec` label, successful Issue Triage Agent completion, or manual dispatch; `issue-to-spec-synthesis.yml` | Creates draft PRD/spec on `spec/issue-N-slug`, adds `documentation`/`spec`, copies a sprint label if present, clears intake labels; an existing branch that conflicts with generated content is preserved and the issue gets one comment plus `synthesis-conflict` | Draft remains draft; synthesis does not approve the issue, assign implementation, or mark the PR ready |
 | Approve supplied spec | Qualified `/approve` issue comment; `issue-approve.yml` | Checks metadata/dependencies/spec, adds `approved`/`copilot-agent`, attempts assignment, then reevaluates linked PRs | Missing type/priority/spec, blocker labels, unresolved dependencies, permission or agent availability |
+| Approved-spec handoff | Qualified exact `/approve-spec <spec-pr> <head-sha>` source-issue comment; `.github/base-coat/scripts/spec-handoff.cjs` | Read-only resolver reports `spec-draft`, `blocked`, `authorization-invalid`, `assigned` or `handoff-pending` with a stable source/directive/spec identity; no assignment write is made | Spec PR not merged before the directive, approved head changed, issue Spec URL not commit-pinned to the merged spec, spec/PRD not `reviewed` or `implementation-ready`, blobs changed on the default branch, `Delivery intent` not exactly `implementation`, hold labels, dependencies (including dependency comments), source edits after the directive, or unreadable GitHub evidence |
 | Implement | Assigned Copilot coding agent or explicitly authorized local delivery execution | Ready implementation PR with `Closes #N`, valid intake contract, spec and validation evidence | Assignment failure can leave approval labels present without an active agent |
 | Label/readiness | PR open/sync/reopen/ready; `pr-size-labeler.yml`; metadata changes also drive `pr-flow-hygiene.yml` | Deterministic size and same-repo sprint labeling; hygiene reports readiness/ownership issues | Hygiene does not turn draft spec PRs into ready implementation PRs |
 | Validate | PR head checks; CI, Validate BaseCoat, PR Validation, Agent Merge and spec/harness gates | Current-head results; required-workflow completion routes executor reevaluation | Failed/missing checks, execution approval holds, stale head, invalid intake |
@@ -42,6 +43,13 @@ without exposing raw source text in diagnostics.
 Orphaned-branch recovery requires both stored artifacts to match generated
 content; conflicting edits are preserved, not overwritten. These checks do not
 approve incomplete specifications or promote their draft PRs.
+
+Approved-spec handoff contract (#3593): the synthesized spec PR must merge
+first. Only a fresh qualified `/approve-spec` naming the merged PR and its final
+head binds the source issue, whose single `- Spec:` URL must be the
+commit-pinned blob of that spec. Later hold-label changes or body edits make the
+directive stale. Assignment writes stay disabled until a trusted single-issue
+canary is configured.
 
 ## Labels, directives and tags
 

@@ -391,6 +391,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running approved-spec handoff resolver tests...'
+& node --test (Join-Path $PSScriptRoot 'spec-handoff-tests.cjs')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Approved-spec handoff resolver tests failed' -ForegroundColor Red
+    Write-FailureLog 'spec-handoff-tests'
+    exit 1
+}
+
 Write-Host 'Running deployed PR conflict routing tests...'
 & node --test (Join-Path $PSScriptRoot 'pr-conflict-routing-tests.cjs')
 if ($LASTEXITCODE -ne 0) {

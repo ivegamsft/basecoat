@@ -28,10 +28,10 @@ function closingIssueNumbers(text) {
 function visibleSpecText(body) {
   let fence = null;
   return String(body || "").replace(/<!--[\s\S]*?(?:-->|$)/g, "").split(/\r?\n/).map(line => {
-    const marker = line.match(/^ {0,3}(`{3,}|~{3,})/);
+    const marker = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
     if (marker) {
       if (!fence) fence = marker[1];
-      else if (marker[1][0] === fence[0] && marker[1].length >= fence.length) fence = null;
+      else if (marker[1][0] === fence[0] && marker[1].length >= fence.length && !marker[2].trim()) fence = null;
       return "";
     }
     return fence ? "" : line;
@@ -92,18 +92,22 @@ async function validateIssue({ github, owner, repo, issueNumber }) {
       dependencies.set(`${dependency.owner}/${dependency.repo}#${dependency.issue_number}`, dependency);
     }
   }
+  const dependencyResolutions = [];
   for (const [reference, dependency] of dependencies) {
     const { data: linked } = await github.rest.issues.get(dependency);
     let resolved = linked.state === "closed";
+    let resolvedAt = linked.closed_at || null;
     if (linked.pull_request) {
       const { data: linkedPr } = await github.rest.pulls.get({
         owner: dependency.owner, repo: dependency.repo, pull_number: dependency.issue_number
       });
       resolved = Boolean(linkedPr.merged);
+      resolvedAt = linkedPr.merged_at || null;
     }
     if (!resolved) missing.push(`Unresolved dependencies: ${reference}`);
+    else dependencyResolutions.push({ reference, resolvedAt });
   }
-  return { issue, comments, missing, specRef };
+  return { issue, comments, missing, specRef, dependencyResolutions };
 }
 
 function forwardReceipt(prNumber, comment, issueNumber) {
@@ -209,4 +213,4 @@ async function findLatestApproval({ github, owner, repo, issueNumber, comments }
 
 module.exports = { isExactIssueApproval, hasQualifiedPermission, isPlaceholderSpecUrl,
   closingIssueNumbers, qualifiedDirective, validateIssue, forwardReceipt, findApproval,
-  findLatestApproval, approvedScopeReceipt, findApprovedSpecRef };
+  findLatestApproval, approvedScopeReceipt, findApprovedSpecRef, visibleSpecText };
