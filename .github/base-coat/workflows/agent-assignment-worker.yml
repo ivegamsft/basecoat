@@ -16,6 +16,11 @@ on:
         description: Specification captured during the approval step
         required: false
         type: string
+      spec_handoff_comment_id:
+        description: Original /approve-spec directive comment ID for an approved-spec handoff
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: read
@@ -44,20 +49,41 @@ jobs:
           RECOVERY_WRITES_ENABLED: ${{ vars.BASECOAT_AGENT_ASSIGNMENT_RECOVERY_ENABLED || 'false' }}
           MAX_ASSIGNMENT_ATTEMPTS: ${{ vars.BASECOAT_AGENT_ASSIGNMENT_MAX_ATTEMPTS || '3' }}
           APPROVED_SPEC_REF: ${{ inputs.approved_spec_ref }}
+          SPEC_HANDOFF_COMMENT_ID: ${{ inputs.spec_handoff_comment_id }}
+          SPEC_HANDOFF_MODE: ${{ vars.BASECOAT_SPEC_HANDOFF_MODE || 'read-only' }}
+          SPEC_HANDOFF_CANARY: ${{ vars.BASECOAT_SPEC_HANDOFF_CANARY }}
         with:
           script: |
             const approval = require(`${process.env.GITHUB_WORKSPACE}/.github/base-coat/scripts/approval-contract.cjs`);
             const assignment = require(`${process.env.GITHUB_WORKSPACE}/.github/base-coat/scripts/agent-assignment.cjs`);
+            const handoff = require(`${process.env.GITHUB_WORKSPACE}/.github/base-coat/scripts/spec-handoff.cjs`);
+            const issueNumber = Number(process.env.ISSUE_NUMBER);
+            const recovery = process.env.RECOVERY === 'true';
+            const recoveryWritesEnabled = process.env.RECOVERY_WRITES_ENABLED === 'true';
+            const specInput = (process.env.SPEC_HANDOFF_COMMENT_ID || '').trim();
+            if (specInput && !/^[1-9]\d*$/.test(specInput)) throw new Error(`Invalid spec_handoff_comment_id: ${specInput}`);
+            const prior = recovery && !specInput ?
+              await assignment.readStatus({ github, ...context.repo, issueNumber }) : null;
+            const specCommentId = Number(specInput) ||
+              await handoff.priorSpecDirective({ github, ...context.repo, status: prior?.state });
+            const contract = specCommentId ? handoff.handoffApproval({
+              github, ...context.repo, issueNumber, commentId: specCommentId, approval,
+              mode: process.env.SPEC_HANDOFF_MODE, canary: process.env.SPEC_HANDOFF_CANARY
+            }) : approval;
             const state = await assignment.runAssignmentWorker({
               github,
               ...context.repo,
-              issueNumber: Number(process.env.ISSUE_NUMBER),
-              recovery: process.env.RECOVERY === 'true',
+              issueNumber,
+              recovery,
               approvedSpecRef: process.env.APPROVED_SPEC_REF,
-              recoveryWritesEnabled: process.env.RECOVERY_WRITES_ENABLED === 'true',
+              recoveryWritesEnabled,
               maxAttempts: process.env.MAX_ASSIGNMENT_ATTEMPTS,
-              approval
+              approval: contract
             });
+            if (contract.record && (!recovery || recoveryWritesEnabled)) {
+              await contract.findLatestApproval().catch(() => null);
+              await handoff.writeHandoffRecord({ github, ...context.repo, record: contract.record, gate: contract.gate });
+            }
             core.info(
               `Issue #${state.issueNumber}: ${state.state}; ` +
               `${state.attemptsConsumed}/${state.maxAttempts} assignment requests consumed.`

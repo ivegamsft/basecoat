@@ -286,3 +286,18 @@ test("recovery recognizes only persisted spec directives", async () => {
 test("a directive posted after dependency clearance proceeds", async () => {
   assert.equal((await fixture(x => { x.issue.body += "Blocked by #8\n"; x.deps = { 8: { state: "closed", closed_at: "2026-10-09T00:00:00Z" } }; }).run()).state, "handoff-pending");
 });
+
+test("workflow wiring is read-only by default and reuses the shared worker", () => {
+  const read = (...parts) => require("node:fs").readFileSync(require("node:path").join(__dirname, "..", ".github", ...parts), "utf8").replace(/\r\n/g, "\n");
+  const [workflow, worker] = ["approved-spec-handoff.yml", "agent-assignment-worker.yml"].map(file => read("workflows", file));
+  assert.equal(read("base-coat", "workflows", "approved-spec-handoff.yml"), workflow);
+  assert.equal(read("base-coat", "workflows", "agent-assignment-worker.yml"), worker);
+  assert.match(workflow, /contains\(github\.event\.comment\.body, '\/approve-spec'\)[\s\S]*pull_request\.base\.ref == github\.event\.repository\.default_branch[\s\S]*handoff\.routeIssue\([\s\S]*handoff\.latestQualifiedHandoff\(/);
+  assert.match(workflow, /needs: route[\s\S]*group: basecoat-spec-handoff-\$\{\{ github\.repository_id \}\}-\$\{\{ needs\.route\.outputs\.issue \}\}/);
+  assert.match(workflow, /BASECOAT_SPEC_HANDOFF_MODE \|\| 'read-only'/);
+  assert.match(workflow, /if: needs\.resolve\.outputs\.dispatch == 'true'[\s\S]*uses: \.\/\.github\/workflows\/agent-assignment-worker\.yml/);
+  assert.doesNotMatch(workflow, /issues\/\{issue_number\}\/assignees|addAssignees|variables/);
+  assert.match(worker, /spec_handoff_comment_id:/);
+  assert.match(worker, /group: basecoat-agent-assignment-\$\{\{ github\.repository_id \}\}-\$\{\{ inputs\.issue_number \}\}/);
+  assert.match(worker, /handoff\.handoffApproval\([\s\S]*contract\.findLatestApproval\(\)\.catch[\s\S]*writeHandoffRecord/);
+});

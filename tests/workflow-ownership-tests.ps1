@@ -234,12 +234,13 @@ jobs:
     foreach ($assignmentWorkflow in @(
             'agent-assignment-worker.yml',
             'issue-approve.yml',
-            'automation-stuck-state-watchdog.yml'
+            'automation-stuck-state-watchdog.yml',
+            'approved-spec-handoff.yml'
         )) {
         Copy-Item -LiteralPath (Join-Path $repoRoot ".github\base-coat\workflows\$assignmentWorkflow") `
             -Destination $assignmentSourceDir
     }
-    foreach ($caller in @('issue-approve.yml', 'automation-stuck-state-watchdog.yml')) {
+    foreach ($caller in @('issue-approve.yml', 'automation-stuck-state-watchdog.yml', 'approved-spec-handoff.yml')) {
         $callerDestinationDir = Join-Path $scratch "assignment-destination-$($caller -replace '\.yml$', '')"
         New-Item -ItemType Directory -Force -Path $callerDestinationDir | Out-Null
         & pwsh -NoProfile -File $installerPath `
@@ -249,7 +250,7 @@ jobs:
             -Workflow $caller | Out-Null
         Assert-True -Condition ($LASTEXITCODE -eq 0) `
             -Message "Targeted install of $caller must include the reusable worker dependency."
-        $callerDestination = if ($caller -eq 'issue-approve.yml') { 'basecoat-issue-approve.yml' } else { $caller }
+        $callerDestination = if ($caller -eq 'automation-stuck-state-watchdog.yml') { $caller } else { "basecoat-$caller" }
         Assert-True -Condition (Test-Path -LiteralPath (Join-Path $callerDestinationDir $callerDestination)) `
             -Message "Targeted install must install caller $caller."
         Assert-True -Condition (Test-Path -LiteralPath (Join-Path $callerDestinationDir 'agent-assignment-worker.yml')) `

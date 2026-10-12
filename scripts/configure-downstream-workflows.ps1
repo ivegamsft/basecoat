@@ -213,6 +213,15 @@ $workflowMap = @(
         Dependencies = @('agent-assignment-worker.yml')
     }
     [pscustomobject]@{
+        Source = 'approved-spec-handoff.yml'
+        Destination = 'basecoat-approved-spec-handoff.yml'
+        LegacyDestinations = @()
+        Name = 'BaseCoat Template - Approved-Spec Handoff'
+        Supported = $true
+        Class = 'templates'
+        Dependencies = @('agent-assignment-worker.yml')
+    }
+    [pscustomobject]@{
         Source = 'pr-auto-merge-executor.yml'
         Destination = 'basecoat-pr-auto-merge-executor.yml'
         LegacyDestinations = @()

@@ -312,7 +312,7 @@ To use the approved-spec directive, also install the issue approval workflow:
 pwsh .github/base-coat/scripts/configure-downstream-workflows.ps1 `
   -SourceDir .github/base-coat/workflows `
   -DestinationDir .github/workflows `
-  -Workflow issue-approve.yml `
+  -Workflow issue-approve.yml, approved-spec-handoff.yml `
   -KeepUnknownBc
 ```
 
@@ -320,6 +320,7 @@ That workflow validates the supplied spec reference on the issue-side
 `/approve` path, applies `approved` and `copilot-agent`, attempts coding-agent
 assignment, and dispatches linked-PR reevaluation after labels are finalized.
 Verify the assignee: labels alone do not prove implementation started.
+`approved-spec-handoff.yml` handles `/approve-spec` and installs its `agent-assignment-worker.yml` dependency.
 `/spec-2-prod` belongs to `ship-it-intent-dispatch.yml` and requires an already
 approved source issue; it does not approve the issue itself.
 

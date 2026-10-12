@@ -1,0 +1,96 @@
+name: "BaseCoat - Approved-Spec Handoff"
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request:
+    types: [closed]
+  workflow_dispatch:
+    inputs:
+      issue_number: { description: Source issue to reconcile against its newest qualified /approve-spec directive, required: true, type: number }
+
+permissions:
+  contents: read
+
+jobs:
+  route:
+    name: Route to the source issue
+    if: >-
+      (github.event_name == 'issue_comment' && !github.event.issue.pull_request &&
+       contains(github.event.comment.body, '/approve-spec')) ||
+      (github.event_name == 'pull_request' && github.event.pull_request.merged &&
+       github.event.pull_request.base.ref == github.event.repository.default_branch) ||
+      github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions: { contents: read }
+    outputs: { issue: "${{ steps.route.outputs.issue }}" }
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with: { ref: "${{ github.event.repository.default_branch }}" }
+      - name: Derive the issue lock key with resolver rules; non-directives route to none and never take the pending slot
+        id: route
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        with:
+          script: |
+            const approval = require(`${process.env.GITHUB_WORKSPACE}/.github/base-coat/scripts/approval-contract.cjs`);
+            const handoff = require(`${process.env.GITHUB_WORKSPACE}/.github/base-coat/scripts/spec-handoff.cjs`);
+            const issue = handoff.routeIssue({ eventName: context.eventName, payload: context.payload, ...context.repo, approval });
+            core.setOutput('issue', String(issue || 'none'));
+
+  resolve:
+    name: Resolve approved-spec handoff
+    needs: route
+    if: needs.route.outputs.issue != 'none'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: { contents: read, issues: write, pull-requests: read }
+    concurrency:
+      group: basecoat-spec-handoff-${{ github.repository_id }}-${{ needs.route.outputs.issue }}
+      cancel-in-progress: false
+    outputs: { dispatch: "${{ steps.resolve.outputs.dispatch }}", comment_id: "${{ steps.resolve.outputs.comment_id }}" }
+    steps:
+      - name: Checkout trusted default-branch contract
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Resolve, gate and record the handoff
+        id: resolve
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        env:
+          SPEC_HANDOFF_MODE: ${{ vars.BASECOAT_SPEC_HANDOFF_MODE || 'read-only' }}
+          SPEC_HANDOFF_CANARY: ${{ vars.BASECOAT_SPEC_HANDOFF_CANARY }}
+          ISSUE: ${{ needs.route.outputs.issue }}
+        with:
+          script: |
+            const approval = require(`${process.env.GITHUB_WORKSPACE}/.github/base-coat/scripts/approval-contract.cjs`);
+            const handoff = require(`${process.env.GITHUB_WORKSPACE}/.github/base-coat/scripts/spec-handoff.cjs`);
+            const repoArgs = { github, ...context.repo };
+            const issueNumber = Number(process.env.ISSUE);
+            // The lock keeps one pending run, so reconcile the newest qualified directive rather than only the trigger.
+            const latest = await handoff.latestQualifiedHandoff({ ...repoArgs, issueNumber, approval });
+            const discovered = context.eventName === 'pull_request'
+              ? await handoff.discoverMergedSpec({ ...repoArgs, pr: context.payload.pull_request, approval }) : null;
+            core.setOutput('dispatch', 'false');
+            for (const record of [latest, discovered?.directiveId ? null : discovered].filter(Boolean)) {
+              const gate = await handoff.checkWriteGate({
+                ...repoArgs, record, mode: process.env.SPEC_HANDOFF_MODE, canary: process.env.SPEC_HANDOFF_CANARY
+              });
+              await handoff.writeHandoffRecord({ ...repoArgs, record, gate });
+              core.info(`Issue #${issueNumber}: ${record.state} (${record.reason}); write gate ${gate.reason}.`);
+              if (record.ownerAction) core.warning(`Issue #${issueNumber} owner action: ${record.ownerAction}`);
+              if (record !== latest || !gate.allowed) continue;
+              core.setOutput('dispatch', 'true');
+              core.setOutput('comment_id', String(record.directiveId));
+            }
+
+  assign:
+    name: Hand off through the shared assignment worker
+    needs: [route, resolve]
+    if: needs.resolve.outputs.dispatch == 'true'
+    permissions: { contents: read, issues: write, pull-requests: read }
+    uses: ./.github/workflows/agent-assignment-worker.yml
+    with:
+      issue_number: ${{ fromJSON(needs.route.outputs.issue) }}
+      spec_handoff_comment_id: ${{ needs.resolve.outputs.comment_id }}
