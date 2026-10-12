@@ -2,10 +2,16 @@
 
 const { createHash } = require("node:crypto");
 const { isBotActor, hasQualifiedPermission } = require("./ship-it/preapproval-evidence.cjs");
-const { isAgentAssignee } = require("./agent-assignment.cjs");
+const { isAgentAssignee, readStatus } = require("./agent-assignment.cjs");
 
 const HOLD_LABELS = ["blocked", "deferred", "delivery-hold", "needs-info", "duplicate", "invalid", "wontfix"];
 const READY_STATUSES = new Set(["reviewed", "implementation-ready"]);
+const HANDOFF_MARKER = "<!-- basecoat-spec-handoff:v1 -->";
+const CANARY_FIELDS = ["issue", "directiveId", "specPr", "approvedHead", "mergeCommit", "specBlob", "prdBlob"];
+
+function sourceIssues(body) {
+  return Array.from(String(body || "").matchAll(/^Source issues:[ \t]*(.*?)[ \t]*$/gm), match => match[1]);
+}
 
 function parseSpecDirective(body) {
   const match = String(body ?? "").trim().match(/^\/approve-spec ([1-9]\d{0,9}) ([0-9a-f]{40})$/i);
@@ -66,6 +72,7 @@ async function resolveInto({ github, owner, repo, issueNumber, commentId, approv
   const { data: permission } = await github.rest.repos.getCollaboratorPermissionLevel({ owner, repo, username: comment.user.login });
   if (!hasQualifiedPermission(permission))
     return finish("authorization-invalid", "directive-actor-unqualified", "A write, maintain, or admin collaborator must post the directive.");
+  Object.defineProperty(record, "directive", { value: comment, enumerable: false });
   Object.assign(record.evidence, { directiveUrl: comment.html_url, actor: comment.user.login,
     specPr: directive.prNumber, approvedHead: directive.headSha });
   const contract = await approval.validateIssue({ github, owner, repo, issueNumber });
@@ -100,7 +107,7 @@ async function resolveInto({ github, owner, repo, issueNumber, commentId, approv
   if (!Number.isFinite(directiveTime) || chronology.some(time => !Number.isFinite(time) || time >= directiveTime))
     return finish("authorization-invalid", "directive-stale", "The source changed or a dependency cleared after the directive; post a fresh qualified directive.");
   const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: directive.prNumber });
-  const sources = Array.from(approval.visibleSpecText(pr.body).matchAll(/^Source issues:[ \t]*(.*?)[ \t]*$/gm), match => match[1]);
+  const sources = sourceIssues(approval.visibleSpecText(pr.body));
   if (pr.head?.repo?.id !== pr.base?.repo?.id || pr.base?.repo?.full_name?.toLowerCase() !== `${owner}/${repo}`.toLowerCase() ||
       pr.base?.ref !== pr.base?.repo?.default_branch || sources.length !== 1 ||
       !new RegExp(`^#?${Number(issueNumber)}$`).test(sources[0])) {
@@ -139,4 +146,126 @@ async function resolveInto({ github, owner, repo, issueNumber, commentId, approv
     "Read-only discovery: assignment writes stay disabled until the trusted canary is configured.");
 }
 
-module.exports = { HOLD_LABELS, parseSpecDirective, deliveryIntent, parseSpecUrl, resolveSpecHandoff };
+async function discoverMergedSpec({ github, owner, repo, pr, approval }) {
+  const sources = sourceIssues(approval.visibleSpecText(pr?.body));
+  if (!pr?.merged || sources.length !== 1 || !/^#?[1-9]\d{0,9}$/.test(sources[0])) return null;
+  const files = await github.paginate(github.rest.pulls.listFiles, { owner, repo, pull_number: pr.number, per_page: 100 });
+  if (!files.some(file => /^docs\/spec\/[\w./-]+\.spec\.md$/.test(file.filename) && file.status !== "removed")) return null;
+  const issueNumber = Number(sources[0].replace("#", ""));
+  const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number: issueNumber, per_page: 100 });
+  const directive = comments.filter(comment => !isBotActor(comment.user) &&
+    parseSpecDirective(comment.body)?.prNumber === Number(pr.number)).pop();
+  if (directive) return resolveSpecHandoff({ github, owner, repo, issueNumber, commentId: directive.id, approval });
+  return { issueNumber, directiveId: null, state: "awaiting-directive", reason: "directive-missing",
+    ownerAction: `Review the merged spec, then post /approve-spec ${Number(pr.number)} <approved-head-sha> on the source issue.`,
+    writesEnabled: false, identity: null, evidence: { specPr: Number(pr.number), mergeCommit: pr.merge_commit_sha || null } };
+}
+
+function parseCanary(value) {
+  try {
+    const tuple = JSON.parse(String(value || ""));
+    return tuple && typeof tuple === "object" && CANARY_FIELDS.every(key => ![undefined, null, ""].includes(tuple[key])) ? tuple : null;
+  } catch {
+    return null;
+  }
+}
+
+function matchesCanary(tuple, record) {
+  const actual = { ...record?.evidence, issue: record?.issueNumber, directiveId: record?.directiveId };
+  return Boolean(tuple) && CANARY_FIELDS.every(key => String(tuple[key]).toLowerCase() === String(actual[key] ?? "").toLowerCase());
+}
+
+function handoffWriteGate({ mode, canary, record, canaryVerified = false }) {
+  const normalized = String(mode || "read-only").trim().toLowerCase();
+  if (!["handoff-pending", "assigned"].includes(record?.state) || !record.identity) return { allowed: false, reason: "handoff-not-ready" };
+  if (normalized === "read-only") return { allowed: false, reason: "read-only-mode" };
+  if (!["canary", "general"].includes(normalized)) return { allowed: false, reason: "mode-invalid" };
+  const tuple = parseCanary(canary);
+  if (!tuple) return { allowed: false, reason: "canary-unconfigured" };
+  if (matchesCanary(tuple, record)) return { allowed: true, reason: "canary-match" };
+  if (normalized === "canary") return { allowed: false, reason: "not-canary" };
+  return canaryVerified ? { allowed: true, reason: "general" } : { allowed: false, reason: "canary-unverified" };
+}
+
+function serializeHandoff(record, gate) {
+  const payload = JSON.stringify({ ...record, gate: gate?.reason || null }).replace(/-->/g, "--\\u003e");
+  return [HANDOFF_MARKER, `<!-- basecoat-spec-handoff-state:v1\n${payload}\n-->`, "## Approved-spec handoff status", "",
+    `- State: \`${record.state}\``, `- Reason: \`${record.reason || "none"}\``, `- Write gate: \`${gate?.reason || "not-evaluated"}\``,
+    `- Identity: \`${record.identity || "unavailable"}\``, `- Directive: ${record.evidence?.directiveUrl || "none"}`,
+    `- Owner action: ${record.ownerAction || "none"}`].join("\n");
+}
+
+async function readHandoffRecord({ github, owner, repo, issueNumber }) {
+  const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number: issueNumber, per_page: 100 });
+  const comment = comments.filter(item => item.user?.login === "github-actions[bot]" &&
+    String(item.body || "").startsWith(HANDOFF_MARKER)).pop();
+  const json = String(comment?.body || "").match(/<!-- basecoat-spec-handoff-state:v1\n([\s\S]*?)\n-->/)?.[1];
+  try {
+    return comment ? { comment, record: json ? JSON.parse(json) : null } : null;
+  } catch {
+    return { comment, record: null };
+  }
+}
+
+async function writeHandoffRecord({ github, owner, repo, record, gate }) {
+  if (["directive-not-exact", "directive-edited", "directive-actor-unqualified"].includes(record.reason)) return null;
+  const body = serializeHandoff(record, gate);
+  const current = await readHandoffRecord({ github, owner, repo, issueNumber: record.issueNumber });
+  if (current?.comment.body === body) return current.comment;
+  const { data } = current
+    ? await github.rest.issues.updateComment({ owner, repo, comment_id: current.comment.id, body })
+    : await github.rest.issues.createComment({ owner, repo, issue_number: record.issueNumber, body });
+  return data;
+}
+
+async function verifyCanary({ github, owner, repo, canary }) {
+  const tuple = parseCanary(canary);
+  if (!tuple) return false;
+  const issueNumber = Number(tuple.issue);
+  const handoff = await readHandoffRecord({ github, owner, repo, issueNumber });
+  const worker = await readStatus({ github, owner, repo, issueNumber });
+  return Boolean(handoff?.record?.identity) && matchesCanary(tuple, handoff.record) &&
+    worker?.state?.state === "assigned" && isAgentAssignee({ login: worker.state.verifiedAssignee }) &&
+    Number(worker.state.originalApprovalId) === Number(tuple.directiveId) &&
+    worker.state.specRef === handoff.record.evidence?.specUrl;
+}
+
+async function checkWriteGate({ github, owner, repo, record, mode, canary }) {
+  const gate = handoffWriteGate({ mode, canary, record });
+  if (gate.reason !== "canary-unverified") return gate;
+  return handoffWriteGate({ mode, canary, record, canaryVerified: await verifyCanary({ github, owner, repo, canary }) });
+}
+
+function handoffApproval({ github, owner, repo, issueNumber, commentId, approval, mode, canary }) {
+  const adapter = {
+    record: null, gate: null,
+    validateIssue: args => approval.validateIssue(args),
+    async findLatestApproval() {
+      adapter.record = await resolveSpecHandoff({ github, owner, repo, issueNumber, commentId, approval });
+      adapter.gate = await checkWriteGate({ github, owner, repo, record: adapter.record, mode, canary });
+      if (adapter.gate.allowed) return adapter.record.directive;
+      if (adapter.record.state === "authorization-invalid") return null;
+      throw Object.assign(new Error(`Spec handoff not dispatchable: ${adapter.gate.reason}`), { status: 409 });
+    },
+    findApprovedSpecRef: () => adapter.record?.evidence.specUrl || null
+  };
+  return adapter;
+}
+
+async function priorSpecDirective({ github, owner, repo, status }) {
+  const id = Number(status?.originalApprovalId);
+  if (!Number.isSafeInteger(id) || id < 1) return null;
+  try {
+    const { data } = await github.rest.issues.getComment({ owner, repo, comment_id: id });
+    return parseSpecDirective(data.body) ? id : null;
+  } catch (error) {
+    if (error.status === 404) return null;
+    throw error;
+  }
+}
+
+module.exports = {
+  HOLD_LABELS, HANDOFF_MARKER, parseSpecDirective, deliveryIntent, parseSpecUrl, resolveSpecHandoff,
+  discoverMergedSpec, parseCanary, handoffWriteGate, readHandoffRecord, writeHandoffRecord,
+  verifyCanary, checkWriteGate, handoffApproval, priorSpecDirective
+};

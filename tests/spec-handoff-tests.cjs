@@ -30,19 +30,37 @@ function fixture(change = () => {}) {
       base: { ref: "main", repo: repoRef }, body: "Source issues: #7\n" },
     files: [{ filename: SPEC, status: "added" }, { filename: PRD, status: "added" }],
     blobs: { [`${MERGE}:${SPEC}`]: ["s1", doc("reviewed", `\n- PRD: \`${PRD}\`\n`)], [`${MERGE}:${PRD}`]: ["p1", doc()] },
-    writes: 0
+    writes: 0, assign: () => { f.issue.assignees = [{ login: "copilot-swe-agent[bot]" }]; }
   };
   for (const path of [SPEC, PRD]) f.blobs[`main:${path}`] = f.blobs[`${MERGE}:${path}`];
   change(f);
   const notFound = () => Object.assign(new Error("Not Found"), { status: 404 });
   const github = {
     paginate: async (method, params) => (await method(params)).data,
-    graphql: async () => { if (f.lastEditedAt instanceof Error) throw f.lastEditedAt; return { repository: { issue: { lastEditedAt: f.lastEditedAt } } }; },
+    graphql: async query => {
+      if (query.includes("suggestedActors")) return { repository: { suggestedActors: { nodes: [{ login: "copilot-swe-agent", id: "B1" }] } } };
+      if (f.lastEditedAt instanceof Error) throw f.lastEditedAt;
+      return { repository: { issue: { lastEditedAt: f.lastEditedAt } } };
+    },
+    request: async () => { f.writes += 1; return f.assign(); },
     rest: {
       issues: {
-        getComment: async () => { if (!f.comment) throw notFound(); return { data: f.comment }; },
+        getComment: async ({ comment_id }) => {
+          const found = f.comment?.id === comment_id ? f.comment : f.comments.find(item => item.id === comment_id);
+          if (!found) throw notFound();
+          return { data: found };
+        },
         get: async ({ issue_number }) => ({ data: issue_number === 7 ? f.issue : f.deps?.[issue_number] || { state: "open" } }),
         listComments: async () => ({ data: f.comments }),
+        createComment: async ({ body }) => {
+          const data = { id: 1000 + f.comments.length, body, user: { login: "github-actions[bot]", type: "Bot" }, created_at: "2026-10-12T00:00:00Z" };
+          f.comments.push(data);
+          return { data };
+        },
+        updateComment: async ({ comment_id, body }) => {
+          const data = Object.assign(f.comments.find(item => item.id === comment_id), { body });
+          return { data };
+        },
         listEvents: async () => ({ data: f.events }),
         addAssignees: async () => { f.writes += 1; }
       },
@@ -54,7 +72,7 @@ function fixture(change = () => {}) {
       pulls: { get: async () => ({ data: f.pr }), listFiles: async () => ({ data: f.files }) }
     }
   };
-  return { f, run: () => handoff.resolveSpecHandoff({
+  return { f, github, run: () => handoff.resolveSpecHandoff({
     github, owner: OWNER, repo: REPO, issueNumber: 7, commentId: 99, approval }) };
 }
 
@@ -124,6 +142,109 @@ for (const [name, [change, state, reason]] of Object.entries(blockedCases)) {
     assert.deepEqual([result.state, result.reason, result.identity, f.writes], [state, reason ?? result.reason, null, 0]);
   });
 }
+
+const assignment = require("../.github/base-coat/scripts/agent-assignment.cjs");
+const NOW = new Date("2026-10-12T00:00:00Z");
+const later = minutes => new Date(NOW.getTime() + minutes * 60000);
+const canaryFor = (record, extra = {}) => JSON.stringify({ issue: record.issueNumber, directiveId: record.directiveId,
+  ...Object.fromEntries(["specPr", "approvedHead", "mergeCommit", "specBlob", "prdBlob"].map(key => [key, record.evidence[key]])), ...extra });
+
+async function runWorker(ctx, mode, canary, now = NOW, maxAttempts = 3) {
+  const adapter = handoff.handoffApproval({ github: ctx.github, owner: OWNER, repo: REPO, issueNumber: 7, commentId: 99, approval, mode, canary });
+  const state = await assignment.runAssignmentWorker({ github: ctx.github, owner: OWNER, repo: REPO, issueNumber: 7, approval: adapter, now, maxAttempts });
+  if (adapter.record) await handoff.writeHandoffRecord({ github: ctx.github, owner: OWNER, repo: REPO, record: adapter.record, gate: adapter.gate });
+  return state;
+}
+
+test("write gate defaults read-only and only the exact canary tuple can write", async () => {
+  const record = await fixture().run();
+  const canary = canaryFor(record);
+  assert.equal(handoff.handoffWriteGate({ record }).reason, "read-only-mode");
+  assert.equal(handoff.handoffWriteGate({ mode: "canary", record }).reason, "canary-unconfigured");
+  assert.equal(handoff.handoffWriteGate({ mode: "enabled", canary, record }).reason, "mode-invalid");
+  assert.deepEqual(handoff.handoffWriteGate({ mode: "canary", canary, record }), { allowed: true, reason: "canary-match" });
+  for (const extra of [{ issue: 8 }, { directiveId: 100 }, { specBlob: "s2" }, { approvedHead: "c".repeat(40) }]) {
+    assert.equal(handoff.handoffWriteGate({ mode: "canary", canary: canaryFor(record, extra), record }).allowed, false);
+  }
+  assert.equal(handoff.handoffWriteGate({ mode: "general", canary: canaryFor(record, { issue: 8 }), record }).reason, "canary-unverified");
+  assert.equal(handoff.handoffWriteGate({ mode: "canary", canary, record: { ...record, state: "blocked" } }).reason, "handoff-not-ready");
+});
+
+test("read-only mode never reaches the assignment request nor burns the directive", async () => {
+  const ctx = fixture();
+  const state = await runWorker(ctx, "read-only", "");
+  assert.equal(ctx.f.writes, 0);
+  assert.equal(state.attemptsConsumed, 0);
+  assert.equal((await handoff.readHandoffRecord({ github: ctx.github, owner: OWNER, repo: REPO, issueNumber: 7 })).record.gate, "read-only-mode");
+  assert.deepEqual([state.state, state.authorizationInvalidAt], ["blocked", null]);
+  assert.equal((await runWorker(ctx, "canary", canaryFor(await ctx.run()), later(5))).state, "assigned");
+  assert.equal(ctx.f.writes, 1);
+});
+
+test("canary assigns once through the shared worker with stable epoch and read-back", async () => {
+  const ctx = fixture();
+  const canary = canaryFor(await ctx.run());
+  const first = await runWorker(ctx, "canary", canary);
+  const second = await runWorker(ctx, "canary", canary, later(60));
+  assert.deepEqual([first.state, first.verifiedAssignee, first.attemptsConsumed, ctx.f.writes], ["assigned", "copilot-swe-agent[bot]", 1, 1]);
+  assert.equal(second.epoch, first.epoch);
+  assert.equal(ctx.f.writes, 1);
+  assert.equal(await handoff.verifyCanary({ github: ctx.github, owner: OWNER, repo: REPO, canary }), true);
+  const other = { ...(await ctx.run()), issueNumber: 8, directiveId: 5 };
+  assert.equal((await handoff.checkWriteGate({ github: ctx.github, owner: OWNER, repo: REPO, record: other, mode: "canary", canary })).allowed, false);
+  assert.deepEqual(await handoff.checkWriteGate({ github: ctx.github, owner: OWNER, repo: REPO, record: other, mode: "general", canary }),
+    { allowed: true, reason: "general" });
+});
+
+test("lost assignment response is re-read before any second request", async () => {
+  let calls = 0;
+  const ctx = fixture(x => { x.assign = () => { calls += 1; x.issue.assignees = [{ login: "copilot-swe-agent[bot]" }];
+    if (calls === 1) throw Object.assign(new Error("lost"), { status: 502 }); }; });
+  const canary = canaryFor(await ctx.run());
+  assert.equal((await runWorker(ctx, "canary", canary)).state, "assigned");
+  assert.equal((await runWorker(ctx, "canary", canary, later(5))).state, "assigned");
+  assert.equal(ctx.f.writes, 1);
+});
+
+test("exhausted budget blocks the canary and cannot verify general writes", async () => {
+  const ctx = fixture(x => { x.assign = () => { throw Object.assign(new Error("down"), { status: 503 }); }; });
+  const canary = canaryFor(await ctx.run());
+  let state;
+  for (const minutes of [0, 5, 10, 15]) state = await runWorker(ctx, "canary", canary, later(minutes), 2);
+  assert.deepEqual([state.state, state.blockReason, ctx.f.writes], ["blocked", "attempt-budget-exhausted", 2]);
+  assert.equal(await handoff.verifyCanary({ github: ctx.github, owner: OWNER, repo: REPO, canary }), false);
+});
+
+test("merge discovery records readiness only for spec merges and binds directives to the merged PR number", async () => {
+  const ctx = fixture();
+  const pr = { ...ctx.f.pr, number: 12 };
+  const ready = await handoff.discoverMergedSpec({ github: ctx.github, owner: OWNER, repo: REPO, pr, approval });
+  assert.deepEqual([ready.state, ready.identity, ctx.f.writes], ["awaiting-directive", null, 0]);
+  ctx.f.comments.push({ ...ctx.f.comment, id: 98, user: { login: "github-actions[bot]", type: "Bot" } });
+  assert.equal((await handoff.discoverMergedSpec({ github: ctx.github, owner: OWNER, repo: REPO, pr, approval })).state, "awaiting-directive");
+  ctx.f.comments.push(ctx.f.comment);
+  assert.equal((await handoff.discoverMergedSpec({ github: ctx.github, owner: OWNER, repo: REPO, pr, approval })).state, "handoff-pending");
+  const reused = await handoff.discoverMergedSpec({ github: ctx.github, owner: OWNER, repo: REPO, pr: { ...pr, number: 13 }, approval });
+  assert.equal(reused.state, "awaiting-directive");
+  assert.equal(await handoff.discoverMergedSpec({ github: ctx.github, owner: OWNER, repo: REPO, pr: { ...pr, merged: false }, approval }), null);
+  ctx.f.files = [{ filename: "README.md", status: "modified" }, { filename: SPEC, status: "removed" }];
+  assert.equal(await handoff.discoverMergedSpec({ github: ctx.github, owner: OWNER, repo: REPO, pr, approval }), null);
+});
+
+test("unqualified directive noise never replaces the auditable record", async () => {
+  const ctx = fixture(x => { x.permission = "read"; });
+  const record = await ctx.run();
+  assert.equal(await handoff.writeHandoffRecord({ github: ctx.github, owner: OWNER, repo: REPO, record }), null);
+  assert.equal(ctx.f.comments.length, 0);
+});
+
+test("recovery recognizes only persisted spec directives", async () => {
+  const ctx = fixture(x => { x.comments.push({ id: 5, body: "/approve" }); });
+  const args = { github: ctx.github, owner: OWNER, repo: REPO };
+  assert.equal(await handoff.priorSpecDirective({ ...args, status: { originalApprovalId: 99 } }), 99);
+  assert.equal(await handoff.priorSpecDirective({ ...args, status: { originalApprovalId: 5 } }), null);
+  assert.equal(await handoff.priorSpecDirective({ ...args, status: { originalApprovalId: 404 } }), null);
+});
 
 test("a directive posted after dependency clearance proceeds", async () => {
   assert.equal((await fixture(x => { x.issue.body += "Blocked by #8\n"; x.deps = { 8: { state: "closed", closed_at: "2026-10-09T00:00:00Z" } }; }).run()).state, "handoff-pending");
