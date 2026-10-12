@@ -31,7 +31,7 @@ $requiredSnippets = @(
     'issues: write',
     'pull-requests: write',
     'timeout-minutes: 20',
-    'group: ${{ github.workflow }}-${{ github.ref }}',
+    'group: ${{ github.workflow }}-${{ github.event.issue.number || github.event.pull_request.number || github.ref }}',
     'actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3',
     'PR_NUMBER_INPUT',
     'PR readiness routing nudge',

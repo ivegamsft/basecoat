@@ -1807,6 +1807,69 @@ else {
     $guardrailFailures += 'dependency-routing-concurrency'
 }
 
+# Test 24: For pull_request_target, issues, issue_comment, and discussion events,
+# github.ref is the default branch, so a ref-keyed group is shared by every
+# PR/issue. cancel-in-progress cancels other items' runs, and even without it the
+# newer pending run replaces the older pending one (#3803). Groups referencing
+# github.ref under these triggers must key on the item first.
+Write-Host '  Test 24: Validate PR/issue-event concurrency groups are not keyed on github.ref alone...'
+function Get-RefKeyedEventConcurrencyGroups {
+    param([string]$Content)
+
+    $defaultRefTriggers = 'pull_request_target|issues|issue_comment|discussion|discussion_comment'
+    $onBlock = [regex]::Match($Content, '(?ms)^(?:on|"on"|''on''):[ \t]*(.*?)(?=^\S)')
+    if (-not $onBlock.Success) { return @() }
+    $onText = $onBlock.Groups[1].Value
+    $inlineTriggers = ($onText -split '\r?\n')[0]
+    $triggerIndent = [regex]::Match($onText, '(?m)^([ \t]+)[^\s#]').Groups[1].Value
+    $hasDefaultRefTrigger = $inlineTriggers -match "\b(?:$defaultRefTriggers)\b" -or
+        ($triggerIndent -and $onText -match "(?m)^$triggerIndent(?:$defaultRefTriggers):")
+    if (-not $hasDefaultRefTrigger) { return @() }
+
+    $itemKey = 'github\.event\.(?:issue|pull_request|discussion)\.number|github\.event\.comment\.id'
+    return @([regex]::Matches($Content, '(?m)^\s+group:\s*(.+?)\s*$') |
+        ForEach-Object { $_.Groups[1].Value } |
+        Where-Object {
+            # github.ref is always populated, so an item key only helps when it precedes the ref fallback.
+            $refMatch = [regex]::Match($_, 'github\.ref(?:_name)?\b')
+            $itemMatch = [regex]::Match($_, $itemKey)
+            $refMatch.Success -and (-not $itemMatch.Success -or $itemMatch.Index -gt $refMatch.Index)
+        })
+}
+
+$refKeyedSample = "on:`n  issue_comment:`n    types: [created]`nconcurrency:`n  group: `${{ github.workflow }}-`${{ github.ref }}`n  cancel-in-progress: true`njobs: {}`n"
+$itemKeyedSample = $refKeyedSample.Replace('${{ github.ref }}', '${{ github.event.issue.number || github.event.pull_request.number || github.ref }}')
+$reversedSample = $refKeyedSample.Replace('${{ github.ref }}', '${{ github.ref || github.event.issue.number }}')
+$pushOnlySample = $refKeyedSample.Replace('issue_comment:', 'push:')
+$inlineSample = $refKeyedSample.Replace("on:`n  issue_comment:`n    types: [created]", 'on: [push, issues]')
+$detectorWorks = (Get-RefKeyedEventConcurrencyGroups $refKeyedSample).Count -eq 1 -and
+    (Get-RefKeyedEventConcurrencyGroups $inlineSample).Count -eq 1 -and
+    (Get-RefKeyedEventConcurrencyGroups $reversedSample).Count -eq 1 -and
+    (Get-RefKeyedEventConcurrencyGroups $itemKeyedSample).Count -eq 0 -and
+    (Get-RefKeyedEventConcurrencyGroups $pushOnlySample).Count -eq 0
+
+$refKeyedEventGroups = @()
+foreach ($dir in @($workflowDir, '.github/base-coat/workflows')) {
+    if (-not (Test-Path $dir)) { continue }
+    foreach ($file in Get-ChildItem "$dir/*.yml" -File) {
+        foreach ($group in Get-RefKeyedEventConcurrencyGroups (Get-Content $file.FullName -Raw)) {
+            $refKeyedEventGroups += "$dir/$($file.Name): $group"
+        }
+    }
+}
+
+if (-not $detectorWorks) {
+    Write-Host '    FAIL Ref-keyed concurrency detector self-check failed' -ForegroundColor Red
+    $guardrailFailures += 'event-concurrency-detector'
+}
+elseif ($refKeyedEventGroups.Count -eq 0) {
+    Write-Host '    PASS PR/issue-event concurrency groups are keyed per item'
+}
+else {
+    Write-Host "    FAIL Concurrency groups keyed on github.ref under PR/issue triggers (key on github.event.issue.number || github.event.pull_request.number || github.ref): $($refKeyedEventGroups -join '; ')" -ForegroundColor Red
+    $guardrailFailures += 'event-concurrency-per-item'
+}
+
 if ($guardrailFailures.Count -gt 0) {
     Write-Host "Workflow guardrails failed: $($guardrailFailures -join ', ')" -ForegroundColor Red
     exit 1
