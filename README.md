@@ -12,20 +12,35 @@ The operating model combines **Guardrails** (BaseCoat assets and standards) with
 
 ## Quick Start
 
-### Method 1: Manual Copy (simplest)
+### Choose your intent
 
-```bash
-# Download latest release
-curl -L https://github.com/YOUR-ORG/basecoat/releases/latest/download/basecoat-ghcp.zip -o basecoat.zip
-unzip basecoat.zip -d .github/base-coat/
+Each onboarding entry point serves one intent. Installing assets and preparing
+repository readiness are separate steps; run only the ones you need.
 
-# Copy Copilot-discoverable files
-cp -r .github/base-coat/agents .github/agents
-cp -r .github/base-coat/instructions .github/instructions
-cp -r .github/base-coat/prompts .github/prompts
-```
+| Intent | Entry point | Side effects | Next step |
+|---|---|---|---|
+| Install or update BaseCoat assets | `sync.ps1` / `sync.sh` | Writes `.github/base-coat/`, the Copilot-discoverable asset folders, and `.github/base-coat/guidance-lock.json`; seeds the PR template, issue template, and `.github/release-notes/templates/default.md` only if missing. Stages workflow definitions under `.github/base-coat/workflows/` without activating them (nothing is written to `.github/workflows/`). Does not change repository settings. | Review and commit the changes in a pull request. |
+| Guided asset install or refresh | `scripts/bootstrap-basecoat.ps1` | Runs `sync.ps1` (same file scope, including staged but inactive workflow definitions) and validates the result. Does not change repository settings. | Review the changes and open a pull request yourself. |
+| Repository readiness and governance profile | `scripts/bootstrap.ps1` | Checks tooling, GitHub Actions status, and the profile-driven secret and variable matrix; may install the `gh aw` extension, update `.gitignore`, initialize the local memory store, and prompt for missing secrets or variables; writes `.memory/bootstrap-audit.json`. In interactive runs of portal-enabled, non-solo profiles with missing Azure variables, it also runs portal OIDC bootstrap without a separate prompt: creates or reuses an Entra application and federated credential, assigns Contributor and User Access Administrator at subscription scope, and sets the Azure repository variables. When `portal-deploy.yml` exists and required secrets are ready, it offers to dispatch that workflow (after confirmation), which can start a cloud deployment. Does not install assets. | Resolve the remediation items in the audit log. |
+| Memory contribution enlistment | `scripts/onboard-basecoat.sh --repo ORG/REPO` | Adds the `basecoat-enabled` repository topic and creates the learning labels. Does not install assets. | The repository joins the weekly memory sweep. |
+| New repository scaffolding | `project-onboarding` agent | Creates or clones the repository, scaffolds root files, runs sync, configures hook packs and issue templates, and logs the first sprint issue. For a brand-new repository it commits and pushes the scaffolded files; reruns on existing repositories use a review branch. | Continue with readiness using `scripts/bootstrap.ps1`. |
 
-### Method 2: Sync Script (recommended for updates)
+Installing assets does not activate workflows or change repository settings.
+Staged workflow definitions run only after you explicitly install them into
+`.github/workflows/` with `configure-downstream-workflows.ps1`. `sync.ps1`
+installs that script under `.github/base-coat/scripts/`; `sync.sh` does not,
+so stay in the consumer repository and invoke the script by path from a
+separate BaseCoat source checkout (for example,
+`pwsh ../basecoat/scripts/configure-downstream-workflows.ps1`). The installer
+targets the git repository of the current working directory.
+See [Downstream workflows setup](docs/guides/downstream-workflows-setup.md).
+Readiness and onboarding entry points do change repository or cloud
+configuration; review the side effects in the table before running them. For
+example, `scripts/onboard-basecoat.sh` updates the repository topic and labels
+without prompting, and `scripts/bootstrap.ps1` can provision portal OIDC
+resources as described above.
+
+### Install assets with the sync script
 
 **macOS / Linux:**
 
@@ -83,9 +98,14 @@ reference implementation is `.github/base-coat/scripts/guidance-lock.ps1`;
 see [Shared guidance ownership lock](docs/reference/guidance-ownership-lock.md)
 for the schema, migration behavior, and sibling-product integration contract.
 
-### ⚠️ Do Not Copy Files Manually
+### Manual copy is unsupported
 
-Always use `sync.ps1` or `sync.sh`. Manual copying leads to stale assets, missing files, and incorrect target paths. The scripts handle cloning, copying, and cleanup in a single idempotent operation.
+Copying files by hand, from a release archive or a submodule, is not a
+supported install method. It bypasses the `guidance-lock/v1` ownership lock,
+asset provenance, and stale-file cleanup, which leads to stale assets, missing
+files, and incorrect target paths. Always use `sync.ps1` or `sync.sh` (or
+`scripts/bootstrap-basecoat.ps1`, which runs sync for you). The scripts handle
+cloning, copying, locking, and cleanup in a single idempotent operation.
 
 ---
 
@@ -384,31 +404,12 @@ tag=v1.0.0
 curl -fsSL https://raw.githubusercontent.com/YOUR-ORG/basecoat/${tag}/sync.sh | bash
 ```
 
-### Option 3 — Git Submodule
+### Unsupported — Git Submodule or Manual Copy
 
-```bash
-git submodule add https://github.com/YOUR-ORG/basecoat.git .github/base-coat
-```
-
-After adding the submodule, copy the assets to the Copilot-discoverable paths:
-
-```bash
-# macOS / Linux
-rm -rf .github/agents .github/instructions .github/prompts
-cp -r .github/base-coat/agents .github/agents
-cp -r .github/base-coat/instructions .github/instructions
-cp -r .github/base-coat/prompts .github/prompts
-```
-
-```powershell
-# Windows PowerShell
-Remove-Item -Recurse -Force -ErrorAction SilentlyContinue .github/agents, .github/instructions, .github/prompts
-Copy-Item -Recurse .github/base-coat/agents .github/agents
-Copy-Item -Recurse .github/base-coat/instructions .github/instructions
-Copy-Item -Recurse .github/base-coat/prompts .github/prompts
-```
-
-Repeat the copy step whenever you update the submodule, or use the sync scripts instead to automate this.
+Adding BaseCoat as a git submodule and copying its folders into the
+Copilot-discoverable paths by hand is not supported. Manual copies bypass the
+`guidance-lock/v1` ownership lock, provenance, and cleanup. Use Option 1 or
+Option 2 instead.
 
 ---
 
