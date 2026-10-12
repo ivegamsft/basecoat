@@ -44,7 +44,10 @@ for (const prefix of ['.github/workflows/', '.github/base-coat/workflows/']) {
     'hold-added', 'recent-pending', 'recent-success', 'old-failure', 'old-pending',
     'active-executor', 'bounded', 'dispatch-error', 'second-tick', 'empty-page',
     'unchanged-replay', 'check-transition', 'issue-transition', 'main-transition',
-    'finite-cap', 'status-budget', 'evidence-truncated', 'changing-evidence-cap']) {
+    'finite-cap', 'status-budget', 'evidence-truncated', 'changing-evidence-cap',
+    'phantom-queued', 'recent-queued', 'queued-with-jobs', 'queued-updated', 'mixed-recent',
+    'mixed-recent-first', 'mixed-jobs', 'jobs-read-error', 'queued-overflow', 'phantom-overflow',
+    'phantom-plus-in-progress', 'boundary-queued']) {
     test(`${prefix} recovery: ${scenario}`, async () => {
       process.env.GITHUB_WORKSPACE = root;
       process.env.SELECTED_PACK = 'solo-dev';
@@ -57,7 +60,29 @@ for (const prefix of ['.github/workflows/', '.github/base-coat/workflows/']) {
       if (scenario === 'advanced') live.head.sha = 'c'.repeat(40);
       if (scenario === 'closed') live.state = 'closed';
       if (scenario === 'hold-added') live.labels = [{ name: 'delivery-hold' }];
-      const requests = [], queries = [], summaries = [];
+      const requests = [], queries = [], summaries = [], jobReads = [];
+      const old = new Date(Date.now() - 2 * 86400000).toISOString();
+      const recent = new Date(Date.now() - 300000).toISOString();
+      const run = (id, created, updated = created) =>
+        ({ id, status: 'queued', created_at: created, updated_at: updated });
+      const many = count => Array.from({ length: count }, (_, id) => run(id + 1, old));
+      const queuedRuns = {
+        'phantom-queued': [run(1, old)], 'recent-queued': [run(1, recent)],
+        'queued-with-jobs': [run(1, old)], 'queued-updated': [run(1, old, recent)],
+        'mixed-recent': [run(1, old), run(2, old), run(3, recent)],
+        'mixed-recent-first': [run(3, recent), run(1, old), run(2, old)],
+        'mixed-jobs': [run(1, old), run(2, old), run(3, old)], 'jobs-read-error': [run(1, old)],
+        'queued-overflow': many(21), 'phantom-overflow': many(9), 'phantom-plus-in-progress': [run(1, old)],
+        'boundary-queued': [run(1, old)]
+      }[scenario] || [];
+      const deferral = {
+        'recent-queued': 'executor has queued work', 'queued-with-jobs': 'executor has queued work',
+        'queued-updated': 'executor has queued work', 'mixed-recent': 'executor has queued work',
+        'mixed-recent-first': 'executor has queued work', 'mixed-jobs': 'executor has queued work',
+        'jobs-read-error': 'executor queued-unverified (1)', 'queued-overflow': 'executor queued-overflow',
+        'phantom-overflow': 'executor phantom-overflow', 'phantom-plus-in-progress': 'executor has in_progress work',
+        'boundary-queued': 'executor has queued work'
+      }[scenario];
       let evidenceVersion = 0;
       const status = scenario.startsWith('recent-') || scenario.startsWith('old-')
         ? [{ context: 'BaseCoat merge eligibility', state: scenario.split('-')[1],
@@ -79,7 +104,17 @@ for (const prefix of ['.github/workflows/', '.github/base-coat/workflows/']) {
         actions: {
           listWorkflowRuns: async args => {
             queries.push(args);
-            return { data: { total_count: scenario === 'active-executor' ? 1 : 0 } };
+            if (args.status === 'queued') {
+              return { data: { total_count: queuedRuns.length, workflow_runs: queuedRuns.slice(0, args.per_page) } };
+            }
+            return { data: { total_count: scenario === 'active-executor' ||
+              (scenario === 'phantom-plus-in-progress' && args.status === 'in_progress') ? 1 : 0 } };
+          },
+          listJobsForWorkflowRun: async ({ run_id }) => {
+            jobReads.push(run_id);
+            if (scenario === 'jobs-read-error') throw new Error('jobs unavailable');
+            const jobs = scenario === 'queued-with-jobs' || (scenario === 'mixed-jobs' && run_id === 3) ? 1 : 0;
+            return { data: { total_count: jobs, jobs: [] } };
           },
           createWorkflowDispatch: async args => {
             if (scenario === 'dispatch-error') throw new Error('dispatch denied');
@@ -129,7 +164,8 @@ for (const prefix of ['.github/workflows/', '.github/base-coat/workflows/']) {
       } };
       const summary = { addRaw(value) { summaries.push(value); return this; }, async write() {} };
       const clock = scenario === 'empty-page'
-        ? { now: () => 900000, parse: Date.parse } : Date;
+        ? { now: () => 900000, parse: Date.parse }
+        : scenario === 'boundary-queued' ? { now: () => Date.parse(old) + 86400000, parse: Date.parse } : Date;
       const invocation = () => execute(github, context, { info() {}, summary }, clock, require);
       if (scenario === 'dispatch-error') await assert.rejects(invocation, /dispatch denied/);
       else await invocation();
@@ -153,7 +189,15 @@ for (const prefix of ['.github/workflows/', '.github/base-coat/workflows/']) {
       }
       assert.equal(requests.length, scenario === 'changing-evidence-cap' ? 50 : scenario === 'bounded' ? 5 :
         ['check-transition', 'issue-transition', 'main-transition'].includes(scenario) ? 2 :
-        ['zero-review', 'old-failure', 'old-pending', 'second-tick', 'empty-page', 'unchanged-replay'].includes(scenario) ? 1 : 0);
+        ['zero-review', 'old-failure', 'old-pending', 'second-tick', 'empty-page', 'unchanged-replay',
+          'phantom-queued'].includes(scenario) ? 1 : 0);
+      if (deferral) assert.deepEqual(summaries, [`Recovery deferred: ${deferral}. 0 evaluation request(s), not queue success.`]);
+      if (scenario === 'phantom-queued') {
+        assert.deepEqual(jobReads, [1]);
+        assert.match(summaries[0], /Stale-phantom queued executor runs ignored: 1 \(1\)\. /);
+      }
+      if (['queued-overflow', 'phantom-plus-in-progress', 'recent-queued', 'queued-updated',
+        'mixed-recent-first', 'boundary-queued'].includes(scenario)) assert.deepEqual(jobReads, []);
       if (scenario === 'empty-page') assert.equal(queries.filter(args => args.state === 'open').length, 2);
       for (const args of queries) {
         assert.ok(args.per_page <= 100);
@@ -164,7 +208,7 @@ for (const prefix of ['.github/workflows/', '.github/base-coat/workflows/']) {
         assert.equal(request.workflow_id, prefix.includes('base-coat')
           ? 'basecoat-pr-auto-merge-executor.yml' : 'pr-auto-merge-executor.yml');
       }
-      if (summaries.length) assert.match(summaries[0], /not queue success.*#3604/);
+      if (summaries.length) assert.match(summaries[0], /not queue success/);
     });
   }
 }

@@ -35,12 +35,19 @@ Implementation spec for #3590.
   privileges. Event-driven/manual executor notifications remain available when
   recovery reaches its budget or cannot read a complete snapshot.
 - Defer recovery while the executor has active work, and use its existing
-  per-PR serialized mailbox for races with event-driven notifications.
+  per-PR serialized mailbox for races with event-driven notifications. Any
+  in-progress, waiting, pending or requested run defers. A queued run defers
+  unless it is a stale phantom: older than 24 hours, `updated_at` equal to
+  `created_at`, and zero jobs. Any live queued run, more than 20 queued runs,
+  more than 8 stale phantoms or an unreadable job list defers the whole tick.
+  Phantom runs are never cancelled. If an ignored run later starts, at most
+  five extra evaluations may run for that tick; this owner-accepted boundary
+  is defined in [the stale backpressure spec](../spec/solo-dev-recovery-stale-backpressure.spec.md).
 - Dispatch is only a request for fresh evaluation, not authorization, queue
   admission or completed delivery. Report this distinction in the run summary.
 - Do not change token ownership, auto-merge authorization or queue credentials.
-  Known #3604 remains: automatic GITHUB_TOKEN queue admission suppresses group
-  CI; reconciliation cannot promise a working automatic queue delivery path.
+  Queue admission and merge-group checks remain with the executor (#3604 was
+  fixed by #3684); recovery dispatch never claims admission.
 
 ## Verification and rollout
 
