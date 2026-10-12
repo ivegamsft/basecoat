@@ -295,6 +295,15 @@ if [[ ! -f "$distribution_helper" ]]; then
 fi
 source "$distribution_helper"
 basecoat_validate_distribution "$TMP_DIR/source"
+# rollback.sh holds the lease across this sync and its restore; verify and renew it before the first write, never release it.
+if [[ -n "${BASECOAT_GUIDANCE_LEASE:-}" ]]; then
+  if [[ "${BASECOAT_GUIDANCE_LEASE%%|*}" != "$REPO_ROOT/.github/base-coat/guidance-lock.lease" ]] ||
+    ! grep -qxF "token=${BASECOAT_GUIDANCE_LEASE#*|}" "$REPO_ROOT/.github/base-coat/guidance-lock.lease/owner" 2>/dev/null; then
+    echo "GUIDANCE_LOCK_BUSY lease='${BASECOAT_GUIDANCE_LEASE%%|*}' reason='inherited lease is not held'" >&2
+    exit 1
+  fi
+  printf 'token=%s\npid=%s\nacquiredEpoch=%s\n' "${BASECOAT_GUIDANCE_LEASE#*|}" "$$" "$(date +%s)" > "$REPO_ROOT/.github/base-coat/guidance-lock.lease/owner"
+fi
 mkdir -p "$REPO_ROOT/$TARGET_DIR"
 
 # Capture the PREVIOUS release's asset-manifest.json before it is
@@ -478,7 +487,9 @@ source "$guidance_helper"
 
 legacy_overlay_file="$REPO_ROOT/$TARGET_DIR/.overlay-managed-files"
 guidance_lock_file="$REPO_ROOT/.github/base-coat/guidance-lock.json"
-guidance_lease="$(guidance_enter_lease "$REPO_ROOT")"
+if [[ -z "${BASECOAT_GUIDANCE_LEASE:-}" ]]; then
+  guidance_lease="$(guidance_enter_lease "$REPO_ROOT")"
+fi
 lock_tsv="$TMP_DIR/guidance-lock.tsv"
 plan_tsv="$TMP_DIR/guidance-plan.tsv"
 next_lock_tsv="$TMP_DIR/guidance-next.tsv"

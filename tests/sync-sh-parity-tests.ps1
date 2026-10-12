@@ -48,6 +48,9 @@ Assert-True ($syncShContent -notmatch 'echo "\.github/agent-references/\$\{asset
     $syncShContent -match 'Preserving modified legacy reference') `
     'Bash pre-lock migration must claim only legacy .github/agents/references paths whose bytes match the previous manifest (#3766).'
 Assert-True ($syncShContent -match 'reference_docs_prefix="\.\./\.\./\$\{TARGET_DIR%/\}/docs/"') 'Bash reference projection must point docs links at the docs installed under TARGET_DIR.'
+$rollbackShContent = Get-Content -LiteralPath (Join-Path $repoRoot 'rollback.sh') -Raw
+Assert-True ($rollbackShContent -match 'BASECOAT_REF="\$TAG" BASECOAT_TARGET_DIR="\$TARGET_DIR" BASECOAT_GUIDANCE_LEASE="\$LEASE" bash "\$SYNC_SCRIPT"' -and
+    $rollbackShContent -notmatch 'git clone') 'Bash rollback must replay sync.sh for the explicit tag instead of re-copying the staged payload (#3776).'
 if ($IsWindows) {
     Write-Host 'Bash runtime parity skipped on Windows after static corporate-origin checks; Ubuntu CI runs the fixture.'
     exit 0
@@ -379,6 +382,110 @@ known_bad_releases:
 }
 finally {
     Remove-Item -LiteralPath $scratch -Recurse -Force -ErrorAction SilentlyContinue
+}
+
+# Rollback parity (#3776): rollback.sh to vN equals a fresh sync of vN.
+$rbScratch = Join-Path $repoRoot 'test-results/rollback-sh-parity'
+try {
+    Remove-Item -LiteralPath $rbScratch -Recurse -Force -ErrorAction SilentlyContinue
+    $rbSource = Join-Path $rbScratch 'source'
+    git init -q $rbSource
+    git -C $rbSource config user.name basecoat-test
+    git -C $rbSource config user.email basecoat-test@example.com
+    foreach ($release in @(
+            @{ Version = '1.0.0'; Instruction = 'retired'; Tag = 'v1.0.0' },
+            @{ Version = '1.1.0'; Instruction = 'added'; Tag = 'v1.1.0' },
+            # Drifted version.json makes sync.sh fail late, after projections and the lock are written.
+            @{ Version = '9.9.9'; Instruction = 'drifted'; Tag = 'v1.2.0' })) {
+        Get-ChildItem -LiteralPath $rbSource -Force | Where-Object Name -ne '.git' | Remove-Item -Recurse -Force
+        New-Item -ItemType Directory -Path (Join-Path $rbSource 'agents'),(Join-Path $rbSource 'instructions'),(Join-Path $rbSource 'docs/reference') -Force | Out-Null
+        "{`"version`":`"$($release.Version)`"}" | Set-Content -LiteralPath (Join-Path $rbSource 'version.json') -Encoding utf8NoBOM
+        '{"schemaVersion":"1","assets":[]}' | Set-Content -LiteralPath (Join-Path $rbSource 'asset-manifest.json') -Encoding utf8NoBOM
+        '# source' | Set-Content -LiteralPath (Join-Path $rbSource 'README.md') -Encoding utf8NoBOM
+        '# reference' | Set-Content -LiteralPath (Join-Path $rbSource 'docs/reference/README.md') -Encoding utf8NoBOM
+        "---`nname: rollback`ndescription: v$($release.Version)`n---" | Set-Content -LiteralPath (Join-Path $rbSource 'agents/rollback.agent.md') -Encoding utf8NoBOM
+        "---`ndescription: $($release.Instruction)`napplyTo: '**/*'`n---" |
+            Set-Content -LiteralPath (Join-Path $rbSource "instructions/$($release.Instruction).instructions.md") -Encoding utf8NoBOM
+        git -C $rbSource add -A
+        git -C $rbSource commit -q -m "release $($release.Version)" | Out-Null
+        git -C $rbSource tag $release.Tag
+    }
+
+    $rbState = {
+        param([string]$Root)
+        $files = foreach ($dir in '.github/agents', '.github/instructions') {
+            Get-ChildItem -LiteralPath (Join-Path $Root $dir) -Recurse -File | Where-Object Name -notlike 'adhesion-*' |
+                ForEach-Object { "$($_.Name)=$(Get-GuidanceContentHash -Path $_.FullName)" }
+        }
+        $owned = @((Read-GuidanceLock -RepoRoot $Root).entries | Where-Object owner -eq 'basecoat')
+        return "$(@($files | Sort-Object) -join ';')|$($owned | ConvertTo-Json -Depth 4 -Compress)"
+    }
+    $rbRun = {
+        param([string]$Root, [string]$Script, [string[]]$Arguments)
+        Push-Location $Root
+        try {
+            $env:BASECOAT_REPO = "file://$rbSource"
+            $output = & $bash.Source (Join-Path $repoRoot $Script) @Arguments 2>&1 | Out-String
+            return [pscustomobject]@{ ExitCode = $LASTEXITCODE; Output = $output }
+        }
+        finally {
+            Remove-Item Env:\BASECOAT_REPO,Env:\BASECOAT_REF -ErrorAction SilentlyContinue
+            Pop-Location
+        }
+    }
+    $rbConsumer = {
+        param([string]$Name, [string]$Ref)
+        $root = Join-Path $rbScratch $Name
+        git init -q $root
+        "source: file://$rbSource`nref: $Ref" | Set-Content -LiteralPath (Join-Path $root '.basecoat.yml') -Encoding utf8NoBOM
+        $result = & $rbRun $root 'sync.sh' @()
+        if ($result.ExitCode -ne 0) { throw "sync.sh $Ref failed for ${Name}: $($result.Output)" }
+        return $root
+    }
+
+    $expectedState = & $rbState (& $rbConsumer 'fresh' 'v1.0.0')
+
+    $rolled = & $rbConsumer 'rolled' 'v1.0.0'
+    $foreignRel = '.github/instructions/adhesion-owned.instructions.md'
+    'adhesion' | Set-Content -LiteralPath (Join-Path $rolled $foreignRel) -Encoding utf8NoBOM
+    $foreignEntry = New-GuidanceLockEntry -RepoRoot $rolled -Path $foreignRel -Owner 'adhesion' -Sha256 (Get-GuidanceContentHash -Path (Join-Path $rolled $foreignRel))
+    Write-GuidanceLock -RepoRoot $rolled -Entries (@((Read-GuidanceLock -RepoRoot $rolled).entries) + $foreignEntry)
+    "source: file://$rbSource`nref: v1.1.0" | Set-Content -LiteralPath (Join-Path $rolled '.basecoat.yml') -Encoding utf8NoBOM
+    $upgrade = & $rbRun $rolled 'sync.sh' @()
+    Assert-True ($upgrade.ExitCode -eq 0) "sync.sh v1.1.0 upgrade failed: $($upgrade.Output)"
+    $rollback = & $rbRun $rolled 'rollback.sh' @('v1.0.0')
+    Assert-True ($rollback.ExitCode -eq 0) "rollback.sh v1.0.0 failed: $($rollback.Output)"
+    Assert-True ((& $rbState $rolled) -eq $expectedState) 'rollback.sh projections or basecoat lock entries differ from a fresh v1.0.0 sync.'
+    $foreignAfter = @((Read-GuidanceLock -RepoRoot $rolled).entries | Where-Object owner -eq 'adhesion')
+    Assert-True ($foreignAfter.Count -eq 1 -and $foreignAfter[0].sha256 -eq $foreignEntry.sha256 -and
+        (Test-Path -LiteralPath (Join-Path $rolled $foreignRel))) 'rollback.sh changed a foreign-owned lock entry or file.'
+    Assert-True ((Get-Content -LiteralPath (Join-Path $rolled '.basecoat.yml') -Raw) -match '(?m)^ref: v1\.0\.0$') 'rollback.sh did not update the .basecoat.yml pin after success.'
+    $rbSnapshot = { "$(& $rbState $rolled)|$(Get-Content -LiteralPath (Join-Path $rolled '.github/base-coat/guidance-lock.json') -Raw)|$(Get-Content -LiteralPath (Join-Path $rolled '.github/base-coat/.source-provenance.json') -Raw)|$(Get-Content -LiteralPath (Join-Path $rolled '.basecoat.yml') -Raw)|$(Test-Path -LiteralPath (Join-Path $rolled '.github/base-coat/guidance-lock.lease'))" }
+    $beforeLate = & $rbSnapshot
+    $late = & $rbRun $rolled 'rollback.sh' @('v1.2.0')
+    Assert-True ($late.ExitCode -ne 0 -and $late.Output -match 'provenance check failed') "rollback.sh v1.2.0 did not fail late in sync.sh: $($late.Output)"
+    Assert-True ((& $rbSnapshot) -eq $beforeLate) 'A late sync.sh failure left projections, lock, provenance, pin, or lease changed after rollback.sh.'
+    Set-ItemProperty -LiteralPath (Join-Path $rolled '.basecoat.yml') -Name IsReadOnly -Value $true
+    $pinFailure = & $rbRun $rolled 'rollback.sh' @('v1.1.0')
+    Assert-True ($pinFailure.ExitCode -ne 0 -and (& $rbSnapshot) -eq $beforeLate) "A failed .basecoat.yml pin write did not restore the prior install: $($pinFailure.Output)"
+    $leaseDir = "$(git -C $rolled rev-parse --show-toplevel)/.github/base-coat/guidance-lock.lease"; New-Item -ItemType Directory -Path $leaseDir | Out-Null
+    "token=held`nacquiredEpoch=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - 598)" | Set-Content -LiteralPath (Join-Path $leaseDir 'owner') -Encoding ascii
+    $env:BASECOAT_GUIDANCE_LEASE = "$leaseDir|other"; $env:BASECOAT_REF = 'v1.1.0'; try { $foreign = & $rbRun $rolled 'sync.sh' @() } finally { Remove-Item Env:\BASECOAT_GUIDANCE_LEASE }
+    Assert-True ($foreign.ExitCode -ne 0 -and $foreign.Output -match 'GUIDANCE_LOCK_BUSY' -and (Get-Content -LiteralPath (Join-Path $rolled '.github/base-coat/version.json') -Raw) -match '1\.0\.0') "sync.sh wrote the staged payload before rejecting a foreign inherited lease: $($foreign.Output)"
+    $env:BASECOAT_GUIDANCE_LEASE = "$leaseDir|held"; try { $inherited = & $rbRun $rolled 'sync.sh' @() } finally { Remove-Item Env:\BASECOAT_GUIDANCE_LEASE }
+    Start-Sleep -Seconds 3; $takeover = try { Enter-GuidanceLockLease -RepoRoot $rolled -TimeoutSeconds 0 } catch { 'busy' }; Remove-Item -LiteralPath $leaseDir -Recurse -Force
+    Assert-True ($inherited.ExitCode -eq 0 -and $takeover -eq 'busy') "sync.sh did not renew an aged inherited lease, so another writer could reclaim it mid-sync: $($inherited.Output)"
+
+    $edited = & $rbConsumer 'edited' 'v1.1.0'
+    Add-Content -LiteralPath (Join-Path $edited '.github/instructions/added.instructions.md') 'local edit'
+    $blocked = & $rbRun $edited 'rollback.sh' @('v1.0.0')
+    Assert-True ($blocked.ExitCode -ne 0 -and $blocked.Output -match 'GUIDANCE_CONTENT_MODIFIED') 'rollback.sh did not stop on a locally modified BaseCoat-owned file.'
+    $stagedVersion = (Get-Content -LiteralPath (Join-Path $edited '.github/base-coat/version.json') -Raw | ConvertFrom-Json).version
+    Assert-True ($stagedVersion -eq '1.1.0' -and (Get-Content -LiteralPath (Join-Path $edited '.basecoat.yml') -Raw) -match 'ref: v1\.1\.0') `
+        'A failed rollback.sh changed the staged payload or the .basecoat.yml pin.'
+}
+finally {
+    Remove-Item -LiteralPath $rbScratch -Recurse -Force -ErrorAction SilentlyContinue
 }
 
 Write-Host 'Bash sync parity tests passed.'
