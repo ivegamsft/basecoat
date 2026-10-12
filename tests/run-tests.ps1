@@ -1048,6 +1048,7 @@ $additionalSuites = @(
     'distribution-exclusion-tests.ps1',
     'asset-manifest-drift-tests.ps1',
     'backlog-efficiency-scorecard-tests.ps1',
+    'bootstrap-pr-counter-tests.ps1',
     'bootstrap-strictmode-interpolation-tests.ps1',
     'ci-audit-script-tests.ps1',
     'failure-pattern-script-tests.ps1',

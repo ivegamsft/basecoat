@@ -83,7 +83,24 @@ function Write-Info([string]$msg) { Write-Host "  ℹ️   $msg" -ForegroundColo
 
 $script:addedCount   = 0
 $script:updatedCount = 0
+$script:removedCount = 0
 $script:errCount     = 0
+$script:changedPaths = New-Object System.Collections.Generic.List[string]
+
+# Hash overlay files sync writes, keyed by repo-relative path (ordinal, so case-only renames count).
+function Get-OverlayFileSnapshot([string]$Root) {
+    $snapshot = New-Object System.Collections.Hashtable ([System.StringComparer]::Ordinal)
+    $rootFull = [System.IO.Path]::GetFullPath($Root).TrimEnd('\', '/')
+    foreach ($rel in @('.github', '.agents', $TargetDir)) {
+        $base = Join-Path $rootFull $rel
+        if (-not (Test-Path -LiteralPath $base)) { continue }
+        foreach ($file in @(Get-ChildItem -LiteralPath $base -Recurse -File -Force -ErrorAction SilentlyContinue)) {
+            $relPath = $file.FullName.Substring($rootFull.Length).TrimStart('\', '/') -replace '\\', '/'
+            $snapshot[$relPath] = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash
+        }
+    }
+    return $snapshot
+}
 
 function Confirm-Step([string]$prompt) {
     if ($Silent) { return $true }
@@ -196,29 +213,24 @@ $tempRoot   = Join-Path ([System.IO.Path]::GetTempPath()) "basecoat-$([System.Gu
 $sourcePath = Join-Path $tempRoot 'source'
 
 try {
-    if (-not $DryRun) {
-        New-Item -ItemType Directory -Path $tempRoot | Out-Null
-        Write-Info "Cloning $BasecoatRepoUrl ($Ref)..."
-        $cloneResult = git clone --quiet --depth 1 --branch $Ref $BasecoatRepoUrl $sourcePath 2>&1
-        if ($LASTEXITCODE -ne 0) {
-            Write-Fail "git clone failed: $cloneResult"
-            exit 1
-        }
-    } else {
-        Write-Info "[DRY RUN] Would clone $BasecoatRepoUrl @ $Ref to temp dir"
+    # Dry runs also clone (into the temp dir only) so the preview can list the items it would install.
+    New-Item -ItemType Directory -Path $tempRoot | Out-Null
+    Write-Info "Cloning $BasecoatRepoUrl ($Ref)..."
+    $cloneResult = git clone --quiet --depth 1 --branch $Ref $BasecoatRepoUrl $sourcePath 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Fail "git clone failed: $cloneResult"
+        exit 1
     }
 
     # Read upstream version
     $upstreamVersion = 'unknown'
-    if (-not $DryRun) {
-        $upstreamVerFile = Join-Path $sourcePath 'version.json'
-        if (Test-Path $upstreamVerFile) {
-            try {
-                $upstreamVersion = (Get-Content $upstreamVerFile -Raw | ConvertFrom-Json).version
-            } catch { }
-        }
-        Write-Ok "BaseCoat $upstreamVersion downloaded"
+    $upstreamVerFile = Join-Path $sourcePath 'version.json'
+    if (Test-Path $upstreamVerFile) {
+        try {
+            $upstreamVersion = (Get-Content $upstreamVerFile -Raw | ConvertFrom-Json).version
+        } catch { }
     }
+    Write-Ok "BaseCoat $upstreamVersion downloaded"
 
     # ── Phase 3: copy overlay files ──────────────────────────────────────────
 
@@ -231,6 +243,7 @@ try {
         $savedRepo = $env:BASECOAT_REPO
         $savedRef = $env:BASECOAT_REF
         $savedTarget = $env:BASECOAT_TARGET_DIR
+        $beforeSnapshot = Get-OverlayFileSnapshot $repoRoot
         try {
             $env:BASECOAT_TEST_SOURCE_PATH = $sourcePath
             $env:BASECOAT_REPO = $BasecoatRepoUrl
@@ -243,6 +256,39 @@ try {
             $env:BASECOAT_REPO = $savedRepo
             $env:BASECOAT_REF = $savedRef
             $env:BASECOAT_TARGET_DIR = $savedTarget
+        }
+
+        # Count the committable files sync actually wrote or removed (#3812).
+        $afterSnapshot = Get-OverlayFileSnapshot $repoRoot
+        $changes = New-Object System.Collections.Generic.List[object]
+        foreach ($path in @($afterSnapshot.Keys | Sort-Object)) {
+            if (-not $beforeSnapshot.ContainsKey($path)) {
+                $changes.Add([pscustomobject]@{ Path = $path; Kind = 'added' })
+            } elseif ($beforeSnapshot[$path] -ne $afterSnapshot[$path]) {
+                $changes.Add([pscustomobject]@{ Path = $path; Kind = 'updated' })
+            }
+        }
+        foreach ($path in @($beforeSnapshot.Keys | Sort-Object)) {
+            if (-not $afterSnapshot.ContainsKey($path)) {
+                $changes.Add([pscustomobject]@{ Path = $path; Kind = 'removed' })
+            }
+        }
+        # Only count changes Git can commit: intersect with post-sync `git status` (excludes ignored files,
+        # untracked removals and content restored to HEAD). -z output is unquoted; decode it as UTF-8.
+        $gitChanged = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::Ordinal)
+        if ($changes.Count -gt 0) {
+            $savedErrorAction = $ErrorActionPreference; $ErrorActionPreference = 'Continue'; $savedEncoding = [Console]::OutputEncoding
+            try {
+                [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
+                $status = (git --literal-pathspecs status --porcelain=v1 -z --no-renames --untracked-files=all -- '.github' '.agents' $TargetDir 2>$null) -join "`n"
+                if ($LASTEXITCODE -ne 0) { throw "git status failed (exit $LASTEXITCODE) after sync; cannot determine overlay changes." }
+                foreach ($entry in ($status -split "`0")) { if ($entry.Length -gt 3) { [void]$gitChanged.Add($entry.Substring(3)) } }
+            } finally { [Console]::OutputEncoding = $savedEncoding; $ErrorActionPreference = $savedErrorAction }
+        }
+        foreach ($change in $changes) {
+            if (-not $gitChanged.Contains($change.Path)) { continue }
+            $script:changedPaths.Add($change.Path)
+            switch ($change.Kind) { 'added' { $script:addedCount++ } 'updated' { $script:updatedCount++ } 'removed' { $script:removedCount++ } }
         }
     }
     if ($DryRun) {
@@ -527,6 +573,8 @@ try {
     Write-Host "  Version: $upstreamVersion" -ForegroundColor White
     Write-Host "  Added:   $($script:addedCount)" -ForegroundColor $(if ($script:addedCount -gt 0) { 'Green' } else { 'DarkGray' })
     Write-Host "  Updated: $($script:updatedCount)" -ForegroundColor $(if ($script:updatedCount -gt 0) { 'Cyan' } else { 'DarkGray' })
+    if ($DryRun) { Write-Info 'Dry-run counts are top-level overlay items, not files; existing items count as updates.' }
+    else { Write-Host "  Removed: $($script:removedCount)" -ForegroundColor $(if ($script:removedCount -gt 0) { 'Cyan' } else { 'DarkGray' }) }
     Write-Host "  Errors:  $($script:errCount)" -ForegroundColor $(if ($script:errCount -gt 0) { 'Red' } else { 'DarkGray' })
 
     if (-not $validationOk) {
@@ -537,23 +585,37 @@ try {
 
     # ── Phase 5: open PR ──────────────────────────────────────────────────────
 
-    if (-not $SkipPR -and $ghAvailable -and -not $DryRun -and ($script:addedCount + $script:updatedCount) -gt 0) {
+    $changeCount = $script:addedCount + $script:updatedCount + $script:removedCount
+    if (-not $DryRun -and $changeCount -eq 0) {
+        Write-Info 'No committable overlay changes detected; skipping pull request.'
+    }
+    if (-not $SkipPR -and $ghAvailable -and -not $DryRun -and $changeCount -gt 0) {
         Write-Host ''
         if (Confirm-Step '  Open a pull request with these changes?') {
             $branchName = "chore/basecoat-$upstreamVersion-$(Get-Date -Format 'yyyyMMdd')"
             $commitMsg  = "chore: adopt BaseCoat overlay v$upstreamVersion
 
-Added $($script:addedCount) new file(s), updated $($script:updatedCount) file(s).
+Added $($script:addedCount) new file(s), updated $($script:updatedCount) file(s), removed $($script:removedCount) file(s).
 Source: $BasecoatRepo @ $Ref
 
 Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
 
+            # PS 5.1 makes redirected native stderr terminate under 'Stop'; rely on git/gh exit codes.
+            $savedErrorAction = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
             try {
                 $currentBranch = git rev-parse --abbrev-ref HEAD 2>$null
                 git checkout -b $branchName 2>$null
-                git add $TargetDir '.github/instructions' '.github/prompts' '.github/skills' '.github/agents' '.agents/skills' 2>$null
-                git commit -m $commitMsg 2>$null
+                if ($LASTEXITCODE -ne 0) { throw "git checkout -b $branchName failed" }
+                # Stage and commit exactly the files this run changed (leaving any other staged
+                # work alone); a pathspec file avoids command-line length limits.
+                $pathspecFile = Join-Path $tempRoot 'changed-paths.txt'
+                [System.IO.File]::WriteAllLines($pathspecFile, [string[]]$script:changedPaths, (New-Object System.Text.UTF8Encoding($false)))
+                git --literal-pathspecs add -A --pathspec-from-file=$pathspecFile 2>$null
+                if ($LASTEXITCODE -ne 0) { throw 'git add failed' }
+                git --literal-pathspecs commit -m $commitMsg --pathspec-from-file=$pathspecFile 2>$null
+                if ($LASTEXITCODE -ne 0) { throw 'git commit failed' }
                 git push -u origin $branchName 2>$null
+                if ($LASTEXITCODE -ne 0) { throw "git push origin $branchName failed" }
 
                 $prBody = "## BaseCoat Overlay — v$upstreamVersion
 
@@ -565,6 +627,7 @@ This PR was generated by ``bootstrap-basecoat.ps1``.
 | Branch/tag | ``$Ref`` |
 | Files added | $($script:addedCount) |
 | Files updated | $($script:updatedCount) |
+| Files removed | $($script:removedCount) |
 
 ### Review checklist
 - [ ] Scan ``$TargetDir/CHANGELOG.md`` for breaking changes
@@ -575,13 +638,15 @@ This PR was generated by ``bootstrap-basecoat.ps1``.
                     --title "chore: adopt BaseCoat overlay v$upstreamVersion" `
                     --body  $prBody `
                     --label 'dependencies'
-
+                if ($LASTEXITCODE -ne 0) { throw 'gh pr create failed' }
                 Write-Ok 'Pull request created.'
                 Write-Info "Branch: $branchName"
                 Write-Info "Run 'git checkout $currentBranch' to return to your previous branch."
             } catch {
                 Write-Warn "PR creation failed: $_"
-                Write-Info "Your changes are committed. Open the PR manually."
+                Write-Info "Branch: $branchName. Review the step above, then push and open the PR manually."
+            } finally {
+                $ErrorActionPreference = $savedErrorAction
             }
         }
     }

@@ -21,6 +21,9 @@ All notable changes to this repository should be recorded in this file.
 - Key `ship-it-build-guard` concurrency per source `workflow_run` so a later completion can no longer displace a pending
   failure run before its retry/escalation; the guardrail now also covers `workflow_run` triggers, with `adoption-metrics`
   and `post-onboarding-drift-loop` explicitly exempted as intentionally serialized aggregates (#3808).
+- `scripts/bootstrap-basecoat.ps1` now counts the committable files a real run adds, updates or removes (including a
+  custom `TargetDir`), so its optional pull request opens when the overlay changed and is skipped otherwise; it stages
+  and commits only those files, and `-DryRun` clones into a temp directory so it can list top-level items (#3812).
 
 ## 4.6.5 - 2026-10-11
 
