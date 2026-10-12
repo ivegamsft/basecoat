@@ -2,7 +2,7 @@
 
 Generated as a standalone inventory (no edits to agent/skill/instruction files).
 
-- Generated: 2026-10-09 17:58:45 +0000
+- Generated: 2026-10-12 17:32:44 +0000
 - Estimation method: `approx_tokens = round(word_count × 1.35)` (same heuristic used in `scripts/validate-basecoat.ps1`).
 - Scope: `agents/*.agent.md`, `skills/*/SKILL.md`, `instructions/*.instructions.md`.
 
@@ -11,9 +11,9 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | Type | Count | Total Words | Total Approx Tokens | Avg Approx Tokens |
 |---|---:|---:|---:|---:|
 | Agent | 131 | 40459 | 54622 | 417 |
-| Skill | 143 | 34249 | 46235 | 323 |
-| Instruction | 94 | 52593 | 71000 | 755 |
-| **All** | 368 | 127301 | 171857 | 467 |
+| Skill | 143 | 34227 | 46205 | 323 |
+| Instruction | 94 | 52604 | 71015 | 755 |
+| **All** | 368 | 127290 | 171842 | 467 |
 
 ## Agents
 
@@ -158,7 +158,6 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | agentic-cost-audit | `skills/agentic-cost-audit/SKILL.md` | 370 | 500 |
 | lane-closeout | `skills/lane-closeout/SKILL.md` | 369 | 498 |
 | repo-cleanup | `skills/repo-cleanup/SKILL.md` | 369 | 498 |
-| ship-it | `skills/ship-it/SKILL.md` | 369 | 498 |
 | rca | `skills/rca/SKILL.md` | 368 | 497 |
 | merge-conflict-mediator | `skills/merge-conflict-mediator/SKILL.md` | 366 | 494 |
 | yagni-analysis | `skills/yagni-analysis/SKILL.md` | 366 | 494 |
@@ -168,6 +167,7 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | queue-rebalancer | `skills/queue-rebalancer/SKILL.md` | 355 | 479 |
 | sprint-management | `skills/sprint-management/SKILL.md` | 352 | 475 |
 | release-notes | `skills/release-notes/SKILL.md` | 348 | 470 |
+| ship-it | `skills/ship-it/SKILL.md` | 347 | 468 |
 | agentops-audit | `skills/agentops-audit/SKILL.md` | 339 | 458 |
 | ci-audit | `skills/ci-audit/SKILL.md` | 339 | 458 |
 | backlog-rebalance-engine | `skills/backlog-rebalance-engine/SKILL.md` | 337 | 455 |
@@ -303,7 +303,7 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 
 | Name | Location | Words | Approx Tokens |
 |---|---|---:|---:|
-| basecoat-10-core-intent-routing | `instructions/basecoat-10-core-intent-routing.instructions.md` | 4255 | 5744 |
+| basecoat-10-core-intent-routing | `instructions/basecoat-10-core-intent-routing.instructions.md` | 4266 | 5759 |
 | basecoat-50-security-entra-oidc-user-auth | `instructions/basecoat-50-security-entra-oidc-user-auth.instructions.md` | 1604 | 2165 |
 | basecoat-60-workflow-multi-repo-orchestration | `instructions/basecoat-60-workflow-multi-repo-orchestration.instructions.md` | 1324 | 1787 |
 | basecoat-20-lang-ruby-on-rails | `instructions/basecoat-20-lang-ruby-on-rails.instructions.md` | 1233 | 1665 |
