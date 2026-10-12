@@ -582,6 +582,24 @@ jobs:
             const deletions = changedFiles.reduce((total, file) => total + file.deletions, 0);
             const expectedLines = additions + deletions;
 
+            const evaluatorResponse = await github.rest.repos.getContent({
+              owner,
+              repo,
+              path: '.github/base-coat/scripts/pr-decomposition-evaluator.cjs',
+              ref: baseSha,
+            });
+            if (Array.isArray(evaluatorResponse.data) || evaluatorResponse.data.type !== 'file') {
+              throw new Error('Trusted PR decomposition evaluator is unavailable at the synthesis base.');
+            }
+            const evaluatorModule = { exports: {} };
+            const loadEvaluator = new Function('require', 'module', 'exports',
+              Buffer.from(evaluatorResponse.data.content, 'base64').toString('utf8'));
+            loadEvaluator(require, evaluatorModule, evaluatorModule.exports);
+            const { evaluateDecomposition, parseScope, MAX_FILES, MAX_LINES } = evaluatorModule.exports;
+            if (!Number.isSafeInteger(MAX_FILES) || !Number.isSafeInteger(MAX_LINES)) {
+              throw new Error('Trusted PR decomposition evaluator does not export its size limits.');
+            }
+
             const templateResponse = await github.rest.repos.getContent({
               owner,
               repo,
@@ -628,7 +646,10 @@ jobs:
             prBody = replaceOnce(
               prBody,
               'Classification rationale: TBD',
-              'The generated PRD and spec are one review unit for one source issue and are not implementation authorization.'
+              // Built only from trusted integers so no issue text reaches intake metadata.
+              `Classification rationale: individual scope; one PRD/spec proposal unit for source issue #${issueNum}; ` +
+                `${changedFiles.length} files and ${expectedLines} changed lines measured against the evaluator limits of ` +
+                `${MAX_FILES} files and ${MAX_LINES} lines.`
             );
             prBody = replaceOnce(
               prBody,
@@ -638,21 +659,14 @@ jobs:
             prBody = replaceOnce(prBody, '- Risks / blast radius:', '- Risks / blast radius: Incorrect generated scope could mislead later implementation; draft status and source-owner review remain required.');
             prBody = replaceOnce(prBody, '- Rollout plan:', '- Rollout plan: Keep as draft until the source issue owner reviews the proposed PRD/spec.');
             prBody = replaceOnce(prBody, '- Rollback plan:', '- Rollback plan: Close the draft PR and remove or regenerate its proposal branch.');
-
-            const evaluatorResponse = await github.rest.repos.getContent({
-              owner,
-              repo,
-              path: '.github/base-coat/scripts/pr-decomposition-evaluator.cjs',
-              ref: baseSha,
-            });
-            if (Array.isArray(evaluatorResponse.data) || evaluatorResponse.data.type !== 'file') {
-              throw new Error('Trusted PR decomposition evaluator is unavailable at the synthesis base.');
+            const unfilled = prBody.replace(/<!--[\s\S]*?-->/g, '')
+              .split(/\r?\n/)
+              .filter(line => /^\s*(?:-\s+)?[A-Z][^:|]*:\s*(?:TBD)?\s*$/.test(line))
+              .map(line => line.trim());
+            if (unfilled.length > 0) {
+              throw new Error(`Generated PR body leaves required template fields empty: ${unfilled.join('; ')}`);
             }
-            const evaluatorModule = { exports: {} };
-            const loadEvaluator = new Function('require', 'module', 'exports',
-              Buffer.from(evaluatorResponse.data.content, 'base64').toString('utf8'));
-            loadEvaluator(require, evaluatorModule, evaluatorModule.exports);
-            const { evaluateDecomposition, parseScope } = evaluatorModule.exports;
+
             const intakeScope = parseScope(prBody);
             if (
               intakeScope.expectedFiles !== changedFiles.length ||
@@ -676,6 +690,10 @@ jobs:
             });
             if (preflight.decision !== 'pass') {
               throw new Error(`Generated PR intake preflight ${preflight.decision}: ${preflight.reason}`);
+            }
+            if (preflight.scope !== 'individual' || preflight.counts.changedFiles !== changedFiles.length ||
+                preflight.counts.changedLines !== expectedLines) {
+              throw new Error(`Generated PR intake preflight classification disagrees with the rationale for #${issueNum}.`);
             }
             const currentMain = await github.rest.git.getRef({
               owner,

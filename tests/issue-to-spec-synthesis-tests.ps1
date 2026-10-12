@@ -92,8 +92,8 @@ assert.equal(extract('Plain text', null), 'Plain text');
   const countStart = script.indexOf('const branchRef =');
   if (countStart >= 0) {
     // Compare-commits responses carry only per-file line counts (#3857).
-    const countEnd = script.indexOf('const templateResponse =', countStart);
-    assert.ok(countEnd > countStart, 'Changed-line computation must precede the PR template read.');
+    const countEnd = script.indexOf('const evaluatorResponse =', countStart);
+    assert.ok(countEnd > countStart, 'Changed-line computation must precede the trusted evaluator read.');
     const countLines = new AsyncFunction('github', 'owner', 'repo', 'branchName', 'baseSha', 'prdPath', 'specPath', 'issueNum',
       'branchExists', 'prdContent', 'specContent', 'recordSynthesisConflict',
       script.slice(countStart, countEnd) + 'return { additions, deletions, expectedLines };');
@@ -108,6 +108,38 @@ assert.equal(extract('Plain text', null), 'Plain text');
     await assert.rejects(compare({ status: 'ahead', additions: 116, deletions: 2 }), /complete generated-file diff/);
     const truncated = [...files, ...Array.from({ length: 298 }, (_, i) => ({ filename: `f${i}`, additions: 1, deletions: 0 }))];
     await assert.rejects(compare({ status: 'ahead', files: truncated }), /complete generated-file diff/);
+
+    // The generated body must satisfy the real author-time and merge-time intake validators (#3866).
+    const repoRoot = require('node:path').resolve(process.argv[2], '..', '..', '..');
+    const readRepo = file => fs.readFileSync(require('node:path').join(repoRoot, file));
+    const { checkBody } = require(require('node:path').join(repoRoot, 'scripts', 'check-pr-intake-metadata.cjs'));
+    const evaluator = require(require('node:path').join(repoRoot, '.github', 'base-coat', 'scripts', 'pr-decomposition-evaluator.cjs'));
+    const bodyEnd = script.indexOf('// Open PR', countStart);
+    const buildBody = new AsyncFunction('github', 'owner', 'repo', 'branchName', 'baseSha', 'prdPath', 'specPath', 'issueNum',
+      'branchExists', 'prdContent', 'specContent', 'recordSynthesisConflict', 'require',
+      script.slice(countStart, bodyEnd) + 'return prBody;');
+    const generate = template => buildBody({ rest: {
+      git: { getRef: async () => ({ data: { object: { sha: 'a'.repeat(40) } } }) },
+      repos: {
+        compareCommits: async () => ({ data: { status: 'ahead', files: files.map(file => ({ ...file, status: 'added' })) } }),
+        getContent: async request => {
+          assert.equal(request.ref, 'a'.repeat(40));
+          const content = request.path === '.github/PULL_REQUEST_TEMPLATE.md' ? template
+            : readRepo('.github/base-coat/scripts/pr-decomposition-evaluator.cjs');
+          return { data: { type: 'file', content: Buffer.from(content).toString('base64') } };
+        },
+      },
+    } }, 'owner', 'repo', 'branch', 'a'.repeat(40), 'prd.md', 'spec.md', 3748, false, '', '', async () => {}, require);
+    const template = readRepo('.github/PULL_REQUEST_TEMPLATE.md').toString('utf8').replace(/\r\n/g, '\n');
+    const generated = await generate(template);
+    const checked = checkBody(generated, { changedFiles: 2, additions: 116, deletions: 2 });
+    assert.deepEqual({ errors: checked.errors, warnings: checked.warnings }, { errors: [], warnings: [] });
+    assert.match(checked.scope.rationale, new RegExp(`^individual scope; .*#3748; 2 files and 118 changed lines .*${evaluator.MAX_FILES} files and ${evaluator.MAX_LINES} lines\\.$`));
+    const verdict = await evaluator.evaluateDecomposition({ body: generated, changedFiles: 2, additions: 116, deletions: 2,
+      files: files.map(file => ({ filename: file.filename, status: 'added' })), headSha: 'a'.repeat(40), baseSha: 'a'.repeat(40) });
+    assert.equal(verdict.decision, 'pass');
+    assert.doesNotMatch(generated, /^[^<\n]*:\s*TBD\s*$/m);
+    await assert.rejects(generate(template.replace('- Rollout plan:', '- Rollout plan:\n- Owner:')), /leaves required template fields empty: - Owner:/);
   }
 
   assert.equal(extract('## Problem \t Statement\nSpaced', ['problem statement']), 'Spaced');
