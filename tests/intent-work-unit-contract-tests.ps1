@@ -8,6 +8,7 @@ $docPath = Join-Path $repoRoot 'docs\reference\intent-work-unit-contracts.md'
 $docDir = Split-Path $docPath -Parent
 
 $expectedVerbs = [ordered]@{
+    'prepare' = @{ Issue = 3626; States = @('prepared', 'blocked', 'limited', 'cancelled', 'unsupported_action_scope'); Forbids = @('issue or label mutation', 'approval directives or labels', 'agent assignment', 'workflow dispatch', 'implementation', 'merge', 'release', 'deployment', 'lasting access grant') }
     'spec' = @{ Issue = 3627; States = @('Reviewable', 'Blocked', 'Limited', 'Cancelled'); Forbids = @('approval fields or labels', 'approval directives', 'agent assignment', 'runtime asset edits', 'ready promotion', 'merge or release requests', 'overwriting semantic conflicts') }
 }
 
@@ -59,6 +60,13 @@ if (-not $candidateBlock.Success) {
             Add-Failure "Disabled-baseline candidate fixtures are missing the '$shape' shape"
         }
     }
+}
+
+foreach ($fixtureId in @('P3725-prepare-modifier-', 'P3725-prepare-dual-prefix', 'P3725-prepare-dual-lines', 'P3725-prepare-unauthorized-actor')) {
+    if (-not $parserText.Contains($fixtureId)) { Add-Failure "Disabled-baseline fixture '$fixtureId' for 'prepare:' is missing from tests/approval-contract-tests.cjs" }
+}
+if ($parserText -notmatch 'for \(const modifier of \["defer", "stop"\]\) \{\s*addCase\(`P3725-prepare-modifier-') {
+    Add-Failure "'prepare:' defer/stop modifier fixtures are missing from tests/approval-contract-tests.cjs"
 }
 
 foreach ($verb in $expectedVerbs.Keys) {

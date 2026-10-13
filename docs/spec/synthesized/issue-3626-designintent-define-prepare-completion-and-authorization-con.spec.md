@@ -426,6 +426,7 @@ runtime implementation.
 
 - PRD: `docs/prd/synthesized/issue-3626-designintent-define-prepare-completion-and-authorization-con.prd.md`
 - Parent comparison: `docs/design/ai-sdlc-work-units.md` (#3625)
+- Shared contract summary: `docs/reference/intent-work-unit-contracts.md#prepare-preparation`
 - Intent routing: `docs/guides/intent-prefixes.md`
 - Shared approval contract: `docs/spec/issue-3591-approval-contract.spec.md`
 - Issue: <https://github.com/IBuySpy-Shared/basecoat/issues/3626>

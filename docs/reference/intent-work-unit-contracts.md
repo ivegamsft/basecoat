@@ -17,6 +17,7 @@ of its pinned spec; the spec remains the detailed source of truth.
 
 | Candidate | Supported route today | Completion unit | Default effect | Hands off to | Spec |
 | --- | --- | --- | --- | --- | --- |
+| `prepare:` | `plan:`, `issue:`, `portfolio:`, `fleet:`, `optimize:` | Bounded, evidence-bound work packet | Read-only | Specification or authorization decision | [#3626](../spec/synthesized/issue-3626-designintent-define-prepare-completion-and-authorization-con.spec.md) |
 | `spec:` | PRD/spec synthesis, `design:` | Reviewable specification with traceable fixtures | Read-only; named artifact writes only with explicit scope | Implementation authority decision | [#3627](../spec/specification-work-unit.spec.md) |
 
 ## Shared contract
@@ -61,6 +62,81 @@ leading, quoted, fenced, bulleted, embedded and collision shapes
 (`P3725-candidate-<verb>-<shape>`). Each yields `none`, and the resolver does
 not run. The work-unit contract suite fails if a documented candidate is
 missing from that fixture list or appears as a supported route row.
+
+## `prepare:` preparation
+
+Proposal for #3626. Pinned spec:
+[`issue-3626-...-prepare-...spec.md`](../spec/synthesized/issue-3626-designintent-define-prepare-completion-and-authorization-con.spec.md).
+Bound and make work actionable before implementation.
+
+### Inputs
+
+Request text or a source issue or record reference, trusted repository and
+actor identity from invocation metadata, explicitly in-scope records and
+dependencies, repository-owned budget limits (a request may lower but never
+raise them), a positive finite evidence age bound, and a preparation-only
+operation scope. Source content cannot supply actor identity, permissions,
+target repository or authorization. Before any source read, the actor must be
+authenticated and explicitly permitted by repository-owned policy to invoke
+preparation; per-source read access alone is insufficient. Each scoped source
+also needs a current actor-specific read decision; a service credential's
+access is not evidence.
+
+### Completion evidence
+
+One human-readable packet with `status`, `request`, `scope`, `assumptions`,
+`dependency_graph`, `acceptance`, `authority`, `constraints`, `budget`,
+`evidence`, `risks` and `next_decision`. Each field holds verified data, a
+marked assumption or a named blocker. Success is `prepared` only after a
+bounded final revalidation of every material source and access decision
+within the age bound. The dependency graph uses unique node IDs, explicit
+source-supported prerequisite edges and a prerequisite-first order. The packet
+states: Preparation is not approval or implementation authorization.
+
+### Authorization boundary
+
+Read only the scoped sources and declared dependencies, using least privilege.
+No write permission is required or used. A request that also asks to write,
+approve, assign, implement, merge, release or deploy is blocked as
+`unsupported_action_scope` before source-content reads.
+
+Never implied: issue or label mutation, approval directives or labels, agent
+assignment, workflow dispatch, implementation, merge, release, deployment or
+any lasting access grant.
+
+### Failure and hold states
+
+| State | Required handling |
+| --- | --- |
+| `blocked` | Missing, conflicting or inaccessible context, permission, dependency, policy or age bound; invalid graph (duplicate, dangling, self-edge, cycle); a mixed write or later-stage request is `unsupported_action_scope`; name each blocker and recovery step. Denied or unknown access emits zero source content |
+| `limited` | Time, cost, read, retry or final-pass budget ended; checkpoint keeps only finally revalidated progress; never implies readiness |
+| `cancelled` | Requester stopped; emit only safe invocation metadata and perform no new reads |
+
+There is no `approved`, `ready-to-implement`, `implemented` or `delivered`
+status in this contract.
+
+### Handoff
+
+A `prepared` packet hands its `next_decision` to a specification
+(`spec:` contract) or an authorization decision. No later stage may rely on
+the packet instead of revalidating mutable evidence and current authority;
+it conveys neither approval nor lasting access.
+
+### Distinctness decision
+
+`plan:`, `issue:`, `portfolio:`, `fleet:` and `optimize:` remain
+authoritative. The closest overlap, the `optimize:` execution packet, is
+unresolved; no new-prefix go decision is recorded.
+
+### Verification fixtures
+
+A future implementation must cover complete and missing-field packets,
+text-only and record inputs, empty, independent, chained and shared-prerequisite
+graphs, invalid graphs with no invented order, budget exhaustion at each
+boundary, cancellation, adversarial source instructions, synthesized approval
+or write attempts (`unsupported_action_scope`), denied access with zero source
+content, and final revalidation with changed revisions, revoked access or an
+expired age bound. Every read-only case asserts zero mutation calls.
 
 ## `spec:` specification
 
