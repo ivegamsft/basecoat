@@ -6,6 +6,8 @@ All notable changes to this repository should be recorded in this file.
 
 ### Added
 
+- `scripts/label-taxonomy-audit.ps1` validates the label registry, fails on deprecated label writes, and
+  with `-Repo` reports live label drift with a proposed operation per deprecated label (#3740, part 3).
 - `scripts/preview-portable-skill-export.ps1` previews the portable Agent Skills
   projection of named source skills without writing files: it validates the
   source and portable profiles independently, projects only `name` and

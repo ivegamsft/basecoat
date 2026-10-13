@@ -20,7 +20,8 @@ defines the reversible, logged migration steps.
 
 ## Safe Cleanup Sequence
 
-1. Export the current label set and label counts.
+1. Export the current label set and label counts
+   (`pwsh scripts/label-taxonomy-audit.ps1 -Repo <owner/name> -ReportPath label-drift.md`).
 2. Partition labels into governance, delivery, migration, or unknown.
 3. Update docs and templates to the shared governance contract.
 4. Apply label changes only to the governance bucket.

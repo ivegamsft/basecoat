@@ -366,6 +366,15 @@ When proposing a new label:
 
 ## Integration with Tools
 
+### Label Taxonomy Audit
+
+`pwsh scripts/label-taxonomy-audit.ps1` validates `.github/governance/label-taxonomy.json` and
+fails when a workflow, script, or agentic prompt writes a deprecated label (run in CI through
+`tests/label-taxonomy-tests.ps1`). With `-Repo <owner/name>` or an offline `-LabelsJsonPath`
+export it also reports deprecated, unknown, and missing canonical labels with the proposed
+`rename`, `migrate-delete`, or `remove` operation; `-FailOnDrift` exits non-zero on drift. It
+never changes labels.
+
 ### GitHub Copilot Issue Triage Agent
 
 The `issue-triage` agent uses these labels to classify and prioritize issues automatically. See [`agents/basecoat-10-core-issue-triage.agent.md`](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-issue-triage.agent.md) for details.
