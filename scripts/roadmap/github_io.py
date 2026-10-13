@@ -84,6 +84,18 @@ class GitHubBranch:
             b == [{"actor_id": int(self.app_id), "actor_type": "Integration",
                    "bypass_mode": "always"}] for b in bypass)
 
+    def create_from(self, base):
+        """Create this missing bot branch at the base branch head; never moves an existing ref."""
+        sha = gh([f"repos/{self.repo}/git/ref/heads/{base}"])["object"]["sha"]
+        try:
+            gh(["--method", "POST", f"repos/{self.repo}/git/refs", "-f",
+                f"ref=refs/heads/{self.branch}", "-f", f"sha={sha}"])
+        except P.Conflict:
+            if self.head() is not None:  # A concurrent creator won; re-read and re-render.
+                raise StaleHead(self.branch)
+            raise
+        return sha
+
     def commit(self, expected, files, message):
         P.require(expected is not None, "ledger-branch-missing")
         changes = {"additions": [{"path": p, "contents": base64.b64encode(c.encode()).decode()}

@@ -76,6 +76,19 @@ class TransportTests(unittest.TestCase):
                 with self.assertRaises(error):
                     branch.commit("c1", {"lease.json": "{}\n"}, "msg")
 
+    def test_create_from_points_new_bot_branch_at_base_head(self):
+        branch = self.branch({"git/ref/heads/main": {"object": {"sha": "m1"}}, "git/refs": {}})
+        self.assertEqual(branch.create_from("main"), "m1")
+        self.assertIn("ref=refs/heads/bot/roadmap-state", self.fake.calls[-1][0])
+        self.assertIn("sha=m1", self.fake.calls[-1][0])
+        exists = (1, "gh: Reference already exists (HTTP 422)")
+        for ref, error in (({"object": {"sha": "b1"}}, L.StaleHead), (None, G.P.Conflict)):
+            with self.subTest(error=error):
+                routes = {"git/ref/heads/main": {"object": {"sha": "m1"}}, "git/refs": exists}
+                branch = self.branch({**routes, **({"git/ref/heads/bot/": ref} if ref else {})})
+                with self.assertRaises(error):
+                    branch.create_from("main")
+
     def test_protected_requires_exact_app_only_ruleset(self):
         ok = {"rules/branches": RULES, "rulesets/9": BYPASS, "commits/c0": ROOT_COMMIT}
         self.assertTrue(self.branch(ok).protected("c0"))
