@@ -19,6 +19,7 @@ of its pinned spec; the spec remains the detailed source of truth.
 | --- | --- | --- | --- | --- | --- |
 | `prepare:` | `plan:`, `issue:`, `portfolio:`, `fleet:`, `optimize:` | Bounded, evidence-bound work packet | Read-only | Specification or authorization decision | [#3626](../spec/synthesized/issue-3626-designintent-define-prepare-completion-and-authorization-con.spec.md) |
 | `spec:` | PRD/spec synthesis, `design:` | Reviewable specification with traceable fixtures | Read-only; named artifact writes only with explicit scope | Implementation authority decision | [#3627](../spec/specification-work-unit.spec.md) |
+| `build:` | `feature:` | Approved scope implemented and validated for an exact head | In-scope source and test writes plus draft PR after implementation authority | Review, then separate delivery authority | [#3628](../spec/synthesized/issue-3628-designintent-define-build-completion-and-authorization-contr.spec.md) |
 
 ## Shared contract
 
@@ -208,3 +209,71 @@ fenced, bulleted or embedded examples not executed; lookalike, empty goal or
 dual prefixes rejected without mutation; `later`, read-only or stop modifiers
 deferring; revoked actor or changed evidence blocking; and repeated requests
 reading back exact identity without duplicate writes or budget reset.
+
+## `build:` implementation
+
+Proposal for #3628. Pinned spec:
+[`issue-3628-...-build-...spec.md`](../spec/synthesized/issue-3628-designintent-define-build-completion-and-authorization-contr.spec.md).
+Implement approved scope and prove it without merge or deployment consent.
+Compilation or packaging alone is a validation activity, not this work unit.
+
+### Inputs
+
+Repository, source issue, approved spec path with immutable revision or
+digest, approved scope and non-goals, authorized actor with live evidence,
+base and head identities, dependencies and execution budgets. Authority and
+dependencies are re-read before writes and on resume. Missing, revoked,
+wrong-repository or changed-scope evidence is blocked. A compile-only or
+package-only request must be disambiguated explicitly rather than treated as
+implementation.
+
+### Completion evidence
+
+Changed-file inventory within approved scope, spec and issue identities,
+base and head SHA, exact positive and negative test commands with results,
+and a reproducible resume checkpoint. `Implemented` means an in-scope diff and
+draft handoff exist; `Validated` means tests and checks passed for that exact
+head. A green run for a different head is never reused.
+
+### Authorization boundary
+
+After valid implementation authority, write only named in-scope source and
+test files, an isolated branch or worktree, attributed commits and a draft PR.
+Existing feature-origin provenance and plan/log-first contracts apply.
+
+Never implied: ready promotion, auto-merge, merge, tagging, deployment,
+approval labels or directives, delivery consent from green checks, or making
+`build:` an alias for `ship-it:`.
+
+### Failure and hold states
+
+| State | Required handling |
+| --- | --- |
+| Blocked | Name the unmet authority, dependency, scope or validation condition and the recovery action |
+| Paused | Durable checkpoint, remaining budget and outstanding effects; not success |
+| Cancelled | Stop new side effects; do not assume permission to revert external changes |
+
+Changed scope or spec revision invalidates affected test evidence.
+
+### Handoff
+
+A validated draft PR hands off to review and to a separately validated
+delivery directive (`deliver:` contract or existing `ship-it:`). The receiver
+revalidates head, spec identity and live authority. Solo-dev needs no routine
+human review through XL once applicable authority exists; XXL and other
+explicit human boundaries remain.
+
+### Distinctness decision
+
+`feature:` remains authoritative and is recommended. `build:` is rejected for
+now as ambiguous with compilation; `implement:` is a candidate only if
+distinctness is demonstrated. No alias is added.
+
+### Verification fixtures
+
+Before adopting either prefix, actual-parser fixtures must cover standalone
+mixed-case input, empty goals, quoted, fenced, bulleted and embedded examples,
+lookalikes, dual authoritative prefixes, defer and stop modifiers,
+unauthorized actors and compile-only ambiguity. Until adoption, both
+candidates must remain unsupported, and behavior fixtures must show
+out-of-scope edits rejected and stale-head evidence refused.

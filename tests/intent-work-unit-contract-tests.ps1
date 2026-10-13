@@ -8,8 +8,9 @@ $docPath = Join-Path $repoRoot 'docs\reference\intent-work-unit-contracts.md'
 $docDir = Split-Path $docPath -Parent
 
 $expectedVerbs = [ordered]@{
-    'prepare' = @{ Issue = 3626; States = @('prepared', 'blocked', 'limited', 'cancelled', 'unsupported_action_scope'); Forbids = @('issue or label mutation', 'approval directives or labels', 'agent assignment', 'workflow dispatch', 'implementation', 'merge', 'release', 'deployment', 'lasting access grant') }
-    'spec' = @{ Issue = 3627; States = @('Reviewable', 'Blocked', 'Limited', 'Cancelled'); Forbids = @('approval fields or labels', 'approval directives', 'agent assignment', 'runtime asset edits', 'ready promotion', 'merge or release requests', 'overwriting semantic conflicts') }
+    'prepare' = @{ Issue = 3626; States = @('prepared', 'blocked', 'limited', 'cancelled', 'unsupported_action_scope'); Forbids = @('issue or label mutation', 'approval directives or labels', 'agent assignment', 'workflow dispatch', 'implementation', 'merge', 'release', 'deployment', 'any lasting access grant') }
+    'spec' = @{ Issue = 3627; States = @('Reviewable', 'Blocked', 'Limited', 'Cancelled'); Forbids = @('approval fields or labels', 'approval directives', 'agent assignment', 'runtime asset edits', 'ready promotion', 'merge or release requests', 'overwriting semantic conflicts and unrelated edits') }
+    'build' = @{ Issue = 3628; States = @('Implemented', 'Validated', 'Blocked', 'Paused', 'Cancelled'); Forbids = @('ready promotion', 'auto-merge', 'merge', 'tagging', 'deployment', 'approval labels or directives', 'delivery consent from green checks', 'making `build:` an alias for `ship-it:`'); Candidates = @('implement') }
 }
 
 $requiredSubsections = @(
@@ -95,7 +96,7 @@ foreach ($verb in $expectedVerbs.Keys) {
         Add-Failure "'${verb}:' authorization boundary lacks a 'Never implied:' list"
     } else {
         foreach ($effect in $meta.Forbids) {
-            if (($neverImplied.Groups[1].Value -replace '\s+', ' ') -notmatch "\b$([regex]::Escape($effect))\b") {
+            if (($neverImplied.Groups[1].Value -replace '\s+', ' ') -notmatch "(?:^\s*|,\s*|\bor\s+)$([regex]::Escape($effect))(?=\s*(?:,|\.|$|\bor\b))") {
                 Add-Failure "'${verb}:' 'Never implied:' list does not prohibit '$effect'"
             }
         }
@@ -109,8 +110,10 @@ foreach ($verb in $expectedVerbs.Keys) {
         }
     }
 
-    if ($candidateList -notmatch "`"$verb`"") {
-        Add-Failure "'${verb}:' has no disabled-baseline parser fixtures in tests/approval-contract-tests.cjs"
+    foreach ($token in @($verb) + @($meta.Candidates | Where-Object { $_ })) {
+        if ($candidateList -notmatch "`"$token`"") {
+            Add-Failure "'${token}:' has no disabled-baseline parser fixtures in tests/approval-contract-tests.cjs"
+        }
     }
 
     foreach ($routeFile in $routeFiles) {

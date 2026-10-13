@@ -115,5 +115,6 @@ that decision rather than inventing approval during queue recovery.
 ## References
 
 - PRD: `docs/prd/synthesized/issue-3628-designintent-define-build-completion-and-authorization-contr.prd.md`
+- Shared contract summary: `docs/reference/intent-work-unit-contracts.md#build-implementation`
 - Refs #3628
 - Issue: <https://github.com/IBuySpy-Shared/basecoat/issues/3628>

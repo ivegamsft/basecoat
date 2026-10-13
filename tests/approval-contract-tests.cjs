@@ -177,7 +177,7 @@ async function main() {
         `${intent}: Deliver feature now ${modifier}`, "invalid");
     }
   }
-  for (const token of ["prepare", "spec", "build", "review", "deliver", "ship"]) {
+  for (const token of ["prepare", "spec", "build", "implement", "review", "deliver", "ship"]) {
     for (const [shape, body] of [
       ["leading", `${token}: Deliver feature now`],
       ["quoted", `> ${token}: Deliver feature now`],
