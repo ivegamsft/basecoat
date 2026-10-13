@@ -5,9 +5,13 @@ Transport: head() -> oid|None; read(oid, path) -> str|None; history(oid) -> olde
 unchanged since root; no delete/force; app-only updates); commit(head, files, msg) -> oid|StaleHead.
 """
 
+import argparse
 import json
+import os
 import re
+import sys
 import time
+from pathlib import Path
 
 import plan as P
 
@@ -256,3 +260,53 @@ class Ledger:
                 doc = {**doc, "state": "needs-reconciliation", "stop_reason": "needs-reconciliation"}
             return {path: doc, LEASE: lease}
         return self.transact(f"roadmap: takeover {run}", mutate)
+
+
+def main(argv=None, transport=None, authority=None):
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("command", choices=("propose", "consume", "claim", "checkpoint",
+                                            "takeover"))
+    parser.add_argument("--repo", required=True)
+    parser.add_argument("--run-id", required=True)
+    parser.add_argument("--result", help="Preview result JSON (propose)")
+    parser.add_argument("--evidence", help="Mapper/advisor evidence JSON (consume recompute)")
+    parser.add_argument("--comment-id", type=int)
+    parser.add_argument("--step", type=int)
+    parser.add_argument("--epoch", type=int)
+    parser.add_argument("--outcome", choices=("done", "conflict", "failed"))
+    parser.add_argument("--status", type=int)
+    parser.add_argument("--error")
+    parser.add_argument("--apply", action="store_true", help="Commit; default prints the commit")
+    args = parser.parse_args(argv)
+    if transport is None:
+        sys.modules.setdefault("ledger", sys.modules[__name__])  # one StaleHead class
+        import github_io
+        transport = github_io.GitHubBranch(args.repo, BRANCH, os.environ.get("ROADMAP_APP_SLUG"),
+                                           os.environ.get("ROADMAP_APP_ID"))
+        authority = github_io.GitHubAuthority(args.repo)
+    ledger = Ledger(transport, args.repo, apply=args.apply)
+    env = os.environ.get
+    holder = f"{env('GITHUB_RUN_ID', 'local')}-{env('GITHUB_RUN_ATTEMPT', '1')}"
+    if args.command == "propose":
+        return ledger.propose(json.loads(Path(args.result).read_text(encoding="utf-8-sig")),
+                              args.run_id)
+    if args.command == "consume":
+        import preview
+        evidence = json.loads(Path(args.evidence).read_text(encoding="utf-8-sig"))
+        return ledger.consume(args.run_id, args.comment_id, authority, lambda: preview.normalize(
+            evidence, P.read_snapshot(args.repo)), env("GITHUB_EVENT_NAME"), holder)
+    if args.command == "claim":
+        return ledger.claim(args.run_id, args.step, holder, args.epoch)
+    if args.command == "checkpoint":
+        return ledger.checkpoint(args.run_id, args.step, holder, args.epoch, args.outcome,
+                                 args.status, args.error)
+    return ledger.takeover(args.run_id, holder, authority)
+
+
+if __name__ == "__main__":
+    try:
+        print(json.dumps(main(), indent=2))
+    except P.Conflict as error:
+        raise SystemExit(f"roadmap-ledger-failed: {error}")
+    except (ValueError, KeyError, TypeError, OSError):
+        raise SystemExit("roadmap-ledger-failed: invalid input or transport failure")
