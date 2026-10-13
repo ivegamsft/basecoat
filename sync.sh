@@ -72,6 +72,66 @@ read_basecoat_yml_map_value() {
   '
 }
 
+# Shared awk helper: strips an inline " # comment", surrounding blanks, and one
+# matching pair of surrounding quotes. Mirrors ConvertTo-BasecoatYmlScalar in sync.ps1.
+BASECOAT_AWK_CLEAN='
+function clean(item, first, last) {
+  sub(/[ \t]+#.*$/, "", item)
+  gsub(/^[ \t]+|[ \t]+$/, "", item)
+  first = substr(item, 1, 1); last = substr(item, length(item), 1)
+  if (length(item) >= 2 && first == last && (first == "\"" || first == sq)) { item = substr(item, 2, length(item) - 2) }
+  return item
+}
+'
+
+read_basecoat_yml_list() {
+  # $1 = top-level key. Emits "P" when the key is present, then one "I<item>" line
+  # per entry of a block ("- item") or flow ("[a, b]") list, or "E<value>" for an
+  # unsupported scalar. Emits nothing when the key or the config is absent.
+  local key="$1"
+  local config="$REPO_ROOT/.basecoat.yml"
+  [[ -f "$config" ]] || return 0
+
+  local bom=$'\xEF\xBB\xBF'
+  # Here-string input (not a pipe): awk exits early, which would SIGPIPE sed under pipefail.
+  awk -v key="$key" -v sq="'" "$BASECOAT_AWK_CLEAN"'
+    function emit(item) { if (item ~ /^$|^[[{-]|:([ \t]|$)/) { print "E" item; exit } print "I" item }
+    { sub(/\r$/, "") }
+    !in_list && index($0, key ":") == 1 {
+      value = substr($0, length(key) + 2)
+      sub(/^[ \t]*#.*$/, "", value)
+      sub(/[ \t]+#.*$/, "", value); gsub(/^[ \t]+|[ \t]+$/, "", value)
+      print "P"
+      if (value == "") { in_list = 1; next }
+      if (value ~ /^\[.*\]$/) {
+        n = clean(substr(value, 2, length(value) - 2)) == "" ? 0 : split(substr(value, 2, length(value) - 2), parts, ",")
+        for (i = 1; i <= n; i++) emit(clean(parts[i]))
+        exit
+      }
+      print "E" value
+      exit
+    }
+    in_list {
+      if ($0 ~ /^[ \t]*(#|$)/) next
+      if ($0 ~ /^[ \t]*-([ \t]|$)/) { item = $0; sub(/^[ \t]*-[ \t]*/, "", item); emit(clean(item)); next }
+      # A new top-level key ends the list; indented non-list content (e.g. a mapping) fails closed.
+      if ($0 ~ /^[ \t]/) { item = $0; gsub(/^[ \t]+|[ \t]+$/, "", item); print "E" item }
+      exit
+    }
+  ' <<< "$(sed "1s/^${bom}//" "$config")"
+}
+
+agent_frontmatter_name() {
+  # Emits the first top-level "name:" value of an agent's leading "---" frontmatter.
+  local bom=$'\xEF\xBB\xBF'
+  awk -v sq="'" "$BASECOAT_AWK_CLEAN"'
+    { sub(/\r$/, "") }
+    NR == 1 { if ($0 != "---") exit; next }
+    $0 == "---" { exit }
+    index($0, "name:") == 1 { print clean(substr($0, 6)); exit }
+  ' <<< "$(sed "1s/^${bom}//" "$1")"
+}
+
 redact_repo_url() {
   # Strip any "user[:password]@" userinfo and any "?query"/"#fragment" (which may
   # carry a token) from an http(s) URL so credential-bearing clone URLs are never
@@ -127,6 +187,25 @@ if [[ -z "$SOURCE_MIRROR" ]]; then
   fi
 fi
 FETCH_REPO="${SOURCE_MIRROR:-$SOURCE_REPO}"
+
+# Optional .basecoat.yml agents allow-list. Absent = project every agent;
+# "agents: []" (or an empty list) = stage agents only, project none (#3747).
+AGENT_ALLOW_PRESENT=""
+AGENT_ALLOW_LIST=()
+agent_allow_raw="$(read_basecoat_yml_list agents)"
+while IFS= read -r agent_allow_line; do
+  case "$agent_allow_line" in
+    P) AGENT_ALLOW_PRESENT=1 ;;
+    I*)
+      agent_allow_item="${agent_allow_line#I}"
+      AGENT_ALLOW_LIST+=("${agent_allow_item%.agent.md}")
+      ;;
+    E*)
+      echo "Invalid .basecoat.yml 'agents:' value '${agent_allow_line#E}': use a list of agent names, or [] to disable agent projection." >&2
+      exit 1
+      ;;
+  esac
+done <<< "$agent_allow_raw"
 
 echo "Resolved BaseCoat source '$(redact_repo_url "$SOURCE_REPO")' (from $SOURCE_REPO_ORIGIN), ref '$SOURCE_REF' (from $SOURCE_REF_ORIGIN)"
 if [[ -n "$SOURCE_MIRROR" ]]; then
@@ -519,10 +598,11 @@ project_agent_link() {
 }
 
 add_guidance_plan_tree() {
-  local src="$1" destination_prefix="$2" unit_prefix="$3" kind="${4:-}" file rel path hash source_file
+  local src="$1" destination_prefix="$2" unit_prefix="$3" kind="${4:-}" only_list="${5:-}" file rel path hash source_file
   [[ -d "$src" ]] || return 0
   while IFS= read -r -d '' file; do
     rel="${file#"$src"/}"
+    [[ -z "$only_list" ]] || grep -Fxq -- "$rel" "$only_list" || continue
     path="$(guidance_normalize_path "$destination_prefix/$rel")"
     source_file="$file"
     [[ -n "$kind" ]] && source_file="$(project_agent_link "$file" "$kind")"
@@ -535,16 +615,44 @@ for copilot_dir in instructions prompts skills; do
   add_guidance_plan_tree "$REPO_ROOT/$TARGET_DIR/$copilot_dir" ".github/$copilot_dir" "$copilot_dir"
 done
 add_guidance_plan_tree "$REPO_ROOT/$TARGET_DIR/skills" ".agents/skills" "skills"
+# An agent matches the allow-list by file name (without ".agent.md") or by its
+# frontmatter "name:"; every matched identity is recorded for unknown-entry warnings.
+agent_names_seen="$TMP_DIR/agent-allow-names" agent_refs_linked="$TMP_DIR/agent-allow-refs"
+: > "$agent_names_seen"; : > "$agent_refs_linked"
+agent_allowed() {
+  local stem="$1" display_name="$2" allowed
+  [[ -n "$AGENT_ALLOW_PRESENT" ]] || return 0
+  printf '%s\n%s\n' "$stem" "$display_name" >> "$agent_names_seen"
+  for allowed in ${AGENT_ALLOW_LIST[@]+"${AGENT_ALLOW_LIST[@]}"}; do
+    [[ "$allowed" == "$stem" || ( -n "$display_name" && "$allowed" == "$display_name" ) ]] && return 0
+  done
+  return 1
+}
+
+projected_agent_count=0
 if [[ -d "$REPO_ROOT/$TARGET_DIR/agents" ]]; then
   while IFS= read -r -d '' file; do
     base="$(basename "$file")"
+    if [[ -n "$AGENT_ALLOW_PRESENT" ]]; then
+      agent_allowed "${base%.agent.md}" "$(agent_frontmatter_name "$file")" || continue
+    fi
+    projected_agent_count=$((projected_agent_count + 1))
+    { grep -o 'references/[A-Za-z0-9._/-]*' "$file" || true; } | sed 's#^references/##' >> "$agent_refs_linked"
     path="$(guidance_normalize_path ".github/agents/$base")"
     staged_agent="$(project_agent_link "$file" agent)"
     hash="$(guidance_sha256 "$staged_agent")"
     printf '%s|basecoat|agents/%s|%s|%s|%s\n' "$path" "$base" "$source_version" "$hash" "$staged_agent" >> "$plan_tsv"
   done < <(find "$REPO_ROOT/$TARGET_DIR/agents" -maxdepth 1 -name '*.agent.md' -type f -print0)
 fi
-add_guidance_plan_tree "$REPO_ROOT/$TARGET_DIR/agents/references" ".github/agent-references" "agents/references" reference
+if [[ -n "$AGENT_ALLOW_PRESENT" ]]; then
+  for allowed in ${AGENT_ALLOW_LIST[@]+"${AGENT_ALLOW_LIST[@]}"}; do
+    grep -Fxq -- "$allowed" "$agent_names_seen" ||
+      echo "WARNING: .basecoat.yml agents allow-list entry '$allowed' does not match any BaseCoat agent." >&2
+  done
+  echo "Honoring .basecoat.yml agents allow-list: projecting $projected_agent_count agent(s) to .github/agents."
+fi
+# With an allow-list, only references linked from a projected agent are projected.
+add_guidance_plan_tree "$REPO_ROOT/$TARGET_DIR/agents/references" ".github/agent-references" "agents/references" reference ${AGENT_ALLOW_PRESENT:+"$agent_refs_linked"}
 
 if [[ "$(cut -d '|' -f1 "$plan_tsv" | sort | uniq -d | wc -l | tr -d ' ')" -ne 0 ]]; then
   echo "GUIDANCE_LOCK_INVALID reason='duplicate path in BaseCoat write plan'" >&2

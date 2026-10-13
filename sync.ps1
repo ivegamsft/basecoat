@@ -71,6 +71,68 @@ function Get-BasecoatYmlMap {
     return $result
 }
 
+function ConvertTo-BasecoatYmlScalar {
+    # Strips an inline " # comment", surrounding blanks, and one matching pair of
+    # surrounding quotes. Mirrors the clean() awk helper in sync.sh.
+    param([AllowEmptyString()][string]$Item)
+    $Item = ($Item -replace '[ \t]+#.*$', '').Trim(" `t".ToCharArray())
+    if ($Item -match '^"(.*)"$' -or $Item -match "^'(.*)'$") { $Item = $Matches[1] }
+    return $Item
+}
+
+function Get-AgentFrontmatterName {
+    # Returns the first top-level "name:" value of an agent's leading "---" frontmatter.
+    param([Parameter(Mandatory)][string]$Path)
+    $lineNumber = 0
+    foreach ($line in Get-Content -LiteralPath $Path) {
+        $lineNumber++
+        $line = $line.TrimStart([char]0xFEFF).TrimEnd("`r")
+        if ($lineNumber -eq 1) { if ($line -ne '---') { return '' } else { continue } }
+        if ($line -eq '---') { return '' }
+        if ($line.StartsWith('name:', [System.StringComparison]::Ordinal)) { return (ConvertTo-BasecoatYmlScalar $line.Substring(5)) }
+    }
+    return ''
+}
+
+function Get-BasecoatYmlList {
+    # Returns Present=$false when the key is absent; otherwise the block ("- item")
+    # or flow ("[a, b]") list entries. Mirrors read_basecoat_yml_list in sync.sh.
+    param([Parameter(Mandatory)][string]$Key, [Parameter(Mandatory)][string]$RepoRoot)
+    $items = New-Object System.Collections.Generic.List[string]
+    $result = [pscustomobject]@{ Present = $false; Items = $items }
+    $config = Join-Path $RepoRoot '.basecoat.yml'
+    if (-not (Test-Path -LiteralPath $config)) { return $result }
+    $inList = $false
+    foreach ($line in Get-Content -LiteralPath $config) {
+        $line = $line.TrimStart([char]0xFEFF).TrimEnd("`r")
+        if ($inList) {
+            if ($line -match '^[ \t]*(#|$)') { continue }
+            if ($line -notmatch '^[ \t]*-([ \t]+(.*))?$') {
+                # A new top-level key ends the list; indented non-list content (e.g. a mapping) fails closed.
+                if ($line -notmatch '^[ \t]') { break }
+                throw "Invalid .basecoat.yml '${Key}:' value '$($line.Trim())': use a list of agent names, or [] to disable agent projection."
+            }
+            $item = ConvertTo-BasecoatYmlScalar $Matches[2]
+            $items.Add($item)
+            continue
+        }
+        if (-not $line.StartsWith("${Key}:", [System.StringComparison]::Ordinal)) { continue }
+        $result.Present = $true
+        $value = ($line.Substring($Key.Length + 1) -replace '^[ \t]*#.*$', '' -replace '[ \t]+#.*$', '').Trim(" `t".ToCharArray())
+        if ($value -eq '') { $inList = $true; continue }
+        if ($value -match '^\[(.*)\]$') {
+            foreach ($part in @(if ($Matches[1].Trim()) { $Matches[1].Split(',') })) {
+                $item = ConvertTo-BasecoatYmlScalar $part
+                $items.Add($item)
+            }
+            break
+        }
+        throw "Invalid .basecoat.yml '${Key}:' value '$value': use a list of agent names, or [] to disable agent projection."
+    }
+    foreach ($item in $items) { if ($item -match '^$|^[\[{-]|:([ \t]|$)') { throw "Invalid .basecoat.yml '${Key}:' value '$item': use a list of agent names, or [] to disable agent projection." } }
+    return $result
+}
+
 function Get-RedactedRepoUrl {
     param([string]$Url)
 
@@ -191,6 +253,9 @@ if (-not $sourceMirror) {
     $sourceMirrorOrigin = if ($sourceMirror) { '.basecoat.yml' } else { 'unset' }
 }
 $fetchRepo = if ($sourceMirror) { $sourceMirror } else { $sourceRepo }
+# Optional agents allow-list: absent = project every agent; [] = stage only, project none (#3747).
+$agentAllowList = Get-BasecoatYmlList -Key 'agents' -RepoRoot $repoRoot
+$allowedAgentNames = @($agentAllowList.Items | ForEach-Object { $_ -creplace '\.agent\.md$', '' })
 
 Write-Host "Resolved BaseCoat source '$(Get-RedactedRepoUrl $sourceRepo)' (from $sourceRepoOrigin), ref '$sourceRef' (from $sourceRefOrigin)"
 if ($sourceMirror) {
@@ -846,7 +911,29 @@ try {
 
     $referenceDocsPrefix = if ([System.IO.Path]::IsPathRooted($targetDir)) { $null } else { "../../$($targetDir.Replace('\', '/').TrimEnd('/'))/docs/" }
     $agentIndex = 0
-    foreach ($projection in Get-BaseCoatProjectionPlan -SourceRoot $fullTargetDir -Mode Consumer) {
+    $projectionPlan = @(Get-BaseCoatProjectionPlan -SourceRoot $fullTargetDir -Mode Consumer)
+    if ($agentAllowList.Present) {
+        # An agent matches by file name (without ".agent.md") or by its frontmatter "name:".
+        $seenAgentNames = New-Object System.Collections.Generic.List[string]
+        $projectionPlan = @($projectionPlan | Where-Object {
+            if ($_.Kind -ne 'agent') { return $true }
+            $stem = [System.IO.Path]::GetFileName($_.DestinationPath) -creplace '\.agent\.md$', ''
+            $displayName = Get-AgentFrontmatterName -Path $_.SourcePath
+            $seenAgentNames.Add($stem); $seenAgentNames.Add($displayName)
+            return ($allowedAgentNames -ccontains $stem) -or ($displayName -and $allowedAgentNames -ccontains $displayName)
+        })
+        $projectedAgentCount = @($projectionPlan | Where-Object { $_.Kind -eq 'agent' }).Count
+        foreach ($allowedAgent in $allowedAgentNames) {
+            if ($seenAgentNames -cnotcontains $allowedAgent) {
+                Write-Warning ".basecoat.yml agents allow-list entry '$allowedAgent' does not match any BaseCoat agent."
+            }
+        }
+        # Only references linked from a projected agent are projected.
+        $linkedReferences = @($projectionPlan | Where-Object Kind -eq 'agent' | ForEach-Object { [regex]::Matches((Get-Content -LiteralPath $_.SourcePath -Raw), 'references/([A-Za-z0-9._/-]+)') | ForEach-Object { $_.Groups[1].Value } })
+        $projectionPlan = @($projectionPlan | Where-Object { $_.Kind -ne 'reference' -or $linkedReferences -ccontains [System.IO.Path]::GetFileName($_.SourcePath) })
+        Write-Host "Honoring .basecoat.yml agents allow-list: projecting $projectedAgentCount agent(s) to .github/agents."
+    }
+    foreach ($projection in $projectionPlan) {
         $plannedSource = $projection.SourcePath
         if ($projection.Kind -in @('agent', 'reference')) {
             $agentIndex++

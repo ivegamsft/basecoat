@@ -22,6 +22,9 @@ All notable changes to this repository should be recorded in this file.
   `docs/reference/label-taxonomy.md` (#3740, part 1).
 - Ship-it intent runs now apply and create canonical `risk:<band>` labels instead of deprecated `risk-<band>`
   labels, and issue triage applies GitHub's `good first issue` label instead of `good-first-issue` (#3740, part 2).
+- `sync.ps1` and `sync.sh` honor the documented `.basecoat.yml` `agents:` allow-list: only listed agents are projected to
+  `.github/agents/`, `agents: []` disables agent projection while keeping agents staged under `.github/base-coat/agents/`,
+  and previously projected agents that leave the list are pruned through `guidance-lock/v1` (#3747).
 - `rollback.ps1` replays `sync.ps1` for the tag under the guidance-lock lease, so projections and `guidance-lock/v1` match a fresh sync;
   failures restore the prior install and pin, except `GUIDANCE_LOCK_BUSY` (lease reclaimed as stale), which keeps the backup instead (#3776).
 - Key `pr-flow-hygiene` and `ship-it-intent-dispatch` concurrency per issue/PR so runs for one item no longer cancel

@@ -82,10 +82,11 @@ known_bad_releases:
 | **Type** | list of strings |
 | **Required** | No |
 | **Default** | All agents (omit key = sync everything) |
-| **Valid values** | Agent names without the `.agent.md` suffix |
+| **Valid values** | Agent frontmatter `name:` or file name, `.agent.md` suffix optional |
 
-Explicit allow-list of agents to include. When present, only the listed agents
-are copied to `.github/agents/`. When absent, all available agents are synced.
+Explicit allow-list of agents to project. When present, only the listed agents
+are copied to `.github/agents/`; when absent, all available agents are synced.
+Every agent stays staged under `.github/base-coat/agents/` either way.
 
 ```yaml
 agents:
@@ -93,6 +94,20 @@ agents:
   - code-review
   - security-review
 ```
+
+Both block lists (as above) and flow lists (`agents: [code-review]`) are
+supported. Entries match an agent's frontmatter `name:` or its file name
+(case-sensitive), with the `.agent.md` suffix optional. Set `agents: []` (or leave the
+key with no entries) to disable agent projection entirely, for example when
+your enterprise governs `.github/agents/` centrally. Agent references under
+`.github/agent-references/` are projected only when at least one agent is.
+
+Agents that BaseCoat previously projected and that leave the list are removed
+on the next sync through the guidance lock; agent files you own are never
+touched. A projected agent you edited locally stops the sync with
+`GUIDANCE_CONTENT_MODIFIED` instead of being deleted. Entries that match no
+BaseCoat agent produce a warning, and any other scalar value (for example
+`agents: all`) fails the sync before it writes anything.
 
 ### skills
 

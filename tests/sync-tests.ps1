@@ -1330,6 +1330,81 @@ finally {
 }
 
 # ============================================================================
+# Test: .basecoat.yml agents allow-list scopes .github/agents projection (#3747)
+# ============================================================================
+Write-Host "`nTest: agents allow-list scopes projection, prunes delisted agents, and supports opt-out" -ForegroundColor Yellow
+
+$allowSource = $null
+$allowConsumer = $null
+try {
+    $allowSource = Join-Path ([System.IO.Path]::GetTempPath()) ("basecoat-allow-source-" + [System.Guid]::NewGuid().ToString())
+    New-Item -ItemType Directory -Path $allowSource | Out-Null
+    git -C $allowSource init -q
+    git -C $allowSource config user.name 'basecoat-test'
+    git -C $allowSource config user.email 'basecoat-test@example.com'
+    New-RollbackSourceCommit -Path $allowSource -Version '1.0.0' -Files @{
+        'agents/alpha.agent.md' = "---`nname: alpha`ndescription: alpha`n---`n[detail](references/alpha-detail.md)"
+        'agents/basecoat-10-core-beta.agent.md' = "---`nname: ""beta""`ndescription: beta`n---`n[detail](references/beta-detail.md)"
+        'agents/references/alpha-detail.md' = '# alpha detail'
+        'agents/references/beta-detail.md' = '# beta detail'
+    }
+    $allowConsumer = New-ConsumerRepo -WithGitHubDir
+    $ownedAgent = Join-Path $allowConsumer '.github/agents/consumer-owned.agent.md'
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $ownedAgent) | Out-Null
+    Set-Content -LiteralPath $ownedAgent -Value '# consumer-owned agent' -Encoding UTF8
+    $config = Join-Path $allowConsumer '.basecoat.yml'
+    $agentsDir = Join-Path $allowConsumer '.github/agents'
+    $projected = { @(Get-ChildItem -LiteralPath $agentsDir -Filter '*.agent.md' -File | ForEach-Object Name | Sort-Object) -join ',' }
+    $lockAgents = { @((Get-Content -LiteralPath (Join-Path $allowConsumer '.github/base-coat/guidance-lock.json') -Raw | ConvertFrom-Json).entries | Where-Object { $_.owner -eq 'basecoat' -and $_.path -like '.github/agent*' } | ForEach-Object path | Sort-Object) -join ',' }
+    $syncAllow = { Invoke-SyncToConsumerWithSource -ConsumerPath $allowConsumer -SourceRepo "file://$allowSource" -SourceRef 'v1.0.0' *>&1 | Out-String }
+
+    $null = & $syncAllow; $testCount++
+    if ((& $projected) -ne 'alpha.agent.md,basecoat-10-core-beta.agent.md,consumer-owned.agent.md') { throw "Allow-list test failed: absent key must project every agent, got $(& $projected)" }
+
+    Set-Content -LiteralPath $config -Value "# scoped`nagents:`n  - alpha  # keep`n  - `"missing-agent`"`nskills:`n  - unrelated" -Encoding UTF8
+    $output = & $syncAllow; $testCount++
+    if ((& $projected) -ne 'alpha.agent.md,consumer-owned.agent.md' -or (& $lockAgents) -ne '.github/agent-references/alpha-detail.md,.github/agents/alpha.agent.md') {
+        throw "Allow-list test failed: block list did not scope projection/lock: $(& $projected) | $(& $lockAgents)"
+    }; $testCount++
+    if ($output -notmatch "entry 'missing-agent' does not match") { throw 'Allow-list test failed: unknown allow-list entry was not reported' }
+
+    Set-Content -LiteralPath $config -Value 'agents: []' -Encoding UTF8
+    $null = & $syncAllow; $testCount++
+    if ((& $projected) -ne 'consumer-owned.agent.md' -or (& $lockAgents) -ne '' -or (Test-Path -LiteralPath (Join-Path $allowConsumer '.github/agent-references/alpha-detail.md'))) {
+        throw "Allow-list test failed: agents: [] did not remove every projected agent and reference: $(& $projected) | $(& $lockAgents)"
+    }; $testCount++
+    if (-not (Test-Path -LiteralPath (Join-Path $allowConsumer '.github/base-coat/agents/basecoat-10-core-beta.agent.md'))) { throw 'Allow-list test failed: agents: [] must keep agents staged under .github/base-coat/agents' }
+
+    Set-Content -LiteralPath $config -Value "agents: [ 'beta', alpha.agent.md, alpha.AGENT.MD ]" -Encoding UTF8
+    $output = & $syncAllow; $testCount++
+    if ($output -notmatch "entry 'alpha\.AGENT\.MD' does not match") { throw 'Allow-list test failed: the .agent.md suffix must be stripped case-sensitively' }
+    if ((& $projected) -ne 'alpha.agent.md,basecoat-10-core-beta.agent.md,consumer-owned.agent.md') { throw "Allow-list test failed: flow list was not honored: $(& $projected)" }
+
+    Set-Content -LiteralPath $config -Value 'agents: all' -Encoding UTF8
+    $invalid = try { & $syncAllow; 'ran' } catch { "$_" }; $testCount++
+    if ($invalid -notmatch "Invalid \.basecoat\.yml 'agents:' value 'all'" -or (& $projected) -ne 'alpha.agent.md,basecoat-10-core-beta.agent.md,consumer-owned.agent.md') {
+        throw "Allow-list test failed: an unsupported agents value must fail before any write: $invalid"
+    }
+    foreach ($bad in "agents:`n  name: alpha", "agents:`n  - name: alpha", "agents:`n  -", "agents:`n  -alpha", 'agents: [,]', 'agents: "[]"') {
+        Set-Content -LiteralPath $config -Value $bad -Encoding UTF8
+        $invalid = try { & $syncAllow; 'ran' } catch { "$_" }; $testCount++
+        if ($invalid -notmatch "Invalid \.basecoat\.yml 'agents:' value '(name: alpha|-alpha|`"\[\]`")?'" -or (& $projected) -ne 'alpha.agent.md,basecoat-10-core-beta.agent.md,consumer-owned.agent.md') {
+            throw "Allow-list test failed: a mapping under agents: must fail closed, not opt out: $invalid"
+        }
+    }
+
+    Write-Host '  Passed: allow-list scopes projection, prunes delisted agents, keeps consumer agents, and supports agents: []' -ForegroundColor Green
+}
+catch {
+    $failures += $_.Exception.Message
+}
+finally {
+    foreach ($path in @($allowConsumer, $allowSource)) {
+        if ($path -and (Test-Path -LiteralPath $path)) { Remove-Item -LiteralPath $path -Recurse -Force }
+    }
+}
+
+# ============================================================================
 # Summary
 # ============================================================================
 Write-Host "`n================================================" -ForegroundColor Cyan
