@@ -150,3 +150,9 @@ validation, unauthorized mutation or missing protection.
 Rollback disables new stack automation, preserves refs/manifest and delegates remaining
 work to existing protected manual integration. Integrated changes require protected
 PR-based reverts; do not reset main or destroy evidence during rollback.
+
+## Implementation status
+
+Stage 1 read-only logic in `.github/base-coat/scripts/stack-handoff.cjs` (tests: `tests/stack-handoff-tests.cjs`)
+validates ancestry and protection, selects bottom-up advancement, invalidates descendants, plans
+squash-aware sync and evaluates finalization through the protected-main barrier. No ref mutations.

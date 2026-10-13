@@ -31,6 +31,12 @@ Write-Host 'Running ordered delivery hold tests...'
 if ($LASTEXITCODE -ne 0) {
     throw 'Ordered delivery hold regressions failed.'
 }
+
+Write-Host 'Running dependent stack handoff tests...'
+& node --test (Join-Path $PSScriptRoot 'stack-handoff-tests.cjs')
+if ($LASTEXITCODE -ne 0) {
+    throw 'Dependent stack handoff regressions failed.'
+}
 $testResultsDir = Join-Path $repoRoot 'test-results'
 
 function Write-FailureLog {
