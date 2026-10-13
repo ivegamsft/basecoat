@@ -57,7 +57,7 @@ class GitHubBranch:
                      self.read(commit["sha"], f["filename"])
                      for page in detail for f in page.get("files", [])
                      if f["filename"].startswith("runs/")}
-            result.append({"oid": commit["sha"], "files": files,
+            result.append({"oid": commit["sha"], "files": files, "root": commit.get("parents") == [],
                            "verified": commit["commit"]["verification"]["verified"] is True,
                            "app": bool(self.app_slug) and author.get("type") == "Bot" and
                            author.get("login") == f"{self.app_slug}[bot]"})
@@ -95,6 +95,22 @@ class GitHubBranch:
                 raise StaleHead(self.branch)
             raise
         return sha
+
+    def bootstrap(self, files, message):
+        """Create the missing branch at a new parentless commit (Git data API, app token)."""
+        P.require(self.head() is None, "ledger-branch-exists")
+        tree = gh(["--method", "POST", f"repos/{self.repo}/git/trees", "--input", "-"],
+                  json.dumps({"tree": [{"path": p, "mode": "100644", "type": "blob", "content": c}
+                                       for p, c in files.items()]}))["sha"]
+        root = gh(["--method", "POST", f"repos/{self.repo}/git/commits", "--input", "-"],
+                  json.dumps({"message": message, "tree": tree, "parents": []}))["sha"]
+        try:
+            gh(["--method", "POST", f"repos/{self.repo}/git/refs", "-f",
+                f"ref=refs/heads/{self.branch}", "-f", f"sha={root}"])
+        except P.Conflict:
+            P.require(self.head() is None, "ledger-branch-exists")  # A concurrent creator won.
+            raise
+        return root
 
     def commit(self, expected, files, message):
         P.require(expected is not None, "ledger-branch-missing")

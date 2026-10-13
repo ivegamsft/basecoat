@@ -1,8 +1,12 @@
 """Roadmap authority ledger on a bot branch: authority and progress only, never membership.
 
 Transport: head() -> oid|None; read(oid, path) -> str|None; history(oid) -> oldest-first
-[{"oid", "app", "verified", "files": {path: text|None}}]; protected(root) -> bool (ruleset
-unchanged since root; no delete/force; app-only updates); commit(head, files, msg) -> oid|StaleHead.
+[{"oid", "app", "verified", "root", "files": {path: text|None}}]; protected(root) -> bool
+(ruleset unchanged since root; no delete/force; app-only updates); commit(head, files, msg) ->
+oid|StaleHead; bootstrap(files, msg) -> oid of a parentless app commit at the missing branch.
+
+Ledger root: the branch must start at a parentless app-authored commit created by `bootstrap`;
+a branch created from main inherits human history and never passes provenance.
 """
 
 import argparse
@@ -17,6 +21,7 @@ import plan as P
 
 BRANCH = "bot/roadmap-state"
 LEASE = "lease.json"
+ROOT_FILE = "ledger-root.json"
 WRITERS = ("write", "maintain", "admin")
 STATES = ("proposed", "approved", "claimed", "needs-reconciliation", "terminal")
 STEP_MOVES = {"pending": {"pending", "claimed"}, "claimed": {"claimed", "done", "conflict", "failed"},
@@ -39,6 +44,7 @@ def verify_provenance(transport, head):
     P.require(head is not None, "ledger-branch-missing")
     history = transport.history(head)
     P.require(isinstance(history, list) and bool(history) and history[-1]["oid"] == head and
+              history[0].get("root") is True and not any(c.get("root") for c in history[1:]) and
               all(c.get("app") is True and c.get("verified") is True for c in history) and
               transport.protected(history[0]["oid"]) is True, "ledger-provenance-unproven")
     return history
@@ -132,6 +138,18 @@ class Ledger:
                                                 payload.items()), "ledger-commit-unconfirmed")
                 return {"dry_run": False, "head": moved, "files": payload}
         raise P.Conflict("ledger-head-contention")
+
+    def bootstrap(self):
+        """Provision the ledger root once: a parentless app commit; never adopts an existing ref."""
+        P.require(self.t.head() is None, "ledger-branch-exists")
+        files = {ROOT_FILE: P.canonical({"schema": 1, "repository": self.repo,
+                                         "branch": BRANCH}) + "\n"}
+        if not self.apply:
+            return {"dry_run": True, "create_root": True, "files": files}
+        root = self.t.bootstrap(files, "roadmap: bootstrap ledger root")
+        P.require(verify_provenance(self.t, self.t.head())[0]["oid"] == root,
+                  "ledger-provenance-unproven")
+        return {"status": "created", "head": root, "root": root}
 
     def propose(self, result, run):
         P.require(result["digest"] == P.digest(result["plan"]) and result["dry_run"] is True and
@@ -264,10 +282,10 @@ class Ledger:
 
 def main(argv=None, transport=None, authority=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("command", choices=("propose", "consume", "claim", "checkpoint",
-                                            "takeover"))
+    parser.add_argument("command", choices=("bootstrap", "propose", "consume", "claim",
+                                            "checkpoint", "takeover"))
     parser.add_argument("--repo", required=True)
-    parser.add_argument("--run-id", required=True)
+    parser.add_argument("--run-id")
     parser.add_argument("--result", help="Preview result JSON (propose)")
     parser.add_argument("--evidence", help="Mapper/advisor evidence JSON (consume recompute)")
     parser.add_argument("--comment-id", type=int)
@@ -287,6 +305,9 @@ def main(argv=None, transport=None, authority=None):
     ledger = Ledger(transport, args.repo, apply=args.apply)
     env = os.environ.get
     holder = f"{env('GITHUB_RUN_ID', 'local')}-{env('GITHUB_RUN_ATTEMPT', '1')}"
+    if args.command == "bootstrap":
+        return ledger.bootstrap()
+    P.require(args.run_id is not None, "invalid-run-id")
     if args.command == "propose":
         return ledger.propose(json.loads(Path(args.result).read_text(encoding="utf-8-sig")),
                               args.run_id)

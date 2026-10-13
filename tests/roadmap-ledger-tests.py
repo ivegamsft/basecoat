@@ -13,7 +13,7 @@ P = L.P
 
 class FakeBranch:  # Models expectedHeadOid compare-and-set and provenance only.
     def __init__(self, protected=True):
-        self.commits = [{"oid": "c0", "app": True, "verified": True, "files": {}}]
+        self.commits = [{"oid": "c0", "app": True, "verified": True, "root": True, "files": {}}]
         self.is_protected, self.lose_next, self.race = protected, False, None
         self.protected_since = "c0"  # Ruleset unchanged since; a rollback re-protects later.
 
@@ -31,9 +31,14 @@ class FakeBranch:  # Models expectedHeadOid compare-and-set and provenance only.
     def protected(self, root):
         return self.is_protected and root == self.protected_since
 
-    def push(self, files, app=True):
+    def push(self, files, app=True, root=False):
         self.commits.append({"oid": f"c{len(self.commits)}", "app": app, "verified": app,
-                             "files": dict(files)})
+                             "root": root, "files": dict(files)})
+
+    def bootstrap(self, files, message):
+        assert not self.commits, "bootstrap requires a missing branch"
+        self.push(files, root=True)
+        return self.head()
 
     def commit(self, expected, files, message):
         if self.race:
@@ -101,6 +106,30 @@ class LedgerTests(unittest.TestCase):
         self.fails("ledger-provenance-unproven")
         self.branch.commits = []
         self.fails("ledger-branch-missing")
+
+    def test_bootstrap_creates_one_app_root_and_inherited_history_fails(self):
+        self.branch.commits = []
+        dry = L.Ledger(self.branch, "owner/repo").bootstrap()
+        self.assertEqual((dry["dry_run"], list(dry["files"]), self.branch.commits),
+                         (True, [L.ROOT_FILE], []))
+        self.assertEqual(self.ledger.bootstrap(), {"status": "created", "head": "c0",
+                                                   "root": "c0"})
+        with self.assertRaisesRegex(P.Conflict, "ledger-branch-exists"):
+            self.ledger.bootstrap()  # Never adopts an existing branch.
+        self.ledger.propose(result(), "run-1")
+        self.branch.push({"notes.txt": "x"}, app=False)  # A human commit after the root.
+        self.fails("ledger-provenance-unproven", run="run-2")
+        with self.assertRaisesRegex(P.Conflict, "ledger-branch-exists"):
+            self.ledger.bootstrap()
+        # Created from main: human root, then app commits; or an app commit with parents.
+        for first in ({"app": False, "root": True}, {"app": True, "root": False}):
+            self.branch.commits = [{"oid": "c0", "verified": first["app"], "files": {}, **first}]
+            self.branch.push({"other.json": "{}"})
+            self.fails("ledger-provenance-unproven", run="run-2")
+        self.branch.commits = []
+        self.branch.push({}, root=True)
+        self.branch.push({}, root=True)  # A second parentless commit is not one ledger root.
+        self.fails("ledger-provenance-unproven", run="run-2")
 
     def test_re_propose_and_tombstone_reuse_are_rejected(self):
         self.ledger.propose(result(), "run-1")

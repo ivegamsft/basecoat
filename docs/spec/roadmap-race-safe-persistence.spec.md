@@ -155,6 +155,21 @@ the ruleset and that every commit in branch history is app-authored and
 verified, scan that full history (not the current tree) for consumed run and
 comment IDs, and re-verify source comment, author ID, permission and digest.
 
+Ledger root bootstrap (operator provisioning, #3882): the ledger root is the
+oldest commit of `bot/roadmap-state`, which must be parentless, app-authored
+and verified; no other commit in its history may be parentless. A branch
+created from `main` inherits human history and never passes provenance. To
+provision, the owner first creates the ruleset above, then runs
+`ledger.py bootstrap --repo <owner>/<repo> --apply` with the roadmap App's
+installation token and `ROADMAP_APP_SLUG`/`ROADMAP_APP_ID` set. It refuses
+an existing branch (`ledger-branch-exists`) and uses the Git data API
+(tree, commit with no parents and no custom author, then ref) to commit
+`ledger-root.json` (schema, repository, branch). It then re-runs the
+provenance check; an unsigned root or a ruleset changed after it fails
+`ledger-provenance-unproven` and must be re-provisioned by the owner.
+Without `--apply` it creates no commit and only prints the proposed
+`ledger-root.json` payload (`dry_run`, `create_root`, `files`).
+
 ### Artifact publisher
 
 Before any branch or PR write it requires a consumed approval for the exact

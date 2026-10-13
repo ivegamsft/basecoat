@@ -89,6 +89,38 @@ class TransportTests(unittest.TestCase):
                 with self.assertRaises(error):
                     branch.create_from("main")
 
+    def test_bootstrap_provisions_parentless_app_root_that_passes_provenance(self):
+        branch = self.branch({"git/trees": {"sha": "t1"}, "git/commits": {"sha": "r0"},
+                              "git/refs": {}})
+        files = {L.ROOT_FILE: '{"schema":1}\n'}
+        self.assertEqual(branch.bootstrap(files, "roadmap: bootstrap ledger root"), "r0")
+        tree, commit = (json.loads(self.fake.calls[i][1]) for i in (1, 2))
+        self.assertEqual((tree["tree"][0]["path"], commit["parents"], commit["tree"]),
+                         (L.ROOT_FILE, [], "t1"))
+        self.assertNotIn("author", commit)  # GitHub signs it as the app installation.
+        self.assertIn("sha=r0", self.fake.calls[-1][0])
+        detail = {"sha": "r0", "parents": [], "author": {"type": "Bot",
+                                                         "login": "roadmap-app[bot]"},
+                  "commit": {"verification": {"verified": True}},
+                  "files": [{"filename": L.ROOT_FILE, "status": "added"}]}
+        provisioned = {"git/ref/heads/bot/": {"object": {"sha": "r0"}},
+                       "commits?sha=r0": [[{"sha": "r0"}]], "commits/r0?per_page": [detail],
+                       "commits/r0": ROOT_COMMIT, "rules/branches": RULES, "rulesets/9": BYPASS}
+        branch = self.branch(provisioned)
+        self.assertEqual(L.verify_provenance(branch, branch.head())[0]["oid"], "r0")
+        missing = {k: v for k, v in detail.items() if k != "parents"}  # Fails closed.
+        for bad in ({**detail, "parents": [{"sha": "m0"}]}, missing):
+            branch = self.branch({**provisioned, "commits/r0?per_page": [bad]})
+            with self.assertRaisesRegex(G.P.Conflict, "ledger-provenance-unproven"):
+                L.verify_provenance(branch, "r0")
+        exists = (1, "gh: Reference already exists (HTTP 422)")
+        for routes in ({"git/ref/heads/bot/": {"object": {"sha": "b1"}}},
+                       {"git/trees": {"sha": "t1"}, "git/commits": {"sha": "r0"},
+                        "git/refs": exists}):
+            with self.subTest(routes=routes):
+                with self.assertRaises(G.P.Conflict):
+                    self.branch(routes).bootstrap(files, "msg")
+
     def test_protected_requires_exact_app_only_ruleset(self):
         ok = {"rules/branches": RULES, "rulesets/9": BYPASS, "commits/c0": ROOT_COMMIT}
         self.assertTrue(self.branch(ok).protected("c0"))
