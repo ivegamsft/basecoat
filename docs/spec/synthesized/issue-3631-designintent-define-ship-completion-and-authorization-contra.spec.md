@@ -129,5 +129,6 @@ runtime or distribution migration.
 - PRD:
   [`docs/prd/synthesized/issue-3631-designintent-define-ship-completion-and-authorization-contra.prd.md`](../../prd/synthesized/issue-3631-designintent-define-ship-completion-and-authorization-contra.prd.md)
 - Comparison: [`docs/design/ai-sdlc-work-units.md`](../../design/ai-sdlc-work-units.md)
+- Shared contract summary: [`docs/reference/intent-work-unit-contracts.md`](../../reference/intent-work-unit-contracts.md#ship-publication)
 - Current routes: [`docs/guides/intent-prefixes.md`](../../guides/intent-prefixes.md),
   [`docs/guides/spec-to-production.md`](../../guides/spec-to-production.md)

@@ -187,11 +187,14 @@ async function main() {
       ["collision", `${token}: ship-it: Deliver feature now`]
     ]) addCase(`P3725-candidate-${token}-${shape}`, body, "none");
   }
-  for (const modifier of ["defer", "stop"]) {
-    addCase(`P3725-prepare-modifier-${modifier}`, `prepare: Bound work ${modifier}`, "none");
+  const collisionTokens = ["prepare", "ship"];
+  for (const token of collisionTokens) {
+    for (const modifier of ["defer", "stop"]) {
+      addCase(`P3725-${token}-modifier-${modifier}`, `${token}: Bound work ${modifier}`, "none");
+    }
+    addCase(`P3725-${token}-dual-prefix`, `${token}: spec: Bound work`, "none");
+    addCase(`P3725-${token}-dual-lines`, `${token}: Bound work\nspec: Bound work`, "none");
   }
-  addCase("P3725-prepare-dual-prefix", "prepare: spec: Bound work", "none");
-  addCase("P3725-prepare-dual-lines", "prepare: Bound work\nspec: Bound work", "none");
   addCase("P3725-dual-lines", "ship-it: Deliver feature\nspec-2-prod: Deliver feature", "invalid");
   addCase("P3725-dual-lines-reversed", "spec-2-prod: Deliver feature\nship-it: Deliver feature", "invalid");
   addCase("P3725-candidate-before-supported", "prepare: Bound work\nship-it: Deliver feature", "invalid");
@@ -235,16 +238,16 @@ async function main() {
     assert.deepEqual(f.state.written, [], id);
     assert.deepEqual(f.state.dispatched, [], id);
   }
-  {
-    const id = "P3725-prepare-unauthorized-actor";
+  for (const token of collisionTokens) {
+    const id = `P3725-${token}-unauthorized-actor`;
     const f = fixture();
     f.state.permissions.writer = { permission: "read" };
-    const result = await run(scripts.delivery, f, "delivery", "prepare: Bound work");
+    const result = await run(scripts.delivery, f, "delivery", `${token}: Bound work`);
     assert.notEqual(result.outputs.should_run, "true", id);
     assert.deepEqual(f.state.written, [], id);
     assert.deepEqual(f.state.dispatched, [], id);
   }
-  console.log(`Preparation baseline: ${preparationCases.length} actual-parser/resolver fixtures + 5 authority fixtures passed.`);
+  console.log(`Preparation baseline: ${preparationCases.length} actual-parser/resolver fixtures + ${4 + collisionTokens.length} authority fixtures passed.`);
   for (const command of ["/approve", "/APPROVE", " \r\n /Approve \t\r\n"]) {
     for (const route of ["issue", "forward"]) {
       const f = fixture();

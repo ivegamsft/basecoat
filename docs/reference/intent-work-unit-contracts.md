@@ -22,6 +22,7 @@ of its pinned spec; the spec remains the detailed source of truth.
 | `build:` | `feature:` | Approved scope implemented and validated for an exact head | In-scope source and test writes plus draft PR after implementation authority | Review, then separate delivery authority | [#3628](../spec/synthesized/issue-3628-designintent-define-build-completion-and-authorization-contr.spec.md) |
 | `review:` | `audit:`, `investigate:`, `rca:` | Evidence-bound findings and disposition for a declared scope | Read-only | Finding owners and a separate approval decision | [#3629](../spec/synthesized/issue-3629-designintent-define-review-completion-and-authorization-cont.spec.md) |
 | `deliver:` | `ship-it:`, `spec-2-prod:` | Approved scope verified at the exact production target | Existing governed delivery controls with live revalidated authority | Close-out and learning; publication step uses `ship:` | [#3630](../spec/synthesized/issue-3630-designintent-define-deliver-completion-and-authorization-con.spec.md) |
+| `ship:` | `release:`, `deploy:` | Validated immutable artifact published and verified at its destination | Publication through existing release gates with separate authority | `deploy:` rollout and delivery verification | [#3631](../spec/synthesized/issue-3631-designintent-define-ship-completion-and-authorization-contra.spec.md) |
 
 ## Shared contract
 
@@ -434,3 +435,83 @@ receipt, changed spec, blocked dependency or failed checks stop before the
 next boundary; wrong target or failed production verification never claims
 completion; and out-of-scope implementation or destructive rollback is
 rejected.
+
+## `ship:` publication
+
+Proposal for #3631. Pinned spec:
+[`issue-3631-...-ship-...spec.md`](../spec/synthesized/issue-3631-designintent-define-ship-completion-and-authorization-contra.spec.md).
+Publish an already validated immutable release without expanding
+implementation scope.
+
+### Inputs
+
+Qualified current permission or receipt for publication to the named
+destination; repository, commit or tree, approved scope and validation run
+identities; an immutable artifact digest with manifest, provenance and build
+identity; the exact version and tag with their existing owner and policy; an
+explicit destination (never a default); and the expected payload, evidence
+source, capture time and freshness policy. Caller-supplied values are checked
+against trusted source and publisher state. Undefined tag or version
+ownership stops for a separate decision.
+
+### Completion evidence
+
+Validation bound to source commit, tree and run; the artifact bound to digest
+and manifest; the release bound to exact version, tag and destination; and
+verification bound to the published payload and capture time. `Published`
+means the exact payload is verified at the named destination. A tag, merge,
+dispatch marker or internal release record alone is not publication, and
+production health is a separate deployment result.
+
+### Authorization boundary
+
+Read the named source, artifact provenance, current validation, release and
+tag state, destination state and publication proof. Publish only after
+separate authority and the existing release gate, for the immutable artifact,
+exact version and tag, and exact destination. Deployment uses the existing
+`deploy:` route and its own target authority.
+
+Never implied: implementing code, rebuilding from changed source,
+overwriting or moving a tag, retargeting a destination, creating approval,
+skipping release checks, deploying, or claiming production health.
+
+### Failure and hold states
+
+| State | Required handling |
+| --- | --- |
+| Blocked | Missing or revoked authority, unclear owner, source or artifact mismatch, failed or stale validation, missing provenance, existing tag with different content, or destination mismatch; stop before any write |
+| Uncertain | Timeout or unknown publisher result; query the exact target, version and digest before any retry and preserve uncertainty if undeterminable |
+| Partial | Record each completed effect and checkpoint; partial release is never success |
+
+A retry uses only the same immutable artifact, version, tag and destination
+and relies on existing publisher idempotency; it never retargets an existing
+version or tag. Recovery or rollback needs separate authority and preserves
+published records. Resume revalidates authority, identities, publisher state,
+freshness and budget.
+
+### Handoff
+
+If code is missing or the artifact is unvalidated, hand back to the `build:`
+contract (or existing `feature:`) rather than implementing implicitly. After
+`Published`, hand off to `deploy:` for target rollout and to the `deliver:`
+contract or existing `ship-it:` ledger for production verification.
+
+### Distinctness decision
+
+`release:`, `deploy:` and `ship-it:`/`spec-2-prod:` remain authoritative.
+`ship:` is added only if publication has a distinct unmet boundary, compared
+against keeping `release:` and a `publish:` alternative; it is never
+registered as an alias. If both are adopted, `deliver:` owns the whole outcome
+and `ship:` only publication of a ready artifact.
+
+### Verification fixtures
+
+A future route must show: an approved standalone candidate for a validated
+immutable artifact routes only if registered and composes current release
+gates; no authority, ambiguous destination or unvalidated artifact is
+rejected before any write; quoted, fenced, bulleted, embedded or dual-prefix
+text does not execute; defer, read-only and stop modifiers publish nothing; a
+tag already pointing to a different digest fails closed; a retry after
+timeout inspects the exact existing target and never retargets; partial
+publication never claims completion; and a request adding implementation or
+deployment stops for separate scope.

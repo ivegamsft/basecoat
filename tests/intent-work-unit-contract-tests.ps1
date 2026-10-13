@@ -13,6 +13,7 @@ $expectedVerbs = [ordered]@{
     'build' = @{ Issue = 3628; States = @('Implemented', 'Validated', 'Blocked', 'Paused', 'Cancelled'); Forbids = @('ready promotion', 'auto-merge', 'merge', 'tagging', 'deployment', 'approval labels or directives', 'delivery consent from green checks', 'making `build:` an alias for `ship-it:`'); Candidates = @('implement') }
     'review' = @{ Issue = 3629; States = @('Complete', 'Blocked', 'Partial', 'Stopped'); Forbids = @('posting an APPROVED review', 'any comment', 'resolving threads', 'editing source', 'creating branches or PRs', 'changing labels, assignees or issues', 'merging', 'releasing', 'deploying', 'modifying authorization') }
     'deliver' = @{ Issue = 3630; States = @('Verified', 'Blocked', 'Partial', 'Stopped'); Forbids = @('applying approval labels', 'assigning an agent', 'altering issue authority', 'expanding scope', 'skipping checks, review or XXL gates', 'bypassing the merge queue', 'retargeting a release or deployment', 'destructive rollback') }
+    'ship' = @{ Issue = 3631; States = @('Published', 'Blocked', 'Uncertain', 'Partial'); Forbids = @('implementing code', 'rebuilding from changed source', 'overwriting or moving a tag', 'retargeting a destination', 'creating approval', 'skipping release checks', 'deploying', 'claiming production health') }
 }
 
 $requiredSubsections = @(
@@ -65,11 +66,15 @@ if (-not $candidateBlock.Success) {
     }
 }
 
-foreach ($fixtureId in @('P3725-prepare-modifier-', 'P3725-prepare-dual-prefix', 'P3725-prepare-dual-lines', 'P3725-prepare-unauthorized-actor')) {
-    if (-not $parserText.Contains($fixtureId)) { Add-Failure "Disabled-baseline fixture '$fixtureId' for 'prepare:' is missing from tests/approval-contract-tests.cjs" }
+$collisionList = [regex]::Match($parserText, 'const collisionTokens = \[([^\]]+)\];').Groups[1].Value
+foreach ($fixtureId in @('modifier-${modifier}', 'dual-prefix', 'dual-lines', 'unauthorized-actor')) {
+    if (-not $parserText.Contains("P3725-`${token}-$fixtureId")) { Add-Failure "Disabled-baseline fixture 'P3725-<token>-$fixtureId' is missing from tests/approval-contract-tests.cjs" }
 }
-if ($parserText -notmatch 'for \(const modifier of \["defer", "stop"\]\) \{\s*addCase\(`P3725-prepare-modifier-') {
-    Add-Failure "'prepare:' defer/stop modifier fixtures are missing from tests/approval-contract-tests.cjs"
+if ($parserText -notmatch 'for \(const modifier of \["defer", "stop"\]\) \{\s*addCase\(`P3725-\$\{token\}-modifier-') {
+    Add-Failure "Defer/stop modifier fixtures are missing from tests/approval-contract-tests.cjs"
+}
+foreach ($token in @('prepare', 'ship')) {
+    if ($collisionList -notmatch "`"$token`"") { Add-Failure "'${token}:' lacks modifier, dual-prefix and unauthorized-actor fixtures in tests/approval-contract-tests.cjs" }
 }
 
 foreach ($verb in $expectedVerbs.Keys) {
