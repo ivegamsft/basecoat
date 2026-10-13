@@ -7,10 +7,13 @@ unchanged since root; no delete/force; app-only updates); commit(head, files, ms
 
 import json
 import re
+import time
 
 import plan as P
 
 BRANCH = "bot/roadmap-state"
+LEASE = "lease.json"
+WRITERS = ("write", "maintain", "admin")
 STATES = ("proposed", "approved", "claimed", "needs-reconciliation", "terminal")
 STEP_MOVES = {"pending": {"pending", "claimed"}, "claimed": {"claimed", "done", "conflict", "failed"},
               "done": {"done"}, "conflict": {"conflict"}, "failed": {"failed"}}
@@ -39,15 +42,29 @@ def verify_provenance(transport, head):
 
 def tombstones(history):
     """Every run path and consumed comment ID that ever existed in branch history."""
-    paths, comments = set(), set()
+    paths, comments = set(), {}
     for commit in history:
         for path, content in commit["files"].items():
             if path.startswith("runs/") and content is not None:
                 paths.add(path)
                 approval = json.loads(content).get("approval")
                 if approval:
-                    comments.add(approval["comment_id"])
+                    comments.setdefault(approval["comment_id"], set()).add(path)
     return paths, comments
+
+
+def human_approval(github, comment_id, run, digest):
+    """Resolve approval from GitHub by comment ID at call time; comment text is never executed."""
+    comment = github.comment(comment_id)
+    P.require(comment["id"] == comment_id and comment["user_type"] == "User",
+              "unauthorized-approval")
+    P.require(comment["body"] == f"roadmap: approve {run} {digest}",
+              "stale-or-mismatched-approval")
+    permission = github.permission(comment["user_login"])
+    P.require(permission in WRITERS, "unauthorized-approval")
+    return {"actor": comment["user_login"], "actor_id": comment["user_id"],
+            "permission": permission, "comment_id": comment_id, "url": comment["url"],
+            "digest": digest}
 
 
 def check_forward(old, new):
@@ -64,6 +81,14 @@ def check_forward(old, new):
     P.require(len(old["steps"]) == len(new["steps"]) and all(
         {**a, **STEP_STATE} == {**b, **STEP_STATE} and b["status"] in STEP_MOVES[a["status"]]
         for a, b in zip(old["steps"], new["steps"])), "invalid-step-transition")
+
+
+def step_index(steps, index):
+    P.require(type(index) is int and 0 <= index < len(steps), "invalid-step-order")
+
+
+def require_holder(holder):
+    P.require(type(holder) is str and holder.strip() == holder != "", "invalid-holder")
 
 
 class Ledger:
@@ -128,3 +153,106 @@ class Ledger:
                            "steps": [{**s, "index": i, **STEP_STATE, "status": "pending"}
                                      for i, s in enumerate(steps)]}}
         return self.transact(f"roadmap: propose {run}", mutate)
+
+    def held(self, head, run, holder, epoch, now, ttl):
+        lease = self.load(head, LEASE)
+        P.require(lease is not None and lease["run_id"] == run and lease["holder"] == holder and
+                  lease["epoch"] == epoch, "fenced-holder")
+        return {**lease, "lease_expires_at": now + ttl}
+
+    def authority(self, run, github):
+        """Re-verify a consumed approval from provenance-checked history and GitHub, never cache."""
+        head = self.t.head()
+        history = verify_provenance(self.t, head)
+        path = run_path(self.repo, run)
+        doc = self.load(head, path)
+        self.reverify(history, path, doc, run, github)
+        return doc, self.load(head, LEASE)
+
+    @staticmethod
+    def reverify(history, path, doc, run, github):
+        P.require(doc is not None and doc["approval"] is not None, "approval-required")
+        current = human_approval(github, doc["approval"]["comment_id"], run, doc["plan_digest"])
+        P.require(tombstones(history)[1].get(current["comment_id"]) == {path} and all(
+            doc["approval"][k] == current[k] for k in ("actor_id", "comment_id", "digest")),
+            "stale-or-mismatched-approval")
+
+    def consume(self, run, comment_id, github, recompute, trigger, holder, now=time.time, ttl=900):
+        P.require(trigger == "issue_comment", "unauthorized-approval")
+        require_holder(holder)
+        path = run_path(self.repo, run)
+
+        def mutate(head, history):
+            doc = self.load(head, path)
+            P.require(doc is not None, "run-missing")
+            P.require(doc["approval"] is None and comment_id not in tombstones(history)[1],
+                      "approval-already-consumed")
+            approval = human_approval(github, comment_id, run, doc["plan_digest"])
+            fresh = recompute()
+            P.require(fresh["digest"] == P.digest(fresh["plan"]) == doc["plan_digest"] and fresh["plan"]["scope"] ==
+                      doc["scope"] and fresh["plan"]["bounds"] == doc["bounds"] and
+                      fresh["plan"].get("evidence_digest") == doc["evidence_digest"],
+                      "stale-or-mismatched-approval")
+            lease = self.load(head, LEASE) or {"epoch": 0, "holder": None, "run_id": None}
+            prior = lease["run_id"] and self.load(head, run_path(self.repo, lease["run_id"]))
+            P.require((lease["holder"] is None or now() >= lease["lease_expires_at"]) and not (
+                prior and any(s["status"] == "claimed" for s in prior["steps"])),
+                "repository-lease-held")
+            return {path: {**doc, "state": "approved", "approval": approval},
+                    LEASE: {"run_id": run, "epoch": lease["epoch"] + 1, "holder": holder,
+                            "lease_expires_at": now() + ttl}}
+        return self.transact(f"roadmap: consume {run}", mutate)
+
+    def claim(self, run, index, holder, epoch, now=time.time, ttl=900):
+        path = run_path(self.repo, run)
+
+        def mutate(head, history):
+            lease, doc = self.held(head, run, holder, epoch, now(), ttl), self.load(head, path)
+            steps = [dict(s) for s in doc["steps"]]
+            step_index(steps, index)
+            P.require(doc["state"] in ("approved", "claimed") and steps[index]["status"] ==
+                      "pending" and all(s["status"] == "done" for s in steps[:index]),
+                      "invalid-step-order")
+            steps[index].update(status="claimed", epoch=epoch)
+            return {path: {**doc, "state": "claimed", "steps": steps}, LEASE: lease}
+        return self.transact(f"roadmap: claim {run} {index}", mutate)
+
+    def checkpoint(self, run, index, holder, epoch, outcome, status, error=None, now=time.time,
+                   ttl=900):
+        P.require(outcome in ("done", "conflict", "failed") and type(status) is int and
+                  (error is None or re.fullmatch(r"[a-z0-9_-]{1,64}", error)), "invalid-evidence")
+        path = run_path(self.repo, run)
+
+        def mutate(head, history):
+            lease, doc = self.held(head, run, holder, epoch, now(), ttl), self.load(head, path)
+            steps = [dict(s) for s in doc["steps"]]
+            step_index(steps, index)
+            P.require(steps[index]["status"] == "claimed" and steps[index]["epoch"] == epoch,
+                      "fenced-holder")
+            steps[index].update(status=outcome, evidence={"status": status, "error": error})
+            finished = outcome != "done" or all(s["status"] == "done" for s in steps)
+            if finished:
+                lease["holder"] = None
+            return {path: {**doc, "steps": steps, "state": "terminal" if finished else "claimed",
+                           "stop_reason": ("complete" if outcome == "done" else f"step-{outcome}")
+                           if finished else None}, LEASE: lease}
+        return self.transact(f"roadmap: checkpoint {run} {index}", mutate)
+
+    def takeover(self, run, holder, github, now=time.time, ttl=900):
+        """After lease expiry exactly one replacement wins epoch + 1; approval is re-verified, not
+        re-consumed."""
+        require_holder(holder)
+        path = run_path(self.repo, run)
+
+        def mutate(head, history):
+            lease, doc = self.load(head, LEASE), self.load(head, path)
+            P.require(lease is not None and lease["run_id"] == run and lease["holder"] is not None
+                      and now() >= lease["lease_expires_at"], "repository-lease-held")
+            self.reverify(history, path, doc, run, github)
+            unknown = any(s["status"] == "claimed" for s in doc["steps"])
+            lease = {**lease, "epoch": lease["epoch"] + 1, "lease_expires_at": now() + ttl,
+                     "holder": None if unknown else holder}
+            if unknown:
+                doc = {**doc, "state": "needs-reconciliation", "stop_reason": "needs-reconciliation"}
+            return {path: doc, LEASE: lease}
+        return self.transact(f"roadmap: takeover {run}", mutate)

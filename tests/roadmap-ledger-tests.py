@@ -159,5 +159,168 @@ class LedgerTests(unittest.TestCase):
         self.rejects("invalid-ledger-transition", {**approved, "state": "terminal"}, {})
 
 
+
+class FakeGitHub:
+    def __init__(self):
+        self.comments, self.permissions = {}, {"alice": "write", "bob": "read"}
+
+    def approve(self, cid, run, digest, login="alice", kind="User", body=None):
+        self.comments[cid] = {"id": cid, "user_type": kind, "user_login": login,
+                              "user_id": len(login), "url": f"https://x/{cid}",
+                              "body": body or f"roadmap: approve {run} {digest}"}
+
+    def comment(self, cid):
+        return dict(self.comments[cid])
+
+    def permission(self, login):
+        return self.permissions[login]
+
+
+class AuthorityTests(unittest.TestCase):
+    def setUp(self):
+        self.branch, self.gh, self.clock = FakeBranch(), FakeGitHub(), [100]
+        self.ledger = L.Ledger(self.branch, "owner/repo", apply=True)
+        self.ledger.propose(result(steps=2), "run-1")
+        self.gh.approve(1, "run-1", result()["digest"])
+
+    def now(self):
+        return self.clock[0]
+
+    def consume(self, run="run-1", cid=1, trigger="issue_comment", plan=None, holder="h1"):
+        return self.ledger.consume(run, cid, self.gh, lambda: plan or result(steps=2), trigger,
+                                   holder, now=self.now)
+
+    def doc(self, run="run-1"):
+        head = self.branch.head()
+        return (json.loads(self.branch.read(head, L.run_path("owner/repo", run))),
+                json.loads(self.branch.read(head, L.LEASE)))
+
+    def test_consume_binds_identity_permission_digest_and_lease_once(self):
+        self.consume()
+        doc, lease = self.doc()
+        self.assertEqual((doc["state"], doc["approval"]["permission"], lease["epoch"],
+                          lease["holder"]), ("approved", "write", 1, "h1"))
+        self.assertEqual(self.ledger.authority("run-1", self.gh)[0]["approval"]["comment_id"], 1)
+        for cid in (1, 2):
+            self.gh.approve(cid, "run-1", result()["digest"])
+            with self.assertRaisesRegex(P.Conflict, "approval-already-consumed"):
+                self.consume(cid=cid)
+
+    def test_concurrent_consumption_has_one_winner(self):
+        self.gh.approve(2, "run-1", result()["digest"])
+        self.branch.race = lambda: self.consume(cid=2, holder="h2")
+        with self.assertRaisesRegex(P.Conflict, "approval-already-consumed"):
+            self.consume()
+        self.assertEqual(self.doc()[1]["holder"], "h2")
+
+    def test_non_human_trigger_permission_and_changed_plan_are_rejected(self):
+        cases = [({"trigger": "schedule"}, "unauthorized-approval"),
+                 ({"plan": result("b", steps=2)}, "stale-or-mismatched-approval")]
+        for login, kind, body, code in (("bob", "User", None, "unauthorized-approval"),
+                                        ("alice", "Bot", None, "unauthorized-approval"),
+                                        ("alice", "User", "lgtm", "stale-or-mismatched-approval")):
+            cases.append((login, kind, body, code))
+        for case in cases:
+            with self.subTest(case=case):
+                if isinstance(case[0], dict):
+                    kwargs, code = case
+                else:
+                    self.gh.approve(1, "run-1", result()["digest"], *case[:3])
+                    kwargs, code = {}, case[3]
+                with self.assertRaisesRegex(P.Conflict, code):
+                    self.consume(**kwargs)
+                self.assertIsNone(self.branch.read(self.branch.head(), L.LEASE))
+
+    def test_forged_or_revoked_approval_fails_reverification(self):
+        self.consume()
+        self.gh.permissions["alice"] = "read"
+        with self.assertRaisesRegex(P.Conflict, "unauthorized-approval"):
+            self.ledger.authority("run-1", self.gh)
+        self.gh.permissions["alice"] = "write"
+        doc, _ = self.doc()
+        doc["approval"]["actor_id"] = 7
+        self.branch.push({L.run_path("owner/repo", "run-1"): P.canonical(doc)}, app=False)
+        with self.assertRaisesRegex(P.Conflict, "ledger-provenance-unproven"):
+            self.ledger.authority("run-1", self.gh)
+
+    def test_second_run_cannot_consume_or_claim_while_lease_is_held(self):
+        self.consume()
+        self.ledger.propose(result(steps=2), "run-2")
+        self.gh.approve(2, "run-2", result()["digest"])
+        with self.assertRaisesRegex(P.Conflict, "repository-lease-held"):
+            self.consume("run-2", 2, holder="h2")
+        with self.assertRaisesRegex(P.Conflict, "fenced-holder"):
+            self.ledger.claim("run-2", 0, "h2", 1, now=self.now)
+
+    def test_claims_are_ordered_and_checkpoints_release_lease_when_complete(self):
+        self.consume()
+        with self.assertRaisesRegex(P.Conflict, "invalid-step-order"):
+            self.ledger.claim("run-1", 1, "h1", 1, now=self.now)
+        for i in (0, 1):
+            self.ledger.claim("run-1", i, "h1", 1, now=self.now)
+            self.ledger.checkpoint("run-1", i, "h1", 1, "done", 200, now=self.now)
+        doc, lease = self.doc()
+        self.assertEqual((doc["state"], doc["stop_reason"], lease["holder"]),
+                         ("terminal", "complete", None))
+
+    def test_takeover_fences_stale_holder_and_only_one_replacement_wins(self):
+        self.consume()
+        with self.assertRaisesRegex(P.Conflict, "repository-lease-held"):
+            self.ledger.takeover("run-1", "h2", self.gh, now=self.now)
+        self.clock[0] = 2000
+        self.branch.race = lambda: self.ledger.takeover("run-1", "h3", self.gh, now=self.now)
+        with self.assertRaisesRegex(P.Conflict, "repository-lease-held"):
+            self.ledger.takeover("run-1", "h2", self.gh, now=self.now)
+        self.assertEqual(self.doc()[1]["holder"], "h3")
+        with self.assertRaisesRegex(P.Conflict, "fenced-holder"):
+            self.ledger.claim("run-1", 0, "h1", 1, now=self.now)
+        self.ledger.claim("run-1", 0, "h3", 2, now=self.now)
+
+    def test_takeover_reverifies_approval_and_steps_reject_bad_indexes(self):
+        self.consume()
+        self.clock[0] = 2000
+        self.gh.permissions["alice"] = "read"
+        with self.assertRaisesRegex(P.Conflict, "unauthorized-approval"):
+            self.ledger.takeover("run-1", "h2", self.gh, now=self.now)
+        self.gh.permissions["alice"] = "write"
+        self.gh.approve(1, "run-1", result()["digest"], body=f"roadmap: approve run-1 "
+                        f"{result()['digest']}\n")
+        with self.assertRaisesRegex(P.Conflict, "stale-or-mismatched-approval"):
+            self.ledger.takeover("run-1", "h2", self.gh, now=self.now)
+        self.clock[0] = 100
+        for index in (-1, 2, True, "0"):
+            with self.subTest(index=index), self.assertRaisesRegex(P.Conflict,
+                                                                   "invalid-step-order"):
+                self.ledger.claim("run-1", index, "h1", 1, now=self.now)
+
+    def test_holders_must_be_named_and_recomputed_digest_must_match_plan(self):
+        for holder in (None, "", " h"):
+            with self.subTest(holder=holder), self.assertRaisesRegex(P.Conflict,
+                                                                     "invalid-holder"):
+                self.consume(holder=holder)
+        forged = {**result(steps=2), "plan": {**result()["plan"], "releases": ["v9.0.0"]}}
+        with self.assertRaisesRegex(P.Conflict, "stale-or-mismatched-approval"):
+            self.consume(plan=forged)
+        self.consume()
+        self.clock[0] = 2000
+        with self.assertRaisesRegex(P.Conflict, "invalid-holder"):
+            self.ledger.takeover("run-1", None, self.gh, now=self.now)
+
+    def test_takeover_with_claimed_step_requires_reconciliation(self):
+        self.consume()
+        self.ledger.claim("run-1", 0, "h1", 1, now=self.now)
+        self.clock[0] = 2000
+        self.ledger.takeover("run-1", "h2", self.gh, now=self.now)
+        doc, lease = self.doc()
+        self.assertEqual((doc["state"], lease["holder"], lease["epoch"]),
+                         ("needs-reconciliation", None, 2))
+        with self.assertRaisesRegex(P.Conflict, "fenced-holder"):
+            self.ledger.checkpoint("run-1", 0, "h1", 1, "done", 200, now=self.now)
+        self.ledger.propose(result(steps=2), "run-2")
+        self.gh.approve(2, "run-2", result()["digest"])
+        with self.assertRaisesRegex(P.Conflict, "repository-lease-held"):
+            self.consume("run-2", 2, holder="h4")
+
+
 if __name__ == "__main__":
     unittest.main()
