@@ -154,3 +154,8 @@ only after writer control is demonstrated; preserve current holds/native checks.
 Stop on untracked admission, silent age bypass, destructive reconciliation or authority drift.
 Rollback disables new scheduling writes, retains ledger/hold evidence and returns to
 existing manual serialized recovery. Expired holds stay held pending scoped resolution.
+
+## Implementation status
+
+Stage 1 shadow logic in `.github/base-coat/scripts/ordered-delivery-holds.cjs` (tests: `tests/ordered-delivery-holds-tests.cjs`) computes age keys, dependency precedence, blocked-item reports,
+scoped exceptions, hold expiry/resume and recovery without writes; order is best-effort unless the writer controls every entry path.

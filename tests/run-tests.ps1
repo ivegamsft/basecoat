@@ -25,6 +25,12 @@ Write-Host 'Running protected-main eligibility barrier tests...'
 if ($LASTEXITCODE -ne 0) {
     throw 'Protected-main eligibility barrier regressions failed.'
 }
+
+Write-Host 'Running ordered delivery hold tests...'
+& node --test (Join-Path $PSScriptRoot 'ordered-delivery-holds-tests.cjs')
+if ($LASTEXITCODE -ne 0) {
+    throw 'Ordered delivery hold regressions failed.'
+}
 $testResultsDir = Join-Path $repoRoot 'test-results'
 
 function Write-FailureLog {
