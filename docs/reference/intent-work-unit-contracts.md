@@ -20,6 +20,7 @@ of its pinned spec; the spec remains the detailed source of truth.
 | `prepare:` | `plan:`, `issue:`, `portfolio:`, `fleet:`, `optimize:` | Bounded, evidence-bound work packet | Read-only | Specification or authorization decision | [#3626](../spec/synthesized/issue-3626-designintent-define-prepare-completion-and-authorization-con.spec.md) |
 | `spec:` | PRD/spec synthesis, `design:` | Reviewable specification with traceable fixtures | Read-only; named artifact writes only with explicit scope | Implementation authority decision | [#3627](../spec/specification-work-unit.spec.md) |
 | `build:` | `feature:` | Approved scope implemented and validated for an exact head | In-scope source and test writes plus draft PR after implementation authority | Review, then separate delivery authority | [#3628](../spec/synthesized/issue-3628-designintent-define-build-completion-and-authorization-contr.spec.md) |
+| `review:` | `audit:`, `investigate:`, `rca:` | Evidence-bound findings and disposition for a declared scope | Read-only | Finding owners and a separate approval decision | [#3629](../spec/synthesized/issue-3629-designintent-define-review-completion-and-authorization-cont.spec.md) |
 
 ## Shared contract
 
@@ -277,3 +278,80 @@ lookalikes, dual authoritative prefixes, defer and stop modifiers,
 unauthorized actors and compile-only ambiguity. Until adoption, both
 candidates must remain unsupported, and behavior fixtures must show
 out-of-scope edits rejected and stale-head evidence refused.
+
+## `review:` assessment
+
+Proposal for #3629. Pinned spec:
+[`issue-3629-...-review-...spec.md`](../spec/synthesized/issue-3629-designintent-define-review-completion-and-authorization-cont.spec.md).
+Assess artifacts and outcomes without changing authorization.
+
+### Inputs
+
+An explicit artifact set, question and exclusions (no inferred
+repository-wide scope); artifact identity with exact revision or content
+digest; a comparison baseline or a recorded `not applicable`; the target
+environment, branch, release or other subject, or an explicit `not
+applicable` when none exists; evidence sources with capture time and their
+freshness policy; trusted actor identity and live authority evidence from
+invocation metadata; a bounded time, read and retry budget; and read access to
+the named evidence only. Caller-supplied identity or permission claims are not
+evidence.
+
+### Completion evidence
+
+A report in which every in-scope item has a finding or an explicit
+non-success disposition. Each finding records a stable identifier, artifact
+and revision, severity and confidence from a vocabulary selected before
+implementation, evidence references with capture times, rationale and a
+disposition (`actionable`, `not reproduced`, `acceptance recorded` with its
+authorized source, or `unresolved`). The report states coverage, unexamined
+items, freshness and blockers. `Complete` requires all of this; partial
+evidence never claims repository-wide completeness.
+
+### Authorization boundary
+
+Read the requested artifacts and named, necessary evidence. Return the report
+to the requester; persist it only to an explicitly specified destination under
+separately documented permission. The assessor cannot accept risk.
+
+Never implied: posting an APPROVED review or any comment, resolving threads,
+editing source, creating branches or PRs, changing labels, assignees or
+issues, merging, releasing, deploying or modifying authorization. Current
+solo-dev advisory-review policy is unchanged.
+
+### Failure and hold states
+
+| State | Required handling |
+| --- | --- |
+| Blocked | Ambiguous scope, unavailable or stale evidence, mismatched identity, permission change or unsupported write request; record the unmet condition and unexamined scope |
+| Partial | Partial source access or exhausted budget; report coverage and checkpoint, never success |
+| Stopped | Explicit stop, defer or conflicting directive; no further reads or writes |
+
+Undefined freshness rules, an unreadable source or a new revision mark
+dependent findings unknown or stale; no current-state conclusion is drawn.
+
+### Handoff
+
+Findings hand off to their owners: `actionable` items to implementation
+(`build:` contract or existing `feature:`/`bug:`), and the report to a human
+or authorized approver who decides separately. Resume rechecks scope,
+permissions, artifact identity, target, freshness and budget; stale findings
+are never inherited as current.
+
+### Distinctness decision
+
+`audit:`, `investigate:` and `rca:` remain authoritative for their documented
+purposes, and GitHub review submission remains a separate authenticated
+decision. `review:` is considered only after a distinct, non-alias need is
+demonstrated.
+
+### Verification fixtures
+
+A future implementation must show: a standalone candidate with explicit scope
+routes only if approved and registered; quoted, fenced, bulleted or embedded
+text does not execute; a dual prefix is rejected with no side effect;
+`defer`, `later`, read-only, no-changes and stop modifiers do not execute; an
+actor who never had review authority is rejected before any read; requests to
+submit APPROVED, change a label or edit source are blocked; missing revision,
+wrong target, stale evidence or revoked access fail closed; and partial access
+or budget exhaustion reports partial coverage, never success.

@@ -134,4 +134,5 @@ migration or rollout.
 - PRD:
   [`docs/prd/synthesized/issue-3629-designintent-define-review-completion-and-authorization-cont.prd.md`](../../prd/synthesized/issue-3629-designintent-define-review-completion-and-authorization-cont.prd.md)
 - Canonical comparison: [`docs/design/ai-sdlc-work-units.md`](../../design/ai-sdlc-work-units.md)
+- Shared contract summary: [`docs/reference/intent-work-unit-contracts.md`](../../reference/intent-work-unit-contracts.md#review-assessment)
 - Source proposal: #3629
