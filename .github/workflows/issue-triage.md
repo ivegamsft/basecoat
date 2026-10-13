@@ -109,7 +109,7 @@ A `duplicate` issue must not carry a type label simultaneously.
 
 ### Step 5 — Apply Structured Fields and Labels
 
-Apply the appropriate type label AND priority label. Add `good-first-issue`
+Apply the appropriate type label AND priority label. Add `good first issue`
 if the issue is well-scoped and approachable for new contributors.
 
 If legacy priority labels are present, normalize them to canonical `priority:*` labels.

@@ -199,7 +199,7 @@ function Assert-PreApprovalCurrent {
   }
 }
 $repoName = $TargetRepo.Split("/")[1]
-$commonLabels = @("intent-control-plane", $Intent, "risk-$RiskBand")
+$commonLabels = @("intent-control-plane", $Intent, "risk:$RiskBand")
 
 if ($Intent -eq "onboarding-conductor") {
   $commonLabels += "onboarding-conductor"
@@ -1016,10 +1016,10 @@ if ($DryRun) {
   Ensure-Label -Repo $TargetRepo -Name "intent-control-plane" -Color "4c1d95" -Description "Tracks intent-driven SDLC execution."
   Ensure-Label -Repo $TargetRepo -Name "ship-it" -Color "0e8a16" -Description "Tracks ship-it intent workflows."
   Ensure-Label -Repo $TargetRepo -Name "spec-2-prod" -Color "1d76db" -Description "Tracks spec-to-production delivery workflows."
-  Ensure-Label -Repo $TargetRepo -Name "risk-low" -Color "bfe5bf" -Description "Low-risk intent run."
-  Ensure-Label -Repo $TargetRepo -Name "risk-medium" -Color "fbca04" -Description "Medium-risk intent run."
-  Ensure-Label -Repo $TargetRepo -Name "risk-high" -Color "f9d0c4" -Description "High-risk intent run."
-  Ensure-Label -Repo $TargetRepo -Name "risk-critical" -Color "b60205" -Description "Critical-risk intent run."
+  Ensure-Label -Repo $TargetRepo -Name "risk:low" -Color "bfe5bf" -Description "Low-risk intent run."
+  Ensure-Label -Repo $TargetRepo -Name "risk:medium" -Color "fbca04" -Description "Medium-risk intent run."
+  Ensure-Label -Repo $TargetRepo -Name "risk:high" -Color "f9d0c4" -Description "High-risk intent run."
+  Ensure-Label -Repo $TargetRepo -Name "risk:critical" -Color "b60205" -Description "Critical-risk intent run."
   Ensure-Label -Repo $TargetRepo -Name "sprint" -Color "5319e7" -Description "Sprint tracking issue."
   Ensure-Label -Repo $TargetRepo -Name "onboarding-conductor" -Color "1d76db" -Description "Tracks onboarding-conductor intent runs."
 
@@ -1157,7 +1157,7 @@ $(($mergeSequencingChecklist -join "`n"))
   - Required gates: ``lint, build, type, e2e, security, smoke``
   - Required artifacts: ``spec, docs, tests, runbook, release_notes``
 - [ ] Evidence bundle attached for this stage (``promotion-evidence-bundle.json``)
-- [ ] Promotion blocked when any required gate fails for ``risk-$RiskBand``
+- [ ] Promotion blocked when any required gate fails for ``risk:$RiskBand``
 - [ ] Rollback validation evidence captured before production cutover
 - [ ] Runbook delta mapped to goal IDs
 - [ ] Release-note delta mapped to goal IDs

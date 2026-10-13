@@ -114,7 +114,7 @@ All control-plane issues are labeled with:
 
 - `intent-control-plane` — identifies the parent or child as a governed execution artifact
 - `ship-it` / `spec-2-prod` / `onboarding-conductor` — intent type
-- `risk-<band>` — risk classification (`risk-low`, `risk-medium`, `risk-high`, `risk-critical`)
+- `risk:<band>` — risk classification (`risk:low`, `risk:medium`, `risk:high`, `risk:critical`)
 - `sprint` — (child issues only) marks child sprint tracking issues
 
 ## Output Artifacts

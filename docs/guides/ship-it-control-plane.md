@@ -16,7 +16,7 @@ into governed SDLC execution artifacts with live GitHub side effects.
 3. **Risk-aware labeling**
    - `intent-control-plane`
    - `ship-it` or `spec-2-prod`
-   - `risk-low|medium|high|critical`
+   - `risk:low|medium|high|critical`
 4. **Automation-ready outputs**
    - JSON summary: `test-results\ship-it\summary.json`
    - Markdown summary: `test-results\ship-it\summary.md`
