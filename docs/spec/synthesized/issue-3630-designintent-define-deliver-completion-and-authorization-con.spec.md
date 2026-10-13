@@ -122,4 +122,5 @@ any rollout. Proposal publication itself has no runtime migration.
   [`docs/prd/synthesized/issue-3630-designintent-define-deliver-completion-and-authorization-con.prd.md`](../../prd/synthesized/issue-3630-designintent-define-deliver-completion-and-authorization-con.prd.md)
 - Comparison: [`docs/design/ai-sdlc-work-units.md`](../../design/ai-sdlc-work-units.md)
 - Existing delivery trace: [`docs/guides/spec-to-production.md`](../../guides/spec-to-production.md)
+- Shared contract summary: [`docs/reference/intent-work-unit-contracts.md`](../../reference/intent-work-unit-contracts.md#deliver-delivery)
 - Source proposal: #3630

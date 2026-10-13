@@ -21,6 +21,7 @@ of its pinned spec; the spec remains the detailed source of truth.
 | `spec:` | PRD/spec synthesis, `design:` | Reviewable specification with traceable fixtures | Read-only; named artifact writes only with explicit scope | Implementation authority decision | [#3627](../spec/specification-work-unit.spec.md) |
 | `build:` | `feature:` | Approved scope implemented and validated for an exact head | In-scope source and test writes plus draft PR after implementation authority | Review, then separate delivery authority | [#3628](../spec/synthesized/issue-3628-designintent-define-build-completion-and-authorization-contr.spec.md) |
 | `review:` | `audit:`, `investigate:`, `rca:` | Evidence-bound findings and disposition for a declared scope | Read-only | Finding owners and a separate approval decision | [#3629](../spec/synthesized/issue-3629-designintent-define-review-completion-and-authorization-cont.spec.md) |
+| `deliver:` | `ship-it:`, `spec-2-prod:` | Approved scope verified at the exact production target | Existing governed delivery controls with live revalidated authority | Close-out and learning; publication step uses `ship:` | [#3630](../spec/synthesized/issue-3630-designintent-define-deliver-completion-and-authorization-con.spec.md) |
 
 ## Shared contract
 
@@ -355,3 +356,81 @@ actor who never had review authority is rejected before any read; requests to
 submit APPROVED, change a label or edit source are blocked; missing revision,
 wrong target, stale evidence or revoked access fail closed; and partial access
 or budget exhaustion reports partial coverage, never success.
+
+## `deliver:` delivery
+
+Proposal for #3630. Pinned spec:
+[`issue-3630-...-deliver-...spec.md`](../spec/synthesized/issue-3630-designintent-define-deliver-completion-and-authorization-con.spec.md).
+Complete approved scope through verified production as one governed intent.
+
+### Inputs
+
+A qualified live delivery receipt with actor, source comment or record and
+current permission, re-fetched at each side-effect boundary; the source issue
+with approved scope, non-goals and exact issue or spec revision; the exact
+change, head or tree with dependencies, expected outputs, budget and stop
+conditions; the destination repository, integration branch, release version,
+deployment environment and target; and named acceptance checks with
+target-specific production evidence. Caller assertions, generated text,
+labels alone or stale receipts are rejected as authorization.
+
+### Completion evidence
+
+Checks bound to their commit, tree or integration tree, workflow run and
+result; publication bound to immutable version, tag, source commit, artifact
+digest and destination; production verification bound to the named target,
+observed behavior and capture time. `Verified` is the only completion state:
+exact approved acceptance evidence at the named target. A PR merge, issue
+closure or dispatch event is not delivery.
+
+### Authorization boundary
+
+Read the approved issue, spec and receipt, declared dependencies, exact-head
+checks, merge queue state and named release and production evidence. Write
+only through existing authorized delivery controls (ship-it and spec-2-prod
+gates, merge queue, release owners), preserving every gate. Parallel
+preparation never permits concurrent merges or relaxed dependency ordering.
+
+Never implied: applying approval labels, assigning an agent, altering issue
+authority, expanding scope, skipping checks, review or XXL gates, bypassing the
+merge queue, retargeting a release or deployment, or destructive rollback.
+
+### Failure and hold states
+
+| State | Required handling |
+| --- | --- |
+| Blocked | Revoked or stale authority, changed source, spec or dependency, failed or missing check, target mismatch, permission loss or explicit hold; stop before the next boundary and retain the checkpoint |
+| Partial | Record completed and in-flight boundaries, blocker, unexamined scope and checkpoint; never label as delivered |
+| Stopped | No new effects after the stop or cancellation; report irreversible and in-flight effects |
+
+Delivery holds and dependency ordering stay effective. Rollback is never
+implied; recovery needs separately authorized scope. Resume re-reads
+authority, scope, spec, dependencies, head, target, checks and budget, and
+invalidates evidence affected by changed identity.
+
+### Handoff
+
+Implementation inside delivery follows the `build:` contract; publication of
+the validated immutable artifact follows the `ship:` contract or existing
+`release:` gates; deployment follows `deploy:`. At `Verified`, the completion
+ledger hands off to close-out and post-delivery learning, which grants no
+further scope.
+
+### Distinctness decision
+
+`ship-it:` and `spec-2-prod:` and their control plane remain authoritative.
+If `deliver:` would have the same route and effects, it is an alias and is not
+added; a canonical rename versus scoped alias remains unresolved. Delivery is
+an outcome, not a parallel-agent mode.
+
+### Verification fixtures
+
+A future route must show: standalone candidate with qualified current
+authority routes only if registered and composes existing controls; missing
+authority, issue approval only or a caller-supplied receipt is rejected before
+side effects; quoted, fenced, bulleted, embedded or dual-prefix text does not
+execute; defer, read-only and stop modifiers produce no effects; revoked
+receipt, changed spec, blocked dependency or failed checks stop before the
+next boundary; wrong target or failed production verification never claims
+completion; and out-of-scope implementation or destructive rollback is
+rejected.

@@ -12,6 +12,7 @@ $expectedVerbs = [ordered]@{
     'spec' = @{ Issue = 3627; States = @('Reviewable', 'Blocked', 'Limited', 'Cancelled'); Forbids = @('approval fields or labels', 'approval directives', 'agent assignment', 'runtime asset edits', 'ready promotion', 'merge or release requests', 'overwriting semantic conflicts and unrelated edits') }
     'build' = @{ Issue = 3628; States = @('Implemented', 'Validated', 'Blocked', 'Paused', 'Cancelled'); Forbids = @('ready promotion', 'auto-merge', 'merge', 'tagging', 'deployment', 'approval labels or directives', 'delivery consent from green checks', 'making `build:` an alias for `ship-it:`'); Candidates = @('implement') }
     'review' = @{ Issue = 3629; States = @('Complete', 'Blocked', 'Partial', 'Stopped'); Forbids = @('posting an APPROVED review', 'any comment', 'resolving threads', 'editing source', 'creating branches or PRs', 'changing labels, assignees or issues', 'merging', 'releasing', 'deploying', 'modifying authorization') }
+    'deliver' = @{ Issue = 3630; States = @('Verified', 'Blocked', 'Partial', 'Stopped'); Forbids = @('applying approval labels', 'assigning an agent', 'altering issue authority', 'expanding scope', 'skipping checks, review or XXL gates', 'bypassing the merge queue', 'retargeting a release or deployment', 'destructive rollback') }
 }
 
 $requiredSubsections = @(
