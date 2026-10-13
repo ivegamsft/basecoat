@@ -37,6 +37,12 @@ Write-Host 'Running dependent stack handoff tests...'
 if ($LASTEXITCODE -ne 0) {
     throw 'Dependent stack handoff regressions failed.'
 }
+
+Write-Host 'Running coding-agent completion readiness tests...'
+& node --test (Join-Path $PSScriptRoot 'completion-readiness-tests.cjs')
+if ($LASTEXITCODE -ne 0) {
+    throw 'Coding-agent completion readiness regressions failed.'
+}
 $testResultsDir = Join-Path $repoRoot 'test-results'
 
 function Write-FailureLog {

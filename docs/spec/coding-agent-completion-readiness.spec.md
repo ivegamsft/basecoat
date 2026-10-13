@@ -191,3 +191,8 @@ may promote only proven identities after owners accept evidence; no queue capabi
 is enabled here. Stop on any stale promotion, ambiguous competition, or authority drift.
 Rollback disables the new promotion path and preserves receipts/drafts for existing
 manual scoped recovery; it must not auto-close sources or retroactively approve work.
+
+## Implementation status
+
+Stage 1 shadow logic in `.github/base-coat/scripts/completion-readiness.cjs` (tests: `tests/completion-readiness-tests.cjs`) computes the operation key,
+bounded candidate coverage, dispositions and the exact-identity receipt gate without mutating draft state; promotion needs an enforceable downstream receipt gate.
