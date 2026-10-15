@@ -488,4 +488,73 @@ finally {
     Remove-Item -LiteralPath $rbScratch -Recurse -Force -ErrorAction SilentlyContinue
 }
 
+# Agents allow-list parity (#3747): same scoping, pruning, and opt-out as sync.ps1.
+$alScratch = Join-Path $repoRoot 'test-results/sync-sh-agents-allow-list'
+try {
+    Remove-Item -LiteralPath $alScratch -Recurse -Force -ErrorAction SilentlyContinue
+    $alSource = Join-Path $alScratch 'source'
+    $alConsumer = Join-Path $alScratch 'consumer'
+    git init -q $alSource
+    git -C $alSource config user.name basecoat-test
+    git -C $alSource config user.email basecoat-test@example.com
+    New-Item -ItemType Directory -Path (Join-Path $alSource 'agents/references'),(Join-Path $alSource 'docs/reference') -Force | Out-Null
+    '{"version":"1.0.0"}' | Set-Content -LiteralPath (Join-Path $alSource 'version.json') -Encoding utf8NoBOM
+    '{"schemaVersion":"1","assets":[]}' | Set-Content -LiteralPath (Join-Path $alSource 'asset-manifest.json') -Encoding utf8NoBOM
+    '# source' | Set-Content -LiteralPath (Join-Path $alSource 'README.md') -Encoding utf8NoBOM
+    '# reference' | Set-Content -LiteralPath (Join-Path $alSource 'docs/reference/README.md') -Encoding utf8NoBOM
+    "---`nname: alpha`ndescription: alpha`n---`n[detail](references/alpha-detail.md)" | Set-Content -LiteralPath (Join-Path $alSource 'agents/alpha.agent.md') -Encoding utf8NoBOM
+    "---`nname: `"beta`"`ndescription: beta`n---`n[detail](references/beta-detail.md)" | Set-Content -LiteralPath (Join-Path $alSource 'agents/basecoat-10-core-beta.agent.md') -Encoding utf8NoBOM
+    '# alpha detail' | Set-Content -LiteralPath (Join-Path $alSource 'agents/references/alpha-detail.md') -Encoding utf8NoBOM
+    '# beta detail' | Set-Content -LiteralPath (Join-Path $alSource 'agents/references/beta-detail.md') -Encoding utf8NoBOM
+    git -C $alSource add -A
+    git -C $alSource commit -q -m 'seed' | Out-Null
+    git -C $alSource tag v1.0.0
+    git init -q $alConsumer
+    New-Item -ItemType Directory -Path (Join-Path $alConsumer '.github/agents') -Force | Out-Null
+    '# consumer-owned agent' | Set-Content -LiteralPath (Join-Path $alConsumer '.github/agents/consumer-owned.agent.md') -Encoding utf8NoBOM
+
+    $alConfig = Join-Path $alConsumer '.basecoat.yml'
+    $alProjected = { @(Get-ChildItem -LiteralPath (Join-Path $alConsumer '.github/agents') -Filter '*.agent.md' -File | ForEach-Object Name | Sort-Object) -join ',' }
+    $alLock = { @((Read-GuidanceLock -RepoRoot $alConsumer).entries | Where-Object { $_.owner -eq 'basecoat' -and $_.path -like '.github/agent*' } | ForEach-Object path | Sort-Object) -join ',' }
+    $alSync = {
+        param([string]$Config)
+        "source: file://$alSource`nref: v1.0.0`n$Config" | Set-Content -LiteralPath $alConfig -Encoding utf8NoBOM
+        Push-Location $alConsumer
+        try {
+            $output = & $bash.Source (Join-Path $repoRoot 'sync.sh') 2>&1 | Out-String
+            return [pscustomobject]@{ ExitCode = $LASTEXITCODE; Output = $output }
+        }
+        finally { Pop-Location }
+    }
+
+    $run = & $alSync ''
+    Assert-True ($run.ExitCode -eq 0 -and (& $alProjected) -eq 'alpha.agent.md,basecoat-10-core-beta.agent.md,consumer-owned.agent.md') "sync.sh without agents: must project every agent: $($run.Output)"
+    $run = & $alSync "# scoped`nagents:`n  - alpha  # keep`n  - `"missing-agent`"`nskills:`n  - unrelated"
+    Assert-True ($run.ExitCode -eq 0 -and (& $alProjected) -eq 'alpha.agent.md,consumer-owned.agent.md' -and
+        (& $alLock) -eq '.github/agent-references/alpha-detail.md,.github/agents/alpha.agent.md') "sync.sh block allow-list did not scope projection/lock: $(& $alProjected) | $(& $alLock)"
+    Assert-True ($run.Output -match "entry 'missing-agent' does not match") 'sync.sh did not report an unknown allow-list entry.'
+    $run = & $alSync 'agents: []'
+    Assert-True ($run.ExitCode -eq 0 -and (& $alProjected) -eq 'consumer-owned.agent.md' -and (& $alLock) -eq '' -and
+        -not (Test-Path -LiteralPath (Join-Path $alConsumer '.github/agent-references/alpha-detail.md'))) "sync.sh agents: [] did not remove every projected agent and reference: $($run.Output)"
+    Assert-True (Test-Path -LiteralPath (Join-Path $alConsumer '.github/base-coat/agents/basecoat-10-core-beta.agent.md')) 'sync.sh agents: [] must keep agents staged under .github/base-coat/agents.'
+    $run = & $alSync "agents: [ 'beta' ]"
+    Assert-True ($run.ExitCode -eq 0 -and (& $alProjected) -eq 'basecoat-10-core-beta.agent.md,consumer-owned.agent.md' -and
+        (& $alLock) -eq '.github/agent-references/beta-detail.md,.github/agents/basecoat-10-core-beta.agent.md' -and
+        -not (Test-Path -LiteralPath (Join-Path $alConsumer '.github/agent-references/alpha-detail.md'))) "sync.sh beta-only flow list did not scope projection/lock: $(& $alProjected) | $(& $alLock)"
+    $run = & $alSync "agents: [ 'beta', alpha.agent.md, alpha.AGENT.MD ]"
+    Assert-True ($run.ExitCode -eq 0 -and (& $alProjected) -eq 'alpha.agent.md,basecoat-10-core-beta.agent.md,consumer-owned.agent.md') "sync.sh flow allow-list was not honored: $($run.Output)"
+    Assert-True ($run.Output -match "entry 'alpha\.AGENT\.MD' does not match") 'sync.sh must strip the .agent.md suffix case-sensitively.'
+    $run = & $alSync 'agents: all'
+    Assert-True ($run.ExitCode -ne 0 -and $run.Output -match "Invalid \.basecoat\.yml 'agents:' value 'all'" -and
+        (& $alProjected) -eq 'alpha.agent.md,basecoat-10-core-beta.agent.md,consumer-owned.agent.md') "sync.sh must reject an unsupported agents value before any write: $($run.Output)"
+    foreach ($bad in "agents:`n  name: alpha", "agents:`n  - name: alpha", "agents:`n  -", "agents:`n  -alpha", 'agents: [,]') {
+        $run = & $alSync $bad
+        Assert-True ($run.ExitCode -ne 0 -and $run.Output -match "Invalid \.basecoat\.yml 'agents:' value '(name: alpha|-alpha)?'" -and
+            (& $alProjected) -eq 'alpha.agent.md,basecoat-10-core-beta.agent.md,consumer-owned.agent.md') "sync.sh must fail closed on a mapping or empty entry under agents: $($run.Output)"
+    }
+}
+finally {
+    Remove-Item -LiteralPath $alScratch -Recurse -Force -ErrorAction SilentlyContinue
+}
+
 Write-Host 'Bash sync parity tests passed.'
