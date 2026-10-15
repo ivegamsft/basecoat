@@ -25,6 +25,10 @@ function deliveryIntent(visibleBody) {
   return values[0] || "malformed";
 }
 
+function declaresImplementation(visibleBody) {
+  return /^[ \t]*Delivery intent:[ \t]*implementation[ \t]*$/im.test(String(visibleBody || ""));
+}
+
 function parseSpecUrl(value, owner, repo) {
   const match = String(value || "").match(/^https:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/([0-9a-f]{40})\/(docs\/spec\/[\w./-]+\.spec\.md)$/);
   if (!match || match[1].toLowerCase() !== owner.toLowerCase() ||
@@ -156,6 +160,7 @@ function routeIssue({ eventName, payload, owner, repo, approval }) {
   if (eventName === "issue_comment") return !payload?.issue?.pull_request && !isBotActor(payload?.comment?.user) &&
     parseSpecDirective(payload?.comment?.body) ? Number(payload.issue.number) : null;
   const pr = payload?.pull_request;
+  if (declaresImplementation(approval.visibleSpecText(pr?.body))) return null;
   const sources = sourceIssues(approval.visibleSpecText(pr?.body));
   return eventName === "pull_request" && pr?.merged && pr.merge_commit_sha && boundSpecPr(pr, owner, repo) &&
     sources.length === 1 && /^#?[1-9]\d{0,9}$/.test(sources[0]) ? Number(sources[0].replace("#", "")) : null;
@@ -165,6 +170,8 @@ async function discoverMergedSpec({ github, owner, repo, pr, approval }) {
   const issueNumber = routeIssue({ eventName: "pull_request", payload: { pull_request: pr }, owner, repo, approval });
   if (!issueNumber) return null;
   const files = await github.paginate(github.rest.pulls.listFiles, { owner, repo, pull_number: pr.number, per_page: 100 });
+  if (files.some(file => !String(file.filename || "").startsWith("docs/") ||
+    file.previous_filename && !String(file.previous_filename).startsWith("docs/"))) return null;
   if (!files.some(file => /^docs\/spec\/[\w./-]+\.spec\.md$/.test(file.filename) && file.status !== "removed")) return null;
   const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number: issueNumber, per_page: 100 });
   for (const directive of comments.filter(comment => !isBotActor(comment.user) &&

@@ -205,7 +205,7 @@ test("exhausted budget blocks the canary and cannot verify general writes", asyn
   assert.equal(await handoff.verifyCanary({ github: ctx.github, owner: OWNER, repo: REPO, canary }), false);
 });
 
-test("merge discovery records readiness only for spec merges and binds directives to the merged PR number", async () => {
+test("merge discovery records readiness only for docs-only spec merges and binds directives to the merged PR number", async () => {
   const ctx = fixture();
   const pr = { ...ctx.f.pr, number: 12 };
   const ready = await handoff.discoverMergedSpec({ github: ctx.github, owner: OWNER, repo: REPO, pr, approval });
@@ -219,8 +219,36 @@ test("merge discovery records readiness only for spec merges and binds directive
   assert.equal(reused.state, "awaiting-directive");
   for (const bad of [{ merged: false }, { merge_commit_sha: null }, { head: { ...pr.head, repo: { id: 999 } } }, { base: { ...pr.base, ref: "release" } }])
     assert.equal(await handoff.discoverMergedSpec({ github: ctx.github, owner: OWNER, repo: REPO, pr: { ...pr, ...bad }, approval }), null);
-  ctx.f.files = [{ filename: "README.md", status: "modified" }, { filename: SPEC, status: "removed" }];
+  ctx.f.files = [{ filename: SPEC, status: "removed" }];
   assert.equal(await handoff.discoverMergedSpec({ github: ctx.github, owner: OWNER, repo: REPO, pr, approval }), null);
+
+  const implementation = fixture(x => { x.files.push({ filename: "scripts/implementation.cjs", status: "modified" }); });
+  assert.equal(await handoff.discoverMergedSpec({ github: implementation.github, owner: OWNER, repo: REPO,
+    pr: { ...implementation.f.pr, number: 12 }, approval }), null);
+
+  for (const intent of ["Delivery intent: implementation\n",
+    "Delivery intent: implementation\nDelivery intent: implementation\n"]) {
+    const docsOnlyImplementation = fixture(x => { x.pr.body += intent; });
+    const implementationPr = { ...docsOnlyImplementation.f.pr, number: 12 };
+    assert.equal(handoff.routeIssue({ eventName: "pull_request", payload: { pull_request: implementationPr },
+      owner: OWNER, repo: REPO, approval }), null);
+    assert.equal(await handoff.discoverMergedSpec({ github: docsOnlyImplementation.github, owner: OWNER, repo: REPO,
+      pr: implementationPr, approval }), null);
+  }
+
+  const implementationRename = fixture(x => {
+    x.files = [{ filename: SPEC, previous_filename: "scripts/implementation.cjs", status: "renamed" },
+      { filename: PRD, status: "added" }];
+  });
+  assert.equal(await handoff.discoverMergedSpec({ github: implementationRename.github, owner: OWNER, repo: REPO,
+    pr: { ...implementationRename.f.pr, number: 12 }, approval }), null);
+
+  const docsOnlyRename = fixture(x => {
+    x.files = [{ filename: SPEC, previous_filename: "docs/spec/old-handoff.spec.md", status: "renamed" },
+      { filename: PRD, status: "added" }];
+  });
+  assert.equal((await handoff.discoverMergedSpec({ github: docsOnlyRename.github, owner: OWNER, repo: REPO,
+    pr: { ...docsOnlyRename.f.pr, number: 12 }, approval })).state, "awaiting-directive");
 });
 
 test("routing admits only exact human directives and visible bound spec merges", () => {
