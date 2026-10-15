@@ -469,11 +469,19 @@ try {
     $pinFailure = & $rbRun $rolled 'rollback.sh' @('v1.1.0')
     Assert-True ($pinFailure.ExitCode -ne 0 -and (& $rbSnapshot) -eq $beforeLate) "A failed .basecoat.yml pin write did not restore the prior install: $($pinFailure.Output)"
     $leaseDir = "$(git -C $rolled rev-parse --show-toplevel)/.github/base-coat/guidance-lock.lease"; New-Item -ItemType Directory -Path $leaseDir | Out-Null
-    "token=held`nacquiredEpoch=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - 598)" | Set-Content -LiteralPath (Join-Path $leaseDir 'owner') -Encoding ascii
+    "token=held`nacquiredEpoch=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - 560)" | Set-Content -LiteralPath (Join-Path $leaseDir 'owner') -Encoding ascii
+    $env:BASECOAT_GUIDANCE_LEASE = "$leaseDir|held"; $env:BASECOAT_REF = 'v1.1.0'; try { $nearStale = & $rbRun $rolled 'sync.sh' @() } finally { Remove-Item Env:\BASECOAT_GUIDANCE_LEASE }
+    Assert-True ($nearStale.ExitCode -ne 0 -and $nearStale.Output -match 'GUIDANCE_LOCK_BUSY' -and (Get-Content -LiteralPath (Join-Path $rolled '.github/base-coat/version.json') -Raw) -match '1\.0\.0') "sync.sh renewed an inherited lease within 60s of stale reclaim (#3804): $($nearStale.Output)"
+    Remove-Item -LiteralPath (Join-Path $leaseDir 'owner')
+    $env:BASECOAT_GUIDANCE_LEASE = "$leaseDir|held"; $env:BASECOAT_REF = 'v1.1.0'; try { $missingOwner = & $rbRun $rolled 'sync.sh' @() } finally { Remove-Item Env:\BASECOAT_GUIDANCE_LEASE }
+    Assert-True ($missingOwner.ExitCode -ne 0 -and $missingOwner.Output -match "GUIDANCE_LOCK_BUSY.*reason='inherited lease is not held'" -and
+        (Get-Content -LiteralPath (Join-Path $rolled '.github/base-coat/version.json') -Raw) -match '1\.0\.0' -and
+        (Test-Path -LiteralPath $leaseDir) -and -not (Test-Path -LiteralPath (Join-Path $leaseDir 'owner'))) "sync.sh did not reject a missing inherited owner before writes with the stable diagnostic: $($missingOwner.Output)"
+    "token=held`nacquiredEpoch=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - 500)" | Set-Content -LiteralPath (Join-Path $leaseDir 'owner') -Encoding ascii
     $env:BASECOAT_GUIDANCE_LEASE = "$leaseDir|other"; $env:BASECOAT_REF = 'v1.1.0'; try { $foreign = & $rbRun $rolled 'sync.sh' @() } finally { Remove-Item Env:\BASECOAT_GUIDANCE_LEASE }
     Assert-True ($foreign.ExitCode -ne 0 -and $foreign.Output -match 'GUIDANCE_LOCK_BUSY' -and (Get-Content -LiteralPath (Join-Path $rolled '.github/base-coat/version.json') -Raw) -match '1\.0\.0') "sync.sh wrote the staged payload before rejecting a foreign inherited lease: $($foreign.Output)"
     $env:BASECOAT_GUIDANCE_LEASE = "$leaseDir|held"; try { $inherited = & $rbRun $rolled 'sync.sh' @() } finally { Remove-Item Env:\BASECOAT_GUIDANCE_LEASE }
-    Start-Sleep -Seconds 3; $takeover = try { Enter-GuidanceLockLease -RepoRoot $rolled -TimeoutSeconds 0 } catch { 'busy' }; Remove-Item -LiteralPath $leaseDir -Recurse -Force
+    Start-Sleep -Seconds 3; $takeover = try { Enter-GuidanceLockLease -RepoRoot $rolled -TimeoutSeconds 0 -StaleAfterSeconds 400 } catch { 'busy' }; Remove-Item -LiteralPath $leaseDir -Recurse -Force
     Assert-True ($inherited.ExitCode -eq 0 -and $takeover -eq 'busy') "sync.sh did not renew an aged inherited lease, so another writer could reclaim it mid-sync: $($inherited.Output)"
 
     $edited = & $rbConsumer 'edited' 'v1.1.0'
@@ -483,6 +491,178 @@ try {
     $stagedVersion = (Get-Content -LiteralPath (Join-Path $edited '.github/base-coat/version.json') -Raw | ConvertFrom-Json).version
     Assert-True ($stagedVersion -eq '1.1.0' -and (Get-Content -LiteralPath (Join-Path $edited '.basecoat.yml') -Raw) -match 'ref: v1\.1\.0') `
         'A failed rollback.sh changed the staged payload or the .basecoat.yml pin.'
+
+    # #3804: sync.sh holds the lease before staging, renews it through the write window, and stops after a takeover.
+    $leaseRoot = { param([string]$Name) $root = Join-Path $rbScratch $Name; git init -q $root; New-Item -ItemType Directory -Path (Join-Path $root 'scripts'), (Join-Path $root '.github/base-coat') -Force | Out-Null; $root }
+    $busyRoot = & $leaseRoot 'lease-busy'
+    New-Item -ItemType Directory -Path (Join-Path $busyRoot '.github/base-coat/guidance-lock.lease') | Out-Null
+    "token=other`npid=0`nacquiredEpoch=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())" | Set-Content -LiteralPath (Join-Path $busyRoot '.github/base-coat/guidance-lock.lease/owner') -Encoding ascii
+    $env:BASECOAT_REF = 'v1.0.0'; $busy = & $rbRun $busyRoot 'sync.sh' @()
+    Assert-True ($busy.ExitCode -ne 0 -and $busy.Output -match 'GUIDANCE_LOCK_BUSY' -and -not (Test-Path -LiteralPath (Join-Path $busyRoot '.github/base-coat/version.json'))) "sync.sh staged the payload before waiting for a held lease: $($busy.Output)"
+    # A source-supplied distribution filter runs right after the payload is staged, mid-sync.
+    $hookRef = {
+        param([string]$Action)
+        git -C $rbSource checkout -q -B lease-hook v1.0.0 2>$null
+        New-Item -ItemType Directory -Path (Join-Path $rbSource 'scripts') -Force | Out-Null
+        @"
+source '$repoRoot/scripts/distribution-filter.sh'
+eval "lease_hook_`$(declare -f basecoat_filter_distribution)"
+basecoat_filter_distribution() {
+  lease_hook_basecoat_filter_distribution "`$@"
+  owner="`$REPO_ROOT/.github/base-coat/guidance-lock.lease/owner"
+  if [[ -f "`$owner" ]]; then $Action; fi
+}
+"@ | Set-Content -LiteralPath (Join-Path $rbSource 'scripts/distribution-filter.sh') -Encoding utf8NoBOM
+        git -C $rbSource add -A; git -C $rbSource commit -q -m 'lease hook' | Out-Null
+        (git -C $rbSource rev-parse HEAD).Trim()
+    }
+    $renewRoot = & $leaseRoot 'lease-renew'
+    'cp .github/base-coat/guidance-lock.lease/owner lease-observed.txt 2>/dev/null || echo missing > lease-observed.txt' |
+        Set-Content -LiteralPath (Join-Path $renewRoot 'scripts/cleanup-basecoat-upgrade.sh') -Encoding utf8NoBOM
+    $env:BASECOAT_REF = & $hookRef 'tok="$(sed -n "s/^token=//p" "$owner")"; printf "token=%s\nacquiredEpoch=%s\n" "$tok" "$(( $(date +%s) - 500 ))" > "$owner"'
+    $renew = & $rbRun $renewRoot 'sync.sh' @()
+    $observed = Get-Content -LiteralPath (Join-Path $renewRoot 'lease-observed.txt') -Raw
+    Assert-True ($renew.ExitCode -eq 0 -and $observed -match '(?m)^acquiredEpoch=(\d+)' -and [long]$Matches[1] -gt [DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - 300 -and
+        -not (Test-Path -LiteralPath (Join-Path $renewRoot '.github/base-coat/guidance-lock.lease'))) "sync.sh did not hold, renew, and release its lease through the write window: $observed $($renew.Output)"
+    $takeoverRoot = & $leaseRoot 'lease-takeover'
+    $env:BASECOAT_REF = & $hookRef 'printf "token=intruder\nacquiredEpoch=%s\n" "$(date +%s)" > "$owner"'
+    $taken = & $rbRun $takeoverRoot 'sync.sh' @()
+    Assert-True ($taken.ExitCode -ne 0 -and $taken.Output -match "reason='lease lost during sync'" -and
+        -not (Test-Path -LiteralPath (Join-Path $takeoverRoot '.github/base-coat/guidance-lock.json')) -and
+        (Get-Content -LiteralPath (Join-Path $takeoverRoot '.github/base-coat/guidance-lock.lease/owner') -Raw) -match 'token=intruder') "sync.sh kept writing or released the new owner's lease after a takeover: $($taken.Output)"
+    # #3822: lease loss mid-callback stops the callback's whole process tree (including a child writer) before sync.sh returns, and nothing else.
+    $treeRoot = & $leaseRoot 'lease-tree'
+    @'
+sh -c 'echo $$ > writer.pid; while :; do echo x >> writer.log; sleep 0.1; done' >/dev/null 2>&1 &
+while [ ! -s writer.log ]; do sleep 0.05; done
+printf 'token=intruder\nacquiredEpoch=%s\n' "$(date +%s)" > .github/base-coat/guidance-lock.lease/owner
+sleep 30
+echo late > late.txt
+'@ | Set-Content -LiteralPath (Join-Path $treeRoot 'scripts/cleanup-basecoat-upgrade.sh') -Encoding utf8NoBOM
+    $isAlive = {
+        param([int]$Id)
+        $state = (& ps -p $Id -o stat= 2>$null) -join ''
+        $LASTEXITCODE -eq 0 -and $state.Trim() -ne '' -and $state.Trim() -notmatch '^Z'
+    }
+    $bystander = Start-Process -FilePath sleep -ArgumentList 120 -PassThru
+    $env:BASECOAT_REF = 'v1.0.0'; $env:BASECOAT_LEASE_HEARTBEAT_SECONDS = '1'
+    try { $tree = & $rbRun $treeRoot 'sync.sh' @() } finally { Remove-Item Env:\BASECOAT_LEASE_HEARTBEAT_SECONDS }
+    $writerId = [string](Get-Content -LiteralPath (Join-Path $treeRoot 'writer.pid') -Raw -ErrorAction SilentlyContinue)
+    $writerAlive = $writerId.Trim() -and (& $isAlive $writerId.Trim())
+    $logLength = (Get-Item -LiteralPath (Join-Path $treeRoot 'writer.log')).Length; Start-Sleep -Milliseconds 800
+    $bystanderAlive = & $isAlive $bystander.Id
+    Stop-Process -Id $bystander.Id -Force -ErrorAction SilentlyContinue
+    if ($writerAlive) { Stop-Process -Id ([int]$writerId) -Force -ErrorAction SilentlyContinue }
+    Assert-True ($tree.ExitCode -ne 0 -and $tree.Output -match "reason='lease lost during sync'" -and
+        (Get-Content -LiteralPath (Join-Path $treeRoot '.github/base-coat/guidance-lock.lease/owner') -Raw) -match 'token=intruder') "sync.sh did not fail closed when its cleanup callback lost the lease: $($tree.Output)"
+    Assert-True ($writerId.Trim() -and -not $writerAlive -and (Get-Item -LiteralPath (Join-Path $treeRoot 'writer.log')).Length -eq $logLength -and
+        -not (Test-Path -LiteralPath (Join-Path $treeRoot 'late.txt'))) "sync.sh returned while the cleanup callback or its child writer could still write after a takeover (#3822): $($tree.Output)"
+    Assert-True $bystanderAlive 'sync.sh terminated a process outside the cleanup callback process group (#3822).'
+
+    $heartbeatHooks = [ordered]@{
+        'before-write' = @'
+renewal="$(declare -f renew_sync_lease)"
+pause='if [[ -f heartbeat-callback ]]; then if [[ ! -f heartbeat-paused ]]; then sh -c "echo \$PPID" > heartbeat-renewer.pid; touch heartbeat-paused; sleep 15; fi; fi; printf '
+eval "${renewal/printf /$pause}"
+'@
+        'publication' = @'
+printf() {
+  if [[ "${1:-}" == token=* && -f heartbeat-callback && ! -f heartbeat-paused ]]; then
+    sh -c 'echo "$$" > heartbeat-renewer.pid; touch heartbeat-paused; sleep 15; printf "$@"' _ "$@"
+  else builtin printf "$@"
+  fi
+}
+'@
+    }
+    foreach ($phase in $heartbeatHooks.Keys) {
+      $heartbeatRef = & $hookRef $heartbeatHooks[$phase]
+      $shutdowns = @('normal', 'exit')
+      if ($phase -eq 'before-write') { $shutdowns += 'kill' }
+      foreach ($shutdown in $shutdowns) {
+        $heartbeatRoot = & $leaseRoot "lease-heartbeat-$phase-$shutdown"
+        $callback = 'echo $$ > callback.pid' + "`ntouch heartbeat-callback`ni=0; while [ ! -f heartbeat-paused ] && [ `$i -lt 200 ]; do i=`$((i + 1)); sleep 0.05; done`n[ -f heartbeat-paused ] || exit 12"
+        if ($shutdown -eq 'exit') { $callback += "`nkill -TERM `"`$(sed -n 's/^pid=//p' .github/base-coat/guidance-lock.lease/owner)`"`nsleep 10" }
+        if ($shutdown -eq 'kill') { $callback += "`nkill -KILL `"`$(sed -n 's/^pid=//p' .github/base-coat/guidance-lock.lease/owner)`"`n" + 'sleep 120 & echo $! > callback-child.pid; wait' }
+        $callback | Set-Content -LiteralPath (Join-Path $heartbeatRoot 'scripts/cleanup-basecoat-upgrade.sh') -Encoding utf8NoBOM
+        $env:BASECOAT_REPO = "file://$rbSource"; $env:BASECOAT_REF = $heartbeatRef; $env:BASECOAT_LEASE_HEARTBEAT_SECONDS = '1'
+        Push-Location $heartbeatRoot
+        try {
+            $heartbeatLog = Join-Path $heartbeatRoot 'sync.log'
+            # Shell-level redirection prevents inherited capture pipes from hiding an orphaned renewal.
+            & $bash.Source -c 'exec bash "$1" > "$2" 2>&1' _ (Join-Path $repoRoot 'sync.sh') $heartbeatLog
+            $heartbeatRun = [pscustomobject]@{ ExitCode = $LASTEXITCODE; Output = Get-Content -LiteralPath $heartbeatLog -Raw }
+        }
+        finally {
+            Remove-Item Env:\BASECOAT_REPO,Env:\BASECOAT_REF,Env:\BASECOAT_LEASE_HEARTBEAT_SECONDS
+            Pop-Location
+        }
+        Assert-True (Test-Path -LiteralPath (Join-Path $heartbeatRoot 'heartbeat-paused')) "Heartbeat $phase $shutdown fixture never paused."
+        Assert-True (($shutdown -eq 'normal' -and $heartbeatRun.ExitCode -eq 0) -or
+            ($shutdown -ne 'normal' -and $heartbeatRun.ExitCode -ne 0)) "Unexpected heartbeat $phase $shutdown shutdown result: $($heartbeatRun.Output)"
+        $renewerId = [int](Get-Content -LiteralPath (Join-Path $heartbeatRoot 'heartbeat-renewer.pid') -Raw)
+        if ($shutdown -eq 'kill') {
+            $deadline = [DateTime]::UtcNow.AddSeconds(35)
+            while ((& $isAlive $renewerId) -and [DateTime]::UtcNow -lt $deadline) { Start-Sleep -Milliseconds 100 }
+            $callbackId = [int](Get-Content -LiteralPath (Join-Path $heartbeatRoot 'callback.pid') -Raw)
+            $callbackChildId = [int](Get-Content -LiteralPath (Join-Path $heartbeatRoot 'callback-child.pid') -Raw)
+            $callbackAlive = (& $isAlive $callbackId) -or (& $isAlive $callbackChildId)
+            if ($callbackAlive) { & $bash.Source -c 'kill -KILL -- "-$1" 2>/dev/null || true' _ $callbackId }
+        }
+        $renewerAlive = & $isAlive $renewerId
+        if ($renewerAlive) { Stop-Process -Id $renewerId -Force }
+        Assert-True (-not $renewerAlive) "Heartbeat renewal survived $phase $shutdown shutdown and could overwrite the successor's lease."
+        if ($shutdown -eq 'kill') {
+            Assert-True (-not $callbackAlive) 'Heartbeat did not stop the callback group after its sync parent disappeared.'
+            $ownerPath = Join-Path $heartbeatRoot '.github/base-coat/guidance-lock.lease/owner'
+            $stoppedOwner = Get-Content -LiteralPath $ownerPath -Raw
+            Start-Sleep -Seconds 2
+            Assert-True ((Get-Content -LiteralPath $ownerPath -Raw) -eq $stoppedOwner) 'Orphaned heartbeat kept refreshing the crashed sync lease.'
+            $stoppedOwner -replace '(?m)^acquiredEpoch=\d+', "acquiredEpoch=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - 601)" |
+                Set-Content -LiteralPath $ownerPath -Encoding ascii
+        }
+        $successor = Enter-GuidanceLockLease -RepoRoot $heartbeatRoot -TimeoutSeconds 0
+        try {
+            Start-Sleep -Seconds 4
+            $successorToken = ($successor -split '\|', 2)[1]
+            Assert-True ((Get-Content -LiteralPath (Join-Path $heartbeatRoot '.github/base-coat/guidance-lock.lease/owner') -Raw) -match
+                "(?m)^token=$([regex]::Escape($successorToken))$") "Heartbeat renewal survived $phase $shutdown shutdown and overwrote the successor's lease."
+        }
+        finally { Exit-GuidanceLockLease -LeasePath $successor }
+      }
+    }
+
+    $startupRoot = & $leaseRoot 'lease-startup-kill'
+    $startupScript = Join-Path $rbScratch 'startup-sync.sh'
+    New-Item -ItemType SymbolicLink -Path (Join-Path $rbScratch 'scripts') -Target (Join-Path $repoRoot 'scripts') | Out-Null
+    $startupContent = (Get-Content -LiteralPath (Join-Path $repoRoot 'sync.sh') -Raw).Replace("`r`n", "`n")
+    $startupPattern = '(?m)^  cleanup_(?:pgid|supervisor)=\$!$'
+    Assert-True ([regex]::Matches($startupContent, $startupPattern).Count -eq 1) 'Callback startup pause did not match exactly one process-registration boundary.'
+    $startupContent = [regex]::Replace($startupContent, $startupPattern, { param($match) $match.Value + "`ntouch startup-paused`nsleep 15" })
+    $startupContent | Set-Content -LiteralPath $startupScript -Encoding utf8NoBOM
+    'echo $$ > callback.pid; while :; do echo x >> startup-writes; sleep 0.1; done' |
+        Set-Content -LiteralPath (Join-Path $startupRoot 'scripts/cleanup-basecoat-upgrade.sh') -Encoding utf8NoBOM
+    $start = [Diagnostics.ProcessStartInfo]::new()
+    $start.FileName = $bash.Source; $start.UseShellExecute = $false; $start.WorkingDirectory = $startupRoot
+    $start.EnvironmentVariables['BASECOAT_REPO'] = "file://$rbSource"; $start.EnvironmentVariables['BASECOAT_REF'] = 'v1.0.0'
+    foreach ($argument in @('-c', 'exec bash "$1" > "$2" 2>&1', '_', $startupScript, (Join-Path $startupRoot 'sync.log'))) { $start.ArgumentList.Add($argument) }
+    $startupProcess = [Diagnostics.Process]::Start($start)
+    try {
+        $deadline = [DateTime]::UtcNow.AddSeconds(30)
+        while (-not (Test-Path -LiteralPath (Join-Path $startupRoot 'startup-paused')) -and [DateTime]::UtcNow -lt $deadline) { Start-Sleep -Milliseconds 100 }
+        Assert-True (Test-Path -LiteralPath (Join-Path $startupRoot 'startup-paused')) "Sync did not pause before starting its lease heartbeat: $(Get-Content -LiteralPath (Join-Path $startupRoot 'sync.log') -Raw -ErrorAction SilentlyContinue)"
+        Stop-Process -Id $startupProcess.Id -Force
+        Assert-True ($startupProcess.WaitForExit(5000)) 'Killed startup process did not exit.'
+        Start-Sleep -Seconds 3
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $startupRoot 'startup-writes'))) 'Callback executed after sync died before its startup handshake.'
+    }
+    finally {
+        if (-not $startupProcess.HasExited) { Stop-Process -Id $startupProcess.Id -Force; $startupProcess.WaitForExit() }
+        $startupProcess.Dispose()
+        if (Test-Path -LiteralPath (Join-Path $startupRoot 'callback.pid')) {
+            $callbackId = [int](Get-Content -LiteralPath (Join-Path $startupRoot 'callback.pid') -Raw)
+            & $bash.Source -c 'kill -KILL -- "-$1" 2>/dev/null || true' _ $callbackId
+        }
+    }
 }
 finally {
     Remove-Item -LiteralPath $rbScratch -Recurse -Force -ErrorAction SilentlyContinue

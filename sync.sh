@@ -214,7 +214,34 @@ fi
 
 TMP_DIR="$(mktemp -d)"
 guidance_lease=""
+lease_heartbeat=""
+cleanup_pgid=""
+cleanup_supervisor=""
+sync_parent_alive() {
+  # $$ remains the sync parent's PID in subshells.
+  ps -A -o pid= -o stat= 2>/dev/null |
+    awk -v parent="$$" '$1 == parent && $2 !~ /^Z/ { alive=1 } END { exit !alive }'
+}
+# stop_process_group <pgid>: stop a consumer callback's whole process group (TERM, then KILL) and wait until it is gone (#3822).
+stop_process_group() {
+  local signal i
+  for signal in TERM KILL; do
+    kill "-$signal" -- "-$1" 2>/dev/null || return 0
+    for (( i = 0; i < 50; i++ )); do kill -0 -- "-$1" 2>/dev/null || return 0; sleep 0.1; done
+  done
+}
+stop_lease_heartbeat() {
+  [[ -n "$lease_heartbeat" ]] || return 0
+  stop_process_group "$lease_heartbeat"
+  wait "$lease_heartbeat" 2>/dev/null || true
+  lease_heartbeat=""
+}
 cleanup() {
+  touch "$TMP_DIR/callback.cancel"
+  stop_lease_heartbeat
+  if [[ -z "$cleanup_pgid" && -s "$TMP_DIR/callback.pgid" ]]; then read -r cleanup_pgid < "$TMP_DIR/callback.pgid" || true; fi
+  [[ -z "$cleanup_pgid" ]] || stop_process_group "$cleanup_pgid"
+  [[ -z "$cleanup_supervisor" ]] || wait "$cleanup_supervisor" 2>/dev/null || true
   if [[ -n "$guidance_lease" ]] && declare -F guidance_exit_lease >/dev/null 2>&1; then
     guidance_exit_lease "$guidance_lease"
   fi
@@ -374,14 +401,57 @@ if [[ ! -f "$distribution_helper" ]]; then
 fi
 source "$distribution_helper"
 basecoat_validate_distribution "$TMP_DIR/source"
-# rollback.sh holds the lease across this sync and its restore; verify and renew it before the first write, never release it.
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+guidance_helper=""
+for candidate in \
+  "$TMP_DIR/source/scripts/guidance-lock.sh" \
+  "$script_dir/scripts/guidance-lock.sh" \
+  "$REPO_ROOT/.github/base-coat/scripts/guidance-lock.sh"; do
+  if [[ -f "$candidate" ]]; then guidance_helper="$candidate"; break; fi
+done
+if [[ -z "$guidance_helper" ]]; then
+  echo "GUIDANCE_LOCK_INVALID reason='source payload is missing scripts/guidance-lock.sh'" >&2
+  exit 1
+fi
+# shellcheck source=scripts/guidance-lock.sh
+source "$guidance_helper"
+
+# renew_sync_lease <lease> [reason]: verify this sync still owns the guidance-lock
+# lease and refresh its stale-takeover clock before a write phase (#3804).
+renew_sync_lease() {
+  local lease="$1" reason="${2:-lease lost during sync}" owner="${1%%|*}/owner" epoch temporary
+  # Refuse renewal within 60s of the 600s stale-reclaim threshold so no reclaimer can swap the lease between check and write.
+  if ! epoch="$(sed -n 's/^acquiredEpoch=\([0-9][0-9]*\)$/\1/p' "$owner" 2>/dev/null | head -n 1)" ||
+      ! grep -qxF "token=${lease#*|}" "$owner" 2>/dev/null || [[ -z "$epoch" ]] || (( $(date +%s) - epoch >= 540 )); then
+    echo "GUIDANCE_LOCK_BUSY lease='${lease%%|*}' reason='$reason'" >&2
+    return 1
+  fi
+  temporary="$(mktemp "${owner}.XXXXXX")" || {
+    echo "GUIDANCE_LOCK_BUSY lease='${lease%%|*}' reason='lease renewal could not be staged'" >&2
+    return 1
+  }
+  if ! {
+    printf 'token=%s\npid=%s\nacquiredEpoch=%s\n' "${lease#*|}" "$$" "$(date +%s)" > "$temporary" &&
+      mv -f "$temporary" "$owner"
+  }; then
+    rm -f "$temporary"
+    echo "GUIDANCE_LOCK_BUSY lease='${lease%%|*}' reason='lease renewal could not be published'" >&2
+    return 1
+  fi
+}
+
+# Hold the guidance-lock lease across every repository write, renewing it before each write phase (#3804).
+# rollback.sh holds the lease across this sync and its restore; verify and renew it, never release it.
 if [[ -n "${BASECOAT_GUIDANCE_LEASE:-}" ]]; then
-  if [[ "${BASECOAT_GUIDANCE_LEASE%%|*}" != "$REPO_ROOT/.github/base-coat/guidance-lock.lease" ]] ||
-    ! grep -qxF "token=${BASECOAT_GUIDANCE_LEASE#*|}" "$REPO_ROOT/.github/base-coat/guidance-lock.lease/owner" 2>/dev/null; then
-    echo "GUIDANCE_LOCK_BUSY lease='${BASECOAT_GUIDANCE_LEASE%%|*}' reason='inherited lease is not held'" >&2
+  sync_lease="$BASECOAT_GUIDANCE_LEASE"
+  if [[ "${sync_lease%%|*}" != "$REPO_ROOT/.github/base-coat/guidance-lock.lease" ]]; then
+    echo "GUIDANCE_LOCK_BUSY lease='${sync_lease%%|*}' reason='inherited lease is not held'" >&2
     exit 1
   fi
-  printf 'token=%s\npid=%s\nacquiredEpoch=%s\n' "${BASECOAT_GUIDANCE_LEASE#*|}" "$$" "$(date +%s)" > "$REPO_ROOT/.github/base-coat/guidance-lock.lease/owner"
+  renew_sync_lease "$sync_lease" 'inherited lease is not held'
+else
+  guidance_lease="$(guidance_enter_lease "$REPO_ROOT")"
+  sync_lease="$guidance_lease"
 fi
 mkdir -p "$REPO_ROOT/$TARGET_DIR"
 
@@ -406,6 +476,7 @@ done
 
 # Copy workflows from .github/base-coat/workflows/ in source
 basecoat_filter_distribution "$REPO_ROOT/$TARGET_DIR"
+renew_sync_lease "$sync_lease"
 
 if [[ -d "$TMP_DIR/source/.github/base-coat/workflows" ]]; then
   validate_workflow_directory "$TMP_DIR/source/.github/base-coat/workflows"
@@ -452,6 +523,7 @@ EOF
 rm -f "$REPO_ROOT/$TARGET_DIR/basecoat-metadata.json"
 
 # Copy only basic documentation (not full docs tree)
+renew_sync_lease "$sync_lease"
 rm -rf "$REPO_ROOT/$TARGET_DIR/docs"
 mkdir -p "$REPO_ROOT/$TARGET_DIR/docs"
 for doc_subdir in reference guides diagrams; do
@@ -526,6 +598,7 @@ find "$REPO_ROOT/$TARGET_DIR/agents" -maxdepth 1 -type f -name '*.agent.eval.yam
 # stale-removal plan is preflighted before any shared file changes; foreign
 # owners and consumer-modified managed files fail closed.
 mkdir -p "$REPO_ROOT/.github"
+renew_sync_lease "$sync_lease"
 
 # resolve_real_path <path>: resolves symlinks/junctions on an existing path
 # (via coreutils `realpath`) so a linked ancestor placed by a co-located
@@ -549,26 +622,8 @@ path_within_boundary() {
   esac
 }
 
-script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-guidance_helper=""
-for candidate in \
-  "$TMP_DIR/source/scripts/guidance-lock.sh" \
-  "$script_dir/scripts/guidance-lock.sh" \
-  "$REPO_ROOT/.github/base-coat/scripts/guidance-lock.sh"; do
-  if [[ -f "$candidate" ]]; then guidance_helper="$candidate"; break; fi
-done
-if [[ -z "$guidance_helper" ]]; then
-  echo "GUIDANCE_LOCK_INVALID reason='source payload is missing scripts/guidance-lock.sh'" >&2
-  exit 1
-fi
-# shellcheck source=scripts/guidance-lock.sh
-source "$guidance_helper"
-
 legacy_overlay_file="$REPO_ROOT/$TARGET_DIR/.overlay-managed-files"
 guidance_lock_file="$REPO_ROOT/.github/base-coat/guidance-lock.json"
-if [[ -z "${BASECOAT_GUIDANCE_LEASE:-}" ]]; then
-  guidance_lease="$(guidance_enter_lease "$REPO_ROOT")"
-fi
 lock_tsv="$TMP_DIR/guidance-lock.tsv"
 plan_tsv="$TMP_DIR/guidance-plan.tsv"
 next_lock_tsv="$TMP_DIR/guidance-next.tsv"
@@ -818,6 +873,7 @@ while IFS='|' read -r path owner unit version expected_hash; do
   fi
 done < "$lock_tsv"
 
+renew_sync_lease "$sync_lease"
 while IFS='|' read -r path owner unit version hash source_file; do
   [[ -z "$path" ]] && continue
   mkdir -p "$(dirname "$REPO_ROOT/$path")"
@@ -851,8 +907,7 @@ awk -F '|' '$2 != "basecoat"' "$lock_tsv" > "$next_lock_tsv"
 cut -d '|' -f1-5 "$plan_tsv" >> "$next_lock_tsv"
 guidance_write_lock "$guidance_lock_file" "$next_lock_tsv"
 rm -f "$legacy_overlay_file"
-guidance_exit_lease "$guidance_lease"
-guidance_lease=""
+renew_sync_lease "$sync_lease"
 
 # Seed release-notes template into downstream-customizable location.
 # Never overwrite local customizations.
@@ -881,11 +936,68 @@ fi
 
 # Optional cleanup pass for stale managed files from prior versions.
 # Uses hash snapshoting to avoid deleting customized files.
-if [[ -x "$REPO_ROOT/scripts/cleanup-basecoat-upgrade.sh" ]]; then
-  "$REPO_ROOT/scripts/cleanup-basecoat-upgrade.sh" "$TARGET_DIR"
-elif [[ -f "$REPO_ROOT/scripts/cleanup-basecoat-upgrade.sh" ]]; then
-  bash "$REPO_ROOT/scripts/cleanup-basecoat-upgrade.sh" "$TARGET_DIR"
+if [[ -f "$REPO_ROOT/scripts/cleanup-basecoat-upgrade.sh" ]]; then
+  # Run the unbounded consumer cleanup in its own process group (set -m) and renew the lease while it runs; on lease
+  # loss the heartbeat stops the whole group, and sync always stops any leftover group members before writing on (#3822).
+  heartbeat_seconds="${BASECOAT_LEASE_HEARTBEAT_SECONDS:-60}"
+  [[ "$heartbeat_seconds" =~ ^[1-9][0-9]?$ ]] && (( heartbeat_seconds <= 60 )) || heartbeat_seconds=60
+  renew_sync_lease "$sync_lease"
+  set -m
+  (
+    set -m
+    (
+      sh -c 'echo "$PPID"' > "$TMP_DIR/callback.pgid"
+      while [[ ! -f "$TMP_DIR/callback.go" ]]; do
+        [[ ! -f "$TMP_DIR/callback.cancel" ]] && sync_parent_alive || exit 1
+        sleep 0.05
+      done
+      [[ ! -f "$TMP_DIR/callback.cancel" ]] && sync_parent_alive || exit 1
+      if [[ -x "$REPO_ROOT/scripts/cleanup-basecoat-upgrade.sh" ]]; then exec "$REPO_ROOT/scripts/cleanup-basecoat-upgrade.sh" "$TARGET_DIR"
+      else exec bash "$REPO_ROOT/scripts/cleanup-basecoat-upgrade.sh" "$TARGET_DIR"; fi
+    ) &
+    callback_pgid=$!
+    set +m
+    while kill -0 "$callback_pgid" 2>/dev/null; do
+      if ! sync_parent_alive; then
+        echo "GUIDANCE_LOCK_BUSY reason='sync parent exited'" >&2
+        stop_process_group "$callback_pgid"
+        wait "$callback_pgid" 2>/dev/null || true
+        exit 1
+      fi
+      sleep 1
+    done
+    callback_status=0
+    wait "$callback_pgid" || callback_status=$?
+    stop_process_group "$callback_pgid"
+    exit "$callback_status"
+  ) &
+  cleanup_supervisor=$!
+  for (( i = 0; i < 200; i++ )); do
+    if [[ -s "$TMP_DIR/callback.pgid" ]] && read -r cleanup_pgid < "$TMP_DIR/callback.pgid"; then break; fi
+    sleep 0.05
+  done
+  if [[ -z "$cleanup_pgid" ]]; then echo "GUIDANCE_LOCK_BUSY reason='callback process group did not start'" >&2; exit 1; fi
+  ( set +m; while sleep "$heartbeat_seconds"; do
+      if ! sync_parent_alive; then
+        echo "GUIDANCE_LOCK_BUSY lease='${sync_lease%%|*}' reason='sync parent exited'" >&2
+        stop_process_group "$cleanup_pgid"
+        exit 1
+      fi
+      kill -0 "$cleanup_pgid" 2>/dev/null || exit 0
+      renew_sync_lease "$sync_lease" || { stop_process_group "$cleanup_pgid"; exit 1; }
+    done ) &
+  lease_heartbeat=$!
+  set +m
+  touch "$TMP_DIR/callback.go"
+  cleanup_status=0
+  wait "$cleanup_supervisor" || cleanup_status=$?
+  stop_process_group "$cleanup_pgid"
+  stop_lease_heartbeat
+  cleanup_pgid=""
+  renew_sync_lease "$sync_lease"
+  (( cleanup_status == 0 )) || exit "$cleanup_status"
 fi
+renew_sync_lease "$sync_lease"
 
 if [[ "$SOURCE_REF" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
   expected_version="${BASH_REMATCH[1]}"

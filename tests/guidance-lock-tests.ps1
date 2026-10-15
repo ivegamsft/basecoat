@@ -66,7 +66,8 @@ function Invoke-TestSync {
     param(
         [string]$Source,
         [string]$Consumer,
-        [switch]$ExpectFailure
+        [switch]$ExpectFailure,
+        [string]$Shell
     )
     $sha = (git -C $Source rev-parse HEAD).Trim()
     Push-Location $Consumer
@@ -75,6 +76,14 @@ function Invoke-TestSync {
         $env:BASECOAT_REF = $sha
         $env:BASECOAT_EXPECTED_SHA = $sha
         $env:BASECOAT_TEST_SOURCE_PATH = $Source
+        if ($Shell) {
+            # Detached with file output, so a leaked child holding sync's handles fails the test instead of hanging it.
+            $out = Join-Path $Consumer 'sync.out'; $err = Join-Path $Consumer 'sync.err'
+            $process = Start-Process -FilePath $Shell -ArgumentList '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', "`"$(Join-Path $repoRoot 'sync.ps1')`"" -NoNewWindow -PassThru -RedirectStandardOutput $out -RedirectStandardError $err
+            $null = $process.Handle
+            if (-not $process.WaitForExit(180000)) { Stop-Process -Id $process.Id -Force; throw "sync.ps1 under $Shell did not exit within 180s." }
+            return [pscustomobject]@{ ExitCode = $process.ExitCode; Output = (Get-Content -LiteralPath $out, $err -Raw) -join "`n" }
+        }
         if ($ExpectFailure) {
             $output = & pwsh -NoProfile -File (Join-Path $repoRoot 'sync.ps1') 2>&1 | Out-String
             return [pscustomobject]@{ ExitCode = $LASTEXITCODE; Output = $output }
@@ -97,6 +106,13 @@ function Invoke-Scenario {
     catch {
         $failures.Add("${Name}: $($_.Exception.Message) [$($_.ScriptStackTrace)]")
     }
+}
+
+function Test-ProcessRunning {
+    param([int]$ProcessId)
+    if ($env:OS -eq 'Windows_NT') { return [bool](Get-Process -Id $ProcessId -ErrorAction SilentlyContinue) }
+    $state = & ps -p $ProcessId -o stat= 2>$null
+    return $LASTEXITCODE -eq 0 -and $state -and $state.Trim() -notmatch '^Z'
 }
 
 Remove-Item -LiteralPath $scratch -Recurse -Force -ErrorAction SilentlyContinue
@@ -506,11 +522,204 @@ Invoke-Scenario 'legacy tracker reference migration preserves modified files' {
     Assert-True ((Get-Content -LiteralPath (Join-Path $legacyDir 'modified-detail.md') -Raw) -match 'consumer edit') 'Tracker-owned consumer-modified legacy reference was deleted.'
 }
 
+function New-LeaseHookSource {
+    param([string]$Path, [string]$Consumer, [string]$OwnerAction)
+    New-TestSource $Path
+    # The source-supplied distribution filter runs right after the payload is staged, mid-sync.
+    @"
+. '$((Join-Path $repoRoot 'scripts/distribution-filter.ps1').Replace("'", "''"))'
+`$script:LeaseHookFilter = `${function:Remove-BaseCoatDistributionExcluded}
+function Remove-BaseCoatDistributionExcluded {
+    param([string]`$Root)
+    & `$script:LeaseHookFilter -Root `$Root
+    `$owner = Join-Path `$repoRoot '.github/base-coat/guidance-lock.lease/owner'
+    if (Test-Path -LiteralPath `$owner) { $OwnerAction }
+}
+"@ | Set-Content -LiteralPath (Join-Path $Path 'scripts/distribution-filter.ps1') -Encoding utf8NoBOM
+    git -C $Path add -A
+    git -C $Path commit -m 'lease hook' | Out-Null
+    New-TestConsumer $Consumer
+}
+
+Invoke-Scenario 'sync acquires the lease before staging the payload' {
+    $source = Join-Path $scratch 'busy-source'
+    $consumer = Join-Path $scratch 'busy-consumer'
+    New-TestSource $source
+    New-TestConsumer $consumer
+    $heldLease = Enter-GuidanceLockLease -RepoRoot $consumer
+    try {
+        $result = Invoke-TestSync $source $consumer -ExpectFailure
+    }
+    finally {
+        Exit-GuidanceLockLease -LeasePath $heldLease
+    }
+    Assert-True ($result.ExitCode -ne 0 -and $result.Output -match 'GUIDANCE_LOCK_BUSY' -and
+        -not (Test-Path -LiteralPath (Join-Path $consumer '.github/base-coat/version.json'))) `
+        "A concurrent sync changed the staged payload before waiting for the held lease: $($result.Output)"
+}
+
+Invoke-Scenario 'sync renews its lease through the write window' {
+    $source = Join-Path $scratch 'renew-source'
+    $consumer = Join-Path $scratch 'renew-consumer'
+    New-LeaseHookSource $source $consumer `
+        "(Get-Content -LiteralPath `$owner) -replace '^acquiredEpoch=.*', `"acquiredEpoch=`$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - 500)`" | Set-Content -LiteralPath `$owner"
+    $observed = Join-Path $consumer 'lease-observed.txt'
+    New-Item -ItemType Directory -Path (Join-Path $consumer 'scripts') -Force | Out-Null
+    "param(`$TargetDir, [switch]`$ProtectCustomized, [switch]`$SetArchiveReadOnly)`n" +
+    "`$o = '.github/base-coat/guidance-lock.lease/owner'; if (Test-Path `$o) { Copy-Item `$o '$observed' } else { 'missing' | Set-Content '$observed' }" |
+        Set-Content -LiteralPath (Join-Path $consumer 'scripts/cleanup-basecoat-upgrade.ps1') -Encoding utf8NoBOM
+    Invoke-TestSync $source $consumer
+    $epochLine = @(Get-Content -LiteralPath $observed | Where-Object { $_ -like 'acquiredEpoch=*' }) | Select-Object -First 1
+    $epoch = if ($epochLine) { [long]($epochLine -replace '^acquiredEpoch=', '') } else { 0 }
+    Assert-True ($epoch -gt [DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - 300) `
+        "Sync did not hold and renew its lease through the late write phases: $(Get-Content -LiteralPath $observed -Raw)"
+    Assert-True (-not (Test-Path -LiteralPath (Join-Path $consumer '.github/base-coat/guidance-lock.lease'))) 'Sync did not release its lease.'
+}
+
+Invoke-Scenario 'sync stops writing after its lease is taken over' {
+    $source = Join-Path $scratch 'takeover-source'
+    $consumer = Join-Path $scratch 'takeover-consumer'
+    New-LeaseHookSource $source $consumer `
+        "[IO.File]::WriteAllText(`$owner, `"token=intruder``npid=0``nacquiredEpoch=`$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())``n`")"
+    $result = Invoke-TestSync $source $consumer -ExpectFailure
+    $owner = Join-Path $consumer '.github/base-coat/guidance-lock.lease/owner'
+    Assert-True ($result.ExitCode -ne 0 -and $result.Output -match 'GUIDANCE_LOCK_BUSY' -and $result.Output -match "reason='lease lost during sync'" -and
+        -not (Test-Path -LiteralPath (Get-GuidanceLockPath -RepoRoot $consumer)) -and
+        -not (Test-Path -LiteralPath (Join-Path $consumer '.github/instructions/example.instructions.md')) -and
+        (Get-Content -LiteralPath $owner -Raw) -match 'token=intruder') `
+        "Sync kept writing, or released the new owner's lease, after a takeover: $($result.Output)"
+}
+
+Invoke-Scenario 'lease loss stops the cleanup callback process tree and nothing else' {
+    $source = Join-Path $scratch 'tree-source'
+    New-TestSource $source
+    $shells = @('pwsh') + @(if ($env:OS -eq 'Windows_NT' -and (Get-Command powershell.exe -ErrorAction SilentlyContinue)) { 'powershell.exe' })
+    foreach ($shell in $shells) {
+        $consumer = Join-Path $scratch "tree-consumer-$($shell -replace '\W', '')"
+        New-TestConsumer $consumer
+        New-Item -ItemType Directory -Path (Join-Path $consumer 'scripts') -Force | Out-Null
+        $log = Join-Path $consumer 'writer.log'; $writerPid = Join-Path $consumer 'writer.pid'; $late = Join-Path $consumer 'late.txt'
+        "while (`$true) { Add-Content -LiteralPath '$log' -Value x; Start-Sleep -Milliseconds 100 }" | Set-Content -LiteralPath (Join-Path $consumer 'writer.ps1') -Encoding utf8
+        # The callback spawns a child writer, loses its lease to a successor, then keeps running.
+        @"
+param(`$TargetDir, [switch]`$ProtectCustomized, [switch]`$SetArchiveReadOnly)
+`$writer = Start-Process -FilePath (Get-Process -Id `$PID).Path -ArgumentList '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', '"$(Join-Path $consumer 'writer.ps1')"' -NoNewWindow -PassThru -RedirectStandardOutput '$(Join-Path $consumer 'writer.out')' -RedirectStandardError '$(Join-Path $consumer 'writer.err')'
+Set-Content -LiteralPath '$writerPid' -Value `$writer.Id
+while (-not (Test-Path -LiteralPath '$log')) { Start-Sleep -Milliseconds 50 }
+[IO.File]::WriteAllText('$(Join-Path $consumer '.github/base-coat/guidance-lock.lease/owner')', "token=intruder``npid=0``nacquiredEpoch=`$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())``n")
+Start-Sleep -Seconds 30
+Set-Content -LiteralPath '$late' -Value late
+"@ | Set-Content -LiteralPath (Join-Path $consumer 'scripts/cleanup-basecoat-upgrade.ps1') -Encoding utf8
+        $bystander = Start-Process -FilePath (Get-Process -Id $PID).Path -ArgumentList '-NoProfile', '-Command', 'Start-Sleep -Seconds 120' -NoNewWindow -PassThru
+        $env:BASECOAT_LEASE_HEARTBEAT_SECONDS = '1'
+        try { $result = Invoke-TestSync $source $consumer -Shell $shell }
+        finally { Remove-Item Env:\BASECOAT_LEASE_HEARTBEAT_SECONDS }
+        $childId = [int](Get-Content -LiteralPath $writerPid -Raw -ErrorAction SilentlyContinue)
+        $childAlive = $childId -and (Test-ProcessRunning $childId)
+        $logLength = (Get-Item -LiteralPath $log).Length; Start-Sleep -Milliseconds 800
+        $bystanderAlive = -not $bystander.HasExited
+        if ($bystanderAlive) { Stop-Process -Id $bystander.Id -Force }
+        if ($childAlive) { Stop-Process -Id $childId -Force }
+        Assert-True ($result.ExitCode -ne 0 -and $result.Output -match 'GUIDANCE_LOCK_BUSY' -and $result.Output -match "reason='lease lost during sync'") "$shell sync did not fail closed when the cleanup callback lost its lease: $($result.Output)"
+        Assert-True ($childId -and -not $childAlive -and (Get-Item -LiteralPath $log).Length -eq $logLength -and -not (Test-Path -LiteralPath $late)) `
+            "$shell sync returned while the cleanup callback or its child writer could still write after the lease was taken over (#3822)."
+        Assert-True $bystanderAlive "$shell sync terminated a process outside the cleanup callback's process tree."
+        Assert-True ((Get-Content -LiteralPath (Join-Path $consumer '.github/base-coat/guidance-lock.lease/owner') -Raw) -match 'token=intruder') "$shell sync released the successor's lease."
+    }
+}
+
+Invoke-Scenario 'forced termination during renewal preserves a reclaimable owner' {
+    $consumer = Join-Path $scratch 'interrupted-renewal'
+    New-TestConsumer $consumer
+    $lease = Enter-GuidanceLockLease -RepoRoot $consumer
+    $owner = Join-Path ($lease -split '\|', 2)[0] 'owner'
+    $original = Get-Content -LiteralPath $owner -Raw
+    $marker = Join-Path $consumer 'write-paused'
+    $ast = [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $repoRoot 'sync.ps1'), [ref]$null, [ref]$null)
+    $definition = $ast.Find({ param($node) $node -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'Update-SyncGuidanceLease' }, $true).Extent.Text
+    $definition = $definition.Replace('[System.IO.File]::WriteAllText(', 'Invoke-InterruptedWrite(')
+    $scriptPath = Join-Path $consumer 'renew.ps1'
+    @"
+function Invoke-InterruptedWrite {
+    param([object[]]`$WriteArguments)
+    [IO.File]::WriteAllText([string]`$WriteArguments[0], '')
+    Set-Content -LiteralPath '$marker' -Value paused
+    Start-Sleep -Seconds 120
+}
+$definition
+Update-SyncGuidanceLease -Lease '$lease'
+"@ | Set-Content -LiteralPath $scriptPath -Encoding utf8
+    $process = Start-Process -FilePath pwsh -ArgumentList '-NoProfile', '-File', "`"$scriptPath`"" -NoNewWindow -PassThru
+    try {
+        $deadline = [DateTime]::UtcNow.AddSeconds(20)
+        while (-not (Test-Path -LiteralPath $marker) -and [DateTime]::UtcNow -lt $deadline) { Start-Sleep -Milliseconds 100 }
+        Assert-True (Test-Path -LiteralPath $marker) 'Renewal fixture did not pause after opening its write destination.'
+        Stop-Process -Id $process.Id -Force; $process.WaitForExit()
+        Assert-True ((Get-Content -LiteralPath $owner -Raw) -ceq $original) 'Interrupted renewal truncated or changed the published owner.'
+        $original -replace '(?m)^acquiredEpoch=\d+', "acquiredEpoch=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - 601)" |
+            Set-Content -LiteralPath $owner -Encoding ascii
+        $successor = Enter-GuidanceLockLease -RepoRoot $consumer -TimeoutSeconds 0
+        Exit-GuidanceLockLease -LeasePath $successor
+    }
+    finally {
+        if (-not $process.HasExited) { Stop-Process -Id $process.Id -Force; $process.WaitForExit() }
+        $process.Dispose()
+        Exit-GuidanceLockLease -LeasePath $lease
+    }
+}
+
+Invoke-Scenario 'forced sync termination stops the cleanup callback and its children' {
+    $source = Join-Path $scratch 'parent-kill-source'
+    New-TestSource $source
+    $shells = @('pwsh') + @(if ($env:OS -eq 'Windows_NT' -and (Get-Command powershell.exe -ErrorAction SilentlyContinue)) { 'powershell.exe' })
+    foreach ($shell in $shells) {
+        $consumer = Join-Path $scratch "parent-kill-$($shell -replace '\W', '')"
+        New-TestConsumer $consumer
+        New-Item -ItemType Directory -Path (Join-Path $consumer 'scripts') -Force | Out-Null
+        $log = Join-Path $consumer 'writer.log'; $writerPid = Join-Path $consumer 'writer.pid'; $callbackPid = Join-Path $consumer 'callback.pid'
+        "while (`$true) { Add-Content -LiteralPath '$log' -Value x; Start-Sleep -Milliseconds 100 }" |
+            Set-Content -LiteralPath (Join-Path $consumer 'writer.ps1') -Encoding utf8
+        @"
+param(`$TargetDir, [switch]`$ProtectCustomized, [switch]`$SetArchiveReadOnly)
+Set-Content -LiteralPath '$callbackPid' -Value `$PID
+`$writer = Start-Process -FilePath (Get-Process -Id `$PID).Path -ArgumentList '-NoProfile', '-File', '"$(Join-Path $consumer 'writer.ps1')"' -NoNewWindow -PassThru -RedirectStandardOutput '$(Join-Path $consumer 'writer.out')' -RedirectStandardError '$(Join-Path $consumer 'writer.err')'
+Set-Content -LiteralPath '$writerPid' -Value `$writer.Id
+while (-not (Test-Path -LiteralPath '$log')) { Start-Sleep -Milliseconds 50 }
+`$owner = Get-Content -LiteralPath '.github/base-coat/guidance-lock.lease/owner' -Raw
+Stop-Process -Id ([int]([regex]::Match(`$owner, '(?m)^pid=(\d+)').Groups[1].Value)) -Force
+Start-Sleep -Seconds 120
+"@ | Set-Content -LiteralPath (Join-Path $consumer 'scripts/cleanup-basecoat-upgrade.ps1') -Encoding utf8
+        $bystander = Start-Process -FilePath pwsh -ArgumentList '-NoProfile', '-Command', 'Start-Sleep -Seconds 120' -NoNewWindow -PassThru
+        $childId = 0; $callbackId = 0
+        try {
+            $result = Invoke-TestSync $source $consumer -Shell $shell
+            $childId = [int](Get-Content -LiteralPath $writerPid -Raw)
+            $callbackId = [int](Get-Content -LiteralPath $callbackPid -Raw)
+            $deadline = [DateTime]::UtcNow.AddSeconds(30)
+            while (((Test-ProcessRunning $childId) -or (Test-ProcessRunning $callbackId)) -and [DateTime]::UtcNow -lt $deadline) { Start-Sleep -Milliseconds 100 }
+            Assert-True ($result.ExitCode -ne 0 -and -not (Test-ProcessRunning $childId) -and -not (Test-ProcessRunning $callbackId)) "$shell parent death left the callback tree running."
+            $length = (Get-Item -LiteralPath $log).Length; Start-Sleep -Milliseconds 800
+            Assert-True ((Get-Item -LiteralPath $log).Length -eq $length -and -not $bystander.HasExited) "$shell parent-death cleanup allowed writes or stopped an unrelated process."
+            $owner = Join-Path $consumer '.github/base-coat/guidance-lock.lease/owner'
+            (Get-Content -LiteralPath $owner -Raw) -replace '(?m)^acquiredEpoch=\d+', "acquiredEpoch=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - 601)" |
+                Set-Content -LiteralPath $owner -Encoding ascii
+            $successor = Enter-GuidanceLockLease -RepoRoot $consumer -TimeoutSeconds 0
+            Exit-GuidanceLockLease -LeasePath $successor
+        }
+        finally {
+            foreach ($processId in @($childId, $callbackId, $bystander.Id)) {
+                if ($processId -and (Test-ProcessRunning $processId)) { Stop-Process -Id $processId -Force }
+            }
+            $bystander.Dispose()
+        }
+    }
+}
+
 Remove-Item -LiteralPath $scratch -Recurse -Force -ErrorAction SilentlyContinue
 if ($failures.Count -gt 0) {
     $failures | ForEach-Object { Write-Host "FAILED: $_" -ForegroundColor Red }
-    Write-Host "Guidance lock telemetry: checks=$checks scenarios=21 failures=$($failures.Count)" -ForegroundColor Red
+    Write-Host "Guidance lock telemetry: checks=$checks scenarios=27 failures=$($failures.Count)" -ForegroundColor Red
     exit 1
 }
 
-Write-Host "Guidance lock telemetry: checks=$checks scenarios=21 failures=0" -ForegroundColor Green
+Write-Host "Guidance lock telemetry: checks=$checks scenarios=27 failures=0" -ForegroundColor Green

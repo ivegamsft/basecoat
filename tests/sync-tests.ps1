@@ -1289,11 +1289,14 @@ try {
     if ((& $pinState) -notmatch '(?m)^ref: v1\.0\.0\|v1\.0\.0$') { throw "Rollback test failed: pin/provenance not v1.0.0 after success: $(& $pinState)" }
 
     $leaseDir = Join-Path $rolled '.github/base-coat/guidance-lock.lease'; New-Item -ItemType Directory -Path $leaseDir | Out-Null
-    Set-Content -LiteralPath (Join-Path $leaseDir 'owner') -Value "token=held`nacquiredEpoch=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - 598)" -Encoding ASCII
+    Set-Content -LiteralPath (Join-Path $leaseDir 'owner') -Value "token=held`nacquiredEpoch=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - 560)" -Encoding ASCII
+    $env:BASECOAT_GUIDANCE_LEASE = "$leaseDir|held"; $nearStale = try { Invoke-SyncToConsumerWithSource -ConsumerPath $rolled -SourceRepo "file://$rollbackSource" -SourceRef 'v1.1.0'; 'ran' } catch { "$_" } finally { Remove-Item Env:\BASECOAT_GUIDANCE_LEASE }; $testCount++
+    if ($nearStale -notmatch 'GUIDANCE_LOCK_BUSY' -or (Get-Content -LiteralPath (Join-Path $rolled '.github/base-coat/version.json') -Raw) -notmatch '1\.0\.0') { throw "Rollback test failed: sync renewed an inherited lease within 60s of stale reclaim (#3804): $nearStale" }
+    Set-Content -LiteralPath (Join-Path $leaseDir 'owner') -Value "token=held`nacquiredEpoch=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - 500)" -Encoding ASCII
     $env:BASECOAT_GUIDANCE_LEASE = "$leaseDir|other"; $busy = try { Invoke-SyncToConsumerWithSource -ConsumerPath $rolled -SourceRepo "file://$rollbackSource" -SourceRef 'v1.1.0'; 'ran' } catch { "$_" } finally { Remove-Item Env:\BASECOAT_GUIDANCE_LEASE }; $testCount++
     if ($busy -notmatch 'GUIDANCE_LOCK_BUSY' -or (Get-Content -LiteralPath (Join-Path $rolled '.github/base-coat/version.json') -Raw) -notmatch '1\.0\.0') { throw "Rollback test failed: sync wrote the staged payload before rejecting a foreign inherited lease: $busy" }
     $env:BASECOAT_GUIDANCE_LEASE = "$leaseDir|held"; try { Invoke-SyncToConsumerWithSource -ConsumerPath $rolled -SourceRepo "file://$rollbackSource" -SourceRef 'v1.0.0' } finally { Remove-Item Env:\BASECOAT_GUIDANCE_LEASE }
-    Start-Sleep -Seconds 3; $takeover = try { Enter-GuidanceLockLease -RepoRoot $rolled -TimeoutSeconds 0 } catch { 'busy' }; Remove-Item -LiteralPath $leaseDir -Recurse -Force; $testCount++
+    Start-Sleep -Seconds 3; $takeover = try { Enter-GuidanceLockLease -RepoRoot $rolled -TimeoutSeconds 0 -StaleAfterSeconds 400 } catch { 'busy' }; Remove-Item -LiteralPath $leaseDir -Recurse -Force; $testCount++
     if ($takeover -ne 'busy') { throw 'Rollback test failed: sync did not renew an aged inherited lease, so another writer could reclaim it mid-sync' }
     $beforeLateFailure = "$((Get-RollbackState -Consumer $rolled).Files)|$(Get-Content -LiteralPath (Join-Path $rolled '.github/base-coat/guidance-lock.json') -Raw)|$(& $pinState)"
     $result = Invoke-RollbackToConsumer -Consumer $rolled -SourceRepo $rollbackSource -Tag 'v1.2.0'; $testCount++

@@ -618,6 +618,133 @@ function Remove-EmptyOverlayParents {
     }
 }
 
+# Verifies this sync still owns the guidance-lock lease and refreshes its stale-takeover clock (#3804).
+function Update-SyncGuidanceLease {
+    param([Parameter(Mandatory)][string]$Lease, [string]$Reason = 'lease lost during sync')
+    $leaseParts = $Lease -split '\|', 2
+    $ownerPath = Join-Path $leaseParts[0] 'owner'
+    $ownerText = [string](Get-Content -LiteralPath $ownerPath -Raw -ErrorAction SilentlyContinue)
+    # Refuse renewal within 60s of the 600s stale-reclaim threshold so no reclaimer can swap the lease between check and write.
+    if ($leaseParts.Count -ne 2 -or
+        $ownerText -notmatch "(?m)^token=$([regex]::Escape($leaseParts[1]))\r?$" -or
+        $ownerText -notmatch '(?m)^acquiredEpoch=(\d+)' -or
+        [DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - [long]$Matches[1] -ge 540) {
+        throw "GUIDANCE_LOCK_BUSY lease='$($leaseParts[0])' reason='$Reason'"
+    }
+    $temporaryPath = "$ownerPath.$([guid]::NewGuid().ToString('N')).tmp"
+    try {
+        [System.IO.File]::WriteAllText($temporaryPath, "token=$($leaseParts[1])`npid=$PID`nacquiredEpoch=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())`n", [System.Text.UTF8Encoding]::new($false))
+        [System.IO.File]::Replace($temporaryPath, $ownerPath, [System.Management.Automation.Language.NullString]::Value)
+    }
+    catch {
+        throw "GUIDANCE_LOCK_BUSY lease='$($leaseParts[0])' reason='lease renewal publication failed': $($_.Exception.Message)"
+    }
+    finally {
+        Remove-Item -LiteralPath $temporaryPath -Force -ErrorAction SilentlyContinue
+    }
+}
+
+# Runs a consumer callback as its own process tree (a job object on Windows, a process group elsewhere) and renews the
+# lease while it runs. On lease loss, failure, or exit the whole tree is stopped and awaited before sync continues (#3822).
+function Invoke-SyncLeasedCallback {
+    param([Parameter(Mandatory)][string]$Lease, [Parameter(Mandatory)][string]$Script, [Parameter(Mandatory)][string]$TargetDir)
+    $interval = 60
+    if ($env:BASECOAT_LEASE_HEARTBEAT_SECONDS -match '^[1-9][0-9]?$' -and [int]$env:BASECOAT_LEASE_HEARTBEAT_SECONDS -le 60) { $interval = [int]$env:BASECOAT_LEASE_HEARTBEAT_SECONDS }
+    $isWindowsHost = [Environment]::OSVersion.Platform -eq 'Win32NT'
+    # The callback waits for 'go' so it cannot spawn children before it is contained. Arguments travel in the environment
+    # and -Command (not -EncodedCommand, which makes Windows PowerShell write CLIXML to a redirected stderr).
+    $command = "`$ErrorActionPreference = 'Stop'; if ([Console]::In.ReadLine() -ne 'go') { exit 3 }; & `$env:BASECOAT_CALLBACK_SCRIPT -TargetDir `$env:BASECOAT_CALLBACK_TARGET -ProtectCustomized -SetArchiveReadOnly"
+    $exe = Join-Path $PSHOME ($(if ($PSVersionTable.PSEdition -eq 'Core') { 'pwsh' } else { 'powershell' }) + $(if ($isWindowsHost) { '.exe' } else { '' }))
+    $start = New-Object System.Diagnostics.ProcessStartInfo
+    $start.UseShellExecute = $false; $start.RedirectStandardInput = $true; $start.WorkingDirectory = (Get-Location).Path
+    $start.EnvironmentVariables['BASECOAT_CALLBACK_SCRIPT'] = $Script; $start.EnvironmentVariables['BASECOAT_CALLBACK_TARGET'] = $TargetDir
+    $start.EnvironmentVariables['BASECOAT_CALLBACK_PARENT_PID'] = [string]$PID
+    $stopGroupCommand = 'for s in TERM KILL; do kill -$s -- "-$1" 2>/dev/null || return 0; for i in $(seq 50); do kill -0 -- "-$1" 2>/dev/null || return 0; sleep 0.1; done; done'
+    $groupFile = $null; $group = $null; $job = [IntPtr]::Zero
+    if ($isWindowsHost) {
+        if (-not ('BaseCoatSyncJob' -as [type])) {
+            Add-Type -TypeDefinition @'
+using System; using System.Runtime.InteropServices;
+public static class BaseCoatSyncJob {
+    [DllImport("kernel32.dll", SetLastError = true)] public static extern IntPtr CreateJobObject(IntPtr attributes, string name);
+    [DllImport("kernel32.dll", SetLastError = true)] public static extern bool AssignProcessToJobObject(IntPtr job, IntPtr process);
+    [DllImport("kernel32.dll", SetLastError = true)] public static extern bool TerminateJobObject(IntPtr job, uint exitCode);
+    [DllImport("kernel32.dll", SetLastError = true)] static extern bool QueryInformationJobObject(IntPtr job, int infoClass, byte[] info, int length, IntPtr returned);
+    [DllImport("kernel32.dll", SetLastError = true)] static extern bool SetInformationJobObject(IntPtr job, int infoClass, byte[] info, int length);
+    [DllImport("kernel32.dll", SetLastError = true)] public static extern bool CloseHandle(IntPtr handle);
+    // JOBOBJECT_BASIC_ACCOUNTING_INFORMATION.ActiveProcesses is at byte offset 40.
+    public static int ActiveProcesses(IntPtr job) { byte[] info = new byte[48]; return QueryInformationJobObject(job, 1, info, info.Length, IntPtr.Zero) ? BitConverter.ToInt32(info, 40) : -1; }
+    // JOBOBJECT_EXTENDED_LIMIT_INFORMATION.LimitFlags is at byte 16; 0x2000 is KILL_ON_JOB_CLOSE.
+    public static bool KillOnClose(IntPtr job) {
+        byte[] info = new byte[IntPtr.Size == 8 ? 144 : 112];
+        Buffer.BlockCopy(BitConverter.GetBytes(0x2000U), 0, info, 16, 4);
+        return SetInformationJobObject(job, 9, info, info.Length);
+    }
+}
+'@
+        }
+        $start.FileName = $exe
+        $start.Arguments = "-NoProfile -NonInteractive -Command `"$command`""
+    }
+    else {
+        $groupFile = [IO.Path]::GetTempFileName()
+        $start.FileName = 'bash'
+        $wrapper = 'stop_group() { ' + $stopGroupCommand + "; }`n" + @'
+set -m
+"$@" &
+child=$!
+echo "$child" > "$0"
+while kill -0 "$child" 2>/dev/null; do
+    if ! ps -A -o pid= -o stat= 2>/dev/null |
+        awk -v parent="$BASECOAT_CALLBACK_PARENT_PID" '$1 == parent && $2 !~ /^Z/ { alive=1 } END { exit !alive }'; then
+        echo "GUIDANCE_LOCK_BUSY reason='sync parent exited'" >&2
+        stop_group "$child"
+        wait "$child"
+        exit 1
+    fi
+    sleep 1
+done
+wait "$child"
+status=$?
+stop_group "$child"
+exit "$status"
+'@
+        foreach ($argument in @('-c', $wrapper, $groupFile, $exe, '-NoProfile', '-NonInteractive', '-Command', $command)) { $start.ArgumentList.Add($argument) }
+    }
+    $process = [System.Diagnostics.Process]::Start($start)
+    try {
+        if ($isWindowsHost) {
+            $job = [BaseCoatSyncJob]::CreateJobObject([IntPtr]::Zero, $null)
+            if ($job -eq [IntPtr]::Zero -or -not [BaseCoatSyncJob]::KillOnClose($job) -or
+                -not [BaseCoatSyncJob]::AssignProcessToJobObject($job, $process.Handle)) {
+                throw "Cannot contain $Script in a job object (Win32 error $([Runtime.InteropServices.Marshal]::GetLastWin32Error()))."
+            }
+        }
+        else {
+            for ($i = 0; $i -lt 200 -and [string](Get-Content -LiteralPath $groupFile -Raw) -notmatch '^(\d+)\r?\n$'; $i++) { Start-Sleep -Milliseconds 50 }
+            if ([string](Get-Content -LiteralPath $groupFile -Raw) -notmatch '^(\d+)\r?\n$') { throw "Cannot start $Script in its own process group." }
+            $group = $Matches[1]
+        }
+        $process.StandardInput.WriteLine('go'); $process.StandardInput.Close()
+        while (-not $process.WaitForExit($interval * 1000)) { Update-SyncGuidanceLease -Lease $Lease }
+        $process.WaitForExit()
+        if ($process.ExitCode -ne 0) { throw "$Script failed with exit code $($process.ExitCode)." }
+    }
+    finally {
+        if ($job -ne [IntPtr]::Zero) {
+            [void][BaseCoatSyncJob]::TerminateJobObject($job, 1)
+            for ($i = 0; $i -lt 100 -and [BaseCoatSyncJob]::ActiveProcesses($job) -gt 0; $i++) { Start-Sleep -Milliseconds 100 }
+            [void][BaseCoatSyncJob]::CloseHandle($job)
+        }
+        if ($group) {
+            & bash -c ('stop_group() { ' + $stopGroupCommand + '; }; stop_group "$1"') _ $group
+        }
+        if (-not $process.HasExited) { $process.Kill(); $process.WaitForExit() }
+        $process.Dispose()
+        if ($groupFile) { Remove-Item -LiteralPath $groupFile -Force -ErrorAction SilentlyContinue }
+    }
+}
+
 $sourcePathOverride = $env:BASECOAT_TEST_SOURCE_PATH
 $tempRoot = $null
 $sourcePath = $null
@@ -668,12 +795,31 @@ try {
     if (-not $distributionHelper) { throw 'Missing scripts/distribution-filter.ps1 distribution helper.' }
     . $distributionHelper
     $distributionExcludedPaths = @(Get-BaseCoatDistributionExclusions -Root $sourcePath)
-    # rollback.ps1 holds the lease across this sync and its restore; verify and renew it before the first write, never release it.
-    $inheritedLease = "$env:BASECOAT_GUIDANCE_LEASE" -split '\|', 2
-    if ($env:BASECOAT_GUIDANCE_LEASE -and ($inheritedLease.Count -ne 2 -or [System.IO.Path]::GetFullPath($inheritedLease[0]) -ne [System.IO.Path]::GetFullPath((Join-Path $repoRoot '.github/base-coat/guidance-lock.lease')) -or
-        -not (Select-String -LiteralPath (Join-Path $inheritedLease[0] 'owner') -Pattern "^token=$([regex]::Escape($inheritedLease[1]))$" -Quiet -ErrorAction SilentlyContinue))) {
-        throw "GUIDANCE_LOCK_BUSY lease='$($inheritedLease[0])' reason='inherited lease is not held'"
-    } elseif ($env:BASECOAT_GUIDANCE_LEASE) { [System.IO.File]::WriteAllText((Join-Path $inheritedLease[0] 'owner'), "token=$($inheritedLease[1])`npid=$PID`nacquiredEpoch=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())`n", [System.Text.UTF8Encoding]::new($false)) }
+    $guidanceHelper = @(
+        (Join-Path $sourcePath 'scripts/guidance-lock.ps1'),
+        (Join-Path $PSScriptRoot 'scripts/guidance-lock.ps1'),
+        (Join-Path $repoRoot '.github/base-coat/scripts/guidance-lock.ps1')
+    ) | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
+    if (-not $guidanceHelper) {
+        throw "GUIDANCE_LOCK_INVALID reason='source payload is missing scripts/guidance-lock.ps1'"
+    }
+    . $guidanceHelper
+    # The helper enables StrictMode on dot-source; keep sync.ps1's own code non-strict now that it loads early.
+    Set-StrictMode -Off
+
+    # Hold the guidance-lock lease across every repository write, renewing it before each write phase (#3804).
+    # rollback.ps1 holds the lease across this sync and its restore; verify and renew it, never release it.
+    $syncLease = $env:BASECOAT_GUIDANCE_LEASE
+    if ($syncLease) {
+        if ([System.IO.Path]::GetFullPath(($syncLease -split '\|', 2)[0]) -ne [System.IO.Path]::GetFullPath((Join-Path $repoRoot '.github/base-coat/guidance-lock.lease'))) {
+            throw "GUIDANCE_LOCK_BUSY lease='$(($syncLease -split '\|', 2)[0])' reason='inherited lease is not held'"
+        }
+        Update-SyncGuidanceLease -Lease $syncLease -Reason 'inherited lease is not held'
+    }
+    else {
+        $guidanceLeasePath = Enter-GuidanceLockLease -RepoRoot $repoRoot
+        $syncLease = $guidanceLeasePath
+    }
     $fullTargetDir = Join-Path $repoRoot $targetDir
     New-Item -ItemType Directory -Force -Path $fullTargetDir | Out-Null
 
@@ -706,6 +852,7 @@ try {
     }
 
     Remove-BaseCoatDistributionExcluded -Root $fullTargetDir
+    Update-SyncGuidanceLease -Lease $syncLease
 
     # Copy workflows from .github/base-coat/workflows/
     $workflowsSource = Join-Path $sourcePath '.github/base-coat/workflows'
@@ -776,6 +923,7 @@ try {
     } | ConvertTo-Json | Set-Content -Path (Join-Path $fullTargetDir '.source-provenance.json') -Encoding UTF8
 
     # Copy only basic documentation (not full docs tree)
+    Update-SyncGuidanceLease -Lease $syncLease
     $docsDest = Join-Path $fullTargetDir 'docs'
     if (Test-Path $docsDest) {
         Remove-Item -Path $docsDest -Recurse -Force
@@ -826,16 +974,7 @@ try {
 
     # Shared physical destinations use one cross-product ownership source.
     # Build and preflight the complete plan before changing any shared file.
-    $guidanceHelper = @(
-        (Join-Path $sourcePath 'scripts/guidance-lock.ps1'),
-        (Join-Path $PSScriptRoot 'scripts/guidance-lock.ps1'),
-        (Join-Path $repoRoot '.github/base-coat/scripts/guidance-lock.ps1')
-    ) | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
-    if (-not $guidanceHelper) {
-        throw "GUIDANCE_LOCK_INVALID reason='source payload is missing scripts/guidance-lock.ps1'"
-    }
-    . $guidanceHelper
-
+    Update-SyncGuidanceLease -Lease $syncLease
     $legacyOverlayStatePath = Join-Path $fullTargetDir '.overlay-managed-files'
     $legacyOverlayFiles = @()
     if (Test-Path -LiteralPath $legacyOverlayStatePath -PathType Leaf) {
@@ -957,7 +1096,6 @@ try {
     }
 
     $guidanceLockPath = Get-GuidanceLockPath -RepoRoot $repoRoot
-    if (-not $env:BASECOAT_GUIDANCE_LEASE) { $guidanceLeasePath = Enter-GuidanceLockLease -RepoRoot $repoRoot }
     $guidanceLock = Read-GuidanceLock -RepoRoot $repoRoot -LockPath $guidanceLockPath
     $lockEntries = [System.Collections.Generic.List[object]]::new()
     foreach ($entry in @($guidanceLock.entries)) { $lockEntries.Add($entry) }
@@ -1067,6 +1205,7 @@ try {
         }
     }
 
+    Update-SyncGuidanceLease -Lease $syncLease
     foreach ($planned in $guidancePlan) {
         $destination = Join-Path $repoRoot $planned.path
         New-Item -ItemType Directory -Path (Split-Path -Parent $destination) -Force | Out-Null
@@ -1094,8 +1233,7 @@ try {
     }
 
     Remove-Item -LiteralPath $guidanceStage -Recurse -Force -ErrorAction SilentlyContinue
-    Exit-GuidanceLockLease -LeasePath $guidanceLeasePath
-    $guidanceLeasePath = $null
+    Update-SyncGuidanceLease -Lease $syncLease
 
     # Seed release-notes template into downstream-customizable location.
     # Never overwrite local customizations.
@@ -1126,8 +1264,10 @@ try {
     # Uses hash snapshoting to avoid deleting customized files.
     $cleanupScript = Join-Path $repoRoot 'scripts/cleanup-basecoat-upgrade.ps1'
     if (Test-Path $cleanupScript) {
-        & $cleanupScript -TargetDir $targetDir -ProtectCustomized -SetArchiveReadOnly
+        Update-SyncGuidanceLease -Lease $syncLease
+        Invoke-SyncLeasedCallback -Lease $syncLease -Script $cleanupScript -TargetDir $targetDir
     }
+    Update-SyncGuidanceLease -Lease $syncLease
 
     if ($sourceRef -match '^v(?<version>\d+\.\d+\.\d+)$') {
         $expectedVersion = $Matches['version']
@@ -1149,11 +1289,11 @@ try {
     Write-Host "Base Coat synced into $targetDir"
 }
 finally {
-    if ($guidanceLeasePath) {
-        Exit-GuidanceLockLease -LeasePath $guidanceLeasePath
-    }
     if ($guidanceStage -and (Test-Path -LiteralPath $guidanceStage)) {
         Remove-Item -LiteralPath $guidanceStage -Recurse -Force -ErrorAction SilentlyContinue
+    }
+    if ($guidanceLeasePath) {
+        Exit-GuidanceLockLease -LeasePath $guidanceLeasePath
     }
     if ($tempRoot -and (Test-Path -LiteralPath $tempRoot)) {
         try {

@@ -35,6 +35,12 @@ All notable changes to this repository should be recorded in this file.
 - `scripts/bootstrap-basecoat.ps1` now counts the committable files a real run adds, updates or removes (including a
   custom `TargetDir`), so its optional pull request opens when the overlay changed and is skipped otherwise; it stages
   and commits only those files, and `-DryRun` clones into a temp directory so it can list top-level items (#3812).
+- `sync.ps1` and `sync.sh` acquire (or verify an inherited) guidance-lock lease before the first repository write and
+  renew it before each write phase, so a concurrent sync cannot interleave staged-payload writes and a sync whose lease
+  was taken over stops with `GUIDANCE_LOCK_BUSY` before writing more (#3804). Renewal fails closed within 60s of the
+  600s stale-reclaim threshold, and a heartbeat keeps the lease fresh while the consumer cleanup script runs. That script
+  runs as its own process tree (a job object on Windows, a process group elsewhere). Sync stops and awaits the whole
+  tree, including child processes, if the lease is lost and before writing on, and leaves unrelated processes running (#3822).
 
 ## 4.6.5 - 2026-10-11
 
