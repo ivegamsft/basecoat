@@ -913,6 +913,13 @@ try {
         Copy-Item -LiteralPath $guidanceSchemaSource `
             -Destination (Join-Path $canonicalContractRoot 'schemas/guidance-lock-v1.schema.json') -Force
     }
+    foreach ($governanceFile in @('policy-packs.json', 'human-approval-boundaries.json')) {
+        $governanceSource = Join-Path $sourcePath ".github/base-coat/governance/$governanceFile"
+        if (Test-Path -LiteralPath $governanceSource -PathType Leaf) {
+            New-Item -ItemType Directory -Path (Join-Path $canonicalContractRoot 'governance') -Force | Out-Null
+            Copy-Item -LiteralPath $governanceSource -Destination (Join-Path $canonicalContractRoot "governance/$governanceFile") -Force
+        }
+    }
 
     [ordered]@{
         schemaVersion = 1

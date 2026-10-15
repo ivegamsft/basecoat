@@ -43,6 +43,9 @@ All notable changes to this repository should be recorded in this file.
   tree, including child processes, if the lease is lost and before writing on, and leaves unrelated processes running (#3822).
 - `sync.sh` installs `configure-downstream-workflows.ps1` like `sync.ps1`, and the parity test now requires both
   scripts to install the same runtime validators (#3813).
+- `sync.ps1` and `sync.sh` stage `policy-packs.json` and `human-approval-boundaries.json` into
+  `.github/base-coat/governance/`, so `configure-downstream-workflows.ps1` no longer warns that the source governance
+  files are missing (#3758, item 2).
 
 ## 4.6.5 - 2026-10-11
 

@@ -909,6 +909,9 @@ function New-BasecoatSource {
         Set-Content -Path 'skills/example-skill/SKILL.md' -Value "---`nname: example`ndescription: example`ncompatibility: [github-copilot-cli]`n---`n" -Encoding UTF8
         Set-Content -Path 'docs/reference/README.md' -Value '# Reference' -Encoding UTF8
         Set-Content -Path 'docs/guides/README.md' -Value '# Guides' -Encoding UTF8
+        New-Item -ItemType Directory -Force -Path '.github/base-coat/governance' | Out-Null
+        Set-Content -Path '.github/base-coat/governance/policy-packs.json' -Value '{ "fixture": "policy-packs" }' -Encoding UTF8
+        Set-Content -Path '.github/base-coat/governance/human-approval-boundaries.json' -Value '{ "fixture": "human-approval-boundaries" }' -Encoding UTF8
 
         git add .
         git commit -m 'seed pin source (default branch, no pin marker)' | Out-Null
@@ -970,6 +973,14 @@ try {
     $testCount++
     Assert-SyncPathExists (Join-Path $consumer '.github/agents/pinmarker.agent.md') 'Sync .basecoat.yml pin test failed: pinned-ref-only agent was not synced (clone did not follow the pinned tag)'
 
+    foreach ($governanceFile in @('policy-packs.json', 'human-approval-boundaries.json')) {
+        $testCount++
+        $stagedGovernance = Join-Path $consumer ".github/base-coat/governance/$governanceFile"
+        Assert-SyncPathExists $stagedGovernance "Sync governance staging failed (#3758): $governanceFile was not staged under .github/base-coat/governance"
+        if ((Get-Content -LiteralPath $stagedGovernance -Raw) -notmatch [regex]::Escape($governanceFile.Replace('.json', ''))) {
+            throw "Sync governance staging failed (#3758): $governanceFile content does not match the source"
+        }
+    }
     Write-Host '  Passed: .basecoat.yml source/ref is honored when env vars are unset' -ForegroundColor Green
 }
 catch {

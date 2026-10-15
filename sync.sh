@@ -505,6 +505,12 @@ if [[ -f "$TMP_DIR/source/schemas/guidance-lock-v1.schema.json" ]]; then
   cp -f "$TMP_DIR/source/schemas/guidance-lock-v1.schema.json" \
     "$REPO_ROOT/.github/base-coat/schemas/guidance-lock-v1.schema.json"
 fi
+for governance_file in policy-packs.json human-approval-boundaries.json; do
+  if [[ -f "$TMP_DIR/source/.github/base-coat/governance/$governance_file" ]]; then
+    mkdir -p "$REPO_ROOT/.github/base-coat/governance"
+    cp -f "$TMP_DIR/source/.github/base-coat/governance/$governance_file" "$REPO_ROOT/.github/base-coat/governance/$governance_file"
+  fi
+done
 
 json_escape() {
   printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g'

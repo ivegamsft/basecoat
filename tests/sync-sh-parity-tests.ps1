@@ -122,6 +122,10 @@ guidance_exit_lease "$lease3"
     'Write-Host updater' | Set-Content -LiteralPath (Join-Path $source '.github/base-coat/scripts/invoke-basecoat-consumer-update.ps1') -Encoding utf8NoBOM
     New-Item -ItemType Directory -Path (Join-Path $source 'scripts') -Force | Out-Null
     'Write-Host configure' | Set-Content -LiteralPath (Join-Path $source 'scripts/configure-downstream-workflows.ps1') -Encoding utf8NoBOM
+    New-Item -ItemType Directory -Path (Join-Path $source '.github/base-coat/governance') -Force | Out-Null
+    foreach ($governanceFile in @('policy-packs.json', 'human-approval-boundaries.json')) {
+        "{ `"fixture`": `"$governanceFile`" }" | Set-Content -LiteralPath (Join-Path $source ".github/base-coat/governance/$governanceFile") -Encoding utf8NoBOM
+    }
     git -C $source add -A
     git -C $source commit -m 'seed v1' | Out-Null
     git -C $source tag v1.0.0
@@ -170,6 +174,11 @@ known_bad_releases:
     Assert-True ($installed -eq '1.0.0') 'sync.sh did not parse a BOM-prefixed config and literally match its SemVer build-metadata known-bad key.'
     Assert-True (Test-Path -LiteralPath (Join-Path $consumer '.github/base-coat/scripts/invoke-basecoat-consumer-update.ps1')) 'sync.sh did not distribute managed updater scripts.'
         Assert-True (Test-Path -LiteralPath (Join-Path $consumer '.github/base-coat/scripts/configure-downstream-workflows.ps1')) 'sync.sh did not install configure-downstream-workflows.ps1 (#3813).'
+    foreach ($governanceFile in @('policy-packs.json', 'human-approval-boundaries.json')) {
+        $stagedGovernance = Join-Path $consumer ".github/base-coat/governance/$governanceFile"
+        Assert-True ((Test-Path -LiteralPath $stagedGovernance) -and (Get-Content -LiteralPath $stagedGovernance -Raw).Contains($governanceFile)) `
+            "sync.sh did not stage $governanceFile under .github/base-coat/governance (#3758)."
+    }
         Assert-True (Test-Path -LiteralPath (Join-Path $consumer '.github/agent-references/example-detail.md')) 'sync.sh did not distribute the agents/references subtree into .github/agent-references.'
     Assert-True ((Get-Content -LiteralPath (Join-Path $consumer '.github/agent-references/example-detail.md') -Raw).Contains('](../../.github/base-coat/docs/guides/example-guide.md)') -and (Test-Path -LiteralPath (Join-Path $consumer '.github/base-coat/docs/guides/example-guide.md'))) 'sync.sh did not point reference docs links at the installed BaseCoat docs.'
     Assert-True (-not (Test-Path -LiteralPath (Join-Path $legacyRefs 'example-detail.md'))) 'sync.sh did not remove the unchanged legacy reference.'
