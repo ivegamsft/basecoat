@@ -43,9 +43,26 @@ if ($LaneName -eq 'core') {
 
 $result = Invoke-WindowsValidationLane -LaneName $LaneName -Stages $stages
 if (-not $result.Succeeded) {
+    foreach ($failure in $result.Failures) {
+        $diagnostics = @($failure.Output | ForEach-Object { "$_" })
+        if ($failure.Error) {
+            $diagnostics += $failure.Error
+        }
+        if ($diagnostics.Count -gt 0) {
+            Write-Host "::group::Windows $LaneName stage $($failure.Stage) diagnostics"
+            foreach ($diagnostic in $diagnostics) {
+                foreach ($line in ($diagnostic -split "`r?`n")) {
+                    Write-Host "  $line"
+                }
+            }
+            Write-Host '::endgroup::'
+        }
+    }
+
     $failedStages = ($result.Failures | ForEach-Object {
         if ($_.Error) {
-            "$($_.Stage)=$($_.ExitCode) ($($_.Error))"
+            $errorMessage = $_.Error -replace '[\r\n]+', ' '
+            "$($_.Stage)=$($_.ExitCode) ($errorMessage)"
         } else {
             "$($_.Stage)=$($_.ExitCode)"
         }

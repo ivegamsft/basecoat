@@ -83,6 +83,27 @@ $syncResult = Invoke-WindowsValidationLane -LaneName sync -Stages @(
 )
 Assert-LaneResult -Result $syncResult -Succeeded $false -ExpectedFailedStage 'sync-tests' -CaseName 'sync lane failure propagation'
 
+$diagnosticResult = Invoke-WindowsValidationLane -LaneName sync -Stages @(
+    @{
+        Name = 'sync-tests'
+        Command = {
+            Write-Output 'sync test assertion name: Expected workflow path.'
+            Write-Error 'sync test stderr detail.' -ErrorAction Continue
+            $global:LASTEXITCODE = 7
+        }
+    }
+)
+Assert-LaneResult -Result $diagnosticResult -Succeeded $false -ExpectedFailedStage 'sync-tests' -CaseName 'sync lane diagnostic propagation'
+$diagnosticFailure = $diagnosticResult.Failures | Where-Object { $_.Stage -eq 'sync-tests' } | Select-Object -First 1
+$diagnosticText = ($diagnosticFailure.Output | ForEach-Object { "$_" }) -join "`n"
+if ($diagnosticFailure.ExitCode -ne 7) {
+    $failures += "sync lane diagnostic propagation expected underlying exit code 7, got $($diagnosticFailure.ExitCode)"
+}
+if ($diagnosticText -notmatch 'sync test assertion name: Expected workflow path\.' -or
+    $diagnosticText -notmatch 'sync test stderr detail\.') {
+    $failures += "sync lane diagnostic propagation did not retain stdout and stderr: $diagnosticText"
+}
+
 $successStages = foreach ($stageName in $coreStageNames) {
     New-TestStage -Name $stageName
 }

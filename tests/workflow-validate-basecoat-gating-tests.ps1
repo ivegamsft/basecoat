@@ -74,6 +74,7 @@ foreach ($requiredText in @(
     'Start-Process -FilePath pwsh',
     'Wait-Process -Id ($processes.Process.Id)',
     'Windows validation failed:',
+    'name: windows-validation-failure-attempt-${{ github.run_attempt }}',
     'exit 1'
 )) {
     if (-not $validateContent.Contains($requiredText)) {
@@ -93,6 +94,7 @@ foreach ($requiredText in @(
     '& .\scripts\validate-basecoat.ps1 -Strict',
     '& .\scripts\check-coherence.ps1 -Strict -Category conflicts',
     '& pwsh -NoProfile -File tests\sync-tests.ps1',
+    '$failure.Output | ForEach-Object { "$_" }',
     'exit $result.ExitCode'
 )) {
     if (-not $laneRunnerContent.Contains($requiredText)) {

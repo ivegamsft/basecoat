@@ -12,16 +12,20 @@ function Invoke-WindowsValidationLane {
 
     foreach ($stage in $Stages) {
         $stageName = [string]$stage.Name
+        $stageOutput = [System.Collections.Generic.List[object]]::new()
         Write-Host "Running Windows $LaneName stage: $stageName"
         try {
             $global:LASTEXITCODE = 0
-            & $stage.Command
+            & $stage.Command 2>&1 | ForEach-Object {
+                [void]$stageOutput.Add($_)
+            }
             $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { [int]$LASTEXITCODE }
             if ($exitCode -ne 0) {
                 $failures += [PSCustomObject]@{
                     Stage = $stageName
                     ExitCode = $exitCode
                     Error = ''
+                    Output = $stageOutput.ToArray()
                 }
                 Write-Host "::error::Windows $LaneName stage failed: $stageName exited $exitCode"
             }
@@ -31,6 +35,7 @@ function Invoke-WindowsValidationLane {
                 Stage = $stageName
                 ExitCode = 1
                 Error = $_.Exception.Message
+                Output = $stageOutput.ToArray()
             }
             Write-Host "::error::Windows $LaneName stage failed: $stageName threw $($_.Exception.Message)"
         }
