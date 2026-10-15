@@ -181,6 +181,8 @@ if ($IncludeInstructions) {
     }
 }
 
+$edges = @($edges | Sort-Object { $_.from }, { $_.to }, { $_.type })
+
 # ── Find orphans ─────────────────────────────────────────────────────────────
 
 $connectedNodes = [System.Collections.Generic.HashSet[string]]::new()

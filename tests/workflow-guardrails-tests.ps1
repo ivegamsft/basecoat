@@ -846,6 +846,20 @@ else {
     if ($dependencyGraphWorkflow -match 'Closes #189') {
         $stabilizationGuardrailIssues += 'dependency-graph-pages.yml (must not close merged PR #189 from automation PR body)'
     }
+
+    foreach ($graphOptions in @(
+        @('-Format', 'Mermaid', '-ShowOrphans'),
+        @('-Format', 'DOT', '-ShowOrphans'),
+        @('-Format', 'Mermaid', '-ShowOrphans', '-IncludeInstructions')
+    )) {
+        $firstGraph = (& pwsh -NoProfile -File scripts/graph-dependencies.ps1 @graphOptions) -join "`n"
+        if ($LASTEXITCODE -ne 0) { throw 'First dependency graph generation failed.' }
+        $secondGraph = (& pwsh -NoProfile -File scripts/graph-dependencies.ps1 @graphOptions) -join "`n"
+        if ($LASTEXITCODE -ne 0) { throw 'Second dependency graph generation failed.' }
+        if ($firstGraph -cne $secondGraph) {
+            $stabilizationGuardrailIssues += "graph-dependencies.ps1 (output differs across fresh processes: $($graphOptions -join ' '))"
+        }
+    }
 }
 
 $tokenInventoryWorkflowPath = Join-Path $workflowDir 'token-inventory.yml'
