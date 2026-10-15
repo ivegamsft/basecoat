@@ -47,6 +47,11 @@ Assert-True ($syncShContent -notmatch 'echo "\.github/agent-references/\$\{asset
     $syncShContent -match '"\$normalized" == \.github/agents/references/\* \]\]; then\s+asset_path="agents/references/' -and
     $syncShContent -match 'Preserving modified legacy reference') `
     'Bash pre-lock migration must claim only legacy .github/agents/references paths whose bytes match the previous manifest (#3766).'
+$syncPs1Content = Get-Content -LiteralPath (Join-Path $repoRoot 'sync.ps1') -Raw
+$ps1Validators = @([regex]::Matches(([regex]::Match($syncPs1Content, '(?s)foreach \(\$validator in @\((.*?)\)\)').Groups[1].Value), "'([^']+)'") | ForEach-Object { $_.Groups[1].Value } | Sort-Object)
+$shValidators = @(([regex]::Match($syncShContent, 'for validator in ([^;]+); do').Groups[1].Value -split '\s+') | Where-Object { $_ } | Sort-Object)
+Assert-True ($ps1Validators.Count -gt 0 -and ($ps1Validators -join ',') -ceq ($shValidators -join ',')) `
+    "sync.sh must install the same runtime validators as sync.ps1 (#3813). ps1: $($ps1Validators -join ', '); sh: $($shValidators -join ', ')"
 Assert-True ($syncShContent -match 'reference_docs_prefix="\.\./\.\./\$\{TARGET_DIR%/\}/docs/"') 'Bash reference projection must point docs links at the docs installed under TARGET_DIR.'
 $rollbackShContent = Get-Content -LiteralPath (Join-Path $repoRoot 'rollback.sh') -Raw
 Assert-True ($rollbackShContent -match 'BASECOAT_REF="\$TAG" BASECOAT_TARGET_DIR="\$TARGET_DIR" BASECOAT_GUIDANCE_LEASE="\$LEASE" bash "\$SYNC_SCRIPT"' -and
@@ -115,6 +120,8 @@ guidance_exit_lease "$lease3"
     "---`ndescription: example`napplyTo: '**/*'`n---" | Set-Content -LiteralPath (Join-Path $source 'instructions/example.instructions.md') -Encoding utf8NoBOM
     "---`nname: example`ndescription: example`n---" | Set-Content -LiteralPath (Join-Path $source 'prompts/example.prompt.md') -Encoding utf8NoBOM
     'Write-Host updater' | Set-Content -LiteralPath (Join-Path $source '.github/base-coat/scripts/invoke-basecoat-consumer-update.ps1') -Encoding utf8NoBOM
+    New-Item -ItemType Directory -Path (Join-Path $source 'scripts') -Force | Out-Null
+    'Write-Host configure' | Set-Content -LiteralPath (Join-Path $source 'scripts/configure-downstream-workflows.ps1') -Encoding utf8NoBOM
     git -C $source add -A
     git -C $source commit -m 'seed v1' | Out-Null
     git -C $source tag v1.0.0
@@ -162,7 +169,8 @@ known_bad_releases:
     $installed = (Get-Content -LiteralPath (Join-Path $consumer '.github/base-coat/version.json') -Raw | ConvertFrom-Json).version
     Assert-True ($installed -eq '1.0.0') 'sync.sh did not parse a BOM-prefixed config and literally match its SemVer build-metadata known-bad key.'
     Assert-True (Test-Path -LiteralPath (Join-Path $consumer '.github/base-coat/scripts/invoke-basecoat-consumer-update.ps1')) 'sync.sh did not distribute managed updater scripts.'
-    Assert-True (Test-Path -LiteralPath (Join-Path $consumer '.github/agent-references/example-detail.md')) 'sync.sh did not distribute the agents/references subtree into .github/agent-references.'
+        Assert-True (Test-Path -LiteralPath (Join-Path $consumer '.github/base-coat/scripts/configure-downstream-workflows.ps1')) 'sync.sh did not install configure-downstream-workflows.ps1 (#3813).'
+        Assert-True (Test-Path -LiteralPath (Join-Path $consumer '.github/agent-references/example-detail.md')) 'sync.sh did not distribute the agents/references subtree into .github/agent-references.'
     Assert-True ((Get-Content -LiteralPath (Join-Path $consumer '.github/agent-references/example-detail.md') -Raw).Contains('](../../.github/base-coat/docs/guides/example-guide.md)') -and (Test-Path -LiteralPath (Join-Path $consumer '.github/base-coat/docs/guides/example-guide.md'))) 'sync.sh did not point reference docs links at the installed BaseCoat docs.'
     Assert-True (-not (Test-Path -LiteralPath (Join-Path $legacyRefs 'example-detail.md'))) 'sync.sh did not remove the unchanged legacy reference.'
     Assert-True ((Get-Content -LiteralPath (Join-Path $legacyRefs 'modified-detail.md') -Raw) -match 'consumer edit') 'sync.sh deleted a consumer-modified legacy reference.'

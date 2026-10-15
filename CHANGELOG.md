@@ -41,6 +41,8 @@ All notable changes to this repository should be recorded in this file.
   600s stale-reclaim threshold, and a heartbeat keeps the lease fresh while the consumer cleanup script runs. That script
   runs as its own process tree (a job object on Windows, a process group elsewhere). Sync stops and awaits the whole
   tree, including child processes, if the lease is lost and before writing on, and leaves unrelated processes running (#3822).
+- `sync.sh` installs `configure-downstream-workflows.ps1` like `sync.ps1`, and the parity test now requires both
+  scripts to install the same runtime validators (#3813).
 
 ## 4.6.5 - 2026-10-11
 
