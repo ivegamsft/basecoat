@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "4.6.5",
-  "releaseDate": "2026-10-11",
-  "notes": "Patch release: agent reference export, Markdown escaping, skill frontmatter validation, and delivery workflow reliability fixes."
+  "version": "4.7.0",
+  "releaseDate": "2026-10-24",
+  "notes": "Minor release: roadmap persistence ledger and gated milestone adapter, approved-spec handoff, Stage 1 delivery shadow evaluators, release label gate on every tag publisher, plus sync, bootstrap, intake and workflow reliability and security fixes."
 }
