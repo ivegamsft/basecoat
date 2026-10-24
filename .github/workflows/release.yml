@@ -171,18 +171,10 @@ jobs:
           # The tag checkout is shallow; fetch full history and tags so the
           # exact previous..tag range and tag ancestry can be proven.
           git fetch --quiet --force --tags --unshallow origin 2>/dev/null || git fetch --quiet --force --tags origin
-          prev_tag="$(git --no-pager tag --list 'v*.*.*' --sort=-v:refname | grep -Fxv "${tag}" | head -n1 || true)"
 
-          if [[ -z "${prev_tag}" ]]; then
-            echo "::warning::No previous semver tag found; skipping wave/sprint label coverage gate."
-            exit 0
-          fi
-          echo "prev_tag=${prev_tag}" >> "${GITHUB_OUTPUT}"
-
-          # Same classifier as the PR and merge-group release-label-gate:
-          # release labels, skip-release-label-gate and dependencies count as
-          # covered; >10% uncovered fails, exactly 10% warns.
-          node scripts/merge-group-release-labels.cjs release-coverage "${prev_tag}" "${tag}" release-label-coverage.json
+          # Shared tag-publisher gate (#3843): same classifier as the PR and
+          # merge-group release-label-gate; writes prev_tag for revalidation.
+          EXPECTED_TAG_SHA="${GITHUB_SHA}" bash scripts/release-label-gate.sh release.yml "${tag}" release-label-coverage.json
 
       - name: Create or update GitHub release
         env:

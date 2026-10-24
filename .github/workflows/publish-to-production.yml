@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 concurrency:
   group: publish-production
@@ -64,6 +65,17 @@ jobs:
           ref: refs/tags/${{ steps.resolve_tag.outputs.tag }}
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Enforce release label policy gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.resolve_tag.outputs.tag }}
+          EXPECTED_TAG_SHA: ${{ github.event_name == 'push' && github.sha || '' }}
+        run: |
+          set -euo pipefail
+          # Fail closed before mirroring: same policy as release.yml (#3843).
+          bash scripts/release-label-gate.sh publish-to-production.yml "${TAG}" release-label-coverage.json
+          rm -f release-label-coverage.json
 
       - name: Remove internal-only content before publish
         env:

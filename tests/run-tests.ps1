@@ -579,6 +579,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running tag publisher release-label gate tests...'
+& node --test (Join-Path $PSScriptRoot 'tag-publisher-gate-tests.cjs')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Tag publisher release-label gate tests failed' -ForegroundColor Red
+    Write-FailureLog 'tag-publisher-gate-tests'
+    exit 1
+}
+
 Write-Host 'Running release-owner state contract tests...'
 & node --test (Join-Path $PSScriptRoot 'release-owner-state-tests.cjs')
 if ($LASTEXITCODE -ne 0) {

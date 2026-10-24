@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: read
 
 concurrency:
   group: basecoat-package-${{ inputs.target_sha || github.sha }}
@@ -194,6 +195,18 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          fetch-depth: 0
+
+      - name: Enforce release label policy gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_TAG_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          # Fail closed before publishing: same policy as release.yml (#3843).
+          git fetch --quiet --force --tags origin
+          bash scripts/release-label-gate.sh package-basecoat.yml "$GITHUB_REF_NAME" release-label-coverage.json
 
       - name: Download package artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c

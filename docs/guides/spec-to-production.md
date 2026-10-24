@@ -98,9 +98,11 @@ verifies the PR still closes the issue; the forwarding bot cannot approve.
 For migration from incidental commands, relative specs, or older bot-only
 acknowledgements, see the [shared approval contract](../spec/issue-3591-approval-contract.spec.md).
 
-The PR release-label gate accepts the two exemptions above. Separately,
-`release.yml` counts merged PRs missing actual wave/sprint coverage and fails
-when more than 10% lack it; those exemptions are not included in its calculation.
+The PR release-label gate accepts the two exemptions above. Every tag publisher
+(`release.yml`, the `package-basecoat.yml` `release` job and the
+`publish-to-production.yml` `publish` job) runs `scripts/release-label-gate.sh`
+before publishing, so a failed coverage decision stops all of them; the gate
+uses the same classifier, fails closed and creates no refs.
 
 ## Required checks versus policy intent
 
