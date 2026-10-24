@@ -12,6 +12,14 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $resolvedRoot = (Resolve-Path -LiteralPath $RootDir).Path
+# Resolve -ConsumerRoot against the caller's location before Set-Location changes it.
+$resolvedConsumerRoot = $null
+if ($WorkflowValidationMode -eq 'Consumer') {
+    if (-not $ConsumerRoot) {
+        throw "Consumer workflow validation requires -ConsumerRoot to identify the consumer repository."
+    }
+    $resolvedConsumerRoot = (Resolve-Path -LiteralPath $ConsumerRoot).Path
+}
 Set-Location $resolvedRoot
 $effectiveWorkflowValidationMode = if ($WorkflowValidationMode -ne 'Auto') {
     $WorkflowValidationMode
@@ -36,10 +44,7 @@ foreach ($item in $required) {
 Write-Host 'Validating immutable workflow action pins...'
 $workflowValidationRoot = $resolvedRoot
 if ($effectiveWorkflowValidationMode -eq 'Consumer') {
-    if (-not $ConsumerRoot) {
-        throw "Consumer workflow validation requires -ConsumerRoot to identify the consumer repository."
-    }
-    $workflowValidationRoot = (Resolve-Path -LiteralPath $ConsumerRoot).Path
+    $workflowValidationRoot = $resolvedConsumerRoot
 }
 & (Join-Path $PSScriptRoot 'validate-workflow-action-pins.ps1') `
     -RootDir $workflowValidationRoot `

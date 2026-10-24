@@ -25,8 +25,11 @@ Turn a delivery goal into a governed execution bundle.
    `approval_comment_id`; one alone fails, neither means ordinary dispatch.
    Never accept caller-supplied identity, permission, time, or approval status.
    Validate live evidence and scope per [output-contract.md](references/output-contract.md).
-3. Validate the target with `pwsh scripts/ship-it/validate-target-repository.ps1
-   -TargetRepo <owner/repo>`; cross-repository execution requires explicit
+3. Validate the target with
+   `.github/base-coat/scripts/ship-it/validate-target-repository.ps1`, falling
+   back to `scripts/ship-it/validate-target-repository.ps1` and failing closed
+   if neither exists ([repository-boundary.md](references/repository-boundary.md)).
+   Pass `-TargetRepo <owner/repo>`; cross-repository execution requires explicit
    authorization and `-AllowCrossRepository`.
 4. Require dispatch, build-guard, and release-gate workflows; if any is missing,
    stop and report. Validate source issue, approved scope/spec, authority, and

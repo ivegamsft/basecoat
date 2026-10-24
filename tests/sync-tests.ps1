@@ -374,9 +374,26 @@ try {
             $consumerInvalidOutput = $_.Exception.Message
             $consumerWorkflowRejected = $LASTEXITCODE -ne 0
         }
+        $relativeConsumerRejected = $false
+        Push-Location $consumer
+        try {
+            $relativeOutput = & (Join-Path $targetDir 'scripts/validate-basecoat.ps1') `
+                -RootDir $targetDir -WorkflowValidationMode Consumer -ConsumerRoot '.' 2>&1 | Out-String
+        }
+        catch {
+            $relativeOutput = $_.Exception.Message
+            $relativeConsumerRejected = $relativeOutput -match 'Workflow action pin validation failed'
+        }
+        finally {
+            Pop-Location
+        }
         Remove-Item (Join-Path $consumer '.github/workflows/sync-test-unpinned.yml') -Force
         if (-not $consumerWorkflowRejected) {
             throw 'Sync test failed: Consumer mode must validate the consumer repository workflows.'
+        }
+        $testCount++
+        if (-not $relativeConsumerRejected) {
+            throw "Sync test failed: relative -ConsumerRoot must resolve against the caller's location.`n$relativeOutput"
         }
     }
     finally {

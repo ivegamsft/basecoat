@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.1",
   "libraryVersion": "4.6.5",
-  "generatedAt": "2026-10-12T06:47:50.6633803Z",
+  "generatedAt": "2026-10-13T19:05:50.0042327Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -854,7 +854,7 @@
     {
       "path": "agents/basecoat-60-workflow-ship-it-control-loop.agent.md",
       "type": "agent",
-      "sha": "35179559d3197fc6c08d206815f60ee1f5f78861",
+      "sha": "babf09aefe596ce20922719465e77208f8765ea5",
       "version": null,
       "effectiveVersion": "4.6.5",
       "versionSource": "library"
@@ -1918,7 +1918,7 @@
     {
       "path": "scripts/validate-basecoat.ps1",
       "type": "script",
-      "sha": "dcb1d06a0987be38710a008cb30212ec1da6dd2d",
+      "sha": "95920fe1cf412b025f56836bf00b9918a9a0c1d1",
       "version": null,
       "effectiveVersion": "4.6.5",
       "versionSource": "library"
@@ -2966,7 +2966,7 @@
     {
       "path": "skills/ship-it/SKILL.md",
       "type": "skill",
-      "sha": "22dc0007b90f29c46b1170fe56b53af9e8853465",
+      "sha": "e46236fca9218df90fafdf60af2260a40d0fab39",
       "version": null,
       "effectiveVersion": "4.6.5",
       "versionSource": "library"

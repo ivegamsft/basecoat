@@ -1,10 +1,17 @@
 # Repository Boundary
 
 Ship-it is repository-scoped by default. Resolve the current repository from
-the worktree and `origin`, then run:
+the worktree and `origin`, then locate the validator. Probe the installed
+consumer path first, then the BaseCoat source path, and fail closed when
+neither exists:
 
 ```powershell
-pwsh scripts/ship-it/validate-target-repository.ps1 -TargetRepo <owner/repo>
+$validator = @(
+  '.github/base-coat/scripts/ship-it/validate-target-repository.ps1',
+  'scripts/ship-it/validate-target-repository.ps1'
+) | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
+if (-not $validator) { throw 'Target repository validator not found; stop before any mutation.' }
+pwsh $validator -TargetRepo <owner/repo>
 ```
 
 The target must match the current repository before discovery, worktree

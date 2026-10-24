@@ -37,4 +37,24 @@ foreach ($requiredText in @(
   }
 }
 
+$installedPrefix = ".github/base-coat/"
+$validatorReferencePattern = '(?:\.github/base-coat/)?scripts/ship-it/validate-target-repository\.ps1'
+foreach ($packagedDoc in @(
+  "agents\basecoat-60-workflow-ship-it-control-loop.agent.md",
+  "skills\ship-it\SKILL.md",
+  "skills\ship-it\references\repository-boundary.md"
+)) {
+  $docContent = Get-Content -Raw -Path (Join-Path $repoRoot $packagedDoc)
+  $references = [regex]::Matches($docContent, $validatorReferencePattern) | ForEach-Object { $_.Value }
+  if (-not ($references -contains "$($installedPrefix)scripts/ship-it/validate-target-repository.ps1")) {
+    throw "$packagedDoc must probe the installed validator path under $installedPrefix."
+  }
+  foreach ($reference in $references) {
+    $installedRelative = if ($reference.StartsWith($installedPrefix)) { $reference } else { "$installedPrefix$reference" }
+    if (-not (Test-Path -LiteralPath (Join-Path $repoRoot $installedRelative) -PathType Leaf)) {
+      throw "$packagedDoc references '$reference' but the installed layout lacks $installedRelative."
+    }
+  }
+}
+
 Write-Host "Ship-it target repository tests passed."
