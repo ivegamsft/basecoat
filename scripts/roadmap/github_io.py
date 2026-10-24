@@ -28,6 +28,22 @@ def gh(args, payload=None, missing_ok=False):
     return json.loads(response.stdout) if response.stdout.strip() else None
 
 
+def request(args, if_match=None):
+    """gh api with response headers: (etag, body). A failed If-Match is an explicit conflict."""
+    cmd = ["gh", "api", "-i", *args, *(["-H", f"If-Match: {if_match}"] if if_match else [])]
+    try:
+        out = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", timeout=60)
+    except subprocess.TimeoutExpired as error:
+        raise TimeoutError("gh-api-timeout") from error
+    if out.returncode != 0:
+        P.require(not re.search(r"HTTP(/[0-9.]+)? 412", out.stdout + out.stderr),
+                  "precondition-failed")
+        raise P.Conflict(f"api-request-failed exit={out.returncode}")
+    head, _, body = out.stdout.replace("\r\n", "\n").partition("\n\n")
+    tag = re.search(r"(?mi)^etag:[ \t]*(\S+)", head)
+    return tag and tag.group(1), json.loads(body) if body.strip() else None
+
+
 class GitHubBranch:
     """Ledger transport for one bot branch; never targets main and never force-updates."""
 
@@ -124,6 +140,35 @@ class GitHubBranch:
         out = gh(["graphql", "--input", "-"], payload)
         P.require(not (out or {}).get("errors"), "ledger-commit-failed")
         return out["data"]["createCommitOnBranch"]["commit"]["oid"]
+
+
+class GitHubMilestones:
+    """Milestone REST client for the gated adapter; item writes carry the read's ETag."""
+
+    def __init__(self, repo):
+        self.repo = P.repository(repo)
+
+    def issue(self, n):
+        etag, i = request([f"repos/{self.repo}/issues/{P.number(n)}"])
+        return {"etag": etag, "milestone": (i["milestone"] or {}).get("number"),
+                "labels": [s["name"] for s in i["labels"]]}
+
+    def milestone(self, n):
+        return gh([f"repos/{self.repo}/milestones/{P.number(n)}"])
+
+    def by_marker(self, marker):
+        pages = gh(["--paginate", "--slurp",
+                    f"repos/{self.repo}/milestones?state=all&per_page=100"])
+        return [m for page in pages for m in page if marker in (m.get("description") or "")]
+
+    def create(self, key, marker):
+        P.version(key)
+        gh(["--method", "POST", f"repos/{self.repo}/milestones", "-f", f"title={key}",
+            "-f", f"description={marker}"])
+
+    def assign(self, n, milestone, etag):
+        request(["--method", "PATCH", f"repos/{self.repo}/issues/{P.number(n)}", "-F",
+                 f"milestone={P.number(milestone)}"], if_match=etag)
 
 
 class GitHubAuthority:

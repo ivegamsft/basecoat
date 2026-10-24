@@ -130,3 +130,9 @@ Shadow first, then opt in only after the revised contract's race/replay and
 end-to-end requirements pass. Rollback disables new execution and retains
 receipts; never delete human milestones or clear assignments. Previously
 published releases keep their existing recovery procedure.
+
+## Implementation status
+
+Issue #3616 implements the [approved spec](../spec/roadmap-race-safe-persistence.spec.md); the
+milestone adapter gate stays closed until the owner provisions it and records positive probe
+evidence.

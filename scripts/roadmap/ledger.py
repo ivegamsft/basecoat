@@ -28,7 +28,8 @@ STEP_MOVES = {"pending": {"pending", "claimed"}, "claimed": {"claimed", "done", 
               "done": {"done"}, "conflict": {"conflict"}, "failed": {"failed"}}
 IDENTITY = ("schema", "repository", "run_id", "plan_digest", "evidence_digest", "scope", "bounds")
 RUN_KEYS = {*IDENTITY, "state", "approval", "stop_reason", "blockers", "steps"}
-STEP_STATE = dict.fromkeys(("status", "epoch", "evidence"))  # The only mutable step fields.
+STEP_STATE = dict.fromkeys(("status", "epoch", "observed", "evidence"))  # Only mutable fields.
+SAFE = re.compile(r"v[0-9]+\.[0-9]+\.[0-9]+|open|closed")
 
 
 class StaleHead(Exception):
@@ -91,6 +92,30 @@ def check_forward(old, new):
     P.require(len(old["steps"]) == len(new["steps"]) and all(
         {**a, **STEP_STATE} == {**b, **STEP_STATE} and b["status"] in STEP_MOVES[a["status"]]
         for a, b in zip(old["steps"], new["steps"])), "invalid-step-transition")
+
+
+def approved_steps(doc):
+    """The canonical storage steps a run was approved for, without ledger-only fields."""
+    return [{k: v for k, v in s.items() if k not in ("index", "source_key", *STEP_STATE)}
+            for s in doc["steps"]]
+
+
+def sanitized(value, depth=0):
+    """Observed pre-write state holds numbers, booleans, keys and states only; never free text."""
+    if isinstance(value, (dict, list)):
+        items = value.items() if isinstance(value, dict) else enumerate(value)
+        return depth < 4 and len(value) <= 100 and all(
+            (isinstance(value, list) or re.fullmatch(r"[a-z_]{1,32}", str(k))) and
+            sanitized(v, depth + 1) for k, v in items)
+    return value is None or type(value) in (int, bool) or (
+        type(value) is str and SAFE.fullmatch(value) is not None)
+
+
+def milestone_state(m):
+    """Sanitized milestone read: number, managed key, pin and lifecycle state; never text."""
+    keys = P.MARKER.findall(m["description"] or "")
+    return {"number": m["number"], "key": keys[0] if len(keys) == 1 else None,
+            "pinned": P.PIN in (m["description"] or ""), "state": m["state"]}
 
 
 def step_index(steps, index):
@@ -157,6 +182,7 @@ class Ledger:
         path, plan = run_path(self.repo, run), result["plan"]
         mark = "<!-- basecoat-roadmap:v1 key={} -->".format  # Steps may only narrow the plan.
         owner = {g["number"]: g["milestone"] for g in plan.get("guards", [])}
+        keys = {m["number"]: m["key"] for m in plan.get("milestones", [])}
         allowed = [{"operation": "create", "key": k, "marker": mark(k)} for k in plan["releases"]]
         allowed += [{"operation": "assign", "number": a["number"], "key": a["release"],
                      "expected_milestone": owner[a["number"]]}
@@ -172,8 +198,10 @@ class Ledger:
                            "evidence_digest": plan.get("evidence_digest"),
                            "scope": plan["scope"], "bounds": plan["bounds"], "state": "proposed",
                            "approval": None, "stop_reason": None, "blockers": [],
-                           "steps": [{**s, "index": i, **STEP_STATE, "status": "pending"}
-                                     for i, s in enumerate(steps)]}}
+                           "steps": [{**s, "index": i, **STEP_STATE, "status": "pending", **(
+                               {"source_key": keys.get(s["expected_milestone"])}
+                               if s["operation"] == "assign" else {})}
+                               for i, s in enumerate(steps)]}}
         return self.transact(f"roadmap: propose {run}", mutate)
 
     def held(self, head, run, holder, epoch, now, ttl):
@@ -225,7 +253,10 @@ class Ledger:
                             "lease_expires_at": now() + ttl}}
         return self.transact(f"roadmap: consume {run}", mutate)
 
-    def claim(self, run, index, holder, epoch, now=time.time, ttl=900):
+    def claim(self, run, index, holder, epoch, observed=None, now=time.time, ttl=900):
+        """Records the sanitized pre-write read set with the claim for manual reconciliation."""
+        P.require(observed is None or (isinstance(observed, dict) and sanitized(observed)),
+                  "invalid-evidence")
         path = run_path(self.repo, run)
 
         def mutate(head, history):
@@ -235,7 +266,7 @@ class Ledger:
             P.require(doc["state"] in ("approved", "claimed") and steps[index]["status"] ==
                       "pending" and all(s["status"] == "done" for s in steps[:index]),
                       "invalid-step-order")
-            steps[index].update(status="claimed", epoch=epoch)
+            steps[index].update(status="claimed", epoch=epoch, observed=observed)
             return {path: {**doc, "state": "claimed", "steps": steps}, LEASE: lease}
         return self.transact(f"roadmap: claim {run} {index}", mutate)
 

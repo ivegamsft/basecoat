@@ -335,6 +335,32 @@ class AuthorityTests(unittest.TestCase):
         with self.assertRaisesRegex(P.Conflict, "invalid-holder"):
             self.ledger.takeover("run-1", None, self.gh, now=self.now)
 
+    def test_assign_steps_record_source_key_and_claims_record_sanitized_reads(self):
+        res = result()
+        res["plan"]["milestones"] = [{"number": 5, "key": "v1.0.0", "state": "open",
+                                      "pinned": False}]
+        res["digest"] = P.digest(res["plan"])
+        res["steps"] = [{"operation": "assign", "number": 2, "key": "v1.1.0",
+                         "expected_milestone": 5}]
+        self.ledger.propose(res, "run-3")
+        doc = json.loads(self.branch.read(self.branch.head(), L.run_path("owner/repo", "run-3")))
+        self.assertEqual((doc["steps"][0]["source_key"], doc["steps"][0]["observed"],
+                          L.approved_steps(doc)), ("v1.0.0", None, res["steps"]))
+        self.consume()
+        target = {"number": 10, "state": "open", "description": f"free text {P.PIN}"}
+        observed = {"item": {"milestone": 5, "pinned": False}, "targets": [L.milestone_state({
+            **target, "description": "<!-- basecoat-roadmap:v1 key=v1.1.0 -->"}),
+            L.milestone_state(target)]}
+        self.assertEqual(observed["targets"][1], {"number": 10, "key": None, "pinned": True,
+                                                  "state": "open"})
+        for bad in ({"title": "free text"}, {"Body": 1}, [1], {"a": {"b": {"c": {"d": [1]}}}}):
+            with self.subTest(bad=bad), self.assertRaisesRegex(P.Conflict, "invalid-evidence"):
+                self.ledger.claim("run-1", 0, "h1", 1, observed=bad, now=self.now)
+        self.ledger.claim("run-1", 0, "h1", 1, observed=observed, now=self.now)
+        self.assertEqual(self.doc()[0]["steps"][0]["observed"], observed)
+        with self.assertRaisesRegex(P.Conflict, "invalid-step-transition"):
+            L.check_forward(doc, {**doc, "steps": [{**doc["steps"][0], "source_key": "v9.0.0"}]})
+
     def test_takeover_with_claimed_step_requires_reconciliation(self):
         self.consume()
         self.ledger.claim("run-1", 0, "h1", 1, now=self.now)

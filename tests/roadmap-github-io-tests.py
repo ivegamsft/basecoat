@@ -153,6 +153,26 @@ class TransportTests(unittest.TestCase):
         self.assertEqual([(c["oid"], c["app"], c["files"]["runs/a.json"]) for c in history],
                          [("c1", True, '{"approval": null}'), ("c2", False, None)])
 
+    def test_request_returns_etag_and_maps_failed_if_match_to_conflict(self):
+        ok = (0, 'HTTP/2.0 200 OK\r\nEtag: W/"abc"\r\n\r\n{"number": 1}')
+        self.branch({"issues/1": ok})
+        self.assertEqual(G.request(["repos/o/r/issues/1"]), ('W/"abc"', {"number": 1}))
+        self.branch({"issues/1": (0, "HTTP/2.0 204 No Content\r\n\r\n")})
+        self.assertEqual(G.request(["repos/o/r/issues/1"], if_match='W/"abc"'), (None, None))
+        self.assertIn('If-Match: W/"abc"', self.fake.calls[-1][0])
+        for out, code in (("HTTP/2.0 412 Precondition Failed\r\n\r\n{}", "precondition-failed"),
+                          ("HTTP/2.0 500 Error\r\n\r\n{}", "api-request-failed")):
+            self.branch({"issues/1": (1, out)})
+            with self.subTest(code=code), self.assertRaisesRegex(G.P.Conflict, code):
+                G.request(["repos/o/r/issues/1"], if_match='W/"abc"')
+        self.branch({"issues/1": (0, 'HTTP/2.0 200 OK\r\nETag: "e1"\r\n\r\n'
+                                     '{"milestone": {"number": 7}, "labels": [{"name": "x"}]}')})
+        milestones = G.GitHubMilestones("owner/repo")
+        self.assertEqual(milestones.issue(1), {"etag": '"e1"', "milestone": 7, "labels": ["x"]})
+        milestones.assign(1, 9, '"e1"')
+        self.assertEqual(self.fake.calls[-1][0][-4:], ["-F", "milestone=9", "-H",
+                                                       'If-Match: "e1"'])
+
     def test_authority_maps_comment_and_current_role(self):
         self.branch({"comments/7": {"id": 7, "user": {"type": "User", "login": "al", "id": 3},
                                     "html_url": "u", "body": "b"},
