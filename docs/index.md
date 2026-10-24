@@ -96,9 +96,9 @@ flowchart LR
 - [operations/hybrid-branching-policy-contract.md](operations/hybrid-branching-policy-contract.md) — Hybrid branch taxonomy, transition matrix, agent lane contract, and rollout scorecard guardrails
 - [operations/release-process.md](operations/release-process.md) — How releases are cut and published
 - [operations/release-metrics.md](operations/release-metrics.md) — Release metrics and KPIs
-- [operations/operational-runbook.md](operations/operational-runbook.md) — Runbook for common operations
-- [operations/disaster-recovery.md](operations/disaster-recovery.md) — DR procedures
-- [operations/cost-optimization.md](operations/cost-optimization.md) — Cost analysis and optimization
+- [operations/operational-runbook.md](operations/operational-runbook.md) — Legacy Portal on AWS only: runbook (implementation-specific)
+- [operations/disaster-recovery.md](operations/disaster-recovery.md) — Legacy Portal on AWS only: DR procedures (implementation-specific)
+- [operations/cost-optimization.md](operations/cost-optimization.md) — Legacy Portal on AWS only: cost estimates (implementation-specific)
 - [operations/enterprise-runners.md](operations/enterprise-runners.md) — Self-hosted runner setup
 - [operations/enterprise-security-hardening.md](operations/enterprise-security-hardening.md) — Security hardening guide
 - [operations/blocked-issues.md](operations/blocked-issues.md) — Blocked issues tracking

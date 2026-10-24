@@ -1,8 +1,15 @@
-# Operational Runbook
+# Legacy Portal on AWS: Operational Runbook
+
+> **Scope:** Implementation-specific. Applies only to the legacy Basecoat Portal
+> deployed on AWS by the Terraform in `infra/aws/`. Use it only when operating that
+> deployment.
+> It is not generic BaseCoat guidance and does not apply to the Azure Portal
+> (`portal/app/iac/`) or to repositories that consume BaseCoat. See #3930.
 
 ## Common Tasks & Procedures
 
 ### Table of Contents
+
 - [Scaling Operations](#scaling-operations)
 - [Database Operations](#database-operations)
 - [Application Deployment](#application-deployment)
@@ -55,6 +62,7 @@ aws cloudwatch get-metric-statistics \
 ```
 
 **Success Criteria**:
+
 - All new instances show "InService" in ALB
 - Response time p99 < 500ms
 - Error rate < 0.1%

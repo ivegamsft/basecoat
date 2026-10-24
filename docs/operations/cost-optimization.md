@@ -1,10 +1,17 @@
-# Cost Estimation & Optimization
+# Legacy Portal on AWS: Cost Estimation and Optimization
+
+> **Scope:** Implementation-specific. Applies only to the legacy Basecoat Portal
+> deployed on AWS by the Terraform in `infra/aws/`. Figures are AWS list-price estimates
+> for that deployment.
+> It is not generic BaseCoat guidance and does not apply to the Azure Portal
+> (`portal/app/iac/`) or to repositories that consume BaseCoat. See #3930.
 
 ## Detailed Cost Breakdown by Component
 
 ### 1. Database Layer
 
 **Production (db.r6i.xlarge + read replica)**:
+
 - RDS Multi-AZ Primary: $1,800/month
 - RDS Read Replica (db.r6i.large): $900/month
 - Storage (200GB @ $0.23/GB): $46/month
@@ -12,6 +19,7 @@
 - **Total Database**: $2,846/month
 
 **Staging (db.t3.small)**:
+
 - RDS Primary: $150/month
 - Read Replica: $100/month
 - Storage: $15/month
@@ -19,6 +27,7 @@
 - **Total**: $285/month
 
 **Development (db.t3.micro)**:
+
 - RDS Primary: $30/month
 - Storage: $5/month
 - Backup: $5/month
@@ -27,6 +36,7 @@
 ### 2. Compute Layer
 
 **Production**:
+
 - On-Demand (3 @ t3.large): $900/month
 - Spot Instances (2 @ t3.large, 70% discount): $270/month
 - Data Transfer (Out): $500/month
@@ -34,6 +44,7 @@
 - **Total**: $1,970/month
 
 **Staging**:
+
 - On-Demand (1 @ t3.medium): $200/month
 - Spot (1 @ t3.medium): $30/month
 - Data Transfer: $50/month
@@ -41,6 +52,7 @@
 - **Total**: $580/month
 
 **Development**:
+
 - On-Demand (1 @ t3.small): $20/month
 - Data Transfer: $10/month
 - ALB: $300/month
@@ -49,50 +61,60 @@
 ### 3. Caching Layer
 
 **Production (cache.r6g.xlarge, 3 nodes)**:
+
 - Node cost: $0.658/hour × 3 × 730 = $1,443/month
 - Reserved Instance 1-year: $960/month (-33%)
 - **Effective**: $960/month
 
 **Staging (cache.t3.small, 2 nodes)**:
+
 - Cost: $0.054/hour × 2 × 730 = $79/month
 
 **Development (cache.t3.micro, 1 node)**:
+
 - Cost: $0.015/hour × 1 × 730 = $11/month
 
 ### 4. Storage Layer
 
 **Production**:
+
 - S3 Storage: $300/month
 - Cross-region replication: $200/month
 - **Total**: $500/month
 
 **Staging**:
+
 - S3 Storage: $50/month
 
 **Development**:
+
 - S3 Storage: $5/month
 
 ### 5. Networking & Security
 
 **Production**:
+
 - NAT Gateway: $45/month × 2 = $90/month
 - VPC Flow Logs: $20/month
 - WAF: $150/month
 - **Total**: $260/month
 
 **Staging**:
+
 - NAT Gateway: $45/month
 - VPC Flow Logs: $10/month
 - WAF: $150/month
 - **Total**: $205/month
 
 **Development**:
+
 - NAT Gateway: $45/month
 - **Total**: $45/month
 
 ### 6. Monitoring & Logging
 
 **Production**:
+
 - CloudWatch (logs, metrics, dashboards): $50/month
 - Custom metrics: $5/month
 - **Total**: $55/month
@@ -124,6 +146,7 @@
 ### 2. Spot Instances (70% discount)
 
 Current configuration uses:
+
 - 70% Spot instances for non-critical workloads
 - 30% On-Demand for baseline reliability
 - 2-3 Spot pools to tolerate interruptions
@@ -148,6 +171,7 @@ Current configuration uses:
 ### 4. Right-Sizing Recommendations
 
 **Current Production**: db.r6i.xlarge (32 vCPU, 256GB)
+
 - If CPU utilization < 20% and memory < 30%, downgrade to db.r6i.large (8 vCPU, 64GB)
 - Monthly savings: $900/month
 
@@ -156,6 +180,7 @@ Current configuration uses:
 ### 5. Data Transfer Optimization
 
 **Current**: ~$500/month (mostly outbound)
+
 - Use CloudFront CDN for static content (-$200/month)
 - Implement VPC endpoints for S3 access (-$50/month)
 - **Potential Savings**: $250/month
@@ -178,6 +203,7 @@ aws budgets create-budget \
 ### Cost Anomaly Detection
 
 Enable AWS Cost Anomaly Detection:
+
 - Monitors daily costs
 - Alerts on 10%+ variance
 - Machine learning-based baseline

@@ -1,4 +1,10 @@
-# Disaster Recovery Procedures
+# Legacy Portal on AWS: Disaster Recovery Procedures
+
+> **Scope:** Implementation-specific. Applies only to the legacy Basecoat Portal
+> deployed on AWS by the Terraform in `infra/aws/`. Use it only when recovering that
+> deployment.
+> It is not generic BaseCoat guidance and does not apply to the Azure Portal
+> (`portal/app/iac/`) or to repositories that consume BaseCoat. See #3930.
 
 ## Overview
 
@@ -7,11 +13,13 @@ This document outlines the procedures for recovering Basecoat Portal infrastruct
 ## Failover Architecture
 
 ### Primary Region: us-east-1
+
 - Production database (master)
 - Primary application servers
 - Primary cache cluster
 
 ### Secondary Region: us-west-2
+
 - Read-only database replica
 - Warm standby application servers
 - Secondary cache cluster (synchronized)
@@ -19,6 +27,7 @@ This document outlines the procedures for recovering Basecoat Portal infrastruct
 ### DNS & Routing
 
 Route53 health checks monitor primary region:
+
 - Primary endpoint: `basecoat-portal.prod.example.com` (us-east-1)
 - Secondary endpoint: `basecoat-portal-dr.prod.example.com` (us-west-2)
 
@@ -39,6 +48,7 @@ Route53 health checks monitor primary region:
 ### Immediate Actions (0-5 min)
 
 1. **Assess damage**:
+
    ```bash
    # Check RDS status
    aws rds describe-db-instances \
@@ -61,6 +71,7 @@ Route53 health checks monitor primary region:
 ### Mitigation (5-10 min)
 
 **If primary is recoverable** (temporary issue):
+
 ```bash
 # Restart database
 aws rds reboot-db-instance \
@@ -70,6 +81,7 @@ aws rds reboot-db-instance \
 ```
 
 **If primary is unrecoverable** (hardware failure):
+
 ```bash
 # Promote read replica
 aws rds promote-read-replica \
@@ -80,6 +92,7 @@ aws rds promote-read-replica \
 ### Recovery (10-30 min)
 
 1. **Update connection strings**:
+
    ```bash
    # Application connects to new primary
    # Via AWS Secrets Manager (auto-rotated)
@@ -89,6 +102,7 @@ aws rds promote-read-replica \
    ```
 
 2. **Verify data integrity**:
+
    ```bash
    # Check replication lag
    aws rds describe-db-instances \
@@ -100,6 +114,7 @@ aws rds promote-read-replica \
    ```
 
 3. **Create new read replica** (if needed):
+
    ```bash
    # Restore read replica in secondary region
    aws rds create-db-instance-read-replica \
@@ -109,6 +124,7 @@ aws rds promote-read-replica \
    ```
 
 4. **Update DNS** (if necessary):
+
    ```bash
    # If application uses Route53 alias
    aws route53 change-resource-record-sets \
@@ -151,6 +167,7 @@ time psql -h new-endpoint -U postgres -d basecoat_db \
    - New instance launched
 
 2. **Monitor replacement**:
+
    ```bash
    aws autoscaling describe-auto-scaling-groups \
      --auto-scaling-group-names basecoat-portal-asg \
@@ -160,6 +177,7 @@ time psql -h new-endpoint -U postgres -d basecoat_db \
 ### Recovery (2-5 min)
 
 1. **Verify new instance health**:
+
    ```bash
    # CloudWatch: TargetHealthDescription shows "healthy"
    aws elbv2 describe-target-health \
@@ -168,6 +186,7 @@ time psql -h new-endpoint -U postgres -d basecoat_db \
    ```
 
 2. **Investigate root cause**:
+
    ```bash
    # Download system logs from failed instance
    aws ec2 get-console-output --instance-id i-xxxxx
@@ -208,6 +227,7 @@ aws autoscaling set-desired-capacity \
 ### Immediate Actions (0-3 min)
 
 1. **Check cache replication group**:
+
    ```bash
    aws elasticache describe-replication-groups \
      --replication-group-id basecoat-portal-cache \
@@ -215,6 +235,7 @@ aws autoscaling set-desired-capacity \
    ```
 
 2. **If single node failure**:
+
    ```bash
    # Automatic failover (enabled)
    # Monitor: ReplicationGroupDescription shows new primary
@@ -223,6 +244,7 @@ aws autoscaling set-desired-capacity \
 ### Recovery (3-10 min)
 
 1. **Verify failover**:
+
    ```bash
    aws elasticache describe-replication-groups \
      --replication-group-id basecoat-portal-cache | \
@@ -230,6 +252,7 @@ aws autoscaling set-desired-capacity \
    ```
 
 2. **Restore from snapshot** (if data loss):
+
    ```bash
    # Create snapshot
    aws elasticache create-snapshot \
@@ -243,6 +266,7 @@ aws autoscaling set-desired-capacity \
    ```
 
 3. **Warm up cache**:
+
    ```bash
    # Pre-load frequently accessed data
    # Application-level logic or manual script
@@ -255,7 +279,7 @@ aws autoscaling set-desired-capacity \
 
 ### Detection
 
-```
+```text
 # Multiple services unavailable:
 # - Database connection timeout
 # - ALB returning 503 errors
@@ -265,6 +289,7 @@ aws autoscaling set-desired-capacity \
 ### Phase 1: Assessment (0-15 min)
 
 1. **Confirm region outage**:
+
    ```bash
    # Check AWS Health dashboard
    # https://phd.aws.amazon.com
@@ -274,6 +299,7 @@ aws autoscaling set-desired-capacity \
    ```
 
 2. **Verify secondary region is operational**:
+
    ```bash
    aws ec2 describe-instances --region us-west-2
    aws rds describe-db-instances --region us-west-2
@@ -383,6 +409,7 @@ aws cloudwatch get-metric-statistics \
    - Cache hit rate > 80%
 
 2. **Verify data consistency**:
+
    ```bash
    # Check recent data
    psql -h new-primary -U postgres -d basecoat_db \
@@ -399,19 +426,24 @@ aws cloudwatch get-metric-statistics \
 ### Phase 4: Communication
 
 **T+0min**: Incident declared
+
 - Notify status page: "Investigating"
 
 **T+30min**: Failover initiated
+
 - Update status page: "Performing maintenance"
 
 **T+120min**: Failover complete
+
 - Update status page: "Operational (secondary region)"
 
 **T+240min**: Primary region recovered
+
 - Begin data sync back to primary
 - Update status page: "Recovering"
 
 **T+360min**: Return to primary (or keep on secondary)
+
 - Flip DNS back to primary (if recovered)
 - Update status page: "Recovered"
 
@@ -428,6 +460,7 @@ aws cloudwatch get-metric-statistics \
 ### Recovery Steps
 
 1. **Immediate**: Isolate affected database
+
    ```bash
    # Stop application access
    # Create snapshot for forensics
@@ -437,6 +470,7 @@ aws cloudwatch get-metric-statistics \
    ```
 
 2. **Restore from point-in-time backup**:
+
    ```bash
    # RDS automatic backups go back 35 days
    # Find last good backup time
@@ -453,6 +487,7 @@ aws cloudwatch get-metric-statistics \
    ```
 
 3. **Verify restored data**:
+
    ```bash
    # Connect to restored database
    psql -h basecoat-portal-db-restored.cxxx.us-east-1.rds.amazonaws.com \
@@ -464,6 +499,7 @@ aws cloudwatch get-metric-statistics \
    ```
 
 4. **Failover to restored database**:
+
    ```bash
    # Update application to connect to restored DB
    # Update Secrets Manager endpoint
@@ -486,6 +522,7 @@ aws cloudwatch get-metric-statistics \
 **Schedule**: First Monday of month, 2 AM UTC
 
 **Procedure**:
+
 1. Promote secondary database replica
 2. Launch secondary region ASG
 3. Update DNS to secondary
@@ -493,12 +530,14 @@ aws cloudwatch get-metric-statistics \
 5. Revert to primary
 
 **Success Criteria**:
+
 - Failover completes within 60 minutes
 - All smoke tests pass
 - Error rate < 0.5% during transition
 - RTO < 4 hours verified
 
 **Post-drill**:
+
 - Document any issues
 - Update runbook
 - Share findings with team
