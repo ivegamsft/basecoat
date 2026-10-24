@@ -272,6 +272,10 @@ closed; enabling it requires positive evidence and a separate owner decision.
 
 ## Rollout, Migration, and Rollback Plan
 
+Operator setting locations, App identity, bot-branch prerequisites, sandbox
+configuration and write gates are documented in the
+[delivery automation settings guide](../operations/delivery-settings.md).
+
 Ship units 1-3 in dry-run, then enable ledger and artifact writes on bot
 branches only. Milestone writes remain disabled. No migration: existing
 milestones are never adopted. Rollback disables the flag and stops new runs;

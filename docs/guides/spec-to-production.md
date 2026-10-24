@@ -55,6 +55,9 @@ Handoff wiring (#3830): `approved-spec-handoff.yml` routes each comment mentioni
 
 ## Labels, directives and tags
 
+For variable locations, canary field values, activation and rollback, see the
+[delivery automation settings guide](../operations/delivery-settings.md).
+
 | Signal | Meaning and authority |
 | --- | --- |
 | `bug`, `enhancement`, `documentation`, `chore`, `security`, `question` | Canonical type; triage and approval metadata |

@@ -159,6 +159,9 @@ the secret, then revoke the old token.
 
 ### `GH_AW_GITHUB_TOKEN`
 
+For its event-trigger implications and the separate non-secret handoff/roadmap
+configuration, see [delivery automation settings](delivery-settings.md).
+
 **Used by:** Agentic workflows only when repository operations require a
 fine-grained PAT beyond the built-in `GITHUB_TOKEN`.
 
