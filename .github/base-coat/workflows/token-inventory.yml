@@ -15,6 +15,7 @@ on:
     types: [closed]
 
 permissions:
+  actions: write
   contents: write
   issues: write
   pull-requests: write
@@ -76,6 +77,8 @@ jobs:
         if: steps.changes.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GH_AW_GITHUB_TOKEN || github.token }}
+          AUTOMATION_TOKEN_CONFIGURED: ${{ secrets.GH_AW_GITHUB_TOKEN != '' }}
+          DISPATCH_GH_TOKEN: ${{ github.token }}
           BRANCH: automation/token-inventory
           SOURCE_ISSUE: "3528"
         run: |
@@ -177,6 +180,10 @@ jobs:
             echo "Creating a new PR from ${BRANCH} to main"
             run_pr_command "create" gh pr create --base main --head "${BRANCH}" --title "${PR_TITLE}" --body-file "${PR_BODY_FILE}" --label skip-release-label-gate
           fi
+
+          # A policy-blocked create leaves no PR; the helper then skips the dispatch.
+          PR_NUMBER="$(gh pr list --base main --head "${BRANCH}" --state open --json number --jq '.[0].number')"
+          bash .github/base-coat/scripts/dispatch-pr-triage.sh "${PR_NUMBER}"
 
   cleanup-automation-branch:
     if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.head_ref == 'automation/token-inventory'

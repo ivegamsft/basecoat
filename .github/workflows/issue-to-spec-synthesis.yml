@@ -14,6 +14,7 @@ on:
     types: [completed]
 
 permissions:
+  actions: write
   contents: write
   issues: write
   pull-requests: write
@@ -734,6 +735,33 @@ jobs:
               });
             } catch (err) {
               core.warning(`Could not add labels ${prLabels.join(', ')} to PR #${pr.number}: ${err.message}`);
+            }
+
+            // GITHUB_TOKEN-authored PRs never start pull_request_target workflows,
+            // so dispatch the size labeler explicitly (#3859). The labeler then
+            // re-dispatches the merge executor for eligibility re-evaluation.
+            if (!process.env.WRITE_TOKEN) {
+              core.warning(`GH_AW_GITHUB_TOKEN is not configured, so PR #${pr.number} was written with github.token. pull_request_target and pull_request workflows (size labeler, reviewer assignment, CI) will not trigger on their own; dispatching the size labeler explicitly.`);
+            }
+            // A dispatch failure must not skip the issue comment and intake cleanup below.
+            try {
+              const triageWorkflows = await github.paginate(github.rest.actions.listRepoWorkflows, { owner, repo, per_page: 100 });
+              const labelerWorkflow = triageWorkflows.find(workflow => workflow.state === 'active' &&
+                ['.github/workflows/pr-size-labeler.yml', '.github/workflows/basecoat-pr-size-labeler.yml'].includes(workflow.path));
+              if (labelerWorkflow) {
+                await github.rest.actions.createWorkflowDispatch({
+                  owner,
+                  repo,
+                  workflow_id: labelerWorkflow.id,
+                  ref: context.payload.repository?.default_branch || 'main',
+                  inputs: { pr_number: String(pr.number) },
+                });
+                core.info(`Dispatched ${labelerWorkflow.path} for PR #${pr.number}.`);
+              } else {
+                core.warning(`No PR size labeler workflow is installed; PR #${pr.number} was not dispatched for triage.`);
+              }
+            } catch (err) {
+              core.setFailed(`Could not dispatch the PR size labeler for PR #${pr.number}: ${err.message}`);
             }
 
             // Comment on original issue

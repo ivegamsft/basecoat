@@ -8,6 +8,7 @@ on:
     types: [closed]
 
 permissions:
+  actions: write
   contents: write
   issues: write
   pull-requests: write
@@ -69,6 +70,8 @@ jobs:
         if: steps.drift.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GH_AW_GITHUB_TOKEN || github.token }}
+          AUTOMATION_TOKEN_CONFIGURED: ${{ secrets.GH_AW_GITHUB_TOKEN != '' }}
+          DISPATCH_GH_TOKEN: ${{ github.token }}
           BRANCH: ${{ steps.drift.outputs.branch }}
           SOURCE_ISSUE: "3531"
         shell: bash
@@ -138,9 +141,12 @@ jobs:
           if [[ -n "$existing" ]]; then
             echo "Updating existing model capability PR #$existing"
             gh pr edit "$existing" --title "$title" --body-file "$body_file" --add-label skip-release-label-gate
+            pr_number="$existing"
           else
-            gh pr create --base main --head "$BRANCH" --title "$title" --body-file "$body_file" --label skip-release-label-gate
+            pr_url="$(gh pr create --base main --head "$BRANCH" --title "$title" --body-file "$body_file" --label skip-release-label-gate)"
+            pr_number="${pr_url##*/}"
           fi
+          bash .github/base-coat/scripts/dispatch-pr-triage.sh "$pr_number"
 
   cleanup-automation-branch:
     if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.head_ref == 'automation/model-capability-refresh'

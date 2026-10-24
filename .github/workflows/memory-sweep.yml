@@ -28,6 +28,7 @@ permissions:
 #                           Contents: Read and Write  (clone + push branch)
 #                           Pull requests: Read and Write  (gh pr create)
 #                           Metadata: Read (implicit)
+# pr-triage-dispatch: exempt (PR targets {org}/basecoat-memory with MEMORY_REPO_TOKEN, a PAT, so its PR events trigger workflows; #3859)
 
 jobs:
   sweep:
