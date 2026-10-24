@@ -130,6 +130,24 @@ function Invoke-CleanupToConsumer {
 # ============================================================================
 Write-Host "`nTest 1: Sync populates .github/ Copilot-discoverable directories" -ForegroundColor Yellow
 
+$syncAst = [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $repoRoot 'sync.ps1'), [ref]$null, [ref]$null)
+$supportedAgentFrontmatterKeys = @('name', 'description', 'tools', 'mcp-servers')
+. ([scriptblock]::Create($syncAst.Find({ param($node) $node -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'Convert-AgentToCliCompatibleContent' }, $true).Extent.Text))
+$allowedToolsCases = @(
+    @{ Label = 'indented flow list'; Frontmatter = "allowed-tools:`n  [bash, git]"; ExpectTools = $true },
+    @{ Label = 'block list'; Frontmatter = "allowed-tools:`n  - bash"; ExpectTools = $true },
+    @{ Label = 'inline empty list'; Frontmatter = 'allowed-tools: []'; ExpectTools = $false },
+    @{ Label = 'indented empty list'; Frontmatter = "allowed-tools:`n  []"; ExpectTools = $false }
+)
+foreach ($case in $allowedToolsCases) {
+    $testCount++
+    $converted = Convert-AgentToCliCompatibleContent -Content "---`nname: probe`ndescription: probe`n$($case.Frontmatter)`n---`nbody`n"
+    $hasTools = $converted -match '(?m)^tools:'
+    if ($hasTools -ne $case.ExpectTools) {
+        throw "Sync test failed: allowed-tools $($case.Label) expected tools present=$($case.ExpectTools), got $hasTools"
+    }
+}
+
 $consumer = $null
 try {
     $consumer = New-ConsumerRepo -WithGitHubDir
@@ -143,6 +161,31 @@ try {
     $agentCount = (Get-ChildItem (Join-Path $consumer '.github/agents') -Filter '*.agent.md' -File).Count
     if ($agentCount -eq 0) {
         throw 'Sync test failed: .github/agents/ contains no agent files'
+    }
+
+    foreach ($implementationAgentName in @('frontend-dev', 'backend-dev')) {
+        $testCount++
+        $implementationAgent = Get-ChildItem (Join-Path $consumer '.github/agents') -Filter '*.agent.md' -File |
+            Where-Object {
+                (Get-Content -LiteralPath $_.FullName -Raw) -match "(?m)^name:\s*$([regex]::Escape($implementationAgentName))\s*$"
+            } |
+            Select-Object -First 1
+        if (-not $implementationAgent) {
+            throw "Sync test failed: installed implementation agent '$implementationAgentName' was not found"
+        }
+
+        $implementationContent = Get-Content -LiteralPath $implementationAgent.FullName -Raw
+        $implementationFrontmatter = [regex]::Match($implementationContent, '(?s)^---\r?\n(.*?)\r?\n---').Groups[1].Value
+        if ($implementationFrontmatter -match '(?m)^tools:\s*\[\s*\]\s*(?:#.*)?$') {
+            throw "Sync test failed: installed implementation agent '$implementationAgentName' has tools: []"
+        }
+    }
+
+    $nonEmptyToolsAgent = Join-Path $consumer '.github/agents/basecoat-60-workflow-local-dev-data-pack-orchestrator.agent.md'
+    $testCount++
+    $nonEmptyToolsContent = Get-Content -LiteralPath $nonEmptyToolsAgent -Raw
+    if ($nonEmptyToolsContent -notmatch '(?m)^tools:\s*\[bash,\s*git\]\s*$') {
+        throw 'Sync test failed: non-empty allowed-tools were not remapped to tools'
     }
 
     $testCount++

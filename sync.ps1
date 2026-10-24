@@ -313,20 +313,34 @@ function Convert-AgentToCliCompatibleContent {
     }
 
     if (-not $toolsChunk -and $allowedToolsChunk) {
-        $remapped = [pscustomobject]@{
-            Key   = 'tools'
-            Value = $allowedToolsChunk.Value
-            Lines = [System.Collections.Generic.List[string]]::new()
+        $allowedToolsValue = $allowedToolsChunk.Value.Trim()
+        $hasAllowedTools = $allowedToolsValue -notmatch '^\s*(?:\[\s*\]|null|~)?\s*(?:#.*)?$'
+        if (-not $hasAllowedTools) {
+            # Continuation lines may hold block items (- bash) or an indented flow list ([bash, git]).
+            $hasAllowedTools = @(
+                $allowedToolsChunk.Lines |
+                    Select-Object -Skip 1 |
+                    ForEach-Object { $_.Trim() } |
+                    Where-Object { $_ -and $_ -notmatch '^#' -and $_ -notmatch '^(?:\[\s*\]|null|~)\s*(?:#.*)?$' }
+            ).Count -gt 0
         }
-        foreach ($line in $allowedToolsChunk.Lines) {
-            if ($line -match '^allowed-tools:') {
-                $remapped.Lines.Add(($line -replace '^allowed-tools:', 'tools:'))
+
+        if ($hasAllowedTools) {
+            $remapped = [pscustomobject]@{
+                Key   = 'tools'
+                Value = $allowedToolsChunk.Value
+                Lines = [System.Collections.Generic.List[string]]::new()
             }
-            else {
-                $remapped.Lines.Add($line)
+            foreach ($line in $allowedToolsChunk.Lines) {
+                if ($line -match '^allowed-tools:') {
+                    $remapped.Lines.Add(($line -replace '^allowed-tools:', 'tools:'))
+                }
+                else {
+                    $remapped.Lines.Add($line)
+                }
             }
+            $selected.Add($remapped)
         }
-        $selected.Add($remapped)
     }
 
     $ordered = @()
