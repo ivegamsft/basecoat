@@ -39,7 +39,9 @@
     Do not offer to open a pull request after a successful install/refresh.
 
 .PARAMETER DryRun
-    Show what would be done without copying any files.
+    Run sync in a temporary clone of the consumer repo (with the current
+    overlay working tree copied in) and list the files it would add, update
+    or remove. The consumer repo is not modified.
 
 .EXAMPLE
     # Interactive fresh install
@@ -100,6 +102,24 @@ function Get-OverlayFileSnapshot([string]$Root) {
         }
     }
     return $snapshot
+}
+
+# Dry run (#3818): clone the consumer and copy its current overlay working tree in, so sync runs on a faithful copy.
+function New-OverlayPreview([string]$PreviewRoot) {
+    $savedErrorAction = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+    try {
+        $cloneOutput = git clone --quiet -- $repoRoot $PreviewRoot 2>&1
+        if ($LASTEXITCODE -ne 0) { throw "git clone of the consumer repo failed: $cloneOutput" }
+    } finally { $ErrorActionPreference = $savedErrorAction }
+    foreach ($rel in @('.github', '.agents', $TargetDir)) {
+        $dest = Join-Path $PreviewRoot $rel
+        if (Test-Path -LiteralPath $dest) { Remove-Item -LiteralPath $dest -Recurse -Force }
+        $src = Join-Path $repoRoot $rel
+        if (Test-Path -LiteralPath $src) {
+            New-Item -ItemType Directory -Force -Path (Split-Path -Parent $dest) | Out-Null
+            Copy-Item -LiteralPath $src -Destination $dest -Recurse -Force
+        }
+    }
 }
 
 function Confirm-Step([string]$prompt) {
@@ -213,7 +233,7 @@ $tempRoot   = Join-Path ([System.IO.Path]::GetTempPath()) "basecoat-$([System.Gu
 $sourcePath = Join-Path $tempRoot 'source'
 
 try {
-    # Dry runs also clone (into the temp dir only) so the preview can list the items it would install.
+    # Dry runs also clone (into the temp dir only) so the preview can run sync.
     New-Item -ItemType Directory -Path $tempRoot | Out-Null
     Write-Info "Cloning $BasecoatRepoUrl ($Ref)..."
     $cloneResult = git clone --quiet --depth 1 --branch $Ref $BasecoatRepoUrl $sourcePath 2>&1
@@ -237,14 +257,22 @@ try {
     Write-Header 'Phase 4 — Installing Overlay'
     $githubDir = Join-Path $repoRoot '.github'
 
-    if (-not $DryRun) {
+    # Dry runs (#3818) run the same sync in a temporary clone of the consumer, so the preview lists the files a real run would change.
+    $installRoot = $repoRoot
+    if ($DryRun) {
+        $installRoot = Join-Path $tempRoot 'preview'
+        Write-Info 'Previewing sync in a temporary clone of the consumer repo...'
+        New-OverlayPreview $installRoot
+    }
+    . {
         # Use the same ownership-aware install and stale-file preflight as sync.
         $savedSource = $env:BASECOAT_TEST_SOURCE_PATH
         $savedRepo = $env:BASECOAT_REPO
         $savedRef = $env:BASECOAT_REF
         $savedTarget = $env:BASECOAT_TARGET_DIR
-        $beforeSnapshot = Get-OverlayFileSnapshot $repoRoot
+        $beforeSnapshot = Get-OverlayFileSnapshot $installRoot
         try {
+            Set-Location -LiteralPath $installRoot
             $env:BASECOAT_TEST_SOURCE_PATH = $sourcePath
             $env:BASECOAT_REPO = $BasecoatRepoUrl
             $env:BASECOAT_REF = $Ref
@@ -252,6 +280,7 @@ try {
             & (Join-Path $sourcePath 'sync.ps1')
         }
         finally {
+            Set-Location -LiteralPath $repoRoot
             $env:BASECOAT_TEST_SOURCE_PATH = $savedSource
             $env:BASECOAT_REPO = $savedRepo
             $env:BASECOAT_REF = $savedRef
@@ -259,7 +288,7 @@ try {
         }
 
         # Count the committable files sync actually wrote or removed (#3812).
-        $afterSnapshot = Get-OverlayFileSnapshot $repoRoot
+        $afterSnapshot = Get-OverlayFileSnapshot $installRoot
         $changes = New-Object System.Collections.Generic.List[object]
         foreach ($path in @($afterSnapshot.Keys | Sort-Object)) {
             if (-not $beforeSnapshot.ContainsKey($path)) {
@@ -280,7 +309,7 @@ try {
             $savedErrorAction = $ErrorActionPreference; $ErrorActionPreference = 'Continue'; $savedEncoding = [Console]::OutputEncoding
             try {
                 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
-                $status = (git --literal-pathspecs status --porcelain=v1 -z --no-renames --untracked-files=all -- '.github' '.agents' $TargetDir 2>$null) -join "`n"
+                $status = (git -C $installRoot --literal-pathspecs status --porcelain=v1 -z --no-renames --untracked-files=all -- '.github' '.agents' $TargetDir 2>$null) -join "`n"
                 if ($LASTEXITCODE -ne 0) { throw "git status failed (exit $LASTEXITCODE) after sync; cannot determine overlay changes." }
                 foreach ($entry in ($status -split "`0")) { if ($entry.Length -gt 3) { [void]$gitChanged.Add($entry.Substring(3)) } }
             } finally { [Console]::OutputEncoding = $savedEncoding; $ErrorActionPreference = $savedErrorAction }
@@ -289,234 +318,8 @@ try {
             if (-not $gitChanged.Contains($change.Path)) { continue }
             $script:changedPaths.Add($change.Path)
             switch ($change.Kind) { 'added' { $script:addedCount++ } 'updated' { $script:updatedCount++ } 'removed' { $script:removedCount++ } }
+            if ($DryRun) { Write-Info "[DRY RUN] Would $(@{ added = 'add'; updated = 'update'; removed = 'remove' }[$change.Kind]) $($change.Path)" }
         }
-    }
-    if ($DryRun) {
-    # Helper: copy a single source item (file or dir) to dest, tracking add vs update
-    function Copy-OverlayItem {
-        param(
-            [string]$Src,
-            [string]$Dest,
-            [string]$Label
-        )
-        if (-not (Test-Path $Src)) {
-            Write-Warn "Source not found, skipping: $Label"
-            return
-        }
-        $existed = Test-Path $Dest
-        if ($DryRun) {
-            $action = if ($existed) { 'update' } else { 'add' }
-            Write-Info "[DRY RUN] Would $action $Label"
-            if ($existed) { $script:updatedCount++ } else { $script:addedCount++ }
-            return
-        }
-        if ($existed) {
-            Remove-Item -Path $Dest -Recurse -Force
-        }
-        Copy-Item -Path $Src -Destination $Dest -Recurse -Force
-        if ($existed) {
-            Write-Ok "Updated: $Label"
-            $script:updatedCount++
-        } else {
-            Write-Ok "Added:   $Label"
-            $script:addedCount++
-        }
-    }
-
-    $supportedAgentFrontmatterKeys = @('name', 'description', 'tools', 'mcp-servers')
-
-    function Convert-AgentToCliCompatibleContent {
-        param(
-            [string]$Content
-        )
-
-        if ($Content -notmatch '(?s)^---\s*\r?\n(.*?)\r?\n---\s*\r?\n?(.*)$') {
-            return $Content
-        }
-
-        $frontmatter = $Matches[1]
-        $body = $Matches[2]
-        $frontLines = $frontmatter -split "`r?`n"
-        $chunks = [System.Collections.Generic.List[object]]::new()
-        $currentChunk = $null
-
-        foreach ($line in $frontLines) {
-            if ($line -match '^([A-Za-z0-9_-]+):\s*(.*)$') {
-                if ($null -ne $currentChunk) {
-                    $chunks.Add($currentChunk)
-                }
-                $currentChunk = [pscustomobject]@{
-                    Key   = $Matches[1]
-                    Value = $Matches[2]
-                    Lines = [System.Collections.Generic.List[string]]::new()
-                }
-                $currentChunk.Lines.Add($line)
-            }
-            elseif ($null -ne $currentChunk) {
-                $currentChunk.Lines.Add($line)
-            }
-        }
-        if ($null -ne $currentChunk) {
-            $chunks.Add($currentChunk)
-        }
-
-        $selected = [System.Collections.Generic.List[object]]::new()
-        $toolsChunk = $null
-        $allowedToolsChunk = $null
-
-        foreach ($chunk in $chunks) {
-            if ($chunk.Key -eq 'tools') { $toolsChunk = $chunk }
-            if ($chunk.Key -eq 'allowed-tools') { $allowedToolsChunk = $chunk }
-            if ($chunk.Key -in $supportedAgentFrontmatterKeys) {
-                $selected.Add($chunk)
-            }
-        }
-
-        if (-not $toolsChunk -and $allowedToolsChunk) {
-            $remapped = [pscustomobject]@{
-                Key   = 'tools'
-                Value = $allowedToolsChunk.Value
-                Lines = [System.Collections.Generic.List[string]]::new()
-            }
-            foreach ($line in $allowedToolsChunk.Lines) {
-                if ($line -match '^allowed-tools:') {
-                    $remapped.Lines.Add(($line -replace '^allowed-tools:', 'tools:'))
-                }
-                else {
-                    $remapped.Lines.Add($line)
-                }
-            }
-            $selected.Add($remapped)
-        }
-
-        $ordered = @()
-        foreach ($key in @('name', 'description', 'tools', 'mcp-servers')) {
-            $match = $selected | Where-Object { $_.Key -eq $key } | Select-Object -First 1
-            if ($match) { $ordered += $match }
-        }
-
-        $newFrontmatterLines = [System.Collections.Generic.List[string]]::new()
-        foreach ($chunk in $ordered) {
-            foreach ($line in $chunk.Lines) {
-                $newFrontmatterLines.Add($line)
-            }
-        }
-        $newFrontmatter = ($newFrontmatterLines -join "`n").TrimEnd()
-
-        return "---`n$newFrontmatter`n---`n`n$body"
-    }
-
-    # Helper: copy only *.agent.md files from a source directory
-    function Copy-AgentFiles {
-        param([string]$SrcDir, [string]$DestDir)
-        if (-not (Test-Path $SrcDir)) { return }
-        if (-not $DryRun) {
-            New-Item -ItemType Directory -Force -Path $DestDir | Out-Null
-        }
-        $agents = Get-ChildItem -Path $SrcDir -Filter '*.agent.md' -ErrorAction SilentlyContinue
-        foreach ($agent in $agents) {
-            $dest = Join-Path $DestDir $agent.Name
-            $existed = Test-Path $dest
-            if ($DryRun) {
-                $action = if ($existed) { 'update' } else { 'add' }
-                Write-Info "[DRY RUN] Would $action agent: $($agent.Name)"
-                if ($existed) { $script:updatedCount++ } else { $script:addedCount++ }
-            } else {
-                $raw = Get-Content -Path $agent.FullName -Raw
-                $sanitized = (Convert-AgentToCliCompatibleContent -Content $raw).Replace('](references/', '](../agent-references/')
-                Set-Content -Path $dest -Value $sanitized -Encoding UTF8
-                if ($existed) {
-                    Write-Ok "Updated agent: $($agent.Name)"
-                    $script:updatedCount++
-                } else {
-                    Write-Ok "Added agent:   $($agent.Name)"
-                    $script:addedCount++
-                }
-            }
-        }
-
-        # Agent references: agents link to ../agent-references/<name>-detail.md for
-        # overflow content. They live outside .github/agents because Copilot CLI
-        # parses every markdown file under that tree as a custom agent; the legacy
-        # .github/agents/references copy is migrated by sync, which removes only
-        # verified unchanged BaseCoat files. Copy-AgentFiles runs only for -DryRun;
-        # real installs delegate to sync.
-        $referencesSrc = Join-Path $SrcDir 'references'
-        if (Test-Path $referencesSrc) {
-            Write-Info "[DRY RUN] Would sync agent references subtree to .github/agent-references"
-        }
-        if (Test-Path (Join-Path $DestDir 'references')) {
-            Write-Info "[DRY RUN] Would remove verified unchanged legacy .github/agents/references files"
-        }
-    }
-
-    $githubDir  = Join-Path $repoRoot '.github'
-    if (-not $DryRun) {
-        New-Item -ItemType Directory -Force -Path $overlayDir | Out-Null
-        New-Item -ItemType Directory -Force -Path $githubDir  | Out-Null
-    }
-
-    # 1. Reference copy: core metadata and asset directories
-    foreach ($item in @('README.md', 'CHANGELOG.md', 'version.json',
-                        'instructions', 'skills', 'prompts', 'agents', 'docs', 'templates')) {
-        Copy-OverlayItem `
-            -Src   (Join-Path $sourcePath $item) `
-            -Dest  (Join-Path $overlayDir $item) `
-            -Label ".github/base-coat/$item"
-    }
-
-    # INVENTORY.md — may live in docs/reference/ in newer versions; also copy to overlay root
-    $invSrc = Join-Path $sourcePath 'docs/reference/INVENTORY.md'
-    if (-not (Test-Path $invSrc)) { $invSrc = Join-Path $sourcePath 'INVENTORY.md' }
-    if (Test-Path $invSrc) {
-        Copy-OverlayItem -Src $invSrc -Dest (Join-Path $overlayDir 'INVENTORY.md') -Label '.github/base-coat/INVENTORY.md'
-    }
-
-    # Remove taxonomy subdirectories from agents reference copy (they contain only READMEs
-    # with relative links that break outside the source repo)
-    if (-not $DryRun) {
-        foreach ($taxDir in @('models', 'orchestrator', 'tasks', 'types')) {
-            $taxPath = Join-Path $overlayDir "agents/$taxDir"
-            if (Test-Path $taxPath) { Remove-Item -Path $taxPath -Recurse -Force }
-        }
-    }
-
-    # 2. Copilot-discoverable paths: instructions, prompts, skills
-    foreach ($dir in @('instructions', 'prompts', 'skills')) {
-        Copy-OverlayItem `
-            -Src   (Join-Path $sourcePath $dir) `
-            -Dest  (Join-Path $githubDir $dir) `
-            -Label ".github/$dir"
-    }
-
-    # 3. Agents: *.agent.md only (skip taxonomy subdirs)
-    Copy-AgentFiles `
-        -SrcDir  (Join-Path $sourcePath 'agents') `
-        -DestDir (Join-Path $githubDir 'agents')
-
-    # 4. Cross-client Agent Skills interop (.agents/skills/)
-    $agentSkillsDest = Join-Path $repoRoot '.agents/skills'
-    $skillsSrc       = Join-Path $sourcePath 'skills'
-    if (Test-Path $skillsSrc) {
-        Copy-OverlayItem -Src $skillsSrc -Dest $agentSkillsDest -Label '.agents/skills'
-    }
-
-    # 5. Intake contract templates
-    $managedPrTemplate = Join-Path $sourcePath 'templates/intake/PULL_REQUEST_TEMPLATE.md'
-    $customPrTemplate = Join-Path $githubDir 'PULL_REQUEST_TEMPLATE.md'
-    if ((Test-Path $managedPrTemplate) -and -not (Test-Path $customPrTemplate)) {
-        Copy-OverlayItem -Src $managedPrTemplate -Dest $customPrTemplate -Label '.github/PULL_REQUEST_TEMPLATE.md'
-    }
-
-    $managedIssueTemplate = Join-Path $sourcePath 'templates/intake/issue.md'
-    $customIssueTemplate = Join-Path $githubDir 'ISSUE_TEMPLATE/issue.md'
-    if ((Test-Path $managedIssueTemplate) -and -not (Test-Path $customIssueTemplate)) {
-        if (-not $DryRun) {
-            New-Item -ItemType Directory -Force -Path (Split-Path -Parent $customIssueTemplate) | Out-Null
-        }
-        Copy-OverlayItem -Src $managedIssueTemplate -Dest $customIssueTemplate -Label '.github/ISSUE_TEMPLATE/issue.md'
-    }
-
     }
 
     # ── Phase 4: validate ─────────────────────────────────────────────────────
@@ -526,8 +329,8 @@ try {
     $requiredOverlay = @('README.md', 'CHANGELOG.md', 'version.json', 'instructions', 'agents', 'skills', 'prompts', 'templates')
     $validationOk = $true
     foreach ($item in $requiredOverlay) {
-        $path = Join-Path $overlayDir $item
-        if ($DryRun -or (Test-Path $path)) {
+        $path = Join-Path (Join-Path $installRoot $TargetDir) $item
+        if (Test-Path $path) {
             Write-Ok "Present: $TargetDir/$item"
         } else {
             Write-Fail "Missing: $TargetDir/$item"
@@ -573,8 +376,8 @@ try {
     Write-Host "  Version: $upstreamVersion" -ForegroundColor White
     Write-Host "  Added:   $($script:addedCount)" -ForegroundColor $(if ($script:addedCount -gt 0) { 'Green' } else { 'DarkGray' })
     Write-Host "  Updated: $($script:updatedCount)" -ForegroundColor $(if ($script:updatedCount -gt 0) { 'Cyan' } else { 'DarkGray' })
-    if ($DryRun) { Write-Info 'Dry-run counts are top-level overlay items, not files; existing items count as updates.' }
-    else { Write-Host "  Removed: $($script:removedCount)" -ForegroundColor $(if ($script:removedCount -gt 0) { 'Cyan' } else { 'DarkGray' }) }
+    Write-Host "  Removed: $($script:removedCount)" -ForegroundColor $(if ($script:removedCount -gt 0) { 'Cyan' } else { 'DarkGray' })
+    if ($DryRun) { Write-Info 'Dry-run counts are files sync would change, computed in a temporary clone; nothing was written.' }
     Write-Host "  Errors:  $($script:errCount)" -ForegroundColor $(if ($script:errCount -gt 0) { 'Red' } else { 'DarkGray' })
 
     if (-not $validationOk) {

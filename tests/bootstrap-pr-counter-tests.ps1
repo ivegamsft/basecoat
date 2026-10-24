@@ -158,14 +158,28 @@ try {
     Assert-True ($run.Output -match 'Updated:\s+1\b' -and @($run.Calls | Where-Object { $_ -like 'gh pr create*' }).Count -eq 1) "custom TargetDir update should count 1 file and open a PR: $($run.Output)"
     Assert-True ($committed -contains 'vendor/basecoat/version.json') "custom TargetDir commit should contain vendor/basecoat/version.json; got: $($committed -join ', ')"
 
-    # 5. Dry run reports counts and neither writes files nor opens a PR.
+    # 5. Dry run previews sync at file level in a temporary clone (#3818): its counts match a real run,
+    #    and it neither writes files nor opens a PR.
     $dryConsumer = Join-Path $workRoot 'dry-consumer'
     New-ConsumerRepo $dryConsumer
     $run = Invoke-Bootstrap -Consumer $dryConsumer -SourceUrl $sourceUrl -LogPath $logPath -DryRun
     Assert-True ($run.ExitCode -eq 0) "dry run exited $($run.ExitCode): $($run.Output)"
-    Assert-True ($run.Output -match 'Added:\s+(\d+)' -and [int]$Matches[1] -gt 0) "dry run should report a non-zero Added count: $($run.Output)"
+    Assert-True ($run.Output -match 'Would add \.github/base-coat/version\.json') "dry run should list file-level additions: $($run.Output)"
+    $dryAdded = if ($run.Output -match 'Added:\s+(\d+)') { [int]$Matches[1] } else { -1 }
+    Assert-True ($dryAdded -gt 0) "dry run should report a non-zero Added count: $($run.Output)"
     Assert-True ($run.Calls.Count -eq 0) "dry run should not push or open a PR; calls: $($run.Calls -join '; ')"
     Assert-True (-not (Test-Path (Join-Path $dryConsumer '.github'))) 'dry run should not write overlay files'
+    $run = Invoke-Bootstrap -Consumer $dryConsumer -SourceUrl $sourceUrl -LogPath $logPath
+    Assert-True ($run.Output -match 'Added:\s+(\d+)' -and [int]$Matches[1] -eq $dryAdded) "dry run Added ($dryAdded) should match the real run: $($run.Output)"
+
+    # 6. A dry refresh counts only files whose content would change and leaves the consumer untouched.
+    Set-Content -LiteralPath (Join-Path $source 'version.json') -Value '{ "version": "9.9.12" }' -Encoding UTF8
+    Invoke-Git $source @('commit', '--quiet', '-am', 'bump again') | Out-Null
+    $run = Invoke-Bootstrap -Consumer $dryConsumer -SourceUrl $sourceUrl -LogPath $logPath -DryRun
+    Assert-True ($run.Output -match 'Added:\s+0\b' -and $run.Output -match 'Updated:\s+1\b' -and $run.Output -match 'Removed:\s+0\b') "dry refresh should report 0 added, 1 updated, 0 removed: $($run.Output)"
+    Assert-True ($run.Output -match 'Would update \.github/base-coat/version\.json') "dry refresh should name the updated file: $($run.Output)"
+    Assert-True ((Get-Content -LiteralPath (Join-Path $dryConsumer '.github/base-coat/version.json') -Raw) -match '9\.9\.11') 'dry refresh should not modify the consumer'
+    Assert-True (@(Invoke-Git $dryConsumer @('status', '--porcelain')).Count -eq 0) 'dry refresh should leave the consumer working tree clean'
 }
 finally {
     Set-Location $repoRoot
@@ -178,4 +192,4 @@ if ($failures.Count -gt 0) {
     exit 1
 }
 
-Write-Host 'Bootstrap PR counter tests passed (5 scenarios)' -ForegroundColor Green
+Write-Host 'Bootstrap PR counter tests passed (6 scenarios)' -ForegroundColor Green
