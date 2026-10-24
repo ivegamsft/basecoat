@@ -62,6 +62,7 @@ If you only need the gist, read these three first:
 | [intent-routing.excalidraw](intent-routing.excalidraw) | Fast-path vs deep-reasoning routing decision |
 | [turn-budget-protocol.excalidraw](turn-budget-protocol.excalidraw) | Token budget enforcement and graceful degradation |
 | [agentic-workflow-lifecycle.excalidraw](agentic-workflow-lifecycle.excalidraw) | PR trigger → filter → agent → buffer → safe output |
+| [spec-to-production-lifecycle.excalidraw](spec-to-production-lifecycle.excalidraw) | Spec-to-production stages with 2026-10-24 audit status: blocked, stalled, and healthy gates |
 | [bootstrap-flow.excalidraw](bootstrap-flow.excalidraw) | 4-phase bootstrap script: repo, memory, secrets, validation |
 | [queue-rebalancer-dependency-dag-and-lane-gates.excalidraw](queue-rebalancer-dependency-dag-and-lane-gates.excalidraw) | Queue rebalancer dependency DAG, unblock lane flow, and gate outcomes (`gate:no-tests`, `gate:needs-check-in`) with stalled-chain handling ([notes](queue-rebalancer-dependency-dag-and-lane-gates.md)) |
 | [orchestrator-dispatch-fan-in-conflict-resolution.md](orchestrator-dispatch-fan-in-conflict-resolution.md) | Orchestrator dispatch sequence, branch status lifecycle (`in_progress`, `blocked`, retry, `resolved`), and conflict tie-break decision flow |

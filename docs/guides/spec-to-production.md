@@ -10,6 +10,11 @@ Source baseline: `2dde3774281e75b083984ea970d5d08723cc7179`, audited
 Workflow filenames refer to the source repository; downstream installers may
 rename them or omit source-only release jobs.
 
+Re-audited 2026-10-24 against `5d1464ee` (#3927). Table rows below reflect that
+revision; dated measurement sections keep their original baseline. See
+[Lifecycle audit 2026-10-24](#lifecycle-audit-2026-10-24) for current stage
+status and blockers.
+
 ## State transitions and owners
 
 | Stage | Trigger and owner | Output and next transition | Blocking conditions |
@@ -20,10 +25,12 @@ rename them or omit source-only release jobs.
 | Spec fallback | `synthesize-spec` label, successful Issue Triage Agent completion, or manual dispatch; `issue-to-spec-synthesis.yml` | Creates draft PRD/spec on `spec/issue-N-slug`, adds `documentation`/`spec`, copies a sprint label if present, clears intake labels; an existing branch that conflicts with generated content is preserved and the issue gets one comment plus `synthesis-conflict` | Draft remains draft; synthesis does not approve the issue, assign implementation, or mark the PR ready |
 | Approve supplied spec | Qualified `/approve` issue comment; `issue-approve.yml` | Checks metadata/dependencies/spec, adds `approved`/`copilot-agent`, attempts assignment, then reevaluates linked PRs | Missing type/priority/spec, blocker labels, unresolved dependencies, permission or agent availability |
 | Approved-spec handoff | Qualified exact `/approve-spec <spec-pr> <head-sha>` source-issue comment; `approved-spec-handoff.yml` with `.github/base-coat/scripts/spec-handoff.cjs` | Resolver reports `spec-draft`, `blocked`, `authorization-invalid`, `assigned` or `handoff-pending` with a stable source/directive/spec identity; the default `read-only` mode makes no assignment write, and `canary`/`general` dispatch `agent-assignment-worker.yml` only through the gates described below | Spec PR not merged before the directive, approved head changed, issue Spec URL not commit-pinned to the merged spec, spec/PRD not `reviewed` or `implementation-ready`, blobs changed on the default branch, `Delivery intent` not exactly `implementation`, hold labels, dependencies (including dependency comments), source edits after the directive, or unreadable GitHub evidence |
-| Implement | Assigned Copilot coding agent or explicitly authorized local delivery execution | Ready implementation PR with `Closes #N`, valid intake contract, spec and validation evidence | Assignment failure can leave approval labels present without an active agent |
+| Implement | Assigned Copilot coding agent or explicitly authorized local delivery execution | Ready implementation PR with `Closes #N`, valid intake contract, spec and validation evidence | The coding agent must be enabled for the repository (#3826); `agent-assignment-worker.yml` serializes assignment per issue and verifies assignee read-back; reconciling failed assignments is tracked in #3592 |
 | Label/readiness | PR open/sync/reopen/ready; `pr-size-labeler.yml`; metadata changes also drive `pr-flow-hygiene.yml` | Deterministic size and same-repo sprint labeling; hygiene reports readiness/ownership issues | Hygiene does not turn draft spec PRs into ready implementation PRs |
+| Intake metadata | PR open/edit/sync/reopen/ready; `pr-intake-metadata.yml` | Authoring-time check of the PR body Design fields that eligibility enforces later | Missing or invalid `Change scope` (`individual` or `batch`), unit inventory, or size fields; read-only, never writes to the PR |
+| Conflict routing | Every 30 minutes, push to main, manual; `pr-conflict-routing.yml` | Labels conflicted PRs `needs-conflict-fix` and posts one trusted instruction comment per head | Routing requests a fix; it does not rebase or resolve conflicts itself |
 | Validate | PR head checks; CI, Validate BaseCoat, PR Validation, Agent Merge and spec/harness gates | Current-head results; required-workflow completion routes executor reevaluation | Failed/missing checks, execution approval holds, stale head, invalid intake |
-| Eligibility | PR events, explicit dispatch, required-workflow completion; `pr-auto-merge-executor.yml` | Reads trusted policy, checks issue/spec/check evidence, publishes eligibility and revalidates snapshot | Draft, delivery hold, unresolved dependency, missing authorization, XXL approval, stale snapshot |
+| Eligibility | PR events, explicit dispatch, required-workflow completion; `pr-auto-merge-executor.yml` | Reads trusted policy, checks issue/spec/check evidence, publishes eligibility and revalidates snapshot | Draft, delivery hold, unresolved dependency, missing authorization, XXL approval, stale snapshot, unresolved review threads (#3795); metadata drift reports pending rather than failure |
 | Merge queue | Eligible enqueue request; native GitHub queue | Serialized exact integration-tree validation, then squash merge | Queue checks failing or missing; queue command incompatibility; new base/head |
 | Post-merge | Merged PR event or hourly backfill; `post-merge-release-chain.yml` | Dispatches evidence-only release gate and source-only packaging; writes marker comment | Dispatch/API failure; comment proves dispatch, not completed production deployment |
 | Release preparation | Authorized release execution; optional `release-train.yml` report | Merge committed version/changelog preparation and create intended `vX.Y.Z` tag | No automatic tag creation in release train or post-merge chain; tag must match committed version |
@@ -112,9 +119,11 @@ Solo-dev policy lists six main checks: `lint-and-validate`, `test`,
 The executor emits `BaseCoat merge eligibility`; intended onboarding also
 requires that context with Actions integration ID `15368`.
 
-Live source rules at audit time require the seven validation/guardrail contexts
-but omit both `BaseCoat merge eligibility` and `validate-workflow-syntax`.
-Thus a green native ruleset is not equivalent to the full documented policy.
+Live source rules on 2026-10-24 require eight contexts: the seven above plus
+`validate-workflow-syntax` (#3576). They still omit `BaseCoat merge eligibility`,
+which the executor reports only on PR heads, not merge-group commits, so it is
+enforced before enqueue rather than by the queue. A green native ruleset is
+therefore still not equivalent to the full documented policy.
 The source queue is enabled, serialized with one build/merge, `ALLGREEN`, a
 one-minute minimum wait and 60-minute check timeout. The policy pack's
 `merge_queue_posture: deferred` describes a default, not this live installation.
@@ -139,7 +148,7 @@ approval rule.
 | Human-review reconciliation | Review submission; every 10 minutes | Relevant human approval/exception evidence; not recovery for every zero-review PR |
 | PR hygiene | Readiness/metadata events; Monday 13:00 UTC | Reports draft drift at 14 days and ready inactivity at 7 days |
 | Post-merge backfill | Hourly at minute 05, manual | Finds missing release-chain marker; an existing dispatch marker is not deployment completion evidence |
-| Stuck-state watchdog | Hourly at minute 15, manual | Escalates at configured 24h issue progress, 12h ready-to-merge, 2h merge-to-release evidence thresholds |
+| Stuck-state watchdog (`automation-stuck-state-watchdog.yml`) | Hourly at minute 15, manual | Escalates at configured 24h issue progress, 12h ready-to-merge, 2h merge-to-release evidence thresholds |
 | Release train | Monday 06:00 UTC, manual | Scheduled dry-run summary; live dispatch creates a candidate issue, never a release tag |
 
 Watchdog thresholds come from `automation-stage-slas.json`; they override input
@@ -181,7 +190,8 @@ Concrete handoffs on 2026-10-06:
   status at the audit snapshot. Missing reevaluation is observed; the exact
   lost-event cause is not established.
 
-Priority gaps and tracking:
+Priority gaps and tracking (all closed by 2026-10-24; current gaps are listed in
+[Lifecycle audit 2026-10-24](#lifecycle-audit-2026-10-24)):
 
 - #3573: unquoted model-refresh heredoc breaks full workflow lint.
 - #3574: `--delete-branch` makes merge enablement fail with the native queue.
@@ -198,3 +208,84 @@ Do not call work delivered solely because an issue closed, a PR merged, a
 dry-run gate passed, or a dispatch comment exists. Verify intended version/tag,
 release assets, public publish, and required docs/smoke evidence. The public tag
 can have a different commit SHA because publication sanitizes the source tree.
+
+## Lifecycle audit 2026-10-24
+
+Baseline: `5d1464ee`, live repository state on 2026-10-24 (#3927). The 2026-10-06
+gaps above are closed. The lifecycle is now limited by stalls between stages, not by
+check failures: every stage after spec synthesis is waiting on a gate that has
+no active owner or no escalation.
+
+Board: [spec-to-production-lifecycle.excalidraw](../diagrams/spec-to-production-lifecycle.excalidraw)
+(open at [aka.ms/excalidraw](https://aka.ms/excalidraw)).
+
+```mermaid
+flowchart LR
+    A[Issue opened] --> B[Triage agent]
+    B -->|needs-prd| C[Spec synthesis draft PR]
+    C -->|human review and merge| D["/approve-spec or /approve"]
+    D --> E[Assignment worker]
+    E --> F[Coding agent PR]
+    F --> G[Checks and intake metadata]
+    G --> H[Eligibility executor]
+    H --> I[Merge queue]
+    I --> J[Post-merge chain]
+    J -->|manual tag| K[Release and publish]
+    K --> L[Docs and production evidence]
+    B:::broken
+    C:::stalled
+    E:::blocked
+    J:::stalled
+    classDef broken stroke:#D13438,stroke-width:3px
+    classDef blocked stroke:#D13438,stroke-dasharray:5 3
+    classDef stalled stroke:#F7630C,stroke-dasharray:5 3
+```
+
+Solid red border: failing. Dashed red: blocked by configuration. Dashed orange:
+work accumulates with no escalation.
+
+### Stage status
+
+| Stage | Status on 2026-10-24 | Evidence | Tracking |
+|---|---|---|---|
+| Triage | Failing | Issue Triage Agent fails every run since 04:39 UTC; `gpt-5-mini` no longer resolves | #3914, #3911 |
+| Spec synthesis | Idle | Of the last 30 runs, 28 skipped and 2 cancelled; none produced a spec draft | #3914 |
+| Spec review | Stalled | Six synthesized spec drafts (#3868, #3877, #3881, #3883, #3886, #3890) are 11 or more days old | #3926 |
+| Approval and handoff | Inert | `BASECOAT_SPEC_HANDOFF_MODE` unset, so `approved-spec-handoff.yml` runs read-only (4 success, 26 skipped of the last 30) | delivery-settings guide |
+| Assignment | Blocked | Coding agent not enabled; all 5 open `approved` issues are unassigned | #3826, #3592 |
+| Checks and queue | Slow | Required checks take about 15 minutes; one serialized queue entry takes 18 to 25 minutes | #3923 |
+| Post-merge to release | Stalled | 61 commits on `main` since `v4.6.5` (2026-10-11); release train runs only as a dry run and never tags | #3594, #3663, #3843 |
+| Publish and docs | Healthy when tagged | `v4.6.2` to `v4.6.5`: release, publish and docs dispatch each finished within 2 minutes of the tag | none |
+| Stuck-state watchdog | Blind | 30 of 30 runs succeeded with no escalations while the stalls above accumulated | #3926 |
+
+### Observed lead times
+
+| Sample | Issue opened to merge | PR open to merge | Merge to production |
+|---|---|---|---|
+| #3830 via #3849 | 17h01m | 15h30m | Unreleased |
+| #3859 via #3878 | 11d07h59m | 11d01h07m | Unreleased |
+
+Samples are single observations, not SLAs. Lead time to production is currently
+unbounded because no tag is created after validated merges.
+
+### Why the watchdog misses these stalls
+
+- **Issue-to-PR stage:** it queries only `label:approved label:copilot-agent`,
+  skips issues without a verified coding-agent assignment before checking age, and
+  ages the rest from the assignment's `verifiedAt`. Approved issues that were
+  never assigned are not measured at all.
+- **Ready-to-merge stage:** it skips draft PRs, so synthesized spec drafts are
+  never measured.
+- **Merge-to-release stage:** it checks for the `post-merge-release-chain:v1`
+  marker, which proves that a dispatch happened, not that a tag or publish exists.
+
+### Resolution order
+
+1. Restore intake: fix the model pin (#3914).
+2. Unblock implementation: enable the coding agent (#3826), then configure a
+   handoff canary per the delivery settings guide.
+3. Make stalls visible: add approval, spec-draft, and release-lag checks to the
+   watchdog (#3926).
+4. Bound release lag: governed automatic tag ownership (#3594), with #3663 and
+   #3843 as prerequisites.
+5. Shorten checks and queue time (#3923).
