@@ -192,6 +192,19 @@ if ($workflowContent -notmatch 'github\.token is scoped to \$hostRepo only') {
   throw "Build guard workflow must explain why github.token cannot be used for cross-repository targets."
 }
 
+# Issue #3758: cross-repository targets must be allowlisted, not authorized by host permission alone.
+foreach ($relativePath in @(
+    '.github/workflows/ship-it-build-guard.yml',
+    '.github/base-coat/workflows/ship-it-build-guard.yml',
+    '.github/workflows/ship-it-intent-dispatch.yml',
+    '.github/base-coat/workflows/ship-it-intent-dispatch.yml')) {
+  $shipItWorkflow = Get-Content -Raw -Path (Join-Path $repoRoot $relativePath)
+  if ($shipItWorkflow -notmatch 'SHIP_IT_ALLOWED_TARGET_REPOS: \$\{\{ vars\.SHIP_IT_ALLOWED_TARGET_REPOS \}\}' -or
+      $shipItWorkflow -notmatch '(?s)result\.target_repo = inputs\.target_repo \|\| result\.target_repo;\s*\r?\n.*?if \(!allowedTargets\.includes\(result\.target_repo\.toLowerCase\(\)\)\) \{\s*\r?\n\s*core\.setFailed') {
+    throw "$relativePath must reject cross-repository targets missing from SHIP_IT_ALLOWED_TARGET_REPOS."
+  }
+}
+
 $detectorContent = Get-Content -Raw -Path $detectorScript
 if ($detectorContent -notmatch '\[AllowEmptyCollection\(\)\]\s*\r?\n\s*\[array\]\$FailureTrend') {
   throw "Build-break detector escalation must allow empty FailureTrend collections."

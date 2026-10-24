@@ -77,6 +77,9 @@ jobs:
       - name: Resolve event inputs
         id: resolve
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          # Comma-separated owner/repo targets this host may reach with SHIP_IT_CROSS_REPO_TOKEN.
+          SHIP_IT_ALLOWED_TARGET_REPOS: ${{ vars.SHIP_IT_ALLOWED_TARGET_REPOS }}
         with:
           script: |
             const eventName = context.eventName;
@@ -95,6 +98,19 @@ jobs:
               const inputs = context.payload.inputs || {};
               result.should_run = "true";
               result.target_repo = inputs.target_repo || result.target_repo;
+              // Issue #3758: host-repository permission alone must not authorize a
+              // different repository reached through SHIP_IT_CROSS_REPO_TOKEN.
+              const hostRepo = `${context.repo.owner}/${context.repo.repo}`;
+              if (result.target_repo.toLowerCase() !== hostRepo.toLowerCase()) {
+                const allowedTargets = (process.env.SHIP_IT_ALLOWED_TARGET_REPOS || "")
+                  .split(",")
+                  .map(repo => repo.trim().toLowerCase())
+                  .filter(Boolean);
+                if (!allowedTargets.includes(result.target_repo.toLowerCase())) {
+                  core.setFailed(`Cross-repository target '${result.target_repo}' is not listed in the SHIP_IT_ALLOWED_TARGET_REPOS repository variable.`);
+                  return;
+                }
+              }
               result.target_branch = inputs.target_branch || "";
               result.workflow_name = inputs.workflow_name || "";
               result.source_run_id = inputs.source_run_id || "";
