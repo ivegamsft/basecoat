@@ -85,17 +85,17 @@ Require-Pattern -Name 'relationship marker part-of' -Pattern 'Part of #N'
 Require-Pattern -Name 'relationship marker related-to' -Pattern 'Related to #N'
 
 # Runtime model guardrails in compiled workflow.
-$pinnedModelPattern = '(?m)^[ \t]*COPILOT_MODEL:[ \t]*(?:"gpt-5-mini"|gpt-5-mini)[ \t]*\r?$'
+$pinnedModelPattern = '(?m)^[ \t]*COPILOT_MODEL:[ \t]*(?:"claude-sonnet-5"|claude-sonnet-5)[ \t]*\r?$'
 $pinnedModelCount = [regex]::Matches($lock, $pinnedModelPattern).Count
 if ($pinnedModelCount -ne 2) {
-    $script:failures += "expected exactly 2 agent and detection gpt-5-mini pins; found $pinnedModelCount"
+    $script:failures += "expected exactly 2 agent and detection claude-sonnet-5 pins; found $pinnedModelCount"
 }
 
 foreach ($invalidModel in @(
-    'gpt-5-mini"',
-    '"gpt-5-mini',
-    'gpt-5-mini-extra',
-    '"gpt-5-mini-extra"'
+    'claude-sonnet-5"',
+    '"claude-sonnet-5',
+    'claude-sonnet-5-extra',
+    '"claude-sonnet-5-extra"'
 )) {
     if ([regex]::IsMatch("COPILOT_MODEL: $invalidModel", $pinnedModelPattern)) {
         $script:failures += "model regex accepted malformed value: $invalidModel"

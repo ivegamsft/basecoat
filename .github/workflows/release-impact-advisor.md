@@ -19,7 +19,7 @@ safe-outputs:
   add-comment:
 engine: copilot
 # Cost control: advisory blast-radius commentary does not require a frontier model.
-model: gpt-5-mini
+model: claude-sonnet-5
 timeout-minutes: 20
 run-name: "Release Impact — PR #${{ github.event.pull_request.number }}"
 ---

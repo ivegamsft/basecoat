@@ -239,9 +239,10 @@ separate cost surface** and are billed per pull request, not per session.
    Do **not** blanket-ignore `**/*.md` — `agents/`, `skills/`, `prompts/`, and
    `.github/workflows/*.md` are functional assets and must still be reviewed.
 
-2. **Match model to consequence.** Advisory agents (release impact, triage, retro) run
-   `gpt-5-mini`. Reserve `claude-sonnet-5` for agents whose false negatives carry real
-   risk — currently only `security-analyst`.
+2. **Match model to consequence.** Prefer the cheapest model the
+   `agentic-workflows` integrator exposes for advisory agents (release impact, triage,
+   retro). `gpt-5-mini` was withdrawn from that catalog (issue #3945), so all agents
+   currently run `claude-sonnet-5`; downshift again once a cheaper model resolves.
 
 3. **One owner per concern.** Overlapping agent charters double the spend on every PR
    for one answer. Security analysis belongs to `security-analyst`; `code-review-agent`

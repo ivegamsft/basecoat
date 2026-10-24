@@ -21,8 +21,8 @@ $lockPaths = @(
 )
 
 $failures = @()
-$infoModelPattern = '(?m)^[ \t]*GH_AW_INFO_MODEL:[ \t]*(?:"gpt-5-mini"|gpt-5-mini)[ \t]*\r?$'
-$copilotModelPattern = '(?m)^[ \t]*COPILOT_MODEL:[ \t]*(?:"gpt-5-mini"|gpt-5-mini)[ \t]*\r?$'
+$infoModelPattern = '(?m)^[ \t]*GH_AW_INFO_MODEL:[ \t]*(?:"claude-sonnet-5"|claude-sonnet-5)[ \t]*\r?$'
+$copilotModelPattern = '(?m)^[ \t]*COPILOT_MODEL:[ \t]*(?:"claude-sonnet-5"|claude-sonnet-5)[ \t]*\r?$'
 
 foreach ($path in $lockPaths) {
     if (-not (Test-Path $path)) {
@@ -48,10 +48,10 @@ foreach ($path in $lockPaths) {
 }
 
 $invalidModelFixtures = @(
-    'gpt-5-mini"',
-    '"gpt-5-mini',
-    'gpt-5-mini-extra',
-    '"gpt-5-mini-extra"'
+    'claude-sonnet-5"',
+    '"claude-sonnet-5',
+    'claude-sonnet-5-extra',
+    '"claude-sonnet-5-extra"'
 )
 
 foreach ($invalidModel in $invalidModelFixtures) {

@@ -360,7 +360,7 @@ Not currently wired up. Reserve the name if Slack integration is planned.
 ## Agentic Workflow Models
 
 BaseCoat's checked-in gh-aw workflows use static model pins from their workflow
-sources. In particular, issue triage and code review pin `gpt-5-mini` and reject
+sources. In particular, issue triage and code review pin `claude-sonnet-5` and reject
 `GH_AW_MODEL_AGENT_COPILOT` and `GH_AW_MODEL_DETECTION_COPILOT` overrides in
 contract tests. To change a model, update the source, recompile its lock, and run
 the workflow contract tests. Do not configure those repository variables for

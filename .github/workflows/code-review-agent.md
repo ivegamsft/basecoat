@@ -24,7 +24,7 @@ safe-outputs:
   noop:
     report-as-issue: false
 engine: copilot
-model: gpt-5-mini
+model: claude-sonnet-5
 timeout-minutes: 20
 run-name: "Code Review — PR #${{ github.event.pull_request.number }}"
 ---

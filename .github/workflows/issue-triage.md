@@ -13,7 +13,7 @@ safe-outputs:
   add-comment:
     hide-older-comments: true
 engine: copilot
-model: gpt-5-mini
+model: claude-sonnet-5
 timeout-minutes: 20
 run-name: "Issue Triage — #${{ github.event.issue.number }}"
 ---

@@ -38,8 +38,10 @@ run fails with `400 The requested model is not supported`, select a supported
 model in the checked-in workflow source and recompile the lock file. BaseCoat
 pins models statically so source, generated locks, and contract tests remain
 consistent; do not edit generated lock files or add repository-variable
-overrides. Prefer `gpt-5-mini` for portability unless a workflow requires a
-different model tier.
+overrides. Prefer `claude-sonnet-5` for portability unless a workflow requires a
+different model tier. `gpt-5-mini` is no longer available to the
+`agentic-workflows` integrator and fails with `400 The requested model is not
+available for integrator` (issue #3945).
 
 ## Active Workflows
 
@@ -108,7 +110,7 @@ Issue triage failures can present as:
 ```
 
 To reduce this risk in BaseCoat, the issue-triage source statically pins both
-agent and detection phases to `gpt-5-mini`. Repository model variables do not
+agent and detection phases to `claude-sonnet-5`. Repository model variables do not
 override this workflow. Change the source `model:` value, recompile the lock,
 and run the workflow contract tests when a model migration is required.
 
