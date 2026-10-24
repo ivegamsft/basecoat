@@ -65,3 +65,52 @@ emit issue-ready learnings, and produce optional memory-promotion suggestions.
 - git range 04143b9..b87de505
 - docs/reference/repository-inventory.md
 <!-- CHRONICLE:END 2026-07-24-to-2026-09-01-backlog-recovery -->
+
+<!-- CHRONICLE:START 2026-10-24-ci-cd-audit -->
+## Chronicle Update — 2026-10-24-ci-cd-audit
+
+- **Generated**: 2026-10-24 09:20:00 -04:00
+- **Mode**: update
+
+### Session Sources
+
+- Copilot session aeaa49e5-f79a-472e-b662-c13c5af804f9
+- The last 300 workflow runs, the 12 merge-queue entries from 2026-10-14 to 2026-10-24, and the live `main` ruleset
+
+### Timeline
+
+| Time | Event | Reference |
+|---|---|---|
+| 2026-10-14 to 2026-10-24 | The merge queue processed one entry at a time; each entry took 18 to 25 minutes. | .github/governance/rulesets/main-merge-queue.json |
+| 2026-10-21 to 2026-10-24 | Dependabot npm update runs were all cancelled or left queued. | #3915 |
+| 2026-10-24 04:39 UTC | Three agentic workflows started failing because the `gpt-5-mini` model pin no longer resolves. | #3911, #3914 |
+| 2026-10-24 | The CI/CD audit recorded blockers, critical-path slowdowns, and a four-phase plan to fix them. | #3923, docs/audit/ci-cd-findings-2026-10-24.md |
+| 2026-10-24 | A repo vocabulary feature, which learns how a team talks and maps those terms to the taxonomy, was added to the backlog. | #3922 |
+
+### Learnings
+
+- [learning:validate-each-commit-once-on-the-critical-path] **Validate each commit once on the critical path** — The same commit ran the validator twice (normal and `-Strict`), ran the full test suite on two operating systems, and was validated again during packaging. Together, that took most of each 15-minute check cycle and each 20-minute queue entry.
+  - Follow-up action: Run the strictest validator once and the full suite on one OS. Have packaging reuse a merge-group result for the same tree SHA (#3916).
+- [learning:queue-entry-time-sets-merge-throughput] **Queue entry time sets merge throughput** — With one entry built at a time, throughput is 60 divided by the entry time. Cutting entry time raises throughput for every PR, without the governance changes that queue concurrency needs.
+  - Follow-up action: Shard the tests (#3917) before raising `max_entries_to_build` (#3918).
+- [learning:pin-model-aliases-not-retiring-model-ids] **Pin model aliases, not retiring model IDs** — A concrete model pin broke three agentic workflows at once when the catalog dropped it, and only gh-aw's auto-opened symptom issue showed it.
+  - Follow-up action: Use gh-aw model aliases, and validate model pins when workflows compile (#3914).
+- [learning:expected-waiting-states-are-not-failures] **Expected waiting states are not failures** — The auto-merge executor marked draft PRs as failed, although pending required checks already reported as pending. Across 103 runs, 21 failed and a separate 15 were cancelled; red runs for expected states trained operators to ignore real eligibility failures.
+  - Follow-up action: Report pending or neutral for draft PRs, and combine duplicate dispatches for the same head SHA to reduce cancelled runs (#3919).
+- [learning:dequeue-must-cancel-merge-group-runs] **Dequeue must cancel merge-group runs** — When a PR was removed from the queue, its merge-group validation kept running for about 20 minutes, using runners that could have served the next entry.
+  - Follow-up action: Cancel in-flight runs on the removed `gh-readonly-queue` ref (#3918).
+
+### References
+
+- <https://github.com/IBuySpy-Shared/basecoat/issues/3923>
+- <https://github.com/IBuySpy-Shared/basecoat/issues/3914>
+- <https://github.com/IBuySpy-Shared/basecoat/issues/3915>
+- <https://github.com/IBuySpy-Shared/basecoat/issues/3916>
+- <https://github.com/IBuySpy-Shared/basecoat/issues/3917>
+- <https://github.com/IBuySpy-Shared/basecoat/issues/3918>
+- <https://github.com/IBuySpy-Shared/basecoat/issues/3919>
+- <https://github.com/IBuySpy-Shared/basecoat/issues/3920>
+- <https://github.com/IBuySpy-Shared/basecoat/issues/3921>
+- <https://github.com/IBuySpy-Shared/basecoat/issues/3922>
+- docs/audit/ci-cd-findings-2026-10-24.md
+<!-- CHRONICLE:END 2026-10-24-ci-cd-audit -->
