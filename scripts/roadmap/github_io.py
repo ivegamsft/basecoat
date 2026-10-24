@@ -13,6 +13,18 @@ COMMIT = """mutation($input: CreateCommitOnBranchInput!) {
   createCommitOnBranch(input: $input) { commit { oid } } }"""
 
 
+class Unconfirmed(P.Conflict):
+    """No 4xx response: the request may have been applied (dropped connection, 5xx)."""
+
+
+def failure(response):
+    """A 4xx is a definitive rejection; any other failure has an unknown outcome."""
+    statuses = re.findall(r"HTTP(?:/[0-9.]+)? ([0-9]{3})", response.stdout + response.stderr)
+    if statuses and statuses[-1].startswith("4"):
+        return P.Conflict(f"api-request-failed exit={response.returncode}")
+    return Unconfirmed(f"api-outcome-unknown exit={response.returncode}")
+
+
 def gh(args, payload=None, missing_ok=False):
     try:
         response = subprocess.run(["gh", "api", *args], input=payload, capture_output=True,
@@ -24,7 +36,7 @@ def gh(args, payload=None, missing_ok=False):
             return None
         if re.search(r"[Ee]xpected branch to point to", response.stdout + response.stderr):
             raise StaleHead(args[-1])
-        raise P.Conflict(f"api-request-failed exit={response.returncode}")
+        raise failure(response)
     return json.loads(response.stdout) if response.stdout.strip() else None
 
 
@@ -38,7 +50,7 @@ def request(args, if_match=None):
     if out.returncode != 0:
         P.require(not re.search(r"HTTP(/[0-9.]+)? 412", out.stdout + out.stderr),
                   "precondition-failed")
-        raise P.Conflict(f"api-request-failed exit={out.returncode}")
+        raise failure(out)
     head, _, body = out.stdout.replace("\r\n", "\n").partition("\n\n")
     tag = re.search(r"(?mi)^etag:[ \t]*(\S+)", head)
     return tag and tag.group(1), json.loads(body) if body.strip() else None

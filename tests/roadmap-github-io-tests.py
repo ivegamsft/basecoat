@@ -60,6 +60,19 @@ class TransportTests(unittest.TestCase):
         self.assertEqual(branch.read("c1", "runs/a.json"), "{}")
         self.assertIsNone(branch.read("c1", "runs/b.json"))
 
+    def test_failures_without_a_4xx_have_unknown_outcome(self):
+        for out, unknown in (("gh: Validation Failed (HTTP 422)", False),
+                             ("HTTP/2.0 404 Not Found\n\n{}", False),
+                             ("gh: Bad Gateway (HTTP 502)", True),
+                             ("gh: connection reset by peer", True)):
+            with self.subTest(out=out):
+                self.branch({"issues/1": (1, out)})
+                for call in (lambda: G.gh(["repos/o/r/issues/1"]),
+                             lambda: G.request(["repos/o/r/issues/1"])):
+                    with self.assertRaises(G.P.Conflict) as caught:
+                        call()
+                    self.assertIs(isinstance(caught.exception, G.Unconfirmed), unknown)
+
     def test_commit_binds_expected_head_and_maps_stale_and_lost_responses(self):
         branch = self.branch({"graphql": {"data": {"createCommitOnBranch": {
             "commit": {"oid": "c2"}}}}})
@@ -161,7 +174,7 @@ class TransportTests(unittest.TestCase):
         self.assertEqual(G.request(["repos/o/r/issues/1"], if_match='W/"abc"'), (None, None))
         self.assertIn('If-Match: W/"abc"', self.fake.calls[-1][0])
         for out, code in (("HTTP/2.0 412 Precondition Failed\r\n\r\n{}", "precondition-failed"),
-                          ("HTTP/2.0 500 Error\r\n\r\n{}", "api-request-failed")):
+                          ("HTTP/2.0 500 Error\r\n\r\n{}", "api-outcome-unknown")):
             self.branch({"issues/1": (1, out)})
             with self.subTest(code=code), self.assertRaisesRegex(G.P.Conflict, code):
                 G.request(["repos/o/r/issues/1"], if_match='W/"abc"')
