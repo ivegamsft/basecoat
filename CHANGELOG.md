@@ -48,6 +48,9 @@ All notable changes to this repository should be recorded in this file.
 - `sync.ps1` and `sync.sh` stage `policy-packs.json` and `human-approval-boundaries.json` into
   `.github/base-coat/governance/`, so `configure-downstream-workflows.ps1` no longer warns that the source governance
   files are missing (#3758, item 2).
+- `scripts/bootstrap-basecoat.ps1` keeps upstream case-only renames on `core.ignorecase=true` repositories: it pairs them
+  from its file snapshots, and its pull request commit is built in a temporary index that removes the old casing before
+  adding the new one, still leaving unrelated staged work alone (#3821).
 
 ## 4.6.5 - 2026-10-11
 

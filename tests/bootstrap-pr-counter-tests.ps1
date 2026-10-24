@@ -180,6 +180,46 @@ try {
     Assert-True ($run.Output -match 'Would update \.github/base-coat/version\.json') "dry refresh should name the updated file: $($run.Output)"
     Assert-True ((Get-Content -LiteralPath (Join-Path $dryConsumer '.github/base-coat/version.json') -Raw) -match '9\.9\.11') 'dry refresh should not modify the consumer'
     Assert-True (@(Invoke-Git $dryConsumer @('status', '--porcelain')).Count -eq 0) 'dry refresh should leave the consumer working tree clean'
+
+    # 7. An upstream case-only rename is committed with its new casing, including on case-insensitive
+    #    filesystems where core.ignorecase=true hides it from git status (#3821).
+    Invoke-Git $source @('mv', 'prompts/p.prompt.md', 'prompts/P.prompt.md') | Out-Null
+    Invoke-Git $source @('commit', '--quiet', '-m', 'case rename') | Out-Null
+    Set-Content -LiteralPath (Join-Path $dryConsumer 'notes.txt') -Value 'wip' -Encoding UTF8
+    Invoke-Git $dryConsumer @('add', 'notes.txt') | Out-Null
+    $run = Invoke-Bootstrap -Consumer $dryConsumer -SourceUrl $sourceUrl -LogPath $logPath
+    Assert-True ($run.Output -match 'Added:\s+2\b' -and $run.Output -match 'Updated:\s+1\b' -and $run.Output -match 'Removed:\s+2\b') "case rename should report 2 added, 1 updated, 2 removed: $($run.Output)"
+    $status = @(Invoke-Git $dryConsumer @('show', '--name-status', '--no-renames', '--pretty=format:', 'HEAD') | Where-Object { $_ } | ForEach-Object { ($_ -split '\s+') -join ' ' })
+    foreach ($expected in @('D .github/prompts/p.prompt.md', 'A .github/prompts/P.prompt.md', 'D .github/base-coat/prompts/p.prompt.md', 'A .github/base-coat/prompts/P.prompt.md')) {
+        Assert-True ($status -ccontains $expected) "case rename commit should contain '$expected'; got: $($status -join ', ')"
+    }
+    $tracked = @(Invoke-Git $dryConsumer @('ls-files', '.github/prompts'))
+    Assert-True ($tracked -ccontains '.github/prompts/P.prompt.md' -and $tracked -cnotcontains '.github/prompts/p.prompt.md') "index should track only the new casing; got: $($tracked -join ', ')"
+    Assert-True ((@(Invoke-Git $dryConsumer @('status', '--porcelain')) -join ',') -eq 'A  notes.txt') "case rename run should leave only unrelated staged work in the working tree: $($run.Output)"
+
+    # 8. A case-only rename of a force-tracked file under an ignored directory still commits the new casing.
+    Set-Content -LiteralPath (Join-Path $dryConsumer '.gitignore') -Value '.github/prompts/' -Encoding UTF8
+    Invoke-Git $dryConsumer @('add', '.gitignore') | Out-Null
+    Invoke-Git $dryConsumer @('commit', '--quiet', '-m', 'ignore prompts') | Out-Null
+    Invoke-Git $source @('mv', 'prompts/P.prompt.md', 'prompts/p.prompt.md') | Out-Null
+    Set-Content -LiteralPath (Join-Path $source 'version.json') -Value '{ "version": "9.9.13" }' -Encoding UTF8
+    Invoke-Git $source @('commit', '--quiet', '-am', 'case rename back') | Out-Null
+    $run = Invoke-Bootstrap -Consumer $dryConsumer -SourceUrl $sourceUrl -LogPath $logPath
+    Assert-True ($run.ExitCode -eq 0 -and @($run.Calls | Where-Object { $_ -like 'gh pr create*' }).Count -eq 1) "ignored case rename should open a PR; exit $($run.ExitCode): $($run.Output)"
+    $tracked = @(Invoke-Git $dryConsumer @('ls-files', '.github/prompts'))
+    Assert-True ($tracked -ccontains '.github/prompts/p.prompt.md' -and $tracked -cnotcontains '.github/prompts/P.prompt.md') "ignored case rename should track only the new casing; got: $($tracked -join ', ')"
+
+    # 9. A removed file replaced by a directory never stages that directory's ignored children.
+    Invoke-Git $source @('rm', '--quiet', 'prompts/p.prompt.md') | Out-Null
+    New-Item -ItemType Directory -Force -Path (Join-Path $source 'prompts/p.prompt.md') | Out-Null
+    Set-Content -LiteralPath (Join-Path $source 'prompts/p.prompt.md/child.prompt.md') -Value '# child' -Encoding UTF8
+    Set-Content -LiteralPath (Join-Path $source 'version.json') -Value '{ "version": "9.9.14" }' -Encoding UTF8
+    Invoke-Git $source @('add', '-A') | Out-Null
+    Invoke-Git $source @('commit', '--quiet', '-m', 'file to directory') | Out-Null
+    $run = Invoke-Bootstrap -Consumer $dryConsumer -SourceUrl $sourceUrl -LogPath $logPath
+    $committed = @(Invoke-Git $dryConsumer @('show', '--name-only', '--pretty=format:', 'HEAD') | Where-Object { $_ })
+    Assert-True ($run.ExitCode -eq 0 -and $committed -contains '.github/prompts/p.prompt.md') "file-to-directory run should commit the removal; exit $($run.ExitCode), got: $($committed -join ', ')"
+    Assert-True ($committed -notcontains '.github/prompts/p.prompt.md/child.prompt.md') "ignored child of a replaced file must not be committed; got: $($committed -join ', ')"
 }
 finally {
     Set-Location $repoRoot
@@ -192,4 +232,4 @@ if ($failures.Count -gt 0) {
     exit 1
 }
 
-Write-Host 'Bootstrap PR counter tests passed (6 scenarios)' -ForegroundColor Green
+Write-Host 'Bootstrap PR counter tests passed (9 scenarios)' -ForegroundColor Green

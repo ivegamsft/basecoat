@@ -88,6 +88,8 @@ $script:updatedCount = 0
 $script:removedCount = 0
 $script:errCount     = 0
 $script:changedPaths = New-Object System.Collections.Generic.List[string]
+$script:caseRenamedPaths = New-Object System.Collections.Generic.List[string]
+$script:removedPaths = New-Object System.Collections.Generic.List[string]
 
 # Hash overlay files sync writes, keyed by repo-relative path (ordinal, so case-only renames count).
 function Get-OverlayFileSnapshot([string]$Root) {
@@ -312,12 +314,21 @@ try {
                 $status = (git -C $installRoot --literal-pathspecs status --porcelain=v1 -z --no-renames --untracked-files=all -- '.github' '.agents' $TargetDir 2>$null) -join "`n"
                 if ($LASTEXITCODE -ne 0) { throw "git status failed (exit $LASTEXITCODE) after sync; cannot determine overlay changes." }
                 foreach ($entry in ($status -split "`0")) { if ($entry.Length -gt 3) { [void]$gitChanged.Add($entry.Substring(3)) } }
+                # Case-only renames (#3821): with core.ignorecase=true git status may report neither casing. Pair them
+                # from the snapshots and keep both sides when Git tracks the old casing; the PR step unstages it first.
+                $addedByKey = New-Object System.Collections.Hashtable ([System.StringComparer]::OrdinalIgnoreCase)
+                foreach ($change in $changes) { if ($change.Kind -eq 'added') { $addedByKey[$change.Path] = $change.Path } }
+                foreach ($change in @($changes | Where-Object { $_.Kind -eq 'removed' -and $addedByKey.ContainsKey($_.Path) })) {
+                    if (-not (git -C $installRoot --literal-pathspecs ls-files -- $change.Path 2>$null)) { continue }
+                    [void]$gitChanged.Add($change.Path); [void]$gitChanged.Add($addedByKey[$change.Path])
+                    $script:caseRenamedPaths.Add($change.Path)
+                }
             } finally { [Console]::OutputEncoding = $savedEncoding; $ErrorActionPreference = $savedErrorAction }
         }
         foreach ($change in $changes) {
             if (-not $gitChanged.Contains($change.Path)) { continue }
             $script:changedPaths.Add($change.Path)
-            switch ($change.Kind) { 'added' { $script:addedCount++ } 'updated' { $script:updatedCount++ } 'removed' { $script:removedCount++ } }
+            switch ($change.Kind) { 'added' { $script:addedCount++ } 'updated' { $script:updatedCount++ } 'removed' { $script:removedCount++; $script:removedPaths.Add($change.Path) } }
             if ($DryRun) { Write-Info "[DRY RUN] Would $(@{ added = 'add'; updated = 'update'; removed = 'remove' }[$change.Kind]) $($change.Path)" }
         }
     }
@@ -409,14 +420,37 @@ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
                 $currentBranch = git rev-parse --abbrev-ref HEAD 2>$null
                 git checkout -b $branchName 2>$null
                 if ($LASTEXITCODE -ne 0) { throw "git checkout -b $branchName failed" }
-                # Stage and commit exactly the files this run changed (leaving any other staged
-                # work alone); a pathspec file avoids command-line length limits.
+                # Commit exactly the files this run changed from a temporary index built from HEAD, leaving any
+                # other staged work alone (`commit --only` cannot record case-only renames on core.ignorecase=true,
+                # #3821); a pathspec file avoids command-line length limits.
                 $pathspecFile = Join-Path $tempRoot 'changed-paths.txt'
                 [System.IO.File]::WriteAllLines($pathspecFile, [string[]]$script:changedPaths, (New-Object System.Text.UTF8Encoding($false)))
-                git --literal-pathspecs add -A --pathspec-from-file=$pathspecFile 2>$null
-                if ($LASTEXITCODE -ne 0) { throw 'git add failed' }
-                git --literal-pathspecs commit -m $commitMsg --pathspec-from-file=$pathspecFile 2>$null
-                if ($LASTEXITCODE -ne 0) { throw 'git commit failed' }
+                $savedIndex = $env:GIT_INDEX_FILE; $env:GIT_INDEX_FILE = Join-Path $tempRoot 'pr-index'
+                try {
+                    $null = git rev-parse -q --verify HEAD 2>$null
+                    if ($LASTEXITCODE -eq 0) { git read-tree HEAD 2>$null } else { git read-tree --empty 2>$null }
+                    if ($LASTEXITCODE -ne 0) { throw 'git read-tree failed' }
+                    # Unstage removals (including case-renamed old casings) separately so a removed path that is now a
+                    # directory never stages its children; then force-add only the selected files that still exist.
+                    if ($script:removedPaths.Count -gt 0) {
+                        $removedFile = Join-Path $tempRoot 'removed-paths.txt'
+                        [System.IO.File]::WriteAllLines($removedFile, [string[]]$script:removedPaths, (New-Object System.Text.UTF8Encoding($false)))
+                        git --literal-pathspecs rm --cached --quiet --ignore-unmatch --pathspec-from-file=$removedFile 2>$null
+                        if ($LASTEXITCODE -ne 0) { throw 'git rm --cached failed' }
+                    }
+                    $addPaths = [string[]]@($script:changedPaths | Where-Object { $script:removedPaths -cnotcontains $_ })
+                    if ($addPaths.Count -gt 0) {
+                        $addFile = Join-Path $tempRoot 'add-paths.txt'
+                        [System.IO.File]::WriteAllLines($addFile, $addPaths, (New-Object System.Text.UTF8Encoding($false)))
+                        git --literal-pathspecs add --force --pathspec-from-file=$addFile 2>$null
+                        if ($LASTEXITCODE -ne 0) { throw 'git add failed' }
+                    }
+                    git commit -m $commitMsg 2>$null
+                    if ($LASTEXITCODE -ne 0) { throw 'git commit failed' }
+                } finally { $env:GIT_INDEX_FILE = $savedIndex }
+                # Point the real index at the new commit for these paths.
+                git --literal-pathspecs reset -q --pathspec-from-file=$pathspecFile 2>$null
+                if ($LASTEXITCODE -ne 0) { throw 'git reset failed' }
                 git push -u origin $branchName 2>$null
                 if ($LASTEXITCODE -ne 0) { throw "git push origin $branchName failed" }
 
