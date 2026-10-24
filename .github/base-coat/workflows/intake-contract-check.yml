@@ -22,11 +22,15 @@ jobs:
 
       - name: Validate required intake surfaces
         shell: bash
+        # Caller-supplied paths go through env so they are never parsed as shell syntax.
+        env:
+          PR_TEMPLATE_PATH: ${{ inputs.pr_template_path }}
+          ISSUE_TEMPLATE_PATH: ${{ inputs.issue_template_path }}
         run: |
           set -euo pipefail
 
-          pr_template="${{ inputs.pr_template_path }}"
-          issue_dir="${{ inputs.issue_template_path }}"
+          pr_template="$PR_TEMPLATE_PATH"
+          issue_dir="$ISSUE_TEMPLATE_PATH"
           legacy_issue_template=".github/ISSUE_TEMPLATE.md"
 
           if [[ ! -f "$pr_template" ]]; then

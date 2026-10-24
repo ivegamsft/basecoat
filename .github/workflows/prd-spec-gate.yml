@@ -34,6 +34,9 @@ jobs:
 
       - name: Enforce PRD and spec links for risky or large changes
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        env:
+          # Comma-separated agent logins exempt from the gate; empty by default.
+          PRD_SPEC_EXEMPT_LOGINS: ${{ vars.BASECOAT_PRD_SPEC_EXEMPT_LOGINS }}
         with:
           script: |
             if (!context.payload.pull_request) {
@@ -53,8 +56,14 @@ jobs:
               return;
             }
 
-            // Bypass for bot/agent-authored PRs — they don't produce PRD/spec artifacts
-            if (pr.user && (pr.user.type === 'Bot' || pr.user.login === 'ibuyspy')) {
+            // Bypass for bot/agent-authored PRs — they don't produce PRD/spec artifacts.
+            // Human logins are exempt only when listed in BASECOAT_PRD_SPEC_EXEMPT_LOGINS.
+            const exemptLogins = (process.env.PRD_SPEC_EXEMPT_LOGINS || '')
+              .split(',')
+              .map(login => login.trim().toLowerCase())
+              .filter(Boolean);
+            const authorLogin = ((pr.user && pr.user.login) || '').toLowerCase();
+            if (pr.user && (pr.user.type === 'Bot' || exemptLogins.includes(authorLogin))) {
               core.notice('Skipping PRD/spec gate for bot/agent-authored PR.');
               return;
             }

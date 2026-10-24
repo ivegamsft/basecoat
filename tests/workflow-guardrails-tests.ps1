@@ -621,9 +621,21 @@ else {
     }
 
     if ($prdSpecWorkflow -notmatch "pr\.user\.type\s*===\s*'Bot'" -or
-        $prdSpecWorkflow -notmatch "pr\.user\.login\s*===\s*'ibuyspy'" -or
+        $prdSpecWorkflow -notmatch 'PRD_SPEC_EXEMPT_LOGINS:\s*\$\{\{\s*vars\.BASECOAT_PRD_SPEC_EXEMPT_LOGINS\s*\}\}' -or
+        $prdSpecWorkflow -notmatch 'exemptLogins\.includes\(authorLogin\)' -or
         $prdSpecWorkflow -notmatch 'Skipping PRD/spec gate for bot/agent-authored PR') {
         $prdSpecWorkflowIssues += 'prd-spec-gate.yml (missing bot/agent bypass semantics)'
+    }
+
+    # Issue #3758: no hardcoded human login may bypass the gate in consumers.
+    if ($prdSpecWorkflow -match "pr\.user\.login\s*===\s*'") {
+        $prdSpecWorkflowIssues += 'prd-spec-gate.yml (hardcoded login bypass; use BASECOAT_PRD_SPEC_EXEMPT_LOGINS)'
+    }
+
+    $packagedPrdSpecPath = '.github/base-coat/workflows/prd-spec-gate.yml'
+    if ((Test-Path $packagedPrdSpecPath) -and
+        ((Get-Content $packagedPrdSpecPath -Raw) -replace "`r`n", "`n") -ne ($prdSpecWorkflow -replace "`r`n", "`n")) {
+        $prdSpecWorkflowIssues += 'prd-spec-gate.yml (packaged copy under .github/base-coat/workflows has drifted)'
     }
 
     if ($prdSpecWorkflow -notmatch '\^\\\.github\\/workflows\\/' -or $prdSpecWorkflow -notmatch 'hasPrd\s*&&\s*hasSpec') {
@@ -655,6 +667,20 @@ else {
         Write-Host "    ✗ $issue" -ForegroundColor Red
     }
     $guardrailFailures += 'prd-spec-gate-contract'
+}
+
+# Issue #3758: workflow_call inputs must reach Bash through env, never inline interpolation.
+$intakeWorkflowPath = '.github/base-coat/workflows/intake-contract-check.yml'
+if (Test-Path $intakeWorkflowPath) {
+    $intakeWorkflow = Get-Content $intakeWorkflowPath -Raw
+    $intakeRunBodies = [regex]::Matches($intakeWorkflow, '(?ms)^(\s+)run:\s*\|\s*\r?\n(.*?)(?=^\s*-\s|\z)') | ForEach-Object { $_.Groups[2].Value }
+    if (@($intakeRunBodies | Where-Object { $_ -match '\$\{\{\s*inputs\.' }).Count -gt 0) {
+        Write-Host '    ✗ intake-contract-check.yml interpolates workflow_call inputs inside run' -ForegroundColor Red
+        $guardrailFailures += 'intake-contract-input-injection'
+    }
+    else {
+        Write-Host '    ✓ intake-contract-check.yml passes workflow_call inputs through env'
+    }
 }
 
 # Test 17: Production workflows must route through the protected production environment

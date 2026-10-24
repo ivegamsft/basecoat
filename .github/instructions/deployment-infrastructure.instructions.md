@@ -53,7 +53,7 @@ The `prd-spec-gate.yml` workflow blocks PRs with:
 - PRs touching risky paths (`skills/`, `agents/`, `instructions/`, `scripts/`, `.github/workflows/`) get advisory warning below threshold
 - Add the `skip-prd-spec-check` label to bypass
 - Merge queue (`merge_group`) checks pass when no pull request payload exists
-- Bot/agent-authored PRs (`ibuyspy` or GitHub Bot accounts) bypass the gate
+- GitHub Bot accounts bypass the gate; agent logins bypass it only when listed in the comma-separated `BASECOAT_PRD_SPEC_EXEMPT_LOGINS` repository variable (empty by default)
 
 Contributor guideline: classify a cohesive individual feature separately from a
 batch of independently deliverable units. Enforce the 15-file and 300-additions-

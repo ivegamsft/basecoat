@@ -163,7 +163,7 @@ Enforces PRD/spec intake evidence on high-change PRs and warns on risky-path PRs
 - Risky-path-only PRs get advisory warning when no PRD/spec reference is present
 - References can be markdown links or structured lines (`PRD: <link>`, `Spec: <link>`)
 - Merge queue events auto-pass (no PR body payload)
-- Bot/agent-authored PRs (`ibuyspy` or GitHub Bot accounts) bypass the gate
+- GitHub Bot accounts bypass the gate; agent logins bypass it only when listed in the comma-separated `BASECOAT_PRD_SPEC_EXEMPT_LOGINS` repository variable (empty by default)
 
 **Skip check:** Add `skip-prd-spec-check` label to PR
 

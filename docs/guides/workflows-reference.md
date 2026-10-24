@@ -231,7 +231,7 @@ inputs:
 - Emits advisory warning (non-blocking) for risky-path-only PRs when no PRD/spec reference is present
 - Accepts links in markdown or structured lines (`PRD: <link>`, `Spec: <link>`)
 - Auto-passes merge queue checks (`merge_group`) when no pull request payload is available
-- Bypasses bot/agent-authored PRs (`ibuyspy` or GitHub Bot accounts)
+- Bypasses GitHub Bot accounts and any agent logins listed in the comma-separated `BASECOAT_PRD_SPEC_EXEMPT_LOGINS` repository variable (empty by default)
 
 **Configuration:**
 
