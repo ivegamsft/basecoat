@@ -2,7 +2,7 @@
 
 ## Status and source
 
-Proposal only, related to [source #3669](https://github.com/IBuySpy-Shared/basecoat/issues/3669).
+Proposal only, related to [source #3669](internal source issue).
 This is a reviewable implementation contract, not approved runtime authority.
 Merging this document neither approves the source/spec nor completes source acceptance.
 No new command, label alias, automatic approval, or production setting is introduced.
@@ -131,7 +131,7 @@ a newly opened competing PR, changed local binding or index gap invalidates the 
 even with unchanged task/head/base. Missing, stale or untrusted receipts block
 even when the PR is non-draft. Final reads and post-mutation invalidation are diagnostic,
 not substitutes for this gate or claims of atomic promotion.
-The [eligibility barrier proposal #3721 for source #3672](https://github.com/IBuySpy-Shared/basecoat/pull/3721)
+The [eligibility barrier proposal #3721 for source #3672](internal source pull request)
 must establish enforceable entry control and revocation/race behavior; its publication
 does not satisfy that prerequisite. If the gate cannot be enforced, automatic promotion
 stays disabled. Completion receipt production must not depend on already being ready,

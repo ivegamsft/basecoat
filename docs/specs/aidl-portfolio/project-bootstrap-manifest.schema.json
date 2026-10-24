@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ibuyspy-shared.github.io/basecoat/schemas/aidl-portfolio/project-bootstrap-manifest.schema.json",
+  "$id": "https://ivegamsft.github.io/basecoat/schemas/aidl-portfolio/project-bootstrap-manifest.schema.json",
   "title": "AIDL Portfolio Project Bootstrap Manifest",
   "type": "object",
   "required": [

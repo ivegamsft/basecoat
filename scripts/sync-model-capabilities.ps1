@@ -245,7 +245,7 @@ function Write-CatalogDocumentation {
     $audit.Add('| Asset | Field | Model | Status | Recommendation |')
     $audit.Add('|---|---|---|---|---|')
     foreach ($assignment in $Assignments) {
-        $audit.Add("| [$($assignment.asset)](https://github.com/IBuySpy-Shared/basecoat/blob/main/$($assignment.asset)) | ``$($assignment.field)`` | ``$($assignment.model)`` | $($assignment.status) | $($assignment.recommendation) |")
+        $audit.Add("| [$($assignment.asset)](https://github.com/ivegamsft/basecoat/blob/main/$($assignment.asset)) | ``$($assignment.field)`` | ``$($assignment.model)`` | $($assignment.status) | $($assignment.recommendation) |")
     }
     [IO.File]::WriteAllText(
         $resolvedAssignmentAuditPath,

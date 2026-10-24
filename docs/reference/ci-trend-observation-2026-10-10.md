@@ -8,7 +8,7 @@ remains unchanged.
 
 ## Population and Collection Identity
 
-Repository: `IBuySpy-Shared/basecoat`. Collection ended at
+Repository: `ivegamsft/basecoat`. Collection ended at
 `2026-10-10T11:49:46.6302875Z`, using authenticated read-only Actions API requests.
 Population: all API-visible workflows, branches and events whose `created_at`
 falls within each UTC half-open interval `[start, end)`. No workflow or branch
@@ -82,7 +82,7 @@ $start = [DateTimeOffset]::Parse('2026-09-21T00:00:00Z').ToUniversalTime()
 $end = [DateTimeOffset]::Parse('2026-09-28T00:00:00Z').ToUniversalTime()
 $range = [uri]::EscapeDataString(
     "$($start.ToString('yyyy-MM-ddTHH:mm:ssZ'))..$($end.ToString('yyyy-MM-ddTHH:mm:ssZ'))")
-gh api "repos/IBuySpy-Shared/basecoat/actions/runs?per_page=100&created=$range" --paginate --slurp
+gh api "repos/ivegamsft/basecoat/actions/runs?per_page=100&created=$range" --paginate --slurp
 ```
 
 Compare each response's total with its deduplicated enumeration before accepting

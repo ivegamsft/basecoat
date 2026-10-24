@@ -1,8 +1,8 @@
 # Roadmap grouping and checkpoint preview
 
-This is the safe, read-only portion of [#3616](https://github.com/IBuySpy-Shared/basecoat/issues/3616),
+This is the safe, read-only portion of [#3616](internal source issue),
 continuing the [foundation](roadmap-planner-foundation.md). #3616 and umbrella
-[#3400](https://github.com/IBuySpy-Shared/basecoat/issues/3400) remain open.
+[#3400](internal source issue) remain open.
 The approved PRD/spec, not this adapter, define eventual live delivery.
 
 ## Boundary and usage
@@ -28,8 +28,8 @@ membership; lifecycle is `proposed`, and verified tag is `none`.
 ## Normalized interchange contract
 
 The adapter consumes supplied reports from the existing
-[`sprint-project-mapper`](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-10-core-sprint-project-mapper.agent.md)
-and [`release-impact-advisor`](https://github.com/IBuySpy-Shared/basecoat/blob/main/agents/basecoat-60-workflow-release-impact-advisor.agent.md).
+[`sprint-project-mapper`](https://github.com/ivegamsft/basecoat/blob/main/agents/basecoat-10-core-sprint-project-mapper.agent.md)
+and [`release-impact-advisor`](https://github.com/ivegamsft/basecoat/blob/main/agents/basecoat-60-workflow-release-impact-advisor.agent.md).
 It does not fabricate reports, infer themes from arbitrary body text, perform
 split/merge debate, or independently certify model-reported historical metrics.
 `source` identifies the required input contract, **not authenticated provenance**.
@@ -101,7 +101,7 @@ Keep the store private, like its repository inventory. No credentials are stored
 ## Actual GitHub API capability evidence
 
 Read-only inspection on 2026-10-07 used authenticated `GET` calls against
-`IBuySpy-Shared/basecoat`: milestone inventory returned records with numeric
+`ivegamsft/basecoat`: milestone inventory returned records with numeric
 `number` and `open|closed` states; `GET .../issues/3616` returned issue `3616`,
 `open`, `milestone: null`, and label names. The foundation's live shadow proof
 validated 13 milestones, 47 open issue/PR records and 79 tags through three

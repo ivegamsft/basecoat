@@ -1,7 +1,7 @@
 # Coverage threshold ratchet (optional)
 
 Opt-in guardrail that caps how far a PR may raise Istanbul-family coverage
-thresholds in one change. Downstream origin: IBuySpy-Dev/COECheck#737 / #754.
+thresholds in one change. Downstream origin: example-org/COECheck#737 / #754.
 
 This template is not enabled by default. Copy the workflow into the consumer
 repository and add a policy file. The script is configuration-driven; adoption

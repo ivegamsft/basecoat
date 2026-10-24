@@ -170,7 +170,7 @@ flags cannot grant that authority.
 The owner must name and authorize a disposable sandbox repository before a
 probe. Add only that repository to the `repositories` array in
 `scripts/roadmap/probe-allowlist.json` through a normal PR. Do not include
-`IBuySpy-Shared/basecoat` or a production repository. Supply sandbox-only
+`ivegamsft/basecoat` or a production repository. Supply sandbox-only
 credentials, never the production token.
 
 After the approved allowlist and probe script are installed:

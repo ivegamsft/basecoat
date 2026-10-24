@@ -3,23 +3,23 @@
 ## Status and Authority
 
 Proposal for the residual of
-[source #3590](https://github.com/IBuySpy-Shared/basecoat/issues/3590).
+[source #3590](internal source issue).
 Merging this document does not authorize runtime changes, approve the source
 issue, or complete its acceptance criteria. Owner approval of this spec is
 required before implementation. It also scopes the reconciliation part of
-[#3645](https://github.com/IBuySpy-Shared/basecoat/issues/3645) and is the
+[#3645](internal source issue) and is the
 prerequisite recorded for #3669, #3670, #3671 and #3672.
 
 ## Context
 
-[PR #3619](https://github.com/IBuySpy-Shared/basecoat/pull/3619) (merge commit
+[PR #3619](internal source pull request) (merge commit
 `7e20edb4d60bdda499a19ecd159085a4352f49db`) added the trusted scheduled
 `Recover missed current-head eligibility` job in
 `.github/workflows/auto-approve-cloud-agent-workflows.yml` and its distributed
 copy. It routes solo-dev by the selected profile, needs no human review, and
 leaves the executor as the sole authorization authority. The contract is in
 [delivery-recovery-spec.md](../reference/delivery-recovery-spec.md).
-[PR #3684](https://github.com/IBuySpy-Shared/basecoat/pull/3684) later closed
+[PR #3684](internal source pull request) later closed
 issue #3604, so executor queue admission now triggers merge-group checks.
 
 ### Residual Evidence (baseline `69beb41d`, 2026-10-12 UTC)
@@ -242,10 +242,10 @@ executor `workflow_dispatch` runs carrying `recovery_fingerprint`. A sustained
 
 ## References
 
-- [#3590](https://github.com/IBuySpy-Shared/basecoat/issues/3590),
-  [#3645](https://github.com/IBuySpy-Shared/basecoat/issues/3645),
-  [#3604](https://github.com/IBuySpy-Shared/basecoat/issues/3604)
-- [PR #3619](https://github.com/IBuySpy-Shared/basecoat/pull/3619),
-  [PR #3684](https://github.com/IBuySpy-Shared/basecoat/pull/3684)
+- [#3590](internal source issue),
+  [#3645](internal source issue),
+  [#3604](internal source issue)
+- [PR #3619](internal source pull request),
+  [PR #3684](internal source pull request)
 - [Delivery recovery spec](../reference/delivery-recovery-spec.md)
 - [PRD and spec guidance](../guides/prd-and-spec-guidance.md)

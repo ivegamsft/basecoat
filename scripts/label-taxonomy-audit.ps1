@@ -17,7 +17,7 @@
 
 .EXAMPLE
     pwsh scripts/label-taxonomy-audit.ps1
-    pwsh scripts/label-taxonomy-audit.ps1 -Repo IBuySpy-Shared/basecoat -ReportPath label-drift.md
+    pwsh scripts/label-taxonomy-audit.ps1 -Repo ivegamsft/basecoat -ReportPath label-drift.md
 #>
 [CmdletBinding()]
 param(

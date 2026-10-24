@@ -51,9 +51,9 @@ jobs:
 
 ```bash
 # Store Azure credentials in GitHub repository secrets
-gh secret set AZURE_TENANT_ID --body "your-tenant-id" --repo IBuySpy-Shared/basecoat
-gh secret set AZURE_CLIENT_ID --body "your-client-id" --repo IBuySpy-Shared/basecoat
-gh secret set AZURE_SUBSCRIPTION_ID --body "your-subscription-id" --repo IBuySpy-Shared/basecoat
-gh secret set AZURE_RESOURCE_GROUP --body "your-resource-group" --repo IBuySpy-Shared/basecoat
-gh secret set KEYVAULT_NAME --body "your-keyvault-name" --repo IBuySpy-Shared/basecoat
+gh secret set AZURE_TENANT_ID --body "your-tenant-id" --repo ivegamsft/basecoat
+gh secret set AZURE_CLIENT_ID --body "your-client-id" --repo ivegamsft/basecoat
+gh secret set AZURE_SUBSCRIPTION_ID --body "your-subscription-id" --repo ivegamsft/basecoat
+gh secret set AZURE_RESOURCE_GROUP --body "your-resource-group" --repo ivegamsft/basecoat
+gh secret set KEYVAULT_NAME --body "your-keyvault-name" --repo ivegamsft/basecoat
 ```
