@@ -1,6 +1,6 @@
 # Dependency Graph
 
-- Generated: 2026-10-19T15:13:19Z
+- Generated: 2026-10-26T14:47:51Z
 - Source workflow: .github/workflows/dependency-graph-pages.yml
 
 ```mermaid
