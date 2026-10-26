@@ -454,6 +454,6 @@ See `.github/workflows/` for examples:
 ## Related Documentation
 
 - `docs/operations/keep-fix-throttle-model.md` — Overall framework (Keep/Fix/Throttle)
-- `docs/operations/operational-runbook.md` — Runbook template for each tier
+- `docs/templates/operational-runbook-template.md` — Provider-neutral runbook template for each tier
 - `.github/instructions/workflow-conventions.instructions.md` — Workflow defaults
 - `docs/reference/governance-contract.md` — Governance labels and taxonomy

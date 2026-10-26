@@ -1,17 +1,21 @@
-# Basecoat Portal Terraform Infrastructure
+# Legacy BaseCoat Portal on AWS: Terraform Infrastructure
 
-Production-ready infrastructure-as-code for deploying the Basecoat Portal across AWS, Azure, and GCP with high availability, disaster recovery, and multi-region support.
+> **Scope:** This README covers only the legacy BaseCoat Portal deployment implemented by
+> the AWS Terraform in this directory. It is not generic BaseCoat guidance; the Azure Bicep
+> deployment is separate under `portal/app/iac/`.
+
+AWS Terraform infrastructure for the legacy BaseCoat Portal, including high-availability and disaster-recovery components.
 
 ## Features
 
-- ✅ **Multi-Cloud**: AWS, Azure, GCP templates (can be extended)
-- ✅ **High Availability**: Multi-AZ deployment with automatic failover
-- ✅ **Disaster Recovery**: RTO < 4 hours, RPO < 1 hour
-- ✅ **Auto-Scaling**: Dynamic scaling (1-20 instances)
-- ✅ **Security First**: Encryption, least-privilege IAM, VPC isolation
-- ✅ **Cost Optimized**: Spot instances, reserved capacity, lifecycle policies
-- ✅ **Fully Automated**: CI/CD integration with GitHub Actions
-- ✅ **Production Ready**: Tested configurations for dev/staging/prod
+- **AWS-only**: This directory contains AWS Terraform modules; it does not provide Azure or GCP modules.
+- **High Availability**: Multi-AZ deployment with automatic failover
+- **Disaster Recovery**: RTO < 4 hours, RPO < 1 hour
+- **Auto-Scaling**: Dynamic scaling (1-20 instances)
+- **Security First**: Encryption, least-privilege IAM, VPC isolation
+- **Cost Optimized**: Spot instances, reserved capacity, lifecycle policies
+- **Fully Automated**: CI/CD integration with GitHub Actions
+- **Production Ready**: Tested configurations for dev/staging/prod
 
 ## Quick Start
 
@@ -42,7 +46,7 @@ terraform apply -var-file=environments/dev/terraform.tfvars
 
 ## Repository Structure
 
-```
+```text
 terraform/
 ├── README.md                           # This file
 ├── DEPLOYMENT_GUIDE.md                 # Deployment procedures
@@ -71,12 +75,14 @@ terraform/
 ## Modules Overview
 
 ### 1. Networking
+
 - VPC with public/private subnets
 - NAT gateways for private outbound access
 - VPC Flow Logs for monitoring
 - **Outputs**: VPC ID, subnet IDs, subnet groups
 
 ### 2. Database
+
 - PostgreSQL 15.3 with Multi-AZ
 - Read replicas for scaling
 - RDS Proxy for connection pooling
@@ -84,6 +90,7 @@ terraform/
 - **Outputs**: DB endpoint, password, proxy endpoint
 
 ### 3. Compute
+
 - Application Load Balancer
 - Auto-Scaling Group (1-20 instances)
 - Spot instances for cost optimization
@@ -91,30 +98,35 @@ terraform/
 - **Outputs**: ALB DNS, ASG name
 
 ### 4. Caching
+
 - Redis 7.0 cluster
 - Multi-node with automatic failover
 - Encryption & authentication
 - **Outputs**: Primary endpoint, reader endpoint
 
 ### 5. Storage
+
 - S3 buckets with encryption
 - Versioning & lifecycle policies
 - Public access blocked
 - **Outputs**: Bucket names, ARNs
 
 ### 6. Secrets
+
 - KMS key for encryption
 - Secrets Manager integration
 - Automatic rotation (30-day cycle)
 - **Outputs**: KMS key ID, secret ARNs
 
 ### 7. Security
+
 - Security groups with least-privilege rules
 - IAM roles & policies
 - Service-to-service authentication
 - **Outputs**: Security group IDs
 
 ### 8. Monitoring
+
 - CloudWatch log groups
 - Custom dashboards
 - Alarms (CPU, connections, errors)
@@ -123,18 +135,21 @@ terraform/
 ## Environment Configurations
 
 ### Development
+
 - Single AZ (no redundancy)
 - Small instances (t3.micro/t3.small)
 - 7-day backup retention
 - Cost: ~$400/month
 
 ### Staging
+
 - Multi-AZ with automatic failover
 - Medium instances (t3.medium)
 - 14-day backup retention
 - Cost: ~$1,200/month
 
 ### Production
+
 - Multi-AZ with read replicas
 - Large instances (t3.large/r6i.xlarge)
 - 30-day backup retention
@@ -159,6 +174,7 @@ terraform output -json > outputs.json
 ### CI/CD Deployment
 
 GitHub Actions workflows handle automated:
+
 - Terraform validation & formatting
 - Automatic dev deployment on push
 - Production plan on pull requests
@@ -219,6 +235,7 @@ See `/docs/COST_OPTIMIZATION.md` for detailed strategies:
 - Annual savings potential: $33K+
 
 **Estimated Monthly Costs**:
+
 - Dev: $400
 - Staging: $1,200
 - Production: $6,500
@@ -227,6 +244,7 @@ See `/docs/COST_OPTIMIZATION.md` for detailed strategies:
 ## High Availability & Disaster Recovery
 
 ### RTO/RPO Targets
+
 - **RTO**: 4 hours (Recovery Time Objective)
 - **RPO**: 1 hour (Recovery Point Objective)
 
@@ -236,6 +254,7 @@ Primary: us-east-1
 Secondary: us-west-2
 
 Automatic failover for:
+
 - Database replicas
 - Cache clusters
 - Application servers
@@ -247,18 +266,21 @@ See `/docs/DISASTER_RECOVERY.md` for complete procedures.
 ## Security
 
 ### Network Security
+
 - VPC isolation (public/private subnets)
 - Security groups with least-privilege rules
 - WAF for web application protection
 - VPC Flow Logs for monitoring
 
 ### Data Security
+
 - Encryption at rest (AES-256 with KMS)
 - Encryption in transit (TLS 1.2+)
 - Secrets Manager for credentials
 - Automatic key rotation
 
 ### Access Control
+
 - IAM roles with least-privilege policies
 - Service-to-service authentication
 - Database IAM authentication
@@ -267,11 +289,13 @@ See `/docs/DISASTER_RECOVERY.md` for complete procedures.
 ## Monitoring & Alerts
 
 ### Dashboards
+
 1. Infrastructure (database, cache, compute)
 2. Application (requests, errors, latency)
 3. Cost (spend by service, trend analysis)
 
 ### Alert Rules
+
 - Database CPU > 80%
 - Connection count > 800
 - Cache evictions > 0
@@ -308,16 +332,19 @@ terraform show -json | jq '.values.root_module.resources[] | select(.address == 
 ### Common Issues
 
 **State lock stuck**:
+
 ```bash
 terraform force-unlock <LOCK_ID>
 ```
 
 **Module not found**:
+
 ```bash
 terraform get -update
 ```
 
 **AWS credentials expired**:
+
 ```bash
 aws sso login --profile default
 ```
@@ -333,8 +360,7 @@ aws sso login --profile default
 
 ## Roadmap
 
-- [ ] Add Azure module implementations
-- [ ] Add GCP module implementations
+- [ ] Define any future provider implementation in a separate, explicitly scoped directory
 - [ ] Implement cross-region replication automation
 - [ ] Add RTO/RPO validation testing
 - [ ] Integrate with Terraform Cloud
@@ -355,6 +381,6 @@ Apache 2.0
 
 ## Support Contact
 
-- **Infrastructure Team**: infrastructure@example.com
+- **Infrastructure Team**: <infrastructure@example.com>
 - **On-Call**: PagerDuty oncall
 - **Escalation**: VP Engineering

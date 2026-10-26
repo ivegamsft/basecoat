@@ -383,6 +383,6 @@ Check the Actions tab for green status on the `triage` job. If it fails with
 
 ## See Also
 
-- [Operational Runbook](operational-runbook.md)
+- [Operational Runbook Template](../templates/operational-runbook-template.md)
 - [Enterprise Security Hardening](enterprise-security-hardening.md)
 - [GitHub Agentic Workflows docs](https://github.github.com/gh-aw/introduction/overview/)

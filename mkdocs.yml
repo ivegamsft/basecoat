@@ -6,9 +6,10 @@ repo_url: https://github.com/IBuySpy-Shared/basecoat
 repo_name: IBuySpy-Shared/basecoat
 edit_uri: edit/main/docs/
 
-# Exclude legacy archive files — links are historical and not maintained
+# Exclude legacy archive files and source templates, except the published runbook template.
 exclude_docs: |
   archive/**
+  !templates/operational-runbook-template.md
 
 theme:
   name: material
@@ -42,8 +43,6 @@ theme:
 plugins:
   - search
   - awesome-pages
-
-exclude_docs: archive/**
 
 extra_css:
   - stylesheets/extra.css
@@ -110,6 +109,7 @@ nav:
     - Create a Custom Agent: guides/custom-agent-authoring.md
     - Agent Examples: guides/agent-examples.md
     - Contributing: guides/contributing.md
+    - Operational Runbook Template: templates/operational-runbook-template.md
     - Version Drift Detection: guides/version-drift.md
     - Model Optimization: guides/model-optimization.md
     - Token Optimization: guides/token-optimization.md

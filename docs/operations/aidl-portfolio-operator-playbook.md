@@ -122,7 +122,8 @@ When an incident is opened or escalated:
    - `Risk`: Critical, High, Medium, or Low
    - `SRE Impact`: None, Latency, Availability, Error Rate, or Capacity
    - `Guardrail State`: Pass, Warn, Block, or Waived
-   - `Runbook Link`: `docs/operations/operational-runbook.md` (or path to specific playbook section)
+   - `Runbook Link`: `docs/templates/operational-runbook-template.md` or a
+     service-specific runbook with an explicit scope
    - `Learning Capture`: None, Candidate, or Promoted
 4. **Route to engineering or SRE**: Assign owner; set Iteration for sprint placement
 5. **Track closure**: Update `Learning Capture=Candidate` and run retrospective
@@ -146,7 +147,7 @@ Remediation Issue created:
   - Risk: High
   - SRE Impact: Latency (if it recurs)
   - Guardrail State: Warn
-  - Runbook Link: `docs/operations/operational-runbook.md`
+  - Runbook Link: `docs/templates/operational-runbook-template.md`
   - Iteration: Sprint 38 (placed in planning)
 
 Resolution:
@@ -232,7 +233,9 @@ All playbook terminology aligns with the BaseCoat canonical lexicon and AIDL fra
 - **Risk**: Business risk classification (Critical, High, Medium, Low). Informs triage priority and SRE allocation.
 - **SRE Impact**: Operational blast radius (None, Latency, Availability, Error Rate, Capacity). Filters on-call routing.
 - **Iteration**: Sprint or release cycle. Drives planning cadence and board filtering.
-- **Runbook Link**: Direct reference to `docs/operations/operational-runbook.md` or specific playbook section.
+- **Runbook Link**: Use `docs/templates/operational-runbook-template.md` as a
+  starting point, or link the specific service runbook section with its
+  implementation scope.
 - **Learning Capture**: State indicator (None, Candidate, Promoted) for knowledge extraction.
 - **Conformance Score**: Portfolio-wide policy adherence percentage; red (<80%), yellow (<95%), green (>=95%).
 
@@ -286,4 +289,4 @@ All portfolio state must meet these standards:
 4. `docs/operations/aidl-sre-feedback-loop.md`
 5. `docs/operations/branch-protection-enforcement.md`
 6. `docs/operations/merge-queue-enforcement.md`
-7. `docs/operations/operational-runbook.md`
+7. `docs/templates/operational-runbook-template.md`

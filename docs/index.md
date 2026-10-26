@@ -113,6 +113,7 @@ flowchart LR
 ## Templates (`docs/templates/`)
 
 - [templates/](templates/) — File templates and scaffold taxonomy guidance
+- [templates/operational-runbook-template.md](templates/operational-runbook-template.md) — Provider-neutral operational runbook template
 
 ## Examples (`docs/examples/`)
 

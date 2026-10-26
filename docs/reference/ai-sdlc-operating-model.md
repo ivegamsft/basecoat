@@ -68,4 +68,4 @@ Use both planes in every sprint:
 - [reference/goals.md](goals.md)
 - [reference/product.md](product.md)
 - [../philosophy.md](../philosophy.md)
-- [operations/operational-runbook.md](../operations/operational-runbook.md)
+- [Operational Runbook Template](../templates/operational-runbook-template.md)

@@ -355,5 +355,6 @@ If you cannot meet this standard, defer to interactive mode.
 ## References
 
 - [Intent Prefixes Guide](../guides/intent-prefixes.md) — Routing behavior and dispatch context
-- [Operational Runbook](operational-runbook.md) — Operational procedures
+- [Operational Runbook Template](../templates/operational-runbook-template.md) — Provider-neutral
+  operational procedures
 - [Autopilot Mode Documentation](../../README.md) — Autopilot and fleet mode overview
