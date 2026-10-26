@@ -2,7 +2,7 @@
 
 Generated as a standalone inventory (no edits to agent/skill/instruction files).
 
-- Generated: 2026-10-19 15:21:59 +0000
+- Generated: 2026-10-26 14:57:30 +0000
 - Estimation method: `approx_tokens = round(word_count × 1.35)` (same heuristic used in `scripts/validate-basecoat.ps1`).
 - Scope: `agents/*.agent.md`, `skills/*/SKILL.md`, `instructions/*.instructions.md`.
 
@@ -10,18 +10,18 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 
 | Type | Count | Total Words | Total Approx Tokens | Avg Approx Tokens |
 |---|---:|---:|---:|---:|
-| Agent | 131 | 40459 | 54622 | 417 |
-| Skill | 143 | 34227 | 46205 | 323 |
+| Agent | 131 | 40468 | 54634 | 417 |
+| Skill | 143 | 34238 | 46220 | 323 |
 | Instruction | 94 | 52604 | 71015 | 755 |
-| **All** | 368 | 127290 | 171842 | 467 |
+| **All** | 368 | 127310 | 171869 | 467 |
 
 ## Agents
 
 | Name | Location | Words | Approx Tokens |
 |---|---|---:|---:|
 | basecoat-60-workflow-ship-it-orchestrator | `agents/basecoat-60-workflow-ship-it-orchestrator.agent.md` | 508 | 686 |
+| basecoat-60-workflow-ship-it-control-loop | `agents/basecoat-60-workflow-ship-it-control-loop.agent.md` | 457 | 617 |
 | basecoat-50-security-security-operations | `agents/basecoat-50-security-security-operations.agent.md` | 448 | 605 |
-| basecoat-60-workflow-ship-it-control-loop | `agents/basecoat-60-workflow-ship-it-control-loop.agent.md` | 448 | 605 |
 | basecoat-10-core-branch-hygiene-sweeper | `agents/basecoat-10-core-branch-hygiene-sweeper.agent.md` | 413 | 558 |
 | basecoat-10-core-change-isolation-architect | `agents/basecoat-10-core-change-isolation-architect.agent.md` | 390 | 526 |
 | basecoat-20-lang-dotnet-modernization-advisor | `agents/basecoat-20-lang-dotnet-modernization-advisor.agent.md` | 386 | 521 |
@@ -164,10 +164,10 @@ Generated as a standalone inventory (no edits to agent/skill/instruction files).
 | copilot-review-triage | `skills/copilot-review-triage/SKILL.md` | 365 | 493 |
 | workflow-parallelization | `skills/workflow-parallelization/SKILL.md` | 363 | 490 |
 | rai-privacy-review | `skills/rai-privacy-review/SKILL.md` | 361 | 487 |
+| ship-it | `skills/ship-it/SKILL.md` | 358 | 483 |
 | queue-rebalancer | `skills/queue-rebalancer/SKILL.md` | 355 | 479 |
 | sprint-management | `skills/sprint-management/SKILL.md` | 352 | 475 |
 | release-notes | `skills/release-notes/SKILL.md` | 348 | 470 |
-| ship-it | `skills/ship-it/SKILL.md` | 347 | 468 |
 | agentops-audit | `skills/agentops-audit/SKILL.md` | 339 | 458 |
 | ci-audit | `skills/ci-audit/SKILL.md` | 339 | 458 |
 | backlog-rebalance-engine | `skills/backlog-rebalance-engine/SKILL.md` | 337 | 455 |
