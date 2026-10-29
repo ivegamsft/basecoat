@@ -226,26 +226,102 @@ $secOutput = & pwsh -NoProfile -Command $secScript
 Assert-Equal 'priority:critical prevents duplicate critical escalation' $secOutput 'False'
 
 # ---------------------------------------------------------------------------
-# Test 9: Security without critical label triggers escalation
+# Test 9: Existing priority prevents security escalation from adding a label
 # ---------------------------------------------------------------------------
-Write-Host '  Test 9: Security without critical triggers escalation...'
+Write-Host '  Test 9: Existing priority is not replaced by security escalation...'
 
 $secScript2 = @'
-$labels       = @("security","P1-high")
+$priorityLabels = @("priority:critical","priority:high","priority:medium","priority:low","P0-critical","P1-high","P2-medium","P3-low","priority/critical","priority/high","priority/medium","priority/low")
+$labels       = @("security","priority:medium")
 $escalated    = $false
-if ($labels -contains "security" -and $labels -notcontains "priority:critical" -and $labels -notcontains "P0-critical" -and $labels -notcontains "priority/critical") {
+if ($labels -contains "security" -and $labels -notcontains "priority:critical" -and $labels -notcontains "P0-critical" -and $labels -notcontains "priority/critical" -and
+    -not ($labels | Where-Object { $priorityLabels -contains $_ })) {
     $escalated = $true
 }
 $escalated.ToString()
 '@
 
 $secOutput2 = & pwsh -NoProfile -Command $secScript2
-Assert-Equal 'Security without critical label triggers escalation' $secOutput2 'True'
+Assert-Equal 'Security with priority:medium does not add priority:critical' $secOutput2 'False'
 
 # ---------------------------------------------------------------------------
-# Test 10: Get-TokenOverlap — identical titles → 1.0
+# Test 10: Existing noncritical priority is preserved during security review
 # ---------------------------------------------------------------------------
-Write-Host '  Test 10: Get-TokenOverlap identical titles...'
+Write-Host '  Test 10: Existing priority is preserved over a security recommendation...'
+
+$fixture = @{
+    number = 456
+    title = 'Security report keeps the existing priority'
+    body = 'A security review found a risk that needs investigation. The existing priority should remain unchanged until a maintainer reviews it.'
+    labels = @(
+        @{ name = 'security' }
+        @{ name = 'priority:medium' }
+        @{ name = 'sprint:24' }
+    )
+    state = 'OPEN'
+    closedAt = $null
+    createdAt = [datetime]::UtcNow.ToString('o')
+    assignees = @()
+    comments = @()
+}
+$global:TriageIssueFixtureJson = ConvertTo-Json -InputObject $fixture -Depth 10 -Compress
+function global:gh {
+    param([Parameter(ValueFromRemainingArguments = $true)][string[]] $Arguments)
+    $global:LASTEXITCODE = 0
+    if ($Arguments[0] -eq 'issue' -and $Arguments[1] -eq 'list') { return '[]' }
+    if ($Arguments[0] -eq 'issue' -and $Arguments[1] -eq 'view') { return $global:TriageIssueFixtureJson }
+    if ($Arguments[0] -eq 'api') { return '[]' }
+    if ($Arguments[0] -eq 'pr' -and $Arguments[1] -eq 'list') { return '[]' }
+    return ''
+}
+try {
+    $triageOutput = (& $scriptPath -Repo 'example/project' -IssueNumber 456 6>&1 | Out-String)
+    Assert-True 'Production script does not add a second priority label' `
+        ($triageOutput -notmatch '(?m)\[\+label\].*priority:(critical|high|medium|low)')
+    Assert-True 'Production script reports the critical recommendation and preserves priority:medium' `
+        ($triageOutput -match '(?m)\[comment\].*security priority recommendation')
+    Assert-True 'PowerShell script reports differing security recommendation instead of adding it' `
+        ($psContent -match 'existingPriorityLabels\.Count -gt 0')
+
+    $fixture.labels = @(
+        @{ name = 'security' }
+        @{ name = 'sprint:24' }
+    )
+    $global:TriageIssueFixtureJson = ConvertTo-Json -InputObject $fixture -Depth 10 -Compress
+    $missingPriorityOutput = (& $scriptPath -Repo 'example/project' -IssueNumber 456 6>&1 | Out-String)
+    $addedPriorityLines = @($missingPriorityOutput -split '\r?\n' | Where-Object {
+        $_ -match '\[\+label\].*priority:(critical|high|medium|low)'
+    })
+    Assert-Equal 'Security without a priority adds exactly one critical label' $addedPriorityLines.Count 1
+    Assert-True 'Critical escalation does not add a priority floor' `
+        ($addedPriorityLines[0] -match 'priority:critical' -and $missingPriorityOutput -notmatch '\[\+label\].*priority:(high|medium|low)')
+
+    $fixture.labels = @(
+        @{ name = 'security' }
+        @{ name = 'priority:medium' }
+        @{ name = 'priority:high' }
+        @{ name = 'sprint:24' }
+    )
+    $global:TriageIssueFixtureJson = ConvertTo-Json -InputObject $fixture -Depth 10 -Compress
+    $conflictOutput = (& $scriptPath -Repo 'example/project' -IssueNumber 456 6>&1 | Out-String)
+    Assert-True 'Pre-existing multi-priority conflict is reported' `
+        ($conflictOutput -match '(?m)\[comment\].*priority conflict')
+    Assert-True 'Multi-priority conflict does not add another priority label' `
+        ($conflictOutput -notmatch '(?m)\[\+label\].*priority:(critical|high|medium|low)')
+} finally {
+    Remove-Item Function:\global:gh -ErrorAction SilentlyContinue
+    Remove-Variable TriageIssueFixtureJson -Scope Global -ErrorAction SilentlyContinue
+}
+$shContent = Get-Content (Join-Path $repoRoot 'skills\issue-triage\scripts\triage-issues.sh') -Raw
+Assert-True 'Bash script preserves the existing priority on security escalation' `
+    ($shContent -match 'if \[\[ "\$HAS_PRIORITY_ANY" == "true" \]\]; then[\s\S]+PRESERVED_PRIORITY[\s\S]+else[\s\S]+Security without an existing priority')
+Assert-True 'Bash script reports pre-existing multi-priority conflicts' `
+    ($shContent -match 'EXISTING_PRIORITIES[\s\S]+-gt 1[\s\S]+"priority conflict"')
+
+# ---------------------------------------------------------------------------
+# Test 11: Get-TokenOverlap — identical titles → 1.0
+# ---------------------------------------------------------------------------
+Write-Host '  Test 11: Get-TokenOverlap identical titles...'
 
 $overlapScript = @'
 function Get-TokenOverlap {
@@ -266,9 +342,9 @@ $overlapOutput = & pwsh -NoProfile -Command $overlapScript
 Assert-Equal 'Identical titles produce overlap 1' $overlapOutput '1'
 
 # ---------------------------------------------------------------------------
-# Test 11: Get-TokenOverlap — completely different titles → 0.0
+# Test 12: Get-TokenOverlap — completely different titles → 0.0
 # ---------------------------------------------------------------------------
-Write-Host '  Test 11: Get-TokenOverlap different titles...'
+Write-Host '  Test 12: Get-TokenOverlap different titles...'
 
 $overlapScript2 = @'
 function Get-TokenOverlap {
@@ -289,9 +365,9 @@ $overlapOutput2 = & pwsh -NoProfile -Command $overlapScript2
 Assert-Equal 'Unrelated titles produce overlap 0' $overlapOutput2 '0'
 
 # ---------------------------------------------------------------------------
-# Test 12: Test-EncodingGibberish detects Mojibake patterns
+# Test 13: Test-EncodingGibberish detects Mojibake patterns
 # ---------------------------------------------------------------------------
-Write-Host '  Test 12: Test-EncodingGibberish detects corruption...'
+Write-Host '  Test 13: Test-EncodingGibberish detects corruption...'
 
 $gibberishScript = @'
 function Test-EncodingGibberish {
@@ -326,9 +402,9 @@ Assert-Equal 'EncodingGibberish: clean=F, two corrupted=T, empty=F' `
     $gibberishOutput 'False,True,True,False'
 
 # ---------------------------------------------------------------------------
-# Test 13: Sprint label policy requires sprint:<number>
+# Test 14: Sprint label policy requires sprint:<number>
 # ---------------------------------------------------------------------------
-Write-Host '  Test 13: Sprint label policy detects missing sprint labels...'
+Write-Host '  Test 14: Sprint label policy detects missing sprint labels...'
 
 $sprintScript = @'
 function Has-SprintLabel {
@@ -347,9 +423,9 @@ $sprintOutput = & pwsh -NoProfile -Command $sprintScript
 Assert-Equal 'Has-SprintLabel matches sprint label formats and rejects missing label' $sprintOutput 'True,True,False'
 
 # ---------------------------------------------------------------------------
-# Test 14: Closed-issue verification checks PR mentions fallback
+# Test 15: Closed-issue verification checks PR mentions fallback
 # ---------------------------------------------------------------------------
-Write-Host '  Test 14: Script source includes PR mention fallback query...'
+Write-Host '  Test 15: Script source includes PR mention fallback query...'
 
 $psContent14 = Get-Content $scriptPath -Raw
 Assert-True 'Closed verification uses fallback PR mention search (#N)' ($psContent14 -match '--search "#\$N"')

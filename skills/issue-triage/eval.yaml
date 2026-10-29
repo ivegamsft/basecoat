@@ -18,6 +18,20 @@ scenarios:
     input: "Deploy the application to production."
     expect_activation: false
 
+  - id: "priority-preservation-pos-1"
+    description: "Preserve an existing priority when the recommendation differs."
+    input: |
+      Triage issue #45. Existing labels are bug and priority:medium. The issue
+      describes a major feature broken for many users with no workaround, so
+      priority:high may be the recommended priority.
+    expect_activation: true
+    expect:
+      labels_not:
+        - "priority:high"
+      comment_contains:
+        - "priority:medium"
+        - "priority:high"
+
   # Step 7 — PRD/spec pre-flight (Check 10 in triage-workflow.md)
   - id: "prd-preflight-pos-1"
     description: "Enhancement touching risky path with no PRD/spec link → needs-prd label + advisory comment"
@@ -54,4 +68,3 @@ scenarios:
     expect:
       labels_not:
         - "needs-prd"
-

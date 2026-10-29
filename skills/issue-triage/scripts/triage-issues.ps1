@@ -54,14 +54,14 @@ $ErrorActionPreference = "Stop"
 # ---------------------------------------------------------------------------
 
 function Invoke-GH {
-    param([string[]] $Args)
-    if ($DryRun -and ($Args[0] -in "issue","pr") -and ($Args[1] -in "edit","close","reopen","comment")) {
-        Write-Host "[DRY-RUN] gh $($Args -join ' ')" -ForegroundColor Cyan
+    param([string[]] $GhArguments)
+    if ($DryRun -and ($GhArguments[0] -in "issue","pr") -and ($GhArguments[1] -in "edit","close","reopen","comment")) {
+        Write-Host "[DRY-RUN] gh $($GhArguments -join ' ')" -ForegroundColor Cyan
         return $null
     }
-    $result = gh @Args 2>&1
+    $result = gh @GhArguments 2>&1
     if ($LASTEXITCODE -ne 0) {
-        Write-Warning "gh $($Args -join ' ') failed: $result"
+        Write-Warning "gh $($GhArguments -join ' ') failed: $result"
         return $null
     }
     return $result
@@ -139,7 +139,7 @@ function Get-TokenOverlap {
     $setA = @(& $tokenize $a)
     $setB = @(& $tokenize $b)
     if ($setA.Count -eq 0 -or $setB.Count -eq 0) { return 0.0 }
-    $intersection = ($setA | Where-Object { $setB -contains $_ }).Count
+    $intersection = @($setA | Where-Object { $setB -contains $_ }).Count
     $union = ($setA + $setB | Sort-Object -Unique).Count
     return [math]::Round($intersection / $union, 2)
 }
@@ -338,7 +338,7 @@ foreach ($issue in $allIssues) {
     $typeLabelSet = @($labels | Where-Object { $typeLabels -contains $_ })
     $hasType     = $typeLabelSet.Count -gt 0
     $hasDuplicate = $labels -contains "duplicate"
-    $hasPriority = ($labels | Where-Object { $priorityLabels -contains $_ }).Count -gt 0
+    $hasPriority = @($labels | Where-Object { $priorityLabels -contains $_ }).Count -gt 0
 
     if ($hasDuplicate -and $hasType) {
         $duplicateAuthoritative = (-not $isOpen) -or ($title -match '(?i)\bduplicate\b') -or ($body -match '(?i)duplicate of #\d+')
@@ -386,6 +386,8 @@ foreach ($issue in $allIssues) {
         if ($labels -contains "security" -or $inferredType -eq "security") {
             Add-Label $N $canonicalPriorityLabels.critical "Security issues are auto-escalated to critical"
             Post-Comment $N "Priority escalated to **critical**: security issues are automatically assigned critical priority per triage policy." "auto-escalate security"
+            $labels += $canonicalPriorityLabels.critical
+            $hasPriority = $true
         } else {
             Add-Label $N "needs-triage" "Missing priority label"
         }
@@ -454,17 +456,29 @@ foreach ($issue in $allIssues) {
             Post-Comment $N "This issue has been open for $([math]::Round($agedays)) days with no recent activity. Adding ``stale`` label. If this is still relevant, please comment to keep it active." "stale policy"
         }
 
+        $existingPriorityLabels = @($labels | Where-Object { $priorityLabels -contains $_ })
+        if ($existingPriorityLabels.Count -gt 1) {
+            Post-Comment $N "Priority conflict: this issue has multiple priority labels (``$($existingPriorityLabels -join '``, ``')``). Triage did not add or remove any priority; a maintainer should keep exactly one." "priority conflict"
+        }
         if ($labels -contains "security" -and $labels -notcontains $canonicalPriorityLabels.critical -and $labels -notcontains "P0-critical" -and $labels -notcontains "priority/critical") {
-            Add-Label $N $canonicalPriorityLabels.critical "Security issue without critical priority"
+            if ($existingPriorityLabels.Count -gt 0) {
+                $preservedPriority = $existingPriorityLabels[0]
+                Post-Comment $N "Security signal recommends ``$($canonicalPriorityLabels.critical)``, but the existing priority ``$preservedPriority`` was preserved. Update the priority only if a maintainer approves the change." "security priority recommendation"
+            } else {
+                Add-Label $N $canonicalPriorityLabels.critical "Security issue without an existing priority"
+                $labels += $canonicalPriorityLabels.critical
+            }
         }
 
         if ($labels -contains "bug" -and $agedays -gt 30 -and
             -not ($labels | Where-Object { $priorityLabels -contains $_ })) {
             Add-Label $N $canonicalPriorityLabels.high "Bug open >30 days without priority"
+            $labels += $canonicalPriorityLabels.high
         }
 
         if (-not ($labels | Where-Object { $priorityLabels -contains $_ }) -and $isOpen) {
             Add-Label $N $canonicalPriorityLabels.low "No priority set; applying floor"
+            $labels += $canonicalPriorityLabels.low
         }
     }
 }
@@ -473,10 +487,10 @@ foreach ($issue in $allIssues) {
 # Report
 # ---------------------------------------------------------------------------
 
-$closeCount  = ($Script:ActionLog | Where-Object { $_.Action -eq "Close" }).Count
-$reopenCount = ($Script:ActionLog | Where-Object { $_.Action -eq "Reopen" }).Count
-$labelCount  = ($Script:ActionLog | Where-Object { $_.Action -like "Add label*" }).Count
-$commentCount= ($Script:ActionLog | Where-Object { $_.Action -eq "Comment" }).Count
+$closeCount  = @($Script:ActionLog | Where-Object { $_.Action -eq "Close" }).Count
+$reopenCount = @($Script:ActionLog | Where-Object { $_.Action -eq "Reopen" }).Count
+$labelCount  = @($Script:ActionLog | Where-Object { $_.Action -like "Add label*" }).Count
+$commentCount= @($Script:ActionLog | Where-Object { $_.Action -eq "Comment" }).Count
 
 Write-Host "`n=== Triage Report ===" -ForegroundColor White
 Write-Host "Issues scanned  : $($allIssues.Count)"

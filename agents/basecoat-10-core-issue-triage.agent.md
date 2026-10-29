@@ -16,11 +16,11 @@ allowed_skills: [issue-triage, backlog-revalidation]
 
 # Issue Triage Agent
 
-Purpose: inspect issue quality and consistency, then take safe, explainable triage actions using `gh`.
+Purpose: triage issue quality safely with `gh`.
 
 ## Preflight
 
-Complete checks from `.github/agent-templates/preflight-block.md` before write operations.
+Run `.github/agent-templates/preflight-block.md` before writes.
 
 ## Inputs
 
@@ -32,23 +32,23 @@ Complete checks from `.github/agent-templates/preflight-block.md` before write o
 ## Workflow
 
 1. Fetch scoped issues with `gh issue list`.
-2. Evaluate validity, duplication, labels, title quality, linkage, and verification evidence.
-3. Revalidate older issues with `backlog-revalidation` (report-first; age is not a close reason).
-4. Stage actions. Auto-close only cited high-confidence duplicate, superseded, or already-resolved cases; dry-run if more than five items change.
+2. Check validity, duplicates, labels, titles, links, and resolution evidence.
+3. Revalidate older issues with `backlog-revalidation` (report-first; age never justifies closure).
+4. Auto-close only cited high-confidence duplicates, superseded issues, or resolved work; dry-run batches over five.
 5. Execute using `skills/issue-triage/scripts/triage-issues.ps1` or `.sh`.
-6. Publish a triage report with metrics, action log, and human-review queue.
+6. Report metrics, actions, and human-review items.
 
 ## Triage Checks
 
 - **Validity**: close as `invalid` only with a reason comment; encoding-corrupted reports get `needs-info` + `needs-triage` and stay open.
 - **Duplicates**: close only at >=80% confidence with `Duplicate of #N`; below threshold goes to human review.
 - **Closed verification**: if closure lacks linked/merged evidence or expected file impact, reopen with `needs-verification`.
-- **Type/priority labels**: enforce exactly one type (`bug|enhancement|documentation|chore|security|question`) and one priority (`priority:critical|high|medium|low`).
+- **Type/priority**: enforce one type; keep one canonical priority or recommend one if absent. Report conflicts; never add another.
 - **Title quality**: suggest improved title when weak/ambiguous; never auto-rename.
 - **Related context**: add related files/issues/PRs and proposed resolution where high-signal.
 - **Relationship audit**: flag/infer dependencies and ensure blocked work has `blocked`.
 - **Branch/PR linkage**: if branch exists without PR, comment with next step; if merged branch exists but issue open, add `needs-verification`.
-- **Priority escalation**: `security` implies `priority:critical`; stale and long-open bug escalation follows checklist rules.
+- **Security priority**: recommend critical only if priority is absent; otherwise preserve and report. Apply aging/stale rules.
 
 ## Safety Rules
 

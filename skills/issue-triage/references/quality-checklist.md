@@ -48,6 +48,13 @@ Encoding-integrity failures should be flagged with `needs-info` + `needs-triage`
 
 Legacy labels (`P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/critical`, `priority/high`, `priority/medium`, `priority/low`) should be normalized to canonical labels during triage automation.
 
+**Existing priority precedence:** If exactly one canonical `priority:*` label is
+already present, preserve it and do not add a different priority based on a new
+recommendation. Report a differing recommendation in the triage comment. If no
+canonical priority exists, apply the recommended canonical label. If multiple
+canonical priority labels are already present, do not add another; flag the
+conflict for maintainer cleanup.
+
 ### State Labels (applied by triage)
 
 | Label | Meaning |
@@ -92,12 +99,14 @@ Use this matrix to assign priority when it is not immediately obvious:
 | **High Urgency** | `priority:critical` | `priority:high` |
 | **Low Urgency** | `priority:medium` | `priority:low` |
 
-**Escalation signals** (auto-upgrade):
+**Escalation signals** (recommendations):
 
-- Title or body contains: `outage`, `data loss`, `security`, `CVE`, `incident`, `breach` → `priority:critical`
+- Title or body contains: `outage`, `data loss`, `security`, `CVE`, `incident`, `breach` → recommend `priority:critical`
 - Bug with no workaround and affecting primary user flow → `priority:high`
 - Open >30 days with reproducible bug + no priority → `priority:high`
 - Open >90 days with no activity → add `stale` regardless of priority
+
+Escalation signals do not override a single existing canonical priority label.
 
 ---
 

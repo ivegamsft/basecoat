@@ -378,6 +378,8 @@ for i in $(seq 0 $((ISSUE_COUNT - 1))); do
       if [[ "$INFERRED_TYPE" == "security" ]] || echo "$LABELS" | grep -q "security"; then
         add_label "$N" "$PRIORITY_CRITICAL" "Security auto-escalation"
         post_comment "$N" "Priority escalated to **critical**: security issues are automatically assigned critical priority per triage policy." "auto-escalate security"
+        LABELS="${LABELS:+$LABELS,}$PRIORITY_CRITICAL"
+        HAS_PRIORITY=true
       else
         add_label "$N" "needs-triage" "Missing priority label"
       fi
@@ -451,16 +453,32 @@ for i in $(seq 0 $((ISSUE_COUNT - 1))); do
       post_comment "$N" "This issue has been open for $AGE_DAYS days with no recent activity. Adding \`stale\` label. Comment to keep it active." "stale policy"
     fi
 
+    EXISTING_PRIORITIES=$(printf '%s' "$LABELS" | tr ',' '\n' | grep -xE 'priority:(critical|high|medium|low)|P[0-3]-(critical|high|medium|low)|priority/(critical|high|medium|low)' || true)
+    if [[ $(printf '%s' "$EXISTING_PRIORITIES" | grep -c .) -gt 1 ]]; then
+      post_comment "$N" "Priority conflict: this issue has multiple priority labels ($(printf '%s' "$EXISTING_PRIORITIES" | paste -sd, -)). Triage did not add or remove any priority; a maintainer should keep exactly one." "priority conflict"
+    fi
+
     if echo "$LABELS" | grep -qE '(^|,)security(,|$)' && ! echo "$LABELS" | grep -qE '(^|,)priority:critical(,|$)|(^|,)P0-critical(,|$)|(^|,)priority/critical(,|$)'; then
-      add_label "$N" "$PRIORITY_CRITICAL" "Security without critical priority"
+      if [[ "$HAS_PRIORITY_ANY" == "true" ]]; then
+        PRESERVED_PRIORITY=$(printf '%s' "$LABELS" | tr ',' '\n' | grep -m1 -xE 'priority:(critical|high|medium|low)|P[0-3]-(critical|high|medium|low)|priority/(critical|high|medium|low)' || true)
+        post_comment "$N" "Security signal recommends \`$PRIORITY_CRITICAL\`, but the existing priority \`$PRESERVED_PRIORITY\` was preserved. Update the priority only if a maintainer approves the change." "security priority recommendation"
+      else
+        add_label "$N" "$PRIORITY_CRITICAL" "Security without an existing priority"
+        LABELS="${LABELS:+$LABELS,}$PRIORITY_CRITICAL"
+        HAS_PRIORITY_ANY=true
+      fi
     fi
 
     if echo "$LABELS" | grep -q "bug" && [[ "$AGE_DAYS" -gt 30 ]] && [[ "$HAS_PRIORITY_ANY" == "false" ]]; then
       add_label "$N" "$PRIORITY_HIGH" "Bug open >30 days without priority"
+      LABELS="${LABELS:+$LABELS,}$PRIORITY_HIGH"
+      HAS_PRIORITY_ANY=true
     fi
 
     if [[ "$HAS_PRIORITY_ANY" == "false" ]]; then
       add_label "$N" "$PRIORITY_LOW" "No priority set; applying floor"
+      LABELS="${LABELS:+$LABELS,}$PRIORITY_LOW"
+      HAS_PRIORITY_ANY=true
     fi
   fi
 

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.1",
   "libraryVersion": "4.7.0",
-  "generatedAt": "2026-10-24T20:26:44.4343945Z",
+  "generatedAt": "2026-10-29T21:10:17.9855015Z",
   "assets": [
     {
       "path": "agents/agentic-sdlc-autonomy.agent.md",
@@ -238,7 +238,7 @@
     {
       "path": "agents/basecoat-10-core-issue-triage.agent.md",
       "type": "agent",
-      "sha": "e3d0a98e2a02c783604ffcbc854ca70a89bacc16",
+      "sha": "99d4d014ea688f92c562bc149cbf3a58f473b536",
       "version": null,
       "effectiveVersion": "4.7.0",
       "versionSource": "library"

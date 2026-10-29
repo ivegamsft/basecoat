@@ -86,7 +86,20 @@ Apply exactly one type label per the taxonomy in `skills/issue-triage/references
 ### Step 3 — Assign Priority
 
 Use the priority taxonomy from `skills/issue-triage/references/quality-checklist.md`.
-Apply exactly one priority label:
+An existing canonical priority label is an explicit repository decision and takes
+precedence over a new recommendation:
+
+- If exactly one canonical `priority:*` label already exists, preserve it. Do not
+  add a different priority label, even when the issue content suggests another
+  priority. If the recommendation differs, explain the recommendation in the
+  triage summary without changing the existing label.
+- If no canonical priority label exists, apply the recommended priority.
+- If multiple canonical priority labels already exist, do not add another. Report
+  the conflict in the triage summary for maintainer cleanup.
+
+For example, if `priority:medium` already exists and the issue appears to warrant
+`priority:high`, keep `priority:medium` and report `priority:high` as the
+recommendation.
 
 | Priority | Criteria |
 |---|---|
@@ -109,10 +122,16 @@ A `duplicate` issue must not carry a type label simultaneously.
 
 ### Step 5 — Apply Structured Fields and Labels
 
-Apply the appropriate type label AND priority label. Add `good first issue`
-if the issue is well-scoped and approachable for new contributors.
+Apply the appropriate type label. Apply a priority label only when no canonical
+`priority:*` label already exists; preserve a single existing canonical priority
+even when it differs from the recommendation. If multiple canonical priority
+labels already exist, do not add another and report the conflict for maintainer
+cleanup. Add `good first issue` if the issue is well-scoped and approachable for
+new contributors.
 
-If legacy priority labels are present, normalize them to canonical `priority:*` labels.
+If legacy priority labels are present and no canonical priority exists, normalize
+them to the recommended canonical `priority:*` label. Never add a canonical
+priority merely to replace a different existing canonical priority.
 
 The canonical labels are mirrored into the native issue `Type` field and `Priority`
 issue field by `.github/workflows/issue-field-sync.yml`.
@@ -170,9 +189,11 @@ Use this structure:
 ## Issue Triage Summary
 
 **Type**: [bug | enhancement | documentation | chore | security | question]
-**Priority**: [priority:critical | priority:high | priority:medium | priority:low]
+**Priority**: [the priority label applied or preserved]
+**Priority recommendation**: [include only when different from the preserved priority]
 
-**Reasoning**: Brief explanation of classification and priority rationale.
+**Reasoning**: Brief explanation of classification and priority rationale. Note
+when an existing priority was preserved over a different recommendation.
 
 **Quality check**: [passed | failed — list missing fields]
 

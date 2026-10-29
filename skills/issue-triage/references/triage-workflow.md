@@ -129,8 +129,14 @@ gh issue edit $N --add-label "needs-verification"
 | Sprint | 1 | `sprint:<number>` |
 | Area | 0–1 | `area/*` labels defined in repo |
 
-Legacy labels (`P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/critical`, `priority/high`, `priority/medium`, `priority/low`) are migration-only and should be normalized to canonical `priority:*` labels during triage runs.
+Legacy labels (`P0-critical`, `P1-high`, `P2-medium`, `P3-low`, `priority/critical`, `priority/high`, `priority/medium`, `priority/low`) are migration-only and should be normalized to canonical `priority:*` labels during triage runs when no canonical priority is already present.
 Repo-specific delivery labels such as `area/*`, `sprint:*`, and legacy `sprint-*` labels must be preserved during cleanup; only governance labels should be normalized automatically.
+
+If exactly one canonical `priority:*` label already exists, preserve it even when
+the current risk assessment recommends another value. Record a differing
+recommendation for review; do not add a conflicting priority. If multiple
+canonical priority labels already exist, add no priority and flag the conflict
+for maintainer cleanup.
 
 ### Inference Rules
 
@@ -273,7 +279,8 @@ gh pr create --head fix/245-oauth-callback --base main --title "fix: OAuth callb
 
 | Condition | Action |
 |-----------|--------|
-| `security` label + no `priority:critical` | Add `priority:critical` |
+| `security` label + no priority label | Add `priority:critical` |
+| `security` label + an existing noncritical priority | Preserve it and report `priority:critical` as a recommendation; do not add a label |
 | Open >90 days + no activity | Add `stale` |
 | Open >30 days + `bug` + has repro steps | Add `priority:high` if no priority set |
 | No priority label at all | Apply `priority:low` as floor |

@@ -83,6 +83,8 @@ Require-Pattern -Name 'relationship marker blocked-by' -Pattern 'Blocked by #N'
 Require-Pattern -Name 'relationship marker depends-on' -Pattern 'Depends on #N'
 Require-Pattern -Name 'relationship marker part-of' -Pattern 'Part of #N'
 Require-Pattern -Name 'relationship marker related-to' -Pattern 'Related to #N'
+Require-Pattern -Name 'existing canonical priority is preserved' -Pattern 'preserve it\. Do not\s+add a different priority label'
+Require-Pattern -Name 'different recommendation is reported, not applied' -Pattern 'priority:medium[\s\S]+priority:high[\s\S]+keep `priority:medium`'
 
 # Runtime model guardrails in compiled workflow.
 $pinnedModelPattern = '(?m)^[ \t]*COPILOT_MODEL:[ \t]*(?:"claude-sonnet-5"|claude-sonnet-5)[ \t]*\r?$'
