@@ -160,6 +160,25 @@ gh api repos/<owner>/<repo>/milestones --jq '.[]|"\(.title) open=\(.open_issues)
 Every created project must appear in the repository `projectsV2` list and every
 grouped issue must have a milestone, or the run reports a blocking gap.
 
+Drift audit (deterministic enforcement of the rules above):
+
+```bash
+pwsh scripts/audit-portfolio-links.ps1 -Owner <owner> -OutputPath portfolio-links.json
+pwsh scripts/audit-portfolio-links.ps1 -Owner <owner> -Fix
+```
+
+The auditor scans every open owner-level project, reports repositories that
+contribute items but are not linked, and reports open issues in `Sprint <N>`
+or `Wave <N>` projects without a milestone. It exits `1` when gaps remain and
+`2` when the audit cannot complete or the report cannot be written. `-Fix`
+links missing same-owner repositories through the GraphQL
+`linkProjectV2ToRepository` mutation, because `gh project link` can fail with
+"unknown owner type". Retries back off exponentially, wait for the reported
+primary rate-limit reset or a secondary-limit cooldown, and stop when the
+required wait exceeds `-MaxWaitSeconds`. Milestone gaps and unlinked
+cross-owner repositories stay report-only gaps. The token needs `project`
+scope.
+
 Required doc check:
 
 - Confirm at least one canonical active project link is documented in

@@ -880,6 +880,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host 'Running portfolio link auditor tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'audit-portfolio-links-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Portfolio link auditor tests failed' -ForegroundColor Red
+    Write-FailureLog 'audit-portfolio-links-tests'
+    exit 1
+}
+
 Write-Host 'Running AIDL portfolio rollup and KPI publisher tests...'
 & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'aidl-portfolio-rollup-kpi-publisher-tests.ps1')
 if ($LASTEXITCODE -ne 0) {
