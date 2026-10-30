@@ -124,6 +124,12 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
+      - name: Record CI source tree
+        id: source
+        if: github.event_name == 'merge_group'
+        shell: bash
+        run: echo "tree=$(git rev-parse 'HEAD^{tree}')" >> "$GITHUB_OUTPUT"
+
       - name: Run PowerShell test suite
         shell: pwsh
         env:
@@ -131,6 +137,29 @@ jobs:
         run: |
           $failOnGuidanceAuditErrors = '${{ github.event_name }}' -ne 'pull_request'
           pwsh tests/run-tests.ps1 -GuidanceAuditFailOnError:$failOnGuidanceAuditErrors
+
+      - name: Validate strict coherence conflicts
+        shell: pwsh
+        run: pwsh scripts/check-coherence.ps1 -Strict -Category conflicts
+
+      - name: Write CI validated tree marker
+        if: github.event_name == 'merge_group'
+        env:
+          VALIDATED_TREE: ${{ steps.source.outputs.tree }}
+        shell: bash
+        run: |
+          mkdir -p test-results
+          printf '%s\n' "$VALIDATED_TREE" > test-results/validated-tree.txt
+
+      - name: Record successful merge-group CI validation
+        if: github.event_name == 'merge_group'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: ci-merge-group-validation-${{ steps.source.outputs.tree }}
+          path: test-results/validated-tree.txt
+          retention-days: 90
+          if-no-files-found: error
+          overwrite: true
 
       - name: Upload test results on failure
         if: failure()

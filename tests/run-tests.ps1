@@ -1,6 +1,5 @@
 param(
-    [bool]$GuidanceAuditFailOnError = $true,
-    [switch]$SkipSyncProcessTests
+    [bool]$GuidanceAuditFailOnError = $true
 )
 
 $ErrorActionPreference = 'Stop'
@@ -81,8 +80,11 @@ function Assert-Equal {
     }
 }
 
-Write-Host 'Running validate-basecoat.ps1...'
-./scripts/validate-basecoat.ps1
+Write-Host 'Running validate-basecoat.ps1 -Strict...'
+& pwsh -NoProfile -File ./scripts/validate-basecoat.ps1 -Strict
+if ($LASTEXITCODE -ne 0) {
+    exit $LASTEXITCODE
+}
 
 Write-Host 'Checking eval.yaml presence for all skills...'
 $skillsDir = Join-Path $repoRoot 'skills'
@@ -226,16 +228,12 @@ finally {
     }
 }
 
-if (-not $SkipSyncProcessTests) {
-    Write-Host 'Running sync process tests...'
-    & pwsh -NoProfile -File (Join-Path $PSScriptRoot 'sync-tests.ps1')
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host 'Sync process tests failed' -ForegroundColor Red
-        Write-FailureLog 'sync-tests'
-        exit 1
-    }
-} else {
-    Write-Host 'Sync process tests run in the separate CI shard.'
+Write-Host 'Running sync process tests...'
+& pwsh -NoProfile -File (Join-Path $PSScriptRoot 'sync-tests.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host 'Sync process tests failed' -ForegroundColor Red
+    Write-FailureLog 'sync-tests'
+    exit 1
 }
 
 Write-Host 'Running local Copilot dogfood projection tests...'

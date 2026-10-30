@@ -203,6 +203,35 @@ jobs:
       - name: Run bash test suite
         run: bash tests/run-tests.sh
 
+  validate-powershell:
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_call'
+    needs: validate-workflow-syntax
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: ${{ inputs.target_sha || github.sha }}
+
+      - name: Run strict PowerShell test suite
+        shell: pwsh
+        env:
+          FAIL_ON_GUIDANCE_AUDIT_ERRORS: ${{ inputs.fail_on_guidance_audit_errors }}
+        run: |
+          $failOnGuidanceAuditErrors = $true
+          if ($env:GITHUB_EVENT_NAME -eq 'workflow_dispatch' -and $env:GITHUB_REF -ne 'refs/heads/main') {
+            $failOnGuidanceAuditErrors = $false
+          }
+          if ($env:FAIL_ON_GUIDANCE_AUDIT_ERRORS -match '^(true|false)$') {
+            $failOnGuidanceAuditErrors = $env:FAIL_ON_GUIDANCE_AUDIT_ERRORS -eq 'true'
+          }
+          pwsh tests/run-tests.ps1 -GuidanceAuditFailOnError:$failOnGuidanceAuditErrors
+
+      - name: Validate strict coherence conflicts
+        shell: pwsh
+        run: pwsh scripts/check-coherence.ps1 -Strict -Category conflicts
+
   validate-windows:
     needs: validate-workflow-syntax
     runs-on: windows-latest
@@ -218,22 +247,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $ErrorActionPreference = 'Stop'
           New-Item -ItemType Directory -Path test-results -Force | Out-Null
 
-          $failOnGuidanceAuditErrors = $true
-          if ('${{ github.event_name }}' -eq 'workflow_call') {
-            $failOnGuidanceAuditErrors = [System.Convert]::ToBoolean('${{ inputs.fail_on_guidance_audit_errors }}')
-          } elseif ('${{ github.event_name }}' -eq 'pull_request' -or ('${{ github.event_name }}' -eq 'workflow_dispatch' -and '${{ github.ref_name }}' -ne 'main')) {
-            $failOnGuidanceAuditErrors = $false
-          }
-          $guidanceAuditArgument = if ($failOnGuidanceAuditErrors) { '$true' } else { '$false' }
-
-          @"
-          `$ErrorActionPreference = 'Stop'
-          & pwsh -NoProfile -File scripts/run-windows-validation-lane.ps1 -LaneName core -GuidanceAuditFailOnError:$guidanceAuditArgument
-          exit `$LASTEXITCODE
-          "@ | Set-Content -Path test-results/windows-core.ps1 -Encoding UTF8
+          @'
+          $ErrorActionPreference = 'Stop'
+          & pwsh -NoProfile -File scripts/run-windows-validation-lane.ps1 -LaneName core
+          exit $LASTEXITCODE
+          '@ | Set-Content -Path test-results/windows-core.ps1 -Encoding UTF8
 
           @'
           $ErrorActionPreference = 'Stop'
@@ -283,3 +303,25 @@ jobs:
           path: test-results/*.log
           retention-days: 7
           if-no-files-found: warn
+
+      - name: Write validated tree marker
+        if: github.event_name == 'merge_group'
+        env:
+          VALIDATED_TREE: ${{ needs.validate-workflow-syntax.outputs.target_tree }}
+        shell: pwsh
+        run: |
+          [System.IO.File]::WriteAllText(
+            'test-results/validated-tree.txt',
+            $env:VALIDATED_TREE,
+            [System.Text.Encoding]::ASCII
+          )
+
+      - name: Record successful merge-group validation
+        if: github.event_name == 'merge_group'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: merge-group-validation-${{ needs.validate-workflow-syntax.outputs.target_tree }}
+          path: test-results/validated-tree.txt
+          retention-days: 90
+          if-no-files-found: error
+          overwrite: true

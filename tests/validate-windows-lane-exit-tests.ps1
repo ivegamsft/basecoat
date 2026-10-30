@@ -11,10 +11,11 @@ Write-Host 'Running validate-windows lane exit propagation tests...'
 
 $failures = @()
 $coreStageNames = @(
-    'validate-basecoat',
-    'run-tests',
-    'validate-basecoat-strict',
-    'check-coherence-conflicts'
+    'windows-path-tests',
+    'dogfood-junction-tests',
+    'portable-skill-junction-tests',
+    'powershell-51-bootstrap-tests',
+    'powershell-51-guidance-lock-tests'
 )
 
 function New-TestStage {
@@ -70,22 +71,23 @@ foreach ($failedStage in $coreStageNames) {
 }
 
 $exceptionStages = @(
-    (New-TestStage -Name 'validate-basecoat' -Throw),
-    (New-TestStage -Name 'run-tests'),
-    (New-TestStage -Name 'validate-basecoat-strict'),
-    (New-TestStage -Name 'check-coherence-conflicts')
+    (New-TestStage -Name 'windows-path-tests' -Throw),
+    (New-TestStage -Name 'dogfood-junction-tests'),
+    (New-TestStage -Name 'portable-skill-junction-tests'),
+    (New-TestStage -Name 'powershell-51-bootstrap-tests'),
+    (New-TestStage -Name 'powershell-51-guidance-lock-tests')
 )
 $exceptionResult = Invoke-WindowsValidationLane -LaneName core -Stages $exceptionStages
-Assert-LaneResult -Result $exceptionResult -Succeeded $false -ExpectedFailedStage 'validate-basecoat' -CaseName 'core terminating exception propagation'
+Assert-LaneResult -Result $exceptionResult -Succeeded $false -ExpectedFailedStage 'windows-path-tests' -CaseName 'core terminating exception propagation'
 
 $syncResult = Invoke-WindowsValidationLane -LaneName sync -Stages @(
-    (New-TestStage -Name 'sync-tests' -ExitCode 1)
+    (New-TestStage -Name 'sync-tests-powershell-7' -ExitCode 1)
 )
-Assert-LaneResult -Result $syncResult -Succeeded $false -ExpectedFailedStage 'sync-tests' -CaseName 'sync lane failure propagation'
+Assert-LaneResult -Result $syncResult -Succeeded $false -ExpectedFailedStage 'sync-tests-powershell-7' -CaseName 'sync lane failure propagation'
 
 $diagnosticResult = Invoke-WindowsValidationLane -LaneName sync -Stages @(
     @{
-        Name = 'sync-tests'
+        Name = 'sync-tests-powershell-7'
         Command = {
             Write-Output 'sync test assertion name: Expected workflow path.'
             Write-Error 'sync test stderr detail.' -ErrorAction Continue
@@ -93,8 +95,8 @@ $diagnosticResult = Invoke-WindowsValidationLane -LaneName sync -Stages @(
         }
     }
 )
-Assert-LaneResult -Result $diagnosticResult -Succeeded $false -ExpectedFailedStage 'sync-tests' -CaseName 'sync lane diagnostic propagation'
-$diagnosticFailure = $diagnosticResult.Failures | Where-Object { $_.Stage -eq 'sync-tests' } | Select-Object -First 1
+Assert-LaneResult -Result $diagnosticResult -Succeeded $false -ExpectedFailedStage 'sync-tests-powershell-7' -CaseName 'sync lane diagnostic propagation'
+$diagnosticFailure = $diagnosticResult.Failures | Where-Object { $_.Stage -eq 'sync-tests-powershell-7' } | Select-Object -First 1
 $diagnosticText = ($diagnosticFailure.Output | ForEach-Object { "$_" }) -join "`n"
 if ($diagnosticFailure.ExitCode -ne 7) {
     $failures += "sync lane diagnostic propagation expected underlying exit code 7, got $($diagnosticFailure.ExitCode)"

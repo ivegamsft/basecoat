@@ -24,8 +24,10 @@ test('Windows validation keeps the required check on one Windows runner', () => 
   assert.ok(validateWindows.includes('scripts/run-windows-validation-lane.ps1'));
   assert.ok(validateWindows.includes('-LaneName core'));
   assert.ok(validateWindows.includes('-LaneName sync'));
-  assert.ok(windowsLaneRunner.includes('-SkipSyncProcessTests'));
-  assert.ok(windowsLaneRunner.includes('tests\\sync-tests.ps1'));
+  assert.ok(windowsLaneRunner.includes("Name = 'sync-tests-powershell-7'"));
+  assert.ok(windowsLaneRunner.includes('& pwsh -NoProfile -File tests\\sync-tests.ps1'));
+  assert.equal(windowsLaneRunner.includes('-SkipSyncProcessTests'), false);
+  assert.equal(windowsLaneRunner.includes('tests\\run-tests.ps1'), false);
   assert.ok(validateWindows.includes('Windows validation failed:'));
 });
 const routing = workflow.split('  route-ci-completion:')[1].split('  route-pr-acknowledgement:')[0];

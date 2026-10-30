@@ -1,9 +1,7 @@
 param(
     [Parameter(Mandatory = $true)]
     [ValidateSet('core', 'sync')]
-    [string]$LaneName,
-
-    [bool]$GuidanceAuditFailOnError = $true
+    [string]$LaneName
 )
 
 $ErrorActionPreference = 'Stop'
@@ -16,26 +14,33 @@ Import-Module (Join-Path $PSScriptRoot 'WindowsValidationLane.psm1') -Force
 if ($LaneName -eq 'core') {
     $stages = @(
         @{
-            Name = 'validate-basecoat'
-            Command = { & .\scripts\validate-basecoat.ps1 }
+            Name = 'windows-path-tests'
+            Command = { & pwsh -NoProfile -File tests\aidl-incident-routing-verification-tests.ps1 }
         },
         @{
-            Name = 'run-tests'
-            Command = { & .\tests\run-tests.ps1 -GuidanceAuditFailOnError:$GuidanceAuditFailOnError -SkipSyncProcessTests }.GetNewClosure()
+            Name = 'dogfood-junction-tests'
+            Command = { & pwsh -NoProfile -File tests\dogfood-install-tests.ps1 }
         },
         @{
-            Name = 'validate-basecoat-strict'
-            Command = { & .\scripts\validate-basecoat.ps1 -Strict }
+            Name = 'portable-skill-junction-tests'
+            Command = { & pwsh -NoProfile -File tests\portable-skill-export-preview-tests.ps1 }
         },
         @{
-            Name = 'check-coherence-conflicts'
-            Command = { & .\scripts\check-coherence.ps1 -Strict -Category conflicts }
+            Name = 'powershell-51-bootstrap-tests'
+            Command = {
+                $powershell51 = Get-Command powershell.exe -ErrorAction Stop
+                & $powershell51.Source -NoProfile -ExecutionPolicy Bypass -File tests\bootstrap-pr-counter-tests.ps1
+            }
+        },
+        @{
+            Name = 'powershell-51-guidance-lock-tests'
+            Command = { & pwsh -NoProfile -File tests\guidance-lock-tests.ps1 }
         }
     )
 } else {
     $stages = @(
         @{
-            Name = 'sync-tests'
+            Name = 'sync-tests-powershell-7'
             Command = { & pwsh -NoProfile -File tests\sync-tests.ps1 }
         }
     )
