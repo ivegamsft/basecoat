@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/IBuySpy-Shared/basecoat/schemas/guidance-lock-v1.schema.json",
+  "$id": "https://github.com/ivegamsft/basecoat/schemas/guidance-lock-v1.schema.json",
   "title": "Shared guidance ownership lock",
   "type": "object",
   "additionalProperties": false,

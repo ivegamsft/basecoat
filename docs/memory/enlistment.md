@@ -128,7 +128,7 @@ Create a fine-grained PAT with:
 - **Expiration:** 30 days or less
 
 ```bash
-gh secret set MEMORY_REPO_TOKEN --repo IBuySpy-Shared/basecoat
+gh secret set MEMORY_REPO_TOKEN --repo ivegamsft/basecoat
 ```text
 
 ---

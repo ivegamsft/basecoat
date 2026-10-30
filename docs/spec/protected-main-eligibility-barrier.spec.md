@@ -2,7 +2,7 @@
 
 ## Status and sources
 
-Proposal only, related to [source #3672](https://github.com/IBuySpy-Shared/basecoat/issues/3672).
+Proposal only, related to [source #3672](internal source issue).
 This is a reviewable enforcement contract, not a production configuration choice,
 approval, admission authority, ruleset mutation, or proof of exploit/live acceptance.
 Merging this proposal does not satisfy source runtime acceptance.
@@ -12,10 +12,10 @@ No new alias, bypass actor, broad token permission or routine XL review is intro
 [hybrid branching](../operations/hybrid-branching-policy-contract.md), and
 [stack guidance](../guides/stacked-pr-integration.md) remain controlling contracts.
 Inputs depend on the proposed
-[readiness identity proposal #3718](https://github.com/IBuySpy-Shared/basecoat/pull/3718),
-[ordered holds proposal #3720](https://github.com/IBuySpy-Shared/basecoat/pull/3720)
+[readiness identity proposal #3718](internal source pull request),
+[ordered holds proposal #3720](internal source pull request)
 and, for stack finalization only,
-[stack manifest proposal #3719](https://github.com/IBuySpy-Shared/basecoat/pull/3719).
+[stack manifest proposal #3719](internal source pull request).
 These are proposal prerequisites, not already-implemented capabilities.
 
 ## Current mechanism evidence

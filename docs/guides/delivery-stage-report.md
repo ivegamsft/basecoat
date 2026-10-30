@@ -7,7 +7,7 @@ It never changes workflows, approvals, queue entries, refs, tags, or releases.
 ## Collect and reproduce
 
 ```powershell
-pwsh scripts\report-delivery-stages.ps1 -Repository IBuySpy-Shared/basecoat `
+pwsh scripts\report-delivery-stages.ps1 -Repository ivegamsft/basecoat `
   -Start '2026-10-06T23:30:00Z,2026-10-06T23:45:00Z' `
   -End '2026-10-06T23:45:00Z,2026-10-07T00:00:00Z' `
   -OutputPath test-results\delivery-live -MaxRequests 2000

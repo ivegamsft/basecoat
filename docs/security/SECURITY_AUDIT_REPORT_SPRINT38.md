@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-This report audits the security posture of the `IBuySpy-Shared/basecoat` repository with respect to:
+This report audits the security posture of the `ivegamsft/basecoat` repository with respect to:
 
 - GitHub rulesets and branch protections
 - Workflow token permissions and least privilege

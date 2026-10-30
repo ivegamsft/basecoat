@@ -2,8 +2,8 @@
 
 ## Context
 
-Source: [#3616](https://github.com/IBuySpy-Shared/basecoat/issues/3616), child of
-closed parent [#3400](https://github.com/IBuySpy-Shared/basecoat/issues/3400). Controlling documents: the parent
+Source: [#3616](internal source issue), child of
+closed parent [#3400](internal source issue). Controlling documents: the parent
 [roadmap synthesizer spec](synthesized/issue-3400-roadmap-synthesizer-auto-group-issuesprs-into-release-milest.spec.md)
 and the [persistence decision](../design/roadmap-persistence-decision.md), in
 which the owner selected option A (GitHub milestones remain canonical).

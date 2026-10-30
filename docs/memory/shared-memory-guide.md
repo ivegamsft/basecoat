@@ -1,6 +1,6 @@
 # Shared Memory Guide
 
-The shared memory repo (`IBuySpy-Shared/basecoat-memory`) extends the personal
+The shared memory repo (`example-org/basecoat-memory`) extends the personal
 session memory layer into an organization-wide knowledge base. Any team member
 can contribute discoveries; all consumers benefit immediately.
 
@@ -39,7 +39,7 @@ If your organization does not yet have a shared memory repo:
 Or manually:
 
 ```bash
-gh repo create <org>/basecoat-memory --private --template IBuySpy-Shared/basecoat-memory
+gh repo create <org>/basecoat-memory --private --template example-org/basecoat-memory
 ```
 
 ### 2. Configure the remote in your repo
