@@ -6,6 +6,24 @@ All notable changes to this repository should be recorded in this file.
 
 No unreleased changes.
 
+## 4.7.1 - 2026-10-30
+
+### Added
+
+- `scripts/audit-portfolio-links.ps1` reports org-project items whose repository is not linked to the
+  project and open Sprint/Wave issues without a milestone; `-Fix` links same-org repositories only
+  (#3754, part 1; #3972).
+
+### Changed
+
+- CI validation is deduplicated: merge-group CI and Validate BaseCoat publish tree-keyed evidence, and
+  post-merge packaging reuses it only after verifying the exact tree, workflow identity and successful
+  merge-group run, failing closed otherwise (#3916, #3971).
+- Provider-neutral runbook guidance (#3930, #3957).
+
+### Fixed
+
+- Issue triage preserves existing priority labels instead of overwriting them (#3970).
 ## 4.7.0 - 2026-10-24
 
 ### Added

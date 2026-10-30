@@ -1,6 +1,6 @@
 {
   "name": "base-coat",
-  "version": "4.7.0",
-  "releaseDate": "2026-10-24",
-  "notes": "Minor release: roadmap persistence ledger and gated milestone adapter, approved-spec handoff, Stage 1 delivery shadow evaluators, release label gate on every tag publisher, plus sync, bootstrap, intake and workflow reliability and security fixes."
+  "version": "4.7.1",
+  "releaseDate": "2026-10-30",
+  "notes": "Patch release: exact-tree CI validation reuse, issue triage priority preservation, provider-neutral runbook guidance and a portfolio project-link auditor."
 }
